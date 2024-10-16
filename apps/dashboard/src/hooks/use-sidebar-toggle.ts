@@ -18,7 +18,7 @@ export interface SidebarState {
 export const useSidebarToggle = create(
   persist<SidebarState>(
     (set, get) => ({
-      isOpen: true,
+      isOpen: false,
       setIsOpen: () => {
         set({ isOpen: !get().isOpen });
       },

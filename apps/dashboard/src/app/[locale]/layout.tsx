@@ -18,11 +18,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://solomon-ai.app"),
   title: "Solomon AI | A better way to act on your finances",
   description:
-    "We extract unknown relationships from your finances and help you act on them.",
+    "We extract unknown relationships from your finances and help you act on them",
   twitter: {
     title: "Solomon AI | A better way to act on your finances",
     description:
-      "We extract unknown relationships from your finances and help you act on them.",
+      "We extract unknown relationships from your finances and help you act on them...",
     // images: [
     //   {
     //     url: "https://cdn.midday.ai/opengraph-image.jpg",

@@ -7,7 +7,6 @@ import { SubscriptionViewModal } from "@/components/modals/subscription/subscrip
 import { TransactionViewModal } from "@/components/modals/transaction/transaction-view-modal";
 import AnalyticsLayout from "@/components/panel/admin-panel-layout";
 import { Sidebar } from "@/components/sidebar";
-import { TeamMenu } from "@/components/team-menu";
 import OnboardToBackendServerWrapper from "@/components/wrappers/onboard-to-backend-wrapper.server";
 import features from "@/config/enabled-features";
 import { setupAnalytics } from "@midday/events/server";
@@ -120,11 +119,13 @@ export default async function Layout({
   const content = (
     <AnalyticsLayout>
       <AI initialAIState={{ user: user.data, messages: [], chatId: nanoid() }}>
-        {/* <Sidebar /> */}
-        <div className="mx-4 md:mx-5 pb-8 overflow-auto relative">
-          {children}
-          {/* <TeamMenu mode="button" /> */}
-          <div className="absolute bottom-4 left-4 flex items-center space-x-4">
+        <div className="flex flex-col h-screen relative">
+          <div className="flex-grow overflow-auto scrollbar-hide relative z-0">
+            <div className="mx-4 md:mx-5 pb-8 relative min-h-full">
+              {children}
+            </div>
+          </div>
+          <div className="flex-shrink-0 p-4 relative z-10">
             <ClientSideAccessibilityWidget
               email={user.data.email as string}
               name={user.data.full_name as string}

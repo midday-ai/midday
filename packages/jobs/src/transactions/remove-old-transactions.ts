@@ -1,71 +1,11 @@
-import { Database } from "@midday/supabase/types";
-import { cronTrigger } from "@trigger.dev/sdk";
+import { Database, TeamSchema as Team } from "@midday/supabase/types";
+import { cronTrigger, IOWithIntegrations } from "@trigger.dev/sdk";
+import { Supabase } from "@trigger.dev/supabase";
 import { format, subYears } from "date-fns";
 import { client, supabase } from "../client";
 import { Jobs } from "../constants";
-
-type Transaction = Database["public"]["Tables"]["transactions"]["Row"];
-type Team = Database["public"]["Tables"]["teams"]["Row"];
-
-const BATCH_SIZE = 500; // Number of transactions to process in each batch
-const TEAMS_PAGE_SIZE = 100; // Number of teams to fetch per page
-
-/**
- * Removes transactions older than the specified date for a given team.
- *
- * @param io - The Trigger.dev IO context for database operations.
- * @param teamId - The ID of the team whose transactions are being processed.
- * @param cutoffDate - The date before which transactions should be removed.
- * @returns The number of transactions removed.
- */
-async function removeOldTransactions(
-  io: any,
-  teamId: string,
-  cutoffDate: Date,
-): Promise<number> {
-  let totalRemoved = 0;
-  let hasMore = true;
-
-  while (hasMore) {
-    const { data: transactions, error } = await io.supabase.client
-      .from("transactions")
-      .select("id")
-      .eq("team_id", teamId)
-      .lt("date", format(cutoffDate, "yyyy-MM-dd"))
-      .order("date", { ascending: true })
-      .limit(BATCH_SIZE);
-
-    if (error) {
-      throw new Error(`Failed to fetch transactions: ${error.message}`);
-    }
-
-    if (transactions.length === 0) {
-      hasMore = false;
-      break;
-    }
-
-    const transactionIds = transactions.map((t: Transaction) => t.id);
-
-    const { error: deleteError, count } = await io.supabase.client
-      .from("transactions")
-      .delete()
-      .in("id", transactionIds)
-      .select("count");
-
-    if (deleteError) {
-      throw new Error(`Failed to delete transactions: ${deleteError.message}`);
-    }
-
-    totalRemoved += count || 0;
-
-    // If we got less than the batch size, we've processed all old transactions
-    if (transactions.length < BATCH_SIZE) {
-      hasMore = false;
-    }
-  }
-
-  return totalRemoved;
-}
+import { TEAMS_PAGE_SIZE } from "../constants/constants";
+import { removeOldTransactionsSubTask } from "../subtasks/remove-old-transactions";
 
 /**
  * Fetches teams in batches using pagination.
@@ -74,7 +14,9 @@ async function removeOldTransactions(
  * @yields An array of teams for each page.
  */
 async function* fetchTeamsBatches(
-  io: any,
+  io: IOWithIntegrations<{
+    supabase: Supabase<Database, "public", any>;
+  }>
 ): AsyncGenerator<Team[], void, unknown> {
   let lastId: string | null = null;
   let hasMore = true;
@@ -99,8 +41,8 @@ async function* fetchTeamsBatches(
     if (teams.length === 0) {
       hasMore = false;
     } else {
-      yield teams;
-      lastId = teams[teams.length - 1].id;
+      yield teams as Team[];
+      lastId = teams[teams.length - 1]?.id ?? null;
     }
   }
 }
@@ -153,10 +95,12 @@ client.defineJob({
 
     for await (const teamsBatch of fetchTeamsBatches(io)) {
       for (const team of teamsBatch) {
-        const removedCount = await removeOldTransactions(
+        const prefix = `remove-old-txns-${team.id}-${Date.now()}`;
+        const removedCount = await removeOldTransactionsSubTask(
           io,
           team.id,
           cutoffDate,
+          prefix
         );
         results[team.id] = removedCount;
         totalRemoved += removedCount;
@@ -165,7 +109,7 @@ client.defineJob({
         // Log progress every 100 teams
         if (processedTeams % 100 === 0) {
           io.logger.info(
-            `Processed ${processedTeams} teams. Total removed: ${totalRemoved}`,
+            `Processed ${processedTeams} teams. Total removed: ${totalRemoved}`
           );
         }
       }

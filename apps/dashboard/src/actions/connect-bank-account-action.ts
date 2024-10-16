@@ -26,6 +26,7 @@ export const connectBankAccountAction = authActionClient
         accessToken,
         enrollmentId,
         referenceId,
+        itemId,
       },
       ctx: { supabase, user },
     }) => {
@@ -92,6 +93,7 @@ export const connectBankAccountAction = authActionClient
           userId: user.id,
           accounts: accounts,
           provider,
+          itemId,
         },
       );
 

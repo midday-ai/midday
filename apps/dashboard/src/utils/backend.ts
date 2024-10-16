@@ -28,6 +28,10 @@ function initializeBackendClient(apiKey?: string): BackendClient {
     return client;
 }
 
+function getBackendClient(): BackendClient {
+    return  initializeBackendClient();
+}
+
 function createErrorResponse(type: ERROR_TYPE, message: string): FetchUserResponse {
     return {
         authenticated: false,
@@ -37,5 +41,5 @@ function createErrorResponse(type: ERROR_TYPE, message: string): FetchUserRespon
     };
 }
 
-export { createErrorResponse, initializeBackendClient };
+export { createErrorResponse, getBackendClient, initializeBackendClient };
 

@@ -11,7 +11,7 @@ import { sleep } from "../utils/sleep";
 import { getClassification, transformTransaction } from "../utils/transform";
 import { scheduler } from "./scheduler";
 
-const BATCH_LIMIT = 500;
+const BATCH_LIMIT = 1000;
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_INITIAL_SYNC,
@@ -87,6 +87,8 @@ client.defineJob({
      * @param account - The bank account information
      */
     const promises = accountsData?.map(async (account) => {
+      let transactionSyncCursor = "";
+
       await io.logger.debug(
         `Processing account: ${account.id} for team: ${teamId}`,
       );
@@ -127,13 +129,19 @@ client.defineJob({
           }
         };
 
-        const transactions = await getTransactions();
+        const {
+          data: transactions,
+          cursor,
+          hasMore,
+        } = await getTransactions();
+
+        transactionSyncCursor = cursor ?? "";
 
         await io.logger.info(
-          `Retrieved ${transactions.data?.length} transactions for account: ${account.id}`,
+          `Retrieved ${transactions?.length} transactions for account: ${account.id}`,
         );
 
-        const formattedTransactions = transactions.data?.map((transaction) =>
+        const formattedTransactions = transactions?.map((transaction) =>
           transformTransaction({
             transaction,
             teamId: account.team_id,
@@ -220,14 +228,14 @@ client.defineJob({
 
         await io.supabase.client
           .from("bank_connections")
-          .update({ last_accessed: new Date().toISOString() })
+          .update({ last_accessed: new Date().toISOString(), last_cursor_sync: transactionSyncCursor })
           .eq("id", account.bank_connection.id);
         await io.logger.debug(
           `Updated last_accessed for bank connection: ${account.bank_connection.id}`,
         );
       } catch (error) {
         await io.logger.error(
-          `Error updating balance or last_accessed for account: ${account.id}`,
+          `Error updating balance or last_accessed for account: ${account.id} ${JSON.stringify(error)}`,
           { error },
         );
       }
@@ -276,6 +284,7 @@ client.defineJob({
     await settingUpAccount.update("setting-up-account-completed", {
       data: { step: "completed" },
     });
+
     await io.logger.info(`Completed initial sync for team: ${teamId}`);
   },
 });

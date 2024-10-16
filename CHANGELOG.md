@@ -1,3 +1,174 @@
+# [0.32.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.31.0...v0.32.0) (2024-10-16)
+
+
+### Features
+
+* wip ([ef38776](https://github.com/SolomonAIEngineering/solomonai/commit/ef38776a0f9490df07e619b3464d6b990d26bc1a))
+
+# [0.31.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.30.0...v0.31.0) (2024-10-16)
+
+
+### Features
+
+* wip ([44f0468](https://github.com/SolomonAIEngineering/solomonai/commit/44f04682323dd7cb3a5601d55c118af523b8fe13))
+
+# [0.30.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.29.0...v0.30.0) (2024-10-16)
+
+
+### Features
+
+* wip ([b0a615a](https://github.com/SolomonAIEngineering/solomonai/commit/b0a615afd13d6b0769fd8aec75c9a55461d37c7f))
+
+# [0.29.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.28.0...v0.29.0) (2024-10-16)
+
+
+### Features
+
+* wip ([8851665](https://github.com/SolomonAIEngineering/solomonai/commit/8851665528d8fe8984a9fcd43ff1748593a8a14b))
+
+# [0.28.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.27.0...v0.28.0) (2024-10-16)
+
+
+### Features
+
+* wip ([3ad7a9a](https://github.com/SolomonAIEngineering/solomonai/commit/3ad7a9af31d982422c17a02cdfcbc6e11fd55e15))
+* wip ([eb93bd6](https://github.com/SolomonAIEngineering/solomonai/commit/eb93bd665afa51153809137bf3e46b15890c1d00))
+
+# [0.27.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.26.0...v0.27.0) (2024-10-16)
+
+
+### Features
+
+* wip ([be13ffc](https://github.com/SolomonAIEngineering/solomonai/commit/be13ffc7d49e048bc1542f6f358570d6840e21c9))
+
+# [0.26.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.25.0...v0.26.0) (2024-10-16)
+
+
+### Features
+
+* wip ([04cf47f](https://github.com/SolomonAIEngineering/solomonai/commit/04cf47febee8ab64689dcc6807c1d7a6cf40f66d))
+
+# [0.25.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.24.0...v0.25.0) (2024-10-16)
+
+
+### Features
+
+* wip ([34d13ce](https://github.com/SolomonAIEngineering/solomonai/commit/34d13ce1ace82663cd759b3ad5cd1cb2ca4163f0))
+
+# [0.24.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.23.0...v0.24.0) (2024-10-16)
+
+
+### Features
+
+* wip ([3d8ed78](https://github.com/SolomonAIEngineering/solomonai/commit/3d8ed78cac949947ce498f6daeee93b3fa317170))
+
+# [0.23.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.22.0...v0.23.0) (2024-10-15)
+
+
+### Features
+
+* remove canadaa support ([881270b](https://github.com/SolomonAIEngineering/solomonai/commit/881270bd0a5c985fb96cd7ed035f44ce261cdca5))
+
+# [0.22.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.21.0...v0.22.0) (2024-10-15)
+
+
+### Features
+
+* enable financial service to account for cursor when triggering account sync operations ([#60](https://github.com/SolomonAIEngineering/solomonai/issues/60)) ([ff55fef](https://github.com/SolomonAIEngineering/solomonai/commit/ff55fef6564bed7ccb6aa72fba6c4b7a50ad99b3))
+
+# [0.21.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.20.0...v0.21.0) (2024-10-15)
+
+
+### Features
+
+* checkpoint ([595ea69](https://github.com/SolomonAIEngineering/solomonai/commit/595ea693b0d9edf073eeb1f1af50cfeabfdbc9c7))
+
+# [0.20.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.19.0...v0.20.0) (2024-10-13)
+
+
+### Features
+
+* checkpoint ([6d3d41b](https://github.com/SolomonAIEngineering/solomonai/commit/6d3d41b206eee279f8c018cd0e72463745dadbb6))
+
+# [0.19.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.18.0...v0.19.0) (2024-10-13)
+
+
+### Features
+
+* checkpoint ([e6b6555](https://github.com/SolomonAIEngineering/solomonai/commit/e6b655561cc77a0dfb53c6617e71c52d6f0955c3))
+
+# [0.18.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.17.0...v0.18.0) (2024-10-13)
+
+
+### Features
+
+* checkpoint ([0f4d318](https://github.com/SolomonAIEngineering/solomonai/commit/0f4d31860018d50e2a1e500740d9ffa179bcef6c))
+
+# [0.17.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.16.0...v0.17.0) (2024-10-13)
+
+
+### Features
+
+* checkpoint ([#56](https://github.com/SolomonAIEngineering/solomonai/issues/56)) ([c545f4f](https://github.com/SolomonAIEngineering/solomonai/commit/c545f4f30e81e13e244aed3b07063b015a50886e))
+
+# [0.16.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.15.0...v0.16.0) (2024-10-12)
+
+
+### Features
+
+* checkpoint ([b464987](https://github.com/SolomonAIEngineering/solomonai/commit/b4649870d0eec3f64349279154715721f45f2158))
+
+# [0.15.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.14.0...v0.15.0) (2024-10-12)
+
+
+### Features
+
+* checkpoint ([77376f5](https://github.com/SolomonAIEngineering/solomonai/commit/77376f57ba7db71fecf999e51905d9a8841b70c7))
+* checkpoint ([b0c62f7](https://github.com/SolomonAIEngineering/solomonai/commit/b0c62f7f39966158a092bf1842e0c66ecd6423a9))
+
+# [0.14.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.13.1...v0.14.0) (2024-10-12)
+
+
+### Features
+
+* checkpoint ([6aa33a7](https://github.com/SolomonAIEngineering/solomonai/commit/6aa33a77113211d6100d44b541b668e19d7e8990))
+
+## [0.13.1](https://github.com/SolomonAIEngineering/solomonai/compare/v0.13.0...v0.13.1) (2024-10-11)
+
+
+### Bug Fixes
+
+* fix batch processing of background jobs ([#54](https://github.com/SolomonAIEngineering/solomonai/issues/54)) ([efea693](https://github.com/SolomonAIEngineering/solomonai/commit/efea6933a015fefd057389e10eb5d4072551a6c4))
+
+# [0.13.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.12.1...v0.13.0) (2024-10-11)
+
+
+### Features
+
+* ensure recurring transaction schema matches ([8b1e08a](https://github.com/SolomonAIEngineering/solomonai/commit/8b1e08a8de17134dc4e4b021557b1825a7f32218))
+
+## [0.12.1](https://github.com/SolomonAIEngineering/solomonai/compare/v0.12.0...v0.12.1) (2024-10-10)
+
+
+### Bug Fixes
+
+* update the batch transaction sync jobs ([#53](https://github.com/SolomonAIEngineering/solomonai/issues/53)) ([4771d00](https://github.com/SolomonAIEngineering/solomonai/commit/4771d00618e3e3831663c552381ea4bc2637881f))
+
+# [0.12.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.11.0...v0.12.0) (2024-10-10)
+
+
+### Features
+
+* wip ([c9bba20](https://github.com/SolomonAIEngineering/solomonai/commit/c9bba209e158244b9229cdc0e004462e0121ff57))
+* wip ([805341e](https://github.com/SolomonAIEngineering/solomonai/commit/805341ef36ef1a0a8e6971ae19bc6974add062c5))
+
+# [0.11.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.10.0...v0.11.0) (2024-10-10)
+
+
+### Features
+
+* wip ([9dbd1a5](https://github.com/SolomonAIEngineering/solomonai/commit/9dbd1a5f76d58802ace6f7b5071020aabde45047))
+
 # [0.10.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.9.0...v0.10.0) (2024-10-08)
 
 

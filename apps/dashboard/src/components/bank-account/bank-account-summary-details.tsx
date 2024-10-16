@@ -67,10 +67,10 @@ export function BankAccountOverviewProTier({
       <div
         className={cn((isEmpty || isCurrentUserTierFree) && "mt-8 relative")}
       >
-        {isEmpty && <EmptyState />}
-        {isCurrentUserTierFree && (
+        {/* {isEmpty && <EmptyState />} */}
+        {/* {isCurrentUserTierFree && (
           <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />
-        )}
+        )} */}
 
         <div
           className={cn(

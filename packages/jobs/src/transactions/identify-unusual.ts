@@ -4,17 +4,15 @@
  * based on amount and frequency patterns, returning the results for further processing.
  */
 
-import { Database } from "@midday/supabase/types";
+import {
+  Database,
+  TransactionSchema as Transaction,
+} from "@midday/supabase/types";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { differenceInDays, format, parseISO, subMonths } from "date-fns";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
-
-// Type Definitions
-
-/** Represents a financial transaction. */
-type Transaction = Database["public"]["Tables"]["transactions"]["Row"];
 
 /** Configuration for unusual transaction detection. */
 interface DetectionConfig {
@@ -69,7 +67,7 @@ function calculateStats(numbers: number[]): Stats {
       ? ((sorted[sorted.length / 2 - 1] ?? 0) +
           (sorted[sorted.length / 2] ?? 0)) /
         2
-      : (sorted[Math.floor(sorted.length / 2)] ?? 0);
+      : sorted[Math.floor(sorted.length / 2)] ?? 0;
 
   return { mean, stdDev, median };
 }
@@ -98,7 +96,7 @@ function calculateStats(numbers: number[]): Stats {
 function checkUnusualAmount(
   transaction: Transaction,
   stats: Stats,
-  config: DetectionConfig,
+  config: DetectionConfig
 ): DetectionReason[] {
   const reasons: DetectionReason[] = [];
   const absAmount = Math.abs(transaction.amount);
@@ -151,7 +149,7 @@ function checkUnusualAmount(
 function checkUnusualFrequency(
   transaction: Transaction,
   merchantTransactions: Transaction[],
-  config: DetectionConfig,
+  config: DetectionConfig
 ): DetectionReason | null {
   if (merchantTransactions.length < 2) return null;
 
@@ -163,7 +161,7 @@ function checkUnusualFrequency(
     (sortedDates.length - 1);
   const daysSinceLastTxn = differenceInDays(
     parseISO(transaction.date),
-    sortedDates[sortedDates.length - 2]!,
+    sortedDates[sortedDates.length - 2]!
   );
 
   if (
@@ -213,7 +211,7 @@ function checkUnusualFrequency(
  */
 function identifyUnusualTransactions(
   transactions: Transaction[],
-  config: DetectionConfig,
+  config: DetectionConfig
 ): UnusualTransaction[] {
   const amounts = transactions.map((t) => Math.abs(t.amount));
   const stats = calculateStats(amounts);
@@ -236,7 +234,7 @@ function identifyUnusualTransactions(
               checkUnusualFrequency(
                 transaction,
                 merchantTransactions[transaction.merchant_name] || [],
-                config,
+                config
               ),
             ]
           : []
@@ -249,7 +247,7 @@ function identifyUnusualTransactions(
 
       return unusualTxns;
     },
-    [],
+    []
   );
 }
 
@@ -307,7 +305,7 @@ client.defineJob({
 
     const startDate = format(
       subMonths(new Date(), lookbackMonths),
-      "yyyy-MM-dd",
+      "yyyy-MM-dd"
     );
     const { data: transactions, error } = await io.supabase.client
       .from("transactions")
@@ -329,7 +327,7 @@ client.defineJob({
 
     const unusualTransactions = identifyUnusualTransactions(
       transactions,
-      config,
+      config
     );
 
     await io.logger.info("Unusual transactions identified", {

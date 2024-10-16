@@ -424,6 +424,26 @@ financial-service-api/
 6. Implement necessary route handlers in `src/routes/`
 7. Add tests for the new provider in `tests/providers/`
 
+### Runnable Tasks
+
+#### Download Logos
+
+```
+bun tasks/download-teller.ts
+```
+
+#### Sync CDN
+
+```
+rclone copy logos r2demo:engine-assets -v --progress
+```
+
+#### Import Institutions
+
+```
+bun tasks/import.ts
+```
+
 ### Coding Standards
 
 - Follow the TypeScript best practices and coding style guide

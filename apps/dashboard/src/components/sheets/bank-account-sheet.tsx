@@ -1,6 +1,7 @@
 import { createClient } from "@midday/supabase/client";
 import { getTransactionsByBankAccountQuery } from "@midday/supabase/queries";
 import { Tables, TransactionSchema } from "@midday/supabase/types";
+import { Dialog, DialogContent } from "@midday/ui/dialog";
 import { Drawer, DrawerContent } from "@midday/ui/drawer";
 import { useMediaQuery } from "@midday/ui/hooks";
 import { Sheet, SheetContent } from "@midday/ui/sheet";
@@ -53,20 +54,25 @@ export function BankAccountSheet({
   }, [bankAccount.id, isOpen]);
 
   const content = (
-    <BankAccountDetails
-      bankAccount={bankAccount}
-      bankConnection={bankConnection}
-      userName={userName}
-      transactions={transactions}
-      transactionsLoading={transactionsLoading}
-    />
+    <div className="p-[0.5%] md:p-[3%]">
+      <BankAccountDetails
+        bankAccount={bankAccount}
+        bankConnection={bankConnection}
+        userName={userName}
+        transactions={transactions}
+        transactionsLoading={transactionsLoading}
+      />
+    </div>
+   
   );
 
   if (isDesktop) {
     return (
-      <Sheet open={isOpen} onOpenChange={setOpen}>
-        <SheetContent>{content}</SheetContent>
-      </Sheet>
+        <Dialog open={isOpen} onOpenChange={setOpen}>
+          <DialogContent className="md:min-w-[80%] md:min-h-[80%] md:max-h-[85%] overflow-y-auto scrollbar-hide">
+            {content}
+          </DialogContent>
+        </Dialog>
     );
   }
 

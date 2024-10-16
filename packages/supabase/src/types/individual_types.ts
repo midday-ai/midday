@@ -14,6 +14,10 @@ type ReportSchema = Tables<"reports">;
 type SubscriptionSchema = Tables<"subscriptions">;
 type PriceSchema = Tables<"prices">;
 type ProductSchema = Tables<"products">;
+type RecurringTransactionSchema = Tables<"recurring_transactions">;
+type ReportsSchema = Tables<"reports">;
+type PersonalFinanceCategorySchema = Tables<"personal_finance_categories">;
+type TransactionIDSchema = Tables<"transaction_ids">;
 
 // Union types from the database schema
 type AccountType = Database["public"]["Enums"]["account_type"];
@@ -35,15 +39,30 @@ type TransactionMethods = Database["public"]["Enums"]["transactionMethods"];
 type TransactionStatus = Database["public"]["Enums"]["transactionStatus"];
 type UserTier = Database["public"]["Enums"]["user_tier"];
 
+type RecurringTransactionsForInsert =
+  Database["public"]["Tables"]["recurring_transactions"]["Insert"] & {
+    personal_finance_category: {
+      primary: string;
+      detailed: string;
+      confidence_level: string;
+    };
+    transaction_ids: string[];
+  };
+
 // combined types
 type UserWithTeam = UserSchema & { team: TeamSchema };
 type UserWithTeams = UserSchema & { teams: TeamSchema[] };
-
+type BankAccountWithTeam = BankAccountSchema & { team: TeamSchema };
+type BankAccountWithBankConnection = BankAccountSchema & {
+  bank_connection: BankConnectionSchema;
+};
 
 export type {
   // Union types
   AccountType,
   BankAccountSchema,
+  BankAccountWithBankConnection,
+  BankAccountWithTeam,
   BankConnectionSchema,
   BankProviders,
   ConnectionStatus,
@@ -51,11 +70,15 @@ export type {
   InboxSchema,
   InboxStatus,
   InboxType,
+  PersonalFinanceCategorySchema,
   PriceSchema,
   PricingPlanInterval,
   PricingType,
   ProductSchema,
+  RecurringTransactionSchema,
+  RecurringTransactionsForInsert,
   ReportSchema,
+  ReportsSchema,
   ReportTypes,
   SubscriptionSchema,
   SubscriptionStatus,
@@ -67,11 +90,11 @@ export type {
   TransactionCategories,
   TransactionCategorySchema,
   TransactionFrequency,
+  TransactionIDSchema,
   TransactionMethods,
   TransactionSchema,
   TransactionStatus,
   UserSchema,
   UserTier,
-  UserWithTeam
+  UserWithTeam,
 };
-

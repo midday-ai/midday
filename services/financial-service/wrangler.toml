@@ -58,8 +58,8 @@ mtls_certificates = [
 ]
 
 r2_buckets = [
-  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "" },
-  { binding = "R2", bucket_name = "bank-statements", preview_bucket_name = "" }
+  { binding = "STORAGE", bucket_name = "storage-staging", preview_bucket_name = "" },
+  { binding = "R2", bucket_name = "bank-statements-staging", preview_bucket_name = "" }
 ]
 
 [env.staging.observability]

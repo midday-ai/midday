@@ -56,7 +56,7 @@ export function createErrorResponse(error: unknown, requestId: string) {
   if (error instanceof ProviderError) {
     return {
       requestId,
-      message: error.message,
+      message: JSON.stringify(error),
       code: error.code,
     };
   }

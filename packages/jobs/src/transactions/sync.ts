@@ -1,9 +1,14 @@
 import FinancialEngine from "@solomon-ai/financial-engine-sdk";
 import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
-import { Events, Jobs } from "../constants";
+import { Jobs } from "../constants";
+import { BATCH_LIMIT } from "../constants/constants";
+import { fetchEnabledBankAccountsForTeamSubTask } from "../subtasks/fetch-enabled-bank-account";
 import { engine } from "../utils/engine";
 import { parseAPIError } from "../utils/error";
+import { uniqueLog } from "../utils/log";
+import { processBatch } from "../utils/process";
+import { sleep } from "../utils/sleep";
 import { getClassification, transformTransaction } from "../utils/transform";
 import { scheduler } from "./scheduler";
 
@@ -31,177 +36,224 @@ client.defineJob({
    * 5. Revalidate relevant cache tags
    */
   run: async (_, io, ctx) => {
-    console.log("Starting TRANSACTIONS_SYNC job");
+    await uniqueLog(io, "info", "Starting TRANSACTIONS_SYNC job");
     const supabase = io.supabase.client;
     const teamId = ctx.source?.id as string;
-    console.log(`Processing for team ID: ${teamId}`);
+    await uniqueLog(io, "info", `Processing for team ID: ${teamId}`);
+    const prefix = `team-txn-sync-${teamId}-${Date.now()}`;
 
     // 1. Fetch enabled bank accounts for the team
-    console.log("Fetching enabled bank accounts");
-    const { data: accountsData, error: accountsError } = await supabase
-      .from("bank_accounts")
-      .select(
-        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)"
-      )
-      .eq("team_id", teamId)
-      .eq("enabled", true)
-      .eq("manual", false);
+    await uniqueLog(io, "info", "Fetching enabled bank accounts");
+    const accountsData = await fetchEnabledBankAccountsForTeamSubTask(
+      io,
+      teamId,
+      "transactions-sync",
+      { excludeManual: true }
+    );
 
-    if (accountsError) {
-      console.error("Error fetching accounts:", accountsError);
-      await io.logger.error("Accounts Error", accountsError);
-    }
+    await uniqueLog(
+      io,
+      "info",
+      `Found ${accountsData?.length || 0} enabled bank accounts`
+    );
 
-    console.log(`Found ${accountsData?.length || 0} enabled bank accounts`);
+    try {
+      // execute the sync transactions subtask for the accounts enabled for the team
+      // await syncTransactionsSubTask(io, accountsData, prefix);
+      /**
+       * Processes transactions for each bank account.
+       *
+       * @param account - The bank account information
+       */
+      const promises = accountsData?.map(async (account) => {
+        let transactionSyncCursor = "";
 
-    // 2. Process each account
-    const promises = accountsData?.map(async (account) => {
-      console.log(`Processing account ID: ${account.id}`);
-      try {
-        // 2a. Update account balance
-        console.log("Updating account balance");
-        const balance = await engine.accounts.balance({
-          provider: account.bank_connection.provider,
-          id: account.account_id,
-          accessToken: account.bank_connection?.access_token,
-        });
+        await io.logger.debug(
+          `Processing account: ${account.id} for team: ${teamId}`
+        );
+        try {
+          /**
+           * Fetches transactions from the financial engine with retry logic.
+           *
+           * @param retries - The number of retry attempts
+           * @returns A promise resolving to the transactions data
+           */
+          const getTransactions = async (
+            retries = 0
+          ): Promise<FinancialEngine.TransactionsSchema> => {
+            try {
+              return await engine.transactions.list({
+                provider: account.bank_connection.provider,
+                accountId: account.account_id,
+                accountType: getClassification(account.type) as any,
+                accessToken: account.bank_connection?.access_token,
+                latest: "true",
+                syncCursor: account.bank_connection?.last_cursor_sync,
+              });
+            } catch (error) {
+              if (
+                (error instanceof FinancialEngine.APIError &&
+                  error.status === 429 &&
+                  retries < 5) ||
+                (error instanceof FinancialEngine.APIError &&
+                  error.message.includes("rate limit") &&
+                  retries < 5)
+              ) {
+                const delay = Math.pow(2, retries) * 1000; // Exponential backoff
+                await io.logger.warn(`Rate limited, retrying in ${delay}ms`, {
+                  retries,
+                });
+                await sleep(delay);
+                return getTransactions(retries + 1);
+              }
+              throw error;
+            }
+          };
 
-        if (balance.data?.amount) {
-          await io.supabase.client
-            .from("bank_accounts")
-            .update({ balance: balance.data.amount })
-            .eq("id", account.id);
-          console.log(`Updated balance for account ID: ${account.id}`);
+          const { data: transactions, cursor, hasMore } =
+            await getTransactions();
+
+          transactionSyncCursor = cursor ?? "";
+
+          await io.logger.info(
+            `Retrieved ${transactions?.length} transactions for account: ${account.id}`
+          );
+
+          const formattedTransactions = transactions?.map((transaction) =>
+            transformTransaction({
+              transaction,
+              teamId: account.team_id,
+              bankAccountId: account.id,
+            })
+          );
+          await io.logger.debug(
+            `Formatted ${formattedTransactions?.length} transactions for account: ${account.id}`
+          );
+
+          /**
+           * Processes transactions in batches and upserts them to the database.
+           */
+          await processBatch(
+            formattedTransactions,
+            BATCH_LIMIT,
+            async (batch) => {
+              await io.logger.debug(
+                `Upserting batch of ${batch.length} transactions for account: ${account.id}`
+              );
+              const { data, error } = await supabase
+                .from("transactions")
+                .upsert(batch as any, {
+                  onConflict: "internal_id",
+                  ignoreDuplicates: true,
+                });
+
+              if (error) {
+                await io.logger.error(
+                  `Error upserting transactions for account: ${account.id}`,
+                  { error }
+                );
+              }
+
+              await io.logger.debug(
+                `Upserted batch ${data} for account: ${account.id}`
+              );
+              return batch;
+            }
+          );
+        } catch (error) {
+          await io.logger.error(
+            `Error processing transactions for account: ${account.id}`,
+            { error }
+          );
+          if (error instanceof FinancialEngine.APIError) {
+            const parsedError = parseAPIError(error);
+            await io.logger.warn(`API Error for account: ${account.id}`, {
+              parsedError,
+            });
+            await io.supabase.client
+              .from("bank_connections")
+              .update({
+                status: parsedError.code as
+                  | "disconnected"
+                  | "connected"
+                  | "unknown"
+                  | null
+                  | undefined,
+                error_details: parsedError.message,
+              })
+              .eq("id", account.bank_connection.id);
+            await io.logger.info(
+              `Updated bank connection status for account: ${account.id}`
+            );
+          }
         }
 
-        // 2b. Update bank connection last accessed timestamp
-        console.log("Updating bank connection last accessed timestamp");
-        await io.supabase.client
-          .from("bank_connections")
-          .update({ last_accessed: new Date().toISOString() })
-          .eq("id", account.bank_connection.id);
-      } catch (error) {
-        console.error(`Error processing account ${account.id}:`, error);
-        // Handle API errors
-        if (error instanceof FinancialEngine.APIError) {
-          const parsedError = parseAPIError(error);
+        /**
+         * Updates the account balance and last accessed time.
+         */
+        try {
+          const balance = await engine.accounts.balance({
+            provider: account.bank_connection.provider,
+            id: account.account_id,
+            accessToken: account.bank_connection?.access_token,
+          });
+          await io.logger.debug(`Retrieved balance for account: ${account.id}`, {
+            balance: balance.data?.amount,
+          });
+
+          if (balance.data?.amount) {
+            await io.supabase.client
+              .from("bank_accounts")
+              .update({ balance: balance.data.amount })
+              .eq("id", account.id);
+            await io.logger.info(`Updated balance for account: ${account.id}`);
+          }
+
           await io.supabase.client
             .from("bank_connections")
             .update({
-              status: parsedError.code,
-              error_details: parsedError.message,
+              last_accessed: new Date().toISOString(),
+              last_cursor_sync: transactionSyncCursor,
             })
             .eq("id", account.bank_connection.id);
-          console.log(
-            `Updated bank connection status for ID: ${account.bank_connection.id}`
+          await io.logger.debug(
+            `Updated last_accessed for bank connection: ${account.bank_connection.id}`
+          );
+        } catch (error) {
+          await io.logger.error(
+            `Error updating balance or last_accessed for account: ${account.id
+            } ${JSON.stringify(error)}`,
+            { error }
           );
         }
-      }
-
-      // 2c. Fetch and format new transactions
-      console.log(`Fetching transactions for account ID: ${account.id}`);
-      const transactions = await engine.transactions.list({
-        provider: account.bank_connection.provider,
-        accountId: account.account_id,
-        accountType: getClassification(account.type),
-        accessToken: account.bank_connection?.access_token,
-        latest: "true",
       });
 
-      const formattedTransactions = transactions.data?.map((transaction) =>
-        transformTransaction({
-          transaction,
-          teamId: account.team_id,
-          bankAccountId: account.id,
-        })
-      );
-      console.log(
-        `Fetched ${formattedTransactions?.length || 0} transactions for account ID: ${account.id}`
-      );
-
-      return formattedTransactions;
-    });
-
-    try {
-      if (promises) {
-        // Wait for all account processing to complete
-        console.log("Processing all accounts");
-
-        // This code will run once, because we're manually creating a task with the "my-task" cacheKey
-        const result = await io.runTask(
-          `resolve-transaction-sync-promises_${teamId}`,
-          async () => {
-            return await await Promise.all(promises);
-          },
-          { name: "Transaction Sync Promise" }
-        );
-
-        const transactions = result.flat();
-        console.log(`Total transactions fetched: ${transactions.length}`);
-
-        if (!transactions?.length) {
-          console.log("No new transactions to process");
-          return null;
-        }
-
-        // 3. Upsert all new transactions into the database
-        console.log("Upserting transactions into the database");
-        const { error: transactionsError, data: transactionsData } =
-          await supabase
-            .from("transactions")
-            .upsert(transactions as any, {
-              onConflict: "internal_id",
-              ignoreDuplicates: true,
-            })
-            .select("*");
-
-        if (transactionsError) {
-          console.error("Error upserting transactions:", transactionsError);
-          await io.logger.error("Transactions error", transactionsError);
-        }
-
-        if (transactionsData && transactionsData?.length > 0) {
-          console.log(
-            `Successfully upserted ${transactionsData.length} transactions`
+      /**
+       * Waits for all account processing to complete.
+       */
+      try {
+        if (promises) {
+          await Promise.all(promises);
+          await io.logger.info(
+            `Completed processing all accounts for team: ${teamId}`
           );
-          // 4. Send notifications for new transactions
-          console.log("Sending notifications for new transactions");
-          await io.sendEvent("🔔 Send notifications", {
-            name: Events.TRANSACTIONS_NOTIFICATION,
-            payload: {
-              teamId,
-              transactions: transactionsData.map((transaction) => ({
-                id: transaction.id,
-                date: transaction.date,
-                amount: transaction.amount,
-                name: transaction.name,
-                currency: transaction.currency,
-                category: transaction.category_slug,
-                status: transaction.status,
-              })),
-            },
-          });
-
-          // 5. Revalidate relevant cache tags
-          console.log("Revalidating cache tags");
-          revalidateTag(`transactions_${teamId}`);
-          revalidateTag(`spending_${teamId}`);
-          revalidateTag(`metrics_${teamId}`);
-          revalidateTag(`expenses_${teamId}`);
         }
-
-        revalidateTag(`bank_accounts_${teamId}`);
-        console.log("Cache tags revalidated");
+      } catch (error) {
+        await io.logger.error(`Error processing accounts for team: ${teamId}`, {
+          error,
+        });
       }
     } catch (error) {
-      // Log any errors that occur during processing
-      console.error("Error in transaction sync process:", error);
-      await io.logger.debug(`Team id: ${teamId}`);
-      await io.logger.error(
-        error instanceof Error ? error.message : String(error)
-      );
+      console.error("Error occurred during processing:", error);
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
 
-    console.log("TRANSACTIONS_SYNC job completed");
+    await uniqueLog(io, "info", "TRANSACTIONS_SYNC job completed");
+
+    console.log("Revalidating cache tags");
+    revalidateTag(`transactions_${teamId}`);
+    revalidateTag(`spending_${teamId}`);
+    revalidateTag(`metrics_${teamId}`);
+    revalidateTag(`expenses_${teamId}`);
   },
 });

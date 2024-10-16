@@ -1,4 +1,5 @@
 import { UTCDate } from "@date-fns/utc";
+import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import {
   addDays,
   endOfMonth,
@@ -7,7 +8,7 @@ import {
   subYears,
 } from "date-fns";
 import { z } from "zod";
-import type { Client } from "../types";
+import type { Client, RecurringTransactionSchema } from "../types";
 
 export enum RecurringTransactionFrequency {
   ALL = "all",
@@ -23,7 +24,7 @@ export enum RecurringTransactionFrequency {
  * @returns The string representation of the frequency.
  */
 export function recurringFrequencyToString(
-  frequency: RecurringTransactionFrequency,
+  frequency: RecurringTransactionFrequency
 ): string {
   switch (frequency) {
     case RecurringTransactionFrequency.ALL:
@@ -62,7 +63,7 @@ export type GetRecentTransactionsParams = {
  */
 export async function getRecentTransactionsQuery(
   supabase: Client,
-  params: GetRecentTransactionsParams,
+  params: GetRecentTransactionsParams
 ) {
   const { teamId, limit = 15, accountId, recurring } = params;
 
@@ -149,7 +150,7 @@ export async function getUserQuery(supabase: Client, userId: string) {
       `
       *,
       team:team_id(*)
-    `,
+    `
     )
     .eq("id", userId)
     .single()
@@ -167,14 +168,40 @@ export async function getCurrentUserTeamQuery(supabase: Client) {
   return getUserQuery(supabase, session.user?.id);
 }
 
+export async function getBankAccountByAccountIdAndTeamQuery(
+  supabase: Client,
+  accountId: string,
+  teamId: string
+) {
+  return supabase
+    .from("bank_accounts")
+    .select("*")
+    .eq("account_id", accountId)
+    .eq("team_id", teamId)
+    .single()
+    .throwOnError();
+}
+
 export async function getBankConnectionsByTeamIdQuery(
   supabase: Client,
-  teamId: string,
+  teamId: string
 ) {
   return supabase
     .from("bank_connections")
     .select("*")
     .eq("team_id", teamId)
+    .throwOnError();
+}
+
+export async function getBankConnectionByIdQuery(
+  supabase: Client,
+  connectionId: string
+) {
+  return supabase
+    .from("bank_connections")
+    .select("*, accounts:bank_accounts(*)")
+    .eq("id", connectionId)
+    .single()
     .throwOnError();
 }
 
@@ -185,7 +212,7 @@ export type GetTeamBankAccountsParams = {
 
 export async function getTeamBankAccountsQuery(
   supabase: Client,
-  params: GetTeamBankAccountsParams,
+  params: GetTeamBankAccountsParams
 ) {
   const { teamId, enabled } = params;
 
@@ -213,7 +240,7 @@ export async function getTeamMembersQuery(supabase: Client, teamId: string) {
       role,
       team_id,
       user:users(id, full_name, avatar_url, email)
-    `,
+    `
     )
     .eq("team_id", teamId)
     .order("created_at")
@@ -231,7 +258,7 @@ type GetTeamUserParams = {
 
 export async function getTeamUserQuery(
   supabase: Client,
-  params: GetTeamUserParams,
+  params: GetTeamUserParams
 ) {
   const { data } = await supabase
     .from("users_on_team")
@@ -241,7 +268,7 @@ export async function getTeamUserQuery(
       role,
       team_id,
       user:users(id, full_name, avatar_url, email)
-    `,
+    `
     )
     .eq("team_id", params.teamId)
     .eq("user_id", params.userId)
@@ -262,7 +289,7 @@ export type GetSpendingParams = {
 
 export async function getSpendingQuery(
   supabase: Client,
-  params: GetSpendingParams,
+  params: GetSpendingParams
 ) {
   return supabase.rpc("get_spending_v3", {
     team_id: params.teamId,
@@ -293,7 +320,7 @@ export type GetTransactionsParams = {
 
 export async function getTransactionsQuery(
   supabase: Client,
-  params: GetTransactionsParams,
+  params: GetTransactionsParams
 ) {
   const { from = 0, to, filter, sort, teamId, searchQuery } = params;
 
@@ -481,7 +508,7 @@ type GetSimilarTransactionsParams = {
 
 export async function getSimilarTransactions(
   supabase: Client,
-  params: GetSimilarTransactionsParams,
+  params: GetSimilarTransactionsParams
 ) {
   const { name, teamId, categorySlug } = params;
 
@@ -497,7 +524,7 @@ export async function getSimilarTransactions(
 // gets all the similar transactions with detailed information
 export async function getSimilarTransactionsDetailedQuery(
   supabase: Client,
-  params: GetSimilarTransactionsParams,
+  params: GetSimilarTransactionsParams
 ) {
   const { name, teamId, categorySlug } = params;
 
@@ -516,7 +543,7 @@ type GetBankAccountsCurrenciesParams = {
 
 export async function getBankAccountsCurrenciesQuery(
   supabase: Client,
-  params: GetBankAccountsCurrenciesParams,
+  params: GetBankAccountsCurrenciesParams
 ) {
   return supabase.rpc("get_bank_account_currencies", {
     team_id: params.teamId,
@@ -532,7 +559,7 @@ export type GetBurnRateQueryParams = {
 
 export async function getBurnRateQuery(
   supabase: Client,
-  params: GetBurnRateQueryParams,
+  params: GetBurnRateQueryParams
 ) {
   const { teamId, from, to, currency } = params;
 
@@ -561,7 +588,7 @@ export type GetRunwayQueryParams = {
 
 export async function getRunwayQuery(
   supabase: Client,
-  params: GetRunwayQueryParams,
+  params: GetRunwayQueryParams
 ) {
   const { teamId, from, to, currency } = params;
 
@@ -586,7 +613,7 @@ export type GetMetricsParams = {
 
 export async function getMetricsQuery(
   supabase: Client,
-  params: GetMetricsParams,
+  params: GetMetricsParams
 ) {
   const { teamId, from, to, type = "profit", currency } = params;
 
@@ -613,7 +640,7 @@ export async function getMetricsQuery(
   const prevTotal = prevData?.reduce((value, item) => item.value + value, 0);
   const currentTotal = currentData?.reduce(
     (value, item) => item.value + value,
-    0,
+    0
   );
 
   const baseCurrency = currentData?.at(0)?.currency;
@@ -636,7 +663,7 @@ export async function getMetricsQuery(
         precentage: {
           value: getPercentageIncrease(
             Math.abs(prev?.value),
-            Math.abs(record.value),
+            Math.abs(record.value)
           ),
           status: record.value > prev?.value ? "positive" : "negative",
         },
@@ -664,7 +691,7 @@ export type GetExpensesQueryParams = {
 
 export async function getExpensesQuery(
   supabase: Client,
-  params: GetExpensesQueryParams,
+  params: GetExpensesQueryParams
 ) {
   const { teamId, from, to, currency } = params;
 
@@ -722,14 +749,14 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   const isSearch =
     (filter !== undefined &&
       Object.values(filter).some(
-        (value) => value !== undefined && value !== null,
+        (value) => value !== undefined && value !== null
       )) ||
     Boolean(searchQuery);
 
   const query = supabase
     .from("documents")
     .select(
-      "id, name, path_tokens, created_at, team_id, metadata, tag, owner:owner_id(*)",
+      "id, name, path_tokens, created_at, team_id, metadata, tag, owner:owner_id(*)"
     )
     .eq("team_id", teamId)
     .limit(limit)
@@ -785,7 +812,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   }));
 
   const mergedMap = new Map(
-    [...defaultFolders, ...filteredData].map((obj) => [obj.name, obj]),
+    [...defaultFolders, ...filteredData].map((obj) => [obj.name, obj])
   );
 
   const mergedArray = Array.from(mergedMap.values());
@@ -815,7 +842,7 @@ type GetVaultRecursiveParams = {
 
 export async function getVaultRecursiveQuery(
   supabase: Client,
-  params: GetVaultRecursiveParams,
+  params: GetVaultRecursiveParams
 ) {
   const { teamId, path, folder, limit = 10000 } = params;
 
@@ -852,8 +879,8 @@ export async function getVaultRecursiveQuery(
       getVaultRecursiveQuery(supabase, {
         ...params,
         folder: decodeURIComponent(folder.name),
-      }),
-    ),
+      })
+    )
   );
 
   subFolderContents.map((subfolderContent) => {
@@ -870,7 +897,7 @@ export async function getTeamsByUserIdQuery(supabase: Client, userId: string) {
       `
       id,
       role,
-      team:team_id(*)`,
+      team:team_id(*)`
     )
     .eq("user_id", userId)
     .throwOnError();
@@ -899,7 +926,7 @@ type GetUserInviteQueryParams = {
 
 export async function getUserInviteQuery(
   supabase: Client,
-  params: GetUserInviteQueryParams,
+  params: GetUserInviteQueryParams
 ) {
   return supabase
     .from("user_invites")
@@ -921,7 +948,7 @@ type GetInboxQueryParams = {
 
 export async function getInboxQuery(
   supabase: Client,
-  params: GetInboxQueryParams,
+  params: GetInboxQueryParams
 ) {
   const {
     from = 0,
@@ -1011,7 +1038,7 @@ export type GetTrackerProjectsQueryParams = {
 
 export async function getTrackerProjectsQuery(
   supabase: Client,
-  params: GetTrackerProjectsQueryParams,
+  params: GetTrackerProjectsQueryParams
 ) {
   const { from = 0, to = 10, filter, sort, teamId, search } = params;
   const { status } = filter || {};
@@ -1059,7 +1086,7 @@ export type GetTrackerRecordsByRangeParams = {
 
 export async function getTrackerRecordsByRangeQuery(
   supabase: Client,
-  params: GetTrackerRecordsByRangeParams,
+  params: GetTrackerRecordsByRangeParams
 ) {
   if (!params.teamId) {
     return null;
@@ -1068,7 +1095,7 @@ export async function getTrackerRecordsByRangeQuery(
   const query = supabase
     .from("tracker_entries")
     .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name)",
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name)"
     )
     .eq("team_id", params.teamId)
     .gte("date", params.from)
@@ -1092,7 +1119,7 @@ export async function getTrackerRecordsByRangeQuery(
 
   const totalDuration = data?.reduce(
     (duration, item) => item.duration + duration,
-    0,
+    0
   );
 
   return {
@@ -1112,7 +1139,7 @@ export type GetCategoriesParams = {
 
 export async function getCategoriesQuery(
   supabase: Client,
-  params: GetCategoriesParams,
+  params: GetCategoriesParams
 ) {
   const { teamId, limit = 1000 } = params;
 
@@ -1132,14 +1159,14 @@ type GetInboxSearchParams = {
 
 export async function getInboxSearchQuery(
   supabase: Client,
-  params: GetInboxSearchParams,
+  params: GetInboxSearchParams
 ) {
   const { teamId, q, limit = 10 } = params;
 
   const query = supabase
     .from("inbox")
     .select(
-      "id, created_at, file_name, amount, currency, file_path, content_type, date, display_name, size, description",
+      "id, created_at, file_name, amount, currency, file_path, content_type, date, display_name, size, description"
     )
     .eq("team_id", teamId)
     .neq("status", "deleted")
@@ -1171,7 +1198,7 @@ export type GetTransactionsByBankAccountQueryParams = z.infer<
 
 export const getTransactionsByBankAccountQuery = async (
   supabase: Client,
-  params: GetTransactionsByBankAccountQueryParams,
+  params: GetTransactionsByBankAccountQueryParams
 ) => {
   const { bankAccountId, limit } =
     getTransactionsByBankAccountQueryParamsSchema.parse(params);
@@ -1199,11 +1226,148 @@ export const getTransactionsByBankAccountQuery = async (
  */
 export async function getUserSubscriptionsQuery(
   supabase: Client,
-  userId: string,
+  userId: string
 ) {
   return await supabase
     .from("subscriptions")
     .select("*")
     .eq("user_id", userId)
     .throwOnError();
+}
+
+type AssociatedTransactionsResponse = {
+  id: string;
+  recurring_transaction_id: string | null;
+  transaction_id: string | null;
+};
+
+/**
+ * Retrieves all associated transactions for a given recurring transaction ID.
+ *
+ * @param supabase - The Supabase client instance.
+ * @param recurringTransactionId - The UUID of the recurring transaction.
+ *
+ * @returns A Promise that resolves to an array of transaction IDs.
+ *
+ * @throws Will throw an error if the retrieval operation fails.
+ *
+ * @example
+ * const transactionIds = await getAssociatedTransactions(supabase, '123e4567-e89b-12d3-a456-426614174000');
+ *
+ * @remarks
+ * This function uses a custom RPC (Remote Procedure Call) named 'get_associated_transactions'
+ * to retrieve the associated transaction IDs.
+ */
+export async function getAssociatedTransactionsQuery(
+  supabase: Client,
+  recurringTransactionId: string
+): Promise<Array<AssociatedTransactionsResponse>> {
+  let { data, error } = await supabase
+    .from("transaction_ids")
+    .select("*")
+    .eq("recurring_transaction_id", recurringTransactionId);
+
+  if (error) {
+    throw new Error(
+      `Error retrieving associated transactions: ${error.message}`
+    );
+  }
+
+  return data || [];
+}
+
+/**
+ * Parameters for querying recurring transactions.
+ */
+export type GetRecurringTransactionsParams = {
+  /** Unique identifier for the transaction stream */
+  streamId?: string;
+  /** Identifier for the associated bank account */
+  accountId?: string;
+  /** Name of the merchant for filtering transactions */
+  merchantName?: string;
+  /** Start date for filtering transactions (inclusive) */
+  startDate?: string;
+  /** End date for filtering transactions based on their last occurrence (inclusive) */
+  lastTransactionDate?: string;
+  /** Maximum number of records to return (default: 100) */
+  limit?: number;
+  /** Number of records to skip for pagination (default: 0) */
+  offset?: number;
+};
+
+/**
+ * Retrieves recurring transactions based on specified criteria.
+ *
+ * @param supabase - The Supabase client instance for database operations.
+ * @param params - An object containing query parameters for filtering and pagination.
+ * @returns A promise that resolves to an array of RecurringTransactionSchema objects.
+ *
+ * @throws Will throw an error if the database query fails.
+ *
+ * @example
+ * const recurringTransactions = await getRecurringTransactions(supabase, {
+ *   accountId: 'acc123',
+ *   merchantName: 'Netflix',
+ *   limit: 10
+ * });
+ *
+ * @remarks
+ * - This function queries the 'recurring_transactions' table in the database.
+ * - It applies filters based on the provided parameters.
+ * - Results are ordered by last_date (descending) and then first_date (descending).
+ * - Pagination is supported through limit and offset parameters.
+ */
+export async function getRecurringTransactions(
+  supabase: Client,
+  params: GetRecurringTransactionsParams
+): Promise<RecurringTransactionSchema[]> {
+  const {
+    streamId,
+    accountId,
+    merchantName,
+    startDate,
+    lastTransactionDate,
+    limit = 100,
+    offset = 0,
+  } = params;
+
+  let query = supabase.from("recurring_transactions").select("*");
+
+  // Apply filters based on provided parameters
+  if (streamId) {
+    query = query.eq("stream_id", streamId);
+  }
+
+  if (accountId) {
+    query = query.eq("account_id", accountId);
+  }
+
+  if (merchantName) {
+    query = query.ilike("merchant_name", `%${merchantName}%`);
+  }
+
+  if (startDate) {
+    query = query.gte("first_date", startDate);
+  }
+
+  if (lastTransactionDate) {
+    query = query.lte("last_date", lastTransactionDate);
+  }
+
+  // Apply ordering and pagination
+  query = query
+    .order("last_date", { ascending: false })
+    .order("first_date", { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(
+      `Error retrieving recurring transactions: ${error.message}`
+    );
+  }
+
+  return data || [];
 }

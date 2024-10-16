@@ -1,3 +1,4 @@
+import { ItemFromJSON } from "@solomon-ai/client-typescript-sdk";
 import { parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
 
 export function useConnectParams(initialCountryCode?: string) {
@@ -8,6 +9,7 @@ export function useConnectParams(initialCountryCode?: string) {
     token: parseAsString,
     enrollment_id: parseAsString,
     institution_id: parseAsString,
+    item_id: parseAsString,
     q: parseAsString.withDefault("").withOptions({ clearOnDefault: true }),
     error: parseAsString,
     ref: parseAsString,

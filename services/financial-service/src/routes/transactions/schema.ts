@@ -62,6 +62,9 @@ export const TransactionsParamsSchema = z
         },
         example: "true",
       }),
+    syncCursor: z.string().nullable().optional().openapi({
+        example: "cursor-123",
+    }),
   })
   .openapi("TransactionsParamsSchema");
 
@@ -122,6 +125,157 @@ export const TransactionSchema = z
         example: 10000,
       })
       .nullable(),
+    internal_id: z.string().openapi({
+      example: "int_12345abcde",
+    }),
+    bank_account_id: z.string().openapi({
+      example: "ba_9876fedcba",
+    }),
+    currency_rate: z.number().nullable().openapi({
+      example: 1.2345,
+    }),
+    currency_source: z.string().nullable().openapi({
+      example: "USD",
+    }),
+    assigned_id: z.string().nullable().optional().openapi({
+      example: "assigned_987654",
+    }),
+    category_slug: z.string().nullable().optional().openapi({
+      example: "groceries",
+    }),
+    manual: z.boolean().nullable().optional().openapi({
+      example: false,
+    }),
+    account_id: z.string().nullable().openapi({
+      example: "acc_1234567890",
+    }),
+    account_owner: z.string().nullable().optional().openapi({
+      example: "John Doe",
+    }),
+    iso_currency_code: z.string().nullable().optional().openapi({
+      example: "USD",
+    }),
+    unofficial_currency_code: z.string().nullable().optional().openapi({
+      example: null,
+    }),
+    category_id: z.string().nullable().optional().openapi({
+      example: "22006001",
+    }),
+    authorized_date: z.date().nullable().optional().openapi({
+      example: "2023-06-15",
+    }),
+    authorized_datetime: z.date().nullable().optional().openapi({
+      example: "2023-06-15T14:30:00Z",
+    }),
+    location_address: z.string().nullable().optional().openapi({
+      example: "123 Main St",
+    }),
+    location_city: z.string().nullable().optional().openapi({
+      example: "San Francisco",
+    }),
+    location_region: z.string().nullable().optional().openapi({
+      example: "CA",
+    }),
+    location_postal_code: z.string().nullable().optional().openapi({
+      example: "94105",
+    }),
+    location_country: z.string().nullable().optional().openapi({
+      example: "US",
+    }),
+    location_lat: z.number().nullable().optional().openapi({
+      example: 37.7749,
+    }),
+    location_lon: z.number().nullable().optional().openapi({
+      example: -122.4194,
+    }),
+    location_store_number: z.string().nullable().optional().openapi({
+      example: "SF-123",
+    }),
+    merchant_name: z.string().nullable().optional().openapi({
+      example: "Whole Foods Market",
+    }),
+    merchant_entity_id: z.string().nullable().optional().openapi({
+      example: "mer_12345abcde",
+    }),
+    logo_url: z.string().nullable().optional().openapi({
+      example: "https://example.com/logos/merchant.png",
+    }),
+    website: z.string().nullable().optional().openapi({
+      example: "https://www.wholefoodsmarket.com",
+    }),
+    payment_meta_by_order_of: z.string().nullable().optional().openapi({
+      example: "John Doe",
+    }),
+    payment_meta_payer: z.string().nullable().optional().openapi({
+      example: "Jane Smith",
+    }),
+    payment_meta_payee: z.string().nullable().optional().openapi({
+      example: "Acme Corp",
+    }),
+    payment_meta_payment_method: z.string().nullable().optional().openapi({
+      example: "ACH",
+    }),
+    payment_meta_payment_processor: z.string().nullable().optional().openapi({
+      example: "Stripe",
+    }),
+    payment_meta_ppd_id: z.string().nullable().optional().openapi({
+      example: "PPD12345",
+    }),
+    payment_meta_reason: z.string().nullable().optional().openapi({
+      example: "Monthly subscription",
+    }),
+    payment_meta_reference_number: z.string().nullable().optional().openapi({
+      example: "REF987654",
+    }),
+    payment_channel: z.string().nullable().optional().openapi({
+      example: "online",
+    }),
+    pending: z.boolean().nullable().optional().openapi({
+      example: false,
+    }),
+    pending_transaction_id: z.string().nullable().optional().openapi({
+      example: "ptx_12345abcde",
+    }),
+    personal_finance_category_primary: z
+      .string()
+      .nullable()
+      .optional()
+      .openapi({
+        example: "FOOD_AND_DRINK",
+      }),
+    personal_finance_category_detailed: z
+      .string()
+      .nullable()
+      .optional()
+      .openapi({
+        example: "GROCERIES",
+      }),
+    personal_finance_category_confidence_level: z
+      .string()
+      .nullable()
+      .optional()
+      .openapi({
+        example: "HIGH",
+      }),
+    personal_finance_category_icon_url: z
+      .string()
+      .nullable()
+      .optional()
+      .openapi({
+        example: "https://example.com/icons/groceries.png",
+      }),
+    transaction_id: z.string().nullable().optional().openapi({
+      example: "tx_12345abcde",
+    }),
+    transaction_code: z.string().nullable().optional().openapi({
+      example: "TC123",
+    }),
+    transaction_type: z.string().nullable().optional().openapi({
+      example: "purchase",
+    }),
+    check_number: z.string().nullable().optional().openapi({
+      example: "1234",
+    }),
   })
   .openapi("TransactionSchema");
 
@@ -132,6 +286,12 @@ export const TransactionSchema = z
 export const TransactionsSchema = z
   .object({
     data: z.array(TransactionSchema),
+    cursor: z.string().nullable().optional().openapi({
+      example: "cursor-123",
+    }),
+    hasMore: z.boolean().nullable().optional().openapi({
+      example: false,
+    }),
   })
   .openapi("TransactionsSchema");
 
@@ -172,14 +332,11 @@ export const RecurringTransactionsParamsSchema = z
 /**
  * Schema for recurring transaction frequency.
  */
-const RecurringTransactionFrequencySchema = z.enum([
-  "weekly",
-  "bi-weekly",
-  "monthly",
-  "yearly",
-  "semi-monthly",
-  "unknown",
-]);
+const RecurringTransactionFrequencySchema = z
+  .enum(["weekly", "bi-weekly", "monthly", "yearly", "semi-monthly", "unknown"])
+  .openapi({
+    example: "monthly",
+  });
 
 /**
  * Schema for recurring transaction amount.
@@ -188,20 +345,19 @@ const RecurringTransactionFrequencySchema = z.enum([
  * @property {string|null} unofficial_currency_code - Unofficial currency code.
  */
 const RecurringTransactionAmountSchema = z.object({
-  amount: z.number(),
-  iso_currency_code: z.string().nullable(),
-  unofficial_currency_code: z.string().nullable(),
+  amount: z.number().openapi({ example: 100.5 }),
+  iso_currency_code: z.string().nullable().openapi({ example: "USD" }),
+  unofficial_currency_code: z.string().nullable().openapi({ example: null }),
 });
 
 /**
  * Schema for recurring transaction status.
  */
-const RecurringTransactionStatusSchema = z.enum([
-  "mature",
-  "early_detection",
-  "tombstoned",
-  "unknown",
-]);
+const RecurringTransactionStatusSchema = z
+  .enum(["mature", "early_detection", "tombstoned", "unknown"])
+  .openapi({
+    example: "mature",
+  });
 
 /**
  * Schema for recurring transaction category.
@@ -210,9 +366,9 @@ const RecurringTransactionStatusSchema = z.enum([
  * @property {string} confidence_level - Confidence level of the categorization.
  */
 const RecurringTransactionCategorySchema = z.object({
-  primary: z.string(),
-  detailed: z.string(),
-  confidence_level: z.string(),
+  primary: z.string().openapi({ example: "FOOD_AND_DRINK" }),
+  detailed: z.string().openapi({ example: "RESTAURANTS" }),
+  confidence_level: z.string().openapi({ example: "HIGH" }),
 });
 
 /**
@@ -234,21 +390,25 @@ const RecurringTransactionCategorySchema = z.object({
  * @property {string|null} last_user_modified_datetime - Datetime of the last user modification.
  */
 export const RecurringTransactionSchema = z.object({
-  account_id: z.string(),
-  recurring_transaction_id: z.string(),
-  description: z.string(),
-  merchant_name: z.string().nullable(),
-  first_date: z.string(),
-  last_date: z.string(),
+  account_id: z.string().openapi({ example: "acc_123456789" }),
+  stream_id: z.string().openapi({ example: "rec_tx_987654321" }),
+  category: z.array(z.string()).openapi({ example: ["groceries", "food"] }),
+  category_id: z.string(),
+  description: z.string().openapi({ example: "Monthly Subscription" }),
+  merchant_name: z.string().nullable().openapi({ example: "Netflix" }),
+  first_date: z.string().openapi({ example: "2023-01-15" }),
+  last_date: z.string().openapi({ example: "2023-12-15" }),
   frequency: RecurringTransactionFrequencySchema,
-  transaction_ids: z.array(z.string()),
+  transaction_ids: z
+    .array(z.string())
+    .openapi({ example: ["tx_123", "tx_456", "tx_789"] }),
   average_amount: RecurringTransactionAmountSchema,
   last_amount: RecurringTransactionAmountSchema,
-  is_active: z.boolean(),
+  is_active: z.boolean().openapi({ example: true }),
   status: RecurringTransactionStatusSchema,
   personal_finance_category: RecurringTransactionCategorySchema.nullable(),
-  is_user_modified: z.boolean(),
-  last_user_modified_datetime: z.string().nullable(),
+  is_user_modified: z.boolean().openapi({ example: false }),
+  last_user_modified_datetime: z.string().nullable().openapi({ example: null }),
 });
 
 /**
@@ -260,7 +420,7 @@ export const RecurringTransactionSchema = z.object({
 export const GetRecurringTransactionsResponseSchema = z.object({
   inflow: z.array(RecurringTransactionSchema),
   outflow: z.array(RecurringTransactionSchema),
-  last_updated_at: z.string(),
+  last_updated_at: z.string().openapi({ example: "2023-06-15T14:30:00Z" }),
 });
 
 /**

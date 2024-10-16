@@ -1,13 +1,14 @@
-import { Database } from "@midday/supabase/types";
+import {
+  Database,
+  TransactionSchema as Transaction,
+} from "@midday/supabase/types";
 import { eventTrigger } from "@trigger.dev/sdk";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, startOfMonth } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { PDFDocument, rgb } from "pdf-lib";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
-
-type Transaction = Database["public"]["Tables"]["transactions"]["Row"];
 
 /**
  * Generates a PDF document containing transaction data.
@@ -22,7 +23,7 @@ async function generateTransactionsPDF(
   transactions: Transaction[],
   teamName: string,
   dateRange: { start: string; end: string },
-  merchant?: string,
+  merchant?: string
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage();
@@ -46,7 +47,7 @@ async function generateTransactionsPDF(
       y: height - 80,
       size: fontSize,
       color: rgb(0.4, 0.4, 0.4),
-    },
+    }
   );
 
   if (merchant) {
@@ -163,8 +164,8 @@ client.defineJob({
     name: Events.TRANSACTIONS_EXPORT_PDF,
     schema: z.object({
       teamId: z.string(),
-      startDate: z.string(),
-      endDate: z.string(),
+      startDate: z.string().default(() => format(startOfMonth(new Date()), 'yyyy-MM-dd')),
+      endDate: z.string().default(() => format(new Date(), 'yyyy-MM-dd')),
       merchantName: z.string().optional(),
       transactionIds: z.array(z.string()).optional(),
     }),
@@ -213,7 +214,7 @@ client.defineJob({
       transactions,
       teamData.name as string,
       { start: startDate, end: endDate },
-      merchantName ?? undefined,
+      merchantName ?? undefined
     );
 
     // Upload PDF to Supabase storage

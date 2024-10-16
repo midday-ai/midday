@@ -22,7 +22,7 @@ import { SheetMenu } from "./sheet-menu";
  */
 interface NavbarProps {
   /** The title to be displayed in the navbar */
-  title: string;
+  title?: string;
 }
 
 /**
@@ -34,17 +34,13 @@ interface NavbarProps {
  */
 export const Navbar: React.FC<NavbarProps> = ({ title }) => {
   return (
-    <header className="sticky top-0 z-10 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-4 flex h-14 items-center sm:mx-8">
-        {/** this is the left side of the navbar and is commented out as we already have one ... it shows itself in small screens */}
-        {/* <NavbarLeft title={title} /> */}
-        <div className="ml-4 flex items-center space-x-4">
+    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="mx-4 flex h-14 items-center justify-between sm:mx-8 relative z-50 pointer-events-auto">
+        <div className="flex items-center space-x-4">
           <MobileMenu />
           {isDesktopApp() && <DesktopTrafficLight />}
           {isDesktopApp() && <BrowserNavigation />}
-          {/* <div className="flex-1">
-            <AssistantButton />
-          </div> */}
+          <TeamMenu mode="dropdown" />
         </div>
         <NavbarRight />
       </div>
@@ -88,10 +84,6 @@ const NavbarRight: React.FC = () => (
 
     <Suspense fallback={<Skeleton className="h-8 w-8 rounded-full" />}>
       <UserMenu onlySignOut={false} />
-    </Suspense>
-
-    <Suspense fallback={<Skeleton className="h-8 w-8 rounded-full" />}>
-      <TeamMenu mode="button" />
     </Suspense>
   </div>
 );

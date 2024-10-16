@@ -3,7 +3,6 @@
 import { Tables } from "@midday/supabase/types";
 import { Badge } from "@midday/ui/badge";
 import { Button, buttonVariants } from "@midday/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
@@ -102,7 +101,7 @@ export const TransactionsFilterHelper: React.FC<{
   }, [transactions]);
 
   return (
-    <div className="bg-background rounded-lg shadow-md">
+    <div className="bg-background rounded-lg">
       <div className="flex items-center justify-between mb-4 gap-2">
         <div
           className={cn(
@@ -120,7 +119,7 @@ export const TransactionsFilterHelper: React.FC<{
           onChange={handleSearch}
         />
       </div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 py-[1.5%]">
         <h1 className="text-2xl font-bold">{title}</h1>
         <div className="flex items-center gap-4">
           <DropdownMenu>
@@ -213,9 +212,9 @@ export const TransactionsFilterHelper: React.FC<{
               <TableHead>Category</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="overflow-y-auto scrollbar-hide border-none">
+          <TableBody className="overflow-y-auto scrollbar-hide">
             {filteredTransactions.map((transaction) => (
-              <TableRow key={transaction.id} className="border-none">
+              <TableRow key={transaction.id}>
                 <TableCell>{formatDate(transaction.date)}</TableCell>
                 <TableCell>{transaction.merchant_name}</TableCell>
                 <TableCell className="text-right">

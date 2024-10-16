@@ -56,6 +56,10 @@ export type GetTransactionsRequest = {
   accountId: string;
   /** If true, fetch only the latest transactions. */
   latest?: boolean;
+  /** The type of the account. */
+  syncCursor?: string;
+  /** The maximum number of calls to make. */
+  maxCalls?: number;
 };
 
 /**
@@ -103,7 +107,11 @@ export type TransformAccountBalance =
 
 export type TransformTransaction = Transaction;
 
-export type GetTransactionsResponse = TransactionsSyncResponse["added"];
+export type GetTransactionsResponse = {
+  added: TransactionsSyncResponse["added"];
+  cursor: TransactionsSyncResponse["next_cursor"];
+  hasMore: TransactionsSyncResponse["has_more"];
+};
 
 export type GetAccountBalanceResponse =
   AccountsGetResponse["accounts"][0]["balances"];
