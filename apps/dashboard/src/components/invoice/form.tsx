@@ -54,6 +54,7 @@ export function Form({ teamId, template: initialTemplate }: Props) {
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(createInvoiceSchema),
     defaultValues: {
+      template,
       customerDetails: undefined,
       fromDetails: template.from_details,
       paymentDetails: template.payment_details,
