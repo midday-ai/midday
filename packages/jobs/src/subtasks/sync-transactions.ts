@@ -40,6 +40,8 @@ async function syncTransactionsSubTask(
       await logAccountInfo(account);
       const { transactions, cursor, hasMore } = await fetchTransactions(account);
       const formattedTransactions = await transformTransactions(transactions, account);
+      await processTransactionBatches(formattedTransactions, account);
+
       await updateAccountBalance(account);
 
       if (cursor) {
@@ -57,7 +59,6 @@ async function syncTransactionsSubTask(
         await uniqueLog(io, "warn", `No cursor returned for account ${account.id}, skipping bank connection update`);
       }
 
-      await processTransactionBatches(formattedTransactions, account);
 
       await uniqueLog(io, "info", `Completed processing for account ${account.id}. Has more: ${hasMore}`);
     } catch (error) {
@@ -91,7 +92,7 @@ async function syncTransactionsSubTask(
       hasMore,
     } = await engine.transactions.list(request);
 
-    await uniqueLog(io, "info", `Retrieved ${transactions?.length || 0} transactions for account ${account.id} (Type: ${accountType})`);
+    await uniqueLog(io, "info", `Retrieved ${transactions?.length || 0} transactions for account ${account.id} (Type: ${accountType}). Fetch request object ${JSON.stringify(request)}`);
 
     return {
       transactions: transactions,
@@ -146,6 +147,10 @@ async function syncTransactionsSubTask(
 
       if (error) {
         console.error(`Error upserting transactions for account ${account.id}:`, error);
+        await io.logger.error(
+          `Error upserting transactions for account: ${account.id}`,
+          { error },
+        );
       } else {
         await uniqueLog(io, "info", `Successfully upserted ${batch.length} transactions for account ${account.id}`);
         allNewTransactions = allNewTransactions.concat(batch);
