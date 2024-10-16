@@ -46,6 +46,12 @@ binding = "DB" # i.e. available in your Worker on env.DB
 database_name = "engine-production-db"
 database_id = "7e9430cd-517d-4139-bb27-1be427d3474a"
 
+[[env.production.unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 5000, period = 60 }
+
 [env.staging]
 name = "engine-staging"
 route = { pattern = "engine-staging.solomon-ai-platform.com/*", zone_name = "solomon-ai-platform.com" }
@@ -81,6 +87,12 @@ consumers = [
   { queue = "user-actions-staging", max_batch_size = 10, max_retries = 10, dead_letter_queue = "user-actions-staging-dlq" },
   { queue = "user-actions-staging-dlq", max_batch_size = 10, max_retries = 10 },
 ]
+
+[[env.staging.unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1002"
+simple = { limit = 5000, period = 60 }
 
 # local
 [[env.local.d1_databases]]

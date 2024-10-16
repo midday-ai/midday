@@ -1,5 +1,5 @@
 import type { UserActionMessageBody } from "@/message/user-action-message";
-import { D1Database, Fetcher, KVNamespace, Queue, R2Bucket } from "@cloudflare/workers-types";
+import { D1Database, Fetcher, KVNamespace, Queue, R2Bucket, RateLimit } from "@cloudflare/workers-types";
 import { z } from "zod";
 
 export const zEnv = z.object({
@@ -8,6 +8,7 @@ export const zEnv = z.object({
     KV: z.custom<KVNamespace>((ns) => typeof ns === "object"),
     STORAGE: z.custom<R2Bucket>((ns) => typeof ns === "object"),
     BANK_STATEMENTS: z.custom<R2Bucket>((ns) => typeof ns === "object"),
+    RATE_LIMITER: z.custom<RateLimit>((ns) => typeof ns === "object"),
     TELLER_CERT: z.custom<Fetcher>((ns) => typeof ns === "object"),
     USER_ACTIONS_QUEUE: z.custom<Queue<UserActionMessageBody>>((q) => typeof q === "object").optional(),
     API_SECRET_KEY: z.string(),

@@ -1,11 +1,9 @@
-import type { Context, Next } from "hono";
+import { Context, Next } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { APIKeyRepository } from "../data/apiKeyRepository";
 import { UserRepository } from "../data/userRepository";
 import { User } from "../db/schema";
-
-/** Paths that are publicly accessible without authentication */
-const PUBLIC_PATHS = ["/", "/openapi", "/health"];
+import constants from "../constants/constant";
 
 /**
  * Authentication middleware
@@ -16,8 +14,8 @@ const PUBLIC_PATHS = ["/", "/openapi", "/health"];
  * @returns {Promise<Response | void>} The response or void if passing to next middleware
  * @throws {HTTPException} Throws a 401 error if authentication fails
  */
-export const authMiddleware = async (c: Context, next: Next) => {
-  if (PUBLIC_PATHS.includes(c.req.path)) {
+export const authMiddleware = async (c: Context, next: Next): Promise<Response | void> => {
+  if (constants.PUBLIC_PATHS.includes(c.req.path)) {
     return next();
   }
 
@@ -32,34 +30,71 @@ export const authMiddleware = async (c: Context, next: Next) => {
   const apiKeyRepo = new APIKeyRepository(db);
   const userRepo = new UserRepository(db);
 
-  // Check cache first
-  const cachedUser = await c.env.KV.get(`auth:${apiKey}:${userId}`);
-  if (cachedUser) {
-    c.set('user', JSON.parse(cachedUser) as User);
-    return next();
-  }
+  try {
+    // Check cache first
+    const cachedUser = await getCachedUser(c, apiKey, userId);
+    if (cachedUser) {
+      c.set('user', cachedUser);
+      return next();
+    }
 
-  // Validate API key and user
-  const isValidApiKey = await apiKeyRepo.isValidApiKey(apiKey);
+    // Validate API key and user
+    await validateApiKeyAndUser(apiKeyRepo, userRepo, apiKey, userId);
+
+    const user = await userRepo.getById(userId);
+    if (!user) {
+      throw new HTTPException(401, { message: "Invalid or inactive user" });
+    }
+
+    // Cache the authenticated user
+    await cacheUser(c, apiKey, userId, user);
+
+    // Set the authenticated user in the context
+    c.set('user', user);
+
+    // Log the successful authentication
+    c.get('logger').info(`User ${userId} authenticated successfully`);
+
+    return next();
+  } catch (error) {
+    handleAuthError(c, error);
+  }
+};
+
+async function getCachedUser(c: Context, apiKey: string, userId: string): Promise<User | null> {
+  const cachedUser = await c.env.KV.get(`auth:${apiKey}:${userId}`);
+  return cachedUser ? JSON.parse(cachedUser) : null;
+}
+
+async function validateApiKeyAndUser(
+  apiKeyRepo: APIKeyRepository,
+  userRepo: UserRepository,
+  apiKey: string,
+  userId: string
+): Promise<void> {
+  const [isValidApiKey, user] = await Promise.all([
+    apiKeyRepo.isValidApiKey(apiKey),
+    userRepo.getById(userId)
+  ]);
+
   if (!isValidApiKey) {
     throw new HTTPException(401, { message: "Invalid API key" });
   }
 
-  const user = await userRepo.getById(userId);
   if (!user) {
     throw new HTTPException(401, { message: "Invalid or inactive user" });
   }
+}
 
-  // Cache the authenticated user
-  await c.env.KV.put(`auth:${apiKey}:${userId}`, JSON.stringify(user), { expirationTtl: 3600 });
+async function cacheUser(c: Context, apiKey: string, userId: string, user: User): Promise<void> {
+  await c.env.KV.put(`auth:${apiKey}:${userId}`, JSON.stringify(user), { expirationTtl: constants.CACHE_TTL });
+}
 
-  // Set the authenticated user in the context
-  c.set('user', user);
 
-  // TODO: Implement rate limiting based on the API key
-
-  // Log the successful authentication
-  console.log(`User ${userId} authenticated successfully`);
-
-  return next();
-};
+function handleAuthError(c: Context, error: unknown): never {
+  if (error instanceof HTTPException) {
+    throw error;
+  }
+  c.get('logger').error('Authentication error:', error);
+  throw new HTTPException(500, { message: "Internal server error during authentication" });
+}
