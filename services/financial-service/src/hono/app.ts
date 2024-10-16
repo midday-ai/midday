@@ -117,7 +117,7 @@ function setupCaching(app: OpenAPIHono<HonoEnv>) {
  */
 function setupSwagger(app: OpenAPIHono<HonoEnv>) {
 
-  app.doc("/doc", {
+  app.doc("/openapi", {
     openapi: "3.1.0",
     info: {
       version: "1.0.0",
@@ -156,7 +156,7 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
     },
   });
 
-  app.get("/", swaggerUI({ url: "/doc" }));
+  app.get("/", swaggerUI({ url: "/openapi" }));
 }
 
 /**
