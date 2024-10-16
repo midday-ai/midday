@@ -6,6 +6,8 @@ import { ApiAnalyticsEvent, SdkAnalyticsEvent } from "./types";
  * 
  * This class provides methods for inserting SDK telemetry and API request data,
  * utilizing a ConsoleLogger for logging purposes.
+ * 
+ * TODO: we will be integrating this with workers analytics engine to store usage analytics at the api owner level
  */
 export class Analytics {
     // public readonly client: Tinybird | NoopTinybird | ClickhouseClient;
@@ -75,7 +77,7 @@ export class Analytics {
             request_body: undefined, // Remove the request body as we do not want to log it (may contain PII)
             response_body: undefined, // Remove the response body as we do not want to log it (may contain PII)
         };
-
+        
         this.logger.info("Inserting API request", {
             event: strippedEvent,
         });

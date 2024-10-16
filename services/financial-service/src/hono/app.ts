@@ -116,9 +116,8 @@ function setupCaching(app: OpenAPIHono<HonoEnv>) {
  * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
  */
 function setupSwagger(app: OpenAPIHono<HonoEnv>) {
-  app.get("/", swaggerUI({ url: "/openapi" }));
 
-  app.doc("/openapi.json", {
+  app.doc("/doc", {
     openapi: "3.1.0",
     info: {
       version: "1.0.0",
@@ -138,10 +137,12 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
         maxElapsedTime: 30_000,
         exponent: 1.5,
       },
-      statusCodes: ["5XX"],
+      statusCodes: ["5XX", "4XX"],
       retryConnectionErrors: true,
     },
   });
+
+  app.get("/", swaggerUI({ url: "/doc" }));
 }
 
 /**

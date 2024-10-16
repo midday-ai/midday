@@ -200,9 +200,7 @@ export function handleZodError(
  * @returns A Response object with error details.
  */
 export function handleError(err: Error, c: Context<HonoEnv>): Response {
-    console.log("Accessing logger in error handler");
-    const logger = c.get("logger") || console;
-    console.log("Logger accessed:", logger ? "Available" : "Not available");
+    const { logger } = c.get("ctx");
 
     /**
      * We can handle this very well, as it is something we threw ourselves
