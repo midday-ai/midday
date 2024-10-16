@@ -1,6 +1,8 @@
 "use client";
 
+import { createCustomerAction } from "@/actions/create-customer-action";
 import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Accordion,
@@ -20,6 +22,7 @@ import {
 import { Input } from "@midday/ui/input";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Textarea } from "@midday/ui/textarea";
+import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -34,9 +37,9 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Email is not valid.",
   }),
+  phone: z.string().optional(),
   website: z
     .string()
-    .url()
     .optional()
     .transform((url) => url?.replace(/^https?:\/\//, "")),
   address_line_1: z
@@ -61,6 +64,12 @@ const formSchema = z.object({
     .string()
     .min(1, {
       message: "State must be at least 1 characters.",
+    })
+    .optional(),
+  country: z
+    .string()
+    .min(1, {
+      message: "Country must be at least 1 characters.",
     })
     .optional(),
   zip: z
@@ -90,7 +99,17 @@ const excludedDomains = [
 ];
 
 export function CreateCustomerForm() {
-  const { setParams } = useCustomerParams();
+  const { setParams: setCustomerParams } = useCustomerParams();
+  const { setParams: setInvoiceParams } = useInvoiceParams();
+
+  const createCustomer = useAction(createCustomerAction, {
+    onSuccess: ({ data }) => {
+      if (data) {
+        setInvoiceParams({ selectedCustomerId: data.id });
+        setCustomerParams(null);
+      }
+    },
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -102,21 +121,19 @@ export function CreateCustomerForm() {
       address_line_2: undefined,
       city: undefined,
       state: undefined,
+      country: undefined,
       zip: undefined,
       note: undefined,
+      phone: undefined,
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-  }
-
   const onSelectAddress = (address: AddressDetails) => {
-    console.log(address);
     form.setValue("address_line_1", address.address_line_1);
     form.setValue("address_line_2", address.address_line_2);
     form.setValue("city", address.city);
     form.setValue("state", address.state);
+    form.setValue("country", address.country);
     form.setValue("zip", address.zip);
   };
 
@@ -133,7 +150,7 @@ export function CreateCustomerForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={form.handleSubmit(createCustomer.execute)}>
         <ScrollArea className="h-[calc(100vh-180px)]">
           <div>
             <Accordion
@@ -165,27 +182,49 @@ export function CreateCustomerForm() {
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs text-[#878787] font-normal">
-                            Email
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="acme@example.com"
-                              type="email"
-                              autoComplete="off"
-                              onBlur={handleEmailBlur}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Email
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="acme@example.com"
+                                type="email"
+                                autoComplete="off"
+                                onBlur={handleEmailBlur}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Phone
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="+1 (555) 123-4567"
+                                type="tel"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
                     <FormField
                       control={form.control}
@@ -260,6 +299,25 @@ export function CreateCustomerForm() {
                     <div className="grid grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
+                        name="country"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Country
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="United States"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
                         name="city"
                         render={({ field }) => (
                           <FormItem>
@@ -276,7 +334,9 @@ export function CreateCustomerForm() {
                           </FormItem>
                         )}
                       />
+                    </div>
 
+                    <div className="grid grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
                         name="state"
@@ -295,26 +355,26 @@ export function CreateCustomerForm() {
                           </FormItem>
                         )}
                       />
-                    </div>
 
-                    <FormField
-                      control={form.control}
-                      name="zip"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs text-[#878787] font-normal">
-                            ZIP Code / Postal Code
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="10001"
-                              autoComplete="off"
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={form.control}
+                        name="zip"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              ZIP Code / Postal Code
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="10001"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
                     <FormField
                       control={form.control}
@@ -346,15 +406,16 @@ export function CreateCustomerForm() {
           <div className="flex justify-end mt-auto space-x-4">
             <Button
               variant="outline"
-              onClick={() => setParams(null)}
+              onClick={() => setCustomerParams(null)}
               type="button"
             >
               Cancel
             </Button>
+
             <Button
-              disabled={form.formState.isSubmitting || !form.formState.isValid}
+              disabled={createCustomer.isExecuting || !form.formState.isValid}
             >
-              {form.formState.isSubmitting ? "Creating..." : "Create"}
+              {createCustomer.isExecuting ? "Creating..." : "Create"}
             </Button>
           </div>
         </div>

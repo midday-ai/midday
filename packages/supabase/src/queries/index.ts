@@ -1229,7 +1229,9 @@ export async function getPaymentStatusQuery(supabase: Client, teamId: string) {
 export async function getCustomersQuery(supabase: Client, teamId: string) {
   return supabase
     .from("customers")
-    .select("id, name, website")
+    .select(
+      "id, name, website, email, country, address_line_1, address_line_2, city, state, zip, phone",
+    )
     .eq("team_id", teamId)
     .limit(100);
 }

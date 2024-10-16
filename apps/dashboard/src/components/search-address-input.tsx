@@ -70,7 +70,6 @@ const getAddressDetailsByAddressId = async (
 
   return {
     address_line_1: `${streetNumber} ${streetAddress}`.trim(),
-    address_line_2: "",
     city,
     state,
     zip,
@@ -100,7 +99,6 @@ export function SearchAddressInput({
     ready,
     suggestions: { status, data },
     setValue,
-    clearSuggestions,
   } = usePlacesAutoComplete({
     initOnMount: isLoaded,
     debounce: 300,

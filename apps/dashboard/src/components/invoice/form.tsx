@@ -3,10 +3,12 @@ import {
   type InvoiceTemplate,
   invoiceFormSchema,
 } from "@/actions/invoice/schema";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { UTCDate } from "@date-fns/utc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { addMonths } from "date-fns";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { CreateButton } from "./create-button";
 import { CustomerDetails } from "./customer-details";
@@ -43,7 +45,9 @@ const defaultTemplate: InvoiceTemplate = {
   from_details: undefined,
 };
 
-export function Form({ teamId, template: initialTemplate }: Props) {
+export function Form({ teamId, template: initialTemplate, customers }: Props) {
+  const { selectedCustomerId } = useInvoiceParams();
+
   const template = {
     ...defaultTemplate,
     ...initialTemplate,
@@ -58,6 +62,7 @@ export function Form({ teamId, template: initialTemplate }: Props) {
       fromDetails: template.from_details,
       paymentDetails: template.payment_details,
       note: undefined,
+      customer_id: undefined,
       issueDate: new UTCDate(),
       dueDate: addMonths(new UTCDate(), 1),
       invoiceNumber: "INV-0001",
@@ -65,6 +70,12 @@ export function Form({ teamId, template: initialTemplate }: Props) {
     },
     mode: "onChange",
   });
+
+  useEffect(() => {
+    if (selectedCustomerId) {
+      form.setValue("customer_id", selectedCustomerId);
+    }
+  }, [selectedCustomerId]);
 
   const onSubmit = (data: InvoiceFormValues) => {
     // createInvoice.execute(data);
@@ -94,7 +105,7 @@ export function Form({ teamId, template: initialTemplate }: Props) {
                 <FromDetails />
               </div>
               <div>
-                <CustomerDetails />
+                <CustomerDetails customers={customers} />
               </div>
             </div>
 

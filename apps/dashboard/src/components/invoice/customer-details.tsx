@@ -3,31 +3,43 @@
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Editor } from "@/components/editor";
 import { useAction } from "next-safe-action/hooks";
-import { useFormContext } from "react-hook-form";
+import { useEffect } from "react";
+import { Controller, useFormContext } from "react-hook-form";
 import { SelectCustomer } from "../select-customer";
 import { LabelInput } from "./label-input";
+import { transformCustomerToContent } from "./utils";
 
-const customers = [
-  {
-    id: "1",
-    name: "Lost Island AB",
-    email: "info@lostisland.se",
-    phone: "+46 8 505 505 50",
-    address: "Lost Island AB, 12345, Stockholm, Sweden",
-  },
-  {
-    id: "2",
-    name: "Viktor Hofte AB",
-    email: "info@viktorhofte.se",
-    phone: "+46 8 505 505 50",
-    address: "Viktor Hofte AB, 12345, Stockholm, Sweden",
-  },
-];
+export type Customer = {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  address_line_1?: string;
+  address_line_2?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  country?: string;
+};
 
-export function CustomerDetails() {
-  const { control } = useFormContext();
+export function CustomerDetails({ customers }: { customers: Customer[] }) {
+  const { control, setValue, watch } = useFormContext();
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+
+  const selectedCustomerId = watch("customer_id");
+
+  const foundCustomer = customers.find(
+    (customer) => customer.id === selectedCustomerId,
+  );
+
+  const initialContent = transformCustomerToContent(foundCustomer);
+
+  useEffect(() => {
+    if (foundCustomer) {
+      setValue("customerDetails", initialContent, { shouldValidate: true });
+    }
+  }, [foundCustomer]);
 
   return (
     <div>
@@ -40,20 +52,22 @@ export function CustomerDetails() {
           });
         }}
       />
-
-      <SelectCustomer data={customers} />
-
-      {/* <Controller
-        name="customerDetails"
-        control={control}
-        render={({ field }) => (
-          <Editor
-            initialContent={field.value}
-            onChange={field.onChange}
-            className="h-[115px]"
-          />
-        )}
-      /> */}
+      {initialContent ? (
+        <Controller
+          name="customerDetails"
+          control={control}
+          render={({ field }) => (
+            <Editor
+              key={selectedCustomerId}
+              initialContent={field.value}
+              onChange={field.onChange}
+              className="h-[115px]"
+            />
+          )}
+        />
+      ) : (
+        <SelectCustomer data={customers} />
+      )}
     </div>
   );
 }
