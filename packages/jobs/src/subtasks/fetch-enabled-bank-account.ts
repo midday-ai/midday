@@ -50,7 +50,7 @@ async function fetchEnabledBankAccountsSubTask(
       const { data: accountsData } = await supabase
         .from("bank_accounts")
         .select(
-          "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)"
+          "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, last_cursor_sync)"
         )
         .eq("bank_connection_id", connectionId)
         .eq("team_id", teamId)
@@ -87,7 +87,7 @@ async function fetchEnabledBankAccountsForTeamSubTask(
       let query = supabase
         .from("bank_accounts")
         .select(
-          "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)"
+          "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, last_cursor_sync)"
         )
         .eq("team_id", teamId)
         .eq("enabled", true);

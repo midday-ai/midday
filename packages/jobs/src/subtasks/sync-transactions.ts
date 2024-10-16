@@ -36,11 +36,33 @@ async function syncTransactionsSubTask(
   );
 
   async function processAccount(account: BankAccountWithConnection) {
-    await logAccountInfo(account);
-    const transactions = await fetchTransactions(account);
-    const formattedTransactions = await transformTransactions(transactions, account);
-    await updateAccountBalance(account);
-    await processTransactionBatches(formattedTransactions, account);
+    try {
+      await logAccountInfo(account);
+      const { transactions, cursor, hasMore } = await fetchTransactions(account);
+      const formattedTransactions = await transformTransactions(transactions, account);
+      await updateAccountBalance(account);
+
+      if (cursor) {
+        const { error } = await supabase
+          .from("bank_connections")
+          .update({ last_cursor_sync: cursor, last_accessed: new Date().toISOString() })
+          .eq("id", account.bank_connection.id);
+
+        if (error) {
+          await uniqueLog(io, "error", `Failed to update bank connection ${account.bank_connection.id}: ${error.message}`);
+        } else {
+          await uniqueLog(io, "info", `Successfully updated bank connection ${account.bank_connection.id} with new cursor`);
+        }
+      } else {
+        await uniqueLog(io, "warn", `No cursor returned for account ${account.id}, skipping bank connection update`);
+      }
+
+      await processTransactionBatches(formattedTransactions, account);
+
+      await uniqueLog(io, "info", `Completed processing for account ${account.id}. Has more: ${hasMore}`);
+    } catch (error) {
+      await uniqueLog(io, "error", `Error processing account ${account.id}: ${error}`);
+    }
   }
 
   async function logAccountInfo(account: BankAccountWithConnection) {
@@ -53,15 +75,31 @@ async function syncTransactionsSubTask(
   async function fetchTransactions(account: BankAccountWithConnection) {
     await uniqueLog(io, "info", `Fetching transactions for account ${account.id}`);
     const accountType = getClassification(account.type);
-    const transactions = await engine.transactions.list({
+    const {
+      data: transactions,
+      cursor,
+      hasMore,
+    } = await engine.transactions.list({
       provider: account.bank_connection.provider,
       accountId: account.account_id,
       accountType: accountType as "depository" | "credit" | "other_asset" | "loan" | "other_liability" | undefined,
       accessToken: account.bank_connection?.access_token,
       latest: "true",
+      syncCursor: account.bank_connection?.last_cursor_sync,
     });
-    await uniqueLog(io, "info", `Retrieved ${transactions.data?.length || 0} transactions for account ${account.id} (Type: ${accountType})`);
-    return transactions.data || [];
+
+    await uniqueLog(io, "info", `Retrieved ${transactions?.length || 0} transactions for account ${account.id} (Type: ${accountType})`);
+    console.log("transactions and data payload obtained", {
+      transactions,
+      cursor,
+      hasMore
+    })
+
+    return {
+      transactions: transactions,
+      cursor,
+      hasMore,
+    }
   }
 
   async function transformTransactions(transactions: EngineTransaction.Data[], account: BankAccountWithConnection) {

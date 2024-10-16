@@ -133,11 +133,13 @@ export type Database = {
           created_at: string
           enrollment_id: string | null
           error_details: string | null
+          error_retries: number | null
           expires_at: string | null
           id: string
           institution_id: string
           item_id: string | null
           last_accessed: string | null
+          last_cursor_sync: string | null
           logo_url: string | null
           name: string
           provider: Database["public"]["Enums"]["bank_providers"] | null
@@ -150,11 +152,13 @@ export type Database = {
           created_at?: string
           enrollment_id?: string | null
           error_details?: string | null
+          error_retries?: number | null
           expires_at?: string | null
           id?: string
           institution_id: string
           item_id?: string | null
           last_accessed?: string | null
+          last_cursor_sync?: string | null
           logo_url?: string | null
           name: string
           provider?: Database["public"]["Enums"]["bank_providers"] | null
@@ -167,11 +171,13 @@ export type Database = {
           created_at?: string
           enrollment_id?: string | null
           error_details?: string | null
+          error_retries?: number | null
           expires_at?: string | null
           id?: string
           institution_id?: string
           item_id?: string | null
           last_accessed?: string | null
+          last_cursor_sync?: string | null
           logo_url?: string | null
           name?: string
           provider?: Database["public"]["Enums"]["bank_providers"] | null
@@ -3117,3 +3123,4 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
+

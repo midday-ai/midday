@@ -9,6 +9,7 @@ type BankAccountWithConnection = {
         id: string;
         provider: BankProviders;
         access_token: string;
+        last_cursor_sync: string;
     };
 };
 export type { BankAccountWithConnection };

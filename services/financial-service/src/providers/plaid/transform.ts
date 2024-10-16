@@ -65,187 +65,86 @@ type MapTransactionCategory = {
 export const mapTransactionCategory = ({
   transaction,
   amount,
-}: MapTransactionCategory): string => {
-  const { personal_finance_category: pfc, transaction_code } = transaction;
-
-  // Helper function to check if a string includes any of the given keywords
-  const includesAny = (str: string, keywords: string[]): boolean =>
-    keywords.some((keyword) =>
-      str?.toLowerCase().includes(keyword.toLowerCase()),
-    );
-
-  // Income
-  if (pfc?.primary === "INCOME" || amount > 0) {
+}: MapTransactionCategory): string | null => {
+  if (transaction.personal_finance_category?.primary === "INCOME") {
     return "income";
   }
 
-  // Transfers
   if (
-    transaction_code === "transfer" ||
-    pfc?.primary === "TRANSFER_IN" ||
-    pfc?.primary === "TRANSFER_OUT" ||
-    pfc?.detailed?.includes("THIRD_PARTY")
+    transaction.transaction_code === "transfer" ||
+    transaction.personal_finance_category?.primary === "TRANSFER_IN" ||
+    transaction.personal_finance_category?.primary === "TRANSFER_OUT"
   ) {
     return "transfer";
   }
 
-  // Bank Fees
+  if (amount > 0) {
+    return "income";
+  }
+
   if (
-    transaction_code === "bank charge" ||
-    pfc?.primary === "BANK_FEES" ||
-    includesAny(pfc?.detailed || "", [
-      "OVERDRAFT",
-      "ATM",
-      "LATE_PAYMENT",
-      "FOREIGN_TRANSACTION",
-      "WIRE_TRANSFER",
-      "INSUFFICIENT_FUNDS",
-    ])
+    transaction.transaction_code === "bank charge" ||
+    transaction.personal_finance_category?.primary === "BANK_FEES"
   ) {
     return "fees";
   }
 
-  // Food and Drink
-  if (pfc?.primary === "FOOD_AND_DRINK") {
-    return "meals"; // Changed from "dining" to match original function
+  if (transaction.personal_finance_category?.primary === "FOOD_AND_DRINK") {
+    return "meals";
   }
 
-  // Transportation and Travel
-  if (pfc?.primary === "TRANSPORTATION" || pfc?.primary === "TRAVEL") {
+  if (
+    transaction.personal_finance_category?.primary === "TRANSPORTATION" ||
+    transaction.personal_finance_category?.primary === "TRAVEL"
+  ) {
     return "travel";
   }
 
-  // Services
-  if (pfc?.primary === "SERVICE" || pfc?.primary === "GENERAL_SERVICES") {
-    if (pfc?.detailed === "GENERAL_SERVICES_OTHER_GENERAL_SERVICES") {
-      return "software";
-    }
-    if (
-      includesAny(pfc?.detailed || "", ["ADVERTISING", "MARKETING", "BUSINESS"])
-    ) {
-      return "business-services";
-    }
-    if (
-      includesAny(pfc?.detailed || "", ["LEGAL", "ACCOUNTING", "FINANCIAL"])
-    ) {
-      return "professional-services";
-    }
-    return "services";
+  if (
+    transaction.personal_finance_category?.detailed ===
+    "GENERAL_SERVICES_OTHER_GENERAL_SERVICES"
+  ) {
+    return "software";
   }
 
-  // Utilities and Rent
-  if (pfc?.primary === "RENT_AND_UTILITIES") {
-    if (pfc?.detailed === "RENT_AND_UTILITIES_RENT") {
-      return "rent";
-    }
-    if (
-      pfc?.detailed === "RENT_AND_UTILITIES_INTERNET_AND_CABLE" ||
-      pfc?.detailed === "RENT_AND_UTILITIES_TELEPHONE"
-    ) {
-      return "internet-and-telephone";
-    }
-    if (
-      pfc?.detailed === "RENT_AND_UTILITIES_GAS_AND_ELECTRICITY" ||
-      pfc?.detailed === "RENT_AND_UTILITIES_SEWAGE_AND_WASTE_MANAGEMENT" ||
-      pfc?.detailed === "RENT_AND_UTILITIES_WATER" ||
-      pfc?.detailed === "RENT_AND_UTILITIES_OTHER_UTILITIES"
-    ) {
-      return "facilities-expenses";
-    }
-    return "housing";
+  if (
+    transaction.personal_finance_category?.detailed ===
+    "RENT_AND_UTILITIES_GAS_AND_ELECTRICITY" ||
+    transaction.personal_finance_category?.detailed ===
+    "RENT_AND_UTILITIES_SEWAGE_AND_WASTE_MANAGEMENT" ||
+    transaction.personal_finance_category?.detailed ===
+    "RENT_AND_UTILITIES_WATER" ||
+    transaction.personal_finance_category?.detailed ===
+    "RENT_AND_UTILITIES_OTHER_UTILITIES"
+  ) {
+    return "facilities-expenses";
   }
 
-  // Home and Office
-  if (pfc?.primary === "HOME_IMPROVEMENT") {
+  if (
+    transaction.personal_finance_category?.detailed ===
+    "RENT_AND_UTILITIES_RENT"
+  ) {
+    return "rent";
+  }
+
+  if (
+    transaction.personal_finance_category?.detailed ===
+    "RENT_AND_UTILITIES_INTERNET_AND_CABLE" ||
+    transaction.personal_finance_category?.detailed ===
+    "RENT_AND_UTILITIES_TELEPHONE"
+  ) {
+    return "internet-and-telephone";
+  }
+
+  if (transaction.personal_finance_category?.primary === "HOME_IMPROVEMENT") {
     return "office-supplies";
   }
 
-  // Entertainment and Recreation
-  if (pfc?.primary === "ENTERTAINMENT") {
+  if (transaction.personal_finance_category?.primary === "ENTERTAINMENT") {
     return "activity";
   }
 
-  // Shopping
-  if (pfc?.primary === "SHOPPING") {
-    if (includesAny(pfc?.detailed || "", ["ELECTRONICS", "COMPUTERS"])) {
-      return "electronics";
-    }
-    if (includesAny(pfc?.detailed || "", ["CLOTHING", "ACCESSORIES"])) {
-      return "clothing";
-    }
-    if (pfc?.detailed?.includes("SUPERMARKETS_AND_GROCERIES")) {
-      return "groceries";
-    }
-    return "shopping";
-  }
-
-  // Healthcare
-  if (pfc?.primary === "HEALTHCARE") {
-    if (pfc?.detailed?.includes("PHARMACY")) {
-      return "pharmacy";
-    }
-    return "healthcare";
-  }
-
-  // Personal Care
-  if (pfc?.primary === "PERSONAL_CARE") {
-    return "personal-care";
-  }
-
-  // Education
-  if (pfc?.primary === "EDUCATION") {
-    return "education";
-  }
-
-  // Charitable Giving
-  if (pfc?.primary === "CHARITABLE_GIVING") {
-    return "donations";
-  }
-
-  // Taxes
-  if (pfc?.primary === "TAX") {
-    return "taxes";
-  }
-
-  // Auto
-  if (
-    includesAny(pfc?.detailed || "", [
-      "AUTOMOTIVE",
-      "CAR_SERVICE",
-      "AUTO_INSURANCE",
-    ])
-  ) {
-    return "auto";
-  }
-
-  // Insurance
-  if (pfc?.primary === "INSURANCE") {
-    return "insurance";
-  }
-
-  // Loans and Mortgages
-  if (includesAny(pfc?.detailed || "", ["LOANS", "MORTGAGES", "CREDIT_CARD"])) {
-    return "loans";
-  }
-
-  // Investment
-  if (pfc?.primary === "INVESTMENT") {
-    return "investments";
-  }
-
-  // Government and Non-Profit
-  if (
-    includesAny(pfc?.detailed || "", [
-      "GOVERNMENT",
-      "COMMUNITY",
-      "ORGANIZATIONS",
-    ])
-  ) {
-    return "government-and-non-profit";
-  }
-
-  // Catch-all for uncategorized transactions
-  return "uncategorized";
+  return null;
 };
 
 /**
