@@ -154,6 +154,10 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
       statusCodes: ["5XX", "4XX"],
       retryConnectionErrors: true,
     },
+    security: [
+      { bearerAuth: [] },
+    ],
+    
   });
 
   app.get("/", swaggerUI({ url: "/openapi" }));
