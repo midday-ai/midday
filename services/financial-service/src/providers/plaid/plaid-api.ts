@@ -61,11 +61,11 @@ export class PlaidApi {
     this.#clientSecret = params.envs.PLAID_SECRET;
     this.#r2 = params.r2;
 
-    console.log('Plaid client ID:', this.#clientId);
-    console.log('Plaid secret length:', this.#clientSecret.length);
+    console.log("Plaid client ID:", this.#clientId);
+    console.log("Plaid secret length:", this.#clientSecret.length);
 
     this.#countryCodes = PLAID_COUNTRIES as CountryCode[];
-    console.log('Country codes:', this.#countryCodes);
+    console.log("Country codes:", this.#countryCodes);
 
     const configuration = new Configuration({
       basePath:
@@ -174,10 +174,13 @@ export class PlaidApi {
     accountId,
     latest,
     syncCursor,
-  }: GetTransactionsRequest): Promise<GetTransactionsResponse | undefined> {
+    maxCalls = 10,
+  }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
     let added: Array<Transaction> = [];
     let cursor = syncCursor;
     let hasMore = true;
+    let callCount = 0;
+
     try {
       if (latest) {
         const { data } = await this.#client.transactionsSync({
@@ -190,15 +193,17 @@ export class PlaidApi {
         cursor = data.next_cursor;
         hasMore = data.has_more;
       } else {
-        while (hasMore) {
+        while (hasMore && callCount < maxCalls) {
           const { data } = await this.#client.transactionsSync({
             access_token: accessToken,
+            count: 100, // Added count parameter for consistency
             cursor,
           });
 
           added = added.concat(data.added);
           hasMore = data.has_more;
           cursor = data.next_cursor;
+          callCount++;
         }
       }
 
@@ -219,6 +224,9 @@ export class PlaidApi {
       if (parsedError) {
         throw new ProviderError(parsedError);
       }
+
+      // If it's not a known error type, throw a generic error
+      throw new Error("An unknown error occurred while fetching transactions");
     }
   }
 
@@ -250,14 +258,17 @@ export class PlaidApi {
       },
     };
 
-    console.log('Link token create payload:', JSON.stringify(payload, null, 2));
+    console.log("Link token create payload:", JSON.stringify(payload, null, 2));
 
     try {
       const response = await this.#client.linkTokenCreate(payload);
-      console.log('Link token created successfully');
+      console.log("Link token created successfully");
       return response;
     } catch (error: unknown) {
-      console.error('Error creating link token:', JSON.stringify(error, null, 2));
+      console.error(
+        "Error creating link token:",
+        JSON.stringify(error, null, 2)
+      );
       throw error;
     }
   }

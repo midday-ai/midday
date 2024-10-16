@@ -58,6 +58,8 @@ export type GetTransactionsRequest = {
   latest?: boolean;
   /** The type of the account. */
   syncCursor?: string;
+  /** The maximum number of calls to make. */
+  maxCalls?: number;
 };
 
 /**
@@ -106,7 +108,7 @@ export type TransformAccountBalance =
 export type TransformTransaction = Transaction;
 
 export type GetTransactionsResponse = {
-  added: TransactionsSyncResponse["added"]
+  added: TransactionsSyncResponse["added"];
   cursor: TransactionsSyncResponse["next_cursor"];
   hasMore: TransactionsSyncResponse["has_more"];
 };
