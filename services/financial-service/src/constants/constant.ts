@@ -1,6 +1,6 @@
 const constants = {
   /** Paths that are publicly accessible without authentication */
-  PUBLIC_PATHS: ["/", "/openapi", "/health"],
+  PUBLIC_PATHS: ["/", "/openapi", "/health", "/openapi.json"],
 
   /** Cache TTL in seconds */
   CACHE_TTL: 3600,
