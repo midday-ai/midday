@@ -208,15 +208,7 @@ export type Database = {
           id?: string
           stripe_customer_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "customers_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       documents: {
         Row: {
@@ -690,13 +682,6 @@ export type Database = {
             columns: ["price_id"]
             isOneToOne: false
             referencedRelation: "prices"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subscriptions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1407,13 +1392,6 @@ export type Database = {
           week_starts_on_monday?: boolean | null
         }
         Relationships: [
-          {
-            foreignKeyName: "users_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "users_team_id_fkey"
             columns: ["team_id"]
@@ -2927,29 +2905,7 @@ export type Database = {
           secret?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "secrets_key_id_fkey"
-            columns: ["key_id"]
-            isOneToOne: false
-            referencedRelation: "decrypted_key"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "secrets_key_id_fkey"
-            columns: ["key_id"]
-            isOneToOne: false
-            referencedRelation: "key"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "secrets_key_id_fkey"
-            columns: ["key_id"]
-            isOneToOne: false
-            referencedRelation: "valid_key"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -2987,29 +2943,7 @@ export type Database = {
           secret?: string | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "secrets_key_id_fkey"
-            columns: ["key_id"]
-            isOneToOne: false
-            referencedRelation: "key"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "secrets_key_id_fkey"
-            columns: ["key_id"]
-            isOneToOne: false
-            referencedRelation: "decrypted_key"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "secrets_key_id_fkey"
-            columns: ["key_id"]
-            isOneToOne: false
-            referencedRelation: "valid_key"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Functions: {
@@ -3124,3 +3058,17 @@ export type Enums<
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
 
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never

@@ -7,7 +7,7 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
-    "db:generate": "supabase gen types --lang=typescript --project-id $PROJECT_ID --schema public --schema storage --schema cron --schema vault > src/types/db.ts"
+    "db:generate": "supabase gen types --lang=typescript --project-id trnlccdjeihaaxmcaddm --schema public --schema storage --schema cron --schema vault > src/types/db.ts"
   },
   "dependencies": {
     "@date-fns/utc": "^2.1.0",
