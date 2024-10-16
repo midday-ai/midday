@@ -84,7 +84,7 @@ async function syncTransactionsSubTask(
       latest: "true",
       syncCursor: account.bank_connection?.last_cursor_sync,
     }
-    
+
     const {
       data: transactions,
       cursor,
@@ -139,10 +139,11 @@ async function syncTransactionsSubTask(
       await uniqueLog(io, "info", `Processing batch of ${batch.length} transactions for account ${account.id}`);
       const { error } = await supabase
         .from("transactions")
-        .upsert(batch as any, {
+        .upsert(batch, {
           onConflict: "internal_id",
           ignoreDuplicates: true,
         });
+
       if (error) {
         console.error(`Error upserting transactions for account ${account.id}:`, error);
       } else {

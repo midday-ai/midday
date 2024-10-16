@@ -205,12 +205,6 @@ client.defineJob({
         }
       }
 
-      // save the last cursor sync for the connection
-      await io.supabase.client
-        .from("bank_connections")
-        .update({ last_cursor_sync: transactionSyncCursor })
-        .eq("id", account.bank_connection.id);
-
       /**
        * Updates the account balance and last accessed time.
        */
@@ -234,14 +228,14 @@ client.defineJob({
 
         await io.supabase.client
           .from("bank_connections")
-          .update({ last_accessed: new Date().toISOString() })
+          .update({ last_accessed: new Date().toISOString(), last_cursor_sync: transactionSyncCursor })
           .eq("id", account.bank_connection.id);
         await io.logger.debug(
           `Updated last_accessed for bank connection: ${account.bank_connection.id}`,
         );
       } catch (error) {
         await io.logger.error(
-          `Error updating balance or last_accessed for account: ${account.id}`,
+          `Error updating balance or last_accessed for account: ${account.id} ${JSON.stringify(error)}`,
           { error },
         );
       }
