@@ -10,9 +10,12 @@ import { APIKeySchema, CreateAPIKeySchema } from "./schema";
  * @description Defines the HTTP method, path, security, request body, and response schemas for the API key creation endpoint.
  */
 const route = createRoute({
+    tags: ["api", "apiKeys"],
     method: "post",
-    path: "/v1/api.apiKeys",
+    path: "/v1/api.apikeys",
     security: [{ bearerAuth: [] }],
+    summary: "Create API Key",
+    operationId: "createApiKey",
     request: {
         body: {
             content: {

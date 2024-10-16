@@ -10,10 +10,10 @@ import { RatesSchema } from "./schema";
  * @constant
  */
 const route = createRoute({
-  tags: ["apis"],
+  tags: ["api", "rates"],
   operationId: "getRatesApi",
   method: "get",
-  path: "/rates",
+  path: "/v1/api.rates",
   summary: "Get rates",
   security: [{ bearerAuth: [] }],
   responses: {

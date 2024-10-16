@@ -12,11 +12,11 @@ import { SearchResult } from "./types";
  * @constant
  */
 const route = createRoute({
-    tags: ["apis"],
+    tags: ["api", "institutions"],
     operationId: "getInstitutionsApi",
     security: [{ bearerAuth: [] }],
     method: "get",
-    path: "/institutions",
+    path: "/v1/api.institutions",
     summary: "Get Institutions",
     request: {
         query: InstitutionParamsSchema,

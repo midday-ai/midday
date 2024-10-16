@@ -14,11 +14,11 @@ import { GoCardLessLinkBodySchema, GoCardLessLinkSchema } from "./schema";
  * The route expects a JSON payload and returns a GoCardLess link object on success.
  */
 const route = createRoute({
-    tags: ["apis"],
+    tags: ["api", "gocardless"],
     operationId: "gocardlessLinkApi",
     security: [{ bearerAuth: [] }],
     method: "post",
-    path: "/gocardless/link",
+    path: "/v1/api.gocardless/link",
     summary: "Auth link (GoCardLess)",
     request: {
         body: {

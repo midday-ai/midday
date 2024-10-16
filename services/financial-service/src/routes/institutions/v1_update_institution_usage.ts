@@ -11,11 +11,11 @@ import { Document } from "./types";
  * Creates the OpenAPI route configuration for updating institution usage.
  */
 export const route = createRoute({
-    tags: ["apis"],
+    tags: ["api", "institutions"],
     operationId: "updateInstitutionUsage",
     security: [{ bearerAuth: [] }],
     method: "put",
-    path: "/institutions/{id}/usage",
+    path: "/v1/api.institutions/{id}/usage",
     summary: "Update Institution Usage",
     request: {
         params: UpdateUsageParamsSchema,

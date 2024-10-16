@@ -11,11 +11,11 @@ import { StatementsParamsSchema, StatementsSchema } from "./schema";
  * @description This route handles GET requests to fetch statements based on the provided query parameters.
  */
 const route = createRoute({
-    tags: ["apis"],
+    tags: ["api", "statements"],
     operationId: "getStatementsApi",
     method: "get",
     security: [{ bearerAuth: [] }],
-    path: "/statements",
+    path: "/v1/api.statements",
     summary: "Get Statements",
     request: {
         query: StatementsParamsSchema,
