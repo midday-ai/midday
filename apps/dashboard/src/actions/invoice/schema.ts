@@ -24,10 +24,20 @@ export const updateInvoiceTemplateSchema = z.object({
   from_details: z.any(),
 });
 
-export const createInvoiceSchema = z.object({
+export const lineItemSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  quantity: z.number().min(0, "Quantity must be at least 0"),
+  price: z.number().min(0, "Price must be at least 0"),
+  vat: z.number().min(0, "VAT must be at least 0").optional(),
+  tax: z.number().min(0, "Tax must be at least 0").optional(),
+});
+
+export const upsertInvoiceSchema = z.object({
+  id: z.string().uuid().optional(),
   template: updateInvoiceTemplateSchema,
   fromDetails: z.any(),
   customerDetails: z.any(),
+  customer_id: z.string().uuid().optional(),
   paymentDetails: z.any(),
   note: z.any().optional(),
   dueDate: z.coerce.date(),
@@ -37,30 +47,46 @@ export const createInvoiceSchema = z.object({
   vat: z.number().optional(),
   tax: z.number().optional(),
   amount: z.number(),
-  lineItems: z
-    .array(
-      z
-        .object({
-          name: z.string().min(1, "Name is required"),
-          quantity: z.number().min(0, "Quantity must be at least 0"),
-          price: z.number().min(0, "Price must be at least 0"),
-          vat: z.number().min(0, "VAT must be at least 0").optional(),
-          tax: z.number().min(0, "Tax must be at least 0").optional(),
-        })
-        .refine((item) => item.quantity > 0 || item.price > 0, {
-          message: "Either quantity or price must be greater than 0",
-          path: ["quantity", "price"],
-        }),
-    )
-    .min(1, "At least one line item is required")
-    .refine(
-      (items) => items.some((item) => item.quantity > 0 && item.price > 0),
-      {
-        message:
-          "At least one line item must have both quantity and price greater than 0",
-      },
-    ),
+  lineItems: z.array(lineItemSchema).min(1).optional(),
 });
 
-export type InvoiceFormValues = z.infer<typeof createInvoiceSchema>;
-export type InvoiceTemplate = z.infer<typeof createInvoiceSchema>["template"];
+export const invoiceTemplateSchema = z.object({
+  customer_label: z.string(),
+  from_label: z.string(),
+  invoice_no_label: z.string(),
+  issue_date_label: z.string(),
+  due_date_label: z.string(),
+  description_label: z.string(),
+  price_label: z.string(),
+  quantity_label: z.string(),
+  total_label: z.string(),
+  vat_label: z.string().optional(),
+  tax_label: z.string().optional(),
+  payment_details_label: z.string(),
+  note_label: z.string(),
+  logo_url: z.string().optional(),
+  currency: z.string(),
+  payment_details: z.any(),
+  from_details: z.any(),
+});
+
+export const invoiceFormSchema = z.object({
+  id: z.string().uuid(),
+  template: invoiceTemplateSchema,
+  fromDetails: z.any(),
+  customerDetails: z.any(),
+  customer_id: z.string().uuid(),
+  paymentDetails: z.any(),
+  note: z.any().optional(),
+  dueDate: z.coerce.date(),
+  issueDate: z.coerce.date(),
+  invoiceNumber: z.string(),
+  logoUrl: z.string().optional(),
+  vat: z.number().optional(),
+  tax: z.number().optional(),
+  amount: z.number(),
+  lineItems: z.array(lineItemSchema).min(1),
+});
+
+export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;
+export type InvoiceTemplate = z.infer<typeof updateInvoiceTemplateSchema>;

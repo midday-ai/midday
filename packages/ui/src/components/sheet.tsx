@@ -49,18 +49,20 @@ const sheetVariants = cva(
 
 interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
-    VariantProps<typeof sheetVariants> {}
+    VariantProps<typeof sheetVariants> {
+  stack?: boolean;
+}
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = "right", className, children, ...props }, ref) => (
+>(({ side = "right", stack = false, className, children, ...props }, ref) => (
   <SheetPortal>
-    <SheetOverlay />
+    {!stack && <SheetOverlay />}
     <SheetPrimitive.Content
       onOpenAutoFocus={(e) => e.preventDefault()}
       ref={ref}
-      className={cn("md:p-2", sheetVariants({ side }))}
+      className={cn("md:p-4", stack && "md:m-2", sheetVariants({ side }))}
       {...props}
     >
       <div

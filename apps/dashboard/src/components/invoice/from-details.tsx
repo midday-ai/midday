@@ -15,6 +15,7 @@ export function FromDetails() {
     <div>
       <LabelInput
         name="template.from_label"
+        className="mb-2 block"
         onSave={(value) => {
           updateInvoiceTemplate.execute({
             from_label: value,

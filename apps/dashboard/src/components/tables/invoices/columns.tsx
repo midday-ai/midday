@@ -111,19 +111,6 @@ export const columns: ColumnDef<Invoice>[] = [
               </Tooltip>
             </TooltipProvider>
           )}
-
-          {row.original.status !== "draft" && (
-            <button type="button" className="relative">
-              <Icons.Chat className="size-3.5 text-[#878787]" />
-              {hasNewMessages && (
-                <div className="rounded-full size-1 absolute bg-[#FFD02B] -right-0 -top-0 ring-2 ring-background">
-                  <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[ping_1s_ease-in-out_5]" />
-                  <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-75" />
-                  <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-50" />
-                </div>
-              )}
-            </button>
-          )}
         </div>
       );
     },
@@ -168,14 +155,21 @@ export const columns: ColumnDef<Invoice>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status");
       const deleteInvoice = useAction(deleteInvoiceAction);
-
+      const hasNewMessages = status === "overdue";
       const { setParams } = useInvoiceParams();
 
       return (
         <div>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild className="relative">
               <Button variant="ghost" className="h-8 w-8 p-0">
+                {hasNewMessages && (
+                  <div className="rounded-full size-1 absolute bg-[#FFD02B] -right-0 top-0.5 ring-2 ring-background">
+                    <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[ping_1s_ease-in-out_5]" />
+                    <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-75" />
+                    <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-50" />
+                  </div>
+                )}
                 <DotsHorizontalIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -189,8 +183,10 @@ export const columns: ColumnDef<Invoice>[] = [
                   Edit invoice
                 </DropdownMenuItem>
               )}
+
               {status !== "draft" && (
                 <>
+                  <DropdownMenuItem>Comments</DropdownMenuItem>
                   <DropdownMenuItem>Download</DropdownMenuItem>
                   <DropdownMenuItem>Copy link</DropdownMenuItem>
                   <DropdownMenuItem>Duplicate</DropdownMenuItem>
