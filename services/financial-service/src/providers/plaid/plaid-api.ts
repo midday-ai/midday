@@ -183,6 +183,7 @@ export class PlaidApi {
         const { data } = await this.#client.transactionsSync({
           access_token: accessToken,
           count: 100,
+          cursor,
         });
 
         added = added.concat(data.added);
