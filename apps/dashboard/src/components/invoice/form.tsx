@@ -1,14 +1,12 @@
-import { createInvoiceAction } from "@/actions/invoice/create-invoice-action";
 import {
   type InvoiceFormValues,
   type InvoiceTemplate,
-  createInvoiceSchema,
+  invoiceFormSchema,
 } from "@/actions/invoice/schema";
 import { UTCDate } from "@date-fns/utc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { addMonths } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
 import { FormProvider, useForm } from "react-hook-form";
 import { CreateButton } from "./create-button";
 import { CustomerDetails } from "./customer-details";
@@ -52,8 +50,9 @@ export function Form({ teamId, template: initialTemplate }: Props) {
   };
 
   const form = useForm<InvoiceFormValues>({
-    resolver: zodResolver(createInvoiceSchema),
+    resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
+      id: undefined,
       template,
       customerDetails: undefined,
       fromDetails: template.from_details,
@@ -67,12 +66,8 @@ export function Form({ teamId, template: initialTemplate }: Props) {
     mode: "onChange",
   });
 
-  const createInvoice = useAction(createInvoiceAction);
-
-  console.log(form.formState.errors);
-
   const onSubmit = (data: InvoiceFormValues) => {
-    createInvoice.execute(data);
+    // createInvoice.execute(data);
   };
 
   return (

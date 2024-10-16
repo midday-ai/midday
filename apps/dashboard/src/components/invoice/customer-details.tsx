@@ -3,8 +3,26 @@
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Editor } from "@/components/editor";
 import { useAction } from "next-safe-action/hooks";
-import { Controller, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
+import { SelectCustomer } from "../select-customer";
 import { LabelInput } from "./label-input";
+
+const customers = [
+  {
+    id: "1",
+    name: "Lost Island AB",
+    email: "info@lostisland.se",
+    phone: "+46 8 505 505 50",
+    address: "Lost Island AB, 12345, Stockholm, Sweden",
+  },
+  {
+    id: "2",
+    name: "Viktor Hofte AB",
+    email: "info@viktorhofte.se",
+    phone: "+46 8 505 505 50",
+    address: "Viktor Hofte AB, 12345, Stockholm, Sweden",
+  },
+];
 
 export function CustomerDetails() {
   const { control } = useFormContext();
@@ -15,13 +33,17 @@ export function CustomerDetails() {
     <div>
       <LabelInput
         name="template.customer_label"
+        className="mb-2 block"
         onSave={(value) => {
           updateInvoiceTemplate.execute({
             customer_label: value,
           });
         }}
       />
-      <Controller
+
+      <SelectCustomer data={customers} />
+
+      {/* <Controller
         name="customerDetails"
         control={control}
         render={({ field }) => (
@@ -31,7 +53,7 @@ export function CustomerDetails() {
             className="h-[115px]"
           />
         )}
-      />
+      /> */}
     </div>
   );
 }

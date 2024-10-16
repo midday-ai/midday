@@ -28,6 +28,7 @@
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
     "@novu/headless": "^2.0.0",
+    "@react-google-maps/api": "^2.20.3",
     "@sentry/nextjs": "^8",
     "@supabase/sentry-js-integration": "^0.3.0",
     "@tanstack/react-table": "^8.20.5",
@@ -71,6 +72,7 @@
     "sharp": "^0.33.5",
     "tus-js-client": "4.1.0",
     "use-long-press": "^3.2.0",
+    "use-places-autocomplete": "^4.0.1",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },
