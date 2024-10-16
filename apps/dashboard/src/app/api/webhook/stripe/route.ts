@@ -126,6 +126,8 @@ export async function POST(req: Request) {
           console.log("Invoice payment succeeded");
           break;
         case "billing_portal.session.created":
+        case "invoice.upcoming":
+          // TODO: Handle billing portal session creation
           console.log("Billing portal session created");
           break;
         default:
