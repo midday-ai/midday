@@ -18,7 +18,7 @@ import { HealthSchema } from "./schema";
  * - Response schemas for success (200) and error cases
  */
 const route = createRoute({
-    tags: ["api", "health"],
+    tags: ["health"],
     operationId: "healthCheckApi",
     method: "get",
     path: "/v1/api.health",

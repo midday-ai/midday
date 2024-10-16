@@ -14,7 +14,7 @@ import { GoCardLessAgreementBodySchema, GoCardLessAgreementSchema } from "./sche
  * The route expects a JSON payload and returns a GoCardLess agreement object on success.
  */
 const route = createRoute({
-    tags: ["api", "gocardless"],
+    tags: ["gocardless"],
     operationId: "gocardlessAgreementApi",
     security: [{ bearerAuth: [] }],
     method: "post",

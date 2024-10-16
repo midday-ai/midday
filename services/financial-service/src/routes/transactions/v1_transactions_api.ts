@@ -11,7 +11,7 @@ import {
 } from "./schema";
 
 const route = createRoute({
-    tags: ["api", "transactions"],
+    tags: ["transactions"],
     operationId: "getTransactionsApi",
     method: "get",
     path: "/v1/api.transactions",

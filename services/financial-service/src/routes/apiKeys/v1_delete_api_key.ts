@@ -9,7 +9,7 @@ import { APIKeyParamsSchema, DeleteAPIKeySchema } from "./schema";
  * @constant
  */
 const route = createRoute({
-    tags: ["api", "apiKeys"],
+    tags: ["apiKeys"],
     operationId: "deleteApiKey",
     method: "delete",
     path: "/v1/api.apikeys",

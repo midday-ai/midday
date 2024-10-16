@@ -10,7 +10,7 @@ import { StatementPdfParamsSchema } from "./schema";
  * OpenAPI route configuration for retrieving a statement PDF.
  */
 const route = createRoute({
-    tags: ["api", "statements"],
+    tags: ["statements"],
     operationId: "getStatementPdf",
     security: [{ bearerAuth: [] }],
     method: "get",

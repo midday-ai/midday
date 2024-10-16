@@ -15,7 +15,7 @@ import { PlaidLinkBodySchema, PlaidLinkSchema } from "./schema";
  * It returns a Plaid link object on success.
  */
 const route = createRoute({
-    tags: ["api", "plaid"],
+    tags: ["plaid"],
     operationId: "plaidLinkApi",
     security: [{ bearerAuth: [] }],
     method: "post",

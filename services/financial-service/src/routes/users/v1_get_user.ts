@@ -9,7 +9,7 @@ import { GetUserResponse } from "./schemas";
  * This route is used to retrieve a single user's information based on their unique identifier.
  */
 const getUserRoute = createRoute({
-    tags: ["api", "users"],
+    tags: ["users"],
     operationId: "getUserApi",
     method: "get",
     path: "/v1/api.users/{id}",

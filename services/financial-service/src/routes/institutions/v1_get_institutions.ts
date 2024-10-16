@@ -12,7 +12,7 @@ import { SearchResult } from "./types";
  * @constant
  */
 const route = createRoute({
-    tags: ["api", "institutions"],
+    tags: ["institutions"],
     operationId: "getInstitutionsApi",
     security: [{ bearerAuth: [] }],
     method: "get",

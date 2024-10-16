@@ -8,7 +8,7 @@ import { APIKeysQuerySchema, APIKeysSchema } from "./schema";
  * @constant
  */
 const route = createRoute({
-    tags: ["api", "apiKeys"],
+    tags: ["apiKeys"],
     operationId: "getApiKeys",
     method: "get",
     path: "/v1/api.apikeys",

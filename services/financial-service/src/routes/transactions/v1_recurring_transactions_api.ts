@@ -7,7 +7,7 @@ import { env } from "hono/adapter";
 import { GetRecurringTransactionsResponseSchema, RecurringTransactionsParamsSchema } from "./schema";
 
 const route = createRoute({
-    tags: ["api", "transactions"],
+    tags: ["transactions"],
     operationId: "getRecurringTransactionsApi",
     security: [{ bearerAuth: [] }],
     method: "get",

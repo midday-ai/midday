@@ -11,7 +11,7 @@ import { Document } from "./types";
  * Creates the OpenAPI route configuration for updating institution usage.
  */
 export const route = createRoute({
-    tags: ["api", "institutions"],
+    tags: ["institutions"],
     operationId: "updateInstitutionUsage",
     security: [{ bearerAuth: [] }],
     method: "put",

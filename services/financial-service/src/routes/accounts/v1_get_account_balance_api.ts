@@ -9,7 +9,7 @@ import {
 } from "./schema";
 
 const route = createRoute({
-    tags: ["api", "accounts"],
+    tags: ["accounts"],
     operationId: "accounts.balance",
     method: "get",
     path: "/v1/api.accounts/balance",

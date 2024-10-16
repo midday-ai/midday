@@ -4,7 +4,7 @@ import { createRoute, z } from "@hono/zod-openapi";
 import { UpdateUserSchema, UpdateUserSchemaResponse } from "./schemas";
 
 const updateUserRoute = createRoute({
-    tags: ["api", "users"],
+    tags: ["users"],
     operationId: "updateUserApi",
     method: "put",
     path: "/v1/api.users/{id}",

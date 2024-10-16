@@ -11,7 +11,7 @@ import { PlaidExchangeBodySchema, PlaidExchangeSchema } from "./schema";
  * This route handles the exchange of a public token for an access token.
  */
 const route = createRoute({
-    tags: ["api", "plaid"],
+    tags: ["plaid"],
     operationId: "plaidExchangeTokenApi",
     security: [{ bearerAuth: [] }],
     method: "post",
