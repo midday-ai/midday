@@ -207,4 +207,8 @@ export const LogEvents = {
     name: "GoCardLess Link Created",
     channel: "gocardless",
   },
+  CreateCustomer: {
+    name: "Create Customer",
+    channel: "customer",
+  },
 };

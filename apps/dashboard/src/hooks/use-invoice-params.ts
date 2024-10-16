@@ -17,6 +17,7 @@ export function useInvoiceParams(options?: { shallow: boolean }) {
       customers: parseAsArrayOf(parseAsString),
       start: parseAsString,
       end: parseAsString,
+      selectedCustomerId: parseAsString,
       type: parseAsStringEnum(["draft", "details"]),
     },
     options,

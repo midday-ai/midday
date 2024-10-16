@@ -1,6 +1,7 @@
 "use client";
 
 import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import {
   Select,
   SelectContent,
@@ -18,13 +19,14 @@ type Props = {
 };
 
 export function SelectCustomer({ data }: Props) {
-  const { setParams } = useCustomerParams();
+  const { setParams: setCustomerParams } = useCustomerParams();
+  const { setParams: setInvoiceParams } = useInvoiceParams();
 
   const handleOnSelect = (value: string) => {
-    if (value === "add-new-customer") {
-      setParams({ createCustomer: true });
+    if (value === "create-customer") {
+      setCustomerParams({ createCustomer: true });
     } else {
-      //   setParams({ customerId: value });
+      setInvoiceParams({ selectedCustomerId: value });
     }
   };
 
@@ -36,7 +38,7 @@ export function SelectCustomer({ data }: Props) {
       >
         <span>Select customer</span>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="max-h-[200px] overflow-y-auto">
         <SelectGroup>
           {data.map((item) => (
             <SelectItem key={item.id} value={item.id} className="text-xs">
@@ -45,8 +47,8 @@ export function SelectCustomer({ data }: Props) {
           ))}
 
           <SelectSeparator />
-          <SelectItem value="add-new-customer" className="text-xs">
-            Add new customer
+          <SelectItem value="create-customer" className="text-xs">
+            Create customer
           </SelectItem>
         </SelectGroup>
       </SelectContent>
