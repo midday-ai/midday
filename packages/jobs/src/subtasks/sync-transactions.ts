@@ -1,5 +1,5 @@
 import { Database } from "@midday/supabase/types";
-import type { TransactionsSchema as EngineTransaction } from "@solomon-ai/financial-engine-sdk/resources/transactions";
+import type { TransactionsSchema as EngineTransaction, TransactionListParams } from "@solomon-ai/financial-engine-sdk/resources/transactions";
 import { IOWithIntegrations } from "@trigger.dev/sdk";
 import { Supabase } from "@trigger.dev/supabase";
 import { BATCH_LIMIT } from "../constants/constants";
@@ -75,25 +75,23 @@ async function syncTransactionsSubTask(
   async function fetchTransactions(account: BankAccountWithConnection) {
     await uniqueLog(io, "info", `Fetching transactions for account ${account.id}`);
     const accountType = getClassification(account.type);
-    const {
-      data: transactions,
-      cursor,
-      hasMore,
-    } = await engine.transactions.list({
+
+    const request: TransactionListParams = {
       provider: account.bank_connection.provider,
       accountId: account.account_id,
       accountType: accountType as "depository" | "credit" | "other_asset" | "loan" | "other_liability" | undefined,
       accessToken: account.bank_connection?.access_token,
       latest: "true",
       syncCursor: account.bank_connection?.last_cursor_sync,
-    });
+    }
+    
+    const {
+      data: transactions,
+      cursor,
+      hasMore,
+    } = await engine.transactions.list(request);
 
     await uniqueLog(io, "info", `Retrieved ${transactions?.length || 0} transactions for account ${account.id} (Type: ${accountType})`);
-    console.log("transactions and data payload obtained", {
-      transactions,
-      cursor,
-      hasMore
-    })
 
     return {
       transactions: transactions,
