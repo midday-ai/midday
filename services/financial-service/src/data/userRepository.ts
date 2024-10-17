@@ -1,4 +1,4 @@
-import { DrizzleDB } from '@/db';
+import { DrizzleDB } from '../db';
 import { eq, like, or } from 'drizzle-orm';
 import { users, type NewUser, type User } from '../db/schema';
 
@@ -22,14 +22,12 @@ export class UserRepository {
 	 * @returns A Promise that resolves to the created User object.
 	 */
 	async create(user: NewUser): Promise<User> {
-		return this.db.transaction(async (tx) => {
-			const [createdUser] = await tx.insert(users).values({
-				...user,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-			}).returning();
-			return this.mapToUser(createdUser);
-		});
+		const [createdUser] = await this.db.insert(users).values({
+			...user,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		}).returning();
+		return this.mapToUser(createdUser);
 	}
 
 	/**
@@ -59,13 +57,11 @@ export class UserRepository {
 	 * @returns A Promise that resolves to the updated User object if found, or null if not found.
 	 */
 	async update(id: string, user: Partial<User>): Promise<User | null> {
-		return this.db.transaction(async (tx) => {
-			const [updatedUser] = await tx.update(users)
-				.set({ ...user, updatedAt: new Date() })
-				.where(eq(users.id, id))
-				.returning();
-			return updatedUser ? this.mapToUser(updatedUser) : null;
-		});
+		const [updatedUser] = await this.db.update(users)
+			.set({ ...user, updatedAt: new Date() })
+			.where(eq(users.id, id))
+			.returning();
+		return updatedUser ? this.mapToUser(updatedUser) : null;
 	}
 
 	/**
@@ -74,12 +70,10 @@ export class UserRepository {
 	 * @returns A Promise that resolves to true if the user was deleted, or false if not found.
 	 */
 	async delete(id: string): Promise<boolean> {
-		return this.db.transaction(async (tx) => {
-			const result = await tx.delete(users)
-				.where(eq(users.id, id))
-				.returning();
-			return result.length > 0;
-		});
+		const result = await this.db.delete(users)
+			.where(eq(users.id, id))
+			.returning();
+		return result.length > 0;
 	}
 
 	/**
