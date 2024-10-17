@@ -12,7 +12,7 @@ import { init } from "@/middleware/init";
 import { authMiddleware, cacheMiddleware, cors, errorHandlerMiddleware, jsonFormattingMiddleware, loggingMiddleware } from "@/middleware/index";
 import { secureHeaders } from "hono/secure-headers";
 import { timing } from "hono/timing";
-import { CachedRoutes, AllRoutes } from "@/route-definitions/routes";
+import { CachedRoutes } from "@/route-definitions/routes";
 
 /**
  * Creates and configures a new OpenAPIHono application.
@@ -27,7 +27,6 @@ export function newApp(): OpenAPIHono<HonoEnv> {
 
   setupMiddleware(app);
   setupCaching(app);
-  setupRoutes(app);
   setupSwagger(app);
   setupOpenAPIRegistry(app);
 
@@ -108,35 +107,6 @@ function setupCaching(app: OpenAPIHono<HonoEnv>) {
   CachedRoutes.forEach(route => app.get(route.path, cacheMiddleware));
 }
 
-/**
- * Sets up all routes for the application.
- * 
- * This function sets up all defined routes with their respective HTTP methods.
- * 
- * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
- */
-function setupRoutes(app: OpenAPIHono<HonoEnv>) {
-    AllRoutes.forEach(route => {
-    const method = route.method;
-    switch (method) {
-        case 'get':
-          app.get(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
-          break;
-        case 'post':
-          app.post(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
-          break;
-        case 'put':
-          app.put(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
-          break;
-        case 'patch':
-          app.patch(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
-          break;
-        case 'delete':
-          app.delete(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
-          break;
-      }
-  });
-}
 
 /**
  * Sets up Swagger UI and OpenAPI documentation for the application.
