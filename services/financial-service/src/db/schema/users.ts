@@ -1,4 +1,5 @@
 import { blob, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
 
 export const users = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -23,8 +24,8 @@ export const users = sqliteTable('users', {
   // Add preferences as a JSON blob
   preferences: blob('preferences', { mode: 'json' }),
   // Existing timestamp fields
-  createdAt: integer('created_at', { mode: 'timestamp' }).defaultNow(),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).defaultNow(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export type User = typeof users.$inferSelect;

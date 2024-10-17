@@ -36,14 +36,12 @@ export const registerV1CreateUser = (app: App) => {
     app.openapi(createUserRoute, async (c) => {
         const userData = c.req.valid("json");
         const repo = c.get("repo");
-        const userStore = repo.user
+        const userStore = repo.user;
 
         const user = await userStore.create({
-            ...userData,
-            passwordHash: '',
-            role: 'user',
-            status: 'active',
-            preferences: {},
+            email: userData.email,
+            name: userData.name,
+            passwordHash: crypto.randomUUID(),
         });
         return c.json(user, 200);
     });

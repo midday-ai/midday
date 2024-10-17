@@ -4,7 +4,7 @@ import { users } from './users';
 
 export const apiKeys = sqliteTable('api_keys', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: text('user_id').notNull().references(() => users.id),
+  userId: integer('user_id').notNull().references(() => users.id),
   key: text('key').notNull().unique(),
   name: text('name').notNull(),
   description: text('description'),
