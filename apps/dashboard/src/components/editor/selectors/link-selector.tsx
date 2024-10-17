@@ -46,10 +46,11 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="gap-2 rounded-none border-none h-8 pl-2"
+          className="rounded-none border-none h-8"
+          size="icon"
         >
           <Icons.AddLink
-            className={cn("rounded-none text-primary h-8", {
+            className={cn("rounded-none text-primary size-4", {
               "bg-accent": editor.isActive("link"),
             })}
           />

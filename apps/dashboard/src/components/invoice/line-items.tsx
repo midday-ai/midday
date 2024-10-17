@@ -106,7 +106,7 @@ export function LineItems() {
         className="flex items-center space-x-2 text-xs text-[#878787] font-mono"
       >
         <Icons.Add />
-        <span>Add item</span>
+        <span className="text-[11px]">Add item</span>
       </button>
     </div>
   );

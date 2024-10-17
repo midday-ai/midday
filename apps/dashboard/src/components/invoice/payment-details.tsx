@@ -7,9 +7,12 @@ import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
 export function PaymentDetails() {
-  const { control } = useFormContext();
+  const { control, watch } = useFormContext();
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+
+  const dueDate = watch("due_date");
+  const invoiceNumber = watch("invoice_number");
 
   return (
     <div>
@@ -38,6 +41,10 @@ export function PaymentDetails() {
               });
             }}
             className="h-[78px]"
+            context={{
+              "Due date": "10/31/2024",
+              "Invoice number": "INV-0001",
+            }}
           />
         )}
       />
