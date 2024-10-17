@@ -15,14 +15,14 @@ import { authActionClient } from "../../safe-action";
  * @property {string} institutionName - The name of the financial institution. Must be non-empty.
  * @property {string} userId - The ID of the user initiating the token exchange. Must be non-empty.
  */
-export const exchangeAccessTokenWithBackendSchema = z.object({
+const exchangeAccessTokenWithBackendSchema = z.object({
     publicToken: z.string().min(1),
     institutionId: z.string().min(1),
     institutionName: z.string().min(1),
     userId: z.string().min(1),
 });
 
-export type ExchangeAccessTokenWithBackendFormValues = z.infer<
+type ExchangeAccessTokenWithBackendFormValues = z.infer<
     typeof exchangeAccessTokenWithBackendSchema
 >;
 

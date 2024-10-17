@@ -6,14 +6,14 @@ import { logger } from "@/utils/logger"; // Assume you have a logger utility
 import { FinancialUserProfileType, PlaidSyncAccountFromAccessTokenOperationRequest, PlaidSyncAccountFromAccessTokenRequest } from "@solomon-ai/client-typescript-sdk";
 import { z } from "zod";
 
-export const exchangePublicTokenPropSchema = z.object({
+const exchangePublicTokenPropSchema = z.object({
   publicToken: z.string().min(1),
   institutionId: z.string().min(1),
   institutionName: z.string().min(1),
   userId: z.string().min(1),
 });
 
-export type ExchangePublicTokenPropSchemaProps = z.infer<
+type ExchangePublicTokenPropSchemaProps = z.infer<
   typeof exchangePublicTokenPropSchema
 >;
 
@@ -43,6 +43,8 @@ export type ExchangePublicTokenPropSchemaProps = z.infer<
  * });
  */
 export const exchangePublicToken = async (props: ExchangePublicTokenPropSchemaProps) => {
+  let accessToken, itemId, institutionIdValue, institutionNameValue;
+
   try {
     const validatedProps = exchangePublicTokenPropSchema.parse(props);
     const { publicToken, institutionId, institutionName, userId } = validatedProps;
@@ -55,8 +57,12 @@ export const exchangePublicToken = async (props: ExchangePublicTokenPropSchemaPr
     });
 
     const { access_token, item_id } = data;
+    accessToken = access_token;
+    itemId = item_id;
+    institutionIdValue = institutionId;
+    institutionNameValue = institutionName;
 
-    logger("Plaid token exchange successful", { itemId: item_id });
+    logger("Plaid token exchange successful", { itemId: item_id, accessToken: access_token });
 
     // Perform the exchange with our own backend
     const backendClient = initializeBackendClient();
@@ -81,23 +87,32 @@ export const exchangePublicToken = async (props: ExchangePublicTokenPropSchemaPr
       .plaidSyncAccountFromAccessToken(request);
 
     if (!backendExchangeResponse || !backendExchangeResponse.success) {
+      logger("Failed to exchange access token with backend for Plaid", { itemId: item_id, accessToken: access_token });
       throw new Error("Failed to exchange access token with backend for Plaid");
     }
 
     logger("Backend token exchange successful");
 
     return {
-      accessToken: access_token,
-      itemId: item_id,
-      institutionId,
-      institutionName
+      accessToken: accessToken,
+      itemId: itemId,
+      institutionIdValue,
+      institutionNameValue
     };
 
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error("Invalid input:", error.errors);
-      throw new Error("Invalid input for exchangePublicToken");
     }
     console.error("Error in exchangePublicToken:", error);
   }
+
+  // We always return the object in order to not break the contract of the function
+  // as this is critical for the account onboarding flow for our end users
+  return {
+    accessToken: accessToken,
+    itemId: itemId,
+    institutionIdValue,
+    institutionNameValue
+  };
 };

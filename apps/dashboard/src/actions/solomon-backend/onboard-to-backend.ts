@@ -14,7 +14,7 @@ import { z } from "zod";
 import { authActionClient } from "../safe-action";
 
 
-export const onboardAccountToBackendSchema = z.object({
+const onboardAccountToBackendSchema = z.object({
     username: z
         .string()
         .min(10, { message: "Username must be at least 10 characters long" })
@@ -25,7 +25,7 @@ export const onboardAccountToBackendSchema = z.object({
     redirectTo: z.string().optional(),
 });
 
-export type OnboardAccountToBackendSchemaFormValues = z.infer<
+type OnboardAccountToBackendSchemaFormValues = z.infer<
     typeof onboardAccountToBackendSchema
 >;
 

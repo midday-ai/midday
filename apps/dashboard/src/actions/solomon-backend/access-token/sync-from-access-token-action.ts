@@ -9,7 +9,7 @@ import { z } from "zod";
 import { authActionClient } from "../../safe-action";
 
 
-export const syncAccountFromAccessTokenSchema = z.object({
+const syncAccountFromAccessTokenSchema = z.object({
   accessToken: z.string().min(1),
   institutionId: z.string().min(1),
   institutionName: z.string().min(1),
@@ -18,7 +18,7 @@ export const syncAccountFromAccessTokenSchema = z.object({
   itemId: z.string().min(1),
 });
 
-export type SyncAccountFromAccessTokenFormValues = z.infer<
+type SyncAccountFromAccessTokenFormValues = z.infer<
   typeof syncAccountFromAccessTokenSchema
 >;
 

@@ -132,6 +132,7 @@ export function ConnectTransactionsModal({
         });
 
         // TODO: save the item id for the given institution id
+        console.log("this is the result obtained from exchange public token", res);
 
         setParams({
           step: "account",
