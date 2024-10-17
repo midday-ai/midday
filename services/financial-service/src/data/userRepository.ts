@@ -24,8 +24,6 @@ export class UserRepository {
 	async create(user: NewUser): Promise<User> {
 		const [createdUser] = await this.db.insert(users).values({
 			...user,
-			createdAt: new Date(),
-			updatedAt: new Date(),
 		}).returning();
 		return this.mapToUser(createdUser);
 	}

@@ -76,7 +76,7 @@ head_sampling_rate = 0.1 # 10% of requests are logged
 [[env.staging.d1_databases]]
 binding = "DB" # i.e. available in your Worker on env.DB
 database_name = "engine-staging-db"
-database_id = "4d7f64be-60e6-44ad-9b7a-5e499dfec52c"
+database_id = "426cad32-ec69-47c8-868a-05094f143c23"
 
 [env.staging.queues]
 producers = [
