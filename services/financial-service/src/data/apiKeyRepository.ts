@@ -37,7 +37,7 @@ export class APIKeyRepository {
 	 * @param userId - The ID of the user
 	 * @returns An array of API keys
 	 */
-	async getByUserId(userId: string): Promise<APIKey[]> {
+	async getByUserId(userId: number): Promise<APIKey[]> {
 		const results = await this.db.select().from(apiKeys).where(eq(apiKeys.userId, userId));
 		return results.map(this.mapToAPIKey);
 	}
@@ -69,7 +69,7 @@ export class APIKeyRepository {
 	 * @param userId - The ID of the user
 	 * @returns An array of active API keys
 	 */
-	async getActiveKeysByUserId(userId: string): Promise<APIKey[]> {
+	async getActiveKeysByUserId(userId: number): Promise<APIKey[]> {
 		const results = await this.db
 			.select()
 			.from(apiKeys)

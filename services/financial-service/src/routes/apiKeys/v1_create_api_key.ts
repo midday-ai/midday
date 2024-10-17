@@ -76,7 +76,7 @@ export const registerV1CreateApiKey = (app: App) => {
             apiId: "solomon_ai_api",
             prefix: "sk_live_solomon_ai",
             byteLength: 16,
-            ownerId: apiKeyData.userId,
+            ownerId: apiKeyData.userId.toString(),
             meta: {
                 name: apiKeyData.name,
             },
@@ -97,7 +97,7 @@ export const registerV1CreateApiKey = (app: App) => {
          * @type {import('@/data/apiKeyRepository').APIKey}
          */
         const apiKey = await repository.apiKey.create({
-                userId: Number(apiKeyData.userId),
+                userId: apiKeyData.userId,
                 key: result.key,
                 name: apiKeyData.name as string,
                 expiresAt: apiKeyData.expiresAt ?? null,

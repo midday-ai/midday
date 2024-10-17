@@ -133,7 +133,7 @@ export class UserRepository {
 			isEmailVerified: row.isEmailVerified,
 			lastLoginAt: row.lastLoginAt,
 			createdAt: row.createdAt,
-			updatedAt: row.updatedAt ? new Date(row.updatedAt) : null,
+			updatedAt: row.updatedAt,
 		};
 	}
 }

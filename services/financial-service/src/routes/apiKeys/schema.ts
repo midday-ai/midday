@@ -1,9 +1,8 @@
 import { z } from '@hono/zod-openapi';
-import { integer } from 'drizzle-orm/sqlite-core';
 
 export const APIKeySchema = z.object({
     id: z.string(),
-    userId: z.string(),
+    userId: z.number(),
     key: z.string(),
     name: z.string().nullable(),
     createdAt: z.date(),
@@ -17,24 +16,24 @@ export const APIKeysSchema = z.object({
 }).openapi("APIKeysSchema");
 
 export const APIKeyParamsSchema = z.object({
-    id: z.string().openapi({
+    id: z.number().openapi({
         description: "API Key ID",
         param: {
             name: "id",
             in: "query",
         },
-        example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        example: 1,
     }),
 }).openapi("APIKeyParamsSchema");
 
 export const APIKeysQuerySchema = z.object({
-    userId: z.string().openapi({
+    userId: z.number().openapi({
         description: "User ID",
         param: {
             name: "userId",
             in: "query",
         },
-        example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        example: 1,
     }),
 }).openapi("APIKeysQuerySchema");
 
