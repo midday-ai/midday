@@ -28,6 +28,8 @@
     "local:d1:init": "npm run local:migrations:apply && wrangler d1 execute engine-db --file='./migrations/0000_watery_vapor.sql' -e local",
     "migrations:apply-production": "wrangler d1 migrations apply DB --env production --remote",
     "migrations:apply-staging": "wrangler d1 migrations apply DB --env staging --remote",
+    "migrations:list-production": "wrangler d1 migrations list DB --env production",
+    "migrations:list-staging": "wrangler d1 migrations list DB --env staging",
     "d1:init": "npm run migrations:apply && wrangler d1 execute database --file='./migrations/0000_black_butterfly.sql'",
     "create-queue": "wrangler queue create queue",
     "create-d1-database": "wrangler d1 create engine-production-db",
