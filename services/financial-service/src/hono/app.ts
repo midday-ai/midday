@@ -155,6 +155,7 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
     info: {
       version: "1.0.0",
       title: "Solomon AI Financial Service API",
+      description: "API for Solomon AI Financial Service",
       termsOfService: "https://solomon-ai.com/terms",
       contact: {
         name: "Solomon AI",
