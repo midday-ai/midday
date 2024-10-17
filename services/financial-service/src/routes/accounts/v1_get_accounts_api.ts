@@ -9,10 +9,10 @@ import {
 } from "./schema";
 
 const route = createRoute({
-    tags: ["accounts"],
-    operationId: "accountsApi",
+    tags: ["financial-accounts"],
+    operationId: "query.financial.accounts",
     method: "get",
-    path: "/v1/api.accounts",
+    path: "/v1/api.financial.accounts",
     security: [{ bearerAuth: [] }],
     summary: "Get Accounts",
     request: {

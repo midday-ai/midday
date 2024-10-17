@@ -4,7 +4,7 @@ import { registerV1ApisGetAccountBalanceApi } from "./v1_get_account_balance_api
 import { registerV1ApisGetAccountsApi } from "./v1_get_accounts_api";
 
 /**
- * Registers all account-related API routes for the application.
+ * Registers all account-related API routes for the application (NOTE: accounts are observed as connected resources against a 3rd party connector).
  * 
  * This function serves as a central point for registering various account-related
  * API endpoints. It calls individual registration functions for different
