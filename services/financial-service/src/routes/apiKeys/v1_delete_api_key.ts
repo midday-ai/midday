@@ -51,7 +51,7 @@ export type V1DeleteApiKeyResponse = z.infer<(typeof route.responses)[200]["cont
  */
 export const registerV1DeleteApiKey = (app: App) => {
     app.openapi(route, async (c) => {
-        const unkeyApi = new Unkey({ rootKey: c.env.UNKEY_API_KEY });
+        // const unkeyApi = new Unkey({ rootKey: c.env.UNKEY_API_KEY });
         const { id } = c.req.valid("query");
 
         /**
@@ -64,7 +64,7 @@ export const registerV1DeleteApiKey = (app: App) => {
             throw new Error("API Key not found");
         }
 
-        await unkeyApi.keys.delete({ keyId: apiKey.key });
+        // await unkeyApi.keys.delete({ keyId: apiKey.key });
         await repository.apiKey.delete(Number(id));
 
         /**
