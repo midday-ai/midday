@@ -40,8 +40,10 @@ export const registerV1CreateUser = (app: App) => {
 
         const user = await userStore.create({
             ...userData,
-            id: '',
-            passwordHash: ''
+            passwordHash: '',
+            role: 'user',
+            status: 'active',
+            preferences: {},
         });
         return c.json(user, 200);
     });

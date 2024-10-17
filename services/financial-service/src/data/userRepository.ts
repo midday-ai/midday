@@ -23,7 +23,17 @@ export class UserRepository {
 	 */
 	async create(user: NewUser): Promise<User> {
 		const [createdUser] = await this.db.insert(users).values({
-			...user,
+			email: user.email,
+			name: user.name,
+			passwordHash: user.passwordHash,
+			role: user.role,
+			avatarUrl: user.avatarUrl,
+			bio: user.bio,
+			phoneNumber: user.phoneNumber,
+			isEmailVerified: user.isEmailVerified,
+			lastLoginAt: user.lastLoginAt,
+			status: user.status,
+			preferences: user.preferences,
 		}).returning();
 		return this.mapToUser(createdUser);
 	}
