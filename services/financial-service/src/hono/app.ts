@@ -60,7 +60,7 @@ function setupMiddleware(app: OpenAPIHono<HonoEnv>) {
   app.onError(handleError);
   app.use("*", setLocationAndUserAgent);
   app.use("*", requestId());
-  app.use("*", authMiddleware);
+  // app.use("*", authMiddleware);
   app.use("*", loggingMiddleware);
   app.use(enrichContext);
   app.use("*", errorHandlerMiddleware);

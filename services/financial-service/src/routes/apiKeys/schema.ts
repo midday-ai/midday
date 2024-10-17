@@ -1,7 +1,7 @@
 import { z } from '@hono/zod-openapi';
 
 export const APIKeySchema = z.object({
-    id: z.string(),
+    id: z.number(),
     userId: z.number(),
     key: z.string(),
     name: z.string().nullable(),
