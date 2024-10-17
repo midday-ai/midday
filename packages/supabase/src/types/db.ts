@@ -198,13 +198,16 @@ export type Database = {
           address_line_2: string | null
           city: string | null
           country: string | null
+          country_code: string | null
           created_at: string
-          email: string | null
+          email: string
           id: string
-          name: string | null
+          name: string
           note: string | null
+          phone: string | null
           state: string | null
           team_id: string
+          vat_number: string | null
           website: string | null
           zip: string | null
         }
@@ -213,13 +216,16 @@ export type Database = {
           address_line_2?: string | null
           city?: string | null
           country?: string | null
+          country_code?: string | null
           created_at?: string
-          email?: string | null
+          email: string
           id?: string
-          name?: string | null
+          name: string
           note?: string | null
+          phone?: string | null
           state?: string | null
           team_id?: string
+          vat_number?: string | null
           website?: string | null
           zip?: string | null
         }
@@ -228,13 +234,16 @@ export type Database = {
           address_line_2?: string | null
           city?: string | null
           country?: string | null
+          country_code?: string | null
           created_at?: string
-          email?: string | null
+          email?: string
           id?: string
-          name?: string | null
+          name?: string
           note?: string | null
+          phone?: string | null
           state?: string | null
           team_id?: string
+          vat_number?: string | null
           website?: string | null
           zip?: string | null
         }

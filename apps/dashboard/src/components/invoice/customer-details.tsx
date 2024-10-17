@@ -9,7 +9,7 @@ import { SelectCustomer } from "../select-customer";
 import { LabelInput } from "./label-input";
 import { transformCustomerToContent } from "./utils";
 
-export type Customer = {
+export interface Customer {
   id: string;
   name: string;
   email: string;
@@ -20,39 +20,42 @@ export type Customer = {
   state?: string;
   zip?: string;
   country?: string;
-};
+}
 
-export function CustomerDetails({ customers }: { customers: Customer[] }) {
+interface CustomerDetailsProps {
+  customers: Customer[];
+}
+
+export function CustomerDetails({ customers }: CustomerDetailsProps) {
   const { control, setValue, watch } = useFormContext();
-
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const selectedCustomerId = watch("customer_id");
+  const content = watch("customerDetails");
 
   const foundCustomer = customers.find(
     (customer) => customer.id === selectedCustomerId,
   );
 
-  const initialContent = transformCustomerToContent(foundCustomer);
-
   useEffect(() => {
     if (foundCustomer) {
+      const initialContent = transformCustomerToContent(foundCustomer);
       setValue("customerDetails", initialContent, { shouldValidate: true });
     }
-  }, [foundCustomer]);
+  }, [foundCustomer, setValue]);
+
+  const handleLabelSave = (value: string) => {
+    updateInvoiceTemplate.execute({ customer_label: value });
+  };
 
   return (
     <div>
       <LabelInput
         name="template.customer_label"
         className="mb-2 block"
-        onSave={(value) => {
-          updateInvoiceTemplate.execute({
-            customer_label: value,
-          });
-        }}
+        onSave={handleLabelSave}
       />
-      {initialContent ? (
+      {content ? (
         <Controller
           name="customerDetails"
           control={control}

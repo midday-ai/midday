@@ -18,10 +18,10 @@ export const updateInvoiceTemplateSchema = z.object({
   tax_label: z.string().optional(),
   payment_details_label: z.string().optional(),
   note_label: z.string().optional(),
-  logo_url: z.string().optional(),
+  logo_url: z.string().optional().nullable(),
   currency: z.string().optional(),
-  payment_details: z.any(),
-  from_details: z.any(),
+  payment_details: z.any().nullable(),
+  from_details: z.any().nullable(),
 });
 
 export const lineItemSchema = z.object({

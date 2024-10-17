@@ -12,7 +12,7 @@ export const updateInvoiceTemplateAction = authActionClient
   .action(async ({ parsedInput: setting, ctx: { user, supabase } }) => {
     const teamId = user.team_id;
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("invoice_templates")
       .upsert({ team_id: teamId, ...setting }, { onConflict: "team_id" })
       .eq("team_id", teamId)

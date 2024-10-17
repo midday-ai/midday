@@ -25,10 +25,12 @@ import { Textarea } from "@midday/ui/textarea";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { CountrySelector } from "../country-selector";
 import {
   type AddressDetails,
   SearchAddressInput,
 } from "../search-address-input";
+import { VatNumberInput } from "../vat-number-input";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -72,12 +74,14 @@ const formSchema = z.object({
       message: "Country must be at least 1 characters.",
     })
     .optional(),
+  country_code: z.string().optional(),
   zip: z
     .string()
     .min(1, {
       message: "ZIP Code must be at least 1 characters.",
     })
     .optional(),
+  vat_number: z.string().optional(),
   note: z.string().optional(),
 });
 
@@ -123,6 +127,7 @@ export function CreateCustomerForm() {
       state: undefined,
       country: undefined,
       zip: undefined,
+      vat_number: undefined,
       note: undefined,
       phone: undefined,
     },
@@ -130,10 +135,10 @@ export function CreateCustomerForm() {
 
   const onSelectAddress = (address: AddressDetails) => {
     form.setValue("address_line_1", address.address_line_1);
-    form.setValue("address_line_2", address.address_line_2);
     form.setValue("city", address.city);
     form.setValue("state", address.state);
     form.setValue("country", address.country);
+    form.setValue("country_code", address.country_code);
     form.setValue("zip", address.zip);
   };
 
@@ -306,10 +311,12 @@ export function CreateCustomerForm() {
                               Country
                             </FormLabel>
                             <FormControl>
-                              <Input
-                                {...field}
-                                placeholder="United States"
-                                autoComplete="off"
+                              <CountrySelector
+                                defaultValue={field.value}
+                                onSelect={(code, name) => {
+                                  field.onChange(name);
+                                  form.setValue("country_code", code);
+                                }}
                               />
                             </FormControl>
                           </FormItem>
@@ -369,6 +376,26 @@ export function CreateCustomerForm() {
                                 {...field}
                                 placeholder="10001"
                                 autoComplete="off"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="vat_number"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Tax ID / VAT Number
+                            </FormLabel>
+                            <FormControl>
+                              <VatNumberInput
+                                {...field}
+                                countryCode={form.watch("country_code")}
                               />
                             </FormControl>
                           </FormItem>

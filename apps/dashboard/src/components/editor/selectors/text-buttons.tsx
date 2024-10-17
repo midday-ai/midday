@@ -34,13 +34,8 @@ export const TextButtons = () => {
       command: (editor) => editor.chain().focus().toggleUnderline().run(),
       icon: Icons.Underlined,
     },
-    {
-      name: "strike",
-      isActive: (editor) => editor.isActive("strike"),
-      command: (editor) => editor.chain().focus().toggleStrike().run(),
-      icon: Icons.Strikethrough,
-    },
   ];
+
   return (
     <div className="flex">
       {items.map((item) => (

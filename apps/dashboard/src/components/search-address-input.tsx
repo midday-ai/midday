@@ -29,11 +29,11 @@ type Props = {
 
 export type AddressDetails = {
   address_line_1: string;
-  address_line_2: string;
   city: string;
   state: string;
   zip: string;
   country: string;
+  country_code: string;
 };
 
 type Option = {
@@ -67,6 +67,8 @@ const getAddressDetailsByAddressId = async (
     comps?.find((c) => c.types.includes("postal_code"))?.long_name || "";
   const country =
     comps?.find((c) => c.types.includes("country"))?.long_name || "";
+  const countryCode =
+    comps?.find((c) => c.types.includes("country"))?.short_name || "";
 
   return {
     address_line_1: `${streetNumber} ${streetAddress}`.trim(),
@@ -74,6 +76,7 @@ const getAddressDetailsByAddressId = async (
     state,
     zip,
     country,
+    country_code: countryCode,
   };
 };
 
