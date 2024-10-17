@@ -362,7 +362,12 @@ export const updateEntriesSchema = z.object({
 });
 
 export const manualSyncTransactionsSchema = z.object({
-  connectionId: z.string().uuid()
+  connectionId: z.string().uuid(),
+  institutionId: z.string().min(1),
+  institutionName: z.string().min(1),
+  userId: z.string().min(1),
+  itemId: z.string().min(1),
+  accessToken: z.string().min(1),
 });
 
 export const createGoCardLessLinkSchema = z.object({

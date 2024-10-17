@@ -1,4 +1,4 @@
-import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
+import { getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
 import { BankConnections } from "./bank-connections";
 import { ManualAccounts } from "./manual-accounts";
@@ -42,6 +42,7 @@ export function BankAccountListSkeleton() {
 
 export async function BankAccountList() {
   const { data } = await getTeamBankAccounts();
+  const user = await getUser();
 
   const manualAccounts = data.filter((account) => account.manual);
 
@@ -82,7 +83,7 @@ export async function BankAccountList() {
 
   return (
     <>
-      <BankConnections data={result} />
+      <BankConnections data={result} userId={user?.data?.id as string}/>
       <ManualAccounts data={manualAccounts} />
     </>
   );
