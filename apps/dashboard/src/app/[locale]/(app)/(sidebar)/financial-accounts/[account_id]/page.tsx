@@ -1,14 +1,11 @@
-import { BankConnections } from "@/components/bank-connections";
-import { default as BankAccountBalanceChart } from "@/components/charts/account-balance/account-balance-chart";
+import { AccountBalanceSummaryCharts } from "@/components/charts/account-balance/account-balance-summary-charts";
 import { ContentLayout } from "@/components/panel/content-layout";
 import RecentTransactions from "@/components/recent-transactions/recent-transactions";
-import { RecentTransactionsServer } from "@/components/recent-transactions/recent-transactions.server";
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getBankAccountByAccountId, getBankConnectionById, getUser } from "@midday/supabase/cached-queries";
+import { getBankAccountByAccountId, getBankConnectionById } from "@midday/supabase/cached-queries";
 import { CardDescription } from "@midday/ui/card";
 import { Skeleton } from '@midday/ui/skeleton';
-import { a } from "framer-motion/client";
 import { Suspense } from 'react';
 
 async function LoadBankAccountData({ accountId, currency, connectionId, accountName }: { accountId: string, currency: string, connectionId: string, accountName: string }) {
@@ -23,14 +20,8 @@ async function LoadBankAccountData({ accountId, currency, connectionId, accountN
                         Connected bank account
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <BankAccountBalanceChart
-                        accountId={accountId}
-                        currency={currency ?? "USD"}
-                        className="p-1"
-
-                    />
-
+                <CardContent className="p-[2%]">
+                    <AccountBalanceSummaryCharts />
                 </CardContent>
             </Card>
         );

@@ -40,6 +40,7 @@ interface BankConnectionProps {
     access_token: string | null;
     error?: string;
     status: "connected" | "disconnected" | "unknown";
+    item_id: string | null;
     accounts: Array<{
       id: string;
       name: string;
