@@ -160,7 +160,7 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
       contact: {
         name: "Solomon AI",
         url: "https://solomon-ai.com",
-        email: "support@solomon-ai.com",
+        email: "engineering@solomon-ai.co",
       },
       license: {
         name: "AGPL-3.0-or-later",
