@@ -97,7 +97,7 @@ export const registerV1CreateApiKey = (app: App) => {
          * @type {import('@/data/apiKeyRepository').APIKey}
          */
         const apiKey = await repository.apiKey.create({
-                userId: apiKeyData.userId,
+                userId: Number(apiKeyData.userId),
                 key: result.key,
                 name: apiKeyData.name as string,
                 expiresAt: apiKeyData.expiresAt ?? null,

@@ -1,4 +1,5 @@
 import { z } from '@hono/zod-openapi';
+import { integer } from 'drizzle-orm/sqlite-core';
 
 export const APIKeySchema = z.object({
     id: z.string(),
