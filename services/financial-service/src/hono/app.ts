@@ -63,7 +63,6 @@ function setupMiddleware(app: OpenAPIHono<HonoEnv>) {
   app.use("*", loggingMiddleware);
   app.use(enrichContext);
   app.use("*", errorHandlerMiddleware);
-  app.use("*", cacheMiddleware);
   app.use("*", jsonFormattingMiddleware);
   app.use("*", rateLimit());
   app.use("*", metrics());
@@ -97,14 +96,14 @@ function setLocationAndUserAgent(c: GenericContext<HonoEnv>, next: () => Promise
 }
 
 /**
- * Sets up caching for specific routes in the application.
+ * Sets up caching for specific GET routes in the application.
  * 
- * This function applies caching middleware to a predefined list of routes.
+ * This function applies caching middleware only to GET requests for a predefined list of routes.
  * 
  * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
  */
 function setupCaching(app: OpenAPIHono<HonoEnv>) {
-  const cachedRoutes = ["/institutions", "/accounts", "/accounts/balance", "/rates"];
+  const cachedRoutes = ["/v1/api.institutions", "/v1/api.financial.accounts", "/v1/api.financial.accounts/balance", "/v1/api.rates", "/v1/api.apikeys"];
   cachedRoutes.forEach(route => app.get(route, cacheMiddleware));
 }
 
