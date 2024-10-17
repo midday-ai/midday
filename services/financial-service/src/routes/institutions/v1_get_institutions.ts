@@ -6,18 +6,19 @@ import { createRoute, z } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { InstitutionParamsSchema, InstitutionsSchema } from "./schema";
 import { SearchResult } from "./types";
+import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route configuration for the Get Institutions API.
  * @constant
  */
 const route = createRoute({
-    tags: ["institutions"],
-    operationId: "getInstitutionsApi",
+    tags: [...Routes.Institutions.base.tags],
+    operationId: Routes.Institutions.base.operationId,
     security: [{ bearerAuth: [] }],
-    method: "get",
-    path: "/v1/api.institutions",
-    summary: "Get Institutions",
+    method: Routes.Institutions.base.method,
+    path: Routes.Institutions.base.path,
+    summary: Routes.Institutions.base.summary,
     request: {
         query: InstitutionParamsSchema,
     },

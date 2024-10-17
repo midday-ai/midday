@@ -5,15 +5,15 @@ import { createErrorResponse } from "@/utils/error";
 import { createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { GetRecurringTransactionsResponseSchema, RecurringTransactionsParamsSchema } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 const route = createRoute({
-    tags: ["transactions"],
-    operationId: "getRecurringTransactionsApi",
+    tags: [...Routes.Transactions.recurring.tags],
+    operationId: Routes.Transactions.recurring.operationId,
     security: [{ bearerAuth: [] }],
-    method: "get",
-    path: "/v1/api.transactions/recurring",
-    summary: "Get recurring transactions",
-    description: "Get recurring transactions",
+    method: Routes.Transactions.recurring.method,
+    path: Routes.Transactions.recurring.path,
+    summary: Routes.Transactions.recurring.summary,
     request: {
         query: RecurringTransactionsParamsSchema,
     },

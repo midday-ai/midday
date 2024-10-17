@@ -5,6 +5,7 @@ import { getHealthCheck } from "@/utils/search";
 import { createRoute, z } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { HealthSchema } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route configuration for the health check endpoint.
@@ -18,11 +19,11 @@ import { HealthSchema } from "./schema";
  * - Response schemas for success (200) and error cases
  */
 const route = createRoute({
-    tags: ["health"],
-    operationId: "healthCheckApi",
-    method: "get",
-    path: "/v1/api.health",
-    summary: "Health",
+    tags: [...Routes.Health.check.tags],
+    operationId: Routes.Health.check.operationId,
+    method: Routes.Health.check.method,
+    path: Routes.Health.check.path,
+    summary: Routes.Health.check.summary,
     responses: {
         200: {
             content: {

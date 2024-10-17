@@ -4,17 +4,18 @@ import { createErrorResponse } from "@/utils/error";
 import { getRates } from "@/utils/rates";
 import { createRoute, z } from "@hono/zod-openapi";
 import { RatesSchema } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route configuration for retrieving rates.
  * @constant
  */
 const route = createRoute({
-  tags: ["rates"],
-  operationId: "getRatesApi",
-  method: "get",
-  path: "/v1/api.rates",
-  summary: "Get rates",
+  tags: [...Routes.Rates.base.tags],
+  operationId: Routes.Rates.base.operationId,
+  method: Routes.Rates.base.method,
+  path: Routes.Rates.base.path,
+  summary: Routes.Rates.base.summary,
   security: [{ bearerAuth: [] }],
   responses: {
     200: {

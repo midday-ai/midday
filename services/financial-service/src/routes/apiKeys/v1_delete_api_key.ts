@@ -3,18 +3,19 @@ import { App } from "@/hono/app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { Unkey } from "@unkey/api";
 import { APIKeyParamsSchema, DeleteAPIKeySchema } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route configuration for deleting an API key.
  * @constant
  */
 const route = createRoute({
-    tags: ["apiKeys"],
-    operationId: "deleteApiKey",
-    method: "delete",
-    path: "/v1/api.apikeys",
+    tags: [...Routes.ApiKeys.revoke.tags],
+    operationId: Routes.ApiKeys.revoke.operationId,
+    method: Routes.ApiKeys.revoke.method,
+    path: Routes.ApiKeys.revoke.path,
     security: [{ bearerAuth: [] }],
-    summary: "Delete API Key",
+    summary: Routes.ApiKeys.revoke.summary,
     request: {
         query: APIKeyParamsSchema,
     },

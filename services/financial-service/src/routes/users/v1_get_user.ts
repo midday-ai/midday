@@ -2,6 +2,7 @@ import { openApiErrorResponses as ErrorResponses, ServiceApiError } from "@/erro
 import { App } from "@/hono/app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { GetUserResponse } from "./schemas";
+import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route configuration for getting a user by ID.
@@ -9,11 +10,11 @@ import { GetUserResponse } from "./schemas";
  * This route is used to retrieve a single user's information based on their unique identifier.
  */
 const getUserRoute = createRoute({
-    tags: ["users"],
-    operationId: "getUserApi",
-    method: "get",
-    path: "/v1/api.users/{id}",
-    summary: "Get User",
+    tags: [...Routes.Users.get.tags],
+    operationId: Routes.Users.get.operationId,
+    method: Routes.Users.get.method,
+    path: Routes.Users.get.path,
+    summary: Routes.Users.get.summary,
     request: {
         params: z.object({
             id: z.string(),

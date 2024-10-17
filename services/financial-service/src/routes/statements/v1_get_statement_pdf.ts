@@ -5,17 +5,18 @@ import { createErrorResponse } from "@/utils/error";
 import { createRoute, z } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { StatementPdfParamsSchema } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route configuration for retrieving a statement PDF.
  */
 const route = createRoute({
-    tags: ["statements"],
-    operationId: "getStatementPdf",
+    tags: [...Routes.Statements.getPdf.tags],
+    operationId: Routes.Statements.getPdf.operationId,
     security: [{ bearerAuth: [] }],
-    method: "get",
-    path: "/v1/api.statements/pdf",
-    summary: "Get Statement PDF",
+    method: Routes.Statements.getPdf.method,
+    path: Routes.Statements.getPdf.path,
+    summary: Routes.Statements.getPdf.summary,
     request: {
         query: StatementPdfParamsSchema,
     },

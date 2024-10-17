@@ -7,14 +7,15 @@ import {
     AccountBalanceParamsSchema,
     AccountBalanceSchema
 } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 const route = createRoute({
-    tags: ["financial-accounts"],
-    operationId: "query.financial.accounts.balance",
-    method: "get",
-    path: "/v1/api.financial.accounts/balance",
+    tags: [...Routes.AccountBalance.base.tags],
+    operationId: Routes.AccountBalance.base.operationId,
+    method: Routes.AccountBalance.base.method,
+    path: Routes.AccountBalance.base.path,
     security: [{ bearerAuth: [] }],
-    summary: "Get Account Balance",
+    summary: Routes.AccountBalance.base.summary,
     request: {
         query: AccountBalanceParamsSchema,
     },

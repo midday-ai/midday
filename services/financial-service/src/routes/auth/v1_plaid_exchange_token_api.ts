@@ -5,18 +5,19 @@ import { createErrorResponse } from "@/utils/error";
 import { createRoute, z } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { PlaidExchangeBodySchema, PlaidExchangeSchema } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route configuration for the Plaid token exchange endpoint.
  * This route handles the exchange of a public token for an access token.
  */
 const route = createRoute({
-    tags: ["plaid"],
-    operationId: "plaidExchangeTokenApi",
+    tags: [...Routes.Auth.plaidExchange.tags],
+    operationId: Routes.Auth.plaidExchange.operationId,
     security: [{ bearerAuth: [] }],
-    method: "post",
-    path: "/v1/api.plaid/exchange",
-    summary: "Exchange token (Plaid)",
+    method: Routes.Auth.plaidExchange.method,
+    path: Routes.Auth.plaidExchange.path,
+    summary: Routes.Auth.plaidExchange.summary,
     request: {
         body: {
             content: {

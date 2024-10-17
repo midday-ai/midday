@@ -5,18 +5,19 @@ import { createErrorResponse } from "@/utils/error";
 import { createRoute, z } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { StatementsParamsSchema, StatementsSchema } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 /**
  * Route definition for retrieving statements.
  * @description This route handles GET requests to fetch statements based on the provided query parameters.
  */
 const route = createRoute({
-    tags: ["statements"],
-    operationId: "getStatementsApi",
-    method: "get",
+    tags: [...Routes.Statements.list.tags],
+    operationId: Routes.Statements.list.operationId,
+    method: Routes.Statements.list.method,
+    path: Routes.Statements.list.path,
     security: [{ bearerAuth: [] }],
-    path: "/v1/api.statements",
-    summary: "Get Statements",
+    summary: Routes.Statements.list.summary,
     request: {
         query: StatementsParamsSchema,
     },

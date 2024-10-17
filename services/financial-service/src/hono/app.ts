@@ -12,6 +12,7 @@ import { init } from "@/middleware/init";
 import { authMiddleware, cacheMiddleware, cors, errorHandlerMiddleware, jsonFormattingMiddleware, loggingMiddleware } from "@/middleware/index";
 import { secureHeaders } from "hono/secure-headers";
 import { timing } from "hono/timing";
+import { CachedRoutes, AllRoutes } from "@/route-definitions/routes";
 
 /**
  * Creates and configures a new OpenAPIHono application.
@@ -26,6 +27,7 @@ export function newApp(): OpenAPIHono<HonoEnv> {
 
   setupMiddleware(app);
   setupCaching(app);
+  setupRoutes(app);
   setupSwagger(app);
   setupOpenAPIRegistry(app);
 
@@ -98,13 +100,44 @@ function setLocationAndUserAgent(c: GenericContext<HonoEnv>, next: () => Promise
 /**
  * Sets up caching for specific GET routes in the application.
  * 
- * This function applies caching middleware only to GET requests for a predefined list of routes.
+ * This function applies caching middleware only to GET requests for routes that should be cached.
  * 
  * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
  */
 function setupCaching(app: OpenAPIHono<HonoEnv>) {
-  const cachedRoutes = ["/v1/api.institutions", "/v1/api.financial.accounts", "/v1/api.financial.accounts/balance", "/v1/api.rates", "/v1/api.apikeys"];
-  cachedRoutes.forEach(route => app.get(route, cacheMiddleware));
+  CachedRoutes.forEach(route => app.get(route.path, cacheMiddleware));
+}
+
+/**
+ * Sets up all routes for the application.
+ * 
+ * This function sets up all defined routes with their respective HTTP methods.
+ * 
+ * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
+ */
+function setupRoutes(app: OpenAPIHono<HonoEnv>) {
+  AllRoutes.forEach(route => {
+    const methods = route.methods || ['GET'];
+    methods.forEach(method => {
+      switch (method) {
+        case 'GET':
+          app.get(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
+          break;
+        case 'POST':
+          app.post(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
+          break;
+        case 'PUT':
+          app.put(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
+          break;
+        case 'PATCH':
+          app.patch(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
+          break;
+        case 'DELETE':
+          app.delete(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
+          break;
+      }
+    });
+  });
 }
 
 /**

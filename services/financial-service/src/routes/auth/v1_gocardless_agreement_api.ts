@@ -5,6 +5,7 @@ import { createErrorResponse } from "@/utils/error";
 import { createRoute, z } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { GoCardLessAgreementBodySchema, GoCardLessAgreementSchema } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route configuration for the GoCardLess Agreement API.
@@ -14,12 +15,12 @@ import { GoCardLessAgreementBodySchema, GoCardLessAgreementSchema } from "./sche
  * The route expects a JSON payload and returns a GoCardLess agreement object on success.
  */
 const route = createRoute({
-    tags: ["gocardless"],
-    operationId: "gocardlessAgreementApi",
+    tags: [...Routes.Auth.gocardlessAgreement.tags],
+    operationId: Routes.Auth.gocardlessAgreement.operationId,
     security: [{ bearerAuth: [] }],
-    method: "post",
-    path: "/v1/api.gocardless/agreement",
-    summary: "Agreement (GoCardLess)",
+    method: Routes.Auth.gocardlessAgreement.method,
+    path: Routes.Auth.gocardlessAgreement.path,
+    summary: Routes.Auth.gocardlessAgreement.summary,
     request: {
         body: {
             content: {

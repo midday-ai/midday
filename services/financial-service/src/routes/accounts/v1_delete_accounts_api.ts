@@ -7,14 +7,15 @@ import {
     DeleteAccountsParamsSchema,
     DeleteSchema
 } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 const route = createRoute({
-    tags: ["financial-accounts"],
-    operationId: "delete.financial.accounts",
-    method: "delete",
-    path: "/v1/api.financial.accounts",
+    tags: [...Routes.FinancialAccounts.delete.tags],
+    operationId: Routes.FinancialAccounts.delete.operationId,
+    method: Routes.FinancialAccounts.delete.method,
+    path: Routes.FinancialAccounts.delete.path,
     security: [{ bearerAuth: [] }],
-    summary: "Delete Accounts",
+    summary: Routes.FinancialAccounts.delete.summary,
     request: {
         query: DeleteAccountsParamsSchema,
     },

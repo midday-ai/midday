@@ -5,6 +5,7 @@ import { createErrorResponse } from "@/utils/error";
 import { createRoute, z } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { PlaidLinkBodySchema, PlaidLinkSchema } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route configuration for the Plaid Link API.
@@ -15,12 +16,12 @@ import { PlaidLinkBodySchema, PlaidLinkSchema } from "./schema";
  * It returns a Plaid link object on success.
  */
 const route = createRoute({
-    tags: ["plaid"],
-    operationId: "plaidLinkApi",
+    tags: [...Routes.Auth.plaidLink.tags],
+    operationId: Routes.Auth.plaidLink.operationId,
     security: [{ bearerAuth: [] }],
-    method: "post",
-    path: "/v1/api.plaid/link",
-    summary: "Auth Link (Plaid)",
+    method: Routes.Auth.plaidLink.method,
+    path: Routes.Auth.plaidLink.path,
+    summary: Routes.Auth.plaidLink.summary,
     request: {
         body: {
             content: {

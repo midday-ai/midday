@@ -9,15 +9,16 @@ import {
     TransactionsParamsSchema,
     TransactionsSchema
 } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 const route = createRoute({
-    tags: ["transactions"],
-    operationId: "getTransactionsApi",
-    method: "get",
-    path: "/v1/api.transactions",
+    tags: [...Routes.Transactions.list.tags],
+    operationId: Routes.Transactions.list.operationId,
+    method: Routes.Transactions.list.method,
+    path: Routes.Transactions.list.path,
     security: [{ bearerAuth: [] }],
-    summary: "Get transactions",
-    description: "Get transactions",
+    summary: Routes.Transactions.list.summary,
+    description: Routes.Transactions.list.description,
     request: {
         query: TransactionsParamsSchema,
     },

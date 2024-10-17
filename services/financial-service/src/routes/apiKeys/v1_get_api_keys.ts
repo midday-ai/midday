@@ -2,18 +2,19 @@ import { openApiErrorResponses as ErrorResponses } from "@/errors";
 import { App } from "@/hono/app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { APIKeysQuerySchema, APIKeysSchema } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route configuration for retrieving API keys.
  * @constant
  */
 const route = createRoute({
-    tags: ["apiKeys"],
-    operationId: "getApiKeys",
-    method: "get",
-    path: "/v1/api.apikeys",
+    tags: [...Routes.ApiKeys.base.tags],
+    operationId: Routes.ApiKeys.base.operationId,
+    method: Routes.ApiKeys.base.method,
+    path: Routes.ApiKeys.base.path,
     security: [{ bearerAuth: [] }],
-    summary: "Get API Keys",
+    summary: Routes.ApiKeys.base.summary,
     request: {
         query: APIKeysQuerySchema,
     },

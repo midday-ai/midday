@@ -6,17 +6,18 @@ import { createRoute, z } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { UpdateUsageParamsSchema, UpdateUsageSchema } from "./schema";
 import { Document } from "./types";
+import { Routes } from "@/route-definitions/routes";
 
 /**
  * Creates the OpenAPI route configuration for updating institution usage.
  */
 export const route = createRoute({
-    tags: ["institutions"],
-    operationId: "updateInstitutionUsage",
+    tags: [...Routes.Institutions.updateUsage.tags],
+    operationId: Routes.Institutions.updateUsage.operationId,
     security: [{ bearerAuth: [] }],
-    method: "put",
-    path: "/v1/api.institutions/{id}/usage",
-    summary: "Update Institution Usage",
+    method: Routes.Institutions.updateUsage.method,
+    path: Routes.Institutions.updateUsage.path,
+    summary: Routes.Institutions.updateUsage.summary,
     request: {
         params: UpdateUsageParamsSchema,
     },

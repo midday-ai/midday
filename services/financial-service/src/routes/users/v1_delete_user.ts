@@ -2,13 +2,14 @@ import { openApiErrorResponses as ErrorResponses, ServiceApiError } from "@/erro
 import { App } from "@/hono/app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { DeleteUserApiResponse } from "./schemas";
+import { Routes } from "@/route-definitions/routes";
 
 const deleteUserRoute = createRoute({
-    tags: ["users"],
-    operationId: "deleteUserApi",
-    method: "delete",
-    path: "/v1/api.users/{id}",
-    summary: "Delete User",
+    tags: [...Routes.Users.delete.tags],
+    operationId: Routes.Users.delete.operationId,
+    method: Routes.Users.delete.method,
+    path: Routes.Users.delete.path,
+    summary: Routes.Users.delete.summary,
     request: {
         params: z.object({
             id: z.string(),

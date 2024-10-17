@@ -4,18 +4,19 @@ import { App } from "@/hono/app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { Unkey } from "@unkey/api";
 import { APIKeySchema, CreateAPIKeySchema } from "./schema";
+import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route definition for creating a new API key.
  * @description Defines the HTTP method, path, security, request body, and response schemas for the API key creation endpoint.
  */
 const route = createRoute({
-    tags: ["apiKeys"],
-    method: "post",
-    path: "/v1/api.apikeys",
+    tags: [...Routes.ApiKeys.create.tags],
+    method: Routes.ApiKeys.create.method,
+    path: Routes.ApiKeys.create.path,
     security: [{ bearerAuth: [] }],
-    summary: "Create API Key",
-    operationId: "createApiKey",
+    summary: Routes.ApiKeys.create.summary,
+    operationId: Routes.ApiKeys.create.operationId,
     request: {
         body: {
             content: {

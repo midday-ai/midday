@@ -2,13 +2,14 @@ import { openApiErrorResponses as ErrorResponses } from "@/errors";
 import { App } from "@/hono/app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { CreateUserSchema, CreateUserSchemaResponse } from "./schemas";
-
+import { Routes } from "@/route-definitions/routes";
+    
 const createUserRoute = createRoute({
-    tags: ["users"],
-    operationId: "createUserApi",
-    method: "post",
-    path: "/v1/api.users",
-    summary: "Create User",
+    tags: [...Routes.Users.create.tags],
+    operationId: Routes.Users.create.operationId,
+    method: Routes.Users.create.method,
+    path: Routes.Users.create.path,
+    summary: Routes.Users.create.summary,
     request: {
         body: {
             content: {
