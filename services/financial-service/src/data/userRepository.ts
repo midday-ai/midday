@@ -35,7 +35,7 @@ export class UserRepository {
 	 * @param id - The ID of the user to retrieve.
 	 * @returns A Promise that resolves to the User object if found, or null if not found.
 	 */
-	async getById(id: string): Promise<User | null> {
+	async getById(id: number): Promise<User | null> {
 		const [user] = await this.db.select().from(users).where(eq(users.id, id));
 		return user ? this.mapToUser(user) : null;
 	}
@@ -56,7 +56,7 @@ export class UserRepository {
 	 * @param user - An object containing the user properties to update.
 	 * @returns A Promise that resolves to the updated User object if found, or null if not found.
 	 */
-	async update(id: string, user: Partial<User>): Promise<User | null> {
+	async update(id: number, user: Partial<User>): Promise<User | null> {
 		const [updatedUser] = await this.db.update(users)
 			.set({ ...user, updatedAt: new Date() })
 			.where(eq(users.id, id))
@@ -69,7 +69,7 @@ export class UserRepository {
 	 * @param id - The ID of the user to delete.
 	 * @returns A Promise that resolves to true if the user was deleted, or false if not found.
 	 */
-	async delete(id: string): Promise<boolean> {
+	async delete(id: number): Promise<boolean> {
 		const result = await this.db.delete(users)
 			.where(eq(users.id, id))
 			.returning();

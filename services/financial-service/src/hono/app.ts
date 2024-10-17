@@ -116,27 +116,25 @@ function setupCaching(app: OpenAPIHono<HonoEnv>) {
  * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
  */
 function setupRoutes(app: OpenAPIHono<HonoEnv>) {
-  AllRoutes.forEach(route => {
-    const methods = route.methods || ['GET'];
-    methods.forEach(method => {
-      switch (method) {
-        case 'GET':
+    AllRoutes.forEach(route => {
+    const method = route.method;
+    switch (method) {
+        case 'get':
           app.get(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
           break;
-        case 'POST':
+        case 'post':
           app.post(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
           break;
-        case 'PUT':
+        case 'put':
           app.put(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
           break;
-        case 'PATCH':
+        case 'patch':
           app.patch(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
           break;
-        case 'DELETE':
+        case 'delete':
           app.delete(route.path, (c) => c.json({ message: `${method} ${route.path}` }));
           break;
       }
-    });
   });
 }
 

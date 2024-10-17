@@ -17,7 +17,6 @@ export class APIKeyRepository {
 	async create(apiKey: Omit<APIKey, 'id' | 'createdAt'>): Promise<APIKey> {
 		const [createdApiKey] = await this.db.insert(apiKeys).values({
 			...apiKey,
-			id: crypto.randomUUID(),
 			createdAt: new Date(),
 		}).returning();
 		return this.mapToAPIKey(createdApiKey);
@@ -28,7 +27,7 @@ export class APIKeyRepository {
 	 * @param id - The ID of the API key
 	 * @returns The API key or null if not found
 	 */
-	async getById(id: string): Promise<APIKey | null> {
+	async getById(id: number): Promise<APIKey | null> {
 		const [apiKey] = await this.db.select().from(apiKeys).where(eq(apiKeys.id, id));
 		return apiKey ? this.mapToAPIKey(apiKey) : null;
 	}
@@ -49,7 +48,7 @@ export class APIKeyRepository {
 	 * @param apiKey - The partial API key data to update
 	 * @returns The updated API key or null if not found
 	 */
-	async update(id: string, apiKey: Partial<APIKey>): Promise<APIKey | null> {
+	async update(id: number, apiKey: Partial<APIKey>): Promise<APIKey | null> {
 		const [updatedApiKey] = await this.db.update(apiKeys)
 			.set(apiKey)
 			.where(eq(apiKeys.id, id))
@@ -61,7 +60,7 @@ export class APIKeyRepository {
 	 * Deletes an API key
 	 * @param id - The ID of the API key to delete
 	 */
-	async delete(id: string): Promise<void> {
+	async delete(id: number): Promise<void> {
 		await this.db.delete(apiKeys).where(eq(apiKeys.id, id));
 	}
 
@@ -90,7 +89,7 @@ export class APIKeyRepository {
 	 * @param ip - The IP address that used the key
 	 * @returns The updated API key
 	 */
-	async incrementUsage(id: string, ip: string): Promise<APIKey | null> {
+	async incrementUsage(id: number, ip: string): Promise<APIKey | null> {
 		const [updatedApiKey] = await this.db
 			.update(apiKeys)
 			.set({
@@ -109,7 +108,7 @@ export class APIKeyRepository {
 	 * @param reason - The reason for revoking the key
 	 * @returns The revoked API key
 	 */
-	async revokeKey(id: string, reason: string): Promise<APIKey | null> {
+	async revokeKey(id: number, reason: string): Promise<APIKey | null> {
 		const [revokedApiKey] = await this.db
 			.update(apiKeys)
 			.set({
@@ -165,7 +164,7 @@ export class APIKeyRepository {
 	 * @param newRateLimit - The new rate limit to set
 	 * @returns The updated API key
 	 */
-	async updateRateLimit(id: string, newRateLimit: number): Promise<APIKey | null> {
+	async updateRateLimit(id: number, newRateLimit: number): Promise<APIKey | null> {
 		const [updatedApiKey] = await this.db
 			.update(apiKeys)
 			.set({ rateLimit: newRateLimit })
