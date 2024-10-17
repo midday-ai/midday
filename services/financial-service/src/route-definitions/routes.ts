@@ -255,7 +255,7 @@ export const Routes = {
             operationId: "get.users",
             summary: "Get User",
             tags: ["users"],
-            shouldCache: true,
+            shouldCache: false,
         },
         update: {
             path: "/v1/api.users/{id}",
