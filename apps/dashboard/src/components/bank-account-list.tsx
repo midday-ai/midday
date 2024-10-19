@@ -83,7 +83,7 @@ export async function BankAccountList() {
 
   return (
     <>
-      <BankConnections data={result} userId={user?.data?.id as string}/>
+      <BankConnections data={result} userId={user?.data?.id as string} />
       <ManualAccounts data={manualAccounts} />
     </>
   );

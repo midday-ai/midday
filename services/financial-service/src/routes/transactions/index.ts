@@ -104,11 +104,7 @@ app.openapi(indexRoute, async (c) => {
       syncCursor: syncCursor ?? "",
     });
 
-    const {
-      data,
-      cursor,
-      hasMore,
-    } = res;
+    const { data, cursor, hasMore } = res;
 
     return c.json(
       {

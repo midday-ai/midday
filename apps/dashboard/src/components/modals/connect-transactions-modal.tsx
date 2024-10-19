@@ -92,7 +92,7 @@ type ConnectTransactionsModalProps = {
 
 export function ConnectTransactionsModal({
   countryCode: initialCountryCode,
-  userId
+  userId,
 }: ConnectTransactionsModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -132,7 +132,10 @@ export function ConnectTransactionsModal({
         });
 
         // TODO: save the item id for the given institution id
-        console.log("this is the result obtained from exchange public token", res);
+        console.log(
+          "this is the result obtained from exchange public token",
+          res,
+        );
 
         setParams({
           step: "account",
@@ -179,7 +182,7 @@ export function ConnectTransactionsModal({
   async function fetchData(query?: string) {
     try {
       setLoading(true);
-      const {data} = await getInstitutions({ countryCode, query });
+      const { data } = await getInstitutions({ countryCode, query });
       setLoading(false);
 
       setResults(data);
@@ -218,7 +221,6 @@ export function ConnectTransactionsModal({
       createLinkToken();
     }
   }, [isOpen, countryCode]);
-
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOnClose}>

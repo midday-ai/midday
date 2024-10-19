@@ -28,7 +28,6 @@ export function CategoryCharts({
     return null;
   }
 
-
   const chartOpacity = (chartName: ChartType) =>
     disabledCharts.includes(chartName) ? "opacity-50" : "";
 

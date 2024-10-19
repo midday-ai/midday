@@ -22,7 +22,13 @@ type ProviderProps = {
   email: string;
 };
 
-export function Providers({ locale, children, userId, email, accessToken }: ProviderProps) {
+export function Providers({
+  locale,
+  children,
+  userId,
+  email,
+  accessToken,
+}: ProviderProps) {
   return (
     <I18nProviderClient locale={locale}>
       <TriggerProvider
@@ -37,7 +43,7 @@ export function Providers({ locale, children, userId, email, accessToken }: Prov
         >
           {/**
            * Conditionally renders the children based on the backend feature flag.
-           * 
+           *
            * @remarks
            * This section of the Providers component checks if the backend feature
            * is enabled. If it is, it wraps the children in a StoreProvider component,

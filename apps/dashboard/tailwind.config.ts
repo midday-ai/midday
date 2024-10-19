@@ -55,6 +55,10 @@ export default {
       full: "9999px",
     },
     keyframes: {
+      wiggle: {
+        "0%, 100%": { transform: "rotate(-3deg)" },
+        "50%": { transform: "rotate(3deg)" },
+      },
       "accordion-down": {
         from: {
           height: "0",

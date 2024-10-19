@@ -13,6 +13,7 @@
  * ```
  */
 
+import { getUser } from "@midday/supabase/cached-queries";
 import {
   BankAccountSchema,
   BankConnectionSchema,
@@ -52,7 +53,7 @@ interface BankAccountSingleViewProps
  * @param {BankAccountSingleViewProps} props - The props for the component
  * @returns {JSX.Element} The rendered component
  */
-const BankAccountSingleView: React.FC<BankAccountSingleViewProps> = ({
+const BankAccountSingleView: React.FC<BankAccountSingleViewProps> = async ({
   bankAccount,
   bankConnections,
   className,
@@ -78,6 +79,8 @@ const BankAccountSingleView: React.FC<BankAccountSingleViewProps> = ({
    */
   const bankConnection = bankAccountMap[bankAccount.bank_connection_id!];
 
+  const user = await getUser();
+
   return (
     <div className={cn(className, "py-[2%]")}>
       <div className="grid md:grid-cols-3 gap-3">
@@ -97,6 +100,7 @@ const BankAccountSingleView: React.FC<BankAccountSingleViewProps> = ({
             userName={userName}
             transactions={[]}
             transactionsLoading={false}
+            userId={user?.data?.id as string}
           />
         </Card>
       </div>

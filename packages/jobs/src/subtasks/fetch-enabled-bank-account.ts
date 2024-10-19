@@ -36,7 +36,7 @@ async function fetchEnabledBankAccountsSubTask(
   }>,
   teamId: string,
   connectionId: string,
-  taskKeyPrefix: string
+  taskKeyPrefix: string,
 ): Promise<BankAccountWithConnection[] | null> {
   const supabase = io.supabase.client;
 
@@ -44,13 +44,11 @@ async function fetchEnabledBankAccountsSubTask(
     `${taskKeyPrefix}-fetch-enabled-bank-accounts`,
     async () => {
       // Fetch enabled bank accounts
-      await uniqueLog(
-        io,
-        "info", "Fetching enabled bank accounts");
+      await uniqueLog(io, "info", "Fetching enabled bank accounts");
       const { data: accountsData } = await supabase
         .from("bank_accounts")
         .select(
-          "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, last_cursor_sync)"
+          "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, last_cursor_sync)",
         )
         .eq("bank_connection_id", connectionId)
         .eq("team_id", teamId)
@@ -59,10 +57,12 @@ async function fetchEnabledBankAccountsSubTask(
 
       await uniqueLog(
         io,
-        "info", `Found ${accountsData?.length || 0} enabled bank accounts`);
+        "info",
+        `Found ${accountsData?.length || 0} enabled bank accounts`,
+      );
       return accountsData;
     },
-    { name: "Fetching enabled bank accounts" }
+    { name: "Fetching enabled bank accounts" },
   );
 
   return data;
@@ -74,20 +74,18 @@ async function fetchEnabledBankAccountsForTeamSubTask(
   }>,
   teamId: string,
   taskKeyPrefix: string,
-  options: { excludeManual?: boolean } = {}
+  options: { excludeManual?: boolean } = {},
 ): Promise<BankAccountWithConnection[] | null> {
   const supabase = io.supabase.client;
 
   const data = await io.runTask(
     `${taskKeyPrefix}-fetch-enabled-bank-accounts`,
     async () => {
-      await uniqueLog(
-        io,
-        "info", "Fetching enabled bank accounts");
+      await uniqueLog(io, "info", "Fetching enabled bank accounts");
       let query = supabase
         .from("bank_accounts")
         .select(
-          "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, last_cursor_sync)"
+          "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, last_cursor_sync)",
         )
         .eq("team_id", teamId)
         .eq("enabled", true);
@@ -108,10 +106,12 @@ async function fetchEnabledBankAccountsForTeamSubTask(
 
       await uniqueLog(
         io,
-        "info", `Found ${accountsData?.length || 0} enabled bank accounts`);
+        "info",
+        `Found ${accountsData?.length || 0} enabled bank accounts`,
+      );
       return accountsData;
     },
-    { name: "Fetching enabled bank accounts" }
+    { name: "Fetching enabled bank accounts" },
   );
 
   return data;
@@ -119,5 +119,5 @@ async function fetchEnabledBankAccountsForTeamSubTask(
 
 export {
   fetchEnabledBankAccountsForTeamSubTask,
-  fetchEnabledBankAccountsSubTask
+  fetchEnabledBankAccountsSubTask,
 };

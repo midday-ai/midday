@@ -54,14 +54,11 @@ client.defineJob({
     await uniqueLog(
       io,
       "info",
-      `Processing for teamId: ${teamId}, connectionId: ${connectionId}`
+      `Processing for teamId: ${teamId}, connectionId: ${connectionId}`,
     );
 
     // Fetch enabled bank accounts
-    await uniqueLog(
-      io,
-      "info",
-      "Fetching enabled bank accounts");
+    await uniqueLog(io, "info", "Fetching enabled bank accounts");
     const prefix = `manual-sync-${teamId}-${connectionId}`;
 
     // Fetch enabled bank accounts for the team
@@ -69,13 +66,14 @@ client.defineJob({
       io,
       teamId,
       connectionId,
-      `${prefix}-fetch-enabled-bank-accounts`
+      `${prefix}-fetch-enabled-bank-accounts`,
     );
 
     await uniqueLog(
       io,
-      "info", 
-      `Found ${accountsData?.length || 0} enabled bank accounts`);
+      "info",
+      `Found ${accountsData?.length || 0} enabled bank accounts`,
+    );
 
     try {
       // execute the sync transactions subtask for the accounts enabled for the team
@@ -89,7 +87,7 @@ client.defineJob({
         let transactionSyncCursor = "";
 
         await io.logger.debug(
-          `Processing account: ${account.id} for team: ${teamId}`
+          `Processing account: ${account.id} for team: ${teamId}`,
         );
         try {
           /**
@@ -99,7 +97,7 @@ client.defineJob({
            * @returns A promise resolving to the transactions data
            */
           const getTransactions = async (
-            retries = 0
+            retries = 0,
           ): Promise<FinancialEngine.TransactionsSchema> => {
             try {
               return await engine.transactions.list({
@@ -130,13 +128,16 @@ client.defineJob({
             }
           };
 
-          const { data: transactions, cursor, hasMore } =
-            await getTransactions();
+          const {
+            data: transactions,
+            cursor,
+            hasMore,
+          } = await getTransactions();
 
           transactionSyncCursor = cursor ?? "";
 
           await io.logger.info(
-            `Retrieved ${transactions?.length} transactions for account: ${account.id}`
+            `Retrieved ${transactions?.length} transactions for account: ${account.id}`,
           );
 
           const formattedTransactions = transactions?.map((transaction) =>
@@ -144,10 +145,10 @@ client.defineJob({
               transaction,
               teamId: account.team_id,
               bankAccountId: account.id,
-            })
+            }),
           );
           await io.logger.debug(
-            `Formatted ${formattedTransactions?.length} transactions for account: ${account.id}`
+            `Formatted ${formattedTransactions?.length} transactions for account: ${account.id}`,
           );
 
           /**
@@ -158,7 +159,7 @@ client.defineJob({
             BATCH_LIMIT,
             async (batch) => {
               await io.logger.debug(
-                `Upserting batch of ${batch.length} transactions for account: ${account.id}`
+                `Upserting batch of ${batch.length} transactions for account: ${account.id}`,
               );
               const { data, error } = await supabase
                 .from("transactions")
@@ -170,20 +171,20 @@ client.defineJob({
               if (error) {
                 await io.logger.error(
                   `Error upserting transactions for account: ${account.id}`,
-                  { error }
+                  { error },
                 );
               }
 
               await io.logger.debug(
-                `Upserted batch ${data} for account: ${account.id}`
+                `Upserted batch ${data} for account: ${account.id}`,
               );
               return batch;
-            }
+            },
           );
         } catch (error) {
           await io.logger.error(
             `Error processing transactions for account: ${account.id}`,
-            { error }
+            { error },
           );
           if (error instanceof FinancialEngine.APIError) {
             const parsedError = parseAPIError(error);
@@ -203,7 +204,7 @@ client.defineJob({
               })
               .eq("id", account.bank_connection.id);
             await io.logger.info(
-              `Updated bank connection status for account: ${account.id}`
+              `Updated bank connection status for account: ${account.id}`,
             );
           }
         }
@@ -217,9 +218,12 @@ client.defineJob({
             id: account.account_id,
             accessToken: account.bank_connection?.access_token,
           });
-          await io.logger.debug(`Retrieved balance for account: ${account.id}`, {
-            balance: balance.data?.amount,
-          });
+          await io.logger.debug(
+            `Retrieved balance for account: ${account.id}`,
+            {
+              balance: balance.data?.amount,
+            },
+          );
 
           if (balance.data?.amount) {
             await io.supabase.client
@@ -237,13 +241,14 @@ client.defineJob({
             })
             .eq("id", account.bank_connection.id);
           await io.logger.debug(
-            `Updated last_accessed for bank connection: ${account.bank_connection.id}`
+            `Updated last_accessed for bank connection: ${account.bank_connection.id}`,
           );
         } catch (error) {
           await io.logger.error(
-            `Error updating balance or last_accessed for account: ${account.id
+            `Error updating balance or last_accessed for account: ${
+              account.id
             } ${JSON.stringify(error)}`,
-            { error }
+            { error },
           );
         }
       });
@@ -255,7 +260,7 @@ client.defineJob({
         if (promises) {
           await Promise.all(promises);
           await io.logger.info(
-            `Completed processing all accounts for team: ${teamId}`
+            `Completed processing all accounts for team: ${teamId}`,
           );
         }
       } catch (error) {
@@ -270,19 +275,17 @@ client.defineJob({
     // Update bank connection status
     await uniqueLog(
       io,
-      "info", 
-      "Updating bank connection status to 'connected'");
+      "info",
+      "Updating bank connection status to 'connected'",
+    );
     await updateBankConnectionStatus(
       io,
       connectionId,
       "connected",
       prefix,
-      null
+      null,
     );
-    await uniqueLog(
-      io,
-      "info", 
-      "Bank connection status updated successfully");
+    await uniqueLog(io, "info", "Bank connection status updated successfully");
 
     // Revalidate data tags
     const tagsToRevalidate = [
@@ -299,8 +302,8 @@ client.defineJob({
     });
     await uniqueLog(
       io,
-      "info", 
-      "All tags revalidated. Manual sync job completed successfully");
-
+      "info",
+      "All tags revalidated. Manual sync job completed successfully",
+    );
   },
 });

@@ -33,16 +33,14 @@ async function updateBankConnectionStatus(
   connectionId: string,
   status: ConnectionStatus,
   taskKeyPrefix: string,
-  errorDetails: string | null = null
+  errorDetails: string | null = null,
 ): Promise<BankAccountWithConnection[] | null> {
   const supabase = io.supabase.client;
 
   const data = await io.runTask(
     `${taskKeyPrefix}-update-bank-connection-status-${Date.now()}-${connectionId}`,
     async () => {
-      await uniqueLog(
-        io,
-        "info", "Updating bank connection status");
+      await uniqueLog(io, "info", "Updating bank connection status");
       const { data: accountsData } = await io.supabase.client
         .from("bank_connections")
         .update({
@@ -54,7 +52,7 @@ async function updateBankConnectionStatus(
 
       return accountsData;
     },
-    { name: "Update bank connection status" }
+    { name: "Update bank connection status" },
   );
 
   return data;

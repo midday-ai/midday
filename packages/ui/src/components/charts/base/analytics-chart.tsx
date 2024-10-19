@@ -140,7 +140,11 @@ export const AnalyticsChart: FC<InteractiveFinancialChartProps> = ({
                   bottom: 10,
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  horizontal={false}
+                />
                 <XAxis
                   dataKey="date"
                   tickLine={false}

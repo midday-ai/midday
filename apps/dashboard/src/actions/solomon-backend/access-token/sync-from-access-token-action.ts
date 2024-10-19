@@ -1,13 +1,12 @@
 import { initializeBackendClient } from "@/utils/backend";
 import { LogEvents } from "@midday/events/events";
 import {
-    FinancialUserProfileType,
-    PlaidSyncAccountFromAccessTokenOperationRequest,
-    PlaidSyncAccountFromAccessTokenRequest,
+  FinancialUserProfileType,
+  PlaidSyncAccountFromAccessTokenOperationRequest,
+  PlaidSyncAccountFromAccessTokenRequest,
 } from "@solomon-ai/client-typescript-sdk";
 import { z } from "zod";
 import { authActionClient } from "../../safe-action";
-
 
 const syncAccountFromAccessTokenSchema = z.object({
   accessToken: z.string().min(1),
@@ -32,42 +31,51 @@ type SyncAccountFromAccessTokenFormValues = z.infer<
  * @returns {Promise<Object>} The response from the backend after exchanging the token.
  * @throws {Error} If the token exchange fails.
  */
-export const syncAccountDetailsFromAccessToken = authActionClient.
-    schema(syncAccountFromAccessTokenSchema).
-    metadata({
-        name: "sync-account-details-from-access-token",
-        track: {
-            event: LogEvents.SyncAccountDetailsFromAccessToken.name,
-            channel: LogEvents.SyncAccountDetailsFromAccessToken.channel,
-        },
-    }).action(async ({
-        parsedInput: { accessToken, userId, institutionId, institutionName, profileType, itemId },
-        ctx: { supabase },
+export const syncAccountDetailsFromAccessToken = authActionClient
+  .schema(syncAccountFromAccessTokenSchema)
+  .metadata({
+    name: "sync-account-details-from-access-token",
+    track: {
+      event: LogEvents.SyncAccountDetailsFromAccessToken.name,
+      channel: LogEvents.SyncAccountDetailsFromAccessToken.channel,
+    },
+  })
+  .action(
+    async ({
+      parsedInput: {
+        accessToken,
+        userId,
+        institutionId,
+        institutionName,
+        profileType,
+        itemId,
+      },
+      ctx: { supabase },
     }) => {
-        const backendClient = initializeBackendClient();
-        // Define the request body
-        const requestBody: PlaidSyncAccountFromAccessTokenRequest = {
-            userId: userId,
-            accessToken: accessToken,
-            institutionId: institutionId,
-            institutionName: institutionName,
-            profileType: profileType,
-            itemId: itemId,
-        };
+      const backendClient = initializeBackendClient();
+      // Define the request body
+      const requestBody: PlaidSyncAccountFromAccessTokenRequest = {
+        userId: userId,
+        accessToken: accessToken,
+        institutionId: institutionId,
+        institutionName: institutionName,
+        profileType: profileType,
+        itemId: itemId,
+      };
 
-        const request: PlaidSyncAccountFromAccessTokenOperationRequest = {
-            plaidSyncAccountFromAccessTokenRequest: requestBody,
-        };
+      const request: PlaidSyncAccountFromAccessTokenOperationRequest = {
+        plaidSyncAccountFromAccessTokenRequest: requestBody,
+      };
 
-        // Exchange the token with the backend
-        const response = await backendClient
-            .getFinancialServiceApi()
-            .plaidSyncAccountFromAccessToken(request);
+      // Exchange the token with the backend
+      const response = await backendClient
+        .getFinancialServiceApi()
+        .plaidSyncAccountFromAccessToken(request);
 
-        if (!response) {
-            throw new Error("Token could not be exchanged");
-        }
+      if (!response) {
+        throw new Error("Token could not be exchanged");
+      }
 
-        return response;
-    });
-    
+      return response;
+    },
+  );

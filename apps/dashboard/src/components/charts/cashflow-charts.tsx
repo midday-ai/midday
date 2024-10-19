@@ -21,7 +21,6 @@ export function CashflowCharts({
   disabledCharts = [],
   disableAllCharts = false,
 }: CashflowChartsProps) {
-
   const chartOpacity = (chartName: ChartType) =>
     disabledCharts.includes(chartName) ? "opacity-50" : "";
 

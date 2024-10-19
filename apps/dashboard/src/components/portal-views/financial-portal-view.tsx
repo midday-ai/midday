@@ -17,7 +17,8 @@ interface FinancialPortalViewProps extends HTMLAttributes<HTMLDivElement> {
   bankAccounts?: Array<BankAccount>;
   bankConnections?: Array<BankConnection>;
   userName: string;
-title?: string;
+  userId: string;
+  title?: string;
   description?: string;
 }
 
@@ -27,11 +28,11 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
   bankAccounts,
   bankConnections,
   userName,
+  userId,
   title,
   description,
   ...props
 }): JSX.Element | null => {
-
   // Return null if analytics v2 is not enabled
   if (!features.isAnalyticsV2Enabled) return null;
 
@@ -65,6 +66,7 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
             bankAccounts={bankAccounts}
             bankConnectionMap={bankConnectionMap}
             userName={userName}
+            userId={userId}
           />
         </Card>
       </div>

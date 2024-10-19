@@ -232,9 +232,7 @@ export function BankConnection({ connection, userId }: BankConnectionProps) {
   return (
     <div>
       <div className="flex justify-between items-center">
-        <AccordionTrigger
-          className="justify-start text-start w-full"
-        >
+        <AccordionTrigger className="justify-start text-start w-full">
           <div className="flex space-x-4 items-center ml-4 w-full">
             <BankLogo src={connection.logo_url} alt={connection.name} />
 

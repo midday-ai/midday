@@ -17,6 +17,7 @@ type Props = {
   bankAccount: BankAccount;
   bankConnection?: BankConnection;
   userName: string;
+  userId: string;
 };
 
 export function BankAccountSheet({
@@ -25,6 +26,7 @@ export function BankAccountSheet({
   bankAccount,
   bankConnection,
   userName,
+  userId,
 }: Props) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [transactions, setTransactions] = useState<TransactionSchema[]>([]);
@@ -61,18 +63,18 @@ export function BankAccountSheet({
         userName={userName}
         transactions={transactions}
         transactionsLoading={transactionsLoading}
+        userId={userId}
       />
     </div>
-   
   );
 
   if (isDesktop) {
     return (
-        <Dialog open={isOpen} onOpenChange={setOpen}>
-          <DialogContent className="md:min-w-[80%] md:min-h-[80%] md:max-h-[85%] overflow-y-auto scrollbar-hide">
-            {content}
-          </DialogContent>
-        </Dialog>
+      <Dialog open={isOpen} onOpenChange={setOpen}>
+        <DialogContent className="md:min-w-[80%] md:min-h-[80%] md:max-h-[85%] overflow-y-auto scrollbar-hide">
+          {content}
+        </DialogContent>
+      </Dialog>
     );
   }
 

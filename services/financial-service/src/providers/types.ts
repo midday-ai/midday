@@ -268,7 +268,7 @@ export type GetTransactionsResponse = {
   data: Transaction[];
   hasMore: boolean;
   cursor: string | null;
-}
+};
 
 export type GetAccountsRequest = {
   id?: string; // GoCardLess

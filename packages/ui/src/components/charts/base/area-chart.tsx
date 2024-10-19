@@ -212,6 +212,7 @@ export const AreaChart: React.FC<AreaChartProps> = ({
         <CartesianGrid
           strokeDasharray="3 3"
           vertical={false}
+          horizontal={false}
           className="stoke-[#DCDAD2] dark:stroke-[#2C2C2C]"
         />
 

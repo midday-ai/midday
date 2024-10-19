@@ -14,7 +14,7 @@ import {
 import { Input } from "@midday/ui/input";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
@@ -27,8 +27,6 @@ export function CreateTeamForm({
   buttonTitle = "Create Team",
   redirectTo = "/teams/invite",
 }: CreateTeamFormProps) {
-
-  
   const createTeam = useAction(createTeamAction);
 
   const form = useForm<z.infer<typeof createTeamSchema>>({

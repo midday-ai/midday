@@ -70,13 +70,8 @@ export class PlaidProvider implements Provider {
         hasMore: false,
       };
     }
-    
-    const {
-      added,
-      cursor,
-      hasMore,
-    } = res;
-  
+
+    const { added, cursor, hasMore } = res;
 
     const data = added.map((transaction) =>
       transformTransaction({

@@ -39,7 +39,9 @@ export enum FinancialEngineAccountType {
   Other = "other",
 }
 
-export function getClassification(type: AccountType): FinancialEngineAccountType {
+export function getClassification(
+  type: AccountType,
+): FinancialEngineAccountType {
   switch (type) {
     case "depository":
       return FinancialEngineAccountType.Depository;

@@ -101,8 +101,7 @@ export default async function Layout({
   // Check if the payment feature flag is enabled
   if (features.isPaymentsEnabled) {
     const currentUserSubscription = await getUserSubscriptions(true); // Invalidate cache
-    if (!currentUserSubscription?.data?.[0]?.status
-    ) {
+    if (!currentUserSubscription?.data?.[0]?.status) {
       redirect("/payment");
     }
   }
@@ -144,7 +143,10 @@ export default async function Layout({
         <SubscriptionViewModal />
         <TransactionViewModal />
         <OverviewViewModal />
-        <ConnectTransactionsModal countryCode={countryCode} userId={user.data.id} />
+        <ConnectTransactionsModal
+          countryCode={countryCode}
+          userId={user.data.id}
+        />
         <SelectBankAccountsModal />
         <ImportModal
           currencies={uniqueCurrencies}
@@ -161,9 +163,7 @@ export default async function Layout({
   return (
     <div className="h-screen w-screen overflow-hidden">
       {features.isBackendEnabled ? (
-        <OnboardToBackendServerWrapper>
-          {content}
-        </OnboardToBackendServerWrapper>
+        <OnboardToBackendServerWrapper>{content}</OnboardToBackendServerWrapper>
       ) : (
         content
       )}

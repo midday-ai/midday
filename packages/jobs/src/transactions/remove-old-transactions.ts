@@ -16,7 +16,7 @@ import { removeOldTransactionsSubTask } from "../subtasks/remove-old-transaction
 async function* fetchTeamsBatches(
   io: IOWithIntegrations<{
     supabase: Supabase<Database, "public", any>;
-  }>
+  }>,
 ): AsyncGenerator<Team[], void, unknown> {
   let lastId: string | null = null;
   let hasMore = true;
@@ -100,7 +100,7 @@ client.defineJob({
           io,
           team.id,
           cutoffDate,
-          prefix
+          prefix,
         );
         results[team.id] = removedCount;
         totalRemoved += removedCount;
@@ -109,7 +109,7 @@ client.defineJob({
         // Log progress every 100 teams
         if (processedTeams % 100 === 0) {
           io.logger.info(
-            `Processed ${processedTeams} teams. Total removed: ${totalRemoved}`
+            `Processed ${processedTeams} teams. Total removed: ${totalRemoved}`,
           );
         }
       }

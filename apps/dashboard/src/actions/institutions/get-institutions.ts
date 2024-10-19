@@ -12,7 +12,7 @@ type GetAccountParams = {
 export async function getInstitutions({
   countryCode,
   query,
-}: GetAccountParams) : Promise<InstitutionsSchema> {
+}: GetAccountParams): Promise<InstitutionsSchema> {
   try {
     return engine.institutions.list({
       countryCode: countryCode as any,

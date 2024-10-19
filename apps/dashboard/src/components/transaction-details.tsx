@@ -210,7 +210,6 @@ export function TransactionDetails({
       categorySlug: category.slug,
     });
 
-
     if (transactions?.data && transactions.data.length > 1) {
       // Show toast for bulk update option
       toast({

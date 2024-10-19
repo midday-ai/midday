@@ -38,7 +38,6 @@ export function ChangeTeamSheet({
   const changeTeam = useAction(changeTeamAction);
   const [open, setOpen] = useState(false);
 
-
   const handleTeamChange = () => {
     if (selectedTeamId !== currentTeamId) {
       changeTeam.execute({ teamId: selectedTeamId, redirectTo: "/" });
@@ -61,7 +60,7 @@ export function ChangeTeamSheet({
               Change Team
             </SheetTitle>
           </SheetHeader>
-         
+
           <Tabs defaultValue="create" className="w-full mt-4">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="create">Create Team</TabsTrigger>
@@ -78,10 +77,11 @@ export function ChangeTeamSheet({
                 {sortedTeams.map((team) => (
                   <div
                     key={team.team.id}
-                    className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors duration-200 ${selectedTeamId === team.team.id
-                      ? "bg-primary/10 border border-primary text-white"
-                      : "hover:bg-secondary/80"
-                      }`}
+                    className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors duration-200 ${
+                      selectedTeamId === team.team.id
+                        ? "bg-primary/10 border border-primary text-white"
+                        : "hover:bg-secondary/80"
+                    }`}
                     onClick={() => setSelectedTeamId(team.team.id)}
                   >
                     <Avatar className="w-12 h-12 mr-4 flex-shrink-0">
@@ -95,7 +95,9 @@ export function ChangeTeamSheet({
                         {team.team.name}
                       </p>
                       {team.team.id === currentTeamId && (
-                        <p className="text-sm text-muted-foreground">Current team</p>
+                        <p className="text-sm text-muted-foreground">
+                          Current team
+                        </p>
                       )}
                     </div>
                     {selectedTeamId === team.team.id && (
@@ -107,7 +109,8 @@ export function ChangeTeamSheet({
               <div className="flex flex-col justify-between md:min-h-[500px]">
                 <div className="flex flex-col gap-2">
                   <p className="text-sm text-muted-foreground pt-[1.5%]">
-                    Changing teams will redirect you to the dashboard of the selected team.
+                    Changing teams will redirect you to the dashboard of the
+                    selected team.
                   </p>
                   <Button
                     onClick={handleTeamChange}

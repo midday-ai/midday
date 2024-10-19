@@ -28,9 +28,8 @@ const relevantEvents = new Set([
   "billing_portal.session.created",
   "invoice.upcoming",
   "customer.created",
-  "invoice.created"
+  "invoice.created",
 ]);
-
 
 /**
  * Handles POST requests for Stripe webhook events.

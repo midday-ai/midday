@@ -83,11 +83,13 @@ export class Provider {
     }
   }
 
-  async getTransactions(params: GetTransactionsRequest): Promise<GetTransactionsResponse> {
+  async getTransactions(
+    params: GetTransactionsRequest,
+  ): Promise<GetTransactionsResponse> {
     if (!this.#provider) {
       throw new Error(`Invalid provider: ${this.#name}`);
     }
-    
+
     return this.#provider.getTransactions(params);
   }
 

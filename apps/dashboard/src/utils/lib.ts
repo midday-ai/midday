@@ -245,7 +245,7 @@ const menuConfig: Group[] = [
  */
 export function getMenuList(
   pathname: string,
-  config: Group[] = menuConfig
+  config: Group[] = menuConfig,
 ): Group[] {
   return config.map((group) => ({
     ...group,

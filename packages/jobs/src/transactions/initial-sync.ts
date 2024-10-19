@@ -129,11 +129,7 @@ client.defineJob({
           }
         };
 
-        const {
-          data: transactions,
-          cursor,
-          hasMore,
-        } = await getTransactions();
+        const { data: transactions, cursor, hasMore } = await getTransactions();
 
         transactionSyncCursor = cursor ?? "";
 
@@ -228,7 +224,10 @@ client.defineJob({
 
         await io.supabase.client
           .from("bank_connections")
-          .update({ last_accessed: new Date().toISOString(), last_cursor_sync: transactionSyncCursor })
+          .update({
+            last_accessed: new Date().toISOString(),
+            last_cursor_sync: transactionSyncCursor,
+          })
           .eq("id", account.bank_connection.id);
         await io.logger.debug(
           `Updated last_accessed for bank connection: ${account.bank_connection.id}`,

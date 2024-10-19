@@ -14,7 +14,7 @@ import { InboxViewSkeleton } from "@/components/inbox-skeleton";
 import { ContentLayout } from "@/components/panel/content-layout";
 import { FinancialPortalView } from "@/components/portal-views/financial-portal-view";
 import config from "@/config";
-import Tier, { isFreeТier } from "@/config/tier";
+import { Tier, isFreeТier } from "@/config/tier";
 import {
   getBankConnectionsByTeamId,
   getTeamBankAccounts,
@@ -64,6 +64,7 @@ export default async function FinancialAccountsPage({ searchParams }: Props) {
   const tier: Tier = user?.data?.tier ?? "free";
   // based on the tier we disclose a different amount of information
   const isCurrentUserTierFree = isFreeТier(tier);
+  const userId: string = user?.data?.id as string;
 
   return (
     <ContentLayout title="Financial Accounts">
@@ -77,6 +78,7 @@ export default async function FinancialAccountsPage({ searchParams }: Props) {
             userName={user?.data?.full_name ?? ""}
             title="Connected Bank Accounts"
             description="View your connected bank accounts and manage them."
+            userId={userId}
           />
           {/** place a selector here to switch between bank accounts */}
           <div className="py-[2%]">
