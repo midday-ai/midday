@@ -1,3 +1,10 @@
+# [0.37.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.36.0...v0.37.0) (2024-10-19)
+
+
+### Features
+
+* add bank account historical balance at the account level ([#63](https://github.com/SolomonAIEngineering/solomonai/issues/63)) ([17148ea](https://github.com/SolomonAIEngineering/solomonai/commit/17148ea4d7f098a7951697fa59a3ad9862cb1772))
+
 # [0.36.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.35.0...v0.36.0) (2024-10-17)
 
 
