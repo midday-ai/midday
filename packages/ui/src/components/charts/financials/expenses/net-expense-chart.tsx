@@ -1,8 +1,11 @@
+import { ExpenseMetrics } from "client-typescript-sdk";
+import { ArrowRightIcon } from "lucide-react";
+import { useMemo } from "react";
 import { FinancialExpenseAndIncomeMetricsConverter } from "../../../../lib/converters/expense-and-income-metrics-converter";
 import { FinancialDataGenerator } from "../../../../lib/random/financial-data-generator";
+import { cn } from "../../../../utils/cn";
 import { Badge } from "../../../badge";
 import { Card } from "../../../card";
-import { cn } from "../../../../utils/cn";
 import { Sheet, SheetContent, SheetTrigger } from "../../../sheet";
 import {
   Table,
@@ -12,9 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from "../../../table";
-import { ExpenseMetrics } from "client-typescript-sdk";
-import { ArrowRightIcon } from "lucide-react";
-import { useMemo } from "react";
 import { BarChart, BarChartProps } from "../../base/bar-chart";
 import { CategoryChart } from "../categories/category-horizontal-chart";
 
@@ -42,7 +42,7 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
   ...rest
 }) => {
   const rootClassName = cn(
-    "w-full max-w-4xl bg-background text-foreground p-6",
+    "w-full bg-background text-foreground p-6",
     className,
     disabled && "opacity-50 pointer-events-none",
   );

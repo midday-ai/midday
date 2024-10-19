@@ -1,8 +1,8 @@
-import { FinancialExpenseAndIncomeMetricsConverter } from "../../../../lib/converters/expense-and-income-metrics-converter";
-import { FinancialDataGenerator } from "../../../../lib/random/financial-data-generator";
+import { IncomeMetrics } from "client-typescript-sdk";
+import { ArrowRightIcon } from "lucide-react";
+import { useMemo } from "react";
 import { Badge } from "../../../../components/badge";
 import { Card } from "../../../../components/card";
-import { cn } from "../../../../utils/cn";
 import {
   Sheet,
   SheetContent,
@@ -16,9 +16,9 @@ import {
   TableHeader,
   TableRow,
 } from "../../../../components/table";
-import { IncomeMetrics } from "client-typescript-sdk";
-import { ArrowRightIcon } from "lucide-react";
-import { useMemo } from "react";
+import { FinancialExpenseAndIncomeMetricsConverter } from "../../../../lib/converters/expense-and-income-metrics-converter";
+import { FinancialDataGenerator } from "../../../../lib/random/financial-data-generator";
+import { cn } from "../../../../utils/cn";
 import { BarChart, BarChartProps } from "../../base/bar-chart";
 import { CategoryChart } from "../categories/category-horizontal-chart";
 
@@ -46,7 +46,7 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
   ...rest
 }) => {
   const rootClassName = cn(
-    "w-full max-w-4xl bg-background text-foreground p-6",
+    "w-full bg-background text-foreground p-6",
     className,
     disabled && "opacity-50 pointer-events-none",
   );

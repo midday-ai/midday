@@ -8,7 +8,7 @@ import { InboxViewSkeleton } from "@/components/inbox-skeleton";
 import { ContentLayout } from "@/components/panel/content-layout";
 import config from "@/config";
 import { getDefaultDateRange } from "@/config/chart-date-range-default-picker";
-import Tier from "@/config/tier";
+import { Tier } from "@/config/tier";
 import { Cookies } from "@/utils/constants";
 import { getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";

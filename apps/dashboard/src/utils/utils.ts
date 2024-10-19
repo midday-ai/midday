@@ -22,4 +22,16 @@ function generateRandomString(length: number = 10): string {
   return result;
 }
 
-export { capitalize, generateRandomString };
+const formatCategoryName = (category: string): string => {
+  // Handle empty or null input
+  if (!category) return '';
+
+  // Split the string by underscores
+  const words = category.toLowerCase().split('_');
+
+  // Capitalize the first letter of each word and join with spaces
+  return words.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+};
+
+export { capitalize, formatCategoryName, generateRandomString };
+

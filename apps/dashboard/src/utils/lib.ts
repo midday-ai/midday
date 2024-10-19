@@ -10,6 +10,7 @@ import {
   DollarSign,
   FileAxis3D,
   FileText,
+  GitGraphIcon,
   InboxIcon,
   LayoutGrid,
   PieChart,
@@ -74,6 +75,13 @@ const menuConfig: Group[] = [
         submenus: [],
         active: false,
       },
+      {
+        href: "/team-insights",
+        label: "Team Insights",
+        icon: GitGraphIcon,
+        submenus: [],
+        active: false,
+      }
     ],
   },
   {

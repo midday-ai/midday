@@ -1,6 +1,6 @@
 {
-  "i18n-ally.localesPaths": [
-    "src/locales",
-    "src/app/[locale]/(app)/(sidebar)/account/language"
-  ]
+    "i18n-ally.localesPaths": [
+        "src/locales",
+        "src/app/[locale]/(app)/(sidebar)/account/language"
+    ]
 }
