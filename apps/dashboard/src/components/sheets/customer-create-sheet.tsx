@@ -5,7 +5,7 @@ import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import React from "react";
-import { CreateCustomerForm } from "../forms/create-customer-form";
+import { CustomerForm } from "../forms/customer-form";
 
 export function CustomerCreateSheet() {
   const { setParams, createCustomer } = useCustomerParams();
@@ -27,7 +27,7 @@ export function CustomerCreateSheet() {
           </Button>
         </SheetHeader>
 
-        <CreateCustomerForm />
+        <CustomerForm />
       </SheetContent>
     </Sheet>
   );

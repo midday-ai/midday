@@ -22,6 +22,7 @@ import {
   getCategoriesQuery,
   getCustomersQuery,
   getExpensesQuery,
+  getInvoiceNumberCountQuery,
   getInvoiceSummaryQuery,
   getInvoiceTemplatesQuery,
   getInvoicesQuery,
@@ -553,6 +554,27 @@ export const getInvoiceTemplates = async () => {
     ["invoice_templates", teamId],
     {
       tags: [`invoice_templates_${teamId}`],
+      revalidate: 3600,
+    },
+  )();
+};
+
+export const getInvoiceNumberCount = async () => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getInvoiceNumberCountQuery(supabase, teamId);
+    },
+    ["invoice_number_count", teamId],
+    {
+      tags: [`invoice_number_count_${teamId}`],
       revalidate: 3600,
     },
   )();

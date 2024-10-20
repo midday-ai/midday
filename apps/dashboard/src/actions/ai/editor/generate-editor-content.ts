@@ -10,7 +10,6 @@ type Params = {
 };
 
 export async function generateEditorContent({ input, context }: Params) {
-  console.log(context);
   const stream = createStreamableValue("");
 
   (async () => {
@@ -23,15 +22,11 @@ export async function generateEditorContent({ input, context }: Params) {
 
         1. Language: Always respond in the same language as the input prompt.
         2. Conciseness: Keep responses brief and precise, with a maximum of 200 characters.
-        3. Context-awareness: Utilize any provided due date to inform payment terms.
 
         You will perform one of these primary functions:
         - Fix grammar: Rectify any grammatical errors while preserving the original meaning.
         - Improve text: Refine the text to improve clarity and professionalism.
         - Condense text: Remove any unnecessary text and only keep the invoice-related content and make it more concise.
-
-        If a due date is provided, incorporate it into the payment terms.
-        Adjust payment terms based on the due date, ensuring they are realistic and aligned with standard business practices.
 
         Format your response as plain text, using '\n' for line breaks when necessary.
         Do not include any titles or headings in your response.

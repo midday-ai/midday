@@ -11,7 +11,7 @@ import { addMonths } from "date-fns";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { CreateButton } from "./create-button";
-import { CustomerDetails } from "./customer-details";
+import { type Customer, CustomerDetails } from "./customer-details";
 import { FromDetails } from "./from-details";
 import { LineItems } from "./line-items";
 import { Logo } from "./logo";
@@ -23,6 +23,8 @@ import { Summary } from "./summary";
 type Props = {
   teamId: string;
   template: InvoiceTemplate;
+  customers: Customer[];
+  invoiceNumber: string;
 };
 
 const defaultTemplate: InvoiceTemplate = {
@@ -45,7 +47,12 @@ const defaultTemplate: InvoiceTemplate = {
   from_details: undefined,
 };
 
-export function Form({ teamId, template: initialTemplate, customers }: Props) {
+export function Form({
+  teamId,
+  template: initialTemplate,
+  customers,
+  invoiceNumber,
+}: Props) {
   const { selectedCustomerId } = useInvoiceParams();
 
   const template = {
@@ -65,7 +72,7 @@ export function Form({ teamId, template: initialTemplate, customers }: Props) {
       customer_id: undefined,
       issueDate: new UTCDate(),
       dueDate: addMonths(new UTCDate(), 1),
-      invoiceNumber: "INV-0001",
+      invoiceNumber,
       lineItems: [{ name: undefined, quantity: 0, price: 0 }],
     },
     mode: "onChange",
@@ -97,7 +104,7 @@ export function Form({ teamId, template: initialTemplate, customers }: Props) {
             </div>
 
             <div className="mt-8">
-              <Meta />
+              <Meta teamId={teamId} />
             </div>
 
             <div className="grid grid-cols-2 gap-6 mt-8">

@@ -8,12 +8,15 @@ export const transformCustomerToContent = (customer?: Customer) => {
   if (customer.name) {
     content.push({ text: customer.name, type: "text" }, { type: "hardBreak" });
   }
+
   if (customer.email) {
     content.push({ text: customer.email, type: "text" }, { type: "hardBreak" });
   }
+
   if (customer?.phone) {
     content.push({ text: customer.phone, type: "text" }, { type: "hardBreak" });
   }
+
   if (customer?.address_line_1) {
     content.push(
       {
@@ -24,9 +27,17 @@ export const transformCustomerToContent = (customer?: Customer) => {
       { type: "hardBreak" },
     );
   }
+
   if (customer?.city && customer?.country) {
     content.push(
       { text: `${customer.city}, ${customer.country}`, type: "text" },
+      { type: "hardBreak" },
+    );
+  }
+
+  if (customer?.vat) {
+    content.push(
+      { text: `VAT: ${customer.vat}`, type: "text" },
       { type: "hardBreak" },
     );
   }

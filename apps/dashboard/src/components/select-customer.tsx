@@ -41,9 +41,21 @@ export function SelectCustomer({ data }: Props) {
       <SelectContent className="max-h-[200px] overflow-y-auto">
         <SelectGroup>
           {data.map((item) => (
-            <SelectItem key={item.id} value={item.id} className="text-xs">
-              {item.name}
-            </SelectItem>
+            <div key={item.id} className="group relative">
+              <SelectItem value={item.id} className="flex-grow text-xs">
+                {item.name}
+              </SelectItem>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomerParams({ customerId: item.id });
+                }}
+                className="absolute right-2 top-[6px] opacity-0 group-hover:opacity-50 hover:opacity-100 z-10 text-xs"
+              >
+                Edit
+              </button>
+            </div>
           ))}
 
           <SelectSeparator />

@@ -47,6 +47,7 @@ export const TextButtons = () => {
         >
           <Button
             size="icon"
+            type="button"
             className={cn("rounded-none text-primary h-8", {
               "bg-accent": item.isActive(editor),
             })}

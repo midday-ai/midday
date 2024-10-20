@@ -21,7 +21,6 @@ type Props = {
   onChange?: (content?: JSONContent) => void;
   onBlur?: (content: JSONContent | null) => void;
   placeholder?: string;
-  context?: Record<string, string>;
 };
 
 export function Editor({
@@ -30,7 +29,6 @@ export function Editor({
   onChange,
   onBlur,
   placeholder,
-  context,
 }: Props) {
   const [isFocused, setIsFocused] = useState(false);
   const [thinking, setThinking] = useState(false);
@@ -86,11 +84,7 @@ export function Editor({
           className="flex w-fit overflow-hidden rounded-full border border-border bg-background shadow-xl"
         >
           {showAI ? (
-            <AISelector
-              onOpenChange={setShowAI}
-              context={context}
-              setThinking={setThinking}
-            />
+            <AISelector onOpenChange={setShowAI} setThinking={setThinking} />
           ) : (
             <>
               <TextButtons />

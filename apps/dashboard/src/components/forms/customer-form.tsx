@@ -20,12 +20,13 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-import { ScrollArea } from "@midday/ui/scroll-area";
 import { Textarea } from "@midday/ui/textarea";
 import { useAction } from "next-safe-action/hooks";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CountrySelector } from "../country-selector";
+import type { Customer } from "../invoice/customer-details";
 import {
   type AddressDetails,
   SearchAddressInput,
@@ -102,7 +103,12 @@ const excludedDomains = [
   "hotmail.com.br",
 ];
 
-export function CreateCustomerForm() {
+type Props = {
+  data?: Customer;
+};
+
+export function CustomerForm({ data }: Props) {
+  const [sections, setSections] = useState<string[]>(["general"]);
   const { setParams: setCustomerParams } = useCustomerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
 
@@ -133,6 +139,13 @@ export function CreateCustomerForm() {
     },
   });
 
+  useEffect(() => {
+    if (data) {
+      setSections(["general", "details"]);
+      form.reset(data);
+    }
+  }, [data]);
+
   const onSelectAddress = (address: AddressDetails) => {
     form.setValue("address_line_1", address.address_line_1);
     form.setValue("city", address.city);
@@ -156,11 +169,12 @@ export function CreateCustomerForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(createCustomer.execute)}>
-        <ScrollArea className="h-[calc(100vh-180px)]">
+        <div className="h-[calc(100vh-180px)] scrollbar-hide overflow-auto">
           <div>
             <Accordion
+              key={sections.join("-")}
               type="multiple"
-              defaultValue={["general"]}
+              defaultValue={sections}
               className="space-y-6"
             >
               <AccordionItem value="general">
@@ -427,7 +441,7 @@ export function CreateCustomerForm() {
               </AccordionItem>
             </Accordion>
           </div>
-        </ScrollArea>
+        </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <div className="flex justify-end mt-auto space-x-4">
@@ -440,9 +454,14 @@ export function CreateCustomerForm() {
             </Button>
 
             <Button
+              type="submit"
               disabled={createCustomer.isExecuting || !form.formState.isValid}
             >
-              {createCustomer.isExecuting ? "Creating..." : "Create"}
+              {createCustomer.isExecuting
+                ? "Creating..."
+                : data
+                  ? "Update"
+                  : "Create"}
             </Button>
           </div>
         </div>

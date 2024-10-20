@@ -42,7 +42,11 @@ export function VatNumberInput({
   const debouncedVatNumber = useDebounce(vatNumber, 300);
 
   useEffect(() => {
-    if (debouncedVatNumber.length > 7 && countryCode) {
+    if (
+      debouncedVatNumber.length > 7 &&
+      countryCode &&
+      value !== debouncedVatNumber
+    ) {
       validateVatNumber.execute({
         vat_number: debouncedVatNumber,
         country_code: countryCode,
