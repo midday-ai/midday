@@ -28,7 +28,6 @@ const selectors = [
 
 type Props = {
   onOpenChange: (open: boolean) => void;
-  context?: Record<string, string>;
   setThinking: (thinking: boolean) => void;
 };
 
@@ -36,9 +35,8 @@ const formatEditorContent = (content: string) => {
   return content.replace(/\n/g, "<br />");
 };
 
-export function AISelector({ onOpenChange, context, setThinking }: Props) {
+export function AISelector({ onOpenChange, setThinking }: Props) {
   const { editor } = useEditor();
-  const [generation, setGeneration] = useState<string>("");
 
   const [isTypingPrompt, setIsTypingPrompt] = useState(false);
   const ref = useClickAway<HTMLDivElement>(() => {
@@ -59,16 +57,11 @@ export function AISelector({ onOpenChange, context, setThinking }: Props) {
 
     const { output } = await generateEditorContent({
       input: text,
-      context: `${selection}\n
-        ${Object.entries(context ?? {})
-          .map(([key, value]) => `${key}: ${value}`)
-          .join("\n")}`,
     });
 
     let generatedContent = "";
     for await (const delta of readStreamableValue(output)) {
       generatedContent += delta;
-      setGeneration(generatedContent);
 
       editor?.commands.insertContent(formatEditorContent(delta ?? ""));
     }

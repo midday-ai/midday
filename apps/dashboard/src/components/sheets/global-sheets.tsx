@@ -3,6 +3,7 @@ import { getUser } from "@midday/supabase/cached-queries";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { CustomerCreateSheet } from "./customer-create-sheet";
+import { CustomerEditSheet } from "./customer-edit-sheet";
 import { InvoiceCreateSheetServer } from "./invoice-create-sheet.server";
 import { TrackerCreateSheet } from "./tracker-create-sheet";
 import { TrackerScheduleSheet } from "./tracker-schedule-sheet";
@@ -33,6 +34,7 @@ export async function GlobalSheets({ defaultCurrency }: Props) {
       />
 
       <CustomerCreateSheet />
+      <CustomerEditSheet />
 
       <Suspense fallback={null}>
         {/* We preload the invoice data (template, invoice number etc) */}

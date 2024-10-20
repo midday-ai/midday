@@ -1229,11 +1229,13 @@ export async function getPaymentStatusQuery(supabase: Client, teamId: string) {
 export async function getCustomersQuery(supabase: Client, teamId: string) {
   return supabase
     .from("customers")
-    .select(
-      "id, name, website, email, country, address_line_1, address_line_2, city, state, zip, phone",
-    )
+    .select("*")
     .eq("team_id", teamId)
     .limit(100);
+}
+
+export async function getCustomerQuery(supabase: Client, customerId: string) {
+  return supabase.from("customers").select("*").eq("id", customerId).single();
 }
 
 export async function getInvoiceTemplatesQuery(
@@ -1245,4 +1247,30 @@ export async function getInvoiceTemplatesQuery(
     .select("*")
     .eq("team_id", teamId)
     .single();
+}
+
+export async function getInvoiceNumberCountQuery(
+  supabase: Client,
+  teamId: string,
+) {
+  return supabase
+    .from("invoices")
+    .select("id", { count: "exact" })
+    .eq("team_id", teamId);
+}
+
+type SearchInvoiceNumberParams = {
+  teamId: string;
+  query: string;
+};
+
+export async function searchInvoiceNumberQuery(
+  supabase: Client,
+  params: SearchInvoiceNumberParams,
+) {
+  return supabase
+    .from("invoices")
+    .select("invoice_number")
+    .eq("team_id", params.teamId)
+    .ilike("invoice_number", `%${params.query}`);
 }

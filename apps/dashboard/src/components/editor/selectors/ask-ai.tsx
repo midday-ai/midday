@@ -19,6 +19,7 @@ export const AskAI = ({ onSelect }: Props) => {
       className="rounded-none text-primary h-8"
       variant="ghost"
       onClick={onSelect}
+      type="button"
     >
       <Icons.AIOutline className="size-4" />
     </Button>

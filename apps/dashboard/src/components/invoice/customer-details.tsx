@@ -20,6 +20,7 @@ export interface Customer {
   state?: string;
   zip?: string;
   country?: string;
+  vat?: string;
 }
 
 interface CustomerDetailsProps {
