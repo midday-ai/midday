@@ -246,7 +246,7 @@ export async function getTransactionsQuery(
 
   if (searchQuery) {
     if (!Number.isNaN(Number.parseInt(searchQuery))) {
-      query.like("amount_text", `%${searchQuery}%`);
+      query.eq("amount", Number(searchQuery));
     } else {
       query.textSearch("fts_vector", `'${searchQuery}'`);
     }
@@ -1118,4 +1118,163 @@ export async function getInboxSearchQuery(
 
 export async function getTeamSettingsQuery(supabase: Client, teamId: string) {
   return supabase.from("teams").select("*").eq("id", teamId).single();
+}
+
+export type GetInvoicesQueryParams = {
+  teamId: string;
+  from?: number;
+  to?: number;
+  searchQuery?: string | null;
+  filter?: {
+    statuses?: string[] | null;
+    customers?: string[] | null;
+    start?: string | null;
+    end?: string | null;
+  };
+  sort?: string[] | null;
+};
+
+export async function getInvoicesQuery(
+  supabase: Client,
+  params: GetInvoicesQueryParams,
+) {
+  const { teamId, filter, searchQuery, sort, from = 0, to = 25 } = params;
+  const { statuses, start, end, customers } = filter || {};
+
+  const query = supabase
+    .from("invoices")
+    .select(
+      "id, invoice_number, due_date, invoice_date, paid_at, updated_at, viewed_at, amount, currency, status, vat, tax, customer:customer_id(id, name, website)",
+      { count: "exact" },
+    )
+    .eq("team_id", teamId);
+
+  if (sort) {
+    const [column, value] = sort;
+
+    const ascending = value === "asc";
+
+    if (column === "customer") {
+      query.order("customer(name)", { ascending });
+    } else if (column === "recurring") {
+      // Don't do anything until we have a recurring invoice table
+    } else if (column) {
+      query.order(column, { ascending });
+    }
+  } else {
+    query.order("due_date", { ascending: false });
+  }
+
+  if (statuses) {
+    query.in("status", statuses);
+  }
+
+  if (start && end) {
+    const fromDate = new UTCDate(start);
+    const toDate = new UTCDate(end);
+
+    query.gte("due_date", fromDate.toISOString());
+    query.lte("due_date", toDate.toISOString());
+  }
+
+  if (customers?.length) {
+    query.in("customer_id", customers);
+  }
+
+  if (searchQuery) {
+    if (!Number.isNaN(Number.parseInt(searchQuery))) {
+      query.eq("amount", Number(searchQuery));
+    } else {
+      query.textSearch("fts", `'${searchQuery}'`);
+    }
+  }
+
+  const { data, count } = await query.range(from, to);
+
+  return {
+    meta: {
+      count,
+    },
+    data,
+  };
+}
+
+export type GetInvoiceSummaryParams = {
+  teamId: string;
+  status?: "paid" | "cancelled";
+};
+
+export async function getInvoiceSummaryQuery(
+  supabase: Client,
+  params: GetInvoiceSummaryParams,
+) {
+  const { teamId, status } = params;
+
+  return supabase
+    .rpc("get_invoice_summary", {
+      team_id: teamId,
+      status,
+    })
+    .single();
+}
+
+export async function getPaymentStatusQuery(supabase: Client, teamId: string) {
+  return supabase
+    .rpc("get_payment_score", {
+      team_id: teamId,
+    })
+    .single();
+}
+
+export async function getCustomersQuery(supabase: Client, teamId: string) {
+  return supabase
+    .from("customers")
+    .select("*")
+    .eq("team_id", teamId)
+    .limit(100);
+}
+
+export async function getCustomerQuery(supabase: Client, customerId: string) {
+  return supabase.from("customers").select("*").eq("id", customerId).single();
+}
+
+export async function getInvoiceTemplatesQuery(
+  supabase: Client,
+  teamId: string,
+) {
+  return supabase
+    .from("invoice_templates")
+    .select("*")
+    .eq("team_id", teamId)
+    .single();
+}
+
+export async function getInvoiceNumberCountQuery(
+  supabase: Client,
+  teamId: string,
+) {
+  return supabase
+    .from("invoices")
+    .select("id", { count: "exact" })
+    .eq("team_id", teamId);
+}
+
+export async function getInvoiceQuery(supabase: Client, invoiceId: string) {
+  return supabase.from("invoices").select("*").eq("id", invoiceId).single();
+}
+
+type SearchInvoiceNumberParams = {
+  teamId: string;
+  query: string;
+};
+
+export async function searchInvoiceNumberQuery(
+  supabase: Client,
+  params: SearchInvoiceNumberParams,
+) {
+  return supabase
+    .from("invoices")
+    .select("invoice_number")
+    .eq("team_id", params.teamId)
+    .ilike("invoice_number", `%${params.query}`);
 }

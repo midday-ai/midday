@@ -428,8 +428,6 @@ export const assistantSettingsSchema = z.object({
   enabled: z.boolean().optional(),
 });
 
-export const requestAccessSchema = z.void();
-
 export const parseDateSchema = z
   .date()
   .transform((value) => new Date(value))
@@ -492,6 +490,26 @@ export const filterTrackerSchema = z.object({
     .describe("The status to filter by"),
 });
 
+export const filterInvoiceSchema = z.object({
+  name: z.string().optional().describe("The name to search for"),
+  statuses: z
+    .array(z.enum(["draft", "overdue", "paid", "unpaid", "canceled"]))
+    .optional()
+    .describe("The statuses to filter by"),
+  start: parseDateSchema
+    .optional()
+    .describe("The start date when to retrieve from. Return ISO-8601 format."),
+  end: parseDateSchema
+    .optional()
+    .describe(
+      "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
+    ),
+  customers: z
+    .array(z.string())
+    .optional()
+    .describe("The customers to filter by"),
+});
+
 export const createTransactionSchema = z.object({
   name: z.string(),
   amount: z.number(),
@@ -514,3 +532,17 @@ export const createTransactionSchema = z.object({
 });
 
 export type CreateTransactionSchema = z.infer<typeof createTransactionSchema>;
+
+export const createCustomerSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  country: z.string().optional(),
+  address_line_1: z.string().optional(),
+  address_line_2: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zip: z.string().optional(),
+  note: z.string().optional(),
+  website: z.string().optional(),
+  phone: z.string().optional(),
+});

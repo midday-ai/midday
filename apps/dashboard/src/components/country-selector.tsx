@@ -15,18 +15,25 @@ import {
 } from "@midday/ui/popover";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import * as React from "react";
+import { useEffect } from "react";
 
 type Props = {
   defaultValue: string;
-  onSelect: (countryCode: string) => void;
+  onSelect: (countryCode: string, countryName: string) => void;
 };
 
 export function CountrySelector({ defaultValue, onSelect }: Props) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState(defaultValue);
 
+  useEffect(() => {
+    if (value !== defaultValue) {
+      setValue(defaultValue);
+    }
+  }, [defaultValue, value]);
+
   const selected = Object.values(countries).find(
-    (country) => country.code === value,
+    (country) => country.code === value || country.name === value,
   );
 
   return (
@@ -34,7 +41,6 @@ export function CountrySelector({ defaultValue, onSelect }: Props) {
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          role="combobox"
           aria-expanded={open}
           className="w-full justify-between font-normal truncate bg-accent"
         >
@@ -53,7 +59,7 @@ export function CountrySelector({ defaultValue, onSelect }: Props) {
                 value={country.name}
                 onSelect={() => {
                   setValue(country.code);
-                  onSelect?.(country.code);
+                  onSelect?.(country.code, country.name);
                   setOpen(false);
                 }}
               >

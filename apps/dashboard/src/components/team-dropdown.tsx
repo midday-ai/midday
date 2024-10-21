@@ -80,7 +80,7 @@ export function TeamDropdown({ selectedTeamId: initialId, teams }: Props) {
               </>
             ) : (
               <Avatar
-                className="w-[32px] h-[32px] rounded-sm border border-[#DCDAD2] dark:border-[#2C2C2C] cursor-pointer"
+                className="w-[32px] h-[32px] rounded-none border border-[#DCDAD2] dark:border-[#2C2C2C] cursor-pointer"
                 onClick={() => {
                   if (index === 0) {
                     toggleActive();
@@ -92,7 +92,7 @@ export function TeamDropdown({ selectedTeamId: initialId, teams }: Props) {
                 }}
               >
                 <AvatarImage src={team?.logo_url} />
-                <AvatarFallback className="rounded-sm w-[32px] h-[32px]">
+                <AvatarFallback className="rounded-none w-[32px] h-[32px]">
                   <span className="text-xs">
                     {team?.name?.charAt(0)?.toUpperCase()}
                     {team?.name?.charAt(1)?.toUpperCase()}
