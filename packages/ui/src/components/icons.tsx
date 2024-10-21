@@ -74,6 +74,7 @@ import {
   MdOutlineInbox,
   MdOutlineInsertPhoto,
   MdOutlineInventory2,
+  MdOutlineLaunch,
   MdOutlineListAlt,
   MdOutlineMoreTime,
   MdOutlineMoreVert,
@@ -654,4 +655,5 @@ export const Icons = {
   Done: MdOutlineDone,
   Spellcheck: MdOutlineSpellcheck,
   WrapText: MdOutlineWrapText,
+  ExternalLink: MdOutlineLaunch,
 };

@@ -1,15 +1,22 @@
+import { draftInvoiceAction } from "@/actions/invoice/draft-invoice-action";
 import {
   type InvoiceFormValues,
   type InvoiceTemplate,
   invoiceFormSchema,
 } from "@/actions/invoice/schema";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { formatRelativeTime } from "@/utils/format";
 import { UTCDate } from "@date-fns/utc";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
+import { useDebounce } from "@uidotdev/usehooks";
 import { addMonths } from "date-fns";
-import { useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { motion } from "framer-motion";
+import { useAction } from "next-safe-action/hooks";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { CreateButton } from "./create-button";
 import { type Customer, CustomerDetails } from "./customer-details";
 import { FromDetails } from "./from-details";
@@ -25,6 +32,7 @@ type Props = {
   template: InvoiceTemplate;
   customers: Customer[];
   invoiceNumber: string;
+  updatedAt?: Date;
 };
 
 const defaultTemplate: InvoiceTemplate = {
@@ -53,7 +61,9 @@ export function Form({
   customers,
   invoiceNumber,
 }: Props) {
-  const { selectedCustomerId } = useInvoiceParams();
+  const { selectedCustomerId, invoiceId } = useInvoiceParams();
+  const [lastUpdated, setLastUpdated] = useState<Date | undefined>();
+  const [lastEditedText, setLastEditedText] = useState("");
 
   const template = {
     ...defaultTemplate,
@@ -63,20 +73,54 @@ export function Form({
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
-      id: undefined,
-      template,
-      customerDetails: undefined,
-      fromDetails: template.from_details,
-      paymentDetails: template.payment_details,
+      id: invoiceId,
+      template: template,
+      customer_details: undefined,
+      from_details: template.from_details,
+      payment_details: template.payment_details,
       note: undefined,
       customer_id: undefined,
-      issueDate: new UTCDate(),
-      dueDate: addMonths(new UTCDate(), 1),
-      invoiceNumber,
-      lineItems: [{ name: undefined, quantity: 0, price: 0 }],
+      issue_date: new UTCDate(),
+      due_date: addMonths(new UTCDate(), 1),
+      invoice_number: invoiceNumber,
+      line_items: [{ name: "", quantity: 0, price: 0 }],
     },
-    mode: "onChange",
   });
+
+  const draftInvoice = useAction(draftInvoiceAction, {
+    onSuccess: ({ data }) => {
+      setLastUpdated(new Date());
+    },
+  });
+
+  // Only watch the fields that are used in the upsert action
+  const formValues = useWatch({
+    control: form.control,
+    name: [
+      "customer_id",
+      "line_items",
+      "amount",
+      "vat",
+      "tax",
+      "due_date",
+      "issue_date",
+    ],
+  });
+
+  const isDirty = form.formState.isDirty;
+  const debouncedValues = useDebounce(formValues, 500);
+
+  useEffect(() => {
+    const currentFormValues = form.getValues();
+
+    if (
+      isDirty &&
+      form.watch("customer_id") &&
+      form.watch("line_items").length
+    ) {
+      draftInvoice.execute(currentFormValues);
+    }
+  }, [debouncedValues, isDirty]);
 
   useEffect(() => {
     if (selectedCustomerId) {
@@ -84,8 +128,24 @@ export function Form({
     }
   }, [selectedCustomerId]);
 
+  useEffect(() => {
+    const updateLastEditedText = () => {
+      if (!lastUpdated) {
+        setLastEditedText("");
+        return;
+      }
+
+      setLastEditedText(`Edited ${formatRelativeTime(lastUpdated)}`);
+    };
+
+    updateLastEditedText();
+    const intervalId = setInterval(updateLastEditedText, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [lastUpdated]);
+
   const onSubmit = (data: InvoiceFormValues) => {
-    // createInvoice.execute(data);
+    // Create or Create & Send
   };
 
   return (
@@ -136,7 +196,30 @@ export function Form({
         </ScrollArea>
 
         <div className="absolute bottom-14 w-full h-9">
-          <div className="flex justify-end mt-auto">
+          <div className="flex justify-between items-center mt-auto">
+            <div className="flex space-x-2 items-center">
+              <Link
+                href={`/preview/invoice/${invoiceId}`}
+                className="text-xs text-[#808080] flex items-center gap-1"
+                target="_blank"
+              >
+                <Icons.ExternalLink className="size-3" />
+                <span>Preview invoice</span>
+              </Link>
+
+              {lastEditedText && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-xs text-[#808080] flex items-center gap-1"
+                >
+                  <span>-</span>
+                  <span>{lastEditedText}</span>
+                </motion.div>
+              )}
+            </div>
             <CreateButton />
           </div>
         </div>

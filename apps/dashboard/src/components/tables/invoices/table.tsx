@@ -1,5 +1,6 @@
 "use client";
 
+import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
 import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody } from "@midday/ui/table";
 import {
@@ -7,6 +8,7 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { type Invoice, columns } from "./columns";
@@ -37,12 +39,25 @@ export function DataTable({
   const { ref, inView } = useInView();
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
 
+  const deleteInvoice = useAction(deleteInvoiceAction);
+
+  const handleDeleteInvoice = (id: string) => {
+    setData((prev) => {
+      return prev.filter((item) => item.id !== id);
+    });
+
+    deleteInvoice.execute({ id });
+  };
+
   const table = useReactTable({
     data,
     getRowId: ({ id }) => id,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    meta: {
+      deleteInvoice: handleDeleteInvoice,
+    },
   });
 
   const loadMoreData = async () => {
@@ -68,6 +83,10 @@ export function DataTable({
       loadMoreData();
     }
   }, [inView]);
+
+  useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
 
   return (
     <div>

@@ -21,7 +21,6 @@ export function CustomerEditSheet() {
     async function fetchCustomer() {
       const { data } = await getCustomerQuery(supabase, customerId);
 
-      console.log(data);
       if (data) {
         setCustomer(data);
       }

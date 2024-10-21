@@ -3,6 +3,7 @@ import {
   differenceInDays,
   differenceInMonths,
   format,
+  formatDistanceToNow,
   isFuture,
   isPast,
   isSameYear,
@@ -162,4 +163,30 @@ export function getDueDateStatus(dueDate: string): string {
   }
 
   return "Today";
+}
+
+export function formatRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) {
+    return "just now";
+  }
+
+  const intervals = [
+    { label: "y", seconds: 31536000 },
+    { label: "mo", seconds: 2592000 },
+    { label: "d", seconds: 86400 },
+    { label: "h", seconds: 3600 },
+    { label: "m", seconds: 60 },
+  ] as const;
+
+  for (const interval of intervals) {
+    const count = Math.floor(diffInSeconds / interval.seconds);
+    if (count > 0) {
+      return `${count}${interval.label} ago`;
+    }
+  }
+
+  return "just now";
 }

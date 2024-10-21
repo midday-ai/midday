@@ -32,7 +32,7 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const selectedCustomerId = watch("customer_id");
-  const content = watch("customerDetails");
+  const content = watch("customer_details");
 
   const foundCustomer = customers.find(
     (customer) => customer.id === selectedCustomerId,
@@ -41,7 +41,7 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
   useEffect(() => {
     if (foundCustomer) {
       const initialContent = transformCustomerToContent(foundCustomer);
-      setValue("customerDetails", initialContent, { shouldValidate: true });
+      setValue("customer_details", initialContent, { shouldValidate: true });
     }
   }, [foundCustomer, setValue]);
 
@@ -58,7 +58,7 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
       />
       {content ? (
         <Controller
-          name="customerDetails"
+          name="customer_details"
           control={control}
           render={({ field }) => (
             <Editor

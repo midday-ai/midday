@@ -10,12 +10,12 @@ import { LabelInput } from "./label-input";
 
 export function IssueDate() {
   const { setValue, watch } = useFormContext<InvoiceFormValues>();
-  const issueDate = watch("issueDate");
+  const issueDate = watch("issue_date");
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
-      setValue("issueDate", date, { shouldValidate: true });
+      setValue("issue_date", date, { shouldValidate: true });
       setIsOpen(false);
     }
   };

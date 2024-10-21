@@ -1259,6 +1259,10 @@ export async function getInvoiceNumberCountQuery(
     .eq("team_id", teamId);
 }
 
+export async function getInvoiceQuery(supabase: Client, invoiceId: string) {
+  return supabase.from("invoices").select("*").eq("id", invoiceId).single();
+}
+
 type SearchInvoiceNumberParams = {
   teamId: string;
   query: string;

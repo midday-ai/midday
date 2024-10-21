@@ -14,9 +14,10 @@ import { VATInput } from "./vat-input";
 
 export function LineItems() {
   const { control } = useFormContext<InvoiceFormValues>();
+
   const { fields, append, remove, swap } = useFieldArray({
     control,
-    name: "lineItems",
+    name: "line_items",
   });
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
@@ -25,6 +26,7 @@ export function LineItems() {
     const firstDiffIndex = fields.findIndex(
       (field, index) => field.id !== newFields[index]?.id,
     );
+
     if (firstDiffIndex !== -1) {
       const newIndex = newFields.findIndex(
         (field) => field.id === fields[firstDiffIndex]?.id,
@@ -121,7 +123,7 @@ function LineItemRow({
   index: number;
   handleRemove: (index: number) => void;
   isReorderable: boolean;
-  item: InvoiceFormValues["lineItems"][number];
+  item: InvoiceFormValues["line_items"][number];
 }) {
   const controls = useDragControls();
   const y = useMotionValue(0);
@@ -146,19 +148,19 @@ function LineItemRow({
       )}
 
       <div className="w-1/2 mr-4">
-        <Input name={`lineItems.${index}.name`} autoFocus={index > 0} />
+        <Input name={`line_items.${index}.name`} autoFocus={index > 0} />
       </div>
 
       <div className="w-40 mr-4">
-        <AmountInput name={`lineItems.${index}.price`} min="0" />
+        <AmountInput name={`line_items.${index}.price`} min="0" />
       </div>
 
       <div className="w-24 mr-4">
-        <Input name={`lineItems.${index}.quantity`} type="number" min="0" />
+        <Input name={`line_items.${index}.quantity`} type="number" min="0" />
       </div>
 
       <div className="w-24">
-        <VATInput name={`lineItems.${index}.vat`} min="0" max="100" />
+        <VATInput name={`line_items.${index}.vat`} min="0" max="100" />
       </div>
 
       {index !== 0 && (

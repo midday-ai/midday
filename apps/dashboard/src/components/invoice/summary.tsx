@@ -16,7 +16,7 @@ export function Summary() {
 
   const lineItems = useWatch({
     control,
-    name: "lineItems",
+    name: "line_items",
   });
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
@@ -38,7 +38,9 @@ export function Summary() {
   const total = totalAmount + totalVAT;
 
   useMemo(() => {
-    setValue("amount", total, { shouldValidate: true });
+    if (total) {
+      setValue("amount", total, { shouldValidate: true });
+    }
 
     if (totalVAT) {
       setValue("vat", totalVAT, { shouldValidate: true });

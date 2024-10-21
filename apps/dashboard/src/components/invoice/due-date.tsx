@@ -10,14 +10,14 @@ import { LabelInput } from "./label-input";
 
 export function DueDate() {
   const { setValue, watch } = useFormContext<InvoiceFormValues>();
-  const dueDate = watch("dueDate");
+  const dueDate = watch("due_date");
   const [isOpen, setIsOpen] = useState(false);
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
-      setValue("dueDate", date, { shouldValidate: true });
+      setValue("due_date", date, { shouldValidate: true });
       setIsOpen(false);
     }
   };

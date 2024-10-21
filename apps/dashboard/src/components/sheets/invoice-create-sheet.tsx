@@ -3,10 +3,13 @@
 import type { InvoiceTemplate } from "@/actions/invoice/schema";
 import { Form } from "@/components/invoice/form";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+// import { createClient } from "@midday/supabase/client";
+// import { getInvoiceQuery } from "@midday/supabase/queries";
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import type { Customer } from "../invoice/customer-details";
+// import type { Invoice } from "../tables/invoices/columns";
 
 type Props = {
   teamId: string;
@@ -21,9 +24,28 @@ export function InvoiceCreateSheet({
   customers,
   invoiceNumber,
 }: Props) {
-  const { setParams, createInvoice } = useInvoiceParams();
+  // const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const { setParams, createInvoice, invoiceId } = useInvoiceParams();
 
   const isOpen = Boolean(createInvoice);
+
+  // const supabase = createClient();
+
+  // useEffect(() => {
+  //   async function fetchInvoice() {
+  //     const { data } = await getInvoiceQuery(supabase, invoiceId);
+
+  //     if (data) {
+  //       setInvoice(data);
+  //     }
+  //   }
+
+  //   if (invoiceId) {
+  //     fetchInvoice();
+  //   }
+  // }, [invoiceId]);
+
+  // console.log(invoice);
 
   return (
     <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
