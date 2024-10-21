@@ -22,7 +22,7 @@ export function InvoiceNo({ teamId }: Props) {
   const { watch, setError, clearErrors } = useFormContext();
   const [isInvoiceNumberExists, setIsInvoiceNumberExists] = useState(false);
   const supabase = createClient();
-  const invoiceNumber = watch("invoiceNumber");
+  const invoiceNumber = watch("invoice_number");
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
@@ -38,12 +38,12 @@ export function InvoiceNo({ teamId }: Props) {
         setIsInvoiceNumberExists(exists ?? false);
 
         if (exists) {
-          setError("invoiceNumber", {
+          setError("invoice_number", {
             type: "manual",
             message: "Invoice number already exists",
           });
         } else {
-          clearErrors("invoiceNumber");
+          clearErrors("invoice_number");
         }
       }
     }
@@ -73,7 +73,7 @@ export function InvoiceNo({ teamId }: Props) {
           <TooltipTrigger asChild>
             <button type="button">
               <Input
-                name="invoiceNumber"
+                name="invoice_number"
                 className={cn(
                   "w-full min-w-0 flex-shrink p-0 border-none text-[11px]",
                   isInvoiceNumberExists ? "text-red-500" : "",

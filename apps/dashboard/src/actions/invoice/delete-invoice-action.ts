@@ -21,6 +21,7 @@ export const deleteInvoiceAction = authActionClient
 
     revalidateTag(`invoices_${teamId}`);
     revalidateTag(`invoice_summary_${teamId}`);
+    revalidateTag(`invoice_number_count_${teamId}`);
 
     return data;
   });

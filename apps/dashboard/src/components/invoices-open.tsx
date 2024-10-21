@@ -9,7 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { FormatAmount } from "./format-amount";
+import { AnimatedNumber } from "./animated-number";
 
 export function InvoicesOpenSkeleton() {
   return (
@@ -42,8 +42,8 @@ export async function InvoicesOpen({
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="font-mono font-medium text-2xl">
-          <FormatAmount
-            amount={data?.total_amount ?? 0}
+          <AnimatedNumber
+            value={data?.total_amount ?? 0}
             currency={data?.currency ?? defaultCurrency}
             maximumFractionDigits={0}
             minimumFractionDigits={0}

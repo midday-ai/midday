@@ -1,6 +1,5 @@
 "use client";
 
-import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
@@ -20,7 +19,6 @@ import { TooltipProvider } from "@midday/ui/tooltip";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
 import * as React from "react";
 
 export type Invoice = {
@@ -152,9 +150,8 @@ export const columns: ColumnDef<Invoice>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const status = row.getValue("status");
-      const deleteInvoice = useAction(deleteInvoiceAction);
       const hasNewMessages = status === "overdue";
       const { setParams } = useInvoiceParams();
 
@@ -205,7 +202,9 @@ export const columns: ColumnDef<Invoice>[] = [
 
               {status === "draft" && (
                 <DropdownMenuItem
-                  onClick={() => deleteInvoice.execute({ id: row.original.id })}
+                  onClick={() =>
+                    table.options.meta?.deleteInvoice(row.original.id)
+                  }
                   className="text-[#FF3638]"
                 >
                   Delete
