@@ -72,10 +72,15 @@ export const invoiceTemplateSchema = z.object({
   tax_label: z.string().optional(),
   payment_label: z.string(),
   note_label: z.string(),
-  logo_url: z.string().optional(),
+  logo_url: z.string().optional().nullable(),
   currency: z.string(),
-  payment_details: z.any(),
-  from_details: z.any(),
+  payment_details: z.any().nullable(),
+  from_details: z.any().nullable(),
+  size: z.enum(["a4", "letter"]),
+  include_vat: z.boolean().optional(),
+  include_tax: z.boolean().optional(),
+  tax_rate: z.number().min(0).max(100).optional(),
+  date_format: z.enum(["dd/mm/yyyy", "mm/dd/yyyy", "yyyy-mm-dd"]),
 });
 
 export const invoiceFormSchema = z.object({

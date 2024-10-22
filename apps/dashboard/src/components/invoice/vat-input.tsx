@@ -28,7 +28,8 @@ export function VATInput({
         autoComplete="off"
         value={value}
         onValueChange={(values) => {
-          onChange(values.floatValue);
+          const newValue = Math.min(Math.max(values.floatValue || 0, 0), 100);
+          onChange(newValue);
         }}
         onFocus={() => setIsFocused(true)}
         onBlur={(e) => {
@@ -38,10 +39,16 @@ export function VATInput({
         {...props}
         className={cn(
           className,
-          "p-0 border-0 h-6 text-xs !bg-transparent border-b border-transparent focus:border-border text-right font-mono",
+          "p-0 border-0 h-6 text-xs !bg-transparent border-b border-transparent focus:border-border font-mono",
         )}
-        thousandSeparator={true}
+        thousandSeparator={false}
         allowNegative={false}
+        isAllowed={(values) => {
+          const { floatValue } = values;
+          return (
+            floatValue === undefined || (floatValue >= 0 && floatValue <= 100)
+          );
+        }}
       />
       {!value && !isFocused && (
         <div className="absolute inset-0 pointer-events-none">

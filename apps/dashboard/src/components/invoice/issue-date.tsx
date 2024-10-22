@@ -11,6 +11,7 @@ import { LabelInput } from "./label-input";
 export function IssueDate() {
   const { setValue, watch } = useFormContext<InvoiceFormValues>();
   const issueDate = watch("issue_date");
+  const dateFormat = watch("template.date_format");
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSelect = (date: Date | undefined) => {
@@ -37,7 +38,7 @@ export function IssueDate() {
       </div>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger className="text-primary text-[11px] font-mono whitespace-nowrap flex">
-          {format(issueDate || new Date(), "MM/dd/yyyy")}
+          {issueDate && format(issueDate, dateFormat)}
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">
           <Calendar
