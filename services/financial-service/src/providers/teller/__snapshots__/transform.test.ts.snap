@@ -104,6 +104,7 @@ exports[`Transform accounts 1`] = `
 {
   "balance": {
     "amount": 2011100,
+    "available": 2011100,
     "currency": "USD",
   },
   "currency": "USD",
@@ -123,6 +124,7 @@ exports[`Transform accounts 1`] = `
 exports[`Transform account balance 1`] = `
 {
   "amount": 2011100,
+  "available": 2011100,
   "currency": "USD",
 }
 `;

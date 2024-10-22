@@ -174,8 +174,8 @@ exports[`Transform type transfer 1`] = `
 exports[`Transform accounts 1`] = `
 {
   "balance": {
-    "amount": 56302.06,
-    "available": 56302.06,
+    "amount": -56302.06,
+    "available": -56302.06,
     "currency": "CAD",
   },
   "currency": "CAD",
@@ -194,8 +194,8 @@ exports[`Transform accounts 1`] = `
 
 exports[`Transform account balance 1`] = `
 {
-  "amount": 0,
-  "available": 2000,
+  "amount": -0,
+  "available": -2000,
   "currency": "USD",
 }
 `;
