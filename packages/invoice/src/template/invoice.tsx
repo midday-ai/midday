@@ -34,6 +34,12 @@ export type Template = {
   date_format: string;
   payment_label: string;
   note_label: string;
+  description_label: string;
+  quantity_label: string;
+  price_label: string;
+  total_label: string;
+  tax_label: string;
+  vat_label: string;
 };
 
 export type LineItem = {
@@ -139,9 +145,24 @@ export async function InvoiceTemplate({
           </View>
         </View>
 
-        <LineItems lineItems={line_items} currency={currency} />
+        <LineItems
+          lineItems={line_items}
+          currency={currency}
+          descriptionLabel={template.description_label}
+          quantityLabel={template.quantity_label}
+          priceLabel={template.price_label}
+          totalLabel={template.total_label}
+        />
 
-        <Summary amount={amount} tax={tax} vat={vat} currency={currency} />
+        <Summary
+          amount={amount}
+          tax={tax}
+          vat={vat}
+          currency={currency}
+          totalLabel={template.total_label}
+          taxLabel={template.tax_label}
+          vatLabel={template.vat_label}
+        />
 
         <View
           style={{

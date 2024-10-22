@@ -5,9 +5,20 @@ import { formatAmount } from "../utils/format";
 type Props = {
   lineItems: LineItem[];
   currency: string;
+  descriptionLabel: string;
+  quantityLabel: string;
+  priceLabel: string;
+  totalLabel: string;
 };
 
-export function LineItems({ lineItems, currency }: Props) {
+export function LineItems({
+  lineItems,
+  currency,
+  descriptionLabel,
+  quantityLabel,
+  priceLabel,
+  totalLabel,
+}: Props) {
   return (
     <View style={{ marginTop: 20 }}>
       <View
@@ -19,8 +30,14 @@ export function LineItems({ lineItems, currency }: Props) {
           marginBottom: 5,
         }}
       >
-        <Text style={{ flex: 2, fontSize: 9, fontWeight: 500 }}>
-          Description
+        <Text style={{ flex: 3, fontSize: 9, fontWeight: 500 }}>
+          {descriptionLabel}
+        </Text>
+        <Text style={{ flex: 1, fontSize: 9, fontWeight: 500 }}>
+          {priceLabel}
+        </Text>
+        <Text style={{ flex: 0.5, fontSize: 9, fontWeight: 500 }}>
+          {quantityLabel}
         </Text>
         <Text
           style={{
@@ -30,27 +47,7 @@ export function LineItems({ lineItems, currency }: Props) {
             textAlign: "right",
           }}
         >
-          Quantity
-        </Text>
-        <Text
-          style={{
-            flex: 1,
-            fontSize: 9,
-            fontWeight: 500,
-            textAlign: "right",
-          }}
-        >
-          Price
-        </Text>
-        <Text
-          style={{
-            flex: 1,
-            fontSize: 9,
-            fontWeight: 500,
-            textAlign: "right",
-          }}
-        >
-          Total
+          {totalLabel}
         </Text>
       </View>
       {lineItems.map((item, index) => (
@@ -58,13 +55,11 @@ export function LineItems({ lineItems, currency }: Props) {
           key={`line-item-${index.toString()}`}
           style={{ flexDirection: "row", paddingVertical: 5 }}
         >
-          <Text style={{ flex: 2, fontSize: 9 }}>{item.name}</Text>
-          <Text style={{ flex: 1, fontSize: 9, textAlign: "right" }}>
-            {item.quantity}
-          </Text>
-          <Text style={{ flex: 1, fontSize: 9, textAlign: "right" }}>
+          <Text style={{ flex: 3, fontSize: 9 }}>{item.name}</Text>
+          <Text style={{ flex: 1, fontSize: 9 }}>
             {formatAmount({ currency, amount: item.price })}
           </Text>
+          <Text style={{ flex: 0.5, fontSize: 9 }}>{item.quantity}</Text>
           <Text style={{ flex: 1, fontSize: 9, textAlign: "right" }}>
             {formatAmount({ currency, amount: item.quantity * item.price })}
           </Text>
