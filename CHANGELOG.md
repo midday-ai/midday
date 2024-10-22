@@ -1,3 +1,10 @@
+## [0.38.1](https://github.com/SolomonAIEngineering/solomonai/compare/v0.38.0...v0.38.1) (2024-10-22)
+
+
+### Bug Fixes
+
+* add general fixes ([#66](https://github.com/SolomonAIEngineering/solomonai/issues/66)) ([1ff2daf](https://github.com/SolomonAIEngineering/solomonai/commit/1ff2dafa44b9feca2c9854c4320253f50e0cf951))
+
 # [0.38.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.37.0...v0.38.0) (2024-10-19)
 
 
