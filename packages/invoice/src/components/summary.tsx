@@ -6,9 +6,20 @@ interface SummaryProps {
   tax?: number;
   vat?: number;
   currency: string;
+  totalLabel: string;
+  taxLabel: string;
+  vatLabel: string;
 }
 
-export function Summary({ amount, tax, vat, currency }: SummaryProps) {
+export function Summary({
+  amount,
+  tax,
+  vat,
+  currency,
+  totalLabel,
+  taxLabel,
+  vatLabel,
+}: SummaryProps) {
   return (
     <View
       style={{
@@ -21,7 +32,7 @@ export function Summary({ amount, tax, vat, currency }: SummaryProps) {
     >
       {tax && (
         <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
-          <Text style={{ fontSize: 9, flex: 1 }}>Tax</Text>
+          <Text style={{ fontSize: 9, flex: 1 }}>{taxLabel}</Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
             {formatAmount({ currency, amount: tax })}
           </Text>
@@ -30,7 +41,7 @@ export function Summary({ amount, tax, vat, currency }: SummaryProps) {
 
       {vat && (
         <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
-          <Text style={{ fontSize: 9, flex: 1 }}>VAT</Text>
+          <Text style={{ fontSize: 9, flex: 1 }}>{vatLabel}</Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
             {formatAmount({ currency, amount: vat })}
           </Text>
@@ -49,7 +60,7 @@ export function Summary({ amount, tax, vat, currency }: SummaryProps) {
           width: "100%",
         }}
       >
-        <Text style={{ fontSize: 9, marginRight: 10 }}>Total</Text>
+        <Text style={{ fontSize: 9, marginRight: 10 }}>{totalLabel}</Text>
         <Text style={{ fontSize: 21 }}>
           {formatAmount({ currency, amount })}
         </Text>
