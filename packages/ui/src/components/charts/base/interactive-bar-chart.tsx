@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
+import { BarChartMultiDataPoint } from "../../../types/chart";
 import {
   Card,
   CardContent,
@@ -17,13 +18,8 @@ import {
   ChartTooltipContent,
 } from "../../chart";
 
-export interface InteractiveBardChartDataPoint {
-  date: string;
-  [key: string]: string | number;
-}
-
 export interface InteractiveBarChartProps {
-  data: InteractiveBardChartDataPoint[];
+  data: BarChartMultiDataPoint[];
   config: ChartConfig;
   title: string;
   description: string;

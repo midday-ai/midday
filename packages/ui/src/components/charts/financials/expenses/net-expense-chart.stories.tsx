@@ -47,7 +47,6 @@ const Template: StoryFn<NetExpenseChartProps> = (
 export const Default = Template.bind({});
 Default.args = {
   currency: "USD",
-  height: 290,
   locale: "en-US",
   enableAssistantMode: true,
   title: "Net Expense",
@@ -87,7 +86,6 @@ NegativeChange.args = {
 export const LargeDataset = Template.bind({});
 LargeDataset.args = {
   ...Default.args,
-  height: 400,
 };
 
 export const DisabledChart = Template.bind({});

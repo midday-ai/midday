@@ -2,7 +2,6 @@
 
 import {
   onboardAccountToBackendAction,
-  onboardAccountToBackendSchema,
 } from "@/actions/solomon-backend/onboard-to-backend";
 import { generateRandomString } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +16,7 @@ import {
 import { Input } from "@midday/ui/input";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { redirect } from 'next/navigation';
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
@@ -43,8 +43,10 @@ export function CreateAccountInBackendForm(props: {
    * Initialize the form using react-hook-form
    * @type {UseFormReturn<z.infer<typeof onboardAccountToBackendSchema>>}
    */
-  const form = useForm<z.infer<typeof onboardAccountToBackendSchema>>({
-    resolver: zodResolver(onboardAccountToBackendSchema),
+  const form = useForm<{
+    username: string;
+    redirectTo?: string | undefined;
+  }>({
     defaultValues: {
       username: "",
     },
@@ -54,7 +56,10 @@ export function CreateAccountInBackendForm(props: {
    * Handle form submission
    * @param {z.infer<typeof onboardAccountToBackendSchema>} values - The form values
    */
-  function onSubmit(values: z.infer<typeof onboardAccountToBackendSchema>) {
+  function onSubmit(values: {
+    username: string;
+    redirectTo?: string | undefined;
+  }) {
     onboardToBackend.execute({ username: values.username });
     onSuccess?.();
   }

@@ -216,7 +216,7 @@ export const BarChart: React.FC<BarChartProps> = ({
           </div>
         </div>
       </ChartWrapper>
-      <ChartContainer
+      <ChartContainer<any>
         data={data}
         dataSet={dataSet}
         setDataSet={setDataSet}
@@ -314,6 +314,27 @@ export const BarChart: React.FC<BarChartProps> = ({
               fill="hsl(var(--primary))"
             />
           )}
+
+          <defs>
+            <linearGradient
+              id="growthGradient"
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="1"
+            >
+              <stop
+                offset="0%"
+                stopColor={"#333"}
+                stopOpacity={0.8}
+              />
+              <stop
+                offset="100%"
+                stopColor={"#666"}
+                stopOpacity={0.1}
+              />
+            </linearGradient>
+          </defs>
         </BaseBarChart>
         {/* <ChartWrapper
                 buttonText="Open"

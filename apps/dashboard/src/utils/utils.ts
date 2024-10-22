@@ -33,5 +33,15 @@ const formatCategoryName = (category: string): string => {
   return words.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
-export { capitalize, formatCategoryName, generateRandomString };
+const formatDate = (dateString: string | number | Date) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+};
+
+
+export { capitalize, formatCategoryName, formatDate, generateRandomString };
 

@@ -19,7 +19,7 @@ import { Suspense } from "react";
 import { searchParamsCache } from "./search-params";
 
 export const metadata: Metadata = {
-    title: `Team Insights | ${config.company}`,
+    title: `Team Insights - Expense | ${config.company}`,
 };
 
 type Props = {
@@ -28,7 +28,7 @@ type Props = {
 
 const defaultValue = getDefaultDateRange("monthly", "expense");
 
-export default async function CashFlowPage({ searchParams }: Props) {
+export default async function Expense({ searchParams }: Props) {
     const { from, to, currency, page, pageSize } = searchParamsCache.parse(searchParams);
 
     const user = await getUser();
@@ -44,22 +44,28 @@ export default async function CashFlowPage({ searchParams }: Props) {
     const effectivePage = page || "1";
     const effectivePageSize = pageSize || "50";
 
-    // TODO: load the financial context from local memory and popuplate a synopsis of insights for the user
-
     return (
         <Suspense fallback={<InboxViewSkeleton ascending />}>
-            <ContentLayout title="Team Insights">
+            <ContentLayout title="Team Insights - Expenses">
                 <ConnectAccountServerWrapper>
                     <div className="mt-5">
-                        <AccountSummarySection
-                            user={user}
-                            isEmpty={isEmpty}
-                            tier={tier}
-                            name={user?.data?.full_name ?? "Solomon AI User"}
-                            description="Team Financial Insights"
-                            detailedDescription="A breakdown of finances and insights relevant to your team"
-                            className="border-none shadow-none"
-                        />
+                        <div className="flex flex-col gap-2">
+                            <AccountSummarySection
+                                user={user}
+                                isEmpty={isEmpty}
+                                tier={tier}
+                                name={user?.data?.full_name ?? "Solomon AI User"}
+                                description="Expense Insights"
+                                detailedDescription="A breakdown of finances and insights relevant to your team"
+                                className="border-none shadow-none"
+                            />
+                            <div className="flex items-center gap-4 ml-[1%]">
+                                <DateRangeSelector from={effectiveFrom} to={effectiveTo} />
+                            </div>
+                        </div>
+                        <div className="md:min-h-full bg-background/10 flex flex-col gap-4 p-[2%]">
+                            <ExpenseMetricsServer userId={userId} currency={"USD"} />
+                        </div>
                     </div>
                 </ConnectAccountServerWrapper>
             </ContentLayout>

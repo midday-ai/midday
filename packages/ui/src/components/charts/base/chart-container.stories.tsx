@@ -1,10 +1,10 @@
-import { generatePayloadArray } from "../../../lib/random/generator";
 import { useAssistant } from "@ai-sdk/react";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useVercelUseAssistantRuntime } from "@assistant-ui/react-ai-sdk";
 import { Meta, StoryFn } from "@storybook/react";
 import React from "react";
 import { JSX } from "react/jsx-runtime";
+import { generatePayloadArray } from "../../../lib/random/generator";
 
 import { ChartContainer, ChartContainerProps } from "./chart-container";
 
@@ -57,12 +57,12 @@ const payloads = generatePayloadArray({
   maxValue: 500,
 });
 
-const Template: StoryFn<ChartContainerProps> = (
-  args: JSX.IntrinsicAttributes & ChartContainerProps,
+const Template: StoryFn<ChartContainerProps<any>> = (
+  args: JSX.IntrinsicAttributes & ChartContainerProps<any>,
 ) => (
   <div className="w-[900px]">
     <ChartContainer {...args}>
-      <div className="h-[290px] rounded-2xl bg-zinc-200"></div>
+      <div className="h-full rounded-2xl bg-zinc-200"></div>
     </ChartContainer>
   </div>
 );

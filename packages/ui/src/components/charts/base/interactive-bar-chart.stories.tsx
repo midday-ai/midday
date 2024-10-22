@@ -6,10 +6,10 @@ import React from "react";
 import { JSX } from "react/jsx-runtime";
 
 import { addDays, format } from "date-fns";
+import { BarChartMultiDataPoint } from "../../../types/chart";
 import {
   InteractiveBarChart,
   InteractiveBarChartProps,
-  InteractiveBardChartDataPoint,
 } from "./interactive-bar-chart";
 
 /**
@@ -68,15 +68,15 @@ export function generateChartData(
   series: string[],
   startDate: Date = new Date(),
   endDate?: Date,
-): InteractiveBardChartDataPoint[] {
-  const data: InteractiveBardChartDataPoint[] = [];
+): BarChartMultiDataPoint[] {
+  const data: BarChartMultiDataPoint[] = [];
   const end = endDate || addDays(startDate, count - 1);
 
   for (let i = 0; i < count; i++) {
     const currentDate = addDays(startDate, i);
     if (currentDate > end) break;
 
-    const dataPoint: InteractiveBardChartDataPoint = {
+    const dataPoint: BarChartMultiDataPoint = {
       date: format(currentDate, "yyyy-MM-dd"),
     };
 

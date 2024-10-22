@@ -27,9 +27,10 @@ import {
   SelectValue,
 } from "../../../select";
 
+import { BarChartMultiDataPoint } from "@/types/chart";
 import { FinancialDataGenerator } from "../../../../lib/random/financial-data-generator";
 import { cn } from "../../../../utils/cn";
-import { AreaChart } from "../../base/area-chart";
+import { AnalyticsChart } from "../../base/analytics-chart";
 import { RadialChart } from "../../base/radial-chart";
 import { ScatterChart } from "../../base/scatter-chart";
 
@@ -101,11 +102,13 @@ export const MonthlyFinancialByCategoryChart: React.FC<
   );
 
   // get the data for the selected category
-  const chartData = CategoryDataConverter.convertToChartDataPoints(
-    data,
-    selectedCategory,
-    type === "income" ? "totalIncome" : "totalSpending",
-  );
+  const chartData = useMemo(() => {
+    return CategoryDataConverter.convertToChartDataPoints(
+      data,
+      selectedCategory,
+      type === "income" ? "totalIncome" : "totalSpending"
+    );
+  }, [data, selectedCategory, type]);
 
   const handleCategoryChange = (value: string) => {
     setSelectedCategory(value);
@@ -156,6 +159,17 @@ export const MonthlyFinancialByCategoryChart: React.FC<
     }),
   );
 
+  const barChartData: Array<BarChartMultiDataPoint> = useMemo(() => {
+    return chartData.map((item) => ({
+      date: item.date,
+      [selectedCategory]: type === "income" 
+        ? Number(item.value) 
+        : Number(item.value)
+    }));
+  }, [chartData, selectedCategory, type]);
+
+  const dataKeys = [selectedCategory];
+
   return (
     <div className="h-full w-full">
       <CardHeader>
@@ -180,9 +194,15 @@ export const MonthlyFinancialByCategoryChart: React.FC<
             "opacity-50": disabled,
           })}
         >
-          <AreaChart
+          <AnalyticsChart
+            chartData={barChartData}
+            title={`${type === 'income' ? 'Income' : 'Expenditure'} Analysis for ${selectedCategory}`}
+            description={`Detailed analysis of ${type} for ${selectedCategory} category`}
+            dataKeys={dataKeys}
+            colors={["#333"]}
+            trendKey={selectedCategory}
+            chartType="area"
             currency={currency}
-            data={chartData}
             height={height}
             locale={locale}
             enableAssistantMode={enableAssistantMode}

@@ -1,8 +1,8 @@
 import { p } from "framer-motion/client";
 import {
     createSearchParamsCache,
-    parseAsString,
     parseAsInteger,
+    parseAsString,
 } from "nuqs/server";
 import { date } from "zod";
 

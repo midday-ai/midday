@@ -1,28 +1,33 @@
-import { CalendarDatePicker } from "../../calendar/index";
-import { AssistantModal } from "../../assistant-modal";
-import { BarChartMultiDataPoint, ChartDataPoint } from "@/types/chart";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import React from "react";
 import { ResponsiveContainer } from "recharts";
-
 import { Button } from "../../button";
+import { CalendarDatePicker } from "../../calendar/index";
 
-export interface ChartContainerProps {
-  data: Array<ChartDataPoint> | Array<BarChartMultiDataPoint>;
-  dataSet: Array<ChartDataPoint> | Array<BarChartMultiDataPoint>;
-  setDataSet: React.Dispatch<
-    React.SetStateAction<Array<ChartDataPoint> | Array<BarChartMultiDataPoint>>
-  >;
+export interface BaseDataPoint {
+  date: string;
+  [key: string]: number | string;
+}
+
+export interface ChartContainerProps<T extends BaseDataPoint> {
+  data: T[];
+  dataSet: T[];
+  setDataSet: React.Dispatch<React.SetStateAction<T[]>>;
   height: number;
   earliestDate: Date;
   latestDate: Date;
   filterDataByDateRange: (range: { from: Date; to: Date }) => void;
   enableAssistantMode?: boolean;
-  children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; // This will be the BaseAreaChart
+  children: React.ReactElement;
   disabled?: boolean;
+  DatePickerComponent?: React.ComponentType<{
+    date: { from: Date; to: Date };
+    onDateSelect: (range: { from: Date; to: Date }) => void;
+  }>;
+  AssistantComponent?: React.ComponentType<{ className?: string }>;
 }
 
-export const ChartContainer: React.FC<ChartContainerProps> = ({
+export function ChartContainer<T extends BaseDataPoint>({
   data,
   dataSet,
   setDataSet,
@@ -33,10 +38,13 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
   enableAssistantMode = false,
   children,
   disabled = false,
-}) => {
+  DatePickerComponent,
+  AssistantComponent,
+}: ChartContainerProps<T>) {
   const disabledClassName = disabled ? "skeleton-box opacity-15" : "";
+
   return (
-    <div className={`flex flex-col gap-2`}>
+    <div className={`flex flex-col gap-2 w-full`}>
       <div className="flex items-center gap-2">
         <CalendarDatePicker
           date={{ from: earliestDate, to: latestDate }}
@@ -53,15 +61,15 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
       <ResponsiveContainer
         width="100%"
         height={height}
-        className={`flex flex-col gap-2 ${disabledClassName}`}
+        className={`flex flex-col gap-2 h-full rounded-2xl ${disabledClassName}`}
       >
         {children}
       </ResponsiveContainer>
-      {enableAssistantMode && (
+      {enableAssistantMode && AssistantComponent && (
         <div className="relative flex items-center gap-2">
-          <AssistantModal className="relative my-[2%]" />
+          <AssistantComponent className="relative my-[2%]" />
         </div>
       )}
     </div>
   );
-};
+}
