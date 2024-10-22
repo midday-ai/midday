@@ -190,7 +190,7 @@ export const dashboardEnvironment = createEnv({
     NEXT_PUBLIC_NEW_UI_VERSION: z.string().default("v1"),
     NEXT_PUBLIC_PAYMENTS_ENABLED: z
       .preprocess(booleanParser, z.boolean())
-      .default(false),
+      .default(true),
     NEXT_PUBLIC_ENABLE_ANALYTICS_V2: z
       .preprocess(booleanParser, z.boolean())
       .default(false),
