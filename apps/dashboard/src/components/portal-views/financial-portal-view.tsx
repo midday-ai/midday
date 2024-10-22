@@ -7,6 +7,8 @@ import { Card } from "@midday/ui/card";
 import { FinancialPortalOverview } from "@midday/ui/portal/financial-portal-view";
 import { HTMLAttributes, useMemo } from "react";
 import { BankAccountOverview } from "../bank-account/bank-account-overview";
+import { useStore } from "@/hooks/use-store";
+import { useUserStore } from "@/store/backend";
 
 type BankAccount = Tables<"bank_accounts">;
 type BankConnection = Tables<"bank_connections">;
@@ -33,6 +35,8 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
   description,
   ...props
 }): JSX.Element | null => {
+  const { userFinancialContext, userFinancialProfile } = useUserStore();
+
   // Return null if analytics v2 is not enabled
   if (!features.isAnalyticsV2Enabled) return null;
 
@@ -77,16 +81,12 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
     <div className="w-full pt-[3%] mx-auto">
       <Card className="p-[2%]">
         <div className={`mt-8 relative`}>
-          {/* {disabled && <EmptyState />} */}
-          {/* {(isCurrentUserTierFree || !hasBankAccounts) && (
-            <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />
-          )} */}
           <div
             className={`${(disabled || isCurrentUserTierFree) && "blur-[8px] opacity-20"}`}
           >
             <FinancialPortalOverview
-              financialProfile={undefined}
-              financialContext={undefined}
+              financialProfile={userFinancialProfile}
+              financialContext={userFinancialContext}
             />
           </div>
         </div>
