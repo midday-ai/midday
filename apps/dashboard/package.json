@@ -27,6 +27,7 @@
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
+    "@midday/invoice": "workspace:*",
     "@novu/headless": "^2.0.0",
     "@react-google-maps/api": "^2.20.3",
     "@sentry/nextjs": "^8",

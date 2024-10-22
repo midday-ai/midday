@@ -16,7 +16,7 @@ export const updateInvoiceTemplateSchema = z.object({
   total_label: z.string().optional(),
   vat_label: z.string().optional(),
   tax_label: z.string().optional(),
-  payment_details_label: z.string().optional(),
+  payment_label: z.string().optional(),
   note_label: z.string().optional(),
   logo_url: z.string().optional().nullable(),
   currency: z.string().optional(),
@@ -39,11 +39,11 @@ export const draftInvoiceSchema = z.object({
   customer_details: z.any().optional(),
   customer_id: z.string().uuid().optional(),
   payment_details: z.any().optional(),
-  note: z.any().optional(),
+  note_details: z.any().optional(),
   due_date: z.coerce.date(),
   issue_date: z.coerce.date(),
   invoice_number: z.string(),
-  logo_url: z.string().optional(),
+  logo_url: z.string().optional().nullable(),
   vat: z.number().optional(),
   tax: z.number().optional(),
   amount: z.number().optional(),
@@ -70,7 +70,7 @@ export const invoiceTemplateSchema = z.object({
   total_label: z.string(),
   vat_label: z.string().optional(),
   tax_label: z.string().optional(),
-  payment_details_label: z.string(),
+  payment_label: z.string(),
   note_label: z.string(),
   logo_url: z.string().optional(),
   currency: z.string(),
@@ -85,11 +85,11 @@ export const invoiceFormSchema = z.object({
   customer_details: z.any(),
   customer_id: z.string().uuid(),
   payment_details: z.any(),
-  note: z.any().optional(),
+  note_details: z.any().optional(),
   due_date: z.coerce.date(),
   issue_date: z.coerce.date(),
   invoice_number: z.string(),
-  logo_url: z.string().optional(),
+  logo_url: z.string().nullable().optional(),
   vat: z.number().optional(),
   tax: z.number().optional(),
   amount: z.number(),
@@ -97,4 +97,4 @@ export const invoiceFormSchema = z.object({
 });
 
 export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;
-export type InvoiceTemplate = z.infer<typeof updateInvoiceTemplateSchema>;
+export type InvoiceTemplate = z.infer<typeof invoiceTemplateSchema>;

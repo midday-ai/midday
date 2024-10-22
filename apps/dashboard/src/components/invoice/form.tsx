@@ -17,13 +17,14 @@ import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
 import { CreateButton } from "./create-button";
 import { type Customer, CustomerDetails } from "./customer-details";
 import { FromDetails } from "./from-details";
 import { LineItems } from "./line-items";
 import { Logo } from "./logo";
 import { Meta } from "./meta";
-import { NoteContent } from "./note-content";
+import { NoteDetails } from "./note-details";
 import { PaymentDetails } from "./payment-details";
 import { Summary } from "./summary";
 
@@ -47,7 +48,7 @@ const defaultTemplate: InvoiceTemplate = {
   total_label: "Total",
   vat_label: "VAT",
   tax_label: "Tax",
-  payment_details_label: "Payment Details",
+  payment_label: "Payment Details",
   payment_details: undefined,
   note_label: "Note",
   logo_url: undefined,
@@ -73,12 +74,12 @@ export function Form({
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
-      id: invoiceId,
+      id: uuidv4(),
       template: template,
       customer_details: undefined,
       from_details: template.from_details,
       payment_details: template.payment_details,
-      note: undefined,
+      note_details: undefined,
       customer_id: undefined,
       issue_date: new UTCDate(),
       due_date: addMonths(new UTCDate(), 1),
@@ -97,6 +98,7 @@ export function Form({
   const formValues = useWatch({
     control: form.control,
     name: [
+      "template",
       "customer_id",
       "line_items",
       "amount",
@@ -104,6 +106,10 @@ export function Form({
       "tax",
       "due_date",
       "issue_date",
+      "note_details",
+      "payment_details",
+      // "customer_details",
+      "from_details",
     ],
   });
 
@@ -113,11 +119,7 @@ export function Form({
   useEffect(() => {
     const currentFormValues = form.getValues();
 
-    if (
-      isDirty &&
-      form.watch("customer_id") &&
-      form.watch("line_items").length
-    ) {
+    if (isDirty && form.watch("customer_id")) {
       draftInvoice.execute(currentFormValues);
     }
   }, [debouncedValues, isDirty]);
@@ -189,7 +191,7 @@ export function Form({
             <div className="flex flex-col space-y-8 mt-auto">
               <div className="grid grid-cols-2 gap-6">
                 <PaymentDetails />
-                <NoteContent />
+                <NoteDetails />
               </div>
             </div>
           </div>

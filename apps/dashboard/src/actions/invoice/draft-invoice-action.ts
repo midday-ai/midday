@@ -16,6 +16,8 @@ export const draftInvoiceAction = authActionClient
     }) => {
       const teamId = user.team_id;
 
+      const { payment_details, from_details, ...restTemplate } = template;
+
       const { data } = await supabase
         .from("invoices")
         .upsert(
@@ -23,6 +25,9 @@ export const draftInvoiceAction = authActionClient
             id,
             team_id: teamId,
             currency: template.currency,
+            payment_details,
+            from_details,
+            template: restTemplate,
             ...input,
           },
           {

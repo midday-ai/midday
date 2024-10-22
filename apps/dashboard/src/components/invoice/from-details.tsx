@@ -23,7 +23,7 @@ export function FromDetails() {
         }}
       />
       <Controller
-        name="template.from_details"
+        name="from_details"
         control={control}
         render={({ field }) => (
           <Editor
