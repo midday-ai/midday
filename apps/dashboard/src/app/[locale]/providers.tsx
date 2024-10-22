@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProviderClient } from "@/locales/client";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { TriggerProvider } from "@trigger.dev/react";
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import type { ReactNode } from "react";
 
 // We need to import it here because this is the first
@@ -30,7 +31,9 @@ export function Providers({ locale, children }: ProviderProps) {
           publicApiKey={process.env.NEXT_PUBLIC_TRIGGER_API_KEY!}
           apiUrl={process.env.NEXT_PUBLIC_TRIGGER_API_URL}
         >
-          {children}
+          <NuqsAdapter>
+            {children}
+          </NuqsAdapter>
         </TriggerProvider>
       </ThemeProvider>
     </I18nProviderClient>
