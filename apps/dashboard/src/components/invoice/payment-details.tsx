@@ -14,10 +14,10 @@ export function PaymentDetails() {
   return (
     <div>
       <LabelInput
-        name="template.payment_details_label"
+        name="template.payment_label"
         onSave={(value) => {
           updateInvoiceTemplate.execute({
-            payment_details_label: value,
+            payment_label: value,
           });
         }}
         className="mb-2 block"
@@ -25,7 +25,7 @@ export function PaymentDetails() {
 
       <Controller
         control={control}
-        name="template.payment_details"
+        name="payment_details"
         render={({ field }) => (
           <Editor
             initialContent={field.value}

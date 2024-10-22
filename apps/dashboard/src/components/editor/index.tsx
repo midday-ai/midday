@@ -53,7 +53,11 @@ export function Editor({
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
-    onBlur?.(content ?? null);
+
+    // Only call onBlur if the content has changed
+    if (content !== initialContent) {
+      onBlur?.(content ?? null);
+    }
   }, [content, onBlur]);
 
   useEffect(() => {

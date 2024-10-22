@@ -23,7 +23,11 @@ export function LabelInput({ name, className, onSave }: Props) {
       onBlur={(e) => {
         const newValue = e.currentTarget.textContent || "";
         setValue(name, newValue, { shouldValidate: true });
-        onSave?.(newValue);
+
+        // Only call onSave if the value has changed
+        if (newValue !== value) {
+          onSave?.(newValue);
+        }
       }}
     >
       {value}
