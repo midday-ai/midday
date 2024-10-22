@@ -145,4 +145,7 @@ export const BusinessConfig: SiteConfig = {
     baseUrlDev: "https://engine-staging.solomon-ai-platform.com",
     bearerToken: "SOLOMONAI",
   },
+  termsAndConditionsUrl: "https://solomon-ai.app/terms",
+  privacyPolicyUrl: "https://solomon-ai.app/privacy",
+  documentationUrl: "https://platform-docs.solomon-ai.app",
 };

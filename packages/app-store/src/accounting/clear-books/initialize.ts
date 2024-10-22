@@ -1,4 +1,3 @@
-export const initialize = () => {
-  // Initialization logic for ClearBooks integration
-  console.log("Initializing ClearBooks integration");
-};
+import { configureDefaultInitializer } from "../../config/initialize";
+
+export const initialize = configureDefaultInitializer("clear-books");

@@ -1,20 +1,53 @@
 import { IncomeMetrics } from "client-typescript-sdk";
-import { ArrowRightIcon, Calendar, DollarSignIcon, TrendingDownIcon, TrendingUpIcon } from "lucide-react";
-import React, { useMemo, useState } from 'react';
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  ArrowRightIcon,
+  Calendar,
+  DollarSignIcon,
+  TrendingDownIcon,
+  TrendingUpIcon,
+} from "lucide-react";
+import React, { useMemo, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { FinancialExpenseAndIncomeMetricsConverter } from "../../../../lib/converters/expense-and-income-metrics-converter";
-import { FinancialDataGenerator, } from "../../../../lib/random/financial-data-generator";
+import { FinancialDataGenerator } from "../../../../lib/random/financial-data-generator";
 import { cn } from "../../../../utils/cn";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../..//tabs";
 import { Badge } from "../../../badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../../card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../select";
 import { Sheet, SheetContent, SheetTrigger } from "../../../sheet";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../../table";
 import { AnalyticsChart } from "../../base/analytics-chart";
 import { AreaChart } from "../../base/area-chart";
 
-export interface NetIncomeChartProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface NetIncomeChartProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
   title: string;
   viewMoreHref?: string;
@@ -27,7 +60,6 @@ export interface NetIncomeChartProps extends React.HTMLAttributes<HTMLDivElement
   enableComparison?: boolean;
   disabled?: boolean;
 }
-
 
 export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
   className,
@@ -47,9 +79,11 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
   const [selectedTab, setSelectedTab] = useState<string>("overview");
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format(value);
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: currency,
+    }).format(value);
   };
-
 
   const rootClassName = cn(
     "w-full bg-background text-foreground p-6 h-full border-none shadow-none",
@@ -60,19 +94,24 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
   // generate the net Income data if disabled
   const data = useMemo(() => {
     if (disabled) {
-      return FinancialDataGenerator.generateIncomeMetricsAcrossManyYears(2022, 2024);
+      return FinancialDataGenerator.generateIncomeMetricsAcrossManyYears(
+        2022,
+        2024,
+      );
     }
     return incomeMetrics;
   }, [disabled, incomeMetrics]);
 
   const [selectedMonth, setSelectedMonth] = useState<string>("");
 
-
   const getMonthAbbreviation = (monthName: string) => {
     return monthName.slice(0, 3);
   };
 
-  const calculateMonthlyChange = (currentIncome: number, previousIncome: number) => {
+  const calculateMonthlyChange = (
+    currentIncome: number,
+    previousIncome: number,
+  ) => {
     if (!previousIncome) return 0;
     return ((currentIncome - previousIncome) / previousIncome) * 100;
   };
@@ -99,15 +138,11 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
   const hasData = data.length > 0;
 
   const years = useMemo(() => {
-    return Object.keys(yearlyTotalIncome).sort(
-      (a, b) => Number(a) - Number(b),
-    );
+    return Object.keys(yearlyTotalIncome).sort((a, b) => Number(a) - Number(b));
   }, [yearlyTotalIncome]);
 
   const monthlyIncome = useMemo(() => {
-    return FinancialExpenseAndIncomeMetricsConverter.computeMonthlyIncome(
-      data,
-    );
+    return FinancialExpenseAndIncomeMetricsConverter.computeMonthlyIncome(data);
   }, [data]);
 
   const monthlyIncomeData = useMemo(() => {
@@ -122,8 +157,8 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
   }, [monthlyIncome, selectedYear]);
 
   const selectedMonthData = useMemo(() => {
-    return monthlyIncomeData.find(({ month, year }) =>
-      `${month}-${year}` === selectedMonth
+    return monthlyIncomeData.find(
+      ({ month, year }) => `${month}-${year}` === selectedMonth,
     );
   }, [monthlyIncomeData, selectedMonth]);
 
@@ -136,14 +171,12 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
   const chartData = useMemo(() => {
     return netIncomeData.map((item) => ({
       date: item.date,
-      income: Number(item.value)
+      income: Number(item.value),
     }));
   }, [netIncomeData]);
 
   // get the data keys
   const dataKeys = ["income"];
-
-
 
   const renderTrend = () => {
     const TrendIcon = priceChange >= 0 ? TrendingUpIcon : TrendingDownIcon;
@@ -186,16 +219,24 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
                   </button>
                 </SheetTrigger>
                 <SheetContent className="w-full md:max-w-[800px] bg-background text-foreground overflow-y-auto">
-                  <Tabs defaultValue="overview" className="w-full" onValueChange={(value) => setSelectedTab(value)}>
+                  <Tabs
+                    defaultValue="overview"
+                    className="w-full"
+                    onValueChange={(value) => setSelectedTab(value)}
+                  >
                     <TabsList className="grid w-full grid-cols-2 sticky top-0 bg-background z-10">
                       <TabsTrigger value="overview">Overview</TabsTrigger>
                       <TabsTrigger value="monthly">Monthly</TabsTrigger>
                     </TabsList>
                     <TabsContent value="overview">
-                      <h2 className="text-lg font-semibold mb-4">Income Overview</h2>
+                      <h2 className="text-lg font-semibold mb-4">
+                        Income Overview
+                      </h2>
                       <AreaChart currency={currency} data={netIncomeData} />
                       <div className="mt-6">
-                        <h3 className="text-md font-semibold mb-2">Key Metrics</h3>
+                        <h3 className="text-md font-semibold mb-2">
+                          Key Metrics
+                        </h3>
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -210,7 +251,10 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
                               <TableCell>Average Monthly Income</TableCell>
                               {years.map((year) => (
                                 <TableCell key={year}>
-                                  {formatCurrency(yearlyAverageMonthlyIncome[Number(year)] || 0)}
+                                  {formatCurrency(
+                                    yearlyAverageMonthlyIncome[Number(year)] ||
+                                      0,
+                                  )}
                                 </TableCell>
                               ))}
                             </TableRow>
@@ -218,7 +262,9 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
                               <TableCell>Year Total Income</TableCell>
                               {years.map((year) => (
                                 <TableCell key={year}>
-                                  {formatCurrency(yearlyTotalIncome[Number(year)] || 0)}
+                                  {formatCurrency(
+                                    yearlyTotalIncome[Number(year)] || 0,
+                                  )}
                                 </TableCell>
                               ))}
                             </TableRow>
@@ -226,34 +272,60 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
                         </Table>
                       </div>
                     </TabsContent>
-                    <TabsContent value="monthly" className="h-[calc(100vh-120px)] overflow-y-auto scroll-smooth">
+                    <TabsContent
+                      value="monthly"
+                      className="h-[calc(100vh-120px)] overflow-y-auto scroll-smooth"
+                    >
                       <Card>
                         <CardHeader>
-                          <CardTitle className="text-2xl font-bold">Monthly Income</CardTitle>
-                          <CardDescription>Analyze your monthly spending patterns</CardDescription>
+                          <CardTitle className="text-2xl font-bold">
+                            Monthly Income
+                          </CardTitle>
+                          <CardDescription>
+                            Analyze your monthly spending patterns
+                          </CardDescription>
                         </CardHeader>
                         <CardContent>
                           <div className="flex space-x-4 mb-6 sticky top-0 bg-background z-10 py-2">
-                            <Select onValueChange={(value) => setSelectedYear(value)}>
+                            <Select
+                              onValueChange={(value) => setSelectedYear(value)}
+                            >
                               <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="Select Year" />
                               </SelectTrigger>
                               <SelectContent>
                                 {years.map((year) => (
-                                  <SelectItem key={year} value={year}>{year}</SelectItem>
+                                  <SelectItem key={year} value={year}>
+                                    {year}
+                                  </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
-                            <Select onValueChange={(value) => setSelectedMonth(value)}>
+                            <Select
+                              onValueChange={(value) => setSelectedMonth(value)}
+                            >
                               <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="Select Month" />
                               </SelectTrigger>
                               <SelectContent>
-                                {monthlyIncomeData.map(({ month, year }: { month: string; year: number; totalIncome: number; formattedIncome: string }) => (
-                                  <SelectItem key={`${month}-${year}`} value={`${month}-${year}`}>
-                                    {month} {year}
-                                  </SelectItem>
-                                ))}
+                                {monthlyIncomeData.map(
+                                  ({
+                                    month,
+                                    year,
+                                  }: {
+                                    month: string;
+                                    year: number;
+                                    totalIncome: number;
+                                    formattedIncome: string;
+                                  }) => (
+                                    <SelectItem
+                                      key={`${month}-${year}`}
+                                      value={`${month}-${year}`}
+                                    >
+                                      {month} {year}
+                                    </SelectItem>
+                                  ),
+                                )}
                               </SelectContent>
                             </Select>
                           </div>
@@ -262,17 +334,29 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
                             <div className="grid grid-cols-1 gap-6">
                               <Card>
                                 <CardHeader>
-                                  <CardTitle className="text-lg">Income Overview</CardTitle>
+                                  <CardTitle className="text-lg">
+                                    Income Overview
+                                  </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                  <ResponsiveContainer width="100%" height={300}>
+                                  <ResponsiveContainer
+                                    width="100%"
+                                    height={300}
+                                  >
                                     <BarChart data={monthlyIncomeData}>
-                                      <XAxis dataKey="month" tickFormatter={getMonthAbbreviation} />
+                                      <XAxis
+                                        dataKey="month"
+                                        tickFormatter={getMonthAbbreviation}
+                                      />
                                       {/* <YAxis /> */}
 
-                                      <Bar dataKey="totalIncome" fill="#333" stroke={`url(#333)`}
+                                      <Bar
+                                        dataKey="totalIncome"
+                                        fill="#333"
+                                        stroke={`url(#333)`}
                                         strokeWidth={3}
-                                        className="border border-gray-200 rounded-2xl" />
+                                        className="border border-gray-200 rounded-2xl"
+                                      />
                                       <defs>
                                         <linearGradient
                                           id="growthGradient"
@@ -301,43 +385,64 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
 
                               <Card>
                                 <CardHeader>
-                                  <CardTitle className="text-lg">Monthly Details</CardTitle>
+                                  <CardTitle className="text-lg">
+                                    Monthly Details
+                                  </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                   {selectedMonthData ? (
                                     <div>
                                       <div className="flex items-center mb-4">
                                         <Calendar className="w-4 h-4 mr-2" />
-                                        <h3 className="text-xl font-semibold">{selectedMonthData.month} {selectedMonthData.year}</h3>
+                                        <h3 className="text-xl font-semibold">
+                                          {selectedMonthData.month}{" "}
+                                          {selectedMonthData.year}
+                                        </h3>
                                       </div>
                                       <Table>
                                         <TableBody>
                                           <TableRow>
                                             <TableCell>Total Income</TableCell>
                                             <TableCell className="text-right font-semibold">
-                                              {selectedMonthData.formattedIncome}
+                                              {
+                                                selectedMonthData.formattedIncome
+                                              }
                                             </TableCell>
                                           </TableRow>
                                           <TableRow>
-                                            <TableCell>vs Previous Month</TableCell>
+                                            <TableCell>
+                                              vs Previous Month
+                                            </TableCell>
                                             <TableCell className="text-right">
                                               {calculateMonthlyChange(
                                                 selectedMonthData.totalIncome,
-                                                monthlyIncomeData[monthlyIncomeData.indexOf(selectedMonthData) - 1]?.totalIncome || 0
-                                              ).toFixed(2)}%
+                                                monthlyIncomeData[
+                                                  monthlyIncomeData.indexOf(
+                                                    selectedMonthData,
+                                                  ) - 1
+                                                ]?.totalIncome || 0,
+                                              ).toFixed(2)}
+                                              %
                                             </TableCell>
                                           </TableRow>
                                           <TableRow>
-                                            <TableCell>Average Daily Income</TableCell>
+                                            <TableCell>
+                                              Average Daily Income
+                                            </TableCell>
                                             <TableCell className="text-right">
-                                              {formatCurrency(selectedMonthData.totalIncome / 30)}
+                                              {formatCurrency(
+                                                selectedMonthData.totalIncome /
+                                                  30,
+                                              )}
                                             </TableCell>
                                           </TableRow>
                                         </TableBody>
                                       </Table>
                                     </div>
                                   ) : (
-                                    <p className="text-center text-muted-foreground">Select a month to view details</p>
+                                    <p className="text-center text-muted-foreground">
+                                      Select a month to view details
+                                    </p>
                                   )}
                                 </CardContent>
                               </Card>
@@ -345,7 +450,9 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
 
                             <div className="mt-6">
                               <CardHeader>
-                                <CardTitle className="text-lg">Monthly Income Breakdown</CardTitle>
+                                <CardTitle className="text-lg">
+                                  Monthly Income Breakdown
+                                </CardTitle>
                               </CardHeader>
                               <div>
                                 <Table>
@@ -358,20 +465,54 @@ export const NetIncomeChart: React.FC<NetIncomeChartProps> = ({
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
-                                    {monthlyIncomeData.map(({ month, year, totalIncome, formattedIncome }: { month: string; year: number; totalIncome: number; formattedIncome: string }, index: number) => (
-                                      <TableRow key={`${month}-${year}`}>
-                                        <TableCell>{month}</TableCell>
-                                        <TableCell>{year}</TableCell>
-                                        <TableCell>{formattedIncome}</TableCell>
-                                        <TableCell>
-                                          {index > 0 ? (
-                                            <span className={calculateMonthlyChange(totalIncome, monthlyIncomeData[index - 1]?.totalIncome ?? 0) >= 0 ? "text-red-500" : "text-green-500"}>
-                                              {calculateMonthlyChange(totalIncome, monthlyIncomeData[index - 1]?.totalIncome ?? 0).toFixed(2)}%
-                                            </span>
-                                          ) : "-"}
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
+                                    {monthlyIncomeData.map(
+                                      (
+                                        {
+                                          month,
+                                          year,
+                                          totalIncome,
+                                          formattedIncome,
+                                        }: {
+                                          month: string;
+                                          year: number;
+                                          totalIncome: number;
+                                          formattedIncome: string;
+                                        },
+                                        index: number,
+                                      ) => (
+                                        <TableRow key={`${month}-${year}`}>
+                                          <TableCell>{month}</TableCell>
+                                          <TableCell>{year}</TableCell>
+                                          <TableCell>
+                                            {formattedIncome}
+                                          </TableCell>
+                                          <TableCell>
+                                            {index > 0 ? (
+                                              <span
+                                                className={
+                                                  calculateMonthlyChange(
+                                                    totalIncome,
+                                                    monthlyIncomeData[index - 1]
+                                                      ?.totalIncome ?? 0,
+                                                  ) >= 0
+                                                    ? "text-red-500"
+                                                    : "text-green-500"
+                                                }
+                                              >
+                                                {calculateMonthlyChange(
+                                                  totalIncome,
+                                                  monthlyIncomeData[index - 1]
+                                                    ?.totalIncome ?? 0,
+                                                ).toFixed(2)}
+                                                %
+                                              </span>
+                                            ) : (
+                                              "-"
+                                            )}
+                                          </TableCell>
+                                        </TableRow>
+                                      ),
+                                    )}
                                   </TableBody>
                                 </Table>
                               </div>

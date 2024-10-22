@@ -40,7 +40,7 @@ export const AccountBalanceChart: React.FC<AccountBalanceChartProps> = ({
   const barChartData = useMemo(() => {
     return chartData.map((item) => ({
       date: item.date,
-      balance: Number(item.value)
+      balance: Number(item.value),
     }));
   }, [chartData]);
 

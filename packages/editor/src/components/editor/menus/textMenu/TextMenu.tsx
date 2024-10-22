@@ -36,24 +36,24 @@ export const TextMenu = ({ editor }: TextMenuProps) => {
     <BubbleMenu
       tippyOptions={{
         popperOptions: {
-          placement: 'top-start',
+          placement: "top-start",
           modifiers: [
             {
-              name: 'preventOverflow',
+              name: "preventOverflow",
               options: {
-                boundary: 'viewport',
+                boundary: "viewport",
                 padding: 8,
               },
             },
             {
-              name: 'flip',
+              name: "flip",
               options: {
-                fallbackPlacements: ['bottom-start', 'top-end', 'bottom-end'],
+                fallbackPlacements: ["bottom-start", "top-end", "bottom-end"],
               },
             },
           ],
         },
-        maxWidth: 'calc(100vw - 16px)',
+        maxWidth: "calc(100vw - 16px)",
       }}
       editor={editor}
       pluginKey="textMenu"

@@ -24,24 +24,24 @@ function generateRandomString(length: number = 10): string {
 
 const formatCategoryName = (category: string): string => {
   // Handle empty or null input
-  if (!category) return '';
+  if (!category) return "";
 
   // Split the string by underscores
-  const words = category.toLowerCase().split('_');
+  const words = category.toLowerCase().split("_");
 
   // Capitalize the first letter of each word and join with spaces
-  return words.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  return words
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 };
 
 const formatDate = (dateString: string | number | Date) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
   });
 };
 
-
 export { capitalize, formatCategoryName, formatDate, generateRandomString };
-

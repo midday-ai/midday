@@ -44,7 +44,8 @@ export type DataPoint = {
 /**
  * Props for the ZoomableChart component.
  */
-export interface ZoomableChartProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ZoomableChartProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /** Array of data points to be displayed in the chart */
   data?: DataPoint[];
   /** Optional description of the chart */
@@ -60,7 +61,7 @@ export interface ZoomableChartProps extends React.HTMLAttributes<HTMLDivElement>
   /** Chart type: 'area' or 'bar' or 'line' or 'pie' (defaults to 'area') */
   chartType?: "area" | "bar" | "line";
   className?: string;
-};
+}
 
 const chartConfig = {
   events: {
@@ -133,7 +134,7 @@ export function ZoomableChart({
   height = 400,
   footerDescription,
   chartType = "area",
-  className
+  className,
 }: ZoomableChartProps) {
   const [data, setData] = useState<DataPoint[]>(initialData || []);
   const [refAreaLeft, setRefAreaLeft] = useState<string | null>(null);
@@ -361,7 +362,9 @@ export function ZoomableChart({
           </div>
         </div>
       </CardHeader>
-      <CardContent className={cn("px-2 sm:p-6 h-full sm:h-[calc(100%-150px)]", className)}>
+      <CardContent
+        className={cn("px-2 sm:p-6 h-full sm:h-[calc(100%-150px)]", className)}
+      >
         <ChartContainer config={chartConfig} className="w-full h-full">
           <div
             className="h-full"

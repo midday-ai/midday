@@ -87,7 +87,9 @@ export function ZoomableChartWithDrilldown({
   const [refAreaRight, setRefAreaRight] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<string | null>(null);
   const [endTime, setEndTime] = useState<string | null>(null);
-  const [originalData, setOriginalData] = useState<DataPoint[]>(initialData || []);
+  const [originalData, setOriginalData] = useState<DataPoint[]>(
+    initialData || [],
+  );
   const [isSelecting, setIsSelecting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const chartRef = useRef<HTMLDivElement>(null);
@@ -189,8 +191,9 @@ export function ZoomableChartWithDrilldown({
     }
 
     const currentRange =
-      new Date(endTime || originalData[originalData.length - 1]!.date).getTime() -
-      new Date(startTime || originalData[0]!.date).getTime();
+      new Date(
+        endTime || originalData[originalData.length - 1]!.date,
+      ).getTime() - new Date(startTime || originalData[0]!.date).getTime();
     const zoomAmount = currentRange * zoomFactor * direction;
 
     const chartRect = chartRef.current.getBoundingClientRect();
@@ -198,11 +201,19 @@ export function ZoomableChartWithDrilldown({
     const chartWidth = chartRect.width;
     const mousePercentage = mouseX / chartWidth;
 
-    const currentStartTime = new Date(startTime || originalData[0]!.date).getTime();
-    const currentEndTime = new Date(endTime || originalData[originalData.length - 1]!.date).getTime();
+    const currentStartTime = new Date(
+      startTime || originalData[0]!.date,
+    ).getTime();
+    const currentEndTime = new Date(
+      endTime || originalData[originalData.length - 1]!.date,
+    ).getTime();
 
-    const newStartTime = new Date(currentStartTime + zoomAmount * mousePercentage);
-    const newEndTime = new Date(currentEndTime - zoomAmount * (1 - mousePercentage));
+    const newStartTime = new Date(
+      currentStartTime + zoomAmount * mousePercentage,
+    );
+    const newEndTime = new Date(
+      currentEndTime - zoomAmount * (1 - mousePercentage),
+    );
 
     setStartTime(newStartTime.toISOString());
     setEndTime(newEndTime.toISOString());
@@ -242,7 +253,10 @@ export function ZoomableChartWithDrilldown({
     setIsDialogOpen(true);
   };
 
-  const getSurroundingData = (selectedPoint: DataPoint, allData: DataPoint[]) => {
+  const getSurroundingData = (
+    selectedPoint: DataPoint,
+    allData: DataPoint[],
+  ) => {
     const index = allData.findIndex((d) => d.date === selectedPoint.date);
     const start = Math.max(0, index - 7);
     const end = Math.min(allData.length, index + 8);
@@ -285,7 +299,10 @@ export function ZoomableChartWithDrilldown({
     }
   };
 
-  const calculateTrend = (dataPoint: DataPoint, surroundingData: DataPoint[]) => {
+  const calculateTrend = (
+    dataPoint: DataPoint,
+    surroundingData: DataPoint[],
+  ) => {
     const index = surroundingData.findIndex((d) => d.date === dataPoint.date);
     if (index > 0 && index < surroundingData.length - 1) {
       const prev = surroundingData[index - 1]!.events;
@@ -498,7 +515,8 @@ export function ZoomableChartWithDrilldown({
             <DialogHeader>
               <DialogTitle>Personal Finance Insights</DialogTitle>
               <DialogDescription>
-                Financial activity analysis for {format(parseISO(drilldownData.date), "PPpp")}
+                Financial activity analysis for{" "}
+                {format(parseISO(drilldownData.date), "PPpp")}
               </DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-4">
@@ -507,24 +525,39 @@ export function ZoomableChartWithDrilldown({
                   Transaction Count: {drilldownData.events}
                 </h3>
                 <p>Time of Day: {format(parseISO(drilldownData.date), "p")}</p>
-                <p>Day of Week: {format(parseISO(drilldownData.date), "EEEE")}</p>
+                <p>
+                  Day of Week: {format(parseISO(drilldownData.date), "EEEE")}
+                </p>
               </div>
               <div>
                 <h4 className="font-semibold">Trend Analysis:</h4>
                 <p>
-                  This is a {getActivityLevel(drilldownData.events).toLowerCase()} activity period.
+                  This is a{" "}
+                  {getActivityLevel(drilldownData.events).toLowerCase()}{" "}
+                  activity period.
                 </p>
                 <p>
-                  Current trend: <span className="font-medium">{calculateTrend(drilldownData, surroundingData)}</span>
+                  Current trend:{" "}
+                  <span className="font-medium">
+                    {calculateTrend(drilldownData, surroundingData)}
+                  </span>
                 </p>
                 <p>
                   Average transactions in this period:{" "}
-                  <span className="font-medium">{calculateAverage(surroundingData).toFixed(2)}</span>
+                  <span className="font-medium">
+                    {calculateAverage(surroundingData).toFixed(2)}
+                  </span>
                 </p>
                 <p>
-                  This day is {drilldownData.events > calculateAverage(surroundingData) ? "above" : "below"} average by{" "}
+                  This day is{" "}
+                  {drilldownData.events > calculateAverage(surroundingData)
+                    ? "above"
+                    : "below"}{" "}
+                  average by{" "}
                   <span className="font-medium">
-                    {Math.abs(drilldownData.events - calculateAverage(surroundingData)).toFixed(2)}
+                    {Math.abs(
+                      drilldownData.events - calculateAverage(surroundingData),
+                    ).toFixed(2)}
                   </span>{" "}
                   transactions.
                 </p>
@@ -532,12 +565,27 @@ export function ZoomableChartWithDrilldown({
               <div>
                 <h4 className="font-semibold">Comparative Analysis:</h4>
                 <p>
-                  Average transactions on {format(parseISO(drilldownData.date), "EEEE")}s:
-                  <span className="font-medium"> {calculateAverage(findSimilarDays(parseISO(drilldownData.date), surroundingData)).toFixed(2)}</span>
+                  Average transactions on{" "}
+                  {format(parseISO(drilldownData.date), "EEEE")}s:
+                  <span className="font-medium">
+                    {" "}
+                    {calculateAverage(
+                      findSimilarDays(
+                        parseISO(drilldownData.date),
+                        surroundingData,
+                      ),
+                    ).toFixed(2)}
+                  </span>
                 </p>
                 <p>
                   This {format(parseISO(drilldownData.date), "EEEE")} is{" "}
-                  {drilldownData.events > calculateAverage(findSimilarDays(parseISO(drilldownData.date), surroundingData))
+                  {drilldownData.events >
+                  calculateAverage(
+                    findSimilarDays(
+                      parseISO(drilldownData.date),
+                      surroundingData,
+                    ),
+                  )
                     ? "more"
                     : "less"}{" "}
                   active than usual.
@@ -549,7 +597,7 @@ export function ZoomableChartWithDrilldown({
                   {getPersonalFinanceRecommendations(drilldownData.events).map(
                     (rec, index) => (
                       <li key={index}>{rec}</li>
-                    )
+                    ),
                   )}
                 </ul>
               </div>
@@ -558,15 +606,17 @@ export function ZoomableChartWithDrilldown({
               <Button onClick={() => setIsDialogOpen(false)} variant="outline">
                 Close
               </Button>
-              <Button onClick={() => {
-                if (onDrilldown) {
-                  const date = parseISO(drilldownData.date);
-                  const start = date;
-                  const end = new Date(start.getTime() + 60 * 60 * 1000); // 1 hour later
-                  onDrilldown(start.toISOString(), end.toISOString());
-                }
-                setIsDialogOpen(false);
-              }}>
+              <Button
+                onClick={() => {
+                  if (onDrilldown) {
+                    const date = parseISO(drilldownData.date);
+                    const start = date;
+                    const end = new Date(start.getTime() + 60 * 60 * 1000); // 1 hour later
+                    onDrilldown(start.toISOString(), end.toISOString());
+                  }
+                  setIsDialogOpen(false);
+                }}
+              >
                 Further Drilldown
               </Button>
             </div>
@@ -609,11 +659,11 @@ export function simulateData(
       (baseValue +
         ((0.5 * (currentDate.getTime() - new Date(start).getTime())) /
           (new Date(end).getTime() - new Date(start).getTime())) *
-        100 +
+          100 +
         (seedRandom(seed) - 0.5) * 20 +
         (seedRandom(seed + 1) < 0.1 ? (seedRandom(seed + 2) - 0.5) * 50 : 0) +
         Math.sin(currentDate.getTime() / 3600000) * 10) *
-      (1 + (seedRandom(seed + 3) - 0.5) * 0.2),
+        (1 + (seedRandom(seed + 3) - 0.5) * 0.2),
       1,
     );
     simulatedData.push({

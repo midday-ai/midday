@@ -1,7 +1,8 @@
 {
-    "i18n-ally.localesPaths": [
-        "src/locales",
-        "src/app/[locale]/(app)/(sidebar)/account/language"
-    ],
-    "files.autoSave": "onFocusChange"
+  "editor.fontSize": 12,
+  "i18n-ally.localesPaths": [
+    "src/locales",
+    "src/app/[locale]/(app)/(sidebar)/account/language"
+  ],
+  "files.autoSave": "onFocusChange"
 }

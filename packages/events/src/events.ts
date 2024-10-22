@@ -203,4 +203,8 @@ export const LogEvents = {
     name: "Failed to onboard account to backend",
     channel: "registered",
   },
+  AddAppToAccount: {
+    name: "Add App To Account",
+    channel: "app",
+  },
 };

@@ -1,20 +1,46 @@
 import { ExpenseMetrics } from "client-typescript-sdk";
-import { ArrowRightIcon, Calendar, DollarSignIcon, TrendingDownIcon, TrendingUpIcon } from "lucide-react";
-import React, { useMemo, useState } from 'react';
+import {
+  ArrowRightIcon,
+  Calendar,
+  DollarSignIcon,
+  TrendingDownIcon,
+  TrendingUpIcon,
+} from "lucide-react";
+import React, { useMemo, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { FinancialExpenseAndIncomeMetricsConverter } from "../../../../lib/converters/expense-and-income-metrics-converter";
 import { FinancialDataGenerator } from "../../../../lib/random/financial-data-generator";
 import { cn } from "../../../../utils/cn";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../..//tabs";
 import { Badge } from "../../../badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../../card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../select";
 import { Sheet, SheetContent, SheetTrigger } from "../../../sheet";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../../table";
 import { AnalyticsChart } from "../../base/analytics-chart";
 import { AreaChart } from "../../base/area-chart";
 
-export interface NetExpenseChartProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface NetExpenseChartProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
   title: string;
   viewMoreHref?: string;
@@ -27,7 +53,6 @@ export interface NetExpenseChartProps extends React.HTMLAttributes<HTMLDivElemen
   enableComparison?: boolean;
   disabled?: boolean;
 }
-
 
 export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
   className,
@@ -47,9 +72,11 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
   const [selectedTab, setSelectedTab] = useState<string>("overview");
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format(value);
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: currency,
+    }).format(value);
   };
-
 
   const rootClassName = cn(
     "w-full bg-background text-foreground p-6 h-full border-none shadow-none",
@@ -60,19 +87,24 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
   // generate the net Expense data if disabled
   const data = useMemo(() => {
     if (disabled) {
-      return FinancialDataGenerator.generateExpenseMetricsAcrossManyYears(2022, 2024);
+      return FinancialDataGenerator.generateExpenseMetricsAcrossManyYears(
+        2022,
+        2024,
+      );
     }
     return expenseMetrics;
   }, [disabled, expenseMetrics]);
 
   const [selectedMonth, setSelectedMonth] = useState<string>("");
 
-
   const getMonthAbbreviation = (monthName: string) => {
     return monthName.slice(0, 3);
   };
 
-  const calculateMonthlyChange = (currentExpense: number, previousExpense: number) => {
+  const calculateMonthlyChange = (
+    currentExpense: number,
+    previousExpense: number,
+  ) => {
     if (!previousExpense) return 0;
     return ((currentExpense - previousExpense) / previousExpense) * 100;
   };
@@ -122,8 +154,8 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
   }, [monthlyExpense, selectedYear]);
 
   const selectedMonthData = useMemo(() => {
-    return monthlyExpenseData.find(({ month, year }) =>
-      `${month}-${year}` === selectedMonth
+    return monthlyExpenseData.find(
+      ({ month, year }) => `${month}-${year}` === selectedMonth,
     );
   }, [monthlyExpenseData, selectedMonth]);
 
@@ -136,14 +168,12 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
   const chartData = useMemo(() => {
     return netExpenseData.map((item) => ({
       date: item.date,
-      expense: Number(item.value)
+      expense: Number(item.value),
     }));
   }, [netExpenseData]);
 
   // get the data keys
   const dataKeys = ["expense"];
-
-
 
   const renderTrend = () => {
     const TrendIcon = priceChange >= 0 ? TrendingUpIcon : TrendingDownIcon;
@@ -171,7 +201,10 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
                   {formatCurrency(price)}
                 </div>
                 <div className="flex items-center mt-1">
-                  <Badge variant={priceChange <= 0 ? "destructive" : "default"} className="mr-2">
+                  <Badge
+                    variant={priceChange <= 0 ? "destructive" : "default"}
+                    className="mr-2"
+                  >
                     {renderTrend()}
                   </Badge>
                   <span className="text-sm text-muted-foreground">
@@ -186,16 +219,24 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
                   </button>
                 </SheetTrigger>
                 <SheetContent className="w-full md:max-w-[800px] bg-background text-foreground overflow-y-auto">
-                  <Tabs defaultValue="overview" className="w-full" onValueChange={(value) => setSelectedTab(value)}>
+                  <Tabs
+                    defaultValue="overview"
+                    className="w-full"
+                    onValueChange={(value) => setSelectedTab(value)}
+                  >
                     <TabsList className="grid w-full grid-cols-2 sticky top-0 bg-background z-10">
                       <TabsTrigger value="overview">Overview</TabsTrigger>
                       <TabsTrigger value="monthly">Monthly</TabsTrigger>
                     </TabsList>
                     <TabsContent value="overview">
-                      <h2 className="text-lg font-semibold mb-4">Expense Overview</h2>
+                      <h2 className="text-lg font-semibold mb-4">
+                        Expense Overview
+                      </h2>
                       <AreaChart currency={currency} data={netExpenseData} />
                       <div className="mt-6">
-                        <h3 className="text-md font-semibold mb-2">Key Metrics</h3>
+                        <h3 className="text-md font-semibold mb-2">
+                          Key Metrics
+                        </h3>
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -210,7 +251,10 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
                               <TableCell>Average Monthly Expense</TableCell>
                               {years.map((year) => (
                                 <TableCell key={year}>
-                                  {formatCurrency(yearlyAverageMonthlyExpense[Number(year)] || 0)}
+                                  {formatCurrency(
+                                    yearlyAverageMonthlyExpense[Number(year)] ||
+                                      0,
+                                  )}
                                 </TableCell>
                               ))}
                             </TableRow>
@@ -218,7 +262,9 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
                               <TableCell>Year Total Expense</TableCell>
                               {years.map((year) => (
                                 <TableCell key={year}>
-                                  {formatCurrency(yearlyTotalExpense[Number(year)] || 0)}
+                                  {formatCurrency(
+                                    yearlyTotalExpense[Number(year)] || 0,
+                                  )}
                                 </TableCell>
                               ))}
                             </TableRow>
@@ -226,31 +272,47 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
                         </Table>
                       </div>
                     </TabsContent>
-                    <TabsContent value="monthly" className="h-[calc(100vh-120px)] overflow-y-auto scroll-smooth">
+                    <TabsContent
+                      value="monthly"
+                      className="h-[calc(100vh-120px)] overflow-y-auto scroll-smooth"
+                    >
                       <Card>
                         <CardHeader>
-                          <CardTitle className="text-2xl font-bold">Monthly Expenses</CardTitle>
-                          <CardDescription>Analyze your monthly spending patterns</CardDescription>
+                          <CardTitle className="text-2xl font-bold">
+                            Monthly Expenses
+                          </CardTitle>
+                          <CardDescription>
+                            Analyze your monthly spending patterns
+                          </CardDescription>
                         </CardHeader>
                         <CardContent>
                           <div className="flex space-x-4 mb-6 sticky top-0 bg-background z-10 py-2">
-                            <Select onValueChange={(value) => setSelectedYear(value)}>
+                            <Select
+                              onValueChange={(value) => setSelectedYear(value)}
+                            >
                               <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="Select Year" />
                               </SelectTrigger>
                               <SelectContent>
                                 {years.map((year) => (
-                                  <SelectItem key={year} value={year}>{year}</SelectItem>
+                                  <SelectItem key={year} value={year}>
+                                    {year}
+                                  </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
-                            <Select onValueChange={(value) => setSelectedMonth(value)}>
+                            <Select
+                              onValueChange={(value) => setSelectedMonth(value)}
+                            >
                               <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="Select Month" />
                               </SelectTrigger>
                               <SelectContent>
                                 {monthlyExpenseData.map(({ month, year }) => (
-                                  <SelectItem key={`${month}-${year}`} value={`${month}-${year}`}>
+                                  <SelectItem
+                                    key={`${month}-${year}`}
+                                    value={`${month}-${year}`}
+                                  >
                                     {month} {year}
                                   </SelectItem>
                                 ))}
@@ -262,14 +324,22 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
                             <div className="grid grid-cols-1 gap-6">
                               <Card>
                                 <CardHeader>
-                                  <CardTitle className="text-lg">Expense Overview</CardTitle>
+                                  <CardTitle className="text-lg">
+                                    Expense Overview
+                                  </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                  <ResponsiveContainer width="100%" height={300}>
+                                  <ResponsiveContainer
+                                    width="100%"
+                                    height={300}
+                                  >
                                     <BarChart data={monthlyExpenseData}>
-                                      <XAxis dataKey="month" tickFormatter={getMonthAbbreviation} />
+                                      <XAxis
+                                        dataKey="month"
+                                        tickFormatter={getMonthAbbreviation}
+                                      />
                                       <YAxis />
-                                    
+
                                       <Bar dataKey="totalExpense" fill="#333" />
                                     </BarChart>
                                   </ResponsiveContainer>
@@ -278,43 +348,64 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
 
                               <Card>
                                 <CardHeader>
-                                  <CardTitle className="text-lg">Monthly Details</CardTitle>
+                                  <CardTitle className="text-lg">
+                                    Monthly Details
+                                  </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                   {selectedMonthData ? (
                                     <div>
                                       <div className="flex items-center mb-4">
                                         <Calendar className="w-4 h-4 mr-2" />
-                                        <h3 className="text-xl font-semibold">{selectedMonthData.month} {selectedMonthData.year}</h3>
+                                        <h3 className="text-xl font-semibold">
+                                          {selectedMonthData.month}{" "}
+                                          {selectedMonthData.year}
+                                        </h3>
                                       </div>
                                       <Table>
                                         <TableBody>
                                           <TableRow>
                                             <TableCell>Total Expense</TableCell>
                                             <TableCell className="text-right font-semibold">
-                                              {selectedMonthData.formattedExpense}
+                                              {
+                                                selectedMonthData.formattedExpense
+                                              }
                                             </TableCell>
                                           </TableRow>
                                           <TableRow>
-                                            <TableCell>vs Previous Month</TableCell>
+                                            <TableCell>
+                                              vs Previous Month
+                                            </TableCell>
                                             <TableCell className="text-right">
                                               {calculateMonthlyChange(
                                                 selectedMonthData.totalExpense,
-                                                monthlyExpenseData[monthlyExpenseData.indexOf(selectedMonthData) - 1]?.totalExpense || 0
-                                              ).toFixed(2)}%
+                                                monthlyExpenseData[
+                                                  monthlyExpenseData.indexOf(
+                                                    selectedMonthData,
+                                                  ) - 1
+                                                ]?.totalExpense || 0,
+                                              ).toFixed(2)}
+                                              %
                                             </TableCell>
                                           </TableRow>
                                           <TableRow>
-                                            <TableCell>Average Daily Expense</TableCell>
+                                            <TableCell>
+                                              Average Daily Expense
+                                            </TableCell>
                                             <TableCell className="text-right">
-                                              {formatCurrency(selectedMonthData.totalExpense / 30)}
+                                              {formatCurrency(
+                                                selectedMonthData.totalExpense /
+                                                  30,
+                                              )}
                                             </TableCell>
                                           </TableRow>
                                         </TableBody>
                                       </Table>
                                     </div>
                                   ) : (
-                                    <p className="text-center text-muted-foreground">Select a month to view details</p>
+                                    <p className="text-center text-muted-foreground">
+                                      Select a month to view details
+                                    </p>
                                   )}
                                 </CardContent>
                               </Card>
@@ -322,7 +413,9 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
 
                             <div className="mt-6">
                               <CardHeader>
-                                <CardTitle className="text-lg">Monthly Expense Breakdown</CardTitle>
+                                <CardTitle className="text-lg">
+                                  Monthly Expense Breakdown
+                                </CardTitle>
                               </CardHeader>
                               <div>
                                 <Table>
@@ -335,20 +428,50 @@ export const NetExpenseChart: React.FC<NetExpenseChartProps> = ({
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
-                                    {monthlyExpenseData.map(({ month, year, totalExpense, formattedExpense }, index) => (
-                                      <TableRow key={`${month}-${year}`}>
-                                        <TableCell>{month}</TableCell>
-                                        <TableCell>{year}</TableCell>
-                                        <TableCell>{formattedExpense}</TableCell>
-                                        <TableCell>
-                                          {index > 0 ? (
-                                            <span className={calculateMonthlyChange(totalExpense, monthlyExpenseData[index - 1]?.totalExpense ?? 0) >= 0 ? "text-red-500" : "text-green-500"}>
-                                              {calculateMonthlyChange(totalExpense, monthlyExpenseData[index - 1]?.totalExpense ?? 0).toFixed(2)}%
-                                            </span>
-                                          ) : "-"}
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
+                                    {monthlyExpenseData.map(
+                                      (
+                                        {
+                                          month,
+                                          year,
+                                          totalExpense,
+                                          formattedExpense,
+                                        },
+                                        index,
+                                      ) => (
+                                        <TableRow key={`${month}-${year}`}>
+                                          <TableCell>{month}</TableCell>
+                                          <TableCell>{year}</TableCell>
+                                          <TableCell>
+                                            {formattedExpense}
+                                          </TableCell>
+                                          <TableCell>
+                                            {index > 0 ? (
+                                              <span
+                                                className={
+                                                  calculateMonthlyChange(
+                                                    totalExpense,
+                                                    monthlyExpenseData[
+                                                      index - 1
+                                                    ]?.totalExpense ?? 0,
+                                                  ) >= 0
+                                                    ? "text-red-500"
+                                                    : "text-green-500"
+                                                }
+                                              >
+                                                {calculateMonthlyChange(
+                                                  totalExpense,
+                                                  monthlyExpenseData[index - 1]
+                                                    ?.totalExpense ?? 0,
+                                                ).toFixed(2)}
+                                                %
+                                              </span>
+                                            ) : (
+                                              "-"
+                                            )}
+                                          </TableCell>
+                                        </TableRow>
+                                      ),
+                                    )}
                                   </TableBody>
                                 </Table>
                               </div>

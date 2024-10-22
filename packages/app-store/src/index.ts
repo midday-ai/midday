@@ -182,4 +182,16 @@ export const apps = {
   ],
 };
 
+export const getAppsMap = (): Record<string, types.IntegrationConfig> => {
+  return Object.values(apps).reduce(
+    (acc, categoryApps) => {
+      for (const app of categoryApps) {
+        acc[app.id] = app;
+      }
+      return acc;
+    },
+    {} as Record<string, types.IntegrationConfig>,
+  );
+};
+
 export { types };

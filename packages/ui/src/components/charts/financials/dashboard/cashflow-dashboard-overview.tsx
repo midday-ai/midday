@@ -1,6 +1,6 @@
 import { ExpenseMetrics, IncomeMetrics } from "client-typescript-sdk";
 import { DollarSign, TrendingDown, TrendingUp } from "lucide-react";
-import React from 'react';
+import React from "react";
 import { FinancialDataGenerator } from "../../../../lib/random/financial-data-generator";
 import { cn } from "../../../../utils/cn";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../card";
@@ -17,7 +17,9 @@ export interface CashflowDashboardOverviewProps
   expenseMetrics: ExpenseMetrics[];
 }
 
-export const CashflowDashboardOverview: React.FC<CashflowDashboardOverviewProps> = ({
+export const CashflowDashboardOverview: React.FC<
+  CashflowDashboardOverviewProps
+> = ({
   className,
   title = "Cashflow Dashboard Overview",
   disabled,
@@ -28,22 +30,34 @@ export const CashflowDashboardOverview: React.FC<CashflowDashboardOverviewProps>
   const rootClassName = cn(
     "w-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6 rounded-xl shadow-lg",
     className,
-    disabled && "opacity-50 pointer-events-none"
+    disabled && "opacity-50 pointer-events-none",
   );
 
   if (disabled) {
-    expenseMetrics = FinancialDataGenerator.generateExpenseMetricsAcrossManyYears(2022, 2024);
-    incomeMetrics = FinancialDataGenerator.generateIncomeMetricsAcrossManyYears(2022, 2024);
+    expenseMetrics =
+      FinancialDataGenerator.generateExpenseMetricsAcrossManyYears(2022, 2024);
+    incomeMetrics = FinancialDataGenerator.generateIncomeMetricsAcrossManyYears(
+      2022,
+      2024,
+    );
   }
 
-  const totalIncome = incomeMetrics.reduce((sum, metric) => sum + (metric.totalIncome ?? 0), 0);
-  const totalExpense = expenseMetrics.reduce((sum, metric) => sum + (metric.totalExpenses ?? 0), 0);
+  const totalIncome = incomeMetrics.reduce(
+    (sum, metric) => sum + (metric.totalIncome ?? 0),
+    0,
+  );
+  const totalExpense = expenseMetrics.reduce(
+    (sum, metric) => sum + (metric.totalExpenses ?? 0),
+    0,
+  );
   const netCashflow = totalIncome - totalExpense;
 
   return (
     <div className={rootClassName} {...rest}>
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-gray-800 dark:text-gray-100">{title}</CardTitle>
+        <CardTitle className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          {title}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -81,7 +95,9 @@ export const CashflowDashboardOverview: React.FC<CashflowDashboardOverviewProps>
                   currency="USD"
                   title="Net Income"
                   price={totalIncome}
-                  priceChange={(totalIncome / (totalIncome - netCashflow) - 1) * 100}
+                  priceChange={
+                    (totalIncome / (totalIncome - netCashflow) - 1) * 100
+                  }
                 />
               </CardContent>
             </div>
@@ -95,7 +111,9 @@ export const CashflowDashboardOverview: React.FC<CashflowDashboardOverviewProps>
                   currency="USD"
                   title="Net Expense"
                   price={totalExpense}
-                  priceChange={(totalExpense / (totalExpense - netCashflow) - 1) * 100}
+                  priceChange={
+                    (totalExpense / (totalExpense - netCashflow) - 1) * 100
+                  }
                 />
               </CardContent>
             </div>
@@ -110,7 +128,7 @@ interface StatCardProps {
   title: string;
   value: number;
   icon: React.ReactNode;
-  trend: 'up' | 'down';
+  trend: "up" | "down";
 }
 
 const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend }) => {
@@ -118,11 +136,15 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend }) => {
     <Card>
       <CardContent className="flex items-center justify-between p-6">
         <div>
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">${value.toLocaleString()}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            {title}
+          </p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            ${value.toLocaleString()}
+          </p>
         </div>
         <div className="flex items-center space-x-2">
-          {trend === 'up' ? (
+          {trend === "up" ? (
             <TrendingUp className="h-4 w-4 text-green-500" />
           ) : (
             <TrendingDown className="h-4 w-4 text-red-500" />

@@ -1,8 +1,6 @@
 "use client";
 
-import {
-  onboardAccountToBackendAction,
-} from "@/actions/solomon-backend/onboard-to-backend";
+import { onboardAccountToBackendAction } from "@/actions/solomon-backend/onboard-to-backend";
 import { generateRandomString } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
@@ -16,7 +14,7 @@ import {
 import { Input } from "@midday/ui/input";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 

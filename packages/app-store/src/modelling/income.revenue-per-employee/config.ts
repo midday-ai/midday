@@ -1,8 +1,8 @@
-import { IntegrationCategory, ModellingIntegrationConfig } from "../../types";
+import { IntegrationCategory, IntegrationConfig, ModelType } from "../../types";
 import { Logo } from "./assets/logo";
 import { initialize } from "./initialize";
 
-const revenuePerEmployeeModelling: ModellingIntegrationConfig = {
+const revenuePerEmployeeModelling: IntegrationConfig = {
   name: "Revenue Per Employee Analysis",
   id: "revenue-per-employee-analysis",
   category: IntegrationCategory.Modelling,
@@ -78,6 +78,16 @@ const revenuePerEmployeeModelling: ModellingIntegrationConfig = {
       };
     },
   },
+  model_type: ModelType.FinancialModel,
+  api_version: "v1.0.0",
+  is_public: false,
+  tags: ["analysis", "financial", "projection"],
+  integration_type: undefined,
+  webhook_url: "https://gateway.solomon-ai-platform.com",
+  supported_features: undefined,
+  last_sync_at: new Date().toISOString(),
+  sync_status: undefined,
+  auth_method: "none",
 };
 
 export default revenuePerEmployeeModelling;

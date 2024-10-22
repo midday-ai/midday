@@ -4,7 +4,8 @@ import { Card } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
 import { ConnectedAccountSummary } from "@midday/ui/portal/connected-account-view";
 
-interface AccountSummarySectionProps extends React.HTMLAttributes<HTMLDivElement> {
+interface AccountSummarySectionProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   user: any;
   isEmpty: boolean;
   tier: UserTier;
@@ -12,7 +13,7 @@ interface AccountSummarySectionProps extends React.HTMLAttributes<HTMLDivElement
   description?: string;
   detailedDescription?: string;
   className?: string;
-};
+}
 
 export function AccountSummarySection({
   user,

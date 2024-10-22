@@ -1,12 +1,12 @@
-import { IntegrationCategory, ModellingIntegrationConfig } from "../../types";
+import { IntegrationCategory, IntegrationConfig, ModelType } from "../../types";
 import { Logo } from "./assets/logo";
 import { initialize } from "./initialize";
 
-const marketExpansionGoalTemplate: ModellingIntegrationConfig = {
+const marketExpansionGoalTemplate: IntegrationConfig = {
   name: "Market Expansion Goal Template",
   id: "market-expansion-goal-template",
   category: IntegrationCategory.GoalTemplates,
-  active: false,
+  active: true,
   logo: Logo,
   short_description: "Set and track market expansion goals for your business.",
   description:
@@ -136,6 +136,16 @@ const marketExpansionGoalTemplate: ModellingIntegrationConfig = {
       };
     },
   },
+  model_type: ModelType.FinancialModel,
+  api_version: "v1.0.0",
+  is_public: false,
+  tags: ["analysis", "financial", "projection"],
+  integration_type: undefined,
+  webhook_url: "https://gateway.solomon-ai-platform.com",
+  supported_features: undefined,
+  last_sync_at: new Date().toISOString(),
+  sync_status: undefined,
+  auth_method: "none",
 };
 
 export default marketExpansionGoalTemplate;

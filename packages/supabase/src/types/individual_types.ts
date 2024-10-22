@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { Database, Tables } from "./db";
 
 type BankAccountSchema = Tables<"bank_accounts">;
@@ -18,6 +19,15 @@ type RecurringTransactionSchema = Tables<"recurring_transactions">;
 type ReportsSchema = Tables<"reports">;
 type PersonalFinanceCategorySchema = Tables<"personal_finance_categories">;
 type TransactionIDSchema = Tables<"transaction_ids">;
+type AppChangelogSchema = Tables<"app_change_log">;
+type AppSchema = Tables<"apps">;
+type CreateAppSchema = Database["public"]["Tables"]["apps"]["Insert"];
+type UpdateAppSchema = Database["public"]["Tables"]["apps"]["Update"];
+
+type CreateAppChangelogSchema =
+  Database["public"]["Tables"]["app_change_log"]["Insert"];
+type UpdateAppChangelogSchema =
+  Database["public"]["Tables"]["app_change_log"]["Update"];
 
 // Union types from the database schema
 type AccountType = Database["public"]["Enums"]["account_type"];
@@ -60,12 +70,16 @@ type BankAccountWithBankConnection = BankAccountSchema & {
 export type {
   // Union types
   AccountType,
+  AppChangelogSchema,
+  AppSchema,
   BankAccountSchema,
   BankAccountWithBankConnection,
   BankAccountWithTeam,
   BankConnectionSchema,
   BankProviders,
   ConnectionStatus,
+  CreateAppChangelogSchema,
+  CreateAppSchema,
   DocumentSchema,
   InboxSchema,
   InboxStatus,
@@ -94,6 +108,8 @@ export type {
   TransactionMethods,
   TransactionSchema,
   TransactionStatus,
+  UpdateAppChangelogSchema,
+  UpdateAppSchema,
   UserSchema,
   UserTier,
   UserWithTeam,

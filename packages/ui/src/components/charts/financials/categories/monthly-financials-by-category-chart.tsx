@@ -106,7 +106,7 @@ export const MonthlyFinancialByCategoryChart: React.FC<
     return CategoryDataConverter.convertToChartDataPoints(
       data,
       selectedCategory,
-      type === "income" ? "totalIncome" : "totalSpending"
+      type === "income" ? "totalIncome" : "totalSpending",
     );
   }, [data, selectedCategory, type]);
 
@@ -162,9 +162,8 @@ export const MonthlyFinancialByCategoryChart: React.FC<
   const barChartData: Array<BarChartMultiDataPoint> = useMemo(() => {
     return chartData.map((item) => ({
       date: item.date,
-      [selectedCategory]: type === "income" 
-        ? Number(item.value) 
-        : Number(item.value)
+      [selectedCategory]:
+        type === "income" ? Number(item.value) : Number(item.value),
     }));
   }, [chartData, selectedCategory, type]);
 
@@ -196,7 +195,7 @@ export const MonthlyFinancialByCategoryChart: React.FC<
         >
           <AnalyticsChart
             chartData={barChartData}
-            title={`${type === 'income' ? 'Income' : 'Expenditure'} Analysis for ${selectedCategory}`}
+            title={`${type === "income" ? "Income" : "Expenditure"} Analysis for ${selectedCategory}`}
             description={`Detailed analysis of ${type} for ${selectedCategory} category`}
             dataKeys={dataKeys}
             colors={["#333"]}

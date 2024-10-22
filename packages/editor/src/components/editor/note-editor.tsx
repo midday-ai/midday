@@ -41,10 +41,10 @@ export interface NoteEditorProps extends React.HTMLAttributes<HTMLDivElement> {
 
 /**
  * NoteEditor component for creating or editing notes with AI assistance.
- * 
+ *
  * This component renders a card containing a BlockEditor, which provides
  * a rich text editing experience with collaborative features and AI integration.
- * 
+ *
  * @param props - The props for the NoteEditor component.
  * @returns A React functional component.
  */

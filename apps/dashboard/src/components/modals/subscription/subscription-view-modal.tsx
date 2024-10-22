@@ -46,7 +46,7 @@ const TransactionSkeleton = () => (
         <Skeleton className="h-6 w-1/4" />
       </div>
       {/* Table rows */}
-      {[...Array(5)].map((_, index) => (
+      {[...Array(15)].map((_, index) => (
         <div key={index} className="flex border-b p-2">
           <Skeleton className="h-4 w-1/4 mr-2" />
           <Skeleton className="h-4 w-1/4 mr-2" />

@@ -86,7 +86,7 @@ export interface EditorProps extends React.HTMLAttributes<HTMLDivElement> {
 
 /**
  * AdvancedEditor component that combines AI-powered and collaborative editing features.
- * 
+ *
  * @component
  * @param {EditorProps} props - The props for the AdvancedEditor component.
  * @returns {React.ReactElement} The rendered AdvancedEditor component.

@@ -6,7 +6,7 @@ import {
   UseBlockEditorProps,
 } from "@/hooks/editor/useBlockEditor";
 import { EditorContent, PureEditorContent } from "@tiptap/react";
-import React, { RefObject, useMemo, useRef } from 'react';
+import React, { RefObject, useMemo, useRef } from "react";
 
 import "@/styles/index.css";
 
