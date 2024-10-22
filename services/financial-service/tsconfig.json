@@ -8,7 +8,6 @@
     "strict": true,
     "types": [
       "@cloudflare/workers-types",
-      "bun-types",
       "@cloudflare/workers-types/experimental",
       "@cloudflare/vitest-pool-workers"
     ],
@@ -35,6 +34,8 @@
     "alwaysStrict": true /* Ensure 'use strict' is always emitted. */,
     "noUnusedLocals": true /* Enable error reporting when a local variables aren't read. */,
     "noUnusedParameters": true /* Raise an error when a function parameter isn't read */,
-    "skipLibCheck": true /* Skip type checking all .d.ts files. */
-  }
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+    "typeRoots": ["./node_modules/@types", "./test"]
+  },
+  "include": ["src/**/*", "test/**/*"]
 }

@@ -20,10 +20,11 @@ export const authMiddleware = async (c: Context, next: Next): Promise<Response |
   }
 
   const apiKey = c.req.header("X-API-Key");
-  const userId = c.req.header("X-User-Id");
+  const userIdStr = c.req.header("X-User-Id");
+  const userId = userIdStr ? parseInt(userIdStr, 10) : null;
 
-  if (!apiKey || !userId) {
-    throw new HTTPException(401, { message: "Missing authentication headers" });
+  if (!apiKey || !userId || isNaN(userId)) {
+    throw new HTTPException(401, { message: "Missing or invalid authentication headers" });
   }
 
   const { db } = c.get('services');
@@ -61,7 +62,7 @@ export const authMiddleware = async (c: Context, next: Next): Promise<Response |
   }
 };
 
-async function getCachedUser(c: Context, apiKey: string, userId: string): Promise<User | null> {
+async function getCachedUser(c: Context, apiKey: string, userId: number): Promise<User | null> {
   const cachedUser = await c.env.KV.get(`auth:${apiKey}:${userId}`);
   return cachedUser ? JSON.parse(cachedUser) : null;
 }
@@ -70,7 +71,7 @@ async function validateApiKeyAndUser(
   apiKeyRepo: APIKeyRepository,
   userRepo: UserRepository,
   apiKey: string,
-  userId: string
+  userId: number
 ): Promise<void> {
   const [isValidApiKey, user] = await Promise.all([
     apiKeyRepo.isValidApiKey(apiKey),
@@ -86,7 +87,7 @@ async function validateApiKeyAndUser(
   }
 }
 
-async function cacheUser(c: Context, apiKey: string, userId: string, user: User): Promise<void> {
+async function cacheUser(c: Context, apiKey: string, userId: number, user: User): Promise<void> {
   await c.env.KV.put(`auth:${apiKey}:${userId}`, JSON.stringify(user), { expirationTtl: constants.CACHE_TTL });
 }
 

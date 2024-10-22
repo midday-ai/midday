@@ -18,4 +18,3 @@ export function initDB(d1: D1Database): DrizzleDB {
 export const getDB = (context: HonoContext<HonoEnv>): DrizzleDB => {
   return drizzle(context.env.DB, { schema });
 };
-

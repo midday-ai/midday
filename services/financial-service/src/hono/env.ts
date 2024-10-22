@@ -7,6 +7,7 @@ import { User } from '@/db/schema';
 import { Env } from '@/env';
 import { Logger } from '@/logger';
 import { Metrics } from '@/metric';
+import type { Custom } from "@vitest/runner";
 
 /**
  * Represents the context for various services used in the application.
@@ -39,7 +40,7 @@ export type Repository = {
 /**
  * Represents the environment and context for Hono application requests.
  */
-export type HonoEnv = {
+export interface HonoEnv {
     /** Environment bindings, typically containing configuration and secrets. */
     Bindings: Env;
     /** Variables available during request processing. */

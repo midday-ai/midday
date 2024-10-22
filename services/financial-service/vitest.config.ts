@@ -3,6 +3,7 @@ import {
     defineWorkersProject,
     readD1Migrations,
 } from "@cloudflare/vitest-pool-workers/config";
+import { D1Database, R2Bucket } from "@cloudflare/workers-types/experimental";
 
 export default defineWorkersProject(async () => {
     // Read all migrations in the `migrations` directory
@@ -12,13 +13,6 @@ export default defineWorkersProject(async () => {
     return {
         test: {
             setupFiles: ["./test/apply-migrations.ts"],
-            include: ["./src/**/*.test.ts"],
-            exclude: ["./src/integration/**", "./src/routes/**", "./src/benchmarks/**"],
-            reporters: ["html", "verbose"],
-            outputFile: "./.vitest/html",
-            alias: {
-                "@/": new URL("./src/", import.meta.url).pathname,
-            },
             poolOptions: {
                 workers: {
                     singleWorker: true,
@@ -29,10 +23,16 @@ export default defineWorkersProject(async () => {
                     miniflare: {
                         // Add a test-only binding for migrations, so we can apply them in a
                         // setup file
-                        bindings: { TEST_MIGRATIONS: migrations },
+                        bindings: {
+                            TEST_MIGRATIONS: migrations,
+                            DB: D1Database,
+                            STORAGE: R2Bucket,
+                            BANK_STATEMENTS: R2Bucket
+                        },
                     },
                 },
             },
+            types: ["@cloudflare/workers-types", "cloudflare:test"],
         },
     };
 });
