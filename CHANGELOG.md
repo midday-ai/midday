@@ -1,3 +1,10 @@
+# [0.40.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.39.0...v0.40.0) (2024-10-22)
+
+
+### Features
+
+* wip ([cc02380](https://github.com/SolomonAIEngineering/solomonai/commit/cc023806340acafea5eb24437fe9f4de3fefa268))
+
 # [0.39.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.38.1...v0.39.0) (2024-10-22)
 
 
