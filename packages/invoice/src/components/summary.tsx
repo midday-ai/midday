@@ -16,22 +16,22 @@ export function Summary({ amount, tax, vat, currency }: SummaryProps) {
         marginBottom: 40,
         alignItems: "flex-end",
         marginLeft: "auto",
-        width: 400,
+        width: 250,
       }}
     >
       {tax && (
-        <View style={{ flexDirection: "row", marginBottom: 5 }}>
-          <Text style={{ fontSize: 9, marginRight: 10 }}>Tax</Text>
-          <Text style={{ fontSize: 9 }}>
+        <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
+          <Text style={{ fontSize: 9, flex: 1 }}>Tax</Text>
+          <Text style={{ fontSize: 9, textAlign: "right" }}>
             {formatAmount({ currency, amount: tax })}
           </Text>
         </View>
       )}
 
       {vat && (
-        <View style={{ flexDirection: "row", marginBottom: 5 }}>
-          <Text style={{ fontSize: 9, marginRight: 10 }}>VAT</Text>
-          <Text style={{ fontSize: 9 }}>
+        <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
+          <Text style={{ fontSize: 9, flex: 1 }}>VAT</Text>
+          <Text style={{ fontSize: 9, textAlign: "right" }}>
             {formatAmount({ currency, amount: vat })}
           </Text>
         </View>
@@ -43,10 +43,13 @@ export function Summary({ amount, tax, vat, currency }: SummaryProps) {
           marginTop: 5,
           borderTopWidth: 0.5,
           borderTopColor: "#000",
+          justifyContent: "space-between",
+          alignItems: "center",
           paddingTop: 5,
+          width: "100%",
         }}
       >
-        <Text style={{ fontSize: 11, marginRight: 10 }}>Total:</Text>
+        <Text style={{ fontSize: 9, marginRight: 10 }}>Total</Text>
         <Text style={{ fontSize: 21 }}>
           {formatAmount({ currency, amount })}
         </Text>
