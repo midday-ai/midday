@@ -7,7 +7,6 @@ import { Card } from "@midday/ui/card";
 import { FinancialPortalOverview } from "@midday/ui/portal/financial-portal-view";
 import { HTMLAttributes, useMemo } from "react";
 import { BankAccountOverview } from "../bank-account/bank-account-overview";
-import { useStore } from "@/hooks/use-store";
 import { useUserStore } from "@/store/backend";
 
 type BankAccount = Tables<"bank_accounts">;

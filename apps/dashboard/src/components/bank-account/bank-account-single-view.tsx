@@ -83,17 +83,8 @@ const BankAccountSingleView: React.FC<BankAccountSingleViewProps> = async ({
 
   return (
     <div className={cn(className, "py-[2%]")}>
-      <div className="grid md:grid-cols-3 gap-3">
-        <Card className="col-span-2 p-[1%] flex flex-col gap-3">
-          <RecentTransactions
-            limit={100}
-            accountId={bankAccount.id}
-            title={`${bankAccount.name} Transactions`}
-            description={`Recent transactions for the bank account`}
-            className="border-none shadow-none"
-          />
-        </Card>
-        <Card className="col-span-1 p-[3%] flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
+        <Card className="p-[1%] flex flex-col gap-3">
           <BankAccountDetails
             bankAccount={bankAccount}
             bankConnection={bankConnection}
@@ -102,7 +93,24 @@ const BankAccountSingleView: React.FC<BankAccountSingleViewProps> = async ({
             transactionsLoading={false}
             userId={user?.data?.id as string}
           />
+          <RecentTransactions
+            limit={100}
+            accountId={bankAccount.id}
+            title={`${bankAccount.name} Transactions`}
+            description={`Recent transactions for the bank account`}
+            className="border-none shadow-none"
+          />
         </Card>
+        {/* <Card className="col-span-1 p-[3%] flex flex-col gap-3">
+          <BankAccountDetails
+            bankAccount={bankAccount}
+            bankConnection={bankConnection}
+            userName={userName}
+            transactions={[]}
+            transactionsLoading={false}
+            userId={user?.data?.id as string}
+          />
+        </Card> */}
       </div>
     </div>
   );
