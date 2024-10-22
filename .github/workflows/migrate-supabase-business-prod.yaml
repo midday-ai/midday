@@ -48,4 +48,4 @@ jobs:
       - name: Deploy migrations
         run: |
           echo "Deploying migrations from directory: ${{ matrix.directory }}"
-          supabase db push --workdir ${{ matrix.directory }}
+          supabase db push --workdir ${{ matrix.directory }} --include-all
