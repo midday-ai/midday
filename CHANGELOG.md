@@ -1,3 +1,10 @@
+# [0.46.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.45.0...v0.46.0) (2024-10-22)
+
+
+### Features
+
+* update google client and secret defs ([d3e38a7](https://github.com/SolomonAIEngineering/solomonai/commit/d3e38a754758e0578a6b67bd007c4aee410ca94b))
+
 # [0.45.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.44.0...v0.45.0) (2024-10-22)
 
 
