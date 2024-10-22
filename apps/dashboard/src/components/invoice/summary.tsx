@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { FormatAmount } from "../format-amount";
 import { LabelInput } from "./label-input";
+import { TaxInput } from "./tax-input";
 
 export function Summary() {
   const { control, setValue } = useFormContext<InvoiceFormValues>();
@@ -12,6 +13,21 @@ export function Summary() {
   const currency = useWatch({
     control,
     name: "template.currency",
+  });
+
+  const includeTax = useWatch({
+    control,
+    name: "template.include_tax",
+  });
+
+  const taxRate = useWatch({
+    control,
+    name: "template.tax_rate",
+  });
+
+  const includeVAT = useWatch({
+    control,
+    name: "template.include_vat",
   });
 
   const lineItems = useWatch({
@@ -35,7 +51,9 @@ export function Summary() {
     );
   }, [lineItems]);
 
-  const total = totalAmount + totalVAT;
+  const totalTax = includeTax ? (totalAmount * (taxRate || 0)) / 100 : 0;
+
+  const total = totalAmount + totalVAT + totalTax;
 
   useMemo(() => {
     if (total) {
@@ -45,30 +63,64 @@ export function Summary() {
     if (totalVAT) {
       setValue("vat", totalVAT, { shouldValidate: true });
     }
-  }, [total, totalVAT, setValue]);
+
+    if (totalTax) {
+      setValue("tax", totalTax, { shouldValidate: true });
+    }
+  }, [total, totalVAT, totalTax, setValue]);
 
   return (
-    <div className="w-[280px] flex flex-col space-y-4 divide-y divide-border">
-      <div className="flex justify-between items-center">
-        <LabelInput
-          name="template.vat_label"
-          onSave={(value) => {
-            updateInvoiceTemplate.execute({
-              vat_label: value,
-            });
-          }}
-        />
-        <span className="text-right font-mono text-[11px] text-[#878787]">
-          <FormatAmount
-            amount={totalVAT}
-            minimumFractionDigits={0}
-            maximumFractionDigits={2}
-            currency={currency}
+    <div className="w-[320px] flex flex-col divide-y divide-border">
+      {includeVAT && (
+        <div className="flex justify-between items-center py-3">
+          <LabelInput
+            name="template.vat_label"
+            onSave={(value) => {
+              updateInvoiceTemplate.execute({
+                vat_label: value,
+              });
+            }}
           />
-        </span>
-      </div>
 
-      <div className="flex justify-between items-center pt-2">
+          <span className="text-right font-mono text-[11px] text-[#878787]">
+            <FormatAmount
+              amount={totalVAT}
+              minimumFractionDigits={0}
+              maximumFractionDigits={2}
+              currency={currency}
+            />
+          </span>
+        </div>
+      )}
+
+      {includeTax && (
+        <div className="flex justify-between items-center py-3">
+          <div className="flex items-center gap-1">
+            <LabelInput
+              className="flex-shrink-0"
+              name="template.tax_label"
+              onSave={(value) => {
+                updateInvoiceTemplate.execute({
+                  tax_label: value,
+                });
+              }}
+            />
+
+            <TaxInput />
+          </div>
+
+          <span className="text-right font-mono text-[11px] text-[#878787]">
+            <FormatAmount
+              amount={totalTax}
+              minimumFractionDigits={0}
+              maximumFractionDigits={2}
+              currency={currency}
+            />
+          </span>
+        </div>
+      )}
+
+      <div className="flex justify-between items-center py-4">
         <LabelInput
           name="template.total_label"
           onSave={(value) => {

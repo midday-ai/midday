@@ -11,6 +11,8 @@ import { LabelInput } from "./label-input";
 export function DueDate() {
   const { setValue, watch } = useFormContext<InvoiceFormValues>();
   const dueDate = watch("due_date");
+  const dateFormat = watch("template.date_format");
+
   const [isOpen, setIsOpen] = useState(false);
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
@@ -37,7 +39,7 @@ export function DueDate() {
       </div>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger className="text-primary text-[11px] font-mono whitespace-nowrap flex">
-          {format(dueDate || new Date(), "MM/dd/yyyy")}
+          {format(dueDate, dateFormat)}
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">
           <Calendar

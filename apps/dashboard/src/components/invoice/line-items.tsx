@@ -2,11 +2,12 @@
 
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
+import { formatAmount } from "@/utils/format";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { Reorder, useDragControls, useMotionValue } from "framer-motion";
+import { Reorder, useDragControls } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { AmountInput } from "./amount-input";
 import { Input } from "./input";
 import { LabelInput } from "./label-input";
@@ -14,6 +15,8 @@ import { VATInput } from "./vat-input";
 
 export function LineItems() {
   const { control } = useFormContext<InvoiceFormValues>();
+  const currency = useWatch({ control, name: "template.currency" });
+  const includeVAT = useWatch({ control, name: "template.include_vat" });
 
   const { fields, append, remove, swap } = useFieldArray({
     control,
@@ -46,7 +49,9 @@ export function LineItems() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-end mb-2">
+      <div
+        className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end mb-2`}
+      >
         <LabelInput
           name="template.description_label"
           onSave={(value) => {
@@ -54,7 +59,7 @@ export function LineItems() {
               description_label: value,
             });
           }}
-          className="w-1/2 mr-4"
+          className="truncate"
         />
         <LabelInput
           name="template.price_label"
@@ -63,7 +68,7 @@ export function LineItems() {
               price_label: value,
             });
           }}
-          className="w-40 mr-4"
+          className="truncate"
         />
         <LabelInput
           name="template.quantity_label"
@@ -72,16 +77,27 @@ export function LineItems() {
               quantity_label: value,
             });
           }}
-          className="w-24 mr-4"
+          className="truncate"
         />
+        {includeVAT && (
+          <LabelInput
+            name="template.vat_label"
+            onSave={(value) => {
+              updateInvoiceTemplate.execute({
+                vat_label: value,
+              });
+            }}
+            className="truncate"
+          />
+        )}
         <LabelInput
-          name="template.vat_label"
+          name="template.total_label"
           onSave={(value) => {
             updateInvoiceTemplate.execute({
-              vat_label: value,
+              total_label: value,
             });
           }}
-          className="w-24 text-right"
+          className="text-right truncate"
         />
       </div>
 
@@ -98,13 +114,22 @@ export function LineItems() {
             index={index}
             handleRemove={handleRemove}
             isReorderable={fields.length > 1}
+            currency={currency}
+            includeVAT={includeVAT}
           />
         ))}
       </Reorder.Group>
 
       <button
         type="button"
-        onClick={() => append({ name: "", quantity: 0, price: 0, vat: 0 })}
+        onClick={() =>
+          append({
+            name: "",
+            quantity: 0,
+            price: 0,
+            vat: includeVAT ? 0 : undefined,
+          })
+        }
         className="flex items-center space-x-2 text-xs text-[#878787] font-mono"
       >
         <Icons.Add />
@@ -119,27 +144,48 @@ function LineItemRow({
   handleRemove,
   isReorderable,
   item,
+  currency,
+  includeVAT,
 }: {
   index: number;
   handleRemove: (index: number) => void;
   isReorderable: boolean;
   item: InvoiceFormValues["line_items"][number];
+  currency: string;
+  includeVAT: boolean;
 }) {
   const controls = useDragControls();
-  const y = useMotionValue(0);
+  const { control } = useFormContext<InvoiceFormValues>();
+
+  const price = useWatch({
+    control,
+    name: `line_items.${index}.price`,
+  });
+
+  const quantity = useWatch({
+    control,
+    name: `line_items.${index}.quantity`,
+  });
+
+  const vat = useWatch({
+    control,
+    name: `line_items.${index}.vat`,
+  });
+
+  const total =
+    (price || 0) * (quantity || 0) * (1 + (includeVAT ? (vat || 0) / 100 : 0));
 
   return (
     <Reorder.Item
-      className="flex items-end relative group mb-2"
+      className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full`}
       value={item}
-      style={{ y }}
       dragListener={false}
       dragControls={controls}
     >
       {isReorderable && (
         <Button
           type="button"
-          className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent cursor-grab"
+          className="absolute -left-[5%] top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent cursor-grab"
           onPointerDown={(e) => controls.start(e)}
           variant="ghost"
         >
@@ -147,27 +193,28 @@ function LineItemRow({
         </Button>
       )}
 
-      <div className="w-1/2 mr-4">
-        <Input name={`line_items.${index}.name`} autoFocus={index > 0} />
-      </div>
+      <Input name={`line_items.${index}.name`} autoFocus={index > 0} />
 
-      <div className="w-40 mr-4">
-        <AmountInput name={`line_items.${index}.price`} min="0" />
-      </div>
+      <AmountInput name={`line_items.${index}.price`} min="0" />
 
-      <div className="w-24 mr-4">
-        <Input name={`line_items.${index}.quantity`} type="number" min="0" />
-      </div>
+      <Input name={`line_items.${index}.quantity`} type="number" min="0" />
 
-      <div className="w-24">
-        <VATInput name={`line_items.${index}.vat`} min="0" max="100" />
+      {includeVAT && <VATInput name={`line_items.${index}.vat`} />}
+
+      <div className="text-right">
+        <span className="text-[11px] text-primary">
+          {formatAmount({
+            amount: total,
+            currency,
+          })}
+        </span>
       </div>
 
       {index !== 0 && (
         <Button
           type="button"
           onClick={() => handleRemove(index)}
-          className="absolute -right-9 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent text-[#878787]"
+          className="absolute -right-[4.5%] top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent text-[#878787]"
           variant="ghost"
         >
           <Icons.Close />

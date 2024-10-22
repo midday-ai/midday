@@ -276,7 +276,7 @@ export function TransactionsSearchFilter({
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.CalendarMonth className="mr-2 h-4 w-4" />
+              <Icons.CalendarMonth className="mr-2 size-4" />
               <span>Date</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -317,7 +317,7 @@ export function TransactionsSearchFilter({
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Status className="mr-2 h-4 w-4" />
+              <Icons.Status className="mr-2 size-4" />
               <span>Status</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -351,7 +351,7 @@ export function TransactionsSearchFilter({
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Attachments className="mr-2 h-4 w-4" />
+              <Icons.Attachments className="mr-2 size-4" />
               <span>Attachments</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -381,7 +381,7 @@ export function TransactionsSearchFilter({
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Category className="mr-2 h-4 w-4" />
+              <Icons.Category className="mr-2 size-4" />
               <span>Categories</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -414,7 +414,7 @@ export function TransactionsSearchFilter({
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Accounts className="mr-2 h-4 w-4" />
+              <Icons.Accounts className="mr-2 size-4" />
               <span>Accounts</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -451,7 +451,7 @@ export function TransactionsSearchFilter({
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Repeat className="mr-2 h-4 w-4" />
+              <Icons.Repeat className="mr-2 size-4" />
               <span>Recurring</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
