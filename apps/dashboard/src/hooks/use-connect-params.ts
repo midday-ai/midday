@@ -8,7 +8,7 @@ export function useConnectParams(initialCountryCode?: string) {
     token: parseAsString,
     enrollment_id: parseAsString,
     institution_id: parseAsString,
-    q: parseAsString.withDefault("").withOptions({ clearOnDefault: true }),
+    q: parseAsString.withDefault(""),
     error: parseAsString,
     ref: parseAsString,
     details: parseAsString,
