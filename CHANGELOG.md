@@ -1,3 +1,10 @@
+## [0.43.1](https://github.com/SolomonAIEngineering/solomonai/compare/v0.43.0...v0.43.1) (2024-10-22)
+
+
+### Bug Fixes
+
+* migration types ([#67](https://github.com/SolomonAIEngineering/solomonai/issues/67)) ([1ee1849](https://github.com/SolomonAIEngineering/solomonai/commit/1ee1849b904c538bce3fb8be9d5d4eefd7050ac5))
+
 # [0.43.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.42.0...v0.43.0) (2024-10-22)
 
 
