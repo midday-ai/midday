@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <>
-      <div className="max-w-[600px] m-auto my-20">
+      <div className="mm-auto my-20">
         <h1 className="scroll-m-20 text-2xl tracking-tight lg:text-3xl">
           Privacy Policy
         </h1>
