@@ -5,6 +5,5 @@ type Props = {
 };
 
 export default function Template({ invoice }: Props) {
-  console.log(invoice);
   return <div>Template</div>;
 }

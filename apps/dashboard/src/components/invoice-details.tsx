@@ -30,6 +30,8 @@ export function InvoiceDetails({
   due_date,
   invoice_date,
   invoice_number,
+  template,
+  short_id,
 }: Props) {
   return (
     <div>
@@ -62,7 +64,7 @@ export function InvoiceDetails({
             <FormatAmount amount={amount} currency={currency} />
           </span>
 
-          <div className="h-3">
+          <div className="h-3 space-x-2">
             {vat && vat > 0 && (
               <span className="text-[#606060] text-xs select-text">
                 VAT <FormatAmount amount={vat} currency={currency} />
@@ -123,15 +125,23 @@ export function InvoiceDetails({
       <div className="mt-6 flex flex-col space-y-2 border-t border-border pt-6">
         <span className="text-sm text-[#606060]">Invoice link</span>
         <div className="flex space-x-2">
-          <CopyInput value="https://go.midday.ai/jw82f" />
-          <Button
-            variant="secondary"
-            className="size-[40px] hover:bg-secondary"
-          >
-            <div>
-              <Icons.Download className="size-4" />
-            </div>
-          </Button>
+          <CopyInput value={`https://app.midday.ai/c/jnsf234/i/${short_id}`} />
+
+          {status !== "draft" && (
+            <a
+              href={`/api/download/invoice?id=${id}&size=${template?.size}`}
+              download
+            >
+              <Button
+                variant="secondary"
+                className="size-[40px] hover:bg-secondary"
+              >
+                <div>
+                  <Icons.Download className="size-4" />
+                </div>
+              </Button>
+            </a>
+          )}
         </div>
       </div>
 

@@ -4,6 +4,11 @@ export const deleteInvoiceSchema = z.object({
   id: z.string(),
 });
 
+export const updateInvoiceSchema = z.object({
+  id: z.string(),
+  status: z.enum(["paid", "canceled"]),
+});
+
 export const updateInvoiceTemplateSchema = z.object({
   customer_label: z.string().optional(),
   from_label: z.string().optional(),
@@ -22,6 +27,11 @@ export const updateInvoiceTemplateSchema = z.object({
   currency: z.string().optional(),
   payment_details: z.any().nullable(),
   from_details: z.any().nullable(),
+  date_format: z.string().optional(),
+  include_vat: z.boolean().optional().optional(),
+  include_tax: z.boolean().optional().optional(),
+  tax_rate: z.number().min(0).max(100).optional(),
+  size: z.enum(["a4", "letter"]).optional(),
 });
 
 export const draftLineItemSchema = z.object({
