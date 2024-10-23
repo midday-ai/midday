@@ -20,9 +20,12 @@ export const updateUserAction = authActionClient
     }) => {
       await updateUser(supabase, data);
 
-      if (data.full_name) {
+      if (data.full_name || data.avatar_url) {
         await supabase.auth.updateUser({
-          data: { full_name: data.full_name },
+          data: {
+            full_name: data.full_name,
+            avatar_url: data.avatar_url,
+          },
         });
       }
 
