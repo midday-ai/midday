@@ -31,7 +31,7 @@ export function InvoiceDetails({
   invoice_date,
   invoice_number,
   template,
-  short_id,
+  token,
 }: Props) {
   return (
     <div>
@@ -122,28 +122,30 @@ export function InvoiceDetails({
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col space-y-2 border-t border-border pt-6">
-        <span className="text-sm text-[#606060]">Invoice link</span>
-        <div className="flex space-x-2">
-          <CopyInput value={`https://app.midday.ai/c/jnsf234/i/${short_id}`} />
+      {customer && (
+        <div className="mt-6 flex flex-col space-y-2 border-t border-border pt-6">
+          <span className="text-sm text-[#606060]">Invoice link</span>
+          <div className="flex space-x-2">
+            <CopyInput value={`https://app.midday.ai/i/${token}`} />
 
-          {status !== "draft" && (
-            <a
-              href={`/api/download/invoice?id=${id}&size=${template?.size}`}
-              download
-            >
-              <Button
-                variant="secondary"
-                className="size-[40px] hover:bg-secondary"
+            {status !== "draft" && (
+              <a
+                href={`/api/download/invoice?id=${id}&size=${template?.size}`}
+                download
               >
-                <div>
-                  <Icons.Download className="size-4" />
-                </div>
-              </Button>
-            </a>
-          )}
+                <Button
+                  variant="secondary"
+                  className="size-[40px] hover:bg-secondary"
+                >
+                  <div>
+                    <Icons.Download className="size-4" />
+                  </div>
+                </Button>
+              </a>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <Accordion type="single" collapsible className="mt-6">
         <AccordionItem value="note">

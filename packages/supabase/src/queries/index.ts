@@ -1,4 +1,5 @@
 import { UTCDate } from "@date-fns/utc";
+import { generateInvoiceNumber } from "@midday/invoice/number";
 import {
   addDays,
   endOfMonth,
@@ -1144,7 +1145,7 @@ export async function getInvoicesQuery(
   const query = supabase
     .from("invoices")
     .select(
-      "id, short_id, invoice_number, due_date, invoice_date, paid_at, updated_at, viewed_at, amount, template, currency, status, vat, tax, customer:customer_id(id, name, website)",
+      "id, invoice_number, token, due_date, invoice_date, paid_at, updated_at, viewed_at, amount, template, currency, status, vat, tax, customer:customer_id(id, name, website), customer_name",
       { count: "exact" },
     )
     .eq("team_id", teamId);
@@ -1231,6 +1232,7 @@ export async function getCustomersQuery(supabase: Client, teamId: string) {
     .from("customers")
     .select("*")
     .eq("team_id", teamId)
+    .order("created_at", { ascending: false })
     .limit(100);
 }
 
@@ -1249,18 +1251,39 @@ export async function getInvoiceTemplatesQuery(
     .single();
 }
 
-export async function getInvoiceNumberCountQuery(
-  supabase: Client,
-  teamId: string,
-) {
-  return supabase
+export async function getInvoiceNumberQuery(supabase: Client, teamId: string) {
+  const { count } = await supabase
     .from("invoices")
     .select("id", { count: "exact" })
     .eq("team_id", teamId);
+
+  let nextNumber = generateInvoiceNumber(count || 0);
+  let isUnique = false;
+
+  while (!isUnique) {
+    const { data } = await supabase
+      .from("invoices")
+      .select("invoice_number")
+      .eq("team_id", teamId)
+      .eq("invoice_number", nextNumber)
+      .maybeSingle();
+
+    if (!data) {
+      isUnique = true;
+    } else {
+      nextNumber = generateInvoiceNumber((count || 0) + 1);
+    }
+  }
+
+  return nextNumber;
 }
 
-export async function getInvoiceQuery(supabase: Client, invoiceId: string) {
-  return supabase.from("invoices").select("*").eq("id", invoiceId).single();
+export async function getInvoiceQuery(supabase: Client, id: string) {
+  return supabase
+    .from("invoices")
+    .select("*, customer:customer_id(name), team:team_id(name)")
+    .eq("id", id)
+    .single();
 }
 
 type SearchInvoiceNumberParams = {

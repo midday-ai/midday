@@ -207,6 +207,7 @@ export type Database = {
           phone: string | null
           state: string | null
           team_id: string
+          token: string
           vat_number: string | null
           website: string | null
           zip: string | null
@@ -225,6 +226,7 @@ export type Database = {
           phone?: string | null
           state?: string | null
           team_id?: string
+          token?: string
           vat_number?: string | null
           website?: string | null
           zip?: string | null
@@ -243,6 +245,7 @@ export type Database = {
           phone?: string | null
           state?: string | null
           team_id?: string
+          token?: string
           vat_number?: string | null
           website?: string | null
           zip?: string | null
@@ -450,11 +453,14 @@ export type Database = {
           created_at: string
           currency: string | null
           customer_label: string | null
+          date_format: string | null
           description_label: string | null
           due_date_label: string | null
           from_details: Json | null
           from_label: string | null
           id: string
+          include_tax: boolean | null
+          include_vat: boolean | null
           invoice_no_label: string | null
           issue_date_label: string | null
           logo_url: string | null
@@ -463,7 +469,9 @@ export type Database = {
           payment_details_label: string | null
           price_label: string | null
           quantity_label: string | null
+          size: Database["public"]["Enums"]["invoice_size"] | null
           tax_label: string | null
+          tax_rate: number | null
           team_id: string
           total_label: string | null
           vat_label: string | null
@@ -472,11 +480,14 @@ export type Database = {
           created_at?: string
           currency?: string | null
           customer_label?: string | null
+          date_format?: string | null
           description_label?: string | null
           due_date_label?: string | null
           from_details?: Json | null
           from_label?: string | null
           id?: string
+          include_tax?: boolean | null
+          include_vat?: boolean | null
           invoice_no_label?: string | null
           issue_date_label?: string | null
           logo_url?: string | null
@@ -485,7 +496,9 @@ export type Database = {
           payment_details_label?: string | null
           price_label?: string | null
           quantity_label?: string | null
+          size?: Database["public"]["Enums"]["invoice_size"] | null
           tax_label?: string | null
+          tax_rate?: number | null
           team_id: string
           total_label?: string | null
           vat_label?: string | null
@@ -494,11 +507,14 @@ export type Database = {
           created_at?: string
           currency?: string | null
           customer_label?: string | null
+          date_format?: string | null
           description_label?: string | null
           due_date_label?: string | null
           from_details?: Json | null
           from_label?: string | null
           id?: string
+          include_tax?: boolean | null
+          include_vat?: boolean | null
           invoice_no_label?: string | null
           issue_date_label?: string | null
           logo_url?: string | null
@@ -507,7 +523,9 @@ export type Database = {
           payment_details_label?: string | null
           price_label?: string | null
           quantity_label?: string | null
+          size?: Database["public"]["Enums"]["invoice_size"] | null
           tax_label?: string | null
+          tax_rate?: number | null
           team_id?: string
           total_label?: string | null
           vat_label?: string | null
@@ -525,25 +543,32 @@ export type Database = {
       invoices: {
         Row: {
           amount: number | null
+          base_amount: number | null
+          base_currency: string | null
           company_datails: Json | null
           created_at: string
           currency: string | null
-          customer_datails: Json | null
+          customer_details: Json | null
           customer_id: string | null
           due_date: string | null
+          from_details: Json | null
           fts: unknown | null
           id: string
           internal_note: string | null
           invoice_date: string | null
           invoice_number: string | null
+          issue_date: string | null
           line_items: Json | null
           note: string | null
+          note_details: Json | null
           paid_at: string | null
           path_tokens: string[] | null
-          payment_datails: Json | null
+          payment_details: Json | null
+          short_id: string
           status: Database["public"]["Enums"]["invoice_status"]
           tax: number | null
           team_id: string
+          template: Json | null
           updated_at: string | null
           url: string | null
           vat: number | null
@@ -551,25 +576,32 @@ export type Database = {
         }
         Insert: {
           amount?: number | null
+          base_amount?: number | null
+          base_currency?: string | null
           company_datails?: Json | null
           created_at?: string
           currency?: string | null
-          customer_datails?: Json | null
+          customer_details?: Json | null
           customer_id?: string | null
           due_date?: string | null
+          from_details?: Json | null
           fts?: unknown | null
           id?: string
           internal_note?: string | null
           invoice_date?: string | null
           invoice_number?: string | null
+          issue_date?: string | null
           line_items?: Json | null
           note?: string | null
+          note_details?: Json | null
           paid_at?: string | null
           path_tokens?: string[] | null
-          payment_datails?: Json | null
+          payment_details?: Json | null
+          short_id?: string
           status?: Database["public"]["Enums"]["invoice_status"]
           tax?: number | null
           team_id: string
+          template?: Json | null
           updated_at?: string | null
           url?: string | null
           vat?: number | null
@@ -577,25 +609,32 @@ export type Database = {
         }
         Update: {
           amount?: number | null
+          base_amount?: number | null
+          base_currency?: string | null
           company_datails?: Json | null
           created_at?: string
           currency?: string | null
-          customer_datails?: Json | null
+          customer_details?: Json | null
           customer_id?: string | null
           due_date?: string | null
+          from_details?: Json | null
           fts?: unknown | null
           id?: string
           internal_note?: string | null
           invoice_date?: string | null
           invoice_number?: string | null
+          issue_date?: string | null
           line_items?: Json | null
           note?: string | null
+          note_details?: Json | null
           paid_at?: string | null
           path_tokens?: string[] | null
-          payment_datails?: Json | null
+          payment_details?: Json | null
+          short_id?: string
           status?: Database["public"]["Enums"]["invoice_status"]
           tax?: number | null
           team_id?: string
+          template?: Json | null
           updated_at?: string | null
           url?: string | null
           vat?: number | null
@@ -2015,6 +2054,7 @@ export type Database = {
       connection_status: "disconnected" | "connected" | "unknown"
       inbox_status: "processing" | "pending" | "archived" | "new" | "deleted"
       inbox_type: "invoice" | "expense"
+      invoice_size: "a4" | "letter"
       invoice_status: "draft" | "overdue" | "paid" | "unpaid" | "canceled"
       reportTypes: "profit" | "revenue" | "burn_rate" | "expense"
       teamRoles: "owner" | "member"

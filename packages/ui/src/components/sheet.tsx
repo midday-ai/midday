@@ -58,11 +58,11 @@ const SheetContent = React.forwardRef<
   SheetContentProps
 >(({ side = "right", stack = false, className, children, ...props }, ref) => (
   <SheetPortal>
-    {!stack && <SheetOverlay />}
+    <SheetOverlay />
     <SheetPrimitive.Content
       onOpenAutoFocus={(e) => e.preventDefault()}
       ref={ref}
-      className={cn("md:p-4", stack && "md:m-2", sheetVariants({ side }))}
+      className={cn("md:p-4", sheetVariants({ side }))}
       aria-describedby={props["aria-describedby"] || undefined}
       {...props}
     >

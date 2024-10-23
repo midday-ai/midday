@@ -8,9 +8,15 @@
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit"
   },
+  "exports": {
+    ".": "./src/index.tsx",
+    "./token": "./src/token/index.ts",
+    "./number": "./src/utils/number.ts"
+  },
   "dependencies": {
     "@react-pdf/renderer": "^4.0.0",
     "date-fns": "^4.1.0",
+    "jose": "^5.9.6",
     "qrcode": "^1.5.4"
   }
 }

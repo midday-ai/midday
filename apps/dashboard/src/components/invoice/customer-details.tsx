@@ -16,6 +16,7 @@ export interface Customer {
   phone?: string;
   address_line_1?: string;
   address_line_2?: string;
+  token: string;
   city?: string;
   state?: string;
   zip?: string;
