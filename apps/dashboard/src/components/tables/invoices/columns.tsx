@@ -1,5 +1,6 @@
 "use client";
 
+import type { InvoiceTemplate } from "@/actions/invoice/schema";
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
@@ -23,6 +24,7 @@ import * as React from "react";
 
 export type Invoice = {
   id: string;
+  short_id: string;
   due_date: string;
   invoice_date?: string;
   paid_at?: string;
@@ -34,6 +36,7 @@ export type Invoice = {
   tax?: number;
   updated_at?: string;
   viewed_at?: string;
+  template: InvoiceTemplate;
   customer?: {
     id: string;
     name: string;
@@ -184,7 +187,14 @@ export const columns: ColumnDef<Invoice>[] = [
               {status !== "draft" && (
                 <>
                   <DropdownMenuItem>Comments</DropdownMenuItem>
-                  <DropdownMenuItem>Download</DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <a
+                      href={`/api/download/invoice?id=${row.original.id}&size=${row.original.template?.size === "a4" ? "a4" : "letter"}`}
+                      download
+                    >
+                      Download
+                    </a>
+                  </DropdownMenuItem>
                   <DropdownMenuItem>Copy link</DropdownMenuItem>
                   <DropdownMenuItem>Duplicate</DropdownMenuItem>
                 </>

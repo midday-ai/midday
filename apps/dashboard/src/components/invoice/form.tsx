@@ -56,12 +56,11 @@ export function Form({ teamId, customers }: Props) {
       "note_details",
       "payment_details",
       "from_details",
-      "tax_rate",
     ],
   });
 
   const isDirty = form.formState.isDirty;
-  const debouncedValues = useDebounce(formValues, 500);
+  const debouncedValues = useDebounce(formValues, 800);
 
   useEffect(() => {
     const currentFormValues = form.getValues();

@@ -2,6 +2,7 @@ import { getI18n } from "@/locales/server";
 import { getInvoiceSummary } from "@midday/supabase/cached-queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { Skeleton } from "@midday/ui/skeleton";
+import Link from "next/link";
 import { FormatAmount } from "./format-amount";
 
 export function InvoicesPaidSkeleton() {
@@ -32,28 +33,30 @@ export async function InvoicesPaid({
   const t = await getI18n();
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="font-mono font-medium text-2xl">
-          <FormatAmount
-            amount={data?.total_amount ?? 0}
-            currency={data?.currency ?? defaultCurrency}
-            maximumFractionDigits={0}
-            minimumFractionDigits={0}
-          />
-        </CardTitle>
-      </CardHeader>
+    <Link href="/invoices?statuses=paid">
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="font-mono font-medium text-2xl">
+            <FormatAmount
+              amount={data?.total_amount ?? 0}
+              currency={data?.currency ?? defaultCurrency}
+              maximumFractionDigits={0}
+              minimumFractionDigits={0}
+            />
+          </CardTitle>
+        </CardHeader>
 
-      <CardContent>
-        <div className="flex flex-col gap-2">
-          <div>Paid</div>
-          <div className="text-sm text-muted-foreground">
-            {t("invoice_count", {
-              count: data?.invoice_count ?? 0,
-            })}
+        <CardContent>
+          <div className="flex flex-col gap-2">
+            <div>Paid</div>
+            <div className="text-sm text-muted-foreground">
+              {t("invoice_count", {
+                count: data?.invoice_count ?? 0,
+              })}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
