@@ -203,7 +203,7 @@ export const TransactionsEmail = ({
                           </Text>
 
                           {transaction.status === "pending" && (
-                            <div className="flex space-x-1 items-center border rounded-md text-xs py-1 px-2 h-[22px] text-[#878787]">
+                            <div className="flex space-x-1 items-center border text-xs py-1 px-2 h-[22px] text-[#878787]">
                               <span>Pending</span>
                             </div>
                           )}

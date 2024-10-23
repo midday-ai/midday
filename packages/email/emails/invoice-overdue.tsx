@@ -14,9 +14,10 @@ import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 
 interface WelcomeProps {
-  fullName: string;
-  bankName: string;
+  companyName: string;
   teamName: string;
+  invoiceNumber: string;
+  link: string;
 }
 
 const baseUrl =
@@ -24,13 +25,14 @@ const baseUrl =
     ? "https://midday.ai/email"
     : "http://localhost:3000/email";
 
-export const ConnectionIssueEmail = ({
-  fullName = "Viktor Hofte",
-  bankName = "Revolut",
+export const InvoiceOverdueEmail = ({
+  companyName = "Customer",
   teamName = "Midday",
+  invoiceNumber = "INV-0001",
+  link = "https://app.midday.ai/i/1234567890",
 }: WelcomeProps) => {
-  const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, We wanted to inform you that our connection to your bank ${bankName} for your team ${teamName} is currently disconnected.`;
+  const firstName = companyName.split(" ").at(0);
+  const text = `Invoice ${invoiceNumber} from ${teamName} is Overdue`;
 
   return (
     <Html>
@@ -67,32 +69,25 @@ export const ConnectionIssueEmail = ({
           >
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Bank Connection Issue
+              Invoice {invoiceNumber} <br />
+              from {teamName} is Overdue
             </Heading>
 
             <br />
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212]">
-              We hope you're having a great day!
-              <br />
-              <br />
-              We wanted to let you know that your bank{" "}
-              <strong>{bankName}</strong> for team <strong>{teamName}</strong>{" "}
-              is currently disconnected. To keep Midday running smoothly, we'll
-              need you to reconnect your bank.
-              <br />
-              <br />
-              The good news? It only takes 60 seconds to get everything back on
-              track!
+              Please settle your payment as soon as possible to avoid further
+              delay. If anything is unclear, feel free to add a comment by
+              viewing the invoice.
             </Text>
 
             <Section className="text-center mt-[50px] mb-[50px]">
               <Button
                 className="bg-transparent text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
-                href="https://go.midday.ai/34Xt7XK"
+                href={link}
               >
-                Reconnect
+                View invoice
               </Button>
             </Section>
 
@@ -106,4 +101,4 @@ export const ConnectionIssueEmail = ({
   );
 };
 
-export default ConnectionIssueEmail;
+export default InvoiceOverdueEmail;
