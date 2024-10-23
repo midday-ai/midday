@@ -95,15 +95,18 @@ export function SettingsMenu() {
                     key={optionIndex.toString()}
                     className="text-xs"
                     checked={watch(watchKey) === option.value}
-                    onCheckedChange={() => {
-                      setValue(watchKey, option.value, {
-                        shouldValidate: true,
-                      });
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setValue(watchKey, option.value, {
+                          shouldValidate: true,
+                        });
 
-                      updateInvoiceTemplate.execute({
-                        [item.key]: option.value,
-                      });
+                        updateInvoiceTemplate.execute({
+                          [item.key]: option.value,
+                        });
+                      }
                     }}
+                    onSelect={(event) => event.preventDefault()}
                   >
                     {watchKey === "template.date_format"
                       ? format(new Date(), option.value as string)

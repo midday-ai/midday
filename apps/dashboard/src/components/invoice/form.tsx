@@ -10,6 +10,7 @@ import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
+import type { Invoice } from "../tables/invoices/columns";
 import { CreateButton } from "./create-button";
 import { type Customer, CustomerDetails } from "./customer-details";
 import { FromDetails } from "./from-details";
@@ -27,7 +28,8 @@ type Props = {
 };
 
 export function Form({ teamId, customers }: Props) {
-  const { selectedCustomerId, invoiceId } = useInvoiceParams();
+  const { selectedCustomerId } = useInvoiceParams();
+  const [data, setData] = useState<Invoice | undefined>();
   const [lastUpdated, setLastUpdated] = useState<Date | undefined>();
   const [lastEditedText, setLastEditedText] = useState("");
 
@@ -37,7 +39,10 @@ export function Form({ teamId, customers }: Props) {
 
   const draftInvoice = useAction(draftInvoiceAction, {
     onSuccess: ({ data }) => {
-      setLastUpdated(new Date());
+      if (data) {
+        setData(data);
+        setLastUpdated(new Date());
+      }
     },
   });
 
@@ -47,6 +52,7 @@ export function Form({ teamId, customers }: Props) {
     name: [
       "template",
       "customer_id",
+      "customer_name",
       "line_items",
       "amount",
       "vat",
@@ -71,8 +77,11 @@ export function Form({ teamId, customers }: Props) {
   }, [debouncedValues, isDirty]);
 
   useEffect(() => {
+    const customer = customers.find((c) => c.id === selectedCustomerId);
+
     if (selectedCustomerId) {
-      form.setValue("customer_id", selectedCustomerId);
+      form.setValue("customer_id", customer?.id);
+      form.setValue("customer_name", customer?.name);
     }
   }, [selectedCustomerId]);
 
@@ -140,14 +149,16 @@ export function Form({ teamId, customers }: Props) {
       <div className="absolute bottom-14 w-full h-9">
         <div className="flex justify-between items-center mt-auto">
           <div className="flex space-x-2 items-center">
-            <Link
-              href={`/preview/invoice/${invoiceId}`}
-              className="text-xs text-[#808080] flex items-center gap-1"
-              target="_blank"
-            >
-              <Icons.ExternalLink className="size-3" />
-              <span>Preview invoice</span>
-            </Link>
+            {data && (
+              <Link
+                href={`/i/${data.token}`}
+                className="text-xs text-[#808080] flex items-center gap-1"
+                target="_blank"
+              >
+                <Icons.ExternalLink className="size-3" />
+                <span>Preview invoice</span>
+              </Link>
+            )}
 
             {lastEditedText && (
               <motion.div

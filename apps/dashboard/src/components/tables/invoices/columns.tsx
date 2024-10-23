@@ -1,6 +1,7 @@
 "use client";
 
 import type { InvoiceTemplate } from "@/actions/invoice/schema";
+import { updateInvoiceAction } from "@/actions/invoice/update-invoice-action";
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
@@ -20,11 +21,11 @@ import { TooltipProvider } from "@midday/ui/tooltip";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
+import { useAction } from "next-safe-action/hooks";
 import * as React from "react";
 
 export type Invoice = {
   id: string;
-  short_id: string;
   due_date: string;
   invoice_date?: string;
   paid_at?: string;
@@ -37,11 +38,14 @@ export type Invoice = {
   updated_at?: string;
   viewed_at?: string;
   template: InvoiceTemplate;
+  token: string;
   customer?: {
     id: string;
     name: string;
     website: string;
   };
+  // Used when relation is deleted
+  customer_name?: string;
 };
 
 export const columns: ColumnDef<Invoice>[] = [
@@ -78,6 +82,7 @@ export const columns: ColumnDef<Invoice>[] = [
     accessorKey: "customer",
     cell: ({ row }) => {
       const customer = row.original.customer;
+      const name = customer?.name || row.original.customer_name;
       const viewAt = row.original.viewed_at;
       const hasNewMessages = false;
 
@@ -87,14 +92,14 @@ export const columns: ColumnDef<Invoice>[] = [
             {customer?.website && (
               <AvatarImage
                 src={`https://img.logo.dev/${customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
-                alt={`${customer?.name} logo`}
+                alt={`${name} logo`}
               />
             )}
             <AvatarFallback className="text-[9px] font-medium">
-              {customer?.name?.[0]}
+              {name?.[0]}
             </AvatarFallback>
           </Avatar>
-          <span className="truncate">{customer?.name}</span>
+          <span className="truncate">{name}</span>
 
           {viewAt && (
             <TooltipProvider delayDuration={0}>
@@ -157,6 +162,7 @@ export const columns: ColumnDef<Invoice>[] = [
       const status = row.getValue("status");
       const hasNewMessages = status === "overdue";
       const { setParams } = useInvoiceParams();
+      const updateInvoice = useAction(updateInvoiceAction);
 
       return (
         <div>
@@ -202,8 +208,12 @@ export const columns: ColumnDef<Invoice>[] = [
 
               {(status === "overdue" || status === "unpaid") && (
                 <DropdownMenuItem
-                  // Cancel
-                  // onClick={() => deleteInvoice.execute({ id: row.original.id })}
+                  onClick={() =>
+                    updateInvoice.execute({
+                      id: row.original.id,
+                      status: "canceled",
+                    })
+                  }
                   className="text-[#FF3638]"
                 >
                   Cancel

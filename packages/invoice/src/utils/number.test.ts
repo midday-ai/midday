@@ -1,5 +1,5 @@
 import { describe, expect, it, test } from "bun:test";
-import { generateInvoiceNumber } from "./invoice";
+import { generateInvoiceNumber } from "./number";
 
 describe("Generate invoice number", () => {
   it("should generate correct invoice number for count less than 10", () => {
