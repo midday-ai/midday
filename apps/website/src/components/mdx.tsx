@@ -13,13 +13,13 @@ interface TableProps {
 
 function Table({ data }: TableProps) {
   const headers = data.headers.map((header, index) => (
-    <th key={`header-${index}`}>{header}</th>
+    <th key={header}>{header}</th>
   ));
 
   const rows = data.rows.map((row, rowIndex) => (
-    <tr key={`row-${rowIndex}`}>
+    <tr key={row.join("-")}>
       {row.map((cell, cellIndex) => (
-        <td key={`cell-${rowIndex}-${cellIndex}`}>{cell}</td>
+        <td key={`${cell}-${cellIndex}`}>{cell}</td>
       ))}
     </tr>
   ));
@@ -49,10 +49,10 @@ function CustomLink({ href, ...props }: CustomLinkProps) {
   }
 
   if (href.startsWith("#")) {
-    return <a {...props} />;
+    return <a href={href} {...props} />;
   }
 
-  return <a target="_blank" rel="noopener noreferrer" {...props} />;
+  return <a href={href} target="_blank" rel="noopener noreferrer" {...props} />;
 }
 
 interface RoundedImageProps extends React.ComponentProps<typeof Image> {
@@ -65,7 +65,6 @@ function RoundedImage(props: RoundedImageProps) {
 
 interface CodeProps {
   children: string;
-  [key: string]: any;
 }
 
 function Code({ children, ...props }: CodeProps) {
@@ -77,11 +76,11 @@ function slugify(str: string): string {
   return str
     .toString()
     .toLowerCase()
-    .trim() // Remove whitespace from both ends of a string
-    .replace(/\s+/g, "-") // Replace spaces with -
-    .replace(/&/g, "-and-") // Replace & with 'and'
-    .replace(/[^\w\-]+/g, "") // Remove all non-word characters except for -
-    .replace(/\-\-+/g, "-"); // Replace multiple - with single -
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/&/g, "-and-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-");
 }
 
 function createHeading(level: number) {
@@ -130,8 +129,7 @@ const components = {
 };
 
 interface CustomMDXProps {
-  components?: Record<string, React.ComponentType<any>>;
-  [key: string]: any;
+  components?: Record<string, React.ComponentType<unknown>>;
 }
 
 export function CustomMDX(props: CustomMDXProps) {
