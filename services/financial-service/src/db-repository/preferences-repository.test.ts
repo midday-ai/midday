@@ -3,7 +3,7 @@ import { PreferencesRepository } from '@/db-repository/preferences-repository';
 import { UserRepository } from '@/db-repository/user-repository';
 import { ComplianceLevel, ServiceTier } from '@/db/schema/preferences';
 import { User } from '@/db/schema/users';
-import { cleanupTestContext, setupTestContext, TestContext } from 'test/test-util/test-context';
+import { cleanupTestContext, setupTestContext, TestContext } from '@/test-util/test-context';
 import { env } from 'cloudflare:test';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
