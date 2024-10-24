@@ -39,7 +39,7 @@ consumers = [
 
 [env.production.observability]
 enabled = true
-head_sampling_rate = 0.1 # 10% of requests are logged
+head_sampling_rate = 0.01 # 10% of requests are logged
 
 [[env.production.d1_databases]]
 binding = "DB" # i.e. available in your Worker on env.DB
@@ -71,7 +71,7 @@ r2_buckets = [
 
 [env.staging.observability]
 enabled = true
-head_sampling_rate = 0.1 # 10% of requests are logged
+head_sampling_rate = 0.05 # 10% of requests are logged
 
 [[env.staging.d1_databases]]
 binding = "DB" # i.e. available in your Worker on env.DB
