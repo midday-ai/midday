@@ -69,7 +69,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
 
         const db = new DatabaseClient(c.env.DB).getDb();
 
-        const cache = new ServiceCache(c.env, c.env.PLATFORM_PREFIX);
+        const cache = new ServiceCache(c.env.KV as KVNamespace<any>, c.env.PLATFORM_PREFIX);
 
         const analyticsClient = new Analytics({
             requestId,

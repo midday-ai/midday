@@ -67,7 +67,7 @@ export default defineWorkersProject(async () => {
             poolOptions: {
                 workers: {
                     singleWorker: true,
-                    isolatedStorage: true,
+                    isolatedStorage: false,
                     wrangler: {
                         configPath: "./wrangler.toml",
                         environment: "local",

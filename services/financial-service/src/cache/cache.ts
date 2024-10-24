@@ -38,8 +38,8 @@ export class ServiceCache {
    * @param env - The environment object containing the KV namespace.
    * @param prefix - An optional prefix for all cache keys.
    */
-  constructor(env: Env, prefix: string = '') {
-    this.kv = env.KV as KVNamespace<any>;
+  constructor(kv: KVNamespace<any>, prefix: string = '') {
+    this.kv = kv;
     this.prefix = prefix;
   }
 
@@ -165,8 +165,12 @@ export class ServiceCache {
    * @param keys - An array of keys to delete.
    */
   async deleteMany(keys: string[]): Promise<void> {
-    const fullKeys = keys.map(this.getFullKey.bind(this));
-    await Promise.all(fullKeys.map(key => withRetry(() => this.kv.delete(key))));
+    const fullKeys = keys.map(key => this.getFullKey(key));
+
+    // Process deletions sequentially to ensure consistency
+    for (const key of fullKeys) {
+      await withRetry(() => this.kv.delete(key));
+    }
   }
 
   /**
@@ -174,12 +178,24 @@ export class ServiceCache {
    */
   async clear(): Promise<void> {
     let cursor: string | undefined;
+
     do {
-      const result = await this.kv.list({ prefix: this.prefix, cursor });
+      // Get all keys with the current prefix
+      const result = await withRetry(() =>
+        this.kv.list({
+          prefix: this.prefix,
+          cursor
+        })
+      );
+
+      // Delete keys in series to ensure consistency
       if (result.keys.length > 0) {
         const keysToDelete = result.keys.map(key => key.name);
-        await this.deleteMany(keysToDelete);
+        for (const key of keysToDelete) {
+          await withRetry(() => this.kv.delete(key));
+        }
       }
+
       cursor = result.list_complete ? undefined : result.cursor;
     } while (cursor);
   }
