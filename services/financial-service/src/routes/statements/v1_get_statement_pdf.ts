@@ -1,11 +1,11 @@
 import { openApiErrorResponses as ErrorResponses } from "@/errors";
 import { App } from "@/hono/app";
 import { Provider } from "@/providers";
+import { Routes } from "@/route-definitions/routes";
 import { createErrorResponse } from "@/utils/error";
 import { createRoute, z } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { StatementPdfParamsSchema } from "./schema";
-import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route configuration for retrieving a statement PDF.

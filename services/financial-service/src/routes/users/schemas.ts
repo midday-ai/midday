@@ -9,7 +9,7 @@ import { z } from "@hono/zod-openapi";
  * @property {Date} updatedAt - The timestamp when the user was last updated.
  */
 export const UserSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   email: z.string().email(),
   name: z.string().nullable(),
   createdAt: z.date(),

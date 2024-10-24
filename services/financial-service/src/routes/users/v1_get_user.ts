@@ -61,7 +61,7 @@ export const registerV1GetUser = (app: App) => {
         }
 
         return c.json({
-            id: user.id,
+            id: user.id.toString(),
             name: user.name,
             email: user.email,
             createdAt: user.createdAt?.toISOString() ?? null,
