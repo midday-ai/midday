@@ -13,23 +13,48 @@ const defaultContent = `
 
 <br />
 
-<strong>Integration with shadcn/cli</strong>
+<strong>Easy Integration</strong>
 
-<p>To ensure seamless integration and consistency within our codebase, we utilize the <code>shadcn/cli</code> tool. This CLI allows us to install all necessary dependencies and components directly into our project repository, maintaining a cohesive structure and simplifying management of the editor and its associated elements.</p>
-
-<br />
-
-<p>If you already have shadcn/cli installed, you can run this command:</p>
+<p>To ensure seamless integration and consistency within your codebase, we've made it easy to add the Midday Editor to your project. You can simply copy and paste the necessary code from our dedicated documentation. This method allows you to quickly incorporate all required dependencies and components directly into your project repository.</p>
 
 <br />
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum convallis congue tellus a lobortis. Curabitur sed velit at sem sagittis accumsan. Quisque non tortor eu orci rutrum iaculis. Nullam tincidunt bibendum lacus, eu dignissim nunc congue at. 
+<p>We're actively working on adding the Midday Editor to the shadcn/cli, which will soon allow you to install it with just one command. Stay tuned for this upcoming feature!</p>
+
+<br />
+
+<strong>Ongoing Development</strong>
+
+<p>As we continue to develop and expand Midday's features, we're constantly adding new functionality to the editor. Our team is committed to enhancing its capabilities, improving performance, and introducing innovative AI-powered tools to make your editing experience even more powerful and efficient.</p>
+
+<br />
 `;
 
 export default function Page() {
   return (
     <div className="container mt-24 max-w-[540px]">
       <Editor content={defaultContent} />
+
+      <div className="mt-8">
+        <div className="border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col space-y-1.5 p-6">
+            <h3 className="text-xl font-medium">Install Midday Editor</h3>
+            <p className="text-sm text-[#878787]">
+              Get started with our powerful AI-enhanced text editor
+            </p>
+          </div>
+          <div className="p-6 pt-0">
+            <a
+              href="https://go.midday.ai/editor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            >
+              View implementation
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
