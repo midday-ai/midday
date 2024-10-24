@@ -11,26 +11,26 @@ import { StatementPdfParamsSchema } from "./schema";
  * OpenAPI route configuration for retrieving a statement PDF.
  */
 const route = createRoute({
-    tags: [...Routes.Statements.getPdf.tags],
-    operationId: Routes.Statements.getPdf.operationId,
-    security: [{ bearerAuth: [] }],
-    method: Routes.Statements.getPdf.method,
-    path: Routes.Statements.getPdf.path,
-    summary: Routes.Statements.getPdf.summary,
-    request: {
-        query: StatementPdfParamsSchema,
-    },
-    responses: {
-        200: {
-            content: {
-                "application/pdf": {
-                    schema: z.any(),
-                },
-            },
-            description: "Retrieve statement PDF",
+  tags: [...Routes.Statements.getPdf.tags],
+  operationId: Routes.Statements.getPdf.operationId,
+  security: [{ bearerAuth: [] }],
+  method: Routes.Statements.getPdf.method,
+  path: Routes.Statements.getPdf.path,
+  summary: Routes.Statements.getPdf.summary,
+  request: {
+    query: StatementPdfParamsSchema,
+  },
+  responses: {
+    200: {
+      content: {
+        "application/pdf": {
+          schema: z.any(),
         },
-        ...ErrorResponses
+      },
+      description: "Retrieve statement PDF",
     },
+    ...ErrorResponses,
+  },
 });
 
 export type GetStatementPdfRoute = typeof route;
@@ -38,51 +38,55 @@ export type GetStatementPdfRequest = z.infer<typeof route.request.query>;
 
 /**
  * Registers the Statement PDF API endpoint with the application.
- * 
+ *
  * @param app - The Hono application instance.
  */
 export const registerStatementPdfApi = (app: App) => {
-    app.openapi(route, async (c) => {
-        const envs = env(c);
-        const { provider, accessToken, statementId, accountId, userId, teamId } = c.req.valid("query");
+  app.openapi(route, async (c) => {
+    const envs = env(c);
+    const { provider, accessToken, statementId, accountId, userId, teamId } =
+      c.req.valid("query");
 
-        const api = new Provider({
-            provider,
-            kv: c.env.KV,
-            fetcher: c.env.TELLER_CERT,
-            r2: c.env.BANK_STATEMENTS,
-            envs,
-        });
-
-        try {
-            const { pdf, filename } = await api.getStatementPdf({
-                accessToken,
-                statementId,
-                accountId,
-                userId,
-                teamId,
-            });
-
-            // Ensure pdf is a Uint8Array or ArrayBuffer
-            const pdfData = new Uint8Array(pdf);
-
-            return new Response(pdfData, {
-                status: 200,
-                headers: {
-                    "Content-Type": "application/pdf",
-                    "Content-Disposition": `attachment; filename="${filename}"`,
-                },
-            });
-        } catch (error) {
-            const errorResponse = createErrorResponse(error, c.get("requestId"));
-            return c.json({
-                error: {
-                    message: errorResponse.message,
-                    docs: "https://engineering-docs.solomon-ai.app/errors",
-                    requestId: c.get("requestId"),
-                    code: errorResponse.code,
-                }
-            }, 400);
-        }
+    const api = new Provider({
+      provider,
+      kv: c.env.KV,
+      fetcher: c.env.TELLER_CERT,
+      r2: c.env.BANK_STATEMENTS,
+      envs,
     });
+
+    try {
+      const { pdf, filename } = await api.getStatementPdf({
+        accessToken,
+        statementId,
+        accountId,
+        userId,
+        teamId,
+      });
+
+      // Ensure pdf is a Uint8Array or ArrayBuffer
+      const pdfData = new Uint8Array(pdf);
+
+      return new Response(pdfData, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${filename}"`,
+        },
+      });
+    } catch (error) {
+      const errorResponse = createErrorResponse(error, c.get("requestId"));
+      return c.json(
+        {
+          error: {
+            message: errorResponse.message,
+            docs: "https://engineering-docs.solomon-ai.app/errors",
+            requestId: c.get("requestId"),
+            code: errorResponse.code,
+          },
+        },
+        400,
+      );
+    }
+  });
 };

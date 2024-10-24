@@ -20,12 +20,18 @@ export const UserSchema = z.object({
  * Schema for creating a new user.
  * Omits the 'id', 'createdAt', and 'updatedAt' fields from the UserSchema.
  */
-export const CreateUserSchema = UserSchema.omit({ id: true, createdAt: true, updatedAt: true });
+export const CreateUserSchema = UserSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 /**
  * Represents the API response for creating a user.
  */
-export const CreateUserSchemaResponse = UserSchema.openapi("CreateUserSchemaResponse");
+export const CreateUserSchemaResponse = UserSchema.openapi(
+  "CreateUserSchemaResponse",
+);
 
 /**
  * Schema for updating an existing user.
@@ -41,19 +47,21 @@ export const UpdateUserSchema = CreateUserSchema.partial();
  * @property {Date} createdAt - The timestamp when the user was created.
  * @property {Date} updatedAt - The timestamp when the user was last updated.
  */
-export const UpdateUserSchemaResponse = UserSchema.
-    partial().
-    openapi("UpdateUserSchemaResponse");
+export const UpdateUserSchemaResponse = UserSchema.partial().openapi(
+  "UpdateUserSchemaResponse",
+);
 
 /**
  * Represents the API response for deleting a user.
  * @property {boolean} success - Indicates whether the deletion was successful.
  */
-export const DeleteUserApiResponse = z.object({
+export const DeleteUserApiResponse = z
+  .object({
     success: z.boolean().openapi({
-        example: true,
+      example: true,
     }),
-}).openapi("DeleteUserApiResponse");
+  })
+  .openapi("DeleteUserApiResponse");
 
 /**
  * Represents the API response for retrieving a user.
@@ -63,10 +71,12 @@ export const DeleteUserApiResponse = z.object({
  * @property {Date | null} createdAt - The timestamp when the user was created (optional).
  * @property {Date | null} updatedAt - The timestamp when the user was last updated (optional).
  */
-export const GetUserResponse = z.object({
+export const GetUserResponse = z
+  .object({
     id: z.string(),
     email: z.string().email(),
     name: z.string().nullable(),
     createdAt: z.date().nullable(),
     updatedAt: z.date().nullable(),
-}).openapi("GetUserResponse");
+  })
+  .openapi("GetUserResponse");

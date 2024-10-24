@@ -109,13 +109,13 @@ export const mapTransactionCategory = ({
 
   if (
     transaction.personal_finance_category?.detailed ===
-    "RENT_AND_UTILITIES_GAS_AND_ELECTRICITY" ||
+      "RENT_AND_UTILITIES_GAS_AND_ELECTRICITY" ||
     transaction.personal_finance_category?.detailed ===
-    "RENT_AND_UTILITIES_SEWAGE_AND_WASTE_MANAGEMENT" ||
+      "RENT_AND_UTILITIES_SEWAGE_AND_WASTE_MANAGEMENT" ||
     transaction.personal_finance_category?.detailed ===
-    "RENT_AND_UTILITIES_WATER" ||
+      "RENT_AND_UTILITIES_WATER" ||
     transaction.personal_finance_category?.detailed ===
-    "RENT_AND_UTILITIES_OTHER_UTILITIES"
+      "RENT_AND_UTILITIES_OTHER_UTILITIES"
   ) {
     return "facilities-expenses";
   }
@@ -129,9 +129,9 @@ export const mapTransactionCategory = ({
 
   if (
     transaction.personal_finance_category?.detailed ===
-    "RENT_AND_UTILITIES_INTERNET_AND_CABLE" ||
+      "RENT_AND_UTILITIES_INTERNET_AND_CABLE" ||
     transaction.personal_finance_category?.detailed ===
-    "RENT_AND_UTILITIES_TELEPHONE"
+      "RENT_AND_UTILITIES_TELEPHONE"
   ) {
     return "internet-and-telephone";
   }

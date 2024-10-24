@@ -5,10 +5,12 @@ import { z } from "@hono/zod-openapi";
  * @property {boolean} healthy - Indicates if the service is healthy.
  * @property {string} [message] - Optional message providing additional health check details.
  */
-export const HealthCheckResponseSchema = z.object({
-  healthy: z.boolean(),
-  message: z.string().optional(),
-}).openapi("HealthCheckResponse");
+export const HealthCheckResponseSchema = z
+  .object({
+    healthy: z.boolean(),
+    message: z.string().optional(),
+  })
+  .openapi("HealthCheckResponse");
 
 /**
  * Schema for the overall health check response.
@@ -18,11 +20,13 @@ export const HealthCheckResponseSchema = z.object({
  * @property {HealthCheckResponseSchema} data.gocardless - Health status for the GoCardless service.
  * @property {HealthCheckResponseSchema} data.plaid - Health status for the Plaid service.
  */
-export const HealthSchema = z.object({
-  data: z.object({
-    search: z.object({ healthy: z.boolean() }),
-    teller: HealthCheckResponseSchema,
-    gocardless: HealthCheckResponseSchema,
-    plaid: HealthCheckResponseSchema,
-  }),
-}).openapi("HealthSchema");
+export const HealthSchema = z
+  .object({
+    data: z.object({
+      search: z.object({ healthy: z.boolean() }),
+      teller: HealthCheckResponseSchema,
+      gocardless: HealthCheckResponseSchema,
+      plaid: HealthCheckResponseSchema,
+    }),
+  })
+  .openapi("HealthSchema");

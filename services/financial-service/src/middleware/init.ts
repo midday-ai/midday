@@ -38,72 +38,75 @@ let isolateCreatedAt: number | undefined = undefined;
  * the lifetime of the worker across multiple executions.
  */
 export function init(): MiddlewareHandler<HonoEnv> {
-    return async (c, next) => {
-        if (!isolateId) {
-            isolateId = crypto.randomUUID();
-        }
-        if (!isolateCreatedAt) {
-            isolateCreatedAt = Date.now();
-        }
-        c.set("isolateId", isolateId);
-        c.set("isolateCreatedAt", isolateCreatedAt);
-        const requestId = newId("request");
-        c.set("requestId", requestId);
+  return async (c, next) => {
+    if (!isolateId) {
+      isolateId = crypto.randomUUID();
+    }
+    if (!isolateCreatedAt) {
+      isolateCreatedAt = Date.now();
+    }
+    c.set("isolateId", isolateId);
+    c.set("isolateCreatedAt", isolateCreatedAt);
+    const requestId = newId("request");
+    c.set("requestId", requestId);
 
-        c.set("requestStartedAt", Date.now());
+    c.set("requestStartedAt", Date.now());
 
-        // format the platform prefix
-        const platformPrefix = c.env.PLATFORM_PREFIX ?? "solomonai_platform";
-        const formattedPlatformPrefix = formatPlatformPrefix(platformPrefix);
+    // format the platform prefix
+    const platformPrefix = c.env.PLATFORM_PREFIX ?? "solomonai_platform";
+    const formattedPlatformPrefix = formatPlatformPrefix(platformPrefix);
 
-        // define request id header
-        const requestIdKey = `${formattedPlatformPrefix}-Request-Id`;
-        c.res.headers.set(requestIdKey, requestId);
+    // define request id header
+    const requestIdKey = `${formattedPlatformPrefix}-Request-Id`;
+    c.res.headers.set(requestIdKey, requestId);
 
-        const logger = new ConsoleLogger({
-            requestId,
-            application: "api",
-            environment: c.env.ENVIRONMENT,
-            defaultFields: { environment: c.env.ENVIRONMENT },
-        });
+    const logger = new ConsoleLogger({
+      requestId,
+      application: "api",
+      environment: c.env.ENVIRONMENT,
+      defaultFields: { environment: c.env.ENVIRONMENT },
+    });
 
-        const db = new DatabaseClient(c.env.DB).getDb();
+    const db = new DatabaseClient(c.env.DB).getDb();
 
-        const cache = new ServiceCache(c.env.KV as KVNamespace<any>, c.env.PLATFORM_PREFIX);
+    const cache = new ServiceCache(
+      c.env.KV as KVNamespace<any>,
+      c.env.PLATFORM_PREFIX,
+    );
 
-        const analyticsClient = new Analytics({
-            requestId,
-            environment: c.env.ENVIRONMENT,
-        });
+    const analyticsClient = new Analytics({
+      requestId,
+      environment: c.env.ENVIRONMENT,
+    });
 
-        const metricsClient = new LogdrainMetrics({
-            requestId,
-            environment: c.env.ENVIRONMENT,
-        });
+    const metricsClient = new LogdrainMetrics({
+      requestId,
+      environment: c.env.ENVIRONMENT,
+    });
 
-        const dataRepository: Repository = {
-            apiKey: new APIKeyRepository(db),
-            user: new UserRepository(db),
-        }
-
-        /**
-         * The context object containing initialized services.
-         * @property {ReturnType<typeof initDB>} db - The database connection.
-         * @property {ConsoleLogger} logger - The logger instance.
-         * @property {ServiceCache} cache - The cache service instance.
-         * @property {LogdrainMetrics} metrics - The metrics service instance.
-         * @property {Analytics} analytics - The analytics service instance.
-         */
-        c.set("ctx", {
-            db: db,
-            logger: logger,
-            cache: cache,
-            metrics: metricsClient,
-            analytics: analyticsClient,
-        });
-
-        c.set("repo", dataRepository);
-
-        await next();
+    const dataRepository: Repository = {
+      apiKey: new APIKeyRepository(db),
+      user: new UserRepository(db),
     };
+
+    /**
+     * The context object containing initialized services.
+     * @property {ReturnType<typeof initDB>} db - The database connection.
+     * @property {ConsoleLogger} logger - The logger instance.
+     * @property {ServiceCache} cache - The cache service instance.
+     * @property {LogdrainMetrics} metrics - The metrics service instance.
+     * @property {Analytics} analytics - The analytics service instance.
+     */
+    c.set("ctx", {
+      db: db,
+      logger: logger,
+      cache: cache,
+      metrics: metricsClient,
+      analytics: analyticsClient,
+    });
+
+    c.set("repo", dataRepository);
+
+    await next();
+  };
 }

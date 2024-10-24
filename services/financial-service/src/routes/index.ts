@@ -10,14 +10,14 @@ import { registerTransactionsApi } from "./transactions";
 import { registerUserRoutes } from "./users";
 
 export function setupRoutes(app: App) {
-    // register the accounts api route
-    registerAccountsApi(app);
-    registerHealthApi(app);
-    registerApiKeysApi(app);
-    registerAuthApi(app);
-    registerInstitutionsApi(app);
-    registerRatesApi(app);
-    registerStatementPdfApi(app);
-    registerTransactionsApi(app);
-    registerUserRoutes(app);
+  // register the accounts api route
+  registerAccountsApi(app);
+  registerHealthApi(app);
+  registerApiKeysApi(app);
+  registerAuthApi(app);
+  registerInstitutionsApi(app);
+  registerRatesApi(app);
+  registerStatementPdfApi(app);
+  registerTransactionsApi(app);
+  registerUserRoutes(app);
 }

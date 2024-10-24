@@ -166,37 +166,27 @@
       "indexes": {
         "api_keys_key_unique": {
           "name": "api_keys_key_unique",
-          "columns": [
-            "key"
-          ],
+          "columns": ["key"],
           "isUnique": true
         },
         "user_id_idx": {
           "name": "user_id_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": true
         },
         "key_idx": {
           "name": "key_idx",
-          "columns": [
-            "key"
-          ],
+          "columns": ["key"],
           "isUnique": true
         },
         "expiration_idx": {
           "name": "expiration_idx",
-          "columns": [
-            "expires_at"
-          ],
+          "columns": ["expires_at"],
           "isUnique": true
         },
         "environment_idx": {
           "name": "environment_idx",
-          "columns": [
-            "environment"
-          ],
+          "columns": ["environment"],
           "isUnique": true
         }
       },
@@ -205,12 +195,8 @@
           "name": "api_keys_user_id_users_id_fk",
           "tableFrom": "api_keys",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -328,9 +314,7 @@
       "indexes": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },

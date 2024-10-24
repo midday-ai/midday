@@ -63,7 +63,7 @@ export const TransactionsParamsSchema = z
         example: "true",
       }),
     syncCursor: z.string().nullable().optional().openapi({
-        example: "cursor-123",
+      example: "cursor-123",
     }),
   })
   .openapi("TransactionsParamsSchema");

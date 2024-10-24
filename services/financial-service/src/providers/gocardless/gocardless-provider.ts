@@ -33,13 +33,16 @@ export class GoCardLessProvider implements Provider {
     return this.#api.getHealthCheck();
   }
 
-  async getTransactions({ accountId, latest }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
+  async getTransactions({
+    accountId,
+    latest,
+  }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
     const response = await this.#api.getTransactions({
       latest,
       accountId,
     });
 
-    const data =  (response ?? []).map((transaction) =>
+    const data = (response ?? []).map((transaction) =>
       transformTransaction(transaction, accountId),
     );
 
@@ -47,7 +50,7 @@ export class GoCardLessProvider implements Provider {
       data,
       cursor: null,
       hasMore: false,
-    }
+    };
   }
 
   async getAccounts({ id }: GetAccountsRequest) {

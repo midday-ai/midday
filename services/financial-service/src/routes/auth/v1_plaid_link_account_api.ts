@@ -16,32 +16,32 @@ import { Routes } from "@/route-definitions/routes";
  * It returns a Plaid link object on success.
  */
 const route = createRoute({
-    tags: [...Routes.Auth.plaidLink.tags],
-    operationId: Routes.Auth.plaidLink.operationId,
-    security: [{ bearerAuth: [] }],
-    method: Routes.Auth.plaidLink.method,
-    path: Routes.Auth.plaidLink.path,
-    summary: Routes.Auth.plaidLink.summary,
-    request: {
-        body: {
-            content: {
-                "application/json": {
-                    schema: PlaidLinkBodySchema,
-                },
-            },
+  tags: [...Routes.Auth.plaidLink.tags],
+  operationId: Routes.Auth.plaidLink.operationId,
+  security: [{ bearerAuth: [] }],
+  method: Routes.Auth.plaidLink.method,
+  path: Routes.Auth.plaidLink.path,
+  summary: Routes.Auth.plaidLink.summary,
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: PlaidLinkBodySchema,
         },
+      },
     },
-    responses: {
-        200: {
-            content: {
-                "application/json": {
-                    schema: PlaidLinkSchema,
-                },
-            },
-            description: "Retrieve Link",
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: PlaidLinkSchema,
         },
-        ...ErrorResponses
+      },
+      description: "Retrieve Link",
     },
+    ...ErrorResponses,
+  },
 });
 
 /**
@@ -57,7 +57,7 @@ export type V1ApisPlaidLinkApiRoute = typeof route;
  * @typedef {z.infer<(typeof route.request.body)["content"]["application/json"]["schema"]>} V1ApisPlaidLinkApiRequest
  */
 export type V1ApisPlaidLinkApiRequest = z.infer<
-    (typeof route.request.body)["content"]["application/json"]["schema"]
+  (typeof route.request.body)["content"]["application/json"]["schema"]
 >;
 
 /**
@@ -67,19 +67,19 @@ export type V1ApisPlaidLinkApiRequest = z.infer<
  * @typedef {z.infer<(typeof route.responses)[200]["content"]["application/json"]["schema"]>} V1ApisPlaidLinkApiApiResponse
  */
 export type V1ApisPlaidLinkApiResponse = z.infer<
-    (typeof route.responses)[200]["content"]["application/json"]["schema"]
+  (typeof route.responses)[200]["content"]["application/json"]["schema"]
 >;
 
 /**
  * Registers the Plaid Link API route with the application.
- * 
+ *
  * @param {App} app - The Hono application instance.
  * @returns {void}
- * 
+ *
  * @remarks
  * This function sets up the OpenAPI route for creating a Plaid link token.
  * It handles the incoming request, interacts with the Plaid API, and returns the link token data.
- * 
+ *
  * @example
  * ```typescript
  * const app = new App();
@@ -87,45 +87,47 @@ export type V1ApisPlaidLinkApiResponse = z.infer<
  * ```
  */
 export const registerV1ApisPlaidLinkAccountsApi = (app: App) => {
-    app.openapi(route, async (c) => {
-        const envs = env(c);
+  app.openapi(route, async (c) => {
+    const envs = env(c);
 
-        // Extract request body parameters
-        const { userId, language, accessToken } = await c.req.json();
+    // Extract request body parameters
+    const { userId, language, accessToken } = await c.req.json();
 
-        // Initialize Plaid API client
-        const api = new PlaidApi({
-            kv: c.env.KV,
-            r2: c.env.STORAGE,
-            envs,
-        });
-
-        try {
-            // Create Plaid link token
-            const { data } = await api.linkTokenCreate({
-                userId,
-                language,
-                accessToken,
-            });
-
-            // Return the link token data
-            return c.json(
-                {
-                    data,
-                },
-                200,
-            );
-        } catch (error) {
-            const { message, code } = createErrorResponse(error, c.get("requestId"));
-            return c.json({
-                error: {
-                    message,
-                    docs: "https://engineering-docs.solomon-ai.app/errors",
-                    requestId: c.get("requestId"),
-                    code,
-                }
-            }, 400);
-        }
+    // Initialize Plaid API client
+    const api = new PlaidApi({
+      kv: c.env.KV,
+      r2: c.env.STORAGE,
+      envs,
     });
-}
 
+    try {
+      // Create Plaid link token
+      const { data } = await api.linkTokenCreate({
+        userId,
+        language,
+        accessToken,
+      });
+
+      // Return the link token data
+      return c.json(
+        {
+          data,
+        },
+        200,
+      );
+    } catch (error) {
+      const { message, code } = createErrorResponse(error, c.get("requestId"));
+      return c.json(
+        {
+          error: {
+            message,
+            docs: "https://engineering-docs.solomon-ai.app/errors",
+            requestId: c.get("requestId"),
+            code,
+          },
+        },
+        400,
+      );
+    }
+  });
+};

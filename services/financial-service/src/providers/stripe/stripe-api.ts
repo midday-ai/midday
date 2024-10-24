@@ -49,23 +49,28 @@ export class StripeApi {
         },
       );
 
-      const data = balanceTransactions.data.map((transaction) => ({
-        id: transaction.id,
-        amount: transaction.amount / 100,
-        currency: transaction.currency,
-        date: new Date(transaction.created * 1000).toISOString().split("T")[0],
-        account_id: accountId,
-        status: "posted",
-        balance: null,
-        category: transaction.type,
-        method: transaction.type,
-        name: transaction.description || "Stripe Transaction",
-        description: transaction.description,
-        currency_rate: null,
-        currency_source: null,
-        internal_id: transaction.id,
-        bank_account_id: accountId,
-      } as Transaction));
+      const data = balanceTransactions.data.map(
+        (transaction) =>
+          ({
+            id: transaction.id,
+            amount: transaction.amount / 100,
+            currency: transaction.currency,
+            date: new Date(transaction.created * 1000)
+              .toISOString()
+              .split("T")[0],
+            account_id: accountId,
+            status: "posted",
+            balance: null,
+            category: transaction.type,
+            method: transaction.type,
+            name: transaction.description || "Stripe Transaction",
+            description: transaction.description,
+            currency_rate: null,
+            currency_source: null,
+            internal_id: transaction.id,
+            bank_account_id: accountId,
+          }) as Transaction,
+      );
 
       return {
         data: data,

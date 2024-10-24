@@ -1,54 +1,54 @@
-import { openApiErrorResponses as ErrorResponses, errorSchemaFactory } from "@/errors";
+import {
+  openApiErrorResponses as ErrorResponses,
+  errorSchemaFactory,
+} from "@/errors";
 import { App } from "@/hono/app";
 import { Provider } from "@/providers";
 import { createRoute, z } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
-import {
-    DeleteAccountsParamsSchema,
-    DeleteSchema
-} from "./schema";
+import { DeleteAccountsParamsSchema, DeleteSchema } from "./schema";
 import { Routes } from "@/route-definitions/routes";
 
 const route = createRoute({
-    tags: [...Routes.FinancialAccounts.delete.tags],
-    operationId: Routes.FinancialAccounts.delete.operationId,
-    method: Routes.FinancialAccounts.delete.method,
-    path: Routes.FinancialAccounts.delete.path,
-    security: [{ bearerAuth: [] }],
-    summary: Routes.FinancialAccounts.delete.summary,
-    request: {
-        query: DeleteAccountsParamsSchema,
-    },
-    responses: {
-        200: {
-            content: {
-                "application/json": {
-                    schema: DeleteSchema,
-                },
-            },
-            description: "Delete accounts",
+  tags: [...Routes.FinancialAccounts.delete.tags],
+  operationId: Routes.FinancialAccounts.delete.operationId,
+  method: Routes.FinancialAccounts.delete.method,
+  path: Routes.FinancialAccounts.delete.path,
+  security: [{ bearerAuth: [] }],
+  summary: Routes.FinancialAccounts.delete.summary,
+  request: {
+    query: DeleteAccountsParamsSchema,
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: DeleteSchema,
         },
-        ...ErrorResponses,
-        429: {
-            description: "The api is protected from deletions",
-            content: {
-                "application/json": {
-                    schema: errorSchemaFactory(z.enum(["DELETE_PROTECTED"])).openapi("ErrDeleteProtected"),
-                },
-            },
-        },
+      },
+      description: "Delete accounts",
     },
+    ...ErrorResponses,
+    429: {
+      description: "The api is protected from deletions",
+      content: {
+        "application/json": {
+          schema: errorSchemaFactory(z.enum(["DELETE_PROTECTED"])).openapi(
+            "ErrDeleteProtected",
+          ),
+        },
+      },
+    },
+  },
 });
-
 
 export type V1ApisDeleteAccountsApiRoute = typeof route;
 export type V1ApisDeleteAccountsApiRequest = z.infer<
-    (typeof route.request.query)
+  typeof route.request.query
 >;
 export type V1ApisDeleteAccountsApiResponse = z.infer<
-    (typeof route.responses)[200]["content"]["application/json"]["schema"]
+  (typeof route.responses)[200]["content"]["application/json"]["schema"]
 >;
-
 
 /**
  * Registers the DELETE /v1/api.deleteAccountsApi endpoint with the Hono app.
@@ -82,7 +82,7 @@ export type V1ApisDeleteAccountsApiResponse = z.infer<
  * ```typescript
  * const app = new Hono();
  * registerV1ApisDeleteAccountsApi(app);
- * 
+ *
  * // The endpoint can then be called like this:
  * // DELETE /v1/api.accountsApi?provider=example&accountId=123&accessToken=xyz
  * ```
@@ -92,30 +92,30 @@ export type V1ApisDeleteAccountsApiResponse = z.infer<
  * @see {@link DeleteSchema} for the response schema.
  */
 export const registerV1ApisDeleteAccountsApi = (app: App) => {
-    app.openapi(route, async (c) => {
-        const envs = env(c);
-        const { provider, accountId, accessToken } = c.req.valid("query");
+  app.openapi(route, async (c) => {
+    const envs = env(c);
+    const { provider, accountId, accessToken } = c.req.valid("query");
 
-        const api = new Provider({
-            provider,
-            fetcher: c.env.TELLER_CERT,
-            kv: c.env.KV,
-            r2: c.env.BANK_STATEMENTS,
-            envs,
-        });
-
-        // Perform the account deletion
-        await api.deleteAccounts({
-            accessToken,
-            accountId,
-        });
-
-        // Return a success response
-        return c.json(
-            {
-                success: true,
-            },
-            200,
-        );
+    const api = new Provider({
+      provider,
+      fetcher: c.env.TELLER_CERT,
+      kv: c.env.KV,
+      r2: c.env.BANK_STATEMENTS,
+      envs,
     });
-}
+
+    // Perform the account deletion
+    await api.deleteAccounts({
+      accessToken,
+      accountId,
+    });
+
+    // Return a success response
+    return c.json(
+      {
+        success: true,
+      },
+      200,
+    );
+  });
+};

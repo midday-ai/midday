@@ -1,4 +1,7 @@
-import { openApiErrorResponses as ErrorResponses, ServiceApiError } from "@/errors";
+import {
+  openApiErrorResponses as ErrorResponses,
+  ServiceApiError,
+} from "@/errors";
 import { App } from "@/hono/app";
 import { Routes } from "@/route-definitions/routes";
 import { createRoute, z } from "@hono/zod-openapi";
@@ -10,27 +13,27 @@ import { GetUserResponse } from "./schemas";
  * This route is used to retrieve a single user's information based on their unique identifier.
  */
 const getUserRoute = createRoute({
-    tags: [...Routes.Users.get.tags],
-    operationId: Routes.Users.get.operationId,
-    method: Routes.Users.get.method,
-    path: Routes.Users.get.path,
-    summary: Routes.Users.get.summary,
-    request: {
-        params: z.object({
-            id: z.string(),
-        }),
-    },
-    responses: {
-        200: {
-            content: {
-                "application/json": {
-                    schema: GetUserResponse,
-                },
-            },
-            description: "User retrieved successfully",
+  tags: [...Routes.Users.get.tags],
+  operationId: Routes.Users.get.operationId,
+  method: Routes.Users.get.method,
+  path: Routes.Users.get.path,
+  summary: Routes.Users.get.summary,
+  request: {
+    params: z.object({
+      id: z.string(),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: GetUserResponse,
         },
-        ...ErrorResponses
+      },
+      description: "User retrieved successfully",
     },
+    ...ErrorResponses,
+  },
 });
 
 /**
@@ -47,37 +50,40 @@ const getUserRoute = createRoute({
  * @throws {ServiceApiError} When the user is not found.
  */
 export const registerV1GetUser = (app: App) => {
-    app.openapi(getUserRoute, async (c) => {
-        const { id } = c.req.valid('param');
-        // convert id to number
-        const userId = parseInt(id, 10);
+  app.openapi(getUserRoute, async (c) => {
+    const { id } = c.req.valid("param");
+    // convert id to number
+    const userId = parseInt(id, 10);
 
-        if (isNaN(userId)) {
-            throw new ServiceApiError({
-                code: 'BAD_REQUEST',
-                message: 'Invalid user ID',
-            });
-        }
+    if (isNaN(userId)) {
+      throw new ServiceApiError({
+        code: "BAD_REQUEST",
+        message: "Invalid user ID",
+      });
+    }
 
-        const repo = c.get('repo');
-        const userStore = repo.user;
+    const repo = c.get("repo");
+    const userStore = repo.user;
 
-        const user = await userStore.getById(userId);
-        if (!user) {
-            throw new ServiceApiError({
-                code: 'NOT_FOUND',
-                message: 'User not found',
-            });
-        }
+    const user = await userStore.getById(userId);
+    if (!user) {
+      throw new ServiceApiError({
+        code: "NOT_FOUND",
+        message: "User not found",
+      });
+    }
 
-        return c.json({
-            id: user.id.toString(),
-            name: user.name,
-            email: user.email,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt
-        }, 200);
-    });
+    return c.json(
+      {
+        id: user.id.toString(),
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+      200,
+    );
+  });
 };
 
 /** Type representing the GET user route configuration. */
@@ -87,4 +93,6 @@ export type V1GetUserRoute = typeof getUserRoute;
 export type V1GetUserRequest = z.infer<typeof getUserRoute.request.params>;
 
 /** Type representing the response body for a successful GET user request. */
-export type V1GetUserResponse = z.infer<(typeof getUserRoute.responses)[200]["content"]["application/json"]["schema"]>;
+export type V1GetUserResponse = z.infer<
+  (typeof getUserRoute.responses)[200]["content"]["application/json"]["schema"]
+>;

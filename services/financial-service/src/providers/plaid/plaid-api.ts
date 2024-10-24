@@ -88,7 +88,7 @@ export class PlaidApi {
   async getHealthCheck(): Promise<boolean> {
     try {
       const response = await fetch(
-        "https://status.plaid.com/api/v2/status.json"
+        "https://status.plaid.com/api/v2/status.json",
       );
 
       const data = (await response.json()) as GetStatusResponse;
@@ -253,7 +253,7 @@ export class PlaidApi {
     } catch (error: unknown) {
       console.error(
         "Error creating link token:",
-        JSON.stringify(error, null, 2)
+        JSON.stringify(error, null, 2),
       );
       throw error;
     }
@@ -329,7 +329,7 @@ export class PlaidApi {
             })
             .then(({ data }) => {
               return data.institutions;
-            })
+            }),
         ),
     });
   }
@@ -367,7 +367,7 @@ export class PlaidApi {
           accountIdToStatements.set(statement.statement_id, statement);
           statementIdToAccountId.set(
             statement.statement_id,
-            account.account_id
+            account.account_id,
           );
         });
 
@@ -382,7 +382,7 @@ export class PlaidApi {
           statement_id: statement.statement_id,
           month: statement.month.toString(),
           year: statement.year.toString(),
-        })
+        }),
       );
 
       return {

@@ -1,4 +1,4 @@
-import { withRetry } from '@/utils/retry';
+import { withRetry } from "@/utils/retry";
 
 /**
  * Options for configuring cache behavior.
@@ -37,7 +37,7 @@ export class ServiceCache {
    * @param env - The environment object containing the KV namespace.
    * @param prefix - An optional prefix for all cache keys.
    */
-  constructor(kv: KVNamespace<any>, prefix: string = '') {
+  constructor(kv: KVNamespace<any>, prefix: string = "") {
     this.kv = kv;
     this.prefix = prefix;
   }
@@ -59,8 +59,8 @@ export class ServiceCache {
    */
   async get<T>(key: string, options: CacheOptions = {}): Promise<T | null> {
     const fullKey = this.getFullKey(key);
-    const cachedData = await this.kv.get<CachedValue<T>>(fullKey, 'json');
-    
+    const cachedData = await this.kv.get<CachedValue<T>>(fullKey, "json");
+
     if (!cachedData) {
       return null;
     }
@@ -69,7 +69,9 @@ export class ServiceCache {
     if (now > cachedData.timestamp + cachedData.revalidateAfter) {
       if (options.staleWhileRevalidate) {
         // Return stale data and trigger revalidation in the background
-        this.revalidate(key, async () => cachedData.value, options).catch(console.error);
+        this.revalidate(key, async () => cachedData.value, options).catch(
+          console.error,
+        );
         return cachedData.value;
       }
       // Data needs revalidation
@@ -85,9 +87,13 @@ export class ServiceCache {
    * @param value - The value to store.
    * @param options - Cache options for this operation.
    */
-  async set<T>(key: string, value: T, options: CacheOptions = {}): Promise<void> {
+  async set<T>(
+    key: string,
+    value: T,
+    options: CacheOptions = {},
+  ): Promise<void> {
     const { expirationTtl = 86400, revalidateAfter = 3600 } = options;
-    
+
     const cachedValue: CachedValue<T> = {
       value,
       timestamp: Date.now(),
@@ -95,7 +101,9 @@ export class ServiceCache {
     };
 
     const fullKey = this.getFullKey(key);
-    await withRetry(() => this.kv.put(fullKey, JSON.stringify(cachedValue), { expirationTtl }));
+    await withRetry(() =>
+      this.kv.put(fullKey, JSON.stringify(cachedValue), { expirationTtl }),
+    );
   }
 
   /**
@@ -114,9 +122,13 @@ export class ServiceCache {
    * @param options - Cache options for this operation.
    * @returns The new or existing value.
    */
-  async revalidate<T>(key: string, fetchFn: () => Promise<T>, options: CacheOptions = {}): Promise<T> {
+  async revalidate<T>(
+    key: string,
+    fetchFn: () => Promise<T>,
+    options: CacheOptions = {},
+  ): Promise<T> {
     const cachedValue = await this.get<T>(key, options);
-    
+
     if (cachedValue !== null && !options.staleWhileRevalidate) {
       return cachedValue;
     }
@@ -133,8 +145,10 @@ export class ServiceCache {
    */
   async getMany<T>(keys: string[]): Promise<(T | null)[]> {
     const fullKeys = keys.map(this.getFullKey.bind(this));
-    const results = await Promise.all(fullKeys.map(key => this.kv.get<CachedValue<T>>(key, 'json')));
-    return results.map(result => result ? result.value : null);
+    const results = await Promise.all(
+      fullKeys.map((key) => this.kv.get<CachedValue<T>>(key, "json")),
+    );
+    return results.map((result) => (result ? result.value : null));
   }
 
   /**
@@ -142,7 +156,10 @@ export class ServiceCache {
    * @param entries - An array of key-value pairs to store.
    * @param options - Cache options for this operation.
    */
-  async setMany<T>(entries: [string, T][], options: CacheOptions = {}): Promise<void> {
+  async setMany<T>(
+    entries: [string, T][],
+    options: CacheOptions = {},
+  ): Promise<void> {
     const { expirationTtl = 86400, revalidateAfter = 3600 } = options;
     const now = Date.now();
 
@@ -153,7 +170,9 @@ export class ServiceCache {
         revalidateAfter: revalidateAfter * 1000,
       };
       const fullKey = this.getFullKey(key);
-      return withRetry(() => this.kv.put(fullKey, JSON.stringify(cachedValue), { expirationTtl }));
+      return withRetry(() =>
+        this.kv.put(fullKey, JSON.stringify(cachedValue), { expirationTtl }),
+      );
     });
 
     await Promise.all(setOperations);
@@ -164,7 +183,7 @@ export class ServiceCache {
    * @param keys - An array of keys to delete.
    */
   async deleteMany(keys: string[]): Promise<void> {
-    const fullKeys = keys.map(key => this.getFullKey(key));
+    const fullKeys = keys.map((key) => this.getFullKey(key));
 
     // Process deletions sequentially to ensure consistency
     for (const key of fullKeys) {
@@ -183,13 +202,13 @@ export class ServiceCache {
       const result = await withRetry(() =>
         this.kv.list({
           prefix: this.prefix,
-          cursor
-        })
+          cursor,
+        }),
       );
 
       // Delete keys in series to ensure consistency
       if (result.keys.length > 0) {
-        const keysToDelete = result.keys.map(key => key.name);
+        const keysToDelete = result.keys.map((key) => key.name);
         for (const key of keysToDelete) {
           await withRetry(() => this.kv.delete(key));
         }
@@ -206,7 +225,11 @@ export class ServiceCache {
    * @param options - Cache options for this operation.
    * @returns The cached or newly fetched value.
    */
-  async getOrSet<T>(key: string, fetchFn: () => Promise<T>, options: CacheOptions = {}): Promise<T> {
+  async getOrSet<T>(
+    key: string,
+    fetchFn: () => Promise<T>,
+    options: CacheOptions = {},
+  ): Promise<T> {
     const cachedValue = await this.get<T>(key, options);
     if (cachedValue !== null) {
       return cachedValue;
@@ -222,14 +245,14 @@ export class ServiceCache {
    * @param prefix - The prefix to scan for (in addition to the cache's own prefix).
    * @yields Pairs of [key, value] for each matching item.
    */
-  async *scan<T>(prefix: string = ''): AsyncIterableIterator<[string, T]> {
+  async *scan<T>(prefix: string = ""): AsyncIterableIterator<[string, T]> {
     let cursor: string | undefined;
     const fullPrefix = this.getFullKey(prefix);
-    
+
     do {
       const result = await this.kv.list({ prefix: fullPrefix, cursor });
       for (const { name } of result.keys) {
-        const value = await this.kv.get<CachedValue<T>>(name, 'json');
+        const value = await this.kv.get<CachedValue<T>>(name, "json");
         if (value !== null) {
           const key = name.slice(this.prefix.length);
           yield [key, value.value];

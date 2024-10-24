@@ -1,9 +1,19 @@
 import { handleError, handleZodError } from "@/errors";
-import { authMiddleware, cacheMiddleware, cors, errorHandlerMiddleware, jsonFormattingMiddleware, loggingMiddleware } from "@/middleware/index";
+import {
+  authMiddleware,
+  cacheMiddleware,
+  cors,
+  errorHandlerMiddleware,
+  jsonFormattingMiddleware,
+  loggingMiddleware,
+} from "@/middleware/index";
 import { init } from "@/middleware/init";
 import { metrics } from "@/middleware/metrics";
 import { rateLimit } from "@/middleware/ratelimit";
-import { AuthenticationRequiredRoutes, CachedRoutes } from "@/route-definitions/routes";
+import {
+  AuthenticationRequiredRoutes,
+  CachedRoutes,
+} from "@/route-definitions/routes";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context as GenericContext } from "hono";
@@ -15,10 +25,10 @@ import type { HonoEnv } from "./env";
 
 /**
  * Creates and configures a new OpenAPIHono application.
- * 
+ *
  * This function sets up the middleware, caching, routes, Swagger UI,
  * and OpenAPI registry for the application.
- * 
+ *
  * @returns {OpenAPIHono<HonoEnv>} A configured OpenAPIHono application instance.
  */
 export function newApp(): OpenAPIHono<HonoEnv> {
@@ -35,7 +45,7 @@ export function newApp(): OpenAPIHono<HonoEnv> {
 
 /**
  * Sets up middleware for the OpenAPIHono application.
- * 
+ *
  * This function adds various middleware to the application, including:
  * - Pretty JSON formatting
  * - Error handling
@@ -50,7 +60,7 @@ export function newApp(): OpenAPIHono<HonoEnv> {
  * - Caching
  * - JSON formatting
  * - Context enrichment
- * 
+ *
  * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
  */
 function setupMiddleware(app: OpenAPIHono<HonoEnv>) {
@@ -71,22 +81,23 @@ function setupMiddleware(app: OpenAPIHono<HonoEnv>) {
 
 /**
  * Middleware function to set location and user agent in the context.
- * 
+ *
  * This function attempts to determine the client's location from various headers
  * and sets it in the context along with the user agent.
- * 
+ *
  * @param {GenericContext<HonoEnv>} c - The Hono context.
  * @param {() => Promise<void>} next - The next middleware function.
  * @returns {Promise<void>}
  */
-function setLocationAndUserAgent(c: GenericContext<HonoEnv>, next: () => Promise<void>) {
-  const location = (
-    c.req.header("True-Client-IP") ??
+function setLocationAndUserAgent(
+  c: GenericContext<HonoEnv>,
+  next: () => Promise<void>,
+) {
+  const location = (c.req.header("True-Client-IP") ??
     c.req.header("CF-Connecting-IP") ??
     // @ts-ignore - the cf object will be there on cloudflare
     c.req.raw?.cf?.colo ??
-    ""
-  ) as string;
+    "") as string;
 
   c.set("location", location);
   c.set("userAgent", c.req.header("User-Agent"));
@@ -96,35 +107,35 @@ function setLocationAndUserAgent(c: GenericContext<HonoEnv>, next: () => Promise
 
 /**
  * Sets up caching for specific GET routes in the application.
- * 
+ *
  * This function applies caching middleware only to GET requests for routes that should be cached.
- * 
+ *
  * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
  */
 function setupCaching(app: OpenAPIHono<HonoEnv>) {
-  CachedRoutes.forEach(route => app.get(route.path, cacheMiddleware));
+  CachedRoutes.forEach((route) => app.get(route.path, cacheMiddleware));
 }
 
 /**
  * Set up authentication middleware for the application's specific routes.
- * 
+ *
  * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
  */
 function setupAuthentication(app: OpenAPIHono<HonoEnv>) {
-  AuthenticationRequiredRoutes.forEach(route => app.use(route.path, authMiddleware));
+  AuthenticationRequiredRoutes.forEach((route) =>
+    app.use(route.path, authMiddleware),
+  );
 }
-
 
 /**
  * Sets up Swagger UI and OpenAPI documentation for the application.
- * 
+ *
  * This function configures the Swagger UI endpoint and defines the OpenAPI
  * specification for the API.
- * 
+ *
  * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
  */
 function setupSwagger(app: OpenAPIHono<HonoEnv>) {
-
   app.doc("/openapi", {
     openapi: "3.1.0",
     info: {
@@ -193,16 +204,15 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
       description: "Additional Documentation",
       url: "https://engineering-docs.solomon-ai.com",
     },
-    security: [
-      { bearerAuth: [] },
-      { apiKey: [] },
-    ],
-
+    security: [{ bearerAuth: [] }, { apiKey: [] }],
   });
 
-  app.get("/", swaggerUI({
-    url: "/openapi"
-  }));
+  app.get(
+    "/",
+    swaggerUI({
+      url: "/openapi",
+    }),
+  );
 
   // Mount API documentation at additional endpoints
   app.get("/docs", (c) => c.redirect("/"));
@@ -211,9 +221,9 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
 
 /**
  * Sets up the OpenAPI registry for the application.
- * 
+ *
  * This function registers the security scheme for bearer authentication.
- * 
+ *
  * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
  */
 function setupOpenAPIRegistry(app: OpenAPIHono<HonoEnv>) {

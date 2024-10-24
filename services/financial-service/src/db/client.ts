@@ -1,8 +1,8 @@
-import { DatabaseError, QueryError, TransactionError } from '@/errors';
-import { HonoEnv } from '@/hono/env';
-import { D1Database } from '@cloudflare/workers-types';
+import { DatabaseError, QueryError, TransactionError } from "@/errors";
+import { HonoEnv } from "@/hono/env";
+import { D1Database } from "@cloudflare/workers-types";
 import { ExtractTablesWithRelations } from "drizzle-orm";
-import { drizzle, DrizzleD1Database } from 'drizzle-orm/d1';
+import { drizzle, DrizzleD1Database } from "drizzle-orm/d1";
 import { SQLiteTransaction } from "drizzle-orm/sqlite-core";
 import { Context as HonoContext } from "hono";
 import * as schema from "./schema";
@@ -24,13 +24,18 @@ export class DatabaseClient {
    * @param dbOrContext - Either a D1Database instance or a HonoContext with HonoEnv.
    * @throws {DatabaseError} If there's an error initializing the database client.
    */
-  public constructor(dbOrContext: D1Database | HonoContext<HonoEnv> | DrizzleDB) {
-    if ('env' in dbOrContext && 'DB' in dbOrContext.env) {
+  public constructor(
+    dbOrContext: D1Database | HonoContext<HonoEnv> | DrizzleDB,
+  ) {
+    if ("env" in dbOrContext && "DB" in dbOrContext.env) {
       this.initialize(dbOrContext.env.DB);
-    } else if ('prepare' in dbOrContext && typeof dbOrContext.prepare === 'function') {
+    } else if (
+      "prepare" in dbOrContext &&
+      typeof dbOrContext.prepare === "function"
+    ) {
       // Check for a method that D1Database should have
       this.initialize(dbOrContext as D1Database);
-    } else if ('all' in dbOrContext && typeof dbOrContext.all === 'function') {
+    } else if ("all" in dbOrContext && typeof dbOrContext.all === "function") {
       // This is likely a DrizzleDB instance
       this.db = dbOrContext as DrizzleDB;
     } else {

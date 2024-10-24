@@ -26,28 +26,30 @@ const route = createRoute({
       },
       description: "Retrieve rates",
     },
-    ...ErrorResponses
+    ...ErrorResponses,
   },
 });
 
 export type GetRatesRoute = typeof route;
-export type GetRatesResponse = z.infer<(typeof route.responses)[200]["content"]["application/json"]["schema"]>;
+export type GetRatesResponse = z.infer<
+  (typeof route.responses)[200]["content"]["application/json"]["schema"]
+>;
 
 /**
  * Registers the GET rates endpoint with the application.
- * 
+ *
  * This function sets up a route to handle the retrieval of rates. It performs the following steps:
  * 1. Attempts to fetch rates using the getRates utility function.
  * 2. Returns the rates data on success.
  * 3. Handles any errors and returns an appropriate error response.
- * 
+ *
  * @param {App} app - The OpenAPIHono application instance.
  * @returns {void}
- * 
+ *
  * @example
  * // Usage in main application file
  * import { registerGetRates } from './routes/rates';
- * 
+ *
  * const app = new App();
  * registerGetRates(app);
  */
@@ -65,14 +67,17 @@ export const registerGetRates = (app: App) => {
       // Handle any errors that occur during the search or data processing
       const { message, code } = createErrorResponse(error, c.get("requestId"));
 
-      return c.json({
-        error: {
-          message,
-          docs: "https://engineering-docs.solomon-ai.app/errors",
-          requestId: c.get("requestId"),
-          code,
-        }
-      }, 400);
+      return c.json(
+        {
+          error: {
+            message,
+            docs: "https://engineering-docs.solomon-ai.app/errors",
+            requestId: c.get("requestId"),
+            code,
+          },
+        },
+        400,
+      );
     }
   });
 };

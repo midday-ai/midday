@@ -255,7 +255,7 @@ export const Routes = {
       operationId: "post.users",
       summary: "Create User",
       tags: ["users"],
-      authenticationRequired: false
+      authenticationRequired: false,
     },
     get: {
       path: "/v1/api.users/{id}",
@@ -289,10 +289,13 @@ export const Routes = {
 } as const;
 
 export const CachedRoutes: RouteDefinition[] = Object.values(Routes)
-  .flatMap(routeGroup => Object.values(routeGroup))
-  .filter(route => route.shouldCache);
+  .flatMap((routeGroup) => Object.values(routeGroup))
+  .filter((route) => route.shouldCache);
 
-export const AllRoutes: RouteDefinition[] = Object.values(Routes)
-  .flatMap(routeGroup => Object.values(routeGroup));
+export const AllRoutes: RouteDefinition[] = Object.values(Routes).flatMap(
+  (routeGroup) => Object.values(routeGroup),
+);
 
-export const AuthenticationRequiredRoutes: RouteDefinition[] = AllRoutes.filter(route => route.authenticationRequired === true);
+export const AuthenticationRequiredRoutes: RouteDefinition[] = AllRoutes.filter(
+  (route) => route.authenticationRequired === true,
+);
