@@ -16,24 +16,24 @@ export const APIKeysSchema = z.object({
 }).openapi("APIKeysSchema");
 
 export const APIKeyParamsSchema = z.object({
-    id: z.number().openapi({
+    id: z.string().openapi({
         description: "API Key ID",
         param: {
             name: "id",
             in: "query",
         },
-        example: 1,
+        example: "1",
     }),
 }).openapi("APIKeyParamsSchema");
 
 export const APIKeysQuerySchema = z.object({
-    userId: z.number().openapi({
+    userId: z.string().openapi({
         description: "User ID",
         param: {
             name: "userId",
             in: "query",
         },
-        example: 1,
+        example: "1",
     }),
 }).openapi("APIKeysQuerySchema");
 

@@ -17,7 +17,7 @@ const getUserRoute = createRoute({
     summary: Routes.Users.get.summary,
     request: {
         params: z.object({
-            id: z.number(),
+            id: z.string(),
         }),
     },
     responses: {
@@ -51,8 +51,10 @@ export const registerV1GetUser = (app: App) => {
         const { id } = c.req.valid('param');
         const repo = c.get("repo");
         const userStore = repo.user;
-
-        const user = await userStore.getById(id);
+        // convert id to number
+        const userId = parseInt(id, 10);
+        
+        const user = await userStore.getById(userId);
         if (!user) {
             throw new ServiceApiError({
                 code: "NOT_FOUND",

@@ -1,8 +1,8 @@
 import { openApiErrorResponses as ErrorResponses } from "@/errors";
 import { App } from "@/hono/app";
+import { Routes } from "@/route-definitions/routes";
 import { createRoute, z } from "@hono/zod-openapi";
 import { APIKeysQuerySchema, APIKeysSchema } from "./schema";
-import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route configuration for retrieving API keys.
@@ -61,6 +61,8 @@ export const registerV1GetApiKeys = (app: App) => {
         const query = c.req.valid("query");
         const { userId } = query;
 
+        // convert id to number
+        const id = parseInt(userId, 10);
         /**
          * Retrieve the API key repository from the context.
          * @type {APIKeyRepository}
@@ -71,7 +73,7 @@ export const registerV1GetApiKeys = (app: App) => {
          * Fetch API keys associated with the userId.
          * @type {Array<APIKey>}
          */
-        const apiKeys = await repository.apiKey.getByUserId(userId);
+        const apiKeys = await repository.apiKey.getByUserId(id);
 
         /**
          * @todo Implement caching for API keys in Redis.

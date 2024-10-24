@@ -1,12 +1,12 @@
 import { openApiErrorResponses as ErrorResponses } from "@/errors";
 import { App } from "@/hono/app";
+import { Routes } from "@/route-definitions/routes";
 import { createErrorResponse } from "@/utils/error";
 import { SearchClient } from "@/utils/search";
 import { createRoute, z } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { InstitutionParamsSchema, InstitutionsSchema } from "./schema";
 import { SearchResult } from "./types";
-import { Routes } from "@/route-definitions/routes";
 
 /**
  * OpenAPI route configuration for the Get Institutions API.

@@ -12,7 +12,7 @@ const deleteUserRoute = createRoute({
     summary: Routes.Users.delete.summary,
     request: {
         params: z.object({
-            id: z.number(),
+            id: z.string(),
         }),
     },
     responses: {
@@ -34,7 +34,10 @@ export const registerV1DeleteUser = (app: App) => {
         const repo = c.get("repo");
         const userStore = repo.user
 
-        const isDeleted = await userStore.delete(id);
+        // convert id to number
+        const userId = parseInt(id, 10);
+
+        const isDeleted = await userStore.delete(userId);
         if (!isDeleted) {
             throw new ServiceApiError({
                 code: "NOT_FOUND",

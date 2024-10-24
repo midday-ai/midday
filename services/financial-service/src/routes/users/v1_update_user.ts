@@ -12,7 +12,7 @@ const updateUserRoute = createRoute({
     summary: Routes.Users.update.summary,
     request: {
         params: z.object({
-            id: z.number(),
+            id: z.string(),
         }),
         body: {
             content: {
@@ -40,8 +40,10 @@ export const registerV1UpdateUser = (app: App) => {
         const repo = c.get("repo");
         const { user: userDb } = repo;
         const updateData = c.req.valid('json');
-
-        const updatedUser = await userDb.update(id, updateData);
+        // convert id to number
+        const userId = parseInt(id, 10);
+        
+        const updatedUser = await userDb.update(userId, updateData);
         if (!updatedUser) {
             throw new ServiceApiError({
                 code: "NOT_FOUND",
