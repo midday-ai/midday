@@ -95,7 +95,7 @@ export function newId<TPrefix extends keyof typeof prefixes>(prefix: TPrefix) {
     buf.set(randomBytes, 8);
 
     // Add process-specific entropy
-    const processEntropy = BigInt(process.pid || Date.now()) & 0xFFFFn;
+    const processEntropy = BigInt(nanoid(10) || Date.now()) & 0xFFFFn;
     buf[22] = Number(processEntropy >> 8n) & 255;
     buf[23] = Number(processEntropy) & 255;
 
@@ -151,4 +151,8 @@ export function extractTimestamp(id: string): {
         sequence,
         counter
     };
+}
+
+function nanoid(arg0: number): string | number | bigint | boolean {
+    throw new Error("Function not implemented.");
 }

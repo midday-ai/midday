@@ -12,7 +12,7 @@ import { z } from "zod";
  * 
  * @example
  * ```typescript
- * const config = databaseEnv.parse(process.env);
+ * const config = databaseEnv.parse(env);
  * console.log(config.DATABASE_HOST); // "localhost:3900" or the value in the environment
  * ```
  */
@@ -31,7 +31,7 @@ export const databaseEnv = z.object({
  * 
  * @example
  * ```typescript
- * const config = integrationTestEnv.parse(process.env);
+ * const config = integrationTestEnv.parse(env);
  * console.log(config.ENGINE_BASE_URL); // "http://localhost:8787" or the value in the environment
  * ```
  */
@@ -52,7 +52,7 @@ export const integrationTestEnv = databaseEnv.merge(
  * 
  * @example
  * ```typescript
- * const config = benchmarkTestEnv.parse(process.env);
+ * const config = benchmarkTestEnv.parse(env);
  * console.log(config.PLANETFALL_URL); // A valid URL as set in the environment
  * ```
  */
