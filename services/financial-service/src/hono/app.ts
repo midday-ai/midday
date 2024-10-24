@@ -153,28 +153,6 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
         description: "Local Development",
       },
     ],
-    tags: [
-      {
-        name: "Authentication",
-        description: "Endpoints for managing API authentication",
-      },
-      {
-        name: "Transactions",
-        description: "Financial transaction processing and management",
-      },
-      {
-        name: "Accounts",
-        description: "User account management endpoints",
-      },
-      {
-        name: "Analytics",
-        description: "Financial data analysis and reporting",
-      },
-      {
-        name: "Webhooks",
-        description: "Event notification and webhook management",
-      },
-    ],
     "x-speakeasy-retries": {
       strategy: "backoff",
       backoff: {
@@ -204,7 +182,7 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
     },
     externalDocs: {
       description: "Additional Documentation",
-      url: "https://docs.solomon-ai.com",
+      url: "https://engineering-docs.solomon-ai.com",
     },
     security: [
       { bearerAuth: [] },
