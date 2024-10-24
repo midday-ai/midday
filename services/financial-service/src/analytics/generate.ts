@@ -108,11 +108,6 @@ export function newId<TPrefix extends keyof typeof prefixes>(prefix: TPrefix) {
         process: processEntropy.toString(16).padStart(4, '0')
     };
 
-    // Log components in development
-    if (process.env.NODE_ENV === 'development') {
-        console.debug('ID Components:', components);
-    }
-
     return `${prefixes[prefix]}_${b58.encode(buf)}` as const;
 }
 

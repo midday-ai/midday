@@ -10,10 +10,6 @@ import { cors } from "hono/cors";
  * @returns {Response | Promise<void>} The CORS-enabled response or void if passing to next middleware
  */
 export const corsMiddleware = (c: Context, next: Next) => {
-  if (process.env.NODE_ENV === "development") {
-    return next();
-  }
-
   return cors({
     origin: ["https://app-business.solomon-ai.app", "http://localhost:3001"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],

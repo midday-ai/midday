@@ -1,4 +1,3 @@
-
 import { Env, zEnv } from "./env";
 import { newApp } from "./hono/app";
 import { ConsoleLogger } from "./logger";
