@@ -53,8 +53,6 @@ export function AIMenu({ onOpenChange, editor }: AIMenuProps) {
   });
 
   const handleGenerate = async (instructions: string) => {
-    // setThinking(true);
-
     const selectedText = editor?.state.doc.textBetween(
       editor?.state.selection?.from,
       editor?.state.selection?.to,
@@ -62,7 +60,6 @@ export function AIMenu({ onOpenChange, editor }: AIMenuProps) {
     );
 
     if (!selectedText) {
-      // setThinking(false);
       return;
     }
 
@@ -81,7 +78,6 @@ export function AIMenu({ onOpenChange, editor }: AIMenuProps) {
       console.error("Error generating content:", error);
     } finally {
       onOpenChange(false);
-      // setThinking(false);
     }
   };
 

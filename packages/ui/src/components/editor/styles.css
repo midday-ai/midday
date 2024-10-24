@@ -15,3 +15,11 @@
 .tiptap .bubble-menu {
   @apply flex gap-2;
 }
+
+.tiptap p.is-empty::before {
+  color: #404040;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
