@@ -1,5 +1,5 @@
-import { describe, expect, it } from "bun:test";
-import { type AccountType, getType } from "./account";
+import { type AccountType, getType } from "@/utils/account";
+import { describe, expect, it } from "vitest";
 
 describe("getType function", () => {
   it("should return 'depository' for 'depository' input", () => {

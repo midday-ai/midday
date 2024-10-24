@@ -1,5 +1,5 @@
+import { withRetry } from "@/utils/retry"; // Adjust the path accordingly
 import { describe, expect, it, vi } from 'vitest';
-import { withRetry } from './retry'; // Adjust the path accordingly
 
 describe('withRetry', () => {
     it('should resolve with the correct result on the first attempt', async () => {

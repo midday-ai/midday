@@ -3,7 +3,7 @@ import {
   transformAccountBalance,
   transformTransaction,
 } from "@/providers/gocardless/transform";
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 
 test("Transform income transaction", () => {
   expect(

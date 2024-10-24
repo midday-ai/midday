@@ -1,5 +1,5 @@
+import { filter, match } from "@/utils//wildcard";
 import { describe, expect, it } from "vitest";
-import { filter, match } from "./wildcard";
 
 describe("filter", () => {
     it("returns an empty array when there are no matches", () => {

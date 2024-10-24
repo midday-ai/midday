@@ -3,7 +3,7 @@ import {
   transformAccountBalance,
   transformTransaction,
 } from "@/providers/plaid/transform";
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 import {
   AccountSubtype,
   AccountType,

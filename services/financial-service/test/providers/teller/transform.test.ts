@@ -3,7 +3,7 @@ import {
   transformAccountBalance,
   transformTransaction,
 } from "@/providers/teller/transform";
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 
 test("Transform pending transaction", () => {
   expect(
