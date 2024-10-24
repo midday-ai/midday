@@ -1,5 +1,5 @@
 import type { TaskContext } from "vitest";
-import { DrizzleDB, initDB } from "../db";
+import { DrizzleDB, initDB } from "../db/client";
 import { Env } from "@/env";
 
 /**

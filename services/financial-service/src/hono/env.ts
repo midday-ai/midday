@@ -2,7 +2,7 @@ import { Analytics } from '@/analytics';
 import { ServiceCache } from '@/cache';
 import { APIKeyRepository } from '@/data/apiKeyRepository';
 import { UserRepository } from '@/data/userRepository';
-import { DrizzleDB } from '@/db';
+import { DrizzleDB } from '@/db/client';
 import { User } from '@/db/schema';
 import { Env } from '@/env';
 import { Logger } from '@/logger';

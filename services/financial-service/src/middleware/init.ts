@@ -2,7 +2,7 @@ import { Analytics, newId } from "@/analytics";
 import { ServiceCache } from "@/cache";
 import { APIKeyRepository } from "@/data/apiKeyRepository";
 import { UserRepository } from "@/data/userRepository";
-import { DatabaseClient } from "@/db";
+import { DatabaseClient } from "@/db/client";
 import { ConsoleLogger } from "@/logger";
 import { LogdrainMetrics } from "@/metric/logdrain";
 import { formatPlatformPrefix } from "@/utils/formatters";

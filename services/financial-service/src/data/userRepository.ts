@@ -1,4 +1,4 @@
-import { DrizzleDB } from '../db';
+import { DrizzleDB } from '../db/client';
 import { eq, like, or } from 'drizzle-orm';
 import { users, type NewUser, type User } from '../db/schema';
 

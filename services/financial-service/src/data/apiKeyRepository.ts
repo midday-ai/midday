@@ -1,5 +1,5 @@
-import { DrizzleDB } from '../db';
 import { and, eq, gte, lte, sql } from 'drizzle-orm';
+import { DrizzleDB } from '../db/client';
 import { apiKeys, type APIKey } from '../db/schema';
 
 export class APIKeyRepository {
