@@ -1,10 +1,10 @@
 import { DatabaseClient, DrizzleDB } from '@/db';
 import { APIKeyRepository } from '@/db-repository/api-key-repository';
 import { UserRepository } from '@/db-repository/user-repository';
-import { createDefaultPreferences, UserPreferences, UserRole } from '@/db/schema/users';
+import { UserRole } from '@/db/schema/users';
 import { cleanupTestContext, setupTestContext, TestContext } from '@/test-util/test-context';
 import { env } from 'cloudflare:test';
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 describe('UserRepository Tests', () => {
     let repository: UserRepository;

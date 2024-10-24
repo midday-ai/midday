@@ -4,7 +4,7 @@ import { APIKey } from '@/db/schema/api-keys';
 import { cleanupTestContext, setupTestContext, TestContext } from '@/test-util/test-context';
 import { APIKeyGenerator } from '@/test-util/utils/api-key-generator';
 import { env } from 'cloudflare:test';
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 describe('APIKeyRepository Integration Tests', () => {
     let repository: APIKeyRepository;
