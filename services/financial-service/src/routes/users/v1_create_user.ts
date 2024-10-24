@@ -51,8 +51,8 @@ export const registerV1CreateUser = (app: App) => {
             role: user.role,
             avatarUrl: user.avatarUrl,
             bio: user.bio,
-            createdAt: user.createdAt.toISOString(),
-            updatedAt: user.updatedAt.toISOString(),
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
         }, 200);
     });
 };
