@@ -16,7 +16,7 @@ export let zEnv = z.object({
   STORAGE: z.custom<R2Bucket>((ns) => typeof ns === "object"),
   BANK_STATEMENTS: z.custom<R2Bucket>((ns) => typeof ns === "object"),
   RATE_LIMITER: z.custom<RateLimit>((ns) => typeof ns === "object"),
-  TELLER_CERT: z.custom<Fetcher>((ns) => typeof ns === "object"),
+  TELLER_CERT: z.custom<Fetcher>((ns) => typeof ns === "object").optional(),
   USER_ACTIONS_QUEUE: z
     .custom<Queue<UserActionMessageBody>>((q) => typeof q === "object")
     .optional(),

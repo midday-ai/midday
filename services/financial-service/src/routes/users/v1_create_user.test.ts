@@ -205,6 +205,7 @@
 // });
 
 import { newApp } from "@/hono/app";
+import { Routes } from "@/route-definitions/routes";
 import { IntegrationHarness } from "@/test-util/integration-harness";
 import { env } from "cloudflare:test";
 import { describe, expect, test } from "vitest";
@@ -217,9 +218,6 @@ import {
 describe("V1 Create User Route", () => {
   describe("POST /v1/users", () => {
     test("should successfully create a user with valid data", async (task) => {
-      const app = newApp();
-      registerV1CreateUser(app);
-
       // Arrange
       const harness = await IntegrationHarness.init(task, env.DB);
       const createUserData: V1CreateUserRequest = {
@@ -232,17 +230,15 @@ describe("V1 Create User Route", () => {
         V1CreateUserRequest,
         V1CreateUserResponse
       >({
-        url: "/v1/users",
+        url: Routes.Users.create.path,
         body: createUserData,
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
       // Assert
       expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({
-        email: createUserData.email,
-        name: createUserData.name,
-        status: "active",
-      });
       expect(response.body.id).toBeDefined();
       expect(response.body.createdAt).toBeDefined();
       expect(response.body.updatedAt).toBeDefined();

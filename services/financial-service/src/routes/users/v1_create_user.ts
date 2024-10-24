@@ -1,6 +1,5 @@
 import {
-  openApiErrorResponses as ErrorResponses,
-  ServiceApiError,
+    openApiErrorResponses as ErrorResponses
 } from "@/errors";
 import { App } from "@/hono/app";
 import { Routes } from "@/route-definitions/routes";
@@ -40,6 +39,7 @@ export const registerV1CreateUser = (app: App) => {
 
     const repo = c.get("repo");
     const userStore = repo.user;
+
     const user = await userStore.create({
       email: userData.email,
       name: userData.name,
