@@ -71,21 +71,34 @@ export class Analytics {
      * @returns A promise that resolves to null after the operation is complete
      */
     public async insertApiRequest(event: ApiAnalyticsEvent): Promise<null> {
-        // Create a new object without the request body
-        const strippedEvent = {
-            ...event,
-            request_body: undefined, // Remove the request body as we do not want to log it (may contain PII)
-            response_body: undefined, // Remove the response body as we do not want to log it (may contain PII)
-        };
-        
-        this.logger.info("Inserting API request", {
-            event: strippedEvent,
-        });
+        try {
+            // Create a new object without the request body
+            const strippedEvent = {
+                ...event,
+                request_body: undefined, // Remove the request body as we do not want to log it (may contain PII)
+                response_body: undefined, // Remove the response body as we do not want to log it (may contain PII)
+            };
 
-        // Placeholder for actual API request insertion logic
-        // TODO: Implement the actual API request insertion logic here
-        await Promise.resolve();
-        return null;
+            this.logger.info("Inserting API request", {
+                event: strippedEvent,
+            });
+
+            // Placeholder for actual API request insertion logic
+            // TODO: Implement the actual API request insertion logic here
+            await Promise.resolve();
+
+            return null;
+        } catch (error) {
+            this.logger.error("Failed to insert API request", {
+                error: error instanceof Error ? error.message : 'Unknown error',
+                event: {
+                    ...event,
+                    request_body: undefined,
+                    response_body: undefined,
+                }
+            });
+            throw error;
+        }
     }
 
     // constructor(opts: {
