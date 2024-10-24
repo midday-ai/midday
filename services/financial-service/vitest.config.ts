@@ -53,7 +53,7 @@ export default defineWorkersProject(async () => {
             exclude: ["./src/integration/**", "./src/routes/**", "./src/benchmarks/**"],
             reporters: ["html", "verbose"],
             outputFile: "./.vitest/index.html",
-            include: ["./**/*.test.ts"],
+            include: ["./**/*.test.ts", "./**/*.test.tsx"],
             alias: {
                 "@/": new URL("./src/", import.meta.url).pathname,
             },
