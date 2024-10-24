@@ -1,3 +1,4 @@
+import { env } from "hono/adapter";
 import type { TaskContext } from "vitest";
 import type { z } from "zod";
 import { benchmarkTestEnv } from "./env";
@@ -29,7 +30,7 @@ export class BenchmarkHarness extends Harness {
      */
     private constructor(t: TaskContext, db: D1Database) {
         super(t, db);
-        this.env = benchmarkTestEnv.parse(process.env);
+        this.env = benchmarkTestEnv.parse(env);
     }
 
     /**
