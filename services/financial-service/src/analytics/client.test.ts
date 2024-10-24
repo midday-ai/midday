@@ -245,8 +245,8 @@ describe('Analytics', () => {
         host: 'test-host',
         request_id: 'test-request-id',
         request_headers: [
-          { key: 'Content-Type', value: 'application/json' },
-          { key: 'Authorization', value: 'Bearer token' }
+          'Content-Type: application/json',
+          'Authorization: Bearer token'
         ],
         response_status: 200,
         response_headers: [],
