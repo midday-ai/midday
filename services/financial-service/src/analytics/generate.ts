@@ -51,7 +51,7 @@ let counter = 0n;
  * - Total length of 24 bytes (192 bits)
  */
 export function newId<TPrefix extends keyof typeof prefixes>(prefix: TPrefix) {
-    const buf = new Uint8Array(24); // Increased to 24 bytes
+    const buf = new Uint8Array(24);
     const randomBytes = crypto.getRandomValues(new Uint8Array(16));
 
     // Get current timestamp
@@ -87,17 +87,19 @@ export function newId<TPrefix extends keyof typeof prefixes>(prefix: TPrefix) {
     // Insert 16-bit sequence number
     buf[4] = (sequence >>> 8) & 255;
     buf[5] = sequence & 255;
-    // Insert 16-bit process counter
+
+    // Insert 16-bit counter
     buf[6] = Number(counter >> 8n) & 255;
     buf[7] = Number(counter) & 255;
 
     // Insert random bytes
     buf.set(randomBytes, 8);
 
-    // Add process-specific entropy
-    const processEntropy = BigInt(nanoid(10) || Date.now()) & 0xFFFFn;
-    buf[22] = Number(processEntropy >> 8n) & 255;
-    buf[23] = Number(processEntropy) & 255;
+    // Replace process entropy with additional random bytes
+    const workerEntropy = new Uint8Array(2);
+    crypto.getRandomValues(workerEntropy);
+    buf[22] = workerEntropy[0];
+    buf[23] = workerEntropy[1];
 
     return `${prefixes[prefix]}_${b58.encode(buf)}` as const;
 }
@@ -151,8 +153,4 @@ export function extractTimestamp(id: string): {
         sequence,
         counter
     };
-}
-
-function nanoid(arg0: number): string | number | bigint | boolean {
-    throw new Error("Function not implemented.");
 }
