@@ -47,6 +47,8 @@ export default defineWorkersProject(async () => {
          * @property {object} poolOptions - Pool options for configuring worker instances.
          */
         test: {
+            globals: true, // This allows using describe, it, etc. without importing them
+            environment: 'node', // or 'jsdom' if you're testing browser code
             setupFiles: ["./test/apply-migrations.ts"],
             exclude: ["./src/integration/**", "./src/routes/**", "./src/benchmarks/**"],
             reporters: ["html", "verbose"],
