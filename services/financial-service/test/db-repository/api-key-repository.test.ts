@@ -165,7 +165,7 @@ describe('APIKeyRepository Integration Tests', () => {
                 scope: ['invalid' as any],
             });
 
-            await expect(repository.create(input)).rejects.toThrow('Invalid scope values provided');
+            await expect(repository.create(input)).rejects.toThrow('Validation failed: Invalid scope array');
         });
 
         it('should handle invalid IP addresses', async () => {
@@ -174,13 +174,13 @@ describe('APIKeyRepository Integration Tests', () => {
                 allowedIPs: ['invalid-ip'],
             });
 
-            await expect(repository.create(input)).rejects.toThrow('Invalid IP addresses provided');
+            await expect(repository.create(input)).rejects.toThrow('Validation failed: Invalid IP addresses array');
         });
 
         it('should validate boolean fields', async () => {
             const input = APIKeyGenerator.generate({
                 userId: testCtx.user.id,
-                isActive: 'not-a-boolean' as any,
+                revoked: 'not-a-boolean' as any,
             });
 
             await expect(repository.create(input)).rejects.toThrow(/Validation failed/);
