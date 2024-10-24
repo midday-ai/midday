@@ -292,10 +292,7 @@ export const CachedRoutes: RouteDefinition[] = Object.values(Routes)
   .flatMap(routeGroup => Object.values(routeGroup))
   .filter(route => route.shouldCache);
 
-export const AuthenticationRequiredRoutes: RouteDefinition[] = Object.values(Routes)
-  .flatMap(routeGroup => Object.values(routeGroup))
-  .filter(route => route.authenticationRequired);
-
 export const AllRoutes: RouteDefinition[] = Object.values(Routes)
   .flatMap(routeGroup => Object.values(routeGroup));
 
+export const AuthenticationRequiredRoutes: RouteDefinition[] = AllRoutes.filter(route => route.authenticationRequired === true);

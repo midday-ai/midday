@@ -50,7 +50,6 @@ export type V1DeleteApiKeyResponse = z.infer<(typeof route.responses)[200]["cont
  */
 export const registerV1DeleteApiKey = (app: App) => {
     app.openapi(route, async (c) => {
-        // const unkeyApi = new Unkey({ rootKey: c.env.UNKEY_API_KEY });
         const { id } = c.req.valid("query");
 
         /**
