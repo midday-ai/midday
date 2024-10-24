@@ -8,7 +8,6 @@ import {
     readD1Migrations,
 } from "@cloudflare/vitest-pool-workers/config";
 import path from "node:path";
-import { defineConfig } from 'vitest/config';
 
 /**
  * Defines the worker's project using Cloudflare Vitest Pool Workers and reads migrations.
@@ -69,6 +68,7 @@ export default defineWorkersProject(async () => {
                     singleWorker: true,
                     wrangler: {
                         configPath: "./wrangler.toml",
+                        environment: "local"
                     },
                     miniflare: {
                         /**
@@ -98,6 +98,13 @@ export default defineWorkersProject(async () => {
                         bindings: {
                             TEST_MIGRATIONS: migrations,
                         },
+                        d1Databases: ['DB'],
+                        kvNamespaces: ['KV'],
+                        r2Buckets: ['STORAGE', 'BANK_STATEMENTS'],
+                        rateLimits: ['RATE_LIMITER'],
+                        fetchers: ['TELLER_CERT'],
+                        queues: ['USER_ACTIONS_QUEUE'],
+                        compatibilityDate: '2024-04-01',
                     },
                 },
             },
