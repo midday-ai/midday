@@ -1,7 +1,7 @@
 import { DatabaseClient, DrizzleDB } from '@/db';
 import { APIKeyRepository } from '@/db-repository/api-key-repository';
 import { APIKey } from '@/db/schema/api-keys';
-import { cleanupTestContext, setupTestContext, TestContext } from '@/test-util/text-context';
+import { cleanupTestContext, setupTestContext, TestContext } from '@/test-util/test-context';
 import { APIKeyGenerator } from '@/test-util/utils/api-key-generator';
 import { env } from 'cloudflare:test';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';

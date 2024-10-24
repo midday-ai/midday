@@ -69,11 +69,28 @@ export class UserRepository {
 	 * @returns A Promise that resolves to the updated User object if found, or null if not found.
 	 */
 	async update(id: number, user: Partial<User>): Promise<User | null> {
-		const [updatedUser] = await this.db.update(users)
-			.set({ ...user, updatedAt: new Date() })
-			.where(eq(users.id, id))
-			.returning();
-		return updatedUser ? this.mapToUser(updatedUser) : null;
+		try {
+			// Ensure preferences is properly stringified if it exists
+			const updateData = {
+				...user,
+				updatedAt: new Date(),
+				preferences: user.preferences ?
+					(typeof user.preferences === 'string' ? user.preferences : JSON.stringify(user.preferences))
+					: user.preferences
+			};
+			const [updatedUser] = await this.db.update(users)
+				.set({
+					...updateData,
+					preferences: updateData.preferences ? JSON.parse(updateData.preferences) : null
+				})
+				.where(eq(users.id, id))
+				.returning();
+
+			return updatedUser ? this.mapToUser(updatedUser) : null;
+		} catch (error) {
+			console.error('Error updating user:', error);
+			throw error;
+		}
 	}
 
 	/**
@@ -191,7 +208,9 @@ export class UserRepository {
 			name: row.name,
 			passwordHash: row.passwordHash,
 			status: row.status,
-			preferences: row.preferences,
+			preferences: row.preferences ?
+				(typeof row.preferences === 'string' ? JSON.parse(row.preferences) : row.preferences)
+				: null,
 			role: row.role,
 			avatarUrl: row.avatarUrl,
 			bio: row.bio,
