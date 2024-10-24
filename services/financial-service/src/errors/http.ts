@@ -243,7 +243,7 @@ export function handleZodError(
  * @returns A Response object with error details.
  */
 export function handleError(err: Error, c: Context<HonoEnv>): Response {
-    const { logger } = c.get("ctx");
+    const logger = c.get("ctx")?.logger || console;
 
     /**
      * We can handle this very well, as it is something we threw ourselves

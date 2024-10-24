@@ -67,7 +67,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
             defaultFields: { environment: c.env.ENVIRONMENT },
         });
 
-        const db = new DatabaseClient(c.env.DB).getDB(c);
+        const db = new DatabaseClient(c.env.DB).getDb();
 
         const cache = new ServiceCache(c.env, c.env.PLATFORM_PREFIX);
 
