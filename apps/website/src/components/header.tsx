@@ -23,6 +23,7 @@ import menuEngine from "public/menu-engine.png";
 import { useEffect, useState } from "react";
 import { FaDiscord, FaGithub } from "react-icons/fa";
 import {
+  MdOutlineDashboardCustomize,
   MdOutlineDescription,
   MdOutlineIntegrationInstructions,
   MdOutlineMemory,
@@ -169,6 +170,11 @@ export function Header() {
           path: "https://docs.midday.ai",
           icon: <MdOutlineIntegrationInstructions size={20} />,
         },
+        {
+          path: "/components",
+          title: "Components",
+          icon: <MdOutlineDashboardCustomize size={20} />,
+        },
       ],
     },
   ];
@@ -282,7 +288,7 @@ export function Header() {
                       hidden && "hidden",
                     )}
                   >
-                    <ul className="p-4 w-[200px] flex-0 space-y-5 mt-2">
+                    <ul className="p-4 w-[200px] flex-0 space-y-4 mt-2">
                       {children.map((child) => {
                         return (
                           <li key={child.title}>

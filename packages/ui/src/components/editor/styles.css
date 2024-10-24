@@ -1,0 +1,17 @@
+.ProseMirror-focused {
+  @apply outline-none;
+}
+
+.tiptap {
+  @apply font-mono text-xs leading-loose;
+}
+
+.tiptap h2 {
+  @apply text-2xl;
+  @apply font-sans;
+  margin-bottom: 1.5rem;
+}
+
+.tiptap .bubble-menu {
+  @apply flex gap-2;
+}
