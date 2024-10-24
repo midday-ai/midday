@@ -13,7 +13,7 @@ export const Routes = {
     base: {
       path: "/v1/api.institutions",
       description: "Get information about financial institutions",
-      shouldCache: true,
+      shouldCache: false,
       method: "get",
       operationId: "get.institutions",
       summary: "List all financial institutions",
@@ -229,6 +229,7 @@ export const Routes = {
             operationId: "get.transactions",
             summary: "Get transactions",
             tags: ["transactions"],
+            shouldCache: false,
         },
         recurring: {
             path: "/v1/api.transactions/recurring",
@@ -237,6 +238,7 @@ export const Routes = {
             operationId: "get.transactions.recurring",
             summary: "Get recurring transactions",
             tags: ["transactions"],
+            shouldCache: false,
         },
     },
     Users: {
@@ -255,7 +257,7 @@ export const Routes = {
             operationId: "get.users",
             summary: "Get User",
             tags: ["users"],
-            shouldCache: false,
+            shouldCache: true,
         },
         update: {
             path: "/v1/api.users/{id}",
