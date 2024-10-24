@@ -1,29 +1,7 @@
 {
   "compilerOptions": {
     "moduleResolution": "Bundler",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
     "strict": true,
-    "types": [
-      "@types/node",
-      "@types/service-worker-mock",
-      "@cloudflare/workers-types/experimental",
-      "@cloudflare/vitest-pool-workers",
-      "@cloudflare/workers-types/2023-07-01",
-      "vitest/globals",
-      "node"
-    ],
-    "resolveJsonModule": true /* Enable importing .json files */,
-    "allowJs": true /* Allow JavaScript files to be a part of your program. Use the `checkJS` option to get errors from these files. */,
-    "checkJs": false /* Enable error reporting in type-checked JavaScript files. */,
-    "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
-    "lib": ["ESNext"],
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleDetection": "force",
     "noFallthroughCasesInSwitch": true,
     "noEmit": true /* Disable emitting files from a compilation. */,
     "isolatedModules": true /* Ensure that each file can be safely transpiled without relying on other imports. */,
@@ -39,7 +17,25 @@
     "noUnusedLocals": true /* Enable error reporting when a local variables aren't read. */,
     "noUnusedParameters": true /* Raise an error when a function parameter isn't read */,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
-    "typeRoots": ["./node_modules/@types", "./test"]
+    "resolveJsonModule": true /* Enable importing .json files */,
+    "allowJs": true /* Allow JavaScript files to be a part of your program. Use the `checkJS` option to get errors from these files. */,
+    "checkJs": false /* Enable error reporting in type-checked JavaScript files. */,
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "types": [
+      "vite/client",
+      "vitest/globals",
+      "@cloudflare/workers-types",
+      "@cloudflare/vitest-pool-workers"
+    ],
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["src/**/*", "test/**/*"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts"]
 }

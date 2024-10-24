@@ -2,7 +2,7 @@ import { Analytics, newId } from "@/analytics";
 import { ServiceCache } from "@/cache";
 import { APIKeyRepository } from "@/data/apiKeyRepository";
 import { UserRepository } from "@/data/userRepository";
-import { initDB } from "@/db";
+import { DatabaseClient } from "@/db";
 import { ConsoleLogger } from "@/logger";
 import { LogdrainMetrics } from "@/metric/logdrain";
 import { formatPlatformPrefix } from "@/utils/formatters";
@@ -67,7 +67,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
             defaultFields: { environment: c.env.ENVIRONMENT },
         });
 
-        const db = initDB(c.env.DB);
+        const db = new DatabaseClient(c.env.DB).getDB(c);
 
         const cache = new ServiceCache(c.env, c.env.PLATFORM_PREFIX);
 

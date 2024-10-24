@@ -2,7 +2,7 @@ import type { UserActionMessageBody } from "@/message/user-action-message";
 import { D1Database, Fetcher, KVNamespace, Queue, R2Bucket, RateLimit } from "@cloudflare/workers-types";
 import { z } from "zod";
 
-export const zEnv = z.object({
+export let zEnv = z.object({
     VERSION: z.string().default("unknown"),
     DB: z.custom<D1Database>((ns) => typeof ns === "object"),
     KV: z.custom<KVNamespace>((ns) => typeof ns === "object"),
