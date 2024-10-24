@@ -49,16 +49,24 @@ const getUserRoute = createRoute({
 export const registerV1GetUser = (app: App) => {
     app.openapi(getUserRoute, async (c) => {
         const { id } = c.req.valid('param');
-        const repo = c.get("repo");
-        const userStore = repo.user;
         // convert id to number
         const userId = parseInt(id, 10);
+
+        if (isNaN(userId)) {
+            throw new ServiceApiError({
+                code: 'BAD_REQUEST',
+                message: 'Invalid user ID',
+            });
+        }
+
+        const repo = c.get('repo');
+        const userStore = repo.user;
 
         const user = await userStore.getById(userId);
         if (!user) {
             throw new ServiceApiError({
-                code: "NOT_FOUND",
-                message: "User not found"
+                code: 'NOT_FOUND',
+                message: 'User not found',
             });
         }
 

@@ -1,4 +1,4 @@
-import { openApiErrorResponses as ErrorResponses } from "@/errors";
+import { openApiErrorResponses as ErrorResponses, ServiceApiError } from "@/errors";
 import { App } from "@/hono/app";
 import { Routes } from "@/route-definitions/routes";
 import { createRoute, z } from "@hono/zod-openapi";
@@ -34,6 +34,7 @@ const createUserRoute = createRoute({
 export const registerV1CreateUser = (app: App) => {
     app.openapi(createUserRoute, async (c) => {
         const userData = c.req.valid("json");
+
         const repo = c.get("repo");
         const userStore = repo.user;
         const user = await userStore.create({
