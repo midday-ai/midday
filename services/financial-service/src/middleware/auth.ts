@@ -1,7 +1,7 @@
 import { Context, Next } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { APIKeyRepository } from "../data/apiKeyRepository";
-import { UserRepository } from "../data/userRepository";
+import { APIKeyRepository } from "../db-repository/api-key-repository";
+import { UserRepository } from "../db-repository/user-repository";
 import { User } from "../db/schema";
 import constants from "../constants/constant";
 

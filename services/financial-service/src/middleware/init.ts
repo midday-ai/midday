@@ -1,7 +1,7 @@
 import { Analytics, newId } from "@/analytics";
 import { ServiceCache } from "@/cache";
-import { APIKeyRepository } from "@/data/apiKeyRepository";
-import { UserRepository } from "@/data/userRepository";
+import { APIKeyRepository } from "@/db-repository/api-key-repository";
+import { UserRepository } from "@/db-repository/user-repository";
 import { DatabaseClient } from "@/db/client";
 import { ConsoleLogger } from "@/logger";
 import { LogdrainMetrics } from "@/metric/logdrain";

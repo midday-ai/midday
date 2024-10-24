@@ -24,12 +24,15 @@ export class DatabaseClient {
    * @param dbOrContext - Either a D1Database instance or a HonoContext with HonoEnv.
    * @throws {DatabaseError} If there's an error initializing the database client.
    */
-  public constructor(dbOrContext: D1Database | HonoContext<HonoEnv>) {
+  public constructor(dbOrContext: D1Database | HonoContext<HonoEnv> | DrizzleDB) {
     if ('env' in dbOrContext && 'DB' in dbOrContext.env) {
       this.initialize(dbOrContext.env.DB);
     } else if ('prepare' in dbOrContext && typeof dbOrContext.prepare === 'function') {
       // Check for a method that D1Database should have
       this.initialize(dbOrContext as D1Database);
+    } else if ('all' in dbOrContext && typeof dbOrContext.all === 'function') {
+      // This is likely a DrizzleDB instance
+      this.db = dbOrContext as DrizzleDB;
     } else {
       throw new DatabaseError({
         code: "INTERNAL_SERVER_ERROR",
@@ -167,7 +170,7 @@ export class DatabaseClient {
    * @param context - The HonoContext that contains the environment configuration.
    * @returns {DrizzleDB} The initialized or current Drizzle database instance.
    */
-  public getDB(context: HonoContext<HonoEnv>): DrizzleDB {
+  public getDBOrInitialize(context: HonoContext<HonoEnv>): DrizzleDB {
     // Check if the database is already initialized
     if (this.db) {
       return this.db;
@@ -175,6 +178,17 @@ export class DatabaseClient {
 
     // Initialize the database using the environment's DB if not already initialized
     this.db = drizzle(context.env.DB, { schema });
+    return this.db;
+  }
+
+  public getDb(): DrizzleDB {
+    if (!this.db) {
+      throw new DatabaseError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Database client is not initialized",
+      });
+    }
+
     return this.db;
   }
 }

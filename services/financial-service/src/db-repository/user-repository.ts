@@ -1,12 +1,14 @@
-import { DrizzleDB } from '../db/client';
-import { eq, like, or } from 'drizzle-orm';
+import { eq, like, or, sql } from 'drizzle-orm';
+import { DatabaseClient, DrizzleDB } from '../db/client';
 import { users, type NewUser, type User } from '../db/schema';
+import { apiKeys } from '../db/schema/api-keys';
 
 /**
  * Repository class for managing user data in the database.
  */
 export class UserRepository {
 	private db: DrizzleDB;
+	private dbC: DatabaseClient;
 
 	/**
 	 * Creates a new UserRepository instance.
@@ -14,6 +16,7 @@ export class UserRepository {
 	*/
 	constructor(d1: DrizzleDB) {
 		this.db = d1;
+		this.dbC = new DatabaseClient(d1);
 	}
 
 	/**
@@ -74,15 +77,77 @@ export class UserRepository {
 	}
 
 	/**
-	 * Deletes a user from the database.
+	 * Deletes a user and all associated data from the database.
 	 * @param id - The ID of the user to delete.
 	 * @returns A Promise that resolves to true if the user was deleted, or false if not found.
 	 */
 	async delete(id: number): Promise<boolean> {
-		const result = await this.db.delete(users)
-			.where(eq(users.id, id))
-			.returning();
-		return result.length > 0;
+		try {
+			// First, delete all associated API keys
+			await this.db.delete(apiKeys)
+				.where(eq(apiKeys.userId, id));
+
+			// Then delete the user
+			const result = await this.db.delete(users)
+				.where(eq(users.id, id))
+				.returning();
+
+			return result.length > 0;
+		} catch (error) {
+			console.error('Error deleting user:', error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Safely deletes a user and all associated data from the database.
+	 * This method ensures all related records are deleted first.
+	 * @param id - The ID of the user to delete.
+	 * @returns A Promise that resolves to true if the user was deleted, or false if not found.
+	 */
+	async safeDelete(id: number): Promise<boolean> {
+		try {
+			// Check if user exists
+			const user = await this.getById(id);
+			if (!user) {
+				return false;
+			}
+
+			return await this.db.transaction(async (tx) => {
+				// Delete all associated records in the correct order
+
+				// 1. Delete API keys
+				await tx.delete(apiKeys)
+					.where(eq(apiKeys.userId, id));
+
+				// 2. Delete any other related records here...
+				// await tx.delete(otherTable).where(eq(otherTable.userId, id));
+
+				// Finally, delete the user
+				const result = await tx.delete(users)
+					.where(eq(users.id, id))
+					.returning();
+
+				return result.length > 0;
+			});
+		} catch (error) {
+			console.error('Error safely deleting user:', error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Checks if a user has any dependent records.
+	 * @param id - The ID of the user to check.
+	 * @returns A Promise that resolves to true if the user has dependent records.
+	 */
+	async hasDependentRecords(id: number): Promise<boolean> {
+		const [result] = await this.db
+			.select({ count: sql<number>`count(*)` })
+			.from(apiKeys)
+			.where(eq(apiKeys.userId, id));
+
+		return result.count > 0;
 	}
 
 	/**

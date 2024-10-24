@@ -13,21 +13,7 @@ describe("DatabaseClient", () => {
     let dbClient: DatabaseClient;
 
     beforeEach(() => {
-        // Create a more complete mock D1Database
-        mockD1Database = {
-            prepare: vi.fn(),
-            dump: vi.fn(),
-            batch: vi.fn(),
-            exec: vi.fn(),
-            transaction: vi.fn(async (fn) => {
-                // Mock successful transaction execution
-                const mockTx = {
-                    execute: vi.fn().mockResolvedValue({ success: true } as D1Result<unknown>),
-                };
-                return await fn(mockTx);
-            }),
-        } as unknown as D1Database;
-
+        mockD1Database = env.DB
         // Mock Hono context
         mockHonoContext = {
             env: {
@@ -190,15 +176,15 @@ describe("DatabaseClient", () => {
 
         it("should initialize database using getDB method", () => {
             const client = new DatabaseClient(mockD1Database);
-            const result = client.getDB(mockHonoContext);
+            const result = client.getDBOrInitialize(mockHonoContext);
 
             expect(result).toBeDefined();
         });
 
         it("should return existing database instance when calling getDB", () => {
             const client = new DatabaseClient(mockD1Database);
-            const firstGet = client.getDB(mockHonoContext);
-            const secondGet = client.getDB(mockHonoContext);
+            const firstGet = client.getDBOrInitialize(mockHonoContext);
+            const secondGet = client.getDBOrInitialize(mockHonoContext);
 
             expect(firstGet).toBe(secondGet);
         });

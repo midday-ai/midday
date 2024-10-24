@@ -1,6 +1,6 @@
 import { and, eq, gte, lte, sql } from 'drizzle-orm';
 import { DrizzleDB } from '../db/client';
-import { apiKeys, type APIKey } from '../db/schema';
+import { apiKeys, isValidIPAddress, isValidScope, validateNewAPIKey, type APIKey } from '../db/schema';
 
 export class APIKeyRepository {
 	private db: DrizzleDB;
@@ -10,27 +10,43 @@ export class APIKeyRepository {
 	}
 
 	/**
-	 * Creates a new API key
-	 * @param apiKey - The API key data to create
-	 * @returns The created API key
-	 */
+	   * Creates a new API key with validation
+	   * @throws Error if validation fails
+	   */
 	async create(apiKey: Omit<APIKey, 'id' | 'createdAt'>): Promise<APIKey> {
+		// Validate the input
+		const validationErrors = validateNewAPIKey(apiKey);
+		if (validationErrors.length > 0) {
+			throw new Error(`Validation failed: ${validationErrors.join(', ')}`);
+		}
+
+		// Additional validation for scope array
+		if (apiKey.scope && !apiKey.scope.every(isValidScope)) {
+			throw new Error('Invalid scope values provided');
+		}
+
+		// Additional validation for IP addresses
+		if (apiKey.allowedIPs && !apiKey.allowedIPs.every(isValidIPAddress)) {
+			throw new Error('Invalid IP addresses provided');
+		}
+
+		// Create the API key if validation passes
 		const [createdApiKey] = await this.db.insert(apiKeys).values({
 			...apiKey,
 			createdAt: new Date(),
 		}).returning();
-		return this.mapToAPIKey(createdApiKey);
+
+		return createdApiKey;
 	}
 
-	/**
-	 * Retrieves an API key by ID
-	 * @param id - The ID of the API key
-	 * @returns The API key or null if not found
-	 */
 	async getById(id: number): Promise<APIKey | null> {
-		const [apiKey] = await this.db.select().from(apiKeys).where(eq(apiKeys.id, id));
-		return apiKey ? this.mapToAPIKey(apiKey) : null;
+		const [apiKey] = await this.db
+			.select()
+			.from(apiKeys)
+			.where(eq(apiKeys.id, id));
+		return apiKey || null;
 	}
+
 
 	/**
 	 * Retrieves all API keys for a user
@@ -42,26 +58,44 @@ export class APIKeyRepository {
 		return results.map(this.mapToAPIKey);
 	}
 
-	/**
-	 * Updates an API key
-	 * @param id - The ID of the API key to update
-	 * @param apiKey - The partial API key data to update
-	 * @returns The updated API key or null if not found
-	 */
 	async update(id: number, apiKey: Partial<APIKey>): Promise<APIKey | null> {
-		const [updatedApiKey] = await this.db.update(apiKeys)
+		// Validate update data if provided
+		if (apiKey.scope && !apiKey.scope.every(isValidScope)) {
+			throw new Error('Invalid scope values provided');
+		}
+
+		if (apiKey.allowedIPs && !apiKey.allowedIPs.every(isValidIPAddress)) {
+			throw new Error('Invalid IP addresses provided');
+		}
+
+		const [updatedApiKey] = await this.db
+			.update(apiKeys)
 			.set(apiKey)
 			.where(eq(apiKeys.id, id))
 			.returning();
-		return updatedApiKey ? this.mapToAPIKey(updatedApiKey) : null;
+		return updatedApiKey || null;
 	}
 
-	/**
-	 * Deletes an API key
-	 * @param id - The ID of the API key to delete
-	 */
 	async delete(id: number): Promise<void> {
 		await this.db.delete(apiKeys).where(eq(apiKeys.id, id));
+	}
+
+	async getExpiringKeys(daysUntilExpiration: number): Promise<APIKey[]> {
+		const now = new Date();
+		const futureDate = new Date();
+		futureDate.setDate(futureDate.getDate() + daysUntilExpiration);
+
+		return await this.db
+			.select()
+			.from(apiKeys)
+			.where(
+				and(
+					gte(apiKeys.expiresAt, now),
+					lte(apiKeys.expiresAt, futureDate),
+					eq(apiKeys.isActive, true),
+					eq(apiKeys.revoked, false)
+				)
+			);
 	}
 
 	/**
@@ -122,28 +156,6 @@ export class APIKeyRepository {
 		return revokedApiKey ? this.mapToAPIKey(revokedApiKey) : null;
 	}
 
-	/**
-	 * Retrieves API keys that are expiring soon
-	 * @param daysUntilExpiration - Number of days until expiration
-	 * @returns An array of soon-to-expire API keys
-	 */
-	async getExpiringKeys(daysUntilExpiration: number): Promise<APIKey[]> {
-		const expirationDate = new Date();
-		expirationDate.setDate(expirationDate.getDate() + daysUntilExpiration);
-
-		const results = await this.db
-			.select()
-			.from(apiKeys)
-			.where(
-				and(
-					gte(apiKeys.expiresAt, new Date()),
-					lte(apiKeys.expiresAt, expirationDate),
-					eq(apiKeys.isActive, true),
-					eq(apiKeys.revoked, false)
-				)
-			);
-		return results.map(this.mapToAPIKey);
-	}
 
 	/**
 	 * Retrieves API keys with high usage
@@ -190,7 +202,7 @@ export class APIKeyRepository {
 					gte(apiKeys.expiresAt, new Date())
 				)
 			);
-		
+
 		return result.count > 0;
 	}
 
