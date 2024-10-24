@@ -1,59 +1,31 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Transform pending transaction 1`] = `
+exports[`Transform account balance 1`] = `
 {
-  "account_id": "AG7EkLW7DRSVaN8Z75jMT1DJN51QpWc9LKB7w",
-  "account_owner": null,
-  "amount": -5.4,
-  "authorized_date": 2024-02-23T00:00:00.000Z,
-  "balance": 5.4,
-  "bank_account_id": "AG7EkLW7DRSVaN8Z75jMT1DJN51QpWc9LKB7w",
-  "category": "travel",
-  "category_id": "22016000",
-  "category_slug": "TRANSPORTATION",
-  "check_number": null,
+  "amount": -0,
+  "available": -2000,
+  "currency": "USD",
+}
+`;
+
+exports[`Transform accounts 1`] = `
+{
+  "balance": {
+    "amount": -56302.06,
+    "available": -56302.06,
+    "currency": "CAD",
+  },
   "currency": "CAD",
-  "currency_rate": null,
-  "currency_source": null,
-  "date": "2024-02-24",
-  "description": "Uber",
-  "id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
-  "internal_id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
-  "iso_currency_code": "CAD",
-  "location_address": null,
-  "location_city": null,
-  "location_country": null,
-  "location_lat": null,
-  "location_lon": null,
-  "location_postal_code": null,
-  "location_region": null,
-  "location_store_number": null,
-  "manual": false,
-  "merchant_entity_id": "eyg8o776k0QmNgVpAmaQj4WgzW9Qzo6O51gdd",
-  "merchant_name": "Uber",
-  "method": "other",
-  "name": "Uber 063015 Sf Pool",
-  "payment_channel": "online",
-  "payment_meta_by_order_of": null,
-  "payment_meta_payee": null,
-  "payment_meta_payer": null,
-  "payment_meta_payment_method": null,
-  "payment_meta_payment_processor": null,
-  "payment_meta_ppd_id": null,
-  "payment_meta_reason": null,
-  "payment_meta_reference_number": null,
-  "pending": true,
-  "pending_transaction_id": null,
-  "personal_finance_category_confidence_level": "VERY_HIGH",
-  "personal_finance_category_detailed": "TRANSPORTATION_TAXIS_AND_RIDE_SHARES",
-  "personal_finance_category_icon_url": "https://plaid-category-icons.plaid.com/PFC_TRANSPORTATION.png",
-  "personal_finance_category_primary": "TRANSPORTATION",
-  "status": "pending",
-  "transaction_code": null,
-  "transaction_id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
-  "transaction_type": "special",
-  "unofficial_currency_code": null,
-  "website": "uber.com",
+  "enrollment_id": null,
+  "id": "kKZWQnoZVqcBeN71qdyoh8mVoErgb7tL7gmBL",
+  "institution": {
+    "id": "ins_100546",
+    "logo": "https://cdn-engine.midday.ai/ins_100546.jpg",
+    "name": "American Funds Retirement Solutions",
+    "provider": "plaid",
+  },
+  "name": "Plaid Mortgage",
+  "type": "loan",
 }
 `;
 
@@ -114,6 +86,63 @@ exports[`Transform income transaction 1`] = `
 }
 `;
 
+exports[`Transform pending transaction 1`] = `
+{
+  "account_id": "AG7EkLW7DRSVaN8Z75jMT1DJN51QpWc9LKB7w",
+  "account_owner": null,
+  "amount": -5.4,
+  "authorized_date": 2024-02-23T00:00:00.000Z,
+  "balance": 5.4,
+  "bank_account_id": "AG7EkLW7DRSVaN8Z75jMT1DJN51QpWc9LKB7w",
+  "category": "travel",
+  "category_id": "22016000",
+  "category_slug": "TRANSPORTATION",
+  "check_number": null,
+  "currency": "CAD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-24",
+  "description": "Uber",
+  "id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "internal_id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "iso_currency_code": "CAD",
+  "location_address": null,
+  "location_city": null,
+  "location_country": null,
+  "location_lat": null,
+  "location_lon": null,
+  "location_postal_code": null,
+  "location_region": null,
+  "location_store_number": null,
+  "manual": false,
+  "merchant_entity_id": "eyg8o776k0QmNgVpAmaQj4WgzW9Qzo6O51gdd",
+  "merchant_name": "Uber",
+  "method": "other",
+  "name": "Uber 063015 Sf Pool",
+  "payment_channel": "online",
+  "payment_meta_by_order_of": null,
+  "payment_meta_payee": null,
+  "payment_meta_payer": null,
+  "payment_meta_payment_method": null,
+  "payment_meta_payment_processor": null,
+  "payment_meta_ppd_id": null,
+  "payment_meta_reason": null,
+  "payment_meta_reference_number": null,
+  "pending": true,
+  "pending_transaction_id": null,
+  "personal_finance_category_confidence_level": "VERY_HIGH",
+  "personal_finance_category_detailed": "TRANSPORTATION_TAXIS_AND_RIDE_SHARES",
+  "personal_finance_category_icon_url": "https://plaid-category-icons.plaid.com/PFC_TRANSPORTATION.png",
+  "personal_finance_category_primary": "TRANSPORTATION",
+  "status": "pending",
+  "transaction_code": null,
+  "transaction_id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "transaction_type": "special",
+  "unofficial_currency_code": null,
+  "website": "uber.com",
+}
+`;
+
 exports[`Transform type transfer 1`] = `
 {
   "account_id": "AG7EkLW7DRSVaN8Z75jMT1DJN51QpWc9LKB7w",
@@ -168,34 +197,5 @@ exports[`Transform type transfer 1`] = `
   "transaction_type": "special",
   "unofficial_currency_code": null,
   "website": "uber.com",
-}
-`;
-
-exports[`Transform accounts 1`] = `
-{
-  "balance": {
-    "amount": -56302.06,
-    "available": -56302.06,
-    "currency": "CAD",
-  },
-  "currency": "CAD",
-  "enrollment_id": null,
-  "id": "kKZWQnoZVqcBeN71qdyoh8mVoErgb7tL7gmBL",
-  "institution": {
-    "id": "ins_100546",
-    "logo": "https://cdn-engine.midday.ai/ins_100546.jpg",
-    "name": "American Funds Retirement Solutions",
-    "provider": "plaid",
-  },
-  "name": "Plaid Mortgage",
-  "type": "loan",
-}
-`;
-
-exports[`Transform account balance 1`] = `
-{
-  "amount": -0,
-  "available": -2000,
-  "currency": "USD",
 }
 `;

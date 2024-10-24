@@ -7,7 +7,6 @@ import { User } from '@/db/schema';
 import { Env } from '@/env';
 import { Logger } from '@/logger';
 import { Metrics } from '@/metric';
-import type { Custom } from "@vitest/runner";
 
 /**
  * Represents the context for various services used in the application.

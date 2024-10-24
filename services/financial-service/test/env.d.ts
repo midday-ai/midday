@@ -7,7 +7,6 @@ declare module "cloudflare:test" {
         STORAGE: R2Bucket;
         BANK_STATEMENTS: R2Bucket;
         RATE_LIMITER: RateLimit;
-        TELLER_CERT: Fetcher;
         USER_ACTIONS_QUEUE: Queue<UserActionMessageBody>;
     }
 }

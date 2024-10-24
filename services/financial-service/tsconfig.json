@@ -7,9 +7,13 @@
     },
     "strict": true,
     "types": [
-      "@cloudflare/workers-types",
+      "@types/node",
+      "@types/service-worker-mock",
       "@cloudflare/workers-types/experimental",
-      "@cloudflare/vitest-pool-workers"
+      "@cloudflare/vitest-pool-workers",
+      "@cloudflare/workers-types/2023-07-01",
+      "vitest/globals",
+      "node"
     ],
     "resolveJsonModule": true /* Enable importing .json files */,
     "allowJs": true /* Allow JavaScript files to be a part of your program. Use the `checkJS` option to get errors from these files. */,

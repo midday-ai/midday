@@ -157,6 +157,49 @@ export class ServiceApiError extends HTTPException {
     }
 }
 
+export class DatabaseError extends ServiceApiError {
+    public readonly code: z.infer<typeof ErrorCode>;
+    constructor({
+        code,
+        message,
+    }: {
+        code: z.infer<typeof ErrorCode>;
+        message: string;
+    }) {
+        super({ code, message });
+        this.code = code;
+    }
+}
+
+export class QueryError extends ServiceApiError {
+    public readonly code: z.infer<typeof ErrorCode>;
+    constructor({
+        code,
+        message,
+    }: {
+        code: z.infer<typeof ErrorCode>;
+        message: string;
+    }) {
+        super({ code, message });
+        this.code = code;
+    }
+}
+
+export class TransactionError extends ServiceApiError {
+    public readonly code: z.infer<typeof ErrorCode>;
+    constructor({
+        code,
+        message,
+    }: {
+        code: z.infer<typeof ErrorCode>;
+        message: string;
+    }) {
+        super({ code, message });
+        this.code = code;
+    }
+}
+
+
 /**
  * Handles Zod validation errors and returns an appropriate error response.
  * 
