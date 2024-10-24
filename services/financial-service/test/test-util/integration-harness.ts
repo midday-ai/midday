@@ -1,6 +1,4 @@
-import { env } from "hono/adapter";
 import type { TaskContext } from "vitest";
-import { integrationTestEnv } from "./env";
 import { Harness } from "./harness";
 import { type StepRequest, type StepResponse, step } from "./request";
 
@@ -31,7 +29,7 @@ export class IntegrationHarness extends Harness {
      */
     private constructor(t: TaskContext, db: D1Database) {
         super(t, db);
-        this.baseUrl = integrationTestEnv.parse(env).ENGINE_BASE_URL;
+        this.baseUrl = "http://localhost:8787";
     }
 
     /**

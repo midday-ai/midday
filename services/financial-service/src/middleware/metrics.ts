@@ -10,7 +10,7 @@ export function metrics(): MiddlewareHandler<HonoEnv> {
     return async (c, next) => {
         const { metrics, analytics } = c.get("ctx");
 
-        const platformPrefix = c.env.PLATFORM_PREFIX;
+        const platformPrefix = c.env.PLATFORM_PREFIX ?? "solomonai_platform";
         const formattedPlatformPrefix = formatPlatformPrefix(platformPrefix);
         let requestBody = await c.req.raw.clone().text();
         requestBody = requestBody.replaceAll(/"key":\s*"[a-zA-Z0-9_]+"/g, '"key": "<REDACTED>"');

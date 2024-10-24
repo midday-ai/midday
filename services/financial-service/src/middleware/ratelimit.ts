@@ -34,7 +34,8 @@ export const rateLimit = (_config: RateLimitConfig = DEFAULT_RATE_LIMIT) => {
             const userId = c.req.header("X-User-Id");
 
             if (!apiKey || !userId) {
-                throw new HTTPException(401, { message: "Missing required authentication headers" });
+                // We don't rate limit public paths or requests without API key and user ID
+                return next();
             }
 
             // Use a combination of API key and user ID as the rate limiting key

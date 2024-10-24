@@ -3,7 +3,7 @@ import { authMiddleware, cacheMiddleware, cors, errorHandlerMiddleware, jsonForm
 import { init } from "@/middleware/init";
 import { metrics } from "@/middleware/metrics";
 import { rateLimit } from "@/middleware/ratelimit";
-import { CachedRoutes } from "@/route-definitions/routes";
+import { AuthenticationRequiredRoutes, CachedRoutes } from "@/route-definitions/routes";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context as GenericContext } from "hono";
@@ -25,6 +25,7 @@ export function newApp(): OpenAPIHono<HonoEnv> {
   const app = new OpenAPIHono<HonoEnv>({ defaultHook: handleZodError });
 
   setupMiddleware(app);
+  setupAuthentication(app);
   setupCaching(app);
   setupSwagger(app);
   setupOpenAPIRegistry(app);
@@ -59,7 +60,6 @@ function setupMiddleware(app: OpenAPIHono<HonoEnv>) {
   app.onError(handleError);
   app.use("*", setLocationAndUserAgent);
   app.use("*", requestId());
-  app.use("*", authMiddleware);
   app.use("*", loggingMiddleware);
   app.use("*", errorHandlerMiddleware);
   app.use("*", jsonFormattingMiddleware);
@@ -103,6 +103,15 @@ function setLocationAndUserAgent(c: GenericContext<HonoEnv>, next: () => Promise
  */
 function setupCaching(app: OpenAPIHono<HonoEnv>) {
   CachedRoutes.forEach(route => app.get(route.path, cacheMiddleware));
+}
+
+/**
+ * Set up authentication middleware for the application's specific routes.
+ * 
+ * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
+ */
+function setupAuthentication(app: OpenAPIHono<HonoEnv>) {
+  AuthenticationRequiredRoutes.forEach(route => app.use(route.path, authMiddleware));
 }
 
 

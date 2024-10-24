@@ -45,7 +45,7 @@ export const registerV1CreateUser = (app: App) => {
         return c.json({
             status: user.status,
             name: user.name,
-            id: user.id.toString(),
+            id: user.id,
             email: user.email,
             passwordHash: user.passwordHash,
             role: user.role,

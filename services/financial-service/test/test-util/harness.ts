@@ -1,5 +1,5 @@
 import type { TaskContext } from "vitest";
-import { DatabaseClient, DrizzleDB } from "../db/client";
+import { DatabaseClient, DrizzleDB } from "../../src/db/client";
 
 /**
  * The `Harness` class provides an abstract base for testing environments that require

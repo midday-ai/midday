@@ -1,6 +1,7 @@
 import { openApiErrorResponses as ErrorResponses } from "@/errors";
 import { App } from "@/hono/app";
 import { Provider } from "@/providers";
+import { Routes } from "@/route-definitions/routes";
 import { AccountType } from "@/utils/account";
 import { createErrorResponse } from "@/utils/error";
 import { createRoute, z } from "@hono/zod-openapi";
@@ -9,7 +10,6 @@ import {
     TransactionsParamsSchema,
     TransactionsSchema
 } from "./schema";
-import { Routes } from "@/route-definitions/routes";
 
 const route = createRoute({
     tags: [...Routes.Transactions.list.tags],

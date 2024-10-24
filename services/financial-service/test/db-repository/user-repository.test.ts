@@ -2,7 +2,7 @@ import { DatabaseClient, DrizzleDB } from '@/db';
 import { APIKeyRepository } from '@/db-repository/api-key-repository';
 import { UserRepository } from '@/db-repository/user-repository';
 import { UserRole } from '@/db/schema/users';
-import { cleanupTestContext, setupTestContext, TestContext } from '@/test-util/test-context';
+import { cleanupTestContext, setupTestContext, TestContext } from 'test/test-util/test-context';
 import { env } from 'cloudflare:test';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

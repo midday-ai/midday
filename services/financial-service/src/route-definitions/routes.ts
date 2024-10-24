@@ -6,6 +6,7 @@ export interface RouteDefinition {
   operationId: string;
   summary: string;
   tags: string[];
+  authenticationRequired?: boolean;
 }
 
 export const Routes = {
@@ -63,6 +64,7 @@ export const Routes = {
       operationId: "create.financial.accounts",
       summary: "Create a new financial account",
       tags: ["Financial Accounts"],
+      authenticationRequired: true,
     },
     update: {
       path: "/v1/api.financial.accounts/{id}",
@@ -71,6 +73,7 @@ export const Routes = {
       operationId: "update.financial.accounts",
       summary: "Update a financial account",
       tags: ["Financial Accounts"],
+      authenticationRequired: true,
     },
     delete: {
       path: "/v1/api.financial.accounts/{id}",
@@ -79,6 +82,7 @@ export const Routes = {
       operationId: "delete.financial.accounts",
       summary: "Delete a financial account",
       tags: ["Financial-Accounts"],
+      authenticationRequired: true,
     },
   },
   AccountBalance: {
@@ -131,6 +135,7 @@ export const Routes = {
       operationId: "get.api.keys",
       summary: "List all API keys",
       tags: ["API Keys"],
+      authenticationRequired: true,
     },
     create: {
       path: "/v1/api.apikeys",
@@ -147,140 +152,150 @@ export const Routes = {
       operationId: "delete.api.key",
       summary: "Revoke an API key",
       tags: ["API Keys"],
+      authenticationRequired: true,
     },
   },
-    Auth: {
-        plaidLink: {
-            path: "/v1/api.plaid/link",
-            description: "Create a Plaid link token for user authentication",
-            method: "post",
-            operationId: "post.plaid.link",
-            summary: "Auth Link (Plaid)",
-            tags: ["auth", "plaid"],
-        },
-        plaidExchange: {
-            path: "/v1/api.plaid/exchange",
-            description: "Exchange a Plaid public token for an access token",
-            method: "post",
-            operationId: "post.plaid.exchange",
-            summary: "Exchange token (Plaid)",
-            tags: ["auth", "plaid"],
-        },
-        gocardlessLink: {
-            path: "/v1/api.gocardless/link",
-            description: "Create a GoCardless link for user authentication",
-            method: "post",
-            operationId: "post.gocardless.link",
-            summary: "Auth link (GoCardLess)",
-            tags: ["auth", "gocardless"],
-        },
-        gocardlessExchange: {
-            path: "/v1/api.gocardless/exchange",
-            description: "Exchange GoCardless tokens",
-            method: "post",
-            operationId: "post.gocardless.exchange",
-            summary: "Exchange token (GoCardLess)",
-            tags: ["auth", "gocardless"],
-        },
-        gocardlessAgreement: {
-            path: "/v1/api.gocardless/agreement",
-            description: "Create a GoCardLess agreement",
-            method: "post",
-            operationId: "post.gocardless.agreement",
-            summary: "Agreement (GoCardLess)",
-            tags: ["auth", "gocardless"],
-        },
+  Auth: {
+    plaidLink: {
+      path: "/v1/api.plaid/link",
+      description: "Create a Plaid link token for user authentication",
+      method: "post",
+      operationId: "post.plaid.link",
+      summary: "Auth Link (Plaid)",
+      tags: ["auth", "plaid"],
     },
-    Health: {
-        check: {
-            path: "/v1/api.health",
-            description: "Check the health status of the API",
-            method: "get",
-            operationId: "get.health",
-            summary: "Health Check",
-            tags: ["health"],
-        },
+    plaidExchange: {
+      path: "/v1/api.plaid/exchange",
+      description: "Exchange a Plaid public token for an access token",
+      method: "post",
+      operationId: "post.plaid.exchange",
+      summary: "Exchange token (Plaid)",
+      tags: ["auth", "plaid"],
     },
-    Statements: {
-        list: {
-            path: "/v1/api.statements",
-            description: "Get statements for a specific account",
-            method: "get",
-            operationId: "get.statements",
-            summary: "Get Statements",
-            tags: ["statements"],
-            shouldCache: true,
-        },
-        getPdf: {
-            path: "/v1/api.statements/pdf",
-            description: "Get a specific statement in PDF format",
-            method: "get",
-            operationId: "get.statements.pdf",
-            summary: "Get Statement PDF",
-            tags: ["statements"],
-            shouldCache: true,
-        },
+    gocardlessLink: {
+      path: "/v1/api.gocardless/link",
+      description: "Create a GoCardless link for user authentication",
+      method: "post",
+      operationId: "post.gocardless.link",
+      summary: "Auth link (GoCardLess)",
+      tags: ["auth", "gocardless"],
     },
-    Transactions: {
-        list: {
-            path: "/v1/api.transactions",
-            description: "Get transactions for a specific account",
-            method: "get",
-            operationId: "get.transactions",
-            summary: "Get transactions",
-            tags: ["transactions"],
-            shouldCache: false,
-        },
-        recurring: {
-            path: "/v1/api.transactions/recurring",
-            description: "Get recurring transactions for a specific account",
-            method: "get",
-            operationId: "get.transactions.recurring",
-            summary: "Get recurring transactions",
-            tags: ["transactions"],
-            shouldCache: false,
-        },
+    gocardlessExchange: {
+      path: "/v1/api.gocardless/exchange",
+      description: "Exchange GoCardless tokens",
+      method: "post",
+      operationId: "post.gocardless.exchange",
+      summary: "Exchange token (GoCardLess)",
+      tags: ["auth", "gocardless"],
     },
-    Users: {
-        create: {
-            path: "/v1/api.users",
-            description: "Create a new user",
-            method: "post",
-            operationId: "post.users",
-            summary: "Create User",
-            tags: ["users"],
-        },
-        get: {
-            path: "/v1/api.users/{id}",
-            description: "Get a user by ID",
-            method: "get",
-            operationId: "get.users",
-            summary: "Get User",
-            tags: ["users"],
-            shouldCache: true,
-        },
-        update: {
-            path: "/v1/api.users/{id}",
-            description: "Update a user",
-            method: "put",
-            operationId: "put.users",
-            summary: "Update User",
-            tags: ["users"],
-        },
-        delete: {
-            path: "/v1/api.users/{id}",
-            description: "Delete a user",
-            method: "delete",
-            operationId: "delete.users",
-            summary: "Delete User",
-            tags: ["users"],
-        },
+    gocardlessAgreement: {
+      path: "/v1/api.gocardless/agreement",
+      description: "Create a GoCardLess agreement",
+      method: "post",
+      operationId: "post.gocardless.agreement",
+      summary: "Agreement (GoCardLess)",
+      tags: ["auth", "gocardless"],
     },
+  },
+  Health: {
+    check: {
+      path: "/v1/api.health",
+      description: "Check the health status of the API",
+      method: "get",
+      operationId: "get.health",
+      summary: "Health Check",
+      tags: ["health"],
+    },
+  },
+  Statements: {
+    list: {
+      path: "/v1/api.statements",
+      description: "Get statements for a specific account",
+      method: "get",
+      operationId: "get.statements",
+      summary: "Get Statements",
+      tags: ["statements"],
+      shouldCache: true,
+    },
+    getPdf: {
+      path: "/v1/api.statements/pdf",
+      description: "Get a specific statement in PDF format",
+      method: "get",
+      operationId: "get.statements.pdf",
+      summary: "Get Statement PDF",
+      tags: ["statements"],
+      shouldCache: true,
+    },
+  },
+  Transactions: {
+    list: {
+      path: "/v1/api.transactions",
+      description: "Get transactions for a specific account",
+      method: "get",
+      operationId: "get.transactions",
+      summary: "Get transactions",
+      tags: ["transactions"],
+      shouldCache: false,
+    },
+    recurring: {
+      path: "/v1/api.transactions/recurring",
+      description: "Get recurring transactions for a specific account",
+      method: "get",
+      operationId: "get.transactions.recurring",
+      summary: "Get recurring transactions",
+      tags: ["transactions"],
+      shouldCache: false,
+    },
+  },
+  Users: {
+    create: {
+      path: "/v1/api.users",
+      description: "Create a new user",
+      method: "post",
+      operationId: "post.users",
+      summary: "Create User",
+      tags: ["users"],
+      authenticationRequired: false
+    },
+    get: {
+      path: "/v1/api.users/{id}",
+      description: "Get a user by ID",
+      method: "get",
+      operationId: "get.users",
+      summary: "Get User",
+      tags: ["users"],
+      shouldCache: true,
+      authenticationRequired: true,
+    },
+    update: {
+      path: "/v1/api.users/{id}",
+      description: "Update a user",
+      method: "put",
+      operationId: "put.users",
+      summary: "Update User",
+      tags: ["users"],
+      authenticationRequired: true,
+    },
+    delete: {
+      path: "/v1/api.users/{id}",
+      description: "Delete a user",
+      method: "delete",
+      operationId: "delete.users",
+      summary: "Delete User",
+      tags: ["users"],
+      authenticationRequired: true,
+    },
+  },
 } as const;
 
 export const CachedRoutes: RouteDefinition[] = Object.values(Routes)
   .flatMap(routeGroup => Object.values(routeGroup))
   .filter(route => route.shouldCache);
 
+export const AuthenticationRequiredRoutes: RouteDefinition[] = Object.values(Routes)
+  .flatMap(routeGroup => Object.values(routeGroup))
+  .filter(route => route.authenticationRequired);
+
 export const AllRoutes: RouteDefinition[] = Object.values(Routes)
   .flatMap(routeGroup => Object.values(routeGroup));
+

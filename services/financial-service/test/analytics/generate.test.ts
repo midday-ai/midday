@@ -4,18 +4,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 describe('newId', () => {
     // Mock crypto.getRandomValues
     const mockRandomValues = vi.fn();
-    const originalCrypto = global.crypto;
+    const originalCrypto = (globalThis as any).crypto;
 
     beforeEach(() => {
         // Setup crypto mock
-        global.crypto = {
+        (globalThis as any).crypto = {
             getRandomValues: mockRandomValues
-        } as unknown as Crypto;
+        };
     });
 
     afterEach(() => {
         // Restore original crypto
-        global.crypto = originalCrypto;
+        (global as any).crypto = originalCrypto;
         vi.clearAllMocks();
         vi.useRealTimers();
     });

@@ -7,5 +7,6 @@ declare module "cloudflare:test" {
         STORAGE: R2Bucket;
         BANK_STATEMENTS: R2Bucket;
         RATE_LIMITER: RateLimit;
+        ENGINE_BASE_URL: string;
     }
 }

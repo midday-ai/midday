@@ -53,7 +53,7 @@ export function init(): MiddlewareHandler<HonoEnv> {
         c.set("requestStartedAt", Date.now());
 
         // format the platform prefix
-        const platformPrefix = c.env.PLATFORM_PREFIX;
+        const platformPrefix = c.env.PLATFORM_PREFIX ?? "solomonai_platform";
         const formattedPlatformPrefix = formatPlatformPrefix(platformPrefix);
 
         // define request id header
