@@ -1,4 +1,5 @@
 import { App } from "@/hono/app";
+import { SELF } from 'cloudflare:test';
 
 /**
  * Defines the structure of a request used in the `step` function, which represents an HTTP request.
@@ -57,7 +58,7 @@ export type StepResponse<TBody = unknown> = {
 export async function step<TRequestBody = unknown, TResponseBody = unknown>(
     req: StepRequest<TRequestBody>,
 ): Promise<StepResponse<TResponseBody>> {
-    const res = await fetch(req.url, {
+    const res = await SELF.fetch(req.url, {
         method: req.method,
         headers: req.headers,
         body: JSON.stringify(req.body),

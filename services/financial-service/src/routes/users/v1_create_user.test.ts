@@ -34,13 +34,13 @@ describe("User Creation API", () => {
                 body: requestBody
             });
 
-            // const res = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
-            //     url: Routes.Users.create.path,
-            //     headers: {
-            //         "Content-Type": "application/json",
-            //     },
-            //     body: requestBody
-            // });
+            const res = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
+                url: Routes.Users.create.path,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: requestBody
+            });
 
             console.log("response from test", ress)
 
