@@ -61,12 +61,16 @@ export const apiKeys = sqliteTable('api_keys', {
   revokedReason: text('revoked_reason'),
   keyId: text('key_id'),
 }, (table) => ({
-  // Only keep essential unique indexes
   keyIndex: uniqueIndex('key_idx').on(table.key),
 }));
 
 export type APIKey = typeof apiKeys.$inferSelect;
 export type NewAPIKey = typeof apiKeys.$inferInsert;
+
+// Helper function to validate boolean values
+export function isValidBoolean(value: unknown): value is boolean {
+  return typeof value === 'boolean';
+}
 
 // Helper function to validate scopes
 export function isValidScope(scope: unknown): scope is APIKeyScope {
@@ -123,6 +127,37 @@ export function validateNewAPIKey(key: NewAPIKey): string[] {
   // Validate dates
   if (key.expiresAt && new Date(key.expiresAt).toString() === 'Invalid Date') {
     errors.push('Invalid expiration date');
+  }
+
+  // Validate boolean fields
+  if (key.isActive !== undefined && !isValidBoolean(key.isActive)) {
+    errors.push('isActive must be a boolean value');
+  }
+
+  if (key.revoked !== undefined && !isValidBoolean(key.revoked)) {
+    errors.push('revoked must be a boolean value');
+  }
+
+  // Validate integer fields
+  if (key.rateLimit !== undefined && (!Number.isInteger(key.rateLimit) || key.rateLimit < 0)) {
+    errors.push('rateLimit must be a non-negative integer');
+  }
+
+  if (key.usageCount !== undefined && (!Number.isInteger(key.usageCount) || key.usageCount < 0)) {
+    errors.push('usageCount must be a non-negative integer');
+  }
+
+  // Validate related boolean-date fields
+  if (key.revoked && !key.revokedAt) {
+    errors.push('revokedAt is required when key is revoked');
+  }
+
+  if (key.revoked && !key.revokedReason?.trim()) {
+    errors.push('revokedReason is required when key is revoked');
+  }
+
+  if (!key.revoked && key.revokedAt) {
+    errors.push('revokedAt should not be set for non-revoked keys');
   }
 
   return errors;
