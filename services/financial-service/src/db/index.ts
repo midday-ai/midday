@@ -1,5 +1,6 @@
 import { DatabaseError, QueryError, TransactionError } from '@/errors';
 import { HonoEnv } from '@/hono/env';
+import { D1Database } from '@cloudflare/workers-types';
 import { ExtractTablesWithRelations } from "drizzle-orm";
 import { drizzle, DrizzleD1Database } from 'drizzle-orm/d1';
 import { SQLiteTransaction } from "drizzle-orm/sqlite-core";
@@ -26,8 +27,9 @@ export class DatabaseClient {
   public constructor(dbOrContext: D1Database | HonoContext<HonoEnv>) {
     if ('env' in dbOrContext && 'DB' in dbOrContext.env) {
       this.initialize(dbOrContext.env.DB);
-    } else if (dbOrContext instanceof D1Database) {
-      this.initialize(dbOrContext);
+    } else if ('prepare' in dbOrContext && typeof dbOrContext.prepare === 'function') {
+      // Check for a method that D1Database should have
+      this.initialize(dbOrContext as D1Database);
     } else {
       throw new DatabaseError({
         code: "INTERNAL_SERVER_ERROR",
