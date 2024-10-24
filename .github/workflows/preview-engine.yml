@@ -28,9 +28,9 @@ jobs:
       # - name: 🪐 Check TypeScript
       #   run: bun run check:types
       #   working-directory: ./services/financial-service
-      # - name: 🧪 Run unit tests
-      #   run: bun test
-      #   working-directory: ./services/financial-service
+      - name: 🧪 Run unit tests
+        run: bun test
+        working-directory: ./services/financial-service
       - name: Deploy Project Artifacts to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
