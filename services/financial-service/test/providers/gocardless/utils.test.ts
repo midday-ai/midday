@@ -1,5 +1,5 @@
+import { getAccessValidForDays, getMaxHistoricalDays } from "@/providers/gocardless/utils";
 import { expect, test } from "bun:test";
-import { getAccessValidForDays, getMaxHistoricalDays } from "./utils";
 
 test("Should return 90 days", () => {
   expect(

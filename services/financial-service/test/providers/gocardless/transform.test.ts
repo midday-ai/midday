@@ -1,9 +1,9 @@
-import { expect, test } from "bun:test";
 import {
   transformAccount,
   transformAccountBalance,
   transformTransaction,
-} from "./transform";
+} from "@/providers/gocardless/transform";
+import { expect, test } from "bun:test";
 
 test("Transform income transaction", () => {
   expect(
