@@ -28,7 +28,7 @@
       "vite/client",
       "vitest/globals",
       "@cloudflare/workers-types",
-      "@cloudflare/vitest-pool-workers"
+      "@cloudflare/vitest-pool-workers",
     ],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
@@ -37,5 +37,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "test/env.d.ts"]
 }
