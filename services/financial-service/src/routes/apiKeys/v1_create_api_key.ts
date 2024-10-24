@@ -1,10 +1,11 @@
 import { CacheOptions } from '@/cache';
 import { openApiErrorResponses as ErrorResponses } from "@/errors";
 import { App } from "@/hono/app";
-import { createRoute, z } from "@hono/zod-openapi";
-import { APIKeySchema, CreateAPIKeySchema } from "./schema";
 import { Routes } from "@/route-definitions/routes";
+import { createRoute, z } from "@hono/zod-openapi";
 import { newKey } from '@internal/keys';
+import { isValid, parse, parseISO } from 'date-fns';
+import { APIKeySchema, CreateAPIKeySchema } from "./schema";
 
 /**
  * OpenAPI route definition for creating a new API key.
@@ -89,7 +90,7 @@ export const registerV1CreateApiKey = (app: App) => {
             userId: apiKeyData.userId,
             key: key,
             name: apiKeyData.name as string,
-            expiresAt: apiKeyData.expiresAt ?? null,
+            expiresAt: parseISO(apiKeyData.expiresAt) ?? null,
             description: null,
             updatedAt: new Date(),
             lastUsedAt: new Date(),

@@ -5,8 +5,14 @@ export const APIKeySchema = z.object({
     userId: z.number(),
     key: z.string(),
     name: z.string().nullable(),
-    createdAt: z.date(),
-    expiresAt: z.date().nullable(),
+    createdAt: z.string().nullable().openapi({
+        example: "2024-01-01T00:00:00Z",
+        description: "ISO 8601 timestamp"
+    }),
+    expiresAt: z.string().openapi({
+        example: "2025-01-01T00:00:00Z",
+        description: "ISO 8601 timestamp"
+    }),
 }).openapi("APIKeySchema");
 
 export const CreateAPIKeySchema = APIKeySchema.omit({ id: true, key: true, createdAt: true }).openapi("CreateAPIKeySchema");
