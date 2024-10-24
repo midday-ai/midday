@@ -31,21 +31,32 @@ const createUserRoute = createRoute({
         ...ErrorResponses
     },
 });
-
 export const registerV1CreateUser = (app: App) => {
     app.openapi(createUserRoute, async (c) => {
         const userData = c.req.valid("json");
         const repo = c.get("repo");
         const userStore = repo.user;
-
         const user = await userStore.create({
             email: userData.email,
             name: userData.name,
             passwordHash: crypto.randomUUID(),
         });
-        return c.json(user, 200);
+        
+        return c.json({
+            status: user.status,
+            name: user.name,
+            id: user.id.toString(),
+            email: user.email,
+            passwordHash: user.passwordHash,
+            role: user.role,
+            avatarUrl: user.avatarUrl,
+            bio: user.bio,
+            createdAt: user.createdAt.toISOString(),
+            updatedAt: user.updatedAt.toISOString(),
+        }, 200);
     });
 };
+
 
 export type V1CreateUserRoute = typeof createUserRoute;
 export type V1CreateUserRequest = z.infer<(typeof createUserRoute.request.body.content)["application/json"]["schema"]>;
