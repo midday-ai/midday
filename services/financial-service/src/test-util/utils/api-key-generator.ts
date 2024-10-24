@@ -41,7 +41,7 @@ export class APIKeyGenerator {
             key,
             keyId,
             name: options.name ?? `API Key ${keyId}`,
-            environment: `${options.environment || 'development'}-${this.counter}` as APIKeyEnvironment,
+            environment: `${options.environment || 'development'}` as APIKeyEnvironment,
             scope: this.normalizeScope(options.scope ?? 'read'),
             rateLimit: options.rateLimit ?? 100,
             allowedIPs: options.allowedIPs ?? [],
