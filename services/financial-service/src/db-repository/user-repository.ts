@@ -1,5 +1,5 @@
 import { eq, like, or, sql } from 'drizzle-orm';
-import { DatabaseClient, DrizzleDB } from '../db/client';
+import { DrizzleDB } from '../db/client';
 import { users, type NewUser, type User } from '../db/schema';
 import { apiKeys } from '../db/schema/api-keys';
 
@@ -8,7 +8,6 @@ import { apiKeys } from '../db/schema/api-keys';
  */
 export class UserRepository {
 	private db: DrizzleDB;
-	private dbC: DatabaseClient;
 
 	/**
 	 * Creates a new UserRepository instance.
@@ -16,7 +15,6 @@ export class UserRepository {
 	*/
 	constructor(d1: DrizzleDB) {
 		this.db = d1;
-		this.dbC = new DatabaseClient(d1);
 	}
 
 	/**

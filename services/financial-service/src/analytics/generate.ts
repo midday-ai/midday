@@ -99,15 +99,6 @@ export function newId<TPrefix extends keyof typeof prefixes>(prefix: TPrefix) {
     buf[22] = Number(processEntropy >> 8n) & 255;
     buf[23] = Number(processEntropy) & 255;
 
-    // Format components for debugging
-    const components = {
-        timestamp: timestamp.toString(16).padStart(8, '0'),
-        sequence: sequence.toString(16).padStart(4, '0'),
-        counter: counter.toString(16).padStart(4, '0'),
-        random: Buffer.from(randomBytes).toString('hex'),
-        process: processEntropy.toString(16).padStart(4, '0')
-    };
-
     return `${prefixes[prefix]}_${b58.encode(buf)}` as const;
 }
 

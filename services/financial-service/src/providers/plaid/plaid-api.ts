@@ -172,7 +172,6 @@ export class PlaidApi {
   async getTransactions({
     accessToken,
     accountId,
-    latest,
     syncCursor,
     maxCalls = 15,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse> {

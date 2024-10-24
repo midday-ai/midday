@@ -67,7 +67,7 @@ export async function step<TRequestBody = unknown, TResponseBody = unknown>(
     try {
         return {
             status: res.status,
-            headers: headersToRecord(res.headers),
+            headers: headersToRecord(res.headers as any),
             body: JSON.parse(body),
         };
     } catch {

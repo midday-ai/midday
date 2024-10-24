@@ -22,12 +22,6 @@ export const arrayHelpers = {
   },
 };
 
-// Custom transformer for array fields
-const arrayTransformer = <T>() => ({
-  from: (value: string | null): T[] => arrayHelpers.deserialize<T>(value),
-  to: (value: T[]): string => arrayHelpers.serialize(value),
-});
-
 export const apiKeys = sqliteTable('api_keys', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: integer('user_id').notNull().references(() => users.id),

@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { DatabaseClient, DrizzleDB } from '../db/client';
+import { DrizzleDB } from '../db/client';
 import { createDefaultPreferences, isValidServiceTier, isValidWebhookEvent, preferences, WebhookEventType, type NewPreferences, type Preferences, type ServiceTier } from '../db/schema/preferences';
 import { users } from '../db/schema/users';
 
@@ -8,7 +8,6 @@ import { users } from '../db/schema/users';
  */
 export class PreferencesRepository {
     private db: DrizzleDB;
-    private dbC: DatabaseClient;
 
     /**
      * Creates a new PreferencesRepository instance.
@@ -16,7 +15,6 @@ export class PreferencesRepository {
      */
     constructor(d1: DrizzleDB) {
         this.db = d1;
-        this.dbC = new DatabaseClient(d1);
     }
 
     private validatePreferences(prefs: Partial<Preferences>, currentPrefs?: Preferences) {

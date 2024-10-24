@@ -1,5 +1,5 @@
-import { HTTPException } from "hono/http-exception";
 import { Context, Next } from "hono";
+import { HTTPException } from "hono/http-exception";
 import constants from "../constants/constant";
 
 
@@ -19,11 +19,11 @@ const DEFAULT_RATE_LIMIT: RateLimitConfig = {
  * @description Handles rate limiting for protected routes using API key and UserId
  * @param {Context} c - The Hono context object
  * @param {Next} next - The next middleware function
- * @param {RateLimitConfig} [config] - Optional custom rate limit configuration
+ * @param {RateLimitConfig} [_config] - Optional custom rate limit configuration
  * @returns {Promise<Response | void>} The response or void if passing to next middleware
  * @throws {HTTPException} Throws a 429 error if rate limit is exceeded
  */
-export const rateLimit = (config: RateLimitConfig = DEFAULT_RATE_LIMIT) => {
+export const rateLimit = (_config: RateLimitConfig = DEFAULT_RATE_LIMIT) => {
     return async (c: Context, next: Next): Promise<Response | void> => {
         try {
             if (constants.PUBLIC_PATHS.includes(c.req.path)) {
