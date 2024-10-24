@@ -1,8 +1,8 @@
 import { openApiErrorResponses as ErrorResponses, ServiceApiError } from "@/errors";
 import { App } from "@/hono/app";
+import { Routes } from "@/route-definitions/routes";
 import { createRoute, z } from "@hono/zod-openapi";
 import { UpdateUserSchema, UpdateUserSchemaResponse } from "./schemas";
-import { Routes } from "@/route-definitions/routes";
 
 const updateUserRoute = createRoute({
     tags: [...Routes.Users.update.tags],
@@ -12,7 +12,7 @@ const updateUserRoute = createRoute({
     summary: Routes.Users.update.summary,
     request: {
         params: z.object({
-            id: z.string(),
+            id: z.number(),
         }),
         body: {
             content: {

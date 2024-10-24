@@ -1,6 +1,6 @@
-import { eq, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { DatabaseClient, DrizzleDB } from '../db/client';
-import { createDefaultPreferences, isValidServiceTier, isValidWebhookEvent, preferences, validatePreferences, WebhookEventType, type NewPreferences, type Preferences, type ServiceTier } from '../db/schema/preferences';
+import { createDefaultPreferences, isValidServiceTier, isValidWebhookEvent, preferences, WebhookEventType, type NewPreferences, type Preferences, type ServiceTier } from '../db/schema/preferences';
 import { users } from '../db/schema/users';
 
 /**

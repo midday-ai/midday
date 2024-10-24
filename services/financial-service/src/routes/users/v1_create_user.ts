@@ -1,8 +1,8 @@
 import { openApiErrorResponses as ErrorResponses } from "@/errors";
 import { App } from "@/hono/app";
+import { Routes } from "@/route-definitions/routes";
 import { createRoute, z } from "@hono/zod-openapi";
 import { CreateUserSchema, CreateUserSchemaResponse } from "./schemas";
-import { Routes } from "@/route-definitions/routes";
     
 const createUserRoute = createRoute({
     tags: [...Routes.Users.create.tags],

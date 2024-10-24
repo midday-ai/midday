@@ -1,9 +1,8 @@
 import { openApiErrorResponses as ErrorResponses } from "@/errors";
 import { App } from "@/hono/app";
-import { createRoute, z } from "@hono/zod-openapi";
-import { Unkey } from "@unkey/api";
-import { APIKeyParamsSchema, DeleteAPIKeySchema } from "./schema";
 import { Routes } from "@/route-definitions/routes";
+import { createRoute, z } from "@hono/zod-openapi";
+import { APIKeyParamsSchema, DeleteAPIKeySchema } from "./schema";
 
 /**
  * OpenAPI route configuration for deleting an API key.

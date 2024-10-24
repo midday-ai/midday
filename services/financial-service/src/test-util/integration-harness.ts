@@ -2,7 +2,6 @@ import type { TaskContext } from "vitest";
 import { integrationTestEnv } from "./env";
 import { Harness } from "./harness";
 import { type StepRequest, type StepResponse, step } from "./request";
-import { Env } from "@/env";
 
 /**
  * IntegrationHarness is an extension of the `Harness` class that provides methods for making HTTP requests
