@@ -31,10 +31,10 @@ export function CopyInput({ value, className }: Props) {
       onClick={handleClipboard}
       className={cn(
         "flex items-center relative w-full border py-2 px-4 cursor-pointer",
-        className
+        className,
       )}
     >
-      <div className="pr-7 text-[#878787] text-sm">{value}</div>
+      <div className="pr-7 text-[#878787] text-sm truncate">{value}</div>
       <motion.div
         className="absolute right-4 top-2.5"
         initial={{ opacity: 1, scale: 1 }}

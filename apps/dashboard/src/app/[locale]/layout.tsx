@@ -80,7 +80,7 @@ export default function Layout({
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,
-          "whitespace-pre-line overscroll-none",
+          "whitespace-pre-line overscroll-none antialiased",
         )}
       >
         <Providers locale={locale}>{children}</Providers>

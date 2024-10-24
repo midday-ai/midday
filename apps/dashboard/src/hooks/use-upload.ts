@@ -1,26 +1,44 @@
 import { createClient } from "@midday/supabase/client";
 import { upload } from "@midday/supabase/storage";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { useState } from "react";
 
-export function useUpload() {
-  const supabase = createClient();
-  const [isLoading, setLoading] = useState(false);
+interface UploadParams {
+  file: File;
+  path: string[];
+  bucket: string;
+}
 
-  const uploadFile = async ({ file, path, bucket }) => {
+interface UploadResult {
+  url: string;
+  path: string[];
+}
+
+export function useUpload() {
+  const supabase: SupabaseClient = createClient();
+  const [isLoading, setLoading] = useState<boolean>(false);
+
+  const uploadFile = async ({
+    file,
+    path,
+    bucket,
+  }: UploadParams): Promise<UploadResult> => {
     setLoading(true);
 
-    const url = await upload(supabase, {
-      path,
-      file,
-      bucket,
-    });
+    try {
+      const url = await upload(supabase, {
+        path,
+        file,
+        bucket,
+      });
 
-    setLoading(false);
-
-    return {
-      url,
-      path,
-    };
+      return {
+        url,
+        path,
+      };
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {

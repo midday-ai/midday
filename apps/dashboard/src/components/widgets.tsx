@@ -12,6 +12,7 @@ import { WidgetsNavigation } from "./widgets-navigation";
 import { AccountBalance } from "./widgets/account-balance";
 import { Inbox } from "./widgets/inbox";
 import { Insights } from "./widgets/insights";
+import { Invoice } from "./widgets/invoice";
 import { Tracker } from "./widgets/tracker";
 import { Vault } from "./widgets/vault";
 
@@ -32,6 +33,7 @@ export function Widgets({ disabled, initialPeriod, searchParams }: Props) {
     />,
     <Tracker key="tracker" date={searchParams?.date} hideDaysIndicators />,
     <Transactions key="transactions" disabled={disabled} />,
+    <Invoice key="invoice" />,
     <Inbox key="inbox" disabled={disabled} />,
     <AccountBalance key="account-balance" />,
     <Vault key="vault" />,
