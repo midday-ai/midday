@@ -122,10 +122,10 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
       version: "1.0.0",
       title: "Solomon AI Financial Service API",
       description: "API for Solomon AI Financial Service",
-      termsOfService: "https://solomon-ai.com/terms",
+      termsOfService: "https://solomon-ai.app/terms",
       contact: {
         name: "Solomon AI",
-        url: "https://solomon-ai.com",
+        url: "https://solomon-ai.app",
         email: "engineering@solomon-ai.co",
       },
       license: {
@@ -136,11 +136,43 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
     servers: [
       {
         url: "https://engine.solomon-ai-platform.com",
-        description: "Production",
+        description: "Production Environment",
+        variables: {
+          region: {
+            enum: ["us-east", "us-west", "eu-central"],
+            default: "us-east",
+          },
+        },
       },
       {
         url: "https://engine-staging.solomon-ai-platform.com",
-        description: "Staging",
+        description: "Staging Environment",
+      },
+      {
+        url: "http://localhost:8787",
+        description: "Local Development",
+      },
+    ],
+    tags: [
+      {
+        name: "Authentication",
+        description: "Endpoints for managing API authentication",
+      },
+      {
+        name: "Transactions",
+        description: "Financial transaction processing and management",
+      },
+      {
+        name: "Accounts",
+        description: "User account management endpoints",
+      },
+      {
+        name: "Analytics",
+        description: "Financial data analysis and reporting",
+      },
+      {
+        name: "Webhooks",
+        description: "Event notification and webhook management",
       },
     ],
     "x-speakeasy-retries": {
@@ -154,13 +186,40 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
       statusCodes: ["5XX", "4XX"],
       retryConnectionErrors: true,
     },
+    "x-solomon-ai": {
+      postman: {
+        name: "Solomon AI Financial API",
+        description: "Postman collection for Solomon AI Financial Service API",
+      },
+      sdks: {
+        typescript: {
+          githubRepo: "solomon-ai/typescript-sdk",
+          version: "1.0.0",
+        },
+        python: {
+          githubRepo: "solomon-ai/python-sdk",
+          version: "1.0.0",
+        },
+      },
+    },
+    externalDocs: {
+      description: "Additional Documentation",
+      url: "https://docs.solomon-ai.com",
+    },
     security: [
       { bearerAuth: [] },
+      { apiKey: [] },
     ],
 
   });
 
-  app.get("/", swaggerUI({ url: "/openapi" }));
+  app.get("/", swaggerUI({
+    url: "/openapi"
+  }));
+
+  // Mount API documentation at additional endpoints
+  app.get("/docs", (c) => c.redirect("/"));
+  app.get("/swagger", (c) => c.redirect("/"));
 }
 
 /**
