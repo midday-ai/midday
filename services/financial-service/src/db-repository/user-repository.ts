@@ -36,7 +36,6 @@ export class UserRepository {
 			isEmailVerified: user.isEmailVerified,
 			lastLoginAt: user.lastLoginAt,
 			status: user.status,
-			preferences: user.preferences,
 		}).returning();
 		return this.mapToUser(createdUser);
 	}
@@ -74,14 +73,10 @@ export class UserRepository {
 			const updateData = {
 				...user,
 				updatedAt: new Date(),
-				preferences: user.preferences ?
-					(typeof user.preferences === 'string' ? user.preferences : JSON.stringify(user.preferences))
-					: user.preferences
 			};
 			const [updatedUser] = await this.db.update(users)
 				.set({
 					...updateData,
-					preferences: updateData.preferences ? JSON.parse(updateData.preferences) : null
 				})
 				.where(eq(users.id, id))
 				.returning();
@@ -208,9 +203,6 @@ export class UserRepository {
 			name: row.name,
 			passwordHash: row.passwordHash,
 			status: row.status,
-			preferences: row.preferences ?
-				(typeof row.preferences === 'string' ? JSON.parse(row.preferences) : row.preferences)
-				: null,
 			role: row.role,
 			avatarUrl: row.avatarUrl,
 			bio: row.bio,

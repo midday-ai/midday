@@ -36,6 +36,20 @@
       "when": 1729749083162,
       "tag": "0004_aromatic_omega_red",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1729751623831,
+      "tag": "0005_groovy_nemesis",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1729751671559,
+      "tag": "0006_nebulous_korvac",
+      "breakpoints": true
     }
   ]
 }

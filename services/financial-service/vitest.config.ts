@@ -50,7 +50,7 @@ export default defineWorkersProject(async () => {
             setupFiles: ["./test/apply-migrations.ts"],
             exclude: ["./src/integration/**", "./src/routes/**", "./src/benchmarks/**"],
             reporters: ["html", "verbose"],
-            outputFile: "./.vitest/html",
+            outputFile: "./.vitest/index.html",
             include: ["./**/*.test.ts"],
             alias: {
                 "@/": new URL("./src/", import.meta.url).pathname,

@@ -1,6 +1,6 @@
-import type { TaskContext } from "vitest";
-import { DrizzleDB, initDB } from "../db/client";
 import { Env } from "@/env";
+import type { TaskContext } from "vitest";
+import { DatabaseClient, DrizzleDB } from "../db/client";
 
 /**
  * The `Harness` class provides an abstract base for testing environments that require
@@ -29,7 +29,7 @@ export abstract class Harness {
      * The context provides access to environment bindings, such as the database connection, through `t.task.Bindings.DB`.
      */
     constructor(t: TaskContext, db: D1Database) {
-        this.db = initDB(db);
+        this.db = new DatabaseClient(db).getDb();
 
         // Set up an event listener to ensure teardown is called after the test is finished
         t.onTestFinished(async () => {
