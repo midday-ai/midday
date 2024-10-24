@@ -53,7 +53,7 @@ export const registerV1GetUser = (app: App) => {
         const userStore = repo.user;
         // convert id to number
         const userId = parseInt(id, 10);
-        
+
         const user = await userStore.getById(userId);
         if (!user) {
             throw new ServiceApiError({
@@ -66,8 +66,8 @@ export const registerV1GetUser = (app: App) => {
             id: user.id.toString(),
             name: user.name,
             email: user.email,
-            createdAt: user.createdAt?.toISOString() ?? null,
-            updatedAt: user.updatedAt?.toISOString() ?? null
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
         }, 200);
     });
 };

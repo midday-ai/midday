@@ -42,7 +42,7 @@ export const registerV1UpdateUser = (app: App) => {
         const updateData = c.req.valid('json');
         // convert id to number
         const userId = parseInt(id, 10);
-        
+
         const updatedUser = await userDb.update(userId, updateData);
         if (!updatedUser) {
             throw new ServiceApiError({
@@ -55,8 +55,8 @@ export const registerV1UpdateUser = (app: App) => {
             id: updatedUser.id,
             email: updatedUser.email,
             name: updatedUser.name,
-            createdAt: updatedUser.createdAt?.toISOString(),
-            updatedAt: updatedUser.updatedAt?.toISOString()
+            createdAt: updatedUser.createdAt,
+            updatedAt: updatedUser.updatedAt
         }, 200);
     });
 };
