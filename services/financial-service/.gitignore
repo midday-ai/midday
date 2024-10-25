@@ -9,5 +9,3 @@ yarn.lock
 pnpm-lock.yaml
 bun.lockb
 .vitest
-
-wrangler-test.toml

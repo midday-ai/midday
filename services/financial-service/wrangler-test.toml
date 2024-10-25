@@ -1,0 +1,145 @@
+compatibility_date = "2024-01-01"
+compatibility_flags = [ "nodejs_compat" ]
+
+workers_dev = false
+logpush = true
+tail_consumers = [
+  {service = "engine-tail-consumer"},
+  {service = "engine-staging-tail-consumer"},
+  {service = "engine-tail"}
+]
+
+[env.production]
+name = "engine"
+logpush = true
+route = { pattern = "engine.solomon-ai-platform.com/*", zone_name = "solomon-ai-platform.com" }
+
+kv_namespaces = [
+  { binding = "KV", id = "019720a586c448c2a88a58773da08fd8" }
+]
+
+mtls_certificates = [
+  { binding = "TELLER_CERT", certificate_id = "c82877a0-409e-4589-a935-ca220531651f" }
+]
+
+r2_buckets = [
+  { binding = "STORAGE", bucket_name = "storage-production", preview_bucket_name = "" },
+  { binding = "BANK_STATEMENTS", bucket_name = "bank-statements-production", preview_bucket_name = "" }
+]
+
+[env.production.queues]
+producers = [
+  { queue = "user-actions-production", binding = "USER_ACTIONS" },
+]
+
+consumers = [
+  { queue = "user-actions-production", max_batch_size = 10, max_retries = 10, dead_letter_queue = "user-actions-production-dlq" },
+  { queue = "user-actions-production-dlq", max_batch_size = 10, max_retries = 10 },
+]
+
+[env.production.observability]
+enabled = true
+head_sampling_rate = 0.01 # 10% of requests are logged
+
+[[env.production.d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "engine-production-db"
+database_id = "7e9430cd-517d-4139-bb27-1be427d3474a"
+
+[[env.production.unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 50000, period = 60 }
+
+[env.staging]
+name = "engine-staging"
+route = { pattern = "engine-staging.solomon-ai-platform.com/*", zone_name = "solomon-ai-platform.com" }
+
+kv_namespaces = [
+  { binding = "KV", id = "6745cb3ad41e4d35a45bf67bb515c08b" }
+]
+
+mtls_certificates = [
+  { binding = "TELLER_CERT", certificate_id = "c82877a0-409e-4589-a935-ca220531651f" }
+]
+
+r2_buckets = [
+  { binding = "STORAGE", bucket_name = "storage-staging", preview_bucket_name = "" },
+  { binding = "BANK_STATEMENTS", bucket_name = "bank-statements-staging", preview_bucket_name = "" }
+]
+
+[env.staging.observability]
+enabled = true
+head_sampling_rate = 0.05 # 10% of requests are logged
+
+[[env.staging.d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "engine-staging-database"
+database_id = "d011debb-4697-4f62-ae29-1582d9086bc4"
+
+[env.staging.queues]
+producers = [
+  { queue = "user-actions-staging", binding = "USER_ACTIONS" },
+]
+
+consumers = [
+  { queue = "user-actions-staging", max_batch_size = 10, max_retries = 10, dead_letter_queue = "user-actions-staging-dlq" },
+  { queue = "user-actions-staging-dlq", max_batch_size = 10, max_retries = 10 },
+]
+
+[[env.staging.unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1002"
+simple = { limit = 50000, period = 60 }
+
+[[env.staging.tail_consumers]]
+service = "engine-staging-tail"
+
+# local
+[[env.local.d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "engine-db"
+# database_id = "50694d1f-d468-4807-a60f-3e3c9287781e"
+database_id = "00000000-0000-0000-0000-000000000000" #real value redacted
+
+# Local development specific settings
+[miniflare]
+kv_persist = true
+cache_persist = true
+durable_objects_persist = true
+
+# Local development port
+[dev]
+port = 8787
+local_protocol = "http"
+
+
+[[env.local.unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1002"
+simple = { limit = 50000, period = 60 }
+
+[[env.local.mtls_certificates]]
+binding = "TELLER_CERT"
+certificate_id = "c82877a0-409e-4589-a935-ca220531651f"
+
+[env.local.vars]
+# Teller certificate - base64 encoded mock certificate
+API_SECRET_KEY = "local-secret-key"
+UNKEY_API_KEY = "local-unkey-key"
+STRIPE_SECRET_KEY = "sk_test_mock"
+GOCARDLESS_SECRET_ID = "local-gocardless-id"
+GOCARDLESS_SECRET_KEY = "local-gocardless-key"
+PLAID_CLIENT_ID = "local-plaid-id"
+PLAID_SECRET = "local-plaid-secret"
+PLAID_ENVIRONMENT = "sandbox"
+TYPESENSE_API_KEY = "local-typesense-key"
+TYPESENSE_ENDPOINT = "http://localhost:8108"
+TYPESENSE_ENDPOINT_US = "http://localhost:8108"
+TYPESENSE_ENDPOINT_EU = "http://localhost:8108"
+TYPESENSE_ENDPOINT_AU = "http://localhost:8108"
+UPSTASH_REDIS_REST_URL = "http://localhost:6379"
+UPSTASH_REDIS_REST_TOKEN = "local-redis-token"
