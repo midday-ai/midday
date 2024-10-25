@@ -1,9 +1,9 @@
 import { Context, Next } from "hono";
 import { HTTPException } from "hono/http-exception";
+import constants from "../constants/constant";
 import { APIKeyRepository } from "../db-repository/api-key-repository";
 import { UserRepository } from "../db-repository/user-repository";
 import { User } from "../db/schema";
-import constants from "../constants/constant";
 
 /**
  * Authentication middleware
@@ -32,7 +32,7 @@ export const authMiddleware = async (
     });
   }
 
-  const { db } = c.get("services");
+  const { db } = c.get("ctx");
   const apiKeyRepo = new APIKeyRepository(db);
   const userRepo = new UserRepository(db);
 
@@ -45,9 +45,15 @@ export const authMiddleware = async (
     }
 
     // Validate API key and user
-    await validateApiKeyAndUser(apiKeyRepo, userRepo, apiKey, userId);
+    const [isValidApiKey, user] = await Promise.all([
+      apiKeyRepo.isValidApiKey(apiKey),
+      userRepo.getById(userId),
+    ]);
 
-    const user = await userRepo.getById(userId);
+    if (!isValidApiKey) {
+      throw new HTTPException(401, { message: "Invalid API key" });
+    }
+
     if (!user) {
       throw new HTTPException(401, { message: "Invalid or inactive user" });
     }
@@ -67,6 +73,8 @@ export const authMiddleware = async (
   }
 };
 
+
+
 async function getCachedUser(
   c: Context,
   apiKey: string,
@@ -74,26 +82,6 @@ async function getCachedUser(
 ): Promise<User | null> {
   const cachedUser = await c.env.KV.get(`auth:${apiKey}:${userId}`);
   return cachedUser ? JSON.parse(cachedUser) : null;
-}
-
-async function validateApiKeyAndUser(
-  apiKeyRepo: APIKeyRepository,
-  userRepo: UserRepository,
-  apiKey: string,
-  userId: number,
-): Promise<void> {
-  const [isValidApiKey, user] = await Promise.all([
-    apiKeyRepo.isValidApiKey(apiKey),
-    userRepo.getById(userId),
-  ]);
-
-  if (!isValidApiKey) {
-    throw new HTTPException(401, { message: "Invalid API key" });
-  }
-
-  if (!user) {
-    throw new HTTPException(401, { message: "Invalid or inactive user" });
-  }
 }
 
 async function cacheUser(

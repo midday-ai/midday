@@ -3,6 +3,7 @@ import { IntegrationHarness } from "@/test-util/integration-harness";
 import { TestDataGenerator } from "@/utils/utils";
 import { env } from "cloudflare:test";
 import { beforeEach, describe, expect, test } from "vitest";
+import { V1CreateApiKeyRequest, V1CreateApiKeyResponse } from "../apiKeys/v1_create_api_key";
 import {
     type V1CreateUserRequest,
     type V1CreateUserResponse,
@@ -48,7 +49,19 @@ describe("V1 Delete User Route", () => {
         });
 
         createdUserId = response.body.id.toString();
-        validApiKey = "test-api-key"; // Replace with actual API key generation
+
+        // create an API key
+        const apiKeyResponse = await harness.post<V1CreateApiKeyRequest, V1CreateApiKeyResponse>({
+            url: Routes.ApiKeys.create.path,
+            body: { 
+                userId: response.body.id,
+                name: response.body.name,
+                expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
+             },
+            headers: createAuthHeaders(),
+        });
+
+        validApiKey = apiKeyResponse.body.key; // Replace with actual API key generation
         validUserId = createdUserId;
     });
 
@@ -110,9 +123,11 @@ describe("V1 Delete User Route", () => {
     //             },
     //         });
 
+    //         expect(res.status).toBe(200);
+
     //         const response = await harness.delete<V1DeleteUserResponse>({
-    //             url: Routes.Users.delete.path.replace(":id", res.body.id.toString()),
-    //             headers: createAuthHeaders("test-api-key", res.body.id.toString()),
+    //             url: Routes.Users.delete.path.replace(":id", createdUserId),
+    //             headers: createAuthHeaders(),
     //         });
 
 
@@ -146,7 +161,7 @@ describe("V1 Delete User Route", () => {
     // });
 
     describe("DELETE /v1/users/:id - Error Cases", () => {
-        test("should return 500 for non-existent user with valid auth", async () => {
+        test("should return 404 for non-existent user with valid auth", async () => {
             const nonExistentId = "999999";
             const response = await harness.delete<ErrorResponse>({
                 url: Routes.Users.delete.path.replace(":id", nonExistentId),
@@ -213,7 +228,7 @@ describe("V1 Delete User Route", () => {
             const duration = Date.now() - startTime;
 
             expect(firstResponse.status).toBe(500);
-            expect(secondResponse.status).toBe(500);
+            expect(secondResponse.status).toBe(404);
             expect(duration).toBeLessThan(100); // Cached request should be faster
         });
     });
