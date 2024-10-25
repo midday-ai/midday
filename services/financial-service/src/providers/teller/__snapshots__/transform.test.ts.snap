@@ -1,42 +1,31 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Transform pending transaction 1`] = `
+exports[`Transform account balance 1`] = `
 {
-  "account_id": "acc_os41qe3a66ks2djhss000",
-  "amount": -83.62,
-  "balance": null,
-  "bank_account_id": "acc_os41qe3a66ks2djhss000",
-  "category": "other",
+  "amount": 2011100,
+  "available": 2011100,
   "currency": "USD",
-  "currency_rate": null,
-  "currency_source": null,
-  "date": "2024-03-05",
-  "description": "Bank Of Many",
-  "id": "txn_os41r5u90e29shubl2000",
-  "internal_id": "txn_os41r5u90e29shubl2000",
-  "method": "other",
-  "name": "Online Check Deposit",
-  "status": "pending",
 }
 `;
 
-exports[`Transform pending transaction 2`] = `
+exports[`Transform accounts 1`] = `
 {
-  "account_id": "acc_os41qe3a66ks2djhss000",
-  "amount": -29,
-  "balance": null,
-  "bank_account_id": "acc_os41qe3a66ks2djhss000",
-  "category": "other",
+  "balance": {
+    "amount": 2011100,
+    "available": 2011100,
+    "currency": "USD",
+  },
   "currency": "USD",
-  "currency_rate": null,
-  "currency_source": null,
-  "date": "2024-03-05",
-  "description": "Bank Of Many",
-  "id": "txn_os41r5u90e29shubl2000",
-  "internal_id": "txn_os41r5u90e29shubl2000",
-  "method": "other",
-  "name": "Technology",
-  "status": "pending",
+  "enrollment_id": "enr_os557c8pck2deoskak000",
+  "id": "acc_os557c2mge29shubl2000",
+  "institution": {
+    "id": "mercury",
+    "logo": "https://cdn-engine.midday.ai/mercury.jpg",
+    "name": "Mercury",
+    "provider": "teller",
+  },
+  "name": "Platinum Card",
+  "type": "credit",
 }
 `;
 
@@ -80,6 +69,46 @@ exports[`Transform income transaction 1`] = `
 }
 `;
 
+exports[`Transform pending transaction 1`] = `
+{
+  "account_id": "acc_os41qe3a66ks2djhss000",
+  "amount": -83.62,
+  "balance": null,
+  "bank_account_id": "acc_os41qe3a66ks2djhss000",
+  "category": "other",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-03-05",
+  "description": "Bank Of Many",
+  "id": "txn_os41r5u90e29shubl2000",
+  "internal_id": "txn_os41r5u90e29shubl2000",
+  "method": "other",
+  "name": "Online Check Deposit",
+  "status": "pending",
+}
+`;
+
+exports[`Transform pending transaction 2`] = `
+{
+  "account_id": "acc_os41qe3a66ks2djhss000",
+  "amount": -29,
+  "balance": null,
+  "bank_account_id": "acc_os41qe3a66ks2djhss000",
+  "category": "other",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-03-05",
+  "description": "Bank Of Many",
+  "id": "txn_os41r5u90e29shubl2000",
+  "internal_id": "txn_os41r5u90e29shubl2000",
+  "method": "other",
+  "name": "Technology",
+  "status": "pending",
+}
+`;
+
 exports[`Transform type transfer 1`] = `
 {
   "account_id": "acc_os41qe3a66ks2djhss000",
@@ -97,32 +126,5 @@ exports[`Transform type transfer 1`] = `
   "method": "transfer",
   "name": "Recurring Transfer To Savings",
   "status": "posted",
-}
-`;
-
-exports[`Transform accounts 1`] = `
-{
-  "balance": {
-    "amount": 2011100,
-    "currency": "USD",
-  },
-  "currency": "USD",
-  "enrollment_id": "enr_os557c8pck2deoskak000",
-  "id": "acc_os557c2mge29shubl2000",
-  "institution": {
-    "id": "mercury",
-    "logo": "https://cdn-engine.midday.ai/mercury.jpg",
-    "name": "Mercury",
-    "provider": "teller",
-  },
-  "name": "Platinum Card",
-  "type": "credit",
-}
-`;
-
-exports[`Transform account balance 1`] = `
-{
-  "amount": 2011100,
-  "currency": "USD",
 }
 `;

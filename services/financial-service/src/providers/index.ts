@@ -3,7 +3,6 @@ import { logger } from "@/utils/logger";
 import { withRetry } from "@/utils/retry";
 import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 import { PlaidProvider } from "./plaid/plaid-provider";
-import { StripeApi } from "./stripe/stripe-api";
 import { StripeProvider } from "./stripe/stripe-provider";
 import { TellerProvider } from "./teller/teller-provider";
 // import { GetTransactionResponse } from './teller/types';

@@ -1,0 +1,39 @@
+FROM node:lts AS base
+
+RUN npm i -g bun turbo
+RUN corepack enable
+
+
+FROM base AS builder
+
+# Set working directory
+WORKDIR /solomonai
+
+COPY . .
+RUN turbo prune api --docker
+
+# Add lockfile and package.json's of isolated subworkspace
+FROM base AS installer
+WORKDIR /solomonai
+
+# First install dependencies (as they change less often)
+COPY .gitignore .gitignore
+COPY --from=builder /solomonai/out/json/ .
+COPY --from=builder /solomonai/out/bun.lock ./bun.lock
+RUN bun install
+
+# Build the project and its dependencies
+COPY --from=builder /solomonai/out/full/ .
+COPY turbo.json turbo.json
+
+RUN bun turbo build --filter=api...
+
+FROM base AS runner
+WORKDIR /solomonai
+
+COPY --from=installer /solomonai .
+
+WORKDIR /solomonai/services/financial-service
+ENV WRANGLER_SEND_METRICS=false
+RUN rm .dev.vars || true
+CMD bun wrangler dev 

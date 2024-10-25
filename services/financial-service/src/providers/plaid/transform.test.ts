@@ -1,4 +1,9 @@
-import { expect, test } from "bun:test";
+import {
+  transformAccount,
+  transformAccountBalance,
+  transformTransaction,
+} from "@/providers/plaid/transform";
+import { expect, test } from "vitest";
 import {
   AccountSubtype,
   AccountType,
@@ -7,11 +12,6 @@ import {
   TransactionPaymentChannelEnum,
   TransactionTransactionTypeEnum,
 } from "plaid";
-import {
-  transformAccount,
-  transformAccountBalance,
-  transformTransaction,
-} from "./transform";
 
 test("Transform pending transaction", () => {
   expect(

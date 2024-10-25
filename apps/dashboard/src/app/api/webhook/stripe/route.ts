@@ -71,7 +71,7 @@ export async function POST(req: Request) {
         case "product.updated":
           await upsertProductRecord(
             event.data.object as Stripe.Product,
-            client,
+            client
           );
           break;
         case "price.created":
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
         case "product.deleted":
           await deleteProductRecord(
             event.data.object as Stripe.Product,
-            client,
+            client
           );
           break;
         case "customer.subscription.created":
@@ -110,6 +110,21 @@ export async function POST(req: Request) {
             });
           }
           break;
+        case "customer.updated":
+          console.log("Customer updated");
+          break;
+        case "invoice.finalized":
+          console.log("Invoice finalized");
+          break;
+        case "invoice.created":
+          console.log("Invoice created");
+          break;
+        case "invoice.paid":
+          console.log("Invoice paid");
+          break;
+        case "invoice.payment_succeeded":
+          console.log("Invoice payment succeeded");
+          break;
         case "billing_portal.session.created":
         case "invoice.upcoming":
           // TODO: Handle billing portal session creation
@@ -124,7 +139,7 @@ export async function POST(req: Request) {
         "Webhook handler failed. View your Next.js function logs.",
         {
           status: 400,
-        },
+        }
       );
     }
   } else {

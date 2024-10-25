@@ -1,77 +1,90 @@
-import type { Bindings } from "@/common/bindings";
-import { swaggerUI } from "@hono/swagger-ui";
-import { OpenAPIHono } from "@hono/zod-openapi";
-import { requestId } from "hono/request-id";
-import {
-  authMiddleware,
-  cacheMiddleware,
-  corsMiddleware,
-  errorHandlerMiddleware,
-  jsonFormattingMiddleware,
-  loggingMiddleware,
-  securityMiddleware,
-  timingMiddleware,
-} from "./middleware";
-import accountRoutes from "./routes/accounts";
-import authRoutes from "./routes/auth";
-import healthRoutes from "./routes/health";
-import institutionRoutes from "./routes/institutions";
-import ratesRoutes from "./routes/rates";
-import transactionsRoutes from "./routes/transactions";
+import { Env, zEnv } from "./env";
+import { newApp } from "./hono/app";
+import { ConsoleLogger } from "./metric/logger";
+import { UserActionMessageBody } from "./message";
+import { setupRoutes } from "./routes";
 
-const app = new OpenAPIHono<{ Bindings: Bindings }>({
-  defaultHook: (result, c) => {
-    console.log(result);
-    if (!result.success) {
-      return c.json({ success: false, errors: result.error.errors }, 422);
+const app = newApp();
+
+// set up all the routes
+setupRoutes(app);
+
+// define default handler
+const handler = {
+  fetch: (req: Request, env: Env, executionCtx: ExecutionContext) => {
+    const parsedEnv = zEnv.safeParse(env);
+    if (!parsedEnv.success) {
+      new ConsoleLogger({
+        requestId: "",
+        environment: env.ENVIRONMENT,
+        application: "api",
+      }).fatal(`BAD_ENVIRONMENT: ${parsedEnv.error.message}`);
+      return Response.json(
+        {
+          code: "BAD_ENVIRONMENT",
+          message: "Some environment variables are missing or are invalid",
+          errors: parsedEnv.error,
+        },
+        { status: 500 },
+      );
+    }
+
+    return app.fetch(req, parsedEnv.data, executionCtx);
+  },
+
+  queue: async (
+    batch: MessageBatch<UserActionMessageBody>,
+    env: Env,
+    _executionContext: ExecutionContext,
+  ) => {
+    const logger = new ConsoleLogger({
+      requestId: "queue",
+      environment: env.ENVIRONMENT,
+      application: "api",
+      defaultFields: { environment: env.ENVIRONMENT },
+    });
+
+    switch (batch.queue) {
+      case "key-migrations-development":
+      case "key-migrations-preview":
+      case "key-migrations-canary":
+      case "key-migrations-production": {
+        for (const message of batch.messages) {
+          // const result = await migrateKey(message.body, env);
+          // if (result.err) {
+          //     const delaySeconds = 2 ** message.attempts;
+          //     logger.error("Unable to migrate key", {
+          //         message,
+          //         error: result.err.message,
+          //         delaySeconds,
+          //     });
+          //     message.retry({ delaySeconds });
+          // } else {
+          //     message.ack();
+          // }
+          logger.info("processed message", {
+            message: message.body,
+          });
+          message.ack();
+        }
+        break;
+      }
+      case "key-migrations-development-dlq":
+      case "key-migrations-preview-dlq":
+      case "key-migrations-canary-dlq":
+      case "key-migrations-production-dlq": {
+        for (const message of batch.messages) {
+          // await storeMigrationError(message.body, env);
+          logger.info("processed message from dql", {
+            message: message.body,
+          });
+        }
+        break;
+      }
+      default:
+        throw new Error(`No queue handler: ${batch.queue}`);
     }
   },
-});
+} satisfies ExportedHandler<Env, UserActionMessageBody>;
 
-app.use("*", requestId());
-app.use(authMiddleware);
-app.use(securityMiddleware);
-app.use(loggingMiddleware);
-app.use("*", errorHandlerMiddleware);
-app.use("*", timingMiddleware);
-app.use("*", corsMiddleware); // This will now only apply CORS in non-dev environments
-app.use("*", cacheMiddleware);
-app.use("*", jsonFormattingMiddleware);
-
-// Enable cache for the following routes
-app.get("/institutions", cacheMiddleware);
-app.get("/accounts", cacheMiddleware);
-app.get("/accounts/balance", cacheMiddleware);
-app.get("/transactions", cacheMiddleware);
-app.get("/rates", cacheMiddleware);
-
-app
-  .route("/transactions", transactionsRoutes)
-  .route("/accounts", accountRoutes)
-  .route("/institutions", institutionRoutes)
-  .route("/rates", ratesRoutes)
-  .route("/auth", authRoutes);
-
-app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
-  type: "http",
-  scheme: "bearer",
-});
-
-app.get(
-  "/",
-  swaggerUI({
-    url: "/openapi",
-  }),
-);
-
-app.doc("/openapi", {
-  openapi: "3.1.0",
-  info: {
-    version: "1.0.2",
-    title: "Solomon AI Financial Service API",
-  },
-});
-
-app.route("/health", healthRoutes);
-
-export default app;
+export default handler;

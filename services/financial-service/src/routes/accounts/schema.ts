@@ -2,6 +2,13 @@ import { Providers } from "@/common/schema";
 import { z } from "@hono/zod-openapi";
 import { InstitutionSchema } from "../institutions/schema";
 
+/**
+ * Schema for account query parameters.
+ * @property {string} [id] - GoCardLess reference id.
+ * @property {Providers} provider - The provider of the account (e.g., Teller).
+ * @property {string} [accessToken] - Teller & Plaid access token.
+ * @property {string} [institutionId] - Plaid institution id.
+ */
 export const AccountsParamsSchema = z.object({
   id: z
     .string()
@@ -41,6 +48,18 @@ export const AccountsParamsSchema = z.object({
     }),
 });
 
+/**
+ * Schema for an individual account.
+ * @property {string} id - Unique identifier for the account.
+ * @property {string} name - Name of the account.
+ * @property {('depository'|'credit'|'other_asset'|'loan'|'other_liability')} type - Type of the account.
+ * @property {Object} balance - Current balance of the account.
+ * @property {number} balance.amount - The balance amount.
+ * @property {string} balance.currency - The currency of the balance.
+ * @property {string} currency - The primary currency of the account.
+ * @property {InstitutionSchema} institution - Details of the institution holding the account.
+ * @property {string|null} enrollment_id - Enrollment ID, if applicable.
+ */
 export const AccountSchema = z
   .object({
     id: z.string().openapi({
@@ -75,12 +94,22 @@ export const AccountSchema = z
   })
   .openapi("AccountSchema");
 
+/**
+ * Schema for a list of accounts.
+ * @property {AccountSchema[]} data - Array of account objects.
+ */
 export const AccountsSchema = z
   .object({
     data: z.array(AccountSchema),
   })
   .openapi("AccountsSchema");
 
+/**
+ * Schema for account balance query parameters.
+ * @property {string} id - Account id.
+ * @property {Providers} provider - The provider of the account (e.g., Teller).
+ * @property {string} [accessToken] - Teller & Plaid access token.
+ */
 export const AccountBalanceParamsSchema = z
   .object({
     id: z.string().openapi({
@@ -108,6 +137,12 @@ export const AccountBalanceParamsSchema = z
   })
   .openapi("AccountBalanceParamsSchema");
 
+/**
+ * Schema for account balance response.
+ * @property {Object|null} data - Balance data object or null if not available.
+ * @property {number} data.amount - The balance amount.
+ * @property {string} data.currency - The currency of the balance.
+ */
 export const AccountBalanceSchema = z
   .object({
     data: z
@@ -123,6 +158,12 @@ export const AccountBalanceSchema = z
   })
   .openapi("AccountBalanceSchema");
 
+/**
+ * Schema for delete account query parameters.
+ * @property {string} accountId - Account id (GoCardLess).
+ * @property {Providers} provider - The provider of the account (e.g., Teller).
+ * @property {string} [accessToken] - Teller & Plaid access token.
+ */
 export const DeleteAccountsParamsSchema = z
   .object({
     accountId: z.string().openapi({
@@ -150,6 +191,10 @@ export const DeleteAccountsParamsSchema = z
   })
   .openapi("DeleteAccountsParamsSchema");
 
+/**
+ * Schema for delete operation response.
+ * @property {boolean} success - Indicates if the delete operation was successful.
+ */
 export const DeleteSchema = z
   .object({
     success: z.boolean().openapi({

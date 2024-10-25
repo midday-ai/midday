@@ -1,4 +1,4 @@
-compatibility_date = "2023-12-01"
+compatibility_date = "2024-01-01"
 compatibility_flags = [ "nodejs_compat" ]
 
 workers_dev = false
@@ -23,12 +23,34 @@ mtls_certificates = [
 ]
 
 r2_buckets = [
-  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "" }
+  { binding = "STORAGE", bucket_name = "storage-production", preview_bucket_name = "" },
+  { binding = "BANK_STATEMENTS", bucket_name = "bank-statements-production", preview_bucket_name = "" }
+]
+
+[env.production.queues]
+producers = [
+  { queue = "user-actions-production", binding = "USER_ACTIONS" },
+]
+
+consumers = [
+  { queue = "user-actions-production", max_batch_size = 10, max_retries = 10, dead_letter_queue = "user-actions-production-dlq" },
+  { queue = "user-actions-production-dlq", max_batch_size = 10, max_retries = 10 },
 ]
 
 [env.production.observability]
 enabled = true
-head_sampling_rate = 0.1 # 10% of requests are logged
+head_sampling_rate = 0.01 # 10% of requests are logged
+
+[[env.production.d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "engine-production-db"
+database_id = "7e9430cd-517d-4139-bb27-1be427d3474a"
+
+[[env.production.unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 50000, period = 60 }
 
 [env.staging]
 name = "engine-staging"
@@ -44,10 +66,40 @@ mtls_certificates = [
 
 r2_buckets = [
   { binding = "STORAGE", bucket_name = "storage-staging", preview_bucket_name = "" },
-  { binding = "R2", bucket_name = "bank-statements-staging", preview_bucket_name = "" }
+  { binding = "BANK_STATEMENTS", bucket_name = "bank-statements-staging", preview_bucket_name = "" }
 ]
 
 [env.staging.observability]
 enabled = true
-head_sampling_rate = 0.1 # 10% of requests are logged
+head_sampling_rate = 0.05 # 10% of requests are logged
 
+[[env.staging.d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "engine-staging-database"
+database_id = "d011debb-4697-4f62-ae29-1582d9086bc4"
+
+[env.staging.queues]
+producers = [
+  { queue = "user-actions-staging", binding = "USER_ACTIONS" },
+]
+
+consumers = [
+  { queue = "user-actions-staging", max_batch_size = 10, max_retries = 10, dead_letter_queue = "user-actions-staging-dlq" },
+  { queue = "user-actions-staging-dlq", max_batch_size = 10, max_retries = 10 },
+]
+
+[[env.staging.unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1002"
+simple = { limit = 50000, period = 60 }
+
+[[env.staging.tail_consumers]]
+service = "engine-staging-tail"
+
+# local
+[[env.local.d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "engine-db"
+# database_id = "50694d1f-d468-4807-a60f-3e3c9287781e"
+database_id = "00000000-0000-0000-0000-000000000000" #real value redacted

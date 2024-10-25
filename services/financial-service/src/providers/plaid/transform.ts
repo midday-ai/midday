@@ -148,17 +148,6 @@ export const mapTransactionCategory = ({
 };
 
 /**
- * Formats the transaction amount to ensure consistent sign convention.
- * @param amount - The original transaction amount.
- * @returns The formatted amount with consistent sign convention.
- */
-const formatAmout = (amount: number) => {
-  // Positive values when money moves out of the account; negative values when money moves in.
-  // For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative.
-  return +(amount * -1);
-};
-
-/**
  * Transforms the transaction description, prioritizing original description or merchant name.
  * @param transaction - The Plaid transaction object.
  * @returns The transformed description or null if no suitable description is found.
@@ -316,8 +305,8 @@ export const transformAccountBalance = (
 ): BaseBalance => ({
   currency:
     balances?.iso_currency_code || balances?.unofficial_currency_code || "USD",
-  amount: balances?.current ?? 0,
-  available: balances?.available ?? 0,
+  amount: transformToSignedAmount(balances?.current ?? 0),
+  available: transformToSignedAmount(balances?.available ?? 0),
 });
 
 /**

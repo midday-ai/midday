@@ -1,195 +1,37 @@
-import type { Bindings } from "@/common/bindings";
-import { ErrorSchema } from "@/common/schema";
-import { Provider } from "@/providers";
-import { createErrorResponse } from "@/utils/error";
-import { createRoute } from "@hono/zod-openapi";
-import { OpenAPIHono } from "@hono/zod-openapi";
-import { env } from "hono/adapter";
-import {
-  AccountBalanceParamsSchema,
-  AccountBalanceSchema,
-  AccountsParamsSchema,
-  AccountsSchema,
-  DeleteAccountsParamsSchema,
-  DeleteSchema,
-} from "./schema";
+import { App } from "@/hono/app";
+import { registerV1ApisDeleteAccountsApi } from "./v1_delete_accounts_api";
+import { registerV1ApisGetAccountBalanceApi } from "./v1_get_account_balance_api";
+import { registerV1ApisGetAccountsApi } from "./v1_get_accounts_api";
 
-const app = new OpenAPIHono<{ Bindings: Bindings }>();
+/**
+ * Registers all account-related API routes for the application (NOTE: accounts are observed as connected resources against a 3rd party connector).
+ *
+ * This function serves as a central point for registering various account-related
+ * API endpoints. It calls individual registration functions for different
+ * account operations, such as retrieving accounts, deleting accounts, and
+ * getting account balances.
+ *
+ * @param {App} app - The main application instance to which the routes will be added.
+ *                    This should be an instance of the custom App type, which is likely
+ *                    an extension of the Hono framework.
+ *
+ * @returns {void} This function doesn't return anything; it modifies the app in-place.
+ *
+ * @example
+ * import { App } from "@/hono/app";
+ * import { registerAccountsApi } from "./accounts";
+ *
+ * const app = new App();
+ * registerAccountsApi(app);
+ *
+ * @see {@link registerV1ApisGetAccountsApi}
+ * @see {@link registerV1ApisDeleteAccountsApi}
+ * @see {@link registerV1ApisGetAccountBalanceApi}
+ */
+const registerAccountsApi = (app: App): void => {
+  registerV1ApisGetAccountsApi(app);
+  registerV1ApisDeleteAccountsApi(app);
+  registerV1ApisGetAccountBalanceApi(app);
+};
 
-const indexRoute = createRoute({
-  method: "get",
-  path: "/",
-  summary: "Get Accounts",
-  request: {
-    query: AccountsParamsSchema,
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: AccountsSchema,
-        },
-      },
-      description: "Retrieve accounts",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
-  },
-});
-
-const deleteRoute = createRoute({
-  method: "delete",
-  path: "/",
-  summary: "Delete Accounts",
-  request: {
-    query: DeleteAccountsParamsSchema,
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: DeleteSchema,
-        },
-      },
-      description: "Retrieve accounts",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
-  },
-});
-
-const balanceRoute = createRoute({
-  method: "get",
-  path: "/balance",
-  summary: "Get Account Balance",
-  request: {
-    query: AccountBalanceParamsSchema,
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: AccountBalanceSchema,
-        },
-      },
-      description: "Retrieve account balance",
-    },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
-  },
-});
-
-app.openapi(indexRoute, async (c) => {
-  const envs = env(c);
-
-  const { provider, accessToken, institutionId, id } = c.req.valid("query");
-
-  const api = new Provider({
-    provider,
-    kv: c.env.KV,
-    fetcher: c.env.TELLER_CERT,
-    envs,
-    r2: c.env.BANK_STATEMENTS,
-  });
-
-  try {
-    const data = await api.getAccounts({
-      id,
-      accessToken,
-      institutionId,
-    });
-
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
-  } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
-
-    return c.json(errorResponse, 400);
-  }
-});
-
-app.openapi(balanceRoute, async (c) => {
-  const envs = env(c);
-  const { provider, accessToken, id } = c.req.valid("query");
-
-  const api = new Provider({
-    provider,
-    fetcher: c.env.TELLER_CERT,
-    kv: c.env.KV,
-    r2: c.env.BANK_STATEMENTS,
-    envs,
-  });
-
-  try {
-    const data = await api.getAccountBalance({
-      accessToken,
-      accountId: id,
-    });
-
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
-  } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
-
-    return c.json(errorResponse, 400);
-  }
-});
-
-app.openapi(deleteRoute, async (c) => {
-  const envs = env(c);
-  const { provider, accountId, accessToken } = c.req.valid("query");
-
-  const api = new Provider({
-    provider,
-    fetcher: c.env.TELLER_CERT,
-    kv: c.env.KV,
-    r2: c.env.BANK_STATEMENTS,
-    envs,
-  });
-
-  try {
-    await api.deleteAccounts({
-      accessToken,
-      accountId,
-    });
-
-    return c.json(
-      {
-        success: true,
-      },
-      200,
-    );
-  } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
-
-    return c.json(errorResponse, 400);
-  }
-});
-
-export default app;
+export { registerAccountsApi };

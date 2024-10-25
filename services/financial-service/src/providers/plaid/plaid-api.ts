@@ -172,7 +172,6 @@ export class PlaidApi {
   async getTransactions({
     accessToken,
     accountId,
-    latest,
     syncCursor,
     maxCalls = 15,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
@@ -343,9 +342,6 @@ export class PlaidApi {
    */
   async getStatements({
     accessToken,
-    accountId,
-    userId,
-    teamId,
   }: GetStatementsRequest): Promise<GetStatementsResponse> {
     try {
       const response = await this.#client.statementsList({

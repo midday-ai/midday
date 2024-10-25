@@ -1,4 +1,33 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Transform account balance 1`] = `
+{
+  "amount": 1942682.86,
+  "available": 1942682.86,
+  "currency": "SEK",
+}
+`;
+
+exports[`Transform accounts 1`] = `
+{
+  "balance": {
+    "amount": 1942682.86,
+    "available": 1942682.86,
+    "currency": "SEK",
+  },
+  "currency": "SEK",
+  "enrollment_id": null,
+  "id": "b11e5627-cac8-41c9-a74a-2b88438fe07d",
+  "institution": {
+    "id": "PLEO_PLEODK00",
+    "logo": "https://cdn-engine.midday.ai/PLEO_PLEODK00.png",
+    "name": "Pleo",
+    "provider": "gocardless",
+  },
+  "name": "Pleo Account",
+  "type": "depository",
+}
+`;
 
 exports[`Transform income transaction 1`] = `
 {
@@ -17,32 +46,5 @@ exports[`Transform income transaction 1`] = `
   "method": "transfer",
   "name": "Lön 160434262327",
   "status": "posted",
-}
-`;
-
-exports[`Transform accounts 1`] = `
-{
-  "balance": {
-    "amount": 1942682.86,
-    "currency": "SEK",
-  },
-  "currency": "SEK",
-  "enrollment_id": null,
-  "id": "b11e5627-cac8-41c9-a74a-2b88438fe07d",
-  "institution": {
-    "id": "PLEO_PLEODK00",
-    "logo": "https://cdn-engine.midday.ai/PLEO_PLEODK00.png",
-    "name": "Pleo",
-    "provider": "gocardless",
-  },
-  "name": "Pleo Account",
-  "type": "depository",
-}
-`;
-
-exports[`Transform account balance 1`] = `
-{
-  "amount": 1942682.86,
-  "currency": "SEK",
 }
 `;

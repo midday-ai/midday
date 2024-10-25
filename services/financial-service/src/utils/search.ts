@@ -1,7 +1,7 @@
-import type { Bindings } from "@/common/bindings";
+import { Env } from "@/env";
 import Typesense from "typesense";
 
-export function SearchClient(envs: Bindings) {
+export function SearchClient(envs: Env) {
   return new Typesense.Client({
     nearestNode: {
       host: envs.TYPESENSE_ENDPOINT!,
@@ -18,7 +18,7 @@ export function SearchClient(envs: Bindings) {
   });
 }
 
-export async function getHealthCheck(envs: Bindings) {
+export async function getHealthCheck(envs: Env) {
   const typesense = SearchClient(envs);
   const searchResponse = await typesense.health.retrieve();
 
