@@ -56,3 +56,6 @@ export type V1DeleteUserRoute = typeof deleteUserRoute;
 export type V1DeleteUserRequest = z.infer<
   typeof deleteUserRoute.request.params
 >;
+export type V1DeleteUserResponse = z.infer<
+  (typeof deleteUserRoute.responses)[204]["content"]["application/json"]["schema"]
+>;

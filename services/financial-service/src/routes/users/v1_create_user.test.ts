@@ -32,7 +32,6 @@ describe("V1 Create User Route", () => {
         },
       });
 
-      console.log("hey yoan here is the response", response.body);
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({

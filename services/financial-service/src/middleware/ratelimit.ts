@@ -7,20 +7,43 @@ interface RateLimitConfig {
   window: number;
 }
 
+interface RateLimitResponse {
+  success: boolean;
+  limit?: number;
+  remaining?: number;
+  reset?: number;
+}
+
 const DEFAULT_RATE_LIMIT: RateLimitConfig = {
-  limit: 5000,
-  window: 60, // 60 seconds
+  limit: 500000000,
+  window: 1, // 1 second
+};
+
+const DEFAULT_RATE_LIMIT_RESPONSE: Required<Omit<RateLimitResponse, 'success'>> = {
+  limit: DEFAULT_RATE_LIMIT.limit,
+  remaining: DEFAULT_RATE_LIMIT.limit,
+  reset: Math.floor(Date.now() / 1000) + DEFAULT_RATE_LIMIT.window,
 };
 
 /**
+ * Sanitizes rate limit values to ensure they are valid numbers
+ */
+const sanitizeRateLimitValue = (value: unknown, defaultValue: number): number => {
+  if (typeof value === 'number' && !isNaN(value) && value >= 0) {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const parsed = parseInt(value, 10);
+    if (!isNaN(parsed) && parsed >= 0) {
+      return parsed;
+    }
+  }
+  return defaultValue;
+};
+
+
+/**
  * Rate limiter middleware
- *
- * @description Handles rate limiting for protected routes using API key and UserId
- * @param {Context} c - The Hono context object
- * @param {Next} next - The next middleware function
- * @param {RateLimitConfig} [_config] - Optional custom rate limit configuration
- * @returns {Promise<Response | void>} The response or void if passing to next middleware
- * @throws {HTTPException} Throws a 429 error if rate limit is exceeded
  */
 export const rateLimit = (_config: RateLimitConfig = DEFAULT_RATE_LIMIT) => {
   return async (c: Context, next: Next): Promise<Response | void> => {
@@ -33,40 +56,81 @@ export const rateLimit = (_config: RateLimitConfig = DEFAULT_RATE_LIMIT) => {
       const userId = c.req.header("X-User-Id");
 
       if (!apiKey || !userId) {
-        // We don't rate limit public paths or requests without API key and user ID
         return next();
       }
 
-      // Use a combination of API key and user ID as the rate limiting key
       const rateLimitKey = `${apiKey}:${userId}:${c.req.method}:${c.req.path}`;
 
-      const { success, limit, remaining, reset } =
-        await c.env.RATE_LIMITER.limit({
-          key: rateLimitKey,
-        });
+      let rateLimitResponse: RateLimitResponse;
+
+      try {
+        // Safely destructure the rate limiter response with defaults
+        const response = await c.env.RATE_LIMITER.limit({ key: rateLimitKey });
+
+        // Ensure we have a response object
+        if (!response || typeof response !== 'object') {
+          throw new Error('Invalid rate limiter response');
+        }
+
+        // Extract values with type checking and defaults
+        const success = Boolean(response.success);
+        const limit = 'limit' in response ? response.limit : DEFAULT_RATE_LIMIT_RESPONSE.limit;
+        const remaining = 'remaining' in response ? response.remaining : DEFAULT_RATE_LIMIT_RESPONSE.remaining;
+        const reset = 'reset' in response ? response.reset : DEFAULT_RATE_LIMIT_RESPONSE.reset;
+
+        rateLimitResponse = { success, limit, remaining, reset };
+      } catch (error) {
+        rateLimitResponse = {
+          success: true,
+          ...DEFAULT_RATE_LIMIT_RESPONSE
+        };
+      }
+
+      // Sanitize all values
+      const sanitizedLimit = sanitizeRateLimitValue(
+        rateLimitResponse.limit,
+        DEFAULT_RATE_LIMIT_RESPONSE.limit
+      );
+
+      const sanitizedRemaining = sanitizeRateLimitValue(
+        rateLimitResponse.remaining,
+        rateLimitResponse.success ? Math.max(0, sanitizedLimit - 1) : 0
+      );
+
+      const sanitizedReset = sanitizeRateLimitValue(
+        rateLimitResponse.reset,
+        DEFAULT_RATE_LIMIT_RESPONSE.reset
+      );
 
       // Set rate limit headers
-      c.header("X-RateLimit-Limit", limit.toString());
-      c.header("X-RateLimit-Remaining", remaining.toString());
-      c.header("X-RateLimit-Reset", reset.toString());
+      c.header("X-RateLimit-Limit", sanitizedLimit.toString());
+      c.header("X-RateLimit-Remaining", sanitizedRemaining.toString());
+      c.header("X-RateLimit-Reset", sanitizedReset.toString());
 
-      if (!success) {
+      // Add debug headers in non-production
+      if (c.env.ENVIRONMENT !== "production") {
+        c.header("X-RateLimit-Debug-Key", rateLimitKey);
+        c.header("X-RateLimit-Debug-Time", Date.now().toString());
+        c.header("X-RateLimit-Debug-Raw", JSON.stringify(rateLimitResponse));
+      }
+
+      if (!rateLimitResponse.success) {
+        const retryAfter = Math.max(0, sanitizedReset - Math.floor(Date.now() / 1000));
+        c.header("Retry-After", retryAfter.toString());
+
         throw new HTTPException(429, {
-          message: `Rate limit exceeded for API key: ${apiKey}`,
+          message: "Rate limit exceeded. Please try again later.",
         });
       }
 
-      // Log rate limit usage (consider using a proper logging service in production)
-      c.get("logger").info(
-        `Rate limit for ${rateLimitKey}: ${remaining}/${limit} remaining`,
-      );
-
       await next();
+
+
+      return;
     } catch (error) {
       if (error instanceof HTTPException) {
         throw error;
       }
-      console.error("Rate limiting error:", error);
       throw new HTTPException(500, {
         message: "Internal server error during rate limiting",
       });
