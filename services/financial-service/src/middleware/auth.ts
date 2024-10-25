@@ -51,7 +51,7 @@ export const authMiddleware = async (
     ]);
 
     if (!isValidApiKey) {
-      throw new HTTPException(401, { message: "Invalid API key" });
+      throw new HTTPException(401, { message: "Missing or invalid authentication headers" });
     }
 
     if (!user) {
