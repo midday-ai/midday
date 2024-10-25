@@ -2,9 +2,7 @@
 
 ## Overview
 
-The Financial Service API is a robust and scalable backend service designed to simplify access to banking and financial information. By integrating with multiple financial data providers (Plaid, GoCardless, Teller, and Stripe), it offers a unified interface for developers to retrieve account information, transactions, balances, and more.
-
-Built with TypeScript and deployed on Cloudflare Workers, this API provides a high-performance, globally distributed solution for fintech applications and services.
+The Financial Service API is engineered as a distributed microservices platform, optimized for deployment on Cloudflare's edge computing infrastructure. Leveraging TypeScript for type-safe development and integrating WebAssembly (WASM) modules for compute-intensive operations, the API achieves deterministic performance across a globally distributed network of Points of Presence (PoPs). The architecture utilizes Cloudflare Workers for serverless execution, KV storage for low-latency data access, and adheres to event-driven, non-blocking I/O models facilitated by the V8 JavaScript engine to ensure high concurrency and throughput.
 
 <div align="center" width="100%">
     <img src="../../saasfly-logo.svg" width="128" alt="" />
@@ -39,6 +37,7 @@ Built with TypeScript and deployed on Cloudflare Workers, this API provides a hi
   - [Project Structure](#project-structure)
   - [Adding a New Provider](#adding-a-new-provider)
   - [Coding Standards](#coding-standards)
+  - [Performance Optimization](#performance-optimization)
 - [Contributing](#contributing)
 - [Security](#security)
 - [License](#license)
@@ -46,165 +45,158 @@ Built with TypeScript and deployed on Cloudflare Workers, this API provides a hi
 
 ## Features
 
-- **Multi-provider Support**: Seamless integration with Plaid, GoCardless, Teller, and Stripe
-- **Unified Data Model**: Consistent data structure across all providers
-- **Account Information**: Retrieve detailed account data
-- **Transaction Fetching**: Access transaction history with advanced filtering
-- **Balance Checking**: Real-time account balance information
-- **Institution Data**: Comprehensive list of supported financial institutions
-- **Bank Statements**: Retrieve and download bank statements in PDF format
-- **Health Monitoring**: Endpoint for checking API and integration health
-- **Typescript Support**: Full TypeScript support for improved developer experience
-- **Cloudflare Workers**: Leverages edge computing for low-latency, globally distributed API access
-- **Webhook Support**: Real-time notifications for account updates and transactions
+- **Multi-Provider Integration Layer**: Implements a modular abstraction layer facilitating seamless integration with multiple financial data providers such as Plaid, GoCardless, Teller, and Stripe. Each provider module adheres to a unified interface contract defined via TypeScript interfaces and abstract classes, allowing for extensibility and interoperability.
+- **Unified Data Schema**: Utilizes consistent data models defined using JSON Schema and TypeScript types, ensuring uniform data representation across disparate provider APIs. This facilitates data integrity and simplifies downstream processing and validation.
+- **Advanced Account Information Retrieval**: Offers detailed account metadata, including account hierarchies, ownership structures, and account attributes, normalized from provider-specific formats into a standardized schema.
+- **Efficient Transaction Fetching**: Implements paginated transaction retrieval with support for advanced filtering parameters, such as date ranges, transaction types, categories, and merchant details. Utilizes provider APIs' bulk data endpoints where available to optimize performance and reduce latency.
+- **Real-Time Balance Checking**: Provides instantaneous account balance information by leveraging WebSocket connections or provider-specific real-time APIs. Ensures data freshness and consistency through cache invalidation strategies and periodic synchronization tasks.
+- **Comprehensive Institution Data**: Maintains an up-to-date repository of supported financial institutions, including metadata such as routing numbers, SWIFT codes, and institution capabilities. Data is synchronized periodically via provider APIs and stored in a distributed key-value store for low-latency access.
+- **Bank Statement Retrieval**: Facilitates the retrieval and generation of bank statements in PDF format, utilizing provider APIs or synthesizing documents via templating engines and data aggregation when native support is not available.
+- **Health Monitoring and Observability**: Exposes health check endpoints and integrates with monitoring tools (e.g., Prometheus, Grafana) to provide real-time metrics on API performance, error rates, and provider integration statuses. Utilizes structured logging and distributed tracing for debugging and performance analysis.
+- **TypeScript and WebAssembly Support**: Leverages TypeScript's advanced language features for robust application development and employs WebAssembly modules for performance-critical code paths, enabling near-native execution speeds within a JavaScript environment.
+- **Edge Computing with Cloudflare Workers**: Deployed across Cloudflare's edge network, the API benefits from reduced latency and improved performance due to proximity to end-users. Utilizes Cloudflare Workers for serverless execution, KV storage for distributed data persistence, and Durable Objects for stateful interactions.
+- **Webhook Event Handling**: Implements webhook listeners and dispatchers for real-time event handling, such as transaction updates or account changes, utilizing message queues and event-driven architectures to ensure reliable and scalable processing.
 
 ## Quick Start
 
-To quickly get started with the Financial Service API:
+To set up the Financial Service API in a development environment:
 
-1. Clone the repository and install dependencies:
-   ```bash
-   git clone https://github.com/SolomonAIEngineering/financial-platform-as-a-service/financial-service-api.git
-   cd financial-service-api
-   npm install
-   ```
+1. Clone the Repository and Install Dependencies:
 
-2. Set up your environment variables:
-   ```bash
-   cp .dev.vars-example .dev.vars
-   # Edit .dev.vars with your API keys
-   ```
+git clone https://github.com/SolomonAIEngineering/financial-platform-as-a-service/financial-service-api.git
+cd financial-service-api
+npm install
 
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
+Ensure that you have Node.js (v14 or later) and npm (v6 or later) installed.
 
-4. Make your first API call:
-   ```bash
-   curl http://localhost:3002/v1/health
-   ```
+2. Configure Environment Variables:
 
-For more detailed setup instructions, see the [Getting Started](#getting-started) section.
+cp .dev.vars-example .dev.vars
+# Edit .dev.vars with your API keys and configuration
+
+Populate .dev.vars with your provider API keys, Cloudflare account details, and other necessary configurations.
+
+3. Start the Development Server:
+
+npm run dev
+
+This command initializes a local development server using wrangler dev, emulating the Cloudflare Workers environment.
+
+4. Test API Connectivity:
+
+curl http://localhost:3002/v1/health
+
+A successful response indicates that the API is operational.
+
+For detailed setup instructions, refer to the Getting Started section.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v14 or later)
-- npm (v6 or later)
-- Wrangler CLI (for Cloudflare Workers development)
-- API keys for the financial data providers you plan to use
+- Node.js: Version 14.x or later (LTS recommended)
+- npm: Version 6.x or later
+- Wrangler CLI: Install globally via npm install -g @cloudflare/wrangler
+- Provider API Credentials: Obtain API keys from providers like Plaid, GoCardless, Teller, and Stripe
 
 ### Installation
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/SolomonAIEngineering/financial-platform-as-a-service/financial-service-api.git
-   cd financial-service-api
-   ```
+1. Clone the Repository:
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+git clone https://github.com/SolomonAIEngineering/financial-platform-as-a-service/financial-service-api.git
+cd financial-service-api
 
-3. Set up environment variables:
-   ```bash
-   cp .dev.vars-example .dev.vars
-   ```
-   Edit `.dev.vars` and fill in your API keys and other configuration values.
+2. Install Dependencies:
+
+npm install
+
+3. Set Up Environment Variables:
+
+cp .dev.vars-example .dev.vars
+
+Edit .dev.vars to include your API keys and other configuration parameters.
 
 ### Configuration
 
-The Financial Service API uses environment variables for configuration. Key variables include:
+Key environment variables:
 
-- `PLAID_CLIENT_ID`: Your Plaid client ID
-- `PLAID_SECRET`: Your Plaid secret key
-- `GOCARDLESS_ACCESS_TOKEN`: Your GoCardless access token
-- `TELLER_APPLICATION_ID`: Your Teller application ID
-- `STRIPE_SECRET_KEY`: Your Stripe secret key
+- Plaid Integration:
+  - PLAID_CLIENT_ID
+  - PLAID_SECRET
+  - PLAID_ENV (e.g., sandbox, development, production)
+- GoCardless Integration:
+  - GOCARDLESS_ACCESS_TOKEN
+  - GOCARDLESS_ENVIRONMENT (sandbox or live)
+- Teller Integration:
+  - TELLER_APPLICATION_ID
+  - TELLER_ACCESS_KEY
+- Stripe Integration:
+  - STRIPE_SECRET_KEY
+- Cloudflare Configuration:
+  - CF_ACCOUNT_ID
+  - CF_API_TOKEN
 
-Refer to `.dev.vars-example` for a complete list of required environment variables.
+Refer to .dev.vars-example for the full list and ensure all variables are securely managed.
 
-## Usage
+### Usage
 
-### Running Locally
+#### Running Locally
 
-To start the development server:
+Start the development server:
 
-```bash
 npm run dev
-```
 
-The API will be available at `http://localhost:3002`.
+The API will be accessible at http://localhost:3002.
 
-### Testing
+#### Testing
 
 Run the test suite:
 
-```bash
 npm test
-```
 
 For coverage report:
 
-```bash
 npm run test:coverage
-```
 
-### Deployment
+#### Deployment
 
 Deploy to Cloudflare Workers:
 
-```bash
 npm run deploy
-```
 
 For staging deployment:
 
-```bash
 npm run deploy:staging
-```
 
-## API Reference
+### API Reference
 
-### Authentication
+#### Authentication
 
-The Financial Service API uses bearer token authentication. Include the token in the `Authorization` header:
+Use bearer token authentication by including the token in the Authorization header:
 
-```
 Authorization: Bearer YOUR_API_KEY
-```
 
-### Rate Limits
+#### Rate Limits
 
-- 100 requests per minute per IP address
-- 1000 requests per hour per API key
+- Per IP Address: 100 requests per minute
+- Per API Key: 1000 requests per hour
 
-### Base URL
+#### Base URL
 
-All API requests should be made to:
-
-```
 https://financial-service.solomon-ai-platform.com/v1
-```
 
-### Endpoints
+#### Endpoints
 
-#### List Institutions
+- **List Institutions**
 
-Retrieve a list of supported financial institutions.
-
-```
 GET /institutions
-```
 
 Query Parameters:
-- `country` (optional): ISO 3166-1 alpha-2 country code to filter institutions
-- `search` (optional): Search term to filter institutions by name
 
-Example Response:
+- country (ISO 3166-1 alpha-2 code)
+- search (institution name)
+
+Response:
 ```json
 {
   "institutions": [
@@ -213,25 +205,29 @@ Example Response:
       "name": "Bank of Example",
       "logo": "https://example.com/logo.png",
       "country": "US",
-      "products": ["auth", "transactions", "balance"]
+      "products": ["auth", "transactions", "balance"],
+      "routing_numbers": ["123456789"],
+      "swift_codes": ["BOEUS3MXXX"]
     }
-  ]
+  ],
+  "pagination": {
+    "total": 500,
+    "limit": 50,
+    "offset": 0
+  }
 }
 ```
+- **Get User's Linked Accounts**
 
-#### Get User's Linked Accounts
-
-Retrieve a list of user's linked financial accounts.
-
-```
 GET /accounts
-```
 
 Query Parameters:
-- `provider` (optional): Filter accounts by provider (e.g., "plaid", "gocardless")
 
-Example Response:
+- provider (e.g., plaid, gocardless)
+
+Response:
 ```json
+
 {
   "accounts": [
     {
@@ -241,29 +237,32 @@ Example Response:
       "name": "Checking Account",
       "type": "depository",
       "subtype": "checking",
-      "mask": "1234"
+      "mask": "1234",
+      "currency": "USD",
+      "balance": {
+        "current": 1500.50,
+        "available": 1450.50
+      },
+      "created_at": "2023-04-15T12:00:00Z"
     }
   ]
 }
 ```
+- **Fetch Transactions**
 
-#### Fetch Transactions
-
-Retrieve transactions for a specific account.
-
-```
 GET /transactions
-```
 
 Query Parameters:
-- `account_id` (required): ID of the account to fetch transactions for
-- `start_date` (optional): Start date for transaction range (YYYY-MM-DD)
-- `end_date` (optional): End date for transaction range (YYYY-MM-DD)
-- `limit` (optional): Number of transactions to return (default: 100, max: 500)
-- `offset` (optional): Number of transactions to skip (for pagination)
 
-Example Response:
+- account_id (required)
+- start_date (YYYY-MM-DD)
+- end_date (YYYY-MM-DD)
+- limit (default: 100, max: 500)
+- offset
+
+Response:
 ```json
+
 {
   "transactions": [
     {
@@ -274,27 +273,37 @@ Example Response:
       "currency": "USD",
       "description": "ACME Store",
       "category": "Shopping",
+      "merchant": {
+        "name": "ACME Store",
+        "location": {
+          "address": "123 Main St",
+          "city": "Anytown",
+          "region": "CA",
+          "postal_code": "12345",
+          "country": "US"
+        }
+      },
       "pending": false
     }
   ],
-  "total_count": 1500,
-  "has_more": true
+  "pagination": {
+    "total": 1500,
+    "limit": 100,
+    "offset": 0
+  }
 }
 ```
+- **Check Account Balance**
 
-#### Check Account Balance
-
-Retrieve current balance information for an account.
-
-```
 GET /accounts/balance
-```
 
 Query Parameters:
-- `account_id` (required): ID of the account to check balance for
 
-Example Response:
+- account_id (required)
+
+Response:
 ```json
+
 {
   "balance": {
     "current": 1500.50,
@@ -305,22 +314,19 @@ Example Response:
   "last_updated": "2023-04-15T14:30:00Z"
 }
 ```
+- **List Available Bank Statements**
 
-#### List Available Bank Statements
-
-Retrieve a list of available bank statements.
-
-```
 GET /statements
-```
 
 Query Parameters:
-- `account_id` (required): ID of the account to fetch statements for
-- `start_date` (optional): Start date for statement range (YYYY-MM-DD)
-- `end_date` (optional): End date for statement range (YYYY-MM-DD)
 
-Example Response:
+- account_id (required)
+- start_date (YYYY-MM-DD)
+- end_date (YYYY-MM-DD)
+
+Response:
 ```json
+
 {
   "statements": [
     {
@@ -328,173 +334,196 @@ Example Response:
       "account_id": "acc_67890",
       "start_date": "2023-03-01",
       "end_date": "2023-03-31",
-      "document_type": "PDF"
+      "document_type": "PDF",
+      "available_at": "2023-04-01T00:00:00Z"
     }
   ]
 }
 ```
+- **Download Bank Statement PDF**
 
-#### Download Bank Statement PDF
-
-Download a specific bank statement as a PDF.
-
-```
 GET /statements/pdf
-```
 
 Query Parameters:
-- `statement_id` (required): ID of the statement to download
+
+- statement_id (required)
+
+Response Headers:
+
+- Content-Type: application/pdf
+- Content-Disposition: attachment; filename="statement_2023-03.pdf"
 
 Response:
-- Content-Type: application/pdf
+
 - Binary PDF data
 
-#### Check API Health
+- **Check API Health**
 
-Check the health status of the API and its integrations.
-
-```
 GET /health
-```
 
-Example Response:
+Response:
 ```json
+
 {
   "status": "healthy",
   "version": "1.0.0",
-  "providers": {
+  "uptime": 86400,
+  "dependencies": {
     "plaid": "operational",
     "gocardless": "operational",
     "teller": "degraded",
     "stripe": "operational"
   },
-  "last_checked": "2023-04-15T15:00:00Z"
+  "timestamp": "2023-04-15T15:00:00Z"
 }
 ```
+- **Error Handling**
 
-### Error Handling
-
-All endpoints may return the following error structure:
-
+Error Structure:
 ```json
+
 {
   "error": {
     "code": "ERROR_CODE",
-    "message": "Human-readable error message."
+    "message": "Human-readable error message.",
+    "details": {
+      "field": "account_id",
+      "issue": "Missing or invalid"
+    },
+    "status": 400
   }
 }
 ```
+Common Error Codes:
 
-Common error codes:
-- `UNAUTHORIZED`: Invalid or missing API key
-- `RATE_LIMIT_EXCEEDED`: Too many requests
-- `RESOURCE_NOT_FOUND`: Requested resource does not exist
-- `INVALID_REQUEST`: Malformed request or invalid parameters
-- `PROVIDER_ERROR`: Error from the underlying financial data provider
-- `INTERNAL_SERVER_ERROR`: Unexpected server error
+- UNAUTHORIZED (401)
+- RATE_LIMIT_EXCEEDED (429)
+- RESOURCE_NOT_FOUND (404)
+- INVALID_REQUEST (400)
+- PROVIDER_ERROR (502)
+- INTERNAL_SERVER_ERROR (500)
 
-## Development
+### Development
 
-### Project Structure
+#### Project Structure
 
-```
 financial-service-api/
 ├── src/
 │   ├── providers/
 │   │   ├── plaid/
+│   │   │   ├── client.ts
+│   │   │   ├── types.ts
+│   │   │   └── utils.ts
 │   │   ├── gocardless/
 │   │   ├── teller/
 │   │   └── stripe/
 │   ├── routes/
+│   │   ├── accounts.ts
+│   │   ├── transactions.ts
+│   │   ├── statements.ts
+│   │   └── health.ts
+│   ├── middleware/
 │   ├── utils/
-│   └── index.ts
+│   ├── types/
+│   ├── index.ts
+│   └── server.ts
 ├── tests/
+│   ├── unit/
+│   └── integration/
 ├── tasks/
+│   ├── download-teller.ts
+│   ├── import.ts
+│   └── sync-cdn.ts
 ├── docs/
-└── package.json
-```
+├── package.json
+└── wrangler.toml
 
-### Adding a New Provider
+#### Adding a New Provider
 
-1. Create a new directory under `src/providers/` for the provider
-2. Implement the provider API client, following the pattern in existing providers
-3. Create transformation functions to standardize the provider's data format
-4. Update the `Provider` interface in `src/providers/interface.ts`
-5. Add the new provider to the `Providers` enum in `src/common/schema.ts`
-6. Implement necessary route handlers in `src/routes/`
-7. Add tests for the new provider in `tests/providers/`
+1. Create Provider Module:
+  - Add a new directory under src/providers/
+  - Implement client.ts, types.ts, and utils.ts
+2. Update Interfaces:
+  - Modify src/providers/interface.ts to include the new provider
+3. Configure Environment Variables:
+  - Add new variables to .dev.vars-example and update configuration loading
+4. Implement Route Handlers:
+  - Update src/routes/ to handle new provider integration
+5. Write Tests:
+  - Add unit and integration tests under tests/
 
-### Runnable Tasks
+#### Coding Standards
 
-#### Download Logos
+- TypeScript Best Practices: Use strong typing, interfaces, and generics
+- Linting and Formatting: Adhere to ESLint and Prettier configurations
+- Testing: Maintain high test coverage with Jest or Mocha
+- Documentation: Use TSDoc comments and update generated docs
+- Code Reviews: All changes must be reviewed before merging
 
-```
-bun tasks/download-teller.ts
-```
+#### Performance Optimization
 
-#### Sync CDN
+- Caching: Implement in-memory and distributed caching
+- Asynchronous Operations: Use async/await and Promise patterns
+- Lazy Loading: Load modules only when necessary
+- Batching Requests: Combine multiple API calls when possible
+- Resource Management: Utilize connection pooling and proper cleanup
 
-```
-rclone copy logos r2demo:engine-assets -v --progress
-```
+### Contributing
 
-#### Import Institutions
+1. Fork the Repository
+2. Create a Feature Branch:
 
-```
-bun tasks/import.ts
-```
+git checkout -b feature/your-feature-name
 
-### Coding Standards
+3. Implement Changes and Write Tests
+4. Run Tests:
 
-- Follow the TypeScript best practices and coding style guide
-- Maintain 100% test coverage for critical paths
-- Document all public functions and classes using JSDoc comments
-- Use meaningful variable and function names
-- Keep functions small and focused on a single responsibility
+npm test
 
-### Performance Optimization
+5. Commit Changes:
 
-- Use caching strategies to reduce API calls to financial providers
-- Implement request batching for bulk operations
-- Utilize Cloudflare Workers' edge caching capabilities
-- Optimize database queries and indexing
+git commit -m 'Add new feature: description'
 
-## Contributing
+6. Push to Branch:
 
-We welcome contributions to the Financial Service API! Please follow these steps:
+git push origin feature/your-feature-name
 
-1. Fork the repository
-2. Create a new branch: `git checkout -b feature/your-feature-name`
-3. Make your changes and write tests
-4. Run the test suite: `npm test`
-5. Commit your changes: `git commit -m 'Add some feature'`
-6. Push to the branch: `git push origin feature/your-feature-name`
-7. Submit a pull request
+7. Submit a Pull Request
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+Refer to CONTRIBUTING.md for detailed guidelines.
 
-## Security
+### Security
 
-Security is a top priority for the Financial Service API. We implement the following security measures:
+- Data Encryption:
+  - In Transit: TLS 1.2+ encryption
+  - At Rest: AES-256 encryption
+- Authentication and Authorization:
+  - OAuth 2.0 protocols
+  - Role-based access control (RBAC)
+- Vulnerability Management:
+  - Regular dependency updates
+  - Static code analysis with tools like Snyk
+- Compliance:
+  - PCI DSS adherence
+  - SOC 2 readiness
+- Monitoring and Logging:
+  - Structured logging
+  - Anomaly detection systems
+- Incident Response:
+  - Defined roles and procedures
+  - Timely stakeholder communication
 
-- End-to-end encryption for all data in transit
-- Regular security audits and penetration testing
-- Compliance with financial industry standards (PCI DSS, SOC 2)
-- Strict access controls and authentication mechanisms
-- Continuous monitoring for suspicious activities
+Report vulnerabilities to security@solomon-ai.co. See our Security Policy.
 
-If you discover a security vulnerability, please send an e-mail to security@solomon-ai.co. All security vulnerabilities will be promptly addressed.
+### License
 
-Please refer to our [Security Policy](SECURITY.md) for more details.
+This project is licensed under the MIT License. See the LICENSE file for details.
 
-## License
+### Support
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-For support, please open an issue on the GitHub repository or contact our support team at support@solomon-ai.co.
-
----
+- Issue Tracker: GitHub Issues
+- Email: support@solomon-ai.co
+- Documentation: Project Wiki
 
 Made with ❤️ by the Solomon AI Engineering Team
+
