@@ -6,7 +6,7 @@ export async function sha256(source: string | Uint8Array): Promise<string> {
   return b64(hash);
 }
 
-// Copyright 2018-2023 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2023 the Deno authors. All rights reserved. AGPL License.
 // This module is browser compatible.
 
 /**

@@ -1,4 +1,4 @@
-MIT License
+AGPL License
 
 Copyright (c) 2023-present Unkeyed, Inc.
 

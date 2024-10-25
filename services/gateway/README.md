@@ -43,7 +43,7 @@ The hosted API is the fastest way to setup an AI Gateway for your Gen AI applica
 <a href="https://app.portkey.ai/signup"><img src="https://portkey.ai/blog/content/images/2024/08/Get-API-Key--3-.png" height=50 alt="Get API Key" /></a><br>
 <br>
 
-#### 👉 Self-hosting the OSS version ([MIT License](https://github.com/Portkey-AI/gateway?tab=MIT-1-ov-file#readme))
+#### 👉 Self-hosting the OSS version ([AGPL License](https://github.com/Portkey-AI/gateway?tab=MIT-1-ov-file#readme))
 
 To run the AI gateway locally, execute the following command in your terminal. (Needs npx installed) Or, explore deployment guides for [Cloudflare](https://github.com/Portkey-AI/gateway/blob/main/docs/installation-deployments.md#cloudflare-workers), [Docker](https://github.com/Portkey-AI/gateway/blob/main/docs/installation-deployments.md#docker), [Node.js](https://github.com/Portkey-AI/gateway/blob/main/docs/installation-deployments.md#nodejs-server) and more [here](#deploying-the-ai-gateway).
 
