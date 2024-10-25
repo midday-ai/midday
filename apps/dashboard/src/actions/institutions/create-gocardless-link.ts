@@ -40,19 +40,30 @@ export const createGoCardLessLinkAction = authActionClient
         reference,
       });
 
-      const { data: agreementData } =
-        await engine.auth.gocardless.agreement.create({
+      try {
+        const { data: agreementData } =
+          await engine.auth.gocardless.agreement.create({
+            institutionId,
+            transactionTotalDays: availableHistory,
+            reference,
+          });
+
+        const { data } = await engine.auth.gocardless.link({
+          agreement: agreementData.id,
           institutionId,
-          transactionTotalDays: availableHistory,
-          reference,
+          redirect: redirectTo.toString(),
         });
 
-      const { data } = await engine.auth.gocardless.link({
-        agreement: agreementData.id,
-        institutionId,
-        redirect: redirectTo.toString(),
-      });
+        return redirect(data.link);
+      } catch (error) {
+        analytics.track({
+          event: LogEvents.GoCardLessLinkFailed.name,
+          institutionId,
+          availableHistory,
+          redirectBase,
+        });
 
-      return redirect(data.link);
+        throw error;
+      }
     },
   );

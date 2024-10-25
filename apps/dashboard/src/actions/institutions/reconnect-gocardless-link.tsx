@@ -44,8 +44,6 @@ export const reconnectGoCardLessLinkAction = authActionClient
           transactionTotalDays: availableHistory,
         });
 
-      console.log(link.toString());
-
       const { data } = await engine.auth.gocardless.link({
         agreement: agreementData.id,
         institutionId,

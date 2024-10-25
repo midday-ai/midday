@@ -56,7 +56,6 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
                 Object.keys(mappableFields).includes(field) &&
                 fileColumns.includes(value as string)
               ) {
-                console.log(field, value);
                 setValue(field as keyof typeof mappableFields, value, {
                   shouldValidate: true,
                 });

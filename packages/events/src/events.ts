@@ -55,6 +55,10 @@ export const LogEvents = {
     name: "Connect Bank Authorized",
     channel: "bank",
   },
+  GoCardLessLinkFailed: {
+    name: "GoCardLess Link Failed",
+    channel: "gocardless",
+  },
   ConnectBankFailed: {
     name: "Connect Bank Failed",
     channel: "bank",
