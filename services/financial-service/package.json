@@ -16,7 +16,7 @@
     "test": "vitest run -c vitest.config.ts",
     "test:integration": "vitest run -c vitest.integration.ts --bail=1",
     "test:benchmark": "vitest run -c vitest.benchmark.ts",
-    "test:debug": "vitest run -c vitest.config.ts  --inspect-brk --browser --no-file-parallelism",
+    "debug": "vite --port 5173 --host",
     "test:ci": "vitest run -c vitest.unit.ts --reporter basic",
     "test:watch": "vitest",
     "start-tests": "npm run cleanup && npm run generate && npm run local:migrations:apply && npm run test:watch",
