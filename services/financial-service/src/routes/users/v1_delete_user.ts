@@ -19,7 +19,7 @@ const deleteUserRoute = createRoute({
     }),
   },
   responses: {
-    204: {
+    200: {
       content: {
         "application/json": {
           schema: DeleteUserApiResponse,
@@ -41,6 +41,7 @@ export const registerV1DeleteUser = (app: App) => {
     const userId = parseInt(id, 10);
 
     const isDeleted = await userStore.delete(userId);
+    console.log("isDeleted", isDeleted);
     if (!isDeleted) {
       throw new ServiceApiError({
         code: "NOT_FOUND",
@@ -48,7 +49,7 @@ export const registerV1DeleteUser = (app: App) => {
       });
     }
 
-    return c.json({ success: true }, 204);
+    return c.json({ success: true }, 200);
   });
 };
 
