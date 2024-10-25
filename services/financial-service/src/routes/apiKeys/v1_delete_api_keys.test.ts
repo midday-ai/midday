@@ -165,7 +165,7 @@ describe("V1 Delete API Key Route", () => {
             // Verify key is actually deleted
             const verifyResponse = await harness.get<V1DeleteApiKeyResponse>({
                 url: `${Routes.ApiKeys.base.path}?userId=${createdUserId}`,
-                headers: createAuthHeaders(),
+                headers: createAuthHeaders(validApiKey, createdUserId),
             });
 
             expect(verifyResponse.status).toBe(200);

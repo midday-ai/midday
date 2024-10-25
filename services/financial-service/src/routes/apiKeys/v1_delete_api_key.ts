@@ -3,7 +3,6 @@ import { App } from "@/hono/app";
 import { getApiKeyCacheKeyReference, getUserApiKeyCacheKeyReference } from "@/middleware/auth";
 import { Routes } from "@/route-definitions/routes";
 import { createRoute, z } from "@hono/zod-openapi";
-import { get } from "http";
 import { APIKeyParamsSchema, DeleteAPIKeySchema } from "./schema";
 
 /**
