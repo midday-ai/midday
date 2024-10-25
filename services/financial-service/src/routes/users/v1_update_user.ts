@@ -1,6 +1,6 @@
 import {
-  openApiErrorResponses as ErrorResponses,
-  ServiceApiError,
+    openApiErrorResponses as ErrorResponses,
+    ServiceApiError,
 } from "@/errors";
 import { App } from "@/hono/app";
 import { Routes } from "@/route-definitions/routes";

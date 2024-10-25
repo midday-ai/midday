@@ -1,235 +1,30 @@
-// import { UserRepository } from "@/db-repository/user-repository";
-// import { Routes } from "@/route-definitions/routes";
-// import { CreateUserSchema } from "@/routes/users/schemas";
-// import { V1CreateUserRequest, V1CreateUserResponse } from "@/routes/users/v1_create_user";
-// import { IntegrationHarness } from "@/test-util/integration-harness";
-// import { env } from "cloudflare:test";
-// import { testClient } from 'hono/testing';
-// import { beforeEach, describe, expect, test } from "vitest";
-// import { z } from "zod";
-// import { newApp } from '../../hono/app';
-
-// describe("User Creation API", () => {
-//     let harness: IntegrationHarness;
-//     let userRepo: UserRepository;
-//     const apiClient: any = testClient(newApp(), env)
-
-//     beforeEach(async (t) => {
-//         harness = await IntegrationHarness.init(t, env.DB);
-//         userRepo = new UserRepository(harness.db);
-//     });
-
-//     describe("successful creation", () => {
-//         test("creates a new user with valid data", async () => {
-//             const requestBody: z.infer<typeof CreateUserSchema> = {
-//                 email: "test@gmail.com",
-//                 name: "Test User",
-//             };
-
-//             // const ress = await apiClient.api.users.$post({
-//             //     // url: Routes.Users.create.path,
-//             //     headers: {
-//             //         "Content-Type": "application/json",
-//             //     },
-//             //     body: requestBody
-//             // });
-
-//             const res = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
-//                 url: Routes.Users.create.path,
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                 },
-//                 body: requestBody
-//             });
-
-//             console.log("response from test", res)
-
-//             expect(res.status).toBe(200);
-//             expect(res.body).toBeDefined();
-
-//             // Verify response structure
-//             expect(res.body).toMatchObject({
-//                 email: requestBody.email,
-//                 name: requestBody.name,
-//                 id: expect.any(String),
-//                 createdAt: expect.any(String),
-//                 updatedAt: expect.any(String),
-//             });
-
-//             // Verify database record
-//             const found = await userRepo.getByEmail(requestBody.email);
-//             expect(found).toBeDefined();
-//             expect(found!.email).toBe(requestBody.email);
-//             expect(found!.name).toBe(requestBody.name);
-//         });
-
-//         test("creates a user with null name", async () => {
-//             const requestBody: z.infer<typeof CreateUserSchema> = {
-//                 email: "nullname@gmail.com",
-//                 name: null,
-//             };
-
-//             const res = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
-//                 url: Routes.Users.create.path,
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                 },
-//                 body: requestBody
-//             });
-
-//             expect(res.status).toBe(200);
-//             const found = await userRepo.getByEmail(requestBody.email);
-//             expect(found!.name).toBeNull();
-//         });
-//     });
-
-//     describe("validation errors", () => {
-//         test("rejects invalid email format", async () => {
-//             const requestBody = {
-//                 email: "invalid-email",
-//                 name: "Test User",
-//             };
-
-//             const res = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
-//                 url: Routes.Users.create.path,
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                 },
-//                 body: requestBody
-//             });
-
-//             expect(res.status).toBe(400);
-//             const found = await userRepo.getByEmail(requestBody.email);
-//             expect(found).toBeNull();
-//         });
-
-//         test("rejects missing required fields", async () => {
-//             const requestBody = {
-//                 name: "Test User",
-//             };
-
-//             const res = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
-//                 url: Routes.Users.create.path,
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                 },
-//                 body: requestBody as any
-//             });
-
-//             expect(res.status).toBe(400);
-//         });
-//     });
-
-//     describe("duplicate handling", () => {
-//         test("handles duplicate email appropriately", async () => {
-//             const requestBody: z.infer<typeof CreateUserSchema> = {
-//                 email: "duplicate@gmail.com",
-//                 name: "First User",
-//             };
-
-//             // Create first user
-//             await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
-//                 url: Routes.Users.create.path,
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                 },
-//                 body: requestBody
-//             });
-
-//             // Attempt to create second user with same email
-//             const duplicateRes = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
-//                 url: Routes.Users.create.path,
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                 },
-//                 body: {
-//                     ...requestBody,
-//                     name: "Second User"
-//                 }
-//             });
-
-//             expect(duplicateRes.status).toBe(409);
-//         });
-//     });
-
-//     describe("response format", () => {
-//         test("returns correctly formatted timestamps", async () => {
-//             const requestBody: z.infer<typeof CreateUserSchema> = {
-//                 email: "timestamps@gmail.com",
-//                 name: "Time Test",
-//             };
-
-//             const res = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
-//                 url: Routes.Users.create.path,
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                 },
-//                 body: requestBody
-//             });
-
-//             expect(res.status).toBe(200);
-//             expect(res.body).toBeDefined();
-//             // Verify ISO 8601 timestamp format
-//             expect(typeof res.body.createdAt).toBe('string');
-//             expect(typeof res.body.updatedAt).toBe('string');
-//             expect(res.body.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
-
-//             test("includes all required response fields", async () => {
-//                 const requestBody: z.infer<typeof CreateUserSchema> = {
-//                     email: "fields@gmail.com",
-//                     name: "Field Test",
-//                 };
-
-//                 const res = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
-//                     url: Routes.Users.create.path,
-//                     headers: {
-//                         "Content-Type": "application/json",
-//                     },
-//                     body: requestBody
-//                 });
-
-//                 expect(res.status).toBe(200);
-//                 expect(res.body).toHaveProperty('id');
-//                 expect(res.body).toHaveProperty('email');
-//                 expect(res.body).toHaveProperty('name');
-//                 expect(res.body).toHaveProperty('createdAt');
-//                 expect(res.body).toHaveProperty('updatedAt');
-//                 expect(res.body).toHaveProperty('status');
-//                 expect(res.body).toHaveProperty('role');
-//                 expect(res.body).toHaveProperty('avatarUrl');
-//                 expect(res.body).toHaveProperty('bio');
-//                 expect(res.body).toHaveProperty('bio');
-//             });
-//         });
-//     })
-// });
-
-import { newApp } from "@/hono/app";
 import { Routes } from "@/route-definitions/routes";
 import { IntegrationHarness } from "@/test-util/integration-harness";
+import { TestDataGenerator } from "@/utils/utils";
 import { env } from "cloudflare:test";
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import {
-  registerV1CreateUser,
+  V1CreateUserResponse400,
+  V1CreateUserResponse409,
   type V1CreateUserRequest,
-  type V1CreateUserResponse,
+  type V1CreateUserResponse
 } from "./v1_create_user";
 
-describe("V1 Create User Route", () => {
-  describe("POST /v1/users", () => {
-    test("should successfully create a user with valid data", async (task) => {
-      // Arrange
-      const harness = await IntegrationHarness.init(task, env.DB);
-      const createUserData: V1CreateUserRequest = {
-        email: "test@example.com",
-        name: "Test User",
-      };
 
-      // Act
-      const response = await harness.post<
-        V1CreateUserRequest,
-        V1CreateUserResponse
-      >({
+describe("V1 Create User Route", () => {
+  let harness: IntegrationHarness;
+  let generator: TestDataGenerator;
+
+  beforeEach(async (task) => {
+    harness = await IntegrationHarness.init(task, env.DB);
+    generator = new TestDataGenerator(`test-${Date.now()}`);
+  });
+
+  describe("POST /v1/users - Success Cases", () => {
+    test("should successfully create a user with all valid fields", async () => {
+      const createUserData = generator.generateUserData();
+
+      const response = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
         url: Routes.Users.create.path,
         body: createUserData,
         headers: {
@@ -237,11 +32,238 @@ describe("V1 Create User Route", () => {
         },
       });
 
-      // Assert
+      console.log("hey yoan here is the response", response.body);
+
       expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        email: createUserData.email,
+        name: createUserData.name,
+        status: "pending_verification",
+      });
       expect(response.body.id).toBeDefined();
       expect(response.body.createdAt).toBeDefined();
       expect(response.body.updatedAt).toBeDefined();
+    });
+
+    test("should create user with null name", async () => {
+      const createUserData: V1CreateUserRequest = {
+        email: "nullname@example.com",
+        name: null,
+      };
+
+      const response = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
+        url: Routes.Users.create.path,
+        body: createUserData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.body.name).toBeNull();
+    });
+
+    test("should trim whitespace from email and name", async () => {
+      const createUserData: V1CreateUserRequest = {
+        email: "  trimmed@example.com  ",
+        name: "  Trimmed User  ",
+      };
+
+      const response = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
+        url: Routes.Users.create.path,
+        body: createUserData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("hey yoan here is the response", response.body);
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe("POST /v1/users - Validation Cases", () => {
+    test("should reject invalid email format", async () => {
+      const createUserData = {
+        email: "invalid-email",
+        name: "Test User",
+      };
+
+      const response = await harness.post<V1CreateUserRequest, V1CreateUserResponse400>({
+        url: Routes.Users.create.path,
+        body: createUserData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBeDefined();
+      expect(response.body.error.code).toBe("BAD_REQUEST");
+    });
+
+    test("should reject empty email", async () => {
+      const createUserData = {
+        email: "",
+        name: "Test User",
+      };
+
+      const response = await harness.post<V1CreateUserRequest, V1CreateUserResponse400>({
+        url: Routes.Users.create.path,
+        body: createUserData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe("BAD_REQUEST");
+    });
+
+    test("should reject missing required fields", async () => {
+      const createUserData = {
+        name: "Test User",
+        email: ""
+      };
+
+      const response = await harness.post<V1CreateUserRequest, V1CreateUserResponse400>({
+        url: Routes.Users.create.path,
+        body: createUserData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe("BAD_REQUEST");
+    });
+
+    test("should reject email exceeding maximum length", async () => {
+      const createUserData = {
+        email: "a".repeat(256) + "@example.com",
+        name: "Test User",
+      };
+
+      const response = await harness.post<V1CreateUserRequest, V1CreateUserResponse400>({
+        url: Routes.Users.create.path,
+        body: createUserData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe("BAD_REQUEST");
+    });
+  });
+
+  describe("POST /v1/users - Duplicate Handling", () => {
+    test("should reject duplicate email addresses", async () => {
+      const createUserData: V1CreateUserRequest = {
+        email: "duplicate@example.com",
+        name: "First User",
+      };
+
+      // Create first user
+      const firstResponse = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
+        url: Routes.Users.create.path,
+        body: createUserData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      expect(firstResponse.status).toBe(200);
+
+      // Attempt to create second user with same email
+      const secondResponse = await harness.post<V1CreateUserRequest, V1CreateUserResponse409>({
+        url: Routes.Users.create.path,
+        body: {
+          ...createUserData,
+          name: "Second User",
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      expect(secondResponse.status).toBe(409);
+    });
+
+    test("should handle case-insensitive email duplicates", async () => {
+      const createUserData: V1CreateUserRequest = {
+        email: "case@example.com",
+        name: "First User",
+      };
+
+      // Create first user
+      await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
+        url: Routes.Users.create.path,
+        body: createUserData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      // Attempt to create second user with same email in different case
+      const duplicateResponse = await harness.post<V1CreateUserRequest, V1CreateUserResponse409>({
+        url: Routes.Users.create.path,
+        body: {
+          ...createUserData,
+          email: "CASE@EXAMPLE.COM",
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      expect(duplicateResponse.status).toBe(409);
+    });
+  });
+
+  describe("POST /v1/users - Response Format", () => {
+    test("should include all required response fields", async () => {
+      const createUserData: V1CreateUserRequest = {
+        email: "fields@example.com",
+        name: "Field Test",
+      };
+
+      const response = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
+        url: Routes.Users.create.path,
+        body: createUserData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("id");
+      expect(response.body).toHaveProperty("email");
+      expect(response.body).toHaveProperty("name");
+      expect(response.body).toHaveProperty("status");
+      expect(response.body).toHaveProperty("role");
+      expect(response.body).toHaveProperty("avatarUrl");
+      expect(response.body).toHaveProperty("bio");
+      expect(response.body).toHaveProperty("createdAt");
+      expect(response.body).toHaveProperty("updatedAt");
+    });
+
+    test("should have correct default values in response", async () => {
+      const createUserData: V1CreateUserRequest = {
+        email: "defaults@example.com",
+        name: "Default Test",
+      };
+
+      const response = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
+        url: Routes.Users.create.path,
+        body: createUserData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      expect(response.status).toBe(200);
     });
   });
 });

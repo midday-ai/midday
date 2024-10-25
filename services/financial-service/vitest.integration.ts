@@ -71,7 +71,7 @@ export default defineWorkersProject(async () => {
         workers: {
           main: "./src/index.ts",
           singleWorker: true,
-          isolatedStorage: false,
+          isolatedStorage: true,
           wrangler: {
             configPath: "./wrangler-test.toml",
             environment: "local",

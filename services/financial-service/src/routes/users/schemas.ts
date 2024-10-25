@@ -10,7 +10,7 @@ import { z } from "@hono/zod-openapi";
  */
 export const UserSchema = z.object({
   id: z.number(),
-  email: z.string().email(),
+  email: z.string().email().min(1).max(256),
   name: z.string().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
