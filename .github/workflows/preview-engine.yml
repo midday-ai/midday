@@ -31,6 +31,9 @@ jobs:
       - name: 🧪 Run unit tests
         run: bun run test
         working-directory: ./services/financial-service
+      - name: 🧪 Run integration tests
+        run: bun run test:integration
+        working-directory: ./services/financial-service
       - name: Deploy Project Artifacts to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
