@@ -11,31 +11,100 @@ export type Database = {
     Tables: {
       apps: {
         Row: {
+          api_version: string | null
           app_id: string
+          app_name: string | null
+          auth_method: string | null
+          category: string | null
           config: Json | null
           created_at: string | null
           created_by: string | null
+          custom_fields: Json | null
+          data_sync_frequency: string | null
+          dependencies: Json | null
+          equation: Json | null
           id: string
+          input_schema: Json | null
+          installed_at: string | null
+          integration_config: Json | null
+          integration_type: string | null
+          is_public: boolean | null
+          last_sync_at: string | null
+          last_updated: string | null
+          model_type: string | null
+          output_schema: Json | null
           settings: Json | null
+          supported_features: string[] | null
+          sync_status: string | null
+          tags: string[] | null
           team_id: string | null
+          user_permissions: Json | null
+          version: string | null
+          webhook_url: string | null
         }
         Insert: {
+          api_version?: string | null
           app_id: string
+          app_name?: string | null
+          auth_method?: string | null
+          category?: string | null
           config?: Json | null
           created_at?: string | null
           created_by?: string | null
+          custom_fields?: Json | null
+          data_sync_frequency?: string | null
+          dependencies?: Json | null
+          equation?: Json | null
           id?: string
+          input_schema?: Json | null
+          installed_at?: string | null
+          integration_config?: Json | null
+          integration_type?: string | null
+          is_public?: boolean | null
+          last_sync_at?: string | null
+          last_updated?: string | null
+          model_type?: string | null
+          output_schema?: Json | null
           settings?: Json | null
+          supported_features?: string[] | null
+          sync_status?: string | null
+          tags?: string[] | null
           team_id?: string | null
+          user_permissions?: Json | null
+          version?: string | null
+          webhook_url?: string | null
         }
         Update: {
+          api_version?: string | null
           app_id?: string
+          app_name?: string | null
+          auth_method?: string | null
+          category?: string | null
           config?: Json | null
           created_at?: string | null
           created_by?: string | null
+          custom_fields?: Json | null
+          data_sync_frequency?: string | null
+          dependencies?: Json | null
+          equation?: Json | null
           id?: string
+          input_schema?: Json | null
+          installed_at?: string | null
+          integration_config?: Json | null
+          integration_type?: string | null
+          is_public?: boolean | null
+          last_sync_at?: string | null
+          last_updated?: string | null
+          model_type?: string | null
+          output_schema?: Json | null
           settings?: Json | null
+          supported_features?: string[] | null
+          sync_status?: string | null
+          tags?: string[] | null
           team_id?: string | null
+          user_permissions?: Json | null
+          version?: string | null
+          webhook_url?: string | null
         }
         Relationships: [
           {
@@ -3072,3 +3141,4 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
     ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+

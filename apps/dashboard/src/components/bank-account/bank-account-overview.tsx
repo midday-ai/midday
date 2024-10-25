@@ -34,6 +34,7 @@ interface BankAccountOverviewProps {
   bankConnectionMap: Record<string, BankConnection>;
   /** Name of the user */
   userName: string;
+  userId: string;
 }
 
 /**
@@ -50,6 +51,7 @@ export const BankAccountOverview: React.FC<BankAccountOverviewProps> = ({
   bankAccounts,
   bankConnectionMap,
   userName,
+  userId,
 }) => {
   /**
    * State for the currently selected bank account
@@ -96,6 +98,7 @@ export const BankAccountOverview: React.FC<BankAccountOverviewProps> = ({
             bankConnectionMap[selectedBankAccount.bank_connection_id!]
           }
           userName={userName}
+          userId={userId}
         />
       )}
     </>

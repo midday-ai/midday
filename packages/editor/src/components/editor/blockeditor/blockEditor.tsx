@@ -1,12 +1,12 @@
 "use client";
 
-import { RefObject, useMemo, useRef } from "react";
 import { LinkMenu } from "@/components/editor/menus";
 import {
   useBlockEditor,
   UseBlockEditorProps,
 } from "@/hooks/editor/useBlockEditor";
 import { EditorContent, PureEditorContent } from "@tiptap/react";
+import React, { RefObject, useMemo, useRef } from "react";
 
 import "@/styles/index.css";
 
@@ -20,6 +20,7 @@ import { useAIState } from "@/hooks/editor/useAIState";
 import { PlusIcon } from "lucide-react";
 import { createPortal } from "react-dom";
 
+import { Button } from "@midday/ui/button";
 import { ContentItemMenu } from "../menus/contentItemMenu";
 import { TextMenu } from "../menus/textMenu";
 import { EditorHeader } from "./components/editorHeader";
@@ -83,13 +84,13 @@ export const BlockEditor = ({
         <div className="relative flex h-full flex-1 flex-col overflow-hidden">
           {label && onContentChange && (
             <div className="py-5">
-              <button
+              <Button
                 onClick={() => onContentChange(editor.getHTML())}
-                className="flex w-fit flex-1 gap-2 rounded-2xl border bg-zinc-950 p-3 text-sm text-white dark:bg-white dark:text-zinc-950"
+                variant={"outline"}
+                className="flex items-center justify-center rounded-2xl ml-[1%]"
               >
-                <PlusIcon className="h-5 w-5" />
                 {label}
-              </button>
+              </Button>
             </div>
           )}
           <EditorHeader
@@ -103,7 +104,7 @@ export const BlockEditor = ({
           <EditorContent
             editor={editor}
             ref={editorRef as unknown as RefObject<HTMLDivElement>}
-            className="flex-1 overflow-y-auto"
+            className="flex-1 overflow-y-auto scroll-smooth"
           />
           <ContentItemMenu editor={editor} />
           <LinkMenu editor={editor} appendTo={menuContainerRef} />

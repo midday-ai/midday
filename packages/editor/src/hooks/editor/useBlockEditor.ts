@@ -1,4 +1,3 @@
-import { useContext, useEffect, useMemo, useState } from "react";
 import { EditorUser } from "@/components/editor/blockeditor/types";
 import { EditorContext } from "@/context/editor/editorContext";
 import { ExtensionKit } from "@/extensions/extension-kit";
@@ -9,6 +8,7 @@ import Ai from "@tiptap-pro/extension-ai";
 import Collaboration from "@tiptap/extension-collaboration";
 import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
 import { Editor, Extensions, useEditor } from "@tiptap/react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import type { Doc as YDoc } from "yjs";
 
 import { useSidebar } from "./useSidebar";
@@ -116,7 +116,7 @@ export const useBlockEditor = ({
           autocomplete: "off",
           autocorrect: "off",
           autocapitalize: "off",
-          class: "min-h-full",
+          class: "h-screen w-full",
         },
       },
       content: content || "",

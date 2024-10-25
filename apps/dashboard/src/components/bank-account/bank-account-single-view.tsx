@@ -13,6 +13,7 @@
  * ```
  */
 
+import { getUser } from "@midday/supabase/cached-queries";
 import {
   BankAccountSchema,
   BankConnectionSchema,
@@ -52,7 +53,7 @@ interface BankAccountSingleViewProps
  * @param {BankAccountSingleViewProps} props - The props for the component
  * @returns {JSX.Element} The rendered component
  */
-const BankAccountSingleView: React.FC<BankAccountSingleViewProps> = ({
+const BankAccountSingleView: React.FC<BankAccountSingleViewProps> = async ({
   bankAccount,
   bankConnections,
   className,
@@ -78,10 +79,20 @@ const BankAccountSingleView: React.FC<BankAccountSingleViewProps> = ({
    */
   const bankConnection = bankAccountMap[bankAccount.bank_connection_id!];
 
+  const user = await getUser();
+
   return (
     <div className={cn(className, "py-[2%]")}>
-      <div className="grid md:grid-cols-3 gap-3">
-        <Card className="col-span-2 p-[1%] flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
+        <Card className="p-[1%] flex flex-col gap-3">
+          <BankAccountDetails
+            bankAccount={bankAccount}
+            bankConnection={bankConnection}
+            userName={userName}
+            transactions={[]}
+            transactionsLoading={false}
+            userId={user?.data?.id as string}
+          />
           <RecentTransactions
             limit={100}
             accountId={bankAccount.id}
@@ -90,15 +101,16 @@ const BankAccountSingleView: React.FC<BankAccountSingleViewProps> = ({
             className="border-none shadow-none"
           />
         </Card>
-        <Card className="col-span-1 p-[3%] flex flex-col gap-3">
+        {/* <Card className="col-span-1 p-[3%] flex flex-col gap-3">
           <BankAccountDetails
             bankAccount={bankAccount}
             bankConnection={bankConnection}
             userName={userName}
             transactions={[]}
             transactionsLoading={false}
+            userId={user?.data?.id as string}
           />
-        </Card>
+        </Card> */}
       </div>
     </div>
   );

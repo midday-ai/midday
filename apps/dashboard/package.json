@@ -27,6 +27,7 @@
     "@midday/kv": "workspace:*",
     "@midday/location": "workspace:*",
     "@midday/notification": "workspace:*",
+    "@midday/editor": "workspace:*",
     "@midday/stripe": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",

@@ -62,7 +62,7 @@ client.defineJob({
       await uniqueLog(
         io,
         "error",
-        `Error in transaction sync job: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Error in transaction sync job: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   },
@@ -81,14 +81,14 @@ async function processTeamWithRetry(
     supabase: Supabase<Database, "public", any>;
   }>,
   enableRetry: boolean = false,
-  retryCount: number = 0
+  retryCount: number = 0,
 ): Promise<void> {
   const processId = nanoid(6);
   try {
     await uniqueLog(
       io,
       "info",
-      `Processing team: ${teamId} (Attempt ${retryCount + 1}) [${processId}]`
+      `Processing team: ${teamId} (Attempt ${retryCount + 1}) [${processId}]`,
     );
 
     await processTeam(teamId, io);
@@ -96,7 +96,7 @@ async function processTeamWithRetry(
     await uniqueLog(
       io,
       "info",
-      `Successfully processed team: ${teamId} [${processId}]`
+      `Successfully processed team: ${teamId} [${processId}]`,
     );
   } catch (error) {
     if (enableRetry && retryCount < MAX_RETRIES) {
@@ -104,7 +104,7 @@ async function processTeamWithRetry(
       await uniqueLog(
         io,
         "warn",
-        `Retrying team ${teamId} after ${backoffTime}ms. Retry count: ${retryCount + 1} [${processId}]`
+        `Retrying team ${teamId} after ${backoffTime}ms. Retry count: ${retryCount + 1} [${processId}]`,
       );
       await delay(backoffTime);
       await processTeamWithRetry(teamId, io, enableRetry, retryCount + 1);
@@ -112,7 +112,7 @@ async function processTeamWithRetry(
       await uniqueLog(
         io,
         "error",
-        `Failed to process team ${teamId}${enableRetry ? ` after ${MAX_RETRIES} retries` : ""}: ${error instanceof Error ? error.message : "Unknown error"} [${processId}]`
+        `Failed to process team ${teamId}${enableRetry ? ` after ${MAX_RETRIES} retries` : ""}: ${error instanceof Error ? error.message : "Unknown error"} [${processId}]`,
       );
       throw error;
     }
@@ -127,7 +127,7 @@ async function processTeamWithRetry(
 async function fetchAllTeams(
   io: IOWithIntegrations<{
     supabase: Supabase<Database, "public", any>;
-  }>
+  }>,
 ): Promise<Team[]> {
   const supabase = await io.supabase.client;
 
@@ -137,7 +137,7 @@ async function fetchAllTeams(
     await uniqueLog(
       io,
       "error",
-      `"Error fetching teams ${JSON.stringify(error)}"`
+      `"Error fetching teams ${JSON.stringify(error)}"`,
     );
     throw error;
   }
@@ -154,7 +154,7 @@ async function processTeam(
   teamId: string,
   io: IOWithIntegrations<{
     supabase: Supabase<Database, "public", any>;
-  }>
+  }>,
 ): Promise<void> {
   const supabase = await io.supabase.client;
 
@@ -171,7 +171,7 @@ async function processTeam(
     await uniqueLog(
       io,
       "info",
-      `No new transactions found for team: ${teamId}`
+      `No new transactions found for team: ${teamId}`,
     );
     return;
   }
@@ -191,14 +191,14 @@ async function fetchAccounts(
   teamId: string,
   io: IOWithIntegrations<{
     supabase: Supabase<Database, "public", any>;
-  }>
+  }>,
 ): Promise<BankAccount[]> {
   const supabase = await io.supabase.client;
 
   const { data, error } = await supabase
     .from("bank_accounts")
     .select(
-      "id, team_id, account_id, type, bank_connection:bank_connection_id(provider, access_token)"
+      "id, team_id, account_id, type, bank_connection:bank_connection_id(provider, access_token)",
     )
     .eq("team_id", teamId)
     .eq("enabled", true)
@@ -222,7 +222,7 @@ async function processAccounts(
   accounts: BankAccount[],
   io: IOWithIntegrations<{
     supabase: Supabase<any, "public", any>;
-  }>
+  }>,
 ): Promise<any[]> {
   const supabase = await io.supabase.client;
 
@@ -254,7 +254,7 @@ async function updateAccountBalance(
   provider: "plaid" | "gocardless" | "teller" | null,
   io: IOWithIntegrations<{
     supabase: Supabase<any, "public", any>;
-  }>
+  }>,
 ): Promise<void> {
   const supabase = await io.supabase.client;
 
@@ -276,7 +276,7 @@ async function updateAccountBalance(
     await uniqueLog(
       io,
       "error",
-      `Update Account Balance Error. Provider: ${account.bank_connection.provider} Account id: ${account.account_id}`
+      `Update Account Balance Error. Provider: ${account.bank_connection.provider} Account id: ${account.account_id}`,
     );
   }
 }
@@ -289,7 +289,7 @@ async function updateAccountBalance(
  */
 async function fetchTransactions(
   account: BankAccount,
-  provider: "plaid" | "gocardless" | "teller" | null
+  provider: "plaid" | "gocardless" | "teller" | null,
 ): Promise<Array<Transaction>> {
   const result = await engine.transactions.list({
     provider: account.bank_connection.provider as
@@ -303,7 +303,7 @@ async function fetchTransactions(
         | "credit"
         | "other_asset"
         | "loan"
-        | "other_liability"
+        | "other_liability",
     ) as
       | "depository"
       | "credit"
@@ -340,7 +340,7 @@ async function upsertTransactions(
   teamId: string,
   io: IOWithIntegrations<{
     supabase: Supabase<Database, "public", any>;
-  }>
+  }>,
 ): Promise<any> {
   const supabase = await io.supabase.client;
 
@@ -356,7 +356,7 @@ async function upsertTransactions(
     await uniqueLog(
       io,
       "error",
-      `Error upserting transactions for team ${teamId}`
+      `Error upserting transactions for team ${teamId}`,
     );
     throw error;
   }
@@ -375,7 +375,7 @@ async function sendNotifications(
   teamId: string,
   io: IOWithIntegrations<{
     supabase: Supabase<Database, "public", any>;
-  }>
+  }>,
 ): Promise<void> {
   if (transactions && transactions.length > 0) {
     const uniqueId = nanoid(6); // Generate a unique identifier

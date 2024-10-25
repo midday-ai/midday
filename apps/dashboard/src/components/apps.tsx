@@ -2,8 +2,8 @@
 
 import { capitalize } from "@/utils/utils";
 import { apps, types } from "@midday/app-store";
-import { ModellingIntegrationConfig } from "@midday/app-store/types";
 import { Button } from "@midday/ui/button";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   BarChart2,
   Bell,
@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Crosshair,
   HelpCircle,
+  Menu,
   MessageSquare,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -27,28 +28,28 @@ export type User = {
 
 const categoryIcons = {
   [types.IntegrationCategory.Accounting]: (
-    <BarChart2 className="h-5 w-5" strokeWidth={0.5} />
+    <BarChart2 className="h-7 w-7" strokeWidth={0.5} />
   ),
   [types.IntegrationCategory.Assistant]: (
-    <HelpCircle className="h-5 w-5" strokeWidth={0.5} />
+    <HelpCircle className="h-7 w-7" strokeWidth={0.5} />
   ),
   [types.IntegrationCategory.Payroll]: (
-    <Briefcase className="h-5 w-5" strokeWidth={0.5} />
+    <Briefcase className="h-7 w-7" strokeWidth={0.5} />
   ),
   [types.IntegrationCategory.Banking]: (
-    <Building2 className="h-5 w-5" strokeWidth={0.5} />
+    <Building2 className="h-7 w-7" strokeWidth={0.5} />
   ),
   [types.IntegrationCategory.CRM]: (
-    <MessageSquare className="h-5 w-5" strokeWidth={0.5} />
+    <MessageSquare className="h-7 w-7" strokeWidth={0.5} />
   ),
   [types.IntegrationCategory.Notification]: (
-    <Bell className="h-5 w-5" strokeWidth={0.5} />
+    <Bell className="h-7 w-7" strokeWidth={0.5} />
   ),
   [types.IntegrationCategory.Modelling]: (
-    <ChartNetwork className="h-5 w-5" strokeWidth={0.5} />
+    <ChartNetwork className="h-7 w-7" strokeWidth={0.5} />
   ),
   [types.IntegrationCategory.GoalTemplates]: (
-    <Crosshair className="h-5 w-5" strokeWidth={0.5} />
+    <Crosshair className="h-7 w-7" strokeWidth={0.5} />
   ),
 };
 
@@ -77,8 +78,8 @@ export function Apps({
   settings,
 }: { user: User; installedApps: string[]; settings: Record<string, any>[] }) {
   const searchParams = useSearchParams();
-  const isInstalledPage = searchParams.get("tab") === "installed";
-  const search = searchParams.get("q");
+  const isInstalledPage = searchParams?.get("tab") === "installed";
+  const search = searchParams?.get("q");
   const router = useRouter();
 
   const [activeCategory, setActiveCategory] =
@@ -100,25 +101,12 @@ export function Apps({
     <div className="flex py-[2%]">
       {/* Side Navigation */}
       <div
-        className={`bg-gray-100 dark:bg-gray-800 h-screen p-4 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ${isSidebarCollapsed ? "w-16" : "w-64"}`}
+        className={`bg-gray-100 dark:bg-gray-800 h-screen p-4 transition-all duration-300 ${isSidebarCollapsed ? "w-16" : "w-64"}`}
       >
-        <div className="flex justify-between items-center mb-4">
-          {!isSidebarCollapsed && (
-            <h2 className="text-xl font-semibold">Categories</h2>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="ml-auto"
-          >
-            {isSidebarCollapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <ChevronLeft className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
+        <AppsMarketplaceSidebar
+          isSidebarCollapsed={isSidebarCollapsed}
+          setIsSidebarCollapsed={setIsSidebarCollapsed}
+        />
         {categories.map((category) => (
           <Button
             key={category}
@@ -137,8 +125,8 @@ export function Apps({
 
       {/* Main Content */}
       <div className="flex-1 p-8">
-        <div className="flex flex-col p-[2%]">
-          <h1 className="text-5xl font-bold mb-2">
+        <div className="flex flex-col p-[2%] md:min-h-[400px] bg-background/4 text-foreground items-center justify-center">
+          <h1 className="md:text-7xl font-bold mb-2">
             {capitalize(activeCategory)} Integrations
           </h1>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
@@ -146,7 +134,7 @@ export function Apps({
           </p>
         </div>
 
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {filteredApps.map((app) => (
             <App
               key={app.id}
@@ -156,8 +144,9 @@ export function Apps({
                 settings.find((setting) => setting.app_id === app.id)
                   ?.settings ?? []
               }
-              onInitialize={() => app.onInitialize(user)}
+              onInitialize={app.onInitialize}
               equation={"equation" in app ? app.equation : undefined}
+              cfg={app}
             />
           ))}
 
@@ -197,3 +186,55 @@ export function Apps({
     </div>
   );
 }
+
+export const AppsMarketplaceSidebar = ({
+  isSidebarCollapsed,
+  setIsSidebarCollapsed,
+}: {
+  isSidebarCollapsed: boolean;
+  setIsSidebarCollapsed: (isCollapsed: boolean) => void;
+}) => {
+  return (
+    <motion.div
+      className="flex justify-between items-center mb-6 p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-none"
+      animate={{
+        width: isSidebarCollapsed ? "60px" : "240px",
+      }}
+      transition={{ duration: 0.3 }}
+    >
+      <AnimatePresence>
+        {!isSidebarCollapsed && (
+          <motion.div
+            className="flex items-center space-x-2"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Menu className="h-6 w-6 text-white" />
+            <h2 className="text-xl font-semibold text-white">Categories</h2>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          className="text-white hover:bg-white hover:bg-opacity-20 transition-colors duration-200"
+        >
+          {isSidebarCollapsed ? (
+            <ChevronRight className="h-5 w-5" />
+          ) : (
+            <ChevronLeft className="h-5 w-5" />
+          )}
+        </Button>
+      </motion.div>
+    </motion.div>
+  );
+};

@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
           email: email,
           avatarUrl: avatarUrl,
           userName: userName,
-          analytics
+          analytics,
         });
       }
 
@@ -107,34 +107,30 @@ type Params = {
   avatarUrl: string;
   userName: string;
   analytics: {
-    track: (options: {
-      event: string;
-    } & PostEventPayload["properties"]) => void;
+    track: (
+      options: {
+        event: string;
+      } & PostEventPayload["properties"],
+    ) => void;
   };
-}
+};
 
 // add function to validate params
 export const validateParams = (params: Params) => {
   if (!params.userId || params.userId.length === 0) {
     throw new Error("userId is required");
   }
-  if (!params.email || params.email.length === 0)  {
+  if (!params.email || params.email.length === 0) {
     throw new Error("email is required");
   }
-  
+
   if (!params.userName || params.userName.length === 0) {
     throw new Error("userName is required");
   }
-}
+};
 
 const onboardToBackendIfNotOnboarded = async (params: Params) => {
-  const {
-    userId,
-    email,
-    avatarUrl,
-    userName,
-    analytics
-  } = params;
+  const { userId, email, avatarUrl, userName, analytics } = params;
   const backendClient = initializeBackendClient();
 
   // validate the provided data payload
@@ -144,7 +140,7 @@ const onboardToBackendIfNotOnboarded = async (params: Params) => {
   const req: GetUserByAuth0IDRequest = {
     supabaseAuth0UserId: userId,
     profileType: ProfileType.Business,
-  }
+  };
 
   // perform the request
   const checkUserExistsResponse = await backendClient
@@ -159,7 +155,7 @@ const onboardToBackendIfNotOnboarded = async (params: Params) => {
       username: userName,
       profileType: ProfileType.Business,
       profileImageUrl: avatarUrl,
-      supabaseAuthUserId: userId
+      supabaseAuthUserId: userId,
     };
 
     /**
@@ -184,4 +180,4 @@ const onboardToBackendIfNotOnboarded = async (params: Params) => {
       });
     }
   }
-}
+};

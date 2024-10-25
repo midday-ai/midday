@@ -17,6 +17,8 @@ const features = {
   isBackendEnabled: featureFlags.isSolomonBackendInteractionsEnabled,
   /** Flag for Enterprise Tier features */
   isEnterpriseTierEnabled: featureFlags.isEnterpriseTierEnabled,
+  /** Flag for Multiple Teams Support */
+  isMultipleTeamSupportEnabled: featureFlags.isMultipleTeamsSupportEnabled,
 };
 
 /**

@@ -12,4 +12,3 @@ export * from "./sync";
 export * from "./sync-all-teams";
 export * from "./sync-recurring";
 export * from "./update-currency";
-

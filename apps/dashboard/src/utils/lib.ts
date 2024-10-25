@@ -1,10 +1,5 @@
 import { Group } from "@/types/index";
 import {
-  BriefcaseIcon,
-  CubeTransparentIcon,
-  WalletIcon,
-} from "@heroicons/react/24/outline";
-import {
   CpuIcon,
   Database,
   DollarSign,
@@ -12,12 +7,9 @@ import {
   FileText,
   InboxIcon,
   LayoutGrid,
-  PieChart,
   Settings,
+  SquareChartGantt,
   TableCellsMergeIcon,
-  Timer,
-  TrendingDown,
-  TrendingUp,
 } from "lucide-react";
 
 /**
@@ -72,6 +64,24 @@ const menuConfig: Group[] = [
         label: "Recurring Transactions",
         icon: FileAxis3D,
         submenus: [],
+        active: false,
+      },
+      {
+        href: "/team-insights",
+        label: "Team Insights",
+        icon: SquareChartGantt,
+        submenus: [
+          {
+            href: "/team-insights/income",
+            label: "Income",
+            active: false,
+          },
+          {
+            href: "/team-insights/expense",
+            label: "Expense",
+            active: false,
+          },
+        ],
         active: false,
       },
     ],
@@ -195,7 +205,26 @@ const menuConfig: Group[] = [
         href: "/apps",
         label: "Market Place",
         icon: FileText,
-        submenus: [],
+        submenus: [
+          {
+            // This is where users can view all available apps in the marketplace
+            href: "/apps",
+            label: "All Apps",
+            active: false,
+          },
+          // {
+          //   // This is where users can view all available apps that they have installed on their account
+          //   href: "/apps/installed",
+          //   label: "My Apps | Beta",
+          //   active: false,
+          // },
+          // {
+          //   // This is where users can play with their data against an app prior to installing it
+          //   href: "/apps/sandbox",
+          //   label: "Sandbox | Beta",
+          //   active: false,
+          // }
+        ],
         active: false,
       },
     ],
@@ -245,7 +274,7 @@ const menuConfig: Group[] = [
  */
 export function getMenuList(
   pathname: string,
-  config: Group[] = menuConfig
+  config: Group[] = menuConfig,
 ): Group[] {
   return config.map((group) => ({
     ...group,

@@ -11,12 +11,12 @@ import React, { useCallback, useEffect, useState } from "react";
  * @extends React.PropsWithChildren
  */
 interface StoreProviderProps extends React.PropsWithChildren {
-    /** The unique identifier of the user */
-    userId: string;
-    /** The access token for authentication */
-    accessToken: string;
-    /** The email address of the user */
-    email: string;
+  /** The unique identifier of the user */
+  userId: string;
+  /** The access token for authentication */
+  accessToken: string;
+  /** The email address of the user */
+  email: string;
 }
 
 /**
@@ -27,131 +27,138 @@ interface StoreProviderProps extends React.PropsWithChildren {
  * @returns {React.ReactElement} The rendered component
  */
 const StoreProvider: React.FC<StoreProviderProps> = ({
-    children,
-    userId,
-    email,
-    accessToken,
+  children,
+  userId,
+  email,
+  accessToken,
 }) => {
-    const { toast } = useToast();
-    const { setData, reset } = useUserStore();
-    const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const { setData, reset } = useUserStore();
+  const [isLoading, setIsLoading] = useState(true);
 
-    /**
-     * Fetches the user profile from the backend.
-     * 
-     * @returns {Promise<UserState | null>} The user data if successful, null otherwise
-     */
-    const fetchUserProfile = useCallback(async () => {
-        try {
-            const { queryUserProfileFromBackend } = await import("@/actions-queries/query-user-from-backend");
-            const response = await queryUserProfileFromBackend({ userId, email, accessToken });
+  /**
+   * Fetches the user profile from the backend.
+   *
+   * @returns {Promise<UserState | null>} The user data if successful, null otherwise
+   */
+  const fetchUserProfile = useCallback(async () => {
+    try {
+      const { queryUserProfileFromBackend } = await import(
+        "@/actions-queries/query-user-from-backend"
+      );
+      const response = await queryUserProfileFromBackend({
+        userId,
+        email,
+        accessToken,
+      });
 
-            if ('error' in response) {
-                throw new Error(response.error);
-            }
+      if ("error" in response) {
+        throw new Error(response.error);
+      }
 
-            return { ...response, authenticated: true };
-        } catch (error) {
-            console.error("Failed to fetch user data:", error);
-            
-            let errorMessage = "An unexpected error occurred. Please try again later.";
-            let errorTitle = "Error fetching user data";
-            
-            if (error instanceof Error) {
-                if (error.message.includes("network")) {
-                    errorMessage = "Please check your internet connection and try again.";
-                } else if (error.message.includes("unauthorized")) {
-                    errorMessage = "Your session may have expired. Please log in again.";
-                    errorTitle = "Authentication Error";
-                } else {
-                    errorMessage = error.message;
-                }
-            }
-            
-            toast({
-                title: errorTitle,
-                description: errorMessage,
-                variant: "destructive",
-                duration: 5000, // Show the toast for 5 seconds
-            });
-            
-            return null;
-        }
-    }, [userId, email, accessToken, toast]);
+      return { ...response, authenticated: true };
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
 
-    /**
-     * Initializes the user store with data from local storage or by fetching from the backend.
-     */
-    const initializeStore = useCallback(async () => {
-        const storedState = getStoredState();
-        if (storedState?.authenticated && storedState.userId === userId) {
-            setData({
-                ...storedState,
-                supabaseAuth0UserId: userId,
-            });
-            return;
-        }
+      let errorMessage =
+        "An unexpected error occurred. Please try again later.";
+      let errorTitle = "Error fetching user data";
 
-        if (userId && email && accessToken) {
-            const userData = await fetchUserProfile();
-            if (userData) {
-                setData({
-                    ...userData,
-                    supabaseAuth0UserId: userId,
-                });
-                localStorage.setItem(USER_STORE_KEY, JSON.stringify(userData));
-            } else {
-                reset();
-            }
+      if (error instanceof Error) {
+        if (error.message.includes("network")) {
+          errorMessage = "Please check your internet connection and try again.";
+        } else if (error.message.includes("unauthorized")) {
+          errorMessage = "Your session may have expired. Please log in again.";
+          errorTitle = "Authentication Error";
         } else {
-            reset();
+          errorMessage = error.message;
         }
-    }, [userId, email, accessToken, setData, reset, fetchUserProfile]);
+      }
 
-    /**
-     * Effect hook to initialize user data when the component mounts.
-     */
-    useEffect(() => {
-        const initializeData = async () => {
-            if (features.isBackendEnabled) {
-                try {
-                    await initializeStore();
-                } catch (error) {
-                    console.error("Error initializing store:", error);
-                    toast({
-                        title: "Error initializing user data",
-                        description: "Please try refreshing the page",
-                        variant: "destructive",
-                    });
-                }
-            }
-            setIsLoading(false);
-        };
+      toast({
+        title: errorTitle,
+        description: errorMessage,
+        variant: "destructive",
+        duration: 5000, // Show the toast for 5 seconds
+      });
 
-        initializeData();
-    }, [initializeStore, toast]);
+      return null;
+    }
+  }, [userId, email, accessToken, toast]);
 
-    if (isLoading) {
-        return <LoadingUserDataFromBackend />;
+  /**
+   * Initializes the user store with data from local storage or by fetching from the backend.
+   */
+  const initializeStore = useCallback(async () => {
+    const storedState = getStoredState();
+    if (storedState?.authenticated && storedState.userId === userId) {
+      setData({
+        ...storedState,
+        supabaseAuth0UserId: userId,
+      });
+      return;
     }
 
-    return <>{children}</>;
+    if (userId && email && accessToken) {
+      const userData = await fetchUserProfile();
+      if (userData) {
+        setData({
+          ...userData,
+          supabaseAuth0UserId: userId,
+        });
+        localStorage.setItem(USER_STORE_KEY, JSON.stringify(userData));
+      } else {
+        reset();
+      }
+    } else {
+      reset();
+    }
+  }, [userId, email, accessToken, setData, reset, fetchUserProfile]);
+
+  /**
+   * Effect hook to initialize user data when the component mounts.
+   */
+  useEffect(() => {
+    const initializeData = async () => {
+      if (features.isBackendEnabled) {
+        try {
+          await initializeStore();
+        } catch (error) {
+          console.error("Error initializing store:", error);
+          toast({
+            title: "Error initializing user data",
+            description: "Please try refreshing the page",
+            variant: "destructive",
+          });
+        }
+      }
+      setIsLoading(false);
+    };
+
+    initializeData();
+  }, [initializeStore, toast]);
+
+  if (isLoading) {
+    return <LoadingUserDataFromBackend />;
+  }
+
+  return <>{children}</>;
 };
 
 /**
  * Retrieves the stored user state from local storage.
- * 
+ *
  * @returns {UserState | null} The parsed user state if available, null otherwise
  */
 function getStoredState(): UserState | null {
-    if (typeof window === "undefined") return null;
-    const storedState = localStorage.getItem(USER_STORE_KEY);
-    try {
-        return storedState ? JSON.parse(storedState) : null;
-    } catch (error) {
-        console.error("Error parsing stored state:", error);
-        return null;
-    }
+  if (typeof window === "undefined") return null;
+  const storedState = localStorage.getItem(USER_STORE_KEY);
+  try {
+    return storedState ? JSON.parse(storedState) : null;
+  } catch (error) {
+    console.error("Error parsing stored state:", error);
+    return null;
+  }
 }
 
 export default StoreProvider;

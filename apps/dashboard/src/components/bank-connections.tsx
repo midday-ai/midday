@@ -28,6 +28,7 @@ import { ReconnectProvider } from "./reconnect-provider";
 import { SyncTransactions } from "./sync-transactions";
 
 interface BankConnectionProps {
+  userId: string;
   connection: {
     id: string;
     name: string;
@@ -40,6 +41,7 @@ interface BankConnectionProps {
     access_token: string | null;
     error?: string;
     status: "connected" | "disconnected" | "unknown";
+    item_id: string | null;
     accounts: Array<{
       id: string;
       name: string;
@@ -133,7 +135,7 @@ function ConnectionState({
   return <div className="text-xs font-normal">Never accessed</div>;
 }
 
-export function BankConnection({ connection }: BankConnectionProps) {
+export function BankConnection({ connection, userId }: BankConnectionProps) {
   const [eventId, setEventId] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
@@ -205,20 +207,32 @@ export function BankConnection({ connection }: BankConnectionProps) {
   // NOTE: GoCardLess reconnect flow (redirect from API route)
   useEffect(() => {
     if (params.step === "reconnect" && params.id) {
-      manualSyncTransactions.execute({ connectionId: params.id });
+      manualSyncTransactions.execute({
+        connectionId: params.id,
+        institutionId: connection.institution_id,
+        institutionName: connection.name,
+        userId: userId,
+        itemId: connection.item_id ?? "",
+        accessToken: connection.access_token ?? "",
+      });
     }
   }, [params]);
 
   const handleManualSync = () => {
-    manualSyncTransactions.execute({ connectionId: connection.id });
+    manualSyncTransactions.execute({
+      connectionId: connection.id,
+      institutionId: connection.institution_id,
+      institutionName: connection.name,
+      userId: userId,
+      itemId: connection.item_id ?? "",
+      accessToken: connection.access_token ?? "",
+    });
   };
 
   return (
     <div>
       <div className="flex justify-between items-center">
-        <AccordionTrigger
-          className="justify-start text-start w-full"
-        >
+        <AccordionTrigger className="justify-start text-start w-full">
           <div className="flex space-x-4 items-center ml-4 w-full">
             <BankLogo src={connection.logo_url} alt={connection.name} />
 
@@ -295,8 +309,10 @@ export function BankConnection({ connection }: BankConnectionProps) {
 
 export function BankConnections({
   data,
+  userId,
 }: {
   data: BankConnectionProps["connection"][];
+  userId: string;
 }) {
   const defaultValue = data.length === 1 ? ["connection-0"] : undefined;
 
@@ -310,7 +326,7 @@ export function BankConnections({
               key={connection.id}
               className="border-none"
             >
-              <BankConnection connection={connection} />
+              <BankConnection connection={connection} userId={userId} />
             </AccordionItem>
           );
         })}

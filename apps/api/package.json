@@ -25,6 +25,6 @@
   },
   "dependencies": {
     "dotenv": "^16.0.3",
-    "supabase": "^1.200.3"
+    "supabase": "^1.207.9"
   }
 }

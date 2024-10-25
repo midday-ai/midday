@@ -19,12 +19,22 @@ export const disconnectAppAction = authActionClient
     },
   })
   .action(async ({ parsedInput: { appId }, ctx: { supabase, user } }) => {
-    const { data } = await supabase
+    console.log("disconnection app with following params", {
+      appId: appId,
+      teamId: user?.team_id,
+    });
+
+    const { data, error } = await supabase
       .from("apps")
       .delete()
       .eq("app_id", appId)
-      .eq("team_id", user.team_id)
+      .eq("team_id", user.team_id as string)
       .select();
+
+    if (error) {
+      console.error(error);
+      throw error;
+    }
 
     revalidatePath("/apps");
 

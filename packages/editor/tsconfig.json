@@ -1,5 +1,15 @@
 {
-  "extends": "@midday/tsconfig/react-library.json",
-  "include": ["src"],
-  "exclude": ["dist", "build", "node_modules"]
+  "extends": "@tooling/typescript-config/base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "incremental": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "bundler"
+  },
+  "include": ["*.ts", "src"],
+  "exclude": ["node_modules"]
 }

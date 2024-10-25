@@ -4,10 +4,7 @@ import { ERROR_TYPE } from "@/types/error-types";
 import { FetchUserResponse } from "@/types/fetch-types";
 import { createErrorResponse, initializeBackendClient } from "@/utils/backend";
 import { getSession } from "@midday/supabase/cached-queries";
-import {
-    CheckEmailAndAuth0UserIdExistsRequest
-} from "@solomon-ai/client-typescript-sdk";
-
+import { CheckEmailAndAuth0UserIdExistsRequest } from "@solomon-ai/client-typescript-sdk";
 
 /**
  * Fetches user information by Auth0 ID and email.
@@ -39,38 +36,40 @@ import {
  * }
  */
 export async function fetchUserByAuth0IdAndEmail(
-    request: CheckEmailAndAuth0UserIdExistsRequest,
+  request: CheckEmailAndAuth0UserIdExistsRequest,
 ): Promise<FetchUserResponse> {
-    try {
-        const session = await getSession();
-        if (!session?.data.session) {
-            return createErrorResponse(
-                ERROR_TYPE.USER_NOT_AUTHENTICATED,
-                "No active session found"
-            );
-        }
-
-        const backendClient = initializeBackendClient();
-        const response = await backendClient.userServiceApi.checkEmailAndAuth0UserIdExists(request);
-
-        if (!response._exists) {
-            return createErrorResponse(
-                ERROR_TYPE.USER_DOES_NOT_EXIST,
-                "User does not exist"
-            );
-        }
-
-        return {
-            authenticated: true,
-            userExists: true,
-            userAccount: response,
-        };
-    } catch (error) {
-        console.error("Error in fetchUserByAuth0IdAndEmail:", error);
-        return createErrorResponse(
-            ERROR_TYPE.USER_NOT_FOUND,
-            "An unexpected error occurred while fetching user information"
-        );
+  try {
+    const session = await getSession();
+    if (!session?.data.session) {
+      return createErrorResponse(
+        ERROR_TYPE.USER_NOT_AUTHENTICATED,
+        "No active session found",
+      );
     }
-}
 
+    const backendClient = initializeBackendClient();
+    const response =
+      await backendClient.userServiceApi.checkEmailAndAuth0UserIdExists(
+        request,
+      );
+
+    if (!response._exists) {
+      return createErrorResponse(
+        ERROR_TYPE.USER_DOES_NOT_EXIST,
+        "User does not exist",
+      );
+    }
+
+    return {
+      authenticated: true,
+      userExists: true,
+      userAccount: response,
+    };
+  } catch (error) {
+    console.error("Error in fetchUserByAuth0IdAndEmail:", error);
+    return createErrorResponse(
+      ERROR_TYPE.USER_NOT_FOUND,
+      "An unexpected error occurred while fetching user information",
+    );
+  }
+}

@@ -94,6 +94,9 @@ type SiteConfig = {
   viewport: Viewport;
   pricing: PricingPlan[];
   financialEngine: FinancialEngineConfig;
+  termsAndConditionsUrl: string;
+  privacyPolicyUrl: string;
+  documentationUrl: string;
 };
 
 export type {

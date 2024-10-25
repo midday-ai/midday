@@ -1,7 +1,5 @@
-import React, { useMemo } from "react";
-import { MerchantFinancialMetricsConverter } from "../../../../lib/converters/merchant-sub-profile-converter";
-import { SpendingPeriod } from "../../../../types/merchant";
 import { MerchantMetricsFinancialSubProfile } from "client-typescript-sdk";
+import React, { useMemo } from "react";
 import {
   Bar,
   BarChart,
@@ -13,6 +11,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { MerchantFinancialMetricsConverter } from "../../../../lib/converters/merchant-sub-profile-converter";
+import { SpendingPeriod } from "../../../../types/merchant";
 
 export interface TopMerchantChartProps {
   merchants: Array<string>;
@@ -50,6 +50,7 @@ export const TopMerchantChart: React.FC<TopMerchantChartProps> = ({
           <CartesianGrid
             strokeDasharray="3 3"
             vertical={false}
+            horizontal={false}
             className="stoke-[#DCDAD2] dark:stroke-[#2C2C2C]"
           />
           <XAxis

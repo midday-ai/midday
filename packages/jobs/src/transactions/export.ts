@@ -73,7 +73,7 @@ client.defineJob({
         category:transaction_categories(id, name, description),
         bank_account:bank_accounts(id, name)
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .in("id", transactionIds)
       .eq("team_id", teamId);
@@ -124,9 +124,9 @@ client.defineJob({
               name,
               blob: data,
             };
-          }
+          },
         );
-      }) ?? []
+      }) ?? [],
     );
 
     await generateExport.update("generate-export-attachments-end", {
@@ -215,10 +215,10 @@ client.defineJob({
 
     zipWriter.add("transactions.csv", new TextReader(csv));
     attachments?.forEach((attachment) => {
-      if (attachment.status === 'fulfilled' && attachment.value?.blob) {
+      if (attachment.status === "fulfilled" && attachment.value?.blob) {
         zipWriter.add(
           attachment.value.name,
-          new BlobReader(attachment.value.blob)
+          new BlobReader(attachment.value.blob),
         );
       }
     });

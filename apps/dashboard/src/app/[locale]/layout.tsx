@@ -73,11 +73,9 @@ export const viewport = {
 export const preferredRegion = ["fra1", "sfo1", "iad1"];
 export const maxDuration = 60;
 
-
 // Initialize the backend client on the server side
 // so backend client is initialized as soon as the app starts
 initializeBackendClient();
-
 
 export default async function Layout({
   children,
@@ -86,7 +84,6 @@ export default async function Layout({
   children: ReactElement;
   params: { locale: string };
 }) {
-
   const session = await getSession().catch((error) => {
     console.error("Failed to fetch session:", error);
     return null;
@@ -104,12 +101,17 @@ export default async function Layout({
           "whitespace-pre-line overscroll-none scrollbar-hide",
         )}
       >
-        {/** 
+        {/**
          * We place this component here to initialize the backend client which is a singleton class when the app loads.
          * In order to work correctly it needs to reside high up on the component tree.
          */}
         <BackendClientInitializer />
-        <Providers locale={locale} userId={userId} accessToken={accessToken} email={email}>
+        <Providers
+          locale={locale}
+          userId={userId}
+          accessToken={accessToken}
+          email={email}
+        >
           {children}
         </Providers>
 

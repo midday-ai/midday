@@ -17,15 +17,15 @@ jobs:
     strategy:
       matrix:
         directory:
-          - apps/api/supabase
+          - apps/api
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
       SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID_BUSINESS_PRODUCTION }}
       SUPABASE_AUTH_GITHUB_CLIENT_ID: ${{ secrets.SUPABASE_AUTH_GITHUB_CLIENT_ID }}
       SUPABASE_AUTH_GITHUB_CLIENT_SECRET: ${{ secrets.SUPABASE_AUTH_GITHUB_CLIENT_SECRET }}
-      SUPABASE_AUTH_GOOGLE_CLIENT_ID: ${{ secrets.SUPABASE_AUTH_GOOGLE_CLIENT_ID }}
-      SUPABASE_AUTH_GOOGLE_CLIENT_SECRET: ${{ secrets.SUPABASE_AUTH_GOOGLE_CLIENT_SECRET }}
+      GOOGLE_CLIENT_ID: ${{ secrets.SUPABASE_AUTH_GOOGLE_CLIENT_ID }}
+      GOOGLE_SECRET: ${{ secrets.SUPABASE_AUTH_GOOGLE_CLIENT_SECRET }}
       SUPABASE_AUTH_APPLE_CLIENT_ID: ${{ secrets.SUPABASE_AUTH_APPLE_CLIENT_ID }}
       SUPABASE_AUTH_APPLE_SECRET: ${{ secrets.SUPABASE_AUTH_APPLE_SECRET }}
       SUPABASE_AUTH_SLACK_CLIENT_ID: ${{ secrets.SUPABASE_AUTH_SLACK_CLIENT_ID }}
@@ -48,4 +48,4 @@ jobs:
       - name: Deploy migrations
         run: |
           echo "Deploying migrations from directory: ${{ matrix.directory }}"
-          supabase db push --workdir ${{ matrix.directory }}
+          supabase db push --workdir ${{ matrix.directory }} --include-all

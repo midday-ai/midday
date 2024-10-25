@@ -1,5 +1,4 @@
-"use client";
-
+import { getBackendClient } from "@/utils/backend";
 import {
   BankAccountSchema,
   BankConnectionSchema,
@@ -11,25 +10,47 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
-import { AccountBalanceChart } from "@midday/ui/charts/financials";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
-import { format } from "date-fns";
+import {
+  AccountBalanceHistory,
+  GetAccountBalanceHistoryRequest,
+} from "@solomon-ai/client-typescript-sdk";
 import { ArrowUpRightFromSquare } from "lucide-react";
 import Link from "next/link";
+import React, { useCallback, useMemo, useState } from "react";
+import { AccountBalanceSummaryCharts } from "./charts/account-balance/account-balance-summary-charts";
 import { FormatAmount } from "./format-amount";
-import { RecentTransactionsServer } from "./recent-transactions/recent-transactions.server";
 import { TransactionsFilterHelper } from "./similar-transactions";
 
+/**
+ * Props for the BankAccountDetails component.
+ * @interface BankAccountDetailsProps
+ */
 interface BankAccountDetailsProps {
+  /** The bank account details */
   bankAccount: BankAccountSchema;
+  /** Optional bank connection details */
   bankConnection?: BankConnectionSchema;
+  /** Name of the account holder */
   userName: string;
+  /** Flag to indicate if data is still loading */
   isLoading?: boolean;
+  /** Array of transactions for the account */
   transactions?: TransactionSchema[];
+  /** Flag to indicate if transactions are still loading */
   transactionsLoading: boolean;
+  /** ID of the user */
+  userId: string;
 }
 
+/**
+ * BankAccountDetails component displays detailed information about a bank account.
+ * It shows account balance, recent transactions, and other relevant details.
+ *
+ * @param {BankAccountDetailsProps} props - The props for the component
+ * @returns {React.ReactElement} The rendered BankAccountDetails component
+ */
 export function BankAccountDetails({
   bankAccount,
   bankConnection,
@@ -37,11 +58,129 @@ export function BankAccountDetails({
   isLoading = false,
   transactions,
   transactionsLoading,
-}: BankAccountDetailsProps) {
-  // Remove the useEffect and useState hooks for transactions
+  userId,
+}: BankAccountDetailsProps): React.ReactElement {
+  /**
+   * Memoized link to view more details about the account.
+   * @type {string}
+   */
+  const viewMoreLink = useMemo(
+    () => `/financial-accounts/${bankAccount.account_id}`,
+    [bankAccount.account_id],
+  );
+
+  /**
+   * Memoized request object for fetching account balance history.
+   * @type {GetAccountBalanceHistoryRequest}
+   */
+  const accountBalanceReq: GetAccountBalanceHistoryRequest = useMemo(
+    () => ({
+      plaidAccountId: bankAccount.account_id,
+      pageNumber: "1",
+      pageSize: "100",
+    }),
+    [bankAccount.account_id],
+  );
+
+  /**
+   * Fetches the account balance history from the backend.
+   * @returns {Promise<any[]>} The account balance history
+   */
+  const fetchAccountBalance = useCallback(async () => {
+    const c = getBackendClient();
+    const accountBalance =
+      await c.financialServiceApi.getAccountBalanceHistory(accountBalanceReq);
+    return accountBalance.accountBalanceHistory;
+  }, [accountBalanceReq]);
+
+  /**
+   * Memoized account balance history.
+   * @type {any[]}
+   */
+  const accountBalanceHistory = useMemo(() => {
+    let history: Array<AccountBalanceHistory> = [];
+    fetchAccountBalance().then((data) => {
+      history = data ?? [];
+    });
+    return history;
+  }, [fetchAccountBalance, bankAccount.account_id]);
+
+  /**
+   * Memoized JSX for rendering account details.
+   * @type {React.ReactElement}
+   */
+  const renderAccountDetails = useMemo(
+    () => (
+      <AccordionItem value="details">
+        <AccordionTrigger>Account Details</AccordionTrigger>
+        <AccordionContent className="select-text">
+          <p>
+            <strong>Account Number:</strong> {bankAccount.account_id}
+          </p>
+          <p>
+            <strong>Currency:</strong> {bankAccount.currency}
+          </p>
+          <p>
+            <strong>Account Holder:</strong> {userName}
+          </p>
+        </AccordionContent>
+      </AccordionItem>
+    ),
+    [bankAccount.account_id, bankAccount.currency, userName],
+  );
+
+  /**
+   * Memoized JSX for rendering bank connection details.
+   * @type {React.ReactElement | null}
+   */
+  const renderBankConnection = useMemo(
+    () =>
+      bankConnection && (
+        <AccordionItem value="connection">
+          <AccordionTrigger>Bank Connection</AccordionTrigger>
+          <AccordionContent className="select-text">
+            <p>
+              <strong>Bank Name:</strong> {bankConnection.name}
+            </p>
+            <p>
+              <strong>Status:</strong> {bankConnection.status}
+            </p>
+          </AccordionContent>
+        </AccordionItem>
+      ),
+    [bankConnection],
+  );
+
+  /**
+   * Memoized JSX for rendering recent transactions.
+   * @type {React.ReactElement | null}
+   */
+  const renderTransactions = useMemo(
+    () =>
+      transactions &&
+      transactions.length > 0 && (
+        <AccordionItem value="transactions" className="h-[calc(100vh-400px)]">
+          <AccordionTrigger>Recent Transactions</AccordionTrigger>
+          <AccordionContent className="h-full">
+            {transactionsLoading ? (
+              <Skeleton className="w-full h-[100px]" />
+            ) : (
+              <div className="h-full">
+                <TransactionsFilterHelper
+                  transactions={transactions}
+                  title={`${bankAccount.name}`}
+                />
+              </div>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+      ),
+    [transactions, transactionsLoading, bankAccount.name],
+  );
 
   return (
     <div className="overflow-y-auto scrollbar-hide h-full">
+      {/* Account header */}
       <div className="flex justify-between mb-8">
         <div className="flex-1 flex-col">
           {isLoading ? (
@@ -72,9 +211,10 @@ export function BankAccountDetails({
                 bankAccount.name
               )}
             </h2>
-            <Link href={`/financial-accounts/${bankAccount.account_id}`}>
+            <Link href={viewMoreLink}>
               <p className="text-md text-[#606060] hover:text-[#090202] hover:font-bold">
-                View More <ArrowUpRightFromSquare size={16} className="inline ml-2" />
+                View More{" "}
+                <ArrowUpRightFromSquare size={16} className="inline ml-2" />
               </p>
             </Link>
           </div>
@@ -95,56 +235,22 @@ export function BankAccountDetails({
         </div>
       </div>
 
+      {/* Account details accordion */}
       <Accordion
         type="multiple"
         defaultValue={["details", "connection", "transactions"]}
       >
-        <AccordionItem value="details">
-          <AccordionTrigger>Account Details</AccordionTrigger>
-          <AccordionContent className="select-text">
-            <p>
-              <strong>Account Number:</strong> {bankAccount.account_id}
-            </p>
-            <p>
-              <strong>Currency:</strong> {bankAccount.currency}
-            </p>
-            <p>
-              <strong>Account Holder:</strong> {userName}
-            </p>
-          </AccordionContent>
-        </AccordionItem>
+        {renderAccountDetails}
+        {renderBankConnection}
 
-        {bankConnection && (
-          <AccordionItem value="connection">
-            <AccordionTrigger>Bank Connection</AccordionTrigger>
-            <AccordionContent className="select-text">
-              <p>
-                <strong>Bank Name:</strong> {bankConnection.name}
-              </p>
-              <p>
-                <strong>Status:</strong> {bankConnection.status}
-              </p>
-            </AccordionContent>
-          </AccordionItem>
-        )}
+        <div className="py-[2%]">
+          <AccountBalanceSummaryCharts
+            link={viewMoreLink}
+            historicalAccountBalance={accountBalanceHistory}
+          />
+        </div>
 
-        {transactions && transactions.length > 0 && (
-          <AccordionItem value="transactions" className="h-[calc(100vh-400px)]">
-            <AccordionTrigger>Recent Transactions</AccordionTrigger>
-            <AccordionContent className="h-full">
-              {transactionsLoading ? (
-                <Skeleton className="w-full h-[100px]" />
-              ) : (
-                <div className="h-full">
-                  <TransactionsFilterHelper
-                    transactions={transactions}
-                    title={`${bankAccount.name}`}
-                  />
-                </div>
-              )}
-            </AccordionContent>
-          </AccordionItem>
-        )}
+        {renderTransactions}
       </Accordion>
     </div>
   );

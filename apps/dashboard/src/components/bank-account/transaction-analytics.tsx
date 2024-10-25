@@ -9,7 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@midday/ui/chart";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@midday/ui/chart";
 import {
   Sheet,
   SheetContent,
@@ -21,7 +26,22 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { TrendingUp, TrendingUpDown } from "lucide-react";
 import React, { useMemo } from "react";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 type Transaction = Tables<"transactions">;
 
@@ -131,7 +151,7 @@ const computeAnalytics = (transactions: Transaction[]): AnalyticsResult => {
   // Determine the most frequent merchant
   const mostFrequentMerchantEntry = Object.entries(merchantCounts).reduce(
     (max, entry) => (entry[1] > max[1] ? entry : max),
-    ["", 0]
+    ["", 0],
   );
   result.mostFrequentMerchant = {
     name: mostFrequentMerchantEntry[0],
@@ -140,7 +160,6 @@ const computeAnalytics = (transactions: Transaction[]): AnalyticsResult => {
 
   return result;
 };
-
 
 const COLORS = [
   "#0088FE",
@@ -173,7 +192,7 @@ export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
         name,
         value,
       })),
-    [analytics.categoryCounts]
+    [analytics.categoryCounts],
   );
 
   const methodData = useMemo(
@@ -182,7 +201,7 @@ export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
         name,
         value,
       })),
-    [analytics.methodCounts]
+    [analytics.methodCounts],
   );
 
   const dailyCashFlow = useMemo(() => {
@@ -196,7 +215,6 @@ export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [transactions]);
 
-
   // Define chartConfig for ChartContainer
   const chartConfig = {
     amount: {
@@ -204,7 +222,6 @@ export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
       color: "hsl(var(--chart-1))",
     },
   } satisfies ChartConfig;
-
 
   return (
     <Sheet>
@@ -216,8 +233,12 @@ export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
       </SheetTrigger>
       <SheetContent className="md:min-w-[80%] sm:max-w-none">
         <SheetHeader>
-          <SheetTitle className="text-3xl font-bold">Transaction Analytics</SheetTitle>
-          <SheetDescription>Comprehensive analysis of your financial transactions</SheetDescription>
+          <SheetTitle className="text-3xl font-bold">
+            Transaction Analytics
+          </SheetTitle>
+          <SheetDescription>
+            Comprehensive analysis of your financial transactions
+          </SheetDescription>
         </SheetHeader>
         <Tabs defaultValue="overview" className="w-full mt-6">
           <TabsList className="grid w-full grid-cols-3">
@@ -239,16 +260,27 @@ export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
               <AnalyticsCard
                 title="Net Cash Flow"
                 value={formatMoney(analytics.netCashFlow)}
-                valueClassName={analytics.netCashFlow >= 0 ? "text-green-500" : "text-red-500"}
+                valueClassName={
+                  analytics.netCashFlow >= 0 ? "text-green-500" : "text-red-500"
+                }
               />
               <AnalyticsCard
                 title="Largest Transaction"
-                value={analytics.largestTransaction ? formatMoney(Math.abs(analytics.largestTransaction.amount)) : "N/A"}
-                subtext={analytics.largestTransaction?.description ?? "No transactions"}
+                value={
+                  analytics.largestTransaction
+                    ? formatMoney(Math.abs(analytics.largestTransaction.amount))
+                    : "N/A"
+                }
+                subtext={
+                  analytics.largestTransaction?.description ?? "No transactions"
+                }
               />
               <AnalyticsCard
                 title="Average Transaction"
-                value={formatMoney(analytics.averageTransactionAmount / analytics.transactionCount)}
+                value={formatMoney(
+                  analytics.averageTransactionAmount /
+                    analytics.transactionCount,
+                )}
               />
               <AnalyticsCard
                 title="Transaction Count"
@@ -261,17 +293,27 @@ export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
             <div className="grid grid-cols-1 gap-4 mt-4">
               <AnalyticsCard
                 title="Most Used Currency"
-                value={Object.entries(analytics.currencyCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A"}
+                value={
+                  Object.entries(analytics.currencyCounts).sort(
+                    (a, b) => b[1] - a[1],
+                  )[0]?.[0] || "N/A"
+                }
                 subtext="Based on transaction count"
               />
               <AnalyticsCard
                 title="Most Common Status"
-                value={Object.entries(analytics.statusCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A"}
+                value={
+                  Object.entries(analytics.statusCounts).sort(
+                    (a, b) => b[1] - a[1],
+                  )[0]?.[0] || "N/A"
+                }
                 subtext="Based on transaction count"
               />
               <AnalyticsCard
                 title="Average Balance"
-                value={formatMoney(analytics.averageBalance / analytics.transactionCount)}
+                value={formatMoney(
+                  analytics.averageBalance / analytics.transactionCount,
+                )}
                 subtext="Across all transactions"
               />
               <AnalyticsCard
@@ -296,7 +338,6 @@ export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
     </Sheet>
   );
 };
-
 
 interface AnalyticsCardProps {
   title: string;

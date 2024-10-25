@@ -10,16 +10,38 @@ const capitalize = (str: string | undefined) => {
  * @returns A randomly generated string containing alphanumeric characters.
  */
 function generateRandomString(length: number = 10): string {
-    const characters =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    const charactersLength = characters.length;
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  const charactersLength = characters.length;
 
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
 
-    return result;
+  return result;
 }
 
-export { capitalize, generateRandomString };
+const formatCategoryName = (category: string): string => {
+  // Handle empty or null input
+  if (!category) return "";
+
+  // Split the string by underscores
+  const words = category.toLowerCase().split("_");
+
+  // Capitalize the first letter of each word and join with spaces
+  return words
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+const formatDate = (dateString: string | number | Date) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+export { capitalize, formatCategoryName, formatDate, generateRandomString };

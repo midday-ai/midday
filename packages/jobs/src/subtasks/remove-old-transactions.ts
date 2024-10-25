@@ -17,7 +17,7 @@ async function removeOldTransactionsSubTask(
   io: IOWithIntegrations<{ supabase: Supabase<Database, "public", any> }>,
   teamId: string,
   cutoffDate: Date,
-  taskKeyPrefix: string
+  taskKeyPrefix: string,
 ): Promise<number> {
   return io.runTask(
     `${taskKeyPrefix}-remove-old-transactions`,
@@ -40,10 +40,13 @@ async function removeOldTransactionsSubTask(
 
       return totalRemoved;
     },
-    { name: "Remove Old Transactions" }
+    { name: "Remove Old Transactions" },
   );
 
-  async function fetchOldTransactionIds(teamId: string, cutoffDate: Date): Promise<string[]> {
+  async function fetchOldTransactionIds(
+    teamId: string,
+    cutoffDate: Date,
+  ): Promise<string[]> {
     const { data: transactions, error } = await io.supabase.client
       .from("transactions")
       .select("id")

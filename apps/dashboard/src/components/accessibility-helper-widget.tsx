@@ -104,18 +104,18 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
         >
           <TabsList className="flex w-fit">
             <TabsTrigger value="quick-access">Quick Access</TabsTrigger>
-            <TabsTrigger value="product">Product</TabsTrigger>
+            {/* <TabsTrigger value="product">Product</TabsTrigger> */}
           </TabsList>
           <TabsContent value="quick-access">
             <div className="flex flex-col gap-4 items-start md:h-[400px] overflow-y-auto scrollbar-hide">
               {renderQuickAccessButtons()}
             </div>
           </TabsContent>
-          <TabsContent value="product">
+          {/* <TabsContent value="product">
             <div className="flex flex-col gap-4 items-start md:h-[400px] overflow-y-auto scrollbar-hide">
               {renderProductButtons()}
             </div>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </Card>
     </div>
@@ -130,33 +130,33 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
     <>
       {renderAccessButton(
         "",
-        <ChatAccessibilityButton className="m-3" title="Ask Solomon" />,
+        <ChatAccessibilityButton className="py-2" title="Ask Solomon" />,
       )}
       {renderAccessButton(
         "",
-        <IncomeViewAccessibilityButton className="m-3" title={"Income"} />,
+        <IncomeViewAccessibilityButton className="py-2" title={"Income"} />,
       )}
       {renderAccessButton(
         "",
-        <ExpenseViewAccessibilityButton className="m-3" title={"Expense"} />,
+        <ExpenseViewAccessibilityButton className="py-2" title={"Expense"} />,
       )}
       {renderAccessButton(
         "",
         <SubscriptionViewAccessibilityButton
-          className="m-3"
+          className="py-2"
           title="Subscriptions"
         />,
       )}
       {renderAccessButton(
         "",
         <TransactionViewAccessibilityButton
-          className="m-3"
+          className="py-2"
           title="Transactions"
         />,
       )}
       {renderAccessButton(
         "",
-        <OverviewViewAccessibilityButton className="m-3" title="Overview" />,
+        <OverviewViewAccessibilityButton className="py-2" title="Overview" />,
       )}
     </>
   );
@@ -176,7 +176,7 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           fullscreenPopup={false}
           locale="en"
           usersName="Solomon"
-          className="m-1"
+          className="py-2"
           placement="right"
           email={email}
           name={name}
@@ -191,7 +191,7 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           theme="light"
           locale="en"
           usersName="Solomon"
-          className="m-1"
+          className="py-2"
           placement="right"
           email={email}
           name={name}
@@ -206,7 +206,7 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           theme="light"
           locale="en"
           usersName="Solomon"
-          className="m-1"
+          className="py-2"
           email={email}
           name={name}
           id={id}

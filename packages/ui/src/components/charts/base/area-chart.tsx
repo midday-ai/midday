@@ -20,6 +20,7 @@ import {
 import { BarChartMultiDataPoint, ChartDataPoint } from "../../../types/chart";
 
 import { generatePayloadArray } from "../../../lib/random/generator";
+import { ChartTooltip, ChartTooltipContent } from "../../chart";
 import { ChartContainer } from "./chart-container";
 import { useWrapperState } from "./chart-wrapper";
 
@@ -169,8 +170,15 @@ export const AreaChart: React.FC<AreaChartProps> = ({
     ? new Date(sortedData[sortedData.length - 1]!.date)
     : undefined;
 
+  const [minValue, maxValue] = useMemo(() => {
+    return [
+      Math.min(...data.map((item) => item.value)),
+      Math.max(...data.map((item) => item.value)),
+    ];
+  }, [data]);
+
   return (
-    <ChartContainer
+    <ChartContainer<any>
       data={data}
       dataSet={dataSet}
       setDataSet={setDataSet}
@@ -191,6 +199,49 @@ export const AreaChart: React.FC<AreaChartProps> = ({
           bottom: 30,
         }}
       >
+        <CartesianGrid
+          strokeDasharray="3 3"
+          vertical={false}
+          horizontal={false}
+          className="stoke-[#DCDAD2] dark:stroke-[#2C2C2C]"
+        />
+
+        <XAxis
+          dataKey="date"
+          stroke="#888888"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+          tickMargin={15}
+          domain={[minValue * 0.9, maxValue * 1.1]}
+          tickFormatter={(value) =>
+            new Date(value).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            })
+          }
+          tick={{
+            fill: "#606060",
+            fontSize: 12,
+            fontFamily: "var(--font-sans)",
+          }}
+        />
+
+        <YAxis
+          stroke="#888888"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+          tickMargin={10}
+          minTickGap={32}
+          tickFormatter={getLabel}
+          width={getYAxisWidth(yAxisLabelMaxValue)}
+          tick={{
+            fill: "#606060",
+            fontSize: 12,
+            fontFamily: "var(--font-sans)",
+          }}
+        />
         <defs>
           <pattern
             id="raster"
@@ -209,50 +260,31 @@ export const AreaChart: React.FC<AreaChartProps> = ({
           </pattern>
         </defs>
 
-        <CartesianGrid
-          strokeDasharray="3 3"
-          vertical={false}
-          className="stoke-[#DCDAD2] dark:stroke-[#2C2C2C]"
-        />
-
         <Tooltip content={CustomTooltip} cursor={false} />
-
-        <XAxis
-          dataKey="date"
-          stroke="#888888"
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          tickMargin={15}
-          tickFormatter={(value) => format(new Date(value), "MMM")}
-          tick={{
-            fill: "#606060",
-            fontSize: 12,
-            fontFamily: "var(--font-sans)",
-          }}
-        />
-
-        <YAxis
-          stroke="#888888"
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          tickMargin={10}
-          tickFormatter={getLabel}
-          width={getYAxisWidth(yAxisLabelMaxValue)}
-          tick={{
-            fill: "#606060",
-            fontSize: 12,
-            fontFamily: "var(--font-sans)",
-          }}
+        <ChartTooltip
+          content={
+            CustomTooltip ?? (
+              <ChartTooltipContent
+                className="w-fit"
+                labelFormatter={(value) =>
+                  new Date(value).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
+                }
+              />
+            )
+          }
         />
 
         <Area
-          strokeWidth={2.5}
+          strokeWidth={2}
           type="monotone"
           dataKey="value"
           stroke="hsl(var(--primary))"
           fill="url(#raster)"
+          dot={false}
+          className="md:min-h-[400px]"
         />
       </BaseAreaChart>
     </ChartContainer>

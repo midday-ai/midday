@@ -1,10 +1,10 @@
-import { memo } from "react";
 import { Icon } from "@/components/editor/editorAtom/icon";
 import { Surface } from "@/components/editor/editorAtom/surface";
 import { Toolbar } from "@/components/editor/editorAtom/toolbar";
 import { ColorPicker } from "@/components/editor/panels";
 import * as Popover from "@radix-ui/react-popover";
 import { BubbleMenu, Editor } from "@tiptap/react";
+import { memo } from "react";
 
 import { AIDropdown } from "./components/aiDropdown";
 import { ContentTypePicker } from "./components/contentTypePicker";
@@ -34,7 +34,27 @@ export const TextMenu = ({ editor }: TextMenuProps) => {
 
   return (
     <BubbleMenu
-      tippyOptions={{ popperOptions: { placement: "top-start" } }}
+      tippyOptions={{
+        popperOptions: {
+          placement: "top-start",
+          modifiers: [
+            {
+              name: "preventOverflow",
+              options: {
+                boundary: "viewport",
+                padding: 8,
+              },
+            },
+            {
+              name: "flip",
+              options: {
+                fallbackPlacements: ["bottom-start", "top-end", "bottom-end"],
+              },
+            },
+          ],
+        },
+        maxWidth: "calc(100vw - 16px)",
+      }}
       editor={editor}
       pluginKey="textMenu"
       shouldShow={states.shouldShow}

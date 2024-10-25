@@ -1,4 +1,5 @@
 import { AccountBalanceHistory } from "client-typescript-sdk";
+import React, { useMemo } from "react";
 import { AccountBalanceConverter } from "../../../../lib/converters/account-balancer-converter";
 
 import { cn } from "../../../../utils/cn";
@@ -9,7 +10,7 @@ import {
   CardTitle,
 } from "../../../card";
 
-import { AreaChart } from "../../base/area-chart";
+import { AnalyticsChart } from "../../base/analytics-chart";
 
 export interface AccountBalanceChartProps {
   currency: string;
@@ -32,13 +33,24 @@ export const AccountBalanceChart: React.FC<AccountBalanceChartProps> = ({
   hideDescription = false,
   hideTitle = false,
 }) => {
-  const chartData = AccountBalanceConverter.convertToChartDataPoints(data);
+  const chartData = useMemo(() => {
+    return AccountBalanceConverter.convertToChartDataPoints(data);
+  }, [data]);
+
+  const barChartData = useMemo(() => {
+    return chartData.map((item) => ({
+      date: item.date,
+      balance: Number(item.value),
+    }));
+  }, [chartData]);
+
+  const dataKeys = ["balance"];
 
   return (
     <div className="h-full w-full">
       <CardHeader>
         {!hideTitle && (
-          <CardTitle className="font bold text-lg">
+          <CardTitle className="font-bold text-lg">
             Account Balance Over Time
           </CardTitle>
         )}
@@ -50,9 +62,15 @@ export const AccountBalanceChart: React.FC<AccountBalanceChartProps> = ({
       </CardHeader>
       <CardContent className={cn("p-3", className)}>
         <div className="border-none text-background shadow-none">
-          <AreaChart
+          <AnalyticsChart
+            chartData={barChartData}
+            title="Account Balance Over Time"
+            description={`Account balance over time in ${currency}`}
+            dataKeys={["balance"] as const}
+            colors={["#333"]}
+            trendKey="balance"
+            chartType="area"
             currency={currency}
-            data={chartData}
             height={height}
             locale={locale}
             enableAssistantMode={enableAssistantMode}

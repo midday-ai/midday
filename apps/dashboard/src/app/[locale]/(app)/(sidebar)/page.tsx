@@ -67,6 +67,7 @@ export default async function Overview({
   const isEmpty = !accounts?.data?.length;
 
   const tier = user?.data?.tier ?? "free";
+  const userId: string = user?.data?.id as string;
 
   return (
     <ContentLayout title="Overview">
@@ -77,6 +78,7 @@ export default async function Overview({
         bankAccounts={accounts?.data ?? []}
         bankConnections={bankConnections?.data ?? []}
         userName={user?.data?.full_name ?? ""}
+        userId={userId}
       />
 
       <div>

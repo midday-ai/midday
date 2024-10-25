@@ -184,7 +184,7 @@ export const BarChart: React.FC<BarChartProps> = ({
   );
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 h-full sm:h-[calc(100%-150px)]">
       <ChartWrapper
         buttonText="Open"
         openButtonText="Close"
@@ -216,7 +216,7 @@ export const BarChart: React.FC<BarChartProps> = ({
           </div>
         </div>
       </ChartWrapper>
-      <ChartContainer
+      <ChartContainer<any>
         data={data}
         dataSet={dataSet}
         setDataSet={setDataSet}
@@ -241,6 +241,7 @@ export const BarChart: React.FC<BarChartProps> = ({
           <CartesianGrid
             strokeDasharray="3 3"
             vertical={false}
+            horizontal={false}
             className="stoke-[#DCDAD2] dark:stroke-[#2C2C2C]"
           />
 
@@ -313,6 +314,13 @@ export const BarChart: React.FC<BarChartProps> = ({
               fill="hsl(var(--primary))"
             />
           )}
+
+          <defs>
+            <linearGradient id="growthGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={"#333"} stopOpacity={0.8} />
+              <stop offset="100%" stopColor={"#666"} stopOpacity={0.1} />
+            </linearGradient>
+          </defs>
         </BaseBarChart>
         {/* <ChartWrapper
                 buttonText="Open"
