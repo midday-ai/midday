@@ -1,4 +1,4 @@
-import { Log, type LogSchema } from "@/logger";
+import { Log, type LogSchema } from "@/metric/logger";
 import type { Metrics } from "./interface";
 import type { Metric } from "./metric-schema";
 

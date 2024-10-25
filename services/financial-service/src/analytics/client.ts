@@ -1,4 +1,4 @@
-import { ConsoleLogger, LogSchema } from "@/logger";
+import { ConsoleLogger, LogSchema } from "@/metric/logger";
 import { ApiAnalyticsEvent, SdkAnalyticsEvent } from "./types";
 
 /**

@@ -1,6 +1,6 @@
 import { Env, zEnv } from "./env";
 import { newApp } from "./hono/app";
-import { ConsoleLogger } from "./logger";
+import { ConsoleLogger } from "./metric/logger";
 import { UserActionMessageBody } from "./message";
 import { setupRoutes } from "./routes";
 

@@ -3,7 +3,7 @@ import { ServiceCache } from "@/cache";
 import { APIKeyRepository } from "@/db-repository/api-key-repository";
 import { UserRepository } from "@/db-repository/user-repository";
 import { DatabaseClient } from "@/db/client";
-import { ConsoleLogger } from "@/logger";
+import { ConsoleLogger } from "@/metric/logger";
 import { LogdrainMetrics } from "@/metric/logdrain";
 import { formatPlatformPrefix } from "@/utils/formatters";
 import type { MiddlewareHandler } from "hono";

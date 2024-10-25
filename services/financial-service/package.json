@@ -16,6 +16,7 @@
     "test": "vitest run -c vitest.config.ts",
     "test:integration": "vitest run -c vitest.integration.ts --bail=1",
     "test:benchmark": "vitest run -c vitest.benchmark.ts",
+    "test:debug": "vitest run -c vitest.config.ts  --inspect-brk --browser --no-file-parallelism",
     "test:ci": "vitest run -c vitest.unit.ts --reporter basic",
     "test:watch": "vitest",
     "start-tests": "npm run cleanup && npm run generate && npm run local:migrations:apply && npm run test:watch",
@@ -60,9 +61,10 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.2",
     "@cloudflare/workers-types": "^4.20240502.0",
-    "@types/service-worker-mock": "^2.0.1",
-    "@types/node": "^20.5.7",
     "@types/bun": "^1.1.9",
+    "@types/node": "^20.5.7",
+    "@types/service-worker-mock": "^2.0.1",
+    "@vitest/browser": "^2.1.3",
     "@vitest/ui": "^1.5.0",
     "drizzle-kit": "^0.25.0",
     "wrangler": "^3.80.2"

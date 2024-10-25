@@ -112,53 +112,53 @@ describe("V1 Delete User Route", () => {
         });
     });
 
-    // describe("DELETE /v1/users/:id - Success Cases", () => {
-    //     test("should successfully delete an existing user", async () => {
-    //         const createUserData = generator.generateUserData();
-    //         const res = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
-    //             url: Routes.Users.create.path,
-    //             body: createUserData,
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //             },
-    //         });
+    describe("DELETE /v1/users/:id - Success Cases", () => {
+        test("should successfully delete an existing user", async () => {
+            const createUserData = generator.generateUserData();
+            const res = await harness.post<V1CreateUserRequest, V1CreateUserResponse>({
+                url: Routes.Users.create.path,
+                body: createUserData,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
 
-    //         expect(res.status).toBe(200);
+            expect(res.status).toBe(200);
 
-    //         const response = await harness.delete<V1DeleteUserResponse>({
-    //             url: Routes.Users.delete.path.replace(":id", createdUserId),
-    //             headers: createAuthHeaders(),
-    //         });
+            const response = await harness.delete<V1DeleteUserResponse>({
+                url: Routes.Users.delete.path.replace(":id", createdUserId),
+                headers: createAuthHeaders(),
+            });
 
 
-    //         expect(response.status).toBe(204);
-    //         expect(response.body.success).toBe(true);
+            expect(response.status).toBe(204);
+            expect(response.body.success).toBe(true);
 
-    //         // Verify user is actually deleted
-    //         const verifyResponse = await harness.get<ErrorResponse>({
-    //             url: `/v1/api.users/${createdUserId}`,
-    //             headers: createAuthHeaders(),
-    //         });
+            // Verify user is actually deleted
+            const verifyResponse = await harness.get<ErrorResponse>({
+                url: `/v1/api.users/${createdUserId}`,
+                headers: createAuthHeaders(),
+            });
 
-    //         expect(verifyResponse.status).toBe(404);
-    //     });
+            expect(verifyResponse.status).toBe(404);
+        });
 
-    //     test("should be idempotent with valid authentication", async () => {
-    //         // First deletion
-    //         await harness.delete<V1DeleteUserResponse>({
-    //             url: Routes.Users.delete.path.replace(":id", createdUserId),
-    //             headers: createAuthHeaders(),
-    //         });
+        test("should be idempotent with valid authentication", async () => {
+            // First deletion
+            await harness.delete<V1DeleteUserResponse>({
+                url: Routes.Users.delete.path.replace(":id", createdUserId),
+                headers: createAuthHeaders(),
+            });
 
-    //         // Second deletion
-    //         const response = await harness.delete<V1DeleteUserResponse>({
-    //             url: Routes.Users.delete.path.replace(":id", createdUserId),
-    //             headers: createAuthHeaders(),
-    //         });
+            // Second deletion
+            const response = await harness.delete<V1DeleteUserResponse>({
+                url: Routes.Users.delete.path.replace(":id", createdUserId),
+                headers: createAuthHeaders(),
+            });
 
-    //         expect(response.status).toBe(204);
-    //     });
-    // });
+            expect(response.status).toBe(204);
+        });
+    });
 
     describe("DELETE /v1/users/:id - Error Cases", () => {
         test("should return 404 for non-existent user with valid auth", async () => {

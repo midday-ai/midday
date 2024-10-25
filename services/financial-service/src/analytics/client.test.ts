@@ -1,6 +1,6 @@
 import { Analytics } from "@/analytics/client";
 import { ApiAnalyticsEvent, SdkAnalyticsEvent } from "@/analytics/types";
-import { LogSchema } from "@/logger";
+import { LogSchema } from "@/metric/logger";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock console methods
