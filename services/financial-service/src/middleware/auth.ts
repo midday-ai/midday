@@ -66,7 +66,6 @@ export const authMiddleware = async (
 
     // Log the successful authentication
     c.get("ctx").logger.info(`User ${userId} authenticated successfully`);
-
     return next();
   } catch (error) {
     handleAuthError(c, error);

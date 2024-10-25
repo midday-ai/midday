@@ -13,6 +13,7 @@ import { rateLimit } from "@/middleware/ratelimit";
 import {
   AuthenticationRequiredRoutes,
   CachedRoutes,
+  Routes,
 } from "@/route-definitions/routes";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
@@ -122,9 +123,9 @@ function setupCaching(app: OpenAPIHono<HonoEnv>) {
  * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
  */
 function setupAuthentication(app: OpenAPIHono<HonoEnv>) {
-  AuthenticationRequiredRoutes.forEach((route) =>
-    app.use(route.path, authMiddleware),
-  );
+  AuthenticationRequiredRoutes.forEach((route) => {
+    app.use(route.path, authMiddleware);  
+  });
 }
 
 /**

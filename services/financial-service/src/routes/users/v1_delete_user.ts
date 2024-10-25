@@ -41,7 +41,6 @@ export const registerV1DeleteUser = (app: App) => {
     const userId = parseInt(id, 10);
 
     const isDeleted = await userStore.delete(userId);
-    console.log("isDeleted", isDeleted);
     if (!isDeleted) {
       throw new ServiceApiError({
         code: "NOT_FOUND",
@@ -58,5 +57,5 @@ export type V1DeleteUserRequest = z.infer<
   typeof deleteUserRoute.request.params
 >;
 export type V1DeleteUserResponse = z.infer<
-  (typeof deleteUserRoute.responses)[204]["content"]["application/json"]["schema"]
+  (typeof deleteUserRoute.responses)[200]["content"]["application/json"]["schema"]
 >;

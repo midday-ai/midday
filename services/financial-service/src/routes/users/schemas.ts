@@ -37,7 +37,12 @@ export const CreateUserSchemaResponse = UserSchema.openapi(
  * Schema for updating an existing user.
  * Makes all fields from the CreateUserSchema optional.
  */
-export const UpdateUserSchema = CreateUserSchema.partial();
+export const UpdateUserSchema = CreateUserSchema.partial().refine((data) => {
+  // Require at least one update field
+  return Object.keys(data).some(key => key !== 'id');
+}, {
+  message: "At least one field must be provided for update"
+});
 
 /**
  * Represents the API response for updating a user.
