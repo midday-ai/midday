@@ -32,8 +32,8 @@ const components = [
     name: "PDF Template",
     description: "A React PDF template supporting Tiptap JSON and more.",
     image: pdf,
-    href: "/components",
-    ready: false,
+    href: "/components/invoice",
+    ready: true,
   },
 ];
 
@@ -41,7 +41,7 @@ export default function Page() {
   return (
     <div className="container mb-52">
       <div className="mb-40">
-        <h1 className="mt-24 font-medium text-center text-[75px] md:text-[170px] mb-2 leading-none text-stroke">
+        <h1 className="mt-24 font-medium text-center text-[55px] md:text-[170px] mb-2 leading-none text-stroke">
           Components
         </h1>
 
