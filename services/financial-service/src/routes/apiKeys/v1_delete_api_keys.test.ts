@@ -121,8 +121,8 @@ describe("V1 Delete API Key Route", () => {
                 headers: createAuthHeaders(),
             });
 
-            expect(response.status).toBe(500);
-            expect(response.body.error.code).toBe("INTERNAL_SERVER_ERROR");
+            expect(response.status).toBe(400);
+            expect(response.body.error.code).toBe("BAD_REQUEST");
         });
     });
 
@@ -134,8 +134,8 @@ describe("V1 Delete API Key Route", () => {
                 headers: createAuthHeaders(),
             });
 
-            expect(response.status).toBe(500);
-            expect(response.body.error.code).toBe("INTERNAL_SERVER_ERROR");
+            expect(response.status).toBe(404);
+            expect(response.body.error.code).toBe("NOT_FOUND");
             expect(response.body.error.message).toBe("API Key not found");
         });
 
@@ -147,8 +147,8 @@ describe("V1 Delete API Key Route", () => {
                 headers: createAuthHeaders(),
             });
 
-            expect(response.status).toBe(500);
-            expect(response.body.error.code).toBe("INTERNAL_SERVER_ERROR");
+            expect(response.status).toBe(400);
+            expect(response.body.error.code).toBe("BAD_REQUEST");
         });
     });
 
@@ -184,7 +184,7 @@ describe("V1 Delete API Key Route", () => {
                 headers: createAuthHeaders(),
             });
 
-            expect(response.status).toBe(500);
+            expect(response.status).toBe(404);
         });
     });
 

@@ -1,5 +1,7 @@
 import { Context, Next } from "hono";
+import { cache } from "hono/cache";
 import { HTTPException } from "hono/http-exception";
+import { a } from "vitest/dist/suite-ynYMzeLu.js";
 import constants from "../constants/constant";
 import { APIKeyRepository } from "../db-repository/api-key-repository";
 import { UserRepository } from "../db-repository/user-repository";
@@ -39,8 +41,11 @@ export const authMiddleware = async (
   try {
     // Check cache first
     const cachedUser = await getCachedUser(c, apiKey, userId);
-    if (cachedUser) {
+    const cachedApiKey = await getCacheApiKey(c, apiKey)
+
+    if (cachedUser && cachedApiKey) {
       c.set("user", cachedUser);
+      c.set("apiKey", cachedApiKey);
       return next();
     }
 
@@ -61,6 +66,8 @@ export const authMiddleware = async (
     // Cache the authenticated user
     await cacheUser(c, apiKey, userId, user);
 
+    await cacheApiKey(c, apiKey);
+
     // Set the authenticated user in the context
     c.set("user", user);
 
@@ -72,15 +79,21 @@ export const authMiddleware = async (
   }
 };
 
-
-
 async function getCachedUser(
   c: Context,
   apiKey: string,
   userId: number,
 ): Promise<User | null> {
-  const cachedUser = await c.env.KV.get(`auth:${apiKey}:${userId}`);
+  const cachedUser = await c.env.KV.get(getUserApiKeyCacheKeyReference(apiKey, userId));
   return cachedUser ? JSON.parse(cachedUser) : null;
+}
+
+async function getCacheApiKey(
+  c: Context,
+  apiKey: string,
+): Promise<string | null> {
+  const cachedApiKey = await c.env.KV.get(getApiKeyCacheKeyReference(apiKey));
+  return cachedApiKey ? cachedApiKey : null;
 }
 
 async function cacheUser(
@@ -94,6 +107,15 @@ async function cacheUser(
   });
 }
 
+async function cacheApiKey(
+  c: Context,
+  apiKey: string,
+): Promise<void> {
+  await c.env.KV.put(getApiKeyCacheKeyReference(apiKey), apiKey.toString(), {
+    expirationTtl: constants.CACHE_TTL,
+  });
+}
+
 function handleAuthError(c: Context, error: unknown): never {
   if (error instanceof HTTPException) {
     throw error;
@@ -103,3 +125,8 @@ function handleAuthError(c: Context, error: unknown): never {
     message: "Internal server error during authentication",
   });
 }
+
+export const getUserApiKeyCacheKeyReference = (apiKey: string, userId: number): string =>
+  `auth:${apiKey}:${userId}`;
+
+export const getApiKeyCacheKeyReference = (apiKey: string): string => `auth:${apiKey}:api_keys`;

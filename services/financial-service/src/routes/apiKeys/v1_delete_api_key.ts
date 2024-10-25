@@ -1,7 +1,9 @@
-import { openApiErrorResponses as ErrorResponses } from "@/errors";
+import { openApiErrorResponses as ErrorResponses, ServiceApiError } from "@/errors";
 import { App } from "@/hono/app";
+import { getApiKeyCacheKeyReference, getUserApiKeyCacheKeyReference } from "@/middleware/auth";
 import { Routes } from "@/route-definitions/routes";
 import { createRoute, z } from "@hono/zod-openapi";
+import { get } from "http";
 import { APIKeyParamsSchema, DeleteAPIKeySchema } from "./schema";
 
 /**
@@ -53,22 +55,80 @@ export type V1DeleteApiKeyResponse = z.infer<
 export const registerV1DeleteApiKey = (app: App) => {
   app.openapi(route, async (c) => {
     const { id } = c.req.valid("query");
-
-    /**
-     *  Retrieve the API key from the database.
-     */
     const repository = c.get("repo");
+    const { cache } = c.get("ctx");
 
-    // convert id to number
-    const userId = parseInt(id, 10);
+    // Validate id parameter
+    if (!id) {
+      throw new ServiceApiError({
+        code: "BAD_REQUEST",
+        message: "API key ID is required",
+      });
+    }
 
-    const apiKey = await repository.apiKey.getById(userId);
+    // Parse and validate ID format
+    const apiKeyId = parseInt(id, 10);
+    if (isNaN(apiKeyId) || apiKeyId <= 0) {
+      throw new ServiceApiError({
+        code: "BAD_REQUEST",
+        message: "Invalid API key ID format",
+      });
+    }
+
+    const apiKey = await repository.apiKey.getById(apiKeyId);
     if (!apiKey) {
-      throw new Error("API Key not found");
+      throw new ServiceApiError({
+        code: "NOT_FOUND",
+        message: "API Key not found",
+      });
+    }
+
+    const currentApiKey = c.req.header("X-API-Key");
+    if (!currentApiKey) {
+      throw new ServiceApiError({
+        code: "UNAUTHORIZED",
+        message: "API Key is required",
+      });
+    }
+
+    const currentApiKeyUint = parseInt(currentApiKey, 10);
+
+    // Fetch the API key to be deleted
+    const currentApiKeyUnderUse = await repository.apiKey.getById(currentApiKeyUint);
+    if (!apiKey) {
+      throw new ServiceApiError({
+        code: "NOT_FOUND",
+        message: "API Key not found",
+      });
+    }
+
+    // Prevent deletion of currently used API key
+    if (currentApiKeyUnderUse && currentApiKeyUnderUse.id === apiKeyId) {
+      throw new ServiceApiError({
+        code: "BAD_REQUEST",
+        message: "Cannot delete currently active API key",
+      });
     }
 
     // await unkeyApi.keys.delete({ keyId: apiKey.key });
-    await repository.apiKey.delete(userId);
+    await repository.apiKey.delete(apiKeyId);
+
+    // Remove from cache if it exists
+    const userCacheKey = getUserApiKeyCacheKeyReference(apiKey.key, apiKey.userId);
+    try {
+      await cache.delete(userCacheKey);
+    } catch (error) {
+      // Log cache deletion error but don't fail the request
+      console.error("Failed to remove API key from cache:", error);
+    }
+
+    // Invalidate any related cache entries
+    const apiKeyCacheKey = getApiKeyCacheKeyReference(apiKey.key);
+    try {
+      await cache.delete(apiKeyCacheKey);
+    } catch (error) {
+      console.error("Failed to invalidate user API keys cache:", error);
+    }
 
     /**
      * @todo Add an audit log event for API key deletion events.
