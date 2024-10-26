@@ -31,6 +31,7 @@ type Props = {
 
 export function ChangeEmail({ email }: Props) {
   const { toast } = useToast();
+
   const action = useAction(updateUserAction, {
     onSuccess: () => {
       toast({
@@ -40,6 +41,7 @@ export function ChangeEmail({ email }: Props) {
       });
     },
   });
+
   const form = useForm<UpdateUserFormValues>({
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
@@ -50,6 +52,7 @@ export function ChangeEmail({ email }: Props) {
   const onSubmit = form.handleSubmit((data) => {
     action.execute({
       email: data?.email,
+      revalidatePath: "/account",
     });
   });
 
@@ -90,7 +93,12 @@ export function ChangeEmail({ email }: Props) {
               You will receive an email with a link to verify your new email
               address.
             </div>
-            <Button type="submit" disabled={action.status === "executing"}>
+            <Button
+              type="submit"
+              disabled={
+                action.status === "executing" || !form.formState.isDirty
+              }
+            >
               {action.status === "executing" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
