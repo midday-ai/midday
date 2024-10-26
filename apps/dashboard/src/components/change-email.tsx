@@ -20,7 +20,6 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
@@ -30,17 +29,7 @@ type Props = {
 };
 
 export function ChangeEmail({ email }: Props) {
-  const { toast } = useToast();
-
-  const action = useAction(updateUserAction, {
-    onSuccess: () => {
-      toast({
-        title: "Check your email",
-        description: "A verification link has been sent to your new email.",
-        variant: "success",
-      });
-    },
-  });
+  const action = useAction(updateUserAction);
 
   const form = useForm<UpdateUserFormValues>({
     resolver: zodResolver(updateUserSchema),
@@ -90,8 +79,7 @@ export function ChangeEmail({ email }: Props) {
 
           <CardFooter className="flex justify-between">
             <div>
-              You will receive an email with a link to verify your new email
-              address.
+              This is your primary email address for notifications and more.
             </div>
             <Button
               type="submit"
