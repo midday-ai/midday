@@ -11,9 +11,13 @@
   "exports": {
     ".": "./src/index.tsx",
     "./token": "./src/token/index.ts",
-    "./number": "./src/utils/number.ts"
+    "./number": "./src/utils/number.ts",
+    "./templates/html": "./src/templates/html/index.tsx",
+    "./templates/pdf": "./src/templates/pdf/index.tsx",
+    "./editor": "./src/editor/index.tsx"
   },
   "dependencies": {
+    "@midday/ui": "workspace:*",
     "@react-pdf/renderer": "^4.0.0",
     "date-fns": "^4.1.0",
     "jose": "^5.9.6",

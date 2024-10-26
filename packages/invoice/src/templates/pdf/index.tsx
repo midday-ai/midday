@@ -1,12 +1,13 @@
 import { Document, Font, Image, Page, Text, View } from "@react-pdf/renderer";
 import QRCodeUtil from "qrcode";
-import { EditorContent } from "../components/editor-content";
-import { LineItems } from "../components/line-items";
-import { Meta } from "../components/meta";
-import { Note } from "../components/note";
-import { PaymentDetails } from "../components/payment-details";
-import { QRCode } from "../components/qr-code";
-import { Summary } from "../components/summary";
+import type { TemplateProps } from "../types";
+import { EditorContent } from "./components/editor-content";
+import { LineItems } from "./components/line-items";
+import { Meta } from "./components/meta";
+import { Note } from "./components/note";
+import { PaymentDetails } from "./components/payment-details";
+import { QRCode } from "./components/qr-code";
+import { Summary } from "./components/summary";
 
 const CDN_URL = "https://cdn.midday.ai";
 
@@ -24,51 +25,7 @@ Font.register({
   ],
 });
 
-export type Template = {
-  logo_url?: string;
-  from_label: string;
-  customer_label: string;
-  invoice_no_label: string;
-  issue_date_label: string;
-  due_date_label: string;
-  date_format: string;
-  payment_label: string;
-  note_label: string;
-  description_label: string;
-  quantity_label: string;
-  price_label: string;
-  total_label: string;
-  tax_label: string;
-  vat_label: string;
-};
-
-export type LineItem = {
-  name: string;
-  quantity: number;
-  price: number;
-  invoice_number?: string;
-  issue_date?: string;
-  due_date?: string;
-};
-
-type Props = {
-  invoice_number: string;
-  issue_date: string;
-  due_date: string;
-  template: Template;
-  line_items: LineItem[];
-  customer_details?: JSON;
-  payment_details?: JSON;
-  from_details?: JSON;
-  note_details?: JSON;
-  currency: string;
-  amount: number;
-  vat?: number;
-  tax?: number;
-  size?: "letter" | "a4";
-};
-
-export async function InvoiceTemplate({
+export async function PdfTemplate({
   invoice_number,
   issue_date,
   due_date,
@@ -82,8 +39,8 @@ export async function InvoiceTemplate({
   vat,
   tax,
   amount,
-  size = "letter",
-}: Props) {
+  size = "a4",
+}: TemplateProps) {
   const qrCode = await QRCodeUtil.toDataURL(
     "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     {

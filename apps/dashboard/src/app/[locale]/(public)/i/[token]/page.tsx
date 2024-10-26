@@ -1,3 +1,4 @@
+import { HtmlTemplate } from "@midday/invoice/templates/html";
 import { verify } from "@midday/invoice/token";
 import { getInvoiceQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
@@ -47,14 +48,17 @@ export default async function Page({ params }: { params: { token: string } }) {
 
   try {
     const { id } = await verify(params.token);
-    console.log("katt", id);
     const { data: invoice } = await getInvoiceQuery(supabase, id);
 
     if (!invoice) {
       notFound();
     }
 
-    return <div>Invoice: {invoice.invoice_number}</div>;
+    return (
+      <div className="flex justify-center items-center h-screen dotted-bg">
+        <HtmlTemplate {...invoice} />
+      </div>
+    );
   } catch (error) {
     notFound();
   }
