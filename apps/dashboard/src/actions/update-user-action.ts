@@ -26,6 +26,12 @@ export const updateUserAction = authActionClient
         });
       }
 
+      if (data.email) {
+        await supabase.auth.updateUser({
+          data: { email: data.email },
+        });
+      }
+
       revalidateTag(`user_${user.id}`);
 
       if (revalidatePath) {
