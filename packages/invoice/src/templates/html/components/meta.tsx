@@ -1,5 +1,5 @@
-import type { Template } from "@midday/invoice/types";
 import { format } from "date-fns";
+import type { Template } from "../../types";
 
 type Props = {
   template: Template;

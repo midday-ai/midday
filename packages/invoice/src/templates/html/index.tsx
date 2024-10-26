@@ -3,6 +3,7 @@ import type { TemplateProps } from "../types";
 import { CustomerDetails } from "./components/customer-details";
 import { EditorContent } from "./components/editor-content";
 import { FromDetails } from "./components/from-details";
+import { LineItems } from "./components/line-items";
 import { Logo } from "./components/logo";
 import { Meta } from "./components/meta";
 
@@ -61,6 +62,14 @@ export function HtmlTemplate({
             </p>
             <EditorContent content={customer_details} />
           </div>
+        </div>
+
+        <div className="mt-8">
+          <LineItems
+            lineItems={line_items}
+            currency={currency}
+            descriptionLabel={template.description_label}
+          />
         </div>
       </div>
     </ScrollArea>
