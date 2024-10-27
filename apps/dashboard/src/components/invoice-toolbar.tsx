@@ -42,7 +42,7 @@ export default function InvoiceToolbar({ id, size, customer }: Props) {
       animate={{ opacity: 1, filter: "blur(0px)", y: -24 }}
       transition={{ type: "spring", stiffness: 260, damping: 20 }}
     >
-      <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 rounded-full px-4 py-3 h-10 flex items-center justify-center">
+      <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 rounded-full px-4 py-3 h-10 flex items-center justify-center border-[0.5px] border-border">
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>

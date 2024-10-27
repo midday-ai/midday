@@ -90,8 +90,20 @@ export function HtmlTemplate({
 
         <div className="flex flex-col space-y-8 mt-auto">
           <div className="grid grid-cols-2 gap-6">
-            <EditorContent content={payment_details} />
-            <EditorContent content={note_details} />
+            <div>
+              <p className="text-[11px] text-[#878787] font-mono mb-2 block">
+                {template.payment_label}
+              </p>
+              <EditorContent content={payment_details} />
+            </div>
+            {note_details && (
+              <div>
+                <p className="text-[11px] text-[#878787] font-mono mb-2 block">
+                  {template.note_label}
+                </p>
+                <EditorContent content={note_details} />
+              </div>
+            )}
           </div>
         </div>
       </div>
