@@ -40,9 +40,9 @@ export default function InvoiceToolbar({ id, size, customer }: Props) {
       className="fixed inset-x-0 bottom-2 flex justify-center"
       initial={{ opacity: 0, filter: "blur(8px)", y: 0 }}
       animate={{ opacity: 1, filter: "blur(0px)", y: -24 }}
-      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
     >
-      <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 rounded-full px-4 py-3 h-10 flex items-center justify-center border-[0.5px] border-border">
+      <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 rounded-full pl-2 pr-4 py-3 h-10 flex items-center justify-center border-[0.5px] border-border">
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -52,7 +52,7 @@ export default function InvoiceToolbar({ id, size, customer }: Props) {
                   size="icon"
                   className="rounded-full size-8"
                 >
-                  <MdOutlineFileDownload className="size-4" />
+                  <MdOutlineFileDownload className="size-[18px]" />
                 </Button>
               </a>
             </TooltipTrigger>

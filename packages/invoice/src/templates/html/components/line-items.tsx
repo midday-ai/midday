@@ -41,7 +41,7 @@ export function LineItems({
       {lineItems.map((item, index) => (
         <div
           key={`line-item-${index.toString()}`}
-          className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full py-1`}
+          className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-1 w-full py-1`}
         >
           <div className="text-[11px]">{item.name}</div>
           <div className="text-[11px]">
