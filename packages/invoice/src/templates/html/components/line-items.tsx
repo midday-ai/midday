@@ -21,25 +21,19 @@ export function LineItems({
   includeVAT = false,
 }: Props) {
   return (
-    <div className="mt-5">
+    <div className="mt-5 font-mono">
       <div
         className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full border-b border-black pb-1`}
       >
-        <div className="text-[11px] text-[#878787] font-mono">
-          {descriptionLabel}
-        </div>
+        <div className="text-[11px] text-[#878787]">{descriptionLabel}</div>
 
-        <div className="text-[11px] text-[#878787] font-mono">{priceLabel}</div>
+        <div className="text-[11px] text-[#878787]">{priceLabel}</div>
 
-        <div className="text-[11px] text-[#878787] font-mono">
-          {quantityLabel}
-        </div>
+        <div className="text-[11px] text-[#878787]">{quantityLabel}</div>
 
-        {includeVAT && (
-          <div className="text-[11px] text-[#878787] font-mono">VAT</div>
-        )}
+        {includeVAT && <div className="text-[11px] text-[#878787]">VAT</div>}
 
-        <div className="text-[11px] text-[#878787] font-mono text-right">
+        <div className="text-[11px] text-[#878787] text-right">
           {totalLabel}
         </div>
       </div>
