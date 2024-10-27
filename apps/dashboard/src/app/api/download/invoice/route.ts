@@ -1,4 +1,4 @@
-import { InvoiceTemplate, renderToStream } from "@midday/invoice";
+import { PdfTemplate, renderToStream } from "@midday/invoice";
 import { getInvoiceQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import type { NextRequest } from "next/server";
@@ -7,7 +7,7 @@ export const preferredRegion = ["fra1", "sfo1", "iad1"];
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = createClient({ admin: true });
   const requestUrl = new URL(req.url);
   const id = requestUrl.searchParams.get("id");
   const size = requestUrl.searchParams.get("size") as "letter" | "a4";
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     return new Response("Invoice not found", { status: 404 });
   }
 
-  const stream = await renderToStream(await InvoiceTemplate({ ...data, size }));
+  const stream = await renderToStream(await PdfTemplate({ ...data, size }));
 
   const blob = await new Response(stream).blob();
 

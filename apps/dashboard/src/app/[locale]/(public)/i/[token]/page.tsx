@@ -1,5 +1,6 @@
 import CustomerHeader from "@/components/customer-heaader";
 import InvoiceToolbar from "@/components/invoice-toolbar";
+import { InvoiceCommentsSheet } from "@/components/sheets/invoice-comments";
 import { HtmlTemplate } from "@midday/invoice/templates/html";
 import { verify } from "@midday/invoice/token";
 import { getInvoiceQuery } from "@midday/supabase/queries";
@@ -71,7 +72,13 @@ export default async function Page({ params }: Props) {
           <HtmlTemplate {...invoice} />
         </div>
 
-        <InvoiceToolbar customer={invoice.customer} />
+        <InvoiceToolbar
+          id={invoice.id}
+          size={invoice.template.size}
+          customer={invoice.customer}
+        />
+
+        <InvoiceCommentsSheet />
       </div>
     );
   } catch (error) {

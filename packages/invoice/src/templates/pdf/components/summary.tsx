@@ -1,5 +1,5 @@
 import { Text, View } from "@react-pdf/renderer";
-import { formatAmount } from "../utils/format";
+import { formatAmount } from "../../../utils/format";
 
 interface SummaryProps {
   amount: number;

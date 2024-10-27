@@ -71,7 +71,10 @@ export function InvoiceViewers({ customer }: Props) {
                     </AvatarFallback>
                   </Avatar>
                 </TooltipTrigger>
-                <TooltipContent sideOffset={20} className="text-xs px-2 py-1">
+                <TooltipContent
+                  sideOffset={20}
+                  className="text-[10px] px-2 py-1 rounded-sm font-medium"
+                >
                   <p>Viewing right now</p>
                 </TooltipContent>
               </Tooltip>
@@ -94,8 +97,11 @@ export function InvoiceViewers({ customer }: Props) {
                 </AvatarFallback>
               </Avatar>
             </TooltipTrigger>
-            <TooltipContent sideOffset={20} className="text-xs px-2 py-1">
-              <p>Last viewed 30m ago</p>
+            <TooltipContent
+              sideOffset={20}
+              className="text-[10px] px-2 py-1 rounded-sm font-medium"
+            >
+              <p>Viewed 30m ago</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
