@@ -17,9 +17,8 @@ export const draftInvoiceAction = authActionClient
     }) => {
       const teamId = user.team_id;
 
-      // Generate token if customer_id is not provided because it's a new invoice
-      // We use upsert so we don't have to check if the invoice already exists
-      const token = !input.customer_id && (await generateToken(id));
+      // TODO: Only generate token if status is pending and fix draft link
+      const token = await generateToken(id);
 
       const { payment_details, from_details, ...restTemplate } = template;
 

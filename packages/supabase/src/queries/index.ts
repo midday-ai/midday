@@ -1281,7 +1281,7 @@ export async function getInvoiceNumberQuery(supabase: Client, teamId: string) {
 export async function getInvoiceQuery(supabase: Client, id: string) {
   return supabase
     .from("invoices")
-    .select("*, customer:customer_id(name), team:team_id(name)")
+    .select("*, customer:customer_id(name, website), team:team_id(name)")
     .eq("id", id)
     .single();
 }

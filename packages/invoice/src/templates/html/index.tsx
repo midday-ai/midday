@@ -1,11 +1,10 @@
 import { ScrollArea } from "@midday/ui/scroll-area";
 import type { TemplateProps } from "../types";
-import { CustomerDetails } from "./components/customer-details";
 import { EditorContent } from "./components/editor-content";
-import { FromDetails } from "./components/from-details";
 import { LineItems } from "./components/line-items";
 import { Logo } from "./components/logo";
 import { Meta } from "./components/meta";
+import { Summary } from "./components/summary";
 
 export function HtmlTemplate({
   invoice_number,
@@ -69,7 +68,31 @@ export function HtmlTemplate({
             lineItems={line_items}
             currency={currency}
             descriptionLabel={template.description_label}
+            quantityLabel={template.quantity_label}
+            priceLabel={template.price_label}
+            totalLabel={template.total_label}
+            includeVAT={template.include_vat}
           />
+        </div>
+
+        <div className="mt-8 flex justify-end mb-8">
+          <Summary
+            includeVAT={template.include_vat}
+            includeTax={template.include_tax}
+            taxRate={template.tax_rate}
+            currency={currency}
+            vatLabel={template.vat_label}
+            taxLabel={template.tax_label}
+            totalLabel={template.total_label}
+            lineItems={line_items}
+          />
+        </div>
+
+        <div className="flex flex-col space-y-8 mt-auto">
+          <div className="grid grid-cols-2 gap-6">
+            <EditorContent content={payment_details} />
+            <EditorContent content={note_details} />
+          </div>
         </div>
       </div>
     </ScrollArea>

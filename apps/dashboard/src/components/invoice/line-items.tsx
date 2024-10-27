@@ -3,6 +3,7 @@
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { formatAmount } from "@/utils/format";
+import { calculateTotal } from "@midday/invoice/calculate";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Reorder, useDragControls } from "framer-motion";
@@ -172,9 +173,6 @@ function LineItemRow({
     name: `line_items.${index}.vat`,
   });
 
-  const total =
-    (price || 0) * (quantity || 0) * (1 + (includeVAT ? (vat || 0) / 100 : 0));
-
   return (
     <Reorder.Item
       className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full`}
@@ -204,7 +202,12 @@ function LineItemRow({
       <div className="text-right">
         <span className="text-[11px] text-primary">
           {formatAmount({
-            amount: total,
+            amount: calculateTotal({
+              price,
+              quantity,
+              vat,
+              includeVAT,
+            }),
             currency,
           })}
         </span>

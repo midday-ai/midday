@@ -1,3 +1,4 @@
+import { calculateTotal } from "../../../utils/calculate";
 import { formatAmount } from "../../../utils/format";
 import type { LineItem } from "../../types";
 type Props = {
@@ -7,6 +8,7 @@ type Props = {
   quantityLabel: string;
   priceLabel: string;
   totalLabel: string;
+  includeVAT?: boolean;
 };
 
 export function LineItems({
@@ -16,26 +18,53 @@ export function LineItems({
   quantityLabel,
   priceLabel,
   totalLabel,
+  includeVAT = false,
 }: Props) {
   return (
     <div className="mt-5">
-      <div className="flex border-b border-black pb-1 mb-1">
-        <div className="flex-3 text-xs font-medium">{descriptionLabel}</div>
-        <div className="flex-1 text-xs font-medium">{priceLabel}</div>
-        <div className="flex-[0.5] text-xs font-medium">{quantityLabel}</div>
-        <div className="flex-1 text-xs font-medium text-right">
+      <div
+        className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full border-b border-black pb-1`}
+      >
+        <div className="text-[11px] text-[#878787] font-mono">
+          {descriptionLabel}
+        </div>
+
+        <div className="text-[11px] text-[#878787] font-mono">{priceLabel}</div>
+
+        <div className="text-[11px] text-[#878787] font-mono">
+          {quantityLabel}
+        </div>
+
+        {includeVAT && (
+          <div className="text-[11px] text-[#878787] font-mono">VAT</div>
+        )}
+
+        <div className="text-[11px] text-[#878787] font-mono text-right">
           {totalLabel}
         </div>
       </div>
+
       {lineItems.map((item, index) => (
-        <div key={`line-item-${index.toString()}`} className="flex py-1">
-          <div className="flex-3 text-xs">{item.name}</div>
-          <div className="flex-1 text-xs">
+        <div
+          key={`line-item-${index.toString()}`}
+          className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full py-1`}
+        >
+          <div className="text-xs">{item.name}</div>
+          <div className="text-xs">
             {formatAmount({ currency, amount: item.price })}
           </div>
-          <div className="flex-[0.5] text-xs">{item.quantity}</div>
-          <div className="flex-1 text-xs text-right">
-            {formatAmount({ currency, amount: item.quantity * item.price })}
+          <div className="text-xs">{item.quantity}</div>
+          {includeVAT && <div className="text-xs">{item.vat}%</div>}
+          <div className="text-xs text-right">
+            {formatAmount({
+              currency,
+              amount: calculateTotal({
+                price: item.price,
+                quantity: item.quantity,
+                vat: item.vat,
+                includeVAT,
+              }),
+            })}
           </div>
         </div>
       ))}

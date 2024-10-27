@@ -1,3 +1,5 @@
+import CustomerHeader from "@/components/customer-heaader";
+import InvoiceToolbar from "@/components/invoice-toolbar";
 import { HtmlTemplate } from "@midday/invoice/templates/html";
 import { verify } from "@midday/invoice/token";
 import { getInvoiceQuery } from "@midday/supabase/queries";
@@ -43,7 +45,11 @@ export async function generateMetadata({
   }
 }
 
-export default async function Page({ params }: { params: { token: string } }) {
+type Props = {
+  params: { token: string };
+};
+
+export default async function Page({ params }: Props) {
   const supabase = createClient({ admin: true });
 
   try {
@@ -55,8 +61,17 @@ export default async function Page({ params }: { params: { token: string } }) {
     }
 
     return (
-      <div className="flex justify-center items-center h-screen dotted-bg">
-        <HtmlTemplate {...invoice} />
+      <div className="flex flex-col justify-center items-center h-screen dotted-bg">
+        <div>
+          <CustomerHeader
+            name={invoice.customer_name || invoice.customer?.name}
+            website={invoice.customer?.website}
+            status={invoice.status}
+          />
+          <HtmlTemplate {...invoice} />
+        </div>
+
+        <InvoiceToolbar customer={invoice.customer} />
       </div>
     );
   } catch (error) {

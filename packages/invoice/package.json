@@ -14,7 +14,8 @@
     "./number": "./src/utils/number.ts",
     "./templates/html": "./src/templates/html/index.tsx",
     "./templates/pdf": "./src/templates/pdf/index.tsx",
-    "./editor": "./src/editor/index.tsx"
+    "./editor": "./src/editor/index.tsx",
+    "./calculate": "./src/utils/calculate.ts"
   },
   "dependencies": {
     "@midday/ui": "workspace:*",

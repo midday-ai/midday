@@ -1,5 +1,6 @@
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
+import { calculateTotals } from "@midday/invoice/calculate";
 import { useAction } from "next-safe-action/hooks";
 import { useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -37,19 +38,7 @@ export function Summary() {
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
-  const { totalAmount, totalVAT } = useMemo(() => {
-    return lineItems.reduce(
-      (acc, item) => {
-        const itemTotal = (item.price || 0) * (item.quantity || 0);
-        const itemVAT = (itemTotal * (item.vat || 0)) / 100;
-        return {
-          totalAmount: acc.totalAmount + itemTotal,
-          totalVAT: acc.totalVAT + itemVAT,
-        };
-      },
-      { totalAmount: 0, totalVAT: 0 },
-    );
-  }, [lineItems]);
+  const { totalAmount, totalVAT } = calculateTotals(lineItems);
 
   const totalTax = includeTax ? (totalAmount * (taxRate || 0)) / 100 : 0;
 
