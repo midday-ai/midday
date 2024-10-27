@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import editor from "./editor.png";
+import invoiceReact from "./invoice-react.png";
 import invoice from "./invoice.png";
 import pdf from "./pdf.png";
 
@@ -23,6 +24,21 @@ const components = [
     className: "mt-24",
     ready: true,
   },
+
+  {
+    name: "Invoice PDF Template",
+    description: "A React PDF template supporting Tiptap JSON and more.",
+    image: pdf,
+    href: "/components/invoice",
+    ready: true,
+  },
+  {
+    name: "Invoice React Template",
+    description: "A React template for invoices supporting Tiptap JSON format.",
+    image: invoiceReact,
+    href: "/components/invoice-react",
+    ready: true,
+  },
   {
     name: "Invoice Editor",
     description:
@@ -30,13 +46,6 @@ const components = [
     image: invoice,
     href: "/components",
     ready: false,
-  },
-  {
-    name: "PDF Template",
-    description: "A React PDF template supporting Tiptap JSON and more.",
-    image: pdf,
-    href: "/components/invoice",
-    ready: true,
   },
 ];
 
