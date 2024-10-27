@@ -23,7 +23,7 @@ export function LineItems({
   return (
     <div className="mt-5 font-mono">
       <div
-        className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full border-b border-black pb-1`}
+        className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full pb-1 border-b border-border`}
       >
         <div className="text-[11px] text-[#878787]">{descriptionLabel}</div>
 
@@ -43,13 +43,13 @@ export function LineItems({
           key={`line-item-${index.toString()}`}
           className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full py-1`}
         >
-          <div className="text-xs">{item.name}</div>
-          <div className="text-xs">
+          <div className="text-[11px]">{item.name}</div>
+          <div className="text-[11px]">
             {formatAmount({ currency, amount: item.price })}
           </div>
-          <div className="text-xs">{item.quantity}</div>
-          {includeVAT && <div className="text-xs">{item.vat}%</div>}
-          <div className="text-xs text-right">
+          <div className="text-[11px]">{item.quantity}</div>
+          {includeVAT && <div className="text-[11px]">{item.vat}%</div>}
+          <div className="text-[11px] text-right">
             {formatAmount({
               currency,
               amount: calculateTotal({

@@ -61,15 +61,25 @@ export default async function Page({ params }: Props) {
       notFound();
     }
 
+    const width = invoice.template.size === "letter" ? 816 : 595;
+    const height = invoice.template.size === "letter" ? 1056 : 842;
+
     return (
-      <div className="flex flex-col justify-center items-center h-screen dotted-bg">
-        <div>
+      <div className="flex flex-col justify-center items-center min-h-screen dotted-bg p-4 sm:p-6 md:p-0">
+        <div
+          className="flex flex-col w-full max-w-full"
+          style={{ maxWidth: width }}
+        >
           <CustomerHeader
             name={invoice.customer_name || invoice.customer?.name}
             website={invoice.customer?.website}
             status={invoice.status}
           />
-          <HtmlTemplate {...invoice} />
+          <div className="pb-24 md:pb-0">
+            <div className="shadow-[0_24px_48px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
+              <HtmlTemplate {...invoice} width={width} height={height} />
+            </div>
+          </div>
         </div>
 
         <InvoiceToolbar
@@ -80,7 +90,7 @@ export default async function Page({ params }: Props) {
 
         <InvoiceCommentsSheet />
 
-        <div className="fixed bottom-4 right-4">
+        <div className="fixed bottom-4 right-4 hidden md:block">
           <a
             href="https://midday.ai?utm_source=invoice"
             target="_blank"

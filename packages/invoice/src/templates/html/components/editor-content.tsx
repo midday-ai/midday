@@ -6,6 +6,6 @@ export function EditorContent({ content }: { content?: JSON }) {
   }
 
   return (
-    <div className="font-mono text-[11px]">{formatEditorToHtml(content)}</div>
+    <div className="font-mono leading-4">{formatEditorToHtml(content)}</div>
   );
 }

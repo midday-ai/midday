@@ -24,11 +24,13 @@ export function InvoiceStatus({
       className={cn(
         "px-2 py-0.5 rounded-full cursor-default font-mono inline-flex max-w-full text-[11px]",
         (status === "draft" || status === "canceled") &&
-          "text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D]",
-        status === "overdue" && "dark:bg-[#FFD02B]/10 dark:text-[#FFD02B]",
+          "text-[#878787] bg-[#F2F1EF] text-[10px] dark:text-[#878787] dark:bg-[#1D1D1D]",
+        status === "overdue" &&
+          "bg-[#FFD02B]/10 text-[#FFD02B] dark:bg-[#FFD02B]/10 dark:text-[#FFD02B]",
         status === "paid" &&
           "text-[#00C969] bg-[#E6F9F0]/10 dark:text-[#00C969] dark:bg-[#00C969]/10",
-        status === "unpaid" && "dark:text-[#F5F5F3] dark:bg-[#F5F5F3]/10",
+        status === "unpaid" &&
+          "text-[#1D1D1D] bg-[#F5F5F3]/10 dark:text-[#F5F5F3] dark:bg-[#F5F5F3]/10",
         className,
       )}
     >

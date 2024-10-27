@@ -122,13 +122,10 @@ export function formatEditorToHtml(doc?: EditorDoc): JSX.Element | null {
       {doc.content.map((node, nodeIndex) => {
         if (node.type === "paragraph") {
           return (
-            <p
-              key={`paragraph-${nodeIndex.toString()}`}
-              className="mb-1 leading-relaxed"
-            >
+            <p key={`paragraph-${nodeIndex.toString()}`} className="mb-1">
               {node.content?.map((inlineContent, inlineIndex) => {
                 if (inlineContent.type === "text") {
-                  let style = "text-xs";
+                  let style = "text-[11px]";
                   let href: string | undefined;
 
                   if (inlineContent.marks) {

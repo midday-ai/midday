@@ -40,5 +40,6 @@ export type TemplateProps = {
   customer_name?: string;
   vat?: number;
   tax?: number;
-  size?: "letter" | "a4";
+  width: number;
+  height: number;
 };

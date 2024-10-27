@@ -1,3 +1,4 @@
+import { cn } from "@midday/ui/cn";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import type { TemplateProps } from "../types";
 import { EditorContent } from "./components/editor-content";
@@ -18,21 +19,20 @@ export function HtmlTemplate({
   note_details,
   currency,
   customer_name,
-  vat,
-  tax,
-  amount,
-  size = "a4",
+  width,
+  height,
 }: TemplateProps) {
-  const width = size === "letter" ? 816 : 595;
-  const height = size === "letter" ? 1056 : 842;
-
   return (
     <ScrollArea
-      className="bg-background border border-border shadow-2xl"
-      style={{ width, height }}
+      className="bg-background border border-border w-full md:w-auto h-full"
+      style={{
+        width: "100%",
+        maxWidth: width,
+        height,
+      }}
       hideScrollbar
     >
-      <div className="p-8 h-full flex flex-col">
+      <div className="p-4 sm:p-6 md:p-8 h-full flex flex-col">
         <div className="flex flex-col">
           {template.logo_url && (
             <Logo logo={template.logo_url} customerName={customer_name || ""} />
@@ -48,14 +48,14 @@ export function HtmlTemplate({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-6 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-8">
           <div>
             <p className="text-[11px] text-[#878787] font-mono mb-2 block">
               {template.from_label}
             </p>
             <EditorContent content={from_details} />
           </div>
-          <div>
+          <div className="mt-4 md:mt-0">
             <p className="text-[11px] text-[#878787] font-mono mb-2 block">
               {template.customer_label}
             </p>
@@ -63,7 +63,7 @@ export function HtmlTemplate({
           </div>
         </div>
 
-        <div className="mt-8">
+        <div className="mt-4">
           <LineItems
             lineItems={line_items}
             currency={currency}
@@ -75,7 +75,7 @@ export function HtmlTemplate({
           />
         </div>
 
-        <div className="mt-8 flex justify-end mb-8">
+        <div className="mt-6 md:mt-8 flex justify-end mb-6 md:mb-8">
           <Summary
             includeVAT={template.include_vat}
             includeTax={template.include_tax}
@@ -88,8 +88,8 @@ export function HtmlTemplate({
           />
         </div>
 
-        <div className="flex flex-col space-y-8 mt-auto">
-          <div className="grid grid-cols-2 gap-6">
+        <div className="flex flex-col space-y-6 md:space-y-8 mt-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div>
               <p className="text-[11px] text-[#878787] font-mono mb-2 block">
                 {template.payment_label}
@@ -97,7 +97,7 @@ export function HtmlTemplate({
               <EditorContent content={payment_details} />
             </div>
             {note_details && (
-              <div>
+              <div className="mt-4 md:mt-0">
                 <p className="text-[11px] text-[#878787] font-mono mb-2 block">
                   {template.note_label}
                 </p>

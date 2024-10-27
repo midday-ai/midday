@@ -246,11 +246,20 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   height: 0;
 }
 
-.dotted-bg {
+.dark .dotted-bg {
   background-image: radial-gradient(
     circle at 1px 1px,
     #232323 0.5px,
     transparent 0
   );
   background-size: 6px 6px;
+}
+
+.light .dotted-bg {
+  background-size: 6px 6px;
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    #e0e0e0 0.5px,
+    transparent 0
+  );
 }
