@@ -20,6 +20,10 @@ export default async function Image({ params }: { params: { token: string } }) {
   const { id } = await verify(params.token);
   const { data: invoice } = await getInvoiceQuery(supabase, id);
 
+  if (!invoice) {
+    return new Response("Not found", { status: 404 });
+  }
+
   const geistMonoRegular = fetch(
     `${CDN_URL}/fonts/GeistMono/og/GeistMono-Regular.otf`,
   ).then((res) => res.arrayBuffer());

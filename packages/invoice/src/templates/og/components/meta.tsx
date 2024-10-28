@@ -10,7 +10,7 @@ type Props = {
 
 export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
   return (
-    <div tw="flex justify-between items-center mt-14 mb-4">
+    <div tw="flex justify-between items-center mt-14 mb-2">
       <div tw="flex items-center space-x-2">
         <span tw="truncate text-[22px] text-[#878787] font-[GeistMono] mr-2">
           {template.invoice_no_label}:

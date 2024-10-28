@@ -24,7 +24,7 @@ export function OgTemplate({
   isValidLogo,
 }: Props) {
   return (
-    <div tw="h-full w-full flex flex-col bg-[#0C0C0C] font-[GeistMono] px-16 py-4">
+    <div tw="h-full w-full flex flex-col bg-[#0C0C0C] font-[GeistMono] p-16 py-8">
       <Header
         customerName={name}
         status={status}

@@ -27,9 +27,21 @@ export async function generateMetadata({
       };
     }
 
+    const title = `Invoice ${invoice.invoice_number} | ${invoice.team?.name}`;
+    const description = `Invoice for ${invoice.customer?.name || "Customer"}`;
+
     return {
-      title: `Invoice ${invoice.invoice_number} | ${invoice.team?.name}`,
-      description: `Invoice for ${invoice.customer?.name || "Customer"}`,
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+      },
+      twitter: {
+        card: "summary",
+        title,
+        description,
+      },
       robots: {
         index: false,
         follow: false,
