@@ -125,8 +125,10 @@ export function InvoiceDetails({
       {customer && (
         <div className="mt-6 flex flex-col space-y-2 border-t border-border pt-6">
           <span className="text-sm text-[#606060]">Invoice link</span>
-          <div className="flex space-x-2">
-            <CopyInput value={`https://app.midday.ai/i/${token}`} />
+          <div className="flex w-full gap-2">
+            <div className="flex-1 min-w-0">
+              <CopyInput value={`${window.location.origin}/i/${token}`} />
+            </div>
 
             {status !== "draft" && (
               <a
@@ -135,7 +137,7 @@ export function InvoiceDetails({
               >
                 <Button
                   variant="secondary"
-                  className="size-[40px] hover:bg-secondary"
+                  className="size-[40px] hover:bg-secondary shrink-0"
                 >
                   <div>
                     <Icons.Download className="size-4" />

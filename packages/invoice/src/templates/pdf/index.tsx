@@ -40,9 +40,10 @@ export async function PdfTemplate({
   tax,
   amount,
   size = "a4",
+  token,
 }: TemplateProps) {
   const qrCode = await QRCodeUtil.toDataURL(
-    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    `https://app.midday.ai/i/${token}`,
     {
       width: 40 * 3,
       height: 40 * 3,

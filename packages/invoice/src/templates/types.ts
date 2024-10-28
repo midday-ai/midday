@@ -42,4 +42,6 @@ export type TemplateProps = {
   tax?: number;
   width: number;
   height: number;
+  token: string;
+  size: "letter" | "a4";
 };
