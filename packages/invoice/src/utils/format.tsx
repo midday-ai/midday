@@ -106,6 +106,7 @@ export function formatEditorToPdf(doc?: EditorDoc): JSX.Element | null {
             </View>
           );
         }
+
         return null;
       })}
     </>
@@ -177,9 +178,63 @@ export function formatEditorToHtml(doc?: EditorDoc): JSX.Element | null {
             </p>
           );
         }
+
         return null;
       })}
     </>
+  );
+}
+
+export function formatEditorToTw(doc?: EditorDoc): JSX.Element | null {
+  if (!doc || !doc.content) {
+    return null;
+  }
+
+  return (
+    <div tw="flex flex-col text-white">
+      {doc.content.map((node, nodeIndex) => {
+        if (node.type === "paragraph") {
+          return (
+            <p key={`paragraph-${nodeIndex.toString()}`} tw="flex flex-col">
+              {node.content?.map((inlineContent, inlineIndex) => {
+                if (inlineContent.type === "text") {
+                  let style = "text-[22px] mb-2";
+
+                  if (inlineContent.marks) {
+                    for (const mark of inlineContent.marks) {
+                      if (mark.type === "bold") {
+                        style += " font-medium";
+                      } else if (mark.type === "italic") {
+                        style += " italic";
+                      } else if (mark.type === "link") {
+                        style += " underline";
+                      }
+                    }
+                  }
+
+                  return (
+                    <span
+                      key={`text-${nodeIndex}-${inlineIndex.toString()}`}
+                      tw={style}
+                    >
+                      {inlineContent.text || ""}
+                    </span>
+                  );
+                }
+                if (inlineContent.type === "hardBreak") {
+                  return (
+                    <br key={`break-${nodeIndex}-${inlineIndex.toString()}`} />
+                  );
+                }
+                return null;
+              })}
+            </p>
+          );
+        }
+
+        return null;
+      })}
+    </div>
   );
 }
 

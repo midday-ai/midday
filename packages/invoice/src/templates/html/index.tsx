@@ -1,4 +1,3 @@
-import { cn } from "@midday/ui/cn";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import type { TemplateProps } from "../types";
 import { EditorContent } from "./components/editor-content";
