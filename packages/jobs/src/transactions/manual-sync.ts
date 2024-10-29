@@ -58,7 +58,6 @@ client.defineJob({
         "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, status, error_retries)",
       )
       .eq("bank_connection_id", connectionId)
-      .lt("bank_connection.error_retries", 4)
       .eq("team_id", teamId)
       .eq("enabled", true)
       .eq("manual", false);
