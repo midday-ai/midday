@@ -138,7 +138,7 @@ client.defineJob({
           },
         );
 
-        await io.logger.info("Completed sync for account", {
+        await io.logger.info(`Completed sync for account: ${account.id}`, {
           accountId: account.id,
         });
 
@@ -147,7 +147,7 @@ client.defineJob({
           accountId: account.id,
         };
       } catch (syncError) {
-        await io.logger.error("Error syncing account", {
+        await io.logger.error(`Error syncing account: ${account.id}`, {
           accountId: account.id,
           error: syncError,
         });
