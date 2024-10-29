@@ -4,11 +4,6 @@ import { getInvoiceQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { ImageResponse } from "next/og";
 
-export const size = {
-  width: 1200,
-  height: 630,
-};
-
 export const contentType = "image/png";
 export const runtime = "edge";
 
@@ -44,7 +39,8 @@ export default async function Image({ params }: { params: { token: string } }) {
       logoUrl={logoUrl}
     />,
     {
-      ...size,
+      width: 1200,
+      height: 630,
       fonts: [
         {
           name: "GeistMono",

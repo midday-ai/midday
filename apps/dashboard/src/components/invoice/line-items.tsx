@@ -12,6 +12,7 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { AmountInput } from "./amount-input";
 import { Input } from "./input";
 import { LabelInput } from "./label-input";
+import { QuantityInput } from "./quantity-input";
 import { VATInput } from "./vat-input";
 
 export function LineItems() {
@@ -156,7 +157,7 @@ function LineItemRow({
   includeVAT: boolean;
 }) {
   const controls = useDragControls();
-  const { control } = useFormContext<InvoiceFormValues>();
+  const { control, setValue } = useFormContext<InvoiceFormValues>();
 
   const price = useWatch({
     control,
@@ -183,7 +184,7 @@ function LineItemRow({
       {isReorderable && (
         <Button
           type="button"
-          className="absolute -left-[5%] top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent cursor-grab"
+          className="absolute -left-9 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent cursor-grab"
           onPointerDown={(e) => controls.start(e)}
           variant="ghost"
         >
@@ -195,7 +196,7 @@ function LineItemRow({
 
       <AmountInput name={`line_items.${index}.price`} min="0" />
 
-      <Input name={`line_items.${index}.quantity`} type="number" min="0" />
+      <QuantityInput name={`line_items.${index}.quantity`} />
 
       {includeVAT && <VATInput name={`line_items.${index}.vat`} />}
 
@@ -217,7 +218,7 @@ function LineItemRow({
         <Button
           type="button"
           onClick={() => handleRemove(index)}
-          className="absolute -right-[4.5%] top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent text-[#878787]"
+          className="absolute -right-9 top-[14px] -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent text-[#878787]"
           variant="ghost"
         >
           <Icons.Close />

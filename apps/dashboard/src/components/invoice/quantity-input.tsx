@@ -1,17 +1,13 @@
-import { cn } from "@midday/ui/cn";
-import { CurrencyInput } from "@midday/ui/currency-input";
+import { QuantityInput as BaseQuantityInput } from "@midday/ui/quantity-input";
 import { useState } from "react";
 import { useController, useFormContext } from "react-hook-form";
-import type { NumericFormatProps } from "react-number-format";
 
-export function AmountInput({
-  className,
+export function QuantityInput({
   name,
   ...props
-}: Omit<NumericFormatProps, "value" | "onChange"> & {
-  name: string;
-}) {
+}: { name: string } & Omit<Parameters<typeof BaseQuantityInput>[0], "value">) {
   const [isFocused, setIsFocused] = useState(false);
+
   const { control } = useFormContext();
   const {
     field: { value, onChange, onBlur },
@@ -21,25 +17,17 @@ export function AmountInput({
   });
 
   return (
-    <div className="relative font-mono">
-      <CurrencyInput
-        autoComplete="off"
+    <div className="relative">
+      <BaseQuantityInput
+        {...props}
         value={value}
-        onValueChange={(values) => {
-          onChange(values.floatValue, { shouldValidate: true });
-        }}
+        min={0}
+        onChange={onChange}
         onFocus={() => setIsFocused(true)}
         onBlur={() => {
           setIsFocused(false);
           onBlur();
         }}
-        {...props}
-        className={cn(
-          className,
-          "p-0 border-0 h-6 text-xs !bg-transparent border-b border-transparent focus:border-border",
-        )}
-        thousandSeparator={true}
-        allowNegative={false}
       />
 
       {!value && !isFocused && (

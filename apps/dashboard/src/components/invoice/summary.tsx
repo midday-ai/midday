@@ -4,6 +4,7 @@ import { calculateTotals } from "@midday/invoice/calculate";
 import { useAction } from "next-safe-action/hooks";
 import { useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
+import { AnimatedNumber } from "../animated-number";
 import { FormatAmount } from "../format-amount";
 import { LabelInput } from "./label-input";
 import { TaxInput } from "./tax-input";
@@ -119,12 +120,7 @@ export function Summary() {
           }}
         />
         <span className="text-right font-mono text-[21px]">
-          <FormatAmount
-            amount={total}
-            currency={currency}
-            minimumFractionDigits={0}
-            maximumFractionDigits={2}
-          />
+          <AnimatedNumber value={total} currency={currency} />
         </span>
       </div>
     </div>

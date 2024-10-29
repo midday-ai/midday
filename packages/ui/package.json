@@ -77,7 +77,8 @@
     "./use-toast": "./src/components/use-toast.tsx",
     "./cn": "./src/utils/cn.ts",
     "./truncate": "./src/utils/truncate.ts",
-    "./hooks": "./src/hooks/index.ts"
+    "./hooks": "./src/hooks/index.ts",
+    "./quantity-input": "./src/components/quantity-input.tsx"
   },
   "dependencies": {
     "@mui/icons-material": "^6.1.2",
