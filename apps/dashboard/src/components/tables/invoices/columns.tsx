@@ -18,6 +18,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { TooltipProvider } from "@midday/ui/tooltip";
+import { useToast } from "@midday/ui/use-toast";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
@@ -163,6 +164,21 @@ export const columns: ColumnDef<Invoice>[] = [
       const hasNewMessages = status === "overdue";
       const { setParams } = useInvoiceParams();
       const updateInvoice = useAction(updateInvoiceAction);
+      const { toast } = useToast();
+
+      const handleCopyLink = async () => {
+        try {
+          await navigator.clipboard.writeText(
+            `${window.location.origin}/i/${row.original.token}`,
+          );
+
+          toast({
+            duration: 4000,
+            title: "Copied link to clipboard.",
+            variant: "success",
+          });
+        } catch {}
+      };
 
       return (
         <div>
@@ -190,9 +206,22 @@ export const columns: ColumnDef<Invoice>[] = [
                 </DropdownMenuItem>
               )}
 
+              <DropdownMenuItem onClick={handleCopyLink}>
+                Copy link
+              </DropdownMenuItem>
+
               {status !== "draft" && (
                 <>
-                  <DropdownMenuItem>Comments</DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      setParams({
+                        type: "comments",
+                        invoiceId: row.original.id,
+                      })
+                    }
+                  >
+                    Comments
+                  </DropdownMenuItem>
                   <DropdownMenuItem>
                     <a
                       href={`/api/download/invoice?id=${row.original.id}&size=${row.original.template?.size === "a4" ? "a4" : "letter"}`}
@@ -201,7 +230,6 @@ export const columns: ColumnDef<Invoice>[] = [
                       Download
                     </a>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>Copy link</DropdownMenuItem>
                   <DropdownMenuItem>Duplicate</DropdownMenuItem>
                 </>
               )}

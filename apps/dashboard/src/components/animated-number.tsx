@@ -1,7 +1,7 @@
 "use client";
 
 import { useCurrentLocale } from "@/locales/client";
-import MotionNumber from "motion-number";
+import NumberFlow from "@number-flow/react";
 
 type Props = {
   value: number;
@@ -19,7 +19,7 @@ export function AnimatedNumber({
   const locale = useCurrentLocale();
 
   return (
-    <MotionNumber
+    <NumberFlow
       value={value}
       format={{
         style: "currency",

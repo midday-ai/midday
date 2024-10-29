@@ -2,20 +2,30 @@ import { PdfTemplate, renderToStream } from "@midday/invoice";
 import { getInvoiceQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import type { NextRequest } from "next/server";
+import { z } from "zod";
 
 export const preferredRegion = ["fra1", "sfo1", "iad1"];
 export const dynamic = "force-dynamic";
 
+const paramsSchema = z.object({
+  id: z.string().uuid(),
+  size: z.enum(["letter", "a4"]).default("a4"),
+  preview: z.boolean().default(false),
+});
+
 export async function GET(req: NextRequest) {
   const supabase = createClient({ admin: true });
   const requestUrl = new URL(req.url);
-  const id = requestUrl.searchParams.get("id");
-  const size = requestUrl.searchParams.get("size") as "letter" | "a4";
-  const preview = requestUrl.searchParams.get("preview") === "true";
 
-  if (!id) {
-    return new Response("No invoice id provided", { status: 400 });
+  const result = paramsSchema.safeParse(
+    Object.fromEntries(requestUrl.searchParams.entries()),
+  );
+
+  if (!result.success) {
+    return new Response("Invalid parameters", { status: 400 });
   }
+
+  const { id, size, preview } = result.data;
 
   const { data } = await getInvoiceQuery(supabase, id);
 

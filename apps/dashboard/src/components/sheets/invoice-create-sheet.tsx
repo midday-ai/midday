@@ -1,44 +1,47 @@
 "use client";
 
+import type { InvoiceTemplate } from "@/actions/invoice/schema";
 import { Form } from "@/components/invoice/form";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
+import { Sheet, SheetHeader } from "@midday/ui/sheet";
 import React from "react";
-import { useFormContext } from "react-hook-form";
 import type { Customer } from "../invoice/customer-details";
+import { FormContext } from "../invoice/form-context";
 import { SettingsMenu } from "../invoice/settings-menu";
+import { InvoiceSheetContent } from "./invoice-sheet-content";
 
 type Props = {
   teamId: string;
+  template: InvoiceTemplate;
   customers: Customer[];
+  invoiceNumber: string;
 };
 
 export function InvoiceCreateSheet({
   teamId,
-
+  template,
   customers,
+  invoiceNumber,
 }: Props) {
   const { setParams, createInvoice } = useInvoiceParams();
-  const { watch } = useFormContext();
-  const templateSize = watch("template.size");
-
-  const size = templateSize === "a4" ? 650 : 816;
-
   const isOpen = Boolean(createInvoice);
 
   return (
-    <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
-      <SheetContent
-        style={{ maxWidth: size }}
-        className="!bg-[#0C0C0C] transition-[max-width] duration-300 ease-in-out"
-      >
-        <SheetHeader className="mb-6 flex justify-between items-center flex-row">
-          <h2 className="text-xl">Invoice</h2>
-          <SettingsMenu />
-        </SheetHeader>
+    <FormContext
+      template={template}
+      invoiceNumber={invoiceNumber}
+      isOpen={isOpen}
+    >
+      <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
+        <InvoiceSheetContent>
+          <SheetHeader className="mb-6 flex justify-between items-center flex-row">
+            <h2 className="text-xl">Invoice</h2>
+            <SettingsMenu />
+          </SheetHeader>
 
-        <Form teamId={teamId} customers={customers} />
-      </SheetContent>
-    </Sheet>
+          <Form teamId={teamId} customers={customers} />
+        </InvoiceSheetContent>
+      </Sheet>
+    </FormContext>
   );
 }

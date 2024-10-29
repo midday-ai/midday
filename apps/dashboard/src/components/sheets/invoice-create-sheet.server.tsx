@@ -3,7 +3,6 @@ import {
   getInvoiceNumber,
   getInvoiceTemplates,
 } from "@midday/supabase/cached-queries";
-import { FormContext } from "../invoice/form-context";
 import { InvoiceCreateSheet } from "./invoice-create-sheet";
 
 export async function InvoiceCreateSheetServer({ teamId }: { teamId: string }) {
@@ -22,8 +21,11 @@ export async function InvoiceCreateSheetServer({ teamId }: { teamId: string }) {
     : {};
 
   return (
-    <FormContext template={template} invoiceNumber={invoiceNumber}>
-      <InvoiceCreateSheet teamId={teamId} customers={customersData} />
-    </FormContext>
+    <InvoiceCreateSheet
+      teamId={teamId}
+      customers={customersData}
+      template={template}
+      invoiceNumber={invoiceNumber}
+    />
   );
 }

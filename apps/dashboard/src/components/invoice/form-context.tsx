@@ -8,6 +8,7 @@ import {
 import { UTCDate } from "@date-fns/utc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addMonths } from "date-fns";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
@@ -40,31 +41,40 @@ type FormContextProps = {
   children: React.ReactNode;
   template: InvoiceTemplate;
   invoiceNumber: string;
+  isOpen: boolean;
 };
 
 export function FormContext({
   children,
   template,
   invoiceNumber,
+  isOpen,
 }: FormContextProps) {
+  const defaultValues = {
+    id: uuidv4(),
+    template: { ...defaultTemplate, ...template },
+    customer_details: undefined,
+    from_details: template.from_details ?? defaultTemplate.from_details,
+    payment_details:
+      template.payment_details ?? defaultTemplate.payment_details,
+    note_details: undefined,
+    customer_id: undefined,
+    issue_date: new UTCDate(),
+    due_date: addMonths(new UTCDate(), 1),
+    invoice_number: invoiceNumber,
+    line_items: [{ name: "", quantity: 0, price: 0 }],
+    tax: undefined,
+  };
+
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceFormSchema),
-    defaultValues: {
-      id: uuidv4(),
-      template: { ...defaultTemplate, ...template },
-      customer_details: undefined,
-      from_details: template.from_details ?? defaultTemplate.from_details,
-      payment_details:
-        template.payment_details ?? defaultTemplate.payment_details,
-      note_details: undefined,
-      customer_id: undefined,
-      issue_date: new UTCDate(),
-      due_date: addMonths(new UTCDate(), 1),
-      invoice_number: invoiceNumber,
-      line_items: [{ name: "", quantity: 0, price: 0 }],
-      tax: undefined,
-    },
+    defaultValues,
   });
+
+  useEffect(() => {
+    // Reset the form when the sheet is opened
+    form.reset(defaultValues);
+  }, [isOpen]);
 
   return <FormProvider {...form}>{children}</FormProvider>;
 }

@@ -10,7 +10,7 @@ export function Avatar({ logoUrl, isValidLogo, customerName }: Props) {
       <img
         src={logoUrl}
         alt="Avatar"
-        tw="w-10 h-10 object-contain border-[0.5px] border-[#2D2D2D]"
+        tw="w-10 h-10 object-contain border-[0.5px] border-[#2D2D2D] rounded-full overflow-hidden"
       />
     );
   }
