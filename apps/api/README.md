@@ -1,5 +1,3 @@
-Here's a rewritten version of the guide, structured and written as a senior technical writer might approach it:
-
 # Supabase Local Development Guide for Solomon AI Platform
 
 ## Introduction
