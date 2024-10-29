@@ -55,9 +55,9 @@ export const draftInvoiceSchema = z.object({
   issue_date: z.coerce.date(),
   invoice_number: z.string(),
   logo_url: z.string().optional().nullable(),
-  vat: z.number().optional(),
-  tax: z.number().optional(),
-  amount: z.number().optional(),
+  vat: z.number().nullable().optional(),
+  tax: z.number().nullable().optional(),
+  amount: z.number().nullable().optional(),
   line_items: z.array(draftLineItemSchema).optional(),
 });
 

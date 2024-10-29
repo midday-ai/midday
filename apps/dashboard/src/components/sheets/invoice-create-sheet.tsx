@@ -23,14 +23,15 @@ export function InvoiceCreateSheet({
   customers,
   invoiceNumber,
 }: Props) {
-  const { setParams, createInvoice } = useInvoiceParams();
-  const isOpen = Boolean(createInvoice);
+  const { setParams, type, invoiceId } = useInvoiceParams();
+  const isOpen = Boolean(type === "create" || type === "edit");
 
   return (
     <FormContext
       template={template}
       invoiceNumber={invoiceNumber}
       isOpen={isOpen}
+      id={invoiceId}
     >
       <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
         <InvoiceSheetContent>

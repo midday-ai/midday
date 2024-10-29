@@ -12,7 +12,7 @@ export function OpenInvoiceSheet() {
       <Button
         variant="outline"
         size="icon"
-        onClick={() => setParams({ createInvoice: true })}
+        onClick={() => setParams({ type: "create" })}
       >
         <Icons.Add />
       </Button>

@@ -1257,22 +1257,26 @@ export async function getInvoiceNumberQuery(supabase: Client, teamId: string) {
     .select("id", { count: "exact" })
     .eq("team_id", teamId);
 
-  let nextNumber = generateInvoiceNumber(count || 0);
-  let isUnique = false;
+  let nextCount = (count || 0) + 1;
+  let nextNumber = generateInvoiceNumber(nextCount);
+  let tries = 0;
 
-  while (!isUnique) {
+  // Try up to 10 times to find an unused invoice number
+  while (tries < 10) {
     const { data } = await supabase
       .from("invoices")
-      .select("invoice_number")
+      .select("id")
       .eq("team_id", teamId)
       .eq("invoice_number", nextNumber)
-      .maybeSingle();
+      .single();
 
     if (!data) {
-      isUnique = true;
-    } else {
-      nextNumber = generateInvoiceNumber((count || 0) + 1);
+      break;
     }
+
+    nextCount++;
+    nextNumber = generateInvoiceNumber(nextCount);
+    tries++;
   }
 
   return nextNumber;
@@ -1282,6 +1286,16 @@ export async function getInvoiceQuery(supabase: Client, id: string) {
   return supabase
     .from("invoices")
     .select("*, customer:customer_id(name, website), team:team_id(name)")
+    .eq("id", id)
+    .single();
+}
+
+export async function getDraftInvoiceQuery(supabase: Client, id: string) {
+  return supabase
+    .from("invoices")
+    .select(
+      "id, due_date, invoice_number, template, amount, currency, line_items, payment_details, note_details, customer_details, vat, tax, from_details, issue_date, customer_id, customer_name, token",
+    )
     .eq("id", id)
     .single();
 }

@@ -199,7 +199,10 @@ export const columns: ColumnDef<Invoice>[] = [
               {status === "draft" && (
                 <DropdownMenuItem
                   onClick={() =>
-                    setParams({ invoiceId: row.original.id, type: "draft" })
+                    setParams({
+                      invoiceId: row.original.id,
+                      type: "edit",
+                    })
                   }
                 >
                   Edit invoice

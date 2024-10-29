@@ -7,6 +7,8 @@ import {
 } from "@/actions/invoice/schema";
 import { UTCDate } from "@date-fns/utc";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createClient } from "@midday/supabase/client";
+import { getDraftInvoiceQuery } from "@midday/supabase/queries";
 import { addMonths } from "date-fns";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -38,6 +40,7 @@ const defaultTemplate: InvoiceTemplate = {
 };
 
 type FormContextProps = {
+  id?: string | null;
   children: React.ReactNode;
   template: InvoiceTemplate;
   invoiceNumber: string;
@@ -45,11 +48,14 @@ type FormContextProps = {
 };
 
 export function FormContext({
+  id,
   children,
   template,
   invoiceNumber,
   isOpen,
 }: FormContextProps) {
+  const supabase = createClient();
+
   const defaultValues = {
     id: uuidv4(),
     template: { ...defaultTemplate, ...template },
@@ -75,6 +81,18 @@ export function FormContext({
     // Reset the form when the sheet is opened
     form.reset(defaultValues);
   }, [isOpen]);
+
+  useEffect(() => {
+    async function fetchInvoice() {
+      if (!id) return;
+      const { data } = await getDraftInvoiceQuery(supabase, id);
+
+      if (data) {
+        form.reset(data);
+      }
+    }
+    fetchInvoice();
+  }, [id]);
 
   return <FormProvider {...form}>{children}</FormProvider>;
 }

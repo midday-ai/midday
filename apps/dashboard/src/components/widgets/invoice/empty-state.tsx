@@ -14,10 +14,7 @@ export function EmptyState() {
         Create an invoice to get started.
       </p>
 
-      <Button
-        variant="outline"
-        onClick={() => setParams({ createInvoice: true })}
-      >
+      <Button variant="outline" onClick={() => setParams({ type: "create" })}>
         Create invoice
       </Button>
     </div>

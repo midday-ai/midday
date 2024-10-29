@@ -1,4 +1,5 @@
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { createClient } from "@midday/supabase/client";
 import { searchInvoiceNumberQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
@@ -23,6 +24,7 @@ export function InvoiceNo({ teamId }: Props) {
   const [isInvoiceNumberExists, setIsInvoiceNumberExists] = useState(false);
   const supabase = createClient();
   const invoiceNumber = watch("invoice_number");
+  const { type } = useInvoiceParams();
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
@@ -48,8 +50,11 @@ export function InvoiceNo({ teamId }: Props) {
       }
     }
 
-    searchInvoiceNumber();
-  }, [invoiceNumber, setError, clearErrors, supabase, teamId]);
+    // Only search for invoice number if we are creating a new invoice
+    if (type === "create") {
+      searchInvoiceNumber();
+    }
+  }, [invoiceNumber, teamId, type]);
 
   return (
     <div className="flex space-x-1 items-center">

@@ -10,8 +10,6 @@ import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
-import type { Invoice } from "../tables/invoices/columns";
-import { CreateButton } from "./create-button";
 import { type Customer, CustomerDetails } from "./customer-details";
 import { FromDetails } from "./from-details";
 import { LineItems } from "./line-items";
@@ -19,17 +17,18 @@ import { Logo } from "./logo";
 import { Meta } from "./meta";
 import { NoteDetails } from "./note-details";
 import { PaymentDetails } from "./payment-details";
+import { SubmitButton } from "./submit-button";
 import { Summary } from "./summary";
 
 type Props = {
   teamId: string;
   customers: Customer[];
   updatedAt?: Date;
+  token?: string;
 };
 
-export function Form({ teamId, customers }: Props) {
+export function Form({ teamId, customers, token }: Props) {
   const { selectedCustomerId } = useInvoiceParams();
-  const [data, setData] = useState<Invoice | undefined>();
   const [lastUpdated, setLastUpdated] = useState<Date | undefined>();
   const [lastEditedText, setLastEditedText] = useState("");
 
@@ -38,11 +37,8 @@ export function Form({ teamId, customers }: Props) {
   const size = form.watch("template.size") === "a4" ? 650 : 816;
 
   const draftInvoice = useAction(draftInvoiceAction, {
-    onSuccess: ({ data }) => {
-      if (data) {
-        setData(data);
-        setLastUpdated(new Date());
-      }
+    onSuccess: () => {
+      setLastUpdated(new Date());
     },
   });
 
@@ -149,9 +145,9 @@ export function Form({ teamId, customers }: Props) {
       <div className="absolute bottom-14 w-full h-9">
         <div className="flex justify-between items-center mt-auto">
           <div className="flex space-x-2 items-center">
-            {data && (
+            {token && (
               <Link
-                href={`/i/${data.token}`}
+                href={`/i/${token}`}
                 className="text-xs text-[#808080] flex items-center gap-1"
                 target="_blank"
               >
@@ -173,7 +169,8 @@ export function Form({ teamId, customers }: Props) {
               </motion.div>
             )}
           </div>
-          <CreateButton />
+
+          <SubmitButton />
         </div>
       </div>
     </form>
