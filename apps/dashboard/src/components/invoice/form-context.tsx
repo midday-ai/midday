@@ -70,6 +70,7 @@ export function FormContext({
     invoice_number: invoiceNumber,
     line_items: [{ name: "", quantity: 0, price: 0 }],
     tax: undefined,
+    type: "create",
   };
 
   const form = useForm<InvoiceFormValues>({

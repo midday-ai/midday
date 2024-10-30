@@ -1,4 +1,4 @@
-import { formatEditorToHtml } from "../../../utils/format";
+import { formatEditorContent } from "../format";
 
 export function EditorContent({ content }: { content?: JSON }) {
   if (!content) {
@@ -6,6 +6,6 @@ export function EditorContent({ content }: { content?: JSON }) {
   }
 
   return (
-    <div className="font-mono leading-4">{formatEditorToHtml(content)}</div>
+    <div className="font-mono leading-4">{formatEditorContent(content)}</div>
   );
 }

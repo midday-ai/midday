@@ -1,9 +1,9 @@
-import { formatEditorToTw } from "../../../utils/format";
+import { formatEditorContent } from "../format";
 
 export function EditorContent({ content }: { content?: JSON }) {
   if (!content) {
     return null;
   }
 
-  return <div tw="flex">{formatEditorToTw(content)}</div>;
+  return <div tw="flex">{formatEditorContent(content)}</div>;
 }

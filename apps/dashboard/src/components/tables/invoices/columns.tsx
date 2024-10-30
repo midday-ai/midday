@@ -40,6 +40,8 @@ export type Invoice = {
   viewed_at?: string;
   template: InvoiceTemplate;
   token: string;
+  sent_to?: string | null;
+  customer_details?: JSON;
   customer?: {
     id: string;
     name: string;
@@ -215,7 +217,7 @@ export const columns: ColumnDef<Invoice>[] = [
 
               {status !== "draft" && (
                 <>
-                  <DropdownMenuItem
+                  {/* <DropdownMenuItem
                     onClick={() =>
                       setParams({
                         type: "comments",
@@ -224,7 +226,7 @@ export const columns: ColumnDef<Invoice>[] = [
                     }
                   >
                     Comments
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuItem>
                     <a
                       href={`/api/download/invoice?id=${row.original.id}&size=${row.original.template?.size === "a4" ? "a4" : "letter"}`}

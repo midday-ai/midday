@@ -1,5 +1,6 @@
 "use client";
 
+import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { Button } from "@midday/ui/button";
 import {
@@ -9,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import { SubmitButton as BaseSubmitButton } from "@midday/ui/submit-button";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -23,26 +25,30 @@ const options = [
   },
 ];
 
-export function SubmitButton() {
-  const [selectedOption, setSelectedOption] = useState(options[0].value);
+type Props = {
+  isSubmitting: boolean;
+};
+
+export function SubmitButton({ isSubmitting }: Props) {
   const { type } = useInvoiceParams();
-  const form = useFormContext();
-  const isValid = form.formState.isValid;
+  const { watch, setValue, formState } = useFormContext<InvoiceFormValues>();
+
+  const selectedOption = watch("type");
+
+  const isValid = formState.isValid;
 
   return (
     <div className="flex divide-x">
-      <Button
-      // disabled={!isValid}
-      >
+      <BaseSubmitButton isSubmitting={isSubmitting} disabled={!isValid}>
         {type === "update"
           ? "Update"
           : options.find((o) => o.value === selectedOption)?.label}
-      </Button>
+      </BaseSubmitButton>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            // disabled={!isValid}
+            disabled={!isValid || isSubmitting}
             className="size-9 p-0 [&[data-state=open]>svg]:rotate-180"
           >
             <Icons.ChevronDown className="size-4 transition-transform duration-200" />
@@ -53,7 +59,11 @@ export function SubmitButton() {
             <DropdownMenuCheckboxItem
               key={option.value}
               checked={selectedOption === option.value}
-              onCheckedChange={() => setSelectedOption(option.value)}
+              onCheckedChange={() =>
+                setValue("type", option.value as "create" | "create_and_send", {
+                  shouldValidate: true,
+                })
+              }
             >
               {option.label}
             </DropdownMenuCheckboxItem>

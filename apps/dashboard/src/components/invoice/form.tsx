@@ -25,9 +25,17 @@ type Props = {
   customers: Customer[];
   updatedAt?: Date;
   token?: string;
+  onSubmit: (values: InvoiceFormValues) => void;
+  isSubmitting: boolean;
 };
 
-export function Form({ teamId, customers, token }: Props) {
+export function Form({
+  teamId,
+  customers,
+  token,
+  onSubmit,
+  isSubmitting,
+}: Props) {
   const { selectedCustomerId } = useInvoiceParams();
   const [lastUpdated, setLastUpdated] = useState<Date | undefined>();
   const [lastEditedText, setLastEditedText] = useState("");
@@ -76,8 +84,8 @@ export function Form({ teamId, customers, token }: Props) {
     const customer = customers.find((c) => c.id === selectedCustomerId);
 
     if (selectedCustomerId) {
-      form.setValue("customer_id", customer?.id);
-      form.setValue("customer_name", customer?.name);
+      form.setValue("customer_id", customer?.id, { shouldValidate: true });
+      form.setValue("customer_name", customer?.name, { shouldValidate: true });
     }
   }, [selectedCustomerId]);
 
@@ -96,10 +104,6 @@ export function Form({ teamId, customers, token }: Props) {
 
     return () => clearInterval(intervalId);
   }, [lastUpdated]);
-
-  const onSubmit = (data: InvoiceFormValues) => {
-    // Create or Create & Send
-  };
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="relative h-full">
@@ -170,7 +174,7 @@ export function Form({ teamId, customers, token }: Props) {
             )}
           </div>
 
-          <SubmitButton />
+          <SubmitButton isSubmitting={isSubmitting} />
         </div>
       </div>
     </form>

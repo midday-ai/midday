@@ -45,3 +45,34 @@ export type TemplateProps = {
   token: string;
   size: "letter" | "a4";
 };
+
+export interface EditorDoc {
+  type: "doc";
+  content: EditorNode[];
+}
+
+export interface EditorNode {
+  type: string;
+  content?: InlineContent[];
+}
+
+interface InlineContent {
+  type: string;
+  text?: string;
+  marks?: Mark[];
+}
+
+export interface Mark {
+  type: string;
+  attrs?: {
+    href?: string;
+  };
+}
+
+export interface TextStyle {
+  fontSize: number;
+  fontWeight?: number;
+  fontStyle?: "normal" | "italic" | "oblique";
+  color?: string;
+  textDecoration?: string;
+}

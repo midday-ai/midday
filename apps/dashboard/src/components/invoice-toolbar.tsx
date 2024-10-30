@@ -86,7 +86,7 @@ export default function InvoiceToolbar({ id, size, customer }: Props) {
           </Tooltip>
         </TooltipProvider>
 
-        <TooltipProvider delayDuration={0}>
+        {/* <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -110,7 +110,7 @@ export default function InvoiceToolbar({ id, size, customer }: Props) {
               <p>Comment</p>
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
+        </TooltipProvider> */}
 
         <InvoiceViewers customer={customer} />
       </div>
