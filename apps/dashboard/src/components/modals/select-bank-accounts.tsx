@@ -233,6 +233,7 @@ export function SelectBankAccountsModal() {
             logo_url: account.institution?.logo,
             account_id: account.id,
             bank_name: account.institution.name,
+            // TODO: Remove once we have a fix and return currency from engine
             currency: account.currency ?? account.balance.currency,
             balance: account.balance.amount,
             enabled: true,

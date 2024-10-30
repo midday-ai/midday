@@ -163,6 +163,7 @@ const transformAccountName = (account: TransformAccountName) => {
     return account.product;
   }
 
+  // TODO: Fix no name
   return "No name";
 };
 
