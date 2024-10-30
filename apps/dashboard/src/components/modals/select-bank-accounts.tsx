@@ -233,7 +233,7 @@ export function SelectBankAccountsModal() {
             logo_url: account.institution?.logo,
             account_id: account.id,
             bank_name: account.institution.name,
-            currency: account.currency,
+            currency: account.currency ?? account.balance.currency,
             balance: account.balance.amount,
             enabled: true,
             type: account.type,
