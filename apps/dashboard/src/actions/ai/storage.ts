@@ -1,7 +1,7 @@
 "use server";
 
 import { client as RedisClient } from "@midday/kv";
-import { getSession, getUser } from "@midday/supabase/cached-queries";
+import { getUser } from "@midday/supabase/cached-queries";
 import type { Chat, SettingsResponse } from "./types";
 
 export async function getAssistantSettings(): Promise<SettingsResponse> {
@@ -39,10 +39,6 @@ export async function setAssistantSettings({
   userId,
   teamId,
 }: SetAassistant) {
-  const {
-    data: { session },
-  } = await getSession();
-
   return RedisClient.set(`assistant:${teamId}:user:${userId}:settings`, {
     ...settings,
     ...params,
@@ -128,11 +124,9 @@ export async function getChats() {
 }
 
 export async function getChat(id: string) {
-  const {
-    data: { session },
-  } = await getSession();
+  const user = await getUser();
 
-  const userId = session?.user.id;
+  const userId = user?.data?.id;
 
   const chat = await RedisClient.hgetall<Chat>(`chat:${id}`);
 

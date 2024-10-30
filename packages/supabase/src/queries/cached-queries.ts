@@ -65,16 +65,17 @@ export const getSession = cache(async () => {
 });
 
 export const getUser = async () => {
+  const supabase = createClient();
+
   const {
-    data: { session },
-  } = await getSession();
-  const userId = session?.user?.id;
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const userId = user?.id;
 
   if (!userId) {
     return null;
   }
-
-  const supabase = createClient();
 
   return unstable_cache(
     async () => {
