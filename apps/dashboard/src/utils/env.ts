@@ -1,11 +1,11 @@
 export function getEnvironmentUrl() {
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.VERCEL_ENV === "production") {
     return "https://app.midday.ai";
   }
 
-  if (process.env.NODE_ENV === "development") {
-    return "http://localhost:3001";
+  if (process.env.VERCEL_ENV === "preview") {
+    return `https://${process.env.VERCEL_URL}`;
   }
 
-  return `https://${process.env.VERCEL_URL}`;
+  return "http://localhost:3001";
 }
