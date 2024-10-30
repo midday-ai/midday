@@ -196,7 +196,7 @@ export const columns: ColumnDef<Invoice>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {status === "draft" && (
+              {status !== "paid" && status !== "canceled" && (
                 <DropdownMenuItem
                   onClick={() =>
                     setParams({
