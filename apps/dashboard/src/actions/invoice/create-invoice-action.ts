@@ -1,10 +1,12 @@
 "use server";
 
 import { authActionClient } from "@/actions/safe-action";
+import { getEnvironmentUrl } from "@/utils/env";
 import { resend } from "@/utils/resend";
 import { UTCDate } from "@date-fns/utc";
 import InvoiceEmail from "@midday/email/emails/invoice";
 import { render } from "@react-email/render";
+import { nanoid } from "nanoid";
 import { revalidateTag } from "next/cache";
 import { createInvoiceSchema } from "./schema";
 
@@ -47,12 +49,16 @@ export const createInvoiceAction = authActionClient
           await resend.emails.send({
             from: "Midday <middaybot@midday.ai>",
             to: customer.email,
+            reply_to: user.team.email,
             subject: `${user.team.name} sent you an invoice`,
+            headers: {
+              "X-Entity-Ref-ID": nanoid(),
+            },
             html: await render(
               InvoiceEmail({
                 companyName: customer.name,
                 teamName: user.team.name,
-                link: `https://app.midday.ai/i/${data?.id}`,
+                link: `${getEnvironmentUrl()}/i/${data?.id}`,
               }),
             ),
           });

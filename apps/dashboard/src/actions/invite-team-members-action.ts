@@ -5,6 +5,7 @@ import InviteEmail from "@midday/email/emails/invite";
 import { getI18n } from "@midday/email/locales";
 import { LogEvents } from "@midday/events/events";
 import { render } from "@react-email/render";
+import { nanoid } from "nanoid";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -51,6 +52,9 @@ export const inviteTeamMembersAction = authActionClient
           invitedByName: invites.user.full_name,
           teamName: invites.team.name,
         }),
+        headers: {
+          "X-Entity-Ref-ID": nanoid(),
+        },
         html: await render(
           InviteEmail({
             invitedByEmail: invites.user.email,
