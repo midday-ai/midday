@@ -56,12 +56,17 @@ export const createGoCardLessLinkAction = authActionClient
 
         return redirect(data.link);
       } catch (error) {
-        analytics.track({
-          event: LogEvents.GoCardLessLinkFailed.name,
-          institutionId,
-          availableHistory,
-          redirectBase,
-        });
+        // Ignore NEXT_REDIRECT error in analytics
+        if (error instanceof Error && error.message !== "NEXT_REDIRECT") {
+          analytics.track({
+            event: LogEvents.GoCardLessLinkFailed.name,
+            institutionId,
+            availableHistory,
+            redirectBase,
+          });
+
+          throw error;
+        }
 
         throw error;
       }
