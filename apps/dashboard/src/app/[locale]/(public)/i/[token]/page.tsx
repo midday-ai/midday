@@ -69,6 +69,8 @@ export default async function Page({ params }: Props) {
     const { id } = await verify(params.token);
     const { data: invoice } = await getInvoiceQuery(supabase, id);
 
+    // TODO: Update viewed_at for customer (not auth user) and use waitUntil
+
     if (!invoice) {
       notFound();
     }
