@@ -1,5 +1,5 @@
 import { Img, Section } from "@react-email/components";
-import { getEnvironmentUrl } from "utils/env";
+import { getEnvironmentUrl } from "../utils/env";
 
 const baseUrl = getEnvironmentUrl();
 

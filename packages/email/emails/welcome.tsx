@@ -10,10 +10,10 @@ import {
   Tailwind,
   Text,
 } from "@react-email/components";
-import { getEnvironmentUrl } from "utils/env";
 import { Footer } from "../components/footer";
 import { GetStarted } from "../components/get-started";
 import { Logo } from "../components/logo";
+import { getEnvironmentUrl } from "../utils/env";
 
 interface WelcomeProps {
   fullName: string;

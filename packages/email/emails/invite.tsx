@@ -12,10 +12,10 @@ import {
   Tailwind,
   Text,
 } from "@react-email/components";
-import { getAppUrl } from "utils/env";
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 import { getI18n } from "../locales";
+import { getAppUrl } from "../utils/env";
 
 interface InviteEmailProps {
   email?: string;

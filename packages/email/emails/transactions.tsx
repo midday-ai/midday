@@ -13,10 +13,10 @@ import {
   Text,
 } from "@react-email/components";
 import { format } from "date-fns";
-import { getAppUrl } from "utils/env";
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 import { getI18n } from "../locales";
+import { getAppUrl } from "../utils/env";
 
 type Transaction = {
   id: string;
