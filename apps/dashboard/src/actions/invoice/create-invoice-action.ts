@@ -58,7 +58,7 @@ export const createInvoiceAction = authActionClient
               InvoiceEmail({
                 companyName: customer.name,
                 teamName: user.team.name,
-                link: `${getEnvironmentUrl()}/i/${data?.id}`,
+                link: `${getEnvironmentUrl()}/i/${data?.token}`,
               }),
             ),
           });

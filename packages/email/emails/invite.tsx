@@ -12,6 +12,7 @@ import {
   Tailwind,
   Text,
 } from "@react-email/components";
+import { getAppUrl } from "utils/env";
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 import { getI18n } from "../locales";
@@ -27,10 +28,7 @@ interface InviteEmailProps {
   locale: string;
 }
 
-const baseAppUrl =
-  process.env.VERCEL_ENV === "production"
-    ? "https://app.midday.ai"
-    : "http://localhost:3001";
+const baseAppUrl = getAppUrl();
 
 export const InviteEmail = ({
   invitedByEmail = "bukinoshita@example.com",

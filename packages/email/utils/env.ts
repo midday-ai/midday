@@ -5,3 +5,11 @@ export function getEnvironmentUrl() {
 
   return "https://midday.ai/email";
 }
+
+export function getAppUrl() {
+  if (process.env.VERCEL_ENV === "production") {
+    return "https://app.midday.ai";
+  }
+
+  return "http://localhost:3001";
+}

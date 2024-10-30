@@ -13,6 +13,7 @@ import {
   Text,
 } from "@react-email/components";
 import { format } from "date-fns";
+import { getAppUrl } from "utils/env";
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 import { getI18n } from "../locales";
@@ -70,10 +71,7 @@ const defaultTransactions = [
   },
 ];
 
-const baseAppUrl =
-  process.env.VERCEL_ENV === "production"
-    ? "https://app.midday.ai"
-    : "http://localhost:3001";
+const baseAppUrl = getAppUrl();
 
 export const TransactionsEmail = ({
   fullName = "Viktor Hofte",
