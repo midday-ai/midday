@@ -18,11 +18,6 @@ interface WelcomeProps {
   link: string;
 }
 
-const baseUrl =
-  process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
-    : "http://localhost:3000/email";
-
 export const InvoiceCommentEmail = ({
   invoiceNumber = "INV-0001",
   link = "https://app.midday.ai/i/1234567890",
@@ -62,7 +57,7 @@ export const InvoiceCommentEmail = ({
             className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
             style={{ borderStyle: "solid", borderWidth: 1 }}
           >
-            <Logo baseUrl={baseUrl} />
+            <Logo />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               New comment on Invoice <br /> {invoiceNumber}
             </Heading>
@@ -85,7 +80,7 @@ export const InvoiceCommentEmail = ({
 
             <br />
 
-            <Footer baseUrl={baseUrl} />
+            <Footer />
           </Container>
         </Body>
       </Tailwind>

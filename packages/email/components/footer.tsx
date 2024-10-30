@@ -8,12 +8,11 @@ import {
   Text,
 } from "@react-email/components";
 import { TripleColumn } from "responsive-react-email";
+import { getEnvironmentUrl } from "utils/env";
 
-type Props = {
-  baseUrl?: string;
-};
+const baseUrl = getEnvironmentUrl();
 
-export function Footer({ baseUrl }: Props) {
+export function Footer() {
   return (
     <Section className="w-full">
       <Hr />

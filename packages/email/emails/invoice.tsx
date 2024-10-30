@@ -19,11 +19,6 @@ interface WelcomeProps {
   link: string;
 }
 
-const baseUrl =
-  process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
-    : "http://localhost:3000/email";
-
 export const InvoiceEmail = ({
   companyName = "Customer",
   teamName = "Midday",
@@ -64,7 +59,7 @@ export const InvoiceEmail = ({
             className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
             style={{ borderStyle: "solid", borderWidth: 1 }}
           >
-            <Logo baseUrl={baseUrl} />
+            <Logo />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               You’ve Received an Invoice <br /> from {teamName}
             </Heading>
@@ -89,7 +84,7 @@ export const InvoiceEmail = ({
 
             <br />
 
-            <Footer baseUrl={baseUrl} />
+            <Footer />
           </Container>
         </Body>
       </Tailwind>

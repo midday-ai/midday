@@ -70,11 +70,6 @@ const defaultTransactions = [
   },
 ];
 
-const baseUrl =
-  process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
-    : "http://localhost:3000/email";
-
 const baseAppUrl =
   process.env.VERCEL_ENV === "production"
     ? "https://app.midday.ai"
@@ -127,7 +122,7 @@ export const TransactionsEmail = ({
             className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
             style={{ borderStyle: "solid", borderWidth: 1 }}
           >
-            <Logo baseUrl={baseUrl} />
+            <Logo />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               {t("transactions.title1")}
               <span className="font-semibold">
@@ -241,7 +236,7 @@ export const TransactionsEmail = ({
             </Section>
 
             <br />
-            <Footer baseUrl={baseUrl} />
+            <Footer />
           </Container>
         </Body>
       </Tailwind>
