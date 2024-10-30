@@ -29,7 +29,6 @@ export const InvoiceEmail = ({
   teamName = "Midday",
   link = "https://app.midday.ai/i/1234567890",
 }: WelcomeProps) => {
-  const firstName = companyName.split(" ").at(0);
   const text = `You’ve Received an Invoice from ${teamName}`;
 
   return (
@@ -72,7 +71,7 @@ export const InvoiceEmail = ({
 
             <br />
 
-            <span className="font-medium">Hi {firstName},</span>
+            <span className="font-medium">Hi {companyName},</span>
             <Text className="text-[#121212]">
               Please review your invoice and make sure to pay it on time. If
               anything is unclear, feel free to add a comment by viewing the

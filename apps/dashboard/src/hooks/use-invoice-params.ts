@@ -17,13 +17,7 @@ export function useInvoiceParams(options?: { shallow: boolean }) {
       start: parseAsString,
       end: parseAsString,
       selectedCustomerId: parseAsString,
-      type: parseAsStringEnum([
-        "edit",
-        "create",
-        "details",
-        "duplicate",
-        "comments",
-      ]),
+      type: parseAsStringEnum(["edit", "create", "details", "comments"]),
     },
     options,
   );

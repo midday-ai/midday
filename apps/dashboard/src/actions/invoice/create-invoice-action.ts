@@ -1,7 +1,10 @@
 "use server";
 
 import { authActionClient } from "@/actions/safe-action";
+import { resend } from "@/utils/resend";
 import { UTCDate } from "@date-fns/utc";
+import InvoiceEmail from "@midday/email/emails/invoice";
+import { render } from "@react-email/render";
 import { revalidateTag } from "next/cache";
 import { createInvoiceSchema } from "./schema";
 
@@ -19,7 +22,7 @@ export const createInvoiceAction = authActionClient
 
       const { data: customer } = await supabase
         .from("customers")
-        .select("id, email")
+        .select("id, email, name")
         .eq("id", customer_id)
         .single();
 
@@ -40,7 +43,22 @@ export const createInvoiceAction = authActionClient
         .single();
 
       if (type === "create_and_send") {
-        // await sendInvoiceEmail.execute({ id });
+        try {
+          await resend.emails.send({
+            from: "Midday <middaybot@midday.ai>",
+            to: customer.email,
+            subject: `${user.team.name} sent you an invoice`,
+            html: await render(
+              InvoiceEmail({
+                companyName: customer.name,
+                teamName: user.team.name,
+                link: `https://app.midday.ai/i/${data?.id}`,
+              }),
+            ),
+          });
+        } catch (error) {
+          console.error(error);
+        }
       }
 
       revalidateTag(`invoice_summary_${teamId}`);

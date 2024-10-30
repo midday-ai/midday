@@ -59,7 +59,6 @@ export function InvoiceActions({ status, id }: Props) {
               >
                 Mark as paid
               </DropdownMenuItem>
-              <DropdownMenuItem>Duplicate</DropdownMenuItem>
               <DropdownMenuItem
                 className="text-destructive"
                 onClick={() =>
@@ -103,7 +102,6 @@ export function InvoiceActions({ status, id }: Props) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent sideOffset={10} align="end">
-              <DropdownMenuItem>Duplicate</DropdownMenuItem>
               <DropdownMenuItem className="text-destructive">
                 Delete draft
               </DropdownMenuItem>

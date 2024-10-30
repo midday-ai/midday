@@ -235,7 +235,6 @@ export const columns: ColumnDef<Invoice>[] = [
                       Download
                     </a>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>Duplicate</DropdownMenuItem>
                 </>
               )}
 

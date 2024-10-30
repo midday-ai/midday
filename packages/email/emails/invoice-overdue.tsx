@@ -31,7 +31,6 @@ export const InvoiceOverdueEmail = ({
   invoiceNumber = "INV-0001",
   link = "https://app.midday.ai/i/1234567890",
 }: WelcomeProps) => {
-  const firstName = companyName.split(" ").at(0);
   const text = `Invoice ${invoiceNumber} from ${teamName} is Overdue`;
 
   return (
@@ -75,7 +74,7 @@ export const InvoiceOverdueEmail = ({
 
             <br />
 
-            <span className="font-medium">Hi {firstName},</span>
+            <span className="font-medium">Hi {companyName},</span>
             <Text className="text-[#121212]">
               Please settle your payment as soon as possible to avoid further
               delay. If anything is unclear, feel free to add a comment by
