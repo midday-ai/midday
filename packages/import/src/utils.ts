@@ -71,15 +71,18 @@ export function formatAmountValue({
 }: { amount: string; inverted?: boolean }) {
   let value: number;
 
-  if (amount.includes(",")) {
+  // Handle special minus sign (−) by replacing with standard minus (-)
+  const normalizedAmount = amount.replace(/−/g, "-");
+
+  if (normalizedAmount.includes(",")) {
     // Remove thousands separators and replace the comma with a period.
-    value = +amount.replace(/\./g, "").replace(",", ".");
-  } else if (amount.match(/\.\d{2}$/)) {
+    value = +normalizedAmount.replace(/\./g, "").replace(",", ".");
+  } else if (normalizedAmount.match(/\.\d{2}$/)) {
     // If it ends with .XX, it's likely a decimal; remove internal periods.
-    value = +amount.replace(/\.(?=\d{3})/g, "");
+    value = +normalizedAmount.replace(/\.(?=\d{3})/g, "");
   } else {
     // If neither condition is met, convert the amount directly to a number
-    value = +amount;
+    value = +normalizedAmount;
   }
 
   if (inverted) {
