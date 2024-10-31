@@ -7,6 +7,7 @@ import Link from "next/link";
 import editor from "./editor.png";
 import invoiceOg from "./invoice-og.png";
 import invoiceReact from "./invoice-react.png";
+import invoiceToolbar from "./invoice-toolbar.png";
 import invoice from "./invoice.png";
 import pdf from "./pdf.png";
 
@@ -22,7 +23,7 @@ const components = [
     description: "A rich text editor with AI tools powered by Vercel AI SDK.",
     image: editor,
     href: "/components/editor",
-    className: "mt-24",
+    className: "mt-24 max-w-[300px]",
     ready: true,
   },
 
@@ -46,6 +47,14 @@ const components = [
     image: invoiceOg,
     href: "/components/invoice-og",
     ready: true,
+  },
+  {
+    name: "Invoice Toolbar",
+    description: "A toolbar for invoices with comments and avatars.",
+    image: invoiceToolbar,
+    href: "/components/invoice-toolbar",
+    ready: true,
+    className: "mt-24 max-w-[220px]",
   },
   {
     name: "Invoice Editor",
@@ -80,7 +89,7 @@ export default function Page() {
         {components.map(
           ({ name, description, image, href, ready, className }) => (
             <Link href={href} key={name} className="flex">
-              <Card className="p-6 flex flex-col group">
+              <Card className="p-6 flex flex-col group w-full">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold">{name}</h2>
                   {!ready && (
@@ -91,11 +100,14 @@ export default function Page() {
                 </div>
                 <p className="text-sm text-[#878787]">{description}</p>
 
-                <div className={cn("flex justify-center mt-6", className)}>
+                <div className="flex justify-center mt-6 w-full">
                   <Image
                     src={image}
                     alt={name}
-                    className="transition-transform duration-300 group-hover:-translate-y-2"
+                    className={cn(
+                      "transition-transform duration-300 group-hover:-translate-y-2",
+                      className,
+                    )}
                   />
                 </div>
               </Card>
