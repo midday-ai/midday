@@ -1,5 +1,5 @@
+import { formatAmount } from "@midday/utils/format";
 import { Text, View } from "@react-pdf/renderer";
-import { formatAmount } from "../../../utils/format";
 import type { LineItem } from "../../types";
 
 type Props = {

@@ -1,3 +1,4 @@
+import { getEmailUrl } from "@midday/utils/envs";
 import {
   Body,
   Container,
@@ -13,13 +14,12 @@ import {
 import { Footer } from "../components/footer";
 import { GetStarted } from "../components/get-started";
 import { Logo } from "../components/logo";
-import { getEnvironmentUrl } from "../utils/env";
 
 interface WelcomeProps {
   fullName: string;
 }
 
-const baseUrl = getEnvironmentUrl();
+const baseUrl = getEmailUrl();
 
 export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
   const firstName = fullName.split(" ").at(0);

@@ -1,3 +1,4 @@
+import { getAppUrl } from "@midday/utils/envs";
 import {
   Body,
   Button,
@@ -15,7 +16,6 @@ import {
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 import { getI18n } from "../locales";
-import { getAppUrl } from "../utils/env";
 
 interface InviteEmailProps {
   email?: string;

@@ -1,5 +1,5 @@
+import { formatAmount } from "@midday/utils/format";
 import { calculateTotal } from "../../../utils/calculate";
-import { formatAmount } from "../../../utils/format";
 import type { LineItem } from "../../types";
 type Props = {
   lineItems: LineItem[];

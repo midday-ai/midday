@@ -1,11 +1,4 @@
-import {
-  Column as TwColumn,
-  Img,
-  Row,
-  Text,
-  Section,
-} from "@react-email/components";
-import React from "react";
+import { Img, Row, Section, Text } from "@react-email/components";
 
 type Props = {
   title: string;

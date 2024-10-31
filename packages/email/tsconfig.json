@@ -1,12 +1,12 @@
 {
-  "extends": "@midday/tsconfig/react-library.json",
+  "extends": "@midday/tsconfig/base.json",
+  "include": ["emails", "components"],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@midday/ui/*": ["../ui/src/*"]
-    }
-  },
-  "include": ["."],
-  "exclude": ["node_modules"]
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  }
 }

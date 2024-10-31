@@ -1,3 +1,4 @@
+import { getCdnUrl } from "@midday/utils/envs";
 import { Document, Font, Image, Page, Text, View } from "@react-pdf/renderer";
 import QRCodeUtil from "qrcode";
 import type { TemplateProps } from "../types";
@@ -9,17 +10,15 @@ import { PaymentDetails } from "./components/payment-details";
 import { QRCode } from "./components/qr-code";
 import { Summary } from "./components/summary";
 
-const CDN_URL = "https://cdn.midday.ai";
-
 Font.register({
   family: "GeistMono",
   fonts: [
     {
-      src: `${CDN_URL}/fonts/GeistMono/ttf/GeistMono-Regular.ttf`,
+      src: `${getCdnUrl()}/fonts/GeistMono/ttf/GeistMono-Regular.ttf`,
       fontWeight: 400,
     },
     {
-      src: `${CDN_URL}/fonts/GeistMono/ttf/GeistMono-Medium.ttf`,
+      src: `${getCdnUrl()}/fonts/GeistMono/ttf/GeistMono-Medium.ttf`,
       fontWeight: 500,
     },
   ],

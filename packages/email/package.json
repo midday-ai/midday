@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@midday/ui": "workspace:*",
+    "@midday/utils": "workspace:*",
     "@react-email/components": "0.0.25",
     "@react-email/render": "^1.0.1",
     "@react-email/tailwind": "0.1.0",

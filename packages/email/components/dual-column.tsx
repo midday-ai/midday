@@ -1,5 +1,5 @@
 import { Section } from "@react-email/section";
-import React from "react";
+import type React from "react";
 
 interface DualColumnProps {
   styles?: Omit<

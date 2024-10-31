@@ -1,7 +1,7 @@
+import { getEmailUrl } from "@midday/utils/envs";
 import { Img, Section } from "@react-email/components";
-import { getEnvironmentUrl } from "../utils/env";
 
-const baseUrl = getEnvironmentUrl();
+const baseUrl = getEmailUrl();
 
 export function Logo() {
   return (

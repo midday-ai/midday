@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@midday/ui": "workspace:*",
+    "@midday/utils": "workspace:*",
     "@react-pdf/renderer": "^4.0.0",
     "date-fns": "^4.1.0",
     "jose": "^5.9.6",

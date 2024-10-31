@@ -1,3 +1,4 @@
+import { getEmailUrl } from "@midday/utils/envs";
 import {
   Column,
   Hr,
@@ -8,9 +9,8 @@ import {
   Text,
 } from "@react-email/components";
 import { TripleColumn } from "responsive-react-email";
-import { getEnvironmentUrl } from "../utils/env";
 
-const baseUrl = getEnvironmentUrl();
+const baseUrl = getEmailUrl();
 
 export function Footer() {
   return (
