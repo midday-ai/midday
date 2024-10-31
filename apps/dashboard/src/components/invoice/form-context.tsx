@@ -34,9 +34,10 @@ const defaultTemplate: InvoiceTemplate = {
   from_details: undefined,
   size: "a4",
   include_vat: true,
-  date_format: "dd/mm/yyyy",
+  date_format: "dd/MM/yyyy",
   include_tax: true,
   tax_rate: 10,
+  delivery_type: "create",
 };
 
 type FormContextProps = {
@@ -70,7 +71,6 @@ export function FormContext({
     invoice_number: invoiceNumber,
     line_items: [{ name: "", quantity: 0, price: 0 }],
     tax: undefined,
-    type: "create",
   };
 
   const form = useForm<InvoiceFormValues>({

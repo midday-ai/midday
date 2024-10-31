@@ -1,6 +1,7 @@
 "use client";
 
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
+import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { Button } from "@midday/ui/button";
 import {
@@ -11,6 +12,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton as BaseSubmitButton } from "@midday/ui/submit-button";
+import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -33,7 +35,21 @@ export function SubmitButton({ isSubmitting }: Props) {
   const { type } = useInvoiceParams();
   const { watch, setValue, formState } = useFormContext<InvoiceFormValues>();
 
-  const selectedOption = watch("type");
+  const selectedOption = watch("template.delivery_type");
+
+  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+
+  const handleOptionChange = (value: string) => {
+    const deliveryType = value as "create" | "create_and_send";
+
+    updateInvoiceTemplate.execute({
+      delivery_type: deliveryType,
+    });
+
+    setValue("template.delivery_type", deliveryType, {
+      shouldValidate: true,
+    });
+  };
 
   const isValid = formState.isValid;
 
@@ -59,11 +75,7 @@ export function SubmitButton({ isSubmitting }: Props) {
             <DropdownMenuCheckboxItem
               key={option.value}
               checked={selectedOption === option.value}
-              onCheckedChange={() =>
-                setValue("type", option.value as "create" | "create_and_send", {
-                  shouldValidate: true,
-                })
-              }
+              onCheckedChange={handleOptionChange}
             >
               {option.label}
             </DropdownMenuCheckboxItem>

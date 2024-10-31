@@ -469,6 +469,7 @@ export type Database = {
           currency: string | null
           customer_label: string | null
           date_format: string | null
+          delivery_type: Database["public"]["Enums"]["invoice_delivery_type"]
           description_label: string | null
           due_date_label: string | null
           from_details: Json | null
@@ -496,6 +497,7 @@ export type Database = {
           currency?: string | null
           customer_label?: string | null
           date_format?: string | null
+          delivery_type?: Database["public"]["Enums"]["invoice_delivery_type"]
           description_label?: string | null
           due_date_label?: string | null
           from_details?: Json | null
@@ -523,6 +525,7 @@ export type Database = {
           currency?: string | null
           customer_label?: string | null
           date_format?: string | null
+          delivery_type?: Database["public"]["Enums"]["invoice_delivery_type"]
           description_label?: string | null
           due_date_label?: string | null
           from_details?: Json | null
@@ -2075,6 +2078,7 @@ export type Database = {
       connection_status: "disconnected" | "connected" | "unknown"
       inbox_status: "processing" | "pending" | "archived" | "new" | "deleted"
       inbox_type: "invoice" | "expense"
+      invoice_delivery_type: "create" | "create_and_send"
       invoice_size: "a4" | "letter"
       invoice_status: "draft" | "overdue" | "paid" | "unpaid" | "canceled"
       reportTypes: "profit" | "revenue" | "burn_rate" | "expense"

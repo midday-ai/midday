@@ -39,6 +39,10 @@ export function Editor({
     initialContent,
   );
 
+  useEffect(() => {
+    setContent(initialContent);
+  }, [initialContent]);
+
   const handleUpdate = useCallback(
     ({ editor }: { editor: EditorInstance }) => {
       const json = editor.getJSON();

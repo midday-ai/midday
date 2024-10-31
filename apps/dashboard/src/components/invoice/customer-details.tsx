@@ -63,7 +63,6 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
           control={control}
           render={({ field }) => (
             <Editor
-              key={selectedCustomerId}
               initialContent={field.value}
               onChange={field.onChange}
               className="h-[115px]"

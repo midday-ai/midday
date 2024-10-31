@@ -32,6 +32,7 @@ export const updateInvoiceTemplateSchema = z.object({
   include_tax: z.boolean().optional().optional(),
   tax_rate: z.number().min(0).max(100).optional(),
   size: z.enum(["a4", "letter"]).optional(),
+  delivery_type: z.enum(["create", "create_and_send"]).optional(),
 });
 
 export const draftLineItemSchema = z.object({
@@ -92,6 +93,7 @@ export const invoiceTemplateSchema = z.object({
   include_tax: z.boolean().optional(),
   tax_rate: z.number().min(0).max(100).optional(),
   date_format: z.enum(["dd/MM/yyyy", "mm/dd/yyyy", "yyyy-mm-dd"]),
+  delivery_type: z.enum(["create", "create_and_send"]),
 });
 
 export const invoiceFormSchema = z.object({
@@ -111,13 +113,10 @@ export const invoiceFormSchema = z.object({
   tax: z.number().optional(),
   amount: z.number(),
   line_items: z.array(lineItemSchema).min(1),
-  type: z.enum(["create", "create_and_send"]),
 });
 
 export const createInvoiceSchema = z.object({
   id: z.string().uuid(),
-  type: z.enum(["create", "create_and_send"]),
-  customer_id: z.string().uuid(),
 });
 
 export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;
