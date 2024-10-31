@@ -75,7 +75,7 @@ export function SubmitButton({ isSubmitting }: Props) {
             <DropdownMenuCheckboxItem
               key={option.value}
               checked={selectedOption === option.value}
-              onCheckedChange={handleOptionChange}
+              onCheckedChange={() => handleOptionChange(option.value)}
             >
               {option.label}
             </DropdownMenuCheckboxItem>

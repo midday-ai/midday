@@ -24,18 +24,11 @@ type Props = {
   teamId: string;
   customers: Customer[];
   updatedAt?: Date;
-  token?: string;
   onSubmit: (values: InvoiceFormValues) => void;
   isSubmitting: boolean;
 };
 
-export function Form({
-  teamId,
-  customers,
-  token,
-  onSubmit,
-  isSubmitting,
-}: Props) {
+export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
   const { selectedCustomerId } = useInvoiceParams();
   const [lastUpdated, setLastUpdated] = useState<Date | undefined>();
   const [lastEditedText, setLastEditedText] = useState("");
@@ -43,10 +36,12 @@ export function Form({
   const form = useFormContext<InvoiceFormValues>();
 
   const size = form.watch("template.size") === "a4" ? 650 : 816;
+  const token = form.watch("token");
 
   const draftInvoice = useAction(draftInvoiceAction, {
-    onSuccess: () => {
+    onSuccess: ({ data }) => {
       setLastUpdated(new Date());
+      form.setValue("token", data?.token, { shouldValidate: true });
     },
   });
 

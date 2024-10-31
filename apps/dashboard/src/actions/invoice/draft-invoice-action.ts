@@ -12,13 +12,13 @@ export const draftInvoiceAction = authActionClient
   .schema(draftInvoiceSchema)
   .action(
     async ({
-      parsedInput: { id, template, ...input },
+      parsedInput: { id, template, token: draftToken, ...input },
       ctx: { user, supabase },
     }) => {
       const teamId = user.team_id;
 
-      // TODO: Only generate token if status is pending and fix draft link
-      const token = await generateToken(id);
+      // Only generate token if it's not provided, ie. when the invoice is created
+      const token = draftToken ?? (await generateToken(id));
 
       const { payment_details, from_details, ...restTemplate } = template;
 

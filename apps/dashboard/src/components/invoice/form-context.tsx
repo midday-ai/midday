@@ -71,6 +71,7 @@ export function FormContext({
     invoice_number: invoiceNumber,
     line_items: [{ name: "", quantity: 0, price: 0 }],
     tax: undefined,
+    token: undefined,
   };
 
   const form = useForm<InvoiceFormValues>({
@@ -89,7 +90,13 @@ export function FormContext({
       const { data } = await getDraftInvoiceQuery(supabase, id);
 
       if (data) {
-        form.reset(data);
+        form.reset({
+          ...data,
+          template: {
+            ...defaultTemplate,
+            ...data.template,
+          },
+        });
       }
     }
     fetchInvoice();

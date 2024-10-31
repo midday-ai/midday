@@ -60,6 +60,7 @@ export const draftInvoiceSchema = z.object({
   tax: z.number().nullable().optional(),
   amount: z.number().nullable().optional(),
   line_items: z.array(draftLineItemSchema).optional(),
+  token: z.string().optional(),
 });
 
 export const lineItemSchema = z.object({
@@ -113,6 +114,7 @@ export const invoiceFormSchema = z.object({
   tax: z.number().optional(),
   amount: z.number(),
   line_items: z.array(lineItemSchema).min(1),
+  token: z.string().optional(),
 });
 
 export const createInvoiceSchema = z.object({
