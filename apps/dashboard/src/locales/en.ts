@@ -59,6 +59,7 @@ export default {
     inbox: "Inbox",
     imports: "Imports",
     transactions: "Transactions",
+    invoices: "Invoices",
   },
   mfa_status: {
     verified: "Verified",

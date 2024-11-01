@@ -23,6 +23,7 @@ export default function Vault({ params, searchParams }: Props) {
     "inbox",
     "imports",
     "transactions",
+    "invoices",
   ].includes(params.folders?.[0] ?? "");
 
   const filter = searchParamsCache.parse(searchParams);

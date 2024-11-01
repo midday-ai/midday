@@ -117,6 +117,7 @@ import {
   MdSearch,
   MdSecurity,
   MdSignalCellularAlt,
+  MdSnippetFolder,
   MdSort,
   MdSubdirectoryArrowLeft,
   MdTopic,
@@ -666,4 +667,5 @@ export const Icons = {
   Tax: MdOutlineAssuredWorkload,
   Vat: MdOutlineCalculate,
   CurrencyOutline: MdOutlineAttachMoney,
+  SnippetFolder: MdSnippetFolder,
 };

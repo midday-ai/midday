@@ -4,4 +4,4 @@ export * from "./templates/og";
 export * from "./editor";
 export * from "./utils/logo";
 
-export { renderToStream } from "@react-pdf/renderer";
+export { renderToStream, renderToBuffer } from "@react-pdf/renderer";

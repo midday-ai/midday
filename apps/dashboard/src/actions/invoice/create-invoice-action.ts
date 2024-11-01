@@ -6,6 +6,7 @@ import { UTCDate } from "@date-fns/utc";
 import InvoiceEmail from "@midday/email/emails/invoice";
 import { getAppUrl } from "@midday/utils/envs";
 import { render } from "@react-email/render";
+import { tasks } from "@trigger.dev/sdk/v3";
 import { nanoid } from "nanoid";
 import { revalidateTag } from "next/cache";
 import { type InvoiceTemplate, createInvoiceSchema } from "./schema";
@@ -65,6 +66,14 @@ export const createInvoiceAction = authActionClient
       } catch (error) {
         console.error(error);
       }
+    }
+
+    try {
+      await tasks.trigger("generate-invoice", {
+        invoiceId: data?.id,
+      });
+    } catch (error) {
+      console.error(error);
     }
 
     revalidateTag(`invoice_summary_${teamId}`);

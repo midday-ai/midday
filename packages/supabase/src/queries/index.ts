@@ -639,6 +639,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
           { name: "inbox", isFolder: true },
           { name: "imports", isFolder: true },
           { name: "transactions", isFolder: true },
+          { name: "invoices", isFolder: true },
         ];
 
   const filteredData = (data ?? []).map((item) => ({

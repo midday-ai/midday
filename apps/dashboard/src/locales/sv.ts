@@ -53,6 +53,7 @@ export default {
     inbox: "Inkorg",
     imports: "Importer",
     transactions: "Transaktioner",
+    invoices: "Fakturor",
   },
   mfa_status: {
     verified: "Verifierad",

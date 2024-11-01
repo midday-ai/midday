@@ -17,7 +17,8 @@
     "./templates/og": "./src/templates/og/index.tsx",
     "./editor": "./src/editor/index.tsx",
     "./calculate": "./src/utils/calculate.ts",
-    "./format-to-html": "./src/templates/html/format.tsx"
+    "./format-to-html": "./src/templates/html/format.tsx",
+    "./default": "./src/utils/default.ts"
   },
   "dependencies": {
     "@midday/ui": "workspace:*",

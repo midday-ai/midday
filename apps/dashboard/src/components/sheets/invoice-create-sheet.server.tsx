@@ -1,3 +1,4 @@
+import { getDefaultSettings } from "@midday/invoice/default";
 import {
   getCustomers,
   getInvoiceNumber,
@@ -13,6 +14,8 @@ export async function InvoiceCreateSheetServer({ teamId }: { teamId: string }) {
       getInvoiceNumber(),
     ]);
 
+  const defaultSettings = getDefaultSettings();
+
   // Filter out null values
   const template = templatesData
     ? Object.fromEntries(
@@ -26,6 +29,7 @@ export async function InvoiceCreateSheetServer({ teamId }: { teamId: string }) {
       customers={customersData}
       template={template}
       invoiceNumber={invoiceNumber}
+      defaultSettings={defaultSettings}
     />
   );
 }

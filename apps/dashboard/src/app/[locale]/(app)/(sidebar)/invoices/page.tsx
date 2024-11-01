@@ -12,8 +12,7 @@ import {
 import { InvoicesPaid, InvoicesPaidSkeleton } from "@/components/invoices-paid";
 import { InvoicesTable } from "@/components/tables/invoices";
 import { InvoiceSkeleton } from "@/components/tables/invoices/skeleton";
-import { getCountryCode } from "@midday/location";
-import { currencies } from "@midday/location/src/currencies";
+import { getDefaultSettings } from "@midday/invoice/default";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
@@ -38,9 +37,7 @@ export default function Page({
     page,
   } = searchParamsCache.parse(searchParams);
 
-  const countryCode = getCountryCode();
-
-  const defaultCurrency = currencies[countryCode];
+  const defaultSettings = getDefaultSettings();
 
   const loadingKey = JSON.stringify({
     q: query,
@@ -56,13 +53,13 @@ export default function Page({
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-4 gap-6 pt-6">
         <Suspense fallback={<InvoicesOpenSkeleton />}>
-          <InvoicesOpen defaultCurrency={defaultCurrency} />
+          <InvoicesOpen defaultCurrency={defaultSettings.currency} />
         </Suspense>
         <Suspense fallback={<InvoicesOverdueSkeleton />}>
-          <InvoicesOverdue defaultCurrency={defaultCurrency} />
+          <InvoicesOverdue defaultCurrency={defaultSettings.currency} />
         </Suspense>
         <Suspense fallback={<InvoicesPaidSkeleton />}>
-          <InvoicesPaid defaultCurrency={defaultCurrency} />
+          <InvoicesPaid defaultCurrency={defaultSettings.currency} />
         </Suspense>
         <Suspense fallback={<InvoicePaymentScoreSkeleton />}>
           <InvoicePaymentScore />

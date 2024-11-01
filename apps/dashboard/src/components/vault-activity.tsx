@@ -11,6 +11,7 @@ const defaultFolders = [
   { id: "exports", name: "Exports" },
   { id: "imports", name: "Imports" },
   { id: "transactions", name: "Transactions" },
+  { id: "invoices", name: "Invoices" },
 ];
 
 export async function VaultActivity() {

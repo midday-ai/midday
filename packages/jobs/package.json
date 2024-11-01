@@ -15,12 +15,16 @@
     "@midday-ai/engine": "^0.1.0-alpha.22",
     "@midday/documents": "workspace:*",
     "@midday/import": "workspace:*",
-    "@trigger.dev/react": "2.3.19",
-    "@trigger.dev/resend": "2.3.19",
-    "@trigger.dev/sdk": "2.3.19",
-    "@trigger.dev/supabase": "^2.3.19",
+    "@midday/invoice": "workspace:*",
+    "@midday/supabase": "workspace:*",
+    "@trigger.dev/react": "3.1.0",
+    "@trigger.dev/resend": "3.1.0",
+    "@trigger.dev/sdk": "^3.1.0",
+    "@trigger.dev/supabase": "3.1.0",
     "@zip.js/zip.js": "2.7.52",
-    "change-case": "^5.4.4",
-    "nanoid": "^5.0.7"
+    "nanoid": "^5.0.8"
+  },
+  "devDependencies": {
+    "@trigger.dev/build": "^3.1.0"
   }
 }

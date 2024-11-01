@@ -74,6 +74,8 @@ export const translatedFolderName = (t: any, folder: string) => {
       return t("folders.imports");
     case "transactions":
       return t("folders.transactions");
+    case "invoices":
+      return t("folders.invoices");
     default:
       return decodeURIComponent(folder);
   }
@@ -184,6 +186,7 @@ export function DataTableRow({ data }: { data: any }) {
     "transactions",
     "inbox",
     "import",
+    "invoices",
   ].includes(data.name);
 
   const disableActions = ["transactions"].includes(folders?.at(0));

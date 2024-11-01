@@ -5,7 +5,8 @@
   "scripts": {
     "build": "NODE_ENV=production next build",
     "clean": "git clean -xdf .next .turbo node_modules",
-    "jobs": "bunx @trigger.dev/cli@latest dev -p 3001 --client-id=midday-G6Yq",
+    "jobs": "bunx @trigger.dev/cli@v2 dev -p 3001 --client-id=midday-G6Yq",
+    "jobs:v3": "npx trigger.dev@latest dev",
     "dev": "next dev -p 3001",
     "lint": "next lint",
     "format": "biome format --write .",
@@ -38,7 +39,7 @@
     "@todesktop/client-active-win": "^0.15.0",
     "@todesktop/client-core": "^1.12.0",
     "@todesktop/runtime": "^1.6.4",
-    "@trigger.dev/nextjs": "^2.3.19",
+    "@trigger.dev/nextjs": "3.1.0",
     "@uidotdev/usehooks": "^2.4.1",
     "@upstash/ratelimit": "^2.0.3",
     "ai": "3.4.9",

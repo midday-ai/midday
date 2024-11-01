@@ -7,6 +7,7 @@ import {
 } from "@/actions/invoice/schema";
 import { UTCDate } from "@date-fns/utc";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { Settings } from "@midday/invoice/default";
 import { createClient } from "@midday/supabase/client";
 import { getDraftInvoiceQuery } from "@midday/supabase/queries";
 import { addMonths } from "date-fns";
@@ -45,6 +46,7 @@ type FormContextProps = {
   children: React.ReactNode;
   template: InvoiceTemplate;
   invoiceNumber: string;
+  defaultSettings: Settings;
   isOpen: boolean;
 };
 
@@ -53,13 +55,20 @@ export function FormContext({
   children,
   template,
   invoiceNumber,
+  defaultSettings,
   isOpen,
 }: FormContextProps) {
   const supabase = createClient();
 
   const defaultValues = {
     id: uuidv4(),
-    template: { ...defaultTemplate, ...template },
+    template: {
+      ...defaultTemplate,
+      size: defaultSettings.size ?? defaultTemplate.size,
+      include_tax: defaultSettings.include_tax ?? defaultTemplate.include_tax,
+      include_vat: defaultSettings.include_vat ?? defaultTemplate.include_vat,
+      ...template,
+    },
     customer_details: undefined,
     from_details: template.from_details ?? defaultTemplate.from_details,
     payment_details:
@@ -90,13 +99,7 @@ export function FormContext({
       const { data } = await getDraftInvoiceQuery(supabase, id);
 
       if (data) {
-        form.reset({
-          ...data,
-          template: {
-            ...defaultTemplate,
-            ...data.template,
-          },
-        });
+        form.reset(data);
       }
     }
     fetchInvoice();
