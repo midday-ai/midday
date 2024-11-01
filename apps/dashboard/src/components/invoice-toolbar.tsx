@@ -25,9 +25,15 @@ type Props = {
   id: string;
   size: "letter" | "a4";
   customer: Customer;
+  viewedAt?: string;
 };
 
-export default function InvoiceToolbar({ id, size, customer }: Props) {
+export default function InvoiceToolbar({
+  id,
+  size,
+  customer,
+  viewedAt,
+}: Props) {
   const { setParams } = useInvoiceParams();
 
   const handleCopyLink = () => {
@@ -112,7 +118,7 @@ export default function InvoiceToolbar({ id, size, customer }: Props) {
           </Tooltip>
         </TooltipProvider> */}
 
-        <InvoiceViewers customer={customer} />
+        <InvoiceViewers customer={customer} viewedAt={viewedAt} />
       </div>
     </motion.div>
   );

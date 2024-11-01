@@ -246,6 +246,11 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   height: 0;
 }
 
+.tiptap {
+  font-size: 11px !important;
+  line-height: 18px !important;
+}
+
 .dark .dotted-bg {
   background-image: radial-gradient(
     circle at 1px 1px,

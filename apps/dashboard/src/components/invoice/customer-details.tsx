@@ -1,7 +1,7 @@
 "use client";
 
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
-import { Editor } from "@/components/editor";
+import { Editor } from "@/components/invoice/editor";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";

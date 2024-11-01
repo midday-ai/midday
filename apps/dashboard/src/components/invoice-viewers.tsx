@@ -1,5 +1,6 @@
 "use client";
 
+import { formatRelativeTime } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
@@ -22,9 +23,10 @@ interface User {
 
 type Props = {
   customer: Customer;
+  viewedAt: string;
 };
 
-export function InvoiceViewers({ customer }: Props) {
+export function InvoiceViewers({ customer, viewedAt }: Props) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const supabase = createClient();
 
@@ -66,7 +68,7 @@ export function InvoiceViewers({ customer }: Props) {
                 <TooltipTrigger asChild>
                   <Avatar className="size-5 object-contain border border-border">
                     <AvatarImage src={currentUser.avatar_url || undefined} />
-                    <AvatarFallback>
+                    <AvatarFallback className="text-[9px] font-medium">
                       {currentUser.full_name?.[0]}
                     </AvatarFallback>
                   </Avatar>
@@ -75,7 +77,7 @@ export function InvoiceViewers({ customer }: Props) {
                   sideOffset={20}
                   className="text-[10px] px-2 py-1 rounded-sm font-medium"
                 >
-                  <p>Viewing right now</p>
+                  <p>just now</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -97,11 +99,12 @@ export function InvoiceViewers({ customer }: Props) {
                 </AvatarFallback>
               </Avatar>
             </TooltipTrigger>
+
             <TooltipContent
               sideOffset={20}
               className="text-[10px] px-2 py-1 rounded-sm font-medium"
             >
-              <p>Viewed 30m ago</p>
+              {viewedAt ? formatRelativeTime(new Date(viewedAt)) : "Not viewed"}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
