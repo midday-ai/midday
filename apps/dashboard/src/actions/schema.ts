@@ -535,15 +535,16 @@ export const createTransactionSchema = z.object({
 export type CreateTransactionSchema = z.infer<typeof createTransactionSchema>;
 
 export const createCustomerSchema = z.object({
+  id: z.string().uuid().optional(),
   name: z.string(),
   email: z.string().email(),
-  country: z.string().optional(),
-  address_line_1: z.string().optional(),
-  address_line_2: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  zip: z.string().optional(),
-  note: z.string().optional(),
-  website: z.string().optional(),
-  phone: z.string().optional(),
+  country: z.string().nullable().optional(),
+  address_line_1: z.string().nullable().optional(),
+  address_line_2: z.string().nullable().optional(),
+  city: z.string().nullable().optional(),
+  state: z.string().nullable().optional(),
+  zip: z.string().nullable().optional(),
+  note: z.string().nullable().optional(),
+  website: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
 });

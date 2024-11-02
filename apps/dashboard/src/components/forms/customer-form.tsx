@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { Textarea } from "@midday/ui/textarea";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
@@ -34,56 +35,28 @@ import {
 import { VatNumberInput } from "../vat-number-input";
 
 const formSchema = z.object({
+  id: z.string().uuid().optional(),
   name: z.string().min(1, {
     message: "Name must be at least 1 characters.",
   }),
   email: z.string().email({
     message: "Email is not valid.",
   }),
-  phone: z.string().optional(),
+  phone: z.string().nullable().optional(),
   website: z
     .string()
+    .nullable()
     .optional()
     .transform((url) => url?.replace(/^https?:\/\//, "")),
-  address_line_1: z
-    .string()
-    .min(1, {
-      message: "Address Line 1 must be at least 1 characters.",
-    })
-    .optional(),
-  address_line_2: z
-    .string()
-    .min(1, {
-      message: "Address Line 2 must be at least 1 characters.",
-    })
-    .optional(),
-  city: z
-    .string()
-    .min(1, {
-      message: "City must be at least 1 characters.",
-    })
-    .optional(),
-  state: z
-    .string()
-    .min(1, {
-      message: "State must be at least 1 characters.",
-    })
-    .optional(),
-  country: z
-    .string()
-    .min(1, {
-      message: "Country must be at least 1 characters.",
-    })
-    .optional(),
-  country_code: z.string().optional(),
-  zip: z
-    .string()
-    .min(1, {
-      message: "ZIP Code must be at least 1 characters.",
-    })
-    .optional(),
-  vat_number: z.string().optional(),
-  note: z.string().optional(),
+  address_line_1: z.string().nullable().optional(),
+  address_line_2: z.string().nullable().optional(),
+  city: z.string().nullable().optional(),
+  state: z.string().nullable().optional(),
+  country: z.string().nullable().optional(),
+  country_code: z.string().nullable().optional(),
+  zip: z.string().nullable().optional(),
+  vat_number: z.string().nullable().optional(),
+  note: z.string().nullable().optional(),
 });
 
 const excludedDomains = [
@@ -124,6 +97,7 @@ export function CustomerForm({ data }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id: undefined,
       name: undefined,
       email: undefined,
       website: undefined,
@@ -453,16 +427,12 @@ export function CustomerForm({ data }: Props) {
               Cancel
             </Button>
 
-            <Button
-              type="submit"
+            <SubmitButton
+              isSubmitting={createCustomer.isExecuting}
               disabled={createCustomer.isExecuting || !form.formState.isValid}
             >
-              {createCustomer.isExecuting
-                ? "Creating..."
-                : data
-                  ? "Update"
-                  : "Create"}
-            </Button>
+              {data ? "Update" : "Create"}
+            </SubmitButton>
           </div>
         </div>
       </form>

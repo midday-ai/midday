@@ -20,11 +20,16 @@ export const createCustomerAction = authActionClient
 
     const { data } = await supabase
       .from("customers")
-      .insert({
-        ...input,
-        token,
-        team_id: user.team_id,
-      })
+      .upsert(
+        {
+          ...input,
+          token,
+          team_id: user.team_id,
+        },
+        {
+          onConflict: "id",
+        },
+      )
       .select("id, name")
       .single();
 
