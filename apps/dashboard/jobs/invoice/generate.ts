@@ -10,9 +10,9 @@ export const generateInvoice = schemaTask({
   }),
   maxDuration: 300,
   run: async (payload) => {
-    const { invoiceId } = payload;
-
     const supabase = createClient();
+
+    const { invoiceId } = payload;
 
     const { data: invoiceData } = await supabase
       .from("invoices")
@@ -23,14 +23,16 @@ export const generateInvoice = schemaTask({
 
     const buffer = await renderToBuffer(await PdfTemplate(invoiceData));
 
-    const filename = `${invoiceData.invoice_number}.pdf`;
+    const filename = `${invoiceData?.invoice_number}.pdf`;
 
-    const { path } = await supabase.storage
+    await supabase.storage
       .from("vault")
-      .upload(`${invoiceData.team_id}/invoices/${filename}`, buffer, {
+      .upload(`${invoiceData?.team_id}/invoices/${filename}`, buffer, {
         contentType: "application/pdf",
         upsert: true,
       });
+
+    logger.debug("PDF uploaded to storage");
 
     await supabase
       .from("invoices")
@@ -38,5 +40,7 @@ export const generateInvoice = schemaTask({
         file_path: ["invoices", filename],
       })
       .eq("id", invoiceId);
+
+    logger.info("Invoice generation completed", { invoiceId, filename });
   },
 });

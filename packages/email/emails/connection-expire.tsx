@@ -14,7 +14,7 @@ import { addDays, formatDistance } from "date-fns";
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 
-interface WelcomeProps {
+interface Props {
   fullName: string;
   expiresAt: string;
   bankName: string;
@@ -26,7 +26,7 @@ export const ConnectionExpireEmail = ({
   expiresAt = addDays(new Date(), 4).toISOString(),
   bankName = "Revolut",
   teamName = "Midday",
-}: WelcomeProps) => {
+}: Props) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, We wanted to inform you that our connection to your bank ${bankName} for your team ${teamName} will expire in ${formatDistance(new Date(expiresAt), new Date())}.`;
 

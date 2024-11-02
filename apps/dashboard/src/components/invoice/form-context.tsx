@@ -90,12 +90,19 @@ export function FormContext({
 
   useEffect(() => {
     // Reset the form when the sheet is opened
-    form.reset(defaultValues);
+    form.reset({
+      ...defaultValues,
+      template: {
+        ...defaultValues.template,
+        locale: navigator.language,
+      },
+    });
   }, [isOpen]);
 
   useEffect(() => {
     async function fetchInvoice() {
       if (!id) return;
+
       const { data } = await getDraftInvoiceQuery(supabase, id);
 
       if (data) {

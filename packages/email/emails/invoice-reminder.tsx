@@ -16,15 +16,17 @@ import { Logo } from "../components/logo";
 interface Props {
   companyName: string;
   teamName: string;
+  invoiceNumber: string;
   link: string;
 }
 
-export const InvoiceEmail = ({
+export const InvoiceReminderEmail = ({
   companyName = "Customer",
   teamName = "Midday",
+  invoiceNumber = "INV-0001",
   link = "https://app.midday.ai/i/1234567890",
 }: Props) => {
-  const text = `You’ve Received an Invoice from ${teamName}`;
+  const text = `Reminder: Payment for ${invoiceNumber}`;
 
   return (
     <Html>
@@ -61,16 +63,18 @@ export const InvoiceEmail = ({
           >
             <Logo />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              You’ve Received an Invoice <br /> from {teamName}
+              Payment Reminder: Invoice {invoiceNumber} <br />
+              from {teamName}
             </Heading>
 
             <br />
 
             <span className="font-medium">Hi {companyName},</span>
             <Text className="text-[#121212]">
-              Please review your invoice and make sure to pay it on time. If
-              anything is unclear, feel free to add a comment by viewing the
-              invoice.
+              This is a friendly reminder about your pending invoice. We kindly
+              ask you to review and process the payment at your earliest
+              convenience. If you have any questions or need clarification,
+              please don't hesitate to view the invoice and add a comment.
             </Text>
 
             <Section className="text-center mt-[50px] mb-[50px]">
@@ -92,4 +96,4 @@ export const InvoiceEmail = ({
   );
 };
 
-export default InvoiceEmail;
+export default InvoiceReminderEmail;

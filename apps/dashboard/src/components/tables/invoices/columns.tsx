@@ -42,6 +42,7 @@ export type Invoice = {
   token: string;
   sent_to?: string | null;
   customer_details?: JSON;
+  internal_note?: string | null;
   customer?: {
     id: string;
     name: string;

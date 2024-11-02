@@ -15,13 +15,13 @@ import { Footer } from "../components/footer";
 import { GetStarted } from "../components/get-started";
 import { Logo } from "../components/logo";
 
-interface WelcomeProps {
+interface Props {
   fullName: string;
 }
 
 const baseUrl = getEmailUrl();
 
-export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
+export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: Props) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, Welcome to Midday! I'm Pontus, one of the founders. It's really important to us that you have a great experience ramping up.`;
 

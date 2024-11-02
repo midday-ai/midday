@@ -8,11 +8,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { Textarea } from "@midday/ui/textarea";
 import { format } from "date-fns";
 import { CopyInput } from "./copy-input";
 import { FormatAmount } from "./format-amount";
 import { InvoiceActions } from "./invoice-actions";
+import { InvoiceNote } from "./invoice-note";
 import { InvoiceStatus } from "./invoice-status";
 import type { Invoice } from "./tables/invoices/columns";
 
@@ -32,6 +32,7 @@ export function InvoiceDetails({
   invoice_number,
   template,
   token,
+  internal_note,
 }: Props) {
   return (
     <div>
@@ -149,15 +150,16 @@ export function InvoiceDetails({
         </div>
       )}
 
-      <Accordion type="single" collapsible className="mt-6">
+      <Accordion
+        type="single"
+        collapsible
+        className="mt-6"
+        defaultValue={internal_note ? "note" : undefined}
+      >
         <AccordionItem value="note">
           <AccordionTrigger>Internal note</AccordionTrigger>
           <AccordionContent>
-            <Textarea
-              id="note"
-              placeholder="Note"
-              className="min-h-[100px] resize-none"
-            />
+            <InvoiceNote id={id} defaultValue={internal_note} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

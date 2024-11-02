@@ -17,7 +17,7 @@ import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 import { getI18n } from "../locales";
 
-interface InviteEmailProps {
+interface Props {
   email?: string;
   invitedByEmail?: string;
   invitedByName?: string;
@@ -39,7 +39,7 @@ export const InviteEmail = ({
   ip = "204.13.186.218",
   location = "São Paulo, Brazil",
   locale = "en",
-}: InviteEmailProps) => {
+}: Props) => {
   const { t } = getI18n({ locale });
   const inviteLink = `${baseAppUrl}/teams/invite/${inviteCode}`;
 

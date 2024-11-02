@@ -479,6 +479,7 @@ export type Database = {
           include_vat: boolean | null
           invoice_no_label: string | null
           issue_date_label: string | null
+          locale: string | null
           logo_url: string | null
           note_label: string | null
           payment_details: Json | null
@@ -507,6 +508,7 @@ export type Database = {
           include_vat?: boolean | null
           invoice_no_label?: string | null
           issue_date_label?: string | null
+          locale?: string | null
           logo_url?: string | null
           note_label?: string | null
           payment_details?: Json | null
@@ -535,6 +537,7 @@ export type Database = {
           include_vat?: boolean | null
           invoice_no_label?: string | null
           issue_date_label?: string | null
+          locale?: string | null
           logo_url?: string | null
           note_label?: string | null
           payment_details?: Json | null
@@ -570,6 +573,7 @@ export type Database = {
           customer_id: string | null
           customer_name: string | null
           due_date: string | null
+          file_path: string[] | null
           from_details: Json | null
           fts: unknown | null
           id: string
@@ -578,11 +582,12 @@ export type Database = {
           invoice_number: string | null
           issue_date: string | null
           line_items: Json | null
+          locale: string | null
           note: string | null
           note_details: Json | null
           paid_at: string | null
-          path_tokens: string[] | null
           payment_details: Json | null
+          reminder_sent_at: string | null
           sent_to: string | null
           status: Database["public"]["Enums"]["invoice_status"]
           tax: number | null
@@ -605,6 +610,7 @@ export type Database = {
           customer_id?: string | null
           customer_name?: string | null
           due_date?: string | null
+          file_path?: string[] | null
           from_details?: Json | null
           fts?: unknown | null
           id?: string
@@ -613,11 +619,12 @@ export type Database = {
           invoice_number?: string | null
           issue_date?: string | null
           line_items?: Json | null
+          locale?: string | null
           note?: string | null
           note_details?: Json | null
           paid_at?: string | null
-          path_tokens?: string[] | null
           payment_details?: Json | null
+          reminder_sent_at?: string | null
           sent_to?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           tax?: number | null
@@ -640,6 +647,7 @@ export type Database = {
           customer_id?: string | null
           customer_name?: string | null
           due_date?: string | null
+          file_path?: string[] | null
           from_details?: Json | null
           fts?: unknown | null
           id?: string
@@ -648,11 +656,12 @@ export type Database = {
           invoice_number?: string | null
           issue_date?: string | null
           line_items?: Json | null
+          locale?: string | null
           note?: string | null
           note_details?: Json | null
           paid_at?: string | null
-          path_tokens?: string[] | null
           payment_details?: Json | null
+          reminder_sent_at?: string | null
           sent_to?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           tax?: number | null

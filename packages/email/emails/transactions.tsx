@@ -29,7 +29,7 @@ type Transaction = {
   teamName: string;
 };
 
-interface TransactionsEmailEmailProps {
+interface Props {
   fullName: string;
   transactions: Transaction[];
   locale: string;
@@ -78,7 +78,7 @@ export const TransactionsEmail = ({
   transactions = defaultTransactions,
   locale = "en",
   teamName = "Viktor Hofte AB",
-}: TransactionsEmailEmailProps) => {
+}: Props) => {
   const { t } = getI18n({ locale });
   const firstName = fullName.split(" ").at(0);
 

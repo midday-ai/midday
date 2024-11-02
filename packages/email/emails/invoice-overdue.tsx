@@ -13,7 +13,7 @@ import {
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 
-interface WelcomeProps {
+interface Props {
   companyName: string;
   teamName: string;
   invoiceNumber: string;
@@ -25,7 +25,7 @@ export const InvoiceOverdueEmail = ({
   teamName = "Midday",
   invoiceNumber = "INV-0001",
   link = "https://app.midday.ai/i/1234567890",
-}: WelcomeProps) => {
+}: Props) => {
   const text = `Invoice ${invoiceNumber} from ${teamName} is Overdue`;
 
   return (

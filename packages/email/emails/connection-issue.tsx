@@ -13,7 +13,7 @@ import {
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 
-interface WelcomeProps {
+interface Props {
   fullName: string;
   bankName: string;
   teamName: string;
@@ -23,7 +23,7 @@ export const ConnectionIssueEmail = ({
   fullName = "Viktor Hofte",
   bankName = "Revolut",
   teamName = "Midday",
-}: WelcomeProps) => {
+}: Props) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, We wanted to inform you that our connection to your bank ${bankName} for your team ${teamName} is currently disconnected.`;
 

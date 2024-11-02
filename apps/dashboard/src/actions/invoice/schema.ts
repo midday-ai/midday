@@ -6,7 +6,9 @@ export const deleteInvoiceSchema = z.object({
 
 export const updateInvoiceSchema = z.object({
   id: z.string(),
-  status: z.enum(["paid", "canceled"]),
+  status: z.enum(["paid", "canceled"]).optional(),
+  paid_at: z.string().optional(),
+  internal_note: z.string().nullable().optional(),
 });
 
 export const updateInvoiceTemplateSchema = z.object({
@@ -95,6 +97,7 @@ export const invoiceTemplateSchema = z.object({
   tax_rate: z.number().min(0).max(100).optional(),
   date_format: z.enum(["dd/MM/yyyy", "mm/dd/yyyy", "yyyy-mm-dd"]),
   delivery_type: z.enum(["create", "create_and_send"]),
+  locale: z.string().optional(),
 });
 
 export const invoiceFormSchema = z.object({

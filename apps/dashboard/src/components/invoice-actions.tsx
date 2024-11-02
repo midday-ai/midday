@@ -1,5 +1,19 @@
+import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
+import { sendReminderAction } from "@/actions/invoice/send-reminder-action";
 import { updateInvoiceAction } from "@/actions/invoice/update-invoice-action";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { UTCDate } from "@date-fns/utc";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@midday/ui/alert-dialog";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -18,26 +32,49 @@ type Props = {
 export function InvoiceActions({ status, id }: Props) {
   const { setParams } = useInvoiceParams();
   const updateInvoice = useAction(updateInvoiceAction);
+  const deleteInvoice = useAction(deleteInvoiceAction);
+  const sendReminder = useAction(sendReminderAction);
 
   switch (status) {
     case "overdue":
     case "unpaid":
       return (
         <div className="flex space-x-2 mt-8">
-          <Button
-            size="sm"
-            variant="secondary"
-            className="flex items-center space-x-2 hover:bg-secondary w-full"
-          >
-            <Icons.Notifications className="size-3.5" />
-            <span>Remind</span>
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="flex items-center space-x-2 hover:bg-secondary w-full"
+              >
+                <Icons.Notifications className="size-3.5" />
+                <span>Remind</span>
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Send Reminder</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to send a reminder for this invoice?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => sendReminder.execute({ id })}
+                  disabled={sendReminder.isPending}
+                >
+                  Send Reminder
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           <Button
             size="sm"
             variant="secondary"
             className="flex items-center space-x-2 hover:bg-secondary w-full"
-            onClick={() => setParams({ invoiceId: id })}
+            onClick={() => setParams({ invoiceId: id, type: "edit" })}
           >
             <Icons.Edit className="size-3.5" />
             <span>Edit invoice</span>
@@ -55,7 +92,13 @@ export function InvoiceActions({ status, id }: Props) {
             </DropdownMenuTrigger>
             <DropdownMenuContent sideOffset={10} align="end">
               <DropdownMenuItem
-                onClick={() => updateInvoice.execute({ id, status: "paid" })}
+                onClick={() =>
+                  updateInvoice.execute({
+                    id,
+                    status: "paid",
+                    paid_at: new UTCDate().toISOString(),
+                  })
+                }
               >
                 Mark as paid
               </DropdownMenuItem>
@@ -78,14 +121,7 @@ export function InvoiceActions({ status, id }: Props) {
             size="sm"
             variant="secondary"
             className="flex items-center space-x-2 hover:bg-secondary w-full"
-          >
-            <Icons.Notifications className="size-3.5" />
-            <span>Remind</span>
-          </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            className="flex items-center space-x-2 hover:bg-secondary w-full"
+            onClick={() => setParams({ invoiceId: id, type: "edit" })}
           >
             <Icons.Edit className="size-3.5" />
             <span>Edit invoice</span>
@@ -102,7 +138,10 @@ export function InvoiceActions({ status, id }: Props) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent sideOffset={10} align="end">
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => deleteInvoice.execute({ id })}
+              >
                 Delete draft
               </DropdownMenuItem>
             </DropdownMenuContent>

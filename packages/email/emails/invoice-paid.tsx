@@ -13,7 +13,7 @@ import {
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 
-interface WelcomeProps {
+interface Props {
   invoiceNumber: string;
   link: string;
 }
@@ -21,7 +21,7 @@ interface WelcomeProps {
 export const InvoicePaidEmail = ({
   invoiceNumber = "INV-0001",
   link = "https://app.midday.ai/i/1234567890",
-}: WelcomeProps) => {
+}: Props) => {
   const text = `New comment on Invoice ${invoiceNumber}`;
 
   return (
