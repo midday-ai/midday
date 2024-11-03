@@ -95,7 +95,7 @@ export const invoiceTemplateSchema = z.object({
   include_vat: z.boolean().optional(),
   include_tax: z.boolean().optional(),
   tax_rate: z.number().min(0).max(100).optional(),
-  date_format: z.enum(["dd/MM/yyyy", "mm/dd/yyyy", "yyyy-mm-dd"]),
+  date_format: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd"]),
   delivery_type: z.enum(["create", "create_and_send"]),
   locale: z.string().optional(),
 });

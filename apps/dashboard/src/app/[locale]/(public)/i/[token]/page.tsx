@@ -67,32 +67,32 @@ type Props = {
 async function updateInvoiceViewedAt(id: string) {
   const supabase = createClient({ admin: true });
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  // TODO: Update viewed_at for customer (not auth user)
-  if (!session) {
-    await supabase
-      .from("invoices")
-      .update({
-        viewed_at: new UTCDate().toISOString(),
-      })
-      .eq("id", id);
-  }
+  await supabase
+    .from("invoices")
+    .update({
+      viewed_at: new UTCDate().toISOString(),
+    })
+    .eq("id", id);
 }
 
 export default async function Page({ params }: Props) {
   const supabase = createClient({ admin: true });
 
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
   const { id } = await verify(params.token);
   const { data: invoice } = await getInvoiceQuery(supabase, id);
 
-  if (!invoice) {
+  // If the invoice is draft and the user is not logged in, return 404 or if the invoice is not found
+  if (!invoice || (invoice.status === "draft" && !session)) {
     notFound();
   }
 
-  waitUntil(updateInvoiceViewedAt(id));
+  if (!session) {
+    waitUntil(updateInvoiceViewedAt(id));
+  }
 
   const width = invoice.template.size === "letter" ? 816 : 595;
   const height = invoice.template.size === "letter" ? 1056 : 842;

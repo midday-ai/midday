@@ -747,6 +747,7 @@ export type Database = {
           created_at: string
           document_classification: boolean | null
           email: string | null
+          flags: string[] | null
           id: string
           inbox_email: string | null
           inbox_forwarding: boolean | null
@@ -759,6 +760,7 @@ export type Database = {
           created_at?: string
           document_classification?: boolean | null
           email?: string | null
+          flags?: string[] | null
           id?: string
           inbox_email?: string | null
           inbox_forwarding?: boolean | null
@@ -771,6 +773,7 @@ export type Database = {
           created_at?: string
           document_classification?: boolean | null
           email?: string | null
+          flags?: string[] | null
           id?: string
           inbox_email?: string | null
           inbox_forwarding?: boolean | null

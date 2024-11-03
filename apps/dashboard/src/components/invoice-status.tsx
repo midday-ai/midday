@@ -28,9 +28,9 @@ export function InvoiceStatus({
         status === "overdue" &&
           "bg-[#FFD02B]/10 text-[#FFD02B] dark:bg-[#FFD02B]/10 dark:text-[#FFD02B]",
         status === "paid" &&
-          "text-[#00C969] bg-[#E6F9F0]/10 dark:text-[#00C969] dark:bg-[#00C969]/10",
+          "text-[#00C969] bg-[#DDF1E4] dark:text-[#00C969] dark:bg-[#00C969]/10",
         status === "unpaid" &&
-          "text-[#1D1D1D] bg-[#F5F5F3]/10 dark:text-[#F5F5F3] dark:bg-[#F5F5F3]/10",
+          "text-[#1D1D1D] bg-[#878787]/10 dark:text-[#F5F5F3] dark:bg-[#F5F5F3]/10",
         className,
       )}
     >

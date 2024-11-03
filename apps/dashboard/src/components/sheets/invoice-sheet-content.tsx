@@ -69,7 +69,7 @@ export function InvoiceSheetContent({
 
   if (invoice) {
     return (
-      <SheetContent className="!bg-[#0C0C0C] transition-[max-width] duration-300 ease-in-out">
+      <SheetContent className="bg-white dark:bg-[#0C0C0C] transition-[max-width] duration-300 ease-in-out">
         <InvoiceSheetHeader
           type={invoice?.sent_to ? "created_and_sent" : "created"}
         />
@@ -99,7 +99,7 @@ export function InvoiceSheetContent({
   return (
     <SheetContent
       style={{ maxWidth: size }}
-      className="!bg-[#0C0C0C] transition-[max-width] duration-300 ease-in-out"
+      className="bg-white dark:bg-[#0C0C0C] transition-[max-width] duration-300 ease-in-out"
     >
       <SheetHeader className="mb-6 flex justify-between items-center flex-row">
         <h2 className="text-xl">Invoice</h2>

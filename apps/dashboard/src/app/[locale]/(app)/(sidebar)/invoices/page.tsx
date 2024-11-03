@@ -1,3 +1,4 @@
+import { EmptyStateInvoice } from "@/components/empty-state-invoice";
 import { ErrorFallback } from "@/components/error-fallback";
 import { InvoiceHeader } from "@/components/invoice-header";
 import {
@@ -10,9 +11,12 @@ import { InvoicesOverdue } from "@/components/invoices-overdue";
 import { InvoicesPaid } from "@/components/invoices-paid";
 import { InvoicesTable } from "@/components/tables/invoices";
 import { InvoiceSkeleton } from "@/components/tables/invoices/skeleton";
+import { Cookies } from "@/utils/constants";
 import { getDefaultSettings } from "@midday/invoice/default";
+import { getUser } from "@midday/supabase/cached-queries";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { searchParamsCache } from "./search-params";
 
@@ -20,11 +24,19 @@ export const metadata: Metadata = {
   title: "Invoices | Midday",
 };
 
-export default function Page({
+export default async function Page({
   searchParams,
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
+  // TODO: Remove once invoice is general available
+  const user = await getUser();
+
+  if (!user?.data?.team?.flags?.includes("invoice")) {
+    const hasRequested = cookies().get(Cookies.RequestAccess)?.value === "true";
+    return <EmptyStateInvoice hasRequested={hasRequested} />;
+  }
+
   const {
     q: query,
     sort,
