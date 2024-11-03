@@ -5,14 +5,16 @@ import { Button, type ButtonProps } from "./button";
 export function SubmitButton({
   children,
   isSubmitting,
+  disabled,
   ...props
 }: {
   children: React.ReactNode;
   isSubmitting: boolean;
+  disabled?: boolean;
 } & ButtonProps) {
   return (
     <Button
-      disabled={isSubmitting}
+      disabled={isSubmitting || disabled}
       {...props}
       className={cn(props.className, "relative")}
     >

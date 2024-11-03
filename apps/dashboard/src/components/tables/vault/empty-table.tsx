@@ -58,6 +58,20 @@ export function EmptyTable({ type }: Props) {
         </div>
       );
 
+    case "invoices":
+      return (
+        <div className="h-[calc(100%-80px)] p-4 flex justify-center items-center">
+          <div className="items-center flex flex-col text-center">
+            <h2 className="mb-2">Invoices</h2>
+            <p className="text-sm text-[#878787]">
+              This is where your created
+              <br />
+              invoices will end up.
+            </p>
+          </div>
+        </div>
+      );
+
     case "search":
       return (
         <div className="h-[calc(100%-80px)] p-4 flex justify-center items-center">

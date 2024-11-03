@@ -112,6 +112,7 @@ export function FilterList({
       }
 
       case "assignees":
+      case "customers":
       case "owners": {
         return value
           .map((id) => {
@@ -150,7 +151,7 @@ export function FilterList({
           <motion.li key="1" variants={itemVariant}>
             <Skeleton className="rounded-full h-8 w-[100px]" />
           </motion.li>
-          <motion.li key="1" variants={itemVariant}>
+          <motion.li key="2" variants={itemVariant}>
             <Skeleton className="rounded-full h-8 w-[100px]" />
           </motion.li>
         </div>

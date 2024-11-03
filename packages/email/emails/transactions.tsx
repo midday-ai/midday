@@ -1,4 +1,5 @@
 import { cn } from "@midday/ui/cn";
+import { getAppUrl } from "@midday/utils/envs";
 import {
   Body,
   Button,
@@ -28,7 +29,7 @@ type Transaction = {
   teamName: string;
 };
 
-interface TransactionsEmailEmailProps {
+interface Props {
   fullName: string;
   transactions: Transaction[];
   locale: string;
@@ -70,22 +71,14 @@ const defaultTransactions = [
   },
 ];
 
-const baseUrl =
-  process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
-    : "http://localhost:3000/email";
-
-const baseAppUrl =
-  process.env.VERCEL_ENV === "production"
-    ? "https://app.midday.ai"
-    : "http://localhost:3001";
+const baseAppUrl = getAppUrl();
 
 export const TransactionsEmail = ({
   fullName = "Viktor Hofte",
   transactions = defaultTransactions,
   locale = "en",
   teamName = "Viktor Hofte AB",
-}: TransactionsEmailEmailProps) => {
+}: Props) => {
   const { t } = getI18n({ locale });
   const firstName = fullName.split(" ").at(0);
 
@@ -127,7 +120,7 @@ export const TransactionsEmail = ({
             className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
             style={{ borderStyle: "solid", borderWidth: 1 }}
           >
-            <Logo baseUrl={baseUrl} />
+            <Logo />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               {t("transactions.title1")}
               <span className="font-semibold">
@@ -241,7 +234,7 @@ export const TransactionsEmail = ({
             </Section>
 
             <br />
-            <Footer baseUrl={baseUrl} />
+            <Footer />
           </Container>
         </Body>
       </Tailwind>

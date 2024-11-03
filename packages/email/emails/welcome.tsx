@@ -1,3 +1,4 @@
+import { getEmailUrl } from "@midday/utils/envs";
 import {
   Body,
   Container,
@@ -14,16 +15,13 @@ import { Footer } from "../components/footer";
 import { GetStarted } from "../components/get-started";
 import { Logo } from "../components/logo";
 
-interface WelcomeProps {
+interface Props {
   fullName: string;
 }
 
-const baseUrl =
-  process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
-    : "http://localhost:3000/email";
+const baseUrl = getEmailUrl();
 
-export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
+export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: Props) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, Welcome to Midday! I'm Pontus, one of the founders. It's really important to us that you have a great experience ramping up.`;
 
@@ -60,7 +58,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
             className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
             style={{ borderStyle: "solid", borderWidth: 1 }}
           >
-            <Logo baseUrl={baseUrl} />
+            <Logo />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               Welcome to Midday
             </Heading>
@@ -116,7 +114,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
 
             <br />
 
-            <Footer baseUrl={baseUrl} />
+            <Footer />
           </Container>
         </Body>
       </Tailwind>

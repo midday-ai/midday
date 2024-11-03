@@ -4,7 +4,7 @@ import { BotCard } from "@/components/chat/messages";
 import { FormatAmount } from "@/components/format-amount";
 import { TransactionStatus } from "@/components/transaction-status";
 import { useI18n } from "@/locales/client";
-import { formatTransactionDate } from "@/utils/format";
+import { formatDate } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
 import {
   Table,
@@ -82,7 +82,7 @@ export function TransactionsUI({ meta, data, q, filter, sort }: Props) {
                     <span className="line-clamp-1">{transaction.name}</span>
                   </TableCell>
                   <TableCell className="font-normal">
-                    {formatTransactionDate(transaction.date)}
+                    {formatDate(transaction.date)}
                   </TableCell>
                   <TableCell
                     className={cn(

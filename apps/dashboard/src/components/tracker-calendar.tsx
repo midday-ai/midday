@@ -11,6 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import NumberFlow from "@number-flow/react";
 import { useClickAway } from "@uidotdev/usehooks";
 import {
   addMonths,
@@ -24,7 +25,6 @@ import {
   startOfWeek,
   subMonths,
 } from "date-fns";
-import MotionNumber from "motion-number";
 import { useCallback, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { TrackerEvents } from "./tracker-events";
@@ -244,12 +244,12 @@ function CalendarHeader({
     <div className="flex items-center justify-between mb-6">
       <div className="space-y-2 select-text">
         <h1 className="text-4xl font-mono">
-          <MotionNumber
+          <NumberFlow
             value={
               meta?.totalDuration ? Math.round(meta.totalDuration / 3600) : 0
             }
           />
-          <span className="relative top-[3px]">h</span>
+          <span className="relative">h</span>
         </h1>
 
         <div className="text-sm text-[#606060] flex items-center space-x-2">

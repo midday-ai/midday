@@ -1,3 +1,4 @@
+import { getAppUrl } from "@midday/utils/envs";
 import {
   Body,
   Button,
@@ -16,7 +17,7 @@ import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 import { getI18n } from "../locales";
 
-interface InviteEmailProps {
+interface Props {
   email?: string;
   invitedByEmail?: string;
   invitedByName?: string;
@@ -27,15 +28,7 @@ interface InviteEmailProps {
   locale: string;
 }
 
-const baseUrl =
-  process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
-    : "http://localhost:3000/email";
-
-const baseAppUrl =
-  process.env.VERCEL_ENV === "production"
-    ? "https://app.midday.ai"
-    : "http://localhost:3001";
+const baseAppUrl = getAppUrl();
 
 export const InviteEmail = ({
   invitedByEmail = "bukinoshita@example.com",
@@ -46,7 +39,7 @@ export const InviteEmail = ({
   ip = "204.13.186.218",
   location = "São Paulo, Brazil",
   locale = "en",
-}: InviteEmailProps) => {
+}: Props) => {
   const { t } = getI18n({ locale });
   const inviteLink = `${baseAppUrl}/teams/invite/${inviteCode}`;
 
@@ -83,7 +76,7 @@ export const InviteEmail = ({
             className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
             style={{ borderStyle: "solid", borderWidth: 1 }}
           >
-            <Logo baseUrl={baseUrl} />
+            <Logo />
             <Heading className="mx-0 my-[30px] p-0 text-[24px] font-normal text-[#121212] text-center">
               {t("invite.title1")} <strong>{teamName}</strong>{" "}
               {t("invite.title2")} <strong>Midday</strong>
@@ -131,7 +124,7 @@ export const InviteEmail = ({
 
             <br />
 
-            <Footer baseUrl={baseUrl} />
+            <Footer />
           </Container>
         </Body>
       </Tailwind>

@@ -14,24 +14,19 @@ import { addDays, formatDistance } from "date-fns";
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 
-interface WelcomeProps {
+interface Props {
   fullName: string;
   expiresAt: string;
   bankName: string;
   teamName: string;
 }
 
-const baseUrl =
-  process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
-    : "http://localhost:3000/email";
-
 export const ConnectionExpireEmail = ({
   fullName = "Viktor Hofte",
   expiresAt = addDays(new Date(), 4).toISOString(),
   bankName = "Revolut",
   teamName = "Midday",
-}: WelcomeProps) => {
+}: Props) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, We wanted to inform you that our connection to your bank ${bankName} for your team ${teamName} will expire in ${formatDistance(new Date(expiresAt), new Date())}.`;
 
@@ -68,7 +63,7 @@ export const ConnectionExpireEmail = ({
             className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
             style={{ borderStyle: "solid", borderWidth: 1 }}
           >
-            <Logo baseUrl={baseUrl} />
+            <Logo />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               Bank Connection Expiring Soon
             </Heading>
@@ -102,7 +97,7 @@ export const ConnectionExpireEmail = ({
 
             <br />
 
-            <Footer baseUrl={baseUrl} />
+            <Footer />
           </Container>
         </Body>
       </Tailwind>

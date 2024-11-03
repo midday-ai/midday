@@ -10,6 +10,6 @@ export const Cookies = {
   TrackingConsent: "tracking-consent",
   InboxOrder: "inbox-order",
   HideConnectFlow: "hide-connect-flow",
-  RequestAccess: "request-access",
   LastProject: "last-project",
+  RequestAccess: "request-access",
 };

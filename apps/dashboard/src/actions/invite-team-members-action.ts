@@ -1,18 +1,16 @@
 "use server";
 
-import { env } from "@/env.mjs";
+import { resend } from "@/utils/resend";
 import InviteEmail from "@midday/email/emails/invite";
 import { getI18n } from "@midday/email/locales";
 import { LogEvents } from "@midday/events/events";
 import { render } from "@react-email/render";
+import { nanoid } from "nanoid";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { Resend } from "resend";
 import { authActionClient } from "./safe-action";
 import { inviteTeamMembersSchema } from "./schema";
-
-const resend = new Resend(env.RESEND_API_KEY);
 
 export const inviteTeamMembersAction = authActionClient
   .schema(inviteTeamMembersSchema)
@@ -54,6 +52,9 @@ export const inviteTeamMembersAction = authActionClient
           invitedByName: invites.user.full_name,
           teamName: invites.team.name,
         }),
+        headers: {
+          "X-Entity-Ref-ID": nanoid(),
+        },
         html: await render(
           InviteEmail({
             invitedByEmail: invites.user.email,

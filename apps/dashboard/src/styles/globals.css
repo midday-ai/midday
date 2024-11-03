@@ -230,3 +230,41 @@ input[type="time"]::-webkit-clear-button {
 input[type="time"]::-webkit-calendar-picker-indicator {
   display: none;
 }
+
+.invoice-editor,
+.invoice-editor div[aria-expanded="false"],
+.invoice-editor .ProseMirror,
+.invoice-editor .is-empty {
+  height: 100%;
+}
+
+.ProseMirror-focused p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #434343;
+  pointer-events: none;
+  height: 0;
+}
+
+.tiptap {
+  font-size: 11px !important;
+  line-height: 18px !important;
+}
+
+.dark .dotted-bg {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    #232323 0.5px,
+    transparent 0
+  );
+  background-size: 6px 6px;
+}
+
+.light .dotted-bg {
+  background-size: 6px 6px;
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    #e0e0e0 0.5px,
+    transparent 0
+  );
+}

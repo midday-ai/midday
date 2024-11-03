@@ -9,16 +9,20 @@ import Underline from "@tiptap/extension-underline";
 import StarterKit from "@tiptap/starter-kit";
 
 // Add your extensions here
-export const extensions = [
+const extensions = [
   StarterKit,
   Paragraph,
   Document,
   Text,
   Underline,
-  Placeholder.configure({ placeholder: "Write something..." }),
   Link.configure({
     openOnClick: false,
     autolink: true,
     defaultProtocol: "https",
   }),
 ];
+
+export function registerExtensions(options?: { placeholder?: string }) {
+  const { placeholder } = options ?? {};
+  return [...extensions, Placeholder.configure({ placeholder })];
+}

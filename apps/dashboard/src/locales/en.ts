@@ -59,6 +59,7 @@ export default {
     inbox: "Inbox",
     imports: "Imports",
     transactions: "Transactions",
+    invoices: "Invoices",
   },
   mfa_status: {
     verified: "Verified",
@@ -173,4 +174,26 @@ export default {
     e_learning_materials: "E-learning Materials",
     competency_assessment_forms: "Competency Assessment Forms",
   },
+  invoice_status: {
+    draft: "Draft",
+    overdue: "Overdue",
+    paid: "Paid",
+    unpaid: "Unpaid",
+    canceled: "Canceled",
+  },
+  payment_status: {
+    none: "Unknown",
+    good: "Good",
+    average: "Average",
+    bad: "Bad",
+  },
+  payment_status_description: {
+    none: "No payment history available yet.",
+    good: "Customers consistently pay on time.",
+    average: "Mostly on time, with a few late payments.",
+    bad: "Room for improvement in payment timeliness.",
+  },
+  "invoice_count#zero": "No invoices",
+  "invoice_count#one": "1 invoice",
+  "invoice_count#other": "{count} invoices",
 } as const;

@@ -1,5 +1,17 @@
 {
   "extends": "@midday/tsconfig/base.json",
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": ["src", "trigger.config.ts"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@midday/invoice/*": ["../invoice/src/*"],
+      "@midday/supabase/server": ["../supabase/src/client/server.ts"],
+      "@/*": ["./src/*"]
+    }
+  }
 }

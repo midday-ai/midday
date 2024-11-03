@@ -63,7 +63,7 @@ export function InboxDetails({
     setShowFallback(false);
   }, [item]);
 
-  const handleCopyUrl = async () => {
+  const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(
         `${window.location.origin}/inbox?id=${item.id}`,
@@ -71,7 +71,7 @@ export function InboxDetails({
 
       toast({
         duration: 4000,
-        title: "Copied URL to clipboard.",
+        title: "Copied link to clipboard.",
         variant: "success",
       });
     } catch {}
@@ -126,8 +126,8 @@ export function InboxDetails({
                   Download
                 </a>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCopyUrl}>
-                Copy URL
+              <DropdownMenuItem onClick={handleCopyLink}>
+                Copy Link
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

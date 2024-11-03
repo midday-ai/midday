@@ -5,7 +5,8 @@
   "scripts": {
     "build": "NODE_ENV=production next build",
     "clean": "git clean -xdf .next .turbo node_modules",
-    "jobs": "bunx @trigger.dev/cli@latest dev -p 3001 --client-id=midday-G6Yq",
+    "jobs": "bunx @trigger.dev/cli@v2 dev -p 3001 --client-id=midday-G6Yq",
+    "jobs:v3": "npx trigger.dev@latest dev",
     "dev": "next dev -p 3001",
     "lint": "next lint",
     "format": "biome format --write .",
@@ -20,6 +21,7 @@
     "@midday/app-store": "workspace:*",
     "@midday/events": "workspace:*",
     "@midday/inbox": "workspace:*",
+    "@midday/invoice": "workspace:*",
     "@midday/jobs": "workspace:*",
     "@midday/kv": "workspace:*",
     "@midday/location": "workspace:*",
@@ -28,6 +30,8 @@
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
     "@novu/headless": "^2.0.0",
+    "@number-flow/react": "^0.3.0",
+    "@react-google-maps/api": "^2.20.3",
     "@sentry/nextjs": "^8",
     "@supabase/sentry-js-integration": "^0.3.0",
     "@tanstack/react-table": "^8.20.5",
@@ -35,7 +39,7 @@
     "@todesktop/client-active-win": "^0.15.0",
     "@todesktop/client-core": "^1.12.0",
     "@todesktop/runtime": "^1.6.4",
-    "@trigger.dev/nextjs": "^2.3.19",
+    "@trigger.dev/nextjs": "3.1.0",
     "@uidotdev/usehooks": "^2.4.1",
     "@upstash/ratelimit": "^2.0.3",
     "ai": "3.4.9",
@@ -47,7 +51,6 @@
     "little-date": "^1.0.0",
     "loops": "1.0.1",
     "lottie-react": "^2.4.0",
-    "motion-number": "^0.1.7",
     "ms": "^2.1.3",
     "next": "14.2.1",
     "next-international": "1.2.4",
@@ -70,6 +73,7 @@
     "sharp": "^0.33.5",
     "tus-js-client": "4.1.0",
     "use-long-press": "^3.2.0",
+    "use-places-autocomplete": "^4.0.1",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },
@@ -81,6 +85,6 @@
     "@types/node": "^22.7.4",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.3"
   }
 }

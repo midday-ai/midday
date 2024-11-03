@@ -2,27 +2,47 @@
 
 import "./styles.css";
 
-import { EditorContent, type JSONContent, useEditor } from "@tiptap/react";
+import {
+  EditorContent,
+  type Editor as EditorInstance,
+  type JSONContent,
+  useEditor,
+} from "@tiptap/react";
 import { BubbleMenu } from "./extentions/bubble-menu";
-import { extensions } from "./extentions/register";
+import { registerExtensions } from "./extentions/register";
 
 type EditorProps = {
-  content?: string;
-  onChange?: (content: JSONContent) => void;
+  initialContent?: JSONContent;
+  placeholder?: string;
+  onUpdate?: (editor: EditorInstance) => void;
+  onBlur?: () => void;
+  onFocus?: () => void;
+  className?: string;
 };
 
-export function Editor({ content, onChange }: EditorProps) {
+export function Editor({
+  initialContent,
+  placeholder,
+  onUpdate,
+  onBlur,
+  onFocus,
+  className,
+}: EditorProps) {
   const editor = useEditor({
-    extensions,
-    content,
+    extensions: registerExtensions({ placeholder }),
+    content: initialContent,
+    onBlur,
+    onFocus,
     onUpdate: ({ editor }) => {
-      onChange?.(editor.getJSON());
+      onUpdate?.(editor);
     },
   });
 
+  if (!editor) return null;
+
   return (
     <>
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} className={className} />
       <BubbleMenu editor={editor} />
     </>
   );

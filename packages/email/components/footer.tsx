@@ -1,3 +1,4 @@
+import { getEmailUrl } from "@midday/utils/envs";
 import {
   Column,
   Hr,
@@ -9,11 +10,9 @@ import {
 } from "@react-email/components";
 import { TripleColumn } from "responsive-react-email";
 
-type Props = {
-  baseUrl?: string;
-};
+const baseUrl = getEmailUrl();
 
-export function Footer({ baseUrl }: Props) {
+export function Footer() {
   return (
     <Section className="w-full">
       <Hr />

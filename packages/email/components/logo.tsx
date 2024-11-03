@@ -1,10 +1,9 @@
+import { getEmailUrl } from "@midday/utils/envs";
 import { Img, Section } from "@react-email/components";
 
-type Props = {
-  baseUrl: string;
-};
+const baseUrl = getEmailUrl();
 
-export function Logo({ baseUrl }: Props) {
+export function Logo() {
   return (
     <Section className="mt-[32px]">
       <Img

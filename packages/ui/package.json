@@ -20,7 +20,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "storybook": "^8.3.5",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.3"
   },
   "exports": {
     "./animated-size-container": "./src/components/animated-size-container.tsx",
@@ -77,7 +77,8 @@
     "./use-toast": "./src/components/use-toast.tsx",
     "./cn": "./src/utils/cn.ts",
     "./truncate": "./src/utils/truncate.ts",
-    "./hooks": "./src/hooks/index.ts"
+    "./hooks": "./src/hooks/index.ts",
+    "./quantity-input": "./src/components/quantity-input.tsx"
   },
   "dependencies": {
     "@mui/icons-material": "^6.1.2",

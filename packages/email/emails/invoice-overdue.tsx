@@ -13,25 +13,19 @@ import {
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 
-interface WelcomeProps {
+interface Props {
   companyName: string;
   teamName: string;
   invoiceNumber: string;
   link: string;
 }
 
-const baseUrl =
-  process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
-    : "http://localhost:3000/email";
-
 export const InvoiceOverdueEmail = ({
   companyName = "Customer",
   teamName = "Midday",
   invoiceNumber = "INV-0001",
   link = "https://app.midday.ai/i/1234567890",
-}: WelcomeProps) => {
-  const firstName = companyName.split(" ").at(0);
+}: Props) => {
   const text = `Invoice ${invoiceNumber} from ${teamName} is Overdue`;
 
   return (
@@ -67,7 +61,7 @@ export const InvoiceOverdueEmail = ({
             className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
             style={{ borderStyle: "solid", borderWidth: 1 }}
           >
-            <Logo baseUrl={baseUrl} />
+            <Logo />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               Invoice {invoiceNumber} <br />
               from {teamName} is Overdue
@@ -75,7 +69,7 @@ export const InvoiceOverdueEmail = ({
 
             <br />
 
-            <span className="font-medium">Hi {firstName},</span>
+            <span className="font-medium">Hi {companyName},</span>
             <Text className="text-[#121212]">
               Please settle your payment as soon as possible to avoid further
               delay. If anything is unclear, feel free to add a comment by
@@ -93,7 +87,7 @@ export const InvoiceOverdueEmail = ({
 
             <br />
 
-            <Footer baseUrl={baseUrl} />
+            <Footer />
           </Container>
         </Body>
       </Tailwind>
