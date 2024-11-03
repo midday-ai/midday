@@ -94,7 +94,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: Props) => {
             <br />
 
             <Img
-              src={`${baseUrl}/founders.jpeg`}
+              src={`${baseUrl}/email/founders.jpeg`}
               alt="Founders"
               className="my-0 mx-auto block w-full"
             />
@@ -102,7 +102,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: Props) => {
             <Text className="text-[#707070]">Best regards, founders</Text>
 
             <Img
-              src={`${baseUrl}/signature.png`}
+              src={`${baseUrl}/email/signature.png`}
               alt="Signature"
               className="block w-full w-[143px] h-[20px]"
             />
