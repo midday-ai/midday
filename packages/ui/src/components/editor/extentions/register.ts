@@ -18,6 +18,7 @@ export const extensions = [
   Placeholder.configure({ placeholder: "Write something..." }),
   Link.configure({
     openOnClick: false,
+    autolink: true,
     defaultProtocol: "https",
   }),
 ];

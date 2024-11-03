@@ -12,6 +12,10 @@
   margin-bottom: 1.5rem;
 }
 
+.tiptap a {
+  @apply underline;
+}
+
 .tiptap .bubble-menu {
   @apply flex gap-2;
 }

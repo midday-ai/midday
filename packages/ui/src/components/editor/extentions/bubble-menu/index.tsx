@@ -9,6 +9,7 @@ import type { Props as TippyOptions } from "tippy.js";
 import { AIMenu } from "../ai";
 import { AskAI } from "../ai/ask-ai";
 import { BubbleMenuItem } from "./bubble-item";
+import { LinkItem } from "./link-item";
 
 export function BubbleMenu({
   editor,
@@ -18,6 +19,7 @@ export function BubbleMenu({
   tippyOptions?: TippyOptions;
 }) {
   const [showAI, setShowAI] = useState(false);
+  const [openLink, setOpenLink] = useState(false);
 
   if (!editor) {
     return null;
@@ -31,6 +33,7 @@ export function BubbleMenu({
         ) : (
           <>
             <AskAI onSelect={() => setShowAI(true)} />
+
             <BubbleMenuItem
               editor={editor}
               action={() => editor.chain().focus().toggleBold().run()}
@@ -39,6 +42,7 @@ export function BubbleMenu({
               <MdOutlineFormatBold className="size-4" />
               <span className="sr-only">Bold</span>
             </BubbleMenuItem>
+
             <BubbleMenuItem
               editor={editor}
               action={() => editor.chain().focus().toggleItalic().run()}
@@ -47,6 +51,7 @@ export function BubbleMenu({
               <MdOutlineFormatItalic className="size-4" />
               <span className="sr-only">Italic</span>
             </BubbleMenuItem>
+
             <BubbleMenuItem
               editor={editor}
               action={() => editor.chain().focus().toggleStrike().run()}
@@ -55,6 +60,8 @@ export function BubbleMenu({
               <MdOutlineFormatStrikethrough className="size-4" />
               <span className="sr-only">Strike</span>
             </BubbleMenuItem>
+
+            <LinkItem editor={editor} open={openLink} setOpen={setOpenLink} />
           </>
         )}
       </div>
