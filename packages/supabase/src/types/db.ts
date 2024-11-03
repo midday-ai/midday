@@ -564,8 +564,6 @@ export type Database = {
       invoices: {
         Row: {
           amount: number | null
-          base_amount: number | null
-          base_currency: string | null
           company_datails: Json | null
           created_at: string
           currency: string | null
@@ -601,8 +599,6 @@ export type Database = {
         }
         Insert: {
           amount?: number | null
-          base_amount?: number | null
-          base_currency?: string | null
           company_datails?: Json | null
           created_at?: string
           currency?: string | null
@@ -638,8 +634,6 @@ export type Database = {
         }
         Update: {
           amount?: number | null
-          base_amount?: number | null
-          base_currency?: string | null
           company_datails?: Json | null
           created_at?: string
           currency?: string | null
@@ -1545,12 +1539,6 @@ export type Database = {
             }
             Returns: unknown
           }
-      generate_invoice_sequence: {
-        Args: {
-          team_id: string
-        }
-        Returns: number
-      }
       get_all_transactions_by_account: {
         Args: {
           account_id: string
@@ -1695,7 +1683,7 @@ export type Database = {
       get_invoice_summary: {
         Args: {
           team_id: string
-          status?: Database["public"]["Enums"]["invoice_status"]
+          status: Database["public"]["Enums"]["invoice_status"]
         }
         Returns: {
           total_amount: number
