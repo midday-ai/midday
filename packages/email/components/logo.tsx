@@ -7,7 +7,7 @@ export function Logo() {
   return (
     <Section className="mt-[32px]">
       <Img
-        src={`${baseUrl}/logo.png`}
+        src={`${baseUrl}/email/logo.png`}
         width="45"
         height="45"
         alt="Midday"

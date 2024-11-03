@@ -221,7 +221,7 @@ export function Footer() {
         <Column className="align-middle w-[40px]">
           <Link href="https://go.midday.ai/lS72Toq">
             <Img
-              src={`${baseUrl}/x.png`}
+              src={`${baseUrl}/email/x.png`}
               width="22"
               height="22"
               alt="Midday on X"
@@ -231,7 +231,7 @@ export function Footer() {
         <Column className="align-middle w-[40px]">
           <Link href="https://go.midday.ai/7rhA3rz">
             <Img
-              src={`${baseUrl}/producthunt.png`}
+              src={`${baseUrl}/email/producthunt.png`}
               width="22"
               height="22"
               alt="Midday on Producthunt"
@@ -242,7 +242,7 @@ export function Footer() {
         <Column className="align-middle w-[40px]">
           <Link href="https://go.midday.ai/anPiuRx">
             <Img
-              src={`${baseUrl}/discord.png`}
+              src={`${baseUrl}/email/discord.png`}
               width="22"
               height="22"
               alt="Midday on Discord"
@@ -253,7 +253,7 @@ export function Footer() {
         <Column className="align-middle">
           <Link href="https://go.midday.ai/Ct3xybK">
             <Img
-              src={`${baseUrl}/linkedin.png`}
+              src={`${baseUrl}/email/linkedin.png`}
               width="22"
               height="22"
               alt="Midday on LinkedIn"
@@ -287,7 +287,7 @@ export function Footer() {
       <Row>
         <Link href="https://go.midday.ai/FZwOHud">
           <Img
-            src={`${baseUrl}/logo-footer.png`}
+            src={`${baseUrl}/email/logo-footer.png`}
             width="100"
             alt="Midday"
             className="block"
