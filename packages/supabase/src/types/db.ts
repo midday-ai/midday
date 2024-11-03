@@ -1683,11 +1683,11 @@ export type Database = {
       get_invoice_summary: {
         Args: {
           team_id: string
-          status: Database["public"]["Enums"]["invoice_status"]
+          status?: Database["public"]["Enums"]["invoice_status"]
         }
         Returns: {
-          total_amount: number
           currency: string
+          total_amount: number
           invoice_count: number
         }[]
       }

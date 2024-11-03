@@ -4,12 +4,10 @@ import {
   InvoicePaymentScore,
   InvoicePaymentScoreSkeleton,
 } from "@/components/invoice-payment-score";
-import { InvoicesOpen, InvoicesOpenSkeleton } from "@/components/invoices-open";
-import {
-  InvoicesOverdue,
-  InvoicesOverdueSkeleton,
-} from "@/components/invoices-overdue";
-import { InvoicesPaid, InvoicesPaidSkeleton } from "@/components/invoices-paid";
+import { InvoiceSummarySkeleton } from "@/components/invoice-summary";
+import { InvoicesOpen } from "@/components/invoices-open";
+import { InvoicesOverdue } from "@/components/invoices-overdue";
+import { InvoicesPaid } from "@/components/invoices-paid";
 import { InvoicesTable } from "@/components/tables/invoices";
 import { InvoiceSkeleton } from "@/components/tables/invoices/skeleton";
 import { getDefaultSettings } from "@midday/invoice/default";
@@ -52,13 +50,13 @@ export default function Page({
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-4 gap-6 pt-6">
-        <Suspense fallback={<InvoicesOpenSkeleton />}>
+        <Suspense fallback={<InvoiceSummarySkeleton />}>
           <InvoicesOpen defaultCurrency={defaultSettings.currency} />
         </Suspense>
-        <Suspense fallback={<InvoicesOverdueSkeleton />}>
+        <Suspense fallback={<InvoiceSummarySkeleton />}>
           <InvoicesOverdue defaultCurrency={defaultSettings.currency} />
         </Suspense>
-        <Suspense fallback={<InvoicesPaidSkeleton />}>
+        <Suspense fallback={<InvoiceSummarySkeleton />}>
           <InvoicesPaid defaultCurrency={defaultSettings.currency} />
         </Suspense>
         <Suspense fallback={<InvoicePaymentScoreSkeleton />}>

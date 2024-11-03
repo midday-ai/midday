@@ -1212,12 +1212,10 @@ export async function getInvoiceSummaryQuery(
 ) {
   const { teamId, status } = params;
 
-  return supabase
-    .rpc("get_invoice_summary", {
-      team_id: teamId,
-      status,
-    })
-    .single();
+  return supabase.rpc("get_invoice_summary", {
+    team_id: teamId,
+    status,
+  });
 }
 
 export async function getPaymentStatusQuery(supabase: Client, teamId: string) {

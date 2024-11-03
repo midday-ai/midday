@@ -26,7 +26,6 @@ export function AnimatedNumber({
         currency: currency ?? "USD",
         minimumFractionDigits,
         maximumFractionDigits,
-        useGrouping: false,
       }}
       willChange
       locales={locale}
