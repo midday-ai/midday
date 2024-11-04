@@ -7,6 +7,7 @@
     "clean": "git clean -xdf .next .turbo node_modules",
     "jobs": "bunx @trigger.dev/cli@v2 dev -p 3001 --client-id=midday-G6Yq",
     "jobs:v3": "npx trigger.dev@latest dev",
+    "jobs:deploy": "npx trigger.dev@latest deploy",
     "dev": "next dev -p 3001",
     "lint": "next lint",
     "format": "biome format --write .",
