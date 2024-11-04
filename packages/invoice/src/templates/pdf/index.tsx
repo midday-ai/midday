@@ -109,6 +109,7 @@ export async function PdfTemplate({
           quantityLabel={template.quantity_label}
           priceLabel={template.price_label}
           totalLabel={template.total_label}
+          locale={template.locale}
         />
 
         <Summary
@@ -119,6 +120,8 @@ export async function PdfTemplate({
           totalLabel={template.total_label}
           taxLabel={template.tax_label}
           vatLabel={template.vat_label}
+          taxRate={template.tax_rate}
+          locale={template.locale}
         />
 
         <View

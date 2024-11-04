@@ -67,6 +67,7 @@ export function FormContext({
       size: defaultSettings.size ?? defaultTemplate.size,
       include_tax: defaultSettings.include_tax ?? defaultTemplate.include_tax,
       include_vat: defaultSettings.include_vat ?? defaultTemplate.include_vat,
+      timezone: defaultSettings.timezone ?? defaultTemplate.timezone,
       ...template,
     },
     customer_details: undefined,

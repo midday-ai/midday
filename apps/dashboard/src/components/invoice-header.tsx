@@ -9,7 +9,7 @@ export async function InvoiceHeader() {
     <div className="flex items-center justify-between">
       <InvoiceSearchFilter customers={customers?.data ?? []} />
 
-      <div>
+      <div className="hidden sm:block">
         <OpenInvoiceSheet />
       </div>
     </div>

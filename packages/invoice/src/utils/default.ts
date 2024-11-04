@@ -1,8 +1,9 @@
-import { getCountryCode } from "@midday/location";
+import { getCountryCode, getTimezone } from "@midday/location";
 import { currencies } from "@midday/location/src/currencies";
 
 export type Settings = {
   currency: string;
+  timezone: string;
   size: string;
   include_tax: boolean;
   include_vat: boolean;
@@ -10,6 +11,7 @@ export type Settings = {
 
 export function getDefaultSettings(): Settings {
   const countryCode = getCountryCode();
+  const timezone = getTimezone();
 
   const currency = currencies[countryCode as keyof typeof currencies] ?? "USD";
 
@@ -25,6 +27,7 @@ export function getDefaultSettings(): Settings {
     currency,
     size,
     include_tax,
+    timezone,
     include_vat: !include_tax,
   };
 }

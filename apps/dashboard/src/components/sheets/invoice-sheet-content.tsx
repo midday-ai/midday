@@ -61,7 +61,7 @@ export function InvoiceSheetContent({
   const { watch } = useFormContext();
   const templateSize = watch("template.size");
 
-  const size = templateSize === "a4" ? 650 : 816;
+  const size = templateSize === "a4" ? 650 : 740;
   const isOpen = Boolean(type === "create" || type === "edit");
 
   useEffect(() => {
@@ -86,7 +86,10 @@ export function InvoiceSheetContent({
 
           <Button
             onClick={() => {
-              setParams({ type: "create", selectedCustomerId: null });
+              setParams(
+                { type: "create", selectedCustomerId: null },
+                { shallow: false },
+              );
               setInvoice(null);
             }}
           >

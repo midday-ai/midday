@@ -21,7 +21,7 @@ export const createInvoiceAction = authActionClient
 
     const { data: draft } = await supabase
       .from("invoices")
-      .select("id, customer:customer_id(name, website), template")
+      .select("id, customer:customer_id(name, website, email), template")
       .eq("id", id)
       .single();
 

@@ -23,7 +23,14 @@ export function InvoiceRow({ row }: Props) {
         {row.getVisibleCells().map((cell, index) => (
           <TableCell
             key={cell.id}
-            className={cn(index === 2 && "w-[50px]")}
+            className={cn(
+              index === 2 && "w-[50px]",
+              (cell.column.id === "actions" ||
+                cell.column.id === "recurring" ||
+                cell.column.id === "invoice_number" ||
+                cell.column.id === "invoice_date") &&
+                "hidden md:table-cell",
+            )}
             onClick={() =>
               index !== row.getVisibleCells().length - 1 && setOpen(true)
             }

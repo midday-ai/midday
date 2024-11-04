@@ -11,7 +11,10 @@ export async function InvoicesOpen({
   const totalInvoiceCount = data?.at(0)?.invoice_count;
 
   return (
-    <Link href="/invoices?statuses=draft,overdue,unpaid">
+    <Link
+      href="/invoices?statuses=draft,overdue,unpaid"
+      className="hidden sm:block"
+    >
       <InvoiceSummary
         data={data}
         totalInvoiceCount={totalInvoiceCount}

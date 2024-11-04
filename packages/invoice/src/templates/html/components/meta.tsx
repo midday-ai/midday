@@ -1,3 +1,4 @@
+import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns";
 import type { Template } from "../../types";
 
@@ -30,7 +31,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
                 {template.issue_date_label}:
               </span>
               <span className="text-[11px] font-mono flex-shrink-0">
-                {format(new Date(issueDate), template.date_format)}
+                {format(new TZDate(issueDate, "UTC"), template.date_format)}
               </span>
             </div>
           </div>
@@ -44,7 +45,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
                 {template.due_date_label}:
               </span>
               <span className="text-[11px] font-mono flex-shrink-0">
-                {format(new Date(dueDate), template.date_format)}
+                {format(new TZDate(dueDate, "UTC"), template.date_format)}
               </span>
             </div>
           </div>

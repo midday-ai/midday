@@ -9,6 +9,7 @@ type Props = {
   quantityLabel: string;
   priceLabel: string;
   totalLabel: string;
+  locale: string;
 };
 
 export function LineItems({
@@ -18,6 +19,7 @@ export function LineItems({
   quantityLabel,
   priceLabel,
   totalLabel,
+  locale,
 }: Props) {
   return (
     <View style={{ marginTop: 20 }}>
@@ -57,11 +59,15 @@ export function LineItems({
         >
           <Text style={{ flex: 3, fontSize: 9 }}>{item.name}</Text>
           <Text style={{ flex: 1, fontSize: 9 }}>
-            {formatAmount({ currency, amount: item.price })}
+            {formatAmount({ currency, amount: item.price, locale })}
           </Text>
           <Text style={{ flex: 0.5, fontSize: 9 }}>{item.quantity}</Text>
           <Text style={{ flex: 1, fontSize: 9, textAlign: "right" }}>
-            {formatAmount({ currency, amount: item.quantity * item.price })}
+            {formatAmount({
+              currency,
+              amount: item.quantity * item.price,
+              locale,
+            })}
           </Text>
         </View>
       ))}

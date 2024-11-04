@@ -65,7 +65,7 @@ export const columns: ColumnDef<Invoice>[] = [
         row.original.status === "pending";
 
       return (
-        <div className="flex flex-col space-y-1">
+        <div className="flex flex-col space-y-1 w-[80px]">
           <span>{date ? formatDate(date) : "-"}</span>
           {showDate && (
             <span className="text-xs text-muted-foreground">

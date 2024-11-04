@@ -80,7 +80,7 @@ export function TableHeader() {
             {"amount" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead>
+        <TableHead className="hidden md:table-cell">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -95,7 +95,7 @@ export function TableHeader() {
             )}
           </Button>
         </TableHead>
-        <TableHead>
+        <TableHead className="hidden md:table-cell">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -110,7 +110,7 @@ export function TableHeader() {
             )}
           </Button>
         </TableHead>
-        <TableHead>
+        <TableHead className="hidden md:table-cell">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -125,7 +125,7 @@ export function TableHeader() {
             )}
           </Button>
         </TableHead>
-        <TableHead>Actions</TableHead>
+        <TableHead className="hidden md:table-cell">Actions</TableHead>
       </TableRow>
     </BaseTableHeader>
   );

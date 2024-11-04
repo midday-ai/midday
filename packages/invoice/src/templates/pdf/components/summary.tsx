@@ -4,21 +4,25 @@ import { Text, View } from "@react-pdf/renderer";
 interface SummaryProps {
   amount: number;
   tax?: number;
+  taxRate?: number;
   vat?: number;
   currency: string;
   totalLabel: string;
   taxLabel: string;
   vatLabel: string;
+  locale: string;
 }
 
 export function Summary({
   amount,
   tax,
+  taxRate,
   vat,
   currency,
   totalLabel,
   taxLabel,
   vatLabel,
+  locale,
 }: SummaryProps) {
   return (
     <View
@@ -32,9 +36,11 @@ export function Summary({
     >
       {tax && (
         <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
-          <Text style={{ fontSize: 9, flex: 1 }}>{taxLabel}</Text>
+          <Text style={{ fontSize: 9, flex: 1 }}>
+            {taxLabel} ({taxRate}%)
+          </Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
-            {formatAmount({ currency, amount: tax })}
+            {formatAmount({ currency, amount: tax, locale })}
           </Text>
         </View>
       )}
@@ -43,7 +49,7 @@ export function Summary({
         <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
           <Text style={{ fontSize: 9, flex: 1 }}>{vatLabel}</Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
-            {formatAmount({ currency, amount: vat })}
+            {formatAmount({ currency, amount: vat, locale })}
           </Text>
         </View>
       )}
@@ -62,7 +68,7 @@ export function Summary({
       >
         <Text style={{ fontSize: 9, marginRight: 10 }}>{totalLabel}</Text>
         <Text style={{ fontSize: 21 }}>
-          {formatAmount({ currency, amount })}
+          {formatAmount({ currency, amount, locale })}
         </Text>
       </View>
     </View>
