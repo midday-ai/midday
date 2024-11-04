@@ -10,6 +10,7 @@ client.defineJob({
   id: Jobs.BANK_CONNECTION_DISCONNECTED,
   name: "Bank - Connection Disconnected",
   version: "0.1.1",
+  enabled: false,
   trigger: cronTrigger({
     // Every monday
     cron: "30 14 * * 1",

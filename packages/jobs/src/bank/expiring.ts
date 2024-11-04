@@ -11,6 +11,7 @@ client.defineJob({
   id: Jobs.BANK_CONNECTION_EXPIRING,
   name: "Bank - Connection Expiring",
   version: "0.1.1",
+  enabled: false,
   trigger: cronTrigger({
     // Every monday
     cron: "30 15 * * 1",
