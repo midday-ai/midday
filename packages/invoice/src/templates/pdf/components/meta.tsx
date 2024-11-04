@@ -1,3 +1,4 @@
+import { TZDate } from "@date-fns/tz";
 import { Text, View } from "@react-pdf/renderer";
 import { format } from "date-fns";
 
@@ -9,6 +10,7 @@ interface MetaProps {
   issueDateLabel: string;
   dueDateLabel: string;
   dateFormat?: string;
+  timezone: string;
 }
 
 export function Meta({
@@ -19,6 +21,7 @@ export function Meta({
   issueDateLabel,
   dueDateLabel,
   dateFormat = "MM/dd/yyyy",
+  timezone,
 }: MetaProps) {
   return (
     <View style={{ flexDirection: "row", marginTop: 20, marginBottom: 40 }}>
@@ -45,7 +48,9 @@ export function Meta({
         >
           {issueDateLabel}:
         </Text>
-        <Text style={{ fontSize: 9 }}>{format(issueDate, dateFormat)}</Text>
+        <Text style={{ fontSize: 9 }}>
+          {format(new TZDate(issueDate, timezone), dateFormat)}
+        </Text>
       </View>
       <View
         style={{
@@ -58,7 +63,9 @@ export function Meta({
         <Text style={{ fontSize: 9, fontWeight: 500, marginRight: 5 }}>
           {dueDateLabel}:
         </Text>
-        <Text style={{ fontSize: 9 }}>{format(dueDate, dateFormat)}</Text>
+        <Text style={{ fontSize: 9 }}>
+          {format(new TZDate(dueDate, timezone), dateFormat)}
+        </Text>
       </View>
     </View>
   );

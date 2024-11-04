@@ -137,9 +137,9 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <div className="flex space-x-4 items-center">
+      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0 items-start sm:items-center w-full">
         <form
-          className="relative"
+          className="relative w-full sm:w-auto"
           onSubmit={(e) => {
             e.preventDefault();
             handleSubmit();
@@ -149,7 +149,7 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
           <Input
             ref={inputRef}
             placeholder="Search or filter"
-            className="pl-9 w-full md:w-[350px] pr-8"
+            className="pl-9 w-full sm:w-[350px] pr-8"
             value={prompt}
             onChange={handleSearch}
             autoComplete="off"

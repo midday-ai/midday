@@ -70,6 +70,7 @@ export function HtmlTemplate({
             quantityLabel={template.quantity_label}
             priceLabel={template.price_label}
             totalLabel={template.total_label}
+            vatLabel={template.vat_label}
             includeVAT={template.include_vat}
           />
         </div>

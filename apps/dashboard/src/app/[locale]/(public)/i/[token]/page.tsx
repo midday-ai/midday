@@ -94,13 +94,13 @@ export default async function Page({ params }: Props) {
     waitUntil(updateInvoiceViewedAt(id));
   }
 
-  const width = invoice.template.size === "letter" ? 816 : 595;
+  const width = invoice.template.size === "letter" ? 750 : 595;
   const height = invoice.template.size === "letter" ? 1056 : 842;
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen dotted-bg p-4 sm:p-6 md:p-0">
       <div
-        className="flex flex-col w-full max-w-full"
+        className="flex flex-col w-full max-w-full py-6"
         style={{ maxWidth: width }}
       >
         <CustomerHeader

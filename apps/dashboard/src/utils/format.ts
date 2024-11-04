@@ -141,7 +141,11 @@ export function getDueDateStatus(dueDate: string): string {
   const now = new Date();
   const due = new Date(dueDate);
 
-  if (isFuture(due)) {
+  // Set both dates to the start of their respective days
+  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+
+  if (dueDay > nowDay) {
     const diffDays = differenceInDays(due, now);
     const diffMonths = differenceInMonths(due, now);
 
@@ -151,7 +155,7 @@ export function getDueDateStatus(dueDate: string): string {
     return `in ${diffMonths} month${diffMonths === 1 ? "" : "s"}`;
   }
 
-  if (isPast(due)) {
+  if (dueDay < nowDay) {
     const diffDays = differenceInDays(now, due);
     const diffMonths = differenceInMonths(now, due);
 

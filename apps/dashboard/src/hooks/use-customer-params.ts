@@ -4,6 +4,7 @@ export function useCustomerParams() {
   const [params, setParams] = useQueryStates({
     customerId: parseAsString,
     createCustomer: parseAsBoolean,
+    name: parseAsString,
   });
 
   return {

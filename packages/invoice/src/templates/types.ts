@@ -14,6 +14,8 @@ export type Template = {
   total_label: string;
   tax_label: string;
   vat_label: string;
+  locale: string;
+  timezone: string;
 };
 
 export type LineItem = {

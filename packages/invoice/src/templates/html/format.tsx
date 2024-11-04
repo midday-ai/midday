@@ -10,7 +10,7 @@ export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
       {doc.content.map((node, nodeIndex) => {
         if (node.type === "paragraph") {
           return (
-            <p key={`paragraph-${nodeIndex.toString()}`} className="mb-1">
+            <p key={`paragraph-${nodeIndex.toString()}`}>
               {node.content?.map((inlineContent, inlineIndex) => {
                 if (inlineContent.type === "text") {
                   let style = "text-[11px]";
@@ -55,6 +55,7 @@ export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
                     </span>
                   );
                 }
+
                 if (inlineContent.type === "hardBreak") {
                   return (
                     <br key={`break-${nodeIndex}-${inlineIndex.toString()}`} />

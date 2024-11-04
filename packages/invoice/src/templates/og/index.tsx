@@ -45,7 +45,7 @@ export function OgTemplate({
 
       <div tw="flex justify-between mt-10">
         <div tw="flex flex-col flex-1 max-w-[50%]">
-          <span tw="text-[#858585] text-[22px] font-[GeistMono]">
+          <span tw="text-[#858585] text-[22px] font-[GeistMono] mb-1">
             {template.from_label}
           </span>
           <EditorContent content={from_details} />
@@ -54,7 +54,7 @@ export function OgTemplate({
         <div tw="w-12" />
 
         <div tw="flex flex-col flex-1 max-w-[50%]">
-          <span tw="text-[#858585] text-[22px] font-[GeistMono]">
+          <span tw="text-[#858585] text-[22px] font-[GeistMono] mb-1">
             {template.customer_label}
           </span>
           <EditorContent content={customer_details} />

@@ -49,7 +49,7 @@ export function Summary({
       {includeTax && (
         <div className="flex justify-between items-center py-3">
           <span className="text-[11px] text-[#878787] font-mono">
-            {taxLabel}
+            {taxLabel} ({taxRate}%)
           </span>
           <span className="text-right font-mono text-[11px] text-[#878787]">
             {new Intl.NumberFormat(undefined, {

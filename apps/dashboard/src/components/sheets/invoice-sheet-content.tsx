@@ -11,6 +11,7 @@ import { InvoiceSuccessful } from "../invoice-successful";
 import type { Customer } from "../invoice/customer-details";
 import { Form } from "../invoice/form";
 import { SettingsMenu } from "../invoice/settings-menu";
+import { OpenURL } from "../open-url";
 import type { Invoice } from "../tables/invoices/columns";
 
 function InvoiceSheetHeader({
@@ -60,7 +61,7 @@ export function InvoiceSheetContent({
   const { watch } = useFormContext();
   const templateSize = watch("template.size");
 
-  const size = templateSize === "a4" ? 650 : 816;
+  const size = templateSize === "a4" ? 650 : 740;
   const isOpen = Boolean(type === "create" || type === "edit");
 
   useEffect(() => {
@@ -79,14 +80,18 @@ export function InvoiceSheetContent({
         </div>
 
         <div className="flex mt-auto absolute bottom-6 justify-end gap-4 right-6 left-6">
-          <a href={`/i/${invoice.token}`} target="_blank" rel="noreferrer">
+          <OpenURL href={`/i/${invoice.token}`}>
             <Button variant="secondary">View invoice</Button>
-          </a>
+          </OpenURL>
 
           <Button
             onClick={() => {
-              setParams({ type: "create", selectedCustomerId: null });
               setInvoice(null);
+              setParams(null, { shallow: false });
+
+              setTimeout(() => {
+                setParams({ type: "create" });
+              }, 600);
             }}
           >
             Create another

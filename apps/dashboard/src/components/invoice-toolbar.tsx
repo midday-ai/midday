@@ -43,7 +43,7 @@ export default function InvoiceToolbar({
 
   return (
     <motion.div
-      className="fixed inset-x-0 bottom-2 flex justify-center"
+      className="fixed inset-x-0 -bottom-1 flex justify-center"
       initial={{ opacity: 0, filter: "blur(8px)", y: 0 }}
       animate={{ opacity: 1, filter: "blur(0px)", y: -24 }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}

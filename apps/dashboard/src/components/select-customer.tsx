@@ -2,14 +2,17 @@
 
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { Button } from "@midday/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectSeparator,
-  SelectTrigger,
-} from "@midday/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@midday/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import React from "react";
 
 type Props = {
   data: {
@@ -21,49 +24,94 @@ type Props = {
 export function SelectCustomer({ data }: Props) {
   const { setParams: setCustomerParams } = useCustomerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
+  const [open, setOpen] = React.useState(false);
+  const [value, setValue] = React.useState("");
 
-  const handleOnSelect = (value: string) => {
-    if (value === "create-customer") {
-      setCustomerParams({ createCustomer: true });
+  const formatData = data.map((item) => ({
+    value: item.name,
+    label: item.name,
+    id: item.id,
+  }));
+
+  const handleSelect = (id: string) => {
+    if (id === "create-customer") {
+      setCustomerParams({ createCustomer: true, name: value });
     } else {
-      setInvoiceParams({ selectedCustomerId: value });
+      setInvoiceParams({ selectedCustomerId: id });
     }
+
+    setOpen(false);
   };
 
   return (
-    <Select onValueChange={handleOnSelect}>
-      <SelectTrigger
-        className="border-none font-mono text-[#434343] p-0 text-[11px] h-auto"
-        hideIcon
-      >
-        <span>Select customer</span>
-      </SelectTrigger>
-      <SelectContent className="max-h-[200px] overflow-y-auto">
-        <SelectGroup>
-          {data.map((item) => (
-            <div key={item.id} className="group relative">
-              <SelectItem value={item.id} className="flex-grow text-xs">
-                {item.name}
-              </SelectItem>
+    <Popover open={open} onOpenChange={setOpen} modal>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          aria-expanded={open}
+          className="font-mono text-[#434343] p-0 text-[11px] h-auto hover:bg-transparent"
+        >
+          Select customer
+        </Button>
+      </PopoverTrigger>
 
+      <PopoverContent
+        className="w-[200px] p-0"
+        side="bottom"
+        sideOffset={10}
+        align="start"
+      >
+        <Command>
+          <CommandInput
+            value={value}
+            onValueChange={setValue}
+            placeholder="Search customer..."
+            className="p-2 text-xs"
+          />
+          <CommandList className="max-h-[180px] overflow-auto">
+            <CommandEmpty className="text-xs border-t-[1px] border-border p-2">
               <button
                 type="button"
-                onClick={() => {
-                  setCustomerParams({ customerId: item.id });
-                }}
-                className="absolute right-2 top-[6px] opacity-0 group-hover:opacity-50 hover:opacity-100 z-10 text-xs"
+                onClick={() =>
+                  setCustomerParams({ createCustomer: true, name: value })
+                }
               >
-                Edit
+                Create customer
               </button>
-            </div>
-          ))}
-
-          <SelectSeparator />
-          <SelectItem value="create-customer" className="text-xs">
-            Create customer
-          </SelectItem>
-        </SelectGroup>
-      </SelectContent>
-    </Select>
+            </CommandEmpty>
+            <CommandGroup>
+              {formatData.map((item) => (
+                <CommandItem
+                  key={item.value}
+                  value={item.value}
+                  onSelect={() => handleSelect(item.id)}
+                  className="text-xs"
+                >
+                  {item.label}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCustomerParams({ customerId: item.id });
+                    }}
+                    className="ml-auto text-xs opacity-0 group-hover:opacity-50 hover:opacity-100"
+                  >
+                    Edit
+                  </button>
+                </CommandItem>
+              ))}
+              <CommandItem
+                value="create-customer"
+                onSelect={handleSelect}
+                className="text-xs border-t-[1px] border-border pt-2 mt-2"
+              >
+                Create customer
+              </CommandItem>
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }

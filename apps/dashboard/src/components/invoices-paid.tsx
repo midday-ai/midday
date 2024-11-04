@@ -12,7 +12,7 @@ export async function InvoicesPaid({
   const totalInvoiceCount = data?.at(0)?.invoice_count;
 
   return (
-    <Link href="/invoices?statuses=paid">
+    <Link href="/invoices?statuses=paid" className="hidden sm:block">
       <InvoiceSummary
         data={data}
         totalInvoiceCount={totalInvoiceCount}
