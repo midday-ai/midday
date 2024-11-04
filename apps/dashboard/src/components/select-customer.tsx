@@ -86,7 +86,7 @@ export function SelectCustomer({ data }: Props) {
                   key={item.value}
                   value={item.value}
                   onSelect={() => handleSelect(item.id)}
-                  className="text-xs"
+                  className="group text-xs"
                 >
                   {item.label}
                   <button
