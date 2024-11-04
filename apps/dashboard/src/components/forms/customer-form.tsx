@@ -82,7 +82,7 @@ type Props = {
 
 export function CustomerForm({ data }: Props) {
   const [sections, setSections] = useState<string[]>(["general"]);
-  const { setParams: setCustomerParams } = useCustomerParams();
+  const { setParams: setCustomerParams, name } = useCustomerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
 
   const createCustomer = useAction(createCustomerAction, {
@@ -98,7 +98,7 @@ export function CustomerForm({ data }: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: undefined,
-      name: undefined,
+      name: name ?? undefined,
       email: undefined,
       website: undefined,
       address_line_1: undefined,

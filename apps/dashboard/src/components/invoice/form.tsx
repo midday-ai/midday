@@ -83,7 +83,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
       form.setValue("customer_id", customer?.id, { shouldValidate: true });
       form.setValue("customer_name", customer?.name, { shouldValidate: true });
     }
-  }, [selectedCustomerId]);
+  }, [selectedCustomerId, customers]);
 
   useEffect(() => {
     const updateLastEditedText = () => {
