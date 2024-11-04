@@ -86,11 +86,12 @@ export function InvoiceSheetContent({
 
           <Button
             onClick={() => {
-              setParams(
-                { type: "create", selectedCustomerId: null },
-                { shallow: false },
-              );
               setInvoice(null);
+              setParams(null, { shallow: false });
+
+              setTimeout(() => {
+                setParams({ type: "create" });
+              }, 600);
             }}
           >
             Create another

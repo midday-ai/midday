@@ -2,6 +2,8 @@
 
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Editor } from "@/components/invoice/editor";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import type { JSONContent } from "@tiptap/react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
@@ -30,6 +32,7 @@ interface CustomerDetailsProps {
 
 export function CustomerDetails({ customers }: CustomerDetailsProps) {
   const { control, setValue, watch } = useFormContext();
+  const { setParams } = useInvoiceParams();
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const selectedCustomerId = watch("customer_id");
@@ -50,6 +53,18 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
     updateInvoiceTemplate.execute({ customer_label: value });
   };
 
+  const handleOnChange = (content?: JSONContent | null) => {
+    // Reset the selected customer id when the content is changed
+    setParams({ selectedCustomerId: null });
+
+    if (!content) {
+      // Reset the selected customer id when the content is empty
+      setValue("customer_id", null, { shouldValidate: true });
+    }
+
+    setValue("customer_details", content, { shouldValidate: true });
+  };
+
   return (
     <div>
       <LabelInput
@@ -64,7 +79,7 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
           render={({ field }) => (
             <Editor
               initialContent={field.value}
-              onChange={field.onChange}
+              onChange={handleOnChange}
               className="h-[115px]"
             />
           )}

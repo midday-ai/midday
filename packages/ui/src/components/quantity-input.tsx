@@ -1,4 +1,4 @@
-import NumberFlow from "@number-flow/react";
+// import NumberFlow from "@number-flow/react";
 import { Minus, Plus } from "lucide-react";
 import * as React from "react";
 import { cn } from "../utils";
@@ -54,14 +54,14 @@ export function QuantityInput({
     };
 
   return (
-    <div className="group flex items-stretch transition-[box-shadow]  font-mono">
+    <div className="group flex items-stretch transition-[box-shadow] font-mono">
       <button
-        aria-hidden
-        tabIndex={-1}
+        aria-label="Decrease"
         className="flex items-center pr-[.325em]"
         disabled={min != null && value <= min}
         onPointerDown={handlePointerDown(-1)}
         type="button"
+        tabIndex={-1}
       >
         <Minus className="size-2" absoluteStrokeWidth strokeWidth={3.5} />
       </button>
@@ -85,24 +85,25 @@ export function QuantityInput({
           onBlur={onBlur}
           onFocus={onFocus}
         />
-        <NumberFlow
+        <span className="text-xs">{value}</span>
+        {/* NOTE: Tabbing from this element is not possible right now */}
+        {/* <NumberFlow
           value={value}
           format={{ useGrouping: false }}
-          aria-hidden
           animated={animated}
           onAnimationsStart={() => setShowCaret(false)}
           onAnimationsFinish={() => setShowCaret(true)}
-          className="pointer-events-none text-xs"
+          className="text-xs"
           willChange
-        />
+        /> */}
       </div>
       <button
-        aria-hidden
-        tabIndex={-1}
+        aria-label="Increase"
         className="flex items-center pl-[.325em]"
         disabled={max != null && value >= max}
         onPointerDown={handlePointerDown(1)}
         type="button"
+        tabIndex={-1}
       >
         <Plus className="size-2" absoluteStrokeWidth strokeWidth={3.5} />
       </button>

@@ -9,6 +9,8 @@ type Props = {
   quantityLabel: string;
   priceLabel: string;
   totalLabel: string;
+  vatLabel?: string;
+  includeVAT?: boolean;
   locale: string;
 };
 
@@ -20,6 +22,8 @@ export function LineItems({
   priceLabel,
   totalLabel,
   locale,
+  includeVAT = false,
+  vatLabel,
 }: Props) {
   return (
     <View style={{ marginTop: 20 }}>
@@ -38,9 +42,14 @@ export function LineItems({
         <Text style={{ flex: 1, fontSize: 9, fontWeight: 500 }}>
           {priceLabel}
         </Text>
-        <Text style={{ flex: 0.5, fontSize: 9, fontWeight: 500 }}>
+        <Text style={{ flex: 1, fontSize: 9, fontWeight: 500 }}>
           {quantityLabel}
         </Text>
+        {includeVAT && (
+          <Text style={{ flex: 1, fontSize: 9, fontWeight: 500 }}>
+            {vatLabel}
+          </Text>
+        )}
         <Text
           style={{
             flex: 1,
@@ -61,7 +70,12 @@ export function LineItems({
           <Text style={{ flex: 1, fontSize: 9 }}>
             {formatAmount({ currency, amount: item.price, locale })}
           </Text>
-          <Text style={{ flex: 0.5, fontSize: 9 }}>{item.quantity}</Text>
+          <Text style={{ flex: 1, fontSize: 9 }}>{item.quantity}</Text>
+
+          {includeVAT && (
+            <Text style={{ flex: 1, fontSize: 9 }}>{item.vat}%</Text>
+          )}
+
           <Text style={{ flex: 1, fontSize: 9, textAlign: "right" }}>
             {formatAmount({
               currency,

@@ -8,6 +8,7 @@ type Props = {
   quantityLabel: string;
   priceLabel: string;
   totalLabel: string;
+  vatLabel?: string;
   includeVAT?: boolean;
 };
 
@@ -18,6 +19,7 @@ export function LineItems({
   quantityLabel,
   priceLabel,
   totalLabel,
+  vatLabel,
   includeVAT = false,
 }: Props) {
   return (
@@ -31,7 +33,9 @@ export function LineItems({
 
         <div className="text-[11px] text-[#878787]">{quantityLabel}</div>
 
-        {includeVAT && <div className="text-[11px] text-[#878787]">VAT</div>}
+        {includeVAT && (
+          <div className="text-[11px] text-[#878787]">{vatLabel}</div>
+        )}
 
         <div className="text-[11px] text-[#878787] text-right">
           {totalLabel}

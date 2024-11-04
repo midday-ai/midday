@@ -110,6 +110,8 @@ export async function PdfTemplate({
           priceLabel={template.price_label}
           totalLabel={template.total_label}
           locale={template.locale}
+          includeVAT={template.include_vat}
+          vatLabel={template.vat_label}
         />
 
         <Summary

@@ -25,7 +25,7 @@ export function InvoiceSuccessful({ invoice }: Props) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.3 }}
         className="flex items-center justify-between mb-6"
       >
         <div className="flex space-x-1 items-center">
@@ -58,7 +58,7 @@ export function InvoiceSuccessful({ invoice }: Props) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
       >
         <span className="text-[11px] font-mono">
           {invoice.template.customer_label}
@@ -69,7 +69,7 @@ export function InvoiceSuccessful({ invoice }: Props) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.6, duration: 0.5 }}
+        transition={{ delay: 0.4, duration: 0.3 }}
         className="flex items-center justify-between mt-10 border-b border-border border-dashed pb-4"
       >
         <span className="text-[11px] text-[#878787] font-mono">
@@ -84,7 +84,7 @@ export function InvoiceSuccessful({ invoice }: Props) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.5 }}
+        transition={{ delay: 0.4, duration: 0.3 }}
         className="flex flex-col space-y-6 mt-10 mb-6"
       >
         <h2>Details</h2>
@@ -129,7 +129,7 @@ export function InvoiceSuccessful({ invoice }: Props) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.9, duration: 0.5 }}
+        transition={{ delay: 0.4, duration: 0.3 }}
         className="flex flex-wrap gap-3 absolute -bottom-[15px] left-0 right-0 w-full justify-center"
       >
         {Array.from({ length: 10 }).map((_, index) => (
