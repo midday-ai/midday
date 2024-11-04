@@ -1,7 +1,7 @@
 "use client";
 
 import type { Editor } from "@tiptap/react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   MdOutlineAddLink,
   MdOutlineCheck,
@@ -20,9 +20,25 @@ interface LinkItemProps {
 }
 
 export function LinkItem({ editor, open, setOpen }: LinkItemProps) {
+  const [value, setValue] = useState("");
   const isActive = editor.isActive("link");
   const inputRef = useRef<HTMLInputElement>(null);
   const linkValue = editor.getAttributes("link").href;
+
+  const handleSubmit = () => {
+    const url = formatUrlWithProtocol(value);
+
+    if (url) {
+      editor
+        .chain()
+        .focus()
+        .extendMarkRange("link")
+        .setLink({ href: url })
+        .run();
+
+      setOpen(false);
+    }
+  };
 
   return (
     <Popover modal={false} open={open} onOpenChange={setOpen}>
@@ -36,31 +52,19 @@ export function LinkItem({ editor, open, setOpen }: LinkItemProps) {
         </BubbleMenuButton>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-60 p-0" sideOffset={10}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const input = e.currentTarget[0] as HTMLInputElement;
-            const url = formatUrlWithProtocol(input.value);
-
-            if (url) {
-              editor
-                .chain()
-                .focus()
-                .extendMarkRange("link")
-                .setLink({ href: url })
-                .run();
-
-              setOpen(false);
-            }
-          }}
-          className="flex p-1"
-        >
+        <div className="flex p-1">
           <input
             ref={inputRef}
             type="text"
             placeholder="Paste a link"
             className="flex-1 bg-background p-0.5 h-7 text-xs outline-none placeholder:text-[#878787]"
             defaultValue={linkValue || ""}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
           />
 
           {linkValue ? (
@@ -80,11 +84,16 @@ export function LinkItem({ editor, open, setOpen }: LinkItemProps) {
               <MdOutlineDelete className="size-4" />
             </Button>
           ) : (
-            <Button size="icon" className="size-7">
+            <Button
+              size="icon"
+              className="size-7"
+              type="button"
+              onClick={handleSubmit}
+            >
               <MdOutlineCheck className="size-4" />
             </Button>
           )}
-        </form>
+        </div>
       </PopoverContent>
     </Popover>
   );

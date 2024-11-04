@@ -2,7 +2,7 @@ import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { calculateTotals } from "@midday/invoice/calculate";
 import { useAction } from "next-safe-action/hooks";
-import { useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { AnimatedNumber } from "../animated-number";
 import { FormatAmount } from "../format-amount";
@@ -45,7 +45,7 @@ export function Summary() {
 
   const total = totalAmount + totalVAT + totalTax;
 
-  useMemo(() => {
+  const updateFormValues = useCallback(() => {
     if (total) {
       setValue("amount", total, { shouldValidate: true });
     }
@@ -57,7 +57,11 @@ export function Summary() {
     if (totalTax) {
       setValue("tax", totalTax, { shouldValidate: true });
     }
-  }, [total, totalVAT, totalTax, setValue]);
+  }, [total, totalVAT, totalTax]);
+
+  useEffect(() => {
+    updateFormValues();
+  }, [updateFormValues]);
 
   return (
     <div className="w-[320px] flex flex-col divide-y divide-border">

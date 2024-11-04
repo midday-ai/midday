@@ -7,9 +7,9 @@ import { ScrollArea } from "@midday/ui/scroll-area";
 import { useDebounce } from "@uidotdev/usehooks";
 import { motion } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
+import { OpenURL } from "../open-url";
 import { type Customer, CustomerDetails } from "./customer-details";
 import { FromDetails } from "./from-details";
 import { LineItems } from "./line-items";
@@ -52,6 +52,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
       "template",
       "customer_id",
       "customer_name",
+      // "customer_details",
       "line_items",
       "amount",
       "vat",
@@ -145,14 +146,13 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
         <div className="flex justify-between items-center mt-auto">
           <div className="flex space-x-2 items-center">
             {token && (
-              <Link
+              <OpenURL
                 href={`/i/${token}`}
                 className="text-xs text-[#808080] flex items-center gap-1"
-                target="_blank"
               >
                 <Icons.ExternalLink className="size-3" />
                 <span>Preview invoice</span>
-              </Link>
+              </OpenURL>
             )}
 
             {lastEditedText && (

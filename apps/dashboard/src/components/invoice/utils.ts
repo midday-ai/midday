@@ -6,49 +6,66 @@ export const transformCustomerToContent = (customer?: Customer) => {
   const content = [];
 
   if (customer.name) {
-    content.push({ text: customer.name, type: "text" }, { type: "hardBreak" });
+    content.push({
+      type: "paragraph",
+      content: [
+        {
+          text: customer.name,
+          type: "text",
+        },
+      ],
+    });
+  }
+
+  if (customer.address_line_1) {
+    content.push({
+      type: "paragraph",
+      content: [{ text: customer.address_line_1, type: "text" }],
+    });
+  }
+
+  if (customer.zip || customer.city) {
+    content.push({
+      type: "paragraph",
+      content: [
+        {
+          text: `${customer.zip || ""} ${customer.city || ""}`.trim(),
+          type: "text",
+        },
+      ],
+    });
+  }
+
+  if (customer.country) {
+    content.push({
+      type: "paragraph",
+      content: [{ text: customer.country, type: "text" }],
+    });
   }
 
   if (customer.email) {
-    content.push({ text: customer.email, type: "text" }, { type: "hardBreak" });
+    content.push({
+      type: "paragraph",
+      content: [{ text: customer.email, type: "text" }],
+    });
   }
 
-  if (customer?.phone) {
-    content.push({ text: customer.phone, type: "text" }, { type: "hardBreak" });
+  if (customer.phone) {
+    content.push({
+      type: "paragraph",
+      content: [{ text: customer.phone, type: "text" }],
+    });
   }
 
-  if (customer?.address_line_1) {
-    content.push(
-      {
-        text:
-          customer.address_line_1 + (customer.zip ? `, ${customer.zip}` : ""),
-        type: "text",
-      },
-      { type: "hardBreak" },
-    );
-  }
-
-  if (customer?.city && customer?.country) {
-    content.push(
-      { text: `${customer.city}, ${customer.country}`, type: "text" },
-      { type: "hardBreak" },
-    );
-  }
-
-  if (customer?.vat) {
-    content.push(
-      { text: `VAT: ${customer.vat}`, type: "text" },
-      { type: "hardBreak" },
-    );
+  if (customer.vat) {
+    content.push({
+      type: "paragraph",
+      content: [{ text: `VAT: ${customer.vat}`, type: "text" }],
+    });
   }
 
   return {
     type: "doc",
-    content: [
-      {
-        type: "paragraph",
-        content,
-      },
-    ],
+    content,
   };
 };

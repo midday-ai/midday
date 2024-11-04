@@ -31,6 +31,7 @@ export function Editor({
   const editor = useEditor({
     extensions: registerExtensions({ placeholder }),
     content: initialContent,
+    immediatelyRender: false,
     onBlur,
     onFocus,
     onUpdate: ({ editor }) => {

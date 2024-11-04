@@ -11,6 +11,7 @@ import { InvoiceSuccessful } from "../invoice-successful";
 import type { Customer } from "../invoice/customer-details";
 import { Form } from "../invoice/form";
 import { SettingsMenu } from "../invoice/settings-menu";
+import { OpenURL } from "../open-url";
 import type { Invoice } from "../tables/invoices/columns";
 
 function InvoiceSheetHeader({
@@ -79,9 +80,9 @@ export function InvoiceSheetContent({
         </div>
 
         <div className="flex mt-auto absolute bottom-6 justify-end gap-4 right-6 left-6">
-          <a href={`/i/${invoice.token}`} target="_blank" rel="noreferrer">
+          <OpenURL href={`/i/${invoice.token}`}>
             <Button variant="secondary">View invoice</Button>
-          </a>
+          </OpenURL>
 
           <Button
             onClick={() => {

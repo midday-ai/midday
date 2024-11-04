@@ -9,7 +9,7 @@ import type { Props as TippyOptions } from "tippy.js";
 import { AIMenu } from "../ai";
 import { AskAI } from "../ai/ask-ai";
 import { BubbleMenuItem } from "./bubble-item";
-import { LinkItem } from "./link-item";
+// import { LinkItem } from "./link-item";
 
 export function BubbleMenu({
   editor,
@@ -19,7 +19,7 @@ export function BubbleMenu({
   tippyOptions?: TippyOptions;
 }) {
   const [showAI, setShowAI] = useState(false);
-  const [openLink, setOpenLink] = useState(false);
+  // const [openLink, setOpenLink] = useState(false);
 
   if (!editor) {
     return null;
@@ -62,7 +62,7 @@ export function BubbleMenu({
                 <span className="sr-only">Strike</span>
               </BubbleMenuItem>
 
-              <LinkItem editor={editor} open={openLink} setOpen={setOpenLink} />
+              {/* <LinkItem editor={editor} open={openLink} setOpen={setOpenLink} /> */}
             </>
           )}
         </div>

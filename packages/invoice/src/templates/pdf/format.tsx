@@ -1,5 +1,5 @@
 import { Link, Text, View } from "@react-pdf/renderer";
-import type { EditorDoc } from "../types";
+import type { EditorDoc, TextStyle } from "../types";
 
 export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
   if (!doc || !doc.content) {
@@ -63,6 +63,7 @@ export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
                     </Text>
                   );
                 }
+
                 if (inlineContent.type === "hardBreak") {
                   return (
                     <View

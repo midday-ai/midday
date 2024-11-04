@@ -13,7 +13,7 @@ export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
             <p key={`paragraph-${nodeIndex.toString()}`} tw="flex flex-col">
               {node.content?.map((inlineContent, inlineIndex) => {
                 if (inlineContent.type === "text") {
-                  let style = "text-[22px] mb-2";
+                  let style = "text-[22px]";
 
                   if (inlineContent.marks) {
                     for (const mark of inlineContent.marks) {
@@ -27,20 +27,24 @@ export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
                     }
                   }
 
-                  return (
-                    <span
-                      key={`text-${nodeIndex}-${inlineIndex.toString()}`}
-                      tw={style}
-                    >
-                      {inlineContent.text || ""}
-                    </span>
-                  );
+                  if (inlineContent.text) {
+                    return (
+                      <span
+                        key={`text-${nodeIndex}-${inlineIndex.toString()}`}
+                        tw={style}
+                      >
+                        {inlineContent.text}
+                      </span>
+                    );
+                  }
                 }
+
                 if (inlineContent.type === "hardBreak") {
                   return (
                     <br key={`break-${nodeIndex}-${inlineIndex.toString()}`} />
                   );
                 }
+
                 return null;
               })}
             </p>
