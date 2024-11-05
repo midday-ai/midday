@@ -74,7 +74,7 @@ export const draftInvoiceSchema = z.object({
 export const lineItemSchema = z.object({
   name: z.string().min(1, "Name is required"),
   quantity: z.number().min(0, "Quantity must be at least 0"),
-  price: z.number().min(0, "Price must be at least 0"),
+  price: z.number(),
   vat: z.number().min(0, "VAT must be at least 0").optional(),
   tax: z.number().min(0, "Tax must be at least 0").optional(),
 });
@@ -112,6 +112,7 @@ export const invoiceTemplateSchema = z.object({
 
 export const invoiceFormSchema = z.object({
   id: z.string().uuid(),
+  status: z.string(),
   template: invoiceTemplateSchema,
   from_details: z.any(),
   customer_details: z.any(),

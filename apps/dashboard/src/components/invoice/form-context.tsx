@@ -86,6 +86,7 @@ export function FormContext({
     tax: undefined,
     token: undefined,
     discount: undefined,
+    status: "draft",
   };
 
   const form = useForm<InvoiceFormValues>({
