@@ -70,7 +70,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
 
   useEffect(() => {
     // Skip auto-save for non-draft invoices
-    if (!canUpdate) return;
+    if (canUpdate) return;
 
     const currentFormValues = form.getValues();
 
