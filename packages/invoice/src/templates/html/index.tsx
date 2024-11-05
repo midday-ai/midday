@@ -74,6 +74,7 @@ export function HtmlTemplate({
             includeVAT={template.include_vat}
             includeDecimals={template.include_decimals}
             locale={template.locale}
+            vatLabel={template.vat_label}
           />
         </div>
 

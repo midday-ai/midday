@@ -66,7 +66,12 @@ export function QuantityInput({
         type="button"
         tabIndex={-1}
       >
-        <Minus className="size-2" absoluteStrokeWidth strokeWidth={3.5} />
+        <Minus
+          className="size-2"
+          absoluteStrokeWidth
+          strokeWidth={3.5}
+          tabIndex={-1}
+        />
       </button>
       <div className="relative grid items-center justify-items-center text-center">
         <input
@@ -93,7 +98,12 @@ export function QuantityInput({
         type="button"
         tabIndex={-1}
       >
-        <Plus className="size-2" absoluteStrokeWidth strokeWidth={3.5} />
+        <Plus
+          className="size-2"
+          absoluteStrokeWidth
+          strokeWidth={3.5}
+          tabIndex={-1}
+        />
       </button>
     </div>
   );

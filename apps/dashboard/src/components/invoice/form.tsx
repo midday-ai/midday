@@ -1,6 +1,5 @@
 import { draftInvoiceAction } from "@/actions/invoice/draft-invoice-action";
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { formatRelativeTime } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
@@ -30,7 +29,6 @@ type Props = {
 };
 
 export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
-  const { type } = useInvoiceParams();
   const [lastUpdated, setLastUpdated] = useState<Date | undefined>();
   const [lastEditedText, setLastEditedText] = useState("");
 
@@ -38,6 +36,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
 
   const size = form.watch("template.size") === "a4" ? 650 : 816;
   const token = form.watch("token");
+  const canUpdate = form.watch("status") !== "draft";
 
   const draftInvoice = useAction(draftInvoiceAction, {
     onSuccess: ({ data }) => {
@@ -70,15 +69,15 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
   const debouncedValues = useDebounce(formValues, 800);
 
   useEffect(() => {
-    // Don't auto save if the invoice is in edit mode
-    if (type === "edit") return;
+    // Skip auto-save for non-draft invoices
+    if (!canUpdate) return;
 
     const currentFormValues = form.getValues();
 
     if (isDirty && form.watch("customer_id")) {
       draftInvoice.execute(transformFormValuesToDraft(currentFormValues));
     }
-  }, [debouncedValues, isDirty, type]);
+  }, [debouncedValues, isDirty, canUpdate]);
 
   useEffect(() => {
     const updateLastEditedText = () => {

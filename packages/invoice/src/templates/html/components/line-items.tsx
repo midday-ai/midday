@@ -63,7 +63,9 @@ export function LineItems({
             })}
           </div>
           <div className="text-[11px]">{item.quantity}</div>
+
           {includeVAT && <div className="text-[11px]">{item.vat}%</div>}
+
           <div className="text-[11px] text-right">
             {formatAmount({
               maximumFractionDigits,

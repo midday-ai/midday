@@ -68,7 +68,7 @@ export function InvoiceSheetContent({
     setInvoice(null);
   }, [isOpen]);
 
-  if (invoice && type !== "edit") {
+  if (invoice && invoice.status !== "draft") {
     return (
       <SheetContent className="bg-white dark:bg-[#0C0C0C] transition-[max-width] duration-300 ease-in-out">
         <InvoiceSheetHeader

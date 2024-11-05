@@ -2,7 +2,6 @@
 
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -32,10 +31,10 @@ type Props = {
 };
 
 export function SubmitButton({ isSubmitting }: Props) {
-  const { type } = useInvoiceParams();
   const { watch, setValue, formState } = useFormContext<InvoiceFormValues>();
 
   const selectedOption = watch("template.delivery_type");
+  const canUpdate = watch("status") !== "draft";
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
@@ -56,12 +55,12 @@ export function SubmitButton({ isSubmitting }: Props) {
   return (
     <div className="flex divide-x">
       <BaseSubmitButton isSubmitting={isSubmitting} disabled={!isValid}>
-        {type === "edit"
+        {canUpdate
           ? "Update"
           : options.find((o) => o.value === selectedOption)?.label}
       </BaseSubmitButton>
 
-      {type !== "edit" && (
+      {!canUpdate && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
