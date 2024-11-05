@@ -32,6 +32,7 @@ export async function PdfTemplate({
   line_items,
   customer_details,
   from_details,
+  discount,
   payment_details,
   note_details,
   currency,
@@ -66,8 +67,8 @@ export async function PdfTemplate({
             <Image
               src={template.logo_url}
               style={{
-                width: 78,
-                height: 78,
+                width: 65,
+                height: 65,
               }}
             />
           )}
@@ -112,6 +113,7 @@ export async function PdfTemplate({
           locale={template.locale}
           includeVAT={template.include_vat}
           vatLabel={template.vat_label}
+          includeDecimals={template.include_decimals}
         />
 
         <Summary
@@ -124,6 +126,12 @@ export async function PdfTemplate({
           vatLabel={template.vat_label}
           taxRate={template.tax_rate}
           locale={template.locale}
+          discount={discount}
+          discountLabel={template.discount_label}
+          includeDiscount={template.include_discount}
+          includeVAT={template.include_vat}
+          includeTax={template.include_tax}
+          includeDecimals={template.include_decimals}
         />
 
         <View

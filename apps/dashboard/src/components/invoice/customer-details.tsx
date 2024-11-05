@@ -32,22 +32,10 @@ interface CustomerDetailsProps {
 
 export function CustomerDetails({ customers }: CustomerDetailsProps) {
   const { control, setValue, watch } = useFormContext();
-  const { setParams } = useInvoiceParams();
+  const { setParams, selectedCustomerId } = useInvoiceParams();
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
-  const selectedCustomerId = watch("customer_id");
   const content = watch("customer_details");
-
-  const foundCustomer = customers.find(
-    (customer) => customer.id === selectedCustomerId,
-  );
-
-  useEffect(() => {
-    if (foundCustomer) {
-      const initialContent = transformCustomerToContent(foundCustomer);
-      setValue("customer_details", initialContent, { shouldValidate: true });
-    }
-  }, [foundCustomer, setValue]);
 
   const handleLabelSave = (value: string) => {
     updateInvoiceTemplate.execute({ customer_label: value });
@@ -57,13 +45,34 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
     // Reset the selected customer id when the content is changed
     setParams({ selectedCustomerId: null });
 
+    setValue("customer_details", content, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+
     if (!content) {
-      // Reset the selected customer id when the content is empty
+      setValue("customer_name", null, { shouldValidate: true });
       setValue("customer_id", null, { shouldValidate: true });
     }
-
-    setValue("customer_details", content, { shouldValidate: true });
   };
+
+  useEffect(() => {
+    const customer = customers.find((c) => c.id === selectedCustomerId);
+
+    if (customer) {
+      const customerContent = transformCustomerToContent(customer);
+
+      // Remove the selected customer id from the url so we don't introduce a race condition
+      setParams({ selectedCustomerId: null });
+
+      setValue("customer_name", customer.name, { shouldValidate: true });
+      setValue("customer_id", customer.id, { shouldValidate: true });
+      setValue("customer_details", customerContent, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [selectedCustomerId, customers]);
 
   return (
     <div>

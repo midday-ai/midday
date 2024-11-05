@@ -6,11 +6,19 @@ import { useCallback, useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { AnimatedNumber } from "../animated-number";
 import { FormatAmount } from "../format-amount";
+import { AmountInput } from "./amount-input";
 import { LabelInput } from "./label-input";
 import { TaxInput } from "./tax-input";
 
 export function Summary() {
   const { control, setValue } = useFormContext<InvoiceFormValues>();
+
+  const includeDecimals = useWatch({
+    control,
+    name: "template.include_decimals",
+  });
+
+  const maximumFractionDigits = includeDecimals ? 2 : 0;
 
   const currency = useWatch({
     control,
@@ -32,21 +40,33 @@ export function Summary() {
     name: "template.include_vat",
   });
 
+  const includeDiscount = useWatch({
+    control,
+    name: "template.include_discount",
+  });
+
   const lineItems = useWatch({
     control,
     name: "line_items",
   });
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
-
   const { totalAmount, totalVAT } = calculateTotals(lineItems);
+  const discount = useWatch({
+    control,
+    name: "discount",
+  });
 
-  const totalTax = includeTax ? (totalAmount * (taxRate || 0)) / 100 : 0;
+  const discountAmount = includeDiscount ? discount || 0 : 0;
+  const amountAfterDiscount = totalAmount - discountAmount;
+  const totalTax = includeTax
+    ? (amountAfterDiscount * (taxRate || 0)) / 100
+    : 0;
 
-  const total = totalAmount + totalVAT + totalTax;
+  const total = amountAfterDiscount + totalVAT + totalTax;
 
   const updateFormValues = useCallback(() => {
-    if (total) {
+    if (total >= 0) {
       setValue("amount", total, { shouldValidate: true });
     }
 
@@ -64,9 +84,29 @@ export function Summary() {
   }, [updateFormValues]);
 
   return (
-    <div className="w-[320px] flex flex-col divide-y divide-border">
+    <div className="w-[320px] flex flex-col">
+      {includeDiscount && (
+        <div className="flex justify-between items-center py-1">
+          <LabelInput
+            name="template.discount_label"
+            onSave={(value) => {
+              updateInvoiceTemplate.execute({
+                discount_label: value,
+              });
+            }}
+          />
+
+          <AmountInput
+            placeholder="0"
+            allowNegative={false}
+            name="discount"
+            className="text-right font-mono text-[11px] text-[#878787] border-none"
+          />
+        </div>
+      )}
+
       {includeVAT && (
-        <div className="flex justify-between items-center py-3">
+        <div className="flex justify-between items-center py-1">
           <LabelInput
             name="template.vat_label"
             onSave={(value) => {
@@ -79,8 +119,7 @@ export function Summary() {
           <span className="text-right font-mono text-[11px] text-[#878787]">
             <FormatAmount
               amount={totalVAT}
-              minimumFractionDigits={0}
-              maximumFractionDigits={2}
+              maximumFractionDigits={maximumFractionDigits}
               currency={currency}
             />
           </span>
@@ -88,7 +127,7 @@ export function Summary() {
       )}
 
       {includeTax && (
-        <div className="flex justify-between items-center py-3">
+        <div className="flex justify-between items-center py-1">
           <div className="flex items-center gap-1">
             <LabelInput
               className="flex-shrink-0"
@@ -106,15 +145,14 @@ export function Summary() {
           <span className="text-right font-mono text-[11px] text-[#878787]">
             <FormatAmount
               amount={totalTax}
-              minimumFractionDigits={0}
-              maximumFractionDigits={2}
+              maximumFractionDigits={maximumFractionDigits}
               currency={currency}
             />
           </span>
         </div>
       )}
 
-      <div className="flex justify-between items-center py-4">
+      <div className="flex justify-between items-center py-4 mt-2 border-t border-border">
         <LabelInput
           name="template.total_label"
           onSave={(value) => {
@@ -124,7 +162,11 @@ export function Summary() {
           }}
         />
         <span className="text-right font-mono text-[21px]">
-          <AnimatedNumber value={total} currency={currency} />
+          <AnimatedNumber
+            value={total}
+            currency={currency}
+            maximumFractionDigits={maximumFractionDigits}
+          />
         </span>
       </div>
     </div>

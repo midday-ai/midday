@@ -56,32 +56,34 @@ export function SubmitButton({ isSubmitting }: Props) {
   return (
     <div className="flex divide-x">
       <BaseSubmitButton isSubmitting={isSubmitting} disabled={!isValid}>
-        {type === "update"
+        {type === "edit"
           ? "Update"
           : options.find((o) => o.value === selectedOption)?.label}
       </BaseSubmitButton>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            disabled={!isValid || isSubmitting}
-            className="size-9 p-0 [&[data-state=open]>svg]:rotate-180"
-          >
-            <Icons.ChevronDown className="size-4 transition-transform duration-200" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" sideOffset={10}>
-          {options.map((option) => (
-            <DropdownMenuCheckboxItem
-              key={option.value}
-              checked={selectedOption === option.value}
-              onCheckedChange={() => handleOptionChange(option.value)}
+      {type !== "edit" && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              disabled={!isValid || isSubmitting}
+              className="size-9 p-0 [&[data-state=open]>svg]:rotate-180"
             >
-              {option.label}
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+              <Icons.ChevronDown className="size-4 transition-transform duration-200" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" sideOffset={10}>
+            {options.map((option) => (
+              <DropdownMenuCheckboxItem
+                key={option.value}
+                checked={selectedOption === option.value}
+                onCheckedChange={() => handleOptionChange(option.value)}
+              >
+                {option.label}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 }

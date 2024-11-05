@@ -58,6 +58,7 @@ import {
   MdOutlineChatBubbleOutline,
   MdOutlineClear,
   MdOutlineCloseFullscreen,
+  MdOutlineConfirmationNumber,
   MdOutlineContentCopy,
   MdOutlineCreateNewFolder,
   MdOutlineCropFree,
@@ -554,6 +555,19 @@ export const Icons = {
       </g>
     </svg>
   ),
+  Decimals: ({ className, size = 24, ...props }: React.SVGProps<SVGSVGElement> & { size?: number | string }) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      height={size}
+      viewBox="0 -960 960 960"
+      width={size}
+      fill="currentColor"
+      className={className}
+      {...props}
+    >
+      <path d="m720-80-56-56 63-64H480v-80h247l-63-64 56-56 160 160L720-80ZM80-440v-120h120v120H80Zm300 0q-58 0-99-41t-41-99v-160q0-58 41-99t99-41q58 0 99 41t41 99v160q0 58-41 99t-99 41Zm360 0q-58 0-99-41t-41-99v-160q0-58 41-99t99-41q58 0 99 41t41 99v160q0 58-41 99t-99 41Zm-360-80q25 0 42.5-17.5T440-580v-160q0-25-17.5-42.5T380-800q-25 0-42.5 17.5T320-740v160q0 25 17.5 42.5T380-520Zm360 0q25 0 42.5-17.5T800-580v-160q0-25-17.5-42.5T740-800q-25 0-42.5 17.5T680-740v160q0 25 17.5 42.5T740-520Z" />
+    </svg>
+  ),
   Fence: MdFence,
   Refresh: MdRefresh,
   Currency: MdAttachMoney,
@@ -668,4 +682,5 @@ export const Icons = {
   Vat: MdOutlineCalculate,
   CurrencyOutline: MdOutlineAttachMoney,
   SnippetFolder: MdSnippetFolder,
-};
+  ConfirmationNumber: MdOutlineConfirmationNumber,
+ };

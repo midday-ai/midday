@@ -84,30 +84,34 @@ export function InvoiceViewers({ customer, viewedAt }: Props) {
           </div>
         )}
 
-        <TooltipProvider delayDuration={0}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Avatar className="size-5 object-contain border border-border">
-                {customer?.website && (
-                  <AvatarImage
-                    src={`https://img.logo.dev/${customer.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
-                    alt={`${customer.name} logo`}
-                  />
-                )}
-                <AvatarFallback className="text-[9px] font-medium">
-                  {customer.name?.[0]}
-                </AvatarFallback>
-              </Avatar>
-            </TooltipTrigger>
+        {customer?.name && (
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Avatar className="size-5 object-contain border border-border">
+                  {customer?.website && (
+                    <AvatarImage
+                      src={`https://img.logo.dev/${customer.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                      alt={`${customer.name} logo`}
+                    />
+                  )}
+                  <AvatarFallback className="text-[9px] font-medium">
+                    {customer.name?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+              </TooltipTrigger>
 
-            <TooltipContent
-              sideOffset={20}
-              className="text-[10px] px-2 py-1 rounded-sm font-medium"
-            >
-              {viewedAt ? formatRelativeTime(new Date(viewedAt)) : "Not viewed"}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+              <TooltipContent
+                sideOffset={20}
+                className="text-[10px] px-2 py-1 rounded-sm font-medium"
+              >
+                {viewedAt
+                  ? formatRelativeTime(new Date(viewedAt))
+                  : "Not viewed"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </motion.div>
     </AnimatedSizeContainer>
   );

@@ -19,6 +19,12 @@ export function LineItems() {
   const { control } = useFormContext<InvoiceFormValues>();
   const currency = useWatch({ control, name: "template.currency" });
   const includeVAT = useWatch({ control, name: "template.include_vat" });
+  const includeDecimals = useWatch({
+    control,
+    name: "template.include_decimals",
+  });
+
+  const maximumFractionDigits = includeDecimals ? 2 : 0;
 
   const { fields, append, remove, swap } = useFieldArray({
     control,
@@ -118,6 +124,7 @@ export function LineItems() {
             isReorderable={fields.length > 1}
             currency={currency}
             includeVAT={includeVAT}
+            maximumFractionDigits={maximumFractionDigits}
           />
         ))}
       </Reorder.Group>
@@ -148,6 +155,7 @@ function LineItemRow({
   item,
   currency,
   includeVAT,
+  maximumFractionDigits,
 }: {
   index: number;
   handleRemove: (index: number) => void;
@@ -155,9 +163,10 @@ function LineItemRow({
   item: InvoiceFormValues["line_items"][number];
   currency: string;
   includeVAT: boolean;
+  maximumFractionDigits: number;
 }) {
   const controls = useDragControls();
-  const { control, setValue } = useFormContext<InvoiceFormValues>();
+  const { control } = useFormContext<InvoiceFormValues>();
 
   const price = useWatch({
     control,
@@ -194,7 +203,7 @@ function LineItemRow({
 
       <Input name={`line_items.${index}.name`} autoFocus={index > 0} />
 
-      <AmountInput name={`line_items.${index}.price`} min="0" />
+      <AmountInput name={`line_items.${index}.price`} />
 
       <QuantityInput name={`line_items.${index}.quantity`} />
 
@@ -210,6 +219,7 @@ function LineItemRow({
               includeVAT,
             }),
             currency,
+            maximumFractionDigits,
           })}
         </span>
       </div>

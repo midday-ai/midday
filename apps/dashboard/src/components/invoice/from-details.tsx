@@ -28,12 +28,10 @@ export function FromDetails() {
         render={({ field }) => (
           <Editor
             initialContent={field.value}
-            onChange={(content) => {
-              field.onChange(content);
-            }}
+            onChange={field.onChange}
             onBlur={(content) => {
               updateInvoiceTemplate.execute({
-                from_details: content,
+                from_details: content ? JSON.stringify(content) : null,
               });
             }}
             className="h-[115px]"

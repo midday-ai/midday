@@ -26,15 +26,15 @@ export function NoteDetails() {
       <Controller
         control={control}
         name="note_details"
-        render={({ field }) => (
-          <Editor
-            initialContent={field.value}
-            onChange={(content) => {
-              field.onChange(content);
-            }}
-            className="h-[78px]"
-          />
-        )}
+        render={({ field }) => {
+          return (
+            <Editor
+              initialContent={field.value}
+              onChange={field.onChange}
+              className="h-[78px]"
+            />
+          );
+        }}
       />
     </div>
   );

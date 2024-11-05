@@ -88,7 +88,8 @@ export const columns: ColumnDef<Invoice>[] = [
       const customer = row.original.customer;
       const name = customer?.name || row.original.customer_name;
       const viewAt = row.original.viewed_at;
-      const hasNewMessages = false;
+
+      if (!name) return "-";
 
       return (
         <div className="flex items-center space-x-2">

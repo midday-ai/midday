@@ -19,6 +19,7 @@ import { NoteDetails } from "./note-details";
 import { PaymentDetails } from "./payment-details";
 import { SubmitButton } from "./submit-button";
 import { Summary } from "./summary";
+import { transformFormValuesToDraft } from "./utils";
 
 type Props = {
   teamId: string;
@@ -29,7 +30,7 @@ type Props = {
 };
 
 export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
-  const { selectedCustomerId } = useInvoiceParams();
+  const { type } = useInvoiceParams();
   const [lastUpdated, setLastUpdated] = useState<Date | undefined>();
   const [lastEditedText, setLastEditedText] = useState("");
 
@@ -49,10 +50,10 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
   const formValues = useWatch({
     control: form.control,
     name: [
-      "template",
+      "customer_details",
       "customer_id",
       "customer_name",
-      // "customer_details",
+      "template",
       "line_items",
       "amount",
       "vat",
@@ -69,21 +70,15 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
   const debouncedValues = useDebounce(formValues, 800);
 
   useEffect(() => {
+    // Don't auto save if the invoice is in edit mode
+    if (type === "edit") return;
+
     const currentFormValues = form.getValues();
 
     if (isDirty && form.watch("customer_id")) {
-      draftInvoice.execute(currentFormValues);
+      draftInvoice.execute(transformFormValuesToDraft(currentFormValues));
     }
-  }, [debouncedValues, isDirty]);
-
-  useEffect(() => {
-    const customer = customers.find((c) => c.id === selectedCustomerId);
-
-    if (selectedCustomerId) {
-      form.setValue("customer_id", customer?.id, { shouldValidate: true });
-      form.setValue("customer_name", customer?.name, { shouldValidate: true });
-    }
-  }, [selectedCustomerId, customers]);
+  }, [debouncedValues, isDirty, type]);
 
   useEffect(() => {
     const updateLastEditedText = () => {
@@ -101,8 +96,18 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
     return () => clearInterval(intervalId);
   }, [lastUpdated]);
 
+  // Submit the form and the draft invoice
+  const handleSubmit = (values: InvoiceFormValues) => {
+    onSubmit(values);
+
+    draftInvoice.execute(transformFormValuesToDraft(values));
+  };
+
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="relative h-full">
+    <form
+      onSubmit={form.handleSubmit(handleSubmit)}
+      className="relative h-full"
+    >
       <ScrollArea
         className={`w-[${size - 20}px] h-[calc(100vh-200px)] bg-background`}
         hideScrollbar
@@ -129,7 +134,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
             <LineItems />
           </div>
 
-          <div className="mt-8 flex justify-end mb-8">
+          <div className="mt-12 flex justify-end mb-8">
             <Summary />
           </div>
 

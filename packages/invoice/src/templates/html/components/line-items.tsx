@@ -10,6 +10,8 @@ type Props = {
   totalLabel: string;
   vatLabel?: string;
   includeVAT?: boolean;
+  includeDecimals?: boolean;
+  locale: string;
 };
 
 export function LineItems({
@@ -21,7 +23,11 @@ export function LineItems({
   totalLabel,
   vatLabel,
   includeVAT = false,
+  includeDecimals = false,
+  locale,
 }: Props) {
+  const maximumFractionDigits = includeDecimals ? 2 : 0;
+
   return (
     <div className="mt-5 font-mono">
       <div
@@ -49,12 +55,18 @@ export function LineItems({
         >
           <div className="text-[11px]">{item.name}</div>
           <div className="text-[11px]">
-            {formatAmount({ currency, amount: item.price })}
+            {formatAmount({
+              currency,
+              amount: item.price,
+              maximumFractionDigits,
+              locale,
+            })}
           </div>
           <div className="text-[11px]">{item.quantity}</div>
           {includeVAT && <div className="text-[11px]">{item.vat}%</div>}
           <div className="text-[11px] text-right">
             {formatAmount({
+              maximumFractionDigits,
               currency,
               amount: calculateTotal({
                 price: item.price,
@@ -62,6 +74,7 @@ export function LineItems({
                 vat: item.vat,
                 includeVAT,
               }),
+              locale,
             })}
           </div>
         </div>
