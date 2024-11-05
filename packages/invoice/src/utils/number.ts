@@ -1,8 +1,7 @@
 const prefix = "INV";
 
 export const generateInvoiceNumber = (count: number) => {
-  // Increment count to get the next invoice number in the sequence
-  const nextInvoiceNumber = count + 1;
+  const nextInvoiceNumber = count > 1 ? count + 1 : 1;
 
   let paddedCount: string;
 
