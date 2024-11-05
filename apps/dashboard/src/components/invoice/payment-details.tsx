@@ -34,7 +34,7 @@ export function PaymentDetails() {
             }}
             onBlur={(content) => {
               updateInvoiceTemplate.execute({
-                payment_details: content,
+                payment_details: content ? JSON.stringify(content) : null,
               });
             }}
             className="h-[78px]"

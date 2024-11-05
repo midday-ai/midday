@@ -68,7 +68,7 @@ export function InvoiceSheetContent({
     setInvoice(null);
   }, [isOpen]);
 
-  if (invoice) {
+  if (invoice && type !== "edit") {
     return (
       <SheetContent className="bg-white dark:bg-[#0C0C0C] transition-[max-width] duration-300 ease-in-out">
         <InvoiceSheetHeader
@@ -115,9 +115,7 @@ export function InvoiceSheetContent({
         teamId={teamId}
         customers={customers}
         isSubmitting={createInvoice.isPending}
-        onSubmit={({ id, type, customer_id }) =>
-          createInvoice.execute({ id, type, customer_id })
-        }
+        onSubmit={({ id }) => createInvoice.execute({ id })}
       />
     </SheetContent>
   );

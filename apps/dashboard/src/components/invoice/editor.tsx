@@ -8,7 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 type Props = {
   initialContent?: JSONContent;
   className?: string;
-  onChange?: (content?: JSONContent) => void;
+  onChange?: (content?: JSONContent | null) => void;
   onBlur?: (content: JSONContent | null) => void;
   placeholder?: string;
 };
@@ -22,7 +22,7 @@ export function Editor({
 }: Props) {
   const [isFocused, setIsFocused] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
-  const [content, setContent] = useState<JSONContent | undefined>(
+  const [content, setContent] = useState<JSONContent | null | undefined>(
     initialContent,
   );
 

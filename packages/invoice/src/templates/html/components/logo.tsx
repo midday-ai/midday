@@ -6,5 +6,5 @@ type Props = {
 };
 
 export function Logo({ logo, customerName }: Props) {
-  return <Image src={logo} alt={customerName} width={78} height={78} />;
+  return <Image src={logo} alt={customerName} width={65} height={65} />;
 }

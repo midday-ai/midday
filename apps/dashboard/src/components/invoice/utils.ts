@@ -1,3 +1,4 @@
+import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import type { Customer } from "./customer-details";
 
 export const transformCustomerToContent = (customer?: Customer) => {
@@ -69,3 +70,35 @@ export const transformCustomerToContent = (customer?: Customer) => {
     content,
   };
 };
+
+export const transformFormValuesToDraft = (values: InvoiceFormValues) => {
+  return {
+    ...values,
+    template: {
+      ...values.template,
+      ...(values.payment_details && {
+        payment_details: JSON.stringify(values.payment_details),
+      }),
+      ...(values.from_details && {
+        from_details: JSON.stringify(values.from_details),
+      }),
+    },
+    ...(values.payment_details && {
+      payment_details: JSON.stringify(values.payment_details),
+    }),
+    ...(values.from_details && {
+      from_details: JSON.stringify(values.from_details),
+    }),
+    ...(values.customer_details && {
+      customer_details: JSON.stringify(values.customer_details),
+    }),
+    ...(values.note_details && {
+      note_details: JSON.stringify(values.note_details),
+    }),
+  };
+};
+
+export function parseInputValue(value?: string | null) {
+  if (value === null) return null;
+  return value ? JSON.parse(value) : undefined;
+}

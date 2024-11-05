@@ -47,13 +47,13 @@ const menuItems = [
   },
   {
     icon: Icons.Tax,
-    label: "Add Sales Tax",
+    label: "Sales Tax",
     options: booleanOptions,
     key: "include_tax",
   },
   {
     icon: Icons.Vat,
-    label: "Add VAT",
+    label: "VAT",
     options: booleanOptions,
     key: "include_vat",
   },
@@ -65,6 +65,18 @@ const menuItems = [
       label: currency,
     })),
     key: "currency",
+  },
+  {
+    icon: Icons.ConfirmationNumber,
+    label: "Discount",
+    options: booleanOptions,
+    key: "include_discount",
+  },
+  {
+    icon: Icons.Decimals,
+    label: "Decimals",
+    options: booleanOptions,
+    key: "include_decimals",
   },
 ];
 

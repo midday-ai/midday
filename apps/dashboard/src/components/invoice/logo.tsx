@@ -42,7 +42,7 @@ export function Logo({ teamId }: { teamId: string }) {
   };
 
   return (
-    <div className="relative size-[78px] group">
+    <div className="relative size-[65px] group">
       <label htmlFor="logo-upload" className="absolute inset-0">
         {isLoading ? (
           <Skeleton className="w-full h-full" />
@@ -69,7 +69,7 @@ export function Logo({ teamId }: { teamId: string }) {
             </button>
           </>
         ) : (
-          <div className="size-[78px] bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,background_1px,background_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,background_1px,background_5px)]" />
+          <div className="size-[65px] bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,background_1px,background_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,background_1px,background_5px)]" />
         )}
       </label>
 

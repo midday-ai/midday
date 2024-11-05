@@ -12,6 +12,7 @@ type Props = {
   vatLabel?: string;
   includeVAT?: boolean;
   locale: string;
+  includeDecimals?: boolean;
 };
 
 export function LineItems({
@@ -24,7 +25,10 @@ export function LineItems({
   locale,
   includeVAT = false,
   vatLabel,
+  includeDecimals,
 }: Props) {
+  const maximumFractionDigits = includeDecimals ? 2 : 0;
+
   return (
     <View style={{ marginTop: 20 }}>
       <View
@@ -68,7 +72,12 @@ export function LineItems({
         >
           <Text style={{ flex: 3, fontSize: 9 }}>{item.name}</Text>
           <Text style={{ flex: 1, fontSize: 9 }}>
-            {formatAmount({ currency, amount: item.price, locale })}
+            {formatAmount({
+              currency,
+              amount: item.price,
+              locale,
+              maximumFractionDigits,
+            })}
           </Text>
           <Text style={{ flex: 1, fontSize: 9 }}>{item.quantity}</Text>
 
@@ -81,6 +90,7 @@ export function LineItems({
               currency,
               amount: item.quantity * item.price,
               locale,
+              maximumFractionDigits,
             })}
           </Text>
         </View>
