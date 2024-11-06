@@ -102,10 +102,18 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
     draftInvoice.execute(transformFormValuesToDraft(values));
   };
 
+  // Prevent form from submitting when pressing enter
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+    }
+  };
+
   return (
     <form
       onSubmit={form.handleSubmit(handleSubmit)}
       className="relative h-full"
+      onKeyDown={handleKeyDown}
     >
       <ScrollArea
         className={`w-[${size - 20}px] h-[calc(100vh-200px)] bg-background`}

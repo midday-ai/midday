@@ -83,6 +83,7 @@ export async function PdfTemplate({
           issueDate={issue_date}
           dueDate={due_date}
           timezone={template.timezone}
+          dateFormat={template.date_format}
         />
 
         <View style={{ flexDirection: "row" }}>
