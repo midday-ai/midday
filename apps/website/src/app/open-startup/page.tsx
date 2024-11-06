@@ -1,6 +1,8 @@
 import { BankAccountsChart } from "@/components/charts/bank-accounts-chart";
 import { BankConnectionsChart } from "@/components/charts/bank-connections-chart";
 import { InboxChart } from "@/components/charts/inbox-chart";
+import { InvoiceCustomersChart } from "@/components/charts/invoice-customers";
+import { InvoicesChart } from "@/components/charts/invoices-chart";
 import { ReportsChart } from "@/components/charts/reports-chart";
 import { TrackerEntriesChart } from "@/components/charts/tracker-entries-chart";
 import { TrackerProjectsChart } from "@/components/charts/tracker-projects-chart";
@@ -59,6 +61,8 @@ export default async function Page() {
             <BankAccountsChart />
             <BankConnectionsChart />
             <VaultChart />
+            <InvoicesChart />
+            <InvoiceCustomersChart />
             <TrackerEntriesChart />
             <TrackerProjectsChart />
             <InboxChart />

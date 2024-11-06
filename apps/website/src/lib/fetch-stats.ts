@@ -2,7 +2,6 @@
 
 import type { Database } from "@midday/supabase/types";
 import { createServerClient } from "@supabase/ssr";
-import { unstable_cache } from "next/cache";
 
 export async function fetchStats() {
   const supabase = createServerClient<Database>(
@@ -53,6 +52,8 @@ export async function fetchStats() {
     { count: reports },
     { count: vaultObjects },
     { count: transactionEnrichments },
+    { count: invoices },
+    { count: invoiceCustomers },
   ] = await Promise.all([
     supabase
       .from("teams")
@@ -94,6 +95,14 @@ export async function fetchStats() {
       .from("transaction_enrichments")
       .select("id", { count: "exact", head: true })
       .limit(1),
+    supabase
+      .from("invoices")
+      .select("id", { count: "exact", head: true })
+      .limit(1),
+    supabase
+      .from("customers")
+      .select("id", { count: "exact", head: true })
+      .limit(1),
   ]);
 
   return {
@@ -107,5 +116,7 @@ export async function fetchStats() {
     reports,
     vaultObjects,
     transactionEnrichments,
+    invoices,
+    invoiceCustomers,
   };
 }
