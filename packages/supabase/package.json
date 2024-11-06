@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@date-fns/utc": "^2.1.0",
-    "@supabase/postgrest-js": "^1.17.0",
+    "@supabase/postgrest-js": "^1.17.2",
     "@supabase/ssr": "^0.5.1",
     "date-fns": "^4.1.0",
     "react": "18.3.1",
     "server-only": "^0.0.1",
-    "supabase": "^1.207.9"
+    "supabase": "^1.215.0"
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2.46.1",
