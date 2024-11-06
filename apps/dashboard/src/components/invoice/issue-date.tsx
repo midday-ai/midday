@@ -16,7 +16,7 @@ export function IssueDate() {
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
-      setValue("issue_date", date, { shouldValidate: true });
+      setValue("issue_date", date, { shouldValidate: true, shouldDirty: true });
       setIsOpen(false);
     }
   };
