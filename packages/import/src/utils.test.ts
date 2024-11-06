@@ -90,4 +90,8 @@ describe("formatDate", () => {
   it("should handle America timezones", () => {
     expect(formatDate("2023-05-15", "America/New_York")).toBe("2023-05-14");
   });
+
+  it("should handle short date format", () => {
+    expect(formatDate("11/4/24", "Europe/Berlin")).toBe("2024-04-11");
+  });
 });
