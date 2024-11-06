@@ -28,7 +28,7 @@ import * as React from "react";
 export type Invoice = {
   id: string;
   due_date: string;
-  invoice_date?: string;
+  issue_date?: string;
   paid_at?: string;
   status: string;
   currency: string;
@@ -148,10 +148,10 @@ export const columns: ColumnDef<Invoice>[] = [
     cell: ({ row }) => row.getValue("invoice_number"),
   },
   {
-    header: "Invoice date",
-    accessorKey: "invoice_date",
+    header: "Issue date",
+    accessorKey: "issue_date",
     cell: ({ row }) => {
-      const date = row.getValue("invoice_date");
+      const date = row.getValue("issue_date");
       return <span>{date ? formatDate(date) : "-"}</span>;
     },
   },

@@ -38,9 +38,10 @@ const defaultTemplate: InvoiceTemplate = {
   discount_label: "Discount",
   include_discount: false,
   include_decimals: false,
+  include_qr: true,
   date_format: "dd/MM/yyyy",
   include_tax: true,
-  tax_rate: 10,
+  tax_rate: 0,
   delivery_type: "create",
 };
 
@@ -82,7 +83,7 @@ export function FormContext({
     issue_date: new UTCDate(),
     due_date: addMonths(new UTCDate(), 1),
     invoice_number: invoiceNumber,
-    line_items: [{ name: "", quantity: 0, price: 0 }],
+    line_items: [{ name: "", quantity: 0, price: 0, vat: 0 }],
     tax: undefined,
     token: undefined,
     discount: undefined,
@@ -95,13 +96,15 @@ export function FormContext({
   });
 
   useEffect(() => {
-    form.reset({
-      ...defaultValues,
-      template: {
-        ...defaultValues.template,
-        locale: navigator.language,
-      },
-    });
+    if (!isOpen) {
+      form.reset({
+        ...defaultValues,
+        template: {
+          ...defaultValues.template,
+          locale: navigator.language,
+        },
+      });
+    }
   }, [isOpen]);
 
   useEffect(() => {

@@ -19,8 +19,9 @@ export function TaxInput() {
       onValueChange={(values) => {
         onChange(values.floatValue);
       }}
-      className="p-0 border-0 h-6 text-xs !bg-transparent font-mono flex-shrink-0 w-10 text-[11px] text-[#878787]"
+      className="p-0 border-0 h-6 text-xs !bg-transparent font-mono flex-shrink-0 w-16 text-[11px] text-[#878787]"
       thousandSeparator={false}
+      decimalScale={2}
       isAllowed={(values) => {
         const { floatValue } = values;
         return (

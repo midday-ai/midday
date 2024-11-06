@@ -21,17 +21,22 @@ export function Editor({
   placeholder,
 }: Props) {
   const [isFocused, setIsFocused] = useState(false);
-  const [isEmpty, setIsEmpty] = useState(false);
   const [content, setContent] = useState<JSONContent | null | undefined>(
     initialContent,
   );
+
+  // When async content is loaded, set the content
+  useEffect(() => {
+    if (initialContent !== content) {
+      setContent(initialContent);
+    }
+  }, [initialContent]);
 
   const handleUpdate = useCallback(
     (editor: EditorInstance) => {
       const json = editor.getJSON();
       const newIsEmpty = editor.state.doc.textContent.length === 0;
 
-      setIsEmpty(newIsEmpty);
       setContent(newIsEmpty ? null : json);
       onChange?.(newIsEmpty ? null : json);
     },
@@ -48,13 +53,7 @@ export function Editor({
     onBlur?.(content ?? null);
   }, [content, onBlur]);
 
-  useEffect(() => {
-    if (!content?.content?.length) {
-      setIsEmpty(true);
-    }
-  }, [content]);
-
-  const showPlaceholder = isEmpty && !isFocused;
+  const showPlaceholder = !content && !isFocused;
 
   return (
     <BaseEditor

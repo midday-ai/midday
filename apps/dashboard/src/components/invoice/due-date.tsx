@@ -44,7 +44,7 @@ export function DueDate() {
         <PopoverContent className="w-auto p-0">
           <Calendar
             mode="single"
-            selected={dueDate}
+            selected={dueDate ? new Date(dueDate) : undefined}
             onSelect={handleSelect}
             initialFocus
           />

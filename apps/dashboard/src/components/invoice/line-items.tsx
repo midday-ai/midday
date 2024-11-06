@@ -58,7 +58,7 @@ export function LineItems() {
   return (
     <div className="space-y-4">
       <div
-        className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end mb-2`}
+        className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_10%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end mb-2`}
       >
         <LabelInput
           name="template.description_label"
@@ -185,7 +185,7 @@ function LineItemRow({
 
   return (
     <Reorder.Item
-      className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full`}
+      className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_10%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full`}
       value={item}
       dragListener={false}
       dragControls={controls}

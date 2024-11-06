@@ -17,6 +17,7 @@ export type Template = {
   locale: string;
   timezone: string;
   include_decimals: boolean;
+  include_qr: boolean;
   include_vat: boolean;
 };
 

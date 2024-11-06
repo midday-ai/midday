@@ -36,7 +36,6 @@ export const createInvoiceAction = authActionClient
       .from("invoices")
       .update({
         id,
-        invoice_date: new UTCDate().toISOString(),
         status: "unpaid",
         sent_to:
           deliveryType === "create_and_send" ? draft.customer.email : null,

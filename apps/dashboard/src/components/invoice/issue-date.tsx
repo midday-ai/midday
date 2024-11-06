@@ -43,7 +43,7 @@ export function IssueDate() {
         <PopoverContent className="w-auto p-0">
           <Calendar
             mode="single"
-            selected={issueDate}
+            selected={issueDate ? new Date(issueDate) : undefined}
             onSelect={handleSelect}
             initialFocus
           />

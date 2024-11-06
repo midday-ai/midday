@@ -204,7 +204,6 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
                 <Calendar
                   mode="range"
                   initialFocus
-                  today={start ? new Date(start) : new Date()}
                   toDate={new Date()}
                   selected={{
                     from: start ? new Date(start) : undefined,

@@ -28,7 +28,7 @@ export function InvoiceRow({ row }: Props) {
               (cell.column.id === "actions" ||
                 cell.column.id === "recurring" ||
                 cell.column.id === "invoice_number" ||
-                cell.column.id === "invoice_date") &&
+                cell.column.id === "issue_date") &&
                 "hidden md:table-cell",
             )}
             onClick={() =>

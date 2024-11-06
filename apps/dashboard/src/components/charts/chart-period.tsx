@@ -161,7 +161,6 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
           <Calendar
             mode="range"
             numberOfMonths={2}
-            today={params.from ? new Date(params.from) : new Date()}
             selected={{
               from: params.from && new Date(params.from),
               to: params.to && new Date(params.to),
