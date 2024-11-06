@@ -396,7 +396,7 @@ export function TrackerSchedule({
           </div>
 
           <div
-            className="relative flex-grow border border-border border-t-0"
+            className="relative flex-grow border border-border border-t-0 cursor-default select-none"
             onMouseMove={handleMouseMove}
             onMouseDown={(e) => {
               if (e.button === 0 && !isContextMenuOpen) {
