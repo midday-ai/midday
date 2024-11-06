@@ -13,6 +13,8 @@ export function Input({ className, ...props }: InputProps) {
     valueAsNumber: props.type === "number",
   });
 
+  const isPlaceholder = !fieldValue && !isFocused;
+
   return (
     <div className="relative">
       <BaseInput
@@ -23,12 +25,13 @@ export function Input({ className, ...props }: InputProps) {
         value={fieldValue || ""}
         className={cn(
           "border-0 p-0 h-6 border-b border-transparent focus:border-border font-mono text-xs",
+          isPlaceholder && "opacity-0",
           className,
         )}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
       />
-      {!fieldValue && !isFocused && (
+      {isPlaceholder && (
         <div className="absolute inset-0 pointer-events-none">
           <div className="h-full w-full bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)]" />
         </div>

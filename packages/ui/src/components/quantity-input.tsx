@@ -1,5 +1,6 @@
 import { Minus, Plus } from "lucide-react";
 import * as React from "react";
+import { cn } from "../utils";
 
 type Props = {
   value?: number;
@@ -8,6 +9,7 @@ type Props = {
   onChange?: (value: number) => void;
   onBlur?: () => void;
   onFocus?: () => void;
+  className?: string;
 };
 
 export function QuantityInput({
@@ -17,6 +19,7 @@ export function QuantityInput({
   onChange,
   onBlur,
   onFocus,
+  className,
 }: Props) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [rawValue, setRawValue] = React.useState(String(value));
@@ -46,7 +49,12 @@ export function QuantityInput({
     };
 
   return (
-    <div className="group flex items-stretch transition-[box-shadow] font-mono">
+    <div
+      className={cn(
+        "group flex items-stretch transition-[box-shadow] font-mono",
+        className,
+      )}
+    >
       <button
         aria-label="Decrease"
         className="flex items-center pr-[.325em]"

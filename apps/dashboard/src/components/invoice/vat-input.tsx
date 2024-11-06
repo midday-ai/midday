@@ -21,6 +21,8 @@ export function VATInput({
 
   const [isFocused, setIsFocused] = useState(false);
 
+  const isPlaceholder = !value && !isFocused;
+
   return (
     <div className="relative">
       <CurrencyInput
@@ -38,6 +40,7 @@ export function VATInput({
         }}
         {...props}
         className={cn(
+          isPlaceholder && "opacity-0",
           className,
           "p-0 border-0 h-6 text-xs !bg-transparent border-b border-transparent focus:border-border font-mono",
         )}
@@ -51,7 +54,7 @@ export function VATInput({
           );
         }}
       />
-      {!value && !isFocused && (
+      {isPlaceholder && (
         <div className="absolute inset-0 pointer-events-none">
           <div className="h-full w-full bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)]" />
         </div>
