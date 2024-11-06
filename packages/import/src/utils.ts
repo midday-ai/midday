@@ -11,6 +11,20 @@ function getAdjustedDate(date: string, dateAdjustment?: number) {
   return adjustedDate;
 }
 
+function ensureValidYear(dateString: string | undefined): string | undefined {
+  if (!dateString) return undefined;
+
+  const [year, month, day] = dateString.split("-");
+  const correctedYear =
+    year?.length === 4
+      ? year.startsWith("20")
+        ? year
+        : `20${year.slice(2)}`
+      : `20${year}`;
+
+  return `${correctedYear}-${month}-${day}`;
+}
+
 export function formatDate(
   date: string,
   timezone = "America/New_York",
@@ -37,28 +51,37 @@ export function formatDate(
     "dd-MM-yyyy HH:mm:ss",
     "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
     "yyyy-MM-dd'T'HH:mm:ss",
+    "d/M/yy",
   ];
 
   for (const format of formats) {
     const parsedDate = parse(date, format, new Date());
     if (isValid(parsedDate)) {
-      const date = formatInTimeZone(parsedDate, timezone, "yyyy-MM-dd");
-
-      return getAdjustedDate(date, dateAdjustment);
+      const formattedDate = formatInTimeZone(
+        parsedDate,
+        timezone,
+        "yyyy-MM-dd",
+      );
+      return ensureValidYear(getAdjustedDate(formattedDate, dateAdjustment));
     }
   }
 
   if (isValid(new Date(date))) {
-    return formatInTimeZone(new Date(date), timezone, "yyyy-MM-dd");
+    return ensureValidYear(
+      formatInTimeZone(new Date(date), timezone, "yyyy-MM-dd"),
+    );
   }
 
   // If the date includes a time, we don't need to remove the time.
   const value = date.includes("T") ? date : date.replace(/[^0-9-\.\/]/g, "");
 
   if (isValid(new Date(value))) {
-    const date = formatInTimeZone(new Date(value), timezone, "yyyy-MM-dd");
-
-    return getAdjustedDate(date, dateAdjustment);
+    const formattedDate = formatInTimeZone(
+      new Date(value),
+      timezone,
+      "yyyy-MM-dd",
+    );
+    return ensureValidYear(getAdjustedDate(formattedDate, dateAdjustment));
   }
 
   // If all parsing attempts fail, return undefined
