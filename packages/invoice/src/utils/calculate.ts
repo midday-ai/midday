@@ -9,7 +9,7 @@ export function calculateTotal({
   vat?: number;
   includeVAT: boolean;
 }): number {
-  const baseTotal = price * quantity;
+  const baseTotal = (price ?? 0) * (quantity ?? 0);
   const vatMultiplier = includeVAT ? 1 + (vat || 0) / 100 : 1;
   return baseTotal * vatMultiplier;
 }
@@ -19,8 +19,10 @@ export function calculateTotals(
 ) {
   return lineItems.reduce(
     (acc, item) => {
-      const itemTotal = (item.price || 0) * (item.quantity || 0);
-      const itemVAT = (itemTotal * (item.vat || 0)) / 100;
+      const itemTotal = (item.price ?? 0) * (item.quantity ?? 0);
+
+      const itemVAT = (itemTotal * (item.vat ?? 0)) / 100;
+
       return {
         totalAmount: acc.totalAmount + itemTotal,
         totalVAT: acc.totalVAT + itemVAT,
