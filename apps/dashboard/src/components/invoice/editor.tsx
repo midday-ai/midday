@@ -60,7 +60,7 @@ export function Editor({
       className={cn(
         "font-mono text-[11px] text-primary leading-[18px] invoice-editor",
         showPlaceholder &&
-          "w-full bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,background_1px,background_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,background_1px,background_5px)]",
+          "w-full bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)]",
         className,
       )}
       placeholder={placeholder}

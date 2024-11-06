@@ -431,7 +431,7 @@ function CalendarDay({
           ? "bg-[#f0f0f0] dark:bg-[#202020]"
           : "bg-background",
         !isCurrentMonth &&
-          "bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,background_1px,background_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,background_1px,background_5px)]",
+          "bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)]",
         selectedDate === formattedDate && "ring-1 ring-primary",
         isInRange(date) && "ring-1 ring-primary bg-opacity-50",
         isFirstSelectedDate(date) && "ring-1 ring-primary bg-opacity-50",
