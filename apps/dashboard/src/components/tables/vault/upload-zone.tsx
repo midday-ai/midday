@@ -145,6 +145,8 @@ export function UploadZone({ children }: Props) {
       "application/pdf": [".pdf"],
       "application/zip": [".zip"],
       "text/csv": [".csv"],
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+        [".pptx"],
     },
   });
 
