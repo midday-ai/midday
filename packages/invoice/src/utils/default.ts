@@ -1,20 +1,24 @@
 import { getCountryCode, getTimezone } from "@midday/location";
 import { currencies } from "@midday/location/src/currencies";
+import { getUser } from "@midday/supabase/cached-queries";
 
 export type Settings = {
   currency: string;
-  timezone: string;
   size: string;
   include_tax: boolean;
   include_vat: boolean;
   include_discount: boolean;
   include_decimals: boolean;
   include_qr: boolean;
+  timezone?: string;
+  locale?: string;
 };
 
-export function getDefaultSettings(): Settings {
+export async function getDefaultSettings(): Promise<Settings> {
   const countryCode = getCountryCode();
   const timezone = getTimezone();
+
+  const { data: userData } = await getUser();
 
   const currency = currencies[countryCode as keyof typeof currencies] ?? "USD";
 
@@ -27,10 +31,11 @@ export function getDefaultSettings(): Settings {
   );
 
   return {
-    currency,
+    currency: userData?.team?.base_currency ?? currency,
     size,
     include_tax,
-    timezone,
+    timezone: userData?.timezone ?? timezone,
+    locale: userData?.locale,
     include_vat: !include_tax,
     include_discount: false,
     include_decimals: false,

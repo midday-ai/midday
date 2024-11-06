@@ -35,7 +35,7 @@ export default async function Page({
     page,
   } = searchParamsCache.parse(searchParams);
 
-  const defaultSettings = getDefaultSettings();
+  const defaultSettings = await getDefaultSettings();
 
   const loadingKey = JSON.stringify({
     q: query,
