@@ -1146,7 +1146,7 @@ export async function getInvoicesQuery(
   const query = supabase
     .from("invoices")
     .select(
-      "id, invoice_number, internal_note, token, due_date, invoice_date, paid_at, updated_at, viewed_at, amount, template, currency, status, vat, tax, customer:customer_id(id, name, website), customer_name",
+      "id, invoice_number, internal_note, token, due_date, issue_date, paid_at, updated_at, viewed_at, amount, template, currency, status, vat, tax, customer:customer_id(id, name, website), customer_name",
       { count: "exact" },
     )
     .eq("team_id", teamId);

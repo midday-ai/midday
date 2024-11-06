@@ -45,6 +45,7 @@ export function HtmlTemplate({
             invoiceNumber={invoice_number}
             issueDate={issue_date}
             dueDate={due_date}
+            timezone={template.timezone}
           />
         </div>
 

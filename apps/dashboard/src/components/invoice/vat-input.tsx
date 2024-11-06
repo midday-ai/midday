@@ -42,6 +42,7 @@ export function VATInput({
           "p-0 border-0 h-6 text-xs !bg-transparent border-b border-transparent focus:border-border font-mono",
         )}
         thousandSeparator={false}
+        decimalScale={2}
         allowNegative={false}
         isAllowed={(values) => {
           const { floatValue } = values;

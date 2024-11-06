@@ -78,6 +78,12 @@ const menuItems = [
     options: booleanOptions,
     key: "include_decimals",
   },
+  {
+    icon: Icons.QrCode,
+    label: "QR Code",
+    options: booleanOptions,
+    key: "include_qr",
+  },
 ];
 
 export function SettingsMenu() {

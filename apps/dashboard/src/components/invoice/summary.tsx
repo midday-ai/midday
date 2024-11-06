@@ -52,6 +52,7 @@ export function Summary() {
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
   const { totalAmount, totalVAT } = calculateTotals(lineItems);
+
   const discount = useWatch({
     control,
     name: "discount",
@@ -82,6 +83,26 @@ export function Summary() {
   useEffect(() => {
     updateFormValues();
   }, [updateFormValues]);
+
+  useEffect(() => {
+    if (!includeVAT) {
+      lineItems.forEach((_, index) => {
+        setValue(`line_items.${index}.vat`, 0, { shouldValidate: true });
+      });
+    }
+  }, [includeVAT]);
+
+  useEffect(() => {
+    if (!includeTax) {
+      setValue("template.tax_rate", 0, { shouldValidate: true });
+    }
+  }, [includeTax]);
+
+  useEffect(() => {
+    if (!includeDiscount) {
+      setValue("discount", 0, { shouldValidate: true });
+    }
+  }, [includeDiscount]);
 
   return (
     <div className="w-[320px] flex flex-col">

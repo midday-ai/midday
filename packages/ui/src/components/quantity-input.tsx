@@ -34,17 +34,6 @@ export function QuantityInput({
     }
   };
 
-  const handleBlur: React.FocusEventHandler<HTMLInputElement> = (event) => {
-    const finalValue = Number.parseFloat(event.currentTarget.value);
-    if (!Number.isNaN(finalValue)) {
-      setRawValue(String(finalValue));
-      onChange?.(finalValue);
-    } else {
-      setRawValue(String(value));
-    }
-    onBlur?.(event);
-  };
-
   const handlePointerDown =
     (diff: number) => (event: React.PointerEvent<HTMLButtonElement>) => {
       if (event.pointerType === "mouse") {
@@ -85,7 +74,7 @@ export function QuantityInput({
           step={0.1}
           value={rawValue}
           onInput={handleInput}
-          onBlur={handleBlur}
+          onBlur={onBlur}
           onFocus={onFocus}
           inputMode="decimal"
         />

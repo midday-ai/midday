@@ -8,6 +8,7 @@ import {
   type JSONContent,
   useEditor,
 } from "@tiptap/react";
+import { useEffect } from "react";
 import { BubbleMenu } from "./extentions/bubble-menu";
 import { registerExtensions } from "./extentions/register";
 
@@ -38,6 +39,12 @@ export function Editor({
       onUpdate?.(editor);
     },
   });
+
+  useEffect(() => {
+    if (initialContent) {
+      editor?.commands.setContent(initialContent);
+    }
+  }, [initialContent]);
 
   if (!editor) return null;
 

@@ -99,13 +99,13 @@ export function TableHeader() {
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
-            onClick={() => createSortQuery("invoice_date")}
+            onClick={() => createSortQuery("issue_date")}
           >
-            <span>Invoice Date</span>
-            {"invoice_date" === column && value === "asc" && (
+            <span>Issue Date</span>
+            {"issue_date" === column && value === "asc" && (
               <ArrowDown size={16} />
             )}
-            {"invoice_date" === column && value === "desc" && (
+            {"issue_date" === column && value === "desc" && (
               <ArrowUp size={16} />
             )}
           </Button>

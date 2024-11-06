@@ -28,7 +28,7 @@ export function InvoiceDetails({
   tax,
   paid_at,
   due_date,
-  invoice_date,
+  issue_date,
   invoice_number,
   template,
   token,
@@ -102,11 +102,9 @@ export function InvoiceDetails({
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-sm text-[#606060]">Invoice date</span>
+          <span className="text-sm text-[#606060]">Issue date</span>
           <span className="text-sm">
-            <span>
-              {invoice_date && format(new Date(invoice_date), "MMM dd")}
-            </span>
+            <span>{issue_date && format(new Date(issue_date), "MMM dd")}</span>
           </span>
         </div>
         <div className="flex justify-between items-center">

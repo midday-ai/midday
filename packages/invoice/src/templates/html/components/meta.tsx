@@ -7,9 +7,16 @@ type Props = {
   invoiceNumber: string;
   issueDate: string;
   dueDate: string;
+  timezone: string;
 };
 
-export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
+export function Meta({
+  template,
+  invoiceNumber,
+  issueDate,
+  dueDate,
+  timezone,
+}: Props) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 md:gap-4 items-center">
       <div className="flex space-x-1 items-center">
@@ -31,7 +38,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
                 {template.issue_date_label}:
               </span>
               <span className="text-[11px] font-mono flex-shrink-0">
-                {format(new TZDate(issueDate, "UTC"), template.date_format)}
+                {format(new TZDate(issueDate, timezone), template.date_format)}
               </span>
             </div>
           </div>
@@ -45,7 +52,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
                 {template.due_date_label}:
               </span>
               <span className="text-[11px] font-mono flex-shrink-0">
-                {format(new TZDate(dueDate, "UTC"), template.date_format)}
+                {format(new TZDate(dueDate, timezone), template.date_format)}
               </span>
             </div>
           </div>

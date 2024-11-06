@@ -42,14 +42,15 @@ export async function PdfTemplate({
   size = "a4",
   token,
 }: TemplateProps) {
-  const qrCode = await QRCodeUtil.toDataURL(
-    `https://app.midday.ai/i/${token}`,
-    {
+  let qrCode = null;
+
+  if (template.include_qr) {
+    qrCode = await QRCodeUtil.toDataURL(`https://app.midday.ai/i/${token}`, {
       width: 40 * 3,
       height: 40 * 3,
       margin: 0,
-    },
-  );
+    });
+  }
 
   return (
     <Document>
@@ -81,6 +82,7 @@ export async function PdfTemplate({
           invoiceNo={invoice_number}
           issueDate={issue_date}
           dueDate={due_date}
+          timezone={template.timezone}
         />
 
         <View style={{ flexDirection: "row" }}>
@@ -148,7 +150,7 @@ export async function PdfTemplate({
                 paymentLabel={template.payment_label}
               />
 
-              <QRCode data={qrCode} />
+              {qrCode && <QRCode data={qrCode} />}
             </View>
 
             <View style={{ flex: 1, marginLeft: 10 }}>

@@ -90,6 +90,8 @@ import {
   MdOutlinePalette,
   MdOutlinePause,
   MdOutlinePlayArrow,
+  MdOutlineQrCode,
+  MdOutlineQrCode2,
   MdOutlineQuestionAnswer,
   MdOutlineRepeat,
   MdOutlineSettings,
@@ -555,7 +557,11 @@ export const Icons = {
       </g>
     </svg>
   ),
-  Decimals: ({ className, size = 24, ...props }: React.SVGProps<SVGSVGElement> & { size?: number | string }) => (
+  Decimals: ({
+    className,
+    size = 24,
+    ...props
+  }: React.SVGProps<SVGSVGElement> & { size?: number | string }) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       height={size}
@@ -683,4 +689,5 @@ export const Icons = {
   CurrencyOutline: MdOutlineAttachMoney,
   SnippetFolder: MdSnippetFolder,
   ConfirmationNumber: MdOutlineConfirmationNumber,
- };
+  QrCode: MdOutlineQrCode2,
+};

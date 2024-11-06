@@ -11,5 +11,4 @@ export const Cookies = {
   InboxOrder: "inbox-order",
   HideConnectFlow: "hide-connect-flow",
   LastProject: "last-project",
-  RequestAccess: "request-access",
 };
