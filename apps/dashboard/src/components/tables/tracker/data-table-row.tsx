@@ -153,9 +153,6 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
           <TrackerExportCSV
             name={row.name}
             projectId={row.id}
-            currency={row.currency}
-            billable={row.billable}
-            rate={row.rate}
             teamId={row.team_id}
             userId={userId}
           />

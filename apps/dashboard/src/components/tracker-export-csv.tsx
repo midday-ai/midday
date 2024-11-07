@@ -1,4 +1,4 @@
-import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
+import { secondsToHoursAndMinutes } from "@/utils/format";
 import { UTCDate } from "@date-fns/utc";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
@@ -20,22 +20,11 @@ import type { DateRange } from "react-day-picker";
 type Props = {
   name: string;
   projectId: string;
-  currency: string;
-  billable: boolean;
   teamId: string;
   userId: string;
-  rate: number;
 };
 
-export function TrackerExportCSV({
-  name,
-  teamId,
-  projectId,
-  currency,
-  userId,
-  billable,
-  rate,
-}: Props) {
+export function TrackerExportCSV({ name, teamId, projectId, userId }: Props) {
   const [includeTeam, setIncludeTeam] = useState(false);
   const [date, setDate] = useState<DateRange | undefined>({
     from: startOfMonth(new Date()),
@@ -83,8 +72,6 @@ export function TrackerExportCSV({
     const totalTimeInSeconds =
       data?.reduce((sum, item) => sum + (item?.duration ?? 0), 0) ?? 0;
 
-    const totalBillable = (totalTimeInSeconds / 3600) * rate;
-
     const dataWithFooter = [
       ...(formattedData ?? []),
       {
@@ -93,21 +80,6 @@ export function TrackerExportCSV({
         Description: null,
         Time: secondsToHoursAndMinutes(totalTimeInSeconds),
       },
-      ...(billable
-        ? [
-            {
-              Date: "Total Amount",
-              Assigned: null,
-              Description: null,
-              Time: formatAmount({
-                amount: totalBillable,
-                currency,
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              }),
-            },
-          ]
-        : []),
     ];
 
     const csv = Papa.unparse(dataWithFooter);
