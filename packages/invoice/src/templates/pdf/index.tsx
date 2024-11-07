@@ -1,5 +1,12 @@
-import { getCdnUrl } from "@midday/utils/envs";
-import { Document, Font, Image, Page, Text, View } from "@react-pdf/renderer";
+import {
+  Document,
+  Font,
+  Image,
+  Page,
+  StyleSheet,
+  Text,
+  View,
+} from "@react-pdf/renderer";
 import QRCodeUtil from "qrcode";
 import type { TemplateProps } from "../types";
 import { EditorContent } from "./components/editor-content";
@@ -14,14 +21,23 @@ Font.register({
   family: "GeistMono",
   fonts: [
     {
-      src: `${getCdnUrl()}/fonts/GeistMono/ttf/GeistMono-Regular.ttf`,
+      src: "https://fonts.gstatic.com/s/geistmono/v1/or3yQ6H-1_WfwkMZI_qYPLs1a-t7PU0AbeE9KK5a5Cl4PuCTfNjENg.woff2",
       fontWeight: 400,
     },
     {
-      src: `${getCdnUrl()}/fonts/GeistMono/ttf/GeistMono-Medium.ttf`,
+      src: "https://fonts.gstatic.com/s/geistmono/v1/or3yQ6H-1_WfwkMZI_qYPLs1a-t7PU0AbeEPKK5U5Cl4PuCTfNg.woff2",
       fontWeight: 500,
     },
   ],
+});
+
+const stylesheet = StyleSheet.create({
+  container: {
+    padding: 20,
+    backgroundColor: "#fff",
+    fontFamily: "GeistMono",
+    color: "#000",
+  },
 });
 
 export async function PdfTemplate({
@@ -56,12 +72,7 @@ export async function PdfTemplate({
     <Document>
       <Page
         size={size.toUpperCase() as "LETTER" | "A4"}
-        style={{
-          padding: 20,
-          backgroundColor: "#fff",
-          fontFamily: "GeistMono",
-          color: "#000",
-        }}
+        style={stylesheet.container}
       >
         <View style={{ marginBottom: 20 }}>
           {template?.logo_url && (
