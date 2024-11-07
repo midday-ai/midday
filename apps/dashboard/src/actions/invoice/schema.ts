@@ -6,8 +6,8 @@ export const deleteInvoiceSchema = z.object({
 
 export const updateInvoiceSchema = z.object({
   id: z.string(),
-  status: z.enum(["paid", "canceled"]).optional(),
-  paid_at: z.string().optional(),
+  status: z.enum(["paid", "canceled", "unpaid"]).optional(),
+  paid_at: z.string().nullable().optional(),
   internal_note: z.string().nullable().optional(),
 });
 

@@ -103,7 +103,7 @@ export function EditInboxModal({
                       <FormItem className="w-full">
                         <FormControl>
                           <SelectCurrency
-                            className="w-full"
+                            className="w-full text-xs"
                             {...field}
                             currencies={Object.values(currencies)?.map(
                               (currency) => currency,

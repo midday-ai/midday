@@ -21,7 +21,9 @@ export const createInvoiceAction = authActionClient
 
     const { data: draft } = await supabase
       .from("invoices")
-      .select("id, customer:customer_id(name, website, email), template")
+      .select(
+        "id, sent_to, customer:customer_id(name, website, email), template",
+      )
       .eq("id", id)
       .single();
 
@@ -44,7 +46,8 @@ export const createInvoiceAction = authActionClient
       .select("*")
       .single();
 
-    if (deliveryType === "create_and_send") {
+    // Send email of delivery type is create_and_send and the invoice is not sent to the customer
+    if (deliveryType === "create_and_send" && !draft.sent_to) {
       try {
         await resend.emails.send({
           from: "Midday <middaybot@midday.ai>",

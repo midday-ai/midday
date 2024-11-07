@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 const paramsSchema = z.object({
   id: z.string().uuid(),
   size: z.enum(["letter", "a4"]).default("a4"),
-  preview: z.boolean().default(false),
+  preview: z.preprocess((val) => val === "true", z.boolean().default(false)),
 });
 
 export async function GET(req: NextRequest) {

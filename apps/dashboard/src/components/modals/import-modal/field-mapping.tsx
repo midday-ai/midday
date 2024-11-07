@@ -199,7 +199,7 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
             name="currency"
             render={({ field: { onChange, value } }) => (
               <SelectCurrency
-                className="w-full mt-4"
+                className="w-full text-xs"
                 value={value}
                 onChange={onChange}
                 currencies={Object.values(currencies)?.map(

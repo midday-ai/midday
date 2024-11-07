@@ -15,6 +15,7 @@ import { Icons } from "@midday/ui/icons";
 import { format } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useFormContext } from "react-hook-form";
+import { SelectCurrency } from "../select-currency";
 
 const dateFormats = [
   { value: "dd/MM/yyyy", label: "DD/MM/YYYY" },
@@ -100,6 +101,33 @@ export function SettingsMenu() {
       <DropdownMenuContent align="end" className="w-48">
         {menuItems.map((item, index) => {
           const watchKey = `template.${item.key}`;
+
+          if (item.key === "currency") {
+            return (
+              <DropdownMenuSub key={index.toString()}>
+                <DropdownMenuSubTrigger>
+                  <item.icon className="mr-2 size-4" />
+                  <span className="text-xs">{item.label}</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="p-0">
+                  <SelectCurrency
+                    headless
+                    className="text-xs"
+                    currencies={uniqueCurrencies}
+                    value={watch(watchKey)}
+                    onChange={(value) => {
+                      setValue(watchKey, value, {
+                        shouldValidate: true,
+                      });
+                      updateInvoiceTemplate.execute({
+                        [item.key]: value,
+                      });
+                    }}
+                  />
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+            );
+          }
 
           return (
             <DropdownMenuSub key={index.toString()}>

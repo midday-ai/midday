@@ -38,6 +38,7 @@ type Props<T> = {
   disabled?: boolean;
   onCreate?: (value: string) => void;
   headless?: boolean;
+  className?: string;
 };
 
 export function ComboboxDropdown<T extends ComboboxItem>({
@@ -47,13 +48,14 @@ export function ComboboxDropdown<T extends ComboboxItem>({
   items,
   onSelect,
   selectedItem: incomingSelectedItem,
-  renderSelectedItem,
+  renderSelectedItem = (item) => item.label,
   renderListItem,
   renderOnCreate,
   emptyResults,
   popoverProps,
   disabled,
   onCreate,
+  className,
 }: Props<T>) {
   const [open, setOpen] = React.useState(false);
   const [internalSelectedItem, setInternalSelectedItem] = React.useState<
@@ -86,7 +88,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
             return (
               <CommandItem
                 disabled={item.disabled}
-                className="cursor-pointer"
+                className={cn("cursor-pointer", className)}
                 key={item.id}
                 value={item.id}
                 onSelect={(id) => {
@@ -151,7 +153,6 @@ export function ComboboxDropdown<T extends ComboboxItem>({
       <PopoverTrigger asChild disabled={disabled}>
         <Button
           variant="outline"
-          role="combobox"
           aria-expanded={open}
           className="w-full justify-between relative"
         >

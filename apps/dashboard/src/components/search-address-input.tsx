@@ -202,9 +202,9 @@ export function SearchAddressInput({
         </div>
 
         {isOpen && (
-          <CommandList className="absolute w-full z-10 mt-10 bg-background">
+          <CommandList className="absolute left-6 right-6 w-auto z-10 mt-10 bg-background">
             {options.length > 0 ? (
-              <CommandGroup className="border border-border max-h-[145px] overflow-auto max-w-[528px]">
+              <CommandGroup className="border border-border max-h-[165px] overflow-auto max-w-[528px]">
                 {options.map((option) => {
                   const isSelected = selected?.value === option.value;
 
