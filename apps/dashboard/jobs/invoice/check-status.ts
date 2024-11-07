@@ -14,7 +14,9 @@ export const checkInvoiceStatus = schemaTask({
 
     const { data: invoice } = await supabase
       .from("invoices")
-      .select("id, status, due_date, currency, amount, team_id")
+      .select(
+        "id, status, due_date, currency, amount, team_id, file_path, invoice_number",
+      )
       .eq("id", invoiceId)
       .single();
 
@@ -53,16 +55,32 @@ export const checkInvoiceStatus = schemaTask({
       .eq("team_id", invoice.team_id)
       .eq("amount", invoice.amount)
       .eq("currency", invoice.currency)
-      .gte("date", subDays(new Date(), 3).toISOString())
+      .gte("date", subDays(new Date(), 5).toISOString())
       .eq("is_fulfilled", false);
 
     if (transactions?.length === 1) {
-      // Insert transaction attachment
-
+      // Update invoice status
       const { data: updatedInvoice } = await supabase
         .from("invoices")
         .update({ status: "paid" })
         .eq("id", invoiceId)
+        .select()
+        .single();
+
+      const transactionId = transactions.at(0)?.id;
+      const filename = `${invoice.invoice_number}.pdf`;
+
+      // Insert transaction attachment
+      await supabase
+        .from("transaction_attachments")
+        .insert({
+          type: "application/pdf",
+          path: invoice.file_path,
+          transaction_id: transactionId,
+          team_id: invoice.team_id,
+          name: filename,
+          size: 0, // TODO: Get size
+        })
         .select()
         .single();
 
