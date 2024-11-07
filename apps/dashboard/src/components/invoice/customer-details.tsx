@@ -36,7 +36,6 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const content = watch("customer_details");
-  const id = watch("id");
 
   const handleLabelSave = (value: string) => {
     updateInvoiceTemplate.execute({ customer_label: value });
@@ -88,8 +87,6 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
           control={control}
           render={({ field }) => (
             <Editor
-              // NOTE: This is a workaround to get the new content to render
-              key={id}
               initialContent={field.value}
               onChange={handleOnChange}
               className="h-[115px]"
