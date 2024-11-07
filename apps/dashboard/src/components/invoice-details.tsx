@@ -14,6 +14,7 @@ import { FormatAmount } from "./format-amount";
 import { InvoiceActions } from "./invoice-actions";
 import { InvoiceNote } from "./invoice-note";
 import { InvoiceStatus } from "./invoice-status";
+import { OpenURL } from "./open-url";
 import type { Invoice } from "./tables/invoices/columns";
 
 type Props = Invoice;
@@ -137,8 +138,14 @@ export function InvoiceDetails({
         <div className="mt-6 flex flex-col space-y-2 border-t border-border pt-6">
           <span className="text-sm text-[#606060]">Invoice link</span>
           <div className="flex w-full gap-2">
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 relative">
               <CopyInput value={`${window.location.origin}/i/${token}`} />
+
+              <div className="absolute right-9 top-[11px]">
+                <OpenURL href={`${window.location.origin}/i/${token}`}>
+                  <Icons.OpenInNew />
+                </OpenURL>
+              </div>
             </div>
 
             {status !== "draft" && (
