@@ -33,6 +33,7 @@ export function InvoiceDetails({
   template,
   token,
   internal_note,
+  updated_at,
 }: Props) {
   return (
     <div>
@@ -90,6 +91,17 @@ export function InvoiceDetails({
           </span>
           <span className="text-xs">
             <span className="text-[#606060]">Marked as paid</span>
+          </span>
+        </div>
+      )}
+
+      {status === "canceled" && (
+        <div className="mt-8 flex flex-col space-y-1">
+          <span className="text-base font-medium">
+            Canceled on {updated_at && format(new Date(updated_at), "MMM dd")}
+          </span>
+          <span className="text-xs">
+            <span className="text-[#606060]">Marked as canceled</span>
           </span>
         </div>
       )}

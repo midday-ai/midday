@@ -254,6 +254,17 @@ export const columns: ColumnDef<Invoice>[] = [
                 </DropdownMenuItem>
               )}
 
+              {status === "canceled" && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    table.options.meta?.deleteInvoice(row.original.id)
+                  }
+                  className="text-[#FF3638]"
+                >
+                  Delete
+                </DropdownMenuItem>
+              )}
+
               {status === "draft" && (
                 <DropdownMenuItem
                   onClick={() =>

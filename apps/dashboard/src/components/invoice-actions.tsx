@@ -36,6 +36,7 @@ export function InvoiceActions({ status, id }: Props) {
   const sendReminder = useAction(sendReminderAction);
 
   switch (status) {
+    case "canceled":
     case "paid":
       return (
         <div className="absolute right-4 mt-7">
