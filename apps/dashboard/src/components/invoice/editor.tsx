@@ -3,7 +3,7 @@
 import { cn } from "@midday/ui/cn";
 import { Editor as BaseEditor } from "@midday/ui/editor";
 import type { Editor as EditorInstance, JSONContent } from "@tiptap/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 type Props = {
   initialContent?: JSONContent;
@@ -24,13 +24,6 @@ export function Editor({
   const [content, setContent] = useState<JSONContent | null | undefined>(
     initialContent,
   );
-
-  // When async content is loaded, set the content
-  useEffect(() => {
-    if (initialContent !== content) {
-      setContent(initialContent);
-    }
-  }, [initialContent]);
 
   const handleUpdate = useCallback(
     (editor: EditorInstance) => {
@@ -64,7 +57,7 @@ export function Editor({
         className,
       )}
       placeholder={placeholder}
-      initialContent={content ?? undefined}
+      initialContent={content}
       onUpdate={handleUpdate}
       onFocus={() => setIsFocused(true)}
       onBlur={handleBlur}
