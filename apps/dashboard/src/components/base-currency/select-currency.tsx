@@ -96,11 +96,12 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
   }, [error]);
 
   return (
-    <SelectCurrencyBase
-      onChange={handleChange}
-      currencies={uniqueCurrencies}
-      value={defaultValue}
-      className="w-[200px]"
-    />
+    <div className="w-[200px]">
+      <SelectCurrencyBase
+        onChange={handleChange}
+        currencies={uniqueCurrencies}
+        value={defaultValue}
+      />
+    </div>
   );
 }

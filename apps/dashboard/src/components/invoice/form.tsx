@@ -66,7 +66,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
   });
 
   const isDirty = form.formState.isDirty;
-  const debouncedValues = useDebounce(formValues, 800);
+  const debouncedValues = useDebounce(formValues, 500);
 
   useEffect(() => {
     // Skip auto-save for non-draft invoices
@@ -167,7 +167,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
               </OpenURL>
             )}
 
-            {lastEditedText && (
+            {(draftInvoice.isPending || lastEditedText) && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -176,12 +176,17 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
                 className="text-xs text-[#808080] flex items-center gap-1"
               >
                 <span>-</span>
-                <span>{lastEditedText}</span>
+                <span>
+                  {draftInvoice.isPending ? "Saving" : lastEditedText}
+                </span>
               </motion.div>
             )}
           </div>
 
-          <SubmitButton isSubmitting={isSubmitting} />
+          <SubmitButton
+            isSubmitting={isSubmitting}
+            disabled={draftInvoice.isPending}
+          />
         </div>
       </div>
     </form>

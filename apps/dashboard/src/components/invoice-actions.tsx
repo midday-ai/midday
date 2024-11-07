@@ -36,6 +36,42 @@ export function InvoiceActions({ status, id }: Props) {
   const sendReminder = useAction(sendReminderAction);
 
   switch (status) {
+    case "paid":
+      return (
+        <div className="absolute right-4 mt-7">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="hover:bg-secondary"
+              >
+                <Icons.MoreHoriz className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent sideOffset={10} align="end">
+              <DropdownMenuItem
+                onClick={() =>
+                  updateInvoice.execute({
+                    id,
+                    status: "unpaid",
+                    paid_at: null,
+                  })
+                }
+              >
+                Mark as unpaid
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => deleteInvoice.execute({ id })}
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      );
+
     case "overdue":
     case "unpaid":
       return (
@@ -77,7 +113,7 @@ export function InvoiceActions({ status, id }: Props) {
             onClick={() => setParams({ invoiceId: id, type: "edit" })}
           >
             <Icons.Edit className="size-3.5" />
-            <span>Edit invoice</span>
+            <span>Edit</span>
           </Button>
 
           <DropdownMenu>
@@ -104,11 +140,17 @@ export function InvoiceActions({ status, id }: Props) {
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-destructive"
+                onClick={() => deleteInvoice.execute({ id })}
+              >
+                Delete
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
                 onClick={() =>
                   updateInvoice.execute({ id, status: "canceled" })
                 }
               >
-                Cancel invoice
+                Cancel
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -124,7 +166,7 @@ export function InvoiceActions({ status, id }: Props) {
             onClick={() => setParams({ invoiceId: id, type: "edit" })}
           >
             <Icons.Edit className="size-3.5" />
-            <span>Edit invoice</span>
+            <span>Edit</span>
           </Button>
 
           <DropdownMenu>

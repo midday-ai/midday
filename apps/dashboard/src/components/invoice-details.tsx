@@ -55,7 +55,7 @@ export function InvoiceDetails({
         <InvoiceStatus status={status} />
       </div>
 
-      <div className="flex justify-between items-center mt-6 mb-3">
+      <div className="flex justify-between items-center mt-6 mb-3 relative">
         <div className="flex flex-col w-full space-y-1">
           <span
             className={cn("text-4xl font-mono select-text", {

@@ -39,6 +39,7 @@ export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
                   if (href || isEmail) {
                     const linkHref =
                       href || (isEmail ? `mailto:${content}` : content);
+
                     return (
                       <Link
                         key={`link-${nodeIndex.toString()}-${inlineIndex.toString()}`}
@@ -72,6 +73,7 @@ export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
                     />
                   );
                 }
+
                 return null;
               })}
             </View>

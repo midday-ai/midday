@@ -44,7 +44,7 @@ export function Editor({
     if (initialContent) {
       editor?.commands.setContent(initialContent);
     }
-  }, [initialContent]);
+  }, []);
 
   if (!editor) return null;
 

@@ -28,9 +28,10 @@ const options = [
 
 type Props = {
   isSubmitting: boolean;
+  disabled?: boolean;
 };
 
-export function SubmitButton({ isSubmitting }: Props) {
+export function SubmitButton({ isSubmitting, disabled }: Props) {
   const { watch, setValue, formState } = useFormContext<InvoiceFormValues>();
 
   const selectedOption = watch("template.delivery_type");
@@ -54,7 +55,10 @@ export function SubmitButton({ isSubmitting }: Props) {
 
   return (
     <div className="flex divide-x">
-      <BaseSubmitButton isSubmitting={isSubmitting} disabled={!isValid}>
+      <BaseSubmitButton
+        isSubmitting={isSubmitting}
+        disabled={!isValid || disabled}
+      >
         {canUpdate
           ? "Update"
           : options.find((o) => o.value === selectedOption)?.label}
@@ -64,7 +68,7 @@ export function SubmitButton({ isSubmitting }: Props) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              disabled={!isValid || isSubmitting}
+              disabled={!isValid || isSubmitting || disabled}
               className="size-9 p-0 [&[data-state=open]>svg]:rotate-180"
             >
               <Icons.ChevronDown className="size-4 transition-transform duration-200" />
