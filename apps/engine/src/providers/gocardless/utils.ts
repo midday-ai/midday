@@ -191,6 +191,7 @@ export function getAccessValidForDays({
     "COMMERZBANK_COBADEFF",
     "DNB_DNBANOKK",
     "MBANK_RETAIL_BREXPLPW",
+    "SANTANDER_BSCHESMM",
   ];
 
   if (RESTRICTED_TO_90DAYS.some((str) => str.startsWith(institutionId))) {
