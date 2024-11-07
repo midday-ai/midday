@@ -9,5 +9,7 @@ export const invoiceNotification = schemaTask({
   }),
   run: async ({ invoiceId, status }) => {
     logger.info("Invoice notification triggered", { invoiceId });
+
+    // TODO: Send notification to user depending on status
   },
 });

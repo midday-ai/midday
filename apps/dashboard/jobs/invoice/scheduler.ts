@@ -4,8 +4,7 @@ import { checkInvoiceStatus } from "./check-status";
 
 export const invoiceScheduler = schedules.task({
   id: "invoice-scheduler",
-  // Runs twice per day at 00:00 and 12:00 (UTC timezone)
-  cron: "0 0,12 * * *",
+  cron: "0 0,12 * * *", // Runs twice per day at 00:00 and 12:00 (UTC timezone)
   run: async () => {
     const supabase = createClient();
 
@@ -23,6 +22,7 @@ export const invoiceScheduler = schedules.task({
         },
       })),
     );
+
     logger.info("Invoice status check jobs started", {
       count: invoices.length,
     });
