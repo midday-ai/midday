@@ -7,7 +7,8 @@ import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
 export function NoteDetails() {
-  const { control } = useFormContext();
+  const { control, watch } = useFormContext();
+  const id = watch("id");
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
@@ -29,6 +30,8 @@ export function NoteDetails() {
         render={({ field }) => {
           return (
             <Editor
+              // NOTE: This is a workaround to get the new content to render
+              key={id}
               initialContent={field.value}
               onChange={field.onChange}
               className="h-[78px]"

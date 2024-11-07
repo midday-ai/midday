@@ -40,12 +40,6 @@ export function Editor({
     },
   });
 
-  useEffect(() => {
-    if (initialContent) {
-      editor?.commands.setContent(initialContent);
-    }
-  }, []);
-
   if (!editor) return null;
 
   return (

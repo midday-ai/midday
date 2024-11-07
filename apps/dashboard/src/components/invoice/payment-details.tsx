@@ -7,7 +7,8 @@ import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
 export function PaymentDetails() {
-  const { control } = useFormContext();
+  const { control, watch } = useFormContext();
+  const id = watch("id");
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
@@ -28,6 +29,8 @@ export function PaymentDetails() {
         name="payment_details"
         render={({ field }) => (
           <Editor
+            // NOTE: This is a workaround to get the new content to render
+            key={id}
             initialContent={field.value}
             onChange={field.onChange}
             onBlur={(content) => {

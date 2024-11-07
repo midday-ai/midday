@@ -1,4 +1,3 @@
-// import { getCdnUrl } from "@midday/utils/envs";
 import { Document, Image, Page, Text, View } from "@react-pdf/renderer";
 import QRCodeUtil from "qrcode";
 import type { TemplateProps } from "../types";
@@ -9,20 +8,6 @@ import { Note } from "./components/note";
 import { PaymentDetails } from "./components/payment-details";
 import { QRCode } from "./components/qr-code";
 import { Summary } from "./components/summary";
-
-// Font.register({
-//   family: "GeistMono",
-//   fonts: [
-//     {
-//       src: `${getCdnUrl()}/fonts/GeistMono/ttf/GeistMono-Regular.ttf`,
-//       fontWeight: 400,
-//     },
-//     {
-//       src: `${getCdnUrl()}/fonts/GeistMono/ttf/GeistMono-Medium.ttf`,
-//       fontWeight: 500,
-//     },
-//   ],
-// });
 
 export async function PdfTemplate({
   invoice_number,
@@ -59,7 +44,6 @@ export async function PdfTemplate({
         style={{
           padding: 20,
           backgroundColor: "#fff",
-          // fontFamily: "GeistMono",
           color: "#000",
         }}
       >
