@@ -64,7 +64,7 @@ export function Editor({
         className,
       )}
       placeholder={placeholder}
-      initialContent={content}
+      initialContent={content ?? undefined}
       onUpdate={handleUpdate}
       onFocus={() => setIsFocused(true)}
       onBlur={handleBlur}

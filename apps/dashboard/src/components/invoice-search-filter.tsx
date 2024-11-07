@@ -10,6 +10,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuPortal,
   DropdownMenuSub,
   DropdownMenuSubContent,
@@ -251,6 +252,12 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
                     {customer.name}
                   </DropdownMenuCheckboxItem>
                 ))}
+
+                {!customersData?.length && (
+                  <DropdownMenuItem disabled>
+                    No customers found
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
