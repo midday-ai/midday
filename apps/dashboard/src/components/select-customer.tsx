@@ -43,6 +43,19 @@ export function SelectCustomer({ data }: Props) {
     setOpen(false);
   };
 
+  if (!data.length) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={() => setCustomerParams({ createCustomer: true })}
+        className="font-mono text-[#434343] p-0 text-[11px] h-auto hover:bg-transparent"
+      >
+        Select customer
+      </Button>
+    );
+  }
+
   return (
     <Popover open={open} onOpenChange={setOpen} modal>
       <PopoverTrigger asChild>

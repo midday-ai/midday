@@ -8,7 +8,10 @@ export async function InvoicesOpen({
   defaultCurrency: string;
 }) {
   const { data } = await getInvoiceSummary();
-  const totalInvoiceCount = data?.at(0)?.invoice_count;
+  const totalInvoiceCount = data?.reduce(
+    (acc, curr) => acc + (curr.invoice_count ?? 0),
+    0,
+  );
 
   return (
     <Link
