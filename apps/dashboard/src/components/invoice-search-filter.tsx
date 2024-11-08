@@ -179,7 +179,7 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
           loading={streaming}
           onRemove={setParams}
           statusFilters={statusFilters}
-          members={customersData}
+          customers={customersData}
         />
       </div>
 

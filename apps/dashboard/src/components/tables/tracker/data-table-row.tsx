@@ -4,6 +4,7 @@ import { deleteProjectAction } from "@/actions/project/delete-project-action";
 import { updateProjectAction } from "@/actions/project/update-project-action";
 import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import {
@@ -22,11 +23,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
+import { formatISO } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import type { TrackerProject } from "./data-table";
 
@@ -60,6 +63,7 @@ type DataTableRowProps = {
 export function DataTableRow({ row, userId }: DataTableRowProps) {
   const { toast } = useToast();
   const { setParams } = useTrackerParams();
+  const { setParams: setInvoiceParams } = useInvoiceParams();
 
   const deleteAction = useAction(deleteProjectAction, {
     onError: () => {
@@ -84,7 +88,14 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
   return (
     <AlertDialog>
       <DropdownMenu>
-        <Row onClick={() => setParams({ projectId: row.id })}>
+        <Row
+          onClick={() =>
+            setParams({
+              projectId: row.id,
+              selectedDate: formatISO(new Date(), { representation: "date" }),
+            })
+          }
+        >
           <DataTableCell>{row.name}</DataTableCell>
           <DataTableCell>
             {row.customer ? (
@@ -147,6 +158,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
             </div>
           </DataTableCell>
         </Row>
+
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -164,11 +176,31 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
+
         <DropdownMenuContent className="w-42" sideOffset={10} align="end">
           <DropdownMenuItem
             onClick={() => setParams({ update: true, projectId: row.id })}
           >
             Edit
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            onClick={() =>
+              setInvoiceParams({
+                selectedCustomerId: row.customer?.id,
+                type: "create",
+                currency: row.currency,
+                lineItems: [
+                  {
+                    name: row.name,
+                    price: row.rate ?? 0,
+                    quantity: 1,
+                  },
+                ],
+              })
+            }
+          >
+            Create invoice
           </DropdownMenuItem>
 
           <TrackerExportCSV
@@ -178,18 +210,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
             userId={userId}
           />
 
-          {row.status !== "completed" && (
-            <DropdownMenuItem
-              onClick={() =>
-                updateAction.execute({
-                  id: row.id,
-                  status: "completed",
-                })
-              }
-            >
-              Mark as complete
-            </DropdownMenuItem>
-          )}
+          <DropdownMenuSeparator />
 
           <AlertDialogTrigger asChild>
             <DropdownMenuItem className="text-destructive">

@@ -465,6 +465,9 @@ export function TrackerSchedule({
                           )}
                           )
                         </span>
+                        {event.project.customer && (
+                          <span>{event.project.customer.name}</span>
+                        )}
                         <span>{event.description}</span>
                       </div>
                       {event.id !== NEW_EVENT_ID && (

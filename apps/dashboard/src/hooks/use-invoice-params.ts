@@ -1,10 +1,18 @@
 import {
   parseAsArrayOf,
-  parseAsBoolean,
+  parseAsJson,
   parseAsString,
   parseAsStringEnum,
   useQueryStates,
 } from "nuqs";
+
+import { z } from "zod";
+
+const lineItemSchema = z.object({
+  name: z.string(),
+  price: z.number(),
+  quantity: z.number(),
+});
 
 export function useInvoiceParams(options?: { shallow: boolean }) {
   const [params, setParams] = useQueryStates(
@@ -18,6 +26,8 @@ export function useInvoiceParams(options?: { shallow: boolean }) {
       end: parseAsString,
       selectedCustomerId: parseAsString,
       type: parseAsStringEnum(["edit", "create", "details", "comments"]),
+      lineItems: parseAsJson<z.infer<typeof lineItemSchema>>(),
+      currency: parseAsString,
     },
     options,
   );

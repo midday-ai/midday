@@ -104,6 +104,7 @@ export const transformTrackerData = (
     project: {
       id: event.project_id,
       name: event.project?.name || "",
+      customer: event.project?.customer,
     },
     description: event.description,
   };

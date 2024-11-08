@@ -890,6 +890,7 @@ export type GetTrackerProjectsQueryParams = {
   };
   filter?: {
     status?: "in_progress" | "completed";
+    customers?: string[];
   };
 };
 
@@ -907,7 +908,7 @@ export async function getTrackerProjectsQuery(
     start,
     end,
   } = params;
-  const { status } = filter || {};
+  const { status, customers } = filter || {};
 
   const query = supabase
     .from("tracker_projects")
@@ -930,6 +931,10 @@ export async function getTrackerProjectsQuery(
 
   if (search?.query && search?.fuzzy) {
     query.ilike("name", `%${search.query}%`);
+  }
+
+  if (customers?.length) {
+    query.in("customer_id", customers);
   }
 
   if (sort) {
@@ -975,7 +980,7 @@ export async function getTrackerRecordsByDateQuery(
   const query = supabase
     .from("tracker_entries")
     .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency, customer:customer_id(id, name))",
     )
     .eq("team_id", teamId)
     .eq("date", formatISO(new UTCDate(date), { representation: "date" }));

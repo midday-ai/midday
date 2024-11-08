@@ -5,6 +5,7 @@ import {
   type InvoiceTemplate,
   invoiceFormSchema,
 } from "@/actions/invoice/schema";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { UTCDate } from "@date-fns/utc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Settings } from "@midday/invoice/default";
@@ -63,6 +64,7 @@ export function FormContext({
   isOpen,
 }: FormContextProps) {
   const supabase = createClient();
+  const { lineItems, currency } = useInvoiceParams();
 
   const defaultValues = {
     id: uuidv4(),
@@ -126,6 +128,19 @@ export function FormContext({
       fetchInvoice();
     }
   }, [id, isOpen]);
+
+  // These values comes from the tracker table
+  useEffect(() => {
+    if (lineItems) {
+      form.setValue("line_items", lineItems);
+    }
+  }, [lineItems]);
+
+  useEffect(() => {
+    if (currency) {
+      form.setValue("template.currency", currency);
+    }
+  }, [currency]);
 
   return <FormProvider {...form}>{children}</FormProvider>;
 }

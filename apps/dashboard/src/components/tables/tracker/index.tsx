@@ -11,9 +11,18 @@ type Props = {
   start?: string;
   end?: string;
   userId: string;
+  customerIds?: string[];
 };
 
-export async function Table({ status, sort, q, start, end, userId }: Props) {
+export async function Table({
+  status,
+  sort,
+  q,
+  start,
+  end,
+  userId,
+  customerIds,
+}: Props) {
   const hasFilters = Boolean(status || q);
 
   const { data, meta } = await getTrackerProjects({
@@ -22,7 +31,7 @@ export async function Table({ status, sort, q, start, end, userId }: Props) {
     sort,
     start,
     end,
-    filter: { status },
+    filter: { status, customers: customerIds },
     search: {
       query: q,
       fuzzy: true,
@@ -38,6 +47,7 @@ export async function Table({ status, sort, q, start, end, userId }: Props) {
       sort,
       filter: {
         status,
+        customers: customerIds,
       },
       search: {
         query: q,

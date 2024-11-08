@@ -8,6 +8,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuPortal,
   DropdownMenuSub,
   DropdownMenuSubContent,
@@ -33,6 +34,10 @@ type Props = {
     id: string;
     name: string;
   }[];
+  customers?: {
+    id: string | null;
+    name: string | null;
+  }[];
 };
 
 const defaultSearch = {
@@ -48,7 +53,10 @@ const statusFilters = [
   { id: "completed", name: "Completed" },
 ];
 
-export function TrackerSearchFilter({ members }: Props) {
+export function TrackerSearchFilter({
+  members,
+  customers: customersData,
+}: Props) {
   const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
@@ -62,6 +70,7 @@ export function TrackerSearchFilter({ members }: Props) {
       statuses: parseAsArrayOf(
         parseAsStringLiteral(["in_progress", "completed"]),
       ),
+      customers: parseAsArrayOf(parseAsString),
     },
     {
       shallow: false,
@@ -106,7 +115,10 @@ export function TrackerSearchFilter({ members }: Props) {
     if (prompt.split(" ").length > 1) {
       setStreaming(true);
 
-      const { object } = await generateTrackerFilters(prompt);
+      const { object } = await generateTrackerFilters(
+        prompt,
+        `Customers: ${customersData?.map((customer) => customer.name).join(", ")}`,
+      );
 
       let finalObject = {};
 
@@ -119,6 +131,11 @@ export function TrackerSearchFilter({ members }: Props) {
             start: partialObject?.start ?? null,
             end: partialObject?.end ?? null,
             q: partialObject?.name ?? null,
+            customers:
+              partialObject?.customers?.map(
+                (name: string) =>
+                  customersData?.find((customer) => customer.name === name)?.id,
+              ) ?? null,
           };
         }
       }
@@ -147,6 +164,7 @@ export function TrackerSearchFilter({ members }: Props) {
           loading={streaming}
           onRemove={setFilters}
           members={members}
+          customers={customersData}
           statusFilters={statusFilters}
         />
 
@@ -258,6 +276,43 @@ export function TrackerSearchFilter({ members }: Props) {
                     {name}
                   </DropdownMenuCheckboxItem>
                 ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.Face className="mr-2 h-4 w-4" />
+              <span>Customer</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent
+                sideOffset={14}
+                alignOffset={-4}
+                className="p-0"
+              >
+                {customersData?.map((customer) => (
+                  <DropdownMenuCheckboxItem
+                    key={customer.id}
+                    onCheckedChange={() => {
+                      setFilters({
+                        customers: filters?.customers?.includes(customer.id)
+                          ? filters.customers.filter((s) => s !== customer.id)
+                          : [...(filters?.customers ?? []), customer.id],
+                      });
+                    }}
+                  >
+                    {customer.name}
+                  </DropdownMenuCheckboxItem>
+                ))}
+
+                {!customersData?.length && (
+                  <DropdownMenuItem disabled>
+                    No customers found
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>

@@ -78,7 +78,7 @@ export function TrackerSelectProject({
       setValue({
         id: foundProject.id,
         name: foundProject.customer?.name
-          ? `${foundProject.name} (${foundProject.customer.name})`
+          ? `${foundProject.name} · ${foundProject.customer.name}`
           : foundProject.name,
       });
     }
