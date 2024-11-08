@@ -1,3 +1,4 @@
+import { SignOutButton } from "@/components/sign-out-button";
 import { UserMenu } from "@/components/user-menu";
 import { joinTeamByInviteCode } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -55,15 +56,18 @@ export default async function InviteCode({
           <div className="flex w-full flex-col relative">
             <div className="pb-4">
               <h1 className="font-medium pb-1 text-3xl">
-                Invite link has expired
+                {" "}
+                This invite link is not associated with your current account.
               </h1>
             </div>
 
-            <p className="font-medium pb-1 text-2xl text-[#606060]">
-              Notify the sender for a new one.
+            <p className="text-sm text-[#606060] mt-2">
+              Please sign in with the email address that received the invite, or
+              contact the team admin for assistance.
             </p>
 
-            <div className="pointer-events-auto mt-6 flex flex-col mb-4">
+            <div className="pointer-events-auto mt-6 flex flex-col mb-4 space-y-4">
+              <SignOutButton />
               <Link href="/teams" className="w-full">
                 <Button className="w-full">Go to teams</Button>
               </Link>
