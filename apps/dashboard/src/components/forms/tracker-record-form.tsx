@@ -65,6 +65,10 @@ export function TrackerRecordForm({
       form.setValue("id", eventId, { shouldValidate: true });
     }
 
+    if (eventId === NEW_EVENT_ID) {
+      form.setValue("id", undefined);
+    }
+
     if (start) {
       form.setValue("start", start);
     }

@@ -101,21 +101,25 @@ export function TrackerSchedule({
         const processedData = result?.data.map((event) =>
           transformTrackerData(event, selectedDate),
         );
-        return prevData
-          .filter((event) => event.id !== NEW_EVENT_ID)
-          .concat(processedData);
+        return [
+          ...prevData.filter((event) => event.id !== NEW_EVENT_ID),
+          ...processedData,
+        ];
       });
 
-      const newTotalDuration = result.data.reduce((total, event) => {
-        const start = event.start
-          ? new Date(event.start)
-          : new Date(`${event.date || selectedDate}T09:00:00`);
-        const end = event.end
-          ? new Date(event.end)
-          : addSeconds(start, event.duration || 0);
-        return total + differenceInSeconds(end, start);
-      }, 0);
-      setTotalDuration(newTotalDuration);
+      setTotalDuration((prevTotalDuration) => {
+        const newEventsDuration = result.data.reduce((total, event) => {
+          const start = event.start
+            ? new Date(event.start)
+            : new Date(`${event.date || selectedDate}T09:00:00`);
+          const end = event.stop
+            ? new Date(event.stop)
+            : addSeconds(start, event.duration || 0);
+          return total + differenceInSeconds(end, start);
+        }, 0);
+
+        return prevTotalDuration + newEventsDuration;
+      });
 
       const lastEvent = result.data.at(-1);
       setSelectedEvent(
