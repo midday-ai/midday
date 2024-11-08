@@ -36,7 +36,6 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
 
   const size = form.watch("template.size") === "a4" ? 650 : 816;
   const token = form.watch("token");
-  const canUpdate = form.watch("status") !== "draft";
 
   const draftInvoice = useAction(draftInvoiceAction, {
     onSuccess: ({ data }) => {
@@ -69,15 +68,12 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
   const debouncedValues = useDebounce(formValues, 500);
 
   useEffect(() => {
-    // Skip auto-save for non-draft invoices
-    if (canUpdate) return;
-
     const currentFormValues = form.getValues();
 
     if (isDirty && form.watch("customer_id")) {
       draftInvoice.execute(transformFormValuesToDraft(currentFormValues));
     }
-  }, [debouncedValues, isDirty, canUpdate]);
+  }, [debouncedValues, isDirty]);
 
   useEffect(() => {
     const updateLastEditedText = () => {

@@ -2,7 +2,6 @@
 
 import { authActionClient } from "@/actions/safe-action";
 import { resend } from "@/utils/resend";
-import { UTCDate } from "@date-fns/utc";
 import InvoiceEmail from "@midday/email/emails/invoice";
 import { getAppUrl } from "@midday/utils/envs";
 import { render } from "@react-email/render";
@@ -46,8 +45,7 @@ export const createInvoiceAction = authActionClient
       .select("*")
       .single();
 
-    // Send email of delivery type is create_and_send and the invoice is not sent to the customer
-    if (deliveryType === "create_and_send" && !draft.sent_to) {
+    if (deliveryType === "create_and_send") {
       try {
         await resend.emails.send({
           from: "Midday <middaybot@midday.ai>",

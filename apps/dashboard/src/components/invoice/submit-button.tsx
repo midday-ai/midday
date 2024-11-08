@@ -15,17 +15,6 @@ import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-const options = [
-  {
-    label: "Create",
-    value: "create",
-  },
-  {
-    label: "Create & Send",
-    value: "create_and_send",
-  },
-];
-
 type Props = {
   isSubmitting: boolean;
   disabled?: boolean;
@@ -52,6 +41,16 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   };
 
   const isValid = formState.isValid;
+  const options = [
+    {
+      label: canUpdate ? "Update" : "Create",
+      value: "create",
+    },
+    {
+      label: canUpdate ? "Update & Send" : "Create & Send",
+      value: "create_and_send",
+    },
+  ];
 
   return (
     <div className="flex divide-x">
@@ -59,34 +58,30 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
         isSubmitting={isSubmitting}
         disabled={!isValid || disabled}
       >
-        {canUpdate
-          ? "Update"
-          : options.find((o) => o.value === selectedOption)?.label}
+        {options.find((o) => o.value === selectedOption)?.label}
       </BaseSubmitButton>
 
-      {!canUpdate && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              disabled={!isValid || isSubmitting || disabled}
-              className="size-9 p-0 [&[data-state=open]>svg]:rotate-180"
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            disabled={!isValid || isSubmitting || disabled}
+            className="size-9 p-0 [&[data-state=open]>svg]:rotate-180"
+          >
+            <Icons.ChevronDown className="size-4 transition-transform duration-200" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" sideOffset={10}>
+          {options.map((option) => (
+            <DropdownMenuCheckboxItem
+              key={option.value}
+              checked={selectedOption === option.value}
+              onCheckedChange={() => handleOptionChange(option.value)}
             >
-              <Icons.ChevronDown className="size-4 transition-transform duration-200" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" sideOffset={10}>
-            {options.map((option) => (
-              <DropdownMenuCheckboxItem
-                key={option.value}
-                checked={selectedOption === option.value}
-                onCheckedChange={() => handleOptionChange(option.value)}
-              >
-                {option.label}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+              {option.label}
+            </DropdownMenuCheckboxItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
