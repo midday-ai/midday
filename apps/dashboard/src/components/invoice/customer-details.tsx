@@ -36,6 +36,14 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const content = watch("customer_details");
+  const id = watch("id");
+
+  // NOTE: This is a workaround to get the new content to render
+  useEffect(() => {
+    if (content) {
+      setValue("customer_details", content, { shouldValidate: true });
+    }
+  }, [id]);
 
   const handleLabelSave = (value: string) => {
     updateInvoiceTemplate.execute({ customer_label: value });
