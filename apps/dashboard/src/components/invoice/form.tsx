@@ -111,10 +111,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
       className="relative h-full"
       onKeyDown={handleKeyDown}
     >
-      <ScrollArea
-        className={`w-[${size - 20}px] h-[calc(100vh-200px)] bg-background`}
-        hideScrollbar
-      >
+      <ScrollArea className="h-[calc(100vh-200px)] bg-background" hideScrollbar>
         <div className="p-8 h-full flex flex-col">
           <div className="flex flex-col">
             <Logo teamId={teamId} />
