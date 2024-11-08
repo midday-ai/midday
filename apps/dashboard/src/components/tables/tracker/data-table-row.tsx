@@ -87,6 +87,27 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
         <Row onClick={() => setParams({ projectId: row.id })}>
           <DataTableCell>{row.name}</DataTableCell>
           <DataTableCell>
+            {row.customer ? (
+              <div className="flex items-center space-x-2">
+                <Avatar className="size-5">
+                  {row.customer?.website && (
+                    <AvatarImage
+                      src={`https://img.logo.dev/${row.customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                      alt={`${row.customer?.name} logo`}
+                    />
+                  )}
+                  <AvatarFallback className="text-[9px] font-medium">
+                    {row.customer?.name?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="truncate">{row.customer?.name}</span>
+              </div>
+            ) : (
+              "-"
+            )}
+          </DataTableCell>
+
+          <DataTableCell>
             <span className="text-sm">
               {row.estimate
                 ? `${secondsToHoursAndMinutes(row.total_duration)} / ${secondsToHoursAndMinutes(row.estimate * 3600)}`

@@ -75,7 +75,12 @@ export function TrackerSelectProject({
     );
 
     if (foundProject) {
-      setValue({ id: foundProject.id, name: foundProject.name });
+      setValue({
+        id: foundProject.id,
+        name: foundProject.customer?.name
+          ? `${foundProject.name} (${foundProject.customer.name})`
+          : foundProject.name,
+      });
     }
   };
 

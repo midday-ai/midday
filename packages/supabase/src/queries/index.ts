@@ -46,6 +46,7 @@ export async function getCurrentUserTeamQuery(supabase: Client) {
   if (!session?.user) {
     return;
   }
+
   return getUserQuery(supabase, session.user?.id);
 }
 
@@ -911,7 +912,7 @@ export async function getTrackerProjectsQuery(
   const query = supabase
     .from("tracker_projects")
     .select(
-      "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount",
+      "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount, customer:customer_id(id, name, website)",
       {
         count: "exact",
       },
@@ -939,6 +940,8 @@ export async function getTrackerProjectsQuery(
       // query.order("total_amount", { ascending: value === "asc" });
     } else if (column === "assigned") {
       // query.order("assigned_id", { ascending: value === "asc" });
+    } else if (column === "customer") {
+      query.order("customer(name)", { ascending: value === "asc" });
     } else {
       query.order(column, { ascending: value === "asc" });
     }

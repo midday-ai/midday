@@ -353,7 +353,10 @@ export function TrackerSchedule({
     project_id: string;
     description?: string;
   }) => {
-    const dates = getDates(selectedDate, sortedRange);
+    const dates = getDates(
+      selectedDate || format(new Date(), "yyyy-MM-dd"),
+      sortedRange,
+    );
     const baseDate =
       dates[0] || selectedDate || format(new Date(), "yyyy-MM-dd");
 

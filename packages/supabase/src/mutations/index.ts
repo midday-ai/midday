@@ -513,6 +513,7 @@ type CreateProjectParams = {
   billable?: boolean;
   rate?: number;
   currency?: string;
+  customer_id?: string;
 };
 
 export async function createProject(
