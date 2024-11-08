@@ -34,7 +34,6 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
 
   const form = useFormContext<InvoiceFormValues>();
 
-  const size = form.watch("template.size") === "a4" ? 650 : 816;
   const token = form.watch("token");
 
   const draftInvoice = useAction(draftInvoiceAction, {
