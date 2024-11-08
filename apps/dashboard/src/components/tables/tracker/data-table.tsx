@@ -17,6 +17,11 @@ export type TrackerProject = {
   estimate?: number;
   rate?: number;
   currency?: string;
+  customer?: {
+    id: string;
+    name: string;
+    website: string;
+  };
   users: {
     id: string;
     full_name: string;

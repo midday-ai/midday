@@ -353,7 +353,10 @@ export function TrackerSchedule({
     project_id: string;
     description?: string;
   }) => {
-    const dates = getDates(selectedDate, sortedRange);
+    const dates = getDates(
+      selectedDate || format(new Date(), "yyyy-MM-dd"),
+      sortedRange,
+    );
     const baseDate =
       dates[0] || selectedDate || format(new Date(), "yyyy-MM-dd");
 
@@ -462,6 +465,9 @@ export function TrackerSchedule({
                           )}
                           )
                         </span>
+                        {event.project.customer && (
+                          <span>{event.project.customer.name}</span>
+                        )}
                         <span>{event.description}</span>
                       </div>
                       {event.id !== NEW_EVENT_ID && (

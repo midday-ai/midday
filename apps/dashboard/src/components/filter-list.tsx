@@ -30,6 +30,7 @@ type Props = {
   categories?: { id: string; name: string; slug: string }[];
   accounts?: { id: string; name: string; currency: string }[];
   members?: { id: string; name: string }[];
+  customers?: { id: string; name: string }[];
   statusFilters: { id: string; name: string }[];
   attachmentsFilters: { id: string; name: string }[];
   recurringFilters: { id: string; name: string }[];
@@ -43,6 +44,7 @@ export function FilterList({
   categories,
   accounts,
   members,
+  customers,
   tags,
   statusFilters,
   attachmentsFilters,
@@ -111,8 +113,13 @@ export function FilterList({
           .join(", ");
       }
 
+      case "customers": {
+        return value
+          .map((id) => customers?.find((customer) => customer.id === id)?.name)
+          .join(", ");
+      }
+
       case "assignees":
-      case "customers":
       case "owners": {
         return value
           .map((id) => {

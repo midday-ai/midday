@@ -46,6 +46,7 @@ export async function getCurrentUserTeamQuery(supabase: Client) {
   if (!session?.user) {
     return;
   }
+
   return getUserQuery(supabase, session.user?.id);
 }
 
@@ -889,6 +890,7 @@ export type GetTrackerProjectsQueryParams = {
   };
   filter?: {
     status?: "in_progress" | "completed";
+    customers?: string[];
   };
 };
 
@@ -906,12 +908,12 @@ export async function getTrackerProjectsQuery(
     start,
     end,
   } = params;
-  const { status } = filter || {};
+  const { status, customers } = filter || {};
 
   const query = supabase
     .from("tracker_projects")
     .select(
-      "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount",
+      "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount, customer:customer_id(id, name, website)",
       {
         count: "exact",
       },
@@ -931,6 +933,10 @@ export async function getTrackerProjectsQuery(
     query.ilike("name", `%${search.query}%`);
   }
 
+  if (customers?.length) {
+    query.in("customer_id", customers);
+  }
+
   if (sort) {
     const [column, value] = sort;
     if (column === "time") {
@@ -939,6 +945,8 @@ export async function getTrackerProjectsQuery(
       // query.order("total_amount", { ascending: value === "asc" });
     } else if (column === "assigned") {
       // query.order("assigned_id", { ascending: value === "asc" });
+    } else if (column === "customer") {
+      query.order("customer(name)", { ascending: value === "asc" });
     } else {
       query.order(column, { ascending: value === "asc" });
     }
@@ -972,7 +980,7 @@ export async function getTrackerRecordsByDateQuery(
   const query = supabase
     .from("tracker_entries")
     .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency, customer:customer_id(id, name))",
     )
     .eq("team_id", teamId)
     .eq("date", formatISO(new UTCDate(date), { representation: "date" }));

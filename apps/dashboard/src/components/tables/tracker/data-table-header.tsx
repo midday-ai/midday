@@ -35,7 +35,7 @@ export function DataTableHeader() {
   return (
     <TableHeader>
       <TableRow className="h-[45px]">
-        <TableHead className="w-[400px]">
+        <TableHead className="w-[320px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -46,6 +46,20 @@ export function DataTableHeader() {
             {"name" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
+        <TableHead className="">
+          <Button
+            className="p-0 hover:bg-transparent space-x-2"
+            variant="ghost"
+            onClick={() => createSortQuery("customer")}
+          >
+            <span>Customer</span>
+            {"customer" === column && value === "asc" && (
+              <ArrowDown size={16} />
+            )}
+            {"customer" === column && value === "desc" && <ArrowUp size={16} />}
+          </Button>
+        </TableHead>
+
         <TableHead className="w-[180px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCurrentLocale } from "@/locales/client";
+import type { Customer } from "@/components/invoice/customer-details";
 import { uniqueCurrencies } from "@midday/location/src/currencies";
 import { Button } from "@midday/ui/button";
 import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
@@ -26,15 +26,21 @@ import { Switch } from "@midday/ui/switch";
 import { Textarea } from "@midday/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { SearchCustomer } from "../search-customer";
 
 type Props = {
   onSubmit: (data: any) => void;
   isSaving: boolean;
   form: any;
+  customers: Customer[];
 };
 
-export function TrackerProjectForm({ onSubmit, isSaving, form }: Props) {
-  const locale = useCurrentLocale();
+export function TrackerProjectForm({
+  onSubmit,
+  isSaving,
+  form,
+  customers,
+}: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -61,6 +67,27 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }: Props) {
               </FormControl>
               <FormDescription>
                 This is the project display name.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="customer_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Customer</FormLabel>
+              <FormControl>
+                <SearchCustomer
+                  data={customers}
+                  onSelect={(id) => field.onChange(id)}
+                  selectedId={field.value}
+                />
+              </FormControl>
+              <FormDescription>
+                Link a customer to enable direct invoicing.
               </FormDescription>
               <FormMessage />
             </FormItem>

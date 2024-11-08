@@ -1,3 +1,4 @@
+import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { NEW_EVENT_ID } from "@/utils/tracker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
@@ -46,6 +47,8 @@ export function TrackerRecordForm({
   description,
   isSaving,
 }: Props) {
+  const { projectId: selectedProjectId } = useTrackerParams();
+
   const isUpdate = eventId && eventId !== NEW_EVENT_ID;
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -53,7 +56,7 @@ export function TrackerRecordForm({
     defaultValues: {
       id: eventId,
       assigned_id: userId,
-      project_id: projectId,
+      project_id: selectedProjectId ?? undefined,
       start,
       end,
       description: description ?? undefined,

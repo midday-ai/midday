@@ -49,6 +49,7 @@ export const createTrackerEntriesAction = authActionClient
       }
 
       revalidateTag(`tracker_entries_${user.team_id}`);
+      revalidateTag(`tracker_projects_${user.team_id}`);
 
       return data;
     },

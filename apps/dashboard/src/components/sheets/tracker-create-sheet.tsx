@@ -3,6 +3,7 @@
 import { createProjectAction } from "@/actions/project/create-project-action";
 import { createProjectSchema } from "@/actions/schema";
 import { TrackerProjectForm } from "@/components/forms/tracker-project-form";
+import type { Customer } from "@/components/invoice/customer-details";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
@@ -17,9 +18,10 @@ import type { z } from "zod";
 
 type Props = {
   currencyCode: string;
+  customers: Customer[];
 };
 
-export function TrackerCreateSheet({ currencyCode }: Props) {
+export function TrackerCreateSheet({ currencyCode, customers }: Props) {
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { setParams, create } = useTrackerParams();
@@ -29,8 +31,14 @@ export function TrackerCreateSheet({ currencyCode }: Props) {
   const form = useForm<z.infer<typeof createProjectSchema>>({
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
-      currency: currencyCode,
+      name: undefined,
+      description: undefined,
+      rate: undefined,
       status: "in_progress",
+      billable: false,
+      estimate: 0,
+      currency: currencyCode,
+      customer_id: undefined,
     },
   });
 
@@ -61,6 +69,7 @@ export function TrackerCreateSheet({ currencyCode }: Props) {
               isSaving={action.status === "executing"}
               onSubmit={action.execute}
               form={form}
+              customers={customers}
             />
           </ScrollArea>
         </SheetContent>
@@ -86,6 +95,7 @@ export function TrackerCreateSheet({ currencyCode }: Props) {
           isSaving={action.status === "executing"}
           onSubmit={action.execute}
           form={form}
+          customers={customers}
         />
       </DrawerContent>
     </Drawer>

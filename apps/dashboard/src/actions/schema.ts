@@ -318,6 +318,7 @@ export const createProjectSchema = z.object({
   rate: z.number().min(1).optional(),
   currency: z.string().optional(),
   status: z.enum(["in_progress", "completed"]).optional(),
+  customer_id: z.string().uuid().nullable().optional(),
 });
 
 export const updateProjectSchema = z.object({
@@ -329,6 +330,7 @@ export const updateProjectSchema = z.object({
   rate: z.number().min(1).optional(),
   currency: z.string().optional(),
   status: z.enum(["in_progress", "completed"]).optional(),
+  customer_id: z.string().uuid().nullable().optional(),
 });
 
 export const deleteProjectSchema = z.object({
