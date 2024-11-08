@@ -46,7 +46,7 @@ export function DataTableHeader() {
             {"name" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead className="">
+        <TableHead className="w-[180px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
