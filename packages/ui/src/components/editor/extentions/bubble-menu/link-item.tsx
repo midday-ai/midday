@@ -42,14 +42,16 @@ export function LinkItem({ editor, open, setOpen }: LinkItemProps) {
 
   return (
     <Popover modal={false} open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
-        <BubbleMenuButton isActive={isActive} action={() => setOpen(true)}>
-          {linkValue ? (
-            <MdOutlineLinkOff className="size-4" />
-          ) : (
-            <MdOutlineAddLink className="size-4" />
-          )}
-        </BubbleMenuButton>
+      <PopoverTrigger asChild>
+        <div>
+          <BubbleMenuButton isActive={isActive} action={() => setOpen(true)}>
+            {linkValue ? (
+              <MdOutlineLinkOff className="size-4" />
+            ) : (
+              <MdOutlineAddLink className="size-4" />
+            )}
+          </BubbleMenuButton>
+        </div>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-60 p-0" sideOffset={10}>
         <div className="flex p-1">

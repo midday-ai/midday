@@ -33,7 +33,7 @@ const defaultContent = `
 export default function Page() {
   return (
     <div className="container mt-24 max-w-[540px]">
-      <Editor content={defaultContent} />
+      <Editor initialContent={defaultContent} />
 
       <div className="mt-8">
         <div className="border bg-card text-card-foreground shadow-sm">

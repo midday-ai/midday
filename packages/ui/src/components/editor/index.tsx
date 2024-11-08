@@ -8,12 +8,11 @@ import {
   type JSONContent,
   useEditor,
 } from "@tiptap/react";
-import { useEffect } from "react";
 import { BubbleMenu } from "./extentions/bubble-menu";
 import { registerExtensions } from "./extentions/register";
 
 type EditorProps = {
-  initialContent?: JSONContent;
+  initialContent?: JSONContent | string;
   placeholder?: string;
   onUpdate?: (editor: EditorInstance) => void;
   onBlur?: () => void;
