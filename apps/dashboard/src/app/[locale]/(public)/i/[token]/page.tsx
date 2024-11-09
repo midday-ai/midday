@@ -10,9 +10,8 @@ import { waitUntil } from "@vercel/functions";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-export async function generateMetadata({
-  params,
-}: { params: { token: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ token: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const supabase = createClient({ admin: true });
 
   try {
@@ -61,7 +60,7 @@ export async function generateMetadata({
 }
 
 type Props = {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 };
 
 async function updateInvoiceViewedAt(id: string) {
@@ -75,7 +74,8 @@ async function updateInvoiceViewedAt(id: string) {
     .eq("id", id);
 }
 
-export default async function Page({ params }: Props) {
+export default async function Page(props: Props) {
+  const params = await props.params;
   const supabase = createClient({ admin: true });
 
   const {

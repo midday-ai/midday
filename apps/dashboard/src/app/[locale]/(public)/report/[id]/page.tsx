@@ -57,7 +57,8 @@ function getReportMeta(data) {
   }
 }
 
-export async function generateMetadata({ params }): Promise<Metadata> {
+export async function generateMetadata(props): Promise<Metadata> {
+  const params = await props.params;
   const supabase = createClient({ admin: true });
 
   const { data, error } = await supabase
@@ -78,7 +79,8 @@ export async function generateMetadata({ params }): Promise<Metadata> {
   };
 }
 
-export default async function Report({ params }) {
+export default async function Report(props) {
+  const params = await props.params;
   const supabase = createClient({ admin: true });
 
   const { data, error } = await supabase

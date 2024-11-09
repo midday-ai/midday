@@ -23,7 +23,7 @@ const itemVariant = {
 };
 
 export function ChatExamples({ onSubmit }) {
-  const ref = useRef();
+  const ref = useRef(undefined);
   const { events } = useDraggable(ref);
 
   const totalLength = chatExamples.reduce((accumulator, currentString) => {

@@ -1,10 +1,6 @@
 import { Button } from "@midday/ui/button";
-import dynamic from "next/dynamic";
 import Link from "next/link";
-
-const Donut = dynamic(() => import("./donut").then((mod) => mod.Donut), {
-  ssr: false,
-});
+import { Donut } from "./donut";
 
 export function Hero() {
   return (

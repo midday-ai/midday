@@ -24,14 +24,15 @@ const defaultValue = {
   period: "monthly",
 };
 
-export default async function Overview({ searchParams }) {
+export default async function Overview(props) {
+  const searchParams = await props.searchParams;
   const accounts = await getTeamBankAccounts();
-  const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
+  const chartType = (await cookies()).get(Cookies.ChartType)?.value ?? "profit";
 
-  const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
+  const hideConnectFlow = (await cookies()).has(Cookies.HideConnectFlow);
 
-  const initialPeriod = cookies().has(Cookies.SpendingPeriod)
-    ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value)
+  const initialPeriod = (await cookies()).has(Cookies.SpendingPeriod)
+    ? JSON.parse((await cookies()).get(Cookies.SpendingPeriod)?.value)
     : {
         id: "this_year",
         from: startOfYear(new Date()).toISOString(),

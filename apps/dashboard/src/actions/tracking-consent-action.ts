@@ -9,7 +9,7 @@ import { trackingConsentSchema } from "./schema";
 export const trackingConsentAction = actionClient
   .schema(trackingConsentSchema)
   .action(async ({ parsedInput: value }) => {
-    cookies().set({
+    (await cookies()).set({
       name: Cookies.TrackingConsent,
       value: value ? "1" : "0",
       expires: addYears(new Date(), 1),

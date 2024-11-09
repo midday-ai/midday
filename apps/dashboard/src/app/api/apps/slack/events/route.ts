@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       signingSecret: process.env.SLACK_SIGNING_SECRET!,
       body: rawBody,
       // @ts-expect-error - headers are not typed
-      headers: Object.fromEntries(headers().entries()),
+      headers: Object.fromEntries((await headers()).entries()),
     });
   } catch (error) {
     console.error("Slack request verification failed:", error);

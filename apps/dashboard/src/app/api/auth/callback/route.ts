@@ -11,7 +11,7 @@ import type { NextRequest } from "next/server";
 export const preferredRegion = ["fra1", "sfo1", "iad1"];
 
 export async function GET(req: NextRequest) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const requestUrl = new URL(req.url);
   const code = requestUrl.searchParams.get("code");
   const client = requestUrl.searchParams.get("client");

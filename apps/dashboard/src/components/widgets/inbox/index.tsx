@@ -8,7 +8,7 @@ import { InboxHeader } from "./inbox-header";
 import { InboxWidget } from "./inbox-widget";
 
 export async function Inbox({ disabled }) {
-  const filter = cookies().get(Cookies.InboxFilter)?.value ?? "all";
+  const filter = (await cookies()).get(Cookies.InboxFilter)?.value ?? "all";
 
   return (
     <div className="border relative aspect-square overflow-hidden p-4 md:p-8">

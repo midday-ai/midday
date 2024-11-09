@@ -12,7 +12,7 @@ export const updateMenuAction = authActionClient
     name: "update-menu",
   })
   .action(async ({ parsedInput: value }) => {
-    cookies().set({
+    (await cookies()).set({
       name: Cookies.MenuConfig,
       value: JSON.stringify(value),
       expires: addYears(new Date(), 1),

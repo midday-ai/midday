@@ -8,7 +8,7 @@ export function useNotifications() {
   const [isLoading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
   const [subscriberId, setSubscriberId] = useState();
-  const headlessServiceRef = useRef<HeadlessService>();
+  const headlessServiceRef = useRef<HeadlessService>(undefined);
 
   const markAllMessagesAsRead = () => {
     const headlessService = headlessServiceRef.current;

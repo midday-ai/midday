@@ -23,11 +23,12 @@ export const metadata: Metadata = {
   title: "Transactions | Midday",
 };
 
-export default async function Transactions({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
-}) {
+export default async function Transactions(
+  props: {
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const {
     q: query,
     page,
@@ -62,7 +63,7 @@ export default async function Transactions({
   };
 
   const sort = searchParams?.sort?.split(":");
-  const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
+  const hideConnectFlow = (await cookies()).has(Cookies.HideConnectFlow);
 
   const isOpen = Boolean(searchParams.step);
   const isEmpty = !accountsData?.data?.length && !isOpen;

@@ -18,7 +18,7 @@ type Props = {
 export async function Table({ filter, page, sort, query }: Props) {
   const hasFilters = Object.values(filter).some((value) => value !== null);
   const initialColumnVisibility = JSON.parse(
-    cookies().get(Cookies.TransactionsColumns)?.value || "[]",
+    (await cookies()).get(Cookies.TransactionsColumns)?.value || "[]",
   );
 
   // NOTE: When we have a filter we want to show all results so users can select

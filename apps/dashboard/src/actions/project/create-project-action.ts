@@ -28,7 +28,7 @@ export const createProjectAction = authActionClient
       throw new Error("Failed to create project");
     }
 
-    cookies().set({
+    (await cookies()).set({
       name: Cookies.LastProject,
       value: data.id,
       expires: addYears(new Date(), 1),

@@ -24,15 +24,15 @@ export const metadata: Metadata = {
 };
 
 export default async function Page(params) {
-  if (params?.searchParams?.return_to === "desktop/command") {
+  if ((await params?.searchParams)?.return_to === "desktop/command") {
     return <DesktopCommandMenuSignIn />;
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const preferred = cookieStore.get(Cookies.PreferredSignInProvider);
   const showTrackingConsent =
     isEU() && !cookieStore.has(Cookies.TrackingConsent);
-  const { device } = userAgent({ headers: headers() });
+  const { device } = userAgent({ headers: await headers() });
 
   let moreSignInOptions = null;
   let preferredSignInOption =

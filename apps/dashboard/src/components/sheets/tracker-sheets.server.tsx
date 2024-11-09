@@ -20,7 +20,7 @@ export async function TrackerSheetsServer({
 }: Props) {
   const { data: customers } = await getCustomers();
 
-  const projectId = cookies().get(Cookies.LastProject)?.value;
+  const projectId = (await cookies()).get(Cookies.LastProject)?.value;
 
   return (
     <>

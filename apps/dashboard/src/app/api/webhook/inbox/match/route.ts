@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   const text = await req.clone().text();
-  const signature = headers().get("x-supabase-signature");
+  const signature = (await headers()).get("x-supabase-signature");
 
   if (!signature) {
     return NextResponse.json({ message: "Missing signature" }, { status: 401 });

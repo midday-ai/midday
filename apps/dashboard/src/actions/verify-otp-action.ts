@@ -20,7 +20,7 @@ export const verifyOtpAction = actionClient
       type: "email",
     });
 
-    cookies().set(Cookies.PreferredSignInProvider, "otp", {
+    (await cookies()).set(Cookies.PreferredSignInProvider, "otp", {
       expires: addYears(new Date(), 1),
     });
 

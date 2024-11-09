@@ -1,14 +1,14 @@
 import { Cookies } from "@/utils/constants";
 import { Icons } from "@midday/ui/icons";
-import { cookies } from "next/headers";
+import { cookies, type UnsafeUnwrappedCookies } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
 import { MainMenu } from "./main-menu";
 import { TeamMenu } from "./team-menu";
 
 export function Sidebar() {
-  const initialItems = cookies().has(Cookies.MenuConfig)
-    ? JSON.parse(cookies().get(Cookies.MenuConfig)?.value)
+  const initialItems = (cookies() as unknown as UnsafeUnwrappedCookies).has(Cookies.MenuConfig)
+    ? JSON.parse((cookies() as unknown as UnsafeUnwrappedCookies).get(Cookies.MenuConfig)?.value)
     : null;
 
   return (

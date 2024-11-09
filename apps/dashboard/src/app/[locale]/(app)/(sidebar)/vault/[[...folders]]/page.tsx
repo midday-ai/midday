@@ -7,17 +7,19 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
-  params: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  params: Promise<{
     folders: string[];
     q?: string;
     owners?: string;
     start?: string;
     end?: string;
-  };
+  }>;
 };
 
-export default function Vault({ params, searchParams }: Props) {
+export default async function Vault(props: Props) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const disableActions = [
     "exports",
     "inbox",
