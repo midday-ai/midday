@@ -32,13 +32,18 @@ jobs:
       - name: 🧪 Run unit tests
         run: bun run test
       - name: 📤 Pull Vercel Environment Information
-        run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-      - name: 📤 Pull Vercel Environment Information
         run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts
         run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
+      - name: 🚀 Deploy Background Jobs
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+          TRIGGER_PROJECT_ID: ${{ secrets.TRIGGER_PROJECT_ID }}
+        run: |
+          bunx trigger.dev@latest deploy
+        working-directory: apps/dashboard
       - name: Deploy Project Artifacts to Vercel
         run: |
           bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt

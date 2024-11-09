@@ -77,6 +77,7 @@ We are working on the documentation to get started with Midday for local develop
 - Loops (Marketing email)
 - OpenPanel (Events and Analytics)
 - Dub (Short URLs)
+- Polar (Payment processing)
 
 ## Repo Activity
 
