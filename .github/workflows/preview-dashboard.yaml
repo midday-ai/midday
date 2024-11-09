@@ -37,5 +37,11 @@ jobs:
         run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
-      - name: Deploy Project Artifacts to Vercel
+      # - name: 🔄 Deploy Background Jobs
+      #   env:
+      #     TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+      #   run: |
+      #     TRIGGER_PROJECT_ID=${{ secrets.TRIGGER_PROJECT_ID }} bunx trigger.dev@latest deploy --env staging
+      #   working-directory: apps/dashboard
+      - name: 🔄 Deploy to Vercel
         run: bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
