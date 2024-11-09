@@ -10,9 +10,14 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@midday/ui/dropdown-menu";
-import { Label } from "@midday/ui/label";
-import { Switch } from "@midday/ui/switch";
-import { endOfMonth, format, startOfMonth } from "date-fns";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@midday/ui/select";
+import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
 import Papa from "papaparse";
 import React, { useState } from "react";
 import type { DateRange } from "react-day-picker";
@@ -34,14 +39,15 @@ export function TrackerExportCSV({ name, teamId, projectId, userId }: Props) {
   const supabase = createClient();
 
   async function downloadCSV() {
+    console.log(date);
     const query = supabase
       .from("tracker_entries")
       .select(
         "date, description, duration, assigned:assigned_id(id, full_name), project:project_id(id, name)",
       )
       .eq("team_id", teamId)
-      .gte("date", new UTCDate(date?.from)?.toISOString())
-      .lte("date", new UTCDate(date?.to)?.toISOString())
+      .gte("date", date?.from?.toISOString())
+      .lte("date", date?.to?.toISOString())
       .eq("project_id", projectId)
       .order("date");
 
@@ -53,7 +59,7 @@ export function TrackerExportCSV({ name, teamId, projectId, userId }: Props) {
 
     const formattedData = data?.map((item) => {
       const formattedItem: Record<string, string | null> = {
-        Date: format(item.date, "P"),
+        Date: format(new Date(item.date), "P"),
         Description: item.description,
         Time: secondsToHoursAndMinutes(item.duration ?? 0),
       };
@@ -102,21 +108,54 @@ export function TrackerExportCSV({ name, teamId, projectId, userId }: Props) {
         <DropdownMenuSubTrigger>Export</DropdownMenuSubTrigger>
         <DropdownMenuPortal>
           <DropdownMenuSubContent>
+            <div className="pt-2 px-4">
+              <Select
+                defaultValue="this-month"
+                onValueChange={(value) => {
+                  const now = new UTCDate();
+                  if (value === "this-month") {
+                    const firstDayThisMonth = startOfMonth(now);
+                    const lastDayThisMonth = endOfMonth(now);
+                    setDate({
+                      from: firstDayThisMonth,
+                      to: lastDayThisMonth,
+                    });
+                  } else if (value === "last-month") {
+                    const firstDayLastMonth = startOfMonth(subMonths(now, 1));
+                    const lastDayLastMonth = endOfMonth(subMonths(now, 1));
+                    setDate({
+                      from: firstDayLastMonth,
+                      to: lastDayLastMonth,
+                    });
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select period" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="this-month">This month</SelectItem>
+                  <SelectItem value="last-month">Last month</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <Calendar
               mode="range"
               selected={date}
               onSelect={setDate}
               disabled={(date) => date > new Date()}
+              month={date?.from}
             />
 
             <div className="p-4 space-y-4">
-              <div className="flex items-center justify-between">
+              {/* <div className="flex items-center justify-between">
                 <Label>Include team</Label>
                 <Switch
                   checked={includeTeam}
                   onCheckedChange={setIncludeTeam}
                 />
-              </div>
+              </div> */}
               <Button onClick={downloadCSV} className="w-full" disabled={!date}>
                 Export
               </Button>
