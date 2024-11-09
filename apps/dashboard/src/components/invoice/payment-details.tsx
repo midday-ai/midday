@@ -3,22 +3,12 @@
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Editor } from "@/components/invoice/editor";
 import { useAction } from "next-safe-action/hooks";
-import { useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
 export function PaymentDetails() {
-  const { control, setValue, watch } = useFormContext();
+  const { control, watch } = useFormContext();
   const id = watch("id");
-
-  const content = watch("payment_details");
-
-  // NOTE: This is a workaround to get the new content to render
-  useEffect(() => {
-    if (content) {
-      setValue("payment_details", content, { shouldValidate: true });
-    }
-  }, [id]);
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
@@ -39,6 +29,8 @@ export function PaymentDetails() {
         name="payment_details"
         render={({ field }) => (
           <Editor
+            // NOTE: This is a workaround to get the new content to render
+            key={id}
             initialContent={field.value}
             onChange={field.onChange}
             onBlur={(content) => {

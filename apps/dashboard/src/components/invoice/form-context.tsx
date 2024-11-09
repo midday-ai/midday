@@ -12,7 +12,7 @@ import type { Settings } from "@midday/invoice/default";
 import { createClient } from "@midday/supabase/client";
 import { getDraftInvoiceQuery } from "@midday/supabase/queries";
 import { addMonths } from "date-fns";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
@@ -65,6 +65,7 @@ export function FormContext({
 }: FormContextProps) {
   const supabase = createClient();
   const { lineItems, currency } = useInvoiceParams();
+  const [isLoading, setLoading] = useState(false);
 
   const defaultValues = {
     id: uuidv4(),
@@ -122,9 +123,12 @@ export function FormContext({
           },
         });
       }
+
+      setLoading(false);
     }
 
     if (id) {
+      setLoading(true);
       fetchInvoice();
     }
   }, [id, isOpen]);
@@ -141,6 +145,10 @@ export function FormContext({
       form.setValue("template.currency", currency);
     }
   }, [currency]);
+
+  if (isLoading) {
+    return null;
+  }
 
   return <FormProvider {...form}>{children}</FormProvider>;
 }

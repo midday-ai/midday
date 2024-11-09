@@ -38,13 +38,6 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
   const content = watch("customer_details");
   const id = watch("id");
 
-  // NOTE: This is a workaround to get the new content to render
-  useEffect(() => {
-    if (content) {
-      setValue("customer_details", content, { shouldValidate: true });
-    }
-  }, [id]);
-
   const handleLabelSave = (value: string) => {
     updateInvoiceTemplate.execute({ customer_label: value });
   };
@@ -95,6 +88,8 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
           control={control}
           render={({ field }) => (
             <Editor
+              // NOTE: This is a workaround to get the new content to render
+              key={id}
               initialContent={field.value}
               onChange={handleOnChange}
               className="h-[115px]"
