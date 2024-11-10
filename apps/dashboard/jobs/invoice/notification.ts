@@ -4,7 +4,7 @@ import { z } from "zod";
 import {
   handleOverdueInvoiceNotifications,
   handlePaidInvoiceNotifications,
-} from "../utils/notifications";
+} from "../utils/invocie/notifications";
 
 export const invoiceNotification = schemaTask({
   id: "invoice-notification",

@@ -1,10 +1,9 @@
 import { TZDate } from "@date-fns/tz";
 import { createClient } from "@midday/supabase/job";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { subDays } from "date-fns";
 import { z } from "zod";
-import { invoiceNotification } from "./notification";
+import { updateInvoiceStatus } from "../utils/invocie/update-status";
 
 export const checkInvoiceStatus = schemaTask({
   id: "check-invoice-status",
@@ -20,7 +19,7 @@ export const checkInvoiceStatus = schemaTask({
     const { data: invoice } = await supabase
       .from("invoices")
       .select(
-        "id, status, due_date, currency, amount, team_id, file_path, invoice_number, file_size, user:user_id(timezone)",
+        "id, status, due_date, currency, amount, team_id, file_path, invoice_number, customer_name, file_size, user:user_id(timezone)",
       )
       .eq("id", invoiceId)
       .single();
@@ -30,7 +29,12 @@ export const checkInvoiceStatus = schemaTask({
       return;
     }
 
-    if (!invoice.amount || !invoice.currency || !invoice.due_date) {
+    if (
+      !invoice.amount ||
+      !invoice.currency ||
+      !invoice.due_date ||
+      !invoice.customer_name
+    ) {
       logger.error("Invoice data is missing");
       return;
     }
@@ -70,7 +74,11 @@ export const checkInvoiceStatus = schemaTask({
         .select()
         .single();
 
-      await updateInvoiceStatus(supabase, invoiceId, "paid");
+      await updateInvoiceStatus({
+        invoiceId,
+        customerName: invoice.customer_name,
+        status: "paid",
+      });
     } else {
       // Check if the invoice is overdue
       const isOverdue =
@@ -79,32 +87,12 @@ export const checkInvoiceStatus = schemaTask({
 
       // Update invoice status to overdue if it's past due date and currently unpaid
       if (isOverdue && invoice.status === "unpaid") {
-        await updateInvoiceStatus(supabase, invoiceId, "overdue");
+        await updateInvoiceStatus({
+          invoiceId,
+          customerName: invoice.customer_name,
+          status: "overdue",
+        });
       }
     }
   },
 });
-
-async function updateInvoiceStatus(
-  supabase: SupabaseClient,
-  invoiceId: string,
-  status: "overdue" | "paid",
-) {
-  const { data: updatedInvoice } = await supabase
-    .from("invoices")
-    .update({ status })
-    .eq("id", invoiceId)
-    .select("id, invoice_number, status, team_id")
-    .single();
-
-  if (updatedInvoice) {
-    logger.info(`Invoice status changed to ${status}`);
-
-    await invoiceNotification.trigger({
-      invoiceId,
-      invoiceNumber: updatedInvoice.invoice_number,
-      status: updatedInvoice.status,
-      teamId: updatedInvoice.team_id,
-    });
-  }
-}
