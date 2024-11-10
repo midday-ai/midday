@@ -19,7 +19,7 @@ export const checkInvoiceStatus = schemaTask({
     const { data: invoice } = await supabase
       .from("invoices")
       .select(
-        "id, status, due_date, currency, amount, team_id, file_path, invoice_number, customer_name, file_size, user:user_id(timezone)",
+        "id, status, due_date, currency, amount, team_id, file_path, invoice_number, file_size, user:user_id(timezone)",
       )
       .eq("id", invoiceId)
       .single();
@@ -29,12 +29,7 @@ export const checkInvoiceStatus = schemaTask({
       return;
     }
 
-    if (
-      !invoice.amount ||
-      !invoice.currency ||
-      !invoice.due_date ||
-      !invoice.customer_name
-    ) {
+    if (!invoice.amount || !invoice.currency || !invoice.due_date) {
       logger.error("Invoice data is missing");
       return;
     }
@@ -76,7 +71,6 @@ export const checkInvoiceStatus = schemaTask({
 
       await updateInvoiceStatus({
         invoiceId,
-        customerName: invoice.customer_name,
         status: "paid",
       });
     } else {
@@ -89,7 +83,6 @@ export const checkInvoiceStatus = schemaTask({
       if (isOverdue && invoice.status === "unpaid") {
         await updateInvoiceStatus({
           invoiceId,
-          customerName: invoice.customer_name,
           status: "overdue",
         });
       }

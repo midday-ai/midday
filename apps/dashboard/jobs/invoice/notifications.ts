@@ -6,8 +6,8 @@ import {
   handlePaidInvoiceNotifications,
 } from "../utils/invoice-notifications";
 
-export const invoiceNotification = schemaTask({
-  id: "invoice-notification",
+export const invoiceNotifications = schemaTask({
+  id: "invoice-notifications",
   schema: z.object({
     invoiceId: z.string().uuid(),
     invoiceNumber: z.string(),
