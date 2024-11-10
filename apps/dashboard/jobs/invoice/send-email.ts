@@ -12,6 +12,10 @@ export const sendInvoiceEmail = schemaTask({
   schema: z.object({
     invoiceId: z.string().uuid(),
   }),
+  maxDuration: 300,
+  queue: {
+    concurrencyLimit: 10,
+  },
   run: async ({ invoiceId }) => {
     const supabase = createClient();
 
