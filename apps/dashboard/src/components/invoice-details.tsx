@@ -1,3 +1,5 @@
+import { createClient } from "@midday/supabase/client";
+import { getInvoiceQuery } from "@midday/supabase/queries";
 import {
   Accordion,
   AccordionContent,
@@ -9,6 +11,7 @@ import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { format } from "date-fns";
+import { useEffect, useState } from "react";
 import { CopyInput } from "./copy-input";
 import { FormatAmount } from "./format-amount";
 import { InvoiceActions } from "./invoice-actions";
@@ -17,25 +20,54 @@ import { InvoiceStatus } from "./invoice-status";
 import { OpenURL } from "./open-url";
 import type { Invoice } from "./tables/invoices/columns";
 
-type Props = Invoice;
+type Props = {
+  id: string;
+  data?: Invoice;
+};
 
-export function InvoiceDetails({
-  id,
-  customer,
-  amount,
-  currency,
-  status,
-  vat,
-  tax,
-  paid_at,
-  due_date,
-  issue_date,
-  invoice_number,
-  template,
-  token,
-  internal_note,
-  updated_at,
-}: Props) {
+export function InvoiceDetails({ id, data: initialData }: Props) {
+  const supabase = createClient();
+  const [data, setData] = useState<Invoice | null>(initialData ?? null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const { data: invoice } = await getInvoiceQuery(supabase, id);
+
+        setData(invoice);
+        setLoading(false);
+      } catch {
+        setLoading(false);
+      }
+    }
+
+    if (!data) {
+      fetchData();
+    }
+  }, [data]);
+
+  if (!data || loading) {
+    return null;
+  }
+
+  const {
+    customer,
+    amount,
+    currency,
+    status,
+    vat,
+    tax,
+    paid_at,
+    due_date,
+    issue_date,
+    invoice_number,
+    template,
+    token,
+    internal_note,
+    updated_at,
+  } = data;
+
   return (
     <div>
       <div className="flex justify-between items-center">
