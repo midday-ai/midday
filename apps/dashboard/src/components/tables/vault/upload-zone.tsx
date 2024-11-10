@@ -173,7 +173,9 @@ export function UploadZone({ children }: Props) {
             </div>
           </div>
 
-          <div className="overflow-scroll h-full">{children}</div>
+          <div className="overflow-y-auto h-full scrollbar-hide">
+            {children}
+          </div>
         </div>
       </ContextMenuTrigger>
 
