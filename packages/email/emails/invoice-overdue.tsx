@@ -14,13 +14,13 @@ import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 
 interface Props {
-  companyName: string;
+  customerName: string;
   invoiceNumber: string;
   link: string;
 }
 
 export const InvoiceOverdueEmail = ({
-  companyName = "Customer",
+  customerName = "Customer",
   invoiceNumber = "INV-0001",
   link = "https://app.midday.ai/invoices?invoiceId=40b25275-258c-48e0-9678-57324cd770a6&type=details",
 }: Props) => {
@@ -69,8 +69,8 @@ export const InvoiceOverdueEmail = ({
 
             <Text className="text-[#121212]">
               Invoice <span className="font-medium">{invoiceNumber}</span> from{" "}
-              <span className="font-medium">{companyName}</span> is now overdue.
-              We've checked your account but haven't found a matching
+              <span className="font-medium">{customerName}</span> is now
+              overdue. We've checked your account but haven't found a matching
               transaction.
               <br />
               <br />
