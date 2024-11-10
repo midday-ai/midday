@@ -48,6 +48,7 @@ export const draftInvoiceAction = authActionClient
             customer_details: parseInputValue(customer_details),
             note_details: parseInputValue(note_details),
             token,
+            user_id: user.id,
             template: restTemplate,
             ...input,
           },

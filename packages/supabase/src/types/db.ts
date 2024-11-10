@@ -588,6 +588,7 @@ export type Database = {
           discount: number | null
           due_date: string | null
           file_path: string[] | null
+          file_size: number | null
           from_details: Json | null
           fts: unknown | null
           id: string
@@ -608,6 +609,7 @@ export type Database = {
           token: string
           updated_at: string | null
           url: string | null
+          user_id: string | null
           vat: number | null
           viewed_at: string | null
         }
@@ -622,6 +624,7 @@ export type Database = {
           discount?: number | null
           due_date?: string | null
           file_path?: string[] | null
+          file_size?: number | null
           from_details?: Json | null
           fts?: unknown | null
           id?: string
@@ -642,6 +645,7 @@ export type Database = {
           token?: string
           updated_at?: string | null
           url?: string | null
+          user_id?: string | null
           vat?: number | null
           viewed_at?: string | null
         }
@@ -656,6 +660,7 @@ export type Database = {
           discount?: number | null
           due_date?: string | null
           file_path?: string[] | null
+          file_size?: number | null
           from_details?: Json | null
           fts?: unknown | null
           id?: string
@@ -676,10 +681,18 @@ export type Database = {
           token?: string
           updated_at?: string | null
           url?: string | null
+          user_id?: string | null
           vat?: number | null
           viewed_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "invoices_created_by_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "invoices_customer_id_fkey"
             columns: ["customer_id"]

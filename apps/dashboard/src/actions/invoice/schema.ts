@@ -39,8 +39,6 @@ export const updateInvoiceTemplateSchema = z.object({
   tax_rate: z.number().min(0).max(100).optional(),
   size: z.enum(["a4", "letter"]).optional(),
   delivery_type: z.enum(["create", "create_and_send"]).optional(),
-  locale: z.string().optional(),
-  timezone: z.string().optional(),
 });
 
 export const draftLineItemSchema = z.object({
@@ -108,8 +106,6 @@ export const invoiceTemplateSchema = z.object({
   tax_rate: z.number().min(0).max(100).optional(),
   date_format: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd"]),
   delivery_type: z.enum(["create", "create_and_send"]),
-  locale: z.string().optional(),
-  timezone: z.string().optional(),
 });
 
 export const invoiceFormSchema = z.object({

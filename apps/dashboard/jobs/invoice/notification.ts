@@ -8,7 +8,7 @@ export const invoiceNotification = schemaTask({
     status: z.enum(["paid", "overdue"]),
   }),
   run: async ({ invoiceId, status }) => {
-    logger.info("Invoice notification triggered", { invoiceId });
+    logger.info("Invoice notification triggered", { invoiceId, status });
 
     // TODO: Send notification to user depending on status
   },
