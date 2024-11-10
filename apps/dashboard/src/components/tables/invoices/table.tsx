@@ -1,6 +1,8 @@
 "use client";
 
 import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
+import { InvoiceDetailsSheet } from "@/components/sheets/invoice-details-sheet";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody } from "@midday/ui/table";
 import {
@@ -38,8 +40,19 @@ export function DataTable({
   const [from, setFrom] = useState(pageSize);
   const { ref, inView } = useInView();
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
+  const { setParams, invoiceId, type } = useInvoiceParams();
 
   const deleteInvoice = useAction(deleteInvoiceAction);
+
+  const selectedInvoice = data.find((invoice) => invoice?.id === invoiceId);
+
+  const setOpen = (id?: string) => {
+    if (id) {
+      setParams({ type: "details", invoiceId: id });
+    } else {
+      setParams(null);
+    }
+  };
 
   const handleDeleteInvoice = (id: string) => {
     setData((prev) => {
@@ -95,7 +108,7 @@ export function DataTable({
 
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <InvoiceRow key={row.id} row={row} />
+            <InvoiceRow key={row.id} row={row} setOpen={setOpen} />
           ))}
         </TableBody>
       </Table>
@@ -108,6 +121,12 @@ export function DataTable({
           </div>
         </div>
       )}
+
+      <InvoiceDetailsSheet
+        data={selectedInvoice}
+        isOpen={type === "details" && !!invoiceId}
+        setOpen={setOpen}
+      />
     </div>
   );
 }

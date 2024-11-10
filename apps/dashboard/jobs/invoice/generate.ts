@@ -9,6 +9,9 @@ export const generateInvoice = schemaTask({
     invoiceId: z.string().uuid(),
   }),
   maxDuration: 300,
+  queue: {
+    concurrencyLimit: 10,
+  },
   run: async (payload) => {
     const supabase = createClient();
 
@@ -16,12 +19,22 @@ export const generateInvoice = schemaTask({
 
     const { data: invoiceData } = await supabase
       .from("invoices")
-      .select("*, customer:customer_id(name)")
+      .select(
+        "*, team_id, customer:customer_id(name), user:user_id(timezone, locale)",
+      )
       .eq("id", invoiceId)
       .single()
       .throwOnError();
 
-    const buffer = await renderToBuffer(await PdfTemplate(invoiceData));
+    const { user, ...invoice } = invoiceData;
+
+    const buffer = await renderToBuffer(
+      await PdfTemplate({
+        ...invoice,
+        timezone: user?.timezone,
+        locale: user?.locale,
+      }),
+    );
 
     const filename = `${invoiceData?.invoice_number}.pdf`;
 
@@ -37,7 +50,8 @@ export const generateInvoice = schemaTask({
     await supabase
       .from("invoices")
       .update({
-        file_path: ["invoices", filename],
+        file_path: [invoiceData?.team_id, "invoices", filename],
+        file_size: buffer.length,
       })
       .eq("id", invoiceId);
 

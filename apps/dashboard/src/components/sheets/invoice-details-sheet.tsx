@@ -1,3 +1,4 @@
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { Drawer, DrawerContent } from "@midday/ui/drawer";
 import { useMediaQuery } from "@midday/ui/hooks";
 import { Sheet, SheetContent } from "@midday/ui/sheet";
@@ -6,19 +7,20 @@ import { InvoiceDetails } from "../invoice-details";
 import type { Invoice } from "../tables/invoices/columns";
 
 type Props = {
-  setOpen: (open: boolean) => void;
+  setOpen: (id?: string) => void;
   isOpen: boolean;
-  data: Invoice;
+  data?: Invoice;
 };
 
 export function InvoiceDetailsSheet({ setOpen, isOpen, data }: Props) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const { invoiceId } = useInvoiceParams();
 
   if (isDesktop) {
     return (
       <Sheet open={isOpen} onOpenChange={setOpen}>
         <SheetContent>
-          <InvoiceDetails {...data} />
+          <InvoiceDetails id={invoiceId} data={data} />
         </SheetContent>
       </Sheet>
     );
@@ -29,12 +31,12 @@ export function InvoiceDetailsSheet({ setOpen, isOpen, data }: Props) {
       open={isOpen}
       onOpenChange={(open: boolean) => {
         if (!open) {
-          setOpen(false);
+          setOpen(undefined);
         }
       }}
     >
       <DrawerContent className="p-6">
-        <InvoiceDetails {...data} />
+        <InvoiceDetails id={invoiceId} data={data} />
       </DrawerContent>
     </Drawer>
   );

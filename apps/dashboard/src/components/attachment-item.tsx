@@ -23,7 +23,7 @@ export function AttachmentItem({ file, onDelete }: Props) {
       <div className="flex space-x-4 items-center">
         <HoverCard openDelay={200}>
           <HoverCardTrigger>
-            <div className="rounded-md border w-[40px] h-[40px] overflow-hidden cursor-pointer">
+            <div className="border w-[40px] h-[40px] overflow-hidden cursor-pointer">
               {file.isUploading ? (
                 <Skeleton className="w-full h-full" />
               ) : (

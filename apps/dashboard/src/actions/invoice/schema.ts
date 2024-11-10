@@ -40,7 +40,6 @@ export const updateInvoiceTemplateSchema = z.object({
   size: z.enum(["a4", "letter"]).optional(),
   delivery_type: z.enum(["create", "create_and_send"]).optional(),
   locale: z.string().optional(),
-  timezone: z.string().optional(),
 });
 
 export const draftLineItemSchema = z.object({
@@ -109,7 +108,6 @@ export const invoiceTemplateSchema = z.object({
   date_format: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd"]),
   delivery_type: z.enum(["create", "create_and_send"]),
   locale: z.string().optional(),
-  timezone: z.string().optional(),
 });
 
 export const invoiceFormSchema = z.object({

@@ -1,4 +1,4 @@
-import { getCountryCode, getTimezone } from "@midday/location";
+import { getCountryCode } from "@midday/location";
 import { currencies } from "@midday/location/src/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
 
@@ -10,13 +10,10 @@ export type Settings = {
   include_discount: boolean;
   include_decimals: boolean;
   include_qr: boolean;
-  timezone?: string;
-  locale?: string;
 };
 
 export async function getDefaultSettings(): Promise<Settings> {
   const countryCode = getCountryCode();
-  const timezone = getTimezone();
 
   const { data: userData } = await getUser();
 
@@ -34,8 +31,6 @@ export async function getDefaultSettings(): Promise<Settings> {
     currency: userData?.team?.base_currency ?? currency,
     size,
     include_tax,
-    timezone: userData?.timezone ?? timezone,
-    locale: userData?.locale,
     include_vat: !include_tax,
     include_discount: false,
     include_decimals: false,

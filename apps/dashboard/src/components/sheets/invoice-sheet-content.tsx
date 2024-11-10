@@ -72,7 +72,11 @@ export function InvoiceSheetContent({
     return (
       <SheetContent className="bg-white dark:bg-[#0C0C0C] transition-[max-width] duration-300 ease-in-out">
         <InvoiceSheetHeader
-          type={invoice?.sent_to ? "created_and_sent" : "created"}
+          type={
+            invoice?.template.delivery_type === "create_and_send"
+              ? "created_and_sent"
+              : "created"
+          }
         />
 
         <div className="flex flex-col justify-center h-[calc(100vh-260px)]">

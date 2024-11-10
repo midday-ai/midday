@@ -14,19 +14,17 @@ import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 
 interface Props {
-  companyName: string;
-  teamName: string;
+  customerName: string;
   invoiceNumber: string;
   link: string;
 }
 
 export const InvoiceOverdueEmail = ({
-  companyName = "Customer",
-  teamName = "Midday",
+  customerName = "Customer",
   invoiceNumber = "INV-0001",
-  link = "https://app.midday.ai/i/1234567890",
+  link = "https://app.midday.ai/invoices?invoiceId=40b25275-258c-48e0-9678-57324cd770a6&type=details",
 }: Props) => {
-  const text = `Invoice ${invoiceNumber} from ${teamName} is Overdue`;
+  const text = `Invoice ${invoiceNumber} is now overdue`;
 
   return (
     <Html>
@@ -64,16 +62,26 @@ export const InvoiceOverdueEmail = ({
             <Logo />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               Invoice {invoiceNumber} <br />
-              from {teamName} is Overdue
+              is now overdue
             </Heading>
 
             <br />
 
-            <span className="font-medium">Hi {companyName},</span>
             <Text className="text-[#121212]">
-              Please settle your payment as soon as possible to avoid further
-              delay. If anything is unclear, feel free to add a comment by
-              viewing the invoice.
+              Invoice <span className="font-medium">{invoiceNumber}</span> to{" "}
+              <span className="font-medium">{customerName}</span> is now
+              overdue. We've checked your account but haven't found a matching
+              transaction.
+              <br />
+              <br />
+              Please review the invoice details page to verify if payment has
+              been made through another method.
+              <br />
+              <br />
+              If needed, you can send a payment reminder to your customer or
+              update the invoice status manually if it has already been paid.
+              <br />
+              <br />
             </Text>
 
             <Section className="text-center mt-[50px] mb-[50px]">
@@ -81,7 +89,7 @@ export const InvoiceOverdueEmail = ({
                 className="bg-transparent text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
                 href={link}
               >
-                View invoice
+                View invoice details
               </Button>
             </Section>
 

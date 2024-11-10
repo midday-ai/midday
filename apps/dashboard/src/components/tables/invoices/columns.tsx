@@ -165,7 +165,6 @@ export const columns: ColumnDef<Invoice>[] = [
     header: "Actions",
     cell: ({ row, table }) => {
       const status = row.getValue("status");
-      const hasNewMessages = status === "overdue";
       const { setParams } = useInvoiceParams();
       const updateInvoice = useAction(updateInvoiceAction);
       const { toast } = useToast();
@@ -189,13 +188,13 @@ export const columns: ColumnDef<Invoice>[] = [
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="relative">
               <Button variant="ghost" className="h-8 w-8 p-0">
-                {hasNewMessages && (
+                {/* {hasNewMessages && (
                   <div className="rounded-full size-1 absolute bg-[#FFD02B] -right-0 top-0.5 ring-2 ring-background">
                     <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[ping_1s_ease-in-out_5]" />
                     <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-75" />
                     <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-50" />
                   </div>
-                )}
+                )} */}
                 <DotsHorizontalIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
