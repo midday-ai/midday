@@ -33,7 +33,7 @@ export async function handlePaidInvoiceNotifications({
         name: TriggerEvents.InvoicePaidInApp,
         payload: {
           type: NotificationTypes.Invoice,
-          invoiceId,
+          recordId: invoiceId,
           description: t("notifications.invoicePaid", {
             invoiceNumber,
           }),

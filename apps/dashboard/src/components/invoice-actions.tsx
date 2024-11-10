@@ -35,6 +35,11 @@ export function InvoiceActions({ status, id }: Props) {
   const deleteInvoice = useAction(deleteInvoiceAction);
   const sendReminder = useAction(sendReminderAction);
 
+  const handleDeleteInvoice = () => {
+    deleteInvoice.execute({ id });
+    setParams(null);
+  };
+
   switch (status) {
     case "canceled":
     case "paid":
@@ -64,7 +69,7 @@ export function InvoiceActions({ status, id }: Props) {
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-destructive"
-                onClick={() => deleteInvoice.execute({ id })}
+                onClick={handleDeleteInvoice}
               >
                 Delete
               </DropdownMenuItem>
@@ -141,7 +146,7 @@ export function InvoiceActions({ status, id }: Props) {
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-destructive"
-                onClick={() => deleteInvoice.execute({ id })}
+                onClick={handleDeleteInvoice}
               >
                 Delete
               </DropdownMenuItem>
@@ -183,7 +188,7 @@ export function InvoiceActions({ status, id }: Props) {
             <DropdownMenuContent sideOffset={10} align="end">
               <DropdownMenuItem
                 className="text-destructive"
-                onClick={() => deleteInvoice.execute({ id })}
+                onClick={handleDeleteInvoice}
               >
                 Delete draft
               </DropdownMenuItem>
