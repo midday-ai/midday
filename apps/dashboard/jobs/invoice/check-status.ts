@@ -98,7 +98,7 @@ async function updateInvoiceStatus(
     .single();
 
   if (updatedInvoice) {
-    logger.info(`Invoice status changed to ${status}`, { invoiceId });
+    logger.info(`Invoice status changed to ${status}`);
 
     await invoiceNotification.trigger({
       invoiceId,

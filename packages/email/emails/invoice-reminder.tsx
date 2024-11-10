@@ -74,7 +74,7 @@ export const InvoiceReminderEmail = ({
               This is a friendly reminder about your pending invoice. We kindly
               ask you to review and process the payment at your earliest
               convenience. If you have any questions or need clarification,
-              please don't hesitate to view the invoice and add a comment.
+              please don't hesitate to reply to this email.
             </Text>
 
             <Section className="text-center mt-[50px] mb-[50px]">
