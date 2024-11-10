@@ -48,6 +48,10 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
     }
   }, [data]);
 
+  useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
+
   if (loading) {
     return (
       <div className="space-y-6">

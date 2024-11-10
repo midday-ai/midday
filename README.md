@@ -78,6 +78,7 @@ We are working on the documentation to get started with Midday for local develop
 - OpenPanel (Events and Analytics)
 - Dub (Short URLs)
 - Polar (Payment processing)
+- Typesense (Search)
 
 ## Repo Activity
 
