@@ -99,7 +99,13 @@ export function FormContext({
 
   useEffect(() => {
     if (!isOpen) {
-      form.reset(defaultValues);
+      form.reset({
+        ...defaultValues,
+        template: {
+          ...defaultValues.template,
+          locale: navigator.language,
+        },
+      });
     }
   }, [isOpen]);
 

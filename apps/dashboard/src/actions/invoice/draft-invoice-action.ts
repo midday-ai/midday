@@ -42,7 +42,7 @@ export const draftInvoiceAction = authActionClient
           {
             id,
             team_id: teamId,
-            currency: template.currency,
+            currency: template.currency?.toUpperCase(),
             payment_details: parseInputValue(payment_details),
             from_details: parseInputValue(from_details),
             customer_details: parseInputValue(customer_details),

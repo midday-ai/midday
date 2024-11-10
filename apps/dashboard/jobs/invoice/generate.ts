@@ -19,7 +19,9 @@ export const generateInvoice = schemaTask({
 
     const { data: invoiceData } = await supabase
       .from("invoices")
-      .select("*, customer:customer_id(name), user:user_id(timezone, locale)")
+      .select(
+        "*, team_id, customer:customer_id(name), user:user_id(timezone, locale)",
+      )
       .eq("id", invoiceId)
       .single()
       .throwOnError();
@@ -48,7 +50,7 @@ export const generateInvoice = schemaTask({
     await supabase
       .from("invoices")
       .update({
-        file_path: ["invoices", filename],
+        file_path: [invoiceData?.team_id, "invoices", filename],
         file_size: buffer.length,
       })
       .eq("id", invoiceId);

@@ -9,6 +9,8 @@ function translations(locale: string, params?: any) {
         "notifications.match": `We matched the transaction “${params?.transactionName}” against “${params?.fileName}”`,
         "notifications.transaction": `You have a new transaction of ${params?.amount} from ${params?.from}`,
         "notifications.transactions": `You have ${params?.numberOfTransactions} new transactions`,
+        "notifications.invoicePaid": `Invoice ${params?.invoiceNumber} has been paid`,
+        "notifications.invoiceOverdue": `Invoice ${params?.invoiceNumber} is overdue`,
         "transactions.subject": "New transactions",
         "transactions.preview": `Hi ${params?.firstName}, You have ${
           params?.numberOfTransactions
@@ -55,6 +57,8 @@ function translations(locale: string, params?: any) {
         "notifications.match": `Vi matchade transaktionen “${params?.transactionName}” mot “${params?.fileName}”`,
         "notifications.transaction": `Du har en ny transaktion på ${params?.amount} från ${params?.from}`,
         "notifications.transactions": `Du har ${params?.numberOfTransactions} nya transaktioner`,
+        "notifications.invoicePaid": `Faktura ${params?.invoiceNumber} har betalats`,
+        "notifications.invoiceOverdue": `Faktura ${params?.invoiceNumber} är försenad`,
         "transactions.subject": "Nya transaktioner",
         "transactions.preview": `Hej ${params?.firstName}, Vi hittade ${
           params?.numberOfTransactions

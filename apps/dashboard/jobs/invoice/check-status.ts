@@ -25,27 +25,17 @@ export const checkInvoiceStatus = schemaTask({
       .eq("id", invoiceId)
       .single();
 
-    if (
-      !invoice ||
-      !invoice.amount ||
-      !invoice.currency ||
-      !invoice.team_id ||
-      !invoice.due_date
-    ) {
+    if (!invoice) {
+      logger.error("Invoice data is missing");
+      return;
+    }
+
+    if (!invoice.amount || !invoice.currency || !invoice.due_date) {
       logger.error("Invoice data is missing");
       return;
     }
 
     const userTimezone = invoice.user?.timezone || "UTC";
-
-    const isOverdue =
-      new TZDate(invoice.due_date, userTimezone) <
-      new TZDate(new Date(), userTimezone);
-
-    // Update invoice status to overdue if unpaid and overdue
-    if (invoice.status === "unpaid" && isOverdue) {
-      await updateInvoiceStatus(supabase, invoiceId, "overdue");
-    }
 
     // Find recent transactions matching invoice amount, currency, and team_id
     const { data: transactions } = await supabase
@@ -53,13 +43,15 @@ export const checkInvoiceStatus = schemaTask({
       .select("id")
       .eq("team_id", invoice.team_id)
       .eq("amount", invoice.amount)
-      .eq("currency", invoice.currency)
+      .eq("currency", invoice.currency?.toUpperCase())
       .gte(
         "date",
-        subDays(new TZDate(new Date(), userTimezone), 5).toISOString(),
+        // Get the transactions from the last 3 days
+        subDays(new TZDate(new Date(), userTimezone), 3).toISOString(),
       )
       .eq("is_fulfilled", false);
 
+    // We have a match
     if (transactions && transactions.length === 1) {
       const transactionId = transactions.at(0)?.id;
       const filename = `${invoice.invoice_number}.pdf`;
@@ -79,6 +71,16 @@ export const checkInvoiceStatus = schemaTask({
         .single();
 
       await updateInvoiceStatus(supabase, invoiceId, "paid");
+    } else {
+      // Check if the invoice is overdue
+      const isOverdue =
+        new TZDate(invoice.due_date, userTimezone) <
+        new TZDate(new Date(), userTimezone);
+
+      // Update invoice status to overdue if it's past due date and currently unpaid
+      if (isOverdue && invoice.status === "unpaid") {
+        await updateInvoiceStatus(supabase, invoiceId, "overdue");
+      }
     }
   },
 });
@@ -92,7 +94,7 @@ async function updateInvoiceStatus(
     .from("invoices")
     .update({ status })
     .eq("id", invoiceId)
-    .select()
+    .select("id, invoice_number, status, team_id")
     .single();
 
   if (updatedInvoice) {
@@ -100,7 +102,9 @@ async function updateInvoiceStatus(
 
     await invoiceNotification.trigger({
       invoiceId,
-      status: updatedInvoice.status as "overdue" | "paid",
+      invoiceNumber: updatedInvoice.invoice_number,
+      status: updatedInvoice.status,
+      teamId: updatedInvoice.team_id,
     });
   }
 }
