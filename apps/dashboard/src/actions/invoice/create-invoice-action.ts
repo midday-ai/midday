@@ -1,12 +1,7 @@
 "use server";
 
 import { authActionClient } from "@/actions/safe-action";
-import { resend } from "@/utils/resend";
-import InvoiceEmail from "@midday/email/emails/invoice";
-import { getAppUrl } from "@midday/utils/envs";
-import { render } from "@react-email/render";
 import { tasks } from "@trigger.dev/sdk/v3";
-import { nanoid } from "nanoid";
 import { revalidateTag } from "next/cache";
 import { type InvoiceTemplate, createInvoiceSchema } from "./schema";
 
@@ -20,9 +15,7 @@ export const createInvoiceAction = authActionClient
 
     const { data: draft } = await supabase
       .from("invoices")
-      .select(
-        "id, sent_to, customer:customer_id(name, website, email), template",
-      )
+      .select("id, template")
       .eq("id", id)
       .single();
 
@@ -33,52 +26,28 @@ export const createInvoiceAction = authActionClient
     const deliveryType =
       (draft.template as InvoiceTemplate).delivery_type ?? "create";
 
-    const { data } = await supabase
+    // Update the invoice status to unpaid
+    const { data: invoice } = await supabase
       .from("invoices")
-      .update({
-        id,
-        status: "unpaid",
-        sent_to:
-          deliveryType === "create_and_send" ? draft.customer.email : null,
-      })
+      .update({ status: "unpaid" })
       .eq("id", id)
       .select("*")
       .single();
 
+    // Only send the email if the delivery type is create_and_send
     if (deliveryType === "create_and_send") {
-      try {
-        await resend.emails.send({
-          from: "Midday <middaybot@midday.ai>",
-          to: draft.customer.email,
-          reply_to: user.team.email,
-          subject: `${user.team.name} sent you an invoice`,
-          headers: {
-            "X-Entity-Ref-ID": nanoid(),
-          },
-          html: await render(
-            InvoiceEmail({
-              companyName: draft.customer.name,
-              teamName: user.team.name,
-              link: `${getAppUrl()}/i/${data?.token}`,
-            }),
-          ),
-        });
-      } catch (error) {
-        console.error(error);
-      }
+      await tasks.trigger("send-invoice-email", {
+        invoiceId: invoice?.id,
+      });
     }
 
-    try {
-      await tasks.trigger("generate-invoice", {
-        invoiceId: data?.id,
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    await tasks.trigger("generate-invoice", {
+      invoiceId: invoice?.id,
+    });
 
     revalidateTag(`invoice_summary_${teamId}`);
     revalidateTag(`invoices_${teamId}`);
     revalidateTag(`invoice_number_${teamId}`);
 
-    return data;
+    return invoice;
   });
