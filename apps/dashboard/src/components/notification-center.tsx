@@ -178,6 +178,41 @@ function NotificationItem({
         </div>
       );
 
+    case "invoice":
+      return (
+        <div className="flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary">
+          <Link
+            className="flex items-between justify-between space-x-4 "
+            onClick={() => setOpen(false)}
+            href={`/invoices?invoiceId=${recordId}&type=details`}
+          >
+            <div>
+              <div className="h-9 w-9 flex items-center justify-center space-y-0 border rounded-full">
+                <Icons.Invoice />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm">{description}</p>
+              <span className="text-xs text-[#606060]">
+                {formatDistanceToNow(new Date(createdAt))} ago
+              </span>
+            </div>
+          </Link>
+          {markMessageAsRead && (
+            <div>
+              <Button
+                size="icon"
+                variant="secondary"
+                className="rounded-full bg-transparent hover:bg-[#1A1A1A]"
+                onClick={() => markMessageAsRead(id)}
+              >
+                <Icons.Inventory2 />
+              </Button>
+            </div>
+          )}
+        </div>
+      );
+
     default:
       return null;
   }

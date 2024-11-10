@@ -121,7 +121,7 @@ export async function handleOverdueInvoiceNotifications({
         name: TriggerEvents.InvoiceOverdueInApp,
         payload: {
           type: NotificationTypes.Invoice,
-          invoiceId,
+          recordId: invoiceId,
           description: t("notifications.invoiceOverdue", {
             invoiceNumber,
           }),
