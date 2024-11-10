@@ -43,5 +43,5 @@ jobs:
       #   run: |
       #     TRIGGER_PROJECT_ID=${{ secrets.TRIGGER_PROJECT_ID }} bunx trigger.dev@latest deploy --env staging
       #   working-directory: apps/dashboard
-      - name: 🔄 Deploy to Vercel
+      - name: 🚀 Deploy to Vercel
         run: bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
