@@ -3,7 +3,7 @@ import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { subDays } from "date-fns";
 import { z } from "zod";
-import { updateInvoiceStatus } from "../utils/invocie/update-status";
+import { updateInvoiceStatus } from "../utils/update-invocie";
 
 export const checkInvoiceStatus = schemaTask({
   id: "check-invoice-status",

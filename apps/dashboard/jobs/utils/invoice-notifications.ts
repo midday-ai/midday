@@ -73,7 +73,7 @@ export async function handlePaidInvoiceNotifications({
       return {
         name: TriggerEvents.InvoicePaidEmail,
         payload: {
-          subject: t("invoicePaid.subject"),
+          subject: t("invoice.paid.subject", { invoiceNumber }),
           html,
         },
         user: {
@@ -162,7 +162,7 @@ export async function handleOverdueInvoiceNotifications({
       return {
         name: TriggerEvents.InvoiceOverdueEmail,
         payload: {
-          subject: t("invoiceOverdue.subject"),
+          subject: t("invoice.overdue.subject", { invoiceNumber }),
           html,
         },
         user: {

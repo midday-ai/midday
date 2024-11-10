@@ -51,6 +51,8 @@ function translations(locale: string, params?: any) {
         "invite.footer3": "located in",
         "invite.footer4":
           "If you were not expecting this invitation, you can ignore this email. If you are concerned about your account's safety, please reply to this email to get in touch with us.",
+        "invoice.overdue.subject": `Invoice #${params?.invoiceNumber} is overdue`,
+        "invoice.paid.subject": `Invoice #${params?.invoiceNumber} has been paid`,
       };
     case "sv":
       return {
@@ -103,6 +105,8 @@ function translations(locale: string, params?: any) {
         "invite.footer3": "belägen i",
         "invite.footer4":
           "Om du inte väntade dig den här inbjudan kan du ignorera det här e-postmeddelandet. Om du är orolig för ditt kontos säkerhet, vänligen svara på det här e-postmeddelandet för att komma i kontakt med oss.",
+        "invoice.overdue.subject": `Faktura #${params?.invoiceNumber} är försenad`,
+        "invoice.paid.subject": `Faktura #${params?.invoiceNumber} har betalats`,
       };
 
     default:

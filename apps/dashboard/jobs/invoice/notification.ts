@@ -4,7 +4,7 @@ import { z } from "zod";
 import {
   handleOverdueInvoiceNotifications,
   handlePaidInvoiceNotifications,
-} from "../utils/invocie/notifications";
+} from "../utils/invoice-notifications";
 
 export const invoiceNotification = schemaTask({
   id: "invoice-notification",
@@ -23,7 +23,8 @@ export const invoiceNotification = schemaTask({
       .select(
         "id, team_id, user:users(id, full_name, avatar_url, email, locale)",
       )
-      .eq("team_id", teamId);
+      .eq("team_id", teamId)
+      .eq("role", "owner");
 
     switch (status) {
       case "paid":

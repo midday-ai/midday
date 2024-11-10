@@ -68,16 +68,18 @@ export const InvoiceOverdueEmail = ({
             <br />
 
             <Text className="text-[#121212]">
-              Invoice <span className="font-medium">{invoiceNumber}</span> from{" "}
+              Invoice <span className="font-medium">{invoiceNumber}</span> to{" "}
               <span className="font-medium">{customerName}</span> is now
               overdue. We've checked your account but haven't found a matching
               transaction.
               <br />
               <br />
               Please review the invoice details page to verify if payment has
-              been made through another method. If needed, you can send a
-              payment reminder to your customer or update the invoice status
-              manually if it has already been paid.
+              been made through another method.
+              <br />
+              <br />
+              If needed, you can send a payment reminder to your customer or
+              update the invoice status manually if it has already been paid.
               <br />
               <br />
             </Text>
