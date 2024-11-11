@@ -12,6 +12,10 @@ export function getTimezone() {
   return headers().get("x-vercel-ip-timezone") || "Europe/Berlin";
 }
 
+export function getLocale() {
+  return headers().get("x-vercel-ip-locale") || "en-US";
+}
+
 export function getTimezones() {
   return timezones;
 }

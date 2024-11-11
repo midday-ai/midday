@@ -19,10 +19,15 @@ import {
 } from "@midday/ui/select";
 import { useAction } from "next-safe-action/hooks";
 
+type Timezone = {
+  tzCode: string;
+  name: string;
+};
+
 export function ChangeTimezone({
-  value,
+  timezone,
   timezones,
-}: { value: string; timezones: any[] }) {
+}: { timezone: string; timezones: Timezone[] }) {
   const action = useAction(updateUserAction);
   const t = useI18n();
 
@@ -35,7 +40,7 @@ export function ChangeTimezone({
 
       <CardContent>
         <Select
-          defaultValue={value}
+          defaultValue={timezone}
           onValueChange={(value) => {
             action.execute({ timezone: value });
           }}
