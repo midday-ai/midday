@@ -2,7 +2,7 @@
 
 import { updateTeamAction } from "@/actions/update-team-action";
 import { useUpload } from "@/hooks/use-upload";
-import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import {
   Card,
   CardDescription,
@@ -56,11 +56,12 @@ export function TeamAvatar({ teamId, logoUrl, name }) {
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <>
-              <AvatarImageNext
+              <AvatarImage
                 src={logoUrl}
                 alt={name}
-                width={16}
-                height={16}
+                width={64}
+                height={64}
+                quality={100}
               />
               <AvatarFallback>
                 <span className="text-md">{name?.charAt(0)}</span>
