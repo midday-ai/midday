@@ -159,37 +159,46 @@ export async function POST(req: Request) {
       });
     }
 
-    // Transform and upload files
-    const uploadedAttachments = allowedAttachments?.map(async (attachment) => {
-      const { content, mimeType, size, fileName, name } =
-        await prepareDocument(attachment);
+    // Transform and upload files, filtering out small attachments (<50kb) except PDFs
+    // This helps avoid processing small images like logos and favicons while keeping all PDFs
+    const uploadedAttachments = allowedAttachments
+      ?.filter(
+        (attachment) =>
+          !(
+            attachment.ContentLength < 50000 &&
+            attachment.ContentType !== "application/pdf"
+          ),
+      )
+      ?.map(async (attachment) => {
+        const { content, mimeType, size, fileName, name } =
+          await prepareDocument(attachment);
 
-      // Add a random 4 character string to the end of the file name
-      // to make it unique before the extension
-      const uniqueFileName = fileName.replace(
-        /(\.[^.]+)$/,
-        (ext) => `_${nanoid(4)}${ext}`,
-      );
+        // Add a random 4 character string to the end of the file name
+        // to make it unique before the extension
+        const uniqueFileName = fileName.replace(
+          /(\.[^.]+)$/,
+          (ext) => `_${nanoid(4)}${ext}`,
+        );
 
-      const { data } = await supabase.storage
-        .from("vault")
-        .upload(`${teamId}/inbox/${uniqueFileName}`, content, {
-          contentType: mimeType,
-          upsert: true,
-        });
+        const { data } = await supabase.storage
+          .from("vault")
+          .upload(`${teamId}/inbox/${uniqueFileName}`, content, {
+            contentType: mimeType,
+            upsert: true,
+          });
 
-      return {
-        // NOTE: If we can't parse the name using OCR this will be the fallback name
-        display_name: Subject || name,
-        team_id: teamId,
-        file_path: data?.path.split("/"),
-        file_name: uniqueFileName,
-        content_type: mimeType,
-        forwarded_to: forwardingEnabled ? forwardEmail : null,
-        reference_id: `${MessageID}_${uniqueFileName}`,
-        size,
-      };
-    });
+        return {
+          // NOTE: If we can't parse the name using OCR this will be the fallback name
+          display_name: Subject || name,
+          team_id: teamId,
+          file_path: data?.path.split("/"),
+          file_name: uniqueFileName,
+          content_type: mimeType,
+          forwarded_to: forwardingEnabled ? forwardEmail : null,
+          reference_id: `${MessageID}_${uniqueFileName}`,
+          size,
+        };
+      });
 
     const insertData = await Promise.all(uploadedAttachments ?? []);
 
