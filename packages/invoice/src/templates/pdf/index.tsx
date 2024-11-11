@@ -45,32 +45,39 @@ export async function PdfTemplate({
           padding: 20,
           backgroundColor: "#fff",
           color: "#000",
+          fontFamily: "Helvetica",
         }}
       >
-        <View style={{ marginBottom: 20 }}>
+        <View
+          style={{
+            marginBottom: 20,
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
           {template?.logo_url && (
             <Image
               src={template.logo_url}
               style={{
-                width: 65,
-                height: 65,
+                height: 75,
+                objectFit: "contain",
               }}
             />
           )}
+
+          <Meta
+            invoiceNoLabel={template.invoice_no_label}
+            issueDateLabel={template.issue_date_label}
+            dueDateLabel={template.due_date_label}
+            invoiceNo={invoice_number}
+            issueDate={issue_date}
+            dueDate={due_date}
+            timezone={template.timezone}
+            dateFormat={template.date_format}
+          />
         </View>
 
-        <Meta
-          invoiceNoLabel={template.invoice_no_label}
-          issueDateLabel={template.issue_date_label}
-          dueDateLabel={template.due_date_label}
-          invoiceNo={invoice_number}
-          issueDate={issue_date}
-          dueDate={due_date}
-          timezone={template.timezone}
-          dateFormat={template.date_format}
-        />
-
-        <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: "row", marginTop: 20 }}>
           <View style={{ flex: 1, marginRight: 10 }}>
             <View style={{ marginBottom: 20 }}>
               <Text style={{ fontSize: 9, fontWeight: 500 }}>

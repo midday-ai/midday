@@ -60,6 +60,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
       "note_details",
       "payment_details",
       "from_details",
+      "invoice_number",
     ],
   });
 
@@ -112,15 +113,12 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
     >
       <ScrollArea className="h-[calc(100vh-200px)] bg-background" hideScrollbar>
         <div className="p-8 h-full flex flex-col">
-          <div className="flex flex-col">
+          <div className="flex justify-between">
             <Logo teamId={teamId} />
-          </div>
-
-          <div className="mt-8">
             <Meta teamId={teamId} />
           </div>
 
-          <div className="grid grid-cols-2 gap-6 mt-8">
+          <div className="grid grid-cols-2 gap-6 mt-10">
             <div>
               <FromDetails />
             </div>

@@ -18,7 +18,7 @@ export function Meta({
   timezone,
 }: Props) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 md:gap-4 items-center">
+    <div className="flex flex-col gap-2 items-end">
       <div className="flex space-x-1 items-center">
         <div className="flex items-center flex-shrink-0 space-x-1">
           <span className="truncate font-mono text-[11px] text-[#878787]">

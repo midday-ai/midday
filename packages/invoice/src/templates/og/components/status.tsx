@@ -21,9 +21,9 @@ export function Status({
 
   return (
     <div
-      tw={`flex px-4 py-1 rounded-full font-mono inline-flex max-w-full text-[22px] ${getStatusStyles()}`}
+      tw={`flex px-4 py-1 rounded-full font-mono max-w-full text-[22px] ${getStatusStyles()}`}
     >
-      <span tw="line-clamp-1 truncate inline-block font-[GeistMono]">
+      <span tw="font-mono">
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
     </div>

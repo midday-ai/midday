@@ -42,8 +42,8 @@ export function Logo({ teamId }: { teamId: string }) {
   };
 
   return (
-    <div className="relative size-[65px] group">
-      <label htmlFor="logo-upload" className="absolute inset-0">
+    <div className="relative h-[75px] group">
+      <label htmlFor="logo-upload" className="block h-full">
         {isLoading ? (
           <Skeleton className="w-full h-full" />
         ) : logoUrl ? (
@@ -51,11 +51,12 @@ export function Logo({ teamId }: { teamId: string }) {
             <img
               src={logoUrl}
               alt="Invoice logo"
-              className="w-full h-full object-cover"
+              className="h-full w-auto max-w-none object-contain"
             />
             <button
               type="button"
               className="absolute inset-0 bg-black bg-opacity-50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity flex-col gap-1"
+              style={{ width: "auto" }}
               onClick={(e) => {
                 e.preventDefault();
                 setValue("template.logo_url", undefined, {
@@ -69,7 +70,7 @@ export function Logo({ teamId }: { teamId: string }) {
             </button>
           </>
         ) : (
-          <div className="size-[65px] bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)]" />
+          <div className="h-[75px] w-[75px] bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)]" />
         )}
       </label>
 
