@@ -12,6 +12,8 @@ const config = {
   poweredByHeader: false,
   reactStrictMode: true,
   images: {
+    loader: "custom",
+    loaderFile: "./image-loader.ts",
     remotePatterns: [
       {
         protocol: "https",

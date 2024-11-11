@@ -1,7 +1,7 @@
 "use client";
 
 import { changeTeamAction } from "@/actions/change-team-action";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useAction } from "next-safe-action/hooks";
@@ -17,7 +17,12 @@ export function SelectTeamTable({ data }) {
             <TableCell className="border-r-[0px] py-4">
               <div className="flex items-center space-x-4">
                 <Avatar className="rounded-full w-8 h-8">
-                  <AvatarImage src={row.team?.logo_url} />
+                  <AvatarImageNext
+                    src={row.team?.logo_url}
+                    alt={row.team?.name ?? ""}
+                    width={32}
+                    height={32}
+                  />
                   <AvatarFallback>
                     <span className="text-xs">
                       {row.team.name?.charAt(0)?.toUpperCase()}

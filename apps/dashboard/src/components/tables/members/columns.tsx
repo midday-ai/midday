@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -44,7 +44,12 @@ export const columns: ColumnDef[] = [
         <div>
           <div className="flex items-center space-x-4">
             <Avatar className="rounded-full w-8 h-8">
-              <AvatarImage src={row.original.user?.avatar_url} />
+              <AvatarImageNext
+                src={row.original.user?.avatar_url}
+                alt={row.original.user?.full_name ?? ""}
+                width={32}
+                height={32}
+              />
               <AvatarFallback>
                 <span className="text-xs">
                   {row.original.user.full_name?.charAt(0)?.toUpperCase()}

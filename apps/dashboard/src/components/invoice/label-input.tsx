@@ -20,6 +20,7 @@ export function LabelInput({ name, className, onSave }: Props) {
       id={name}
       contentEditable
       suppressContentEditableWarning
+      tabIndex={-1}
       onBlur={(e) => {
         const newValue = e.currentTarget.textContent || "";
         setValue(name, newValue, { shouldValidate: true });

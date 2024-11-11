@@ -53,7 +53,8 @@ export function NotificationSetting({
       <div className="space-y-0.5">
         <Label htmlFor={id}>{name}</Label>
         <p className="text-sm text-[#606060]">
-          {t(`notifications.${name.toLowerCase()}`)}
+          {/* Replace all spaces with a dot to match the translation key */}
+          {t(`notifications.${name.toLowerCase().replaceAll(" ", ".")}`)}
         </p>
       </div>
       <Switch

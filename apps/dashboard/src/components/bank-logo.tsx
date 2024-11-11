@@ -1,4 +1,5 @@
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
+import Image from "next/image";
 
 type Props = {
   src: string | null;
@@ -9,8 +10,23 @@ type Props = {
 export function BankLogo({ src, alt, size = 34 }: Props) {
   return (
     <Avatar style={{ width: size, height: size }}>
-      {src && <AvatarImage src={src} alt={alt} className="text-transparent" />}
-      <AvatarImage src="https://cdn-engine.midday.ai/default.jpg" alt={alt} className="absolute -z-10" />
+      {src && (
+        <Image
+          src={src}
+          alt={alt}
+          className="text-transparent"
+          width={size}
+          height={size}
+          quality={100}
+        />
+      )}
+      <Image
+        src="https://cdn-engine.midday.ai/default.jpg"
+        alt={alt}
+        className="absolute -z-10"
+        width={size}
+        height={size}
+      />
     </Avatar>
   );
 }

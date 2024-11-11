@@ -6,7 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -131,9 +131,12 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
         <div className="flex space-x-2 mt-1 items-center">
           <Avatar className="size-5">
             {customer?.website && (
-              <AvatarImage
+              <AvatarImageNext
                 src={`https://img.logo.dev/${customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
                 alt={`${customer?.name} logo`}
+                width={20}
+                height={20}
+                quality={100}
               />
             )}
             <AvatarFallback className="text-[9px] font-medium">

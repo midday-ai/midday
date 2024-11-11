@@ -56,7 +56,13 @@ export function TeamAvatar({ teamId, logoUrl, name }) {
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <>
-              <AvatarImage src={logoUrl} />
+              <AvatarImage
+                src={logoUrl}
+                alt={name}
+                width={64}
+                height={64}
+                quality={100}
+              />
               <AvatarFallback>
                 <span className="text-md">{name?.charAt(0)}</span>
               </AvatarFallback>

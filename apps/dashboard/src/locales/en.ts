@@ -78,6 +78,9 @@ export default {
     match: "Receive notifications about matches.",
     transaction: "Receive notifications about a new transaction.",
     transactions: "Receive notifications about new transactions.",
+    "invoice.paid": "Receive notifications about paid invoices.",
+    "invoice.overdue": "Receive notifications about overdue invoices.",
+    "inbox.match": "Receive notifications about new matches in your inbox.",
   },
   widgets: {
     insights: "Assistant",
