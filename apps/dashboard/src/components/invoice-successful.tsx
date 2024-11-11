@@ -73,7 +73,7 @@ export function InvoiceSuccessful({ invoice }: Props) {
         className="flex items-center justify-between mt-10 border-b border-border border-dashed pb-4"
       >
         <span className="text-[11px] text-[#878787] font-mono">
-          {invoice.template.total_label}
+          {invoice.template.total_summary_label}
         </span>
 
         <span className="font-mono text-xl">

@@ -108,7 +108,7 @@ export async function PdfTemplate({
           tax={tax}
           vat={vat}
           currency={currency}
-          totalLabel={template.total_label}
+          totalLabel={template.total_summary_label}
           taxLabel={template.tax_label}
           vatLabel={template.vat_label}
           taxRate={template.tax_rate}

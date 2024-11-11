@@ -87,7 +87,7 @@ export function HtmlTemplate({
             currency={currency}
             vatLabel={template.vat_label}
             taxLabel={template.tax_label}
-            totalLabel={template.total_label}
+            totalLabel={template.total_summary_label}
             lineItems={line_items}
             includeDiscount={template.include_discount}
             discountLabel={template.discount_label}
