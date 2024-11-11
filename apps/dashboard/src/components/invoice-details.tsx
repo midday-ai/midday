@@ -12,6 +12,7 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { format } from "date-fns";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { CopyInput } from "./copy-input";
 import { FormatAmount } from "./format-amount";
@@ -131,9 +132,11 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
         <div className="flex space-x-2 mt-1 items-center">
           <Avatar className="size-5">
             {customer?.website && (
-              <AvatarImage
+              <Image
                 src={`https://img.logo.dev/${customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
                 alt={`${customer?.name} logo`}
+                width={20}
+                height={20}
               />
             )}
             <AvatarFallback className="text-[9px] font-medium">

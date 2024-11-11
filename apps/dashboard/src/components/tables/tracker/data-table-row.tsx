@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +31,7 @@ import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { formatISO } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
+import Image from "next/image";
 import type { TrackerProject } from "./data-table";
 
 type DataTableCellProps = {
@@ -102,9 +103,11 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
               <div className="flex items-center space-x-2">
                 <Avatar className="size-5">
                   {row.customer?.website && (
-                    <AvatarImage
+                    <Image
                       src={`https://img.logo.dev/${row.customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
                       alt={`${row.customer?.name} logo`}
+                      width={20}
+                      height={20}
                     />
                   )}
                   <AvatarFallback className="text-[9px] font-medium">
@@ -140,7 +143,12 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
             <div className="flex items-center space-x-2">
               {row.users?.map((user) => (
                 <Avatar key={user.user_id} className="size-4">
-                  <AvatarImage src={user.avatar_url} />
+                  <Image
+                    src={user.avatar_url || ""}
+                    alt={user.full_name ?? ""}
+                    width={20}
+                    height={20}
+                  />
                   <AvatarFallback className="text-[10px]">
                     {user.full_name?.slice(0, 1)?.toUpperCase()}
                   </AvatarFallback>

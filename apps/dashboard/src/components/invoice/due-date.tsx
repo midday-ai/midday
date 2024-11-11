@@ -41,7 +41,7 @@ export function DueDate() {
         <PopoverTrigger className="text-primary text-[11px] font-mono whitespace-nowrap flex">
           {format(dueDate, dateFormat)}
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0">
+        <PopoverContent className="w-auto p-0 mr-5">
           <Calendar
             mode="single"
             selected={dueDate ? new Date(dueDate) : undefined}

@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { Customer } from "./invoice-toolbar";
 
@@ -67,7 +68,12 @@ export function InvoiceViewers({ customer, viewedAt }: Props) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Avatar className="size-5 object-contain border border-border">
-                    <AvatarImage src={currentUser.avatar_url || undefined} />
+                    <Image
+                      src={currentUser.avatar_url || ""}
+                      alt={currentUser.full_name ?? ""}
+                      width={20}
+                      height={20}
+                    />
                     <AvatarFallback className="text-[9px] font-medium">
                       {currentUser.full_name?.[0]}
                     </AvatarFallback>
@@ -90,9 +96,11 @@ export function InvoiceViewers({ customer, viewedAt }: Props) {
               <TooltipTrigger asChild>
                 <Avatar className="size-5 object-contain border border-border">
                   {customer?.website && (
-                    <AvatarImage
+                    <Image
                       src={`https://img.logo.dev/${customer.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
                       alt={`${customer.name} logo`}
+                      width={20}
+                      height={20}
                     />
                   )}
                   <AvatarFallback className="text-[9px] font-medium">

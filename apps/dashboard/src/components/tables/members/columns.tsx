@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -33,6 +33,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export const columns: ColumnDef[] = [
@@ -44,7 +45,12 @@ export const columns: ColumnDef[] = [
         <div>
           <div className="flex items-center space-x-4">
             <Avatar className="rounded-full w-8 h-8">
-              <AvatarImage src={row.original.user?.avatar_url} />
+              <Image
+                src={row.original.user?.avatar_url || ""}
+                alt={row.original.user?.full_name ?? ""}
+                width={32}
+                height={32}
+              />
               <AvatarFallback>
                 <span className="text-xs">
                   {row.original.user.full_name?.charAt(0)?.toUpperCase()}

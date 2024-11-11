@@ -1,8 +1,9 @@
 "use client";
 
 import type { AI } from "@/actions/ai/chat";
-import { Avatar, AvatarImage } from "@midday/ui/avatar";
+import { Avatar } from "@midday/ui/avatar";
 import { useAIState } from "ai/rsc";
+import Image from "next/image";
 
 type Props = {
   role: "assistant" | "user";
@@ -14,9 +15,11 @@ export function ChatAvatar({ role }: Props) {
     case "user": {
       return (
         <Avatar className="size-6">
-          <AvatarImage
-            src={aiState?.user?.avatar_url}
+          <Image
+            src={aiState?.user?.avatar_url || ""}
             alt={aiState?.user?.full_name ?? ""}
+            width={24}
+            height={24}
           />
         </Avatar>
       );

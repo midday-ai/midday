@@ -1,4 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback } from "@midday/ui/avatar";
+import Image from "next/image";
 import { InvoiceStatus } from "./invoice-status";
 
 type Props = {
@@ -14,9 +15,11 @@ export default function CustomerHeader({ name, website, status }: Props) {
         {name && (
           <Avatar className="size-5 object-contain border border-border">
             {website && (
-              <AvatarImage
+              <Image
                 src={`https://img.logo.dev/${website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
                 alt={`${name} logo`}
+                width={20}
+                height={20}
               />
             )}
             <AvatarFallback className="text-[9px] font-medium">

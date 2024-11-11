@@ -2,13 +2,14 @@
 
 import { changeTeamAction } from "@/actions/change-team-action";
 import { CreateTeamModal } from "@/components/modals/create-team-modal";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Dialog } from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
 import { useClickAway } from "@uidotdev/usehooks";
 import { motion } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
+import Image from "next/image";
 import { useState } from "react";
 
 type Team = {
@@ -91,7 +92,12 @@ export function TeamDropdown({ selectedTeamId: initialId, teams }: Props) {
                   }
                 }}
               >
-                <AvatarImage src={team?.logo_url} />
+                <Image
+                  src={team?.logo_url || ""}
+                  alt={team?.name ?? ""}
+                  width={20}
+                  height={20}
+                />
                 <AvatarFallback className="rounded-none w-[32px] h-[32px]">
                   <span className="text-xs">
                     {team?.name?.charAt(0)?.toUpperCase()}
