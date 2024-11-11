@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { format } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useFormContext } from "react-hook-form";
 import { SelectCurrency } from "../select-currency";
@@ -154,9 +153,7 @@ export function SettingsMenu() {
                     }}
                     onSelect={(event) => event.preventDefault()}
                   >
-                    {watchKey === "template.date_format"
-                      ? format(new Date(), option.value as string)
-                      : option.label}
+                    {option.label}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuSubContent>
