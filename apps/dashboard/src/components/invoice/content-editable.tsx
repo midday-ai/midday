@@ -55,7 +55,10 @@ export function ContentEditable({
           className,
         )}
         onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
+        onBlur={(e) => {
+          setIsFocused(false);
+          props.onBlur?.(e);
+        }}
         onInput={handleInput}
       />
       {isPlaceholder && (

@@ -1,6 +1,6 @@
-import { ContentEditable } from "./content-editable";
 import { DueDate } from "./due-date";
 import { InvoiceNo } from "./invoice-no";
+import { InvoiceTitle } from "./invoice-title";
 import { IssueDate } from "./issue-date";
 
 type Props = {
@@ -10,10 +10,7 @@ type Props = {
 export function Meta({ teamId }: Props) {
   return (
     <div>
-      <ContentEditable
-        className="text-[21px] font-medium mb-1 w-fit min-w-[100px]"
-        name="template.title"
-      />
+      <InvoiceTitle />
 
       <div className="flex flex-col gap-0.5">
         <div>
