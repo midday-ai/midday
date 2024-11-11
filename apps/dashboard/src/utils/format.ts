@@ -6,6 +6,7 @@ import {
   isFuture,
   isPast,
   isSameYear,
+  startOfDay,
 } from "date-fns";
 
 export function formatSize(bytes: number): string {
@@ -142,30 +143,24 @@ export function getDueDateStatus(dueDate: string): string {
   const due = new Date(dueDate);
 
   // Set both dates to the start of their respective days
-  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+  const nowDay = startOfDay(now);
+  const dueDay = startOfDay(due);
 
-  if (dueDay > nowDay) {
-    const diffDays = differenceInDays(due, now);
-    const diffMonths = differenceInMonths(due, now);
+  const diffDays = differenceInDays(dueDay, nowDay);
+  const diffMonths = differenceInMonths(dueDay, nowDay);
 
-    if (diffMonths < 1) {
-      return `in ${diffDays} day${diffDays === 1 ? "" : "s"}`;
-    }
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Tomorrow";
+  if (diffDays === -1) return "Yesterday";
+
+  if (diffDays > 0) {
+    if (diffMonths < 1) return `in ${diffDays} days`;
     return `in ${diffMonths} month${diffMonths === 1 ? "" : "s"}`;
   }
 
-  if (dueDay < nowDay) {
-    const diffDays = differenceInDays(now, due);
-    const diffMonths = differenceInMonths(now, due);
-
-    if (diffMonths < 1) {
-      return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
-    }
-    return `${diffMonths} month${diffMonths === 1 ? "" : "s"} ago`;
-  }
-
-  return "Today";
+  if (diffMonths < 1)
+    return `${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? "" : "s"} ago`;
+  return `${diffMonths} month${diffMonths === 1 ? "" : "s"} ago`;
 }
 
 export function formatRelativeTime(date: Date): string {

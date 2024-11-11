@@ -12,6 +12,7 @@ export type Template = {
   quantity_label: string;
   price_label: string;
   total_label: string;
+  total_summary_label: string;
   tax_label: string;
   vat_label: string;
   locale: string;

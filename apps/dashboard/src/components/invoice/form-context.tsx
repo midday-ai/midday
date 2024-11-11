@@ -26,6 +26,7 @@ const defaultTemplate: InvoiceTemplate = {
   price_label: "Price",
   quantity_label: "Quantity",
   total_label: "Total",
+  total_summary_label: "Total",
   vat_label: "VAT",
   tax_label: "Sales Tax",
   payment_label: "Payment Details",

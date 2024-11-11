@@ -175,10 +175,10 @@ export function Summary() {
 
       <div className="flex justify-between items-center py-4 mt-2 border-t border-border">
         <LabelInput
-          name="template.total_label"
+          name="template.total_summary_label"
           onSave={(value) => {
             updateInvoiceTemplate.execute({
-              total_label: value,
+              total_summary_label: value,
             });
           }}
         />

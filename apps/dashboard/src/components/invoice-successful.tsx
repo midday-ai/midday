@@ -21,7 +21,7 @@ function CustomerDetails({ content }: { content: JSON }) {
 
 export function InvoiceSuccessful({ invoice }: Props) {
   return (
-    <div className="bg-background p-6 relative">
+    <div className="bg-[#F2F2F2] dark:bg-background p-6 relative">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -73,7 +73,7 @@ export function InvoiceSuccessful({ invoice }: Props) {
         className="flex items-center justify-between mt-10 border-b border-border border-dashed pb-4"
       >
         <span className="text-[11px] text-[#878787] font-mono">
-          {invoice.template.total_label}
+          {invoice.template.total_summary_label}
         </span>
 
         <span className="font-mono text-xl">
@@ -135,7 +135,7 @@ export function InvoiceSuccessful({ invoice }: Props) {
         {Array.from({ length: 10 }).map((_, index) => (
           <div
             key={index.toString()}
-            className="size-[30px] rounded-full bg-[#0C0C0C]"
+            className="size-[30px] rounded-full bg-background dark:bg-[#0C0C0C]"
           />
         ))}
       </motion.div>
