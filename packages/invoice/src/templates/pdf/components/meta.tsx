@@ -24,7 +24,7 @@ export function Meta({
   timezone,
 }: MetaProps) {
   return (
-    <View style={{ flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
+    <View style={{ flexDirection: "column", gap: 8 }}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Text style={{ fontSize: 9, fontWeight: 500, marginRight: 2 }}>
           {invoiceNoLabel}:
@@ -54,7 +54,6 @@ export function Meta({
       <View
         style={{
           flexDirection: "row",
-          justifyContent: "flex-end",
           alignItems: "center",
         }}
       >

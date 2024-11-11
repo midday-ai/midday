@@ -35,9 +35,9 @@ export function LineItems({
       >
         <div className="text-[11px] text-[#878787]">{descriptionLabel}</div>
 
-        <div className="text-[11px] text-[#878787]">{priceLabel}</div>
-
         <div className="text-[11px] text-[#878787]">{quantityLabel}</div>
+
+        <div className="text-[11px] text-[#878787]">{priceLabel}</div>
 
         {includeVAT && (
           <div className="text-[11px] text-[#878787]">{vatLabel}</div>
@@ -54,6 +54,9 @@ export function LineItems({
           className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-1 w-full py-1`}
         >
           <div className="text-[11px]">{item.name}</div>
+
+          <div className="text-[11px]">{item.quantity}</div>
+
           <div className="text-[11px]">
             {formatAmount({
               currency,
@@ -62,7 +65,6 @@ export function LineItems({
               locale,
             })}
           </div>
-          <div className="text-[11px]">{item.quantity}</div>
 
           {includeVAT && <div className="text-[11px]">{item.vat}%</div>}
 

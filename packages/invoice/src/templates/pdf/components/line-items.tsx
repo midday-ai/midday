@@ -44,10 +44,10 @@ export function LineItems({
           {descriptionLabel}
         </Text>
         <Text style={{ flex: 1, fontSize: 9, fontWeight: 500 }}>
-          {priceLabel}
+          {quantityLabel}
         </Text>
         <Text style={{ flex: 1, fontSize: 9, fontWeight: 500 }}>
-          {quantityLabel}
+          {priceLabel}
         </Text>
         {includeVAT && (
           <Text style={{ flex: 1, fontSize: 9, fontWeight: 500 }}>
@@ -71,6 +71,9 @@ export function LineItems({
           style={{ flexDirection: "row", paddingVertical: 5 }}
         >
           <Text style={{ flex: 3, fontSize: 9 }}>{item.name}</Text>
+
+          <Text style={{ flex: 1, fontSize: 9 }}>{item.quantity}</Text>
+
           <Text style={{ flex: 1, fontSize: 9 }}>
             {formatAmount({
               currency,
@@ -79,7 +82,6 @@ export function LineItems({
               maximumFractionDigits,
             })}
           </Text>
-          <Text style={{ flex: 1, fontSize: 9 }}>{item.quantity}</Text>
 
           {includeVAT && (
             <Text style={{ flex: 1, fontSize: 9 }}>{item.vat}%</Text>

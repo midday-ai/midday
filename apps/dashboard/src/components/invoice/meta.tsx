@@ -8,7 +8,7 @@ type Props = {
 
 export function Meta({ teamId }: Props) {
   return (
-    <div className="flex flex-col gap-2 items-end">
+    <div className="flex flex-col gap-2">
       <div>
         <InvoiceNo teamId={teamId} />
       </div>

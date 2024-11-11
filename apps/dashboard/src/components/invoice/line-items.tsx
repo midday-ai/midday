@@ -69,15 +69,7 @@ export function LineItems() {
           }}
           className="truncate"
         />
-        <LabelInput
-          name="template.price_label"
-          onSave={(value) => {
-            updateInvoiceTemplate.execute({
-              price_label: value,
-            });
-          }}
-          className="truncate"
-        />
+
         <LabelInput
           name="template.quantity_label"
           onSave={(value) => {
@@ -87,6 +79,17 @@ export function LineItems() {
           }}
           className="truncate"
         />
+
+        <LabelInput
+          name="template.price_label"
+          onSave={(value) => {
+            updateInvoiceTemplate.execute({
+              price_label: value,
+            });
+          }}
+          className="truncate"
+        />
+
         {includeVAT && (
           <LabelInput
             name="template.vat_label"
@@ -203,9 +206,9 @@ function LineItemRow({
 
       <Input name={`line_items.${index}.name`} autoFocus={index > 0} />
 
-      <AmountInput name={`line_items.${index}.price`} />
-
       <QuantityInput name={`line_items.${index}.quantity`} />
+
+      <AmountInput name={`line_items.${index}.price`} />
 
       {includeVAT && <VATInput name={`line_items.${index}.vat`} />}
 
