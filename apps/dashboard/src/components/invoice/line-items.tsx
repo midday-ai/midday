@@ -213,7 +213,7 @@ function LineItemRow({
       {includeVAT && <VATInput name={`line_items.${index}.vat`} />}
 
       <div className="text-right">
-        <span className="text-[11px] text-primary">
+        <span className="text-[11px] text-primary font-mono">
           {formatAmount({
             amount: calculateTotal({
               price,

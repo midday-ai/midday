@@ -9,7 +9,7 @@ export function Logo({ logo, customerName }: Props) {
       src={logo}
       alt={customerName}
       style={{
-        height: 75,
+        height: 80,
         objectFit: "contain",
       }}
     />
