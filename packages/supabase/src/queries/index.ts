@@ -1172,7 +1172,7 @@ export async function getInvoicesQuery(
       query.order(column, { ascending });
     }
   } else {
-    query.order("due_date", { ascending: false });
+    query.order("created_at", { ascending: false });
   }
 
   if (statuses) {
