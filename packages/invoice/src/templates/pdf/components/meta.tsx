@@ -24,16 +24,15 @@ export function Meta({
   timezone,
 }: MetaProps) {
   return (
-    <View style={{ flexDirection: "row", marginTop: 20, marginBottom: 40 }}>
-      <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
-        <Text style={{ fontSize: 9, fontWeight: 500, marginRight: 5 }}>
+    <View style={{ flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Text style={{ fontSize: 9, fontWeight: 500, marginRight: 2 }}>
           {invoiceNoLabel}:
         </Text>
         <Text style={{ fontSize: 9 }}>{invoiceNo}</Text>
       </View>
       <View
         style={{
-          flex: 1,
           flexDirection: "row",
           justifyContent: "center",
           alignItems: "center",
@@ -43,7 +42,7 @@ export function Meta({
           style={{
             fontSize: 9,
             fontWeight: 500,
-            marginRight: 5,
+            marginRight: 2,
           }}
         >
           {issueDateLabel}:
@@ -54,13 +53,12 @@ export function Meta({
       </View>
       <View
         style={{
-          flex: 1,
           flexDirection: "row",
           justifyContent: "flex-end",
           alignItems: "center",
         }}
       >
-        <Text style={{ fontSize: 9, fontWeight: 500, marginRight: 5 }}>
+        <Text style={{ fontSize: 9, fontWeight: 500, marginRight: 2 }}>
           {dueDateLabel}:
         </Text>
         <Text style={{ fontSize: 9 }}>

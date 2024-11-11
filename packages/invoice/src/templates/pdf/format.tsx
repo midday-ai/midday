@@ -1,5 +1,16 @@
 import { Link, Text, View } from "@react-pdf/renderer";
-import type { EditorDoc, TextStyle } from "../types";
+import type { Style } from "@react-pdf/types";
+import type { EditorDoc } from "../types";
+
+type PDFTextStyle = Style & {
+  fontFamily?: string;
+  fontStyle?: "normal" | "italic" | "oblique";
+  textDecoration?:
+    | "none"
+    | "underline"
+    | "line-through"
+    | "underline line-through";
+};
 
 export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
   if (!doc || !doc.content) {
@@ -17,18 +28,20 @@ export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
             >
               {node.content?.map((inlineContent, inlineIndex) => {
                 if (inlineContent.type === "text") {
-                  const style: TextStyle = { fontSize: 9 };
+                  const style: PDFTextStyle = { fontSize: 9 };
                   let href: string | undefined;
 
                   if (inlineContent.marks) {
                     for (const mark of inlineContent.marks) {
                       if (mark.type === "bold") {
-                        style.fontWeight = 500;
+                        style.fontFamily = "Helvetica-Bold";
                       } else if (mark.type === "italic") {
                         style.fontStyle = "italic";
                       } else if (mark.type === "link") {
                         href = mark.attrs?.href;
                         style.textDecoration = "underline";
+                      } else if (mark.type === "strike") {
+                        style.textDecoration = "line-through";
                       }
                     }
                   }

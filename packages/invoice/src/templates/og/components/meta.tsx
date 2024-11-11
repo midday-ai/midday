@@ -12,20 +12,18 @@ type Props = {
 export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
   return (
     <div tw="flex justify-between items-center mt-14 mb-2">
-      <div tw="flex items-center space-x-2">
-        <span tw="truncate text-[22px] text-[#878787] font-[GeistMono] mr-2">
+      <div tw="flex items-center">
+        <span tw="text-[22px] text-[#878787] font-mono mr-2">
           {template.invoice_no_label}:
         </span>
-        <span tw="text-[22px] text-white font-[GeistMono]">
-          {invoiceNumber}
-        </span>
+        <span tw="text-[22px] text-white font-mono">{invoiceNumber}</span>
       </div>
 
-      <div tw="flex items-center space-x-2">
-        <span tw="truncate text-[22px] text-[#878787] font-[GeistMono] mr-2">
+      <div tw="flex items-center">
+        <span tw="text-[22px] text-[#878787] font-mono mr-2">
           {template.issue_date_label}:
         </span>
-        <span tw="text-[22px] text-white font-[GeistMono]">
+        <span tw="text-[22px] text-white font-mono">
           {format(
             new TZDate(issueDate, template.timezone),
             template.date_format,
@@ -33,11 +31,11 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
         </span>
       </div>
 
-      <div tw="flex items-center space-x-2">
-        <span tw="truncate text-[22px] text-[#878787] font-[GeistMono] mr-2">
+      <div tw="flex items-center">
+        <span tw="text-[22px] text-[#878787] font-mono mr-2">
           {template.due_date_label}:
         </span>
-        <span tw="text-[22px] text-white font-[GeistMono]">
+        <span tw="text-[22px] text-white font-mono">
           {format(new TZDate(dueDate, template.timezone), template.date_format)}
         </span>
       </div>

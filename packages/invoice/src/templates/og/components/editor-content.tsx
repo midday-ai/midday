@@ -6,7 +6,7 @@ export function EditorContent({ content }: { content?: JSON }) {
   }
 
   return (
-    <div tw="flex" style={{ lineHeight: 1.3 }}>
+    <div tw="flex" style={{ lineHeight: 1.5 }}>
       {formatEditorContent(content)}
     </div>
   );

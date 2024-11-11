@@ -33,13 +33,11 @@ export function HtmlTemplate({
       hideScrollbar
     >
       <div className="p-4 sm:p-6 md:p-8 h-full flex flex-col">
-        <div className="flex flex-col">
+        <div className="flex justify-between">
           {template.logo_url && (
             <Logo logo={template.logo_url} customerName={customer_name || ""} />
           )}
-        </div>
 
-        <div className="mt-8">
           <Meta
             template={template}
             invoiceNumber={invoice_number}
@@ -49,7 +47,7 @@ export function HtmlTemplate({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-10">
           <div>
             <p className="text-[11px] text-[#878787] font-mono mb-2 block">
               {template.from_label}
@@ -64,7 +62,7 @@ export function HtmlTemplate({
           </div>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-8">
           <LineItems
             lineItems={line_items}
             currency={currency}

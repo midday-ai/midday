@@ -11,8 +11,8 @@ import {
 } from "@midday/ui/tooltip";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
-import { useFormContext, useWatch } from "react-hook-form";
-import { Input } from "./input";
+import { useFormContext } from "react-hook-form";
+import { ContentEditable } from "./content-editable";
 import { LabelInput } from "./label-input";
 
 type Props = {
@@ -76,11 +76,11 @@ export function InvoiceNo({ teamId }: Props) {
       <TooltipProvider delayDuration={100}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button type="button">
-              <Input
+            <button type="button" className="w-fit">
+              <ContentEditable
                 name="invoice_number"
                 className={cn(
-                  "w-full min-w-0 flex-shrink p-0 border-none text-[11px]",
+                  "min-w-0 w-fit flex-shrink p-0 border-none text-[11px]",
                   isInvoiceNumberExists ? "text-red-500" : "",
                 )}
                 value={invoiceNumber}

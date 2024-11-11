@@ -24,8 +24,6 @@ export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
                         style += " font-medium";
                       } else if (mark.type === "italic") {
                         style += " italic";
-                      } else if (mark.type === "link") {
-                        style += " underline";
                       }
                     }
                   }

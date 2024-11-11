@@ -19,12 +19,14 @@ export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
                   if (inlineContent.marks) {
                     for (const mark of inlineContent.marks) {
                       if (mark.type === "bold") {
-                        style += " font-medium";
+                        style += " font-semibold";
                       } else if (mark.type === "italic") {
                         style += " italic";
                       } else if (mark.type === "link") {
                         href = mark.attrs?.href;
                         style += " underline";
+                      } else if (mark.type === "strike") {
+                        style += " line-through";
                       }
                     }
                   }
