@@ -13,8 +13,6 @@ import { TaxInput } from "./tax-input";
 export function Summary() {
   const { control, setValue } = useFormContext<InvoiceFormValues>();
 
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
-
   const includeDecimals = useWatch({
     control,
     name: "template.include_decimals",

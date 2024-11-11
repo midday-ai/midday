@@ -2,7 +2,7 @@
 
 import { updateTeamAction } from "@/actions/update-team-action";
 import { useUpload } from "@/hooks/use-upload";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import {
   Card,
   CardDescription,
@@ -13,7 +13,6 @@ import {
 import { stripSpecialCharacters } from "@midday/utils";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import Image from "next/image";
 import { useRef } from "react";
 
 export function TeamAvatar({ teamId, logoUrl, name }) {
@@ -57,9 +56,9 @@ export function TeamAvatar({ teamId, logoUrl, name }) {
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <>
-              <Image
-                src={logoUrl || ""}
-                alt={name ?? ""}
+              <AvatarImageNext
+                src={logoUrl}
+                alt={name}
                 width={16}
                 height={16}
               />

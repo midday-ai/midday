@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import {
@@ -13,7 +13,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
@@ -144,7 +143,7 @@ export function InboxDetails({
               ) : (
                 <Avatar>
                   {item.website && (
-                    <Image
+                    <AvatarImageNext
                       alt={item.website}
                       width={40}
                       height={40}
@@ -153,6 +152,7 @@ export function InboxDetails({
                         showFallback && "hidden",
                       )}
                       src={`https://img.logo.dev/${item.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ`}
+                      quality={100}
                       onError={() => {
                         setShowFallback(true);
                       }}

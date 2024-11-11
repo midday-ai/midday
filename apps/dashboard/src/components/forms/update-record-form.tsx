@@ -1,8 +1,7 @@
 import { secondsToHoursAndMinutes } from "@/utils/format";
-import { Avatar, AvatarFallback } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Skeleton } from "@midday/ui/skeleton";
-import Image from "next/image";
 
 export function RecordSkeleton() {
   return (
@@ -35,8 +34,8 @@ export function UpdateRecordForm({
       <div className="flex items-center">
         <div className="flex space-x-2 items-center">
           <Avatar className="h-8 w-8">
-            <Image
-              src={assigned.avatar_url || ""}
+            <AvatarImageNext
+              src={assigned.avatar_url}
               alt={assigned?.full_name ?? ""}
               width={32}
               height={32}

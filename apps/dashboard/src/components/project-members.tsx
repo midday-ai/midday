@@ -1,5 +1,4 @@
-import { Avatar, AvatarFallback } from "@midday/ui/avatar";
-import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 
 interface Member {
   id: string;
@@ -17,8 +16,8 @@ export function ProjectMembers({ members }: ProjectMembersProps) {
       {members?.map((member) => (
         <div key={member.id} className="relative">
           <Avatar className="rounded-full w-5 h-5">
-            <Image
-              src={member?.avatar_url || ""}
+            <AvatarImageNext
+              src={member?.avatar_url}
               alt={member?.full_name ?? ""}
               width={20}
               height={20}

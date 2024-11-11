@@ -1,10 +1,9 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Textarea } from "@midday/ui/textarea";
-import Image from "next/image";
 
 const comments = [
   {
@@ -70,8 +69,8 @@ export function InvoiceComments() {
           >
             {comment.owner === "customer" && (
               <Avatar className="size-6 mr-2 mt-auto object-contain border border-border">
-                <Image
-                  src={comment.avatarUrl || ""}
+                <AvatarImageNext
+                  src={comment.avatarUrl}
                   alt={comment.name ?? ""}
                   width={24}
                   height={24}
@@ -94,8 +93,8 @@ export function InvoiceComments() {
 
             {comment.owner === "user" && (
               <Avatar className="size-6 ml-2 mt-auto object-contain border border-border">
-                <Image
-                  src={comment.avatarUrl || ""}
+                <AvatarImageNext
+                  src={comment.avatarUrl}
                   alt={comment.name ?? ""}
                   width={24}
                   height={24}

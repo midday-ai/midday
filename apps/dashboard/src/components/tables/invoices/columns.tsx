@@ -6,7 +6,7 @@ import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { formatDate, getDueDateStatus } from "@/utils/format";
-import { Avatar, AvatarFallback } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import {
@@ -23,7 +23,6 @@ import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
-import Image from "next/image";
 import * as React from "react";
 
 export type Invoice = {
@@ -96,11 +95,12 @@ export const columns: ColumnDef<Invoice>[] = [
         <div className="flex items-center space-x-2">
           <Avatar className="size-5">
             {customer?.website && (
-              <Image
+              <AvatarImageNext
                 src={`https://img.logo.dev/${customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
                 alt={`${name} logo`}
                 width={20}
                 height={20}
+                quality={100}
               />
             )}
             <AvatarFallback className="text-[9px] font-medium">

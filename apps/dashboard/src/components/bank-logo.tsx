@@ -17,7 +17,7 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
           className="text-transparent"
           width={size}
           height={size}
-          quality={95}
+          quality={100}
         />
       )}
       <Image

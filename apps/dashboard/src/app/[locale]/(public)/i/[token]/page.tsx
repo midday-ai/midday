@@ -1,4 +1,4 @@
-import CustomerHeader from "@/components/customer-heaader";
+import CustomerHeader from "@/components/customer-header";
 import InvoiceToolbar from "@/components/invoice-toolbar";
 import { InvoiceCommentsSheet } from "@/components/sheets/invoice-comments";
 import { UTCDate } from "@date-fns/utc";

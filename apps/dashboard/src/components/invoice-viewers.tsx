@@ -3,7 +3,12 @@
 import { formatRelativeTime } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  AvatarImageNext,
+} from "@midday/ui/avatar";
 import { Separator } from "@midday/ui/separator";
 import {
   Tooltip,
@@ -12,7 +17,6 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { Customer } from "./invoice-toolbar";
 
@@ -68,8 +72,8 @@ export function InvoiceViewers({ customer, viewedAt }: Props) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Avatar className="size-5 object-contain border border-border">
-                    <Image
-                      src={currentUser.avatar_url || ""}
+                    <AvatarImageNext
+                      src={currentUser.avatar_url}
                       alt={currentUser.full_name ?? ""}
                       width={20}
                       height={20}
@@ -96,11 +100,12 @@ export function InvoiceViewers({ customer, viewedAt }: Props) {
               <TooltipTrigger asChild>
                 <Avatar className="size-5 object-contain border border-border">
                   {customer?.website && (
-                    <Image
+                    <AvatarImageNext
                       src={`https://img.logo.dev/${customer.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
                       alt={`${customer.name} logo`}
                       width={20}
                       height={20}
+                      quality={100}
                     />
                   )}
                   <AvatarFallback className="text-[9px] font-medium">
