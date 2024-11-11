@@ -96,6 +96,7 @@ export function TeamDropdown({ selectedTeamId: initialId, teams }: Props) {
                   alt={team?.name ?? ""}
                   width={20}
                   height={20}
+                  quality={100}
                 />
                 <AvatarFallback className="rounded-none w-[32px] h-[32px]">
                   <span className="text-xs">
