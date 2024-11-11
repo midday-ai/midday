@@ -159,13 +159,13 @@ export async function POST(req: Request) {
       });
     }
 
-    // Transform and upload files, filtering out small attachments (<50kb) except PDFs
-    // This helps avoid processing small images like logos and favicons while keeping all PDFs
+    // Transform and upload files, filtering out attachments smaller than 100kb except PDFs
+    // This helps avoid processing small images like logos, favicons and tracking pixels while keeping all PDFs for processing
     const uploadedAttachments = allowedAttachments
       ?.filter(
         (attachment) =>
           !(
-            attachment.ContentLength < 50000 &&
+            attachment.ContentLength < 100000 &&
             attachment.ContentType !== "application/pdf"
           ),
       )
