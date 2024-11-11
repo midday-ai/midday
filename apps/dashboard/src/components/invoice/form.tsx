@@ -114,8 +114,8 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
       <ScrollArea className="h-[calc(100vh-200px)] bg-background" hideScrollbar>
         <div className="p-8 h-full flex flex-col">
           <div className="flex justify-between">
-            <Logo teamId={teamId} />
             <Meta teamId={teamId} />
+            <Logo teamId={teamId} />
           </div>
 
           <div className="grid grid-cols-2 gap-6 mt-10">

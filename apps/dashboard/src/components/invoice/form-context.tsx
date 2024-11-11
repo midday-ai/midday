@@ -17,6 +17,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
 const defaultTemplate: InvoiceTemplate = {
+  title: "Invoice",
   customer_label: "To",
   from_label: "From",
   invoice_no_label: "Invoice No",

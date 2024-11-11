@@ -55,16 +55,6 @@ export async function PdfTemplate({
             justifyContent: "space-between",
           }}
         >
-          {template?.logo_url && (
-            <Image
-              src={template.logo_url}
-              style={{
-                height: 75,
-                objectFit: "contain",
-              }}
-            />
-          )}
-
           <Meta
             invoiceNoLabel={template.invoice_no_label}
             issueDateLabel={template.issue_date_label}
@@ -74,7 +64,18 @@ export async function PdfTemplate({
             dueDate={due_date}
             timezone={template.timezone}
             dateFormat={template.date_format}
+            title={template.title}
           />
+
+          {template?.logo_url && (
+            <Image
+              src={template.logo_url}
+              style={{
+                height: 75,
+                objectFit: "contain",
+              }}
+            />
+          )}
         </View>
 
         <View style={{ flexDirection: "row", marginTop: 20 }}>

@@ -182,7 +182,7 @@ export function Summary() {
             });
           }}
         />
-        <span className="text-right font-mono text-[21px]">
+        <span className="text-right font-mono font-medium text-[21px]">
           <AnimatedNumber
             value={total}
             currency={currency}

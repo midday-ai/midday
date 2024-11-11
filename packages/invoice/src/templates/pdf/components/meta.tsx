@@ -11,6 +11,7 @@ interface MetaProps {
   dueDateLabel: string;
   dateFormat?: string;
   timezone: string;
+  title: string;
 }
 
 export function Meta({
@@ -22,47 +23,53 @@ export function Meta({
   dueDateLabel,
   dateFormat = "MM/dd/yyyy",
   timezone,
+  title,
 }: MetaProps) {
   return (
-    <View style={{ flexDirection: "column", gap: 8 }}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Text style={{ fontSize: 9, fontWeight: 500, marginRight: 2 }}>
-          {invoiceNoLabel}:
-        </Text>
-        <Text style={{ fontSize: 9 }}>{invoiceNo}</Text>
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Text
+    <View>
+      <Text style={{ fontSize: 21, fontWeight: 500, marginBottom: 8 }}>
+        {title}
+      </Text>
+      <View style={{ flexDirection: "column", gap: 4 }}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={{ fontSize: 9, fontWeight: 500, marginRight: 2 }}>
+            {invoiceNoLabel}:
+          </Text>
+          <Text style={{ fontSize: 9 }}>{invoiceNo}</Text>
+        </View>
+        <View
           style={{
-            fontSize: 9,
-            fontWeight: 500,
-            marginRight: 2,
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          {issueDateLabel}:
-        </Text>
-        <Text style={{ fontSize: 9 }}>
-          {format(new TZDate(issueDate, timezone), dateFormat)}
-        </Text>
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
-        <Text style={{ fontSize: 9, fontWeight: 500, marginRight: 2 }}>
-          {dueDateLabel}:
-        </Text>
-        <Text style={{ fontSize: 9 }}>
-          {format(new TZDate(dueDate, timezone), dateFormat)}
-        </Text>
+          <Text
+            style={{
+              fontSize: 9,
+              fontWeight: 500,
+              marginRight: 2,
+            }}
+          >
+            {issueDateLabel}:
+          </Text>
+          <Text style={{ fontSize: 9 }}>
+            {format(new TZDate(issueDate, timezone), dateFormat)}
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ fontSize: 9, fontWeight: 500, marginRight: 2 }}>
+            {dueDateLabel}:
+          </Text>
+          <Text style={{ fontSize: 9 }}>
+            {format(new TZDate(dueDate, timezone), dateFormat)}
+          </Text>
+        </View>
       </View>
     </View>
   );

@@ -83,7 +83,6 @@ export function InvoiceNo({ teamId }: Props) {
                   "min-w-0 w-fit flex-shrink p-0 border-none text-[11px]",
                   isInvoiceNumberExists ? "text-red-500" : "",
                 )}
-                value={invoiceNumber}
               />
             </button>
           </TooltipTrigger>

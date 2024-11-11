@@ -20,6 +20,7 @@ export type Template = {
   include_decimals: boolean;
   include_qr: boolean;
   include_vat: boolean;
+  title: string;
 };
 
 export type LineItem = {
@@ -32,6 +33,7 @@ export type LineItem = {
 };
 
 export type TemplateProps = {
+  title: string;
   invoice_number: string;
   discount?: number;
   issue_date: string;

@@ -111,8 +111,9 @@ export function InvoiceSheetContent({
       className="bg-white dark:bg-[#0C0C0C] transition-[max-width] duration-300 ease-in-out"
     >
       <SheetHeader className="mb-6 flex justify-between items-center flex-row">
-        <h2 className="text-xl">Invoice</h2>
-        <SettingsMenu />
+        <div className="ml-auto">
+          <SettingsMenu />
+        </div>
       </SheetHeader>
 
       <Form

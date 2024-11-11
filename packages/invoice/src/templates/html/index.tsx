@@ -34,10 +34,6 @@ export function HtmlTemplate({
     >
       <div className="p-4 sm:p-6 md:p-8 h-full flex flex-col">
         <div className="flex justify-between">
-          {template.logo_url && (
-            <Logo logo={template.logo_url} customerName={customer_name || ""} />
-          )}
-
           <Meta
             template={template}
             invoiceNumber={invoice_number}
@@ -45,6 +41,10 @@ export function HtmlTemplate({
             dueDate={due_date}
             timezone={template.timezone}
           />
+
+          {template.logo_url && (
+            <Logo logo={template.logo_url} customerName={customer_name || ""} />
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-10">

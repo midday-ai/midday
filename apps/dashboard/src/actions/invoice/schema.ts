@@ -13,6 +13,7 @@ export const updateInvoiceSchema = z.object({
 
 export const updateInvoiceTemplateSchema = z.object({
   customer_label: z.string().optional(),
+  title: z.string().optional(),
   from_label: z.string().optional(),
   invoice_no_label: z.string().optional(),
   issue_date_label: z.string().optional(),
@@ -81,6 +82,7 @@ export const lineItemSchema = z.object({
 });
 
 export const invoiceTemplateSchema = z.object({
+  title: z.string().optional(),
   customer_label: z.string(),
   from_label: z.string(),
   invoice_no_label: z.string(),

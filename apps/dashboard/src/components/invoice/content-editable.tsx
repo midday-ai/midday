@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@midday/ui/cn";
 import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
