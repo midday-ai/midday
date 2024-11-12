@@ -11,6 +11,7 @@ type Props = {
   onChange?: (content?: JSONContent | null) => void;
   onBlur?: (content: JSONContent | null) => void;
   placeholder?: string;
+  disablePlaceholder?: boolean;
 };
 
 export function Editor({
@@ -19,6 +20,7 @@ export function Editor({
   onChange,
   onBlur,
   placeholder,
+  disablePlaceholder = false,
 }: Props) {
   const [isFocused, setIsFocused] = useState(false);
   const [content, setContent] = useState<JSONContent | null | undefined>(
@@ -46,7 +48,7 @@ export function Editor({
     onBlur?.(content ?? null);
   }, [content, onBlur]);
 
-  const showPlaceholder = !content && !isFocused;
+  const showPlaceholder = !disablePlaceholder && !content && !isFocused;
 
   return (
     <BaseEditor

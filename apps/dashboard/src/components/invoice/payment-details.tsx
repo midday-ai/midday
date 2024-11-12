@@ -38,7 +38,7 @@ export function PaymentDetails() {
                 payment_details: content ? JSON.stringify(content) : null,
               });
             }}
-            className="h-[78px]"
+            className="min-h-[78px]"
           />
         )}
       />

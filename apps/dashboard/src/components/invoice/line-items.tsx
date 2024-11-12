@@ -200,7 +200,7 @@ function LineItemRow({
           onPointerDown={(e) => controls.start(e)}
           variant="ghost"
         >
-          <Icons.DragIndicator className="h-4 w-4 text-[#878787]" />
+          <Icons.DragIndicator className="size-4 text-[#878787]" />
         </Button>
       )}
 
@@ -213,7 +213,7 @@ function LineItemRow({
       {includeVAT && <VATInput name={`line_items.${index}.vat`} />}
 
       <div className="text-right">
-        <span className="text-[11px] text-primary font-mono">
+        <span className="text-xs text-primary font-mono">
           {formatAmount({
             amount: calculateLineItemTotal({
               price,

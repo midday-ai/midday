@@ -25,6 +25,8 @@ export async function PdfTemplate({
   tax,
   amount,
   subtotal,
+  top_block,
+  bottom_block,
   size = "a4",
   token,
 }: TemplateProps) {
@@ -99,6 +101,8 @@ export async function PdfTemplate({
           </View>
         </View>
 
+        <EditorContent content={top_block} />
+
         <LineItems
           lineItems={line_items}
           currency={currency}
@@ -154,6 +158,8 @@ export async function PdfTemplate({
             </View>
           </View>
         </View>
+
+        <EditorContent content={bottom_block} />
       </Page>
     </Document>
   );

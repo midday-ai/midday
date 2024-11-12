@@ -94,6 +94,8 @@ export function FormContext({
     discount: undefined,
     subtotal: undefined,
     status: "draft",
+    top_block: undefined,
+    bottom_block: undefined,
   };
 
   const form = useForm<InvoiceFormValues>({

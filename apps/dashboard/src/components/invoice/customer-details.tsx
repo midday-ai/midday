@@ -3,6 +3,7 @@
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Editor } from "@/components/invoice/editor";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { cn } from "@midday/ui/cn";
 import type { JSONContent } from "@tiptap/react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
@@ -92,7 +93,7 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
               key={id}
               initialContent={field.value}
               onChange={handleOnChange}
-              className="h-[115px]"
+              className="min-h-[90px]"
             />
           )}
         />
