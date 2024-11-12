@@ -17,6 +17,8 @@ interface SummaryProps {
   includeVAT: boolean;
   includeTax: boolean;
   includeDecimals: boolean;
+  subtotalLabel: string;
+  subtotal: number;
 }
 
 export function Summary({
@@ -35,6 +37,8 @@ export function Summary({
   includeVAT,
   includeTax,
   includeDecimals,
+  subtotalLabel,
+  subtotal,
 }: SummaryProps) {
   const maximumFractionDigits = includeDecimals ? 2 : 0;
 
@@ -48,6 +52,18 @@ export function Summary({
         width: 250,
       }}
     >
+      <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
+        <Text style={{ fontSize: 9, flex: 1 }}>{subtotalLabel}</Text>
+        <Text style={{ fontSize: 9, textAlign: "right" }}>
+          {formatAmount({
+            currency,
+            amount: subtotal,
+            locale,
+            maximumFractionDigits,
+          })}
+        </Text>
+      </View>
+
       {includeDiscount && discount && (
         <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
           <Text style={{ fontSize: 9, flex: 1 }}>{discountLabel}</Text>

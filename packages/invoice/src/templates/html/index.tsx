@@ -92,6 +92,7 @@ export function HtmlTemplate({
             discount={discount}
             locale={template.locale}
             includeDecimals={template.include_decimals}
+            subtotalLabel={template.subtotal_label}
           />
         </div>
 

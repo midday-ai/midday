@@ -1,6 +1,6 @@
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
-import { calculateTotals } from "@midday/invoice/calculate";
+import { calculateTotal } from "@midday/invoice/calculate";
 import { useAction } from "next-safe-action/hooks";
 import { useCallback, useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -12,6 +12,8 @@ import { TaxInput } from "./tax-input";
 
 export function Summary() {
   const { control, setValue } = useFormContext<InvoiceFormValues>();
+
+  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const includeDecimals = useWatch({
     control,
@@ -50,35 +52,30 @@ export function Summary() {
     name: "line_items",
   });
 
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
-  const { totalAmount, totalVAT } = calculateTotals(lineItems);
-
   const discount = useWatch({
     control,
     name: "discount",
   });
 
-  const discountAmount = includeDiscount ? discount || 0 : 0;
-  const amountAfterDiscount = totalAmount - discountAmount;
-  const totalTax = includeTax
-    ? (amountAfterDiscount * (taxRate || 0)) / 100
-    : 0;
-
-  const total = amountAfterDiscount + totalVAT + totalTax;
+  const {
+    subTotal,
+    total,
+    vat: totalVAT,
+    tax: totalTax,
+  } = calculateTotal({
+    lineItems,
+    taxRate,
+    includeVAT,
+    includeTax,
+    discount: discount ?? 0,
+  });
 
   const updateFormValues = useCallback(() => {
-    if (total >= 0) {
-      setValue("amount", total, { shouldValidate: true });
-    }
-
-    if (totalVAT) {
-      setValue("vat", totalVAT, { shouldValidate: true });
-    }
-
-    if (totalTax) {
-      setValue("tax", totalTax, { shouldValidate: true });
-    }
-  }, [total, totalVAT, totalTax]);
+    setValue("amount", total, { shouldValidate: true });
+    setValue("vat", totalVAT, { shouldValidate: true });
+    setValue("tax", totalTax, { shouldValidate: true });
+    setValue("subtotal", subTotal, { shouldValidate: true });
+  }, [total, totalVAT, totalTax, subTotal]);
 
   useEffect(() => {
     updateFormValues();
@@ -106,6 +103,25 @@ export function Summary() {
 
   return (
     <div className="w-[320px] flex flex-col">
+      <div className="flex justify-between items-center py-1">
+        <LabelInput
+          className="flex-shrink-0 min-w-6"
+          name="template.subtotal_label"
+          onSave={(value) => {
+            updateInvoiceTemplate.execute({
+              subtotal_label: value,
+            });
+          }}
+        />
+        <span className="text-right font-mono text-[11px] text-[#878787]">
+          <FormatAmount
+            amount={subTotal}
+            maximumFractionDigits={maximumFractionDigits}
+            currency={currency}
+          />
+        </span>
+      </div>
+
       {includeDiscount && (
         <div className="flex justify-between items-center py-1">
           <LabelInput
@@ -151,7 +167,7 @@ export function Summary() {
         <div className="flex justify-between items-center py-1">
           <div className="flex items-center gap-1">
             <LabelInput
-              className="flex-shrink-0"
+              className="flex-shrink-0 min-w-5"
               name="template.tax_label"
               onSave={(value) => {
                 updateInvoiceTemplate.execute({

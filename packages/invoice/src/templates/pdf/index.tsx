@@ -24,6 +24,7 @@ export async function PdfTemplate({
   vat,
   tax,
   amount,
+  subtotal,
   size = "a4",
   token,
 }: TemplateProps) {
@@ -127,6 +128,8 @@ export async function PdfTemplate({
           includeVAT={template.include_vat}
           includeTax={template.include_tax}
           includeDecimals={template.include_decimals}
+          subtotalLabel={template.subtotal_label}
+          subtotal={subtotal}
         />
 
         <View

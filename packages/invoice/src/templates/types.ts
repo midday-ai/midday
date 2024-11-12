@@ -21,6 +21,8 @@ export type Template = {
   include_qr: boolean;
   include_vat: boolean;
   title: string;
+  subtotal_label: string;
+  subtotal: number;
 };
 
 export type LineItem = {

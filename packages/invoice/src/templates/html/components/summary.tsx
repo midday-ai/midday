@@ -1,4 +1,4 @@
-import { calculateTotals } from "../../../utils/calculate";
+import { calculateTotal } from "../../../utils/calculate";
 import type { LineItem } from "../../types";
 
 type Props = {
@@ -15,6 +15,7 @@ type Props = {
   totalLabel: string;
   lineItems: LineItem[];
   includeDecimals?: boolean;
+  subtotalLabel: string;
 };
 
 export function Summary({
@@ -31,20 +32,38 @@ export function Summary({
   totalLabel,
   lineItems,
   includeDecimals,
+  subtotalLabel,
 }: Props) {
   const maximumFractionDigits = includeDecimals ? 2 : 0;
 
-  const { totalAmount, totalVAT } = calculateTotals(lineItems);
-  const discountAmount = includeDiscount ? discount || 0 : 0;
-  const amountAfterDiscount = totalAmount - discountAmount;
-  const totalTax = includeTax
-    ? (amountAfterDiscount * (taxRate || 0)) / 100
-    : 0;
-
-  const total = amountAfterDiscount + totalVAT + totalTax;
+  const {
+    subTotal,
+    total,
+    vat: totalVAT,
+    tax: totalTax,
+  } = calculateTotal({
+    lineItems,
+    taxRate,
+    discount: discount ?? 0,
+    includeVAT,
+    includeTax,
+  });
 
   return (
     <div className="w-[320px] flex flex-col">
+      <div className="flex justify-between items-center py-1">
+        <span className="text-[11px] text-[#878787] font-mono">
+          {subtotalLabel}
+        </span>
+        <span className="text-right font-mono text-[11px] text-[#878787]">
+          {new Intl.NumberFormat(locale, {
+            style: "currency",
+            currency: currency,
+            maximumFractionDigits,
+          }).format(subTotal)}
+        </span>
+      </div>
+
       {includeDiscount && (
         <div className="flex justify-between items-center py-1">
           <span className="text-[11px] text-[#878787] font-mono">
@@ -55,7 +74,7 @@ export function Summary({
               style: "currency",
               currency: currency,
               maximumFractionDigits,
-            }).format(discount)}
+            }).format(discount ?? 0)}
           </span>
         </div>
       )}
