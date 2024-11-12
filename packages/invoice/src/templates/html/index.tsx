@@ -21,6 +21,8 @@ export function HtmlTemplate({
   customer_name,
   width,
   height,
+  top_block,
+  bottom_block,
 }: TemplateProps) {
   return (
     <ScrollArea
@@ -47,7 +49,7 @@ export function HtmlTemplate({
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-6 mb-4">
           <div>
             <p className="text-[11px] text-[#878787] font-mono mb-2 block">
               {template.from_label}
@@ -62,20 +64,20 @@ export function HtmlTemplate({
           </div>
         </div>
 
-        <div className="mt-8">
-          <LineItems
-            lineItems={line_items}
-            currency={currency}
-            descriptionLabel={template.description_label}
-            quantityLabel={template.quantity_label}
-            priceLabel={template.price_label}
-            totalLabel={template.total_label}
-            includeVAT={template.include_vat}
-            includeDecimals={template.include_decimals}
-            locale={template.locale}
-            vatLabel={template.vat_label}
-          />
-        </div>
+        <EditorContent content={top_block} />
+
+        <LineItems
+          lineItems={line_items}
+          currency={currency}
+          descriptionLabel={template.description_label}
+          quantityLabel={template.quantity_label}
+          priceLabel={template.price_label}
+          totalLabel={template.total_label}
+          includeVAT={template.include_vat}
+          includeDecimals={template.include_decimals}
+          locale={template.locale}
+          vatLabel={template.vat_label}
+        />
 
         <div className="mt-10 md:mt-12 flex justify-end mb-6 md:mb-8">
           <Summary
@@ -113,6 +115,8 @@ export function HtmlTemplate({
               </div>
             )}
           </div>
+
+          <EditorContent content={bottom_block} />
         </div>
       </div>
     </ScrollArea>

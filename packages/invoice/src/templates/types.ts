@@ -55,6 +55,9 @@ export type TemplateProps = {
   height: number;
   token: string;
   size: "letter" | "a4";
+  top_block?: JSON;
+  bottom_block?: JSON;
+  subtotal?: number;
 };
 
 export interface EditorDoc {

@@ -38,7 +38,7 @@ export function FromDetails() {
                 from_details: content ? JSON.stringify(content) : null,
               });
             }}
-            className="h-[115px]"
+            className="min-h-[90px]"
           />
         )}
       />

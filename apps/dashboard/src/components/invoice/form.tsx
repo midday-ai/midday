@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { OpenURL } from "../open-url";
 import { type Customer, CustomerDetails } from "./customer-details";
+import { EditBlock } from "./edit-block";
 import { FromDetails } from "./from-details";
 import { LineItems } from "./line-items";
 import { Logo } from "./logo";
@@ -61,6 +62,8 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
       "payment_details",
       "from_details",
       "invoice_number",
+      "top_block",
+      "bottom_block",
     ],
   });
 
@@ -112,13 +115,13 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
       onKeyDown={handleKeyDown}
     >
       <ScrollArea className="h-[calc(100vh-200px)] bg-background" hideScrollbar>
-        <div className="p-8 h-full flex flex-col">
+        <div className="p-8 pb-4 h-full flex flex-col">
           <div className="flex justify-between">
             <Meta teamId={teamId} />
             <Logo teamId={teamId} />
           </div>
 
-          <div className="grid grid-cols-2 gap-6 mt-10">
+          <div className="grid grid-cols-2 gap-6 mt-8 mb-4">
             <div>
               <FromDetails />
             </div>
@@ -127,7 +130,9 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
             </div>
           </div>
 
-          <div className="mt-8">
+          <EditBlock name="top_block" />
+
+          <div className="mt-4">
             <LineItems />
           </div>
 
@@ -135,11 +140,13 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
             <Summary />
           </div>
 
-          <div className="flex flex-col space-y-8 mt-auto">
-            <div className="grid grid-cols-2 gap-6">
+          <div className="flex flex-col mt-auto">
+            <div className="grid grid-cols-2 gap-6 mb-4 overflow-hidden">
               <PaymentDetails />
               <NoteDetails />
             </div>
+
+            <EditBlock name="bottom_block" />
           </div>
         </div>
       </ScrollArea>
