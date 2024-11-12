@@ -76,7 +76,15 @@ export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
                   }
 
                   if (inlineContent.type === "hardBreak") {
-                    return "\n";
+                    // This is a hack to force a line break in the PDF to look like the web editor
+                    return (
+                      <Text
+                        key={`hard-break-${nodeIndex.toString()}-${inlineIndex.toString()}`}
+                        style={{ height: 12, fontSize: 12 }}
+                      >
+                        {"\n"}
+                      </Text>
+                    );
                   }
 
                   return null;
