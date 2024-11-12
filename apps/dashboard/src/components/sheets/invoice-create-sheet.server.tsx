@@ -17,7 +17,7 @@ export async function InvoiceCreateSheetServer({ teamId }: { teamId: string }) {
     getLastInvoiceNumber(),
   ]);
 
-  const defaultSettings = getDefaultSettings();
+  const defaultSettings = await getDefaultSettings();
 
   // Filter out null values
   const template = templatesData
