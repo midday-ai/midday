@@ -128,8 +128,6 @@ export const TransactionsEmail = ({
                   numberOfTransactions: transactions.length,
                 })}{" "}
               </span>
-              {t("transactions.title3")} <br />
-              {t("transactions.title4")}
             </Heading>
             <Text className="text-[#121212] text-[14px] leading-[24px]">
               {t("transactions.description1", { firstName })},
