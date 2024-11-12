@@ -12,6 +12,7 @@ type Props = {
   onBlur?: (content: JSONContent | null) => void;
   placeholder?: string;
   disablePlaceholder?: boolean;
+  tabIndex?: number;
 };
 
 export function Editor({
@@ -21,6 +22,7 @@ export function Editor({
   onBlur,
   placeholder,
   disablePlaceholder = false,
+  tabIndex,
 }: Props) {
   const [isFocused, setIsFocused] = useState(false);
   const [content, setContent] = useState<JSONContent | null | undefined>(
@@ -63,6 +65,7 @@ export function Editor({
       onUpdate={handleUpdate}
       onFocus={() => setIsFocused(true)}
       onBlur={handleBlur}
+      tabIndex={tabIndex}
     />
   );
 }

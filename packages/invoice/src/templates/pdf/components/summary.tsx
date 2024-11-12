@@ -6,6 +6,7 @@ interface SummaryProps {
   tax?: number;
   taxRate?: number;
   vat?: number;
+  vatRate?: number;
   currency: string;
   totalLabel: string;
   taxLabel: string;
@@ -26,6 +27,7 @@ export function Summary({
   tax,
   taxRate,
   vat,
+  vatRate,
   currency,
   totalLabel,
   taxLabel,
@@ -80,7 +82,9 @@ export function Summary({
 
       {includeVAT && (
         <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
-          <Text style={{ fontSize: 9, flex: 1 }}>{vatLabel}</Text>
+          <Text style={{ fontSize: 9, flex: 1 }}>
+            {vatLabel} ({vatRate}%)
+          </Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
             {formatAmount({
               currency,

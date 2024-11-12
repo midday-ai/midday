@@ -73,10 +73,8 @@ export function HtmlTemplate({
           quantityLabel={template.quantity_label}
           priceLabel={template.price_label}
           totalLabel={template.total_label}
-          includeVAT={template.include_vat}
           includeDecimals={template.include_decimals}
           locale={template.locale}
-          vatLabel={template.vat_label}
         />
 
         <div className="mt-10 md:mt-12 flex justify-end mb-6 md:mb-8">
@@ -84,6 +82,7 @@ export function HtmlTemplate({
             includeVAT={template.include_vat}
             includeTax={template.include_tax}
             taxRate={template.tax_rate}
+            vatRate={template.vat_rate}
             currency={currency}
             vatLabel={template.vat_label}
             taxLabel={template.tax_label}

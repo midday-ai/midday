@@ -1301,7 +1301,7 @@ export async function getDraftInvoiceQuery(supabase: Client, id: string) {
   return supabase
     .from("invoices")
     .select(
-      "id, due_date, invoice_number, template, status, discount, amount, currency, line_items, payment_details, note_details, customer_details, vat, tax, from_details, issue_date, customer_id, customer_name, token",
+      "id, due_date, invoice_number, template, status, discount, amount, currency, line_items, payment_details, note_details, customer_details, vat, tax, from_details, issue_date, customer_id, customer_name, token, top_block, bottom_block",
     )
     .eq("id", id)
     .single();

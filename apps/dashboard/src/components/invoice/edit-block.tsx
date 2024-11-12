@@ -2,7 +2,7 @@
 
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { cn } from "@midday/ui/cn";
-import { useFormContext, useWatch } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 import { Editor } from "./editor";
 
 type Props = {
@@ -10,22 +10,28 @@ type Props = {
 };
 
 export function EditBlock({ name }: Props) {
-  const { control, setValue } = useFormContext<InvoiceFormValues>();
-  const content = useWatch({
-    control,
-    name,
-  });
+  const { control, watch } = useFormContext();
+  const id = watch("id");
 
   return (
     <div className="group">
-      <Editor
-        initialContent={content}
-        onChange={(newContent) => setValue(name, newContent)}
-        placeholder="Write something..."
-        disablePlaceholder
-        className={cn(
-          "transition-opacity",
-          content ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+      <Controller
+        name={name}
+        control={control}
+        render={({ field }) => (
+          <Editor
+            // NOTE: This is a workaround to get the new content to render
+            key={id}
+            tabIndex={-1}
+            initialContent={field.value}
+            onChange={field.onChange}
+            placeholder="Write something..."
+            disablePlaceholder
+            className={cn(
+              "transition-opacity",
+              field.value ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+            )}
+          />
         )}
       />
     </div>

@@ -3,8 +3,8 @@ import { calculateLineItemTotal, calculateTotal } from "./calculate";
 
 describe("calculateTotal", () => {
   const sampleLineItems = [
-    { price: 100, quantity: 2, vat: 10 },
-    { price: 50, quantity: 1, vat: 5 },
+    { price: 100, quantity: 2 },
+    { price: 50, quantity: 1 },
   ];
 
   it("should calculate subtotal correctly", () => {
@@ -16,14 +16,16 @@ describe("calculateTotal", () => {
     const result = calculateTotal({
       lineItems: sampleLineItems,
       includeVAT: true,
+      vatRate: 10,
     });
-    expect(result.vat).toBe(22.5); // (200 * 0.1) + (50 * 0.05)
+    expect(result.vat).toBe(25); // 250 * 0.1
   });
 
   it("should not include VAT when disabled", () => {
     const result = calculateTotal({
       lineItems: sampleLineItems,
       includeVAT: false,
+      vatRate: 10,
     });
     expect(result.vat).toBe(0);
   });
@@ -33,8 +35,9 @@ describe("calculateTotal", () => {
       lineItems: sampleLineItems,
       discount: 20,
       includeVAT: true,
+      vatRate: 10,
     });
-    expect(result.total).toBe(252.5); // (250 + 22.5 - 20)
+    expect(result.total).toBe(255); // (250 + 25 - 20)
   });
 
   it("should calculate tax correctly when included", () => {
@@ -42,8 +45,10 @@ describe("calculateTotal", () => {
       lineItems: sampleLineItems,
       taxRate: 15,
       includeTax: true,
+      includeVAT: true,
+      vatRate: 10,
     });
-    expect(result.tax).toBe(40.875); // (250 + 22.5) * 0.15
+    expect(result.tax).toBe(41.25); // (250 + 25) * 0.15
   });
 
   it("should handle empty line items", () => {
@@ -56,31 +61,10 @@ describe("calculateTotal", () => {
 });
 
 describe("calculateLineItemTotal", () => {
-  it("should calculate base price correctly", () => {
+  it("should calculate total price correctly", () => {
     const result = calculateLineItemTotal({
       price: 100,
       quantity: 2,
-      includeVAT: false,
-    });
-    expect(result).toBe(200);
-  });
-
-  it("should include VAT when enabled", () => {
-    const result = calculateLineItemTotal({
-      price: 100,
-      quantity: 2,
-      vat: 10,
-      includeVAT: true,
-    });
-    expect(result).toBe(220); // 200 + (200 * 0.1)
-  });
-
-  it("should not include VAT when disabled", () => {
-    const result = calculateLineItemTotal({
-      price: 100,
-      quantity: 2,
-      vat: 10,
-      includeVAT: false,
     });
     expect(result).toBe(200);
   });
@@ -94,7 +78,6 @@ describe("calculateLineItemTotal", () => {
     const result = calculateLineItemTotal({
       price: undefined,
       quantity: undefined,
-      vat: undefined,
     });
     expect(result).toBe(0);
   });
