@@ -58,8 +58,8 @@ export default function Page() {
 
           <p className="leading-7 mt-8">
             A valid payment method, including credit card, is required to
-            process the payment for your Subscription. You shall provide Acre
-            Labs Ab with accurate and complete billing information including
+            process the payment for your Subscription. You shall provide Midday
+            Labs AB with accurate and complete billing information including
             full name, address, state, zip code, telephone number, and a valid
             payment method information. By submitting such payment information,
             you automatically authorize Midday Labs AB to charge all
@@ -98,9 +98,9 @@ export default function Page() {
           <h2>Refunds</h2>
 
           <p className="leading-7 mt-8">
-            Certain refund requests for Subscriptions may be considered by Acre
-            Labs AB on a case-by-case basis and granted in sole discretion of
-            Midday Labs AB.
+            Certain refund requests for Subscriptions may be considered by
+            Midday Labs AB on a case-by-case basis and granted in sole
+            discretion of Midday Labs AB.
           </p>
 
           <h2>Content</h2>
@@ -209,8 +209,8 @@ export default function Page() {
           <p className="leading-7 mt-8">
             Midday Labs AB has no control over, and assumes no responsibility
             for, the content, privacy policies, or practices of any third party
-            web sites or services. You further acknowledge and agree that Acre
-            Labs Ab shall not be responsible or liable, directly or indirectly,
+            web sites or services. You further acknowledge and agree that Midday
+            Labs AB shall not be responsible or liable, directly or indirectly,
             for any damage or loss caused or alleged to be caused by or in
             connection with use of or reliance on any such content, goods or
             services available on or through any such web sites or services.

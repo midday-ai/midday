@@ -401,7 +401,7 @@ export default function Page() {
             <li>
               <p className="leading-7 mt-8">
                 <strong>The right to withdraw consent.</strong> You also have
-                the right to withdraw your consent at any time where Acre Labs
+                the right to withdraw your consent at any time where Midday Labs
                 AB relied on your consent to process your personal information.
               </p>
             </li>

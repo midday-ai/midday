@@ -28,8 +28,9 @@ const defaultTemplate: InvoiceTemplate = {
   quantity_label: "Quantity",
   total_label: "Total",
   total_summary_label: "Total",
+  subtotal_label: "Subtotal",
   vat_label: "VAT",
-  tax_label: "Sales Tax",
+  tax_label: "Tax",
   payment_label: "Payment Details",
   payment_details: undefined,
   note_label: "Note",
@@ -91,6 +92,7 @@ export function FormContext({
     tax: undefined,
     token: undefined,
     discount: undefined,
+    subtotal: undefined,
     status: "draft",
   };
 

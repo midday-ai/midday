@@ -3,7 +3,7 @@
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { formatAmount } from "@/utils/format";
-import { calculateTotal } from "@midday/invoice/calculate";
+import { calculateLineItemTotal } from "@midday/invoice/calculate";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Reorder, useDragControls } from "framer-motion";
@@ -215,7 +215,7 @@ function LineItemRow({
       <div className="text-right">
         <span className="text-[11px] text-primary font-mono">
           {formatAmount({
-            amount: calculateTotal({
+            amount: calculateLineItemTotal({
               price,
               quantity,
               vat,
