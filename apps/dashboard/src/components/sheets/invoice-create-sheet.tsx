@@ -30,6 +30,7 @@ export function InvoiceCreateSheet({
   return (
     <FormContext
       template={template}
+      invoiceNumber={invoiceNumber}
       isOpen={isOpen}
       id={invoiceId}
       defaultSettings={defaultSettings}

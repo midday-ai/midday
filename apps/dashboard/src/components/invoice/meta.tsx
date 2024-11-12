@@ -5,17 +5,16 @@ import { IssueDate } from "./issue-date";
 
 type Props = {
   teamId: string;
-  invoiceNumber: string | null;
 };
 
-export function Meta({ teamId, invoiceNumber }: Props) {
+export function Meta({ teamId }: Props) {
   return (
     <div>
       <InvoiceTitle />
 
       <div className="flex flex-col gap-0.5">
         <div>
-          <InvoiceNo teamId={teamId} invoiceNumber={invoiceNumber} />
+          <InvoiceNo teamId={teamId} />
         </div>
         <div>
           <IssueDate />

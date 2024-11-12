@@ -1296,12 +1296,10 @@ export async function getLastInvoiceNumberQuery(
   teamId: string,
 ) {
   const { data } = await supabase
-    .from("invoices")
-    .select("invoice_number")
-    .eq("team_id", teamId)
-    .order("created_at", { ascending: false })
-    .limit(1)
+    .rpc("get_next_invoice_number", {
+      team_id: teamId,
+    })
     .single();
 
-  return { data: data?.invoice_number };
+  return { data };
 }
