@@ -18,6 +18,7 @@ type EditorProps = {
   onBlur?: () => void;
   onFocus?: () => void;
   className?: string;
+  tabIndex?: number;
 };
 
 export function Editor({
@@ -27,6 +28,7 @@ export function Editor({
   onBlur,
   onFocus,
   className,
+  tabIndex,
 }: EditorProps) {
   const editor = useEditor({
     extensions: registerExtensions({ placeholder }),
@@ -43,7 +45,11 @@ export function Editor({
 
   return (
     <>
-      <EditorContent editor={editor} className={className} />
+      <EditorContent
+        editor={editor}
+        className={className}
+        tabIndex={tabIndex}
+      />
       <BubbleMenu editor={editor} />
     </>
   );

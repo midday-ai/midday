@@ -1,6 +1,7 @@
 import { formatAmount } from "@midday/utils/format";
 import { Text, View } from "@react-pdf/renderer";
 import type { LineItem } from "../../types";
+import { Description } from "./description";
 
 type Props = {
   lineItems: LineItem[];
@@ -24,7 +25,6 @@ export function LineItems({
   includeDecimals,
 }: Props) {
   const maximumFractionDigits = includeDecimals ? 2 : 0;
-
   return (
     <View style={{ marginTop: 20 }}>
       <View
@@ -59,9 +59,13 @@ export function LineItems({
       {lineItems.map((item, index) => (
         <View
           key={`line-item-${index.toString()}`}
-          style={{ flexDirection: "row", paddingVertical: 5 }}
+          style={{
+            flexDirection: "row",
+            paddingVertical: 5,
+            alignItems: "flex-start",
+          }}
         >
-          <Text style={{ flex: 3, fontSize: 9 }}>{item.name}</Text>
+          <Description content={item.name} />
 
           <Text style={{ flex: 1, fontSize: 9 }}>{item.quantity}</Text>
 

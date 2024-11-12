@@ -10,7 +10,7 @@ import { Reorder, useDragControls } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { AmountInput } from "./amount-input";
-import { Input } from "./input";
+import { Description } from "./description";
 import { LabelInput } from "./label-input";
 import { QuantityInput } from "./quantity-input";
 
@@ -164,7 +164,7 @@ function LineItemRow({
 
   return (
     <Reorder.Item
-      className="grid grid-cols-[1.5fr_15%_15%_15%] gap-4 items-end relative group mb-2 w-full"
+      className="grid grid-cols-[1.5fr_15%_15%_15%] gap-4 items-start relative group mb-2 w-full"
       value={item}
       dragListener={false}
       dragControls={controls}
@@ -172,7 +172,7 @@ function LineItemRow({
       {isReorderable && (
         <Button
           type="button"
-          className="absolute -left-9 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent cursor-grab"
+          className="absolute -left-9 -top-[4px] opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent cursor-grab"
           onPointerDown={(e) => controls.start(e)}
           variant="ghost"
         >
@@ -180,7 +180,7 @@ function LineItemRow({
         </Button>
       )}
 
-      <Input name={`line_items.${index}.name`} autoFocus={index > 0} />
+      <Description name={`line_items.${index}.name`} />
 
       <QuantityInput name={`line_items.${index}.quantity`} />
 
@@ -203,7 +203,7 @@ function LineItemRow({
         <Button
           type="button"
           onClick={() => handleRemove(index)}
-          className="absolute -right-9 top-[14px] -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent text-[#878787]"
+          className="absolute -right-9 -top-[4px] opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent text-[#878787]"
           variant="ghost"
         >
           <Icons.Close />
