@@ -9,6 +9,7 @@ import { FormatAmount } from "../format-amount";
 import { AmountInput } from "./amount-input";
 import { LabelInput } from "./label-input";
 import { TaxInput } from "./tax-input";
+import { VATInput } from "./vat-input";
 
 export function Summary() {
   const { control, setValue } = useFormContext<InvoiceFormValues>();
@@ -35,6 +36,11 @@ export function Summary() {
   const taxRate = useWatch({
     control,
     name: "template.tax_rate",
+  });
+
+  const vatRate = useWatch({
+    control,
+    name: "template.vat_rate",
   });
 
   const includeVAT = useWatch({
@@ -65,7 +71,7 @@ export function Summary() {
   } = calculateTotal({
     lineItems,
     taxRate,
-    includeVAT,
+    vatRate,
     includeTax,
     discount: discount ?? 0,
   });
@@ -82,18 +88,16 @@ export function Summary() {
   }, [updateFormValues]);
 
   useEffect(() => {
-    if (!includeVAT) {
-      lineItems.forEach((_, index) => {
-        setValue(`line_items.${index}.vat`, 0, { shouldValidate: true });
-      });
-    }
-  }, [includeVAT]);
-
-  useEffect(() => {
     if (!includeTax) {
       setValue("template.tax_rate", 0, { shouldValidate: true });
     }
   }, [includeTax]);
+
+  useEffect(() => {
+    if (!includeVAT) {
+      setValue("template.vat_rate", 0, { shouldValidate: true });
+    }
+  }, [includeVAT]);
 
   useEffect(() => {
     if (!includeDiscount) {
@@ -144,14 +148,19 @@ export function Summary() {
 
       {includeVAT && (
         <div className="flex justify-between items-center py-1">
-          <LabelInput
-            name="template.vat_label"
-            onSave={(value) => {
-              updateInvoiceTemplate.execute({
-                vat_label: value,
-              });
-            }}
-          />
+          <div className="flex items-center gap-1">
+            <LabelInput
+              className="flex-shrink-0 min-w-5"
+              name="template.vat_label"
+              onSave={(value) => {
+                updateInvoiceTemplate.execute({
+                  vat_label: value,
+                });
+              }}
+            />
+
+            <VATInput />
+          </div>
 
           <span className="text-right font-mono text-[11px] text-[#878787]">
             <FormatAmount

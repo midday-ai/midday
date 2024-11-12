@@ -13,12 +13,10 @@ import { AmountInput } from "./amount-input";
 import { Input } from "./input";
 import { LabelInput } from "./label-input";
 import { QuantityInput } from "./quantity-input";
-import { VATInput } from "./vat-input";
 
 export function LineItems() {
   const { control } = useFormContext<InvoiceFormValues>();
   const currency = useWatch({ control, name: "template.currency" });
-  const includeVAT = useWatch({ control, name: "template.include_vat" });
   const includeDecimals = useWatch({
     control,
     name: "template.include_decimals",
@@ -57,9 +55,7 @@ export function LineItems() {
 
   return (
     <div className="space-y-4">
-      <div
-        className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_10%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end mb-2`}
-      >
+      <div className="grid grid-cols-[1.5fr_15%_15%_15%] gap-4 items-end mb-2">
         <LabelInput
           name="template.description_label"
           onSave={(value) => {
@@ -90,17 +86,6 @@ export function LineItems() {
           className="truncate"
         />
 
-        {includeVAT && (
-          <LabelInput
-            name="template.vat_label"
-            onSave={(value) => {
-              updateInvoiceTemplate.execute({
-                vat_label: value,
-              });
-            }}
-            className="truncate"
-          />
-        )}
         <LabelInput
           name="template.total_label"
           onSave={(value) => {
@@ -126,7 +111,6 @@ export function LineItems() {
             handleRemove={handleRemove}
             isReorderable={fields.length > 1}
             currency={currency}
-            includeVAT={includeVAT}
             maximumFractionDigits={maximumFractionDigits}
           />
         ))}
@@ -139,7 +123,6 @@ export function LineItems() {
             name: "",
             quantity: 0,
             price: 0,
-            vat: includeVAT ? 0 : undefined,
           })
         }
         className="flex items-center space-x-2 text-xs text-[#878787] font-mono"
@@ -157,7 +140,6 @@ function LineItemRow({
   isReorderable,
   item,
   currency,
-  includeVAT,
   maximumFractionDigits,
 }: {
   index: number;
@@ -165,7 +147,6 @@ function LineItemRow({
   isReorderable: boolean;
   item: InvoiceFormValues["line_items"][number];
   currency: string;
-  includeVAT: boolean;
   maximumFractionDigits: number;
 }) {
   const controls = useDragControls();
@@ -181,14 +162,9 @@ function LineItemRow({
     name: `line_items.${index}.quantity`,
   });
 
-  const vat = useWatch({
-    control,
-    name: `line_items.${index}.vat`,
-  });
-
   return (
     <Reorder.Item
-      className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_10%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full`}
+      className="grid grid-cols-[1.5fr_15%_15%_15%] gap-4 items-end relative group mb-2 w-full"
       value={item}
       dragListener={false}
       dragControls={controls}
@@ -210,16 +186,12 @@ function LineItemRow({
 
       <AmountInput name={`line_items.${index}.price`} />
 
-      {includeVAT && <VATInput name={`line_items.${index}.vat`} />}
-
       <div className="text-right">
         <span className="text-xs text-primary font-mono">
           {formatAmount({
             amount: calculateLineItemTotal({
               price,
               quantity,
-              vat,
-              includeVAT,
             }),
             currency,
             maximumFractionDigits,

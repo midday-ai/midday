@@ -46,6 +46,7 @@ const defaultTemplate: InvoiceTemplate = {
   date_format: "dd/MM/yyyy",
   include_tax: true,
   tax_rate: 0,
+  vat_rate: 0,
   delivery_type: "create",
 };
 

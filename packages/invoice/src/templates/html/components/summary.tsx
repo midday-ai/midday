@@ -8,6 +8,7 @@ type Props = {
   discount?: number;
   discountLabel: string;
   taxRate: number;
+  vatRate: number;
   locale: string;
   currency: string;
   vatLabel: string;
@@ -26,6 +27,7 @@ export function Summary({
   locale,
   discount,
   taxRate,
+  vatRate,
   currency,
   vatLabel,
   taxLabel,
@@ -44,6 +46,7 @@ export function Summary({
   } = calculateTotal({
     lineItems,
     taxRate,
+    vatRate,
     discount: discount ?? 0,
     includeVAT,
     includeTax,
@@ -82,7 +85,7 @@ export function Summary({
       {includeVAT && (
         <div className="flex justify-between items-center py-1">
           <span className="text-[11px] text-[#878787] font-mono">
-            {vatLabel}
+            {vatLabel} ({vatRate}%)
           </span>
           <span className="text-right font-mono text-[11px] text-[#878787]">
             {new Intl.NumberFormat(locale, {
