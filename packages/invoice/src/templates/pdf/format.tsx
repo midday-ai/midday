@@ -22,7 +22,10 @@ export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
       {doc.content.map((node, nodeIndex) => {
         if (node.type === "paragraph") {
           return (
-            <View key={`paragraph-${nodeIndex.toString()}`}>
+            <View
+              key={`paragraph-${nodeIndex.toString()}`}
+              style={{ alignItems: "flex-start" }}
+            >
               <Text>
                 {node.content?.map((inlineContent, inlineIndex) => {
                   if (inlineContent.type === "text") {

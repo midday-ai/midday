@@ -4,7 +4,6 @@ import { formatRelativeTime } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { useDebounce } from "@uidotdev/usehooks";
-import { motion } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -153,30 +152,21 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
 
       <div className="absolute bottom-14 w-full h-9">
         <div className="flex justify-between items-center mt-auto">
-          <div className="flex space-x-2 items-center">
+          <div className="flex space-x-2 items-center text-xs text-[#808080]">
             {(draftInvoice.isPending || lastEditedText) && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5 }}
-                className="text-xs text-[#808080] flex items-center gap-1"
-              >
-                <span>
-                  {draftInvoice.isPending ? "Saving" : lastEditedText}
-                </span>
-              </motion.div>
+              <span>{draftInvoice.isPending ? "Saving" : lastEditedText}</span>
             )}
-
             {token && (
-              <OpenURL
-                href={`/i/${token}`}
-                className="text-xs text-[#808080] flex items-center gap-1"
-              >
-                <span>-</span>
-                <Icons.ExternalLink className="size-3" />
-                <span>Preview invoice</span>
-              </OpenURL>
+              <>
+                {(draftInvoice.isPending || lastEditedText) && <span>-</span>}
+                <OpenURL
+                  href={`/i/${token}`}
+                  className="flex items-center gap-1"
+                >
+                  <Icons.ExternalLink className="size-3" />
+                  <span>Preview invoice</span>
+                </OpenURL>
+              </>
             )}
           </div>
 

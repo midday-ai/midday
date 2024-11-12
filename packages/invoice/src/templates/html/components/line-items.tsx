@@ -1,6 +1,7 @@
 import { formatAmount } from "@midday/utils/format";
 import { calculateLineItemTotal } from "../../../utils/calculate";
 import type { LineItem } from "../../types";
+import { Description } from "./description";
 
 type Props = {
   lineItems: LineItem[];
@@ -39,11 +40,13 @@ export function LineItems({
       {lineItems.map((item, index) => (
         <div
           key={`line-item-${index.toString()}`}
-          className="grid grid-cols-[1.5fr_15%_15%_15%] gap-4 items-end relative group mb-1 w-full py-1"
+          className="grid grid-cols-[1.5fr_15%_15%_15%] gap-4 items-start relative group mb-1 w-full py-1"
         >
-          <div className="text-[11px]">{item.name}</div>
-          <div className="text-[11px]">{item.quantity}</div>
-          <div className="text-[11px]">
+          <div className="self-start">
+            <Description content={item.name} />
+          </div>
+          <div className="text-[11px] self-start">{item.quantity}</div>
+          <div className="text-[11px] self-start">
             {formatAmount({
               currency,
               amount: item.price,
@@ -51,7 +54,7 @@ export function LineItems({
               locale,
             })}
           </div>
-          <div className="text-[11px] text-right">
+          <div className="text-[11px] text-right self-start">
             {formatAmount({
               maximumFractionDigits,
               currency,
