@@ -26,6 +26,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   const selectedOption = watch("template.delivery_type");
   const canUpdate = watch("status") !== "draft";
 
+  const invoiceNumberValid = !formState.errors.invoice_number;
+
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const handleOptionChange = (value: string) => {
@@ -40,7 +42,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     });
   };
 
-  const isValid = formState.isValid;
+  const isValid = formState.isValid && invoiceNumberValid;
+
   const options = [
     {
       label: canUpdate ? "Update" : "Create",

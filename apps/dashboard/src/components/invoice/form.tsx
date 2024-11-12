@@ -26,16 +26,9 @@ type Props = {
   updatedAt?: Date;
   onSubmit: (values: InvoiceFormValues) => void;
   isSubmitting: boolean;
-  invoiceNumber: string | null;
 };
 
-export function Form({
-  teamId,
-  customers,
-  onSubmit,
-  isSubmitting,
-  invoiceNumber,
-}: Props) {
+export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
   const [lastUpdated, setLastUpdated] = useState<Date | undefined>();
   const [lastEditedText, setLastEditedText] = useState("");
 
@@ -74,15 +67,17 @@ export function Form({
   });
 
   const isDirty = form.formState.isDirty;
+  const invoiceNumberValid = !form.getFieldState("invoice_number").error;
   const debouncedValues = useDebounce(formValues, 500);
 
   useEffect(() => {
     const currentFormValues = form.getValues();
 
-    if (isDirty && form.watch("customer_id")) {
+    // Only draft the invoice if the customer is selected and the invoice number is valid
+    if (isDirty && form.watch("customer_id") && invoiceNumberValid) {
       draftInvoice.execute(transformFormValuesToDraft(currentFormValues));
     }
-  }, [debouncedValues, isDirty]);
+  }, [debouncedValues, isDirty, invoiceNumberValid]);
 
   useEffect(() => {
     const updateLastEditedText = () => {
@@ -123,7 +118,7 @@ export function Form({
       <ScrollArea className="h-[calc(100vh-200px)] bg-background" hideScrollbar>
         <div className="p-8 pb-4 h-full flex flex-col">
           <div className="flex justify-between">
-            <Meta teamId={teamId} invoiceNumber={invoiceNumber} />
+            <Meta teamId={teamId} />
             <Logo teamId={teamId} />
           </div>
 

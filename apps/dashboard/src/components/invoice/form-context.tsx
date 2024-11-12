@@ -54,6 +54,7 @@ type FormContextProps = {
   id?: string | null;
   children: React.ReactNode;
   template: InvoiceTemplate;
+  invoiceNumber: string;
   defaultSettings: Settings;
   isOpen: boolean;
 };
@@ -64,6 +65,7 @@ export function FormContext({
   template,
   defaultSettings,
   isOpen,
+  invoiceNumber,
 }: FormContextProps) {
   const supabase = createClient();
   const { lineItems, currency } = useInvoiceParams();
@@ -86,7 +88,7 @@ export function FormContext({
     customer_id: undefined,
     issue_date: new UTCDate(),
     due_date: addMonths(new UTCDate(), 1),
-    invoice_number: undefined,
+    invoice_number: invoiceNumber,
     line_items: [{ name: "", quantity: 0, price: 0, vat: 0 }],
     tax: undefined,
     token: undefined,
@@ -100,6 +102,7 @@ export function FormContext({
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues,
+    mode: "onChange",
   });
 
   useEffect(() => {

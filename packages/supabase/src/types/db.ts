@@ -495,8 +495,11 @@ export type Database = {
           tax_rate: number | null
           team_id: string
           timezone: string | null
+          title: string | null
           total_label: string | null
+          total_summary_label: string | null
           vat_label: string | null
+          vat_rate: number | null
         }
         Insert: {
           created_at?: string
@@ -529,8 +532,11 @@ export type Database = {
           tax_rate?: number | null
           team_id: string
           timezone?: string | null
+          title?: string | null
           total_label?: string | null
+          total_summary_label?: string | null
           vat_label?: string | null
+          vat_rate?: number | null
         }
         Update: {
           created_at?: string
@@ -563,8 +569,11 @@ export type Database = {
           tax_rate?: number | null
           team_id?: string
           timezone?: string | null
+          title?: string | null
           total_label?: string | null
+          total_summary_label?: string | null
           vat_label?: string | null
+          vat_rate?: number | null
         }
         Relationships: [
           {
@@ -579,6 +588,7 @@ export type Database = {
       invoices: {
         Row: {
           amount: number | null
+          bottom_block: Json | null
           company_datails: Json | null
           created_at: string
           currency: string | null
@@ -603,10 +613,12 @@ export type Database = {
           reminder_sent_at: string | null
           sent_to: string | null
           status: Database["public"]["Enums"]["invoice_status"]
+          subtotal: number | null
           tax: number | null
           team_id: string
           template: Json | null
           token: string
+          top_block: Json | null
           updated_at: string | null
           url: string | null
           user_id: string | null
@@ -615,6 +627,7 @@ export type Database = {
         }
         Insert: {
           amount?: number | null
+          bottom_block?: Json | null
           company_datails?: Json | null
           created_at?: string
           currency?: string | null
@@ -639,10 +652,12 @@ export type Database = {
           reminder_sent_at?: string | null
           sent_to?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number | null
           tax?: number | null
           team_id: string
           template?: Json | null
           token?: string
+          top_block?: Json | null
           updated_at?: string | null
           url?: string | null
           user_id?: string | null
@@ -651,6 +666,7 @@ export type Database = {
         }
         Update: {
           amount?: number | null
+          bottom_block?: Json | null
           company_datails?: Json | null
           created_at?: string
           currency?: string | null
@@ -675,10 +691,12 @@ export type Database = {
           reminder_sent_at?: string | null
           sent_to?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number | null
           tax?: number | null
           team_id?: string
           template?: Json | null
           token?: string
+          top_block?: Json | null
           updated_at?: string | null
           url?: string | null
           user_id?: string | null
@@ -1728,6 +1746,12 @@ export type Database = {
           total_amount: number
           invoice_count: number
         }[]
+      }
+      get_next_invoice_number: {
+        Args: {
+          team_id: string
+        }
+        Returns: string
       }
       get_payment_score: {
         Args: {
