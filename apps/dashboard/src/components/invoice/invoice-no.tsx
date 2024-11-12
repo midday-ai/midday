@@ -39,15 +39,15 @@ export function InvoiceNo({ teamId, invoiceNumber }: Props) {
     // Generate invoice number if we are creating a new invoice
     if (type === "create" && invoiceNumber && !initialFetch.current) {
       initialFetch.current = true;
+
       (async () => {
         setIsLoading(true);
         const result = await generateInvoiceNumber(invoiceNumber);
         setValue("invoice_number", result.nextInvoiceNumber);
-        initialFetch.current = false;
         setIsLoading(false);
       })();
     }
-  }, [invoiceNumber]);
+  }, []);
 
   useEffect(() => {
     async function searchInvoiceNumber() {
