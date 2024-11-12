@@ -86,7 +86,7 @@ export function FormContext({
     customer_id: undefined,
     issue_date: new UTCDate(),
     due_date: addMonths(new UTCDate(), 1),
-    invoice_number: "INV-0001",
+    invoice_number: undefined,
     line_items: [{ name: "", quantity: 0, price: 0, vat: 0 }],
     tax: undefined,
     token: undefined,

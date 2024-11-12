@@ -1290,3 +1290,18 @@ export async function searchInvoiceNumberQuery(
     .eq("team_id", params.teamId)
     .ilike("invoice_number", `%${params.query}`);
 }
+
+export async function getLastInvoiceNumberQuery(
+  supabase: Client,
+  teamId: string,
+) {
+  const { data } = await supabase
+    .from("invoices")
+    .select("invoice_number")
+    .eq("team_id", teamId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  return { data: data?.invoice_number };
+}

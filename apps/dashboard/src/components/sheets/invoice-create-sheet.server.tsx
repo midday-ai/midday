@@ -2,13 +2,19 @@ import { getDefaultSettings } from "@midday/invoice/default";
 import {
   getCustomers,
   getInvoiceTemplates,
+  getLastInvoiceNumber,
 } from "@midday/supabase/cached-queries";
 import { InvoiceCreateSheet } from "./invoice-create-sheet";
 
 export async function InvoiceCreateSheetServer({ teamId }: { teamId: string }) {
-  const [{ data: templatesData }, { data: customersData }] = await Promise.all([
+  const [
+    { data: templatesData },
+    { data: customersData },
+    { data: invoiceNumber },
+  ] = await Promise.all([
     getInvoiceTemplates(),
     getCustomers(),
+    getLastInvoiceNumber(),
   ]);
 
   const defaultSettings = getDefaultSettings();
@@ -26,6 +32,7 @@ export async function InvoiceCreateSheetServer({ teamId }: { teamId: string }) {
       customers={customersData}
       template={template}
       defaultSettings={defaultSettings}
+      invoiceNumber={invoiceNumber}
     />
   );
 }
