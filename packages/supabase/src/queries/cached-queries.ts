@@ -26,6 +26,7 @@ import {
   getInvoiceSummaryQuery,
   getInvoiceTemplatesQuery,
   getInvoicesQuery,
+  getLastInvoiceNumberQuery,
   getMetricsQuery,
   getPaymentStatusQuery,
   getRunwayQuery,
@@ -559,7 +560,7 @@ export const getInvoiceTemplates = async () => {
   )();
 };
 
-export const getInvoiceNumber = async () => {
+export const getLastInvoiceNumber = async () => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -570,7 +571,7 @@ export const getInvoiceNumber = async () => {
 
   return unstable_cache(
     async () => {
-      return getInvoiceNumberQuery(supabase, teamId);
+      return getLastInvoiceNumberQuery(supabase, teamId);
     },
     ["invoice_number", teamId],
     {

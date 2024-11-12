@@ -26,9 +26,16 @@ type Props = {
   updatedAt?: Date;
   onSubmit: (values: InvoiceFormValues) => void;
   isSubmitting: boolean;
+  invoiceNumber: string | null;
 };
 
-export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
+export function Form({
+  teamId,
+  customers,
+  onSubmit,
+  isSubmitting,
+  invoiceNumber,
+}: Props) {
   const [lastUpdated, setLastUpdated] = useState<Date | undefined>();
   const [lastEditedText, setLastEditedText] = useState("");
 
@@ -116,7 +123,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
       <ScrollArea className="h-[calc(100vh-200px)] bg-background" hideScrollbar>
         <div className="p-8 pb-4 h-full flex flex-col">
           <div className="flex justify-between">
-            <Meta teamId={teamId} />
+            <Meta teamId={teamId} invoiceNumber={invoiceNumber} />
             <Logo teamId={teamId} />
           </div>
 

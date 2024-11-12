@@ -42,13 +42,17 @@ function InvoiceSheetHeader({
   return null;
 }
 
+type Props = {
+  teamId: string;
+  customers: Customer[];
+  invoiceNumber: string | null;
+};
+
 export function InvoiceSheetContent({
   teamId,
   customers,
-}: {
-  teamId: string;
-  customers: Customer[];
-}) {
+  invoiceNumber,
+}: Props) {
   const { setParams, type } = useInvoiceParams();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
 
@@ -121,6 +125,7 @@ export function InvoiceSheetContent({
         customers={customers}
         isSubmitting={createInvoice.isPending}
         onSubmit={({ id }) => createInvoice.execute({ id })}
+        invoiceNumber={invoiceNumber}
       />
     </SheetContent>
   );

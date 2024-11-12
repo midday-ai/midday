@@ -1,8 +1,10 @@
+import { generateInvoiceNumber } from "@/actions/invoice/generate-invoice-number";
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { createClient } from "@midday/supabase/client";
 import { searchInvoiceNumberQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
+import { Skeleton } from "@midday/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -10,30 +12,49 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useAction } from "next-safe-action/hooks";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { ContentEditable } from "./content-editable";
 import { LabelInput } from "./label-input";
 
 type Props = {
   teamId: string;
+  invoiceNumber: string | null;
 };
 
-export function InvoiceNo({ teamId }: Props) {
-  const { watch, setError, clearErrors } = useFormContext();
-  const [isInvoiceNumberExists, setIsInvoiceNumberExists] = useState(false);
+export function InvoiceNo({ teamId, invoiceNumber }: Props) {
+  const { watch, setValue, setError, clearErrors } = useFormContext();
   const supabase = createClient();
-  const invoiceNumber = watch("invoice_number");
+  const nextInvoiceNumber = watch("invoice_number");
+  const initialFetch = useRef(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [isInvoiceNumberExists, setIsInvoiceNumberExists] = useState(false);
+
   const { type } = useInvoiceParams();
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   useEffect(() => {
+    // Generate invoice number if we are creating a new invoice
+    if (type === "create" && invoiceNumber && !initialFetch.current) {
+      initialFetch.current = true;
+
+      (async () => {
+        setIsLoading(true);
+        const result = await generateInvoiceNumber(invoiceNumber);
+        setValue("invoice_number", result.nextInvoiceNumber);
+        setIsLoading(false);
+      })();
+    }
+  }, []);
+
+  useEffect(() => {
     async function searchInvoiceNumber() {
-      if (invoiceNumber) {
+      if (nextInvoiceNumber) {
         const { data } = await searchInvoiceNumberQuery(supabase, {
           teamId,
-          query: invoiceNumber,
+          query: nextInvoiceNumber,
         });
 
         const exists = data && data.length > 0;
@@ -54,7 +75,7 @@ export function InvoiceNo({ teamId }: Props) {
     if (type === "create") {
       searchInvoiceNumber();
     }
-  }, [invoiceNumber, teamId, type]);
+  }, [nextInvoiceNumber, teamId, type]);
 
   return (
     <div className="flex space-x-1 items-center">
@@ -76,15 +97,19 @@ export function InvoiceNo({ teamId }: Props) {
       <TooltipProvider delayDuration={100}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button type="button" className="w-fit">
-              <ContentEditable
-                name="invoice_number"
-                className={cn(
-                  "min-w-0 w-fit flex-shrink p-0 border-none text-[11px]",
-                  isInvoiceNumberExists ? "text-red-500" : "",
-                )}
-              />
-            </button>
+            <div>
+              {isLoading ? (
+                <Skeleton className="w-16 h-3.5" />
+              ) : (
+                <ContentEditable
+                  name="invoice_number"
+                  className={cn(
+                    "min-w-16 flex-shrink p-0 border-none text-[11px]",
+                    isInvoiceNumberExists ? "text-red-500" : "",
+                  )}
+                />
+              )}
+            </div>
           </TooltipTrigger>
           {isInvoiceNumberExists && (
             <TooltipContent className="text-xs px-3 py-1.5">

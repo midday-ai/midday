@@ -13,16 +13,16 @@ type Props = {
   teamId: string;
   template: InvoiceTemplate;
   customers: Customer[];
-  invoiceNumber: string;
   defaultSettings: Settings;
+  invoiceNumber: string | null;
 };
 
 export function InvoiceCreateSheet({
   teamId,
   template,
   customers,
-  invoiceNumber,
   defaultSettings,
+  invoiceNumber,
 }: Props) {
   const { setParams, type, invoiceId } = useInvoiceParams();
   const isOpen = Boolean(type === "create" || type === "edit");
@@ -30,13 +30,16 @@ export function InvoiceCreateSheet({
   return (
     <FormContext
       template={template}
-      invoiceNumber={invoiceNumber}
       isOpen={isOpen}
       id={invoiceId}
       defaultSettings={defaultSettings}
     >
       <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
-        <InvoiceSheetContent teamId={teamId} customers={customers} />
+        <InvoiceSheetContent
+          teamId={teamId}
+          customers={customers}
+          invoiceNumber={invoiceNumber}
+        />
       </Sheet>
     </FormContext>
   );
