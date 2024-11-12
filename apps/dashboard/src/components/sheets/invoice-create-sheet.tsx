@@ -13,7 +13,6 @@ type Props = {
   teamId: string;
   template: InvoiceTemplate;
   customers: Customer[];
-  invoiceNumber: string;
   defaultSettings: Settings;
 };
 
@@ -21,7 +20,6 @@ export function InvoiceCreateSheet({
   teamId,
   template,
   customers,
-  invoiceNumber,
   defaultSettings,
 }: Props) {
   const { setParams, type, invoiceId } = useInvoiceParams();
@@ -30,7 +28,6 @@ export function InvoiceCreateSheet({
   return (
     <FormContext
       template={template}
-      invoiceNumber={invoiceNumber}
       isOpen={isOpen}
       id={invoiceId}
       defaultSettings={defaultSettings}

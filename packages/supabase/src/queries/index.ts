@@ -1,5 +1,4 @@
 import { UTCDate } from "@date-fns/utc";
-import { generateInvoiceNumber } from "@midday/invoice/number";
 import {
   addDays,
   endOfMonth,
@@ -1256,37 +1255,6 @@ export async function getInvoiceTemplatesQuery(
     .select("*")
     .eq("team_id", teamId)
     .single();
-}
-
-export async function getInvoiceNumberQuery(supabase: Client, teamId: string) {
-  const { count } = await supabase
-    .from("invoices")
-    .select("id", { count: "exact" })
-    .eq("team_id", teamId);
-
-  let nextCount = (count || 0) + 1;
-  let nextNumber = generateInvoiceNumber(nextCount);
-  let tries = 0;
-
-  // Try up to 10 times to find an unused invoice number
-  while (tries < 10) {
-    const { data } = await supabase
-      .from("invoices")
-      .select("id")
-      .eq("team_id", teamId)
-      .eq("invoice_number", nextNumber)
-      .single();
-
-    if (!data) {
-      break;
-    }
-
-    nextCount++;
-    nextNumber = generateInvoiceNumber(nextCount);
-    tries++;
-  }
-
-  return nextNumber;
 }
 
 export async function getInvoiceQuery(supabase: Client, id: string) {

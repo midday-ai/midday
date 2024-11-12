@@ -54,7 +54,6 @@ type FormContextProps = {
   id?: string | null;
   children: React.ReactNode;
   template: InvoiceTemplate;
-  invoiceNumber: string;
   defaultSettings: Settings;
   isOpen: boolean;
 };
@@ -63,7 +62,6 @@ export function FormContext({
   id,
   children,
   template,
-  invoiceNumber,
   defaultSettings,
   isOpen,
 }: FormContextProps) {
@@ -88,7 +86,7 @@ export function FormContext({
     customer_id: undefined,
     issue_date: new UTCDate(),
     due_date: addMonths(new UTCDate(), 1),
-    invoice_number: invoiceNumber,
+    invoice_number: "INV-0001",
     line_items: [{ name: "", quantity: 0, price: 0, vat: 0 }],
     tax: undefined,
     token: undefined,
