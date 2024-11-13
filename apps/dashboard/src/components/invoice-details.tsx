@@ -160,14 +160,14 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
           </span>
 
           <div className="h-3 space-x-2">
-            {vat && vat > 0 && (
+            {vat !== 0 && (
               <span className="text-[#606060] text-xs select-text">
                 {template?.vat_label}{" "}
                 <FormatAmount amount={vat} currency={currency} />
               </span>
             )}
 
-            {tax && tax > 0 && (
+            {tax !== 0 && (
               <span className="text-[#606060] text-xs select-text">
                 {template?.tax_label}{" "}
                 <FormatAmount amount={tax} currency={currency} />

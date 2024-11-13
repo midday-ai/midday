@@ -43,6 +43,7 @@ export async function PdfTemplate({
   return (
     <Document>
       <Page
+        wrap
         size={size.toUpperCase() as "LETTER" | "A4"}
         style={{
           padding: 20,
@@ -114,27 +115,6 @@ export async function PdfTemplate({
           includeDecimals={template.include_decimals}
         />
 
-        <Summary
-          amount={amount}
-          tax={tax}
-          vat={vat}
-          currency={currency}
-          totalLabel={template.total_summary_label}
-          taxLabel={template.tax_label}
-          vatLabel={template.vat_label}
-          taxRate={template.tax_rate}
-          vatRate={template.vat_rate}
-          locale={template.locale}
-          discount={discount}
-          discountLabel={template.discount_label}
-          includeDiscount={template.include_discount}
-          includeVAT={template.include_vat}
-          includeTax={template.include_tax}
-          includeDecimals={template.include_decimals}
-          subtotalLabel={template.subtotal_label}
-          subtotal={subtotal}
-        />
-
         <View
           style={{
             flex: 1,
@@ -142,7 +122,28 @@ export async function PdfTemplate({
             justifyContent: "flex-end",
           }}
         >
-          <View style={{ flexDirection: "row" }}>
+          <Summary
+            amount={amount}
+            tax={tax}
+            vat={vat}
+            currency={currency}
+            totalLabel={template.total_summary_label}
+            taxLabel={template.tax_label}
+            vatLabel={template.vat_label}
+            taxRate={template.tax_rate}
+            vatRate={template.vat_rate}
+            locale={template.locale}
+            discount={discount}
+            discountLabel={template.discount_label}
+            includeDiscount={template.include_discount}
+            includeVAT={template.include_vat}
+            includeTax={template.include_tax}
+            includeDecimals={template.include_decimals}
+            subtotalLabel={template.subtotal_label}
+            subtotal={subtotal}
+          />
+
+          <View style={{ flexDirection: "row", marginTop: 20 }}>
             <View style={{ flex: 1, marginRight: 10 }}>
               <PaymentDetails
                 content={payment_details}
@@ -156,9 +157,9 @@ export async function PdfTemplate({
               <Note content={note_details} noteLabel={template.note_label} />
             </View>
           </View>
-        </View>
 
-        <EditorContent content={bottom_block} />
+          <EditorContent content={bottom_block} />
+        </View>
       </Page>
     </Document>
   );

@@ -14,6 +14,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { ContentEditable } from "./content-editable";
+import { Input } from "./input";
 import { LabelInput } from "./label-input";
 
 type Props = {
@@ -80,10 +81,10 @@ export function InvoiceNo({ teamId }: Props) {
         <Tooltip>
           <TooltipTrigger asChild>
             <div>
-              <ContentEditable
+              <Input
                 name="invoice_number"
                 className={cn(
-                  "min-w-16 flex-shrink p-0 border-none text-[11px]",
+                  "w-28 flex-shrink p-0 border-none text-[11px] h-4.5 overflow-hidden",
                   isInvoiceNumberExists ? "text-red-500" : "",
                 )}
               />
