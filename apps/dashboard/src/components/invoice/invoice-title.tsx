@@ -2,14 +2,14 @@
 
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { useAction } from "next-safe-action/hooks";
-import { ContentEditable } from "./content-editable";
+import { Input } from "./input";
 
 export function InvoiceTitle() {
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   return (
-    <ContentEditable
-      className="text-[21px] font-medium mb-1 w-fit min-w-[100px]"
+    <Input
+      className="text-[21px] font-medium mb-2 w-fit min-w-[100px] !border-none"
       name="template.title"
       onBlur={(e) => {
         const value = e.currentTarget.textContent || undefined;

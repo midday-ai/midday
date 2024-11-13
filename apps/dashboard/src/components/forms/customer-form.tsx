@@ -130,7 +130,7 @@ export function CustomerForm({ data }: Props) {
   };
 
   const handleEmailBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const email = e.target.value;
+    const email = e.target.value.trim();
     const domain = email.split("@").at(1);
     if (domain && !excludedDomains.includes(domain)) {
       const currentWebsite = form.getValues("website");

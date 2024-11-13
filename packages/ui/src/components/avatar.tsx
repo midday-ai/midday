@@ -33,7 +33,7 @@ export const AvatarImageNext = React.forwardRef<
   return (
     <Image
       ref={ref}
-      className={cn("aspect-square h-full w-full", className)}
+      className={cn("aspect-square h-full w-full absolute z-10", className)}
       onError={(e) => {
         setHasError(true);
         onError?.(e);

@@ -16,11 +16,13 @@ export function LabelInput({ name, className, onSave }: Props) {
 
   return (
     <span
-      className={cn("text-[11px] text-[#878787] min-w-10 font-mono", className)}
+      className={cn(
+        "text-[11px] text-[#878787] min-w-10 font-mono outline-none",
+        className,
+      )}
       id={name}
       contentEditable
       suppressContentEditableWarning
-      tabIndex={-1}
       onBlur={(e) => {
         const newValue = e.currentTarget.textContent || "";
         setValue(name, newValue, { shouldValidate: true });
