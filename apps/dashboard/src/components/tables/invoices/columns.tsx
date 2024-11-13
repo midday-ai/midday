@@ -4,6 +4,7 @@ import type { InvoiceTemplate } from "@/actions/invoice/schema";
 import { updateInvoiceAction } from "@/actions/invoice/update-invoice-action";
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
+import { OpenURL } from "@/components/open-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { formatDate, getDueDateStatus } from "@/utils/format";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
@@ -54,6 +55,16 @@ export type Invoice = {
 
 export const columns: ColumnDef<Invoice>[] = [
   {
+    header: "Invoice no.",
+    accessorKey: "invoice_number",
+    cell: ({ row }) => row.getValue("invoice_number"),
+  },
+  {
+    header: "Status",
+    accessorKey: "status",
+    cell: ({ row }) => <InvoiceStatus status={row.getValue("status")} />,
+  },
+  {
     header: "Due date",
     accessorKey: "due_date",
     cell: ({ row }) => {
@@ -75,11 +86,6 @@ export const columns: ColumnDef<Invoice>[] = [
         </div>
       );
     },
-  },
-  {
-    header: "Status",
-    accessorKey: "status",
-    cell: ({ row }) => <InvoiceStatus status={row.getValue("status")} />,
   },
   {
     header: "Customer",
@@ -146,11 +152,6 @@ export const columns: ColumnDef<Invoice>[] = [
     ),
   },
   {
-    header: "Invoice no.",
-    accessorKey: "invoice_number",
-    cell: ({ row }) => row.getValue("invoice_number"),
-  },
-  {
     header: "Issue date",
     accessorKey: "issue_date",
     cell: ({ row }) => {
@@ -201,6 +202,7 @@ export const columns: ColumnDef<Invoice>[] = [
                 <DotsHorizontalIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
+
             <DropdownMenuContent align="end">
               {status !== "paid" && status !== "canceled" && (
                 <DropdownMenuItem
@@ -214,6 +216,12 @@ export const columns: ColumnDef<Invoice>[] = [
                   Edit invoice
                 </DropdownMenuItem>
               )}
+
+              <DropdownMenuItem>
+                <OpenURL href={`/i/${row.original.token}`}>
+                  Open invoice
+                </OpenURL>
+              </DropdownMenuItem>
 
               <DropdownMenuItem onClick={handleCopyLink}>
                 Copy link
