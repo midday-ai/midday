@@ -10,6 +10,11 @@
     "format": "biome --write .",
     "typecheck": "tsc --noEmit"
   },
+  "exports": {
+    ".": "./src/index.ts",
+    "./countries": "./src/countries.ts",
+    "./countries-intl": "./src/countries-intl.ts"
+  },
   "devDependencies": {
     "typescript": "^5.6.3"
   }

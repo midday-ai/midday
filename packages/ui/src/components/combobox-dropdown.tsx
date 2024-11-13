@@ -150,7 +150,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal>
-      <PopoverTrigger asChild disabled={disabled}>
+      <PopoverTrigger asChild disabled={disabled} className="w-full">
         <Button
           variant="outline"
           aria-expanded={open}

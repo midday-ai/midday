@@ -9,6 +9,7 @@ export const updateUserSchema = z.object({
   week_starts_on_monday: z.boolean().optional(),
   timezone: z.string().optional(),
   time_format: z.number().optional(),
+  date_format: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd"]).optional(),
   revalidatePath: z.string().optional(),
 });
 

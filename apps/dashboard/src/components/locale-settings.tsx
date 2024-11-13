@@ -1,6 +1,7 @@
 "use client";
 
 import { updateUserAction } from "@/actions/update-user-action";
+import { countries } from "@midday/location/countries-intl";
 import {
   Card,
   CardContent,
@@ -8,24 +9,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@midday/ui/select";
-import * as locales from "locale-codes";
+import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
 import { useAction } from "next-safe-action/hooks";
 
 type Props = {
   locale: string;
 };
 
-console.log(locales.all);
-
 export function LocaleSettings({ locale }: Props) {
   const action = useAction(updateUserAction);
+
+  const localeItems = Object.values(countries).map((c, index) => ({
+    id: index.toString(),
+    label: `${c.name} (${c.default_locale})`,
+    value: c.default_locale,
+  }));
 
   return (
     <Card className="flex justify-between items-center">
@@ -38,23 +36,18 @@ export function LocaleSettings({ locale }: Props) {
       </CardHeader>
 
       <CardContent>
-        <Select
-          defaultValue={locale}
-          onValueChange={(value) => {
-            action.execute({ locale: value });
-          }}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Locale" />
-          </SelectTrigger>
-          <SelectContent>
-            {/* {locales.all.map((l) => (
-              <SelectItem key={l.local} value={l.local}>
-                {l.location} ({l.local})
-              </SelectItem>
-            ))} */}
-          </SelectContent>
-        </Select>
+        <div className="w-[250px]">
+          <ComboboxDropdown
+            placeholder="Select locale"
+            selectedItem={localeItems.find((item) => item.value === locale)}
+            searchPlaceholder="Search locales"
+            items={localeItems}
+            className="text-xs py-1"
+            onSelect={(item) => {
+              action.execute({ locale: item.value });
+            }}
+          />
+        </div>
       </CardContent>
     </Card>
   );
