@@ -15,11 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
+import * as locales from "locale-codes";
 import { useAction } from "next-safe-action/hooks";
 
 type Props = {
   locale: string;
 };
+
+console.log(locales.all);
 
 export function LocaleSettings({ locale }: Props) {
   const action = useAction(updateUserAction);
@@ -45,9 +48,11 @@ export function LocaleSettings({ locale }: Props) {
             <SelectValue placeholder="Locale" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="en-US">English (United States)</SelectItem>
-            <SelectItem value="en-GB">English (United Kingdom)</SelectItem>
-            <SelectItem value="fr-FR">French (France)</SelectItem>
+            {/* {locales.all.map((l) => (
+              <SelectItem key={l.local} value={l.local}>
+                {l.location} ({l.local})
+              </SelectItem>
+            ))} */}
           </SelectContent>
         </Select>
       </CardContent>
