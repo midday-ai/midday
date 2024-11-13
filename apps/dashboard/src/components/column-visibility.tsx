@@ -18,10 +18,12 @@ export function ColumnVisibility({ disabled }: { disabled?: boolean }) {
       <PopoverContent className="w-[200px] p-0" align="end" sideOffset={8}>
         <div className="flex flex-col p-4 space-y-2 max-h-[352px] overflow-auto">
           {columns
-            .filter((column: any) =>
-              column.columnDef.enableHiding === false ? false : true,
+            .filter(
+              (column) =>
+                column.columnDef.enableHiding !== false &&
+                column.id !== "status",
             )
-            .map((column: any) => {
+            .map((column) => {
               return (
                 <div key={column.id} className="flex items-center space-x-2">
                   <Checkbox
