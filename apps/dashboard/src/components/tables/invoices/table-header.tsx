@@ -32,17 +32,19 @@ export function TableHeader() {
   return (
     <BaseTableHeader>
       <TableRow>
-        <TableHead>
+        <TableHead className="hidden md:table-cell">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
-            onClick={() => createSortQuery("due_date")}
+            onClick={() => createSortQuery("invoice_number")}
           >
-            <span>Due Date</span>
-            {"due_date" === column && value === "asc" && (
+            <span>Invoice no.</span>
+            {"invoice_number" === column && value === "asc" && (
               <ArrowDown size={16} />
             )}
-            {"due_date" === column && value === "desc" && <ArrowUp size={16} />}
+            {"invoice_number" === column && value === "desc" && (
+              <ArrowUp size={16} />
+            )}
           </Button>
         </TableHead>
         <TableHead>
@@ -54,6 +56,19 @@ export function TableHeader() {
             <span>Status</span>
             {"status" === column && value === "asc" && <ArrowDown size={16} />}
             {"status" === column && value === "desc" && <ArrowUp size={16} />}
+          </Button>
+        </TableHead>
+        <TableHead>
+          <Button
+            className="p-0 hover:bg-transparent space-x-2"
+            variant="ghost"
+            onClick={() => createSortQuery("due_date")}
+          >
+            <span>Due Date</span>
+            {"due_date" === column && value === "asc" && (
+              <ArrowDown size={16} />
+            )}
+            {"due_date" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
         <TableHead className="w-[200px]">
@@ -80,21 +95,7 @@ export function TableHeader() {
             {"amount" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead className="hidden md:table-cell">
-          <Button
-            className="p-0 hover:bg-transparent space-x-2"
-            variant="ghost"
-            onClick={() => createSortQuery("invoice_number")}
-          >
-            <span>Invoice no.</span>
-            {"invoice_number" === column && value === "asc" && (
-              <ArrowDown size={16} />
-            )}
-            {"invoice_number" === column && value === "desc" && (
-              <ArrowUp size={16} />
-            )}
-          </Button>
-        </TableHead>
+
         <TableHead className="hidden md:table-cell">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
