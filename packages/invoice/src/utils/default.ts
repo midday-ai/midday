@@ -1,4 +1,4 @@
-import { getCountryCode } from "@midday/location";
+import { getCountryCode, getLocale, getTimezone } from "@midday/location";
 import { currencies } from "@midday/location/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
 
@@ -10,6 +10,8 @@ export type Settings = {
   include_discount: boolean;
   include_decimals: boolean;
   include_qr: boolean;
+  timezone: string;
+  locale: string;
 };
 
 export async function getDefaultSettings(): Promise<Settings> {
@@ -21,6 +23,9 @@ export async function getDefaultSettings(): Promise<Settings> {
     userData?.team?.base_currency ??
     currencies[countryCode as keyof typeof currencies] ??
     "USD";
+
+  const timezone = userData?.timezone ?? getTimezone();
+  const locale = userData?.locale ?? getLocale();
 
   // Default to letter size for US/CA, A4 for rest of world
   const size = ["US", "CA"].includes(countryCode) ? "letter" : "a4";
@@ -38,5 +43,7 @@ export async function getDefaultSettings(): Promise<Settings> {
     include_discount: false,
     include_decimals: false,
     include_qr: true,
+    timezone,
+    locale,
   };
 }

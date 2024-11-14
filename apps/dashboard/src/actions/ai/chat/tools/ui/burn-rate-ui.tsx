@@ -3,7 +3,9 @@
 import { AreaChart } from "@/components/charts/area-chart";
 import { BotCard } from "@/components/chat/messages";
 import { FormatAmount } from "@/components/format-amount";
-import { addMonths, format } from "date-fns";
+import { useUserContext } from "@/store/user/hook";
+import { formatDate } from "@/utils/format";
+import { addMonths } from "date-fns";
 
 type Props = {
   averageBurnRate: number;
@@ -12,6 +14,8 @@ type Props = {
 };
 
 export function BurnRateUI({ averageBurnRate, months, data }: Props) {
+  const { date_format: dateFormat } = useUserContext((state) => state.data);
+
   if (!data?.length) {
     return (
       <BotCard>
@@ -25,7 +29,7 @@ export function BurnRateUI({ averageBurnRate, months, data }: Props) {
         Based on your historical data, your avarage burn rate is{" "}
         <FormatAmount amount={averageBurnRate} currency={data.currency} />
         per month. Your expected runway is {months} months, ending in{" "}
-        {format(addMonths(new Date(), months), "PP")}.
+        {formatDate(addMonths(new Date(), months).toISOString(), dateFormat)}.
       </p>
 
       <AreaChart data={data} height={200} />

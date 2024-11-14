@@ -12,6 +12,7 @@ type Props = {
   totalInvoiceCount: number;
   defaultCurrency: string;
   title: string;
+  locale: string;
 };
 
 export function InvoiceSummarySkeleton() {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCurrentLocale } from "@/locales/client";
+import { useUserContext } from "@/store/user/hook";
 import NumberFlow from "@number-flow/react";
 
 type Props = {
@@ -8,6 +8,7 @@ type Props = {
   currency: string;
   minimumFractionDigits?: number;
   maximumFractionDigits?: number;
+  locale?: string;
 };
 
 export function AnimatedNumber({
@@ -15,8 +16,10 @@ export function AnimatedNumber({
   currency,
   minimumFractionDigits,
   maximumFractionDigits,
+  locale,
 }: Props) {
-  const locale = useCurrentLocale();
+  const { locale: currentLocale } = useUserContext((state) => state.data);
+  const localeToUse = locale || currentLocale;
 
   return (
     <NumberFlow
@@ -28,7 +31,7 @@ export function AnimatedNumber({
         maximumFractionDigits,
       }}
       willChange
-      locales={locale}
+      locales={localeToUse}
     />
   );
 }

@@ -43,6 +43,7 @@ import { TransactionBankAccount } from "./transaction-bank-account";
 type Props = {
   data: any;
   ids?: string[];
+  locale: string;
   updateTransaction: (
     values: UpdateTransactionValues,
     optimisticData: any,
@@ -52,6 +53,7 @@ type Props = {
 export function TransactionDetails({
   data: initialData,
   ids,
+  locale,
   updateTransaction,
 }: Props) {
   const [data, setData] = useState(initialData);

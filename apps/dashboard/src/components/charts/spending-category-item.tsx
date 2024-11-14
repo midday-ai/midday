@@ -1,6 +1,6 @@
 "use client";
 
-import { useCurrentLocale } from "@/locales/client";
+import { useUserContext } from "@/store/user/hook";
 import { formatAmount } from "@/utils/format";
 import { CategoryColor } from "../category";
 
@@ -19,7 +19,7 @@ export function SpendingCategoryItem({
   currency,
   percentage,
 }: Props) {
-  const locale = useCurrentLocale();
+  const { locale } = useUserContext((state) => state.data);
 
   return (
     <div className="px-3 py-1 flex justify-between items-center space-x-12">

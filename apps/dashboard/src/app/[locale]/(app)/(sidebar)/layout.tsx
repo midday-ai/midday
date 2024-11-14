@@ -2,6 +2,7 @@ import { AI } from "@/actions/ai/chat";
 import { Header } from "@/components/header";
 import { GlobalSheets } from "@/components/sheets/global-sheets";
 import { Sidebar } from "@/components/sidebar";
+import { UserProvider } from "@/store/user/provider";
 import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode } from "@midday/location";
 import { currencies, uniqueCurrencies } from "@midday/location/currencies";
@@ -80,32 +81,36 @@ export default async function Layout({
   }
 
   return (
-    <div className="relative">
-      <AI initialAIState={{ user: user.data, messages: [], chatId: nanoid() }}>
-        <Sidebar />
+    <UserProvider data={user.data}>
+      <div className="relative">
+        <AI
+          initialAIState={{ user: user.data, messages: [], chatId: nanoid() }}
+        >
+          <Sidebar />
 
-        <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
-          <Header />
-          {children}
-        </div>
+          <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
+            <Header />
+            {children}
+          </div>
 
-        {/* This is used to make the header draggable on macOS */}
-        <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-4 pointer-events-none" />
+          {/* This is used to make the header draggable on macOS */}
+          <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-4 pointer-events-none" />
 
-        <AssistantModal />
-        <ConnectTransactionsModal countryCode={countryCode} />
-        <SelectBankAccountsModal />
-        <ImportModal
-          currencies={uniqueCurrencies}
-          defaultCurrency={currencies[countryCode]}
-        />
-        <ExportStatus />
-        <HotKeys />
+          <AssistantModal />
+          <ConnectTransactionsModal countryCode={countryCode} />
+          <SelectBankAccountsModal />
+          <ImportModal
+            currencies={uniqueCurrencies}
+            defaultCurrency={currencies[countryCode]}
+          />
+          <ExportStatus />
+          <HotKeys />
 
-        <Suspense>
-          <GlobalSheets defaultCurrency={currencies[countryCode]} />
-        </Suspense>
-      </AI>
-    </div>
+          <Suspense>
+            <GlobalSheets defaultCurrency={currencies[countryCode]} />
+          </Suspense>
+        </AI>
+      </div>
+    </UserProvider>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCurrentLocale } from "@/locales/client";
+import { useUserContext } from "@/store/user/hook";
 import { formatAmount } from "@/utils/format";
 
 type Props = {
@@ -8,6 +8,7 @@ type Props = {
   currency: string;
   maximumFractionDigits?: number;
   minimumFractionDigits?: number;
+  locale?: string;
 };
 
 export function FormatAmount({
@@ -15,11 +16,12 @@ export function FormatAmount({
   currency,
   maximumFractionDigits,
   minimumFractionDigits,
+  locale,
 }: Props) {
-  const locale = useCurrentLocale();
+  const { data } = useUserContext((state) => state);
 
   return formatAmount({
-    locale,
+    locale: locale || data.locale,
     amount: amount,
     currency: currency,
     maximumFractionDigits,

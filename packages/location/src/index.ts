@@ -20,6 +20,27 @@ export function getTimezones() {
   return timezones;
 }
 
+export function getDateFormat() {
+  const country = getCountryCode();
+
+  // US uses MM/dd/yyyy
+  if (country === "US") {
+    return "MM/dd/yyyy";
+  }
+
+  // China, Japan, Korea, Taiwan use yyyy-MM-dd
+  if (["CN", "JP", "KR", "TW"].includes(country)) {
+    return "yyyy-MM-dd";
+  }
+  // Most Latin American, African, and some Asian countries use dd/MM/yyyy
+  if (["AU", "NZ", "IN", "ZA", "BR", "AR"].includes(country)) {
+    return "dd/MM/yyyy";
+  }
+
+  // Default to yyyy-MM-dd for other countries
+  return "yyyy-MM-dd";
+}
+
 export function getCountryInfo() {
   const country = getCountryCode();
 

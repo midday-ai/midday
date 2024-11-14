@@ -26,6 +26,7 @@ type Props = {
   ascending: boolean;
   query?: string;
   currencies: string[];
+  locale: string;
 };
 
 export const TAB_ITEMS = ["todo", "done"];
@@ -49,6 +50,7 @@ export function InboxView({
   ascending,
   query,
   currencies,
+  locale,
 }: Props) {
   const supabase = createClient();
   const { toast } = useToast();

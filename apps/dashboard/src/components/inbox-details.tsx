@@ -1,3 +1,5 @@
+import { useUserContext } from "@/store/user/hook";
+import { formatDate } from "@/utils/format";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -33,6 +35,7 @@ type InboxItem = {
   content_type?: string;
   description?: string;
   transaction?: any;
+  locale?: string;
 };
 
 type Props = {
@@ -55,6 +58,7 @@ export function InboxDetails({
   const { toast } = useToast();
   const [isOpen, setOpen] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
+  const { date_format: dateFormat } = useUserContext((state) => state.data);
 
   const isProcessing = item?.status === "processing" || item?.status === "new";
 
@@ -197,7 +201,7 @@ export function InboxDetails({
                 {isProcessing && !item.date && (
                   <Skeleton className="h-3 w-[50px] rounded-sm" />
                 )}
-                {item.date && format(new Date(item.date), "PP")}
+                {item.date && formatDate(item.date, dateFormat)}
               </div>
 
               <div className="flex space-x-4 items-center ml-auto mt-1">

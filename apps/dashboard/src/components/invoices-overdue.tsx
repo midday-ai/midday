@@ -2,11 +2,11 @@ import { getInvoiceSummary } from "@midday/supabase/cached-queries";
 import Link from "next/link";
 import { InvoiceSummary } from "./invoice-summary";
 
-export async function InvoicesOverdue({
-  defaultCurrency,
-}: {
+type Props = {
   defaultCurrency: string;
-}) {
+};
+
+export async function InvoicesOverdue({ defaultCurrency }: Props) {
   const { data } = await getInvoiceSummary({ status: "overdue" });
 
   const totalInvoiceCount = data?.at(0)?.invoice_count;

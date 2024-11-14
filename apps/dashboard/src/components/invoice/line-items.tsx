@@ -152,6 +152,8 @@ function LineItemRow({
   const controls = useDragControls();
   const { control } = useFormContext<InvoiceFormValues>();
 
+  const locale = useWatch({ control, name: "template.locale" });
+
   const price = useWatch({
     control,
     name: `line_items.${index}.price`,
@@ -194,6 +196,7 @@ function LineItemRow({
               quantity,
             }),
             currency,
+            locale,
             maximumFractionDigits,
           })}
         </span>

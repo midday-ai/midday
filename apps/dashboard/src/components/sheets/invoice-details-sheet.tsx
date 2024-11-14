@@ -10,9 +10,10 @@ type Props = {
   setOpen: (id?: string) => void;
   isOpen: boolean;
   data?: Invoice;
+  locale: string;
 };
 
-export function InvoiceDetailsSheet({ setOpen, isOpen, data }: Props) {
+export function InvoiceDetailsSheet({ setOpen, isOpen, data, locale }: Props) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { invoiceId } = useInvoiceParams();
 

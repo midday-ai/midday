@@ -1,6 +1,7 @@
 "use client";
 
-import { useCurrentLocale, useI18n } from "@/locales/client";
+import { useI18n } from "@/locales/client";
+import { useUserContext } from "@/store/user/hook";
 import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { format } from "date-fns";
@@ -17,7 +18,8 @@ import {
 
 const ToolTipContent = ({ payload = [] }) => {
   const t = useI18n();
-  const locale = useCurrentLocale();
+  const { locale } = useUserContext((state) => state.data);
+
   const current = payload[0]?.payload;
 
   if (!current) return null;

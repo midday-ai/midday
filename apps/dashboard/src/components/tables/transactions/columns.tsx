@@ -89,8 +89,8 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "date",
     header: "Date",
-    cell: ({ row }) => {
-      return formatDate(row.original.date);
+    cell: ({ row, table }) => {
+      return formatDate(row.original.date, table.options.meta?.dateFormat);
     },
   },
   {

@@ -3,6 +3,7 @@
 import { generateCsvMapping } from "@/actions/ai/generate-csv-mapping";
 import { SelectAccount } from "@/components/select-account";
 import { SelectCurrency } from "@/components/select-currency";
+import { useUserContext } from "@/store/user/hook";
 import { formatAmount } from "@/utils/format";
 import { formatAmountValue, formatDate } from "@midday/import";
 import {
@@ -225,6 +226,9 @@ function FieldRow({
 }) {
   const { label, required } = mappableFields[field];
   const { control, watch, fileColumns, firstRows } = useCsvContext();
+  const { locale, date_format: dateFormat } = useUserContext(
+    (state) => state.data,
+  );
 
   const value = watch(field);
   const inverted = watch("inverted");
@@ -239,14 +243,14 @@ function FieldRow({
     if (!description) return;
 
     if (field === "date") {
-      return formatDate(description);
+      return formatDate(description, dateFormat);
     }
 
     if (field === "amount") {
       const amount = formatAmountValue({ amount: description, inverted });
 
       if (currency) {
-        return formatAmount({ currency, amount });
+        return formatAmount({ currency, amount, locale });
       }
 
       return amount;
@@ -259,7 +263,7 @@ function FieldRow({
       const balance = +(amount * -1);
 
       if (currency) {
-        return formatAmount({ currency, amount: balance });
+        return formatAmount({ currency, amount: balance, locale });
       }
 
       return balance;

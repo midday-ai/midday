@@ -1,12 +1,14 @@
+import { useUserContext } from "@/store/user/hook";
+import { formatDate } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
-import { format } from "date-fns";
 import { useQueryState } from "nuqs";
 import { FormatAmount } from "./format-amount";
 import { InboxStatus } from "./inbox-status";
 
 export function InboxItem({ item }) {
   const [selectedId, setSelectedId] = useQueryState("inboxId");
+  const { date_format: dateFormat } = useUserContext((state) => state.data);
 
   const isSelected = selectedId === item.id;
   const isProcessing = item.status === "processing" || item.status === "new";
@@ -43,7 +45,7 @@ export function InboxItem({ item }) {
             )}
           >
             {isProcessing && <Skeleton className="h-3 w-[50px] rounded-sm" />}
-            {!isProcessing && item?.date && format(new Date(item.date), "PP")}
+            {!isProcessing && item?.date && formatDate(item.date, dateFormat)}
           </div>
         </div>
 

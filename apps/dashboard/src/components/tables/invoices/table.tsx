@@ -3,6 +3,7 @@
 import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
 import { InvoiceDetailsSheet } from "@/components/sheets/invoice-details-sheet";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useUserContext } from "@/store/user/hook";
 import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody } from "@midday/ui/table";
 import {
@@ -43,6 +44,7 @@ export function DataTable({
   const { setParams, invoiceId, type } = useInvoiceParams();
 
   const deleteInvoice = useAction(deleteInvoiceAction);
+  const { date_format: dateFormat } = useUserContext((state) => state.data);
 
   const selectedInvoice = data.find((invoice) => invoice?.id === invoiceId);
 
@@ -70,6 +72,7 @@ export function DataTable({
     getFilteredRowModel: getFilteredRowModel(),
     meta: {
       deleteInvoice: handleDeleteInvoice,
+      dateFormat,
     },
   });
 

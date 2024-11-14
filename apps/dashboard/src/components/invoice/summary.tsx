@@ -28,6 +28,11 @@ export function Summary() {
     name: "template.currency",
   });
 
+  const locale = useWatch({
+    control,
+    name: "template.locale",
+  });
+
   const includeTax = useWatch({
     control,
     name: "template.include_tax",
@@ -122,6 +127,7 @@ export function Summary() {
             amount={subTotal}
             maximumFractionDigits={maximumFractionDigits}
             currency={currency}
+            locale={locale}
           />
         </span>
       </div>
@@ -167,6 +173,7 @@ export function Summary() {
               amount={totalVAT}
               maximumFractionDigits={maximumFractionDigits}
               currency={currency}
+              locale={locale}
             />
           </span>
         </div>
