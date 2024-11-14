@@ -31,7 +31,7 @@ export async function InvoicePaymentScore() {
 
   return (
     <Card>
-      <CardHeader className="pb-2 flex flex-row justify-between">
+      <CardHeader className="pb-2 flex flex-col xl:flex-row justify-between">
         <CardTitle className="font-mono font-medium text-2xl">
           {t(`payment_status.${payment_status}`)}
         </CardTitle>
@@ -39,7 +39,7 @@ export async function InvoicePaymentScore() {
         <PaymentScoreVisualizer score={score} paymentStatus={payment_status} />
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="sm:hidden xl:flex">
         <div className="flex flex-col gap-2">
           <div>Payment score</div>
           <div className="text-sm text-muted-foreground">

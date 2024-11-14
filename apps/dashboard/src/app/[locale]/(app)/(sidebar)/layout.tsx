@@ -4,8 +4,8 @@ import { GlobalSheets } from "@/components/sheets/global-sheets";
 import { Sidebar } from "@/components/sidebar";
 import { UserProvider } from "@/store/user/provider";
 import { setupAnalytics } from "@midday/events/server";
-import { getCountryCode } from "@midday/location";
-import { currencies, uniqueCurrencies } from "@midday/location/currencies";
+import { getCountryCode, getCurrency } from "@midday/location";
+import { uniqueCurrencies } from "@midday/location/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
 import { nanoid } from "nanoid";
 import dynamic from "next/dynamic";
@@ -71,6 +71,7 @@ export default async function Layout({
 }) {
   const user = await getUser();
   const countryCode = getCountryCode();
+  const currency = getCurrency();
 
   if (!user?.data?.team) {
     redirect("/teams");
@@ -101,13 +102,13 @@ export default async function Layout({
           <SelectBankAccountsModal />
           <ImportModal
             currencies={uniqueCurrencies}
-            defaultCurrency={currencies[countryCode]}
+            defaultCurrency={currency}
           />
           <ExportStatus />
           <HotKeys />
 
           <Suspense>
-            <GlobalSheets defaultCurrency={currencies[countryCode]} />
+            <GlobalSheets defaultCurrency={currency} />
           </Suspense>
         </AI>
       </div>
