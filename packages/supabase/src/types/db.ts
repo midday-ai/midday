@@ -1513,6 +1513,13 @@ export type Database = {
         }
         Returns: string
       }
+      create_team_v2: {
+        Args: {
+          name: string
+          currency?: string
+        }
+        Returns: string
+      }
       determine_transaction_frequency:
         | {
             Args: {

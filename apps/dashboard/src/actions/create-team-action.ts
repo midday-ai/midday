@@ -1,6 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
+import { getCurrency } from "@midday/location";
 import { createTeam, updateUser } from "@midday/supabase/mutations";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
@@ -17,7 +18,8 @@ export const createTeamAction = authActionClient
     },
   })
   .action(async ({ parsedInput: { name, redirectTo }, ctx: { supabase } }) => {
-    const team_id = await createTeam(supabase, { name });
+    const currency = getCurrency();
+    const team_id = await createTeam(supabase, { name, currency });
     const user = await updateUser(supabase, { team_id });
 
     if (!user?.data) {
