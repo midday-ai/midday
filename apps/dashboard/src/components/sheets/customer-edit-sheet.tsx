@@ -47,15 +47,14 @@ export function CustomerEditSheet() {
     async function fetchCustomer() {
       if (customerId) {
         const { data } = await getCustomerQuery(supabase, customerId);
+
         if (data) {
           setCustomer(data as Customer);
         }
       }
     }
 
-    if (customerId) {
-      fetchCustomer();
-    }
+    fetchCustomer();
   }, [customerId, supabase]);
 
   return (
