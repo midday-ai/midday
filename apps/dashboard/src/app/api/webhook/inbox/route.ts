@@ -200,6 +200,14 @@ export async function POST(req: Request) {
         };
       });
 
+    if (!uploadedAttachments?.length) {
+      logger("No uploaded attachments");
+
+      return NextResponse.json({
+        success: true,
+      });
+    }
+
     const insertData = await Promise.all(uploadedAttachments ?? []);
 
     // Insert records
