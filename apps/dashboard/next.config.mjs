@@ -30,6 +30,11 @@ const config = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
   typescript: {
     ignoreBuildErrors: true,
   },

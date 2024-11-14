@@ -43,10 +43,10 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
       }
     }
 
-    if (!data) {
+    if (!data && id) {
       fetchData();
     }
-  }, [data]);
+  }, [data, id]);
 
   useEffect(() => {
     setData(initialData);
