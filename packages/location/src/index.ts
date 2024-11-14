@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import countries from "./countries.json";
-import flags from "./country-flag";
+import flags from "./country-flags";
 import { EU_COUNTRY_CODES } from "./eu-countries";
 import timezones from "./timezones.json";
 

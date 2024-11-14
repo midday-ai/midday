@@ -7,7 +7,7 @@ import { SelectAccount } from "@/components/select-account";
 import { SelectCategory } from "@/components/select-category";
 import { SelectCurrency } from "@/components/select-currency";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { uniqueCurrencies } from "@midday/location/src/currencies";
+import { uniqueCurrencies } from "@midday/location/currencies";
 import {
   Accordion,
   AccordionContent,

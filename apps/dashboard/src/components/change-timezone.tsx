@@ -10,23 +10,29 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
-import { useAction } from "next-safe-action/hooks";
+import { useOptimisticAction } from "next-safe-action/hooks";
 
-type Timezone = {
-  tzCode: string;
-  name: string;
+type Props = {
+  timezone: string;
+  timezones: { tzCode: string; name: string }[];
 };
 
-export function ChangeTimezone({
-  timezone,
-  timezones,
-}: { timezone: string; timezones: Timezone[] }) {
-  const action = useAction(updateUserAction);
+export function ChangeTimezone({ timezone, timezones }: Props) {
   const t = useI18n();
 
-  const timezoneItems = timezones.map((tz) => ({
-    id: tz.tzCode,
+  const { execute, optimisticState } = useOptimisticAction(updateUserAction, {
+    currentState: { timezone },
+    updateFn: (state, newTimezone) => {
+      return {
+        timezone: newTimezone.timezone ?? state.timezone,
+      };
+    },
+  });
+
+  const timezoneItems = timezones.map((tz, id) => ({
+    id: id.toString(),
     label: tz.name,
+    value: tz.tzCode,
   }));
 
   return (
@@ -40,12 +46,14 @@ export function ChangeTimezone({
         <div className="w-[250px]">
           <ComboboxDropdown
             placeholder={t("timezone.placeholder")}
-            selectedItem={timezoneItems.find((item) => item.id === timezone)}
+            selectedItem={timezoneItems.find(
+              (item) => item.value === optimisticState.timezone,
+            )}
             searchPlaceholder={t("timezone.searchPlaceholder")}
             items={timezoneItems}
             className="text-xs py-1"
             onSelect={(item) => {
-              action.execute({ timezone: item.id });
+              execute({ timezone: item.value });
             }}
           />
         </div>

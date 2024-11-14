@@ -27,9 +27,9 @@ export function DateFormatSettings({ dateFormat }: Props) {
   return (
     <Card className="flex justify-between items-center">
       <CardHeader>
-        <CardTitle>Date format</CardTitle>
+        <CardTitle>Date Display Format</CardTitle>
         <CardDescription>
-          This will change how all date related data in your app looks.
+          Select the format used to display dates throughout the app.
         </CardDescription>
       </CardHeader>
 
@@ -37,15 +37,18 @@ export function DateFormatSettings({ dateFormat }: Props) {
         <Select
           defaultValue={dateFormat}
           onValueChange={(value) => {
-            action.execute({ date_format: value });
+            action.execute({
+              date_format: value as "dd/MM/yyyy" | "MM/dd/yyyy" | "yyyy-MM-dd",
+            });
           }}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Date format" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-            <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+            <SelectItem value="dd/MM/yyyy">dd/MM/yyyy</SelectItem>
+            <SelectItem value="MM/dd/yyyy">MM/dd/yyyy</SelectItem>
+            <SelectItem value="yyyy-MM-dd">yyyy-MM-dd</SelectItem>
           </SelectContent>
         </Select>
       </CardContent>

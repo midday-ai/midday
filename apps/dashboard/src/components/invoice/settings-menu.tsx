@@ -1,7 +1,7 @@
 "use client";
 
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
-import { uniqueCurrencies } from "@midday/location/src/currencies";
+import { uniqueCurrencies } from "@midday/location/currencies";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,

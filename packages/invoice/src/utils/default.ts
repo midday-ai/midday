@@ -1,5 +1,5 @@
 import { getCountryCode } from "@midday/location";
-import { currencies } from "@midday/location/src/currencies";
+import { currencies } from "@midday/location/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
 
 export type Settings = {

@@ -21,9 +21,9 @@ export function WeekSettings({ weekStartsOnMonday }: Props) {
   return (
     <Card className="flex justify-between items-center">
       <CardHeader>
-        <CardTitle>Start week on Monday</CardTitle>
+        <CardTitle>Start Week on Monday</CardTitle>
         <CardDescription>
-          This will change how all calendars in your app look.
+          Set the first day of the week in calendar views.
         </CardDescription>
       </CardHeader>
 

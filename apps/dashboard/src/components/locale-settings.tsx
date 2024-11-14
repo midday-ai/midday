@@ -1,6 +1,7 @@
 "use client";
 
 import { updateUserAction } from "@/actions/update-user-action";
+import { useI18n } from "@/locales/client";
 import { countries } from "@midday/location/countries-intl";
 import {
   Card,
@@ -10,14 +11,23 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
-import { useAction } from "next-safe-action/hooks";
+import { useOptimisticAction } from "next-safe-action/hooks";
 
 type Props = {
   locale: string;
 };
 
 export function LocaleSettings({ locale }: Props) {
-  const action = useAction(updateUserAction);
+  const t = useI18n();
+
+  const { execute, optimisticState } = useOptimisticAction(updateUserAction, {
+    currentState: { locale },
+    updateFn: (state, newLocale) => {
+      return {
+        locale: newLocale.locale ?? state.locale,
+      };
+    },
+  });
 
   const localeItems = Object.values(countries).map((c, index) => ({
     id: index.toString(),
@@ -28,23 +38,22 @@ export function LocaleSettings({ locale }: Props) {
   return (
     <Card className="flex justify-between items-center">
       <CardHeader>
-        <CardTitle>Locale & Formatting</CardTitle>
-        <CardDescription>
-          This will change how currency and other locale-specific data is
-          formatted throughout the app.
-        </CardDescription>
+        <CardTitle>{t("locale.title")}</CardTitle>
+        <CardDescription>{t("locale.description")}</CardDescription>
       </CardHeader>
 
       <CardContent>
         <div className="w-[250px]">
           <ComboboxDropdown
-            placeholder="Select locale"
-            selectedItem={localeItems.find((item) => item.value === locale)}
-            searchPlaceholder="Search locales"
+            placeholder={t("locale.placeholder")}
+            selectedItem={localeItems.find(
+              (item) => item.value === optimisticState.locale,
+            )}
+            searchPlaceholder={t("locale.searchPlaceholder")}
             items={localeItems}
             className="text-xs py-1"
             onSelect={(item) => {
-              action.execute({ locale: item.value });
+              execute({ locale: item.value });
             }}
           />
         </div>

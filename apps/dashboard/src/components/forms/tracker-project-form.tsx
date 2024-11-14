@@ -1,7 +1,7 @@
 "use client";
 
 import type { Customer } from "@/components/invoice/customer-details";
-import { uniqueCurrencies } from "@midday/location/src/currencies";
+import { uniqueCurrencies } from "@midday/location/currencies";
 import { Button } from "@midday/ui/button";
 import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
 import { CurrencyInput } from "@midday/ui/currency-input";

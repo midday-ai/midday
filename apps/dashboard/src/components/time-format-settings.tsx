@@ -27,9 +27,9 @@ export function TimeFormatSettings({ timeFormat }: Props) {
   return (
     <Card className="flex justify-between items-center">
       <CardHeader>
-        <CardTitle>Time format</CardTitle>
+        <CardTitle>Time Display Format</CardTitle>
         <CardDescription>
-          This will change how all time related data in your app looks.
+          Choose between 12-hour or 24-hour clock format for displaying time.
         </CardDescription>
       </CardHeader>
 
