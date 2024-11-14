@@ -29,7 +29,6 @@ import { useCallback, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { TrackerEvents } from "./tracker-events";
 import { TrackerMonthSelect } from "./tracker-month-select";
-import { TrackerSettings } from "./tracker-settings";
 
 type Props = {
   weekStartsOnMonday?: boolean;
@@ -309,10 +308,6 @@ function CalendarHeader({
       </div>
       <div className="flex space-x-2">
         <TrackerMonthSelect dateFormat="MMMM" />
-        <TrackerSettings
-          timeFormat={timeFormat}
-          weekStartsOnMonday={weekStartsOnMonday}
-        />
       </div>
     </div>
   );

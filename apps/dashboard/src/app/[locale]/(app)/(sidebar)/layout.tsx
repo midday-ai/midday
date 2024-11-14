@@ -4,7 +4,7 @@ import { GlobalSheets } from "@/components/sheets/global-sheets";
 import { Sidebar } from "@/components/sidebar";
 import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode } from "@midday/location";
-import { currencies, uniqueCurrencies } from "@midday/location/src/currencies";
+import { currencies, uniqueCurrencies } from "@midday/location/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
 import { nanoid } from "nanoid";
 import dynamic from "next/dynamic";

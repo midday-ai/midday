@@ -2,7 +2,7 @@
 
 import { updateCurrencyAction } from "@/actions/transactions/update-currency-action";
 import { SelectCurrency as SelectCurrencyBase } from "@/components/select-currency";
-import { uniqueCurrencies } from "@midday/location/src/currencies";
+import { uniqueCurrencies } from "@midday/location/currencies";
 import { Button } from "@midday/ui/button";
 import { useToast } from "@midday/ui/use-toast";
 import { useEventDetails } from "@trigger.dev/react";

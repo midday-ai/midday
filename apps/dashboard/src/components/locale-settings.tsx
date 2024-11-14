@@ -2,6 +2,7 @@
 
 import { updateUserAction } from "@/actions/update-user-action";
 import { useI18n } from "@/locales/client";
+import { countries } from "@midday/location/countries-intl";
 import {
   Card,
   CardContent,
@@ -13,47 +14,46 @@ import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
 type Props = {
-  timezone: string;
-  timezones: { tzCode: string; name: string }[];
+  locale: string;
 };
 
-export function ChangeTimezone({ timezone, timezones }: Props) {
+export function LocaleSettings({ locale }: Props) {
   const t = useI18n();
 
   const { execute, optimisticState } = useOptimisticAction(updateUserAction, {
-    currentState: { timezone },
-    updateFn: (state, newTimezone) => {
+    currentState: { locale },
+    updateFn: (state, newLocale) => {
       return {
-        timezone: newTimezone.timezone ?? state.timezone,
+        locale: newLocale.locale ?? state.locale,
       };
     },
   });
 
-  const timezoneItems = timezones.map((tz, id) => ({
-    id: id.toString(),
-    label: tz.name,
-    value: tz.tzCode,
+  const localeItems = Object.values(countries).map((c, index) => ({
+    id: index.toString(),
+    label: `${c.name} (${c.default_locale})`,
+    value: c.default_locale,
   }));
 
   return (
     <Card className="flex justify-between items-center">
       <CardHeader>
-        <CardTitle>{t("timezone.title")}</CardTitle>
-        <CardDescription>{t("timezone.description")}</CardDescription>
+        <CardTitle>{t("locale.title")}</CardTitle>
+        <CardDescription>{t("locale.description")}</CardDescription>
       </CardHeader>
 
       <CardContent>
         <div className="w-[250px]">
           <ComboboxDropdown
-            placeholder={t("timezone.placeholder")}
-            selectedItem={timezoneItems.find(
-              (item) => item.value === optimisticState.timezone,
+            placeholder={t("locale.placeholder")}
+            selectedItem={localeItems.find(
+              (item) => item.value === optimisticState.locale,
             )}
-            searchPlaceholder={t("timezone.searchPlaceholder")}
-            items={timezoneItems}
+            searchPlaceholder={t("locale.searchPlaceholder")}
+            items={localeItems}
             className="text-xs py-1"
             onSelect={(item) => {
-              execute({ timezone: item.value });
+              execute({ locale: item.value });
             }}
           />
         </div>

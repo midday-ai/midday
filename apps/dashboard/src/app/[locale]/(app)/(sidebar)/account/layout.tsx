@@ -6,7 +6,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <SecondaryMenu
         items={[
           { path: "/account", label: "General" },
-          { path: "/account/date-and-time", label: "Date & Time" },
+          { path: "/account/date-and-locale", label: "Date & Locale" },
           { path: "/account/security", label: "Security" },
           { path: "/account/assistant", label: "Assistant" },
           { path: "/account/teams", label: "Teams" },

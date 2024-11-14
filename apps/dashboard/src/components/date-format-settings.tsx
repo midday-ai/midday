@@ -18,34 +18,37 @@ import {
 import { useAction } from "next-safe-action/hooks";
 
 type Props = {
-  timeFormat: string;
+  dateFormat: string;
 };
 
-export function TimeFormatSettings({ timeFormat }: Props) {
+export function DateFormatSettings({ dateFormat }: Props) {
   const action = useAction(updateUserAction);
 
   return (
     <Card className="flex justify-between items-center">
       <CardHeader>
-        <CardTitle>Time format</CardTitle>
+        <CardTitle>Date Display Format</CardTitle>
         <CardDescription>
-          This will change how all time related data in your app looks.
+          Select the format used to display dates throughout the app.
         </CardDescription>
       </CardHeader>
 
       <CardContent>
         <Select
-          defaultValue={timeFormat.toString()}
+          defaultValue={dateFormat}
           onValueChange={(value) => {
-            action.execute({ time_format: +value });
+            action.execute({
+              date_format: value as "dd/MM/yyyy" | "MM/dd/yyyy" | "yyyy-MM-dd",
+            });
           }}
         >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Time format" />
+            <SelectValue placeholder="Date format" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="12">12 hours (AM/PM)</SelectItem>
-            <SelectItem value="24">24 hours</SelectItem>
+            <SelectItem value="dd/MM/yyyy">dd/MM/yyyy</SelectItem>
+            <SelectItem value="MM/dd/yyyy">MM/dd/yyyy</SelectItem>
+            <SelectItem value="yyyy-MM-dd">yyyy-MM-dd</SelectItem>
           </SelectContent>
         </Select>
       </CardContent>

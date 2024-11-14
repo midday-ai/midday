@@ -1,4 +1,4 @@
-import countries from "@midday/location/src/country-flag";
+import countries from "@midday/location/country-flags";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import {

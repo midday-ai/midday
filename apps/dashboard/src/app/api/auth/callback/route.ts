@@ -1,8 +1,10 @@
 import { Cookies } from "@/utils/constants";
+import { setupUser } from "@/utils/setup-user";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
+import { waitUntil } from "@vercel/functions";
 import { addYears } from "date-fns";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
@@ -49,6 +51,9 @@ export async function GET(req: NextRequest) {
         event: LogEvents.SignIn.name,
         channel: LogEvents.SignIn.channel,
       });
+
+      // Set default user timezone and locale
+      waitUntil(setupUser(userId));
 
       // If user have no teams, redirect to team creation
       const { count } = await supabase
