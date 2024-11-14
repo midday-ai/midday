@@ -8,10 +8,17 @@ export async function setupUser(userId: string) {
   const locale = getLocale();
   const timezone = getTimezone();
 
-  const user = await getUser();
+  try {
+    const user = await getUser();
 
-  // Set timezone if not set
-  if (!user?.data?.timezone) {
-    await supabase.from("users").update({ timezone, locale }).eq("id", userId);
+    // Set timezone if not set
+    if (!user?.data?.timezone) {
+      await supabase
+        .from("users")
+        .update({ timezone, locale })
+        .eq("id", userId);
+    }
+  } catch (error) {
+    console.error(error);
   }
 }

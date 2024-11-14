@@ -14,7 +14,7 @@ export function InvoiceRow({ row, setOpen }: Props) {
   return (
     <>
       <TableRow
-        className="hover:bg-transparent cursor-default h-[57px]"
+        className="hover:bg-transparent cursor-default h-[57px] cursor-pointer"
         key={row.id}
       >
         {row.getVisibleCells().map((cell, index) => (

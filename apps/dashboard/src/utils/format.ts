@@ -3,8 +3,6 @@ import {
   differenceInDays,
   differenceInMonths,
   format,
-  isFuture,
-  isPast,
   isSameYear,
   startOfDay,
 } from "date-fns";
@@ -82,12 +80,12 @@ export function calculateAvgBurnRate(data: BurnRateData[] | null) {
   return data?.reduce((acc, curr) => acc + curr.value, 0) / data?.length;
 }
 
-export function formatDate(date: string) {
+export function formatDate(date: string, dateFormat?: string) {
   if (isSameYear(new Date(), new Date(date))) {
     return format(new Date(date), "MMM d");
   }
 
-  return format(new Date(date), "P");
+  return format(new Date(date), dateFormat ?? "P");
 }
 
 export function getInitials(value: string) {

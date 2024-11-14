@@ -6,6 +6,7 @@ import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useUserContext } from "@/store/user/hook";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import {
   AlertDialog,
@@ -64,6 +65,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
   const { toast } = useToast();
   const { setParams } = useTrackerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
+  const { locale } = useUserContext((state) => state.data);
 
   const deleteAction = useAction(deleteProjectAction, {
     onError: () => {
@@ -135,6 +137,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
                 amount: row.total_amount,
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
+                locale,
               })}
             </span>
           </DataTableCell>

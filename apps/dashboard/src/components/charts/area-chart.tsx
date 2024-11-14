@@ -1,6 +1,6 @@
 "use client";
 
-import { useCurrentLocale } from "@/locales/client";
+import { useUserContext } from "@/store/user/hook";
 import { formatAmount } from "@/utils/format";
 import { format } from "date-fns";
 import React from "react";
@@ -20,7 +20,7 @@ type ToolTipContentProps = {
 
 const ToolTipContent = ({ payload }: ToolTipContentProps) => {
   const { value = 0, date, currency } = payload.at(0)?.payload ?? {};
-  const locale = useCurrentLocale();
+  const { locale } = useUserContext((state) => state.data);
 
   return (
     <div className="w-[240px] border shadow-sm bg-background">

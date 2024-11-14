@@ -3,7 +3,8 @@
 import { BotCard } from "@/components/chat/messages";
 import { CopyInput } from "@/components/copy-input";
 import { useI18n } from "@/locales/client";
-import { format } from "date-fns";
+import { useUserContext } from "@/store/user/hook";
+import { formatDate } from "@/utils/format";
 
 type Props = {
   shortLink: string;
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function ReportUI({ shortLink, type, startDate, endDate }: Props) {
+  const { date_format: dateFormat } = useUserContext((state) => state.data);
   const t = useI18n();
 
   if (!shortLink) {
@@ -25,8 +27,8 @@ export function ReportUI({ shortLink, type, startDate, endDate }: Props) {
     <BotCard className="font-sans space-y-4">
       <p className="font-mono">
         Here is your report for {t(`chart_type.${type}`)} between{" "}
-        {format(new Date(startDate), "PP")} and{" "}
-        {format(new Date(endDate), "PP")}
+        {formatDate(startDate, dateFormat)} and{" "}
+        {formatDate(endDate, dateFormat)}
       </p>
 
       <div className="flex">

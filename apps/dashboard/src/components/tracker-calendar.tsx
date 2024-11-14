@@ -1,6 +1,7 @@
 "use client";
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useUserContext } from "@/store/user/hook";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import { TZDate } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
@@ -177,16 +178,11 @@ function handleMonthChange(
 type CalendarHeaderProps = {
   meta: { totalDuration?: number };
   data: Record<string, TrackerEvent[]>;
-  timeFormat: number;
-  weekStartsOnMonday: boolean;
 };
 
-function CalendarHeader({
-  meta,
-  data,
-  timeFormat,
-  weekStartsOnMonday,
-}: CalendarHeaderProps) {
+function CalendarHeader({ meta, data }: CalendarHeaderProps) {
+  const { locale } = useUserContext((state) => state.data);
+
   const projectTotals = Object.entries(data).reduce(
     (acc, [_, events]) => {
       for (const event of events) {
@@ -259,6 +255,7 @@ function CalendarHeader({
                   amount: meta?.totalAmount,
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
+                  locale,
                 })} this month`
               : "Nothing billable yet"}
           </p>
@@ -294,6 +291,7 @@ function CalendarHeader({
                               amount: project.amount,
                               minimumFractionDigits: 0,
                               maximumFractionDigits: 0,
+                              locale,
                             })}
                           </span>
                         </div>

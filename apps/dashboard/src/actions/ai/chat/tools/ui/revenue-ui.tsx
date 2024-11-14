@@ -3,7 +3,8 @@
 import { BarChart } from "@/components/charts/bar-chart";
 import { BotCard } from "@/components/chat/messages";
 import { FormatAmount } from "@/components/format-amount";
-import { format } from "date-fns";
+import { useUserContext } from "@/store/user/hook";
+import { formatDate } from "@/utils/format";
 
 type Props = {
   data: any;
@@ -12,6 +13,8 @@ type Props = {
 };
 
 export function RevenueUI({ data, startDate, endDate }: Props) {
+  const { date_format: dateFormat } = useUserContext((state) => state.data);
+
   if (!data?.result?.length) {
     return (
       <BotCard>
@@ -23,8 +26,8 @@ export function RevenueUI({ data, startDate, endDate }: Props) {
     <BotCard className="font-sans space-y-16">
       <div>
         <p className="font-mono">
-          Based on the period from {format(new Date(startDate), "PP")} and{" "}
-          {format(new Date(endDate), "PP")} your revenue is{" "}
+          Based on the period from {formatDate(startDate, dateFormat)} and{" "}
+          {formatDate(endDate, dateFormat)} your revenue is{" "}
           <FormatAmount
             amount={data.summary.currentTotal}
             currency={data.summary.currency}

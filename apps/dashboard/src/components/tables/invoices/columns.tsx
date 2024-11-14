@@ -67,7 +67,7 @@ export const columns: ColumnDef<Invoice>[] = [
   {
     header: "Due date",
     accessorKey: "due_date",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const date = row.getValue("due_date");
 
       const showDate =
@@ -77,7 +77,9 @@ export const columns: ColumnDef<Invoice>[] = [
 
       return (
         <div className="flex flex-col space-y-1 w-[80px]">
-          <span>{date ? formatDate(date) : "-"}</span>
+          <span>
+            {date ? formatDate(date, table.options.meta?.dateFormat) : "-"}
+          </span>
           {showDate && (
             <span className="text-xs text-muted-foreground">
               {date ? getDueDateStatus(date) : "-"}
@@ -154,9 +156,13 @@ export const columns: ColumnDef<Invoice>[] = [
   {
     header: "Issue date",
     accessorKey: "issue_date",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const date = row.getValue("issue_date");
-      return <span>{date ? formatDate(date) : "-"}</span>;
+      return (
+        <span>
+          {date ? formatDate(date, table.options.meta?.dateFormat) : "-"}
+        </span>
+      );
     },
   },
   {

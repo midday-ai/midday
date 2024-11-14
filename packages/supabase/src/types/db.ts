@@ -483,7 +483,6 @@ export type Database = {
           include_vat: boolean | null
           invoice_no_label: string | null
           issue_date_label: string | null
-          locale: string | null
           logo_url: string | null
           note_label: string | null
           payment_details: Json | null
@@ -494,7 +493,6 @@ export type Database = {
           tax_label: string | null
           tax_rate: number | null
           team_id: string
-          timezone: string | null
           title: string | null
           total_label: string | null
           total_summary_label: string | null
@@ -520,7 +518,6 @@ export type Database = {
           include_vat?: boolean | null
           invoice_no_label?: string | null
           issue_date_label?: string | null
-          locale?: string | null
           logo_url?: string | null
           note_label?: string | null
           payment_details?: Json | null
@@ -531,7 +528,6 @@ export type Database = {
           tax_label?: string | null
           tax_rate?: number | null
           team_id: string
-          timezone?: string | null
           title?: string | null
           total_label?: string | null
           total_summary_label?: string | null
@@ -557,7 +553,6 @@ export type Database = {
           include_vat?: boolean | null
           invoice_no_label?: string | null
           issue_date_label?: string | null
-          locale?: string | null
           logo_url?: string | null
           note_label?: string | null
           payment_details?: Json | null
@@ -568,7 +563,6 @@ export type Database = {
           tax_label?: string | null
           tax_rate?: number | null
           team_id?: string
-          timezone?: string | null
           title?: string | null
           total_label?: string | null
           total_summary_label?: string | null
@@ -1313,6 +1307,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string | null
+          date_format: string | null
           email: string | null
           full_name: string | null
           id: string
@@ -1325,6 +1320,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
+          date_format?: string | null
           email?: string | null
           full_name?: string | null
           id: string
@@ -1337,6 +1333,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string | null
+          date_format?: string | null
           email?: string | null
           full_name?: string | null
           id?: string

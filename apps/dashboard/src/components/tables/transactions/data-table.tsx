@@ -6,6 +6,7 @@ import { updateColumnVisibilityAction } from "@/actions/update-column-visibility
 import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { useTransactionsStore } from "@/store/transactions";
+import { useUserContext } from "@/store/user/hook";
 import { Cookies } from "@/utils/constants";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -43,6 +44,7 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   query,
+
   data: initialData,
   pageSize,
   loadMore,
@@ -55,6 +57,8 @@ export function DataTable<TData, TValue>({
   const [data, setData] = useState(initialData);
   const [from, setFrom] = useState(pageSize);
   const { ref, inView } = useInView();
+  const { date_format: dateFormat } = useUserContext((state) => state.data);
+
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const { setColumns, setCanDelete, rowSelection, setRowSelection } =
     useTransactionsStore();
@@ -162,6 +166,7 @@ export function DataTable<TData, TValue>({
       copyUrl: handleCopyUrl,
       updateTransaction: handleUpdateTransaction,
       deleteTransactions: handleDeleteTransactions,
+      dateFormat,
     },
     state: {
       rowSelection,
@@ -240,7 +245,7 @@ export function DataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className="h-[40px] md:h-[45px] cursor-default select-text"
+                className="h-[40px] md:h-[45px] cursor-pointer select-text"
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell

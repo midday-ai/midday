@@ -1,6 +1,7 @@
 "use client";
 
-import { useCurrentLocale, useI18n } from "@/locales/client";
+import { useI18n } from "@/locales/client";
+import { useUserContext } from "@/store/user/hook";
 import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -21,7 +22,7 @@ type Props = {
 };
 
 export function BottomBar({ count, show, totalAmount }: Props) {
-  const locale = useCurrentLocale();
+  const { locale } = useUserContext((state) => state.data);
   const multiCurrency = totalAmount && totalAmount.length > 1;
   const t = useI18n();
   const first = totalAmount && totalAmount.at(0);

@@ -22,7 +22,6 @@ import {
   getCategoriesQuery,
   getCustomersQuery,
   getExpensesQuery,
-  getInvoiceNumberQuery,
   getInvoiceSummaryQuery,
   getInvoiceTemplatesQuery,
   getInvoicesQuery,

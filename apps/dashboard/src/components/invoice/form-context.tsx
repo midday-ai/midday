@@ -78,6 +78,8 @@ export function FormContext({
       size: defaultSettings.size ?? defaultTemplate.size,
       include_tax: defaultSettings.include_tax ?? defaultTemplate.include_tax,
       include_vat: defaultSettings.include_vat ?? defaultTemplate.include_vat,
+      timezone: defaultSettings.timezone,
+      locale: defaultSettings.locale,
       ...template,
     },
     customer_details: undefined,
@@ -107,13 +109,7 @@ export function FormContext({
 
   useEffect(() => {
     if (!isOpen) {
-      form.reset({
-        ...defaultValues,
-        template: {
-          ...defaultValues.template,
-          locale: navigator.language,
-        },
-      });
+      form.reset(defaultValues);
     }
   }, [isOpen]);
 
