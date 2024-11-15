@@ -35,7 +35,11 @@ export function Hero() {
 
         <div className="mt-8 md:mt-10">
           <div className="flex items-center space-x-4">
-            <Link href="/talk-to-us">
+            <Link
+              href="https://cal.com/pontus-midday/15min"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Button
                 variant="outline"
                 className="border-transparent h-11 px-6 bg-[#1D1D1D]"

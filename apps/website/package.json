@@ -12,7 +12,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@calcom/embed-react": "^1.5.1",
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@openpanel/nextjs": "^1.0.5",

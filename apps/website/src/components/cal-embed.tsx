@@ -7,16 +7,18 @@ type Props = {
   calLink: string;
 };
 
-export function CalEmbed({ calLink }) {
+export function CalEmbed({ calLink }: Props) {
   useEffect(() => {
-    (async function () {
+    const initCal = async () => {
       const cal = await getCalApi();
       cal("ui", {
         styles: { branding: { brandColor: "#000000" } },
         hideEventTypeDetails: false,
         layout: "month_view",
       });
-    })();
+    };
+
+    void initCal();
   }, []);
 
   return (
