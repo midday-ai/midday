@@ -29,7 +29,7 @@ export function Hero() {
         </Link>
 
         <h2 className="mt-6 md:mt-10 max-w-[580px] text-[#878787] leading-tight text-[24px] md:text-[36px] font-medium">
-          Invoicing, Time tracking, File reconsilitation, Storage, Financial
+          Invoicing, Time tracking, File reconciliation, Storage, Financial
           Overview & your own Assistant made for <WordAnimation />
         </h2>
 
