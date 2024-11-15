@@ -32,7 +32,7 @@ function useWordCycle(words: string[], interval: number) {
 }
 
 export function WordAnimation() {
-  const word = useWordCycle(words, 4500);
+  const word = useWordCycle(words, 3000);
 
   return (
     <AnimatePresence mode="wait">
