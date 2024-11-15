@@ -12,12 +12,12 @@ export function SectionThree() {
     <section className="relative mb-12 group">
       <div className="border border-border container bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden">
         <div className="flex flex-col md:space-x-12 md:flex-row">
-          <div className="mt-6 md:max-w-[40%] md:mr-8 md:mb-8">
-            <h3 className="font-medium text-xl md:text-2xl	mb-4">
+          <div className="xl:mt-6 md:max-w-[40%] md:mr-8 md:mb-8">
+            <h3 className="font-medium text-xl md:text-2xl mb-4">
               Time track your projects
             </h3>
 
-            <p className="text-[#878787] mb-4 text-sm">
+            <p className="text-[#878787] md:mb-4 text-sm">
               Effortlessly boost productivity and collaboration with our
               advanced <br />
               time tracking solution: gain insightful project overviews and
@@ -61,7 +61,7 @@ export function SectionThree() {
             </div>
           </div>
 
-          <div className="relative">
+          <div className="relative mt-8 md:mt-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -74,32 +74,34 @@ export function SectionThree() {
                 height={142}
                 width={135}
                 className="object-contain"
-                quality={100}
+                quality={90}
                 alt="Time format"
               />
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 1.2 }}
-              viewport={{ once: true }}
-              className="absolute -right-[15px] -top-[20px]"
-            >
-              <Image
-                src={breakdown}
-                height={124}
-                width={238}
-                className="object-contain"
-                quality={100}
-                alt="Breakdown"
-              />
-            </motion.div>
+            <div className="scale-75 md:scale-100">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 1.2 }}
+                viewport={{ once: true }}
+                className="absolute -right-[65px] md:-right-[15px] md:-top-[20px]"
+              >
+                <Image
+                  src={breakdown}
+                  height={124}
+                  width={238}
+                  className="object-contain"
+                  quality={90}
+                  alt="Breakdown"
+                />
+              </motion.div>
+            </div>
             <Image
               src={timetracker}
               height={400}
               className="-mb-[32px] md:-mb-[1px] object-contain mt-8 md:mt-0"
-              quality={100}
+              quality={90}
               alt="Tracker"
             />
           </div>

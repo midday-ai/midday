@@ -90,7 +90,7 @@ export function Header() {
       title: "Features",
       cover: (
         <Link href="/#assistant" onClick={handleOnClick}>
-          <Image alt="Assistant" src={menuAssistant} quality={100} />
+          <Image alt="Assistant" src={menuAssistant} quality={90} />
         </Link>
       ),
       children: [
@@ -141,7 +141,7 @@ export function Header() {
       title: "Developers",
       cover: (
         <Link href="/engine" onClick={handleOnClick}>
-          <Image alt="Engine" src={menuEngine} quality={100} />
+          <Image alt="Engine" src={menuEngine} quality={90} />
         </Link>
       ),
       children: [
@@ -167,7 +167,7 @@ export function Header() {
         },
         {
           title: "Apps & Integrations",
-          path: "https://docs.midday.ai",
+          path: "https://docs.midday.ai/integrations",
           icon: <MdOutlineIntegrationInstructions size={20} />,
         },
         {
@@ -285,7 +285,7 @@ export function Header() {
                     <ul className="p-4 w-[200px] flex-0 space-y-4 mt-2">
                       {children.map((child) => {
                         return (
-                          <li key={child.title}>
+                          <li key={child.path}>
                             <Link
                               onClick={handleOnClick}
                               href={child.path}
@@ -372,7 +372,7 @@ export function Header() {
               className="px-3 pt-8 text-xl text-[#878787] space-y-8 mb-8 overflow-auto"
               variants={listVariant}
             >
-              {links.map(({ path, title, children }) => {
+              {links.map(({ path, title, children }, index) => {
                 const isActive =
                   path === "/updates"
                     ? pathname.includes("updates")
@@ -393,7 +393,7 @@ export function Header() {
                 }
 
                 return (
-                  <li key={path}>
+                  <li key={title}>
                     <Accordion collapsible type="single">
                       <AccordionItem value="item-1" className="border-none">
                         <AccordionTrigger className="flex items-center justify-between w-full font-normal p-0 hover:no-underline">
@@ -402,7 +402,7 @@ export function Header() {
 
                         {children && (
                           <AccordionContent className="text-xl">
-                            <ul className="space-y-8 ml-4 mt-6" key={path}>
+                            <ul className="space-y-8 ml-4 mt-6">
                               {children.map((child) => {
                                 return (
                                   <li key={child.path}>

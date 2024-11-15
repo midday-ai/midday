@@ -27,7 +27,7 @@ export function Keyboard() {
         width={1092}
         height={448}
         className="z-10 relative"
-        quality={100}
+        quality={90}
         priority
       />
     </div>

@@ -46,7 +46,7 @@ export default function Page() {
           width={1026}
           height={552}
           className="mt-16"
-          quality={100}
+          quality={90}
         />
       </div>
 

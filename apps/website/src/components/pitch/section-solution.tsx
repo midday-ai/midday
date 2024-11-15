@@ -139,7 +139,7 @@ export function SectionSolution() {
               alt="Overview"
               width={650}
               height={875}
-              quality={100}
+              quality={90}
             />
           </div>
         </div>

@@ -6,7 +6,7 @@ import { WordAnimation } from "./word-animation";
 
 export function Hero() {
   return (
-    <section className="md:mt-[180px] relative h-[calc(100vh-300px)]">
+    <section className="mt-[60px] lg:mt-[180px] relative lg:h-[calc(100vh-300px)]">
       <div className="flex flex-col">
         <Link href="/updates/october-product-updates">
           <Button
@@ -28,19 +28,19 @@ export function Hero() {
           </Button>
         </Link>
 
-        <h2 className="mt-6 md:mt-10 max-w-[580px] text-[#878787] leading-tight text-[36px] font-medium">
+        <h2 className="mt-6 md:mt-10 max-w-[580px] text-[#878787] leading-tight text-[24px] md:text-[36px] font-medium">
           Invoicing, Time tracking, File reconsilitation, Storage, Financial
           Overview & your own Assistant made for <WordAnimation />
         </h2>
 
-        <div className="mt-10">
+        <div className="mt-8 md:mt-10">
           <div className="flex items-center space-x-4">
             <Link href="/talk-to-us">
               <Button
                 variant="outline"
                 className="border-transparent h-11 px-6 bg-[#1D1D1D]"
               >
-                Talk to a founder
+                Talk to founders
               </Button>
             </Link>
 
@@ -50,7 +50,7 @@ export function Hero() {
           </div>
         </div>
 
-        <p className="text-xs text-[#707070] mt-8 font-mono">
+        <p className="text-xs text-[#707070] mt-4 font-mono">
           Claim $49/mo deal, free during beta.
         </p>
       </div>

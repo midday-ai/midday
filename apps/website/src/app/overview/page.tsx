@@ -1,4 +1,5 @@
 import { Assistant } from "@/components/assistant";
+import { CtaLink } from "@/components/cta-link";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Overview from "public/product-overview.jpg";
@@ -27,10 +28,15 @@ export default function Page() {
             Get real-time insight into your business's financial state. Keep
             track of your spending, income and overall financial health.
           </p>
+
+          <CtaLink
+            text="Get on top of your finances"
+            className="mt-12 opacity-100 text-center"
+          />
         </div>
       </div>
 
-      <Image src={Overview} quality={100} alt="Overview" />
+      <Image src={Overview} quality={90} alt="Overview" />
 
       <div className="flex items-center flex-col text-center relative mt-28">
         <div className="max-w-[600px]">
@@ -47,7 +53,7 @@ export default function Page() {
 
         <Image
           src={Spending}
-          quality={100}
+          quality={90}
           alt="Spending"
           className="mt-10 max-w-[834px] w-full"
         />

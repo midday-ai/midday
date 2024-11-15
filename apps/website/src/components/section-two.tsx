@@ -4,23 +4,23 @@ import { CtaLink } from "./cta-link";
 
 export function SectionTwo() {
   return (
-    <section className="border border-border container bg-[#121212] md:pb-0 overflow-hidden mb-12 group">
-      <div className="flex flex-col md:space-x-12 md:flex-row">
+    <section className="border border-border container bg-[#121212] lg:pb-0 overflow-hidden mb-12 group">
+      <div className="flex flex-col lg:space-x-12 lg:flex-row">
         <Image
           src={computer}
           height={446}
           width={836}
-          className="-mb-[1px] object-contain"
+          className="-mb-[1px] object-contain lg:w-1/2"
           alt="Overview"
-          quality={100}
+          quality={90}
         />
 
-        <div className="mt-6 md:max-w-[40%] md:ml-8 md:mb-8 flex flex-col justify-center p-8 md:p-0 relative">
+        <div className="xl:mt-6 lg:max-w-[40%] md:ml-8 md:mb-8 flex flex-col justify-center p-8 md:pl-0 relative">
           <h3 className="font-medium text-xl md:text-2xl mb-4">
             Financial overview
           </h3>
 
-          <p className="text-[#878787] mb-4 text-sm">
+          <p className="text-[#878787] mb-8 lg:mb-4 text-sm">
             Bring your own bank. We connect to over 20 000+ banks in 33
             countries across US, Canada, UK and Europe. Keep tabs on your
             expenses and income, and gain a clearer picture of your business's

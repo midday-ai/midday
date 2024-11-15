@@ -144,7 +144,7 @@ export function SectionTraction() {
               </a>
             </div>
 
-            <Image src={customers} width={698} alt="Customers" quality={100} />
+            <Image src={customers} width={698} alt="Customers" quality={90} />
           </div>
         </div>
       </div>
