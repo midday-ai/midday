@@ -18,7 +18,9 @@ export default async function Page() {
       }
       return 1;
     })
-    .map((post, index) => <Article data={post} firstPost={index === 0} />);
+    .map((post, index) => (
+      <Article data={post} firstPost={index === 0} key={post.slug} />
+    ));
 
   return (
     <div className="container flex justify-center scroll-smooth">

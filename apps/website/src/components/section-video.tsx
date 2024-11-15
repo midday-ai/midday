@@ -12,7 +12,7 @@ const ReactHlsPlayer = dynamic(() => import("react-hls-player"), {
 });
 
 export function SectionVideo() {
-  const playerRef = useRef();
+  const playerRef = useRef(undefined);
   const [isPlaying, setPlaying] = useState(false);
   const [isMuted, setMuted] = useState(true);
   const isDesktop = useMediaQuery("(min-width: 768px)");

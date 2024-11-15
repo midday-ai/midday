@@ -45,6 +45,7 @@ import {
   MdOutlineApps,
   MdOutlineArrowDownward,
   MdOutlineArrowForward,
+  MdOutlineArrowOutward,
   MdOutlineAssuredWorkload,
   MdOutlineAttachFile,
   MdOutlineAttachMoney,
@@ -691,4 +692,5 @@ export const Icons = {
   SnippetFolder: MdSnippetFolder,
   ConfirmationNumber: MdOutlineConfirmationNumber,
   QrCode: MdOutlineQrCode2,
+  ArrowOutward: MdOutlineArrowOutward,
 };
