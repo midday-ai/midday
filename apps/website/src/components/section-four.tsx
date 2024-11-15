@@ -5,7 +5,7 @@ import { CtaLink } from "./cta-link";
 
 export function SectionFour() {
   return (
-    <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 flex-col md:flex-row overflow-hidden mb-12 group">
+    <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 flex-col md:flex-row overflow-hidden mb-12 group relative">
       <div className="border border-border md:basis-2/3 bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col">
         <div className="flex flex-col md:basis-1/2">
           <h4 className="font-medium text-xl md:text-2xl mb-4">Invoicing</h4>
@@ -48,18 +48,20 @@ export function SectionFour() {
               <span className="text-[#878787]">Share with your clients</span>
             </div>
 
-            <div className="absolute bottom-6 left-0">
-              <CtaLink text="Start tracking time now" />
+            <div className="absolute bottom-6">
+              <CtaLink text="Send your first invoice in seconds" />
             </div>
           </div>
         </div>
 
         <div className="md:basis-1/2 mt-8 md:mt-0 -bottom-[8px] relative">
           <Image
-            src={inbox}
-            quality={100}
-            className="object-contain -bottom-[32px] relative"
-            alt="Inbox"
+            src={invoicing}
+            width={299}
+            height={423}
+            quality={90}
+            className="object-contain -bottom-[33px] relative ml-[20%]"
+            alt="Invoicing"
           />
         </div>
       </div>
@@ -73,13 +75,6 @@ export function SectionFour() {
           We’re working hard to give you the best invoice solution. It will
           feature web based invoices, live collaboration and project sync.
         </p>
-
-        <Image
-          src={invoicing}
-          quality={100}
-          className="object-contain mt-auto"
-          alt="Invoice"
-        />
       </div>
     </section>
   );

@@ -8,6 +8,7 @@ env:
   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
   SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
   SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING: true
+  NODE_OPTIONS: "--max_old_space_size=4096"
 on:
   push:
     branches-ignore:
