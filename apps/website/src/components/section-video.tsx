@@ -13,8 +13,7 @@ const ReactHlsPlayer = dynamic(() => import("react-hls-player"), {
 
 export function SectionVideo() {
   const playerRef = useRef();
-  const timer = useRef();
-  const [isPlaying, setPlaying] = useState<Timer | undefined>(false);
+  const [isPlaying, setPlaying] = useState(false);
   const [isMuted, setMuted] = useState(true);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -35,20 +34,9 @@ export function SectionVideo() {
   return (
     <motion.div
       className="flex flex-col justify-center container pb-20"
-      onViewportEnter={() => {
-        if (!isPlaying && isDesktop) {
-          timer.current = setTimeout(() => {
-            playerRef.current?.play();
-            setPlaying(true);
-          }, 4000);
-        }
-      }}
       onViewportLeave={() => {
         playerRef.current?.pause();
         setPlaying(false);
-        if (timer.current) {
-          clearTimeout(timer.current);
-        }
       }}
     >
       <div className="relative">

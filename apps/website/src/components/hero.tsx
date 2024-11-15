@@ -40,18 +40,18 @@ export function Hero() {
                 variant="outline"
                 className="border-transparent h-11 px-6 bg-[#1D1D1D]"
               >
-                Talk to us
+                Talk to a founder
               </Button>
             </Link>
 
             <a href="https://app.midday.ai">
-              <Button className="h-11 px-5">Get Started</Button>
+              <Button className="h-11 px-5">Try it for free</Button>
             </a>
           </div>
         </div>
 
         <p className="text-xs text-[#707070] mt-8 font-mono">
-          30 days trial (No credit card required)
+          Claim $49/mo deal, free during beta.
         </p>
       </div>
 

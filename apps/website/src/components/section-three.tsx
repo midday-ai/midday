@@ -1,9 +1,15 @@
+"use client";
+
+import { CtaLink } from "@/components/cta-link";
+import { motion } from "framer-motion";
 import Image from "next/image";
+import breakdown from "public/breakdown.png";
+import timeFormat from "public/time-format.png";
 import timetracker from "public/time-tracker.png";
 
 export function SectionThree() {
   return (
-    <section className="relative mb-12">
+    <section className="relative mb-12 group">
       <div className="border border-border container bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden">
         <div className="flex flex-col md:space-x-12 md:flex-row">
           <div className="mt-6 md:max-w-[40%] md:mr-8 md:mb-8">
@@ -47,15 +53,54 @@ export function SectionThree() {
               </svg>
               <span className="text-[#878787]">Share with your clients</span>
             </div>
+
+            <div className="absolute bottom-6">
+              <CtaLink text="Start tracking time now" />
+            </div>
           </div>
 
-          <Image
-            src={timetracker}
-            height={400}
-            className="-mb-[32px] md:-mb-[1px] object-contain mt-8 md:mt-0"
-            quality={100}
-            alt="Tracker"
-          />
+          <div className="relative">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.7 }}
+              viewport={{ once: true }}
+              className="absolute -left-[80px] top-[200px]"
+            >
+              <Image
+                src={timeFormat}
+                height={142}
+                width={135}
+                className="object-contain"
+                quality={100}
+                alt="Time format"
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 1.2 }}
+              viewport={{ once: true }}
+              className="absolute -right-[15px] -top-[20px]"
+            >
+              <Image
+                src={breakdown}
+                height={124}
+                width={238}
+                className="object-contain"
+                quality={100}
+                alt="Breakdown"
+              />
+            </motion.div>
+            <Image
+              src={timetracker}
+              height={400}
+              className="-mb-[32px] md:-mb-[1px] object-contain mt-8 md:mt-0"
+              quality={100}
+              alt="Tracker"
+            />
+          </div>
         </div>
       </div>
     </section>
