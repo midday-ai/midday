@@ -184,13 +184,7 @@ export function Header() {
   }
 
   return (
-    <header
-      className={cn(
-        "sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center",
-        pathname === "/" &&
-          "transition duration-1s ease-in-out animate-header-slide-down-fade",
-      )}
-    >
+    <header className="sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center">
       <nav className="border border-border px-4 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 h-[50px] z-20">
         <ContextMenu>
           <ContextMenuTrigger>

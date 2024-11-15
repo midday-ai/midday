@@ -1,5 +1,4 @@
 import { Hero } from "@/components/hero";
-import { Screens } from "@/components/screens";
 import { SectionFive } from "@/components/section-five";
 import { SectionFour } from "@/components/section-four";
 import { SectionOne } from "@/components/section-one";
@@ -16,7 +15,6 @@ export function StartPage() {
   return (
     <>
       <Hero />
-      <Screens />
       <SectionOne />
       <SectionTwo />
       <SectionThree />
