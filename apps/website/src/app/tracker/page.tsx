@@ -1,3 +1,4 @@
+import { CtaLink } from "@/components/cta-link";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Projects from "public/product-projects.png";
@@ -26,10 +27,15 @@ export default function Page() {
           <p className="text-lg mt-4 max-w-[600px]">
             Track your projects time and gain insightful project overviews.
           </p>
+
+          <CtaLink
+            text="Start tracking time now"
+            className="mt-12 opacity-100 text-center"
+          />
         </div>
       </div>
 
-      <Image src={Tracker} quality={100} alt="Tracker" />
+      <Image src={Tracker} quality={90} alt="Tracker" />
 
       <div className="flex items-center flex-col text-center relative mt-28">
         <div className="max-w-[600px]">
@@ -45,11 +51,10 @@ export default function Page() {
 
         <Image
           src={Projects}
-          quality={100}
-          alt="Projects"
-          className="mt-10 max-w-[834px] w-full"
+          quality={90}
+          alt="Slot"
+          className="mt-10 max-w-[450px] w-full"
         />
-
         <div className="mt-32 max-w-[600px]">
           <h4 className="font-medium text-xl md:text-2xl mb-4">
             Track all your projects
@@ -63,9 +68,9 @@ export default function Page() {
 
         <Image
           src={Slot}
-          quality={100}
+          quality={90}
           alt="Slot"
-          className="mt-10 max-w-[400px] w-full"
+          className="mt-10 max-w-[550px] w-full"
         />
       </div>
     </div>

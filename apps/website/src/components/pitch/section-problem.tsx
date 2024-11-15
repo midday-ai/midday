@@ -49,7 +49,7 @@ export function SectionProblem() {
               alt="Reciept"
               width={650}
               height={875}
-              quality={100}
+              quality={90}
             />
           </div>
           <div className="ml-auto w-full space-y-8">

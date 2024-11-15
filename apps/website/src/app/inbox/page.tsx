@@ -1,4 +1,5 @@
 import { CopyInput } from "@/components/copy-input";
+import { CtaLink } from "@/components/cta-link";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Inbox from "public/product-inbox.jpg";
@@ -28,10 +29,15 @@ export default function Page() {
             Automatically match incoming invoices or receipts to the correct
             transaction.
           </p>
+
+          <CtaLink
+            text="Automate your reconciliation process"
+            className="mt-12 opacity-100 text-center"
+          />
         </div>
       </div>
 
-      <Image src={Inbox} quality={100} alt="Inbox" />
+      <Image src={Inbox} quality={90} alt="Inbox" />
 
       <div className="flex items-center flex-col text-center relative mt-28">
         <div>
@@ -55,7 +61,7 @@ export default function Page() {
 
         <Image
           src={Match}
-          quality={100}
+          quality={90}
           alt="Matching"
           className="mt-10 max-w-[834px] w-full"
         />
@@ -74,7 +80,7 @@ export default function Page() {
 
         <Image
           src={Receipt}
-          quality={100}
+          quality={90}
           alt="Receipt"
           className="mt-10 max-w-[432px] w-full"
         />

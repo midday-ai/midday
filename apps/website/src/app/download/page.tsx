@@ -25,7 +25,7 @@ export default function Page() {
         alt="Midday App"
         width={120}
         height={120}
-        quality={100}
+        quality={90}
         className="w-[80px] h-[80px] mt-12 md:mt-0 md:h-auto md:w-auto"
       />
       <p className="mb-4 text-2xl	font-medium mt-8">Midday for Mac</p>

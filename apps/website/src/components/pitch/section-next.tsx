@@ -22,7 +22,7 @@ export function SectionNext() {
             <Card className="min-h-[370px]">
               <h2 className="text-xl">Invoice</h2>
               <span />
-              <Image src={invoice} width={362} alt="Invoice" quality={100} />
+              <Image src={invoice} width={362} alt="Invoice" quality={90} />
             </Card>
 
             <a
@@ -34,7 +34,7 @@ export function SectionNext() {
               <Card className="min-h-[370px]">
                 <h2 className="text-xl">Engine</h2>
                 <span className="underline">Read more</span>
-                <Image src={engine} width={362} alt="Engine" quality={100} />
+                <Image src={engine} width={362} alt="Engine" quality={90} />
               </Card>
             </a>
           </div>
@@ -42,7 +42,7 @@ export function SectionNext() {
             <Card className="min-h-[370px]">
               <h2 className="text-xl">Midday AI</h2>
               <span />
-              <Image src={ai} width={362} alt="Midday AI" quality={100} />
+              <Image src={ai} width={362} alt="Midday AI" quality={90} />
             </Card>
 
             <Card className="min-h-[370px]">
@@ -52,7 +52,7 @@ export function SectionNext() {
                 src={apps}
                 width={362}
                 alt="Apps & integrations"
-                quality={100}
+                quality={90}
               />
             </Card>
           </div>
@@ -60,7 +60,7 @@ export function SectionNext() {
           <div className="ml-auto w-full max-w-[820px] h-full border border-border p-6 bg-[#0C0C0C]">
             <h2 className="mb-24 block text-xl">Native app</h2>
             <span />
-            <Image src={app} width={698} alt="App" quality={100} />
+            <Image src={app} width={698} alt="App" quality={90} />
           </div>
         </div>
       </div>

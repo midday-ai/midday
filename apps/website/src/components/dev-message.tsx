@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 
 export function DevMessage() {
-  const ref = useRef();
+  const ref = useRef(undefined);
 
   useEffect(() => {
     if (!ref.current) {

@@ -13,7 +13,7 @@ export const voteAction = actionClient
     }),
   )
   .action(async ({ parsedInput: { id } }) => {
-    const clientIP = headers().get("x-forwarded-for");
+    const clientIP = (await headers()).get("x-forwarded-for");
 
     const hasVoted = await client.sadd(`apps:${id}:ip:${clientIP}`, true);
 

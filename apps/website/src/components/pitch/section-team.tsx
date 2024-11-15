@@ -23,7 +23,7 @@ export function SectionTeam() {
                 alt="Pontus"
                 width={76}
                 height={76}
-                quality={100}
+                quality={90}
                 className="mb-4"
               />
 
@@ -43,7 +43,7 @@ export function SectionTeam() {
                 alt="Viktor"
                 width={76}
                 height={76}
-                quality={100}
+                quality={90}
                 className="mb-4"
               />
 
@@ -67,7 +67,7 @@ export function SectionTeam() {
               alt="Founders"
               width={650}
               height={875}
-              quality={100}
+              quality={90}
             />
           </div>
           <div className="ml-auto w-full space-y-8 items-center flex">

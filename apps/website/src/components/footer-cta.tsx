@@ -25,7 +25,11 @@ export function FooterCTA() {
 
       <div className="mt-10 md:mb-8">
         <div className="flex items-center space-x-4">
-          <Link href="/talk-to-us">
+          <Link
+            href="https://cal.com/pontus-midday/15min"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Button
               variant="outline"
               className="border border-primary h-12 px-6 border-white text-white hidden md:block"

@@ -18,7 +18,7 @@ type Props = {
 };
 
 export function SectionDemo({ playVideo }: Props) {
-  const playerRef = useRef();
+  const playerRef = useRef(undefined);
   const [isPlaying, setPlaying] = useState(true);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 

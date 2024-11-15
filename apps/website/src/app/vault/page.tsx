@@ -1,4 +1,5 @@
 import { Assistant } from "@/components/assistant";
+import { CtaLink } from "@/components/cta-link";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Files from "public/product-files.png";
@@ -27,10 +28,15 @@ export default function Page() {
             Don’t waste time searching through old emails and random folders.
             Keep all your contracts, agreements and more safe in one place.
           </p>
+
+          <CtaLink
+            text="Centralize Your Files now"
+            className="mt-12 opacity-100 text-center"
+          />
         </div>
       </div>
 
-      <Image src={Vault} quality={100} alt="Vault" />
+      <Image src={Vault} quality={90} alt="Vault" />
 
       <div className="flex items-center flex-col text-center relative mt-28">
         <div className="max-w-[600px]">
@@ -46,7 +52,7 @@ export default function Page() {
 
         <Image
           src={Files}
-          quality={100}
+          quality={90}
           alt="Files"
           className="mt-10 max-w-[834px] w-full"
         />

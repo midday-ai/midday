@@ -118,23 +118,6 @@ pre code {
     background-size: 8px 8px;
 }
 
-
-.hero-slide-up {
-    animation: hero-animation 1s ease-in-out
-}
-
-@keyframes hero-animation {
-    0% {
-        opacity: 0;
-        transform: translateY(16px)
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0)
-    }
-}
-
 .text-stroke {
     color: black;
     text-shadow: -1px 1px 0 white,
@@ -148,39 +131,6 @@ pre code {
     background-size: 5px 5px;
     background-clip: text;  
    -webkit-text-fill-color: transparent;  
-}
-
-/* Thanks Resend */
-.animate-webgl-scale-in-fade {
-    animation: webgl-scale-in-fade 0.7s ease-in-out;
-}
-
-@keyframes webgl-scale-in-fade {
-    0% {
-        opacity: 0;
-        transform: scale(.75);
-    }
-
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-.animate-header-slide-down-fade {
-    animation: header-slide-down-fade 1s ease-in-out
-}
-
-@keyframes header-slide-down-fade {
-    0% {
-        opacity: 0;
-        transform: translateY(-16px)
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0)
-    }
 }
 
 ::selection {

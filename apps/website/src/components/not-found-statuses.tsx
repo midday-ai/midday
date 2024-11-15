@@ -40,7 +40,7 @@ const data = [
 export function NotFoundStatuses() {
   const [statuses, setStatuses] = useState();
   const ref = useRef(false);
-  const scrollRef = useRef();
+  const scrollRef = useRef(undefined);
 
   useEffect(() => {
     setStatuses([

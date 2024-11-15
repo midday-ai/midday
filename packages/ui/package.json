@@ -9,8 +9,7 @@
     "lint": "biome check .",
     "format": "biome --write .",
     "typecheck": "tsc --noEmit",
-    "dev": "storybook dev -p 6006",
-    "build": "storybook build"
+    "dev": "storybook dev -p 6006"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^8.3.5",
