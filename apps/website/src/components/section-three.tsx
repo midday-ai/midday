@@ -18,11 +18,9 @@ export function SectionThree() {
             </h3>
 
             <p className="text-[#878787] md:mb-4 text-sm">
-              Effortlessly boost productivity and collaboration with our
-              advanced <br />
-              time tracking solution: gain insightful project overviews and
-              foster seamless collaboration amongst your team for optimal
-              efficiency and success.
+              Track your time, monitor project durations, set rates and create{" "}
+              <br />
+              invoices from your recorded hours.
             </p>
 
             <div className="flex flex-col space-y-2">
@@ -38,7 +36,9 @@ export function SectionThree() {
                     d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
                   />
                 </svg>
-                <span className="text-[#878787]">Live time tracking</span>
+                <span className="text-primary">
+                  Get a monthly overview of tracked hours
+                </span>
               </div>
               <div className="flex space-x-2 items-center text-sm">
                 <svg
@@ -52,7 +52,58 @@ export function SectionThree() {
                     d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
                   />
                 </svg>
-                <span className="text-[#878787]">Share with your clients</span>
+                <span className="text-primary">
+                  Set billable rate & time estimates
+                </span>
+              </div>
+
+              <div className="flex space-x-2 items-center text-sm">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={18}
+                  height={13}
+                  fill="none"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
+                  />
+                </svg>
+                <span className="text-primary">
+                  See billable amount & monthly breakdown
+                </span>
+              </div>
+
+              <div className="flex space-x-2 items-center text-sm">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={18}
+                  height={13}
+                  fill="none"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
+                  />
+                </svg>
+                <span className="text-primary">
+                  Create invoice based on recorded time
+                </span>
+              </div>
+
+              <div className="flex space-x-2 items-center text-sm">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={18}
+                  height={13}
+                  fill="none"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
+                  />
+                </svg>
+                <span className="text-primary">Export as CSV</span>
               </div>
             </div>
 

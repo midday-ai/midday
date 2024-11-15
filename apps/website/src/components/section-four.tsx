@@ -17,11 +17,8 @@ export function SectionFour() {
           <h4 className="font-medium text-xl md:text-2xl mb-4">Invoicing</h4>
 
           <p className="text-[#878787] md:mb-4 text-sm">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum
-            eu porta neque. Duis sit amet erat nec ligula pretium ultricies in
-            ac urna. Quisque id pharetra lorem, sit amet cursus enim. Mauris a
-            dui volutpat, vehicula est pretium, lacinia felis. Sed nec ante
-            efficitur nunc sagittis sollicitudin quis ac augue.
+            Create and send invoices to your customers, monitor your sent
+            balance, track overdue payments and send reminders.
           </p>
 
           <div className="flex flex-col space-y-2">
@@ -37,7 +34,7 @@ export function SectionFour() {
                   d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
                 />
               </svg>
-              <span className="text-[#878787]">Live time tracking</span>
+              <span className="text-primary">Create Customers</span>
             </div>
             <div className="flex space-x-2 items-center text-sm">
               <svg
@@ -51,22 +48,7 @@ export function SectionFour() {
                   d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
                 />
               </svg>
-              <span className="text-[#878787]">Share with your clients</span>
-            </div>
-
-            <div className="flex space-x-2 items-center text-sm">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
-                fill="none"
-              >
-                <path
-                  fill="currentColor"
-                  d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
-                />
-              </svg>
-              <span className="text-[#878787]">Share with your clients</span>
+              <span className="text-primary">Add Vat & Sales tax</span>
             </div>
 
             <div className="flex space-x-2 items-center text-sm">
@@ -81,7 +63,67 @@ export function SectionFour() {
                   d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
                 />
               </svg>
-              <span className="text-[#878787]">Share with your clients</span>
+              <span className="text-primary">Add discount</span>
+            </div>
+
+            <div className="flex space-x-2 items-center text-sm">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={18}
+                height={13}
+                fill="none"
+              >
+                <path
+                  fill="currentColor"
+                  d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
+                />
+              </svg>
+              <span className="text-primary">Add Logo</span>
+            </div>
+
+            <div className="flex space-x-2 items-center text-sm">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={18}
+                height={13}
+                fill="none"
+              >
+                <path
+                  fill="currentColor"
+                  d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
+                />
+              </svg>
+              <span className="text-primary">Send web invoices</span>
+            </div>
+
+            <div className="flex space-x-2 items-center text-sm">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={18}
+                height={13}
+                fill="none"
+              >
+                <path
+                  fill="currentColor"
+                  d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
+                />
+              </svg>
+              <span className="text-primary">Export as PDF</span>
+            </div>
+
+            <div className="flex space-x-2 items-center text-sm">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={18}
+                height={13}
+                fill="none"
+              >
+                <path
+                  fill="currentColor"
+                  d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
+                />
+              </svg>
+              <span className="text-primary">See if invoice is viewed</span>
             </div>
 
             <div className="absolute bottom-6">
@@ -143,14 +185,64 @@ export function SectionFour() {
             Use your personalized email address for your invoices and receipts.
           </li>
           <li>
-            The invoice arrives in the inbox, with our AI solution the invoice
-            automatically matches with the right transaction.
+            The invoice arrives in the inbox, Midday gives you a transaction
+            suggestion to match it with.
           </li>
           <li>
             Your transaction now have the right basis/attachments for you to
             export.
           </li>
         </ul>
+
+        <div className="flex flex-col space-y-2">
+          <div className="flex space-x-2 items-center mt-8 text-sm">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={18}
+              height={13}
+              fill="none"
+            >
+              <path
+                fill="currentColor"
+                d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
+              />
+            </svg>
+            <span className="text-primary">Personlized email</span>
+          </div>
+          <div className="flex space-x-2 items-center text-sm">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={18}
+              height={13}
+              fill="none"
+            >
+              <path
+                fill="currentColor"
+                d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
+              />
+            </svg>
+            <span className="text-primary">
+              Smart search receipts and invoices content
+            </span>
+          </div>
+
+          <div className="flex space-x-2 items-center text-sm">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={18}
+              height={13}
+              fill="none"
+            >
+              <path
+                fill="currentColor"
+                d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
+              />
+            </svg>
+            <span className="text-primary">
+              Automatically saves invoices and receipt in your vault
+            </span>
+          </div>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
