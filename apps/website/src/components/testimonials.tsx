@@ -4,7 +4,7 @@ const testimonials = [
   {
     name: "Lucas Grey",
     avatarUrl:
-      "https://pbs.twimg.com/profile_images/1835098603733520384/-5ere4t1_400x400.jpg",
+      "https://pbs.twimg.com/profile_images/1843079229073981440/pQqZJX5G_400x400.jpg",
     handle: "@ImLucasGrey",
     verified: true,
     quote: "This is so ingenious and good!",
@@ -61,7 +61,7 @@ const testimonials = [
   {
     name: "Cal.com",
     avatarUrl:
-      "https://pbs.twimg.com/profile_images/1826608625340514304/glxnI9mS_400x400.jpg",
+      "https://pbs.twimg.com/profile_images/1839412200760610816/Lce29ADc_400x400.jpg",
     handle: "@calcom",
     verified: true,
     quote: "We love @middayai 🖤",
