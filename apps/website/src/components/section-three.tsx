@@ -25,33 +25,35 @@ export function SectionThree() {
               efficiency and success.
             </p>
 
-            <div className="flex space-x-2 items-center mt-8 text-sm">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
-                fill="none"
-              >
-                <path
-                  fill="currentColor"
-                  d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
-                />
-              </svg>
-              <span className="text-[#878787]">Live time tracking</span>
-            </div>
-            <div className="flex space-x-2 items-center mt-1 text-sm">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
-                fill="none"
-              >
-                <path
-                  fill="currentColor"
-                  d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
-                />
-              </svg>
-              <span className="text-[#878787]">Share with your clients</span>
+            <div className="flex flex-col space-y-2">
+              <div className="flex space-x-2 items-center mt-8 text-sm">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={18}
+                  height={13}
+                  fill="none"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
+                  />
+                </svg>
+                <span className="text-[#878787]">Live time tracking</span>
+              </div>
+              <div className="flex space-x-2 items-center text-sm">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={18}
+                  height={13}
+                  fill="none"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
+                  />
+                </svg>
+                <span className="text-[#878787]">Share with your clients</span>
+              </div>
             </div>
 
             <div className="absolute bottom-6">
