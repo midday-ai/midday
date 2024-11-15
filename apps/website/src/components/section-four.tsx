@@ -180,7 +180,7 @@ export function SectionFour() {
 
       <div className="border border-border basis-1/3 bg-[#121212] p-10 flex flex-col relative group">
         <h4 className="font-medium text-xl md:text-2xl mb-4">Inbox</h4>
-        <ul className="list-decimal list-inside text-[#878787] text-sm space-y-2 leading-relaxed mb-8 xl:mb-0">
+        <ul className="list-decimal list-inside text-[#878787] text-sm space-y-2 leading-relaxed">
           <li>
             Use your personalized email address for your invoices and receipts.
           </li>
@@ -194,7 +194,7 @@ export function SectionFour() {
           </li>
         </ul>
 
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col space-y-2 mb-6">
           <div className="flex space-x-2 items-center mt-8 text-sm">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -247,7 +247,7 @@ export function SectionFour() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 1.8 }}
+          transition={{ duration: 0.3, delay: 1.4 }}
           viewport={{ once: true }}
           className="xl:absolute bottom-[100px]"
         >
@@ -264,7 +264,7 @@ export function SectionFour() {
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3, delay: 2.1 }}
+          transition={{ duration: 0.3, delay: 1.8 }}
           viewport={{ once: true }}
           className="xl:absolute mt-4 xl:mt-0 bottom-[140px] right-10"
         >

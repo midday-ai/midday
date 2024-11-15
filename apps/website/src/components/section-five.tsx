@@ -9,7 +9,7 @@ import { ExportToast } from "./export-toast";
 export function SectionFive() {
   return (
     <section className="flex justify-between space-y-12 lg:space-y-0 lg:space-x-8 flex-col lg:flex-row overflow-hidden mb-12">
-      <div className="border border-border lg:basis-2/3 bg-[#121212] p-10 flex justify-between lg:space-x-8 lg:flex-row flex-col-reverse lg:items-center lg:items-start group">
+      <div className="border border-border lg:basis-2/3 bg-[#121212] p-10 flex lg:space-x-8 lg:flex-row flex-col-reverse lg:items-center lg:items-start group">
         <Image
           src={vault}
           quality={90}
@@ -73,7 +73,7 @@ export function SectionFive() {
         <h4 className="font-medium text-xl md:text-2xl mb-4">
           Seamless export
         </h4>
-        <p className="text-[#878787] text-sm mb-8 xl:mb-0">
+        <p className="text-[#878787] text-sm mb-8">
           Take the hassle out of preparing exports for your accountant. Just
           select any time period or transaction you want and hit export. We
           package everything up neatly in a CSV file (accountants loves these)
