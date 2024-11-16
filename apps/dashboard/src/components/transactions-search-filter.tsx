@@ -27,6 +27,7 @@ import {
 } from "nuqs";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import AmountRange from "./amount-range";
 import { FilterList } from "./filter-list";
 import { SelectCategory } from "./select-category";
 
@@ -308,6 +309,24 @@ export function TransactionsSearchFilter({
                     setFilters(newRange);
                   }}
                 />
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.Amount className="mr-2 size-4" />
+              <span>Amount</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent
+                sideOffset={14}
+                alignOffset={-4}
+                className="p-0"
+              >
+                <AmountRange />
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
