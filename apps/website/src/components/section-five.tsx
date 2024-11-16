@@ -9,12 +9,12 @@ import { ExportToast } from "./export-toast";
 export function SectionFive() {
   return (
     <section className="flex justify-between space-y-12 lg:space-y-0 lg:space-x-8 flex-col lg:flex-row overflow-hidden mb-12">
-      <div className="border border-border lg:basis-2/3 bg-[#121212] p-10 flex lg:space-x-8 lg:flex-row flex-col-reverse lg:items-center lg:items-start group">
+      <div className="border border-border lg:basis-2/3 bg-[#121212] p-10 flex lg:space-x-8 lg:flex-row flex-col-reverse lg:items-start group">
         <Image
           src={vault}
           quality={90}
           alt="Vault"
-          className="mt-8 lg:mt-0 basis-1/2 object-contain max-w-[70%] sm:max-w-[50%] md:max-w-[35%] border-l-[1px] border-border"
+          className="mt-8 lg:mt-0 basis-1/2 object-contain max-w-[70%] sm:max-w-[50%] md:max-w-[35%]"
         />
 
         <div className="flex flex-col basis-1/2 relative h-full">
