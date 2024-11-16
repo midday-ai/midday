@@ -1,5 +1,6 @@
 import { Assistant } from "@/components/assistant";
-import { CtaLink } from "@/components/cta-link";
+import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Files from "public/product-files.png";
@@ -26,13 +27,16 @@ export default function Page() {
         <div className="flex items-center flex-col text-center relative">
           <p className="text-lg mt-4 max-w-[600px]">
             Don’t waste time searching through old emails and random folders.
-            Keep all your contracts, agreements and more safe in one place.
+            Keep all your contracts, agreements and more safe in one place
           </p>
 
-          <CtaLink
-            text="Centralize Your Files now"
-            className="mt-12 opacity-100 text-center"
-          />
+          <Button
+            className="mt-12 h-11 space-x-2 items-center py-2"
+            variant="outline"
+          >
+            <span>Centralize Your Files now</span>
+            <Icons.ArrowOutward />
+          </Button>
         </div>
       </div>
 
@@ -44,9 +48,10 @@ export default function Page() {
             All your files in one place
           </h4>
           <p className="text-[#878787] text-sm">
-            Gather all your business files you have laying around and have them
-            in one place. Upload quickly and be able to share them with whomever
-            you want.
+            Store all your important files securely in Midday, including
+            contracts and agreements, keeping everything in one place for easy
+            access. Simplify your document management and stay organized with a
+            central repository for all your business needs.
           </p>
         </div>
 
@@ -59,7 +64,7 @@ export default function Page() {
 
         <div className="mt-32 max-w-[550px]">
           <h4 className="font-medium text-xl md:text-2xl mb-4">
-            Use assistant to search
+            Find what you need faster
           </h4>
           <p className="text-[#878787] text-sm mb-10">
             Use the assistant to search for your files or even within your

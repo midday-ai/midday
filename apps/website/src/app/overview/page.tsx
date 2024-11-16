@@ -1,5 +1,6 @@
 import { Assistant } from "@/components/assistant";
-import { CtaLink } from "@/components/cta-link";
+import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Overview from "public/product-overview.jpg";
@@ -25,14 +26,18 @@ export default function Page() {
 
         <div className="flex items-center flex-col text-center relative">
           <p className="text-lg mt-4 max-w-[600px]">
-            Get real-time insight into your business's financial state. Keep
-            track of your spending, income and overall financial health.
+            Track key financial metrics like revenue, profit and loss, burn
+            rate, and expenses. View a consolidated currency overview across all
+            your accounts, and generate shareable reports.
           </p>
 
-          <CtaLink
-            text="Get on top of your finances"
-            className="mt-12 opacity-100 text-center"
-          />
+          <Button
+            className="mt-12 h-11 space-x-2 items-center py-2"
+            variant="outline"
+          >
+            <span>Get on top of your finances</span>
+            <Icons.ArrowOutward />
+          </Button>
         </div>
       </div>
 
@@ -44,10 +49,12 @@ export default function Page() {
             From revenue to spending
           </h4>
           <p className="text-[#878787] text-sm">
-            The financial overview is there for your business when you feel that
-            you don’t have enough insights about your company. See crucial
-            numbers on how your company is doing, what you spent the most on
-            last year or just keep track of your transactions.
+            Connect your business with over 20,000 banks across 33 countries,
+            including the US, Canada, the UK, and Europe. Gain seamless insights
+            into your income and expenses by integrating your existing bank
+            accounts. With a unified view of all your finances, you’ll have a
+            clearer picture of your financial health and the tools to make
+            informed decisions about your business.
           </p>
         </div>
 
@@ -59,12 +66,13 @@ export default function Page() {
         />
 
         <div className="mt-32 max-w-[550px]">
-          <h4 className="font-medium text-xl md:text-2xl mb-4">
-            Use assistant to dive deeper
-          </h4>
+          <h4 className="font-medium text-xl md:text-2xl mb-4">Dive deeper</h4>
           <p className="text-[#878787] text-sm md:mb-10">
-            Use the assistant to ask questions about your business's financials,
-            all just one keystroke away.
+            Our assistant is here to help you navigate your financial data with
+            ease. Ask questions about your key financial metrics and get
+            instant, insightful answers. With access to real-time data across
+            your connected bank accounts, the assistant helps you make informed
+            decisions and stay on top of your business finances.
           </p>
         </div>
 

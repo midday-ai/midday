@@ -1,4 +1,5 @@
-import { CtaLink } from "@/components/cta-link";
+import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Projects from "public/product-projects.png";
@@ -25,13 +26,18 @@ export default function Page() {
 
         <div className="flex items-center flex-col text-center relative">
           <p className="text-lg mt-4 max-w-[600px]">
-            Track your projects time and gain insightful project overviews.
+            Track your hours with ease and gain a clear monthly breakdown of
+            billable amounts. Link tracked time to customers and generate
+            invoices.
           </p>
 
-          <CtaLink
-            text="Start tracking time now"
-            className="mt-12 opacity-100 text-center"
-          />
+          <Button
+            className="mt-12 h-11 space-x-2 items-center py-2"
+            variant="outline"
+          >
+            <span>Start tracking time now</span>
+            <Icons.ArrowOutward />
+          </Button>
         </div>
       </div>
 
@@ -43,9 +49,9 @@ export default function Page() {
             Have an overview of whats going on
           </h4>
           <p className="text-[#878787] text-sm">
-            Instead of using old docs or sheets, use the tracker when you are
-            tracking your business time on a project. Share the results with
-            your client or just keep an overview for your own sake.
+            Get a clear monthly overview of your tracked hours, set rates and
+            view the total billable amount with a detailed monthly breakdown.
+            Stay on top of your projects and manage your time effectively.
           </p>
         </div>
 
@@ -60,9 +66,9 @@ export default function Page() {
             Track all your projects
           </h4>
           <p className="text-[#878787] text-sm mb-10">
-            Track multiple projects simultaneously, invite your whole team, and
-            see what people are working on. Easily connect each project to your
-            upcoming invoice.
+            Easily link tracked time to a customer and generate invoices based
+            on recorded hours. Export your data as a CSV for seamless reporting
+            and analysis.
           </p>
         </div>
 

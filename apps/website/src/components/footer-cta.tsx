@@ -17,10 +17,8 @@ export function FooterCTA() {
         Stress free by midday.
       </span>
       <p className="text-[#878787] mt-6">
-        An all-in-one tool for freelancers, contractors, consultants, and micro
-        <br />
-        businesses to manage their finances, track projects, store files, and
-        send invoices.
+        Invoicing, Time tracking, File reconciliation, Storage, Financial
+        Overview & your own <br /> Assistant.
       </p>
 
       <div className="mt-10 md:mb-8">
@@ -34,13 +32,13 @@ export function FooterCTA() {
               variant="outline"
               className="border border-primary h-12 px-6 border-white text-white hidden md:block"
             >
-              Talk to us
+              Talk to founders
             </Button>
           </Link>
 
           <a href="https://app.midday.ai">
             <Button className="h-12 px-5 bg-white text-black hover:bg-white/80">
-              Get Started
+              Try it for free
             </Button>
           </a>
         </div>
