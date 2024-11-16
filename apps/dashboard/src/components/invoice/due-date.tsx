@@ -1,5 +1,6 @@
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
+import { TZDate } from "@date-fns/tz";
 import { Calendar } from "@midday/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { format } from "date-fns";
@@ -17,7 +18,7 @@ export function DueDate() {
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
-  const handleSelect = (date: Date | undefined) => {
+  const handleSelect = (date: TZDate | undefined) => {
     if (date) {
       setValue("due_date", date, { shouldValidate: true, shouldDirty: true });
       setIsOpen(false);
@@ -39,12 +40,12 @@ export function DueDate() {
       </div>
       <Popover open={isOpen} onOpenChange={setIsOpen} modal>
         <PopoverTrigger className="text-primary text-[11px] font-mono whitespace-nowrap flex">
-          {format(dueDate, dateFormat)}
+          {dueDate && format(dueDate, dateFormat)}
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">
           <Calendar
             mode="single"
-            selected={dueDate ? new Date(dueDate) : undefined}
+            selected={dueDate ? new TZDate(dueDate, "UTC") : undefined}
             onSelect={handleSelect}
             initialFocus
           />
