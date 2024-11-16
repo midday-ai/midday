@@ -21,7 +21,7 @@ export function FormatAmount({
   const { data } = useUserContext((state) => state);
 
   return formatAmount({
-    locale: locale || data.locale,
+    locale: locale || data?.locale,
     amount: amount,
     currency: currency,
     maximumFractionDigits,
