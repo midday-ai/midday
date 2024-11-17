@@ -93,7 +93,7 @@ export default function Page() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold">{name}</h2>
                   {!ready && (
-                    <span className="text-[#F5F5F3] border border-border rounded-full text-[10px] font-mono px-1.5 py-1 bg-[#1D1D1D]">
+                    <span className="text-[#F5F5F3] dark:border dark:border-border rounded-full text-[10px] font-mono px-1.5 py-1 bg-[#1D1D1D]">
                       Coming soon
                     </span>
                   )}

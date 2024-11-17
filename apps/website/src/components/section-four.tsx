@@ -1,18 +1,23 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
-import inboxActions from "public/inbox-actions.png";
-import inboxSuggested from "public/inbox-suggested.png";
-import invoiceComments from "public/invoice-comments.png";
-import invoiceToolbar from "public/invoice-toolbar.png";
-import invoicing from "public/invoicing.png";
+import inboxActionsLight from "public/inbox-actions-light.png";
+import inboxActionsDark from "public/inbox-actions.png";
+import inboxSuggestedLight from "public/inbox-suggested-light.png";
+import inboxSuggestedDark from "public/inbox-suggested.png";
+import invoiceCommentsLight from "public/invoice-comments-light.png";
+import invoiceCommentsDark from "public/invoice-comments.png";
+import invoiceToolbarLight from "public/invoice-toolbar-light.png";
+import invoiceToolbarDark from "public/invoice-toolbar.png";
+import invoicingLight from "public/invoicing-light.png";
+import invoicingDark from "public/invoicing.png";
 import { CtaLink } from "./cta-link";
+import { DynamicImage } from "./dynamic-image";
 
 export function SectionFour() {
   return (
     <section className="flex justify-between space-y-12 lg:space-y-0 lg:space-x-8 flex-col lg:flex-row overflow-hidden mb-12 relative">
-      <div className="border border-border md:basis-2/3 bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col group">
+      <div className="border border-border md:basis-2/3 dark:bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col group">
         <div className="flex flex-col md:basis-1/2">
           <h4 className="font-medium text-xl md:text-2xl mb-4">Invoicing</h4>
 
@@ -133,8 +138,9 @@ export function SectionFour() {
         </div>
 
         <div className="md:basis-1/2 md:mt-8 md:mt-0 -ml-[40px] md:-ml-0 -bottom-[8px] relative">
-          <Image
-            src={invoicing}
+          <DynamicImage
+            lightSrc={invoicingLight}
+            darkSrc={invoicingDark}
             width={299}
             height={423}
             quality={90}
@@ -149,8 +155,9 @@ export function SectionFour() {
             viewport={{ once: true }}
             className="absolute left-4 md:-left-[80px] bottom-[35px]"
           >
-            <Image
-              src={invoiceComments}
+            <DynamicImage
+              lightSrc={invoiceCommentsLight}
+              darkSrc={invoiceCommentsDark}
               height={57}
               width={327}
               className="object-contain"
@@ -166,8 +173,9 @@ export function SectionFour() {
             viewport={{ once: true }}
             className="absolute left-8 bottom-[100px]"
           >
-            <Image
-              src={invoiceToolbar}
+            <DynamicImage
+              lightSrc={invoiceToolbarLight}
+              darkSrc={invoiceToolbarDark}
               height={34}
               width={136}
               className="object-contain"
@@ -178,7 +186,7 @@ export function SectionFour() {
         </div>
       </div>
 
-      <div className="border border-border basis-1/3 bg-[#121212] p-10 flex flex-col relative group">
+      <div className="border border-border basis-1/3 dark:bg-[#121212] p-10 flex flex-col relative group">
         <h4 className="font-medium text-xl md:text-2xl mb-4">Inbox</h4>
         <ul className="list-decimal list-inside text-[#878787] text-sm space-y-2 leading-relaxed">
           <li>
@@ -251,8 +259,9 @@ export function SectionFour() {
           viewport={{ once: true }}
           className="xl:absolute bottom-[100px]"
         >
-          <Image
-            src={inboxActions}
+          <DynamicImage
+            lightSrc={inboxActionsLight}
+            darkSrc={inboxActionsDark}
             height={33}
             width={384}
             className="object-contain scale-[0.9] 2x:scale-100"
@@ -268,8 +277,9 @@ export function SectionFour() {
           viewport={{ once: true }}
           className="xl:absolute mt-4 xl:mt-0 bottom-[140px] right-10"
         >
-          <Image
-            src={inboxSuggested}
+          <DynamicImage
+            lightSrc={inboxSuggestedLight}
+            darkSrc={inboxSuggestedDark}
             height={19}
             width={106}
             className="object-contain"

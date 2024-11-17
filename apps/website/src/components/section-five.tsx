@@ -1,17 +1,19 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
-import vault from "public/vault.png";
+import vaultLight from "public/vault-light.png";
+import vaultDark from "public/vault.png";
 import { CtaLink } from "./cta-link";
+import { DynamicImage } from "./dynamic-image";
 import { ExportToast } from "./export-toast";
 
 export function SectionFive() {
   return (
     <section className="flex justify-between space-y-12 lg:space-y-0 lg:space-x-8 flex-col lg:flex-row overflow-hidden mb-12">
-      <div className="border border-border lg:basis-2/3 bg-[#121212] p-10 flex lg:space-x-8 lg:flex-row flex-col-reverse lg:items-start group">
-        <Image
-          src={vault}
+      <div className="border border-border lg:basis-2/3 dark:bg-[#121212] p-10 flex lg:space-x-8 lg:flex-row flex-col-reverse lg:items-start group">
+        <DynamicImage
+          lightSrc={vaultLight}
+          darkSrc={vaultDark}
           quality={90}
           alt="Vault"
           className="mt-8 lg:mt-0 basis-1/2 object-contain max-w-[70%] sm:max-w-[50%] md:max-w-[35%]"
@@ -69,7 +71,7 @@ export function SectionFive() {
         </div>
       </div>
 
-      <div className="border border-border basis-1/3 bg-[#121212] p-10 flex flex-col group">
+      <div className="border border-border basis-1/3 dark:bg-[#121212] p-10 flex flex-col group">
         <h4 className="font-medium text-xl md:text-2xl mb-4">
           Seamless export
         </h4>

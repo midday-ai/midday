@@ -1,6 +1,8 @@
+import { DynamicImage } from "@/components/dynamic-image";
 import type { Metadata } from "next";
 import Image from "next/image";
-import signature from "public/email/signature-dark.png";
+import signatureDark from "public/email/signature-dark.png";
+import signatureLight from "public/email/signature.png";
 import founders from "public/founders.png";
 
 export const metadata: Metadata = {
@@ -49,10 +51,12 @@ export default function Page() {
 
       <div className="mt-6 mb-8">
         <p className="text-sm text-[#878787] mb-2">Best regards, founders</p>
-        <Image
-          src={signature}
+
+        <DynamicImage
+          darkSrc={signatureDark}
+          lightSrc={signatureLight}
           alt="Signature"
-          className="block w-[143px] h-[20px]"
+          className="w-[143px] h-[20px]"
         />
       </div>
     </div>

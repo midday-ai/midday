@@ -32,7 +32,7 @@ export function ExportToast() {
   return (
     <div
       ref={ref}
-      className="w-full bg-[#121212] flex flex-col border border-border p-4 space-y-3"
+      className="w-full darK:bg-[#121212] flex flex-col border border-border p-4 space-y-3"
     >
       <div className="flex items-center space-x-2">
         <Loader2 className="animate-spin size-5" />

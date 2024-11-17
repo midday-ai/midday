@@ -42,7 +42,7 @@ export function Hero() {
             >
               <Button
                 variant="outline"
-                className="border-transparent h-11 px-6 bg-[#1D1D1D]"
+                className="border-transparent h-11 px-6 dark:bg-[#1D1D1D] bg-[#F2F1EF]"
               >
                 Talk to founders
               </Button>

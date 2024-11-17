@@ -51,7 +51,7 @@ export function ChatExamples({ onSubmit }) {
           >
             <motion.li
               variants={itemVariant}
-              className="font-mono text-[#878787] text-xs bg-[#1D1D1D] px-3 py-2 rounded-full cursor-default"
+              className="font-mono text-[#878787] text-xs dark:bg-[#1D1D1D] bg-white px-3 py-2 rounded-full cursor-default"
             >
               {example.title}
             </motion.li>

@@ -123,10 +123,10 @@ export function Tray() {
           </filter>
         </defs>
       </svg>
-      <span className="text-sm font-medium">
+      <span className="text-sm font-medium text-white">
         {format(new Date(), "eee d MMM")}
       </span>
-      <span className="text-sm font-medium">
+      <span className="text-sm font-medium text-white">
         {date && format(new Date(date), "p")}
       </span>
     </div>

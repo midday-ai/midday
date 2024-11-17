@@ -13,7 +13,7 @@ export function Footer({ onSubmit }: Props) {
     <div className="flex px-3 h-[40px] w-full border-t-[1px] items-center bg-background backdrop-filter dark:border-[#2C2C2C] backdrop-blur-lg dark:bg-[#151515]/[99]">
       <Popover>
         <PopoverTrigger>
-          <div className="scale-50 opacity-50 -ml-2">
+          <div className="scale-50 dark:opacity-50 -ml-2">
             <Icons.LogoSmall />
           </div>
         </PopoverTrigger>

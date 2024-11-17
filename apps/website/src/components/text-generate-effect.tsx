@@ -20,7 +20,7 @@ export const TextGenerateEffect = ({
           return (
             <motion.span
               key={word + idx.toString()}
-              className="text-white opacity-0"
+              className="text-primary opacity-0"
             >
               {word}{" "}
             </motion.span>
@@ -41,7 +41,7 @@ export const TextGenerateEffect = ({
           {
             duration: 1,
             delay: stagger(0.13),
-          }
+          },
         );
       }}
       className={cn("text-center font-medium", className)}

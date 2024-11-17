@@ -1,11 +1,14 @@
 import { CopyInput } from "@/components/copy-input";
+import { DynamicImage } from "@/components/dynamic-image";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
-import Image from "next/image";
-import Bulk from "public/product-bulk.png";
-import Inbox from "public/product-inbox.jpg";
-import Match from "public/product-match.png";
+import BulkLight from "public/product-bulk-light.png";
+import BulkDark from "public/product-bulk.png";
+import InboxLight from "public/product-inbox-light.jpg";
+import InboxDark from "public/product-inbox.jpg";
+import MatchLight from "public/product-match-light.png";
+import MatchDark from "public/product-match.png";
 
 export const metadata: Metadata = {
   title: "Inbox",
@@ -42,7 +45,7 @@ export default function Page() {
         </div>
       </div>
 
-      <Image src={Inbox} quality={90} alt="Inbox" />
+      <DynamicImage darkSrc={InboxDark} lightSrc={InboxLight} alt="Inbox" />
 
       <div className="flex items-center flex-col text-center relative mt-28">
         <div>
@@ -64,9 +67,9 @@ export default function Page() {
           className="max-w-[240px] mt-8"
         />
 
-        <Image
-          src={Match}
-          quality={90}
+        <DynamicImage
+          darkSrc={MatchDark}
+          lightSrc={MatchLight}
           alt="Matching"
           className="mt-10 max-w-[834px] w-full"
         />
@@ -83,9 +86,9 @@ export default function Page() {
           </p>
         </div>
 
-        <Image
-          src={Bulk}
-          quality={90}
+        <DynamicImage
+          darkSrc={BulkDark}
+          lightSrc={BulkLight}
           alt="Receipt"
           className="mt-10 max-w-[1374px] w-full"
         />
