@@ -11,15 +11,22 @@ import { useAction } from "next-safe-action/hooks";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { AmountInput } from "./amount-input";
 import { Description } from "./description";
+import { Input } from "./input";
 import { LabelInput } from "./label-input";
 import { QuantityInput } from "./quantity-input";
 
 export function LineItems() {
   const { control } = useFormContext<InvoiceFormValues>();
   const currency = useWatch({ control, name: "template.currency" });
+
   const includeDecimals = useWatch({
     control,
     name: "template.include_decimals",
+  });
+
+  const includeUnits = useWatch({
+    control,
+    name: "template.include_units",
   });
 
   const maximumFractionDigits = includeDecimals ? 2 : 0;
@@ -55,7 +62,9 @@ export function LineItems() {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-[1.5fr_15%_15%_15%] gap-4 items-end mb-2">
+      <div
+        className={`grid ${includeUnits ? "grid-cols-[1.5fr_15%25%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end mb-2`}
+      >
         <LabelInput
           name="template.description_label"
           onSave={(value) => {
@@ -112,6 +121,7 @@ export function LineItems() {
             isReorderable={fields.length > 1}
             currency={currency}
             maximumFractionDigits={maximumFractionDigits}
+            includeUnits={includeUnits}
           />
         ))}
       </Reorder.Group>
@@ -141,6 +151,7 @@ function LineItemRow({
   item,
   currency,
   maximumFractionDigits,
+  includeUnits,
 }: {
   index: number;
   handleRemove: (index: number) => void;
@@ -148,6 +159,7 @@ function LineItemRow({
   item: InvoiceFormValues["line_items"][number];
   currency: string;
   maximumFractionDigits: number;
+  includeUnits?: boolean;
 }) {
   const controls = useDragControls();
   const { control } = useFormContext<InvoiceFormValues>();
@@ -166,7 +178,7 @@ function LineItemRow({
 
   return (
     <Reorder.Item
-      className="grid grid-cols-[1.5fr_15%_15%_15%] gap-4 items-start relative group mb-2 w-full"
+      className={`grid ${includeUnits ? "grid-cols-[1.5fr_15%25%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-start relative group mb-2 w-full`}
       value={item}
       dragListener={false}
       dragControls={controls}
@@ -186,7 +198,11 @@ function LineItemRow({
 
       <QuantityInput name={`line_items.${index}.quantity`} />
 
-      <AmountInput name={`line_items.${index}.price`} />
+      <div className="flex items-center gap-2">
+        <AmountInput name={`line_items.${index}.price`} />
+        {includeUnits && <span className="text-xs text-[#878787]">/</span>}
+        {includeUnits && <Input name={`line_items.${index}.unit`} />}
+      </div>
 
       <div className="text-right">
         <span className="text-xs text-primary font-mono">

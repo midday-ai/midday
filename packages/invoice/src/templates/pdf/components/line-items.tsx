@@ -12,6 +12,7 @@ type Props = {
   totalLabel: string;
   locale: string;
   includeDecimals?: boolean;
+  includeUnits?: boolean;
 };
 
 export function LineItems({
@@ -23,6 +24,7 @@ export function LineItems({
   totalLabel,
   locale,
   includeDecimals,
+  includeUnits,
 }: Props) {
   const maximumFractionDigits = includeDecimals ? 2 : 0;
   return (
@@ -78,6 +80,7 @@ export function LineItems({
               locale,
               maximumFractionDigits,
             })}
+            {includeUnits && item.unit ? ` / ${item.unit}` : null}
           </Text>
 
           <Text style={{ flex: 1, fontSize: 9, textAlign: "right" }}>

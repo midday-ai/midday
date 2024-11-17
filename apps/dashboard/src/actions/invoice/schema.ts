@@ -38,6 +38,7 @@ export const updateInvoiceTemplateSchema = z.object({
   include_tax: z.boolean().optional().optional(),
   include_discount: z.boolean().optional(),
   include_decimals: z.boolean().optional(),
+  include_units: z.boolean().optional(),
   include_qr: z.boolean().optional(),
   tax_rate: z.number().min(0).max(100).optional(),
   vat_rate: z.number().min(0).max(100).optional(),
@@ -49,6 +50,7 @@ export const updateInvoiceTemplateSchema = z.object({
 export const draftLineItemSchema = z.object({
   name: z.string().optional(),
   quantity: z.number().min(0, "Quantity must be at least 0").optional(),
+  unit: z.string().optional().nullable(),
   price: z.number().safe().optional(),
   vat: z.number().min(0, "VAT must be at least 0").optional(),
   tax: z.number().min(0, "Tax must be at least 0").optional(),
@@ -81,6 +83,7 @@ export const draftInvoiceSchema = z.object({
 export const lineItemSchema = z.object({
   name: z.string().min(1, "Name is required"),
   quantity: z.number().min(0, "Quantity must be at least 0"),
+  unit: z.string().optional(),
   price: z.number(),
   vat: z.number().min(0, "VAT must be at least 0").optional(),
   tax: z.number().min(0, "Tax must be at least 0").optional(),
@@ -113,6 +116,7 @@ export const invoiceTemplateSchema = z.object({
   include_tax: z.boolean().optional(),
   include_discount: z.boolean().optional(),
   include_decimals: z.boolean().optional(),
+  include_units: z.boolean().optional(),
   include_qr: z.boolean().optional(),
   tax_rate: z.number().min(0).max(100).optional(),
   vat_rate: z.number().min(0).max(100).optional(),

@@ -97,6 +97,7 @@ import {
   MdOutlineRepeat,
   MdOutlineSettings,
   MdOutlineSpellcheck,
+  MdOutlineSquareFoot,
   MdOutlineStyle,
   MdOutlineSubject,
   MdOutlineTask,
@@ -693,4 +694,5 @@ export const Icons = {
   ConfirmationNumber: MdOutlineConfirmationNumber,
   QrCode: MdOutlineQrCode2,
   ArrowOutward: MdOutlineArrowOutward,
+  Straighten: MdOutlineSquareFoot,
 };

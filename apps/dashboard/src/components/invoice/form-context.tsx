@@ -42,6 +42,7 @@ const defaultTemplate: InvoiceTemplate = {
   include_tax: true,
   discount_label: "Discount",
   include_discount: false,
+  include_units: false,
   include_decimals: false,
   include_qr: true,
   date_format: "dd/MM/yyyy",

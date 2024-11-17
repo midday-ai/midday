@@ -12,6 +12,7 @@ type Props = {
   totalLabel: string;
   includeDecimals?: boolean;
   locale: string;
+  includeUnits?: boolean;
 };
 
 export function LineItems({
@@ -22,6 +23,7 @@ export function LineItems({
   priceLabel,
   totalLabel,
   includeDecimals = false,
+  includeUnits = false,
   locale,
 }: Props) {
   const maximumFractionDigits = includeDecimals ? 2 : 0;
@@ -47,12 +49,19 @@ export function LineItems({
           </div>
           <div className="text-[11px] self-start">{item.quantity}</div>
           <div className="text-[11px] self-start">
-            {formatAmount({
-              currency,
-              amount: item.price,
-              maximumFractionDigits,
-              locale,
-            })}
+            {includeUnits && item.unit
+              ? `${formatAmount({
+                  currency,
+                  amount: item.price,
+                  maximumFractionDigits,
+                  locale,
+                })}/${item.unit}`
+              : formatAmount({
+                  currency,
+                  amount: item.price,
+                  maximumFractionDigits,
+                  locale,
+                })}
           </div>
           <div className="text-[11px] text-right self-start">
             {formatAmount({

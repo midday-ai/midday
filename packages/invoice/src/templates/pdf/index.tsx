@@ -113,6 +113,7 @@ export async function PdfTemplate({
           totalLabel={template.total_label}
           locale={template.locale}
           includeDecimals={template.include_decimals}
+          includeUnits={template.include_units}
         />
 
         <View

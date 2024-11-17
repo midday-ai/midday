@@ -480,6 +480,7 @@ export type Database = {
           include_discount: boolean | null
           include_qr: boolean | null
           include_tax: boolean | null
+          include_units: boolean | null
           include_vat: boolean | null
           invoice_no_label: string | null
           issue_date_label: string | null
@@ -515,6 +516,7 @@ export type Database = {
           include_discount?: boolean | null
           include_qr?: boolean | null
           include_tax?: boolean | null
+          include_units?: boolean | null
           include_vat?: boolean | null
           invoice_no_label?: string | null
           issue_date_label?: string | null
@@ -550,6 +552,7 @@ export type Database = {
           include_discount?: boolean | null
           include_qr?: boolean | null
           include_tax?: boolean | null
+          include_units?: boolean | null
           include_vat?: boolean | null
           invoice_no_label?: string | null
           issue_date_label?: string | null
@@ -1134,6 +1137,35 @@ export type Database = {
           },
           {
             foreignKeyName: "transaction_enrichments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transaction_tags: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_tags_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
