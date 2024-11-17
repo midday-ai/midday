@@ -12,8 +12,8 @@ export function SectionSix() {
     >
       <Tray />
       <div className="absolute w-full h-full flex items-center justify-center flex-col top-8 xl:top-0">
-        <h4 className="text-4xl mb-4 font-medium text-white">Assistant</h4>
-        <p className="max-w-[790px] px-4 text-center text-sm text-white dark:text-[#878787] mb-12 md:mb-0">
+        <h4 className="text-4xl mb-4 font-medium md:text-white">Assistant</h4>
+        <p className="max-w-[790px] px-4 text-center text-sm md:text-white dark:text-[#878787] mb-12 md:mb-0">
           Ask Midday anything and get tailored insights into your financial
           situation. Understand your biggest outgoings and incomings to get a
           better grasp on your financials to help you cut costs, find
