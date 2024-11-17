@@ -38,12 +38,12 @@ import { Attachments } from "./attachments";
 import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
+import { SelectTags } from "./select-tags";
 import { TransactionBankAccount } from "./transaction-bank-account";
 
 type Props = {
   data: any;
   ids?: string[];
-  locale: string;
   updateTransaction: (
     values: UpdateTransactionValues,
     optimisticData: any,
@@ -53,7 +53,6 @@ type Props = {
 export function TransactionDetails({
   data: initialData,
   ids,
-  locale,
   updateTransaction,
 }: Props) {
   const [data, setData] = useState(initialData);
@@ -311,6 +310,14 @@ export function TransactionDetails({
             }}
           />
         </div>
+      </div>
+
+      <div className="mt-6">
+        <Label htmlFor="tags" className="mb-2 block">
+          Tags
+        </Label>
+
+        <SelectTags />
       </div>
 
       <Accordion type="multiple" defaultValue={defaultValue}>

@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
+import { Label } from "@midday/ui/label";
 import {
   Select,
   SelectContent,
@@ -27,6 +28,7 @@ import { Textarea } from "@midday/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SearchCustomer } from "../search-customer";
+import { SelectTags } from "../select-tags";
 
 type Props = {
   onSubmit: (data: any) => void;
@@ -93,6 +95,18 @@ export function TrackerProjectForm({
             </FormItem>
           )}
         />
+
+        <div className="mt-6">
+          <Label htmlFor="tags" className="mb-2 block">
+            Expense Tags
+          </Label>
+
+          <SelectTags />
+
+          <FormDescription className="mt-2">
+            Tags help categorize and track project expenses.
+          </FormDescription>
+        </div>
 
         <FormField
           control={form.control}

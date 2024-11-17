@@ -215,4 +215,8 @@ export const LogEvents = {
     name: "Delete Customer",
     channel: "customer",
   },
+  CreateTag: {
+    name: "Create Tag",
+    channel: "tag",
+  },
 };

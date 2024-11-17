@@ -13,6 +13,8 @@ export const updateUserSchema = z.object({
   revalidatePath: z.string().optional(),
 });
 
+export const createTagsSchema = z.array(z.object({ name: z.string() }));
+
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
 
 export const trackingConsentSchema = z.boolean();

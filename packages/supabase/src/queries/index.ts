@@ -1303,3 +1303,14 @@ export async function getLastInvoiceNumberQuery(
 
   return { data };
 }
+
+export async function getTransactionTagsQuery(
+  supabase: Client,
+  teamId: string,
+) {
+  return supabase
+    .from("transaction_tags")
+    .select("*")
+    .eq("team_id", teamId)
+    .order("created_at", { ascending: false });
+}
