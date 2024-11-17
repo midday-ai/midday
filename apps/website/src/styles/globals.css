@@ -135,8 +135,15 @@ pre code {
     -1px -1px 0 white;
 }
  
-.text-dotted {
+.dark .text-dotted {
     background-image: radial-gradient(circle at 0.4px 0.2px, #fff 1px, transparent 0);
+    background-size: 5px 5px;
+    background-clip: text;  
+   -webkit-text-fill-color: transparent;  
+}
+
+.text-dotted {
+    background-image: radial-gradient(circle at 0.4px 0.2px, #000 1px, transparent 0);
     background-size: 5px 5px;
     background-clip: text;  
    -webkit-text-fill-color: transparent;  
