@@ -18,6 +18,7 @@ export type Template = {
   locale: string;
   timezone: string;
   include_decimals: boolean;
+  include_units: boolean;
   include_qr: boolean;
   include_vat: boolean;
   title: string;
@@ -29,6 +30,7 @@ export type LineItem = {
   name: string;
   quantity: number;
   price: number;
+  unit?: string;
   invoice_number?: string;
   issue_date?: string;
   due_date?: string;

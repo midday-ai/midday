@@ -9,6 +9,7 @@ export type Settings = {
   include_vat: boolean;
   include_discount: boolean;
   include_decimals: boolean;
+  include_units: boolean;
   include_qr: boolean;
   timezone: string;
   locale: string;
@@ -42,6 +43,7 @@ export async function getDefaultSettings(): Promise<Settings> {
     include_vat: !include_tax,
     include_discount: false,
     include_decimals: false,
+    include_units: false,
     include_qr: true,
     timezone,
     locale,

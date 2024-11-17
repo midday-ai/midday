@@ -75,6 +75,7 @@ export function HtmlTemplate({
           totalLabel={template.total_label}
           includeDecimals={template.include_decimals}
           locale={template.locale}
+          includeUnits={template.include_units}
         />
 
         <div className="mt-10 md:mt-12 flex justify-end mb-6 md:mb-8">

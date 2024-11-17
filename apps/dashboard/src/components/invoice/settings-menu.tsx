@@ -73,6 +73,12 @@ const menuItems = [
     key: "include_discount",
   },
   {
+    icon: Icons.Straighten,
+    label: "Units",
+    options: booleanOptions,
+    key: "include_units",
+  },
+  {
     icon: Icons.Decimals,
     label: "Decimals",
     options: booleanOptions,
