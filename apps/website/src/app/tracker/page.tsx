@@ -1,10 +1,13 @@
+import { DynamicImage } from "@/components/dynamic-image";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
-import Image from "next/image";
-import Projects from "public/product-projects.png";
-import Slot from "public/product-slot.png";
-import Tracker from "public/product-tracker.jpg";
+import ProjectsLight from "public/product-projects-light.png";
+import ProjectsDark from "public/product-projects.png";
+import SlotLight from "public/product-slot-light.png";
+import SlotDark from "public/product-slot.png";
+import TrackerLight from "public/product-tracker-light.jpg";
+import TrackerDark from "public/product-tracker.jpg";
 
 export const metadata: Metadata = {
   title: "Time Tracker",
@@ -41,7 +44,11 @@ export default function Page() {
         </div>
       </div>
 
-      <Image src={Tracker} quality={90} alt="Tracker" />
+      <DynamicImage
+        darkSrc={TrackerDark}
+        lightSrc={TrackerLight}
+        alt="Tracker"
+      />
 
       <div className="flex items-center flex-col text-center relative mt-28">
         <div className="max-w-[600px]">
@@ -55,9 +62,9 @@ export default function Page() {
           </p>
         </div>
 
-        <Image
-          src={Projects}
-          quality={90}
+        <DynamicImage
+          darkSrc={ProjectsDark}
+          lightSrc={ProjectsLight}
           alt="Slot"
           className="mt-10 max-w-[450px] w-full"
         />
@@ -72,9 +79,9 @@ export default function Page() {
           </p>
         </div>
 
-        <Image
-          src={Slot}
-          quality={90}
+        <DynamicImage
+          darkSrc={SlotDark}
+          lightSrc={SlotLight}
           alt="Slot"
           className="mt-10 max-w-[550px] w-full"
         />

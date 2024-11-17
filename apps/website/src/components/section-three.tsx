@@ -2,15 +2,18 @@
 
 import { CtaLink } from "@/components/cta-link";
 import { motion } from "framer-motion";
-import Image from "next/image";
-import breakdown from "public/breakdown.png";
-import timeFormat from "public/time-format.png";
-import timetracker from "public/time-tracker.png";
+import breakdownLight from "public/breakdown-light.png";
+import breakdownDark from "public/breakdown.png";
+import timeFormatLight from "public/time-format-light.png";
+import timeFormatDark from "public/time-format.png";
+import timetrackerLight from "public/time-tracker-light.png";
+import timetrackerDark from "public/time-tracker.png";
+import { DynamicImage } from "./dynamic-image";
 
 export function SectionThree() {
   return (
     <section className="relative mb-12 group">
-      <div className="border border-border container bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden">
+      <div className="border border-border container dark:bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden">
         <div className="flex flex-col md:space-x-12 md:flex-row">
           <div className="xl:mt-6 md:max-w-[40%] md:mr-8 md:mb-8">
             <h3 className="font-medium text-xl md:text-2xl mb-4">
@@ -120,8 +123,9 @@ export function SectionThree() {
               viewport={{ once: true }}
               className="absolute -left-[80px] top-[200px]"
             >
-              <Image
-                src={timeFormat}
+              <DynamicImage
+                lightSrc={timeFormatLight}
+                darkSrc={timeFormatDark}
                 height={142}
                 width={135}
                 className="object-contain"
@@ -138,8 +142,9 @@ export function SectionThree() {
                 viewport={{ once: true }}
                 className="absolute -right-[65px] md:-right-[15px] md:-top-[20px]"
               >
-                <Image
-                  src={breakdown}
+                <DynamicImage
+                  lightSrc={breakdownLight}
+                  darkSrc={breakdownDark}
                   height={124}
                   width={238}
                   className="object-contain"
@@ -148,8 +153,9 @@ export function SectionThree() {
                 />
               </motion.div>
             </div>
-            <Image
-              src={timetracker}
+            <DynamicImage
+              lightSrc={timetrackerLight}
+              darkSrc={timetrackerDark}
               height={400}
               className="-mb-[32px] md:-mb-[1px] object-contain mt-8 md:mt-0"
               quality={90}

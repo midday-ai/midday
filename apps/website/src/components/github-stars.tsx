@@ -10,7 +10,7 @@ export async function GithubStars() {
       target="_blank"
       rel="noreferrer"
     >
-      <div className="bg-[#1D1D1D] pl-2 pr-3 text-[14px] flex items-center space-x-2 border-r-[1px] border-border">
+      <div className="dark:bg-[#1D1D1D] pl-2 pr-3 text-[14px] flex items-center space-x-2 border-r-[1px] border-border">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width={18}

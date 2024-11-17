@@ -1,13 +1,15 @@
-import Image from "next/image";
-import computer from "public/computer.png";
+import computerLight from "public/computer-light.png";
+import computerDark from "public/computer.png";
 import { CtaLink } from "./cta-link";
+import { DynamicImage } from "./dynamic-image";
 
 export function SectionTwo() {
   return (
-    <section className="border border-border container bg-[#121212] lg:pb-0 overflow-hidden mb-12 group">
+    <section className="border border-border container dark:bg-[#121212] lg:pb-0 overflow-hidden mb-12 group">
       <div className="flex flex-col lg:space-x-12 lg:flex-row">
-        <Image
-          src={computer}
+        <DynamicImage
+          lightSrc={computerLight}
+          darkSrc={computerDark}
           height={446}
           width={836}
           className="-mb-[1px] object-contain lg:w-1/2"

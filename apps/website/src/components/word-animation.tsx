@@ -32,7 +32,7 @@ function useWordCycle(words: string[], interval: number) {
 }
 
 export function WordAnimation() {
-  const word = useWordCycle(words, 3000);
+  const word = useWordCycle(words, 2000);
 
   return (
     <AnimatePresence mode="wait">
@@ -42,7 +42,7 @@ export function WordAnimation() {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: -20, opacity: 0 }}
         transition={{ duration: 0.1 }}
-        className="text-white"
+        className="text-primary"
       >
         {word}
       </motion.span>

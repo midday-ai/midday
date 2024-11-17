@@ -1,11 +1,13 @@
-import { CtaLink } from "@/components/cta-link";
+import { DynamicImage } from "@/components/dynamic-image";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
-import Image from "next/image";
-import Invoice from "public/product-invoice.jpg";
-import Pdf from "public/product-pdf.png";
-import Status from "public/product-status.png";
+import InvoiceLight from "public/product-invoice-light.jpg";
+import InvoiceDark from "public/product-invoice.jpg";
+import PdfLight from "public/product-pdf-light.png";
+import PdfDark from "public/product-pdf.png";
+import StatusLight from "public/product-status-light.png";
+import StatusDark from "public/product-status.png";
 
 export const metadata: Metadata = {
   title: "Invoice",
@@ -43,7 +45,11 @@ export default function Page() {
         </div>
       </div>
 
-      <Image src={Invoice} quality={90} alt="Invoice" />
+      <DynamicImage
+        darkSrc={InvoiceDark}
+        lightSrc={InvoiceLight}
+        alt="Invoice"
+      />
 
       <div className="flex items-center flex-col text-center relative mt-28">
         <div className="max-w-[600px]">
@@ -59,9 +65,9 @@ export default function Page() {
           </p>
         </div>
 
-        <Image
-          src={Pdf}
-          quality={90}
+        <DynamicImage
+          darkSrc={PdfDark}
+          lightSrc={PdfLight}
           alt="Pdf"
           className="mt-10 max-w-[536px] w-full"
         />
@@ -78,9 +84,9 @@ export default function Page() {
           </p>
         </div>
 
-        <Image
-          src={Status}
-          quality={90}
+        <DynamicImage
+          darkSrc={StatusDark}
+          lightSrc={StatusLight}
           alt="Pdf"
           className="mt-10 max-w-[736px] w-full"
         />

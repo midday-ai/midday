@@ -4,15 +4,14 @@ import { Icons } from "@midday/ui/icons";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-export function PostCopyURL({ slug }) {
+export function PostCopyURL() {
   const [isCopied, setCopied] = useState(false);
-  const url = `https://midday.ai${slug}`;
 
   const handleClipboard = async () => {
     try {
       setCopied(true);
 
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(window.location.href);
 
       setTimeout(() => {
         setCopied(false);

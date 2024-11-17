@@ -15,11 +15,12 @@ import {
 } from "@midday/ui/context-menu";
 import { Icons } from "@midday/ui/icons";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import menuAssistant from "public/menu-assistant.jpg";
-import menuEngine from "public/menu-engine.png";
+import menuAssistantLight from "public/menu-assistant-light.jpg";
+import menuAssistantDark from "public/menu-assistant.jpg";
+import menuEngineLight from "public/menu-engine-light.png";
+import menuEngineDark from "public/menu-engine.png";
 import { useEffect, useState } from "react";
 import { FaDiscord, FaGithub } from "react-icons/fa";
 import {
@@ -28,6 +29,7 @@ import {
   MdOutlineIntegrationInstructions,
   MdOutlineMemory,
 } from "react-icons/md";
+import { DynamicImage } from "./dynamic-image";
 import { LogoIcon } from "./logo-icon";
 
 const listVariant = {
@@ -90,7 +92,11 @@ export function Header() {
       title: "Features",
       cover: (
         <Link href="/#assistant" onClick={handleOnClick}>
-          <Image alt="Assistant" src={menuAssistant} quality={90} />
+          <DynamicImage
+            alt="Assistant"
+            darkSrc={menuAssistantDark}
+            lightSrc={menuAssistantLight}
+          />
         </Link>
       ),
       children: [
@@ -141,7 +147,11 @@ export function Header() {
       title: "Developers",
       cover: (
         <Link href="/engine" onClick={handleOnClick}>
-          <Image alt="Engine" src={menuEngine} quality={90} />
+          <DynamicImage
+            alt="Engine"
+            darkSrc={menuEngineDark}
+            lightSrc={menuEngineLight}
+          />
         </Link>
       ),
       children: [
@@ -185,7 +195,7 @@ export function Header() {
 
   return (
     <header className="sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center">
-      <nav className="border border-border px-4 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 h-[50px] z-20">
+      <nav className="border border-border px-4 flex items-center backdrop-filter backdrop-blur-xl bg-[#FFFFFF] dark:bg-[#121212] bg-opacity-70 h-[50px] z-20">
         <ContextMenu>
           <ContextMenuTrigger>
             <Link href="/">
@@ -195,7 +205,7 @@ export function Header() {
           </ContextMenuTrigger>
 
           <ContextMenuContent
-            className="w-[200px] bg-[#121212] rounded-none"
+            className="w-[200px] dark:bg-[]dark:bg-[#121212] bg-[#fff] rounded-none"
             alignOffset={20}
           >
             <div className="divide-y">
@@ -278,7 +288,7 @@ export function Header() {
                 {children && (
                   <div
                     className={cn(
-                      "absolute top-[48px] left-0 -mx-[calc(var(--pixel-ratio)_*_2px)] bg-[#121212] flex h-0 group-hover:h-[250px] overflow-hidden transition-all duration-300 ease-in-out border-l border-r",
+                      "absolute top-[48px] left-0 -mx-[calc(var(--pixel-ratio)_*_2px)] bg-[#fff] dark:bg-[#121212] flex h-0 group-hover:h-[250px] overflow-hidden transition-all duration-300 ease-in-out border-l border-r",
                       hidden && "hidden",
                     )}
                   >

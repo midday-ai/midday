@@ -30,13 +30,13 @@ const popupCenter = ({ url, title, w, h }) => {
   const width = window.innerWidth
     ? window.innerWidth
     : document.documentElement.clientWidth
-    ? document.documentElement.clientWidth
-    : screen.width;
+      ? document.documentElement.clientWidth
+      : screen.width;
   const height = window.innerHeight
     ? window.innerHeight
     : document.documentElement.clientHeight
-    ? document.documentElement.clientHeight
-    : screen.height;
+      ? document.documentElement.clientHeight
+      : screen.height;
 
   const systemZoom = width / window.screen.availWidth;
   const left = (width - w) / 2 / systemZoom + dualScreenLeft;
@@ -50,7 +50,7 @@ const popupCenter = ({ url, title, w, h }) => {
       height=${h / systemZoom}, 
       top=${top}, 
       left=${left}
-      `
+      `,
   );
 
   return newWindow;
@@ -103,7 +103,7 @@ export function UpdatesToolbar({ posts }) {
     <Dialog>
       <div className="fixed right-6 bottom-0 top-0 flex-col items-center justify-center hidden md:flex">
         <TooltipProvider delayDuration={20}>
-          <div className="flex flex-col items-center backdrop-filter backdrop-blur-lg bg-[#1A1A1A]/80 p-2 border border-[#2C2C2C] space-y-4 rounded-full">
+          <div className="flex flex-col items-center backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 p-2 border dark:border-[#2C2C2C] bg-white space-y-4 rounded-full">
             <Tooltip>
               <TooltipTrigger>
                 <DialogTrigger asChild>
@@ -143,7 +143,7 @@ export function UpdatesToolbar({ posts }) {
                   <button
                     type="button"
                     className={cn(
-                      currentIndex === posts.length - 1 && "opacity-50"
+                      currentIndex === posts.length - 1 && "opacity-50",
                     )}
                     onClick={handleNext}
                   >

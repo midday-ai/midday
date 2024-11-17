@@ -1,10 +1,12 @@
 import { Assistant } from "@/components/assistant";
+import { DynamicImage } from "@/components/dynamic-image";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
-import Image from "next/image";
-import Overview from "public/product-overview.jpg";
-import Spending from "public/product-spending.png";
+import OverviewLight from "public/product-overview-light.jpg";
+import OverviewDark from "public/product-overview.jpg";
+import SpendingLight from "public/product-spending-light.png";
+import SpendingDark from "public/product-spending.png";
 
 export const metadata: Metadata = {
   title: "Financial Overview",
@@ -41,7 +43,12 @@ export default function Page() {
         </div>
       </div>
 
-      <Image src={Overview} quality={90} alt="Overview" />
+      <DynamicImage
+        darkSrc={OverviewDark}
+        lightSrc={OverviewLight}
+        alt="Overview"
+        className="mt-28"
+      />
 
       <div className="flex items-center flex-col text-center relative mt-28">
         <div className="max-w-[600px]">
@@ -58,9 +65,9 @@ export default function Page() {
           </p>
         </div>
 
-        <Image
-          src={Spending}
-          quality={90}
+        <DynamicImage
+          darkSrc={SpendingDark}
+          lightSrc={SpendingLight}
           alt="Spending"
           className="mt-10 max-w-[834px] w-full"
         />

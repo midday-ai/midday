@@ -120,7 +120,7 @@ export function BrandCanvas() {
       </div>
 
       <div className="fixed bottom-10 z-20 w-full flex justify-center items-center -ml-[80px]">
-        <div className="h-[48px] w-[200px] rounded-full border border-border backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 text-center flex items-center p-1 pl-2 justify-between space-x-4">
+        <div className="h-[48px] w-[200px] rounded-full border border-border backdrop-filter backdrop-blur-xl dark:bg-[#121212] bg-white bg-opacity-70 text-center flex items-center p-1 pl-2 justify-between space-x-4">
           <Select onValueChange={setValue} value={value}>
             <SelectTrigger className="w-[180px] border-0 space-x-2">
               <SelectValue placeholder="All" className="border-0" />

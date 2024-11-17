@@ -44,7 +44,7 @@ export default async function Page() {
           return (
             <div
               key={friend.name}
-              className="border border-border bg-[#121212] p-4"
+              className="border border-border dark:bg-[#121212] p-4"
             >
               <div className="flex justify-between items-center mb-2">
                 <a href={friend.href} target="_blank" rel="noreferrer">
