@@ -15,13 +15,17 @@ export const invoiceScheduler = schedules.task({
 
     if (!invoices) return;
 
-    await checkInvoiceStatus.batchTrigger(
-      invoices.map((invoice) => ({
-        payload: {
-          invoiceId: invoice.id,
-        },
-      })),
-    );
+    // Split invoices into chunks of 100
+    for (let i = 0; i < invoices.length; i += 100) {
+      const chunk = invoices.slice(i, i + 100);
+      await checkInvoiceStatus.batchTrigger(
+        chunk.map((invoice) => ({
+          payload: {
+            invoiceId: invoice.id,
+          },
+        })),
+      );
+    }
 
     logger.info("Invoice status check jobs started", {
       count: invoices.length,
