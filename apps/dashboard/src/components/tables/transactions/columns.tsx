@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import { ScrollArea, ScrollBar } from "@midday/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
@@ -178,12 +179,20 @@ export const columns: ColumnDef<Transaction>[] = [
     header: "Tags",
     cell: ({ row }) => {
       return (
-        <div className="flex space-x-2">
-          {row.original.tags?.map((tag) => (
-            <Badge key={tag.id} variant="tag">
-              {tag.tag.name}
-            </Badge>
-          ))}
+        <div className="relative">
+          <ScrollArea className="max-w-[200px] whitespace-nowrap">
+            <div className="flex items-center space-x-2">
+              {row.original.tags?.map((tag) => (
+                <Badge key={tag.id} variant="tag" className="whitespace-nowrap">
+                  {tag.tag.name}
+                </Badge>
+              ))}
+            </div>
+
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
         </div>
       );
     },

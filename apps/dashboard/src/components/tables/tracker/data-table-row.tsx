@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import { ScrollArea, ScrollBar } from "@midday/ui/scroll-area";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { formatISO } from "date-fns";
@@ -142,12 +143,25 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
             {row.description}
           </DataTableCell>
           <DataTableCell>
-            <div className="flex items-center space-x-2">
-              {row.tags?.map((tag) => (
-                <Link href={`/transactions?tags=${tag.tag.id}`} key={tag.id}>
-                  <Badge variant="tag">{tag.tag.name}</Badge>
-                </Link>
-              ))}
+            <div className="relative">
+              <ScrollArea className="max-w-[200px] whitespace-nowrap">
+                <div className="flex items-center space-x-2">
+                  {row.tags?.map((tag) => (
+                    <Link
+                      href={`/transactions?tags=${tag.tag.id}`}
+                      key={tag.id}
+                    >
+                      <Badge variant="tag" className="whitespace-nowrap">
+                        {tag.tag.name}
+                      </Badge>
+                    </Link>
+                  ))}
+                </div>
+
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+
+              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
             </div>
           </DataTableCell>
           <DataTableCell onClick={onClick} className="cursor-pointer">
