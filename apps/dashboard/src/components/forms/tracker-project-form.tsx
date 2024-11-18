@@ -111,6 +111,7 @@ export function TrackerProjectForm({
 
           <SelectTags
             tags={form.getValues("tags")}
+            key={form.getValues("id")}
             onRemove={(tag) => {
               deleteProjectTag.execute({
                 tagId: tag.id,

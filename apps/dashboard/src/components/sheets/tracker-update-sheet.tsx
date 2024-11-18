@@ -129,6 +129,12 @@ export function TrackerUpdateSheet({ teamId, customers }: Props) {
     },
   });
 
+  useEffect(() => {
+    if (!isOpen) {
+      form.reset();
+    }
+  }, [isOpen]);
+
   if (isDesktop) {
     return (
       <AlertDialog>

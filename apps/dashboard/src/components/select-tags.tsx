@@ -44,10 +44,6 @@ export function SelectTags({ tags, onSelect, onRemove, onChange }: Props) {
     fetchData();
   }, [teamId]);
 
-  useEffect(() => {
-    setSelected(tags ?? []);
-  }, [tags]);
-
   return (
     <div className="w-full">
       <MultipleSelector
@@ -79,6 +75,7 @@ export function SelectTags({ tags, onSelect, onRemove, onChange }: Props) {
 
             if (removedTag) {
               onRemove?.(removedTag);
+              setSelected(options);
             }
           }
         }}

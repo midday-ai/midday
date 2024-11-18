@@ -58,7 +58,7 @@ type RowProps = {
 };
 
 export function Row({ children }: RowProps) {
-  return <TableRow className="h-[45px] cursor-pointer">{children}</TableRow>;
+  return <TableRow className="h-[45px]">{children}</TableRow>;
 }
 
 type DataTableRowProps = {
@@ -93,8 +93,10 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
     <AlertDialog>
       <DropdownMenu>
         <Row>
-          <DataTableCell onClick={onClick}>{row.name}</DataTableCell>
-          <DataTableCell onClick={onClick}>
+          <DataTableCell onClick={onClick} className="cursor-pointer">
+            {row.name}
+          </DataTableCell>
+          <DataTableCell onClick={onClick} className="cursor-pointer">
             {row.customer ? (
               <div className="flex items-center space-x-2">
                 <Avatar className="size-5">
@@ -118,14 +120,14 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
             )}
           </DataTableCell>
 
-          <DataTableCell onClick={onClick}>
+          <DataTableCell onClick={onClick} className="cursor-pointer">
             <span className="text-sm">
               {row.estimate
                 ? `${secondsToHoursAndMinutes(row.total_duration)} / ${secondsToHoursAndMinutes(row.estimate * 3600)}`
                 : secondsToHoursAndMinutes(row?.total_duration)}
             </span>
           </DataTableCell>
-          <DataTableCell onClick={onClick}>
+          <DataTableCell onClick={onClick} className="cursor-pointer">
             <span className="text-sm">
               {formatAmount({
                 currency: row.currency,
@@ -136,7 +138,9 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
               })}
             </span>
           </DataTableCell>
-          <DataTableCell onClick={onClick}>{row.description}</DataTableCell>
+          <DataTableCell onClick={onClick} className="cursor-pointer">
+            {row.description}
+          </DataTableCell>
           <DataTableCell>
             <div className="flex items-center space-x-2">
               {row.tags?.map((tag) => (
@@ -146,7 +150,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
               ))}
             </div>
           </DataTableCell>
-          <DataTableCell onClick={onClick}>
+          <DataTableCell onClick={onClick} className="cursor-pointer">
             <div className="flex items-center space-x-2">
               {row.users?.map((user) => (
                 <Avatar key={user.user_id} className="size-4">
@@ -163,7 +167,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
               ))}
             </div>
           </DataTableCell>
-          <DataTableCell onClick={onClick}>
+          <DataTableCell onClick={onClick} className="cursor-pointer">
             <div className="flex justify-between items-center">
               <TrackerStatus status={row.status} />
 
