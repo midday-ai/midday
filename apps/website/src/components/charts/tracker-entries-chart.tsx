@@ -16,7 +16,7 @@ export async function TrackerEntriesChart() {
           <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
         </span>
 
-        <span className="mt-auto font-mono text-[80px] md:text-[122px]">
+        <span className="mt-auto font-mono text-[80px] md:text-[110px]">
           {trackerEntries &&
             Intl.NumberFormat("en", { notation: "compact" }).format(
               trackerEntries,
