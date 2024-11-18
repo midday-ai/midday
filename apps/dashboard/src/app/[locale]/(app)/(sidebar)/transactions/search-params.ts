@@ -13,6 +13,7 @@ export const searchParamsCache = createSearchParamsCache({
   start: parseAsString,
   end: parseAsString,
   categories: parseAsArrayOf(parseAsString),
+  tags: parseAsArrayOf(parseAsString),
   accounts: parseAsArrayOf(parseAsString),
   assignees: parseAsArrayOf(parseAsString),
   recurring: parseAsArrayOf(

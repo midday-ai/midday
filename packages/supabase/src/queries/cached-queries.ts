@@ -30,6 +30,7 @@ import {
   getPaymentStatusQuery,
   getRunwayQuery,
   getSpendingQuery,
+  getTagsQuery,
   getTeamBankAccountsQuery,
   getTeamInvitesQuery,
   getTeamMembersQuery,
@@ -38,7 +39,6 @@ import {
   getTeamsByUserIdQuery,
   getTrackerProjectsQuery,
   getTrackerRecordsByRangeQuery,
-  getTransactionTagsQuery,
   getTransactionsQuery,
   getUserInvitesQuery,
   getUserQuery,
@@ -581,7 +581,7 @@ export const getLastInvoiceNumber = async () => {
   )();
 };
 
-export const getTransactionTags = async () => {
+export const getTags = async () => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -592,11 +592,11 @@ export const getTransactionTags = async () => {
 
   return unstable_cache(
     async () => {
-      return getTransactionTagsQuery(supabase, teamId);
+      return getTagsQuery(supabase, teamId);
     },
-    ["transaction_tags", teamId],
+    ["tags", teamId],
     {
-      tags: [`transaction_tags_${teamId}`],
+      tags: [`tags_${teamId}`],
       revalidate: 180,
     },
   )();

@@ -49,6 +49,7 @@ interface MultipleSelectorProps {
    **/
   onSearchSync?: (value: string) => Option[];
   onChange?: (options: Option[]) => void;
+  onCreate?: (option: Option) => void;
   /** Limit the maximum number of selected options. */
   maxSelected?: number;
   /** When the number of selected options exceeds the limit, the onMaxSelected will be called. */
@@ -179,6 +180,7 @@ const MultipleSelector = React.forwardRef<
     {
       value,
       onChange,
+      onCreate,
       placeholder,
       defaultOptions: arrayDefaultOptions = [],
       options: arrayOptions,
@@ -375,12 +377,12 @@ const MultipleSelector = React.forwardRef<
               return;
             }
             setInputValue("");
-            const newOptions = [
-              ...selected,
-              { value: inputValue, label: inputValue, create: true },
-            ];
+            const newOption = { value: inputValue, label: inputValue };
+            const newOptions = [...selected, newOption];
+
             setSelected(newOptions);
             onChange?.(newOptions);
+            onCreate?.(newOption);
           }}
         >
           {`Create "${inputValue}"`}

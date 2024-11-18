@@ -1,7 +1,6 @@
 "use client";
 
 import { deleteProjectAction } from "@/actions/project/delete-project-action";
-import { updateProjectAction } from "@/actions/project/update-project-action";
 import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
@@ -20,6 +19,7 @@ import {
   AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
+import { Badge } from "@midday/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,28 +32,33 @@ import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { formatISO } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
+import Link from "next/link";
 import type { TrackerProject } from "./data-table";
 
 type DataTableCellProps = {
   children: React.ReactNode;
   className?: string;
+  onClick?: () => void;
 };
 
-export function DataTableCell({ children, className }: DataTableCellProps) {
-  return <TableCell className={className}>{children}</TableCell>;
+export function DataTableCell({
+  children,
+  className,
+  onClick,
+}: DataTableCellProps) {
+  return (
+    <TableCell className={className} onClick={onClick}>
+      {children}
+    </TableCell>
+  );
 }
 
 type RowProps = {
-  onClick: () => void;
   children: React.ReactNode;
 };
 
-export function Row({ onClick, children }: RowProps) {
-  return (
-    <TableRow className="h-[45px]" onClick={onClick}>
-      {children}
-    </TableRow>
-  );
+export function Row({ children }: RowProps) {
+  return <TableRow className="h-[45px] cursor-pointer">{children}</TableRow>;
 }
 
 type DataTableRowProps = {
@@ -77,29 +82,19 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
     },
   });
 
-  const updateAction = useAction(updateProjectAction, {
-    onError: () => {
-      toast({
-        duration: 2500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
+  const onClick = () => {
+    setParams({
+      projectId: row.id,
+      update: true,
+    });
+  };
 
   return (
     <AlertDialog>
       <DropdownMenu>
-        <Row
-          onClick={() =>
-            setParams({
-              projectId: row.id,
-              selectedDate: formatISO(new Date(), { representation: "date" }),
-            })
-          }
-        >
-          <DataTableCell>{row.name}</DataTableCell>
-          <DataTableCell>
+        <Row>
+          <DataTableCell onClick={onClick}>{row.name}</DataTableCell>
+          <DataTableCell onClick={onClick}>
             {row.customer ? (
               <div className="flex items-center space-x-2">
                 <Avatar className="size-5">
@@ -123,14 +118,14 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
             )}
           </DataTableCell>
 
-          <DataTableCell>
+          <DataTableCell onClick={onClick}>
             <span className="text-sm">
               {row.estimate
                 ? `${secondsToHoursAndMinutes(row.total_duration)} / ${secondsToHoursAndMinutes(row.estimate * 3600)}`
                 : secondsToHoursAndMinutes(row?.total_duration)}
             </span>
           </DataTableCell>
-          <DataTableCell>
+          <DataTableCell onClick={onClick}>
             <span className="text-sm">
               {formatAmount({
                 currency: row.currency,
@@ -141,8 +136,17 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
               })}
             </span>
           </DataTableCell>
-          <DataTableCell>{row.description}</DataTableCell>
+          <DataTableCell onClick={onClick}>{row.description}</DataTableCell>
           <DataTableCell>
+            <div className="flex items-center space-x-2">
+              {row.tags?.map((tag) => (
+                <Link href={`/transactions?tags=${tag.tag.id}`} key={tag.id}>
+                  <Badge variant="tag">{tag.tag.name}</Badge>
+                </Link>
+              ))}
+            </div>
+          </DataTableCell>
+          <DataTableCell onClick={onClick}>
             <div className="flex items-center space-x-2">
               {row.users?.map((user) => (
                 <Avatar key={user.user_id} className="size-4">
@@ -159,7 +163,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
               ))}
             </div>
           </DataTableCell>
-          <DataTableCell>
+          <DataTableCell onClick={onClick}>
             <div className="flex justify-between items-center">
               <TrackerStatus status={row.status} />
 

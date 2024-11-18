@@ -1,27 +1,33 @@
-import { createTagsAction } from "@/actions/create-tags-action";
+import { createTagAction } from "@/actions/create-tag-action";
 import { useUserContext } from "@/store/user/hook";
 import { createClient } from "@midday/supabase/client";
-import { getTransactionTagsQuery } from "@midday/supabase/queries";
+import { getTagsQuery } from "@midday/supabase/queries";
 import MultipleSelector, { type Option } from "@midday/ui/multiple-selector";
 import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useState } from "react";
 
 type Props = {
   tags?: Option[];
+  onSelect?: (tag: Option) => void;
+  onRemove?: (tag: Option & { id: string }) => void;
 };
 
-export function SelectTags({ tags }: Props) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState<Option[]>(tags ?? []);
-  const createTags = useAction(createTagsAction);
+export function SelectTags({ tags, onSelect, onRemove }: Props) {
   const supabase = createClient();
+
+  const [data, setData] = useState<Option[]>(tags ?? []);
+  const [selected, setSelected] = useState<Option[]>(tags ?? []);
+  const createTag = useAction(createTagAction, {
+    onSuccess: ({ data }) => {
+      onSelect(data);
+    },
+  });
+
   const { team_id: teamId } = useUserContext((state) => state.data);
 
   useEffect(() => {
     async function fetchData() {
-      setIsLoading(true);
-
-      const { data } = await getTransactionTagsQuery(supabase, teamId);
+      const { data } = await getTagsQuery(supabase, teamId);
 
       if (data?.length) {
         setData(
@@ -32,30 +38,42 @@ export function SelectTags({ tags }: Props) {
           })),
         );
       }
-
-      setIsLoading(false);
     }
 
-    if (!data?.length) {
-      fetchData();
-    }
+    fetchData();
   }, [teamId]);
 
   return (
     <div className="w-full">
       <MultipleSelector
-        // key={isLoading ? "loading" : "loaded"}
         options={data}
+        value={selected}
         placeholder="Select tags"
         creatable
-        emptyIndicator={<p className="text-sm">no results found.</p>}
+        emptyIndicator={<p className="text-sm">No results found.</p>}
+        onCreate={(option) => {
+          createTag.execute({ name: option.value });
+        }}
         onChange={(options) => {
-          const newTags = options.filter((option) => option.create);
+          setSelected(options);
 
-          console.log(newTags);
+          const newTag = options.find(
+            (tag) => !selected.find((opt) => opt.value === tag.value),
+          );
 
-          if (newTags.length > 0) {
-            createTags.execute(newTags.map((tag) => ({ name: tag.value })));
+          if (newTag) {
+            onSelect?.(newTag);
+            return;
+          }
+
+          if (options.length < selected.length) {
+            const removedTag = selected.find(
+              (tag) => !options.find((opt) => opt.value === tag.value),
+            );
+
+            if (removedTag) {
+              onRemove?.(removedTag);
+            }
           }
         }}
       />

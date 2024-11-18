@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
+import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
 import { cn } from "@midday/ui/cn";
@@ -72,6 +73,10 @@ export type Transaction = {
       logo_url: string;
     };
   };
+  tags?: {
+    id: string;
+    name: string;
+  }[];
 };
 
 export const columns: ColumnDef<Transaction>[] = [
@@ -165,6 +170,21 @@ export const columns: ColumnDef<Transaction>[] = [
           name={row.original?.category?.name}
           color={row.original?.category?.color}
         />
+      );
+    },
+  },
+  {
+    accessorKey: "tags",
+    header: "Tags",
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          {row.original.tags?.map((tag) => (
+            <Badge key={tag.id} variant="tag">
+              {tag.tag.name}
+            </Badge>
+          ))}
+        </div>
       );
     },
   },

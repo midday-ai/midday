@@ -1,5 +1,6 @@
 "use client";
 
+import { createTrackerProjectTagAction } from "@/actions/create-tracker-project-tag-action";
 import type { Customer } from "@/components/invoice/customer-details";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { Button } from "@midday/ui/button";
@@ -26,6 +27,7 @@ import {
 import { Switch } from "@midday/ui/switch";
 import { Textarea } from "@midday/ui/textarea";
 import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { SearchCustomer } from "../search-customer";
 import { SelectTags } from "../select-tags";
@@ -44,6 +46,7 @@ export function TrackerProjectForm({
   customers,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  const createTrackerProjectTag = useAction(createTrackerProjectTagAction);
 
   useEffect(() => {
     setIsOpen(Boolean(form.getValues("billable")));
@@ -101,7 +104,31 @@ export function TrackerProjectForm({
             Expense Tags
           </Label>
 
-          <SelectTags />
+          <SelectTags
+            // onSelect={(tagId) =>
+            //   createTrackerProjectTag.execute({
+            //     tagId,
+            //     trackerProjectId: form.getValues("id"),
+            //   })
+            // }
+            // tags={data?.tags?.map((tag) => ({
+            //   label: tag.tag.name,
+            //   value: tag.tag.name,
+            //   id: tag.tag.id,
+            // }))}
+            onSelect={(tag) => {
+              createTrackerProjectTag.execute({
+                tagId: tag.id,
+                trackerProjectId: form.getValues("id"),
+              });
+            }}
+            onRemove={(tag) => {
+              createTrackerProjectTag.execute({
+                tagId: tag.id,
+                trackerProjectId: form.getValues("id"),
+              });
+            }}
+          />
 
           <FormDescription className="mt-2">
             Tags help categorize and track project expenses.

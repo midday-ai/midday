@@ -13,7 +13,21 @@ export const updateUserSchema = z.object({
   revalidatePath: z.string().optional(),
 });
 
-export const createTagsSchema = z.array(z.object({ name: z.string() }));
+export const createTagSchema = z.object({ name: z.string() });
+export const createTransactionTagSchema = z.object({
+  tagId: z.string(),
+  transactionId: z.string(),
+});
+
+export const deleteTransactionTagSchema = z.object({
+  tagId: z.string(),
+  transactionId: z.string(),
+});
+
+export const createTrackerProjectTagSchema = z.object({
+  tagId: z.string(),
+  trackerProjectId: z.string(),
+});
 
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
 
