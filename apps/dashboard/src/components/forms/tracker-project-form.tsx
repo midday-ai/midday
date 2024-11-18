@@ -1,6 +1,7 @@
 "use client";
 
-import { createTrackerProjectTagAction } from "@/actions/create-tracker-project-tag-action";
+import { createProjectTagAction } from "@/actions/project/create-project-tag-action";
+import { deleteProjectTagAction } from "@/actions/project/delete-project-tag-action";
 import type { Customer } from "@/components/invoice/customer-details";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { Button } from "@midday/ui/button";
@@ -46,7 +47,11 @@ export function TrackerProjectForm({
   customers,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const createTrackerProjectTag = useAction(createTrackerProjectTagAction);
+
+  const deleteProjectTag = useAction(deleteProjectTagAction);
+  const createProjectTag = useAction(createProjectTagAction);
+
+  const isEdit = form.getValues("id") !== undefined;
 
   useEffect(() => {
     setIsOpen(Boolean(form.getValues("billable")));
@@ -105,28 +110,30 @@ export function TrackerProjectForm({
           </Label>
 
           <SelectTags
-            // onSelect={(tagId) =>
-            //   createTrackerProjectTag.execute({
-            //     tagId,
-            //     trackerProjectId: form.getValues("id"),
-            //   })
-            // }
-            // tags={data?.tags?.map((tag) => ({
-            //   label: tag.tag.name,
-            //   value: tag.tag.name,
-            //   id: tag.tag.id,
-            // }))}
-            onSelect={(tag) => {
-              createTrackerProjectTag.execute({
+            tags={form.getValues("tags")}
+            onRemove={(tag) => {
+              deleteProjectTag.execute({
                 tagId: tag.id,
-                trackerProjectId: form.getValues("id"),
+                projectId: form.getValues("id"),
               });
             }}
-            onRemove={(tag) => {
-              createTrackerProjectTag.execute({
-                tagId: tag.id,
-                trackerProjectId: form.getValues("id"),
-              });
+            // Only for create projects
+            onChange={(tags) => {
+              if (!isEdit) {
+                form.setValue("tags", tags, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+              }
+            }}
+            // Only for edit projects
+            onSelect={(tag) => {
+              if (isEdit) {
+                createProjectTag.execute({
+                  tagId: tag.id,
+                  projectId: form.getValues("id"),
+                });
+              }
             }}
           />
 

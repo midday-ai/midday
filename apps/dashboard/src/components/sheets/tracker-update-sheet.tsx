@@ -64,6 +64,7 @@ export function TrackerUpdateSheet({ teamId, customers }: Props) {
       estimate: 0,
       currency: undefined,
       customer_id: undefined,
+      tags: undefined,
     },
   });
 
@@ -85,6 +86,12 @@ export function TrackerUpdateSheet({ teamId, customers }: Props) {
           estimate: data.estimate ?? undefined,
           currency: data.currency ?? undefined,
           customer_id: data.customer_id ?? undefined,
+          tags:
+            data.tags?.map((tag) => ({
+              id: tag.tag?.id ?? "",
+              label: tag.tag?.name ?? "",
+              value: tag.tag?.name ?? "",
+            })) ?? undefined,
         });
       }
     };

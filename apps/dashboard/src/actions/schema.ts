@@ -24,9 +24,14 @@ export const deleteTransactionTagSchema = z.object({
   transactionId: z.string(),
 });
 
-export const createTrackerProjectTagSchema = z.object({
+export const deleteProjectTagSchema = z.object({
   tagId: z.string(),
-  trackerProjectId: z.string(),
+  projectId: z.string(),
+});
+
+export const createProjectTagSchema = z.object({
+  tagId: z.string(),
+  projectId: z.string(),
 });
 
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
@@ -336,6 +341,16 @@ export const createProjectSchema = z.object({
   currency: z.string().optional(),
   status: z.enum(["in_progress", "completed"]).optional(),
   customer_id: z.string().uuid().nullable().optional(),
+  tags: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        label: z.string(),
+        value: z.string(),
+      }),
+    )
+    .optional()
+    .nullable(),
 });
 
 export const updateProjectSchema = z.object({
@@ -348,6 +363,16 @@ export const updateProjectSchema = z.object({
   currency: z.string().optional(),
   status: z.enum(["in_progress", "completed"]).optional(),
   customer_id: z.string().uuid().nullable().optional(),
+  tags: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        label: z.string(),
+        value: z.string(),
+      }),
+    )
+    .optional()
+    .nullable(),
 });
 
 export const deleteProjectSchema = z.object({

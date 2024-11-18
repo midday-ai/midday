@@ -227,8 +227,12 @@ export const LogEvents = {
     name: "Delete Transaction Tag",
     channel: "tag",
   },
-  CreateTrackerProjectTag: {
-    name: "Create Tracker Project Tag",
+  DeleteProjectTag: {
+    name: "Delete Project Tag",
+    channel: "tag",
+  },
+  CreateProjectTag: {
+    name: "Create Project Tag",
     channel: "tag",
   },
 };

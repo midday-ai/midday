@@ -10,9 +10,10 @@ type Props = {
   tags?: Option[];
   onSelect?: (tag: Option) => void;
   onRemove?: (tag: Option & { id: string }) => void;
+  onChange?: (tags: Option[]) => void;
 };
 
-export function SelectTags({ tags, onSelect, onRemove }: Props) {
+export function SelectTags({ tags, onSelect, onRemove, onChange }: Props) {
   const supabase = createClient();
 
   const [data, setData] = useState<Option[]>(tags ?? []);
@@ -43,6 +44,10 @@ export function SelectTags({ tags, onSelect, onRemove }: Props) {
     fetchData();
   }, [teamId]);
 
+  useEffect(() => {
+    setSelected(tags ?? []);
+  }, [tags]);
+
   return (
     <div className="w-full">
       <MultipleSelector
@@ -56,6 +61,7 @@ export function SelectTags({ tags, onSelect, onRemove }: Props) {
         }}
         onChange={(options) => {
           setSelected(options);
+          onChange?.(options);
 
           const newTag = options.find(
             (tag) => !selected.find((opt) => opt.value === tag.value),
