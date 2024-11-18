@@ -98,7 +98,7 @@ export function DataTableHeader() {
           </Button>
         </TableHead>
 
-        <TableHead className="min-w-[220px]">
+        <TableHead className="min-w-[170px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"

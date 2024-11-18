@@ -144,7 +144,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
           </DataTableCell>
           <DataTableCell>
             <div className="relative">
-              <ScrollArea className="max-w-[200px] whitespace-nowrap">
+              <ScrollArea className="max-w-[170px] whitespace-nowrap">
                 <div className="flex items-center space-x-2">
                   {row.tags?.map((tag) => (
                     <Link
