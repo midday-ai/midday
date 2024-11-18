@@ -26,7 +26,7 @@ export function HtmlTemplate({
 }: TemplateProps) {
   return (
     <ScrollArea
-      className="bg-background border border-border w-full md:w-auto h-full"
+      className="bg-background border border-border w-full md:w-auto h-full [&>div]:h-full"
       style={{
         width: "100%",
         maxWidth: width,
@@ -34,7 +34,10 @@ export function HtmlTemplate({
       }}
       hideScrollbar
     >
-      <div className="p-4 sm:p-6 md:p-8 h-full flex flex-col">
+      <div
+        className="p-4 sm:p-6 md:p-8 h-full flex flex-col"
+        style={{ minHeight: height - 5 }}
+      >
         <div className="flex justify-between">
           <Meta
             template={template}
