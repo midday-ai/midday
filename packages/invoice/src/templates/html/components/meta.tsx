@@ -1,5 +1,4 @@
 import { TZDate } from "@date-fns/tz";
-import { UTCDate } from "@date-fns/utc";
 import { format } from "date-fns";
 import type { Template } from "../../types";
 
@@ -44,7 +43,7 @@ export function Meta({
                 </span>
                 <span className="text-[11px] font-mono flex-shrink-0">
                   {format(
-                    new TZDate(new UTCDate(issueDate), timezone),
+                    new TZDate(issueDate, timezone),
                     template.date_format,
                   )}
                 </span>
@@ -60,10 +59,7 @@ export function Meta({
                   {template.due_date_label}:
                 </span>
                 <span className="text-[11px] font-mono flex-shrink-0">
-                  {format(
-                    new TZDate(new UTCDate(dueDate), timezone),
-                    template.date_format,
-                  )}
+                  {format(new TZDate(dueDate, timezone), template.date_format)}
                 </span>
               </div>
             </div>
