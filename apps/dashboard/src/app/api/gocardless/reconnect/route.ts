@@ -9,10 +9,10 @@ export const preferredRegion = ["fra1", "sfo1", "iad1"];
 
 export async function GET(req: NextRequest) {
   const {
-    data: { session },
+    data: { user },
   } = await getSession();
 
-  if (!session) {
+  if (!user) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 

@@ -39,10 +39,6 @@ export async function setAssistantSettings({
   userId,
   teamId,
 }: SetAassistant) {
-  const {
-    data: { session },
-  } = await getSession();
-
   return RedisClient.set(`assistant:${teamId}:user:${userId}:settings`, {
     ...settings,
     ...params,
@@ -129,10 +125,10 @@ export async function getChats() {
 
 export async function getChat(id: string) {
   const {
-    data: { session },
+    data: { user },
   } = await getSession();
 
-  const userId = session?.user.id;
+  const userId = user.id;
 
   const chat = await RedisClient.hgetall<Chat>(`chat:${id}`);
 
