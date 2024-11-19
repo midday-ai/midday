@@ -27,6 +27,7 @@ export const updateInvoiceTemplateSchema = z.object({
   subtotal_label: z.string().optional(),
   tax_label: z.string().optional(),
   discount_label: z.string().optional(),
+  timezone: z.string().optional(),
   payment_label: z.string().optional(),
   note_label: z.string().optional(),
   logo_url: z.string().optional().nullable(),
