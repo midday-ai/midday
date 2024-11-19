@@ -2,9 +2,8 @@
 
 import { importTransactionsAction } from "@/actions/transactions/import-transactions";
 import { useUpload } from "@/hooks/use-upload";
+import { useUserContext } from "@/store/user/hook";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createClient } from "@midday/supabase/client";
-import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import { Button } from "@midday/ui/button";
 import {
@@ -48,10 +47,11 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
     null,
   );
 
+  const { team_id: teamId } = useUserContext((state) => state.data);
+
   const [pageNumber, setPageNumber] = useState<number>(0);
   const page = pages[pageNumber];
 
-  const supabase = createClient();
   const { uploadFile } = useUpload();
 
   const { toast } = useToast();
@@ -218,15 +218,12 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                         setIsImporting(true);
 
                         if (data.import_type === "csv") {
-                          const { data: userData } =
-                            await getCurrentUserTeamQuery(supabase);
-
                           const filename = stripSpecialCharacters(
                             data.file.name,
                           );
                           const { path } = await uploadFile({
                             bucket: "vault",
-                            path: [userData?.team_id, "imports", filename],
+                            path: [teamId, "imports", filename],
                             file,
                           });
 

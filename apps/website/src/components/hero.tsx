@@ -6,7 +6,7 @@ import { WordAnimation } from "./word-animation";
 
 export function Hero() {
   return (
-    <section className="mt-[60px] lg:mt-[180px] relative lg:h-[calc(100vh-300px)]">
+    <section className="mt-[60px] lg:mt-[180px] min-h-[530px] relative lg:h-[calc(100vh-300px)]">
       <div className="flex flex-col">
         <Link href="/updates/october-product-updates">
           <Button

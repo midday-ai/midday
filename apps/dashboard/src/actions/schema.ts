@@ -19,6 +19,15 @@ export const createTransactionTagSchema = z.object({
   transactionId: z.string(),
 });
 
+export const deleteTagSchema = z.object({
+  id: z.string(),
+});
+
+export const updateTagSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
 export const deleteTransactionTagSchema = z.object({
   tagId: z.string(),
   transactionId: z.string(),

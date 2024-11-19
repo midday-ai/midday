@@ -1,10 +1,8 @@
 import { createBankAccountAction } from "@/actions/create-bank-account-action";
+import { useUserContext } from "@/store/user/hook";
 import { formatAccountName } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
-import {
-  getCurrentUserTeamQuery,
-  getTeamBankAccountsQuery,
-} from "@midday/supabase/queries";
+import { getTeamBankAccountsQuery } from "@midday/supabase/queries";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
@@ -27,6 +25,8 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
   const [data, setData] = useState([]);
   const supabase = createClient();
 
+  const { team_id: teamId } = useUserContext((state) => state.data);
+
   const createBankAccount = useAction(createBankAccountAction, {
     onSuccess: async ({ data: result }) => {
       if (result) {
@@ -38,22 +38,19 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
 
   useEffect(() => {
     async function fetchData() {
-      const { data: userData } = await getCurrentUserTeamQuery(supabase);
-      if (userData?.team_id) {
-        const repsonse = await getTeamBankAccountsQuery(supabase, {
-          teamId: userData.team_id,
-        });
+      const repsonse = await getTeamBankAccountsQuery(supabase, {
+        teamId,
+      });
 
-        setData(
-          repsonse.data?.map((account) => ({
-            id: account.id,
-            label: account.name,
-            logo: account?.logo_url,
-            currency: account.currency,
-            type: account.type,
-          })),
-        );
-      }
+      setData(
+        repsonse.data?.map((account) => ({
+          id: account.id,
+          label: account.name,
+          logo: account?.logo_url,
+          currency: account.currency,
+          type: account.type,
+        })),
+      );
     }
 
     if (!data.length) {

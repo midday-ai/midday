@@ -1,10 +1,8 @@
 "use client";
 
+import { useUserContext } from "@/store/user/hook";
 import { createClient } from "@midday/supabase/client";
-import {
-  getCurrentUserTeamQuery,
-  getTeamMembersQuery,
-} from "@midday/supabase/queries";
+import { getTeamMembersQuery } from "@midday/supabase/queries";
 import { Spinner } from "@midday/ui/spinner";
 import { useEffect, useState } from "react";
 import { AssignedUser } from "./assigned-user";
@@ -26,23 +24,18 @@ export function SelectUser({ selectedId, onSelect }: Props) {
   const supabase = createClient();
   const [users, setUsers] = useState<User[]>([]);
 
+  const { team_id: teamId } = useUserContext((state) => state.data);
+
   useEffect(() => {
     setValue(selectedId);
   }, [selectedId]);
 
   useEffect(() => {
     async function getUsers() {
-      const { data: userData } = await getCurrentUserTeamQuery(supabase);
+      const { data: membersData } = await getTeamMembersQuery(supabase, teamId);
 
-      if (userData?.team_id) {
-        const { data: membersData } = await getTeamMembersQuery(
-          supabase,
-          userData.team_id,
-        );
-
-        setUsers(membersData?.map(({ user }) => user));
-        setIsLoading(false);
-      }
+      setUsers(membersData?.map(({ user }) => user));
+      setIsLoading(false);
     }
 
     setIsLoading(true);
