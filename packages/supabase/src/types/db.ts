@@ -781,6 +781,35 @@ export type Database = {
           },
         ]
       }
+      tags: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tags_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teams: {
         Row: {
           base_currency: string | null
@@ -887,6 +916,52 @@ export type Database = {
           },
           {
             foreignKeyName: "tracker_entries_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracker_project_tags: {
+        Row: {
+          created_at: string
+          id: string
+          tag_id: string
+          team_id: string
+          tracker_project_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          tag_id: string
+          team_id: string
+          tracker_project_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          tag_id?: string
+          team_id?: string
+          tracker_project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_tags_tracker_project_id_fkey"
+            columns: ["tracker_project_id"]
+            isOneToOne: false
+            referencedRelation: "tracker_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracker_project_tags_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -1148,27 +1223,44 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          name: string
+          tag_id: string
           team_id: string
+          transaction_id: string
         }
         Insert: {
           created_at?: string
           id?: string
-          name: string
+          tag_id: string
           team_id: string
+          transaction_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          name?: string
+          tag_id?: string
           team_id?: string
+          transaction_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "transaction_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "transaction_tags_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_tags_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
             referencedColumns: ["id"]
           },
         ]
@@ -2066,6 +2158,18 @@ export type Database = {
       is_fulfilled: {
         Args: {
           "": unknown
+        }
+        Returns: boolean
+      }
+      is_project_tagged: {
+        Args: {
+          project: unknown
+        }
+        Returns: boolean
+      }
+      is_transaction_tagged: {
+        Args: {
+          transaction: unknown
         }
         Returns: boolean
       }

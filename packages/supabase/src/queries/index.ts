@@ -164,6 +164,7 @@ export type GetTransactionsParams = {
     statuses?: string[];
     attachments?: "include" | "exclude";
     categories?: string[];
+    tags?: string[];
     accounts?: string[];
     assignees?: string[];
     type?: "income" | "expense";
@@ -183,6 +184,7 @@ export async function getTransactionsQuery(
     statuses,
     attachments,
     categories,
+    tags,
     type,
     accounts,
     start,
@@ -208,6 +210,7 @@ export async function getTransactionsQuery(
     "category:transaction_categories(id, name, color, slug)",
     "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
     "attachments:transaction_attachments(id, name, size, path, type)",
+    "tags:transaction_tags(id, tag_id, tag:tags(id, name))",
     "vat:calculated_vat",
   ];
 
@@ -228,6 +231,8 @@ export async function getTransactionsQuery(
       query.order("bank_account(name)", { ascending });
     } else if (column === "category") {
       query.order("category(name)", { ascending });
+    } else if (column === "tags") {
+      query.order("is_transaction_tagged", { ascending });
     } else {
       query.order(column, { ascending });
     }
@@ -278,6 +283,15 @@ export async function getTransactionsQuery(
       .join(",");
 
     query.or(matchCategory);
+  }
+
+  if (tags) {
+    query
+      .select(
+        [...columns, "temp_filter_tags:transaction_tags!inner()"].join(","),
+      )
+      .eq("team_id", teamId)
+      .in("temp_filter_tags.tag_id", tags);
   }
 
   if (recurring) {
@@ -338,6 +352,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
     "assigned:assigned_id(*)",
     "category:category_slug(id, name, vat)",
     "attachments:transaction_attachments(*)",
+    "tags:transaction_tags(id, tag:tags(id, name))",
     "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
     "vat:calculated_vat",
   ];
@@ -870,7 +885,7 @@ export async function getTrackerProjectQuery(
 ) {
   return supabase
     .from("tracker_projects")
-    .select("*")
+    .select("*, tags:tracker_project_tags(id, tag:tags(id, name))")
     .eq("id", params.projectId)
     .eq("team_id", params.teamId)
     .single();
@@ -912,7 +927,7 @@ export async function getTrackerProjectsQuery(
   const query = supabase
     .from("tracker_projects")
     .select(
-      "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount, customer:customer_id(id, name, website)",
+      "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount, customer:customer_id(id, name, website), tags:tracker_project_tags(id, tag:tags(id, name))",
       {
         count: "exact",
       },
@@ -946,6 +961,8 @@ export async function getTrackerProjectsQuery(
       // query.order("assigned_id", { ascending: value === "asc" });
     } else if (column === "customer") {
       query.order("customer(name)", { ascending: value === "asc" });
+    } else if (column === "tags") {
+      query.order("is_project_tagged", { ascending: value === "asc" });
     } else {
       query.order(column, { ascending: value === "asc" });
     }
@@ -1302,4 +1319,12 @@ export async function getLastInvoiceNumberQuery(
     .single();
 
   return { data };
+}
+
+export async function getTagsQuery(supabase: Client, teamId: string) {
+  return supabase
+    .from("tags")
+    .select("*")
+    .eq("team_id", teamId)
+    .order("created_at", { ascending: false });
 }

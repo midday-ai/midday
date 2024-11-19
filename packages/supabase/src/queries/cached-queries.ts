@@ -30,6 +30,7 @@ import {
   getPaymentStatusQuery,
   getRunwayQuery,
   getSpendingQuery,
+  getTagsQuery,
   getTeamBankAccountsQuery,
   getTeamInvitesQuery,
   getTeamMembersQuery,
@@ -576,6 +577,27 @@ export const getLastInvoiceNumber = async () => {
     {
       tags: [`invoice_number_${teamId}`],
       revalidate: 3600,
+    },
+  )();
+};
+
+export const getTags = async () => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getTagsQuery(supabase, teamId);
+    },
+    ["tags", teamId],
+    {
+      tags: [`tags_${teamId}`],
+      revalidate: 180,
     },
   )();
 };

@@ -13,6 +13,27 @@ export const updateUserSchema = z.object({
   revalidatePath: z.string().optional(),
 });
 
+export const createTagSchema = z.object({ name: z.string() });
+export const createTransactionTagSchema = z.object({
+  tagId: z.string(),
+  transactionId: z.string(),
+});
+
+export const deleteTransactionTagSchema = z.object({
+  tagId: z.string(),
+  transactionId: z.string(),
+});
+
+export const deleteProjectTagSchema = z.object({
+  tagId: z.string(),
+  projectId: z.string(),
+});
+
+export const createProjectTagSchema = z.object({
+  tagId: z.string(),
+  projectId: z.string(),
+});
+
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
 
 export const trackingConsentSchema = z.boolean();
@@ -320,6 +341,15 @@ export const createProjectSchema = z.object({
   currency: z.string().optional(),
   status: z.enum(["in_progress", "completed"]).optional(),
   customer_id: z.string().uuid().nullable().optional(),
+  tags: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        value: z.string(),
+      }),
+    )
+    .optional()
+    .nullable(),
 });
 
 export const updateProjectSchema = z.object({
@@ -332,6 +362,15 @@ export const updateProjectSchema = z.object({
   currency: z.string().optional(),
   status: z.enum(["in_progress", "completed"]).optional(),
   customer_id: z.string().uuid().nullable().optional(),
+  tags: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        value: z.string(),
+      }),
+    )
+    .optional()
+    .nullable(),
 });
 
 export const deleteProjectSchema = z.object({

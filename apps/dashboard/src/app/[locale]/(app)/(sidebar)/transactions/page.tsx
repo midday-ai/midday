@@ -39,6 +39,7 @@ export default async function Transactions({
     statuses,
     recurring,
     accounts,
+    tags,
   } = searchParamsCache.parse(searchParams);
 
   // Move this in a suspense
@@ -59,6 +60,7 @@ export default async function Transactions({
     statuses,
     recurring,
     accounts,
+    tags,
   };
 
   const sort = searchParams?.sort?.split(":");

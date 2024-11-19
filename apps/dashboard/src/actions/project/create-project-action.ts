@@ -18,23 +18,35 @@ export const createProjectAction = authActionClient
       channel: LogEvents.ProjectCreated.channel,
     },
   })
-  .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
-    const { data } = await createProject(supabase, {
-      ...params,
-      team_id: user.team_id,
-    });
+  .action(
+    async ({ parsedInput: { tags, ...params }, ctx: { user, supabase } }) => {
+      const { data } = await createProject(supabase, {
+        ...params,
+        team_id: user.team_id!,
+      });
 
-    if (!data) {
-      throw new Error("Failed to create project");
-    }
+      if (!data) {
+        throw new Error("Failed to create project");
+      }
 
-    cookies().set({
-      name: Cookies.LastProject,
-      value: data.id,
-      expires: addYears(new Date(), 1),
-    });
+      if (tags?.length) {
+        await supabase.from("tracker_project_tags").insert(
+          tags.map((tag) => ({
+            tag_id: tag.id,
+            tracker_project_id: data?.id,
+            team_id: user.team_id!,
+          })),
+        );
+      }
 
-    revalidateTag(`tracker_projects_${user.team_id}`);
+      cookies().set({
+        name: Cookies.LastProject,
+        value: data.id,
+        expires: addYears(new Date(), 1),
+      });
 
-    return data;
-  });
+      revalidateTag(`tracker_projects_${user.team_id}`);
+
+      return data;
+    },
+  );

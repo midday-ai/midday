@@ -516,20 +516,12 @@ type CreateProjectParams = {
   rate?: number;
   currency?: string;
   customer_id?: string;
+  team_id: string;
 };
 
 export async function createProject(
   supabase: Client,
   params: CreateProjectParams,
 ) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
-
-  return supabase
-    .from("tracker_projects")
-    .insert({
-      ...params,
-      team_id: userData?.team_id,
-    })
-    .select()
-    .single();
+  return supabase.from("tracker_projects").insert(params).select().single();
 }

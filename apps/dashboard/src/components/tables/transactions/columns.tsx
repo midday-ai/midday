@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
+import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
 import { cn } from "@midday/ui/cn";
@@ -29,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import { ScrollArea, ScrollBar } from "@midday/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
@@ -72,6 +74,10 @@ export type Transaction = {
       logo_url: string;
     };
   };
+  tags?: {
+    id: string;
+    name: string;
+  }[];
 };
 
 export const columns: ColumnDef<Transaction>[] = [
@@ -165,6 +171,29 @@ export const columns: ColumnDef<Transaction>[] = [
           name={row.original?.category?.name}
           color={row.original?.category?.color}
         />
+      );
+    },
+  },
+  {
+    accessorKey: "tags",
+    header: "Tags",
+    cell: ({ row }) => {
+      return (
+        <div className="relative">
+          <ScrollArea className="max-w-[170px] whitespace-nowrap">
+            <div className="flex items-center space-x-2">
+              {row.original.tags?.map((tag) => (
+                <Badge key={tag.id} variant="tag" className="whitespace-nowrap">
+                  {tag.tag.name}
+                </Badge>
+              ))}
+            </div>
+
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+        </div>
       );
     },
   },

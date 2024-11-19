@@ -1,4 +1,6 @@
 import { createAttachmentsAction } from "@/actions/create-attachments-action";
+import { createTransactionTagAction } from "@/actions/create-transaction-tag-action";
+import { deleteTransactionTagAction } from "@/actions/delete-transaction-tag-action";
 import type { UpdateTransactionValues } from "@/actions/schema";
 import { updateSimilarTransactionsCategoryAction } from "@/actions/update-similar-transactions-action";
 import { updateSimilarTransactionsRecurringAction } from "@/actions/update-similar-transactions-recurring";
@@ -38,12 +40,12 @@ import { Attachments } from "./attachments";
 import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
+import { SelectTags } from "./select-tags";
 import { TransactionBankAccount } from "./transaction-bank-account";
 
 type Props = {
   data: any;
   ids?: string[];
-  locale: string;
   updateTransaction: (
     values: UpdateTransactionValues,
     optimisticData: any,
@@ -53,7 +55,6 @@ type Props = {
 export function TransactionDetails({
   data: initialData,
   ids,
-  locale,
   updateTransaction,
 }: Props) {
   const [data, setData] = useState(initialData);
@@ -68,6 +69,8 @@ export function TransactionDetails({
     updateSimilarTransactionsRecurringAction,
   );
   const createAttachments = useAction(createAttachmentsAction);
+  const createTransactionTag = useAction(createTransactionTagAction);
+  const deleteTransactionTag = useAction(deleteTransactionTagAction);
 
   useHotkeys("esc", () => setTransactionId(null));
 
@@ -311,6 +314,32 @@ export function TransactionDetails({
             }}
           />
         </div>
+      </div>
+
+      <div className="mt-6">
+        <Label htmlFor="tags" className="mb-2 block">
+          Tags
+        </Label>
+
+        <SelectTags
+          tags={data?.tags?.map((tag) => ({
+            label: tag.tag.name,
+            value: tag.tag.name,
+            id: tag.tag.id,
+          }))}
+          onSelect={(tag) => {
+            createTransactionTag.execute({
+              tagId: tag.id,
+              transactionId: data?.id,
+            });
+          }}
+          onRemove={(tag) => {
+            deleteTransactionTag.execute({
+              tagId: tag.id,
+              transactionId: data?.id,
+            });
+          }}
+        />
       </div>
 
       <Accordion type="multiple" defaultValue={defaultValue}>

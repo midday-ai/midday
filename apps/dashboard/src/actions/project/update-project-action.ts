@@ -15,7 +15,8 @@ export const updateProjectAction = authActionClient
     },
   })
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
-    const { id, ...data } = params;
+    // We store tags in the form state, it's deleted from the action
+    const { id, tags, ...data } = params;
 
     await supabase.from("tracker_projects").update(data).eq("id", id);
 
