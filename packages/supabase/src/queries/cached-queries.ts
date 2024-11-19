@@ -61,25 +61,23 @@ export const getTransactions = async (
     },
     ["transactions", teamId],
     {
-      revalidate: 600,
+      revalidate: 180,
       tags: [`transactions_${teamId}`],
     },
   )(params);
 };
 
-// Cache per request
 export const getSession = cache(async () => {
   const supabase = createClient();
 
-  return supabase.auth.getUser();
+  return supabase.auth.getSession();
 });
 
-// Cache per request and revalidate every 30 minutes
-export const getUser = cache(async () => {
+export const getUser = async () => {
   const {
-    data: { user },
+    data: { session },
   } = await getSession();
-  const userId = user?.id;
+  const userId = session?.user?.id;
 
   if (!userId) {
     return null;
@@ -94,11 +92,10 @@ export const getUser = cache(async () => {
     ["user", userId],
     {
       tags: [`user_${userId}`],
-      // 30 minutes, jwt expires in 1 hour
-      revalidate: 1800,
+      revalidate: 180,
     },
-  )();
-});
+  )(userId);
+};
 
 export const getTeamUser = async () => {
   const supabase = createClient();
@@ -114,7 +111,7 @@ export const getTeamUser = async () => {
     ["team", "user", data.id],
     {
       tags: [`team_user_${data.id}`],
-      revalidate: 1800,
+      revalidate: 180,
     },
   )(data.id);
 };
@@ -352,7 +349,7 @@ export const getTrackerProjects = async (
     ["tracker_projects", teamId],
     {
       tags: [`tracker_projects_${teamId}`],
-      revalidate: 3600,
+      revalidate: 180,
     },
   )(params);
 };
@@ -375,7 +372,7 @@ export const getTrackerRecordsByRange = async (
     ["tracker_entries", teamId],
     {
       tags: [`tracker_entries_${teamId}`],
-      revalidate: 3600,
+      revalidate: 180,
     },
   )(params);
 };
@@ -600,7 +597,7 @@ export const getTags = async () => {
     ["tags", teamId],
     {
       tags: [`tags_${teamId}`],
-      revalidate: 3600,
+      revalidate: 180,
     },
   )();
 };
