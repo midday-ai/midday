@@ -28,8 +28,14 @@ export function Input({ className, ...props }: InputProps) {
           isPlaceholder && "opacity-0",
           className,
         )}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
+        onFocus={(evt) => {
+          setIsFocused(true);
+          props.onFocus?.(evt);
+        }}
+        onBlur={(evt) => {
+          setIsFocused(false);
+          props.onBlur?.(evt);
+        }}
       />
       {isPlaceholder && (
         <div className="absolute inset-0 pointer-events-none">

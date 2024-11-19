@@ -3,7 +3,6 @@ import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { createClient } from "@midday/supabase/client";
 import { searchInvoiceNumberQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
-import { Skeleton } from "@midday/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -13,7 +12,6 @@ import {
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
-import { ContentEditable } from "./content-editable";
 import { Input } from "./input";
 import { LabelInput } from "./label-input";
 
