@@ -74,20 +74,22 @@ client.defineJob({
     });
 
     const attachments = await Promise.allSettled(
-      data?.flatMap((transaction, idx) => {
+      (data ?? []).flatMap((transaction, idx) => {
         const rowId = idx + 1;
 
-        return transaction?.attachments?.map(
+        return (transaction.attachments ?? []).map(
           async (attachment, idx2: number) => {
-            const extension = attachment.name.split(".").pop();
+            const filename = attachment.name?.split(".").at(0);
+            const extension = attachment.name?.split(".").at(-1);
+
             const name =
               idx2 > 0
-                ? `${rowId}_${idx2}.${extension}`
-                : `${rowId}.${extension}`;
+                ? `${filename}-${rowId}_${idx2}.${extension}`
+                : `${filename}-${rowId}.${extension}`;
 
             const { data } = await download(client, {
               bucket: "vault",
-              path: attachment.path.join("/"),
+              path: (attachment.path ?? []).join("/"),
             });
 
             return {
@@ -114,10 +116,11 @@ client.defineJob({
       },
     });
 
+    console.log(attachments);
+
     const rows = data
-      ?.sort((a, b) => a.date - b.date)
+      ?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .map((transaction, idx) => [
-        transaction?.id,
         transaction.date,
         transaction.name,
         Intl.NumberFormat(locale, {
@@ -132,8 +135,16 @@ client.defineJob({
           : "",
         transaction?.category?.name ?? "",
         transaction?.category?.description ?? "",
-        transaction?.attachments?.length > 0 ? `${idx + 1}.pdf` : null,
         transaction?.attachments?.length > 0 ? "✔️" : "❌",
+
+        attachments
+          .filter(
+            (a) => a.status === "fulfilled" && a.value?.id === transaction.id,
+          )
+          .map((a) => a.value?.name)
+          .filter(Boolean)
+          .join(", ") ?? "",
+
         transaction?.balance ?? "",
         transaction?.bank_account?.name ?? "",
         transaction?.note ?? "",
@@ -141,15 +152,14 @@ client.defineJob({
 
     const csv = await writeToString(rows, {
       headers: [
-        "ID",
         "Date",
         "Description",
         "Amount",
         "VAT",
         "Category",
         "Category description",
-        "Attachment name",
-        "Attachment",
+        "Status",
+        "Attachments",
         "Balance",
         "Account",
         "Note",
