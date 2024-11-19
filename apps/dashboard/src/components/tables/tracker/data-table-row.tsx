@@ -31,7 +31,6 @@ import { Icons } from "@midday/ui/icons";
 import { ScrollArea, ScrollBar } from "@midday/ui/scroll-area";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
-import { formatISO } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import type { TrackerProject } from "./data-table";
@@ -144,7 +143,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
           </DataTableCell>
           <DataTableCell>
             <div className="relative">
-              <ScrollArea className="max-w-[170px] whitespace-nowrap">
+              <ScrollArea className="w-[170px] whitespace-nowrap">
                 <div className="flex items-center space-x-2">
                   {row.tags?.map((tag) => (
                     <Link

@@ -4,12 +4,10 @@ import { deleteTransactionTagAction } from "@/actions/delete-transaction-tag-act
 import type { UpdateTransactionValues } from "@/actions/schema";
 import { updateSimilarTransactionsCategoryAction } from "@/actions/update-similar-transactions-action";
 import { updateSimilarTransactionsRecurringAction } from "@/actions/update-similar-transactions-recurring";
+import { useUserContext } from "@/store/user/hook";
 import { createClient } from "@midday/supabase/client";
 import { getTransactionQuery } from "@midday/supabase/queries";
-import {
-  getCurrentUserTeamQuery,
-  getSimilarTransactions,
-} from "@midday/supabase/queries";
+import { getSimilarTransactions } from "@midday/supabase/queries";
 import {
   Accordion,
   AccordionContent,
@@ -71,6 +69,8 @@ export function TransactionDetails({
   const createAttachments = useAction(createAttachmentsAction);
   const createTransactionTag = useAction(createTransactionTagAction);
   const deleteTransactionTag = useAction(deleteTransactionTagAction);
+
+  const { team_id: teamId } = useUserContext((state) => state.data);
 
   useHotkeys("esc", () => setTransactionId(null));
 
@@ -134,10 +134,9 @@ export function TransactionDetails({
       { category },
     );
 
-    const user = await getCurrentUserTeamQuery(supabase);
     const transactions = await getSimilarTransactions(supabase, {
       name: data?.name,
-      teamId: user?.data?.team_id,
+      teamId: teamId,
       categorySlug: category.slug,
     });
 
@@ -173,10 +172,9 @@ export function TransactionDetails({
       { recurring: value, frequency: value ? "monthly" : null },
     );
 
-    const user = await getCurrentUserTeamQuery(supabase);
     const transactions = await getSimilarTransactions(supabase, {
       name: data?.name,
-      teamId: user?.data?.team_id,
+      teamId: teamId,
     });
 
     if (transactions?.data && transactions.data.length > 1) {

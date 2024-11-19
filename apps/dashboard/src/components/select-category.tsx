@@ -1,10 +1,8 @@
 import { createCategoriesAction } from "@/actions/create-categories-action";
+import { useUserContext } from "@/store/user/hook";
 import { getColorFromName } from "@/utils/categories";
 import { createClient } from "@midday/supabase/client";
-import {
-  getCategoriesQuery,
-  getCurrentUserTeamQuery,
-} from "@midday/supabase/queries";
+import { getCategoriesQuery } from "@midday/supabase/queries";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
 import { Spinner } from "@midday/ui/spinner";
 import { useAction } from "next-safe-action/hooks";
@@ -46,31 +44,29 @@ export function SelectCategory({
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
 
+  const { team_id: teamId } = useUserContext((state) => state.data);
+
   useEffect(() => {
     async function fetchData() {
-      const { data: userData } = await getCurrentUserTeamQuery(supabase);
+      const response = await getCategoriesQuery(supabase, {
+        teamId,
+        limit: 1000,
+      });
 
-      if (userData?.team_id) {
-        const response = await getCategoriesQuery(supabase, {
-          teamId: userData.team_id,
-          limit: 1000,
-        });
-
-        if (response.data) {
-          setData([
-            ...response.data.map(transformCategory),
-            ...(uncategorized
-              ? [
-                  {
-                    id: "uncategorized",
-                    label: "Uncategorized",
-                    color: "#606060",
-                    slug: "uncategorized",
-                  },
-                ]
-              : []),
-          ]);
-        }
+      if (response.data) {
+        setData([
+          ...response.data.map(transformCategory),
+          ...(uncategorized
+            ? [
+                {
+                  id: "uncategorized",
+                  label: "Uncategorized",
+                  color: "#606060",
+                  slug: "uncategorized",
+                },
+              ]
+            : []),
+        ]);
       }
 
       setIsLoading(false);

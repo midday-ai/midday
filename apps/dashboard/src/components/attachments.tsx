@@ -2,8 +2,7 @@
 
 import { deleteAttachmentAction } from "@/actions/delete-attachment-action";
 import { useUpload } from "@/hooks/use-upload";
-import { createClient } from "@midday/supabase/client";
-import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
+import { useUserContext } from "@/store/user/hook";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
@@ -33,10 +32,11 @@ type Props = {
 };
 
 export function Attachments({ prefix, data, onUpload }: Props) {
-  const supabase = createClient();
   const { toast } = useToast();
   const [files, setFiles] = useState<Attachment[]>([]);
   const { uploadFile } = useUpload();
+
+  const { team_id: teamId } = useUserContext((state) => state.data);
 
   const handleOnDelete = async (id: string) => {
     setFiles((files) => files.filter((file) => file?.id !== id));
@@ -54,15 +54,13 @@ export function Attachments({ prefix, data, onUpload }: Props) {
       })),
     ]);
 
-    const { data: userData } = await getCurrentUserTeamQuery(supabase);
-
     const uploadedFiles = await Promise.all(
       acceptedFiles.map(async (acceptedFile) => {
         const filename = stripSpecialCharacters(acceptedFile.name);
 
         const { path } = await uploadFile({
           bucket: "vault",
-          path: [userData?.team_id, "transactions", prefix, filename],
+          path: [teamId, "transactions", prefix, filename],
           file: acceptedFile,
         });
 

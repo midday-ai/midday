@@ -79,6 +79,8 @@ interface MultipleSelectorProps {
   >;
   /** hide the clear all button. */
   hideClearAllButton?: boolean;
+
+  renderOption?: (option: Option) => React.ReactNode;
 }
 
 export interface MultipleSelectorRef {
@@ -202,6 +204,7 @@ const MultipleSelector = React.forwardRef<
       commandProps,
       inputProps,
       hideClearAllButton = false,
+      renderOption,
     }: MultipleSelectorProps,
     ref: React.Ref<MultipleSelectorRef>,
   ) => {
@@ -612,12 +615,12 @@ const MultipleSelector = React.forwardRef<
                               onChange?.(newOptions);
                             }}
                             className={cn(
-                              "cursor-pointer",
+                              "cursor-pointer w-full",
                               option.disable &&
                                 "cursor-default text-muted-foreground",
                             )}
                           >
-                            {option.label}
+                            {renderOption ? renderOption(option) : option.label}
                           </CommandItem>
                         );
                       })}
