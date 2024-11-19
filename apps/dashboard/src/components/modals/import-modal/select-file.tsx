@@ -1,7 +1,7 @@
 import { getTransactionsFromLayout } from "@/actions/transactions/get-transactions-from-layout";
 import { useUpload } from "@/hooks/use-upload";
+import { useUserContext } from "@/store/user/hook";
 import { createClient } from "@midday/supabase/client";
-import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
 import { Spinner } from "@midday/ui/spinner";
 import { stripSpecialCharacters } from "@midday/utils";
@@ -20,6 +20,8 @@ export function SelectFile() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { uploadFile } = useUpload();
+
+  const { team_id: teamId } = useUserContext((state) => state.data);
 
   const getTransactions = useAction(getTransactionsFromLayout, {
     onSuccess: ({ data }) => {
@@ -52,13 +54,11 @@ export function SelectFile() {
       try {
         setValue("import_type", "image");
 
-        const { data: userData } = await getCurrentUserTeamQuery(supabase);
-
         const filename = stripSpecialCharacters(file.name);
 
         const { path } = await uploadFile({
           bucket: "vault",
-          path: [userData?.team_id, "imports", filename],
+          path: [teamId, "imports", filename],
           file,
         });
 

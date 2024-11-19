@@ -226,9 +226,7 @@ function FieldRow({
 }) {
   const { label, required } = mappableFields[field];
   const { control, watch, fileColumns, firstRows } = useCsvContext();
-  const { locale, date_format: dateFormat } = useUserContext(
-    (state) => state.data,
-  );
+  const { locale, timezone } = useUserContext((state) => state.data);
 
   const value = watch(field);
   const inverted = watch("inverted");
@@ -243,7 +241,7 @@ function FieldRow({
     if (!description) return;
 
     if (field === "date") {
-      return formatDate(description, dateFormat);
+      return formatDate(description, timezone);
     }
 
     if (field === "amount") {

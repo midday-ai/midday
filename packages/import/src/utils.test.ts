@@ -94,4 +94,8 @@ describe("formatDate", () => {
   it("should handle short date format", () => {
     expect(formatDate("11/4/24", "Europe/Berlin")).toBe("2024-04-11");
   });
+
+  it("should handle dates in dd-MM-yyyy format", () => {
+    expect(formatDate("24-09-2024", "Europe/Berlin")).toBe("2024-09-24");
+  });
 });
