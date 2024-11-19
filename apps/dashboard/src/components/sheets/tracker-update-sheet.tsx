@@ -33,7 +33,7 @@ import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
@@ -46,6 +46,7 @@ type Props = {
 export function TrackerUpdateSheet({ teamId, customers }: Props) {
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const [isLoading, setIsLoading] = useState(false);
   const { setParams, update, projectId } = useTrackerParams();
   const supabase = createClient();
   const id = projectId ?? "";
@@ -70,6 +71,8 @@ export function TrackerUpdateSheet({ teamId, customers }: Props) {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
+
       const { data } = await getTrackerProjectQuery(supabase, {
         teamId,
         projectId: id,
@@ -94,6 +97,8 @@ export function TrackerUpdateSheet({ teamId, customers }: Props) {
             })) ?? undefined,
         });
       }
+
+      setIsLoading(false);
     };
 
     if (id) {
@@ -134,6 +139,10 @@ export function TrackerUpdateSheet({ teamId, customers }: Props) {
       form.reset();
     }
   }, [isOpen]);
+
+  if (isLoading) {
+    return null;
+  }
 
   if (isDesktop) {
     return (
