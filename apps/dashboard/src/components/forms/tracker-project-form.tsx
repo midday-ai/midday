@@ -118,12 +118,19 @@ export function TrackerProjectForm({
               });
             }}
             // Only for create projects
-            onChange={(tags) => {
+            onCreate={(tag) => {
               if (!isEdit) {
-                form.setValue("tags", tags, {
-                  shouldDirty: true,
-                  shouldValidate: true,
-                });
+                form.setValue(
+                  "tags",
+                  [
+                    ...(form.getValues("tags") ?? []),
+                    { id: tag.id, value: tag.name },
+                  ],
+                  {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  },
+                );
               }
             }}
             // Only for edit projects
@@ -295,7 +302,7 @@ export function TrackerProjectForm({
         <div className="fixed bottom-8 w-full sm:max-w-[455px] right-8">
           <Button
             className="w-full"
-            disabled={isSaving || form.formState.isValid}
+            disabled={isSaving || !form.formState.isValid}
           >
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
           </Button>

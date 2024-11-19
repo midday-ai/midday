@@ -345,7 +345,6 @@ export const createProjectSchema = z.object({
     .array(
       z.object({
         id: z.string().uuid(),
-        label: z.string(),
         value: z.string(),
       }),
     )
@@ -367,7 +366,6 @@ export const updateProjectSchema = z.object({
     .array(
       z.object({
         id: z.string().uuid(),
-        label: z.string(),
         value: z.string(),
       }),
     )

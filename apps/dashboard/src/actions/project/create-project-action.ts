@@ -33,8 +33,8 @@ export const createProjectAction = authActionClient
         await supabase.from("tracker_project_tags").insert(
           tags.map((tag) => ({
             tag_id: tag.id,
-            tracker_project_id: data?.id ?? "",
-            team_id: user.team_id ?? "",
+            tracker_project_id: data?.id,
+            team_id: user.team_id!,
           })),
         );
       }

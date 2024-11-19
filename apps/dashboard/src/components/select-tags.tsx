@@ -11,16 +11,25 @@ type Props = {
   onSelect?: (tag: Option) => void;
   onRemove?: (tag: Option & { id: string }) => void;
   onChange?: (tags: Option[]) => void;
+  onCreate?: (tag: Option) => void;
 };
 
-export function SelectTags({ tags, onSelect, onRemove, onChange }: Props) {
+export function SelectTags({
+  tags,
+  onSelect,
+  onRemove,
+  onChange,
+  onCreate,
+}: Props) {
   const supabase = createClient();
 
   const [data, setData] = useState<Option[]>(tags ?? []);
   const [selected, setSelected] = useState<Option[]>(tags ?? []);
+
   const createTag = useAction(createTagAction, {
     onSuccess: ({ data }) => {
-      onSelect(data);
+      onSelect?.(data);
+      onCreate?.(data);
     },
   });
 
