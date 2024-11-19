@@ -14,7 +14,7 @@
   "dependencies": {
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
-    "@openpanel/nextjs": "^1.0.5",
+    "@openpanel/nextjs": "^1.0.6",
     "@openstatus/react": "^0.0.3",
     "@team-plain/typescript-sdk": "5.5.0",
     "@uidotdev/usehooks": "^2.4.1",
@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^22.9.0",
+    "@types/node": "^22.9.1",
     "@types/react": "18.3.12",
     "@types/react-dom": "npm:types-react-dom@19.0.0-alpha.3"
   },
