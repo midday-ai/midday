@@ -37,7 +37,7 @@ export async function getDefaultSettings(): Promise<Settings> {
   );
 
   return {
-    currency,
+    currency: currency.toUpperCase(),
     size,
     include_tax,
     include_vat: !include_tax,
