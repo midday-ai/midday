@@ -1,7 +1,6 @@
 import { CopyInput } from "@/components/copy-input";
+import { CtaButton } from "@/components/cta-button";
 import { DynamicImage } from "@/components/dynamic-image";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import BulkLight from "public/product-bulk-light.png";
 import BulkDark from "public/product-bulk.png";
@@ -35,13 +34,7 @@ export default function Page() {
             export documents to keep your business organized.
           </p>
 
-          <Button
-            className="mt-12 h-11 space-x-2 items-center py-2"
-            variant="outline"
-          >
-            <span>Automate your reconciliation process</span>
-            <Icons.ArrowOutward />
-          </Button>
+          <CtaButton>Automate your reconciliation process</CtaButton>
         </div>
       </div>
 

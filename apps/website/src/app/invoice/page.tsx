@@ -1,6 +1,5 @@
+import { CtaButton } from "@/components/cta-button";
 import { DynamicImage } from "@/components/dynamic-image";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import InvoiceLight from "public/product-invoice-light.jpg";
 import InvoiceDark from "public/product-invoice.jpg";
@@ -35,13 +34,7 @@ export default function Page() {
             your invoices and see your outstanding balance.
           </p>
 
-          <Button
-            className="mt-12 h-11 space-x-2 items-center py-2"
-            variant="outline"
-          >
-            <span>Send your first invoice in seconds</span>
-            <Icons.ArrowOutward />
-          </Button>
+          <CtaButton>Create invoices in seconds</CtaButton>
         </div>
       </div>
 

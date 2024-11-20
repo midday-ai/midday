@@ -1,7 +1,6 @@
 import { Assistant } from "@/components/assistant";
+import { CtaButton } from "@/components/cta-button";
 import { DynamicImage } from "@/components/dynamic-image";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import FilesLight from "public/product-files-light.png";
 import FilesDark from "public/product-files.png";
@@ -32,13 +31,7 @@ export default function Page() {
             Keep all your contracts, agreements and more safe in one place
           </p>
 
-          <Button
-            className="mt-12 h-11 space-x-2 items-center py-2"
-            variant="outline"
-          >
-            <span>Centralize Your Files now</span>
-            <Icons.ArrowOutward />
-          </Button>
+          <CtaButton>Centralize Your Files now</CtaButton>
         </div>
       </div>
 

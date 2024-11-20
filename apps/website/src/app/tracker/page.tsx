@@ -1,6 +1,5 @@
+import { CtaButton } from "@/components/cta-button";
 import { DynamicImage } from "@/components/dynamic-image";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import ProjectsLight from "public/product-projects-light.png";
 import ProjectsDark from "public/product-projects.png";
@@ -34,13 +33,7 @@ export default function Page() {
             invoices.
           </p>
 
-          <Button
-            className="mt-12 h-11 space-x-2 items-center py-2"
-            variant="outline"
-          >
-            <span>Start tracking time now</span>
-            <Icons.ArrowOutward />
-          </Button>
+          <CtaButton>Start tracking time now</CtaButton>
         </div>
       </div>
 
