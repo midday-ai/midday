@@ -5,11 +5,11 @@ import { getSession } from "@midday/supabase/cached-queries";
 
 export const createPlaidLinkTokenAction = async (accessToken?: string) => {
   const {
-    data: { session },
+    data: { user },
   } = await getSession();
 
   const { data } = await engine.auth.plaid.link({
-    userId: session?.user.id,
+    userId: user.id,
     accessToken,
   });
 
