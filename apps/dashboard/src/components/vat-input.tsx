@@ -34,6 +34,7 @@ export function VatInput({
         type="number"
         min={0}
         max={100}
+        step={0.1}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         defaultValue={value ?? ""}
