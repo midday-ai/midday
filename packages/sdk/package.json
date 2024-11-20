@@ -1,0 +1,32 @@
+{
+  "name": "@midday/sdk",
+  "description": "Midday SDK",
+  "version": "0.0.0-beta.1",
+  "private": false,
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/midday-ai/midday"
+  },
+  "homepage": "https://midday.ai",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "dev": "tsup tsup src/index.ts --format cjs,esm --dts --watch",
+    "build": "rm -rf dist && tsup src/index.ts --format cjs,esm --dts",
+    "npm:publish": "npm run build && npm publish",
+    "lint": "biome check .",
+    "check:types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.46.1"
+  }
+}
