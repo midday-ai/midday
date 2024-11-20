@@ -155,15 +155,22 @@ export const transformTransaction = (
 };
 
 const transformAccountName = (account: TransformAccountName) => {
+  // First try to use the name from the account
   if (account?.name) {
     return capitalCase(account.name);
   }
 
+  // Then try to use the product
   if (account?.product) {
     return account.product;
   }
 
-  // TODO: Fix no name
+  // Then try to use the institution name
+  if (account?.institution?.name) {
+    return account.institution.name;
+  }
+
+  // Last use a default name
   return "No name";
 };
 
@@ -179,6 +186,7 @@ export const transformAccount = ({
     name: transformAccountName({
       name: account.name,
       product: account.product,
+      institution: institution,
     }),
     currency: account.currency.toUpperCase(),
     enrollment_id: null,

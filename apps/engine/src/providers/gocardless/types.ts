@@ -202,6 +202,7 @@ export type TransformAccount = GetAccountsResponse[0];
 export type TransformAccountName = {
   name: string;
   product: string;
+  institution: Institution;
 };
 
 export type AccountBalance = {

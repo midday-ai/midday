@@ -1,4 +1,5 @@
 import { ProviderError } from "@/utils/error";
+import { logger } from "@/utils/logger";
 import { formatISO, subDays } from "date-fns";
 import xior from "xior";
 import type { XiorInstance, XiorRequestConfig } from "xior";
@@ -27,8 +28,6 @@ import { getAccessValidForDays, getMaxHistoricalDays, isError } from "./utils";
 
 export class GoCardLessApi {
   #baseUrl = "https://bankaccountdata.gocardless.com";
-
-  #api: XiorInstance | null = null;
 
   // Cache keys
   #accessTokenCacheKey = "gocardless_access_token";
@@ -97,14 +96,18 @@ export class GoCardLessApi {
       },
     );
 
-    await Promise.all([
-      this.#kv?.put(this.#accessTokenCacheKey, response.access, {
-        expirationTtl: response.access_expires - this.#oneHour,
-      }),
-      this.#kv?.put(this.#refreshTokenCacheKey, response.refresh, {
-        expirationTtl: response.refresh_expires - this.#oneHour,
-      }),
-    ]);
+    try {
+      await Promise.all([
+        this.#kv?.put(this.#accessTokenCacheKey, response.access, {
+          expirationTtl: response.access_expires - this.#oneHour,
+        }),
+        this.#kv?.put(this.#refreshTokenCacheKey, response.refresh, {
+          expirationTtl: response.refresh_expires - this.#oneHour,
+        }),
+      ]);
+    } catch (error) {
+      logger("Error saving tokens");
+    }
 
     return response.access;
   }
@@ -348,18 +351,14 @@ export class GoCardLessApi {
   }
 
   async #getApi(accessToken?: string): Promise<XiorInstance> {
-    if (!this.#api) {
-      this.#api = xior.create({
-        baseURL: this.#baseUrl,
-        timeout: 30_000,
-        headers: {
-          Accept: "application/json",
-          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-        },
-      });
-    }
-
-    return this.#api;
+    return xior.create({
+      baseURL: this.#baseUrl,
+      timeout: 30_000,
+      headers: {
+        Accept: "application/json",
+        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+      },
+    });
   }
 
   async #get<TResponse>(
