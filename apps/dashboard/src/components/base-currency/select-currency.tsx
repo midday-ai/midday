@@ -44,7 +44,13 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
           "This will update the base currency for all transactions and account balances.",
         duration: 7000,
         footer: (
-          <Button onClick={() => updateCurrency.execute({ baseCurrency })}>
+          <Button
+            onClick={() =>
+              updateCurrency.execute({
+                baseCurrency: baseCurrency.toUpperCase(),
+              })
+            }
+          >
             Update
           </Button>
         ),
@@ -53,11 +59,6 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
       return;
     }
   };
-
-  useEffect(() => {
-    if (eventId) {
-    }
-  }, [eventId]);
 
   useEffect(() => {
     if (status === "SUCCESS") {
