@@ -1,5 +1,4 @@
 import { logger } from "@/utils/logger";
-import { withRetry } from "@/utils/retry";
 import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 import { PlaidProvider } from "./plaid/plaid-provider";
 import { TellerProvider } from "./teller/teller-provider";
@@ -72,7 +71,7 @@ export class Provider {
       `provider: ${this.#name} id: ${params.accountId}`,
     );
 
-    const data = await withRetry(() => this.#provider?.getTransactions(params));
+    const data = await this.#provider?.getTransactions(params);
 
     if (data) {
       return data;
@@ -84,7 +83,7 @@ export class Provider {
   async getAccounts(params: GetAccountsRequest) {
     logger("getAccounts:", `provider: ${this.#name}`);
 
-    const data = await withRetry(() => this.#provider?.getAccounts(params));
+    const data = await this.#provider?.getAccounts(params);
 
     if (data) {
       return data;
@@ -99,9 +98,7 @@ export class Provider {
       `provider: ${this.#name} id: ${params.accountId}`,
     );
 
-    const data = await withRetry(() =>
-      this.#provider?.getAccountBalance(params),
-    );
+    const data = await this.#provider?.getAccountBalance(params);
 
     if (data) {
       return data;
@@ -113,7 +110,7 @@ export class Provider {
   async getInstitutions(params: GetInstitutionsRequest) {
     logger("getInstitutions:", `provider: ${this.#name}`);
 
-    const data = await withRetry(() => this.#provider?.getInstitutions(params));
+    const data = await this.#provider?.getInstitutions(params);
 
     if (data) {
       return data;
@@ -125,6 +122,6 @@ export class Provider {
   async deleteAccounts(params: DeleteAccountsRequest) {
     logger("delete:", `provider: ${this.#name}`);
 
-    return withRetry(() => this.#provider?.deleteAccounts(params));
+    return this.#provider?.deleteAccounts(params);
   }
 }
