@@ -28,6 +28,6 @@ export function transform({
         ? "income"
         : null,
     bank_account_id: transaction.bankAccountId,
-    currency: transaction.currency,
+    currency: transaction.currency.toUpperCase(),
   };
 }

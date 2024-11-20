@@ -151,7 +151,7 @@ export const transformAccount = ({
   return {
     id,
     name,
-    currency,
+    currency: currency.toUpperCase(),
     enrollment_id: enrollment_id,
     institution: transformInstitution(institution),
     type: getType(type),
@@ -162,7 +162,7 @@ export const transformAccount = ({
 export const transformAccountBalance = (
   account: TransformAccountBalance,
 ): BaseAccountBalance => ({
-  currency: account.currency,
+  currency: account.currency.toUpperCase(),
   amount: +account.amount,
 });
 

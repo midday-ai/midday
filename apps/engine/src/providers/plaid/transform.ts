@@ -164,8 +164,8 @@ export const transformTransaction = ({
     method,
     amount,
     currency:
-      transaction.iso_currency_code ||
-      transaction.unofficial_currency_code ||
+      transaction?.iso_currency_code?.toUpperCase() ||
+      transaction?.unofficial_currency_code?.toUpperCase() ||
       "USD",
     category: mapTransactionCategory({ transaction, amount }),
     balance: null,
@@ -184,7 +184,9 @@ export const transformAccount = ({
     id: account_id,
     name,
     currency:
-      balances.iso_currency_code || balances.unofficial_currency_code || "USD",
+      balances?.iso_currency_code?.toUpperCase() ||
+      balances?.unofficial_currency_code?.toUpperCase() ||
+      "USD",
     type: getType(type),
     enrollment_id: null,
     balance: transformAccountBalance(balances),
@@ -201,7 +203,9 @@ export const transformAccountBalance = (
   balances?: TransformAccountBalance,
 ): BaseBalance => ({
   currency:
-    balances?.iso_currency_code || balances?.unofficial_currency_code || "USD",
+    balances?.iso_currency_code?.toUpperCase() ||
+    balances?.unofficial_currency_code?.toUpperCase() ||
+    "USD",
   amount: balances?.available ?? 0,
 });
 
