@@ -1,8 +1,10 @@
+import { DynamicImage } from "@/components/dynamic-image";
 import { SubscribeInput } from "@/components/subscribe-input";
 import type { Metadata } from "next";
 import Image from "next/image";
 import engineSDK from "public/engine-sdk.png";
-import engine from "public/engine-ui.png";
+import engineLight from "public/engine-ui-light.png";
+import engineDark from "public/engine-ui.png";
 
 export const metadata: Metadata = {
   title: "Engine",
@@ -40,8 +42,9 @@ export default function Page() {
           just one click. We add even more providers in the future.
         </p>
 
-        <Image
-          src={engine}
+        <DynamicImage
+          lightSrc={engineLight}
+          darkSrc={engineDark}
           alt="Engine UI"
           width={1026}
           height={552}

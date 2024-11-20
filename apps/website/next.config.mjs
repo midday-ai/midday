@@ -31,6 +31,11 @@ const config = {
         destination: "/",
         permanent: true,
       },
+      {
+        source: "/pitch",
+        destination: "/",
+        permanent: true,
+      },
     ];
   },
 };
