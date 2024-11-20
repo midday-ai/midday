@@ -324,7 +324,7 @@ export function TransactionsSearchFilter({
               <DropdownMenuSubContent
                 sideOffset={14}
                 alignOffset={-4}
-                className="p-0"
+                className="w-[280px] p-4"
               >
                 <AmountRange />
               </DropdownMenuSubContent>
