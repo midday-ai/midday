@@ -104,8 +104,6 @@ export function FormContext({
     bottom_block: undefined,
   };
 
-  console.log("defaultValues", defaultValues);
-
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues,
