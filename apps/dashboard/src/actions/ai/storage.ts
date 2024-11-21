@@ -125,10 +125,10 @@ export async function getChats() {
 
 export async function getChat(id: string) {
   const {
-    data: { user },
+    data: { session },
   } = await getSession();
 
-  const userId = user.id;
+  const userId = session?.user?.id;
 
   const chat = await RedisClient.hgetall<Chat>(`chat:${id}`);
 

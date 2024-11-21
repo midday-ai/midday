@@ -1,15 +1,13 @@
-import { createClient } from "@midday/supabase/server";
+import { getSession } from "@midday/supabase/cached-queries";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const requestUrl = new URL(req.url);
   const filePath = requestUrl.searchParams.get("filePath");
 
-  const supabase = createClient();
-
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await getSession();
 
   if (!session) {
     return new NextResponse("Unauthorized", { status: 401 });
