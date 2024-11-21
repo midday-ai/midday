@@ -49,6 +49,7 @@ const defaultTemplate: InvoiceTemplate = {
   tax_rate: 0,
   vat_rate: 0,
   delivery_type: "create",
+  timezone: undefined,
 };
 
 type FormContextProps = {
@@ -79,8 +80,9 @@ export function FormContext({
       size: defaultSettings.size ?? defaultTemplate.size,
       include_tax: defaultSettings.include_tax ?? defaultTemplate.include_tax,
       include_vat: defaultSettings.include_vat ?? defaultTemplate.include_vat,
-      timezone: defaultSettings.timezone,
       locale: defaultSettings.locale,
+      // Use user timezone
+      timezone: defaultSettings.timezone,
       ...template,
     },
     customer_details: undefined,
@@ -101,6 +103,8 @@ export function FormContext({
     top_block: undefined,
     bottom_block: undefined,
   };
+
+  console.log("defaultValues", defaultValues);
 
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceFormSchema),

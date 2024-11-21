@@ -1,4 +1,5 @@
 import { AI } from "@/actions/ai/chat";
+import { DefaultSettings } from "@/components/default-settings.server";
 import { Header } from "@/components/header";
 import { GlobalSheets } from "@/components/sheets/global-sheets";
 import { Sidebar } from "@/components/sidebar";
@@ -109,6 +110,11 @@ export default async function Layout({
 
           <Suspense>
             <GlobalSheets defaultCurrency={currency} />
+          </Suspense>
+
+          <Suspense>
+            {/* Set default user timezone and locale */}
+            <DefaultSettings />
           </Suspense>
         </AI>
       </div>

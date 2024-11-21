@@ -1,8 +1,10 @@
-import { getDateFormat, getLocale, getTimezone } from "@midday/location";
+import { getTimezone } from "@midday/location";
+import { getLocale } from "@midday/location";
+import { getDateFormat } from "@midday/location";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 
-export async function setupUser(userId: string) {
+export async function DefaultSettings() {
   const supabase = createClient();
 
   const locale = getLocale();
@@ -12,8 +14,10 @@ export async function setupUser(userId: string) {
   try {
     const user = await getUser();
 
-    // Set timezone if not set
-    if (!user?.data?.date_format) {
+    const { id, date_format } = user?.data ?? {};
+
+    // Set default date format if not set
+    if (!date_format && id) {
       await supabase
         .from("users")
         .update({
@@ -21,9 +25,11 @@ export async function setupUser(userId: string) {
           timezone,
           locale,
         })
-        .eq("id", userId);
+        .eq("id", id);
     }
   } catch (error) {
     console.error(error);
   }
+
+  return null;
 }
