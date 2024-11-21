@@ -124,6 +124,7 @@ export const invoiceTemplateSchema = z.object({
   date_format: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd"]),
   delivery_type: z.enum(["create", "create_and_send"]),
   locale: z.string().optional(),
+  timezone: z.string().optional(),
 });
 
 export const invoiceFormSchema = z.object({

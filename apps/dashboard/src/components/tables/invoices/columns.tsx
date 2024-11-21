@@ -117,7 +117,7 @@ export const columns: ColumnDef<Invoice>[] = [
           </Avatar>
           <span className="truncate">{name}</span>
 
-          {viewAt && (
+          {viewAt && row.original.status !== "paid" && (
             <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger className="flex items-center space-x-2">
