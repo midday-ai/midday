@@ -78,62 +78,66 @@ async function updateInvoiceViewedAt(id: string) {
 export default async function Page({ params }: Props) {
   const supabase = createClient({ admin: true });
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-  const { id } = await verify(params.token);
-  const { data: invoice } = await getInvoiceQuery(supabase, id);
+    const { id } = await verify(params.token);
+    const { data: invoice } = await getInvoiceQuery(supabase, id);
 
-  // If the invoice is draft and the user is not logged in, return 404 or if the invoice is not found
-  if (!invoice || (invoice.status === "draft" && !session)) {
-    notFound();
-  }
+    // If the invoice is draft and the user is not logged in, return 404 or if the invoice is not found
+    if (!invoice || (invoice.status === "draft" && !session)) {
+      notFound();
+    }
 
-  if (!session) {
-    waitUntil(updateInvoiceViewedAt(id));
-  }
+    if (!session) {
+      waitUntil(updateInvoiceViewedAt(id));
+    }
 
-  const width = invoice.template.size === "letter" ? 750 : 595;
-  const height = invoice.template.size === "letter" ? 1056 : 842;
+    const width = invoice.template.size === "letter" ? 750 : 595;
+    const height = invoice.template.size === "letter" ? 1056 : 842;
 
-  return (
-    <div className="flex flex-col justify-center items-center min-h-screen dotted-bg p-4 sm:p-6 md:p-0">
-      <div
-        className="flex flex-col w-full max-w-full py-6"
-        style={{ maxWidth: width }}
-      >
-        <CustomerHeader
-          name={invoice.customer_name || invoice.customer?.name}
-          website={invoice.customer?.website}
-          status={invoice.status}
-        />
-        <div className="pb-24 md:pb-0">
-          <div className="shadow-[0_24px_48px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
-            <HtmlTemplate {...invoice} width={width} height={height} />
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen dotted-bg p-4 sm:p-6 md:p-0">
+        <div
+          className="flex flex-col w-full max-w-full py-6"
+          style={{ maxWidth: width }}
+        >
+          <CustomerHeader
+            name={invoice.customer_name || invoice.customer?.name}
+            website={invoice.customer?.website}
+            status={invoice.status}
+          />
+          <div className="pb-24 md:pb-0">
+            <div className="shadow-[0_24px_48px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
+              <HtmlTemplate {...invoice} width={width} height={height} />
+            </div>
           </div>
         </div>
+
+        <InvoiceToolbar
+          id={invoice.id}
+          size={invoice.template.size}
+          customer={invoice.customer}
+          viewedAt={invoice.viewed_at}
+        />
+
+        <InvoiceCommentsSheet />
+
+        <div className="fixed bottom-4 right-4 hidden md:block">
+          <a
+            href="https://midday.ai?utm_source=invoice"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[9px] text-[#878787]"
+          >
+            Powered by <span className="text-primary">midday</span>
+          </a>
+        </div>
       </div>
-
-      <InvoiceToolbar
-        id={invoice.id}
-        size={invoice.template.size}
-        customer={invoice.customer}
-        viewedAt={invoice.viewed_at}
-      />
-
-      <InvoiceCommentsSheet />
-
-      <div className="fixed bottom-4 right-4 hidden md:block">
-        <a
-          href="https://midday.ai?utm_source=invoice"
-          target="_blank"
-          rel="noreferrer"
-          className="text-[9px] text-[#878787]"
-        >
-          Powered by <span className="text-primary">midday</span>
-        </a>
-      </div>
-    </div>
-  );
+    );
+  } catch (error) {
+    notFound();
+  }
 }
