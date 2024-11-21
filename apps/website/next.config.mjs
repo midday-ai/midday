@@ -3,6 +3,9 @@ const config = {
   poweredByHeader: false,
   reactStrictMode: true,
   transpilePackages: ["@midday/ui", "@midday/tailwind", "next-mdx-remote"],
+  experimental: {
+    inlineCss: true,
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
