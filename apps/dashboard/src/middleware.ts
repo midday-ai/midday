@@ -1,4 +1,3 @@
-import { getSession } from "@midday/supabase/cached-queries";
 import { updateSession } from "@midday/supabase/middleware";
 import { createClient } from "@midday/supabase/server";
 import { createI18nMiddleware } from "next-international/middleware";
@@ -28,7 +27,7 @@ export async function middleware(request: NextRequest) {
 
   const {
     data: { session },
-  } = await getSession();
+  } = await supabase.auth.getSession();
 
   // Not authenticated
   if (
