@@ -18,6 +18,11 @@ export function useSliderWithInput({
     initialValue.map((v) => v.toString()),
   );
 
+  const setValues = useCallback((values: number[]) => {
+    setSliderValue(values);
+    setInputValues(values.map((v) => v.toString()));
+  }, []);
+
   const validateAndUpdateValue = useCallback(
     (rawValue: string, index: number) => {
       if (rawValue === "" || rawValue === "-") {
@@ -33,7 +38,7 @@ export function useSliderWithInput({
 
       const numValue = Number.parseFloat(rawValue);
 
-      if (isNaN(numValue)) {
+      if (Number.isNaN(numValue)) {
         const newInputValues = [...inputValues];
         newInputValues[index] = sliderValue[index].toString();
         setInputValues(newInputValues);
@@ -90,5 +95,6 @@ export function useSliderWithInput({
     handleInputChange,
     handleSliderChange,
     resetToDefault,
+    setValues,
   };
 }

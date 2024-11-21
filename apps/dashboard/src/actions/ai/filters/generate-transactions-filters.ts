@@ -9,11 +9,13 @@ const VALID_FILTERS = [
   "name",
   "attachments",
   "categories",
+  "tags",
   "start",
   "end",
   "accounts",
   "assignees",
   "recurring",
+  "amount_range",
 ];
 
 export async function generateTransactionsFilters(

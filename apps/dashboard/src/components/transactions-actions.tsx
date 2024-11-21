@@ -22,7 +22,12 @@ import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 
-export function TransactionsActions({ isEmpty }: { isEmpty: boolean }) {
+type Props = {
+  isEmpty: boolean;
+  tags: { id: string; name: string }[];
+};
+
+export function TransactionsActions({ isEmpty, tags }: Props) {
   const { toast } = useToast();
   const { setRowSelection, canDelete, rowSelection } = useTransactionsStore();
 
@@ -50,7 +55,7 @@ export function TransactionsActions({ isEmpty }: { isEmpty: boolean }) {
             <div className="h-8 w-[1px] bg-border ml-4 mr-4" />
 
             <div className="flex space-x-2">
-              <BulkActions ids={transactionIds} />
+              <BulkActions ids={transactionIds} tags={tags} />
 
               <div>
                 {canDelete && (

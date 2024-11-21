@@ -2090,6 +2090,16 @@ export type Database = {
         }
         Returns: number
       }
+      get_transactions_amount_range_data: {
+        Args: {
+          team_id: string
+          amount_type?: string
+        }
+        Returns: {
+          id: string
+          amount: number
+        }[]
+      }
       group_transactions_v2: {
         Args: {
           p_team_id: string

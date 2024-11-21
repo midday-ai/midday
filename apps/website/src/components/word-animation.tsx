@@ -18,6 +18,7 @@ function useWordCycle(words: string[], interval: number) {
 
   useEffect(() => {
     if (isInitial) {
+      setIndex(Math.floor(Math.random() * words.length));
       setIsInitial(false);
       return;
     }
@@ -30,6 +31,7 @@ function useWordCycle(words: string[], interval: number) {
 
   return words[index];
 }
+
 export function WordAnimation() {
   const word = useWordCycle(words, 2100);
 

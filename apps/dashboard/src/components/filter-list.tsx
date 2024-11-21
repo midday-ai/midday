@@ -34,7 +34,8 @@ type Props = {
   statusFilters: { id: string; name: string }[];
   attachmentsFilters: { id: string; name: string }[];
   recurringFilters: { id: string; name: string }[];
-  tags?: { id: string; name: string; slug: string }[];
+  tags?: { id: string; name: string; slug?: string }[];
+  amountRange?: [number, number];
 };
 
 export function FilterList({
@@ -49,6 +50,7 @@ export function FilterList({
   statusFilters,
   attachmentsFilters,
   recurringFilters,
+  amountRange,
 }: Props) {
   const renderFilter = ({ key, value }) => {
     switch (key) {
@@ -62,6 +64,10 @@ export function FilterList({
         return (
           key === "start" && value && format(new Date(value), "MMM d, yyyy")
         );
+      }
+
+      case "amount_range": {
+        return `${amountRange?.[0]} - ${amountRange?.[1]}`;
       }
 
       case "attachments": {
@@ -97,7 +103,10 @@ export function FilterList({
 
       case "tags": {
         return value
-          .map((slug) => tags?.find((tag) => tag.slug === slug)?.name)
+          .map(
+            (id) =>
+              tags?.find((tag) => tag?.id === id || tag?.slug === id)?.name,
+          )
           .join(", ");
       }
 
