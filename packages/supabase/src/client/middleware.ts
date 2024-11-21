@@ -9,6 +9,12 @@ export async function updateSession(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      global: {
+        headers: {
+          // https://supabase.com/docs/guides/platform/read-replicas#experimental-routing
+          "sb-lb-routing-mode": "alpha-all-services",
+        },
+      },
       cookies: {
         get(name: string) {
           return request.cookies.get(name)?.value;

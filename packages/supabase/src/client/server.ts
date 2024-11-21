@@ -78,6 +78,8 @@ export const createClient = (options?: CreateClientOptions) => {
         headers: {
           // Pass user agent from browser
           "user-agent": headers().get("user-agent") as string,
+          // https://supabase.com/docs/guides/platform/read-replicas#experimental-routing
+          "sb-lb-routing-mode": "alpha-all-services",
         },
       },
     },

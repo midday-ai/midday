@@ -71,16 +71,16 @@ export const getTransactions = async (
 export const getSession = cache(async () => {
   const supabase = createClient();
 
-  return supabase.auth.getUser();
+  return supabase.auth.getSession();
 });
 
 // Cache per request and revalidate every 30 minutes
 export const getUser = cache(async () => {
   const {
-    data: { user },
+    data: { session },
   } = await getSession();
 
-  const userId = user?.id;
+  const userId = session?.user?.id;
 
   if (!userId) {
     return null;

@@ -10,7 +10,7 @@ import { redirect } from "next/navigation";
 export async function signOutAction() {
   const supabase = createClient();
   const {
-    data: { user },
+    data: { session },
   } = await getSession();
 
   await supabase.auth.signOut({
@@ -18,8 +18,8 @@ export async function signOutAction() {
   });
 
   const analytics = await setupAnalytics({
-    userId: user.id,
-    fullName: user.user_metadata?.full_name,
+    userId: session?.user?.id,
+    fullName: session?.user?.user_metadata?.full_name,
   });
 
   analytics.track({
@@ -27,7 +27,7 @@ export async function signOutAction() {
     channel: LogEvents.SignOut.channel,
   });
 
-  revalidateTag(`user_${user.id}`);
+  revalidateTag(`user_${session?.user?.id}`);
 
   return redirect("/login");
 }
