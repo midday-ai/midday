@@ -22,9 +22,10 @@ import { SelectUser } from "./select-user";
 
 type Props = {
   ids: string[];
+  tags: { id: string; name: string }[];
 };
 
-export function BulkActions({ ids }: Props) {
+export function BulkActions({ ids, tags }: Props) {
   const { toast } = useToast();
 
   const { setRowSelection } = useTransactionsStore();
@@ -92,6 +93,44 @@ export function BulkActions({ ids }: Props) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
+              <Icons.Status className="mr-2 h-4 w-4" />
+              <span>Tags</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent
+                sideOffset={14}
+                alignOffset={-4}
+                className="py-2 max-h-[200px] overflow-y-auto max-w-[220px]"
+              >
+                {tags?.length > 0 ? (
+                  tags?.map((tag) => (
+                    <DropdownMenuCheckboxItem
+                      key={tag.id}
+                      checked={ids.includes(tag.id)}
+                      onCheckedChange={() => {
+                        bulkUpdateTransactions.execute({
+                          type: "tags",
+                          data: ids.map((transaction) => ({
+                            id: transaction,
+                            tag_id: tag.id,
+                          })),
+                        });
+                      }}
+                    >
+                      {tag.name}
+                    </DropdownMenuCheckboxItem>
+                  ))
+                ) : (
+                  <p className="text-sm text-[#878787] px-2">No tags found</p>
+                )}
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
               <Icons.Visibility className="mr-2 h-4 w-4" />
               <span>Visibility</span>
             </DropdownMenuSubTrigger>
@@ -137,7 +176,7 @@ export function BulkActions({ ids }: Props) {
             <DropdownMenuPortal>
               <DropdownMenuSubContent
                 sideOffset={14}
-                className="w-[230px] h-[170px] p-4"
+                className="w-[230px] h-[170px] p-4 space-y-4"
               >
                 <SelectUser
                   onSelect={(selected) => {

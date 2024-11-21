@@ -202,6 +202,7 @@ export const updateTransactionSchema = z.object({
   id: z.string().uuid(),
   note: z.string().optional().nullable(),
   category_slug: z.string().optional(),
+  tag_id: z.string().uuid().optional(),
   assigned_id: z.string().uuid().optional(),
   recurring: z.boolean().optional().nullable(),
   frequency: z.enum(["weekly", "monthly", "annually"]).optional().nullable(),
@@ -220,7 +221,7 @@ export const deleteCategoriesSchema = z.object({
 });
 
 export const bulkUpdateTransactionsSchema = z.object({
-  type: z.enum(["category", "note", "assigned", "status", "recurring"]),
+  type: z.enum(["category", "note", "assigned", "status", "recurring", "tags"]),
   data: z.array(updateTransactionSchema),
 });
 
@@ -506,10 +507,15 @@ export const filterTransactionsSchema = z.object({
     .array(z.string())
     .optional()
     .describe("The categories to filter by"),
+  tags: z.array(z.string()).optional().describe("The tags to filter by"),
   recurring: z
     .array(z.enum(["all", "weekly", "monthly", "annually"]))
     .optional()
     .describe("The recurring to filter by"),
+  amount_range: z
+    .array(z.number())
+    .optional()
+    .describe("The amount range to filter by"),
 });
 
 export const filterVaultSchema = z.object({
