@@ -36,6 +36,8 @@ export const draftInvoiceAction = authActionClient
         ...restTemplate
       } = template;
 
+      console.log("restTemplate", restTemplate);
+
       const { data } = await supabase
         .from("invoices")
         .upsert(
