@@ -1,14 +1,50 @@
+import { Midday } from "@midday-ai/engine";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
+import { engine } from "../../utils/engine";
+import { parseAPIError } from "../../utils/parse-error";
 
 export const syncBalance = schemaTask({
   id: "sync-balance",
+  retry: {
+    maxAttempts: 2,
+  },
   schema: z.object({
-    team_id: z.string().uuid(),
-    bank_account_id: z.string(),
+    accountId: z.string(),
+    accessToken: z.string().optional(),
+    provider: z.enum(["gocardless", "plaid", "teller"]),
+    connectionId: z.string(),
   }),
-  run: async ({ team_id, bank_account_id }) => {
+  run: async ({ accountId, accessToken, provider, connectionId }) => {
     const supabase = createClient();
+
+    try {
+      const balance = await engine.accounts.balance({
+        provider,
+        id: accountId,
+        accessToken,
+      });
+
+      // Only update the balance if it's greater than 0
+      if (balance.data?.amount && balance.data.amount > 0) {
+        await supabase
+          .from("bank_accounts")
+          .update({
+            balance: balance.data.amount,
+            error_details: null,
+          })
+          .eq("id", accountId);
+      }
+    } catch (error) {
+      if (error instanceof Midday.APIError) {
+        const parsedError = parseAPIError(error);
+        // TODO: Handle error (disconnect, expired, etc.)
+
+        throw error;
+      }
+
+      throw error;
+    }
   },
 });

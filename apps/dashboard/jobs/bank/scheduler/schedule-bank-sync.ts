@@ -13,7 +13,9 @@ export const scheduleBankSync = schedules.task({
   run: async (payload) => {
     const supabase = createClient();
 
-    if (!payload.externalId) {
+    const teamId = payload.externalId;
+
+    if (!teamId) {
       throw new Error("externalId is required");
     }
 
@@ -22,7 +24,7 @@ export const scheduleBankSync = schedules.task({
       .select(
         "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)",
       )
-      .eq("team_id", payload.externalId)
+      .eq("team_id", teamId)
       .eq("enabled", true)
       .eq("manual", false);
 
@@ -35,17 +37,32 @@ export const scheduleBankSync = schedules.task({
       return;
     }
 
-    const formattedBankAccounts = bankAccounts.map((account) => ({
-      team_id: account.team_id,
-      bank_account_id: account.id,
-    }));
+    await triggerSequence(
+      bankAccounts.map((account) => ({
+        teamId: account.team_id,
+        accountId: account.id,
+        accountType: account.type ?? "depository",
+        accessToken: account.bank_connection?.access_token,
+        provider: account.bank_connection?.provider,
+      })),
+      syncTransactions,
+      {
+        tags: ["team_id", teamId],
+      },
+    );
 
-    await triggerSequence(formattedBankAccounts, syncTransactions, {
-      tags: ["team_id", payload.externalId],
-    });
+    await triggerSequence(
+      bankAccounts.map((account) => ({
+        accountId: account.id,
+        accessToken: account.bank_connection?.access_token,
+        provider: account.bank_connection?.provider,
+        connectionId: account.bank_connection?.id,
+      })),
+      syncBalance,
+      { tags: ["team_id", teamId] },
+    );
 
-    await triggerSequence(formattedBankAccounts, syncBalance, {
-      tags: ["team_id", payload.externalId],
-    });
+    // Trigger check connection status
+    // If all bank accounts have errors, set the bank connection status to disconnec
   },
 });

@@ -21,7 +21,7 @@ export const syncTransactions = schemaTask({
       "depository",
       "loan",
     ]),
-    accessToken: z.string(),
+    accessToken: z.string().optional(),
     provider: z.enum(["gocardless", "plaid", "teller"]),
   }),
   run: async ({ teamId, accountId, accountType, accessToken, provider }) => {
