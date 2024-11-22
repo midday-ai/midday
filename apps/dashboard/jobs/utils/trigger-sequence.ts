@@ -1,32 +1,27 @@
-import type { RunHandle } from "@trigger.dev/sdk/v3";
+import type { RunHandle, TaskRunOptions } from "@trigger.dev/sdk/v3";
 
 interface TriggerTask<T> {
-  trigger: (input: { payload: T; options?: { delay?: string } }) => Promise<
-    RunHandle<string, T, void>
-  >;
+  trigger: (
+    payload: T,
+    options?: TaskRunOptions & { delayMinutes?: number },
+  ) => Promise<RunHandle<string, T, void>>;
 }
-
-type TaskRunOptions = {
-  delay?: number;
-};
 
 export async function triggerSequence<T>(
   items: T[],
   task: TriggerTask<T>,
-  options?: TaskRunOptions,
+  options?: TaskRunOptions & { delayMinutes?: number },
 ) {
-  const delay = options?.delay ?? 5;
+  const { delayMinutes = 5, ...restOptions } = options ?? {};
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
 
     if (!item) continue;
 
-    await task.trigger({
-      payload: item,
-      options: {
-        delay: `${i * delay}min`,
-      },
+    await task.trigger(item, {
+      ...restOptions,
+      delay: `${i * delayMinutes}min`,
     });
   }
 }

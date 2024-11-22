@@ -1,4 +1,4 @@
-export function generateDailyScheduleCron(teamId: string): string {
+export function generateCron(teamId: string): string {
   // Use teamId to generate a deterministic random minute and hour
   const hash = Array.from(teamId).reduce(
     (acc, char) => acc + char.charCodeAt(0),

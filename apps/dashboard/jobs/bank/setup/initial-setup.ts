@@ -1,5 +1,5 @@
 import { schedules, schemaTask } from "@trigger.dev/sdk/v3";
-import { generateDailyScheduleCron } from "jobs/utils/cron";
+import { generateCron } from "jobs/utils/generate-cron";
 import { z } from "zod";
 import { scheduleBankSync } from "../scheduler/schedule-bank-sync";
 
@@ -22,7 +22,7 @@ export const initialBankSetup = schemaTask({
     // Add teamId as externalId to use it in the scheduleBankSync task
     await schedules.create({
       task: scheduleBankSync.id,
-      cron: generateDailyScheduleCron(teamId),
+      cron: generateCron(teamId),
       timezone: "UTC",
       externalId: teamId,
       deduplicationKey: `${teamId}-${scheduleBankSync.id}`,

@@ -4,6 +4,10 @@ import { triggerSequence } from "jobs/utils/trigger-sequence";
 import { syncBalance } from "../sync/sync-balance";
 import { syncTransactions } from "../sync/sync-transactions";
 
+// This is a fan-out pattern. We want to trigger a task for each bank account.
+// Each bank account will trigger a task to sync transactions and a task to sync balance.
+// We want to trigger these tasks in sequence, but we want to delay each task by a certain amount of time.
+// Because of rate limits on our providers, we want to stagger the tasks.
 export const scheduleBankSync = schedules.task({
   id: "schedule-bank-sync",
   run: async (payload) => {
@@ -36,7 +40,12 @@ export const scheduleBankSync = schedules.task({
       bank_account_id: account.id,
     }));
 
-    await triggerSequence(formattedBankAccounts, syncTransactions);
-    await triggerSequence(formattedBankAccounts, syncBalance);
+    await triggerSequence(formattedBankAccounts, syncTransactions, {
+      tags: ["team_id", payload.externalId],
+    });
+
+    await triggerSequence(formattedBankAccounts, syncBalance, {
+      tags: ["team_id", payload.externalId],
+    });
   },
 });
