@@ -1,6 +1,6 @@
 import { createClient } from "@midday/supabase/job";
 import { logger } from "@trigger.dev/sdk/v3";
-import { invoiceNotifications } from "jobs/invoice/notifications";
+import { sendInvoiceNotifications } from "../invoice/notifications/send-notifications";
 
 export async function updateInvoiceStatus({
   invoiceId,
@@ -29,7 +29,7 @@ export async function updateInvoiceStatus({
 
   logger.info(`Invoice status changed to ${status}`);
 
-  await invoiceNotifications.trigger({
+  await sendInvoiceNotifications.trigger({
     invoiceId,
     invoiceNumber: updatedInvoice.invoice_number,
     status: updatedInvoice.status as "paid" | "overdue",

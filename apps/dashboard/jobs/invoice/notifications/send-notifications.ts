@@ -4,9 +4,9 @@ import { z } from "zod";
 import {
   handleOverdueInvoiceNotifications,
   handlePaidInvoiceNotifications,
-} from "../utils/invoice-notifications";
+} from "../../utils/invoice-notifications";
 
-export const invoiceNotifications = schemaTask({
+export const sendInvoiceNotifications = schemaTask({
   id: "invoice-notifications",
   schema: z.object({
     invoiceId: z.string().uuid(),
