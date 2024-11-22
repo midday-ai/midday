@@ -40,6 +40,8 @@ export const syncBalance = schemaTask({
       if (error instanceof Midday.APIError) {
         const parsedError = parseAPIError(error);
         // TODO: Handle error (disconnect, expired, etc.)
+        // Update error details and retries
+        // If error retries > 3, set the account to enabled = false
 
         throw error;
       }

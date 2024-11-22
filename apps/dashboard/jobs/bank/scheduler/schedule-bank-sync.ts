@@ -37,6 +37,28 @@ export const scheduleBankSync = schedules.task({
       return;
     }
 
+    // Add a new endpoint to our Engine GET `/connection/${connectionId}/status`
+    // This endpoint will check the connection status of a bank connection
+    // It will return a status of `connected` or `disconnected`
+
+    // Update the connection status in the DB
+    // Continue and start tasks if the connection is connected
+
+    // We run this first to ensure we have a healthy
+    // account connection before starting the transaction sync
+    await triggerSequence(
+      bankAccounts.map((account) => ({
+        accountId: account.id,
+        accessToken: account.bank_connection?.access_token,
+        provider: account.bank_connection?.provider,
+        connectionId: account.bank_connection?.id,
+      })),
+      syncBalance,
+      { tags: ["team_id", teamId] },
+    );
+
+    // Wait for the account sync to complete before starting the transaction sync
+    // We don't want run against the same account at the same time if there are errors
     await triggerSequence(
       bankAccounts.map((account) => ({
         teamId: account.team_id,
@@ -50,19 +72,5 @@ export const scheduleBankSync = schedules.task({
         tags: ["team_id", teamId],
       },
     );
-
-    await triggerSequence(
-      bankAccounts.map((account) => ({
-        accountId: account.id,
-        accessToken: account.bank_connection?.access_token,
-        provider: account.bank_connection?.provider,
-        connectionId: account.bank_connection?.id,
-      })),
-      syncBalance,
-      { tags: ["team_id", teamId] },
-    );
-
-    // Trigger check connection status
-    // If all bank accounts have errors, set the bank connection status to disconnec
   },
 });
