@@ -81,3 +81,7 @@ export type TransformTransactionPayload = {
 export type DisconnectAccountRequest = {
   accessToken: string;
 };
+
+export type GetConnectionStatusRequest = {
+  accessToken: string;
+};

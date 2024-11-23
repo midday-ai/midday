@@ -14,7 +14,7 @@ import {
   type Transaction,
 } from "plaid";
 import type {
-  GetConnectionStatusRequest,
+  ConnectionStatus,
   GetInstitutionsRequest,
   ProviderParams,
 } from "../types";
@@ -24,6 +24,7 @@ import type {
   GetAccountBalanceResponse,
   GetAccountsRequest,
   GetAccountsResponse,
+  GetConnectionStatusRequest,
   GetStatusResponse,
   GetTransactionsRequest,
   GetTransactionsResponse,
@@ -243,13 +244,29 @@ export class PlaidApi {
     });
   }
 
-  async getConnectionStatus({ accessToken }: GetConnectionStatusRequest) {
-    const response = await this.#client.itemGet({
-      access_token: accessToken,
-    });
+  async getConnectionStatus({
+    accessToken,
+  }: GetConnectionStatusRequest): Promise<ConnectionStatus> {
+    try {
+      await this.#client.accountsGet({
+        access_token: accessToken,
+      });
 
-    console.log(response);
+      return { status: "connected" };
+    } catch (error) {
+      const parsedError = isError(error);
 
-    return { status: "connected" };
+      if (parsedError) {
+        const providerError = new ProviderError(parsedError);
+
+        if (providerError.code === "disconnected") {
+          return { status: "disconnected" };
+        }
+      }
+
+      // If we get here, the account is not disconnected
+      // But it could be a connection issue between Plaid and the institution
+      return { status: "connected" };
+    }
   }
 }

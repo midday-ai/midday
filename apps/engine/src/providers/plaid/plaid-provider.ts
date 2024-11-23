@@ -3,6 +3,7 @@ import type {
   DeleteAccountsRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
+  GetConnectionStatusRequest,
   GetInstitutionsRequest,
   GetTransactionsRequest,
   ProviderParams,
@@ -95,5 +96,15 @@ export class PlaidProvider implements Provider {
     await this.#api.deleteAccounts({
       accessToken,
     });
+  }
+
+  async getConnectionStatus({ accessToken }: GetConnectionStatusRequest) {
+    if (!accessToken) {
+      throw Error("accessToken is missing");
+    }
+
+    const response = await this.#api.getConnectionStatus({ accessToken });
+
+    return response;
   }
 }
