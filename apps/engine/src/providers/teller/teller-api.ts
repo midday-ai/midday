@@ -42,8 +42,6 @@ export class TellerApi {
       accessToken,
     );
 
-    console.log("dogo", accounts);
-
     return Promise.all(
       accounts?.map(async (account) => {
         const balance = await this.getAccountBalance({
@@ -102,24 +100,29 @@ export class TellerApi {
     accessToken,
   }: GetConnectionStatusRequest): Promise<GetConnectionStatusResponse> {
     try {
-      const katt = await this.#get("/accounts", accessToken);
+      const accounts = await this.#get("/accounts", accessToken);
 
-      console.log("katt", katt);
-      return { status: "connected" };
-    } catch (error) {
-      console.log("katt", error);
-      const parsedError = isError(error);
+      if (!Array.isArray(accounts)) {
+        return { status: "disconnected" };
+      }
 
-      console.log("katt", parsedError);
+      // If we can fetch any accounts, the connection is active
+      // Check all accounts in parallel
+      const results = await Promise.allSettled(
+        accounts.map((account) =>
+          this.#get(`/accounts/${account.id}`, accessToken),
+        ),
+      );
 
-      //
-      if (!parsedError) {
+      // If any account request succeeded, connection is valid
+      if (results.some((result) => result.status === "fulfilled")) {
         return { status: "connected" };
       }
 
-      if (parsedError.code?.startsWith("enrollment")) {
-        return { status: "disconnected" };
-      }
+      // If we couldn't verify any accounts, assume disconnected
+      return { status: "disconnected" };
+    } catch (error) {
+      const parsedError = isError(error);
     }
 
     // If we get here, the account is not disconnected
