@@ -34,10 +34,11 @@ console.log = (...args) => {
 type CreateClientOptions = {
   admin?: boolean;
   schema?: "public" | "storage";
+  balancer?: boolean;
 };
 
 export const createClient = (options?: CreateClientOptions) => {
-  const { admin = false, ...rest } = options ?? {};
+  const { admin = false, balancer = false, ...rest } = options ?? {};
 
   const cookieStore = cookies();
 
@@ -53,35 +54,35 @@ export const createClient = (options?: CreateClientOptions) => {
       }
     : {};
 
-  return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    key,
-    {
-      ...rest,
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          try {
-            cookieStore.set({ name, value, ...options });
-          } catch (error) {}
-        },
-        remove(name: string, options: CookieOptions) {
-          try {
-            cookieStore.set({ name, value: "", ...options });
-          } catch (error) {}
-        },
+  const url = balancer
+    ? process.env.NEXT_PUBLIC_SUPABASE_LOAD_BALANCER_URL!
+    : process.env.NEXT_PUBLIC_SUPABASE_URL!;
+
+  return createServerClient<Database>(url, key, {
+    ...rest,
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value;
       },
-      auth,
-      global: {
-        headers: {
-          // Pass user agent from browser
-          "user-agent": headers().get("user-agent") as string,
-          // https://supabase.com/docs/guides/platform/read-replicas#experimental-routing
-          "sb-lb-routing-mode": "alpha-all-services",
-        },
+      set(name: string, value: string, options: CookieOptions) {
+        try {
+          cookieStore.set({ name, value, ...options });
+        } catch (error) {}
+      },
+      remove(name: string, options: CookieOptions) {
+        try {
+          cookieStore.set({ name, value: "", ...options });
+        } catch (error) {}
       },
     },
-  );
+    auth,
+    global: {
+      headers: {
+        // Pass user agent from browser
+        "user-agent": headers().get("user-agent") as string,
+        // https://supabase.com/docs/guides/platform/read-replicas#experimental-routing
+        ...(balancer && { "sb-lb-routing-mode": "alpha-all-services" }),
+      },
+    },
+  });
 };

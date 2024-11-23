@@ -342,7 +342,7 @@ export const getUserInvites = async () => {
 export const getTrackerProjects = async (
   params: Omit<GetTrackerProjectsQueryParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = createClient({ balancer: true });
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -361,7 +361,7 @@ export const getTrackerProjects = async (
 export const getTrackerRecordsByRange = async (
   params: Omit<GetTrackerRecordsByRangeParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = createClient({ balancer: true });
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -384,7 +384,7 @@ export const getTrackerRecordsByRange = async (
 export const getBurnRate = async (
   params: Omit<GetBurnRateQueryParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = createClient({ balancer: true });
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -403,7 +403,7 @@ export const getBurnRate = async (
 export const getRunway = async (
   params: Omit<GetRunwayQueryParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = createClient({ balancer: true });
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -422,7 +422,7 @@ export const getRunway = async (
 export const getCategories = async (
   params?: Omit<GetCategoriesParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = createClient({ balancer: true });
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
