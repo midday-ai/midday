@@ -123,6 +123,14 @@ export class TellerApi {
       return { status: "disconnected" };
     } catch (error) {
       const parsedError = isError(error);
+
+      if (parsedError) {
+        const providerError = new ProviderError(parsedError);
+
+        if (providerError.code === "disconnected") {
+          return { status: "disconnected" };
+        }
+      }
     }
 
     // If we get here, the account is not disconnected
