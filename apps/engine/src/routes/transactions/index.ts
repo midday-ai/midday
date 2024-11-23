@@ -7,66 +7,65 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { TransactionsParamsSchema, TransactionsSchema } from "./schema";
 
-const app = new OpenAPIHono<{ Bindings: Bindings }>();
-
-const indexRoute = createRoute({
-  method: "get",
-  path: "/",
-  summary: "Get transactions",
-  request: {
-    query: TransactionsParamsSchema,
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: TransactionsSchema,
-        },
-      },
-      description: "Retrieve transactions",
+const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
+  createRoute({
+    method: "get",
+    path: "/",
+    summary: "Get transactions",
+    request: {
+      query: TransactionsParamsSchema,
     },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: TransactionsSchema,
+          },
         },
+        description: "Retrieve transactions",
       },
-      description: "Returns an error",
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorSchema,
+          },
+        },
+        description: "Returns an error",
+      },
     },
-  },
-});
+  }),
+  async (c) => {
+    const envs = env(c);
+    const { provider, accountId, accountType, latest, accessToken } =
+      c.req.valid("query");
 
-app.openapi(indexRoute, async (c) => {
-  const envs = env(c);
-  const { provider, accountId, accountType, latest, accessToken } =
-    c.req.valid("query");
-
-  const api = new Provider({
-    provider,
-    fetcher: c.env.TELLER_CERT,
-    kv: c.env.KV,
-    envs,
-  });
-
-  try {
-    const data = await api.getTransactions({
-      accountId,
-      accessToken,
-      accountType,
-      latest,
+    const api = new Provider({
+      provider,
+      fetcher: c.env.TELLER_CERT,
+      kv: c.env.KV,
+      envs,
     });
 
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
-  } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
+    try {
+      const data = await api.getTransactions({
+        accountId,
+        accessToken,
+        accountType,
+        latest,
+      });
 
-    return c.json(errorResponse, 400);
-  }
-});
+      return c.json(
+        {
+          data,
+        },
+        200,
+      );
+    } catch (error) {
+      const errorResponse = createErrorResponse(error, c.get("requestId"));
+
+      return c.json(errorResponse, 400);
+    }
+  },
+);
 
 export default app;

@@ -18,7 +18,6 @@
     "@ai-sdk/openai": "^0.0.66",
     "@date-fns/tz": "^1.1.2",
     "@hookform/resolvers": "^3.9.0",
-    "@midday-ai/engine": "^0.1.0-alpha.23",
     "@midday/app-store": "workspace:*",
     "@midday/events": "workspace:*",
     "@midday/inbox": "workspace:*",

@@ -252,7 +252,6 @@ export class PlaidApi {
         access_token: accessToken,
       });
 
-      console.log("katt", katt);
       return { status: "connected" };
     } catch (error) {
       const parsedError = isError(error);

@@ -18,29 +18,15 @@ import transactionsRoutes from "./routes/transactions";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>({
   defaultHook: (result, c) => {
-    console.log(result);
     if (!result.success) {
       return c.json({ success: false, errors: result.error.errors }, 422);
     }
   },
 });
-
 app.use("*", requestId());
 app.use(authMiddleware);
 app.use(securityMiddleware);
 app.use(loggingMiddleware);
-
-// Enable cache for the following routes
-app.get("/institutions", cacheMiddleware);
-app.get("/rates", cacheMiddleware);
-
-app
-  .route("/transactions", transactionsRoutes)
-  .route("/accounts", accountRoutes)
-  .route("/institutions", institutionRoutes)
-  .route("/rates", ratesRoutes)
-  .route("/auth", authRoutes)
-  .route("/connections", connectionRoutes);
 
 app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
   type: "http",
@@ -62,6 +48,15 @@ app.doc("/openapi", {
   },
 });
 
-app.route("/health", healthRoutes);
+const appRoutes = app
+  .route("/transactions", transactionsRoutes)
+  .route("/accounts", accountRoutes)
+  .route("/institutions", institutionRoutes)
+  .route("/rates", ratesRoutes)
+  .route("/auth", authRoutes)
+  .route("/connections", connectionRoutes)
+  .route("/health", healthRoutes);
+
+export type AppType = typeof appRoutes;
 
 export default app;

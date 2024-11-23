@@ -1,7 +1,7 @@
 "use server";
 
-import { engine } from "@/utils/engine";
 import { logger } from "@/utils/logger";
+import { client } from "@midday/engine/client";
 
 type GetAccountParams = {
   countryCode: string;
@@ -13,10 +13,20 @@ export async function getInstitutions({
   query,
 }: GetAccountParams) {
   try {
-    return engine.institutions.list({
-      countryCode,
-      q: query,
+    const institutionsResponse = await client.institutions.$get({
+      query: {
+        countryCode,
+        q: query,
+      },
     });
+
+    if (!institutionsResponse.ok) {
+      throw new Error("Failed to get institutions");
+    }
+
+    const { data } = await institutionsResponse.json();
+
+    return data;
   } catch (error) {
     logger(error instanceof Error ? error.message : String(error));
     return [];
