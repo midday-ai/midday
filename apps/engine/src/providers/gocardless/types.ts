@@ -126,7 +126,7 @@ export type Requestion = {
   id: string;
   created: string;
   redirect: string;
-  status: string;
+  status: "CR" | "GC" | "UA" | "RJ" | "SA" | "GA" | "LN" | "EX";
   institution_id: string;
   agreement: string;
   reference: string;

@@ -3,6 +3,7 @@ import type {
   DeleteAccountsRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
+  GetConnectionStatusRequest,
   GetTransactionsRequest,
   ProviderParams,
 } from "../types";
@@ -86,5 +87,15 @@ export class TellerProvider implements Provider {
     await this.#api.deleteAccounts({
       accessToken,
     });
+  }
+
+  async getConnectionStatus({ accessToken }: GetConnectionStatusRequest) {
+    if (!accessToken) {
+      throw Error("accessToken missing");
+    }
+
+    const response = await this.#api.getConnectionStatus({ accessToken });
+
+    return response;
   }
 }

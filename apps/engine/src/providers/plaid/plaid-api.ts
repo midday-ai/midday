@@ -13,7 +13,11 @@ import {
   Products,
   type Transaction,
 } from "plaid";
-import type { GetInstitutionsRequest, ProviderParams } from "../types";
+import type {
+  GetConnectionStatusRequest,
+  GetInstitutionsRequest,
+  ProviderParams,
+} from "../types";
 import type {
   DisconnectAccountRequest,
   GetAccountBalanceRequest,
@@ -237,5 +241,15 @@ export class PlaidApi {
             }),
         ),
     });
+  }
+
+  async getConnectionStatus({ accessToken }: GetConnectionStatusRequest) {
+    const response = await this.#client.itemGet({
+      access_token: accessToken,
+    });
+
+    console.log(response);
+
+    return { status: "connected" };
   }
 }

@@ -3,6 +3,7 @@ import type {
   DeleteAccountsRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
+  GetConnectionStatusRequest,
   GetInstitutionsRequest,
   GetTransactionsRequest,
   ProviderParams,
@@ -11,6 +12,7 @@ import { GoCardLessApi } from "./gocardless-api";
 import {
   transformAccount,
   transformAccountBalance,
+  transformConnectionStatus,
   transformInstitution,
   transformTransaction,
 } from "./transform";
@@ -71,5 +73,15 @@ export class GoCardLessProvider implements Provider {
     }
 
     await this.#api.deleteRequisition(accountId);
+  }
+
+  async getConnectionStatus({ id }: GetConnectionStatusRequest) {
+    if (!id) {
+      throw Error("Missing params");
+    }
+
+    const response = await this.#api.getRequestion(id);
+
+    return transformConnectionStatus(response);
   }
 }

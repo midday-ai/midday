@@ -1,5 +1,9 @@
 import { ProviderError } from "@/utils/error";
-import type { ProviderParams } from "../types";
+import type {
+  GetConnectionStatusRequest,
+  GetConnectionStatusResponse,
+  ProviderParams,
+} from "../types";
 import type {
   AuthenticatedRequest,
   DisconnectAccountRequest,
@@ -90,6 +94,23 @@ export class TellerApi {
 
   async getInstitutions(): Promise<GetInstitutionsResponse> {
     return this.#get("/institutions");
+  }
+
+  async getConnectionStatus({
+    accessToken,
+  }: GetConnectionStatusRequest): Promise<GetConnectionStatusResponse> {
+    try {
+      await this.#get("/accounts", accessToken);
+      return { status: "connected" };
+    } catch (error) {
+      const parsedError = isError(error);
+
+      if (parsedError?.code?.startsWith("enrollment")) {
+        return { status: "disconnected" };
+      }
+    }
+
+    return { status: "connected" };
   }
 
   async deleteAccounts({

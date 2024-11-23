@@ -10,6 +10,7 @@ import {
 } from "./middleware";
 import accountRoutes from "./routes/accounts";
 import authRoutes from "./routes/auth";
+import connectionRoutes from "./routes/connections";
 import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
 import ratesRoutes from "./routes/rates";
@@ -38,7 +39,8 @@ app
   .route("/accounts", accountRoutes)
   .route("/institutions", institutionRoutes)
   .route("/rates", ratesRoutes)
-  .route("/auth", authRoutes);
+  .route("/auth", authRoutes)
+  .route("/connections", connectionRoutes);
 
 app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
   type: "http",

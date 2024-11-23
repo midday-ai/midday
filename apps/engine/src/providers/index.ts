@@ -6,6 +6,7 @@ import type {
   DeleteAccountsRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
+  GetConnectionStatusRequest,
   GetHealthCheckResponse,
   GetInstitutionsRequest,
   GetTransactionsRequest,
@@ -123,5 +124,11 @@ export class Provider {
     logger("delete:", `provider: ${this.#name}`);
 
     return this.#provider?.deleteAccounts(params);
+  }
+
+  async getConnectionStatus(params: GetConnectionStatusRequest) {
+    logger("getConnectionStatus:", `provider: ${this.#name}`);
+
+    return this.#provider?.getConnectionStatus(params);
   }
 }

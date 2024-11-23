@@ -5,8 +5,10 @@ import type {
   Account as BaseAccount,
   Balance as BaseAccountBalance,
   Transaction as BaseTransaction,
+  ConnectionStatus,
 } from "../types";
 import type {
+  GetRequisitionResponse,
   Institution,
   Transaction,
   TransactionDescription,
@@ -210,3 +212,18 @@ export const transformInstitution = (
   logo: getLogoURL(institution.id, getFileExtension(institution.logo)),
   provider: Providers.Enum.gocardless,
 });
+
+export const transformConnectionStatus = (
+  requisition?: GetRequisitionResponse,
+): ConnectionStatus => {
+  // Expired or Rejected
+  if (requisition?.status === "EX" || requisition?.status === "RJ") {
+    return {
+      status: "disconnected",
+    };
+  }
+
+  return {
+    status: "connected",
+  };
+};
