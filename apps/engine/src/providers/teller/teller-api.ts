@@ -105,11 +105,18 @@ export class TellerApi {
     } catch (error) {
       const parsedError = isError(error);
 
-      if (parsedError?.code?.startsWith("enrollment")) {
+      //
+      if (!parsedError) {
+        return { status: "connected" };
+      }
+
+      if (parsedError.code?.startsWith("enrollment")) {
         return { status: "disconnected" };
       }
     }
 
+    // If we get here, the account is not disconnected
+    // But it could be a connection issue between Teller and the institution
     return { status: "connected" };
   }
 

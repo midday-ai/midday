@@ -129,6 +129,12 @@ export class Provider {
   async getConnectionStatus(params: GetConnectionStatusRequest) {
     logger("getConnectionStatus:", `provider: ${this.#name}`);
 
-    return this.#provider?.getConnectionStatus(params);
+    const data = await this.#provider?.getConnectionStatus(params);
+
+    if (data) {
+      return data;
+    }
+
+    return { status: "connected" };
   }
 }

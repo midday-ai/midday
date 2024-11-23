@@ -31,11 +31,10 @@ export const ConnectionStatusQuerySchema = z.object({
 
 export const ConnectionStatusSchema = z
   .object({
-    status: z.string().openapi({
-      example: "connected",
-    }),
-    expiresAt: z.string().openapi({
-      example: "2024-11-22T10:00:00.000Z",
+    data: z.object({
+      status: z.string().openapi({
+        example: "connected",
+      }),
     }),
   })
   .openapi("ConnectionStatusSchema");
