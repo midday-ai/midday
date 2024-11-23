@@ -42,7 +42,7 @@ export class TellerApi {
       accessToken,
     );
 
-    const results = await Promise.allSettled(
+    return Promise.all(
       accounts?.map(async (account) => {
         const balance = await this.getAccountBalance({
           accountId: account.id,
@@ -52,16 +52,6 @@ export class TellerApi {
         return { ...account, balance };
       }),
     );
-
-    return results
-      .filter(
-        (
-          result,
-        ): result is PromiseFulfilledResult<
-          GetAccountsResponse[number] & { balance: GetAccountBalanceResponse }
-        > => result.status === "fulfilled",
-      )
-      .map((result) => result.value);
   }
 
   async getTransactions({
