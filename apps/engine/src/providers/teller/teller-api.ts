@@ -42,6 +42,8 @@ export class TellerApi {
       accessToken,
     );
 
+    console.log("dogo", accounts);
+
     return Promise.all(
       accounts?.map(async (account) => {
         const balance = await this.getAccountBalance({
