@@ -100,10 +100,15 @@ export class TellerApi {
     accessToken,
   }: GetConnectionStatusRequest): Promise<GetConnectionStatusResponse> {
     try {
-      await this.#get("/accounts", accessToken);
+      const katt = await this.#get("/accounts", accessToken);
+
+      console.log("katt", katt);
       return { status: "connected" };
     } catch (error) {
+      console.log("katt", error);
       const parsedError = isError(error);
+
+      console.log("katt", parsedError);
 
       //
       if (!parsedError) {
