@@ -1,9 +1,11 @@
 import { client } from "@midday/engine/client";
-import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { parseAPIError } from "jobs/utils/parse-error";
-import { getClassification, transformTransaction } from "jobs/utils/transform";
+import { getClassification } from "jobs/utils/transform";
 import { z } from "zod";
+import { upsertTransactions } from "../transactions/upsert";
+
+const BATCH_SIZE = 500;
 
 export const syncTransactions = schemaTask({
   id: "sync-transactions",
@@ -22,7 +24,7 @@ export const syncTransactions = schemaTask({
     ]),
     accessToken: z.string().optional(),
     provider: z.enum(["gocardless", "plaid", "teller"]),
-    manual: z.boolean().optional(),
+    manualSync: z.boolean().optional(),
   }),
   run: async ({
     teamId,
@@ -30,10 +32,8 @@ export const syncTransactions = schemaTask({
     accountType,
     accessToken,
     provider,
-    manual,
+    manualSync,
   }) => {
-    const supabase = createClient();
-
     const classification = getClassification(accountType);
 
     logger.info(`Syncing transactions for account ${accountId}`, {
@@ -47,7 +47,6 @@ export const syncTransactions = schemaTask({
           accountId,
           accountType: classification,
           accessToken,
-          // TODO: Fix boolean type (check invoice preview)
           latest: true,
         },
       });
@@ -63,23 +62,25 @@ export const syncTransactions = schemaTask({
         return;
       }
 
-      // Transform transactions to match our DB schema
-      const formattedTransactions = transactionsData.map((transaction) => {
-        return transformTransaction({
-          transaction,
+      // Upsert transactions in batches of 500
+      // This is to avoid memory issues with the DB
+      // Also the task has a queue limit of 10
+      for (let i = 0; i < transactionsData.length; i += BATCH_SIZE) {
+        const transactionBatch = transactionsData.slice(i, i + BATCH_SIZE);
+        await upsertTransactions.trigger({
+          transactions: transactionBatch,
           teamId,
           bankAccountId: accountId,
+          manualSync: Boolean(manualSync),
         });
-      });
-
-      // Upsert transactions, ignoring duplicates based on internal_id
-      await supabase.from("transactions").upsert(formattedTransactions, {
-        onConflict: "internal_id",
-        ignoreDuplicates: true,
-      });
+      }
     } catch (error) {
       const parsedError = parseAPIError(error);
       // TODO: Handle error (disconnect, expired, etc.)
+
+      logger.error("Failed to sync transactions", {
+        error: parsedError,
+      });
 
       throw error;
     }

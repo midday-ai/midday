@@ -1,6 +1,6 @@
 import { createClient } from "@midday/supabase/job";
 import { logger } from "@trigger.dev/sdk/v3";
-import { sendInvoiceNotifications } from "../invoice/notifications/send-notifications";
+import { sendInvoiceNotifications } from "jobs/tasks/invoice/notifications/send-notifications";
 
 export async function updateInvoiceStatus({
   invoiceId,

@@ -1,6 +1,7 @@
 import { client } from "@midday/engine/client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { parseAPIError } from "jobs/utils/parse-error";
 import { triggerSequence } from "jobs/utils/trigger-sequence";
 import { z } from "zod";
 import { syncBalance } from "./balance";
@@ -18,85 +19,88 @@ export const syncConnection = schemaTask({
   run: async ({ connectionId }, { ctx }) => {
     const supabase = createClient();
 
-    const connectionResponse = await client.connections.status.$get({
-      query: {
-        id: connectionId,
-      },
-    });
+    try {
+      const { data } = await supabase
+        .from("bank_connections")
+        .select("provider, access_token, reference_id")
+        .eq("id", connectionId)
+        .single()
+        .throwOnError();
 
-    if (!connectionResponse.ok) {
-      logger.error("Failed to get connection status", { connectionId });
-      throw new Error("Failed to get connection status");
-    }
+      // const connectionResponse = await client.connections.status.$get({
+      //   query: {
+      //     id: data.reference_id,
+      //     provider: data.provider,
+      //     access_token: data.access_token,
+      //   },
+      // });
 
-    const { data: connectionData } = await connectionResponse.json();
+      // if (!connectionResponse.ok) {
+      //   logger.error("Failed to get connection status");
+      //   throw new Error("Failed to get connection status");
+      // }
 
-    if (connectionData.status === "connected") {
+      // const { data: connectionData } = await connectionResponse.json();
+
+      // if (connectionData.status === "connected") {
       await supabase
         .from("bank_connections")
         .update({
           status: "connected",
-          last_synced_at: new Date().toISOString(),
+          last_accessed: new Date().toISOString(),
         })
         .eq("id", connectionId);
 
-      const { data: bankAccountsData, error: bankAccountsError } =
-        await supabase
-          .from("bank_accounts")
-          .select("id, bank_connection_id")
-          .eq("bank_connection_id", connectionId)
-          .eq("enabled", true)
-          .eq("manual", false);
-
-      if (bankAccountsError) {
-        logger.error("Failed to get bank accounts", { connectionId });
-        throw new Error("Failed to get bank accounts");
-      }
+      const { data: bankAccountsData } = await supabase
+        .from("bank_accounts")
+        .select(
+          "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, status, error_retries)",
+        )
+        .eq("bank_connection_id", connectionId)
+        .eq("enabled", true)
+        .eq("manual", false)
+        .throwOnError();
 
       if (!bankAccountsData) {
-        logger.info("No bank accounts found", { connectionId });
+        logger.info("No bank accounts found");
         return;
       }
 
       const bankAccounts = bankAccountsData.map((account) => ({
-        accountId: account.id,
+        accountId: account.account_id,
+        accessToken: account.bank_connection?.access_token ?? undefined,
+        provider: account.bank_connection?.provider,
+        connectionId: account.bank_connection?.id,
+        teamId: account.team_id,
+        accountType: account.type ?? "depository",
       }));
 
       // We run this first to ensure we have a healthy
       // account connection before starting the transaction sync
-      await triggerSequence(
-        bankAccounts.map((account) => ({
-          accountId: account.id,
-          accessToken: account.bank_connection?.access_token,
-          provider: account.bank_connection?.provider,
-          connectionId: account.bank_connection?.id,
-        })),
-        syncBalance,
-        { tags: ctx.run.tags },
-      );
+      await triggerSequence(bankAccounts, syncBalance, {
+        tags: ctx.run.tags,
+      });
 
       // TODO: Wait for the account sync to complete before starting the transaction sync
       // We don't want run against the same account at the same time if there are errors
-      await triggerSequence(
-        bankAccounts.map((account) => ({
-          teamId: account.team_id,
-          accountId: account.id,
-          accountType: account.type ?? "depository",
-          accessToken: account.bank_connection?.access_token,
-          provider: account.bank_connection?.provider,
-        })),
-        syncTransactions,
-        { tags: ctx.run.tags },
-      );
-    }
+      await triggerSequence(bankAccounts, syncTransactions, {
+        tags: ctx.run.tags,
+      });
+      //   }
 
-    if (connectionData.status === "disconnected") {
-      logger.info("Connection disconnected", { connectionId });
+      //   if (connectionData.status === "disconnected") {
+      //     logger.info("Connection disconnected");
 
-      await supabase
-        .from("bank_connections")
-        .update({ status: "disconnected" })
-        .eq("id", connectionId);
+      //     await supabase
+      //       .from("bank_connections")
+      //       .update({ status: "disconnected" })
+      //       .eq("id", connectionId);
+    } catch (error) {
+      logger.error("Failed to sync connection", {
+        error: parseAPIError(error),
+      });
+
+      throw error;
     }
   },
 });

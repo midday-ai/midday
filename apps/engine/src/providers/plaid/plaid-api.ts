@@ -248,7 +248,7 @@ export class PlaidApi {
     accessToken,
   }: GetConnectionStatusRequest): Promise<ConnectionStatus> {
     try {
-      const katt = await this.#client.accountsGet({
+      await this.#client.accountsGet({
         access_token: accessToken,
       });
 

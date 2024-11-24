@@ -1,8 +1,9 @@
 import { createClient } from "@midday/supabase/job";
-import { schedules } from "@trigger.dev/sdk/v3";
+import { logger, schedules } from "@trigger.dev/sdk/v3";
 import { syncConnection } from "../sync/connection";
 
-// This is a fan-out pattern. We want to trigger a task for each bank connection.
+// This is a fan-out pattern. We want to trigger a task for each bank connection
+// that has a status of "connected".
 export const bankSyncScheduler = schedules.task({
   id: "bank-sync-scheduler",
   run: async (payload) => {
@@ -14,24 +15,31 @@ export const bankSyncScheduler = schedules.task({
       throw new Error("externalId is required");
     }
 
-    const { data: bankConnections, error } = await supabase
-      .from("bank_connections")
-      .select("id")
-      .eq("team_id", teamId)
-      .eq("enabled", true)
-      .eq("manual", false);
+    try {
+      // Get all bank connections that has a status of "connected"
+      const { data: bankConnections } = await supabase
+        .from("bank_connections")
+        .select("id")
+        .eq("team_id", teamId)
+        .eq("status", "connected")
+        .throwOnError();
 
-    if (error) {
+      const formattedConnections = bankConnections?.map((connection) => ({
+        payload: {
+          connectionId: connection.id,
+        },
+        tags: ["team_id", teamId],
+      }));
+
+      if (!formattedConnections) {
+        return;
+      }
+
+      await syncConnection.batchTrigger(formattedConnections);
+    } catch (error) {
+      logger.error("Failed to sync bank connections", { error });
+
       throw error;
     }
-
-    const formattedConnections = bankConnections.map((connection) => ({
-      payload: {
-        connectionId: connection.id,
-      },
-      tags: ["team_id", teamId],
-    }));
-
-    await syncConnection.batchTrigger(formattedConnections);
   },
 });
