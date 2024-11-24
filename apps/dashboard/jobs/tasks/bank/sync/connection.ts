@@ -6,6 +6,7 @@ import { z } from "zod";
 import { syncBalance } from "./balance";
 import { syncTransactions } from "./transactions";
 
+// Fan-out pattern. We want to trigger a task for each bank connection (Transactions, Balance)
 export const syncConnection = schemaTask({
   id: "sync-connection",
   retry: {

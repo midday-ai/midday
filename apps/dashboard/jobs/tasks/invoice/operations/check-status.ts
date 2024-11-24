@@ -2,8 +2,8 @@ import { TZDate } from "@date-fns/tz";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { subDays } from "date-fns";
+import { updateInvoiceStatus } from "jobs/utils/update-invocie";
 import { z } from "zod";
-import { updateInvoiceStatus } from "../../utils/update-invocie";
 
 export const checkInvoiceStatus = schemaTask({
   id: "check-invoice-status",

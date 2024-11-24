@@ -1,8 +1,8 @@
 import { client } from "@midday/engine/client";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
+import { parseAPIError } from "jobs/utils/parse-error";
 import { z } from "zod";
-import { parseAPIError } from "../../utils/parse-error";
 
 export const syncBalance = schemaTask({
   id: "sync-balance",

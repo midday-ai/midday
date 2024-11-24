@@ -2,8 +2,8 @@ import { client } from "@midday/engine/client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { parseAPIError } from "jobs/utils/parse-error";
+import { getClassification, transformTransaction } from "jobs/utils/transform";
 import { z } from "zod";
-import { getClassification, transformTransaction } from "../../utils/transform";
 
 export const syncTransactions = schemaTask({
   id: "sync-transactions",
