@@ -12,7 +12,7 @@ export async function triggerSequence<T>(
   task: TriggerTask<T>,
   options?: TaskRunOptions & { delayMinutes?: number },
 ) {
-  const { delayMinutes = 5, ...restOptions } = options ?? {};
+  const { delayMinutes = 1, ...restOptions } = options ?? {};
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];

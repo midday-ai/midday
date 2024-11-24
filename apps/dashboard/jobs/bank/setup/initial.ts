@@ -1,7 +1,7 @@
 import { schedules, schemaTask } from "@trigger.dev/sdk/v3";
 import { generateCron } from "jobs/utils/generate-cron";
 import { z } from "zod";
-import { scheduleBankSync } from "../scheduler/schedule-bank-sync";
+import { scheduleBankSync } from "../scheduler/bank-sync";
 
 // This task sets up the bank sync for a new team on a daily schedule and
 // runs the initial sync for transactions and balance

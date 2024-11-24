@@ -1,9 +1,8 @@
-import Midday from "@midday-ai/engine";
+import { client } from "@midday/engine/client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { parseAPIError } from "jobs/utils/parse-error";
 import { z } from "zod";
-import { engine } from "../../utils/engine";
 import { getClassification, transformTransaction } from "../../utils/transform";
 
 export const syncTransactions = schemaTask({
@@ -34,22 +33,30 @@ export const syncTransactions = schemaTask({
     });
 
     try {
-      // Fetch transactions from our Engine
-      const transactions = await engine.transactions.list({
-        provider,
-        accountId,
-        accountType: classification,
-        accessToken,
-        latest: "true",
+      const transactionsResponse = await client.transactions.$get({
+        query: {
+          provider,
+          accountId,
+          accountType: classification,
+          accessToken,
+          // TODO: Fix boolean type (check invoice preview)
+          latest: true,
+        },
       });
 
-      if (!transactions.data) {
+      if (!transactionsResponse.ok) {
+        throw new Error("Failed to get transactions");
+      }
+
+      const { data: transactionsData } = await transactionsResponse.json();
+
+      if (!transactionsData) {
         logger.info(`No transactions to upsert for account ${accountId}`);
         return;
       }
 
       // Transform transactions to match our DB schema
-      const formattedTransactions = transactions.data.map((transaction) => {
+      const formattedTransactions = transactionsData.map((transaction) => {
         return transformTransaction({
           transaction,
           teamId,
@@ -63,12 +70,8 @@ export const syncTransactions = schemaTask({
         ignoreDuplicates: true,
       });
     } catch (error) {
-      if (error instanceof Midday.APIError) {
-        const parsedError = parseAPIError(error);
-        // TODO: Handle error (disconnect, expired, etc.)
-
-        throw error;
-      }
+      const parsedError = parseAPIError(error);
+      // TODO: Handle error (disconnect, expired, etc.)
 
       throw error;
     }
