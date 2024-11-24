@@ -3,8 +3,8 @@ import { schedules } from "@trigger.dev/sdk/v3";
 import { syncConnection } from "../sync/connection";
 
 // This is a fan-out pattern. We want to trigger a task for each bank connection.
-export const scheduleBankSync = schedules.task({
-  id: "schedule-bank-sync",
+export const bankSyncScheduler = schedules.task({
+  id: "bank-sync-scheduler",
   run: async (payload) => {
     const supabase = createClient();
 

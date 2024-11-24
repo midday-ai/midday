@@ -13,8 +13,9 @@ export const syncBalance = schemaTask({
     accountId: z.string(),
     accessToken: z.string().optional(),
     provider: z.enum(["gocardless", "plaid", "teller"]),
+    manual: z.boolean().optional(),
   }),
-  run: async ({ accountId, accessToken, provider }) => {
+  run: async ({ accountId, accessToken, provider, manual }) => {
     const supabase = createClient();
 
     try {

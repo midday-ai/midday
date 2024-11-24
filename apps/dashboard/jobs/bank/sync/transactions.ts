@@ -22,8 +22,16 @@ export const syncTransactions = schemaTask({
     ]),
     accessToken: z.string().optional(),
     provider: z.enum(["gocardless", "plaid", "teller"]),
+    manual: z.boolean().optional(),
   }),
-  run: async ({ teamId, accountId, accountType, accessToken, provider }) => {
+  run: async ({
+    teamId,
+    accountId,
+    accountType,
+    accessToken,
+    provider,
+    manual,
+  }) => {
     const supabase = createClient();
 
     const classification = getClassification(accountType);

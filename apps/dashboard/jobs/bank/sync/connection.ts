@@ -24,6 +24,7 @@ export const syncConnection = schemaTask({
     });
 
     if (!connectionResponse.ok) {
+      logger.error("Failed to get connection status", { connectionId });
       throw new Error("Failed to get connection status");
     }
 
@@ -47,11 +48,12 @@ export const syncConnection = schemaTask({
           .eq("manual", false);
 
       if (bankAccountsError) {
+        logger.error("Failed to get bank accounts", { connectionId });
         throw new Error("Failed to get bank accounts");
       }
 
       if (!bankAccountsData) {
-        logger.info("No bank accounts found");
+        logger.info("No bank accounts found", { connectionId });
         return;
       }
 
@@ -88,6 +90,8 @@ export const syncConnection = schemaTask({
     }
 
     if (connectionData.status === "disconnected") {
+      logger.info("Connection disconnected", { connectionId });
+
       await supabase
         .from("bank_connections")
         .update({ status: "disconnected" })
