@@ -1,27 +1,26 @@
-import type { RunHandle, TaskRunOptions } from "@trigger.dev/sdk/v3";
+import type { BatchRunHandle, TaskRunOptions } from "@trigger.dev/sdk/v3";
 
 interface TriggerTask<T> {
-  trigger: (
-    payload: T,
+  batchTriggerAndWait: (
+    items: { payload: T }[],
     options?: TaskRunOptions & { delayMinutes?: number },
-  ) => Promise<RunHandle<string, T, void>>;
+  ) => Promise<BatchRunHandle<string, T, void>>;
 }
 
-export async function triggerSequence<T>(
+export async function triggerSequenceAndWait<T>(
   items: T[],
   task: TriggerTask<T>,
   options?: TaskRunOptions & { delayMinutes?: number },
 ) {
   const { delayMinutes = 1, ...restOptions } = options ?? {};
 
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-
-    if (!item) continue;
-
-    await task.trigger(item, {
+  const batchItems = items.map((item, i) => ({
+    payload: item,
+    options: {
       ...restOptions,
       delay: `${i * delayMinutes}min`,
-    });
-  }
+    },
+  }));
+
+  return task.batchTriggerAndWait(batchItems, restOptions);
 }

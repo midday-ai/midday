@@ -14,6 +14,7 @@ export const syncAccount = schemaTask({
     maxAttempts: 2,
   },
   schema: z.object({
+    id: z.string().uuid(),
     teamId: z.string(),
     accountId: z.string(),
     accessToken: z.string().optional(),
@@ -28,6 +29,7 @@ export const syncAccount = schemaTask({
     manualSync: z.boolean().optional(),
   }),
   run: async ({
+    id,
     teamId,
     accountId,
     accountType,
@@ -65,13 +67,11 @@ export const syncAccount = schemaTask({
           error_details: null,
           error_retries: 0,
         })
-        .eq("id", accountId);
+        .eq("id", id);
     } catch (error) {
       const parsedError = parseAPIError(error);
 
-      logger.error("Failed to sync account balance", {
-        error: parsedError,
-      });
+      logger.error("Failed to sync account balance", { error: parsedError });
 
       await supabase
         .from("bank_accounts")
@@ -79,7 +79,7 @@ export const syncAccount = schemaTask({
           error_details: parsedError.message,
           // error_retries: 0,
         })
-        .eq("id", accountId);
+        .eq("id", id);
 
       throw error;
     }
@@ -115,16 +115,12 @@ export const syncAccount = schemaTask({
         await upsertTransactions.trigger({
           transactions: transactionBatch,
           teamId,
-          bankAccountId: accountId,
+          bankAccountId: id,
           manualSync: Boolean(manualSync),
         });
       }
     } catch (error) {
-      const parsedError = parseAPIError(error);
-
-      logger.error("Failed to sync transactions", {
-        error: parsedError,
-      });
+      logger.error("Failed to sync transactions", { error });
 
       throw error;
     }
