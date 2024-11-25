@@ -1,4 +1,5 @@
 import { client } from "@midday/engine/client";
+import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { parseAPIError } from "jobs/utils/parse-error";
 import { getClassification } from "jobs/utils/transform";
@@ -7,14 +8,16 @@ import { upsertTransactions } from "../transactions/upsert";
 
 const BATCH_SIZE = 500;
 
-export const syncTransactions = schemaTask({
-  id: "sync-transactions",
+export const syncAccount = schemaTask({
+  id: "sync-account",
   retry: {
     maxAttempts: 2,
   },
   schema: z.object({
-    teamId: z.string().uuid(),
+    teamId: z.string(),
     accountId: z.string(),
+    accessToken: z.string().optional(),
+    provider: z.enum(["gocardless", "plaid", "teller"]),
     accountType: z.enum([
       "credit",
       "other_asset",
@@ -22,8 +25,6 @@ export const syncTransactions = schemaTask({
       "depository",
       "loan",
     ]),
-    accessToken: z.string().optional(),
-    provider: z.enum(["gocardless", "plaid", "teller"]),
     manualSync: z.boolean().optional(),
   }),
   run: async ({
@@ -34,12 +35,56 @@ export const syncTransactions = schemaTask({
     provider,
     manualSync,
   }) => {
+    const supabase = createClient();
     const classification = getClassification(accountType);
 
-    logger.info(`Syncing transactions for account ${accountId}`, {
-      classification,
-    });
+    // Get the balance
+    try {
+      const balanceResponse = await client.accounts.balance.$get({
+        query: {
+          provider,
+          id: accountId,
+          accessToken,
+        },
+      });
 
+      if (!balanceResponse.ok) {
+        throw new Error("Failed to get balance");
+      }
+
+      const { data: balanceData } = await balanceResponse.json();
+
+      // Only update the balance if it's greater than 0
+      const balance = balanceData?.amount ?? undefined;
+
+      // Reset error details and retries if we successfully get the balance
+      await supabase
+        .from("bank_accounts")
+        .update({
+          balance,
+          error_details: null,
+          error_retries: 0,
+        })
+        .eq("id", accountId);
+    } catch (error) {
+      const parsedError = parseAPIError(error);
+
+      logger.error("Failed to sync account balance", {
+        error: parsedError,
+      });
+
+      await supabase
+        .from("bank_accounts")
+        .update({
+          error_details: parsedError.message,
+          // error_retries: 0,
+        })
+        .eq("id", accountId);
+
+      throw error;
+    }
+
+    // Get the transactions
     try {
       const transactionsResponse = await client.transactions.$get({
         query: {
@@ -76,7 +121,6 @@ export const syncTransactions = schemaTask({
       }
     } catch (error) {
       const parsedError = parseAPIError(error);
-      // TODO: Handle error (disconnect, expired, etc.)
 
       logger.error("Failed to sync transactions", {
         error: parsedError,

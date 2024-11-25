@@ -12,7 +12,7 @@ export const bankSyncScheduler = schedules.task({
     const teamId = payload.externalId;
 
     if (!teamId) {
-      throw new Error("externalId is required");
+      throw new Error("teamId is required");
     }
 
     try {

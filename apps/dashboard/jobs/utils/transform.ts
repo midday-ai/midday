@@ -5,6 +5,7 @@ type TransformTransactionData = {
   transaction: Transactions.Data;
   teamId: string;
   bankAccountId: string;
+  processed: boolean;
 };
 
 type Transaction = {
@@ -20,12 +21,14 @@ type Transaction = {
   team_id: string;
   date: string;
   status: "posted" | "pending";
+  processed: boolean;
 };
 
 export function transformTransaction({
   transaction,
   teamId,
   bankAccountId,
+  processed,
 }: TransformTransactionData): Transaction {
   return {
     name: transaction.name,
@@ -40,6 +43,7 @@ export function transformTransaction({
     balance: transaction.balance,
     team_id: teamId,
     status: transaction.status,
+    processed,
   };
 }
 

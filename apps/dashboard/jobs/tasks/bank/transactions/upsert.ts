@@ -28,7 +28,7 @@ export const upsertTransactions = schemaTask({
     bankAccountId: z.string().uuid(),
     manualSync: z.boolean(),
   }),
-  run: async ({ transactions, teamId, bankAccountId }) => {
+  run: async ({ transactions, teamId, bankAccountId, manualSync }) => {
     const supabase = createClient();
 
     try {
@@ -38,16 +38,16 @@ export const upsertTransactions = schemaTask({
           transaction,
           teamId,
           bankAccountId,
-          // TODO: Save if we should notify or not (if manualSync false)
+          // If the transactions are being synced manually, we don't want to notify
+          processed: manualSync,
         });
       });
 
-      // Upsert transactions, ignoring duplicates based on internal_id
+      // Upsert transactions into the transactions table, skipping duplicates based on internal_id
       await supabase
         .from("transactions")
         .upsert(formattedTransactions, {
           onConflict: "internal_id",
-          ignoreDuplicates: true,
         })
         .throwOnError();
     } catch (error) {
