@@ -11,8 +11,14 @@ export function Description({ content }: { content: string }) {
       <Text style={{ fontFamily: "Helvetica", fontSize: 9 }}>{content}</Text>
     );
   }
+
   return (
-    <View style={{ flex: 3, alignSelf: "flex-start", marginTop: -10 }}>
+    <View
+      style={{
+        alignSelf: "flex-start",
+        marginTop: -10,
+      }}
+    >
       <EditorContent content={value} />
     </View>
   );
