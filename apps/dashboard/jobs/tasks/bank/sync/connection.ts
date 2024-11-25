@@ -92,9 +92,6 @@ export const syncConnection = schemaTask({
 
         logger.info("Synced bank accounts completed");
 
-        // Revalidate the bank cache (transactions, accounts, connections)
-        await revalidateCache({ tag: "bank", teamId: data.team_id });
-
         // Trigger a notification for new transactions if it's an background sync
         // We delay it by 1 minutes to allow for more transactions to be processed
         if (!manualSync) {
@@ -103,6 +100,9 @@ export const syncConnection = schemaTask({
             { delay: "1m" },
           );
         }
+
+        // Revalidate the bank cache (transactions, accounts, connections)
+        await revalidateCache({ tag: "bank", teamId: data.team_id });
       }
 
       if (connectionData.status === "disconnected") {
@@ -114,7 +114,11 @@ export const syncConnection = schemaTask({
           .eq("id", connectionId);
 
         // Revalidate the bank cache (transactions, accounts, connections)
-        await revalidateCache({ tag: "bank", teamId: data.team_id });
+        try {
+          await revalidateCache({ tag: "bank", teamId: data.team_id });
+        } catch (error) {
+          logger.error("Failed to revalidate cache", { error });
+        }
       }
     } catch (error) {
       logger.error("Failed to sync connection", { error });
