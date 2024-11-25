@@ -1,6 +1,9 @@
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
-import { handleTransactionEmails } from "jobs/utils/transaction-notifications";
+import {
+  handleTransactionEmails,
+  handleTransactionSlackNotifications,
+} from "jobs/utils/transaction-notifications";
 import { handleTransactionNotifications } from "jobs/utils/transaction-notifications";
 import { z } from "zod";
 
@@ -36,5 +39,6 @@ export const transactionsNotification = schemaTask({
 
     await handleTransactionNotifications(usersData, sortedTransactions);
     await handleTransactionEmails(usersData, sortedTransactions);
+    await handleTransactionSlackNotifications(teamId, sortedTransactions);
   },
 });
