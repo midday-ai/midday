@@ -48,6 +48,7 @@ interface BankConnectionProps {
       currency: string;
       balance?: number;
       type: string;
+      error_retries?: number;
     }>;
   };
 }
@@ -282,6 +283,12 @@ export function BankConnection({ connection }: BankConnectionProps) {
                 currency={account.currency}
                 balance={account.balance ?? 0}
                 type={account.type}
+                hasError={
+                  account.enabled &&
+                  connection.status !== "disconnected" &&
+                  account.error_retries !== undefined &&
+                  account.error_retries > 0
+                }
               />
             );
           })}

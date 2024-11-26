@@ -4,12 +4,12 @@ import { transformTransaction } from "jobs/utils/transform";
 import { z } from "zod";
 
 const transactionSchema = z.object({
+  id: z.string(),
   description: z.string().nullable(),
   method: z.string().nullable(),
   date: z.string(),
   name: z.string(),
   status: z.enum(["pending", "posted"]),
-  id: z.string(),
   balance: z.number().nullable(),
   currency: z.string(),
   amount: z.number(),
@@ -23,10 +23,10 @@ export const upsertTransactions = schemaTask({
     concurrencyLimit: 10,
   },
   schema: z.object({
-    transactions: z.array(transactionSchema),
     teamId: z.string().uuid(),
     bankAccountId: z.string().uuid(),
-    manualSync: z.boolean(),
+    manualSync: z.boolean().optional(),
+    transactions: z.array(transactionSchema),
   }),
   run: async ({ transactions, teamId, bankAccountId, manualSync }) => {
     const supabase = createClient();
@@ -38,8 +38,7 @@ export const upsertTransactions = schemaTask({
           transaction,
           teamId,
           bankAccountId,
-          // If the transactions are being synced manually, we don't want to notify
-          processed: manualSync,
+          notified: manualSync,
         });
       });
 

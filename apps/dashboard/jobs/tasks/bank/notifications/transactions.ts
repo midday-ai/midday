@@ -17,12 +17,12 @@ export const transactionsNotification = schemaTask({
     const supabase = createClient();
 
     try {
-      // Mark all transactions as processed and get the ones that need to be notified about
+      // Mark all transactions as notified and get the ones that need to be notified about
       const { data: transactionsData } = await supabase
         .from("transactions")
-        .update({ processed: true })
+        .update({ notified: true })
         .eq("team_id", teamId)
-        .eq("processed", false)
+        .eq("notified", false)
         .select("id, date, amount, name, currency, category, status")
         .order("date", { ascending: false })
         .throwOnError();

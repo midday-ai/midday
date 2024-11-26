@@ -62,13 +62,13 @@ export const syncAccount = schemaTask({
       // Only update the balance if it's greater than 0
       const balance = balanceData?.amount ?? undefined;
 
-      // Reset error details and retries if we successfully get the balance
+      // Reset error details and retries if we successfully got the balance
       await supabase
         .from("bank_accounts")
         .update({
           balance,
           error_details: null,
-          error_retries: 0,
+          error_retries: null,
         })
         .eq("id", id);
     } catch (error) {
@@ -135,7 +135,7 @@ export const syncAccount = schemaTask({
           transactions: transactionBatch,
           teamId,
           bankAccountId: id,
-          manualSync: Boolean(manualSync),
+          manualSync,
         });
       }
     } catch (error) {

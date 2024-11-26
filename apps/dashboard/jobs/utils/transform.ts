@@ -5,7 +5,7 @@ type TransformTransactionData = {
   transaction: Transactions.Data;
   teamId: string;
   bankAccountId: string;
-  processed: boolean;
+  notified?: boolean;
 };
 
 type Transaction = {
@@ -21,14 +21,14 @@ type Transaction = {
   team_id: string;
   date: string;
   status: "posted" | "pending";
-  processed: boolean;
+  notified?: boolean;
 };
 
 export function transformTransaction({
   transaction,
   teamId,
   bankAccountId,
-  processed,
+  notified,
 }: TransformTransactionData): Transaction {
   return {
     name: transaction.name,
@@ -43,7 +43,9 @@ export function transformTransaction({
     balance: transaction.balance,
     team_id: teamId,
     status: transaction.status,
-    processed,
+    // If the transactions are being synced manually, we don't want to notify
+    // And using upsert, we don't want to override the notified value
+    ...(notified ? { notified } : {}),
   };
 }
 
