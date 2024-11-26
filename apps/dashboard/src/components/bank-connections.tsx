@@ -16,7 +16,6 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { useEventDetails } from "@trigger.dev/react";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
@@ -24,6 +23,7 @@ import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { BankAccount } from "./bank-account";
 import { BankLogo } from "./bank-logo";
+import { RealtimeRun } from "./realtime-run";
 import { ReconnectProvider } from "./reconnect-provider";
 import { SyncTransactions } from "./sync-transactions";
 
@@ -132,16 +132,14 @@ function ConnectionState({
 }
 
 export function BankConnection({ connection }: BankConnectionProps) {
-  const [eventId, setEventId] = useState<string | undefined>();
+  const [runId, setRunId] = useState<string | undefined>();
+  const [accessToken, setAccessToken] = useState<string | undefined>();
+  const [status, setStatus] = useState<"FAILED" | "COMPLETED" | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
-  const { data } = useEventDetails(eventId);
   const router = useRouter();
 
-  const status = data?.runs.at(-1)?.status;
   const { show } = connectionStatus(connection);
-
-  const error = status === "FAILURE" || status === "TIMED_OUT";
 
   const [params] = useQueryStates({
     step: parseAsString,
@@ -151,13 +149,16 @@ export function BankConnection({ connection }: BankConnectionProps) {
   const manualSyncTransactions = useAction(manualSyncTransactionsAction, {
     onExecute: () => setSyncing(true),
     onSuccess: ({ data }) => {
-      if (data?.id) {
-        setEventId(data.id);
+      if (data) {
+        setRunId(data.id);
+        setAccessToken(data.publicAccessToken);
       }
     },
     onError: () => {
       setSyncing(false);
-      setEventId(undefined);
+      setRunId(undefined);
+      setStatus("FAILED");
+
       toast({
         duration: 3500,
         variant: "error",
@@ -165,16 +166,6 @@ export function BankConnection({ connection }: BankConnectionProps) {
       });
     },
   });
-
-  useEffect(() => {
-    if (status === "SUCCESS") {
-      dismiss();
-      setEventId(undefined);
-      setSyncing(false);
-      router.replace("/settings/accounts");
-      router.refresh();
-    }
-  }, [status]);
 
   useEffect(() => {
     if (isSyncing) {
@@ -188,9 +179,19 @@ export function BankConnection({ connection }: BankConnectionProps) {
   }, [isSyncing]);
 
   useEffect(() => {
-    if (error) {
+    if (status === "COMPLETED") {
+      dismiss();
+      setRunId(undefined);
       setSyncing(false);
-      setEventId(undefined);
+      router.replace("/settings/accounts");
+      router.refresh();
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (status === "FAILED") {
+      setSyncing(false);
+      setRunId(undefined);
 
       toast({
         duration: 3500,
@@ -198,14 +199,14 @@ export function BankConnection({ connection }: BankConnectionProps) {
         title: "Something went wrong please try again.",
       });
     }
-  }, [error]);
+  }, [status]);
 
-  // NOTE: GoCardLess reconnect flow (redirect from API route)
-  useEffect(() => {
-    if (params.step === "reconnect" && params.id) {
-      manualSyncTransactions.execute({ connectionId: params.id });
-    }
-  }, [params]);
+  // // NOTE: GoCardLess reconnect flow (redirect from API route)
+  // useEffect(() => {
+  //   if (params.step === "reconnect" && params.id) {
+  //     manualSyncTransactions.execute({ connectionId: params.id });
+  //   }
+  // }, [params]);
 
   const handleManualSync = () => {
     manualSyncTransactions.execute({ connectionId: connection.id });
@@ -213,6 +214,14 @@ export function BankConnection({ connection }: BankConnectionProps) {
 
   return (
     <div>
+      {runId && accessToken && (
+        <RealtimeRun
+          runId={runId}
+          accessToken={accessToken}
+          onChange={setStatus}
+        />
+      )}
+
       <div className="flex justify-between items-center">
         <AccordionTrigger
           className="justify-start text-start w-full"

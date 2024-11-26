@@ -111,7 +111,8 @@ export const syncAccount = schemaTask({
           accountId,
           accountType: classification,
           accessToken,
-          latest: "true",
+          // If the transactions are being synced manually, we want to get all transactions
+          latest: manualSync ? "false" : "true",
         },
       });
 
