@@ -23,10 +23,13 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>({
     }
   },
 });
+
 app.use("*", requestId());
 app.use(authMiddleware);
 app.use(securityMiddleware);
 app.use(loggingMiddleware);
+app.get("/institutions", cacheMiddleware);
+app.get("/rates", cacheMiddleware);
 
 app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
   type: "http",

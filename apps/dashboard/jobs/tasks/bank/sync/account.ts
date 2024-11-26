@@ -19,6 +19,7 @@ export const syncAccount = schemaTask({
     teamId: z.string(),
     accountId: z.string(),
     accessToken: z.string().optional(),
+    errorRetries: z.number().optional(),
     provider: z.enum(["gocardless", "plaid", "teller"]),
     accountType: z.enum([
       "credit",
@@ -35,6 +36,7 @@ export const syncAccount = schemaTask({
     accountId,
     accountType,
     accessToken,
+    errorRetries,
     provider,
     manualSync,
   }) => {
@@ -74,13 +76,29 @@ export const syncAccount = schemaTask({
 
       logger.error("Failed to sync account balance", { error: parsedError });
 
-      await supabase
-        .from("bank_accounts")
-        .update({
-          error_details: parsedError.message,
-          // error_retries: 0,
-        })
-        .eq("id", id);
+      if (parsedError.code === "disconnected") {
+        const retries = errorRetries ? errorRetries + 1 : 1;
+
+        if (retries > 4) {
+          logger.error("Account disconnected too many times", {
+            accountId,
+            retries,
+          });
+        }
+
+        // Update the account with the error details and retries
+        // And disable the account if we've retried too many times
+        await supabase
+          .from("bank_accounts")
+          .update({
+            error_details: parsedError.message,
+            error_retries: retries,
+            enabled: retries <= 4,
+          })
+          .eq("id", id);
+
+        return;
+      }
 
       throw error;
     }
@@ -93,7 +111,7 @@ export const syncAccount = schemaTask({
           accountId,
           accountType: classification,
           accessToken,
-          latest: true,
+          latest: "true",
         },
       });
 

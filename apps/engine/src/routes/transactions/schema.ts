@@ -39,9 +39,7 @@ export const TransactionsParamsSchema = z
         example: "token-123",
       }),
     latest: z
-      .enum(["true", "false"])
-      .transform((value) => value === "true")
-      .optional()
+      .preprocess((val) => val === "true", z.boolean().default(false))
       .openapi({
         description: "Get latest transactions",
         param: {
