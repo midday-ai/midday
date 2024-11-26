@@ -42,6 +42,7 @@ export default async function Transactions({
     accounts,
     tags,
     amount_range,
+    amount,
   } = searchParamsCache.parse(searchParams);
 
   // Move this in a suspense
@@ -65,6 +66,7 @@ export default async function Transactions({
     accounts,
     tags,
     amount_range,
+    amount,
   };
 
   const sort = searchParams?.sort?.split(":");

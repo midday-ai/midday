@@ -65,7 +65,10 @@ export function SpendingPeriod({ initialPeriod }: Props) {
   return (
     <div className="flex justify-between">
       <div>
-        <Link href="/spending" prefetch>
+        <Link
+          href={`/transactions?start=${optimisticState.from}&end=${optimisticState.to}&amount=lte,0`}
+          prefetch
+        >
           <h2 className="text-lg">Spending</h2>
         </Link>
       </div>

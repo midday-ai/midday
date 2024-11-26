@@ -172,6 +172,7 @@ export type GetTransactionsParams = {
     end?: string;
     recurring?: string[];
     amount_range?: [number, number];
+    amount?: [string, string];
   };
 };
 
@@ -193,6 +194,7 @@ export async function getTransactionsQuery(
     assignees,
     recurring,
     amount_range,
+    amount,
   } = filter || {};
 
   const columns = [
@@ -324,6 +326,16 @@ export async function getTransactionsQuery(
   if (amount_range) {
     query.gte("amount", amount_range[0]);
     query.lte("amount", amount_range[1]);
+  }
+
+  if (amount?.length === 2) {
+    const [operator, value] = amount;
+
+    if (operator === "gte") {
+      query.gte("amount", value);
+    } else if (operator === "lte") {
+      query.lte("amount", value);
+    }
   }
 
   const { data, count } = await query.range(from, to);
