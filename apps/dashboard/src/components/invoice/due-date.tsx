@@ -18,7 +18,7 @@ export function DueDate() {
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
-  const handleSelect = (date: TZDate | undefined) => {
+  const handleSelect = (date: Date | undefined) => {
     if (date) {
       setValue("due_date", date, { shouldValidate: true, shouldDirty: true });
       setIsOpen(false);

@@ -15,7 +15,7 @@ export function IssueDate() {
   const dateFormat = watch("template.date_format");
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSelect = (date: TZDate | undefined) => {
+  const handleSelect = (date: Date | undefined) => {
     if (date) {
       setValue("issue_date", date, { shouldValidate: true, shouldDirty: true });
       setIsOpen(false);
