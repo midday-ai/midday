@@ -141,6 +141,8 @@ export class GoCardLessApi {
     } catch (error) {
       const parsedError = isError(error);
 
+      console.log(error);
+
       if (parsedError) {
         throw new ProviderError(parsedError);
       }

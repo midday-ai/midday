@@ -201,12 +201,12 @@ export function BankConnection({ connection }: BankConnectionProps) {
     }
   }, [status]);
 
-  // // NOTE: GoCardLess reconnect flow (redirect from API route)
-  // useEffect(() => {
-  //   if (params.step === "reconnect" && params.id) {
-  //     manualSyncTransactions.execute({ connectionId: params.id });
-  //   }
-  // }, [params]);
+  // NOTE: GoCardLess reconnect flow (redirect from API route)
+  useEffect(() => {
+    if (params.step === "reconnect" && params.id) {
+      manualSyncTransactions.execute({ connectionId: params.id });
+    }
+  }, [params]);
 
   const handleManualSync = () => {
     manualSyncTransactions.execute({ connectionId: connection.id });
