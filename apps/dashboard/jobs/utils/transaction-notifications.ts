@@ -1,4 +1,4 @@
-import { sendSlackTransactionsNotification } from "@midday/app-store/slack";
+import { sendSlackTransactionsNotification } from "@midday/app-store/slack-notifications";
 import TransactionsEmail from "@midday/email/emails/transactions";
 import { getI18n } from "@midday/email/locales";
 import { getInboxEmail } from "@midday/inbox";
@@ -7,6 +7,7 @@ import {
   TriggerEvents,
   triggerBulk,
 } from "@midday/notification";
+import { createClient } from "@midday/supabase/job";
 import { render } from "@react-email/components";
 import { logger } from "@trigger.dev/sdk/v3";
 
@@ -41,7 +42,7 @@ interface Transaction {
 
 export async function handleTransactionNotifications(
   usersData: UserData[],
-  sortedTransactions: Transaction[],
+  transactions: Transaction[],
 ) {
   const notificationEvents = usersData.map(({ user, team_id }) => {
     const { t } = getI18n({ locale: user.locale ?? "en" });
@@ -50,10 +51,10 @@ export async function handleTransactionNotifications(
       name: TriggerEvents.TransactionsNewInApp,
       payload: {
         type: NotificationTypes.Transactions,
-        from: sortedTransactions[sortedTransactions.length - 1]?.date,
-        to: sortedTransactions[0]?.date,
+        from: transactions[transactions.length - 1]?.date,
+        to: transactions[0]?.date,
         description: t("notifications.transactions", {
-          numberOfTransactions: sortedTransactions.length,
+          numberOfTransactions: transactions.length,
         }),
       },
       user: {
@@ -79,7 +80,7 @@ export async function handleTransactionNotifications(
 
 export async function handleTransactionEmails(
   usersData: UserData[],
-  sortedTransactions: Transaction[],
+  transactions: Transaction[],
 ) {
   const emailPromises = usersData.map(async ({ user, team_id, team }) => {
     const { t } = getI18n({ locale: user.locale ?? "en" });
@@ -87,7 +88,7 @@ export async function handleTransactionEmails(
     const html = await render(
       TransactionsEmail({
         fullName: user.full_name,
-        transactions: sortedTransactions,
+        transactions,
         locale: user.locale ?? "en",
         teamName: team.name,
       }),
@@ -123,11 +124,12 @@ export async function handleTransactionEmails(
 
 export async function handleTransactionSlackNotifications(
   teamId: string,
-  sortedTransactions: Transaction[],
+  transactions: Transaction[],
 ) {
+  const supabase = createClient();
+
   // TODO: Get correct locale for formatting the amount
-  const slackTransactions = sortedTransactions.map((transaction) => ({
-    date: transaction.date,
+  const slackTransactions = transactions.map((transaction) => ({
     amount: Intl.NumberFormat("en-US", {
       style: "currency",
       currency: transaction.currency,
@@ -138,5 +140,6 @@ export async function handleTransactionSlackNotifications(
   await sendSlackTransactionsNotification({
     teamId,
     transactions: slackTransactions,
+    supabase,
   });
 }

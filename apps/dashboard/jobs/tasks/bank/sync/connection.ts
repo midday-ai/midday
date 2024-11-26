@@ -10,6 +10,7 @@ import { syncAccount } from "./account";
 // Fan-out pattern. We want to trigger a task for each bank account (Transactions, Balance)
 export const syncConnection = schemaTask({
   id: "sync-connection",
+  maxDuration: 300,
   retry: {
     maxAttempts: 2,
   },
@@ -40,6 +41,8 @@ export const syncConnection = schemaTask({
           access_token: data.access_token,
         },
       });
+
+      logger.info("Connection response", { connectionResponse });
 
       if (!connectionResponse.ok) {
         logger.error("Failed to get connection status");

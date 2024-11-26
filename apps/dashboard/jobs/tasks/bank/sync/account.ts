@@ -10,6 +10,7 @@ const BATCH_SIZE = 500;
 
 export const syncAccount = schemaTask({
   id: "sync-account",
+  maxDuration: 300,
   retry: {
     maxAttempts: 2,
   },

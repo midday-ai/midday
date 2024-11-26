@@ -23,6 +23,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./slack": "./src/slack/index.ts",
+    "./slack-notifications": "./src/slack/lib/notifications/transactions.ts",
     "./db": "./src/db/index.ts"
   }
 }

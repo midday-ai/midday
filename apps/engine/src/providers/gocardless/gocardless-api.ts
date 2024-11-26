@@ -30,8 +30,8 @@ export class GoCardLessApi {
   #baseUrl = "https://bankaccountdata.gocardless.com";
 
   // Cache keys
-  #accessTokenCacheKey = "gocardless_access_token";
-  #refreshTokenCacheKey = "gocardless_refresh_token";
+  #accessTokenCacheKey = "gocardless_access_token_v2";
+  #refreshTokenCacheKey = "gocardless_refresh_token_v2";
   #institutionsCacheKey = "gocardless_institutions";
 
   #kv: KVNamespace;

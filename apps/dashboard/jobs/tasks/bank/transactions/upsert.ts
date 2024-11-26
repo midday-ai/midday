@@ -18,7 +18,7 @@ const transactionSchema = z.object({
 
 export const upsertTransactions = schemaTask({
   id: "upsert-transactions",
-  maxDuration: 20000,
+  maxDuration: 300,
   queue: {
     concurrencyLimit: 10,
   },

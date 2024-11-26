@@ -6,6 +6,7 @@ import { syncConnection } from "../sync/connection";
 // that has a status of "connected".
 export const bankSyncScheduler = schedules.task({
   id: "bank-sync-scheduler",
+  maxDuration: 600,
   run: async (payload) => {
     const supabase = createClient();
 
