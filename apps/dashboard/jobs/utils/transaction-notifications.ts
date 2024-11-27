@@ -56,6 +56,9 @@ export async function handleTransactionNotifications(
         description: t("notifications.transactions", {
           numberOfTransactions: transactions.length,
         }),
+        // For single transaction
+        amount: transactions[0]?.amount,
+        name: transactions[0]?.name,
       },
       user: {
         subscriberId: user.id,

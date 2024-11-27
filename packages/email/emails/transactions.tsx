@@ -25,7 +25,6 @@ type Transaction = {
   name: string;
   currency: string;
   category?: string;
-  status: "pending" | "posted";
   teamName: string;
 };
 
@@ -42,7 +41,6 @@ const defaultTransactions = [
     amount: -1000,
     currency: "USD",
     name: "Spotify",
-    status: "pending",
   },
   {
     id: "2",
@@ -51,7 +49,6 @@ const defaultTransactions = [
     currency: "USD",
     name: "H23504959",
     category: "income",
-    status: "pending",
   },
   {
     id: "3",
@@ -59,7 +56,6 @@ const defaultTransactions = [
     amount: -1000,
     currency: "USD",
     name: "Webflow",
-    status: "posted",
   },
   {
     id: "4",
@@ -67,7 +63,83 @@ const defaultTransactions = [
     amount: -1000,
     currency: "USD",
     name: "Netflix",
-    status: "posted",
+  },
+  {
+    id: "5",
+    date: new Date().toISOString(),
+    amount: -2500,
+    currency: "USD",
+    name: "Adobe Creative Cloud",
+  },
+  {
+    id: "6",
+    date: new Date().toISOString(),
+    amount: -1499,
+    currency: "USD",
+    name: "Amazon Prime",
+  },
+  {
+    id: "7",
+    date: new Date().toISOString(),
+    amount: -999,
+    currency: "USD",
+    name: "Disney+",
+  },
+  {
+    id: "8",
+    date: new Date().toISOString(),
+    amount: -1299,
+    currency: "USD",
+    name: "Microsoft 365",
+  },
+  {
+    id: "9",
+    date: new Date().toISOString(),
+    amount: -899,
+    currency: "USD",
+    name: "Apple Music",
+  },
+  {
+    id: "10",
+    date: new Date().toISOString(),
+    amount: -1599,
+    currency: "USD",
+    name: "HBO Max",
+  },
+  {
+    id: "11",
+    date: new Date().toISOString(),
+    amount: -1999,
+    currency: "USD",
+    name: "Adobe Photoshop",
+  },
+  {
+    id: "12",
+    date: new Date().toISOString(),
+    amount: -799,
+    currency: "USD",
+    name: "YouTube Premium",
+  },
+  {
+    id: "13",
+    date: new Date().toISOString(),
+    amount: -1499,
+    currency: "USD",
+    name: "Dropbox Plus",
+  },
+  {
+    id: "14",
+    date: new Date().toISOString(),
+    amount: -999,
+    currency: "USD",
+    name: "Nintendo Online",
+  },
+  {
+    id: "15",
+    date: new Date().toISOString(),
+    amount: -1299,
+    currency: "USD",
+    name: "Slack",
   },
 ];
 
@@ -86,6 +158,8 @@ export const TransactionsEmail = ({
     firstName,
     numberOfTransactions: transactions.length,
   });
+
+  const displayedTransactions = transactions.slice(0, 10);
 
   return (
     <Html>
@@ -169,7 +243,7 @@ export const TransactionsEmail = ({
               </thead>
 
               <tbody style={{ width: "100%", minWidth: "100% !important" }}>
-                {transactions?.map((transaction) => (
+                {displayedTransactions.map((transaction) => (
                   <tr
                     key={transaction.id}
                     className="border-0 border-b-[1px] border-solid border-[#E8E7E1] h-[45px]"
@@ -188,17 +262,9 @@ export const TransactionsEmail = ({
                             "!text-[#00C969]",
                         )}
                       >
-                        <div className="flex space-x-2 items-center">
-                          <Text className="text-[14px] m-0 p-0 mt-1 pb-1 line-clamp-1">
-                            {transaction.name}
-                          </Text>
-
-                          {transaction.status === "pending" && (
-                            <div className="flex space-x-1 items-center border text-xs py-1 px-2 h-[22px] text-[#878787]">
-                              <span>Pending</span>
-                            </div>
-                          )}
-                        </div>
+                        <Text className="text-[14px] m-0 p-0 mt-1 pb-1 line-clamp-1">
+                          {transaction.name}
+                        </Text>
                       </Link>
                     </td>
                     <td align="left">
@@ -224,7 +290,7 @@ export const TransactionsEmail = ({
 
             <Section className="text-center mt-[32px] mb-[32px]">
               <Button
-                className="bg-transparent rounded-md text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
+                className="bg-transparent text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
                 href={`${baseAppUrl}/transactions?start=${transactions.at(0)?.date}&end=${transactions[transactions.length - 1]?.date}`}
               >
                 {t("transactions.button")}
