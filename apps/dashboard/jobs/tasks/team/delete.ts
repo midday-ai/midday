@@ -1,3 +1,4 @@
+import { client } from "@midday/engine/client";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
@@ -27,5 +28,11 @@ export const deleteTeam = schemaTask({
     // Unregister sync scheduler
     // TODO: Not implemented yet in Trigger.dev
     // await schedules.del(teamId);
+
+    // const connectionResponse = await client.connections.$delete({
+    //   params: {
+    //     id
+    //   },
+    // });
   },
 });
