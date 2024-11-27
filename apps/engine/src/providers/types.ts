@@ -115,3 +115,8 @@ export type GetHealthCheckResponse = {
 };
 
 export type GetConnectionStatusResponse = ConnectionStatus;
+
+export type DeleteConnectionRequest = {
+  id: string; // GoCardLess
+  accessToken?: string; // Teller & Plaid
+};

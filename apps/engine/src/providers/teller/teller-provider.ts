@@ -1,6 +1,7 @@
 import type { Provider } from "../interface";
 import type {
   DeleteAccountsRequest,
+  DeleteConnectionRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
   GetConnectionStatusRequest,
@@ -97,5 +98,13 @@ export class TellerProvider implements Provider {
     const response = await this.#api.getConnectionStatus({ accessToken });
 
     return response;
+  }
+
+  async deleteConnection({ accessToken }: DeleteConnectionRequest) {
+    if (!accessToken) {
+      throw Error("accessToken missing");
+    }
+
+    await this.#api.deleteAccounts({ accessToken });
   }
 }

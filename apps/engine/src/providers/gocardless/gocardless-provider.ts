@@ -1,6 +1,7 @@
 import type { Provider } from "../interface";
 import type {
   DeleteAccountsRequest,
+  DeleteConnectionRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
   GetConnectionStatusRequest,
@@ -83,5 +84,13 @@ export class GoCardLessProvider implements Provider {
     const response = await this.#api.getRequestion(id);
 
     return transformConnectionStatus(response);
+  }
+
+  async deleteConnection({ id }: DeleteConnectionRequest) {
+    if (!id) {
+      throw Error("Missing params");
+    }
+
+    await this.#api.deleteRequisition(id);
   }
 }

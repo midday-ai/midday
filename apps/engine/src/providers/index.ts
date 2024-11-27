@@ -4,6 +4,7 @@ import { PlaidProvider } from "./plaid/plaid-provider";
 import { TellerProvider } from "./teller/teller-provider";
 import type {
   DeleteAccountsRequest,
+  DeleteConnectionRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
   GetConnectionStatusRequest,
@@ -136,5 +137,11 @@ export class Provider {
     }
 
     return { status: "connected" };
+  }
+
+  async deleteConnection(params: DeleteConnectionRequest) {
+    logger("deleteConnection:", `provider: ${this.#name}`);
+
+    return this.#provider?.deleteConnection(params);
   }
 }

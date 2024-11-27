@@ -25,14 +25,22 @@ export const deleteTeam = schemaTask({
       throw new Error("Team not found");
     }
 
-    // Unregister sync scheduler
-    // TODO: Not implemented yet in Trigger.dev
+    // Unregister sync scheduler (Not implemented yet in Trigger.dev)
     // await schedules.del(teamId);
 
-    // const connectionResponse = await client.connections.$delete({
-    //   params: {
-    //     id
-    //   },
-    // });
+    // Delete connections in providers
+    const connectionPromises = teamData.bank_connections.map(
+      async (connection) => {
+        return client.connections.delete.$post({
+          json: {
+            id: connection.reference_id,
+            provider: connection.provider,
+            accessToken: connection.access_token,
+          },
+        });
+      },
+    );
+
+    await Promise.all(connectionPromises);
   },
 });

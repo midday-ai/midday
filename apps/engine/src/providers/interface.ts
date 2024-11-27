@@ -1,5 +1,6 @@
 import type {
   DeleteAccountsRequest,
+  DeleteConnectionRequest,
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
   GetAccountsRequest,
@@ -28,4 +29,5 @@ export interface Provider {
   getConnectionStatus: (
     params: GetConnectionStatusRequest,
   ) => Promise<GetConnectionStatusResponse>;
+  deleteConnection: (params: DeleteConnectionRequest) => void;
 }
