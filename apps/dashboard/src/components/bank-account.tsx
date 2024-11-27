@@ -120,11 +120,11 @@ export function BankAccount({
             )}
           </div>
 
-          {balance && (
+          {balance && balance > 0 ? (
             <span className="text-[#878787] text-sm">
               <FormatAmount amount={balance} currency={currency} />
             </span>
-          )}
+          ) : null}
         </div>
       </div>
 

@@ -68,7 +68,8 @@ export class TellerApi {
       },
     );
 
-    return result;
+    // NOTE: Remove pending transactions until upsert issue is fixed
+    return result.filter((transaction) => transaction.status !== "pending");
   }
 
   async getAccountBalance({

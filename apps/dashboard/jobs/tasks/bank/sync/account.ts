@@ -129,7 +129,6 @@ export const syncAccount = schemaTask({
 
       // Upsert transactions in batches of 500
       // This is to avoid memory issues with the DB
-      // Also the task has a queue limit of 10
       for (let i = 0; i < transactionsData.length; i += BATCH_SIZE) {
         const transactionBatch = transactionsData.slice(i, i + BATCH_SIZE);
         await upsertTransactions.trigger({

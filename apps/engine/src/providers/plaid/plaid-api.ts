@@ -154,10 +154,10 @@ export class PlaidApi {
       }
 
       // NOTE: Plaid transactions for all accounts
-      // we need to filter based on the provided accountId
-      return added.filter(
-        (transaction) => transaction.account_id === accountId,
-      );
+      // we need to filter based on the provided accountId and pending status
+      return added
+        .filter((transaction) => transaction.account_id === accountId)
+        .filter((transaction) => !transaction.pending);
     } catch (error) {
       const parsedError = isError(error);
 

@@ -3,7 +3,7 @@ import { addDays } from "date-fns";
 import { getCurrentUserTeamQuery, getUserInviteQuery } from "../queries";
 import type { Client } from "../types";
 
-type CreateBankAccountsPayload = {
+type CreateBankConnectionPayload = {
   accounts: {
     account_id: string;
     institution_id: string;
@@ -24,7 +24,7 @@ type CreateBankAccountsPayload = {
   provider: "gocardless" | "teller" | "plaid";
 };
 
-export async function createBankAccounts(
+export async function createBankConnection(
   supabase: Client,
   {
     accounts,
@@ -34,7 +34,7 @@ export async function createBankAccounts(
     teamId,
     userId,
     provider,
-  }: CreateBankAccountsPayload,
+  }: CreateBankConnectionPayload,
 ) {
   // Get first account to create a bank connection
   const account = accounts?.at(0);
@@ -73,27 +73,26 @@ export async function createBankAccounts(
     .select()
     .single();
 
-  return supabase
-    .from("bank_accounts")
-    .upsert(
-      accounts.map(
-        (account) => ({
-          account_id: account.account_id,
-          bank_connection_id: bankConnection?.data?.id,
-          team_id: teamId,
-          created_by: userId,
-          name: account.name,
-          currency: account.currency,
-          enabled: account.enabled,
-          type: account.type,
-          balance: account.balance ?? 0,
-        }),
-        {
-          onConflict: "account_id",
-        },
-      ),
-    )
-    .select();
+  await supabase.from("bank_accounts").upsert(
+    accounts.map(
+      (account) => ({
+        account_id: account.account_id,
+        bank_connection_id: bankConnection?.data?.id,
+        team_id: teamId,
+        created_by: userId,
+        name: account.name,
+        currency: account.currency,
+        enabled: account.enabled,
+        type: account.type,
+        balance: account.balance ?? 0,
+      }),
+      {
+        onConflict: "account_id",
+      },
+    ),
+  );
+
+  return bankConnection;
 }
 
 type UpdateBankConnectionData = {
@@ -221,10 +220,6 @@ export async function updateUserTeamRole(
     .eq("team_id", teamId)
     .select()
     .single();
-}
-
-export async function deleteTeam(supabase: Client, teamId: string) {
-  return supabase.from("teams").delete().eq("id", teamId);
 }
 
 type DeleteTeamMemberParams = {

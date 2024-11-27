@@ -14,7 +14,7 @@ export const initialBankSetup = schemaTask({
   }),
   maxDuration: 300,
   queue: {
-    concurrencyLimit: 20,
+    concurrencyLimit: 50,
   },
   run: async (payload) => {
     const { teamId, connectionId } = payload;
@@ -31,8 +31,22 @@ export const initialBankSetup = schemaTask({
     });
 
     // Run initial sync for transactions and balance for the connection
-    await syncConnection.trigger({
+    await syncConnection.triggerAndWait({
       connectionId,
+      manualSync: true,
     });
+
+    // And run once more to ensure all transactions are fetched on the providers side
+    // GoCardLess, Teller and Plaid can take up to 3 minutes to fetch all transactions
+    // For Teller and Plaid we also listen on the webhook to fetch any new transactions
+    await syncConnection.trigger(
+      {
+        connectionId,
+        manualSync: true,
+      },
+      {
+        delay: "5m",
+      },
+    );
   },
 });

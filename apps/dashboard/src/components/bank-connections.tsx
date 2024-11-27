@@ -1,6 +1,7 @@
 "use client";
 
 import { manualSyncTransactionsAction } from "@/actions/transactions/manual-sync-transactions-action";
+import { useSyncStatus } from "@/hooks/use-sync-status";
 import { connectionStatus } from "@/utils/connection-status";
 import {
   Accordion,
@@ -23,7 +24,6 @@ import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { BankAccount } from "./bank-account";
 import { BankLogo } from "./bank-logo";
-import { RealtimeRun } from "./realtime-run";
 import { ReconnectProvider } from "./reconnect-provider";
 import { SyncTransactions } from "./sync-transactions";
 
@@ -134,12 +134,12 @@ function ConnectionState({
 export function BankConnection({ connection }: BankConnectionProps) {
   const [runId, setRunId] = useState<string | undefined>();
   const [accessToken, setAccessToken] = useState<string | undefined>();
-  const [status, setStatus] = useState<"FAILED" | "COMPLETED" | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
   const router = useRouter();
 
   const { show } = connectionStatus(connection);
+  const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
   const [params] = useQueryStates({
     step: parseAsString,
@@ -214,14 +214,6 @@ export function BankConnection({ connection }: BankConnectionProps) {
 
   return (
     <div>
-      {runId && accessToken && (
-        <RealtimeRun
-          runId={runId}
-          accessToken={accessToken}
-          onChange={setStatus}
-        />
-      )}
-
       <div className="flex justify-between items-center">
         <AccordionTrigger
           className="justify-start text-start w-full"

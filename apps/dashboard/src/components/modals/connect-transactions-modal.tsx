@@ -274,7 +274,7 @@ export function ConnectTransactionsModal({
                   );
                 })}
 
-                {!loading && results.length === 0 && (
+                {!loading && results?.length === 0 && (
                   <div className="flex flex-col items-center justify-center min-h-[350px]">
                     <p className="font-medium mb-2">No banks found</p>
                     <p className="text-sm text-center text-[#878787]">

@@ -24,9 +24,7 @@ export async function getInstitutions({
       throw new Error("Failed to get institutions");
     }
 
-    const { data } = await institutionsResponse.json();
-
-    return data;
+    return institutionsResponse.json();
   } catch (error) {
     logger(error instanceof Error ? error.message : String(error));
     return [];

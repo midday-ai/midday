@@ -138,14 +138,15 @@ function SupportForm() {
 
 export function SelectBankAccountsModal() {
   const { toast } = useToast();
+  const t = useI18n();
+
   const [accounts, setAccounts] = useState<Accounts.Data[]>([]);
   const [loading, setLoading] = useState(true);
-  const [eventId, setEventId] = useState<string>();
+  const [runId, setRunId] = useState<string>();
+  const [accessToken, setAccessToken] = useState<string>();
   const [activeTab, setActiveTab] = useState<
     "select-accounts" | "loading" | "support"
   >("select-accounts");
-
-  const t = useI18n();
 
   const {
     step,
@@ -192,7 +193,8 @@ export function SelectBankAccountsModal() {
     },
     onSuccess: ({ data }) => {
       if (data?.id) {
-        setEventId(data.id);
+        setRunId(data.id);
+        setAccessToken(data.publicAccessToken);
         setActiveTab("loading");
       }
     },
@@ -373,7 +375,7 @@ export function SelectBankAccountsModal() {
                       <div className="flex justify-center mt-4">
                         <button
                           type="button"
-                          className="text-sm"
+                          className="text-xs text-[#878787]"
                           onClick={() => setActiveTab("support")}
                         >
                           Need support
@@ -386,13 +388,13 @@ export function SelectBankAccountsModal() {
             </TabsContent>
 
             <TabsContent value="loading">
-              {eventId && (
-                <LoadingTransactionsEvent
-                  eventId={eventId}
-                  setEventId={setEventId}
-                  onClose={onClose}
-                />
-              )}
+              <LoadingTransactionsEvent
+                accessToken={accessToken}
+                runId={runId}
+                setRunId={setRunId}
+                onClose={onClose}
+                setActiveTab={setActiveTab}
+              />
             </TabsContent>
 
             <TabsContent value="support">
