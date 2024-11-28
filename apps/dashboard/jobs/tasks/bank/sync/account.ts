@@ -12,7 +12,7 @@ export const syncAccount = schemaTask({
   id: "sync-account",
   maxDuration: 300,
   retry: {
-    maxAttempts: 2,
+    maxAttempts: 1,
   },
   schema: z.object({
     id: z.string().uuid(),
@@ -79,21 +79,12 @@ export const syncAccount = schemaTask({
       if (parsedError.code === "disconnected") {
         const retries = errorRetries ? errorRetries + 1 : 1;
 
-        if (retries > 4) {
-          logger.error("Account disconnected too many times", {
-            accountId,
-            retries,
-          });
-        }
-
         // Update the account with the error details and retries
-        // And disable the account if we've retried too many times
         await supabase
           .from("bank_accounts")
           .update({
             error_details: parsedError.message,
             error_retries: retries,
-            enabled: retries <= 4,
           })
           .eq("id", id);
 

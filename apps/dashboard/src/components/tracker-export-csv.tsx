@@ -39,7 +39,6 @@ export function TrackerExportCSV({ name, teamId, projectId, userId }: Props) {
   const supabase = createClient();
 
   async function downloadCSV() {
-    console.log(date);
     const query = supabase
       .from("tracker_entries")
       .select(

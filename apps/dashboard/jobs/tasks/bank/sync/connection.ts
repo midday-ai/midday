@@ -60,15 +60,22 @@ export const syncConnection = schemaTask({
           })
           .eq("id", connectionId);
 
-        const { data: bankAccountsData } = await supabase
+        const query = supabase
           .from("bank_accounts")
           .select(
-            "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, status, error_retries)",
+            "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, status)",
           )
           .eq("bank_connection_id", connectionId)
           .eq("enabled", true)
-          .eq("manual", false)
-          .throwOnError();
+          .eq("manual", false);
+
+        // Skip accounts with more than 3 error retries during background sync
+        // Allow all accounts during manual sync to clear errors after reconnect
+        if (!manualSync) {
+          query.or("error_retries.lt.4,error_retries.is.null");
+        }
+
+        const { data: bankAccountsData } = await query.throwOnError();
 
         if (!bankAccountsData) {
           logger.info("No bank accounts found");
@@ -105,19 +112,23 @@ export const syncConnection = schemaTask({
         }
 
         // Check connection status by accounts
-        // If all accounts are disabled (due to errors), we want to disable the connection
+        // If all accounts have 3+ error retries, disconnect the connection
         // So the user will get a notification and can reconnect the bank
         try {
           const { data: bankAccountsData } = await supabase
             .from("bank_accounts")
-            .select("id, enabled")
+            .select("id, error_retries")
             .eq("bank_connection_id", connectionId)
             .eq("manual", false)
             .throwOnError();
 
-          if (bankAccountsData?.every((account) => !account.enabled)) {
+          if (
+            bankAccountsData?.every(
+              (account) => (account.error_retries ?? 0) >= 3,
+            )
+          ) {
             logger.info(
-              "All bank accounts are disabled, disconnecting connection",
+              "All bank accounts have 3+ error retries, disconnecting connection",
             );
 
             await supabase

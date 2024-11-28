@@ -79,6 +79,11 @@ export const transformTransactionName = (transaction: Transaction) => {
 
   console.log("No transaction name", transaction);
 
+  // When there is no name, we use the proprietary bank transaction code (Service Fee)
+  if (transaction.proprietaryBankTransactionCode) {
+    return transaction.proprietaryBankTransactionCode;
+  }
+
   return "No information";
 };
 
