@@ -8,6 +8,9 @@ export const bankSyncScheduler = schedules.task({
   id: "bank-sync-scheduler",
   maxDuration: 600,
   run: async (payload) => {
+    // Only run in production (Set in Trigger.dev)
+    if (process.env.TRIGGER_ENVIRONMENT !== "production") return;
+
     const supabase = createClient();
 
     const teamId = payload.externalId;

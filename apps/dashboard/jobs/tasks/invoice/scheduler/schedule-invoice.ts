@@ -7,6 +7,9 @@ export const invoiceScheduler = schedules.task({
   id: "invoice-scheduler",
   cron: "0 0,12 * * *",
   run: async () => {
+    // Only run in production (Set in Trigger.dev)
+    if (process.env.TRIGGER_ENVIRONMENT !== "production") return;
+
     const supabase = createClient();
 
     const { data: invoices } = await supabase
