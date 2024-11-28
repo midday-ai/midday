@@ -4,7 +4,7 @@ import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { revalidateCache } from "jobs/utils/revalidate-cache";
 import { triggerSequenceAndWait } from "jobs/utils/trigger-sequence";
 import { z } from "zod";
-import { transactionsNotification } from "../notifications/transactions";
+import { transactionNotifications } from "../notifications/transactions";
 import { syncAccount } from "./account";
 
 // Fan-out pattern. We want to trigger a task for each bank account (Transactions, Balance)
@@ -98,7 +98,7 @@ export const syncConnection = schemaTask({
         // Trigger a notification for new transactions if it's an background sync
         // We delay it by 1 minutes to allow for more transactions to be notified
         if (!manualSync) {
-          await transactionsNotification.trigger(
+          await transactionNotifications.trigger(
             { teamId: data.team_id },
             { delay: "1m" },
           );

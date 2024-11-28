@@ -1,4 +1,4 @@
-import { sendSlackTransactionsNotification } from "@midday/app-store/slack-notifications";
+import { sendSlackTransactionNotifications } from "@midday/app-store/slack-notifications";
 import TransactionsEmail from "@midday/email/emails/transactions";
 import { getI18n } from "@midday/email/locales";
 import { getInboxEmail } from "@midday/inbox";
@@ -140,7 +140,7 @@ export async function handleTransactionSlackNotifications(
     name: transaction.name,
   }));
 
-  await sendSlackTransactionsNotification({
+  await sendSlackTransactionNotifications({
     teamId,
     transactions: slackTransactions,
     supabase,

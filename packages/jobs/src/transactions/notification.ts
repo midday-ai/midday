@@ -1,4 +1,4 @@
-import { sendSlackTransactionsNotification } from "@midday/app-store/slack";
+import { sendSlackTransactionNotifications } from "@midday/app-store/slack";
 import TransactionsEmail from "@midday/email/emails/transactions";
 import { getI18n } from "@midday/email/locales";
 import { getInboxEmail } from "@midday/inbox";
@@ -159,7 +159,7 @@ client.defineJob({
       name: transaction.name,
     }));
 
-    await sendSlackTransactionsNotification({
+    await sendSlackTransactionNotifications({
       teamId,
       transactions: slackTransactions,
     });

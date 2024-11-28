@@ -21,6 +21,7 @@ export const syncAccount = schemaTask({
     accessToken: z.string().optional(),
     errorRetries: z.number().optional(),
     provider: z.enum(["gocardless", "plaid", "teller"]),
+    manualSync: z.boolean().optional(),
     accountType: z.enum([
       "credit",
       "other_asset",
@@ -28,7 +29,6 @@ export const syncAccount = schemaTask({
       "depository",
       "loan",
     ]),
-    manualSync: z.boolean().optional(),
   }),
   run: async ({
     id,

@@ -7,7 +7,7 @@ const transactionSchema = z.object({
   name: z.string(),
 });
 
-export async function sendSlackTransactionsNotification({
+export async function sendSlackTransactionNotifications({
   teamId,
   transactions,
   supabase,

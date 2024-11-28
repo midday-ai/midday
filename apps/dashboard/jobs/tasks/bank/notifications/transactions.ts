@@ -7,8 +7,8 @@ import {
 import { handleTransactionNotifications } from "jobs/utils/transaction-notifications";
 import { z } from "zod";
 
-export const transactionsNotification = schemaTask({
-  id: "transactions-notification",
+export const transactionNotifications = schemaTask({
+  id: "transaction-notifications",
   maxDuration: 300,
   schema: z.object({
     teamId: z.string(),
