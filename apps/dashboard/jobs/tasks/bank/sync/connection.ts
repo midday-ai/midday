@@ -104,6 +104,33 @@ export const syncConnection = schemaTask({
           );
         }
 
+        // Check connection status by accounts
+        // If all accounts are disabled (due to errors), we want to disable the connection
+        // So the user will get a notification and can reconnect the bank
+        try {
+          const { data: bankAccountsData } = await supabase
+            .from("bank_accounts")
+            .select("id, enabled")
+            .eq("bank_connection_id", connectionId)
+            .eq("manual", false)
+            .throwOnError();
+
+          if (bankAccountsData?.every((account) => !account.enabled)) {
+            logger.info(
+              "All bank accounts are disabled, disconnecting connection",
+            );
+
+            await supabase
+              .from("bank_connections")
+              .update({ status: "disconnected" })
+              .eq("id", connectionId);
+          }
+        } catch (error) {
+          logger.error("Failed to check connection status by accounts", {
+            error,
+          });
+        }
+
         // Revalidate the bank cache (transactions, accounts, connections)
         await revalidateCache({ tag: "bank", teamId: data.team_id });
       }
@@ -117,11 +144,7 @@ export const syncConnection = schemaTask({
           .eq("id", connectionId);
 
         // Revalidate the bank cache (transactions, accounts, connections)
-        try {
-          await revalidateCache({ tag: "bank", teamId: data.team_id });
-        } catch (error) {
-          logger.error("Failed to revalidate cache", { error });
-        }
+        await revalidateCache({ tag: "bank", teamId: data.team_id });
       }
     } catch (error) {
       logger.error("Failed to sync connection", { error });

@@ -5,12 +5,12 @@ import type {
   Transaction,
   TransactionsSyncResponse,
 } from "plaid";
-import type { Balance } from "../types";
 
 export type LinkTokenCreateRequest = {
   userId: string;
   language?: string;
   accessToken?: string;
+  environment?: "sandbox" | "production";
 };
 
 export type GetStatusResponse = {

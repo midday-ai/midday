@@ -58,6 +58,14 @@ export class PlaidApi {
     this.#client = new PlaidBaseApi(configuration);
   }
 
+  #generateWebhookUrl(environment: "sandbox" | "production") {
+    if (environment === "sandbox") {
+      return "https://staging.app.midday.ai/api/webhook/plaid";
+    }
+
+    return "https://app.midday.ai/api/webhook/plaid";
+  }
+
   async getHealthCheck() {
     try {
       const response = await fetch(
@@ -171,6 +179,7 @@ export class PlaidApi {
     userId,
     language = "en",
     accessToken,
+    environment = "production",
   }: LinkTokenCreateRequest): Promise<
     import("axios").AxiosResponse<LinkTokenCreateResponse>
   > {
@@ -182,6 +191,7 @@ export class PlaidApi {
       language,
       access_token: accessToken,
       country_codes: this.#countryCodes,
+      webhook: this.#generateWebhookUrl(environment),
       transactions: {
         days_requested: 730,
       },
