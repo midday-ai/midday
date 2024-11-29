@@ -30,12 +30,6 @@ export const reconnectGoCardLessLinkAction = authActionClient
       },
       ctx: { user },
     }) => {
-      await client.institutions[":id"].usage.$put({
-        param: {
-          id: institutionId,
-        },
-      });
-
       const reference = `${user.team_id}_${nanoid()}`;
 
       const link = new URL(redirectTo);
