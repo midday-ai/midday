@@ -7,12 +7,14 @@ import { SectionSix } from "@/components/section-six";
 import { SectionThree } from "@/components/section-three";
 import { SectionTwo } from "@/components/section-two";
 import { Testimonials } from "@/components/testimonials";
+import SectionStories from "./section-stories";
 import { SectionVideo } from "./section-video";
 
 export function StartPage() {
   return (
     <>
       <Hero />
+      <SectionStories />
       <SectionOne />
       <SectionTwo />
       <SectionThree />

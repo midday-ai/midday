@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@midday/ui/button";
-import { useMediaQuery } from "@midday/ui/hooks";
 import { Icons } from "@midday/ui/icons";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -15,7 +14,6 @@ export function SectionVideo() {
   const playerRef = useRef(undefined);
   const [isPlaying, setPlaying] = useState(false);
   const [isMuted, setMuted] = useState(true);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const togglePlay = () => {
     if (isPlaying) {
