@@ -254,10 +254,10 @@ export default function SectionStories() {
     <Dialog>
       <div className="relative mt-20 pb-20">
         <div className="w-full h-full flex items-center flex-col z-10 relative">
-          <h2 className="text-[56px] text-center font-medium mt-20">
+          <h2 className="text-[56px] text-center font-medium mt-12">
             What our users say
           </h2>
-          <div className="flex mt-10 -space-x-4">
+          <div className="flex mt-20 -space-x-4">
             {stories.map((story, index) => (
               <div
                 key={story.id}
@@ -280,7 +280,7 @@ export default function SectionStories() {
         <div className="dotted-bg w-[calc(100vw+1400px)] h-full absolute top-0 -left-[1200px] z-0" />
       </div>
 
-      <DialogContent className="max-w-[550px] p-6 pt-10 max-h-[calc(100vh-200px)] overflow-y-auto">
+      <DialogContent className="max-w-[550px] !p-6 pt-10 max-h-[calc(100vh-200px)] overflow-y-auto">
         <DialogHeader className="sr-only">
           <DialogTitle>{selectedStory?.title}</DialogTitle>
         </DialogHeader>
