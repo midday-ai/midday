@@ -113,8 +113,13 @@ pre code {
     font-weight: 500 !important;
 }
 
-.dotted-bg {
+.dark .dotted-bg {
     background-image: radial-gradient(circle at 1px 1px, #232323 1px, transparent 0);
+    background-size: 8px 8px;
+}
+
+.light .dotted-bg {
+    background-image: radial-gradient(circle at 1px 1px, #e7e7e7 1px, transparent 0);
     background-size: 8px 8px;
 }
 
