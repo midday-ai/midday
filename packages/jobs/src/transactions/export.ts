@@ -120,9 +120,11 @@ client.defineJob({
 
     const rows = data
       ?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .map((transaction, idx) => [
+      .map((transaction) => [
         transaction.date,
         transaction.name,
+        transaction.amount,
+        transaction.currency,
         Intl.NumberFormat(locale, {
           style: "currency",
           currency: transaction.currency,
@@ -155,6 +157,8 @@ client.defineJob({
         "Date",
         "Description",
         "Amount",
+        "Currency",
+        "Formatted amount",
         "VAT",
         "Category",
         "Category description",
