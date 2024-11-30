@@ -9,7 +9,6 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuPortal,
   DropdownMenuSub,
   DropdownMenuSubContent,
@@ -144,6 +143,7 @@ export function TransactionsSearchFilter({
     },
     {
       enableOnFormTags: true,
+      enabled: Boolean(prompt),
     },
   );
 
