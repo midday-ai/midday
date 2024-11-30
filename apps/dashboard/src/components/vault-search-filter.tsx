@@ -70,6 +70,7 @@ export function VaultSearchFilter({ members }: { members: any[] }) {
     },
     {
       enableOnFormTags: true,
+      enabled: Boolean(prompt),
     },
   );
 

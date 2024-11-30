@@ -59,6 +59,7 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
     },
     {
       enableOnFormTags: true,
+      enabled: Boolean(prompt),
     },
   );
 

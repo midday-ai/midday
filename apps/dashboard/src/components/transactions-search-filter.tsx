@@ -131,6 +131,7 @@ export function TransactionsSearchFilter({
     },
     {
       shallow: false,
+      history: "push",
     },
   );
 
