@@ -37,14 +37,9 @@ function NotificationItem({
       return (
         <div className="flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary">
           <Link
-            className="flex items-between justify-between space-x-4 "
+            className="flex items-between justify-between space-x-4"
             onClick={() => setOpen(false)}
-            href={`/transactions?filter=${JSON.stringify({
-              date: {
-                from,
-                to,
-              },
-            })}`}
+            href={`/transactions?start=${from}&end=${to}`}
           >
             <div>
               <div className="h-9 w-9 flex items-center justify-center space-y-0 border rounded-full">
