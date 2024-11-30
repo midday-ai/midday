@@ -175,7 +175,8 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
     async (c) => {
       const envs = env(c);
 
-      const { institutionId, agreement, redirect } = await c.req.json();
+      const { institutionId, agreement, redirect, reference } =
+        await c.req.json();
 
       const api = new GoCardLessApi({
         kv: c.env.KV,
@@ -187,6 +188,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           institutionId,
           agreement,
           redirect,
+          reference,
         });
 
         return c.json(

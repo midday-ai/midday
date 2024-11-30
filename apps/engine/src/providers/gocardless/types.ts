@@ -144,7 +144,7 @@ export type GetRequisitionsResponse = {
   count: number;
   next: string;
   previous: string;
-  result: Requestion[];
+  results: Requestion[];
 };
 
 export type DeleteRequistionResponse = {

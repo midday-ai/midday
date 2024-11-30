@@ -28,7 +28,7 @@ export const createGoCardLessLinkAction = authActionClient
         },
       });
 
-      const reference = `${user.team_id}_${nanoid()}`;
+      const reference = `${user.team_id}:${nanoid()}`;
 
       const redirectTo = new URL(redirectBase);
 

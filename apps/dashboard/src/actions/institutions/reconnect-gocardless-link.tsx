@@ -30,7 +30,7 @@ export const reconnectGoCardLessLinkAction = authActionClient
       },
       ctx: { user },
     }) => {
-      const reference = `${user.team_id}_${nanoid()}`;
+      const reference = `${user.team_id}:${nanoid()}`;
 
       const link = new URL(redirectTo);
 

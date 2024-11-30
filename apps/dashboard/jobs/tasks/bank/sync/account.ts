@@ -88,10 +88,8 @@ export const syncAccount = schemaTask({
           })
           .eq("id", id);
 
-        return;
+        throw error;
       }
-
-      throw error;
     }
 
     // Get the transactions
@@ -110,6 +108,15 @@ export const syncAccount = schemaTask({
       if (!transactionsResponse.ok) {
         throw new Error("Failed to get transactions");
       }
+
+      // Reset error details and retries if we successfully got the transactions
+      await supabase
+        .from("bank_accounts")
+        .update({
+          error_details: null,
+          error_retries: null,
+        })
+        .eq("id", id);
 
       const { data: transactionsData } = await transactionsResponse.json();
 

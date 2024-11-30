@@ -72,3 +72,20 @@ export const DeleteConnectionBodySchema = z.object({
       example: "test_token_ky6igyqi3qxa4",
     }),
 });
+
+export const ConnectionByReferenceParamsSchema = z.object({
+  reference: z.string().openapi({
+    description: "GoCardLess reference id",
+    param: {
+      name: "reference",
+      in: "path",
+    },
+  }),
+});
+
+export const ConnectionByReferenceSchema = z.object({
+  data: z.object({
+    id: z.string(),
+    accounts: z.array(z.string()),
+  }),
+});

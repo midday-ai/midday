@@ -1,11 +1,14 @@
 import type { Bindings } from "@/common/bindings";
-import { ErrorSchema } from "@/common/schema";
+import { ErrorSchema, Providers } from "@/common/schema";
 import { Provider } from "@/providers";
+import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { createErrorResponse } from "@/utils/error";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
+  ConnectionByReferenceParamsSchema,
+  ConnectionByReferenceSchema,
   ConnectionDeletedSchema,
   ConnectionStatusQuerySchema,
   ConnectionStatusSchema,
@@ -132,6 +135,72 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
       } catch (error) {
         const errorResponse = createErrorResponse(error, c.get("requestId"));
 
+        return c.json(errorResponse, 400);
+      }
+    },
+  )
+  .openapi(
+    createRoute({
+      method: "get",
+      path: "/:reference",
+      summary: "Get Connection by Reference",
+      request: {
+        params: ConnectionByReferenceParamsSchema,
+      },
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: ConnectionByReferenceSchema,
+            },
+          },
+          description: "Retrieve connection by reference",
+        },
+        404: {
+          content: {
+            "application/json": {
+              schema: ErrorSchema,
+            },
+          },
+          description: "Connection not found",
+        },
+        400: {
+          content: {
+            "application/json": {
+              schema: ErrorSchema,
+            },
+          },
+          description: "Connection not found",
+        },
+      },
+    }),
+    async (c) => {
+      const envs = env(c);
+      const { reference } = c.req.valid("param");
+      const requestId = c.get("requestId");
+
+      const api = new GoCardLessApi({
+        kv: c.env.KV,
+        envs,
+      });
+
+      try {
+        const data = await api.getRequiestionByReference(reference);
+
+        if (!data) {
+          return c.json(
+            {
+              code: "NOT_FOUND",
+              message: "Connection not found",
+              requestId,
+            },
+            404,
+          );
+        }
+
+        return c.json({ data: { id: data.id, accounts: data.accounts } }, 200);
+      } catch (error) {
+        const errorResponse = createErrorResponse(error, requestId);
         return c.json(errorResponse, 400);
       }
     },

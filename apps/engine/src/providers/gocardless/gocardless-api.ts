@@ -341,6 +341,28 @@ export class GoCardLessApi {
     }
   }
 
+  async getRequiestionByReference(
+    reference: string,
+  ): Promise<GetRequisitionResponse | undefined> {
+    const token = await this.#getAccessToken();
+
+    const response = await this.#get<GetRequisitionsResponse>(
+      "/api/v2/requisitions/",
+      token,
+    );
+
+    // Reference is in the format of id:generatedId for unique requisition
+    const id = reference.split(":").at(0);
+
+    // Find the requisition with the same id and status of linked
+    return response.results?.find((requisition) => {
+      return (
+        requisition.reference?.split(":").at(0) === id &&
+        requisition.status === "LN"
+      );
+    });
+  }
+
   async deleteRequisition(id: string): Promise<DeleteRequistionResponse> {
     const token = await this.#getAccessToken();
 
