@@ -7,7 +7,7 @@ export function EditorContent({ content }: { content?: JSON }) {
   }
 
   return (
-    <View style={{ marginTop: 10, lineHeight: 1.4 }}>
+    <View style={{ marginTop: 10, lineHeight: 0.9 }}>
       {formatEditorContent(content)}
     </View>
   );
