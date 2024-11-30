@@ -21,6 +21,9 @@ const webhookSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  // TODO: Remove this after testing
+  return NextResponse.json({ success: true });
+
   const text = await req.clone().text();
   const body = await req.json();
 
