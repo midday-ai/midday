@@ -228,7 +228,7 @@ export function SelectBankAccountsModal() {
           provider: provider as "gocardless" | "plaid" | "teller",
           accessToken: token ?? undefined,
           enrollmentId: enrollment_id ?? undefined,
-          // TODO: GoCardLess Requestion ID or Plaid Item ID
+          // GoCardLess Requestion ID or Plaid Item ID
           referenceId: ref ?? undefined,
           accounts: data.map((account) => ({
             name: account.name,

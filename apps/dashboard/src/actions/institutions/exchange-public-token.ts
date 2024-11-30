@@ -13,5 +13,5 @@ export const exchangePublicToken = async (token: string) => {
 
   const { data } = await plaidResponse.json();
 
-  return data.access_token;
+  return data;
 };

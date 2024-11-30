@@ -31,6 +31,7 @@ export const env = createEnv({
     WEBHOOK_SECRET_KEY: z.string(),
     AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT: z.string(),
     AZURE_DOCUMENT_INTELLIGENCE_KEY: z.string(),
+    TELLER_SIGNING_SECRET: z.string(),
   },
   /**
    * Specify your client-side environment variables schema here.
@@ -85,6 +86,7 @@ export const env = createEnv({
       process.env.AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT,
     AZURE_DOCUMENT_INTELLIGENCE_KEY:
       process.env.AZURE_DOCUMENT_INTELLIGENCE_KEY,
+    TELLER_SIGNING_SECRET: process.env.TELLER_SIGNING_SECRET,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

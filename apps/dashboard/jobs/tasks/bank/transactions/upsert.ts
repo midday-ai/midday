@@ -47,6 +47,7 @@ export const upsertTransactions = schemaTask({
         .from("transactions")
         .upsert(formattedTransactions, {
           onConflict: "internal_id",
+          ignoreDuplicates: true,
         })
         .throwOnError();
     } catch (error) {
