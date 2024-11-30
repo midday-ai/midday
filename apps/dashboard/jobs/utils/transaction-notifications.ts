@@ -51,8 +51,8 @@ export async function handleTransactionNotifications(
       name: TriggerEvents.TransactionsNewInApp,
       payload: {
         type: NotificationTypes.Transactions,
-        from: transactions[transactions.length - 1]?.date,
-        to: transactions[0]?.date,
+        from: transactions[0]?.date,
+        to: transactions[transactions.length - 1]?.date,
         description: t("notifications.transactions", {
           numberOfTransactions: transactions.length,
         }),
