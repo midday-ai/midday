@@ -49,6 +49,7 @@ export const createTransactionAction = authActionClient
           team_id: teamId,
           method: "other",
           manual: true,
+          notified: true,
           internal_id: `${teamId}_${nanoid()}`,
         })
         .select("*")

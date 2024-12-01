@@ -5,7 +5,7 @@ export default defineConfig({
   runtime: "node",
   logLevel: "log",
   retries: {
-    enabledInDev: true,
+    enabledInDev: false,
     default: {
       maxAttempts: 3,
       minTimeoutInMs: 1000,
@@ -14,5 +14,5 @@ export default defineConfig({
       randomize: true,
     },
   },
-  dirs: ["./jobs"],
+  dirs: ["./jobs/tasks"],
 });

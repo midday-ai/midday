@@ -1,6 +1,6 @@
 "use server";
 
-import { engine } from "@/utils/engine";
+import { client } from "@midday/engine/client";
 import { LogEvents } from "@midday/events/events";
 import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
@@ -22,9 +22,13 @@ export const createGoCardLessLinkAction = authActionClient
       },
       ctx: { analytics, user },
     }) => {
-      await engine.institutions.usage.update(institutionId);
+      await client.institutions[":id"].usage.$put({
+        param: {
+          id: institutionId,
+        },
+      });
 
-      const reference = `${user.team_id}_${nanoid()}`;
+      const reference = `${user.team_id}:${nanoid()}`;
 
       const redirectTo = new URL(redirectBase);
 
@@ -41,20 +45,27 @@ export const createGoCardLessLinkAction = authActionClient
       });
 
       try {
-        const { data: agreementData } =
-          await engine.auth.gocardless.agreement.create({
+        const agreementResponse = await client.auth.gocardless.agreement.$post({
+          json: {
             institutionId,
             transactionTotalDays: availableHistory,
-            reference,
-          });
-
-        const { data } = await engine.auth.gocardless.link({
-          agreement: agreementData.id,
-          institutionId,
-          redirect: redirectTo.toString(),
+          },
         });
 
-        return redirect(data.link);
+        const { data: agreementData } = await agreementResponse.json();
+
+        const linkResponse = await client.auth.gocardless.link.$post({
+          json: {
+            agreement: agreementData.id,
+            institutionId,
+            redirect: redirectTo.toString(),
+            reference,
+          },
+        });
+
+        const { data: linkData } = await linkResponse.json();
+
+        return redirect(linkData.link);
       } catch (error) {
         // Ignore NEXT_REDIRECT error in analytics
         if (error instanceof Error && error.message !== "NEXT_REDIRECT") {

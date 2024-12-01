@@ -1,5 +1,9 @@
 import { ProviderError } from "@/utils/error";
-import type { ProviderParams } from "../types";
+import type {
+  GetConnectionStatusRequest,
+  GetConnectionStatusResponse,
+  ProviderParams,
+} from "../types";
 import type {
   AuthenticatedRequest,
   DisconnectAccountRequest,
@@ -90,6 +94,48 @@ export class TellerApi {
 
   async getInstitutions(): Promise<GetInstitutionsResponse> {
     return this.#get("/institutions");
+  }
+
+  async getConnectionStatus({
+    accessToken,
+  }: GetConnectionStatusRequest): Promise<GetConnectionStatusResponse> {
+    try {
+      const accounts = await this.#get("/accounts", accessToken);
+
+      if (!Array.isArray(accounts)) {
+        return { status: "disconnected" };
+      }
+
+      // If we can fetch any accounts, the connection is active
+      // Check all accounts in parallel
+      const results = await Promise.allSettled(
+        accounts.map((account) =>
+          this.#get(`/accounts/${account.id}`, accessToken),
+        ),
+      );
+
+      // If any account request succeeded, connection is valid
+      if (results.some((result) => result.status === "fulfilled")) {
+        return { status: "connected" };
+      }
+
+      // If we couldn't verify any accounts, assume disconnected
+      return { status: "disconnected" };
+    } catch (error) {
+      const parsedError = isError(error);
+
+      if (parsedError) {
+        const providerError = new ProviderError(parsedError);
+
+        if (providerError.code === "disconnected") {
+          return { status: "disconnected" };
+        }
+      }
+    }
+
+    // If we get here, the account is not disconnected
+    // But it could be a connection issue between Teller and the institution
+    return { status: "connected" };
   }
 
   async deleteAccounts({

@@ -1,12 +1,12 @@
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 import {
   handleOverdueInvoiceNotifications,
   handlePaidInvoiceNotifications,
-} from "../utils/invoice-notifications";
+} from "jobs/utils/invoice-notifications";
+import { z } from "zod";
 
-export const invoiceNotifications = schemaTask({
+export const sendInvoiceNotifications = schemaTask({
   id: "invoice-notifications",
   schema: z.object({
     invoiceId: z.string().uuid(),

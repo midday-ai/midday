@@ -27,9 +27,11 @@ export const env = createEnv({
     RESEND_API_KEY: z.string(),
     OPENPANEL_SECRET_KEY: z.string(),
     MIDDAY_ENGINE_API_KEY: z.string(),
+    MIDDAY_CACHE_API_SECRET: z.string(),
     WEBHOOK_SECRET_KEY: z.string(),
     AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT: z.string(),
     AZURE_DOCUMENT_INTELLIGENCE_KEY: z.string(),
+    TELLER_SIGNING_SECRET: z.string(),
   },
   /**
    * Specify your client-side environment variables schema here.
@@ -78,11 +80,13 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
     OPENPANEL_SECRET_KEY: process.env.OPENPANEL_SECRET_KEY,
     MIDDAY_ENGINE_API_KEY: process.env.MIDDAY_ENGINE_API_KEY,
+    MIDDAY_CACHE_API_SECRET: process.env.MIDDAY_CACHE_API_SECRET,
     WEBHOOK_SECRET_KEY: process.env.WEBHOOK_SECRET_KEY,
     AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT:
       process.env.AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT,
     AZURE_DOCUMENT_INTELLIGENCE_KEY:
       process.env.AZURE_DOCUMENT_INTELLIGENCE_KEY,
+    TELLER_SIGNING_SECRET: process.env.TELLER_SIGNING_SECRET,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

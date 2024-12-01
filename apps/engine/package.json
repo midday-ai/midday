@@ -10,17 +10,21 @@
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.4.1",
-    "@hono/zod-openapi": "^0.16.4",
+    "@hono/zod-openapi": "^0.18.0",
     "@hono/zod-validator": "^0.4.1",
-    "hono": "^4.6.3",
-    "plaid": "^28.0.0",
+    "hono": "^4.6.11",
+    "plaid": "^30.0.0",
     "typesense": "^1.8.2",
     "xior": "^0.6.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20241004.0",
-    "@types/bun": "^1.1.10",
-    "wrangler": "^3.80.0"
+    "@cloudflare/workers-types": "^4.20241112.0",
+    "@types/bun": "^1.1.13",
+    "wrangler": "^3.90.0"
+  },
+  "exports": {
+    "./client": "./src/client/index.ts",
+    "./gocardless/utils": "./src/providers/gocardless/utils.ts"
   }
 }

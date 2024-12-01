@@ -2,8 +2,8 @@ import { TZDate } from "@date-fns/tz";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { subDays } from "date-fns";
+import { updateInvoiceStatus } from "jobs/utils/update-invocie";
 import { z } from "zod";
-import { updateInvoiceStatus } from "../utils/update-invocie";
 
 export const checkInvoiceStatus = schemaTask({
   id: "check-invoice-status",
@@ -19,7 +19,7 @@ export const checkInvoiceStatus = schemaTask({
     const { data: invoice } = await supabase
       .from("invoices")
       .select(
-        "id, status, due_date, currency, amount, team_id, file_path, invoice_number, file_size, user:user_id(timezone)",
+        "id, status, due_date, currency, amount, team_id, file_path, invoice_number, file_size, template",
       )
       .eq("id", invoiceId)
       .single();
@@ -34,7 +34,7 @@ export const checkInvoiceStatus = schemaTask({
       return;
     }
 
-    const userTimezone = invoice.user?.timezone || "UTC";
+    const timezone = invoice.template?.timezone || "UTC";
 
     // Find recent transactions matching invoice amount, currency, and team_id
     const { data: transactions } = await supabase
@@ -46,7 +46,7 @@ export const checkInvoiceStatus = schemaTask({
       .gte(
         "date",
         // Get the transactions from the last 3 days
-        subDays(new TZDate(new Date(), userTimezone), 3).toISOString(),
+        subDays(new TZDate(new Date(), timezone), 3).toISOString(),
       )
       .eq("is_fulfilled", false);
 
@@ -76,8 +76,8 @@ export const checkInvoiceStatus = schemaTask({
     } else {
       // Check if the invoice is overdue
       const isOverdue =
-        new TZDate(invoice.due_date, userTimezone) <
-        new TZDate(new Date(), userTimezone);
+        new TZDate(invoice.due_date, timezone) <
+        new TZDate(new Date(), timezone);
 
       // Update invoice status to overdue if it's past due date and currently unpaid
       if (isOverdue && invoice.status === "unpaid") {

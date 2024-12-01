@@ -126,7 +126,7 @@ export type Requestion = {
   id: string;
   created: string;
   redirect: string;
-  status: string;
+  status: "CR" | "GC" | "UA" | "RJ" | "SA" | "GA" | "LN" | "EX";
   institution_id: string;
   agreement: string;
   reference: string;
@@ -144,7 +144,7 @@ export type GetRequisitionsResponse = {
   count: number;
   next: string;
   previous: string;
-  result: Requestion[];
+  results: Requestion[];
 };
 
 export type DeleteRequistionResponse = {
@@ -202,6 +202,7 @@ export type TransformAccount = GetAccountsResponse[0];
 export type TransformAccountName = {
   name: string;
   product: string;
+  institution: Institution;
 };
 
 export type AccountBalance = {

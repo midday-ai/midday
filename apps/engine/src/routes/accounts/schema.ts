@@ -21,7 +21,7 @@ export const AccountsParamsSchema = z.object({
     .string()
     .optional()
     .openapi({
-      description: "Teller & Plaid access token",
+      description: "Teller or Plaid access token",
       param: {
         name: "accessToken",
         in: "query",
@@ -98,7 +98,7 @@ export const AccountBalanceParamsSchema = z
       .string()
       .optional()
       .openapi({
-        description: "Teller & Plaid access token",
+        description: "Teller or Plaid access token",
         param: {
           name: "accessToken",
           in: "query",
@@ -140,7 +140,7 @@ export const DeleteAccountsParamsSchema = z
       .string()
       .optional()
       .openapi({
-        description: "Teller & Plaid access token",
+        description: "Teller or Plaid access token",
         param: {
           name: "accessToken",
           in: "query",

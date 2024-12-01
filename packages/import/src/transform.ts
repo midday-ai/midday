@@ -29,5 +29,6 @@ export function transform({
         : null,
     bank_account_id: transaction.bankAccountId,
     currency: transaction.currency.toUpperCase(),
+    notified: true,
   };
 }

@@ -14,6 +14,7 @@ const authMiddleware = (c: Context, next: Next) => {
   }
 
   const { API_SECRET_KEY } = env(c);
+
   const bearer = bearerAuth({ token: API_SECRET_KEY });
 
   return bearer(c, next);

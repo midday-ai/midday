@@ -1,9 +1,12 @@
 import type {
   DeleteAccountsRequest,
+  DeleteConnectionRequest,
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
   GetAccountsRequest,
   GetAccountsResponse,
+  GetConnectionStatusRequest,
+  GetConnectionStatusResponse,
   GetInstitutionsRequest,
   GetInstitutionsResponse,
   GetTransactionsRequest,
@@ -23,4 +26,8 @@ export interface Provider {
   ) => Promise<GetInstitutionsResponse>;
   getHealthCheck: () => Promise<boolean>;
   deleteAccounts: (params: DeleteAccountsRequest) => void;
+  getConnectionStatus: (
+    params: GetConnectionStatusRequest,
+  ) => Promise<GetConnectionStatusResponse>;
+  deleteConnection: (params: DeleteConnectionRequest) => void;
 }

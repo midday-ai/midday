@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { deleteTeam } from "@midday/supabase/mutations";
+import { deleteTeam } from "jobs/tasks/team/delete";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { deleteTeamSchema } from "./schema";
@@ -15,11 +15,13 @@ export const deleteTeamAction = authActionClient
       channel: LogEvents.DeleteTeam.channel,
     },
   })
-  .action(async ({ parsedInput: { teamId }, ctx: { user, supabase } }) => {
-    const { data } = await deleteTeam(supabase, teamId);
+  .action(async ({ parsedInput: { teamId }, ctx: { user } }) => {
+    await deleteTeam.triggerAndWait({
+      teamId,
+    });
 
     revalidateTag(`user_${user.id}`);
     revalidateTag(`teams_${user.id}`);
 
-    return data;
+    return teamId;
   });

@@ -1,28 +1,26 @@
-import { createClient } from "@midday/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
-import config from "../../config";
 import { createSlackWebClient } from "../client";
 
 const transactionSchema = z.object({
-  date: z.coerce.date(),
   amount: z.string(),
   name: z.string(),
 });
 
-export async function sendSlackTransactionsNotification({
+export async function sendSlackTransactionNotifications({
   teamId,
   transactions,
+  supabase,
 }: {
   teamId: string;
   transactions: z.infer<typeof transactionSchema>[];
+  supabase: SupabaseClient;
 }) {
-  const supabase = createClient({ admin: true });
-
   const { data } = await supabase
     .from("apps")
     .select("settings, config")
     .eq("team_id", teamId)
-    .eq("app_id", config.id)
+    .eq("app_id", "slack")
     .single();
 
   const enabled = data?.settings?.find(

@@ -116,8 +116,6 @@ client.defineJob({
       },
     });
 
-    console.log(attachments);
-
     const rows = data
       ?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .map((transaction) => [

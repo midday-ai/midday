@@ -118,12 +118,13 @@ export function ConnectTransactionsModal({
     clientName: "Midday",
     product: ["transactions"],
     onSuccess: async (public_token, metadata) => {
-      const accessToken = await exchangePublicToken(public_token);
+      const { access_token, item_id } = await exchangePublicToken(public_token);
 
       setParams({
         step: "account",
         provider: "plaid",
-        token: accessToken,
+        token: access_token,
+        ref: item_id,
         institution_id: metadata.institution?.institution_id,
       });
       track({
@@ -274,7 +275,7 @@ export function ConnectTransactionsModal({
                   );
                 })}
 
-                {!loading && results.length === 0 && (
+                {!loading && results?.length === 0 && (
                   <div className="flex flex-col items-center justify-center min-h-[350px]">
                     <p className="font-medium mb-2">No banks found</p>
                     <p className="text-sm text-center text-[#878787]">

@@ -47,6 +47,10 @@ export type Account = {
   enrollment_id: string | null; // Teller
 };
 
+export type ConnectionStatus = {
+  status: "connected" | "disconnected";
+};
+
 export type Balance = {
   amount: number;
   currency: string;
@@ -80,6 +84,11 @@ export type DeleteAccountsRequest = {
   accessToken?: string; // Teller & Plaid
 };
 
+export type GetConnectionStatusRequest = {
+  id?: string;
+  accessToken?: string; // Teller & Plaid
+};
+
 export type GetTransactionsResponse = Transaction[];
 
 export type GetAccountsResponse = Account[];
@@ -103,4 +112,11 @@ export type GetHealthCheckResponse = {
   teller: HealthCheckResponse;
   gocardless: HealthCheckResponse;
   plaid: HealthCheckResponse;
+};
+
+export type GetConnectionStatusResponse = ConnectionStatus;
+
+export type DeleteConnectionRequest = {
+  id: string; // GoCardLess
+  accessToken?: string; // Teller & Plaid
 };

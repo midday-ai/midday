@@ -1,6 +1,6 @@
 "use server";
 
-import { engine } from "@/utils/engine";
+import { client } from "@midday/engine/client";
 
 type GetAccountParams = {
   id?: string;
@@ -15,12 +15,20 @@ export async function getAccounts({
   accessToken,
   institutionId,
 }: GetAccountParams) {
-  const { data } = await engine.accounts.list({
-    id,
-    provider,
-    accessToken,
-    institutionId,
+  const accountsResponse = await client.accounts.$get({
+    query: {
+      id,
+      provider,
+      accessToken,
+      institutionId,
+    },
   });
+
+  if (!accountsResponse.ok) {
+    throw new Error("Failed to get accounts");
+  }
+
+  const { data } = await accountsResponse.json();
 
   return {
     data: data.sort((a, b) => b.balance.amount - a.balance.amount),

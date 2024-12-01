@@ -1,6 +1,7 @@
 "use client";
 
 import { manualSyncTransactionsAction } from "@/actions/transactions/manual-sync-transactions-action";
+import { useSyncStatus } from "@/hooks/use-sync-status";
 import { connectionStatus } from "@/utils/connection-status";
 import {
   Accordion,
@@ -16,7 +17,6 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { useEventDetails } from "@trigger.dev/react";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
@@ -48,6 +48,7 @@ interface BankConnectionProps {
       currency: string;
       balance?: number;
       type: string;
+      error_retries?: number;
     }>;
   };
 }
@@ -131,16 +132,14 @@ function ConnectionState({
 }
 
 export function BankConnection({ connection }: BankConnectionProps) {
-  const [eventId, setEventId] = useState<string | undefined>();
+  const [runId, setRunId] = useState<string | undefined>();
+  const [accessToken, setAccessToken] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
-  const { data } = useEventDetails(eventId);
   const router = useRouter();
 
-  const status = data?.runs.at(-1)?.status;
   const { show } = connectionStatus(connection);
-
-  const error = status === "FAILURE" || status === "TIMED_OUT";
+  const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
   const [params] = useQueryStates({
     step: parseAsString,
@@ -150,13 +149,16 @@ export function BankConnection({ connection }: BankConnectionProps) {
   const manualSyncTransactions = useAction(manualSyncTransactionsAction, {
     onExecute: () => setSyncing(true),
     onSuccess: ({ data }) => {
-      if (data?.id) {
-        setEventId(data.id);
+      if (data) {
+        setRunId(data.id);
+        setAccessToken(data.publicAccessToken);
       }
     },
     onError: () => {
       setSyncing(false);
-      setEventId(undefined);
+      setRunId(undefined);
+      setStatus("FAILED");
+
       toast({
         duration: 3500,
         variant: "error",
@@ -164,16 +166,6 @@ export function BankConnection({ connection }: BankConnectionProps) {
       });
     },
   });
-
-  useEffect(() => {
-    if (status === "SUCCESS") {
-      dismiss();
-      setEventId(undefined);
-      setSyncing(false);
-      router.replace("/settings/accounts");
-      router.refresh();
-    }
-  }, [status]);
 
   useEffect(() => {
     if (isSyncing) {
@@ -187,9 +179,19 @@ export function BankConnection({ connection }: BankConnectionProps) {
   }, [isSyncing]);
 
   useEffect(() => {
-    if (error) {
+    if (status === "COMPLETED") {
+      dismiss();
+      setRunId(undefined);
       setSyncing(false);
-      setEventId(undefined);
+      router.replace("/settings/accounts");
+      router.refresh();
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (status === "FAILED") {
+      setSyncing(false);
+      setRunId(undefined);
 
       toast({
         duration: 3500,
@@ -197,17 +199,25 @@ export function BankConnection({ connection }: BankConnectionProps) {
         title: "Something went wrong please try again.",
       });
     }
-  }, [error]);
+  }, [status]);
 
   // NOTE: GoCardLess reconnect flow (redirect from API route)
   useEffect(() => {
     if (params.step === "reconnect" && params.id) {
-      manualSyncTransactions.execute({ connectionId: params.id });
+      manualSyncTransactions.execute({
+        connectionId: params.id,
+        provider: connection.provider,
+        type: "reconnect",
+      });
     }
   }, [params]);
 
   const handleManualSync = () => {
-    manualSyncTransactions.execute({ connectionId: connection.id });
+    manualSyncTransactions.execute({
+      connectionId: connection.id,
+      provider: connection.provider,
+      type: "sync",
+    });
   };
 
   return (
@@ -282,6 +292,12 @@ export function BankConnection({ connection }: BankConnectionProps) {
                 currency={account.currency}
                 balance={account.balance ?? 0}
                 type={account.type}
+                hasError={
+                  account.enabled &&
+                  connection.status !== "disconnected" &&
+                  account.error_retries !== undefined &&
+                  account.error_retries > 0
+                }
               />
             );
           })}

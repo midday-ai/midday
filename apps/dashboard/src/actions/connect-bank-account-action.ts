@@ -2,9 +2,9 @@
 
 import { getMostFrequentCurrency } from "@/utils/currency";
 import { LogEvents } from "@midday/events/events";
-import { Events, client } from "@midday/jobs";
 import { getTeamSettings } from "@midday/supabase/cached-queries";
-import { createBankAccounts } from "@midday/supabase/mutations";
+import { createBankConnection } from "@midday/supabase/mutations";
+import { initialBankSetup } from "jobs/tasks/bank/setup/initial";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { connectBankAccountSchema } from "./schema";
@@ -30,6 +30,11 @@ export const connectBankAccountAction = authActionClient
       ctx: { supabase, user },
     }) => {
       const teamId = user.team_id;
+
+      if (!teamId) {
+        throw new Error("Team ID is required");
+      }
+
       const { data } = await getTeamSettings();
 
       const selectedCurrency = getMostFrequentCurrency(accounts);
@@ -44,7 +49,7 @@ export const connectBankAccountAction = authActionClient
           .eq("id", teamId);
       }
 
-      await createBankAccounts(supabase, {
+      const { data: bankConnection } = await createBankConnection(supabase, {
         accessToken,
         enrollmentId,
         referenceId,
@@ -54,11 +59,9 @@ export const connectBankAccountAction = authActionClient
         provider,
       });
 
-      const event = await client.sendEvent({
-        name: Events.TRANSACTIONS_INITIAL_SYNC,
-        payload: {
-          teamId,
-        },
+      const event = await initialBankSetup.trigger({
+        teamId,
+        connectionId: bankConnection?.id,
       });
 
       revalidateTag(`bank_accounts_${teamId}`);

@@ -5,8 +5,10 @@ import type {
   Account as BaseAccount,
   Balance as BaseAccountBalance,
   Transaction as BaseTransaction,
+  ConnectionStatus,
 } from "../types";
 import type {
+  GetRequisitionResponse,
   Institution,
   Transaction,
   TransactionDescription,
@@ -76,6 +78,11 @@ export const transformTransactionName = (transaction: Transaction) => {
   }
 
   console.log("No transaction name", transaction);
+
+  // When there is no name, we use the proprietary bank transaction code (Service Fee)
+  if (transaction.proprietaryBankTransactionCode) {
+    return transaction.proprietaryBankTransactionCode;
+  }
 
   return "No information";
 };
@@ -155,15 +162,22 @@ export const transformTransaction = (
 };
 
 const transformAccountName = (account: TransformAccountName) => {
+  // First try to use the name from the account
   if (account?.name) {
     return capitalCase(account.name);
   }
 
+  // Then try to use the product
   if (account?.product) {
     return account.product;
   }
 
-  // TODO: Fix no name
+  // Then try to use the institution name
+  if (account?.institution?.name) {
+    return account.institution.name;
+  }
+
+  // Last use a default name
   return "No name";
 };
 
@@ -179,6 +193,7 @@ export const transformAccount = ({
     name: transformAccountName({
       name: account.name,
       product: account.product,
+      institution: institution,
     }),
     currency: account.currency.toUpperCase(),
     enrollment_id: null,
@@ -202,3 +217,18 @@ export const transformInstitution = (
   logo: getLogoURL(institution.id, getFileExtension(institution.logo)),
   provider: Providers.Enum.gocardless,
 });
+
+export const transformConnectionStatus = (
+  requisition?: GetRequisitionResponse,
+): ConnectionStatus => {
+  // Expired or Rejected
+  if (requisition?.status === "EX" || requisition?.status === "RJ") {
+    return {
+      status: "disconnected",
+    };
+  }
+
+  return {
+    status: "connected",
+  };
+};

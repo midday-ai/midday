@@ -1,8 +1,10 @@
 import type { Provider } from "../interface";
 import type {
   DeleteAccountsRequest,
+  DeleteConnectionRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
+  GetConnectionStatusRequest,
   GetInstitutionsRequest,
   GetTransactionsRequest,
   ProviderParams,
@@ -95,5 +97,23 @@ export class PlaidProvider implements Provider {
     await this.#api.deleteAccounts({
       accessToken,
     });
+  }
+
+  async getConnectionStatus({ accessToken }: GetConnectionStatusRequest) {
+    if (!accessToken) {
+      throw Error("accessToken is missing");
+    }
+
+    const response = await this.#api.getConnectionStatus({ accessToken });
+
+    return response;
+  }
+
+  async deleteConnection({ accessToken }: DeleteConnectionRequest) {
+    if (!accessToken) {
+      throw Error("accessToken is missing");
+    }
+
+    await this.#api.deleteAccounts({ accessToken });
   }
 }

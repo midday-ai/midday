@@ -13,13 +13,18 @@ import {
   Products,
   type Transaction,
 } from "plaid";
-import type { GetInstitutionsRequest, ProviderParams } from "../types";
+import type {
+  ConnectionStatus,
+  GetInstitutionsRequest,
+  ProviderParams,
+} from "../types";
 import type {
   DisconnectAccountRequest,
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
   GetAccountsRequest,
   GetAccountsResponse,
+  GetConnectionStatusRequest,
   GetStatusResponse,
   GetTransactionsRequest,
   GetTransactionsResponse,
@@ -51,6 +56,14 @@ export class PlaidApi {
     });
 
     this.#client = new PlaidBaseApi(configuration);
+  }
+
+  #generateWebhookUrl(environment: "sandbox" | "production") {
+    if (environment === "sandbox") {
+      return "https://staging.app.midday.ai/api/webhook/plaid";
+    }
+
+    return "https://app.midday.ai/api/webhook/plaid";
   }
 
   async getHealthCheck() {
@@ -166,6 +179,7 @@ export class PlaidApi {
     userId,
     language = "en",
     accessToken,
+    environment = "production",
   }: LinkTokenCreateRequest): Promise<
     import("axios").AxiosResponse<LinkTokenCreateResponse>
   > {
@@ -177,6 +191,7 @@ export class PlaidApi {
       language,
       access_token: accessToken,
       country_codes: this.#countryCodes,
+      webhook: this.#generateWebhookUrl(environment),
       transactions: {
         days_requested: 730,
       },
@@ -237,5 +252,31 @@ export class PlaidApi {
             }),
         ),
     });
+  }
+
+  async getConnectionStatus({
+    accessToken,
+  }: GetConnectionStatusRequest): Promise<ConnectionStatus> {
+    try {
+      await this.#client.accountsGet({
+        access_token: accessToken,
+      });
+
+      return { status: "connected" };
+    } catch (error) {
+      const parsedError = isError(error);
+
+      if (parsedError) {
+        const providerError = new ProviderError(parsedError);
+
+        if (providerError.code === "disconnected") {
+          return { status: "disconnected" };
+        }
+      }
+
+      // If we get here, the account is not disconnected
+      // But it could be a connection issue between Plaid and the institution
+      return { status: "connected" };
+    }
   }
 }

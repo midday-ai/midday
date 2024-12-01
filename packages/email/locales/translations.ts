@@ -8,7 +8,12 @@ export function translations(locale: string, params?: TranslationParams) {
       return {
         "notifications.match": `We matched the transaction “${params?.transactionName}” against “${params?.fileName}”`,
         "notifications.transaction": `You have a new transaction of ${params?.amount} from ${params?.from}`,
-        "notifications.transactions": `You have ${params?.numberOfTransactions} new transactions`,
+        "notifications.transactions":
+          params?.numberOfTransactions &&
+          typeof params?.numberOfTransactions === "number" &&
+          params?.numberOfTransactions > 1
+            ? `You have ${params?.numberOfTransactions} new transactions`
+            : `You have a new transaction of ${params?.amount} from ${params?.name}`,
         "notifications.invoicePaid": `Invoice ${params?.invoiceNumber} has been paid`,
         "notifications.invoiceOverdue": `Invoice ${params?.invoiceNumber} is overdue`,
         "transactions.subject": "New transactions",
@@ -58,7 +63,12 @@ export function translations(locale: string, params?: TranslationParams) {
       return {
         "notifications.match": `Vi matchade transaktionen “${params?.transactionName}” mot “${params?.fileName}”`,
         "notifications.transaction": `Du har en ny transaktion på ${params?.amount} från ${params?.from}`,
-        "notifications.transactions": `Du har ${params?.numberOfTransactions} nya transaktioner`,
+        "notifications.transactions":
+          params?.numberOfTransactions &&
+          typeof params?.numberOfTransactions === "number" &&
+          params?.numberOfTransactions > 1
+            ? `Du har ${params?.numberOfTransactions} nya transaktioner`
+            : `Du har en ny transaktion på ${params?.amount} från ${params?.name}`,
         "notifications.invoicePaid": `Faktura ${params?.invoiceNumber} har betalats`,
         "notifications.invoiceOverdue": `Faktura ${params?.invoiceNumber} är försenad`,
         "transactions.subject": "Nya transaktioner",
