@@ -2,7 +2,6 @@
 
 import { client } from "@midday/engine/client";
 import { LogEvents } from "@midday/events/events";
-import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import { authActionClient } from "../safe-action";
 import { createGoCardLessLinkSchema } from "../schema";
@@ -28,8 +27,6 @@ export const createGoCardLessLinkAction = authActionClient
         },
       });
 
-      const reference = `${user.team_id}:${nanoid()}`;
-
       const redirectTo = new URL(redirectBase);
 
       redirectTo.searchParams.append("step", step);
@@ -41,7 +38,6 @@ export const createGoCardLessLinkAction = authActionClient
         availableHistory,
         redirectBase,
         step,
-        reference,
       });
 
       try {
@@ -59,7 +55,6 @@ export const createGoCardLessLinkAction = authActionClient
             agreement: agreementData.id,
             institutionId,
             redirect: redirectTo.toString(),
-            reference,
           },
         });
 
