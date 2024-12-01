@@ -38,7 +38,7 @@ export const syncConnection = schemaTask({
         query: {
           id: data.reference_id,
           provider: data.provider,
-          access_token: data.access_token,
+          accessToken: data.access_token,
         },
       });
 
