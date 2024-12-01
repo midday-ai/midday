@@ -1347,3 +1347,12 @@ export async function getTagsQuery(supabase: Client, teamId: string) {
     .eq("team_id", teamId)
     .order("created_at", { ascending: false });
 }
+
+export async function getBankAccountsBalancesQuery(
+  supabase: Client,
+  teamId: string,
+) {
+  return supabase.rpc("get_team_bank_accounts_balances", {
+    team_id: teamId,
+  });
+}

@@ -1,4 +1,4 @@
-import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
+import { getBankAccountsBalances } from "@midday/supabase/cached-queries";
 import { AccountBalance } from "./account-balance";
 
 export function AccountBalanceSkeleton() {
@@ -6,7 +6,7 @@ export function AccountBalanceSkeleton() {
 }
 
 export async function AccountBalanceWidget() {
-  const accountsData = await getTeamBankAccounts({ enabled: true });
+  const accountsData = await getBankAccountsBalances();
 
   return (
     <div className="h-full">
