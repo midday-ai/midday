@@ -14,6 +14,7 @@ const cacheTags = {
     "bank_accounts",
     "spending",
     "bank_accounts_currencies",
+    "bank_accounts_balances",
     "metrics",
     "expenses",
     "burn_rate",
