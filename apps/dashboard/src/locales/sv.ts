@@ -67,4 +67,7 @@ export default {
     in_progress: "Pågående",
     completed: "Färdig",
   },
+  account_balance: {
+    total_balance: "Total saldo",
+  },
 } as const;

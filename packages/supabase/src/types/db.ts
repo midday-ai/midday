@@ -66,6 +66,7 @@ export type Database = {
           currency: string | null
           enabled: boolean
           error_details: string | null
+          error_retries: number | null
           id: string
           manual: boolean | null
           name: string | null
@@ -83,6 +84,7 @@ export type Database = {
           currency?: string | null
           enabled?: boolean
           error_details?: string | null
+          error_retries?: number | null
           id?: string
           manual?: boolean | null
           name?: string | null
@@ -100,6 +102,7 @@ export type Database = {
           currency?: string | null
           enabled?: boolean
           error_details?: string | null
+          error_retries?: number | null
           id?: string
           manual?: boolean | null
           name?: string | null
@@ -1287,6 +1290,7 @@ export type Database = {
           method: Database["public"]["Enums"]["transactionMethods"]
           name: string
           note: string | null
+          notified: boolean | null
           recurring: boolean | null
           status: Database["public"]["Enums"]["transactionStatus"] | null
           team_id: string
@@ -1318,6 +1322,7 @@ export type Database = {
           method: Database["public"]["Enums"]["transactionMethods"]
           name: string
           note?: string | null
+          notified?: boolean | null
           recurring?: boolean | null
           status?: Database["public"]["Enums"]["transactionStatus"] | null
           team_id: string
@@ -1346,6 +1351,7 @@ export type Database = {
           method?: Database["public"]["Enums"]["transactionMethods"]
           name?: string
           note?: string | null
+          notified?: boolean | null
           recurring?: boolean | null
           status?: Database["public"]["Enums"]["transactionStatus"] | null
           team_id?: string
@@ -1586,6 +1592,12 @@ export type Database = {
         }
         Returns: number
       }
+      calculate_total_sum2: {
+        Args: {
+          target_currency: string
+        }
+        Returns: number
+      }
       calculate_transaction_differences_v2: {
         Args: {
           p_team_id: string
@@ -1748,6 +1760,7 @@ export type Database = {
           method: Database["public"]["Enums"]["transactionMethods"]
           name: string
           note: string | null
+          notified: boolean | null
           recurring: boolean | null
           status: Database["public"]["Enums"]["transactionStatus"] | null
           team_id: string
@@ -2067,6 +2080,18 @@ export type Database = {
           currency: string
           color: string
           percentage: number
+        }[]
+      }
+      get_team_bank_accounts_balances: {
+        Args: {
+          team_id: string
+        }
+        Returns: {
+          id: string
+          currency: string
+          balance: number
+          name: string
+          logo_url: string
         }[]
       }
       get_total_balance: {

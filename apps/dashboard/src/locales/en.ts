@@ -208,4 +208,7 @@ export default {
   "invoice_count#zero": "No invoices",
   "invoice_count#one": "1 invoice",
   "invoice_count#other": "{count} invoices",
+  account_balance: {
+    total_balance: "Total balance",
+  },
 } as const;

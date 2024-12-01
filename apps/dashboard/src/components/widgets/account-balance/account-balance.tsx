@@ -2,16 +2,39 @@
 
 import { AddAccountButton } from "@/components/add-account-button";
 import { FormatAmount } from "@/components/format-amount";
+import { useI18n } from "@/locales/client";
 import { formatAccountName } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
 import Image from "next/image";
 import { useState } from "react";
 
-export function AccountBalance({ data }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const sortedAccounts = data?.sort((a, b) => b.balance - a.balance);
+type Props = {
+  data: {
+    id: string;
+    name: string;
+    balance: number;
+    currency: string;
+    logo_url?: string;
+  }[];
+};
 
-  const activeAccount = sortedAccounts.at(activeIndex);
+export function AccountBalance({ data }: Props) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const t = useI18n();
+
+  const formattedData = data.map((account) => {
+    if (account.name === "total_balance") {
+      return {
+        ...account,
+        id: account.name,
+        name: t("account_balance.total_balance"),
+      };
+    }
+
+    return account;
+  });
+
+  const activeAccount = formattedData.at(activeIndex);
 
   if (!activeAccount) {
     return (
@@ -37,10 +60,10 @@ export function AccountBalance({ data }) {
         </h2>
 
         <div className="flex space-x-2 items-center">
-          {activeAccount.bank?.logo_url && (
+          {activeAccount?.logo_url && (
             <Image
-              src={activeAccount.bank.logo_url}
-              alt={activeAccount.bank.name}
+              src={activeAccount.logo_url}
+              alt=""
               width={24}
               height={24}
               quality={100}
@@ -57,9 +80,9 @@ export function AccountBalance({ data }) {
         </div>
       </div>
 
-      {sortedAccounts.length > 1 && (
+      {formattedData.length > 1 && (
         <div className="flex space-x-2">
-          {sortedAccounts.map((account, idx) => (
+          {formattedData.map((account, idx) => (
             <button
               type="button"
               onMouseEnter={() => setActiveIndex(idx)}

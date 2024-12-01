@@ -16,6 +16,7 @@ import {
   type GetTrackerProjectsQueryParams,
   type GetTrackerRecordsByRangeParams,
   type GetTransactionsParams,
+  getBankAccountsBalancesQuery,
   getBankAccountsCurrenciesQuery,
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
@@ -601,6 +602,27 @@ export const getTags = async () => {
     ["tags", teamId],
     {
       tags: [`tags_${teamId}`],
+      revalidate: 3600,
+    },
+  )();
+};
+
+export const getBankAccountsBalances = async () => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getBankAccountsBalancesQuery(supabase, teamId);
+    },
+    ["bank_accounts_balances", teamId],
+    {
+      tags: [`bank_accounts_balances_${teamId}`],
       revalidate: 3600,
     },
   )();
