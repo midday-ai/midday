@@ -16,7 +16,7 @@ export function SelectCurrency({
   className,
 }: Props) {
   const data = currencies.map((currency) => ({
-    id: currency.toLowerCase(),
+    id: currency.toUpperCase(),
     label: currency,
   }));
 
@@ -24,12 +24,12 @@ export function SelectCurrency({
     <ComboboxDropdown
       headless={headless}
       placeholder="Select currency"
-      selectedItem={data.find((item) => item.id === value?.toLowerCase())}
+      selectedItem={data.find((item) => item.id === value?.toUpperCase())}
       searchPlaceholder="Search currencies"
       items={data}
       className={className}
       onSelect={(item) => {
-        onChange(item.id);
+        onChange(item.id.toUpperCase());
       }}
     />
   );
