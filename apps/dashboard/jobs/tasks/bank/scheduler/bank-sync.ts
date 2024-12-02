@@ -2,8 +2,8 @@ import { createClient } from "@midday/supabase/job";
 import { logger, schedules } from "@trigger.dev/sdk/v3";
 import { syncConnection } from "../sync/connection";
 
-// This is a fan-out pattern. We want to trigger a task for each bank connection
-// that has a status of "connected".
+// This is a fan-out pattern. We want to trigger a job for each bank connection
+// Then in sync connection we check if the connection is connected and if not we update the status (Connected, Disconnected)
 export const bankSyncScheduler = schedules.task({
   id: "bank-sync-scheduler",
   maxDuration: 600,
@@ -20,12 +20,10 @@ export const bankSyncScheduler = schedules.task({
     }
 
     try {
-      // Get all bank connections that has a status of "connected"
       const { data: bankConnections } = await supabase
         .from("bank_connections")
         .select("id")
         .eq("team_id", teamId)
-        .eq("status", "connected")
         .throwOnError();
 
       const formattedConnections = bankConnections?.map((connection) => ({
