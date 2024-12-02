@@ -7,7 +7,6 @@ export function translations(locale: string, params?: TranslationParams) {
     case "en":
       return {
         "notifications.match": `We matched the transaction “${params?.transactionName}” against “${params?.fileName}”`,
-        "notifications.transaction": `You have a new transaction of ${params?.amount} from ${params?.from}`,
         "notifications.transactions":
           params?.numberOfTransactions &&
           typeof params?.numberOfTransactions === "number" &&
@@ -62,7 +61,6 @@ export function translations(locale: string, params?: TranslationParams) {
     case "sv":
       return {
         "notifications.match": `Vi matchade transaktionen “${params?.transactionName}” mot “${params?.fileName}”`,
-        "notifications.transaction": `Du har en ny transaktion på ${params?.amount} från ${params?.from}`,
         "notifications.transactions":
           params?.numberOfTransactions &&
           typeof params?.numberOfTransactions === "number" &&

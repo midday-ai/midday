@@ -66,7 +66,7 @@ export function getCountryInfo() {
 }
 
 export function isEU() {
-  const countryCode = headers().get("x-vercel-ip-country");
+  const countryCode = getCountryCode();
 
   if (countryCode && EU_COUNTRY_CODES.includes(countryCode)) {
     return true;
