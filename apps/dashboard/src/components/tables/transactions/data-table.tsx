@@ -308,10 +308,7 @@ export function DataTable<TData, TValue>({
         totalAmount={pageMeta?.totalAmount}
       />
 
-      <ExportBar
-        selected={selectedRows}
-        deselectAll={() => table.toggleAllPageRowsSelected(false)}
-      />
+      <ExportBar selected={selectedRows} />
     </div>
   );
 }

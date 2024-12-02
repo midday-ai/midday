@@ -1,6 +1,7 @@
 "use client";
 
 import { shareFileAction } from "@/actions/share-file-action";
+import { useExportStatus } from "@/hooks/use-export-status";
 import { useExportStore } from "@/store/export";
 import { Button } from "@midday/ui/button";
 import {
@@ -11,7 +12,6 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
-import { useEventRunStatuses } from "@trigger.dev/react";
 import ms from "ms";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
@@ -34,9 +34,8 @@ const options = [
 export function ExportStatus() {
   const { toast, dismiss, update } = useToast();
   const [toastId, setToastId] = useState(null);
-  const { exportId, setExportId } = useExportStore();
-  const { error, statuses } = useEventRunStatuses(exportId);
-  const status = statuses?.at(0);
+  const { exportData, setExportData } = useExportStore();
+  const { status, progress, result } = useExportStatus(exportData);
 
   const shareFile = useAction(shareFileAction, {
     onError: () => {
@@ -67,7 +66,20 @@ export function ExportStatus() {
   };
 
   useEffect(() => {
-    if (exportId && !toastId) {
+    if (status === "FAILED") {
+      toast({
+        duration: 2500,
+        variant: "error",
+        title: "Something went wrong please try again.",
+      });
+
+      setToastId(null);
+      setExportData(undefined);
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (exportData && !toastId) {
       const { id } = toast({
         title: "Exporting transactions.",
         variant: "progress",
@@ -79,14 +91,14 @@ export function ExportStatus() {
       setToastId(id);
     } else {
       update(toastId, {
-        progress: status?.data?.progress,
+        progress,
       });
     }
 
-    if (status?.data?.progress === 100) {
+    if (status === "COMPLETED" && result) {
       update(toastId, {
         title: "Export completed",
-        description: `Your export is ready based on ${status?.data?.totalItems} transactions. It's stored in your Vault.`,
+        description: `Your export is ready based on ${result.totalItems} transactions. It's stored in your Vault.`,
         variant: "success",
         footer: (
           <div className="mt-4 flex space-x-4">
@@ -108,7 +120,7 @@ export function ExportStatus() {
                     onClick={() =>
                       handleOnShare({
                         expireIn: option.expireIn,
-                        filename: status?.data?.fileName,
+                        filename: result.fileName,
                       })
                     }
                   >
@@ -119,7 +131,7 @@ export function ExportStatus() {
             </DropdownMenu>
 
             <a
-              href={`/api/download/file?path=exports/${status?.data?.fileName}&filename=${status?.data?.fileName}`}
+              href={`/api/download/file?path=exports/${result.fileName}&filename=${result.fileName}`}
               download
             >
               <Button size="sm" onClick={handleOnDownload}>
@@ -131,22 +143,9 @@ export function ExportStatus() {
       });
 
       setToastId(null);
-      setExportId(undefined);
+      setExportData(undefined);
     }
-  }, [exportId, toastId, status]);
-
-  useEffect(() => {
-    if (error) {
-      toast({
-        duration: 2500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-
-      setToastId(null);
-      setExportId(undefined);
-    }
-  }, [error]);
+  }, [toastId, progress, status]);
 
   return null;
 }

@@ -10,18 +10,25 @@ import { useEffect, useState } from "react";
 
 type Props = {
   selected: boolean;
-  deselectAll: () => void;
 };
 
-export function ExportBar({ selected, deselectAll }: Props) {
+export function ExportBar({ selected }: Props) {
   const { toast } = useToast();
-  const { setExportId } = useExportStore();
-  const { rowSelection } = useTransactionsStore();
+  const { setExportData } = useExportStore();
+  const { rowSelection, setRowSelection } = useTransactionsStore();
   const [isOpen, setOpen] = useState(false);
 
   const { execute, status } = useAction(exportTransactionsAction, {
     onSuccess: ({ data }) => {
-      setExportId(data?.id);
+      if (data?.id && data?.publicAccessToken) {
+        setExportData({
+          runId: data.id,
+          accessToken: data.publicAccessToken,
+        });
+
+        setRowSelection(() => ({}));
+      }
+
       setOpen(false);
     },
     onError: () => {
@@ -52,7 +59,11 @@ export function ExportBar({ selected, deselectAll }: Props) {
           <span className="text-sm">{selected} selected</span>
 
           <div className="flex items-center space-x-4">
-            <button type="button" onClick={deselectAll} className="text-sm">
+            <button
+              type="button"
+              onClick={() => setRowSelection(() => ({}))}
+              className="text-sm"
+            >
               Deselect all
             </button>
             <Button

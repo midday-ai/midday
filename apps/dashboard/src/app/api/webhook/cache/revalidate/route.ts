@@ -20,6 +20,7 @@ const cacheTags = {
     "burn_rate",
     "runway",
   ],
+  vault: ["vault"],
 } as const;
 
 export async function POST(req: Request) {

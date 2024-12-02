@@ -28,13 +28,7 @@ export const generateInvoice = schemaTask({
 
     const { user, ...invoice } = invoiceData;
 
-    const buffer = await renderToBuffer(
-      await PdfTemplate({
-        ...invoice,
-        timezone: user?.timezone,
-        locale: user?.locale,
-      }),
-    );
+    const buffer = await renderToBuffer(await PdfTemplate(invoice));
 
     const filename = `${invoiceData?.invoice_number}.pdf`;
 

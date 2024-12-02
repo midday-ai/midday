@@ -1,11 +1,17 @@
 import { create } from "zustand";
 
 interface ExportState {
-  exportId?: string;
-  setExportId: (exportId?: string) => void;
+  exportData?: {
+    runId?: string;
+    accessToken?: string;
+  };
+  setExportData: (exportData?: {
+    runId?: string;
+    accessToken?: string;
+  }) => void;
 }
 
 export const useExportStore = create<ExportState>()((set) => ({
-  exportId: undefined,
-  setExportId: (exportId) => set({ exportId }),
+  exportData: undefined,
+  setExportData: (exportData) => set({ exportData }),
 }));
