@@ -49,6 +49,8 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
+
+  console.log("plaid webhook body", body);
   const result = webhookSchema.safeParse(body);
 
   if (!result.success) {
