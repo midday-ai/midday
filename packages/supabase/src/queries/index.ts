@@ -405,7 +405,6 @@ export async function getSimilarTransactions(
     .from("transactions")
     .select("id, amount, team_id", { count: "exact" })
     .eq("team_id", teamId)
-    .neq("category_slug", categorySlug)
     .textSearch("fts_vector", `'${name}'`)
     .throwOnError();
 }
