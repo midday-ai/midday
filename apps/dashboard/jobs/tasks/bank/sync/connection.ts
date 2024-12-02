@@ -123,6 +123,7 @@ export const syncConnection = schemaTask({
             .select("id, error_retries")
             .eq("bank_connection_id", connectionId)
             .eq("manual", false)
+            .eq("enabled", true)
             .throwOnError();
 
           if (
