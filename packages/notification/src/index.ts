@@ -103,7 +103,7 @@ export async function getSubscriberPreferences({
   teamId,
 }: GetSubscriberPreferencesParams) {
   const response = await fetch(
-    `${API_ENDPOINT}/subscribers/${teamId}_${subscriberId}/preferences`,
+    `${API_ENDPOINT}/subscribers/${teamId}_${subscriberId}/preferences?includeInactiveChannels=false`,
     {
       method: "GET",
       headers: {
