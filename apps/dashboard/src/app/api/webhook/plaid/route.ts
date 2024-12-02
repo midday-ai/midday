@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import { createClient } from "@midday/supabase/server";
 import { isAfter, subDays } from "date-fns";
 import { syncConnection } from "jobs/tasks/bank/sync/connection";
@@ -19,7 +20,7 @@ const webhookSchema = z.object({
     "INITIAL_UPDATE",
     "TRANSACTIONS_REMOVED",
   ]),
-  webhook_code: z.enum(["SYNC_UPDATES_AVAILABLE"]),
+  webhook_code: z.enum(["SYNC_UPDATES_AVAILABLE", "HISTORICAL_UPDATE"]),
   item_id: z.string(),
   error: z
     .object({
@@ -33,8 +34,7 @@ const webhookSchema = z.object({
       status: z.number(),
     })
     .nullable(),
-  initial_update_complete: z.boolean(),
-  historical_update_complete: z.boolean(),
+  new_transactions: z.number().optional(),
   environment: z.enum(["sandbox", "production"]),
 });
 
@@ -50,10 +50,13 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
-  console.log("plaid webhook body", body);
   const result = webhookSchema.safeParse(body);
 
   if (!result.success) {
+    logger("Invalid plaid webhook payload", {
+      details: result.error.issues,
+    });
+
     return NextResponse.json(
       { error: "Invalid webhook payload", details: result.error.issues },
       { status: 400 },
@@ -79,8 +82,13 @@ export async function POST(req: NextRequest) {
     case "TRANSACTIONS": {
       // Only run manual sync if the historical update is complete and the connection was created in the last 24 hours
       const manualSync =
-        result.data.historical_update_complete &&
+        result.data.webhook_code === "HISTORICAL_UPDATE" &&
         isAfter(new Date(connectionData.created_at), subDays(new Date(), 1));
+
+      logger("Triggering manual sync", {
+        connectionId: connectionData.id,
+        manualSync,
+      });
 
       await syncConnection.trigger({
         connectionId: connectionData.id,
