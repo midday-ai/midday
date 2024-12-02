@@ -93,12 +93,15 @@ export const syncConnection = schemaTask({
           manualSync,
         }));
 
+        // Only run the sync if there are bank accounts enabled
         // We don't want to delay the sync if it's a manual sync
         // but we do want to delay it if it's an background sync to avoid rate limiting
-        await triggerSequenceAndWait(bankAccounts, syncAccount, {
-          tags: ctx.run.tags,
-          delayMinutes: manualSync ? 0 : 1,
-        });
+        if (bankAccounts.length > 0) {
+          await triggerSequenceAndWait(bankAccounts, syncAccount, {
+            tags: ctx.run.tags,
+            delayMinutes: manualSync ? 0 : 1,
+          });
+        }
 
         logger.info("Synced bank accounts completed");
 
