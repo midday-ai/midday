@@ -35,7 +35,9 @@ export const bankSyncScheduler = schedules.task({
         tags: ["team_id", teamId],
       }));
 
-      if (!formattedConnections) {
+      // If there are no bank connections to sync, return
+      if (!formattedConnections?.length) {
+        logger.info("No bank connections to sync");
         return;
       }
 
