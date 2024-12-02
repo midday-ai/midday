@@ -15,13 +15,19 @@ type Props = {
 
 export function ExportBar({ selected, deselectAll }: Props) {
   const { toast } = useToast();
-  const { setExportId } = useExportStore();
+  const { setExportData } = useExportStore();
   const { rowSelection } = useTransactionsStore();
   const [isOpen, setOpen] = useState(false);
 
   const { execute, status } = useAction(exportTransactionsAction, {
     onSuccess: ({ data }) => {
-      setExportId(data?.id);
+      if (data?.id && data?.publicAccessToken) {
+        setExportData({
+          runId: data.id,
+          accessToken: data.publicAccessToken,
+        });
+      }
+
       setOpen(false);
     },
     onError: () => {

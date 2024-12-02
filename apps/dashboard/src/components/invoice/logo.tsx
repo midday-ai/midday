@@ -77,7 +77,7 @@ export function Logo({ teamId }: { teamId: string }) {
       <input
         id="logo-upload"
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/jpg,image/png"
         className="hidden"
         onChange={handleUpload}
         disabled={isLoading}

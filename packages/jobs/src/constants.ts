@@ -1,5 +1,4 @@
 export const Jobs = {
-  TRANSACTIONS_EXPORT: "transactions-export",
   INBOX_DOCUMENT: "inbox-document",
   INBOX_MATCH: "inbox-match",
   INBOX_UPLOAD: "inbox-upload",
@@ -10,7 +9,6 @@ export const Jobs = {
 };
 
 export const Events = {
-  TRANSACTIONS_EXPORT: "transactions.export",
   INBOX_DOCUMENT: "inbox.document",
   INBOX_MATCH: "inbox.match",
   TRANSACTIONS_IMPORT: "transactions.import",
