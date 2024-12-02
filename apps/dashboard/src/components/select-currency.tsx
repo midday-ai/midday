@@ -25,7 +25,7 @@ export function SelectCurrency({
     <ComboboxDropdown
       headless={headless}
       placeholder="Select currency"
-      selectedItem={data.find((item) => item.id === value?.toUpperCase())}
+      selectedItem={data.find((item) => item.id === value?.toLowerCase())}
       searchPlaceholder="Search currencies"
       items={data}
       className={className}
