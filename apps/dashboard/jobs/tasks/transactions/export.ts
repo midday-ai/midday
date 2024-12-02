@@ -3,6 +3,7 @@ import { createClient } from "@midday/supabase/job";
 import { metadata, schemaTask } from "@trigger.dev/sdk/v3";
 import { BlobReader, BlobWriter, TextReader, ZipWriter } from "@zip.js/zip.js";
 import { serializableToBlob } from "jobs/utils/blob";
+import { revalidateCache } from "jobs/utils/revalidate-cache";
 import { z } from "zod";
 import { processTransactions } from "./process";
 
@@ -111,7 +112,7 @@ export const exportTransactions = schemaTask({
         contentType: "application/zip",
       });
 
-    //   revalidateTag(`vault_${teamId}`);
+    revalidateCache({ tag: "vault", teamId });
 
     metadata.set("progress", 100);
 
