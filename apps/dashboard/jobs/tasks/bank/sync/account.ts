@@ -12,7 +12,7 @@ export const syncAccount = schemaTask({
   id: "sync-account",
   maxDuration: 300,
   retry: {
-    maxAttempts: 1,
+    maxAttempts: 2,
   },
   schema: z.object({
     id: z.string().uuid(),
