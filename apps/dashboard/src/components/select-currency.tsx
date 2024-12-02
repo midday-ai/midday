@@ -16,7 +16,8 @@ export function SelectCurrency({
   className,
 }: Props) {
   const data = currencies.map((currency) => ({
-    id: currency.toUpperCase(),
+    id: currency.toLowerCase(),
+    value: currency.toUpperCase(),
     label: currency,
   }));
 
@@ -29,7 +30,7 @@ export function SelectCurrency({
       items={data}
       className={className}
       onSelect={(item) => {
-        onChange(item.id.toUpperCase());
+        onChange(item.value);
       }}
     />
   );
