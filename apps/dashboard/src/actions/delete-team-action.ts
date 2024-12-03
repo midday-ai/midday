@@ -15,9 +15,17 @@ export const deleteTeamAction = authActionClient
       channel: LogEvents.DeleteTeam.channel,
     },
   })
-  .action(async ({ parsedInput: { teamId }, ctx: { user } }) => {
-    await deleteTeam.triggerAndWait({
+  .action(async ({ parsedInput: { teamId }, ctx: { user, supabase } }) => {
+    const { data: teamData } = await supabase
+      .from("teams")
+      .delete()
+      .eq("id", teamId)
+      .select("id, bank_connections(access_token, provider, reference_id)")
+      .single();
+
+    await deleteTeam.trigger({
       teamId,
+      connections: teamData?.bank_connections ?? [],
     });
 
     revalidateTag(`user_${user.id}`);

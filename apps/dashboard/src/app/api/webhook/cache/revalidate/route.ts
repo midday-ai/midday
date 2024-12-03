@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const schema = z.object({
   tag: z.enum(["bank"]),
-  teamId: z.string(),
+  id: z.string(),
 });
 
 const cacheTags = {
@@ -43,14 +43,14 @@ export async function POST(req: Request) {
     );
   }
 
-  const { tag, teamId } = parsedBody.data;
+  const { tag, id } = parsedBody.data;
 
   if (!(tag in cacheTags)) {
     return NextResponse.json({ error: "Invalid tag" }, { status: 400 });
   }
 
   for (const cacheTag of cacheTags[tag]) {
-    revalidateTag(`${cacheTag}_${teamId}`);
+    revalidateTag(`${cacheTag}_${id}`);
   }
 
   return NextResponse.json({ success: true });

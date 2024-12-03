@@ -112,7 +112,7 @@ export const exportTransactions = schemaTask({
         contentType: "application/zip",
       });
 
-    revalidateCache({ tag: "vault", teamId });
+    revalidateCache({ tag: "vault", id: teamId });
 
     metadata.set("progress", 100);
 
