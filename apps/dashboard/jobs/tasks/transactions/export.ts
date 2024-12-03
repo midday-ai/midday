@@ -22,7 +22,7 @@ export const exportTransactions = schemaTask({
     concurrencyLimit: 10,
   },
   machine: {
-    preset: "medium-1x",
+    preset: "large-1x",
   },
   run: async ({ teamId, locale, transactionIds }) => {
     const supabase = createClient();

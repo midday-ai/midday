@@ -18,7 +18,7 @@ export const processTransactions = schemaTask({
     concurrencyLimit: 5,
   },
   machine: {
-    preset: "medium-1x",
+    preset: "large-1x",
   },
   run: async ({ ids, locale }) => {
     const supabase = createClient();
