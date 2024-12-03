@@ -11,7 +11,7 @@ export function useInitialConnectionStatus({
   accessToken: initialAccessToken,
 }: UseInitialConnectionStatusProps) {
   const [accessToken, setAccessToken] = useState<string | undefined>(
-    initialAccessToken ?? "dummy",
+    initialAccessToken,
   );
   const [runId, setRunId] = useState<string | undefined>(initialRunId);
   const [status, setStatus] = useState<

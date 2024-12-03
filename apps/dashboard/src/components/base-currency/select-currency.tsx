@@ -2,32 +2,32 @@
 
 import { updateCurrencyAction } from "@/actions/transactions/update-currency-action";
 import { SelectCurrency as SelectCurrencyBase } from "@/components/select-currency";
+import { useSyncStatus } from "@/hooks/use-sync-status";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { Button } from "@midday/ui/button";
 import { useToast } from "@midday/ui/use-toast";
-import { useEventDetails } from "@trigger.dev/react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
 export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
   const { toast } = useToast();
-  const [eventId, setEventId] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
-  const { data } = useEventDetails(eventId);
+  const [runId, setRunId] = useState<string | undefined>();
+  const [accessToken, setAccessToken] = useState<string | undefined>();
 
-  const status = data?.runs.at(-1)?.status;
-
-  const error = status === "FAILURE" || status === "TIMED_OUT";
+  const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
   const updateCurrency = useAction(updateCurrencyAction, {
     onExecute: () => setSyncing(true),
     onSuccess: ({ data }) => {
-      if (data?.id) {
-        setEventId(data.id);
+      if (data) {
+        setRunId(data.id);
+        setAccessToken(data.publicAccessToken);
       }
     },
     onError: () => {
-      setEventId(undefined);
+      setRunId(undefined);
+
       toast({
         duration: 3500,
         variant: "error",
@@ -61,9 +61,10 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
   };
 
   useEffect(() => {
-    if (status === "SUCCESS") {
+    if (status === "COMPLETED") {
       setSyncing(false);
-      setEventId(undefined);
+      setStatus(null);
+      setRunId(undefined);
       toast({
         duration: 3500,
         variant: "success",
@@ -84,9 +85,9 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
   }, [isSyncing]);
 
   useEffect(() => {
-    if (error) {
+    if (status === "FAILED") {
       setSyncing(false);
-      setEventId(undefined);
+      setRunId(undefined);
 
       toast({
         duration: 3500,
@@ -94,7 +95,7 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
         title: "Something went wrong pleaase try again.",
       });
     }
-  }, [error]);
+  }, [status]);
 
   return (
     <div className="w-[200px]">
