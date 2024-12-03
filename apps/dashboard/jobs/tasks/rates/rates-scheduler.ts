@@ -8,7 +8,7 @@ export const ratesScheduler = schedules.task({
   cron: "0 0,12 * * *",
   run: async () => {
     // Only run in production (Set in Trigger.dev)
-    // if (process.env.TRIGGER_ENVIRONMENT !== "production") return;
+    if (process.env.TRIGGER_ENVIRONMENT !== "production") return;
 
     const supabase = createClient();
 
