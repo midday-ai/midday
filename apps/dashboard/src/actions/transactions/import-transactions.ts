@@ -2,8 +2,6 @@
 
 import { LogEvents } from "@midday/events/events";
 import { formatAmountValue } from "@midday/import";
-import { Events, client } from "@midday/jobs";
-import { getTimezone } from "@midday/location";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
 
@@ -58,23 +56,22 @@ export const importTransactionsAction = authActionClient
         .update({ currency, balance })
         .eq("id", bankAccountId);
 
-      const timezone = getTimezone();
+      // const timezone = getTimezone();
 
-      const event = await client.sendEvent({
-        name: Events.TRANSACTIONS_IMPORT,
-        payload: {
-          filePath,
-          bankAccountId,
-          currency,
-          mappings,
-          teamId: user.team_id,
-          inverted,
-          dateAdjustment,
-          importType,
-          table,
-          timezone,
-        },
-      });
+      // const event = await client.sendEvent({
+      //    payload: {
+      //     filePath,
+      //     bankAccountId,
+      //     currency,
+      //     mappings,
+      //     teamId: user.team_id,
+      //     inverted,
+      //     dateAdjustment,
+      //     importType,
+      //     table,
+      //     timezone,
+      //   },
+      // });
 
       return event;
     },
