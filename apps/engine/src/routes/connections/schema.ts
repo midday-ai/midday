@@ -89,3 +89,26 @@ export const ConnectionByReferenceSchema = z.object({
     accounts: z.array(z.string()),
   }),
 });
+
+export const GoCardLessConnectionSchema = z.object({
+  id: z.string(),
+  created: z.string(),
+  redirect: z.string(),
+  status: z.enum(["CR", "GC", "UA", "RJ", "SA", "GA", "LN", "EX"]),
+  institution_id: z.string(),
+  agreement: z.string(),
+  reference: z.string(),
+  accounts: z.array(z.string()),
+  user_language: z.string(),
+  link: z.string(),
+  ssn: z.string(),
+  account_selection: z.boolean(),
+  redirect_immediate: z.boolean(),
+});
+
+export const GoCardLessConnectionsSchema = z.object({
+  count: z.number(),
+  next: z.string(),
+  previous: z.string(),
+  results: z.array(GoCardLessConnectionSchema),
+});

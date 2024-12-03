@@ -1,7 +1,7 @@
 import { schedules, schemaTask } from "@trigger.dev/sdk/v3";
 import { generateCronTag } from "jobs/utils/generate-cron-tag";
 import { z } from "zod";
-import { bankSyncScheduler } from "../scheduler/bank-sync";
+import { bankSyncScheduler } from "../scheduler/bank-scheduler";
 import { syncConnection } from "../sync/connection";
 
 // This task sets up the bank sync for a new team on a daily schedule and

@@ -13,6 +13,7 @@ import {
   ConnectionStatusQuerySchema,
   ConnectionStatusSchema,
   DeleteConnectionBodySchema,
+  GoCardLessConnectionsSchema,
 } from "./schema";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>()
@@ -129,6 +130,57 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
             data: {
               success: true,
             },
+          },
+          200,
+        );
+      } catch (error) {
+        const errorResponse = createErrorResponse(error, c.get("requestId"));
+
+        return c.json(errorResponse, 400);
+      }
+    },
+  )
+  .openapi(
+    createRoute({
+      method: "get",
+      path: "/gocardless",
+      summary: "Get GoCardless Connections",
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: GoCardLessConnectionsSchema,
+            },
+          },
+          description: "Retrieve GoCardless connections",
+        },
+        400: {
+          content: {
+            "application/json": {
+              schema: ErrorSchema,
+            },
+          },
+          description: "Returns an error",
+        },
+      },
+    }),
+    async (c) => {
+      const envs = env(c);
+
+      const api = new GoCardLessApi({
+        kv: c.env.KV,
+        envs,
+      });
+
+      try {
+        const data = await api.getRequisitions();
+
+        return c.json(
+          {
+            count: data.count,
+            next: data.next,
+            previous: data.previous,
+            results: data.results,
           },
           200,
         );
