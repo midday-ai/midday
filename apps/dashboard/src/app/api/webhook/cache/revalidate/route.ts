@@ -12,6 +12,7 @@ const cacheTags = {
     "transactions",
     "bank_connections",
     "bank_accounts",
+    "insights",
     "spending",
     "bank_accounts_currencies",
     "bank_accounts_balances",

@@ -1,8 +1,8 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { Events, client } from "@midday/jobs";
 import { updateTeam } from "@midday/supabase/mutations";
+import { updateBaseCurrency } from "jobs/tasks/transactions/update-base-currency";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
@@ -22,6 +22,10 @@ export const updateCurrencyAction = authActionClient
   })
   .action(
     async ({ parsedInput: { baseCurrency }, ctx: { user, supabase } }) => {
+      if (!user.team_id) {
+        throw new Error("No team id");
+      }
+
       await updateTeam(supabase, {
         id: user.team_id,
         base_currency: baseCurrency,
@@ -30,12 +34,9 @@ export const updateCurrencyAction = authActionClient
       revalidateTag(`team_settings_${user.team_id}`);
       revalidatePath("/settings/accounts");
 
-      const event = await client.sendEvent({
-        name: Events.UPDATE_CURRENCY,
-        payload: {
-          baseCurrency,
-          teamId: user.team_id,
-        },
+      const event = await updateBaseCurrency.trigger({
+        teamId: user.team_id,
+        baseCurrency,
       });
 
       return event;
