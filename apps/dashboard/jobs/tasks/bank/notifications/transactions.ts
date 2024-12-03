@@ -36,10 +36,14 @@ export const transactionNotifications = schemaTask({
         .eq("role", "owner")
         .throwOnError();
 
-      if (transactionsData && transactionsData.length > 0) {
-        await handleTransactionNotifications(usersData, transactionsData);
-        await handleTransactionEmails(usersData, transactionsData);
-        await handleTransactionSlackNotifications(teamId, transactionsData);
+      const sortedTransactions = transactionsData?.sort((a, b) => {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
+
+      if (sortedTransactions && sortedTransactions.length > 0) {
+        await handleTransactionNotifications(usersData, sortedTransactions);
+        await handleTransactionEmails(usersData, sortedTransactions);
+        await handleTransactionSlackNotifications(teamId, sortedTransactions);
       }
     } catch (error) {
       await logger.error("Transactions notification", { error });

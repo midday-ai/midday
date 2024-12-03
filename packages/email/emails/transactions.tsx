@@ -291,7 +291,7 @@ export const TransactionsEmail = ({
             <Section className="text-center mt-[32px] mb-[32px]">
               <Button
                 className="bg-transparent text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
-                href={`${baseAppUrl}/transactions?start=${transactions.at(0)?.date}&end=${transactions[transactions.length - 1]?.date}`}
+                href={`${baseAppUrl}/transactions?start=${transactions[transactions.length - 1]?.date}&end=${transactions.at(0)?.date}`}
               >
                 {t("transactions.button")}
               </Button>
