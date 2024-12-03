@@ -157,9 +157,6 @@ export const syncConnection = schemaTask({
           .from("bank_connections")
           .update({ status: "disconnected" })
           .eq("id", connectionId);
-
-        // Revalidate the bank cache (transactions, accounts, connections)
-        await revalidateCache({ tag: "bank", teamId: data.team_id });
       }
     } catch (error) {
       logger.error("Failed to sync connection", { error });
