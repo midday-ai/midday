@@ -115,43 +115,6 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
                   </div>
                 )}
               />
-
-              <Controller
-                control={control}
-                name="date_adjustment"
-                render={({ field: { onChange, value } }) => (
-                  <div className="space-y-1">
-                    <Label htmlFor="date_adjustment">Date adjustment</Label>
-
-                    <p className="text-sm text-[#606060]">
-                      Transactions may be exported in different timezones,
-                      causing them to appear off by one day. If you notice this,
-                      you can adjust the date by adding or subtracting a day to
-                      correct this.
-                    </p>
-
-                    <div className="flex justify-end">
-                      <Select
-                        value={value?.toString() ?? "0"}
-                        onValueChange={(value) => {
-                          onChange(+value);
-                        }}
-                      >
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Default" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectItem value="0">Default</SelectItem>
-                            <SelectItem value="1">+ 1 day</SelectItem>
-                            <SelectItem value="-1">- 1 day</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                )}
-              />
             </div>
           </AccordionContent>
         </AccordionItem>

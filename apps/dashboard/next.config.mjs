@@ -21,12 +21,7 @@ const config = {
       },
     ],
   },
-  transpilePackages: [
-    "@midday/ui",
-    "@midday/jobs",
-    "@midday/tailwind",
-    "@midday/invoice",
-  ],
+  transpilePackages: ["@midday/ui", "@midday/tailwind", "@midday/invoice"],
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -63,4 +58,7 @@ export default withSentryConfig(withBundleAnalyzer(config), {
   hideSourceMaps: true,
   disableLogger: true,
   tunnelRoute: "/monitoring",
+  sourcemaps: {
+    disable: true,
+  },
 });

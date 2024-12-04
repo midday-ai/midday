@@ -4,9 +4,9 @@ import { getAllowedAttachments, prepareDocument } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
-import { client as BackgroundClient, Events } from "@midday/jobs";
 import { client as RedisClient } from "@midday/kv";
 import { createClient } from "@midday/supabase/server";
+import { inboxDocument } from "jobs/tasks/inbox/document";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -221,14 +221,11 @@ export async function POST(req: Request) {
       throw Error("No records");
     }
 
+    // Trigger the document task job
     await Promise.all(
-      inboxData?.map((inbox) =>
-        BackgroundClient.sendEvent({
-          name: Events.INBOX_DOCUMENT,
-          payload: {
-            recordId: inbox.id,
-            teamId,
-          },
+      inboxData.map((inbox) =>
+        inboxDocument.trigger({
+          inboxId: inbox.id,
         }),
       ),
     );

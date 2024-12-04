@@ -1,48 +1,40 @@
-import { createSlackWebClient, downloadFile } from "@midday/app-store/slack";
+import {
+  createSlackWebClient,
+  downloadFile,
+} from "@midday/app-store/slack-client";
 import { DocumentClient, prepareDocument } from "@midday/documents";
-import { eventTrigger } from "@trigger.dev/sdk";
+import { createClient } from "@midday/supabase/job";
+import { schemaTask } from "@trigger.dev/sdk/v3";
 import { format } from "date-fns";
 import { z } from "zod";
-import { client, supabase } from "../client";
-import { Events, Jobs } from "../constants";
 
-const concurrencyLimit = client.defineConcurrencyLimit({
+export const inboxSlackUpload = schemaTask({
   id: "inbox-slack-upload",
-  limit: 25,
-});
-
-client.defineJob({
-  id: Jobs.INBOX_SLACK_UPLOAD,
-  name: "Inbox - Slack Upload",
-  version: "0.0.1",
-  concurrencyLimit,
-  trigger: eventTrigger({
-    name: Events.INBOX_SLACK_UPLOAD,
-    schema: z.object({
-      teamId: z.string(),
-      token: z.string(),
-      channelId: z.string(),
-      threadId: z.string().optional(),
-      file: z.object({
-        id: z.string(),
-        name: z.string(),
-        mimetype: z.string(),
-        size: z.number(),
-        url: z.string(),
-      }),
+  schema: z.object({
+    teamId: z.string(),
+    token: z.string(),
+    channelId: z.string(),
+    threadId: z.string().optional(),
+    file: z.object({
+      id: z.string(),
+      name: z.string(),
+      mimetype: z.string(),
+      size: z.number(),
+      url: z.string(),
     }),
   }),
-  integrations: {
-    supabase,
+  maxDuration: 300,
+  queue: {
+    concurrencyLimit: 10,
   },
-  run: async (payload, io) => {
-    const {
-      teamId,
-      token,
-      channelId,
-      threadId,
-      file: { id, name, mimetype, size, url },
-    } = payload;
+  run: async ({
+    teamId,
+    token,
+    channelId,
+    threadId,
+    file: { id, name, mimetype, size, url },
+  }) => {
+    const supabase = createClient();
 
     const slackApp = createSlackWebClient({
       token,
@@ -75,14 +67,14 @@ client.defineJob({
     const pathTokens = [teamId, "inbox", document.fileName];
 
     // Upload file to vault
-    await io.supabase.client.storage
+    await supabase.storage
       .from("vault")
       .upload(pathTokens.join("/"), new Uint8Array(document.content), {
         contentType: document.mimeType,
         upsert: true,
       });
 
-    const { data: inboxData } = await io.supabase.client
+    const { data: inboxData } = await supabase
       .from("inbox")
       .insert({
         // NOTE: If we can't parse the name using OCR this will be the fallback name
@@ -98,23 +90,27 @@ client.defineJob({
       .single()
       .throwOnError();
 
+    if (!inboxData) {
+      throw Error("Inbox data not found");
+    }
+
     try {
       const document = new DocumentClient({
-        contentType: inboxData?.content_type,
+        contentType: inboxData.content_type!,
       });
 
       const result = await document.getDocument({
         content: Buffer.from(fileData).toString("base64"),
       });
 
-      const { data: updatedInbox } = await io.supabase.client
+      const { data: updatedInbox } = await supabase
         .from("inbox")
         .update({
           amount: result.amount,
           currency: result.currency,
           display_name: result.name,
           website: result.website,
-          date: result.date && new Date(result.date),
+          date: result.date ? new Date(result.date).toISOString() : null,
           type: result.type,
           description: result.description,
           status: "pending",
@@ -140,7 +136,7 @@ client.defineJob({
                     "en-US",
                     {
                       style: "currency",
-                      currency: updatedInbox.currency,
+                      currency: updatedInbox.currency!,
                     },
                   ).format(
                     updatedInbox.amount,
@@ -176,19 +172,12 @@ client.defineJob({
           console.error(err);
         }
 
-        await io.sendEvent("Match Inbox", {
-          name: Events.INBOX_MATCH,
-          payload: {
-            teamId: updatedInbox.team_id,
-            inboxId: updatedInbox.id,
-            amount: updatedInbox.amount,
-          },
-        });
+        // TODO: Send event to match inbox
       }
     } catch {
       // If we end up here we could not parse the document
       // But we want to update the status so we show the record with fallback name
-      await io.supabase.client
+      await supabase
         .from("inbox")
         .update({ status: "pending" })
         .eq("id", inboxData.id);

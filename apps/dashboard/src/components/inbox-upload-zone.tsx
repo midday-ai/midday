@@ -1,10 +1,11 @@
 "use client";
 
-import { invalidateCacheAction } from "@/actions/invalidate-cache-action";
+import { inboxUploadAction } from "@/actions/inbox-upload-action";
 import { resumableUpload } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
+import { useAction } from "next-safe-action/hooks";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -20,6 +21,8 @@ export function UploadZone({ children, teamId }: Props) {
   const [toastId, setToastId] = useState(null);
   const uploadProgress = useRef([]);
   const { toast, dismiss, update } = useToast();
+
+  const inboxUpload = useAction(inboxUploadAction);
 
   useEffect(() => {
     if (!toastId && showProgress) {
@@ -52,14 +55,14 @@ export function UploadZone({ children, teamId }: Props) {
     setShowProgress(true);
 
     // Add uploaded folder so we can filter background job on this
-    const filePath = [teamId, "inbox", "uploaded"];
+    const path = [teamId, "inbox"];
 
     try {
-      await Promise.all(
+      const results = await Promise.all(
         files.map(async (file, idx) =>
           resumableUpload(supabase, {
             bucket: "vault",
-            path: filePath,
+            path,
             file,
             onProgress: (bytesUploaded, bytesTotal) => {
               uploadProgress.current[idx] = (bytesUploaded / bytesTotal) * 100;
@@ -77,6 +80,15 @@ export function UploadZone({ children, teamId }: Props) {
         ),
       );
 
+      // Trigger the upload jobs
+      inboxUpload.execute(
+        results.map((result) => ({
+          file_path: [...path, result.file.name],
+          mimetype: result.file.type,
+          size: result.file.size,
+        })),
+      );
+
       // Reset once done
       uploadProgress.current = [];
 
@@ -90,7 +102,6 @@ export function UploadZone({ children, teamId }: Props) {
       setShowProgress(false);
       setToastId(null);
       dismiss(toastId);
-      invalidateCacheAction([`vault_${teamId}`]);
     } catch {
       toast({
         duration: 2500,

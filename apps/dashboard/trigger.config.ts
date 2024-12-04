@@ -14,5 +14,8 @@ export default defineConfig({
       randomize: true,
     },
   },
+  build: {
+    external: ["sharp"],
+  },
   dirs: ["./jobs/tasks"],
 });

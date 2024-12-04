@@ -24,6 +24,7 @@
     ".": "./src/index.ts",
     "./slack": "./src/slack/index.ts",
     "./slack-notifications": "./src/slack/lib/notifications/transactions.ts",
+    "./slack-client": "./src/slack/lib/client.ts",
     "./db": "./src/db/index.ts"
   }
 }

@@ -5,7 +5,7 @@ import { BlobReader, BlobWriter, TextReader, ZipWriter } from "@zip.js/zip.js";
 import { serializableToBlob } from "jobs/utils/blob";
 import { revalidateCache } from "jobs/utils/revalidate-cache";
 import { z } from "zod";
-import { processTransactions } from "./process";
+import { processExport } from "./process-export";
 
 // Process transactions in batches of 100
 const BATCH_SIZE = 100;
@@ -44,7 +44,7 @@ export const exportTransactions = schemaTask({
     for (let i = 0; i < transactionIds.length; i += BATCH_SIZE) {
       const transactionBatch = transactionIds.slice(i, i + BATCH_SIZE);
 
-      const batchResult = await processTransactions.triggerAndWait({
+      const batchResult = await processExport.triggerAndWait({
         ids: transactionBatch,
         locale,
       });

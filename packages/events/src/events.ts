@@ -243,4 +243,8 @@ export const LogEvents = {
     name: "Update Tag",
     channel: "tag",
   },
+  InboxUpload: {
+    name: "Inbox Upload",
+    channel: "inbox",
+  },
 };

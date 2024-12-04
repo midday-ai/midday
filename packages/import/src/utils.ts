@@ -1,15 +1,4 @@
-import { addDays, isValid, parse, subDays } from "date-fns";
-import { formatInTimeZone } from "date-fns-tz";
-
-function getAdjustedDate(date: string, dateAdjustment?: number) {
-  const adjustedDate = dateAdjustment
-    ? dateAdjustment > 0
-      ? addDays(date, Math.abs(dateAdjustment)).toISOString()
-      : subDays(date, Math.abs(dateAdjustment)).toISOString()
-    : date;
-
-  return adjustedDate;
-}
+import { isValid, parse, parseISO } from "date-fns";
 
 function ensureValidYear(dateString: string | undefined): string | undefined {
   if (!dateString) return undefined;
@@ -25,12 +14,9 @@ function ensureValidYear(dateString: string | undefined): string | undefined {
   return `${correctedYear}-${month}-${day}`;
 }
 
-export function formatDate(
-  date: string,
-  timezone = "America/New_York",
-  dateAdjustment?: number,
-) {
+export function formatDate(date: string) {
   const formats = [
+    "dd/MMM/yyyy",
     "dd/MM/yyyy",
     "yyyy-MM-dd",
     "MM/dd/yyyy",
@@ -57,31 +43,29 @@ export function formatDate(
   for (const format of formats) {
     const parsedDate = parse(date, format, new Date());
     if (isValid(parsedDate)) {
-      const formattedDate = formatInTimeZone(
-        parsedDate,
-        timezone,
-        "yyyy-MM-dd",
-      );
-      return ensureValidYear(getAdjustedDate(formattedDate, dateAdjustment));
+      return ensureValidYear(parsedDate.toISOString().split("T")[0]);
     }
   }
 
-  if (isValid(new Date(date))) {
-    return ensureValidYear(
-      formatInTimeZone(new Date(date), timezone, "yyyy-MM-dd"),
-    );
+  try {
+    const parsedDate = parseISO(date);
+    if (isValid(parsedDate)) {
+      return ensureValidYear(parsedDate.toISOString().split("T")[0]);
+    }
+  } catch {
+    // Continue if parseISO fails
   }
 
   // If the date includes a time, we don't need to remove the time.
   const value = date.includes("T") ? date : date.replace(/[^0-9-\.\/]/g, "");
 
-  if (isValid(new Date(value))) {
-    const formattedDate = formatInTimeZone(
-      new Date(value),
-      timezone,
-      "yyyy-MM-dd",
-    );
-    return ensureValidYear(getAdjustedDate(formattedDate, dateAdjustment));
+  try {
+    const parsedDate = parseISO(value);
+    if (isValid(parsedDate)) {
+      return ensureValidYear(parsedDate.toISOString().split("T")[0]);
+    }
+  } catch {
+    // Continue if parseISO fails
   }
 
   // If all parsing attempts fail, return undefined
