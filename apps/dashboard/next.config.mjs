@@ -51,13 +51,11 @@ const config = {
   },
 };
 
-export default config;
-
-// export default withSentryConfig(withBundleAnalyzer(config), {
-//   silent: !process.env.CI,
-//   telemetry: false,
-//   widenClientFileUpload: true,
-//   hideSourceMaps: true,
-//   disableLogger: true,
-//   tunnelRoute: "/monitoring",
-// });
+export default withSentryConfig(withBundleAnalyzer(config), {
+  silent: !process.env.CI,
+  telemetry: false,
+  widenClientFileUpload: true,
+  hideSourceMaps: true,
+  disableLogger: true,
+  tunnelRoute: "/monitoring",
+});
