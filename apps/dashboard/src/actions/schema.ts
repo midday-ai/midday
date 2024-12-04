@@ -607,3 +607,11 @@ export const createCustomerSchema = z.object({
   website: z.string().nullable().optional(),
   phone: z.string().nullable().optional(),
 });
+
+export const inboxUploadSchema = z.array(
+  z.object({
+    mimetype: z.string(),
+    size: z.number(),
+    file_path: z.array(z.string()),
+  }),
+);

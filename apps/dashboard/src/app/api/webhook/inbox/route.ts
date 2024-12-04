@@ -221,7 +221,7 @@ export async function POST(req: Request) {
       throw Error("No records");
     }
 
-    // Trigger the document task
+    // Trigger the document task job
     await Promise.all(
       inboxData.map((inbox) =>
         inboxDocument.trigger({

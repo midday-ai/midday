@@ -1,100 +1,90 @@
-// import { DocumentClient } from "@midday/documents";
-// import { client, db, supabase } from "../client";
-// import { Jobs } from "../constants";
+import { DocumentClient } from "@midday/documents";
+import { createClient } from "@midday/supabase/job";
+import { schemaTask } from "@trigger.dev/sdk/v3";
+import { z } from "zod";
 
-// const concurrencyLimit = client.defineConcurrencyLimit({
-//   id: "inbox-upload",
-//   limit: 25,
-// });
+export const inboxUpload = schemaTask({
+  id: "inbox-upload",
+  schema: z.object({
+    id: z.string(),
+    teamId: z.string().uuid(),
+    mimetype: z.string(),
+    size: z.number(),
+    file_path: z.array(z.string()),
+  }),
+  maxDuration: 300,
+  queue: {
+    concurrencyLimit: 25,
+  },
+  run: async ({ id, teamId, mimetype, size, file_path }) => {
+    const supabase = createClient();
 
-// client.defineJob({
-//   id: Jobs.INBOX_UPLOAD,
-//   name: "Inbox - Upload",
-//   version: "0.0.1",
-//   concurrencyLimit,
-//   trigger: db.onInserted({
-//     schema: "storage",
-//     table: "objects",
-//     filter: {
-//       record: {
-//         bucket_id: ["vault"],
-//         path_tokens: [
-//           {
-//             // NOTE: This ensures jobs run only for files uploaded through the inbox bulk upload.
-//             $includes: "uploaded",
-//           },
-//         ],
-//       },
-//     },
-//   }),
-//   integrations: {
-//     supabase,
-//   },
-//   run: async (payload, io) => {
-//     const { path_tokens, metadata, id } = payload.record;
-//     const teamId = path_tokens.at(0);
-//     const filename = path_tokens.at(-1);
+    const filename = file_path.at(-1);
 
-//     const { data: inboxData } = await io.supabase.client
-//       .from("inbox")
-//       .insert({
-//         // NOTE: If we can't parse the name using OCR this will be the fallback name
-//         display_name: filename,
-//         team_id: teamId,
-//         file_path: path_tokens,
-//         file_name: filename,
-//         content_type: metadata.mimetype,
-//         reference_id: `${id}_${filename}`,
-//         size: metadata.size,
-//       })
-//       .select("*")
-//       .single()
-//       .throwOnError();
+    const { data: inboxData } = await supabase
+      .from("inbox")
+      .insert({
+        // NOTE: If we can't parse the name using OCR this will be the fallback name
+        display_name: filename,
+        team_id: teamId,
+        file_path: file_path,
+        file_name: filename,
+        content_type: mimetype,
+        reference_id: `${id}_${filename}`,
+        size,
+      })
+      .select("*")
+      .single()
+      .throwOnError();
 
-//     const { data } = await io.supabase.client.storage
-//       .from("vault")
-//       .download(path_tokens.join("/"));
+    if (!inboxData) {
+      throw Error("Inbox data not found");
+    }
 
-//     // Convert the document data to a Buffer and base64 encode it.
-//     const buffer = await data?.arrayBuffer();
+    const { data } = await supabase.storage
+      .from("vault")
+      .download(file_path.join("/"));
 
-//     if (!buffer) {
-//       throw Error("No file data");
-//     }
+    // Convert the document data to a Buffer and base64 encode it.
+    const buffer = await data?.arrayBuffer();
 
-//     try {
-//       const document = new DocumentClient({
-//         contentType: inboxData?.content_type,
-//       });
+    if (!buffer) {
+      throw Error("No file data");
+    }
 
-//       const result = await document.getDocument({
-//         content: Buffer.from(buffer).toString("base64"),
-//       });
+    try {
+      const document = new DocumentClient({
+        contentType: inboxData.content_type!,
+      });
 
-//       const { data: updatedInbox } = await io.supabase.client
-//         .from("inbox")
-//         .update({
-//           amount: result.amount,
-//           currency: result.currency,
-//           display_name: result.name,
-//           website: result.website,
-//           date: result.date && new Date(result.date),
-//           type: result.type,
-//           description: result.description,
-//           status: "pending",
-//         })
-//         .eq("id", inboxData.id)
-//         .select()
-//         .single();
+      const result = await document.getDocument({
+        content: Buffer.from(buffer).toString("base64"),
+      });
 
-//       // TODO: Send event to match inbox
-//     } catch {
-//       // If we end up here we could not parse the document
-//       // But we want to update the status so we show the record with fallback name
-//       await io.supabase.client
-//         .from("inbox")
-//         .update({ status: "pending" })
-//         .eq("id", inboxData.id);
-//     }
-//   },
-// });
+      const { data: updatedInbox } = await supabase
+        .from("inbox")
+        .update({
+          amount: result.amount,
+          currency: result.currency,
+          display_name: result.name,
+          website: result.website,
+          date: result.date && new Date(result.date).toISOString(),
+          type: result.type,
+          description: result.description,
+          status: "pending",
+        })
+        .eq("id", inboxData.id)
+        .select()
+        .single();
+
+      // TODO: Send event to match inbox
+    } catch {
+      // If we end up here we could not parse the document
+      // But we want to update the status so we show the record with fallback name
+      await supabase
+        .from("inbox")
+        .update({ status: "pending" })
+        .eq("id", inboxData.id);
+    }
+  },
+});
