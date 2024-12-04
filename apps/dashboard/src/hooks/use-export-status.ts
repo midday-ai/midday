@@ -27,8 +27,6 @@ export function useExportStatus({
     accessToken,
   });
 
-  console.log(run);
-
   useEffect(() => {
     if (initialRunId && initialAccessToken) {
       setAccessToken(initialAccessToken);
