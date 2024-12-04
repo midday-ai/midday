@@ -1,10 +1,11 @@
 "use client";
 
-import { inboxUploadAction } from "@/actions/inbox-upload";
+import { inboxUploadAction } from "@/actions/inbox-upload-action";
 import { resumableUpload } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
+import { useAction } from "next-safe-action/hooks";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -20,6 +21,8 @@ export function UploadZone({ children, teamId }: Props) {
   const [toastId, setToastId] = useState(null);
   const uploadProgress = useRef([]);
   const { toast, dismiss, update } = useToast();
+
+  const inboxUpload = useAction(inboxUploadAction);
 
   useEffect(() => {
     if (!toastId && showProgress) {
@@ -78,7 +81,7 @@ export function UploadZone({ children, teamId }: Props) {
       );
 
       // Trigger the upload jobs
-      inboxUploadAction(
+      inboxUpload.execute(
         results.map((result) => ({
           file_path: [...path, result.file.name],
           mimetype: result.file.type,
