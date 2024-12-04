@@ -7,8 +7,8 @@ import { z } from "zod";
 
 const ATTACHMENT_BATCH_SIZE = 20;
 
-export const processTransactions = schemaTask({
-  id: "process-transactions",
+export const processExport = schemaTask({
+  id: "process-export",
   schema: z.object({
     ids: z.array(z.string().uuid()),
     locale: z.string(),

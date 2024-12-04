@@ -42,60 +42,48 @@ describe("formatAmountValue", () => {
 
 describe("formatDate", () => {
   it("should format a valid date string", () => {
-    expect(formatDate("2023-05-15", "Europe/Berlin")).toBe("2023-05-15");
+    expect(formatDate("2023-05-15")).toBe("2023-05-15");
   });
 
   it("should handle date strings with non-date characters", () => {
-    expect(formatDate("2023/05/15", "Europe/Berlin")).toBe("2023-05-15");
-    expect(formatDate("May 15, 2023", "Europe/Berlin")).toBe("2023-05-15");
+    expect(formatDate("2023/05/15")).toBe("2023-05-15");
+    expect(formatDate("May 15, 2023")).toBe("2023-05-15");
   });
 
   it("should return undefined for invalid date strings", () => {
-    expect(formatDate("invalid-date", "Europe/Berlin")).toBeUndefined();
-    expect(formatDate("2023-13-45", "Europe/Berlin")).toBeUndefined();
+    expect(formatDate("invalid-date")).toBeUndefined();
+    expect(formatDate("2023-13-45")).toBeUndefined();
   });
 
   it("should handle different date formats", () => {
-    expect(formatDate("05/15/2023", "Europe/Berlin")).toBe("2023-05-15");
+    expect(formatDate("05/15/2023")).toBe("2023-05-15");
   });
 
   it("should handle dates with time", () => {
-    expect(formatDate("2023-05-15T14:30:00", "Europe/Berlin")).toBe(
-      "2023-05-15",
-    );
+    expect(formatDate("2023-05-15T14:30:00")).toBe("2023-05-15");
   });
 
   it("should handle dates dot separated", () => {
-    expect(formatDate("04.09.2024", "Europe/Berlin")).toBe("2024-09-04");
+    expect(formatDate("04.09.2024")).toBe("2024-09-04");
   });
 
   it("should handle dates with time", () => {
-    expect(formatDate("08.05.2024 09:12:07", "Europe/Berlin")).toBe(
-      "2024-05-08",
-    );
+    expect(formatDate("08.05.2024 09:12:07")).toBe("2024-05-08");
   });
 
   it("should handle dates 07/Aug/2024", () => {
-    expect(formatDate("07/Aug/2024", "Europe/Berlin")).toBe("2024-08-07");
+    expect(formatDate("07/Aug/2024")).toBe("2024-08-07");
   });
 
   it("should handle dates 24-08-2024", () => {
-    expect(formatDate("24-08-2024", "Europe/Berlin")).toBe("2024-08-24");
-  });
-
-  it("should handle European timezones", () => {
-    expect(formatDate("2023-05-15", "Europe/Berlin")).toBe("2023-05-15");
-  });
-
-  it("should handle America timezones", () => {
-    expect(formatDate("2023-05-15", "America/New_York")).toBe("2023-05-14");
-  });
-
-  it("should handle short date format", () => {
-    expect(formatDate("11/4/24", "Europe/Berlin")).toBe("2024-04-11");
+    expect(formatDate("24-08-2024")).toBe("2024-08-24");
   });
 
   it("should handle dates in dd-MM-yyyy format", () => {
-    expect(formatDate("24-09-2024", "Europe/Berlin")).toBe("2024-09-24");
+    expect(formatDate("24-09-2024")).toBe("2024-09-24");
+  });
+
+  it("should handle short date format", () => {
+    expect(formatDate("11/4/24")).toBe("2024-04-11");
   });
 });

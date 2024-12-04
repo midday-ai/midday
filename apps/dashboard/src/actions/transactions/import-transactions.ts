@@ -2,6 +2,7 @@
 
 import { LogEvents } from "@midday/events/events";
 import { formatAmountValue } from "@midday/import";
+import { importTransactions } from "jobs/tasks/transactions/import";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
 
@@ -13,7 +14,6 @@ export const importTransactionsAction = authActionClient
       currency: z.string(),
       currentBalance: z.string().optional(),
       inverted: z.boolean(),
-      dateAdjustment: z.number().optional(),
       table: z.array(z.record(z.string(), z.string())).optional(),
       importType: z.enum(["csv", "image"]),
       mappings: z.object({
@@ -40,7 +40,6 @@ export const importTransactionsAction = authActionClient
         mappings,
         currentBalance,
         inverted,
-        dateAdjustment,
         table,
         importType,
       },
@@ -56,22 +55,15 @@ export const importTransactionsAction = authActionClient
         .update({ currency, balance })
         .eq("id", bankAccountId);
 
-      // const timezone = getTimezone();
-
-      // const event = await client.sendEvent({
-      //    payload: {
-      //     filePath,
-      //     bankAccountId,
-      //     currency,
-      //     mappings,
-      //     teamId: user.team_id,
-      //     inverted,
-      //     dateAdjustment,
-      //     importType,
-      //     table,
-      //     timezone,
-      //   },
-      // });
+      const event = await importTransactions.trigger({
+        filePath,
+        bankAccountId,
+        currency,
+        mappings,
+        teamId: user.team_id!,
+        inverted,
+        importType,
+      });
 
       return event;
     },

@@ -1,6 +1,7 @@
 "use client";
 
 import { importTransactionsAction } from "@/actions/transactions/import-transactions";
+import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useUpload } from "@/hooks/use-upload";
 import { useUserContext } from "@/store/user/hook";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +18,6 @@ import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
 import { ErrorBoundary } from "@sentry/nextjs";
-import { useEventDetails } from "@trigger.dev/react";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
@@ -40,7 +40,8 @@ type Props = {
 };
 
 export function ImportModal({ currencies, defaultCurrency }: Props) {
-  const [eventId, setEventId] = useState<string | undefined>();
+  const [runId, setRunId] = useState<string | undefined>();
+  const [accessToken, setAccessToken] = useState<string | undefined>();
   const [isImporting, setIsImporting] = useState(false);
   const [fileColumns, setFileColumns] = useState<string[] | null>(null);
   const [firstRows, setFirstRows] = useState<Record<string, string>[] | null>(
@@ -57,10 +58,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
   const { toast } = useToast();
   const router = useRouter();
 
-  const { data: eventData } = useEventDetails(eventId);
-
-  const status = eventData?.runs.at(-1)?.status;
-  const error = status === "FAILURE" || status === "TIMED_OUT";
+  const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
   const [params, setParams] = useQueryStates({
     step: parseAsString,
@@ -73,13 +71,16 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
 
   const importTransactions = useAction(importTransactionsAction, {
     onSuccess: ({ data }) => {
-      if (data?.id) {
-        setEventId(data.id);
+      if (data) {
+        setRunId(data.id);
+        setAccessToken(data.publicAccessToken);
       }
     },
     onError: () => {
       setIsImporting(false);
-      setEventId(undefined);
+      setRunId(undefined);
+      setStatus("FAILED");
+
       toast({
         duration: 3500,
         variant: "error",
@@ -133,9 +134,9 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
   }, [params.type]);
 
   useEffect(() => {
-    if (error) {
+    if (status === "FAILED") {
       setIsImporting(false);
-      setEventId(undefined);
+      setRunId(undefined);
 
       toast({
         duration: 3500,
@@ -143,11 +144,11 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
         title: "Something went wrong please try again or contact support.",
       });
     }
-  }, [error]);
+  }, [status]);
 
   useEffect(() => {
-    if (status === "SUCCESS") {
-      setEventId(undefined);
+    if (status === "COMPLETED") {
+      setRunId(undefined);
       setIsImporting(false);
       onclose();
       router.refresh();
@@ -236,7 +237,6 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                           bankAccountId: data.bank_account_id,
                           currentBalance: data.balance,
                           inverted: data.inverted,
-                          dateAdjustment: data.date_adjustment,
                           table: data.table,
                           importType: data.import_type,
                           mappings: {
