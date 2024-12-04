@@ -4,6 +4,7 @@ import { validateTransactions } from "@midday/import/validate";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { processBatch } from "jobs/utils/process-batch";
+import { revalidateCache } from "jobs/utils/revalidate-cache";
 import Papa from "papaparse";
 import { z } from "zod";
 
@@ -148,5 +149,7 @@ export const importTransactions = schemaTask({
         throw new Error("Invalid import type");
       }
     }
+
+    await revalidateCache({ tag: "transactions", id: teamId });
   },
 });

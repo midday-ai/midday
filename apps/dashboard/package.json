@@ -16,6 +16,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^0.0.66",
     "@date-fns/tz": "^1.1.2",
+    "@fast-csv/format": "^5.0.2",
     "@hookform/resolvers": "^3.9.0",
     "@midday/app-store": "workspace:*",
     "@midday/events": "workspace:*",
