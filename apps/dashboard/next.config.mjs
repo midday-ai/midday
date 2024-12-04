@@ -58,4 +58,7 @@ export default withSentryConfig(withBundleAnalyzer(config), {
   hideSourceMaps: true,
   disableLogger: true,
   tunnelRoute: "/monitoring",
+  sourcemaps: {
+    disable: true,
+  },
 });
