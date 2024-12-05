@@ -217,8 +217,8 @@ export const Icons = {
   Vault: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={22}
-      height={22}
+      width={24}
+      height={24}
       fill="none"
       {...props}
     >
@@ -242,15 +242,15 @@ export const Icons = {
   Customers: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={22}
-      height={22}
+      width={24}
+      height={24}
       fill="none"
       {...props}
     >
       <mask
         id="a"
-        width={22}
-        height={22}
+        width={24}
+        height={24}
         x={0}
         y={0}
         maskUnits="userSpaceOnUse"
@@ -772,4 +772,5 @@ export const Icons = {
   QrCode: MdOutlineQrCode2,
   ArrowOutward: MdOutlineArrowOutward,
   Straighten: MdOutlineSquareFoot,
+  Files: MdOutlineInventory2,
 };
