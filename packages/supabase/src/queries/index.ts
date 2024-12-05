@@ -1268,13 +1268,53 @@ export async function getPaymentStatusQuery(supabase: Client, teamId: string) {
     .single();
 }
 
-export async function getCustomersQuery(supabase: Client, teamId: string) {
-  return supabase
+export type GetCustomersQueryParams = {
+  teamId: string;
+  from?: number;
+  to?: number;
+  searchQuery?: string | null;
+  sort?: string[] | null;
+};
+
+export async function getCustomersQuery(
+  supabase: Client,
+  params: GetCustomersQueryParams,
+) {
+  const { teamId, from = 0, to = 100, searchQuery, sort } = params;
+
+  const query = supabase
     .from("customers")
-    .select("*")
+    .select("*, invoices:invoices(id), projects:tracker_projects(id)")
     .eq("team_id", teamId)
-    .order("created_at", { ascending: false })
-    .limit(100);
+    .range(from, to);
+
+  if (searchQuery) {
+    query.ilike("name", `%${searchQuery}%`);
+  }
+
+  if (sort) {
+    const [column, value] = sort;
+    const ascending = value === "asc";
+
+    if (column === "invoices") {
+      query.order("invoices(id)", { ascending });
+    } else if (column === "projects") {
+      query.order("projects(id)", { ascending });
+    } else {
+      query.order(column, { ascending });
+    }
+  } else {
+    query.order("created_at", { ascending: false });
+  }
+
+  const { data, count } = await query;
+
+  return {
+    meta: {
+      count,
+    },
+    data,
+  };
 }
 
 export async function getCustomerQuery(supabase: Client, customerId: string) {

@@ -11,6 +11,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
+import Link from "next/link";
 import * as React from "react";
 
 export type Customer = {
@@ -18,10 +19,10 @@ export type Customer = {
   name: string;
   customer_name?: string;
   website: string;
-  contact_person?: string;
+  contact?: string;
   email: string;
-  invoices: number;
-  projects: number;
+  invoices: { id: string }[];
+  projects: { id: string }[];
   tags: { id: string; name: string }[];
 };
 
@@ -57,8 +58,8 @@ export const columns: ColumnDef<Customer>[] = [
   },
   {
     header: "Contact person",
-    accessorKey: "contact_person",
-    cell: ({ row }) => row.getValue("contact_person") ?? "-",
+    accessorKey: "contact",
+    cell: ({ row }) => row.getValue("contact") ?? "-",
   },
   {
     header: "Email",
@@ -68,18 +69,38 @@ export const columns: ColumnDef<Customer>[] = [
   {
     header: "Invoices",
     accessorKey: "invoices",
-    cell: ({ row }) => row.getValue("invoices") ?? "-",
+    cell: ({ row }) => {
+      if (row.original.invoices.length > 0) {
+        return (
+          <Link href={`/invoices?customers=${row.original.id}`}>
+            {row.original.invoices.length}
+          </Link>
+        );
+      }
+
+      return "-";
+    },
   },
   {
     header: "Projects",
     accessorKey: "projects",
-    cell: ({ row }) => row.getValue("projects") ?? "-",
+    cell: ({ row }) => {
+      if (row.original.projects.length > 0) {
+        return (
+          <Link href={`/tracker?customers=${row.original.id}`}>
+            {row.original.projects.length}
+          </Link>
+        );
+      }
+
+      return "-";
+    },
   },
-  {
-    header: "Tags",
-    accessorKey: "tags",
-    cell: ({ row }) => row.getValue("tags") ?? "-",
-  },
+  // {
+  //   header: "Tags",
+  //   accessorKey: "tags",
+  //   cell: ({ row }) => row.getValue("tags") ?? "-",
+  // },
   {
     id: "actions",
     header: "Actions",

@@ -1,14 +1,13 @@
-import { InvoiceSearchFilter } from "@/components/invoice-search-filter";
-import { getCustomers } from "@midday/supabase/cached-queries";
-import { OpenInvoiceSheet } from "./open-invoice-sheet";
+import { OpenCustomerSheet } from "./open-customer-sheet";
+import { SearchField } from "./search-field";
 
 export async function CustomersHeader() {
   return (
     <div className="flex items-center justify-between">
-      <InvoiceSearchFilter />
+      <SearchField placeholder="Search customers" />
 
       <div className="hidden sm:block">
-        <OpenInvoiceSheet />
+        <OpenCustomerSheet />
       </div>
     </div>
   );

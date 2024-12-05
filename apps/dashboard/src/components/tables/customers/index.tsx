@@ -22,18 +22,16 @@ export async function CustomersTable({ query, sort, start, end, page }: Props) {
     "use server";
 
     return getCustomers({
-      //   to,
-      //   from: from + 1,
-      //   searchQuery: query,
-      //   sort,
-      //   filter,
+      to,
+      from: from + 1,
+      searchQuery: query,
+      sort,
     });
   }
 
   const { data, meta } = await getCustomers({
     searchQuery: query,
     sort,
-    filter,
     to: pageSize,
   });
 
@@ -55,7 +53,7 @@ export async function CustomersTable({ query, sort, start, end, page }: Props) {
   return (
     <DataTable
       data={data}
-      //   loadMore={loadMore}
+      loadMore={loadMore}
       pageSize={pageSize}
       hasNextPage={hasNextPage}
       page={page}

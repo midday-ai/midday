@@ -24,6 +24,8 @@ export interface Customer {
   zip?: string;
   country?: string;
   vat?: string;
+  contact?: string;
+  website?: string;
 }
 
 interface CustomerDetailsProps {

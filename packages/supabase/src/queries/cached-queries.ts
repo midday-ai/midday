@@ -6,6 +6,7 @@ import { createClient } from "../client/server";
 import {
   type GetBurnRateQueryParams,
   type GetCategoriesParams,
+  type GetCustomersQueryParams,
   type GetExpensesQueryParams,
   type GetInvoiceSummaryParams,
   type GetInvoicesQueryParams,
@@ -500,7 +501,9 @@ export const getPaymentStatus = async () => {
   )();
 };
 
-export const getCustomers = async () => {
+export const getCustomers = async (
+  params?: Omit<GetCustomersQueryParams, "teamId">,
+) => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -511,14 +514,14 @@ export const getCustomers = async () => {
 
   return unstable_cache(
     async () => {
-      return getCustomersQuery(supabase, teamId);
+      return getCustomersQuery(supabase, { ...params, teamId });
     },
     ["customers", teamId],
     {
       tags: [`customers_${teamId}`],
       revalidate: 3600,
     },
-  )();
+  )(params);
 };
 
 export const getInvoices = async (

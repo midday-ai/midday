@@ -47,15 +47,11 @@ export function TableHeader() {
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
-            onClick={() => createSortQuery("status")}
+            onClick={() => createSortQuery("contact")}
           >
             <span>Contact person</span>
-            {"contact_person" === column && value === "asc" && (
-              <ArrowDown size={16} />
-            )}
-            {"contact_person" === column && value === "desc" && (
-              <ArrowUp size={16} />
-            )}
+            {"contact" === column && value === "asc" && <ArrowDown size={16} />}
+            {"contact" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
         <TableHead>
@@ -73,7 +69,7 @@ export function TableHeader() {
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
-            onClick={() => createSortQuery("customer")}
+            // onClick={() => createSortQuery("customer")}
           >
             <span>Invoices</span>
             {"invoices" === column && value === "asc" && (
@@ -86,7 +82,7 @@ export function TableHeader() {
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
-            onClick={() => createSortQuery("projects")}
+            // onClick={() => createSortQuery("projects")}
           >
             <span>Projects</span>
             {"projects" === column && value === "asc" && (
@@ -96,7 +92,7 @@ export function TableHeader() {
           </Button>
         </TableHead>
 
-        <TableHead className="hidden md:table-cell">
+        {/* <TableHead className="hidden md:table-cell">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -106,7 +102,7 @@ export function TableHeader() {
             {"tags" === column && value === "asc" && <ArrowDown size={16} />}
             {"tags" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
-        </TableHead>
+        </TableHead> */}
 
         <TableHead className="hidden md:table-cell">Actions</TableHead>
       </TableRow>

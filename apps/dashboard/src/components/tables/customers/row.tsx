@@ -20,9 +20,7 @@ export function CustomerRow({ row, setOpen }: Props) {
         {row.getVisibleCells().map((cell, index) => (
           <TableCell
             key={cell.id}
-            onClick={() =>
-              index !== row.getVisibleCells().length - 1 && setOpen(row.id)
-            }
+            onClick={() => ![3, 4, 5].includes(index) && setOpen(row.id)}
           >
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </TableCell>

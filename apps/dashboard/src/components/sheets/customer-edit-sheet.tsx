@@ -54,7 +54,11 @@ export function CustomerEditSheet() {
       }
     }
 
-    fetchCustomer();
+    if (customerId) {
+      fetchCustomer();
+    } else {
+      setCustomer(null);
+    }
   }, [customerId, supabase]);
 
   return (
