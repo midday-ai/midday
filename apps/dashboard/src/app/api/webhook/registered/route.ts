@@ -1,20 +1,16 @@
 import * as crypto from "node:crypto";
 import { env } from "@/env.mjs";
 import { logger } from "@/utils/logger";
+import { resend } from "@/utils/resend";
 import WelcomeEmail from "@midday/email/emails/welcome";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { render } from "@react-email/render";
-import { LoopsClient } from "loops";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 
 export const dynamic = "force-dynamic";
-
-const loops = new LoopsClient(env.LOOPS_API_KEY);
-const resend = new Resend(env.RESEND_API_KEY);
 
 // NOTE: This is trigger from supabase database webhook
 export async function POST(req: Request) {
@@ -74,34 +70,17 @@ export async function POST(req: Request) {
   }
 
   try {
-    const found = await loops.findContact(email);
     const [firstName, lastName] = fullName?.split(" ") ?? [];
 
-    if (found.length > 0) {
-      const userId = found?.at(0)?.id;
-
-      if (!userId) {
-        return null;
-      }
-
-      await loops.updateContact(email, {
-        userId,
-        userGroup: "registered",
-        firstName,
-        lastName,
-      });
-    } else {
-      await loops.createContact(email, {
-        userId: body.record.id,
-        userGroup: "registered",
-        firstName,
-        lastName,
-      });
-    }
+    await resend.contacts.create({
+      email,
+      firstName,
+      lastName,
+      unsubscribed: false,
+      audienceId: env.RESEND_AUDIENCE_ID,
+    });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-
-    logger(message);
+    logger(error as string);
   }
 
   return NextResponse.json({ success: true });
