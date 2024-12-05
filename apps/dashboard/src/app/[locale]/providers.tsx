@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProviderClient } from "@/locales/client";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { TriggerProvider } from "@trigger.dev/react";
-import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { ReactNode } from "react";
 
 // We need to import it here because this is the first
