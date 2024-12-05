@@ -605,6 +605,7 @@ export const createCustomerSchema = z.object({
   note: z.string().nullable().optional(),
   website: z.string().nullable().optional(),
   phone: z.string().nullable().optional(),
+  contact: z.string().nullable().optional(),
 });
 
 export const inboxUploadSchema = z.array(

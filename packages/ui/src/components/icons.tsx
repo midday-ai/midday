@@ -185,11 +185,86 @@ export const Icons = {
       />
     </svg>
   ),
-  Overview: MdBarChart,
+  Overview: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      fill="none"
+      {...props}
+    >
+      <mask
+        id="a"
+        width={24}
+        height={24}
+        x={0}
+        y={0}
+        maskUnits="userSpaceOnUse"
+      >
+        <path fill="currentColor" d="M0 0h24v24H0z" />
+      </mask>
+      <g mask="url(#a)">
+        <path
+          fill="currentColor"
+          d="M3 21v-2l2-2v4H3Zm4 0v-6l2-2v8H7Zm4 0v-8l2 2.025V21h-2Zm4 0v-5.975l2-2V21h-2Zm4 0V11l2-2v12h-2ZM3 15.825V13l7-7 4 4 7-7v2.825l-7 7-4-4-7 7Z"
+        />
+      </g>
+    </svg>
+  ),
   Apps: MdOutlineApps,
   Transactions: MdOutlineListAlt,
   Invoice: MdOutlineDescription,
-  Files: MdOutlineInventory2,
+  Vault: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={22}
+      height={22}
+      fill="none"
+      {...props}
+    >
+      <g
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        clipPath="url(#a)"
+      >
+        <path d="M18 18.75V21M6 18.75V21M20.25 4.5H3.75a.75.75 0 0 0-.75.75V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18V5.25a.75.75 0 0 0-.75-.75ZM16.875 12H21" />
+        <path d="M13.875 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+      </g>
+      <defs>
+        <clipPath id="a">
+          <path fill="currentColor" d="M0 0h24v24H0z" />
+        </clipPath>
+      </defs>
+    </svg>
+  ),
+  Customers: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={22}
+      height={22}
+      fill="none"
+      {...props}
+    >
+      <mask
+        id="a"
+        width={22}
+        height={22}
+        x={0}
+        y={0}
+        maskUnits="userSpaceOnUse"
+      >
+        <path fill="currentColor" d="M0 0h24v24H0z" />
+      </mask>
+      <g mask="url(#a)">
+        <path
+          fill="currentColor"
+          d="M1 20v-2.8c0-.567.146-1.087.438-1.563.291-.475.679-.837 1.162-1.087a14.843 14.843 0 0 1 3.15-1.163A13.76 13.76 0 0 1 9 13c1.1 0 2.183.13 3.25.387 1.067.259 2.117.646 3.15 1.163.483.25.87.612 1.162 1.087.292.476.438.996.438 1.563V20H1Zm18 0v-3c0-.733-.204-1.438-.613-2.113-.408-.675-.987-1.254-1.737-1.737a12.515 12.515 0 0 1 4.5 1.4c.6.333 1.058.704 1.375 1.112.317.409.475.855.475 1.338v3h-4ZM9 12c-1.1 0-2.042-.392-2.825-1.175C5.392 10.042 5 9.1 5 8s.392-2.042 1.175-2.825C6.958 4.392 7.9 4 9 4s2.042.392 2.825 1.175C12.608 5.958 13 6.9 13 8s-.392 2.042-1.175 2.825C11.042 11.608 10.1 12 9 12Zm10-4c0 1.1-.392 2.042-1.175 2.825C17.042 11.608 16.1 12 15 12c-.183 0-.417-.02-.7-.063a6.128 6.128 0 0 1-.7-.137 5.947 5.947 0 0 0 1.037-1.775C14.88 9.375 15 8.7 15 8s-.12-1.375-.363-2.025A5.947 5.947 0 0 0 13.6 4.2a3.04 3.04 0 0 1 .7-.163c.233-.024.467-.037.7-.037 1.1 0 2.042.392 2.825 1.175C18.608 5.958 19 6.9 19 8ZM3 18h12v-.8a.973.973 0 0 0-.5-.85c-.9-.45-1.808-.787-2.725-1.012a11.6 11.6 0 0 0-5.55 0c-.917.225-1.825.562-2.725 1.012a.973.973 0 0 0-.5.85v.8Zm6-8c.55 0 1.02-.196 1.412-.588C10.804 9.021 11 8.55 11 8c0-.55-.196-1.02-.588-1.412A1.926 1.926 0 0 0 9 6c-.55 0-1.02.196-1.412.588A1.926 1.926 0 0 0 7 8c0 .55.196 1.02.588 1.412C7.979 9.804 8.45 10 9 10Z"
+        />
+      </g>
+    </svg>
+  ),
   X: FaXTwitter,
   Discord: PiDiscordLogo,
   GithubOutline: FiGithub,

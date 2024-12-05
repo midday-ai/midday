@@ -48,6 +48,7 @@ const formSchema = z.object({
     .nullable()
     .optional()
     .transform((url) => url?.replace(/^https?:\/\//, "")),
+  contact: z.string().nullable().optional(),
   address_line_1: z.string().nullable().optional(),
   address_line_2: z.string().nullable().optional(),
   city: z.string().nullable().optional(),
@@ -110,6 +111,7 @@ export function CustomerForm({ data }: Props) {
       vat_number: undefined,
       note: undefined,
       phone: undefined,
+      contact: undefined,
     },
   });
 
@@ -231,6 +233,25 @@ export function CustomerForm({ data }: Props) {
                             <Input
                               {...field}
                               placeholder="acme.com"
+                              autoComplete="off"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="contact"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs text-[#878787] font-normal">
+                            Contact person
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="John Doe"
                               autoComplete="off"
                             />
                           </FormControl>
