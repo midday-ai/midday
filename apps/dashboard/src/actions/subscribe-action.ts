@@ -9,7 +9,7 @@ export const subscribeAction = authActionClient
   .metadata({
     name: "subscribe",
   })
-  .action(async ({ parsedInput: { email, userGroup } }) => {
+  .action(async ({ parsedInput: { email } }) => {
     return resend.contacts.create({
       email,
       audienceId: process.env.RESEND_AUDIENCE_ID!,

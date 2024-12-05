@@ -26,11 +26,7 @@ function SubmitButton() {
   );
 }
 
-type Props = {
-  group: string;
-};
-
-export function SubscribeInput({ group }: Props) {
+export function SubscribeInput() {
   const [isSubmitted, setSubmitted] = useState(false);
 
   return (
@@ -57,7 +53,7 @@ export function SubscribeInput({ group }: Props) {
           <form
             action={async (formData) => {
               setSubmitted(true);
-              await subscribeAction(formData, group);
+              await subscribeAction(formData);
 
               setTimeout(() => {
                 setSubmitted(false);

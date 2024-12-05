@@ -103,7 +103,7 @@ export function Footer() {
               </div>
 
               <div className="mb-8">
-                <SubscribeInput group="news" />
+                <SubscribeInput />
               </div>
               <div className="md:mr-0 mt-auto mr-auto">
                 <StatusWidget />
