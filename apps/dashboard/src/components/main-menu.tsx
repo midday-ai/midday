@@ -24,7 +24,8 @@ const icons = {
   "/transactions": () => <Icons.Transactions size={22} />,
   "/invoices": () => <Icons.Invoice size={22} />,
   "/tracker": () => <Icons.Tracker size={22} />,
-  "/vault": () => <Icons.Files size={22} />,
+  "/customers": () => <Icons.Customers size={22} />,
+  "/vault": () => <Icons.Vault size={22} />,
   "/settings": () => <Icons.Settings size={22} />,
   "/apps": () => <Icons.Apps size={22} />,
   "/inbox": () => <Icons.Inbox2 size={22} />,
@@ -50,6 +51,10 @@ const defaultItems = [
   {
     path: "/tracker",
     name: "Tracker",
+  },
+  {
+    path: "/customers",
+    name: "Customers",
   },
   {
     path: "/vault",
