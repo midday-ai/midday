@@ -39,11 +39,9 @@ export function DataTable({
   const [from, setFrom] = useState(pageSize);
   const { ref, inView } = useInView();
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
-  const { setParams, customerId } = useCustomerParams();
+  const { setParams } = useCustomerParams();
 
   const deleteCustomer = useAction(deleteCustomerAction);
-
-  const selectedCustomer = data.find((customer) => customer?.id === customerId);
 
   const setOpen = (id?: string) => {
     if (id) {
@@ -120,12 +118,6 @@ export function DataTable({
           </div>
         </div>
       )}
-      {/* 
-      <InvoiceDetailsSheet
-        data={selectedInvoice}
-        isOpen={type === "details" && !!invoiceId}
-        setOpen={setOpen}
-      /> */}
     </div>
   );
 }

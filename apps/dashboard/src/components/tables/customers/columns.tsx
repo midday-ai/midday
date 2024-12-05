@@ -104,7 +104,7 @@ export const columns: ColumnDef<Customer>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const { setParams } = useCustomerParams();
 
       return (
