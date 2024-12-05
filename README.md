@@ -68,13 +68,12 @@ We are working on the documentation to get started with Midday for local develop
 ### Services
 
 - Trigger.dev (background jobs)
-- Resend (email)
+- Resend (Transactional & Marketing)
 - Novu (notifications)
 - Github Actions (CI/CD)
 - GoCardLess (Bank connection EU)
 - Plaid (Bank connection in Canada and US)
 - Teller (Bank connection in the US)
-- Loops (Marketing email)
 - OpenPanel (Events and Analytics)
 - Dub (Short URLs)
 - Polar (Payment processing)

@@ -28,6 +28,7 @@
     "react-dom": "19.0.0-rc-66855b96-20241106",
     "react-hls-player": "^3.0.7",
     "react-use-draggable-scroll": "^0.4.7",
+    "resend": "^4.0.1",
     "server-only": "^0.0.1",
     "sharp": "^0.33.5",
     "sugar-high": "^0.7.5"

@@ -31,7 +31,7 @@ export default function Page() {
         </p>
       </div>
 
-      <SubscribeInput group="engine" />
+      <SubscribeInput />
 
       <div className="text-center flex flex-col items-center mt-[140px]">
         <h3 className="mb-4 text-2xl font-medium">

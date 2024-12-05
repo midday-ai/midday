@@ -1,5 +1,6 @@
 "use server";
 
+import { resend } from "@/utils/resend";
 import { authActionClient } from "./safe-action";
 import { subscribeSchema } from "./schema";
 
@@ -8,20 +9,9 @@ export const subscribeAction = authActionClient
   .metadata({
     name: "subscribe",
   })
-  .action(async ({ parsedInput: { email, userGroup } }) => {
-    const res = await fetch(
-      "https://app.loops.so/api/newsletter-form/clna1p09j00d3l60og56gj3u1",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          userGroup,
-        }),
-      },
-    );
-
-    return res.json();
+  .action(async ({ parsedInput: { email } }) => {
+    return resend.contacts.create({
+      email,
+      audienceId: process.env.RESEND_AUDIENCE_ID!,
+    });
   });
