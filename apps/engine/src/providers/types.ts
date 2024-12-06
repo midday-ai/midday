@@ -1,6 +1,6 @@
 import type { AccountType } from "@/utils/account";
 
-export type Providers = "teller" | "plaid" | "gocardless";
+export type Providers = "teller" | "plaid" | "gocardless" | "pluggy";
 
 export type ProviderParams = {
   provider: Providers;
@@ -12,6 +12,8 @@ export type ProviderParams = {
     PLAID_CLIENT_ID: string;
     PLAID_SECRET: string;
     PLAID_ENVIRONMENT: string;
+    PLUGGY_CLIENT_ID: string;
+    PLUGGY_SECRET: string;
   };
 };
 

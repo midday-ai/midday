@@ -14,6 +14,7 @@
     "@hono/zod-validator": "^0.4.1",
     "hono": "^4.6.13",
     "plaid": "^30.0.0",
+    "pluggy-sdk": "^0.64.0",
     "typesense": "^1.8.2",
     "workers-ai-provider": "^0.0.10",
     "xior": "^0.6.1",
