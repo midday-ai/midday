@@ -126,7 +126,9 @@ export class GoCardLessApi {
       );
 
       const foundInterimAvailable = balances?.find(
-        (account) => account.balanceType === "interimAvailable",
+        (account) =>
+          account.balanceType === "interimAvailable" ||
+          account.balanceType === "interimBooked",
       );
 
       // For some accounts, the interimAvailable balance is 0, so we need to use the expected balance
