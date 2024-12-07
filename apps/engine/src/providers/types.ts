@@ -67,7 +67,7 @@ export type GetTransactionsRequest = {
 };
 
 export type GetAccountsRequest = {
-  id?: string; // GoCardLess
+  id?: string; // GoCardLess & Pluggy
   accessToken?: string; // Teller & Plaid
   institutionId?: string; // Plaid
 };

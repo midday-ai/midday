@@ -7,8 +7,10 @@ export type AccountType =
 
 export function getType(type: string): AccountType {
   switch (type) {
+    case "BANK":
     case "depository":
       return "depository";
+    case "CREDIT":
     case "credit":
       return "credit";
     default:

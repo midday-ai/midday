@@ -10,12 +10,7 @@ import type {
   ProviderParams,
 } from "../types";
 import { PluggyApi } from "./pluggy-api";
-import {
-  transformAccount,
-  transformAccountBalance,
-  transformInstitution,
-  transformTransaction,
-} from "./transform";
+import { transformAccount, transformTransaction } from "./transform";
 
 export class PluggyProvider implements Provider {
   #api: PluggyApi;
@@ -24,62 +19,46 @@ export class PluggyProvider implements Provider {
     this.#api = new PluggyApi(params);
   }
 
-  //   async getTransactions({
-  //     accessToken,
-  //     accountId,
-  //     accountType,
-  //     latest,
-  //   }: GetTransactionsRequest) {
-  //     if (!accessToken || !accountId) {
-  //       throw Error("accessToken or accountId is missing");
-  //     }
+  async getTransactions({ accountId, latest }: GetTransactionsRequest) {
+    if (!accountId) {
+      throw Error("accountId is missing");
+    }
 
-  //     const response = await this.#api.getTransactions({
-  //       accessToken,
-  //       accountId,
-  //       latest,
-  //     });
+    const response = await this.#api.getTransactions({
+      accountId,
+      latest,
+    });
 
-  //     return (response ?? []).map((transaction) =>
-  //       transformTransaction({
-  //         transaction,
-  //         accountType,
-  //       }),
-  //     );
-  //   }
+    return (response ?? []).map(transformTransaction);
+  }
 
-  //   async getHealthCheck() {
-  //     return this.#api.getHealthCheck();
-  //   }
+  async getHealthCheck() {
+    return this.#api.getHealthCheck();
+  }
 
-  //   async getAccounts({ accessToken, institutionId }: GetAccountsRequest) {
-  //     if (!accessToken || !institutionId) {
-  //       throw Error("accessToken or institutionId is missing");
-  //     }
+  async getAccounts({ id }: GetAccountsRequest) {
+    if (!id) {
+      throw Error("id is missing");
+    }
 
-  //     const response = await this.#api.getAccounts({
-  //       accessToken,
-  //       institutionId,
-  //     });
+    const response = await this.#api.getAccounts(id);
 
-  //     return (response ?? []).map(transformAccount);
-  //   }
+    return (response ?? []).map(transformAccount);
+  }
 
-  //   async getAccountBalance({
-  //     accessToken,
-  //     accountId,
-  //   }: GetAccountBalanceRequest) {
-  //     if (!accessToken || !accountId) {
-  //       throw Error("Missing params");
-  //     }
+  async getAccountBalance({ accountId }: GetAccountBalanceRequest) {
+    if (!accountId) {
+      throw Error("Missing params");
+    }
 
-  //     const response = await this.#api.getAccountBalance({
-  //       accessToken,
-  //       accountId,
-  //     });
+    const response = await this.#api.getAccountBalance(accountId);
 
-  //     return transformAccountBalance(response);
-  //   }
+    if (!response) {
+      throw Error("Account not found");
+    }
+
+    return response;
+  }
 
   //   async getInstitutions({ countryCode }: GetInstitutionsRequest) {
   //     const response = await this.#api.getInstitutions({

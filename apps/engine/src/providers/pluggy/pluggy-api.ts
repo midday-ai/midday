@@ -1,6 +1,10 @@
 import { PluggyClient } from "pluggy-sdk";
-import type { ProviderParams } from "../types";
-import type { GetTransactionsParams } from "./types";
+import type {
+  GetAccountBalanceResponse,
+  GetConnectionStatusRequest,
+  ProviderParams,
+} from "../types";
+import type { GetStatusResponse, GetTransactionsParams } from "./types";
 
 export class PluggyApi {
   #client: PluggyClient;
@@ -26,35 +30,57 @@ export class PluggyApi {
   }
 
   async getAccounts(id: string) {
-    return this.#client.fetchAccounts(id);
+    const response = await this.#client.fetchAccounts(id);
+
+    return response.results;
   }
 
   async getTransactions({ accountId, latest }: GetTransactionsParams) {
     if (latest) {
-      return this.#client.fetchTransactions(accountId);
+      const response = await this.#client.fetchTransactions(accountId);
+
+      return response.results;
     }
 
-    return this.#client.fetchAllTransactions(accountId);
+    const response = await this.#client.fetchAllTransactions(accountId);
+
+    return response;
   }
 
   async getHealthCheck() {
-    // https://status.pluggy.ai/api/v2/status.json
-    // return this.#client.healthCheck();
+    try {
+      const response = await fetch(
+        "https://status.pluggy.ai/api/v2/status.json",
+      );
+
+      const data = (await response.json()) as GetStatusResponse;
+
+      return (
+        data.status.indicator === "none" ||
+        data.status.indicator === "maintenance"
+      );
+    } catch {
+      return false;
+    }
   }
 
-  async getAccountBalance({
-    accessToken,
-    accountId,
-  }: GetAccountBalanceRequest): Promise<
-    GetAccountBalanceResponse | undefined
-  > {}
+  async getAccountBalance(
+    accountId: string,
+  ): Promise<GetAccountBalanceResponse | undefined> {
+    const response = await this.#client.fetchAccount(accountId);
+
+    return {
+      currency: response.currencyCode,
+      amount: response.balance,
+    };
+  }
 
   async getInstitutions() {
     return this.#client.fetchConnectors();
   }
 
-  async getInstitutionById(id: string) {
-    return this.#client.fetchConnectorById(id);
+  async getInstitutionById(id: number) {
+    return this.#client.fetchConnector(id);
   }
 
   async getConnectionStatus({ id }: GetConnectionStatusRequest) {
