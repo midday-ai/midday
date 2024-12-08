@@ -20,11 +20,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { Input } from "@midday/ui/input";
+import { Label } from "@midday/ui/label";
 import { Loader2 } from "lucide-react";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 
 export function DeleteAccount() {
   const [isPending, startTransition] = useTransition();
+  const [value, setValue] = useState("");
 
   return (
     <Card className="border-destructive">
@@ -56,10 +59,23 @@ export function DeleteAccount() {
                 account and remove your data from our servers.
               </AlertDialogDescription>
             </AlertDialogHeader>
+
+            <div className="flex flex-col gap-2 mt-2">
+              <Label htmlFor="confirm-delete">
+                Type <span className="font-medium">DELETE</span> to confirm.
+              </Label>
+              <Input
+                id="confirm-delete"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+              />
+            </div>
+
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => startTransition(() => deleteUserAction())}
+                disabled={value !== "DELETE"}
               >
                 {isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
