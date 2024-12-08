@@ -65,11 +65,8 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
           - fees: For service charges, professional fees, and administrative costs
 
           Analyze the following transaction and categorize it appropriately.
-          
-          Transactions:
-          ${JSON.stringify(data)}
 
-          And return your response as a JSON array of objects containing the following fields:
+            And return your response as a JSON array of objects containing the following fields:
           - id: The id of the transaction, always return the passed id
           - category: The category of the transaction
           - company: The company name
@@ -86,6 +83,9 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
               "subscription": true
             }
           ]
+          
+          Transactions:
+          ${JSON.stringify(data)}
           `,
         schema: z.array(
           z.object({
