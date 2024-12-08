@@ -11,6 +11,7 @@ import {
 import accountRoutes from "./routes/accounts";
 import authRoutes from "./routes/auth";
 import connectionRoutes from "./routes/connections";
+import enrichRoutes from "./routes/enrich";
 import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
 import ratesRoutes from "./routes/rates";
@@ -58,7 +59,8 @@ const appRoutes = app
   .route("/rates", ratesRoutes)
   .route("/auth", authRoutes)
   .route("/connections", connectionRoutes)
-  .route("/health", healthRoutes);
+  .route("/health", healthRoutes)
+  .route("/enrich", enrichRoutes);
 
 export type AppType = typeof appRoutes;
 
