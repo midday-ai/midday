@@ -85,15 +85,10 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
           ]
           
           Transactions:
-          ${JSON.stringify(data)}
+          ${JSON.stringify(data.map(({ id, ...rest }) => rest))}
           `,
         schema: z.array(
           z.object({
-            id: z
-              .string()
-              .describe(
-                "The id of the transaction, always return the passed id",
-              ),
             category: z
               .enum([
                 "travel",
@@ -115,7 +110,9 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
             website: z
               .string()
               .url()
-              .describe("The website of the company")
+              .describe(
+                "The website of the company, only root domains without protocol",
+              )
               .nullable(),
             subscription: z
               .boolean()
@@ -129,7 +126,10 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
 
       return c.json(
         {
-          data: result.object,
+          data: result.object.map((result, i) => ({
+            id: data[i].id,
+            ...result,
+          })),
         },
         200,
       );
