@@ -1,6 +1,9 @@
-compatibility_date = "2024-11-06"
+compatibility_date = "2024-11-11"
 workers_dev = false
 logpush = true
+
+[ai]
+binding = "AI"
 
 [observability]
 enabled = true
@@ -20,9 +23,6 @@ mtls_certificates = [
 r2_buckets = [
   { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "", jurisdiction = "eu" }
 ]
-
-[ai]
-binding = "AI"
 
 [env.staging]
 name = "engine-staging"

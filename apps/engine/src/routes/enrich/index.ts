@@ -43,7 +43,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
   async (c) => {
     try {
       // @ts-ignore
-      const workersai = createWorkersAI({ binding: env.AI });
+      const workersai = createWorkersAI({ binding: c.env.AI });
       const result = await generateObject({
         // @ts-ignore
         model: workersai("@cf/meta/llama-2-70b-chat"),
