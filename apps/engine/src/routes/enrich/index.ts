@@ -3,8 +3,8 @@ import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { generateObject } from "ai";
 import type { Bindings } from "hono/types";
 import { createWorkersAI } from "workers-ai-provider";
-import { z } from "zod";
-import { EnrichBodySchema, EnrichSchema } from "./schema";
+import { prompt } from "./prompt";
+import { EnrichBodySchema, EnrichSchema, OutputSchema } from "./schema";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
   createRoute({
@@ -43,86 +43,17 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
     const { data } = c.req.valid("json");
 
     try {
-      // @ts-ignore
       const workersai = createWorkersAI({ binding: c.env.AI });
       const result = await generateObject({
         mode: "json",
-        // @ts-ignore
         model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
-        maxTokens: 32768,
         temperature: 0,
-        prompt: `You are a financial transaction categorization specialist. Your task is to analyze transaction descriptions and assign them to the most appropriate category from the following list. Consider the context, merchant type, transaction patterns, and the transaction currency to understand the country context when making your decision.
-          Categories:
-          - travel: For transportation, accommodation, and travel-related expenses
-          - office_supplies: For stationery, printing materials, and general office consumables
-          - meals: For food, dining, and restaurant expenses
-          - software: For digital tools, subscriptions, and software licenses
-          - rent: For property rental and lease payments
-          - equipment: For hardware, machinery, and durable business assets
-          - internet_and_telephone: For connectivity and communication services
-          - facilities_expenses: For utilities, maintenance, and building-related costs
-          - activity: For events, entertainment, and business activities
-          - taxes: For government levies and tax payments
-          - fees: For service charges, professional fees, and administrative costs
-
-          Analyze the following transaction and categorize it appropriately. Use the currency to help identify the country context - for example, SEK indicates Sweden, USD indicates United States, etc.
-
-            And return your response as a JSON array of objects containing the following fields:
-          - category: The category of the transaction, if none of the categories match, return null
-          - company: The company name
-          - website: The website of the company
-          - subscription: Whether the transaction is a recurring subscription payment
-
-          Never return anything other than the valid JSON format.
-
-          Example response:
-          [
-            {
-              "id": "123",
-              "category": "software",
-              "company": "Slack Technologies",
-              "website": "https://slack.com",
-              "subscription": true
-            }
-          ]
-          
-          Transactions:
-          ${JSON.stringify(data.map(({ id, ...rest }) => rest))}
-          `,
-        schema: z.array(
-          z.object({
-            category: z
-              .enum([
-                "travel",
-                "office_supplies",
-                "meals",
-                "software",
-                "rent",
-                "equipment",
-                "transfer",
-                "internet_and_telephone",
-                "facilities_expenses",
-                "activity",
-                "taxes",
-                "fees",
-              ])
-              .describe("The category of the transaction")
-              .nullable(),
-            company: z.string().describe("The company name").nullable(),
-            website: z
-              .string()
-              .describe(
-                "The website of the company, only root domains without protocol",
-              )
-              .nullable(),
-            subscription: z
-              .boolean()
-              .describe(
-                "Whether the transaction is a recurring subscription payment",
-              )
-              .default(false),
-          }),
-        ),
+        prompt,
+        messages: data.map(({ id, ...rest }) => ({
+          role: "user",
+          content: JSON.stringify(rest),
+        })),
+        schema: OutputSchema,
       });
 
       return c.json(
