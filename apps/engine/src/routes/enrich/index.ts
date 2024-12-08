@@ -68,7 +68,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
 
             And return your response as a JSON array of objects containing the following fields:
           - id: The id of the transaction, always return the passed id
-          - category: The category of the transaction
+          - category: The category of the transaction, if none of the categories match, return null
           - company: The company name
           - website: The website of the company
           - subscription: Whether the transaction is a recurring subscription payment
