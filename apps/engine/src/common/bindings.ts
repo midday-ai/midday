@@ -2,7 +2,6 @@ export type Bindings = {
   KV: KVNamespace;
   STORAGE: R2Bucket;
   TELLER_CERT: Fetcher;
-  AI: Ai;
   API_SECRET_KEY: string;
   GOCARDLESS_SECRET_ID: string;
   GOCARDLESS_SECRET_KEY: string;

@@ -41,60 +41,70 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
   }),
   async (c) => {
     try {
-      // @ts-ignore
-      console.log(c.env.AI);
-      // @ts-ignore
-      const workersai = createWorkersAI({ binding: c.env.AI });
-      const result = await generateObject({
-        model: workersai("@cf/meta/llama-2-7b-chat-int8"),
-        prompt: `You are a financial transaction categorization specialist. Your task is to analyze transaction descriptions and assign them to the most appropriate category from the following list. Consider the context, merchant type, and transaction patterns when making your decision.
-        Categories:
-        - travel: For transportation, accommodation, and travel-related expenses
-        - office_supplies: For stationery, printing materials, and general office consumables
-        - meals: For food, dining, and restaurant expenses
-        - software: For digital tools, subscriptions, and software licenses
-        - rent: For property rental and lease payments
-        - equipment: For hardware, machinery, and durable business assets
-        - transfer: For fund movements between accounts
-        - internet_and_telephone: For connectivity and communication services
-        - facilities_expenses: For utilities, maintenance, and building-related costs
-        - activity: For events, entertainment, and business activities
-        - taxes: For government levies and tax payments
-        - fees: For service charges, professional fees, and administrative costs
+      //   // @ts-ignore
+      //   console.log(c.env.AI);
+      //   // @ts-ignore
+      //   const workersai = createWorkersAI({ binding: c.env.AI });
+      //   const result = await generateObject({
+      //     model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+      //     prompt: `You are a financial transaction categorization specialist. Your task is to analyze transaction descriptions and assign them to the most appropriate category from the following list. Consider the context, merchant type, and transaction patterns when making your decision.
+      //     Categories:
+      //     - travel: For transportation, accommodation, and travel-related expenses
+      //     - office_supplies: For stationery, printing materials, and general office consumables
+      //     - meals: For food, dining, and restaurant expenses
+      //     - software: For digital tools, subscriptions, and software licenses
+      //     - rent: For property rental and lease payments
+      //     - equipment: For hardware, machinery, and durable business assets
+      //     - transfer: For fund movements between accounts
+      //     - internet_and_telephone: For connectivity and communication services
+      //     - facilities_expenses: For utilities, maintenance, and building-related costs
+      //     - activity: For events, entertainment, and business activities
+      //     - taxes: For government levies and tax payments
+      //     - fees: For service charges, professional fees, and administrative costs
 
-        Analyze the following transaction and categorize it appropriately.`,
-        schema: z.array(
-          z.object({
-            category: z
-              .enum([
-                "travel",
-                "office_supplies",
-                "meals",
-                "software",
-                "rent",
-                "equipment",
-                "transfer",
-                "internet_and_telephone",
-                "facilities_expenses",
-                "activity",
-                "taxes",
-                "fees",
-              ])
-              .describe("The category of the transaction"),
-            company: z.string().describe("The company name"),
-            website: z.string().url().describe("The website of the company"),
-            subscription: z
-              .boolean()
-              .describe(
-                "Whether the transaction is a recurring subscription payment",
-              ),
-          }),
-        ),
-      });
+      //     Analyze the following transaction and categorize it appropriately.`,
+      //     schema: z.array(
+      //       z.object({
+      //         category: z
+      //           .enum([
+      //             "travel",
+      //             "office_supplies",
+      //             "meals",
+      //             "software",
+      //             "rent",
+      //             "equipment",
+      //             "transfer",
+      //             "internet_and_telephone",
+      //             "facilities_expenses",
+      //             "activity",
+      //             "taxes",
+      //             "fees",
+      //           ])
+      //           .describe("The category of the transaction"),
+      //         company: z.string().describe("The company name"),
+      //         website: z.string().url().describe("The website of the company"),
+      //         subscription: z
+      //           .boolean()
+      //           .describe(
+      //             "Whether the transaction is a recurring subscription payment",
+      //           ),
+      //       }),
+      //     ),
+      //   });
+
+      // @ts-ignore
+      const response = await c.env.AI.run(
+        "@cf/meta/llama-3.1-8b-instruct-fast",
+        {
+          prompt: "What is the origin of the phrase Hello, World",
+        },
+      );
+
+      console.log(response);
 
       return c.json(
         {
-          data: result.object,
+          data: [],
         },
         200,
       );
