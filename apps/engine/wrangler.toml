@@ -21,6 +21,9 @@ r2_buckets = [
   { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "", jurisdiction = "eu" }
 ]
 
+[ai]
+binding = "AI"
+
 [env.staging]
 name = "engine-staging"
 route = { pattern = "engine-staging.midday.ai/*", zone_name = "midday.ai" }
