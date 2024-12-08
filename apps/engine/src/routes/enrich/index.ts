@@ -109,7 +109,6 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
             company: z.string().describe("The company name").nullable(),
             website: z
               .string()
-              .url()
               .describe(
                 "The website of the company, only root domains without protocol",
               )
