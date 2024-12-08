@@ -4,7 +4,12 @@ import type {
   GetConnectionStatusRequest,
   ProviderParams,
 } from "../types";
-import type { GetStatusResponse, GetTransactionsParams } from "./types";
+import type {
+  GetAccountsRequest,
+  GetInstitutionsRequest,
+  GetStatusResponse,
+  GetTransactionsParams,
+} from "./types";
 
 export class PluggyApi {
   #client: PluggyClient;
@@ -29,10 +34,15 @@ export class PluggyApi {
     return "https://app.midday.ai/api/webhook/pluggy";
   }
 
-  async getAccounts(id: string) {
+  async getAccounts({ id, institutionId }: GetAccountsRequest) {
     const response = await this.#client.fetchAccounts(id);
 
-    return response.results;
+    const institution = await this.getInstitutionById(Number(institutionId));
+
+    return response.results.map((account) => ({
+      ...account,
+      institution,
+    }));
   }
 
   async getTransactions({ accountId, latest }: GetTransactionsParams) {
@@ -75,8 +85,12 @@ export class PluggyApi {
     };
   }
 
-  async getInstitutions() {
-    return this.#client.fetchConnectors();
+  async getInstitutions({ countries }: GetInstitutionsRequest) {
+    const response = await this.#client.fetchConnectors({
+      countries,
+    });
+
+    return response.results;
   }
 
   async getInstitutionById(id: number) {

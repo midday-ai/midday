@@ -16,3 +16,12 @@ export type GetStatusResponse = {
     description: string;
   };
 };
+
+export type GetInstitutionsRequest = {
+  countries: string[];
+};
+
+export type GetAccountsRequest = {
+  id: string;
+  institutionId: string;
+};

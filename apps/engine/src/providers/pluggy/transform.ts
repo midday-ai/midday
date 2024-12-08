@@ -1,6 +1,8 @@
+import { Providers } from "@/common/schema";
 import { getType } from "@/utils/account";
+import { getLogoURL } from "@/utils/logo";
 import { capitalCase } from "change-case";
-import type { Account, AccountType, Transaction } from "pluggy-sdk";
+import type { Account, Connector, Transaction } from "pluggy-sdk";
 import type {
   Account as BaseAccount,
   Balance as BaseBalance,
@@ -26,17 +28,19 @@ export const transformTransaction = (
   };
 };
 
-export const transformAccount = (account: Account): BaseAccount => {
+export const transformAccount = (
+  account: Account & { institution: Connector },
+): BaseAccount => {
   return {
     id: account.id,
     name: account.name,
     currency: account.currencyCode,
     type: getType(account.type),
     institution: {
-      id: "",
-      name: "",
-      logo: "",
-      provider: "pluggy",
+      id: account.institution.id.toString(),
+      name: account.institution.name,
+      logo: account.institution.imageUrl,
+      provider: Providers.Enum.pluggy,
     },
     enrollment_id: null,
     balance: {
@@ -45,3 +49,15 @@ export const transformAccount = (account: Account): BaseAccount => {
     },
   };
 };
+
+export const transformInstitution = (institution: Connector) => ({
+  id: institution.id.toString(),
+  name: institution.name,
+  logo: getLogoURL(institution.id.toString()),
+  provider: Providers.Enum.pluggy,
+});
+
+export const transformBalance = (account: Account): BaseBalance => ({
+  currency: account.currencyCode,
+  amount: account.balance,
+});
