@@ -2,7 +2,7 @@ compatibility_date = "2024-11-11"
 workers_dev = false
 logpush = true
 
-[[ai]]
+[ai]
 binding = "AI"
 
 [observability]
