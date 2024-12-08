@@ -24,9 +24,16 @@ export const EnrichSchema = z
   .object({
     data: z.array(
       z.object({
-        category: z.string().openapi("The category of the transaction"),
-        company: z.string().openapi("The company name"),
-        website: z.string().url().openapi("The website of the company"),
+        category: z
+          .string()
+          .openapi("The category of the transaction")
+          .nullable(),
+        company: z.string().openapi("The company name").nullable(),
+        website: z
+          .string()
+          .url()
+          .openapi("The website of the company")
+          .nullable(),
         subscription: z
           .boolean()
           .openapi(
