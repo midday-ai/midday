@@ -20,7 +20,7 @@ export const transformTransaction = (
     status: transaction.status === "POSTED" ? "posted" : "pending",
     balance: transaction.balance,
     category: transaction.category,
-    method: transaction.type,
+    // method: transaction.type,
     description: null,
     currency_rate: null,
     currency_source: null,
