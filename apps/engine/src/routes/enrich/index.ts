@@ -49,7 +49,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
         mode: "json",
         // @ts-ignore
         model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
-        maxTokens: 8192,
+        maxTokens: 32768,
         temperature: 0,
         prompt: `You are a financial transaction categorization specialist. Your task is to analyze transaction descriptions and assign them to the most appropriate category from the following list. Consider the context, merchant type, transaction patterns, and the transaction currency to understand the country context when making your decision.
           Categories:
