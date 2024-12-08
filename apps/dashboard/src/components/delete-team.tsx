@@ -20,15 +20,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { Input } from "@midday/ui/input";
+import { Label } from "@midday/ui/label";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface DeleteTeamProps {
   teamId: string;
 }
 
 export function DeleteTeam({ teamId }: DeleteTeamProps) {
+  const [value, setValue] = useState("");
+
   const router = useRouter();
   const deleteTeam = useAction(deleteTeamAction, {
     onSuccess: () => router.push("/teams"),
@@ -64,9 +69,24 @@ export function DeleteTeam({ teamId }: DeleteTeamProps) {
                 team and remove your data from our servers.
               </AlertDialogDescription>
             </AlertDialogHeader>
+
+            <div className="flex flex-col gap-2 mt-2">
+              <Label htmlFor="confirm-delete">
+                Type <span className="font-medium">DELETE</span> to confirm.
+              </Label>
+              <Input
+                id="confirm-delete"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+              />
+            </div>
+
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => deleteTeam.execute({ teamId })}>
+              <AlertDialogAction
+                onClick={() => deleteTeam.execute({ teamId })}
+                disabled={value !== "DELETE"}
+              >
                 {deleteTeam.status === "executing" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
