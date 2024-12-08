@@ -46,9 +46,10 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
       // @ts-ignore
       const workersai = createWorkersAI({ binding: c.env.AI });
       const result = await generateObject({
-        mode: "json",
+        mode: "auto",
         // @ts-ignore
         model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+        temperature: 0,
         prompt: `You are a financial transaction categorization specialist. Your task is to analyze transaction descriptions and assign them to the most appropriate category from the following list. Consider the context, merchant type, and transaction patterns when making your decision.
           Categories:
           - travel: For transportation, accommodation, and travel-related expenses
@@ -57,7 +58,6 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
           - software: For digital tools, subscriptions, and software licenses
           - rent: For property rental and lease payments
           - equipment: For hardware, machinery, and durable business assets
-          - transfer: For fund movements between accounts
           - internet_and_telephone: For connectivity and communication services
           - facilities_expenses: For utilities, maintenance, and building-related costs
           - activity: For events, entertainment, and business activities
@@ -109,14 +109,20 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
                 "taxes",
                 "fees",
               ])
-              .describe("The category of the transaction"),
-            company: z.string().describe("The company name"),
-            website: z.string().url().describe("The website of the company"),
+              .describe("The category of the transaction")
+              .nullable(),
+            company: z.string().describe("The company name").nullable(),
+            website: z
+              .string()
+              .url()
+              .describe("The website of the company")
+              .nullable(),
             subscription: z
               .boolean()
               .describe(
                 "Whether the transaction is a recurring subscription payment",
-              ),
+              )
+              .default(false),
           }),
         ),
       });
