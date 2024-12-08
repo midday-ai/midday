@@ -69,12 +69,23 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
           Transactions:
           ${JSON.stringify(data)}
 
-          And return your response as a JSON object containing the following fields:
+          And return your response as a JSON array of objects containing the following fields:
           - id: The id of the transaction, always return the passed id
           - category: The category of the transaction
           - company: The company name
           - website: The website of the company
           - subscription: Whether the transaction is a recurring subscription payment
+
+          Example response:
+          [
+            {
+              "id": "123",
+              "category": "software",
+              "company": "Slack Technologies",
+              "website": "https://slack.com",
+              "subscription": true
+            }
+          ]
           `,
         schema: z.array(
           z.object({
