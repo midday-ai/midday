@@ -1,7 +1,6 @@
 import { GeneralErrorSchema } from "@/common/schema";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { generateObject } from "ai";
-import { env } from "hono/adapter";
 import type { Bindings } from "hono/types";
 import { createWorkersAI } from "workers-ai-provider";
 import { z } from "zod";
@@ -47,8 +46,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
       // @ts-ignore
       const workersai = createWorkersAI({ binding: c.env.AI });
       const result = await generateObject({
-        // @ts-ignore
-        model: workersai("@cf/meta/llama-2-70b-chat"),
+        model: workersai("@cf/meta/llama-2-7b-chat-int8"),
         prompt: `You are a financial transaction categorization specialist. Your task is to analyze transaction descriptions and assign them to the most appropriate category from the following list. Consider the context, merchant type, and transaction patterns when making your decision.
         Categories:
         - travel: For transportation, accommodation, and travel-related expenses
