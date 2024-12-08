@@ -43,6 +43,8 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
   async (c) => {
     try {
       // @ts-ignore
+      console.log(c.env.AI);
+      // @ts-ignore
       const workersai = createWorkersAI({ binding: c.env.AI });
       const result = await generateObject({
         // @ts-ignore
@@ -99,6 +101,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
         200,
       );
     } catch (error) {
+      console.log(error);
       return c.json(
         {
           error: "Internal server error",
