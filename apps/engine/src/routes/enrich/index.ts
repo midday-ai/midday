@@ -46,7 +46,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
       // @ts-ignore
       const workersai = createWorkersAI({ binding: c.env.AI });
       const result = await generateObject({
-        mode: "auto",
+        mode: "json",
         // @ts-ignore
         model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
         temperature: 0,
@@ -72,6 +72,8 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
           - company: The company name
           - website: The website of the company
           - subscription: Whether the transaction is a recurring subscription payment
+
+          Never return anything other than the valid JSON format.
 
           Example response:
           [
