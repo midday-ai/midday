@@ -43,9 +43,11 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
     const { data } = c.req.valid("json");
 
     try {
+      // @ts-ignore
       const workersai = createWorkersAI({ binding: c.env.AI });
       const result = await generateObject({
         mode: "json",
+        // @ts-ignore
         model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
         temperature: 0,
         prompt,
