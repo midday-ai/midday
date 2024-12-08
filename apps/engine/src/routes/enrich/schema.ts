@@ -15,6 +15,8 @@ export const EnrichBodySchema = z.object({
           .openapi("The category of the transaction"),
       }),
     )
+    .min(1)
+    .max(5000)
     .openapi("The transactions to enrich"),
 });
 

@@ -42,8 +42,10 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
   }),
   async (c) => {
     try {
+      // @ts-ignore
       const workersai = createWorkersAI({ binding: env.AI });
       const result = await generateObject({
+        // @ts-ignore
         model: workersai("@cf/meta/llama-2-70b-chat"),
         prompt: `You are a financial transaction categorization specialist. Your task is to analyze transaction descriptions and assign them to the most appropriate category from the following list. Consider the context, merchant type, and transaction patterns when making your decision.
         Categories:
