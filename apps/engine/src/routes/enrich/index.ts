@@ -49,8 +49,9 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
         mode: "json",
         // @ts-ignore
         model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+        maxTokens: 8192,
         temperature: 0,
-        prompt: `You are a financial transaction categorization specialist. Your task is to analyze transaction descriptions and assign them to the most appropriate category from the following list. Consider the context, merchant type, and transaction patterns when making your decision.
+        prompt: `You are a financial transaction categorization specialist. Your task is to analyze transaction descriptions and assign them to the most appropriate category from the following list. Consider the context, merchant type, transaction patterns, and the transaction currency to understand the country context when making your decision.
           Categories:
           - travel: For transportation, accommodation, and travel-related expenses
           - office_supplies: For stationery, printing materials, and general office consumables
@@ -64,10 +65,9 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
           - taxes: For government levies and tax payments
           - fees: For service charges, professional fees, and administrative costs
 
-          Analyze the following transaction and categorize it appropriately.
+          Analyze the following transaction and categorize it appropriately. Use the currency to help identify the country context - for example, SEK indicates Sweden, USD indicates United States, etc.
 
             And return your response as a JSON array of objects containing the following fields:
-          - id: The id of the transaction, always return the passed id
           - category: The category of the transaction, if none of the categories match, return null
           - company: The company name
           - website: The website of the company
