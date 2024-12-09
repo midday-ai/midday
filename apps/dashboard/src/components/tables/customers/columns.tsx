@@ -107,9 +107,11 @@ export const columns: ColumnDef<Customer>[] = [
           <ScrollArea className="max-w-[170px] whitespace-nowrap">
             <div className="flex items-center space-x-2">
               {row.original.tags?.map(({ tag }) => (
-                <Badge key={tag.id} variant="tag" className="whitespace-nowrap">
-                  {tag.name}
-                </Badge>
+                <Link href={`/transactions?tags=${tag.id}`} key={tag.id}>
+                  <Badge variant="tag" className="whitespace-nowrap">
+                    {tag.name}
+                  </Badge>
+                </Link>
               ))}
             </div>
 
