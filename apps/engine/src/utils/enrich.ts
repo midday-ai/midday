@@ -8,6 +8,7 @@ import {
 } from "ai";
 import type { Context } from "hono";
 import { createWorkersAI } from "workers-ai-provider";
+import { prompt } from "./prompt";
 
 export function createCacheMiddleware(c: Context<{ Bindings: Bindings }>) {
   return {
@@ -24,9 +25,6 @@ export function createCacheMiddleware(c: Context<{ Bindings: Bindings }>) {
           ...cached,
           response: {
             ...cached.response,
-            timestamp: cached?.response?.timestamp
-              ? new Date(cached?.response?.timestamp)
-              : undefined,
             source: "cached",
           },
         };
