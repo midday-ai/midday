@@ -58,14 +58,23 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
           },
           {
             role: "user",
-            content: data
-              .map(({ id, ...rest }) => JSON.stringify(rest))
-              .join(","),
+            content: JSON.stringify(data.map(({ id, ...rest }) => rest)),
           },
         ],
         schema: OutputSchema,
       });
 
+      console.log(result.object);
+      console.log([
+        {
+          role: "system",
+          content: prompt,
+        },
+        {
+          role: "user",
+          content: JSON.stringify(data.map(({ id, ...rest }) => rest)),
+        },
+      ]);
       return c.json(
         {
           data: result.object.map((result, i) => ({

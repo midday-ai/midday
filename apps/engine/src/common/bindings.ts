@@ -1,5 +1,6 @@
 export type Bindings = {
   KV: KVNamespace;
+  ENRICH_KV: KVNamespace;
   STORAGE: R2Bucket;
   TELLER_CERT: Fetcher;
   AI: Ai;
