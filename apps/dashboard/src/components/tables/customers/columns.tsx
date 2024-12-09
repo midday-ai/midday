@@ -2,6 +2,7 @@
 
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
+import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -9,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import { ScrollArea, ScrollBar } from "@midday/ui/scroll-area";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
@@ -23,7 +25,7 @@ export type Customer = {
   email: string;
   invoices: { id: string }[];
   projects: { id: string }[];
-  tags: { id: string; name: string }[];
+  tags: { tag: { id: string; name: string } }[];
 };
 
 export const columns: ColumnDef<Customer>[] = [
@@ -96,11 +98,29 @@ export const columns: ColumnDef<Customer>[] = [
       return "-";
     },
   },
-  // {
-  //   header: "Tags",
-  //   accessorKey: "tags",
-  //   cell: ({ row }) => row.getValue("tags") ?? "-",
-  // },
+  {
+    header: "Tags",
+    accessorKey: "tags",
+    cell: ({ row }) => {
+      return (
+        <div className="relative">
+          <ScrollArea className="max-w-[170px] whitespace-nowrap">
+            <div className="flex items-center space-x-2">
+              {row.original.tags?.map(({ tag }) => (
+                <Badge key={tag.id} variant="tag" className="whitespace-nowrap">
+                  {tag.name}
+                </Badge>
+              ))}
+            </div>
+
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+        </div>
+      );
+    },
+  },
   {
     id: "actions",
     header: "Actions",

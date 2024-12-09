@@ -88,7 +88,7 @@ export function InvoiceSheetContent({
         </div>
 
         <div className="flex mt-auto absolute bottom-6 justify-end gap-4 right-6 left-6">
-          <OpenURL href={`/i/${invoice.token}`}>
+          <OpenURL href={`${window.location.origin}/i/${invoice.token}`}>
             <Button variant="secondary">View invoice</Button>
           </OpenURL>
 

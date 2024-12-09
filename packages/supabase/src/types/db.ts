@@ -195,11 +195,58 @@ export type Database = {
           },
         ];
       };
+      customer_tags: {
+        Row: {
+          created_at: string;
+          customer_id: string;
+          id: string;
+          tag_id: string;
+          team_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          customer_id: string;
+          id?: string;
+          tag_id: string;
+          team_id: string;
+        };
+        Update: {
+          created_at?: string;
+          customer_id?: string;
+          id?: string;
+          tag_id?: string;
+          team_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customer_tags_customer_id_fkey";
+            columns: ["customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "customer_tags_tag_id_fkey";
+            columns: ["tag_id"];
+            isOneToOne: false;
+            referencedRelation: "tags";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "customer_tags_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       customers: {
         Row: {
           address_line_1: string | null;
           address_line_2: string | null;
           city: string | null;
+          contact: string | null;
           country: string | null;
           country_code: string | null;
           created_at: string;
@@ -219,6 +266,7 @@ export type Database = {
           address_line_1?: string | null;
           address_line_2?: string | null;
           city?: string | null;
+          contact?: string | null;
           country?: string | null;
           country_code?: string | null;
           created_at?: string;
@@ -238,6 +286,7 @@ export type Database = {
           address_line_1?: string | null;
           address_line_2?: string | null;
           city?: string | null;
+          contact?: string | null;
           country?: string | null;
           country_code?: string | null;
           created_at?: string;
@@ -2087,18 +2136,6 @@ export type Database = {
         }[];
       };
       get_team_bank_accounts_balances: {
-        Args: {
-          team_id: string;
-        };
-        Returns: {
-          id: string;
-          currency: string;
-          balance: number;
-          name: string;
-          logo_url: string;
-        }[];
-      };
-      get_team_bank_accounts_balances_v2: {
         Args: {
           team_id: string;
         };

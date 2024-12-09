@@ -1284,7 +1284,9 @@ export async function getCustomersQuery(
 
   const query = supabase
     .from("customers")
-    .select("*, invoices:invoices(id), projects:tracker_projects(id)")
+    .select(
+      "*, invoices:invoices(id), projects:tracker_projects(id), tags:customer_tags(id, tag:tags(id, name))",
+    )
     .eq("team_id", teamId)
     .range(from, to);
 
@@ -1318,7 +1320,11 @@ export async function getCustomersQuery(
 }
 
 export async function getCustomerQuery(supabase: Client, customerId: string) {
-  return supabase.from("customers").select("*").eq("id", customerId).single();
+  return supabase
+    .from("customers")
+    .select("*, tags:customer_tags(id, tag:tags(id, name))")
+    .eq("id", customerId)
+    .single();
 }
 
 export async function getInvoiceTemplatesQuery(

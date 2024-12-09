@@ -162,7 +162,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
               <>
                 {(draftInvoice.isPending || lastEditedText) && <span>-</span>}
                 <OpenURL
-                  href={`/i/${token}`}
+                  href={`${window.location.origin}/i/${token}`}
                   className="flex items-center gap-1"
                 >
                   <Icons.ExternalLink className="size-3" />

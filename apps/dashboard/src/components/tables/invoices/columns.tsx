@@ -224,7 +224,9 @@ export const columns: ColumnDef<Invoice>[] = [
               )}
 
               <DropdownMenuItem>
-                <OpenURL href={`/i/${row.original.token}`}>
+                <OpenURL
+                  href={`${window.location.origin}/i/${row.original.token}`}
+                >
                   Open invoice
                 </OpenURL>
               </DropdownMenuItem>

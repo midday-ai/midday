@@ -14,13 +14,14 @@ export function CustomerRow({ row, setOpen }: Props) {
   return (
     <>
       <TableRow
-        className="hover:bg-transparent cursor-default h-[45px] cursor-pointer"
+        className="hover:bg-transparent cursor-default h-[45px]"
         key={row.id}
       >
         {row.getVisibleCells().map((cell, index) => (
           <TableCell
             key={cell.id}
-            onClick={() => ![3, 4, 5].includes(index) && setOpen(row.id)}
+            onClick={() => ![3, 4, 6].includes(index) && setOpen(row.id)}
+            className={cn(index !== 0 && "hidden md:table-cell")}
           >
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </TableCell>

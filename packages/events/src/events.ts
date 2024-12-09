@@ -247,4 +247,12 @@ export const LogEvents = {
     name: "Inbox Upload",
     channel: "inbox",
   },
+  DeleteCustomerTag: {
+    name: "Delete Customer Tag",
+    channel: "customer",
+  },
+  CreateCustomerTag: {
+    name: "Create Customer Tag",
+    channel: "customer",
+  },
 };

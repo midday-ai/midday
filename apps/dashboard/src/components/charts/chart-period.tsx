@@ -45,6 +45,14 @@ const periods = [
     },
   },
   {
+    value: "6m",
+    label: "Last 6 months",
+    range: {
+      from: subMonths(new Date(), 6),
+      to: new Date(),
+    },
+  },
+  {
     value: "12m",
     label: "Last 12 months",
     range: {

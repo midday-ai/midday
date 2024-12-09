@@ -32,7 +32,7 @@ export function TableHeader() {
   return (
     <BaseTableHeader>
       <TableRow>
-        <TableHead className="hidden md:table-cell">
+        <TableHead>
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -43,7 +43,7 @@ export function TableHeader() {
             {"name" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead>
+        <TableHead className="hidden md:table-cell">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -54,7 +54,7 @@ export function TableHeader() {
             {"contact" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead>
+        <TableHead className="hidden md:table-cell">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -65,7 +65,7 @@ export function TableHeader() {
             {"email" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead className="w-[200px]">
+        <TableHead className="w-[200px] hidden md:table-cell">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -78,7 +78,7 @@ export function TableHeader() {
             {"invoices" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead>
+        <TableHead className="hidden md:table-cell">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -92,7 +92,7 @@ export function TableHeader() {
           </Button>
         </TableHead>
 
-        {/* <TableHead className="hidden md:table-cell">
+        <TableHead className="hidden md:table-cell">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -102,7 +102,7 @@ export function TableHeader() {
             {"tags" === column && value === "asc" && <ArrowDown size={16} />}
             {"tags" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
-        </TableHead> */}
+        </TableHead>
 
         <TableHead className="hidden md:table-cell">Actions</TableHead>
       </TableRow>

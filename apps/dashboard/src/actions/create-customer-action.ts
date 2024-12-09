@@ -15,25 +15,37 @@ export const createCustomerAction = authActionClient
       channel: LogEvents.CreateCustomer.channel,
     },
   })
-  .action(async ({ parsedInput: input, ctx: { user, supabase } }) => {
-    const token = await generateToken(user.id);
+  .action(
+    async ({ parsedInput: { tags, ...input }, ctx: { user, supabase } }) => {
+      const token = await generateToken(user.id);
 
-    const { data } = await supabase
-      .from("customers")
-      .upsert(
-        {
-          ...input,
-          token,
-          team_id: user.team_id,
-        },
-        {
-          onConflict: "id",
-        },
-      )
-      .select("id, name")
-      .single();
+      const { data } = await supabase
+        .from("customers")
+        .upsert(
+          {
+            ...input,
+            token,
+            team_id: user.team_id,
+          },
+          {
+            onConflict: "id",
+          },
+        )
+        .select("id, name")
+        .single();
 
-    revalidateTag(`customers_${user.team_id}`);
+      if (tags?.length) {
+        await supabase.from("customer_tags").insert(
+          tags.map((tag) => ({
+            tag_id: tag.id,
+            customer_id: data?.id,
+            team_id: user.team_id!,
+          })),
+        );
+      }
 
-    return data;
-  });
+      revalidateTag(`customers_${user.team_id}`);
+
+      return data;
+    },
+  );

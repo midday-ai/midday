@@ -606,6 +606,15 @@ export const createCustomerSchema = z.object({
   website: z.string().nullable().optional(),
   phone: z.string().nullable().optional(),
   contact: z.string().nullable().optional(),
+  tags: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        value: z.string(),
+      }),
+    )
+    .optional()
+    .nullable(),
 });
 
 export const inboxUploadSchema = z.array(

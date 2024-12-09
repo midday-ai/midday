@@ -26,6 +26,7 @@ export interface Customer {
   vat?: string;
   contact?: string;
   website?: string;
+  tags?: { tag: { id: string; name: string } }[];
 }
 
 interface CustomerDetailsProps {
