@@ -23,9 +23,9 @@ export function createCacheMiddleware(
       console.log("params", params);
       const cacheKey = generateCacheKey(description);
 
-      const cached = (await c.env.ENRICH_KV.get(cacheKey)) as Awaited<
-        ReturnType<LanguageModelV1["doGenerate"]>
-      > | null;
+      const cached = (await c.env.ENRICH_KV.get(cacheKey, {
+        type: "json",
+      })) as Awaited<ReturnType<LanguageModelV1["doGenerate"]>> | null;
 
       if (cached !== null) {
         return {
@@ -40,6 +40,8 @@ export function createCacheMiddleware(
       }
 
       const result = await doGenerate();
+
+      console.log("result1", result);
 
       await c.env.ENRICH_KV.put(cacheKey, JSON.stringify(result));
 
@@ -79,6 +81,8 @@ export async function enrichTransactionWithLLM(
         `,
     schema: OutputSchema,
   });
+
+  console.log("result", result);
 
   return result.object;
 }
