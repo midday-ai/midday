@@ -50,23 +50,19 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
         // @ts-ignore
         model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
         temperature: 0,
-        maxTokens: 32768,
-        prompt: `
-        ${prompt}
-
-        Transactions:
-        ${JSON.stringify(data)}
-        `,
-        // messages: [
-        //   {
-        //     role: "system" as const,
-        //     content: prompt,
-        //   },
-        //   ...data.map(({ id, ...rest }) => ({
-        //     role: "user" as const,
-        //     content: JSON.stringify(rest),
-        //   })),
-        // ],
+        maxTokens: 2048,
+        messages: [
+          {
+            role: "system",
+            content: prompt,
+          },
+          {
+            role: "user",
+            content: data
+              .map(({ id, ...rest }) => JSON.stringify(rest))
+              .join(","),
+          },
+        ],
         schema: OutputSchema,
       });
 
