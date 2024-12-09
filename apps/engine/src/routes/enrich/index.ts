@@ -1,9 +1,7 @@
 import { GeneralErrorSchema } from "@/common/schema";
-import { generateEnrichedCacheKey } from "@/utils/enrich";
 import { enrichTransactionWithLLM } from "@/utils/enrich";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import type { Bindings } from "hono/types";
-import { createWorkersAI } from "workers-ai-provider";
 import { EnrichBodySchema, EnrichSchema } from "./schema";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
@@ -41,42 +39,17 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
   }),
   async (c) => {
     const { data } = c.req.valid("json");
-    // @ts-ignore
-    const workersai = createWorkersAI({ binding: c.env.AI });
 
     try {
-      const results = [];
-
-      for (const transaction of data) {
-        const enrichedKey = generateEnrichedCacheKey(transaction);
-        console.log("enrichedKey", enrichedKey);
-        // @ts-ignore
-        const enrichedResult = await c.env.ENRICH_KV.get(enrichedKey, {
-          type: "json",
-        });
-
-        if (enrichedResult) {
-          results.push({
-            id: transaction.id,
-            ...enrichedResult,
-            source: "cache",
-          });
-        } else {
-          const enrichment = await enrichTransactionWithLLM(
-            workersai,
-            transaction,
-          );
-
-          // @ts-ignore
-          await c.env.ENRICH_KV.put(enrichedKey, JSON.stringify(enrichment));
-
-          results.push({ id: transaction.id, ...enrichment, source: "model" });
-        }
-      }
+      // @ts-ignore
+      const enrichments = await enrichTransactionWithLLM(c, data);
 
       return c.json(
         {
-          data: results,
+          data: enrichments.map((enrichment, index) => ({
+            id: data[index].id,
+            ...enrichment,
+          })),
         },
         200,
       );

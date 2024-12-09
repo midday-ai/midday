@@ -15,7 +15,7 @@ Categories:
 
 Analyze the following transaction and categorize it appropriately. Use the currency to help identify the country context - for example, SEK indicates Sweden, USD indicates United States, etc.
 
-And return your response as a JSON object containing the following fields:
+And return your response as a JSON array of objects containing the following fields:
 - category: The category of the transaction, if none of the categories match, return null
 - company: The company name
 - website: The website of the company
