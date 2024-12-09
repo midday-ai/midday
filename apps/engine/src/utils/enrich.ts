@@ -70,16 +70,12 @@ export async function enrichTransactionWithLLM(
     model: wrappedLanguageModel,
     temperature: 0,
     maxTokens: 2048,
-    messages: [
-      {
-        role: "system",
-        content: prompt,
-      },
-      {
-        role: "user",
-        content: JSON.stringify(data),
-      },
-    ],
+    prompt: `
+            ${prompt}
+  
+            Transaction:
+            ${JSON.stringify(data)}
+        `,
     schema: OutputSchema,
   });
 
