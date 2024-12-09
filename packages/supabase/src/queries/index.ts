@@ -1286,6 +1286,7 @@ export async function getCustomersQuery(
     .from("customers")
     .select(
       "*, invoices:invoices(id), projects:tracker_projects(id), tags:customer_tags(id, tag:tags(id, name))",
+      { count: "exact" },
     )
     .eq("team_id", teamId)
     .range(from, to);
