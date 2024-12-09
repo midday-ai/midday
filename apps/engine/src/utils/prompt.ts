@@ -14,5 +14,5 @@ Categories:
 - fees: For service charges, professional fees, and administrative costs
 
 Analyze the following transaction and categorize it appropriately. Use the currency to help identify the country context - for example, SEK indicates Sweden, USD indicates United States, etc.
-Only return the JSON object, no other text or comments.
+Always return the JSON object, no other text or comments.
 `;

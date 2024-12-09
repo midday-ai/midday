@@ -66,6 +66,7 @@ export async function enrichTransactionWithLLM(
   });
 
   const result = await generateObject({
+    mode: "json",
     model: wrappedLanguageModel,
     temperature: 0,
     maxTokens: 2048,
