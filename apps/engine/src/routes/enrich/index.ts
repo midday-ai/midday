@@ -76,7 +76,6 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
         200,
       );
     } catch (error) {
-      console.log(error);
       return c.json(
         {
           error: "Internal server error",

@@ -2,11 +2,9 @@ compatibility_date = "2024-11-11"
 workers_dev = false
 logpush = true
 
-[ai]
-binding = "AI"
-
 [observability]
 enabled = true
+
 
 [env.production]
 name = "engine"
@@ -24,6 +22,12 @@ r2_buckets = [
   { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "", jurisdiction = "eu" }
 ]
 
+[env.production.ai]
+binding = "AI"
+provider = "llama"
+model = "llama-3.3"
+jurisdiction = "eu"
+
 [env.staging]
 name = "engine-staging"
 route = { pattern = "engine-staging.midday.ai/*", zone_name = "midday.ai" }
@@ -39,3 +43,9 @@ mtls_certificates = [
 r2_buckets = [
   { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "", jurisdiction = "eu" }
 ]
+
+[env.staging.ai]
+binding = "AI"
+provider = "llama"
+model = "llama-3.3"
+jurisdiction = "eu"
