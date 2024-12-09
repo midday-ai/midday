@@ -1,6 +1,6 @@
 import { GeneralErrorSchema } from "@/common/schema";
 import { generateEnrichedCacheKey } from "@/utils/enrich";
-import { callEnrichmentLLM } from "@/utils/enrich";
+import { enrichTransactionWithLLM } from "@/utils/enrich";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import type { Bindings } from "hono/types";
 import { createWorkersAI } from "workers-ai-provider";
@@ -49,6 +49,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
 
       for (const transaction of data) {
         const enrichedKey = generateEnrichedCacheKey(transaction);
+        console.log("enrichedKey", enrichedKey);
         // @ts-ignore
         const enrichedResult = await c.env.ENRICH_KV.get(enrichedKey, {
           type: "json",
@@ -61,13 +62,13 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
             source: "cache",
           });
         } else {
-          // @ts-ignore
-          const enrichment = await callEnrichmentLLM(workersai, transaction);
+          const enrichment = await enrichTransactionWithLLM(
+            workersai,
+            transaction,
+          );
 
           // @ts-ignore
-          await c.env.ENRICH_KV.put(enrichedKey, JSON.stringify(enrichment), {
-            expirationTtl: 604800,
-          });
+          await c.env.ENRICH_KV.put(enrichedKey, JSON.stringify(enrichment));
 
           results.push({ id: transaction.id, ...enrichment, source: "model" });
         }

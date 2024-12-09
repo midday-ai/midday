@@ -39,6 +39,9 @@ export const EnrichSchema = z
           .openapi(
             "Whether the transaction is a recurring subscription payment",
           ),
+        source: z
+          .enum(["cache", "model"])
+          .openapi("The source of the enrichment"),
       }),
     ),
   })

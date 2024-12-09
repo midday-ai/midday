@@ -7,7 +7,7 @@ export function generateEnrichedCacheKey(transaction: EnrichBody["data"][0]) {
   return `enriched:${description.replace(/\s+/g, "_")}`.toLowerCase();
 }
 
-export async function callEnrichmentLLM(
+export async function enrichTransactionWithLLM(
   model: WorkersAI,
   transaction: EnrichBody["data"][0],
 ) {
