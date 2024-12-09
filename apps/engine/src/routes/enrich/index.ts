@@ -1,10 +1,38 @@
 import { GeneralErrorSchema } from "@/common/schema";
+import { generateEnrichedCacheKey } from "@/utils/enrich";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { generateObject } from "ai";
 import type { Bindings } from "hono/types";
-import { createWorkersAI } from "workers-ai-provider";
+import { type WorkersAI, createWorkersAI } from "workers-ai-provider";
 import { prompt } from "./prompt";
-import { EnrichBodySchema, EnrichSchema, OutputSchema } from "./schema";
+import {
+  type EnrichBody,
+  EnrichBodySchema,
+  EnrichSchema,
+  OutputSchema,
+} from "./schema";
+
+async function enrichTransactions(
+  model: WorkersAI,
+  transaction: EnrichBody["data"][0],
+) {
+  const result = await generateObject({
+    mode: "json",
+    // @ts-ignore
+    model: model("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+    temperature: 0,
+    maxTokens: 2048,
+    prompt: `
+          ${prompt}
+
+          Transaction:
+          ${JSON.stringify(transaction)}
+      `,
+    schema: OutputSchema,
+  });
+
+  return result.object;
+}
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
   createRoute({
@@ -41,52 +69,37 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
   }),
   async (c) => {
     const { data } = c.req.valid("json");
+    // @ts-ignore
+    const workersai = createWorkersAI({ binding: c.env.AI });
 
     try {
-      // @ts-ignore
-      const workersai = createWorkersAI({ binding: c.env.AI });
-      const result = await generateObject({
-        mode: "json",
+      const results = [];
+
+      for (const transaction of data) {
+        const enrichedKey = generateEnrichedCacheKey(transaction);
         // @ts-ignore
-        model: workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
-        temperature: 0,
-        maxTokens: 2048,
-        prompt: `
-            ${prompt}
+        const enrichedResult = await c.env.ENRICH_KV.get(enrichedKey, {
+          type: "json",
+        });
 
-            Transactions:
-            ${JSON.stringify(data)}
-        `,
-        // messages: [
-        //   {
-        //     role: "system",
-        //     content: prompt,
-        //   },
-        //   {
-        //     role: "user",
-        //     content: JSON.stringify(data.map(({ id, ...rest }) => rest)),
-        //   },
-        // ],
-        schema: OutputSchema,
-      });
+        if (enrichedResult) {
+          results.push({ ...transaction, ...enrichedResult, source: "cache" });
+        } else {
+          // @ts-ignore
+          const enrichment = await enrichTransactions(workersai, transaction);
 
-      console.log(result.object);
-      console.log([
-        {
-          role: "system",
-          content: prompt,
-        },
-        {
-          role: "user",
-          content: JSON.stringify(data.map(({ id, ...rest }) => rest)),
-        },
-      ]);
+          // @ts-ignore
+          await c.env.ENRICH_KV.put(enrichedKey, JSON.stringify(enrichment), {
+            expirationTtl: 604800,
+          });
+
+          results.push({ ...transaction, ...enrichment, source: "model" });
+        }
+      }
+
       return c.json(
         {
-          data: result.object.map((result, i) => ({
-            id: data[i].id,
-            ...result,
-          })),
+          data: results,
         },
         200,
       );

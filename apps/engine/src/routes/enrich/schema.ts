@@ -75,3 +75,5 @@ export const OutputSchema = z.array(
       .default(false),
   }),
 );
+
+export type EnrichBody = z.infer<typeof EnrichBodySchema>;
