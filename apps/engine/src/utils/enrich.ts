@@ -60,7 +60,7 @@ export async function enrichTransactionWithLLM(
   const model = createWorkersAI({ binding: c.env.AI });
 
   const wrappedLanguageModel = wrapLanguageModel({
-    // @ts-ignore
+    // @ts-ignore (Not available in the SDK)
     model: model("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
     middleware: createCacheMiddleware(c, data.description),
   });
@@ -70,16 +70,18 @@ export async function enrichTransactionWithLLM(
     model: wrappedLanguageModel,
     temperature: 0,
     maxTokens: 2048,
-    prompt: `
-            ${prompt}
-  
-            Transaction:
-            ${JSON.stringify(data)}
-        `,
+    messages: [
+      {
+        role: "system",
+        content: prompt,
+      },
+      {
+        role: "user",
+        content: JSON.stringify(data),
+      },
+    ],
     schema: OutputSchema,
   });
-
-  console.log("result", result);
 
   return result.object;
 }
