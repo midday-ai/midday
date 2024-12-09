@@ -1,38 +1,10 @@
 import { GeneralErrorSchema } from "@/common/schema";
 import { generateEnrichedCacheKey } from "@/utils/enrich";
+import { callEnrichmentLLM } from "@/utils/enrich";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { generateObject } from "ai";
 import type { Bindings } from "hono/types";
-import { type WorkersAI, createWorkersAI } from "workers-ai-provider";
-import { prompt } from "./prompt";
-import {
-  type EnrichBody,
-  EnrichBodySchema,
-  EnrichSchema,
-  OutputSchema,
-} from "./schema";
-
-async function enrichTransactions(
-  model: WorkersAI,
-  transaction: EnrichBody["data"][0],
-) {
-  const result = await generateObject({
-    mode: "json",
-    // @ts-ignore
-    model: model("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
-    temperature: 0,
-    maxTokens: 2048,
-    prompt: `
-          ${prompt}
-
-          Transaction:
-          ${JSON.stringify(transaction)}
-      `,
-    schema: OutputSchema,
-  });
-
-  return result.object;
-}
+import { createWorkersAI } from "workers-ai-provider";
+import { EnrichBodySchema, EnrichSchema } from "./schema";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
   createRoute({
@@ -83,17 +55,21 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
         });
 
         if (enrichedResult) {
-          results.push({ ...transaction, ...enrichedResult, source: "cache" });
+          results.push({
+            id: transaction.id,
+            ...enrichedResult,
+            source: "cache",
+          });
         } else {
           // @ts-ignore
-          const enrichment = await enrichTransactions(workersai, transaction);
+          const enrichment = await callEnrichmentLLM(workersai, transaction);
 
           // @ts-ignore
           await c.env.ENRICH_KV.put(enrichedKey, JSON.stringify(enrichment), {
             expirationTtl: 604800,
           });
 
-          results.push({ ...transaction, ...enrichment, source: "model" });
+          results.push({ id: transaction.id, ...enrichment, source: "model" });
         }
       }
 
