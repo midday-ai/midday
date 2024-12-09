@@ -258,7 +258,7 @@ export async function getTransactionsQuery(
     if (!Number.isNaN(Number.parseInt(searchQuery))) {
       query.eq("amount", Number(searchQuery));
     } else {
-      query.textSearch("fts_vector", `'${searchQuery}'`);
+      query.textSearch("fts_vector", `%${searchQuery}%:*`);
     }
   }
 
@@ -405,7 +405,7 @@ export async function getSimilarTransactions(
     .from("transactions")
     .select("id, amount, team_id", { count: "exact" })
     .eq("team_id", teamId)
-    .textSearch("fts_vector", `'${name}'`)
+    .textSearch("fts_vector", `%${name}%:*`)
     .throwOnError();
 }
 
@@ -1229,7 +1229,7 @@ export async function getInvoicesQuery(
     if (!Number.isNaN(Number.parseInt(searchQuery))) {
       query.eq("amount", Number(searchQuery));
     } else {
-      query.textSearch("fts", `'${searchQuery}'`);
+      query.textSearch("fts", `%${searchQuery}%:*`);
     }
   }
 
