@@ -10,11 +10,18 @@ import type { Context } from "hono";
 import { createWorkersAI } from "workers-ai-provider";
 import { prompt } from "./prompt";
 
-export function createCacheMiddleware(c: Context<{ Bindings: Bindings }>) {
+function generateCacheKey(description: string): string {
+  return description.toLowerCase().replace(/\s+/g, "_");
+}
+
+export function createCacheMiddleware(
+  c: Context<{ Bindings: Bindings }>,
+  description: string,
+): LanguageModelV1Middleware {
   return {
-    // @ts-ignore
     wrapGenerate: async ({ doGenerate, params }) => {
-      const cacheKey = JSON.stringify(params);
+      console.log("params", params);
+      const cacheKey = generateCacheKey(description);
 
       const cached = (await c.env.ENRICH_KV.get(cacheKey)) as Awaited<
         ReturnType<LanguageModelV1["doGenerate"]>
@@ -25,20 +32,16 @@ export function createCacheMiddleware(c: Context<{ Bindings: Bindings }>) {
           ...cached,
           response: {
             ...cached.response,
-            source: "cached",
+            timestamp: cached?.response?.timestamp
+              ? new Date(cached?.response?.timestamp)
+              : undefined,
           },
         };
       }
 
       const result = await doGenerate();
 
-      await c.env.ENRICH_KV.put(cacheKey, {
-        ...result,
-        response: {
-          ...result.response,
-          source: "model",
-        },
-      });
+      await c.env.ENRICH_KV.put(cacheKey, JSON.stringify(result));
 
       return {
         ...result,
@@ -53,26 +56,25 @@ export function createCacheMiddleware(c: Context<{ Bindings: Bindings }>) {
 
 export async function enrichTransactionWithLLM(
   c: Context<{ Bindings: Bindings }>,
-  data: EnrichBody["data"],
+  data: EnrichBody["data"][number],
 ) {
   const model = createWorkersAI({ binding: c.env.AI });
 
   const wrappedLanguageModel = wrapLanguageModel({
     // @ts-ignore
     model: model("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
-    middleware: createCacheMiddleware(c),
+    middleware: createCacheMiddleware(c, data.description),
   });
 
   const result = await generateObject({
     mode: "json",
-    // @ts-ignore
     model: wrappedLanguageModel,
     temperature: 0,
     maxTokens: 2048,
     prompt: `
             ${prompt}
   
-            Transactions:
+            Transaction:
             ${JSON.stringify(data)}
         `,
     schema: OutputSchema,

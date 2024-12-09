@@ -41,15 +41,20 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
     const { data } = c.req.valid("json");
 
     try {
-      // @ts-ignore
-      const enrichments = await enrichTransactionWithLLM(c, data);
+      const enrichments = await Promise.all(
+        data.map(async (item) => {
+          // @ts-ignore
+          const enrichment = await enrichTransactionWithLLM(c, item);
+          return {
+            id: item.id,
+            ...enrichment,
+          };
+        }),
+      );
 
       return c.json(
         {
-          data: enrichments.map((enrichment, index) => ({
-            id: data[index].id,
-            ...enrichment,
-          })),
+          data: enrichments,
         },
         200,
       );
