@@ -42,11 +42,11 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
 
     try {
       const enrichments = await Promise.all(
-        data.map(async (item) => {
+        data.map(async ({ id, ...transaction }) => {
           // @ts-ignore
-          const enrichment = await enrichTransactionWithLLM(c, item);
+          const enrichment = await enrichTransactionWithLLM(c, transaction);
           return {
-            id: item.id,
+            id,
             ...enrichment,
           };
         }),

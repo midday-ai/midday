@@ -19,8 +19,7 @@ export function createCacheMiddleware(
   description: string,
 ): LanguageModelV1Middleware {
   return {
-    wrapGenerate: async ({ doGenerate, params }) => {
-      console.log("params", params);
+    wrapGenerate: async ({ doGenerate }) => {
       const cacheKey = generateCacheKey(description);
 
       const cached = (await c.env.ENRICH_KV.get(cacheKey, {
@@ -40,8 +39,6 @@ export function createCacheMiddleware(
       }
 
       const result = await doGenerate();
-
-      console.log("result1", result);
 
       await c.env.ENRICH_KV.put(cacheKey, JSON.stringify(result));
 
@@ -69,7 +66,6 @@ export async function enrichTransactionWithLLM(
   });
 
   const result = await generateObject({
-    mode: "json",
     model: wrappedLanguageModel,
     temperature: 0,
     maxTokens: 2048,
