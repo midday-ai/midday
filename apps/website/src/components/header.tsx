@@ -195,7 +195,7 @@ export function Header() {
 
   return (
     <header className="sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center">
-      <nav className="border border-border px-4 flex items-center backdrop-filter backdrop-blur-xl bg-[#FFFFFF] dark:bg-[#121212] bg-opacity-70 h-[50px] z-20">
+      <nav className="border border-border px-4 flex items-center backdrop-filter backdrop-blur-xl bg-[#FFFFFF] dark:bg-[#121212] bg-opacity-70 h-[50px] z-20 relative">
         <ContextMenu>
           <ContextMenuTrigger>
             <Link href="/">
