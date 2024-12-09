@@ -83,7 +83,7 @@ export function UploadZone({ children, teamId }: Props) {
       // Trigger the upload jobs
       inboxUpload.execute(
         results.map((result) => ({
-          file_path: [...path, result.file.name],
+          file_path: [...path, result.filename],
           mimetype: result.file.type,
           size: result.file.size,
         })),

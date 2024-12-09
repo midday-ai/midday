@@ -6,7 +6,6 @@ import { z } from "zod";
 export const inboxUpload = schemaTask({
   id: "inbox-upload",
   schema: z.object({
-    id: z.string(),
     teamId: z.string().uuid(),
     mimetype: z.string(),
     size: z.number(),
@@ -16,7 +15,7 @@ export const inboxUpload = schemaTask({
   queue: {
     concurrencyLimit: 25,
   },
-  run: async ({ id, teamId, mimetype, size, file_path }) => {
+  run: async ({ teamId, mimetype, size, file_path }) => {
     const supabase = createClient();
 
     const filename = file_path.at(-1);
@@ -30,7 +29,6 @@ export const inboxUpload = schemaTask({
         file_path: file_path,
         file_name: filename,
         content_type: mimetype,
-        reference_id: `${id}_${filename}`,
         size,
       })
       .select("*")

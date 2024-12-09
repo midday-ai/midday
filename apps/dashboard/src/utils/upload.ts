@@ -17,9 +17,9 @@ export async function resumableUpload(
     data: { session },
   } = await client.auth.getSession();
 
-  const fullPath = decodeURIComponent(
-    [...path, stripSpecialCharacters(file.name)].join("/"),
-  );
+  const filename = stripSpecialCharacters(file.name);
+
+  const fullPath = decodeURIComponent([...path, filename].join("/"));
 
   return new Promise((resolve, reject) => {
     const upload = new tus.Upload(file, {
@@ -46,7 +46,10 @@ export async function resumableUpload(
       },
       onProgress,
       onSuccess: () => {
-        resolve(upload);
+        resolve({
+          ...upload,
+          filename,
+        });
       },
     });
 
