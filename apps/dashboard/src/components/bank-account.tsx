@@ -25,6 +25,8 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import { Input } from "@midday/ui/input";
+import { Label } from "@midday/ui/label";
 import { Switch } from "@midday/ui/switch";
 import {
   Tooltip,
@@ -61,6 +63,7 @@ export function BankAccount({
   type,
   hasError,
 }: Props) {
+  const [value, setValue] = useState("");
   const [_, setParams] = useQueryStates({
     step: parseAsString,
     accountId: parseAsString,
@@ -168,10 +171,22 @@ export function BankAccount({
                 transactions associated with this account will also be deleted.
               </AlertDialogDescription>
             </AlertDialogHeader>
+
+            <div className="flex flex-col gap-2 mt-2">
+              <Label htmlFor="confirm-delete">
+                Type <span className="font-medium">DELETE</span> to confirm.
+              </Label>
+              <Input
+                id="confirm-delete"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+              />
+            </div>
+
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                disabled={deleteAccount.status === "executing"}
+                disabled={value !== "DELETE"}
                 onClick={() =>
                   deleteAccount.execute({
                     id,
