@@ -174,7 +174,7 @@ export function TrackerUpdateSheet({ teamId, customers }: Props) {
               </DropdownMenu>
             </SheetHeader>
 
-            <ScrollArea className="h-full p-0 pb-280" hideScrollbar>
+            <ScrollArea className="h-full p-0 pb-28" hideScrollbar>
               <TrackerProjectForm
                 form={form}
                 isSaving={updateAction.status === "executing"}

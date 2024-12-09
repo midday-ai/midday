@@ -1,6 +1,8 @@
 "use client";
 
 import { createCustomerAction } from "@/actions/create-customer-action";
+import { createCustomerTagAction } from "@/actions/customer/create-customer-tag-action";
+import { deleteCustomerTagAction } from "@/actions/customer/delete-customer-tag-action";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,12 +16,14 @@ import { Button } from "@midday/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
+import { Label } from "@midday/ui/label";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Textarea } from "@midday/ui/textarea";
 import { useAction } from "next-safe-action/hooks";
@@ -32,6 +36,7 @@ import {
   type AddressDetails,
   SearchAddressInput,
 } from "../search-address-input";
+import { SelectTags } from "../select-tags";
 import { VatNumberInput } from "../vat-number-input";
 
 const formSchema = z.object({
@@ -58,6 +63,15 @@ const formSchema = z.object({
   zip: z.string().nullable().optional(),
   vat_number: z.string().nullable().optional(),
   note: z.string().nullable().optional(),
+  tags: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        value: z.string(),
+      }),
+    )
+    .optional()
+    .nullable(),
 });
 
 const excludedDomains = [
@@ -86,6 +100,11 @@ export function CustomerForm({ data }: Props) {
   const { setParams: setCustomerParams, name } = useCustomerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
 
+  const deleteCustomerTag = useAction(deleteCustomerTagAction);
+  const createCustomerTag = useAction(createCustomerTagAction);
+
+  const isEdit = !!data;
+
   const createCustomer = useAction(createCustomerAction, {
     onSuccess: ({ data }) => {
       if (data) {
@@ -112,13 +131,22 @@ export function CustomerForm({ data }: Props) {
       note: undefined,
       phone: undefined,
       contact: undefined,
+      tags: undefined,
     },
   });
 
   useEffect(() => {
     if (data) {
       setSections(["general", "details"]);
-      form.reset(data);
+      form.reset({
+        ...data,
+        tags:
+          data.tags?.map((tag) => ({
+            id: tag.tag?.id ?? "",
+            value: tag.tag?.name ?? "",
+            label: tag.tag?.name ?? "",
+          })) ?? undefined,
+      });
     }
   }, [data]);
 
@@ -392,6 +420,72 @@ export function CustomerForm({ data }: Props) {
                       />
                     </div>
 
+                    <div className="mt-6">
+                      <Label
+                        htmlFor="tags"
+                        className="mb-2 text-xs text-[#878787] font-normal block"
+                      >
+                        Expense Tags
+                      </Label>
+
+                      <SelectTags
+                        tags={form.getValues("tags")}
+                        onRemove={(tag) => {
+                          deleteCustomerTag.execute({
+                            tagId: tag.id,
+                            customerId: form.getValues("id")!,
+                          });
+                        }}
+                        // Only for create customers
+                        onCreate={(tag) => {
+                          if (!isEdit) {
+                            form.setValue(
+                              "tags",
+                              [
+                                ...(form.getValues("tags") ?? []),
+                                {
+                                  value: tag.value ?? "",
+                                  id: tag.id ?? "",
+                                },
+                              ],
+                              {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              },
+                            );
+                          }
+                        }}
+                        // Only for edit customers
+                        onSelect={(tag) => {
+                          if (isEdit) {
+                            createCustomerTag.execute({
+                              tagId: tag.id,
+                              customerId: form.getValues("id")!,
+                            });
+                          } else {
+                            form.setValue(
+                              "tags",
+                              [
+                                ...(form.getValues("tags") ?? []),
+                                {
+                                  value: tag.value ?? "",
+                                  id: tag.id ?? "",
+                                },
+                              ],
+                              {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              },
+                            );
+                          }
+                        }}
+                      />
+
+                      <FormDescription className="mt-2">
+                        Tags help categorize and track customer expenses.
+                      </FormDescription>
+                    </div>
+
                     <div>
                       <FormField
                         control={form.control}
@@ -452,7 +546,7 @@ export function CustomerForm({ data }: Props) {
               isSubmitting={createCustomer.isExecuting}
               disabled={createCustomer.isExecuting || !form.formState.isValid}
             >
-              {data ? "Update" : "Create"}
+              {isEdit ? "Update" : "Create"}
             </SubmitButton>
           </div>
         </div>

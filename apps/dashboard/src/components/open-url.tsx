@@ -11,7 +11,7 @@ export function OpenURL({
 }: { href: string; children: React.ReactNode; className?: string }) {
   const handleOnClick = () => {
     if (isDesktopApp()) {
-      platform.os.openURL(`${window.location.origin}/${href}`);
+      platform.os.openURL(href);
     } else {
       window.open(href, "_blank");
     }
