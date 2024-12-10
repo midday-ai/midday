@@ -5,24 +5,24 @@ import { intro, outro, spinner } from "@clack/prompts";
 import { generateText } from "ai";
 import chalk from "chalk";
 import dedent from "dedent";
+import { prompt as defaultPrompt } from "../prompt.js";
+import type { LanguineConfig } from "../types.js";
 import { getApiKey } from "../utils.js";
 
 export async function translate(targetLocale?: string) {
   intro("Starting translation process...");
 
   // Read config file
-  let config;
+  let config: LanguineConfig;
   try {
     const configFile = await fs.readFile(
-      path.join(process.cwd(), "languine.config.json"),
+      path.join(process.cwd(), "languine.json"),
       "utf-8",
     );
     config = JSON.parse(configFile);
   } catch (error) {
     outro(
-      chalk.red(
-        "Could not find languine.config.json. Run 'languine init' first.",
-      ),
+      chalk.red("Could not find languine.json. Run 'languine init' first."),
     );
     process.exit(1);
   }
@@ -58,7 +58,7 @@ export async function translate(targetLocale?: string) {
 
         try {
           // Read source file
-          let sourceContent;
+          let sourceContent = "";
           try {
             sourceContent = await fs.readFile(
               path.join(process.cwd(), sourcePath),
@@ -75,7 +75,6 @@ export async function translate(targetLocale?: string) {
               "",
               "utf-8",
             );
-            sourceContent = "";
           }
 
           // Prepare translation prompt
@@ -84,14 +83,9 @@ export async function translate(targetLocale?: string) {
             
             Task: Translate the content below from ${source} to ${locale}.
 
-            Requirements:
-            - Preserve the exact file structure and formatting
-            - Only translate string values inside quotes
-            - Keep all object keys, syntax, and punctuation unchanged
-            - Maintain consistent casing and spacing
-            - Ensure translations are natural and culturally appropriate
-            - Do not add or remove any code elements
-            - Do not include comments or explanatory text
+            ${defaultPrompt}
+
+            ${config.instructions ?? ""}
 
             Source content:
             ${sourceContent}
@@ -121,7 +115,6 @@ export async function translate(targetLocale?: string) {
         } catch (error) {
           s.stop(`Error translating ${sourcePath} to ${locale}`);
           console.error(error);
-          continue;
         }
       }
     }

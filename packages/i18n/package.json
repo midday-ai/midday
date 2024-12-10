@@ -3,18 +3,17 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "bin": {
-    "languine": "./dist/index.js"
-  },
+  "bin": "dist/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "test": "bun test src",
-    "build": "tsup src/cli.ts --format esm --dts --clean",
-    "dev": "tsup src/cli.ts --format esm --watch --clean",
-    "start": "node dist/cli.js"
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts --format esm --watch --clean",
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.7",

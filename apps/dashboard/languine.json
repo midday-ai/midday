@@ -2,17 +2,11 @@
   "version": "1.0.0",
   "locale": {
     "source": "en",
-    "targets": [
-      "es",
-      "fr",
-      "pt"
-    ]
+    "targets": ["sv"]
   },
   "files": {
     "ts": {
-      "include": [
-        "locales/[locale].ts"
-      ]
+      "include": ["src/locales/[locale].ts"]
     }
   },
   "openai": {

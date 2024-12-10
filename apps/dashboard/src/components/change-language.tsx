@@ -25,13 +25,13 @@ import {
 import { useAction } from "next-safe-action/hooks";
 
 export function ChangeLanguage() {
-  const action = useAction(updateUserAction);
+  // const action = useAction(updateUserAction);
   const changeLocale = useChangeLocale();
   const locale = useCurrentLocale();
   const t = useI18n();
 
-  const handleOnChange = async (locale: string) => {
-    await action.execute({ locale });
+  const handleOnChange = (locale: string) => {
+    // await action.execute({ locale });
     changeLocale(locale);
   };
 

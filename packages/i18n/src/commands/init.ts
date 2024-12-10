@@ -88,6 +88,13 @@ export async function init() {
     },
   });
 
+  const filesDirectory = await text({
+    message: "Where should language files be stored?",
+    placeholder: "src/locales",
+    defaultValue: "src/locales",
+    validate: () => undefined,
+  });
+
   const fileFormat = await select({
     message: "What format should language files use?",
     options: [
@@ -123,7 +130,7 @@ export async function init() {
     },
     files: {
       [fileFormat]: {
-        include: [`locales/[locale].${fileFormat}`],
+        include: [`${filesDirectory}/[locale].${fileFormat}`],
       },
     },
     openai: {
@@ -133,12 +140,14 @@ export async function init() {
 
   try {
     // Create locales directory if it doesn't exist
-    await fs.mkdir(path.join(process.cwd(), "locales"), { recursive: true });
+    await fs.mkdir(path.join(process.cwd(), filesDirectory), {
+      recursive: true,
+    });
 
     // Create source language file if it doesn't exist
     const sourceFile = path.join(
       process.cwd(),
-      `locales/${String(sourceLanguage)}.${String(fileFormat)}`,
+      `${filesDirectory}/${String(sourceLanguage)}.${String(fileFormat)}`,
     );
     if (
       !(await fs
@@ -155,7 +164,7 @@ export async function init() {
     for (const targetLang of targetLangs.map((l: string) => l.trim())) {
       const targetFile = path.join(
         process.cwd(),
-        `locales/${String(targetLang)}.${String(fileFormat)}`,
+        `${filesDirectory}/${String(targetLang)}.${String(fileFormat)}`,
       );
       if (
         !(await fs
@@ -169,7 +178,7 @@ export async function init() {
 
     // Write config file
     await fs.writeFile(
-      path.join(process.cwd(), "languine.config.json"),
+      path.join(process.cwd(), "languine.json"),
       JSON.stringify(config, null, 2),
     );
     outro("Configuration file and language files created successfully!");
