@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "locale": {
+    "source": "en",
+    "targets": ["sv"]
+  },
+  "files": {
+    "ts": {
+      "include": ["src/locales/[locale].ts"]
+    }
+  },
+  "openai": {
+    "model": "gpt-4"
+  },
+  "instructions": "Make the tone more for a Fintech/Accounting tool"
+}

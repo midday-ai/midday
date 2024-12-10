@@ -1,3 +1,4 @@
+import { ChangeLanguage } from "@/components/change-language";
 import { ChangeTimezone } from "@/components/change-timezone";
 import { DateFormatSettings } from "@/components/date-format-settings";
 import { LocaleSettings } from "@/components/locale-settings";
@@ -19,6 +20,7 @@ export default async function Page() {
   return (
     <div className="space-y-12">
       <LocaleSettings locale={userData?.locale} />
+      <ChangeLanguage />
       <ChangeTimezone timezone={userData?.timezone} timezones={timezones} />
       <TimeFormatSettings timeFormat={userData?.time_format} />
       <DateFormatSettings dateFormat={userData?.date_format} />
