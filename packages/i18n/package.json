@@ -1,0 +1,32 @@
+{
+  "name": "languine",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "languine": "./dist/index.js"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test src",
+    "build": "tsup src/cli.ts --format esm --dts --clean",
+    "dev": "tsup src/cli.ts --format esm --watch --clean",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^1.0.7",
+    "@clack/prompts": "^0.8.2",
+    "chalk": "^5.3.0",
+    "dedent": "^1.5.3",
+    "dotenv": "^16.4.7",
+    "gradient-string": "^3.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.2",
+    "typescript": "^5.3.3"
+  }
+}

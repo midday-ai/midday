@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "locale": {
+    "source": "en",
+    "targets": [
+      "es",
+      "fr",
+      "pt"
+    ]
+  },
+  "files": {
+    "ts": {
+      "include": [
+        "locales/[locale].ts"
+      ]
+    }
+  },
+  "openai": {
+    "model": "gpt-4"
+  }
+}
