@@ -11,5 +11,6 @@
   },
   "openai": {
     "model": "gpt-4"
-  }
+  },
+  "instructions": "Make the tone more for a Fintech/Accounting tool"
 }
