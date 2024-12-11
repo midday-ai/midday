@@ -41,11 +41,11 @@ export const sendInvoiceEmail = schemaTask({
         "X-Entity-Ref-ID": nanoid(),
       },
       html: await render(
-        InvoiceEmail({
-          customerName: invoice?.customer.name,
-          teamName: invoice?.team.name,
-          link: `${getAppUrl()}/i/${invoice?.token}`,
-        }),
+        <InvoiceEmail
+          customerName={invoice?.customer.name}
+          teamName={invoice?.team.name}
+          link={`${getAppUrl()}/i/${invoice?.token}`}
+        />,
       ),
     });
 

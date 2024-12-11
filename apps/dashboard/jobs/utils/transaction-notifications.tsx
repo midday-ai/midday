@@ -89,12 +89,12 @@ export async function handleTransactionEmails(
     const { t } = getI18n({ locale: user.locale ?? "en" });
 
     const html = await render(
-      TransactionsEmail({
-        fullName: user.full_name,
-        transactions,
-        locale: user.locale ?? "en",
-        teamName: team.name,
-      }),
+      <TransactionsEmail
+        fullName={user.full_name}
+        transactions={transactions}
+        locale={user.locale ?? "en"}
+        teamName={team.name}
+      />,
     );
 
     return {
