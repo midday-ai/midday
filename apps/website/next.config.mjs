@@ -9,6 +9,9 @@ const config = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  experimental: {
+    inlineCss: true,
+  },
   images: {
     loader: "custom",
     loaderFile: "./image-loader.ts",
