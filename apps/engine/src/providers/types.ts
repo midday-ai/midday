@@ -45,6 +45,7 @@ export type Account = {
   institution: Institution;
   balance: Balance;
   enrollment_id: string | null; // Teller
+  resource_id: string | null; // GoCardLess
 };
 
 export type ConnectionStatus = {
