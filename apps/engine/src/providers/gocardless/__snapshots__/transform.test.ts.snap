@@ -33,6 +33,7 @@ exports[`Transform accounts 1`] = `
     "provider": "gocardless",
   },
   "name": "Pleo Account",
+  "resource_id": "3133",
   "type": "depository",
 }
 `;
