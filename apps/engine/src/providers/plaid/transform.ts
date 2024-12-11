@@ -196,6 +196,7 @@ export const transformAccount = ({
       logo: getLogoURL(institution.id),
       provider: Providers.Enum.plaid,
     },
+    resource_id: null,
   };
 };
 

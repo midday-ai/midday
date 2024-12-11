@@ -156,6 +156,7 @@ export const transformAccount = ({
     institution: transformInstitution(institution),
     type: getType(type),
     balance: transformAccountBalance(balance),
+    resource_id: null,
   };
 };
 
