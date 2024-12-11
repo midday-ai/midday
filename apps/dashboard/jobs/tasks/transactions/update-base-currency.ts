@@ -36,10 +36,16 @@ export const updateBaseCurrency = schemaTask({
       baseCurrency,
     }));
 
-    await triggerSequenceAndWait(formattedAccounts, updateAccountBaseCurrency, {
-      delayMinutes: 0,
-    });
+    if (formattedAccounts.length > 0) {
+      await triggerSequenceAndWait(
+        formattedAccounts,
+        updateAccountBaseCurrency,
+        {
+          delayMinutes: 0,
+        },
+      );
 
-    await revalidateCache({ tag: "bank", id: teamId });
+      await revalidateCache({ tag: "bank", id: teamId });
+    }
   },
 });
