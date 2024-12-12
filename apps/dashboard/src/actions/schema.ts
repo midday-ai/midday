@@ -180,6 +180,7 @@ export const connectBankAccountSchema = z.object({
       currency: z.string(),
       name: z.string(),
       institution_id: z.string(),
+      account_reference: z.string().nullable().optional(),
       enabled: z.boolean(),
       logo_url: z.string().nullable().optional(),
       type: z.enum([
