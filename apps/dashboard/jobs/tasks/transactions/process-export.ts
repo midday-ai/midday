@@ -81,6 +81,7 @@ export const processExport = schemaTask({
     const rows = transactionsData
       ?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .map((transaction) => [
+        transaction.id,
         transaction.date,
         transaction.name,
         transaction.description,

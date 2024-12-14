@@ -70,6 +70,7 @@ export const exportTransactions = schemaTask({
 
     const csv = await writeToString(rows, {
       headers: [
+        "ID",
         "Date",
         "Description",
         "Additional info",
