@@ -6,6 +6,13 @@ import { z } from "zod";
 export const updateReference = schemaTask({
   id: "update-reference",
   maxDuration: 300,
+  retry: {
+    maxAttempts: 1,
+    factor: 1,
+    minTimeoutInMs: 60000, // 1 minute
+    maxTimeoutInMs: 60000,
+    randomize: false,
+  },
   schema: z.object({
     referenceId: z.string(),
   }),
