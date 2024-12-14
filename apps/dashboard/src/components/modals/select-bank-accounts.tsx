@@ -296,7 +296,7 @@ export function SelectBankAccountsModal() {
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6 h-[300px] overflow-auto pb-[80px] relative scrollbar-hide"
+                    className="space-y-6 h-[300px] overflow-auto pb-[100px] relative scrollbar-hide"
                   >
                     {loading && <RowsSkeleton />}
 

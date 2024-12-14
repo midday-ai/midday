@@ -174,7 +174,7 @@ const transformAccountName = (account: TransformAccountName) => {
 
   // Then try to use the institution name
   if (account?.institution?.name) {
-    return account.institution.name;
+    return `${account.institution.name} (${account.currency.toUpperCase()})`;
   }
 
   // Last use a default name
@@ -194,6 +194,7 @@ export const transformAccount = ({
       name: account.name,
       product: account.product,
       institution: institution,
+      currency: account.currency.toUpperCase(),
     }),
     currency: account.currency.toUpperCase(),
     enrollment_id: null,

@@ -204,6 +204,7 @@ export type TransformAccountName = {
   name: string;
   product: string;
   institution: Institution;
+  currency: string;
 };
 
 export type AccountBalance = {
