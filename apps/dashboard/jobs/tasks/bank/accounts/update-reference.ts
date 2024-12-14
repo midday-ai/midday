@@ -7,14 +7,14 @@ export const updateReference = schemaTask({
   id: "update-reference",
   maxDuration: 300,
   schema: z.object({
-    connectionId: z.string(),
+    referenceId: z.string(),
   }),
-  run: async ({ connectionId }) => {
+  run: async ({ referenceId }) => {
     const supabase = createClient();
 
     const accountsResponse = await client.accounts.$get({
       query: {
-        id: connectionId,
+        id: referenceId,
         provider: "gocardless",
       },
     });

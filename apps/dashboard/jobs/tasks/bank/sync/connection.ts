@@ -144,7 +144,7 @@ export const syncConnection = schemaTask({
 
           if (data.provider === "gocardless") {
             await updateReference.trigger({
-              connectionId,
+              referenceId: data.reference_id,
             });
           }
         } catch (error) {
