@@ -8,7 +8,6 @@ import { useConnectParams } from "@/hooks/use-connect-params";
 import { useI18n } from "@/locales/client";
 import { getInitials } from "@/utils/format";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Accounts } from "@midday-ai/engine/resources/accounts.mjs";
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
@@ -38,6 +37,20 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { FormatAmount } from "../format-amount";
 import { LoadingTransactionsEvent } from "../loading-transactions-event";
+
+type Account = {
+  id: string;
+  name: string;
+  balance: number;
+  currency: string;
+  type: string;
+  subtype: string;
+  mask: string;
+  institution: {
+    id: string;
+    name: string;
+  };
+};
 
 function RowsSkeleton() {
   return (
@@ -140,7 +153,7 @@ export function SelectBankAccountsModal() {
   const { toast } = useToast();
   const t = useI18n();
 
-  const [accounts, setAccounts] = useState<Accounts.Data[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [runId, setRunId] = useState<string>();
   const [accessToken, setAccessToken] = useState<string>();
@@ -235,6 +248,7 @@ export function SelectBankAccountsModal() {
             institution_id: account.institution.id,
             logo_url: account.institution?.logo,
             account_id: account.id,
+            account_reference: account.resource_id,
             bank_name: account.institution.name,
             // TODO: Remove once we have a fix and return currency from engine
             currency: account.currency ?? account.balance.currency,

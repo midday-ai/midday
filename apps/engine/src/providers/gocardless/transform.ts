@@ -199,6 +199,7 @@ export const transformAccount = ({
     enrollment_id: null,
     balance: transformAccountBalance(balance),
     institution: transformInstitution(institution),
+    resource_id: account.resourceId,
   };
 };
 

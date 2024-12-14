@@ -69,7 +69,15 @@ export const AccountSchema = z
     enrollment_id: z
       .string()
       .openapi({
+        description: "Teller/Plaid enrollment id",
         example: "add29d44-1b36-4bcc-b317-b2cbc73ab8e7",
+      })
+      .nullable(),
+    resource_id: z
+      .string()
+      .openapi({
+        description: "GoCardLess reference id",
+        example: "GBRGZX62Y8",
       })
       .nullable(),
   })

@@ -14,6 +14,7 @@ type CreateBankConnectionPayload = {
     enabled: boolean;
     balance: number;
     type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
+    account_reference: string | null;
   }[];
   balance: number;
   accessToken?: string;
@@ -84,6 +85,7 @@ export async function createBankConnection(
         currency: account.currency,
         enabled: account.enabled,
         type: account.type,
+        account_reference: account.account_reference,
         balance: account.balance ?? 0,
       }),
       {
