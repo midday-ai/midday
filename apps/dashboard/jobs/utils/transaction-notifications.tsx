@@ -8,7 +8,7 @@ import {
   triggerBulk,
 } from "@midday/notification";
 import { createClient } from "@midday/supabase/job";
-import { render } from "@react-email/components";
+import { render } from "@react-email/render";
 import { logger } from "@trigger.dev/sdk/v3";
 
 interface User {
