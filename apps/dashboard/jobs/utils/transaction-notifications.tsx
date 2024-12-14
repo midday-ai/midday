@@ -118,8 +118,11 @@ export async function handleTransactionEmails(
 
   try {
     await triggerBulk(validEmailPromises);
+    logger.info("Transaction emails sent", {
+      count: validEmailPromises.length,
+    });
   } catch (error) {
-    await logger.error("Transaction emails", { error });
+    logger.error("Transaction emails", { error });
   }
 
   return validEmailPromises;

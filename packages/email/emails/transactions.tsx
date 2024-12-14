@@ -25,13 +25,13 @@ type Transaction = {
   name: string;
   currency: string;
   category?: string;
-  teamName: string;
 };
 
 interface Props {
   fullName: string;
   transactions: Transaction[];
   locale: string;
+  teamName: string;
 }
 
 const defaultTransactions = [
