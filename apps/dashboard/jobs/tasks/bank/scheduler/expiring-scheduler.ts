@@ -13,6 +13,9 @@ export const expiringScheduler = schedules.task({
     // Only run in production (Set in Trigger.dev)
     if (process.env.TRIGGER_ENVIRONMENT !== "production") return;
 
+    // TODO: Enable soon
+    return null;
+
     const supabase = createClient();
 
     const { data: bankConnections } = await supabase
