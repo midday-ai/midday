@@ -208,12 +208,8 @@ export function TransactionDetails({
     defaultValue.push("note");
   }
 
-  if (data?.recurring) {
-    defaultValue.push("recurring");
-  }
-
   return (
-    <div>
+    <div className="h-[calc(100vh-80px)] scrollbar-hide overflow-auto">
       <div className="flex justify-between mb-8">
         <div className="flex-1 flex-col">
           {isLoading ? (
@@ -359,6 +355,30 @@ export function TransactionDetails({
             />
           </AccordionContent>
         </AccordionItem>
+
+        <div className="mt-6 mb-4">
+          <Label htmlFor="settings" className="mb-2 block font-medium text-md">
+            Exclude from analytics
+          </Label>
+          <div className="flex flex-row items-center justify-between">
+            <div className="space-y-0.5 pr-4">
+              <p className="text-xs text-muted-foreground">
+                Exclude this transaction from calculations and analytics such as
+                burn rate, expense tracking, and more.
+              </p>
+            </div>
+
+            <Switch
+              checked={data?.exclude}
+              onCheckedChange={() => {
+                updateTransaction(
+                  { id: data?.id, exclude: !data?.exclude },
+                  { exclude: !data?.exclude },
+                );
+              }}
+            />
+          </div>
+        </div>
 
         <AccordionItem value="recurring">
           <AccordionTrigger>Recurring</AccordionTrigger>
