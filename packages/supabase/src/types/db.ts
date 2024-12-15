@@ -1334,10 +1334,10 @@ export type Database = {
           currency: string
           date: string
           description: string | null
-          exclude: boolean | null
           frequency: Database["public"]["Enums"]["transaction_frequency"] | null
           fts_vector: unknown | null
           id: string
+          internal: boolean | null
           internal_id: string
           manual: boolean | null
           method: Database["public"]["Enums"]["transactionMethods"]
@@ -1364,12 +1364,12 @@ export type Database = {
           currency: string
           date: string
           description?: string | null
-          exclude?: boolean | null
           frequency?:
             | Database["public"]["Enums"]["transaction_frequency"]
             | null
           fts_vector?: unknown | null
           id?: string
+          internal?: boolean | null
           internal_id: string
           manual?: boolean | null
           method: Database["public"]["Enums"]["transactionMethods"]
@@ -1393,12 +1393,12 @@ export type Database = {
           currency?: string
           date?: string
           description?: string | null
-          exclude?: boolean | null
           frequency?:
             | Database["public"]["Enums"]["transaction_frequency"]
             | null
           fts_vector?: unknown | null
           id?: string
+          internal?: boolean | null
           internal_id?: string
           manual?: boolean | null
           method?: Database["public"]["Enums"]["transactionMethods"]
@@ -1804,10 +1804,10 @@ export type Database = {
           currency: string
           date: string
           description: string | null
-          exclude: boolean | null
           frequency: Database["public"]["Enums"]["transaction_frequency"] | null
           fts_vector: unknown | null
           id: string
+          internal: boolean | null
           internal_id: string
           manual: boolean | null
           method: Database["public"]["Enums"]["transactionMethods"]
