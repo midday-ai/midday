@@ -206,6 +206,7 @@ export async function getTransactionsQuery(
     "status",
     "note",
     "manual",
+    "exclude",
     "recurring",
     "frequency",
     "name",
