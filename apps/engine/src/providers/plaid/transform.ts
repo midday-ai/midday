@@ -47,14 +47,6 @@ export const mapTransactionCategory = ({
     return "income";
   }
 
-  if (
-    transaction.transaction_code === "transfer" ||
-    transaction.personal_finance_category?.primary === "TRANSFER_IN" ||
-    transaction.personal_finance_category?.primary === "TRANSFER_OUT"
-  ) {
-    return "transfer";
-  }
-
   if (amount > 0) {
     return "income";
   }

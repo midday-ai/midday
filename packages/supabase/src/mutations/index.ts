@@ -151,7 +151,7 @@ export async function updateTransaction(
     .from("transactions")
     .update(data)
     .eq("id", id)
-    .select("id, category, category_slug, team_id, name, status")
+    .select("id, category, category_slug, team_id, name, status, internal")
     .single();
 }
 

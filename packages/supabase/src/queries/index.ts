@@ -206,6 +206,7 @@ export async function getTransactionsQuery(
     "status",
     "note",
     "manual",
+    "internal",
     "recurring",
     "frequency",
     "name",
@@ -262,12 +263,10 @@ export async function getTransactionsQuery(
     }
   }
 
-  if (statuses?.includes("fullfilled") || attachments === "include") {
-    query.eq("is_fulfilled", true);
-  }
-
-  if (statuses?.includes("unfulfilled") || attachments === "exclude") {
+  if (statuses?.includes("uncompleted") || attachments === "exclude") {
     query.eq("is_fulfilled", false);
+  } else if (statuses?.includes("completed") || attachments === "include") {
+    query.eq("is_fulfilled", true);
   }
 
   if (statuses?.includes("excluded")) {

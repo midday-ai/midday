@@ -27,7 +27,7 @@ const config = {
   },
   logging: {
     fetches: {
-      fullUrl: true,
+      fullUrl: process.env.LOG_FETCHES === "true",
     },
   },
   typescript: {

@@ -207,6 +207,7 @@ export const updateTransactionSchema = z.object({
   recurring: z.boolean().optional().nullable(),
   frequency: z.enum(["weekly", "monthly", "annually"]).optional().nullable(),
   status: z.enum(["deleted", "excluded", "posted", "completed"]).optional(),
+  internal: z.boolean().optional().nullable(),
 });
 
 export type UpdateTransactionValues = z.infer<typeof updateTransactionSchema>;

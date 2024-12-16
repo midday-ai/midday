@@ -91,6 +91,11 @@ export const ConnectionIssueEmail = ({
               </Button>
             </Section>
 
+            <Text className="text-[#121212]">
+              If you have any questions, please don't hesitate to reach out by
+              just replying to this email.
+            </Text>
+
             <br />
 
             <Footer />

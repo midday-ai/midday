@@ -75,7 +75,8 @@ export async function BurnRateChart({
                 <p>
                   Explanation: This tracks how fast you’re spending. If it’s
                   incorrect, internal transfers may be counted as income. You
-                  can change this manually in the transaction list.
+                  can adjust this by excluding the transactions from the
+                  calculations.
                 </p>
 
                 <p>

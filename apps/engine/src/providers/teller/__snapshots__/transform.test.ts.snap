@@ -72,7 +72,7 @@ exports[`Transform type transfer 1`] = `
 {
   "amount": -37.99,
   "balance": 85897.25,
-  "category": "transfer",
+  "category": null,
   "currency": "USD",
   "currency_rate": null,
   "currency_source": null,

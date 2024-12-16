@@ -52,10 +52,6 @@ export const mapTransactionCategory = ({
   transaction,
   amount,
 }: MapTransactionCategory) => {
-  if (transaction.type === "transfer") {
-    return "transfer";
-  }
-
   if (transaction.type === "fee") {
     return "fees";
   }
