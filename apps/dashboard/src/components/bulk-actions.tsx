@@ -142,7 +142,7 @@ export function BulkActions({ ids, tags }: Props) {
                       type: "status",
                       data: ids.map((transaction) => ({
                         id: transaction,
-                        status: "posted",
+                        internal: false,
                       })),
                     });
                   }}
@@ -155,7 +155,7 @@ export function BulkActions({ ids, tags }: Props) {
                       type: "status",
                       data: ids.map((transaction) => ({
                         id: transaction,
-                        status: "excluded",
+                        internal: true,
                       })),
                     });
                   }}

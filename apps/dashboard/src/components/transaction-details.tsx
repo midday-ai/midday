@@ -363,9 +363,9 @@ export function TransactionDetails({
           <div className="flex flex-row items-center justify-between">
             <div className="space-y-0.5 pr-4">
               <p className="text-xs text-muted-foreground">
-                Exclude this transaction from analytics like burn rate. This is
-                useful for internal transfers between accounts to avoid
-                double-counting.
+                Exclude this transaction from analytics like profit, expense and
+                revenue. This is useful for internal transfers between accounts
+                to avoid double-counting.
               </p>
             </div>
 
