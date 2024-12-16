@@ -1,6 +1,7 @@
 "use client";
 
 import { manualSyncTransactionsAction } from "@/actions/transactions/manual-sync-transactions-action";
+import { reconnectConnectionAction } from "@/actions/transactions/reconnect-connection-action";
 import { useSyncStatus } from "@/hooks/use-sync-status";
 import { connectionStatus } from "@/utils/connection-status";
 import {
@@ -167,6 +168,27 @@ export function BankConnection({ connection }: BankConnectionProps) {
     },
   });
 
+  const reconnectConnection = useAction(reconnectConnectionAction, {
+    onExecute: () => setSyncing(true),
+    onSuccess: ({ data }) => {
+      if (data) {
+        setRunId(data.id);
+        setAccessToken(data.publicAccessToken);
+      }
+    },
+    onError: () => {
+      setSyncing(false);
+      setRunId(undefined);
+      setStatus("FAILED");
+
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong please try again.",
+      });
+    },
+  });
+
   useEffect(() => {
     if (isSyncing) {
       toast({
@@ -204,10 +226,9 @@ export function BankConnection({ connection }: BankConnectionProps) {
   // NOTE: GoCardLess reconnect flow (redirect from API route)
   useEffect(() => {
     if (params.step === "reconnect" && params.id) {
-      manualSyncTransactions.execute({
+      reconnectConnection.execute({
         connectionId: params.id,
         provider: connection.provider,
-        type: "reconnect",
       });
     }
   }, [params]);
@@ -215,8 +236,6 @@ export function BankConnection({ connection }: BankConnectionProps) {
   const handleManualSync = () => {
     manualSyncTransactions.execute({
       connectionId: connection.id,
-      provider: connection.provider,
-      type: "sync",
     });
   };
 

@@ -4,7 +4,6 @@ import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { revalidateCache } from "jobs/utils/revalidate-cache";
 import { triggerSequenceAndWait } from "jobs/utils/trigger-sequence";
 import { z } from "zod";
-import { updateReference } from "../accounts/update-reference";
 import { transactionNotifications } from "../notifications/transactions";
 import { syncAccount } from "./account";
 
@@ -140,12 +139,6 @@ export const syncConnection = schemaTask({
               .from("bank_connections")
               .update({ status: "disconnected" })
               .eq("id", connectionId);
-          }
-
-          if (data.provider === "gocardless") {
-            await updateReference.trigger({
-              referenceId: data.reference_id,
-            });
           }
         } catch (error) {
           logger.error("Failed to check connection status by accounts", {
