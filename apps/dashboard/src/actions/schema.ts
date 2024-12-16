@@ -206,7 +206,9 @@ export const updateTransactionSchema = z.object({
   assigned_id: z.string().uuid().optional(),
   recurring: z.boolean().optional().nullable(),
   frequency: z.enum(["weekly", "monthly", "annually"]).optional().nullable(),
-  status: z.enum(["deleted", "excluded", "posted", "completed"]).optional(),
+  status: z
+    .enum(["deleted", "excluded", "posted", "completed", "archived"])
+    .optional(),
   internal: z.boolean().optional().nullable(),
 });
 
@@ -222,7 +224,15 @@ export const deleteCategoriesSchema = z.object({
 });
 
 export const bulkUpdateTransactionsSchema = z.object({
-  type: z.enum(["category", "note", "assigned", "status", "recurring", "tags"]),
+  type: z.enum([
+    "category",
+    "note",
+    "assigned",
+    "status",
+    "recurring",
+    "tags",
+    "archive",
+  ]),
   data: z.array(updateTransactionSchema),
 });
 

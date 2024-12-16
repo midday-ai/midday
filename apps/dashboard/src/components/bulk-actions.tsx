@@ -132,23 +132,10 @@ export function BulkActions({ ids, tags }: Props) {
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <Icons.Visibility className="mr-2 h-4 w-4" />
-              <span>Visibility</span>
+              <span>Exclude</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent sideOffset={14}>
-                <DropdownMenuCheckboxItem
-                  onCheckedChange={() => {
-                    bulkUpdateTransactions.execute({
-                      type: "status",
-                      data: ids.map((transaction) => ({
-                        id: transaction,
-                        internal: false,
-                      })),
-                    });
-                  }}
-                >
-                  Include
-                </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
                   onCheckedChange={() => {
                     bulkUpdateTransactions.execute({
@@ -160,7 +147,59 @@ export function BulkActions({ ids, tags }: Props) {
                     });
                   }}
                 >
-                  Exclude
+                  Yes
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  onCheckedChange={() => {
+                    bulkUpdateTransactions.execute({
+                      type: "status",
+                      data: ids.map((transaction) => ({
+                        id: transaction,
+                        internal: false,
+                      })),
+                    });
+                  }}
+                >
+                  No
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.Files className="mr-2 h-4 w-4" />
+              <span>Archive</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent sideOffset={14}>
+                <DropdownMenuCheckboxItem
+                  onCheckedChange={() => {
+                    bulkUpdateTransactions.execute({
+                      type: "status",
+                      data: ids.map((transaction) => ({
+                        id: transaction,
+                        status: "archived",
+                      })),
+                    });
+                  }}
+                >
+                  Yes
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  onCheckedChange={() => {
+                    bulkUpdateTransactions.execute({
+                      type: "status",
+                      data: ids.map((transaction) => ({
+                        id: transaction,
+                        status: "posted",
+                      })),
+                    });
+                  }}
+                >
+                  No
                 </DropdownMenuCheckboxItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>

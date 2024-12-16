@@ -2407,7 +2407,12 @@ export type Database = {
         | "deposit"
         | "wire"
         | "fee"
-      transactionStatus: "posted" | "pending" | "excluded" | "completed"
+      transactionStatus:
+        | "posted"
+        | "pending"
+        | "excluded"
+        | "completed"
+        | "archived"
     }
     CompositeTypes: {
       metrics_record: {

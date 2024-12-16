@@ -21,5 +21,10 @@ export const searchParamsCache = createSearchParamsCache({
   recurring: parseAsArrayOf(
     parseAsStringLiteral(["all", "weekly", "monthly", "annually"] as const),
   ),
-  statuses: parseAsStringLiteral(["completed", "uncompleted"] as const),
+  statuses: parseAsStringLiteral([
+    "completed",
+    "uncompleted",
+    "archived",
+    "excluded",
+  ] as const),
 });

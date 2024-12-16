@@ -69,6 +69,8 @@ const defaultSearch = {
 const statusFilters = [
   { id: "completed", name: "Completed" },
   { id: "uncompleted", name: "Uncompleted" },
+  { id: "archived", name: "Archived" },
+  { id: "excluded", name: "Excluded" },
 ];
 
 const attachmentsFilters = [
@@ -121,7 +123,12 @@ export function TransactionsSearchFilter({
         parseAsStringLiteral(["all", "weekly", "monthly", "annually"] as const),
       ),
       statuses: parseAsArrayOf(
-        parseAsStringLiteral(["completed", "uncompleted"] as const),
+        parseAsStringLiteral([
+          "completed",
+          "uncompleted",
+          "archived",
+          "excluded",
+        ] as const),
       ),
     },
     {

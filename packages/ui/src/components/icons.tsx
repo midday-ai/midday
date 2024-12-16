@@ -43,6 +43,7 @@ import {
   MdOutlineAccountBalance,
   MdOutlineAccountCircle,
   MdOutlineApps,
+  MdOutlineArchive,
   MdOutlineArrowDownward,
   MdOutlineArrowForward,
   MdOutlineArrowOutward,
