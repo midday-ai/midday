@@ -370,11 +370,11 @@ export function TransactionDetails({
             </div>
 
             <Switch
-              checked={data?.exclude}
+              checked={data?.internal}
               onCheckedChange={() => {
                 updateTransaction(
-                  { id: data?.id, exclude: !data?.exclude },
-                  { exclude: !data?.exclude },
+                  { id: data?.id, internal: !data?.internal },
+                  { internal: !data?.internal },
                 );
               }}
             />
