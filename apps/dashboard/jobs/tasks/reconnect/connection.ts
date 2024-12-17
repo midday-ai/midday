@@ -1,6 +1,6 @@
 import { client } from "@midday/engine/client";
 import { createClient } from "@midday/supabase/job";
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { syncConnection } from "jobs/tasks/bank/sync/connection";
 import { z } from "zod";
 
@@ -29,6 +29,8 @@ export const reconnectConnection = schemaTask({
 
       // Update the reference_id of the new connection
       if (referenceId) {
+        logger.info("Updating reference_id of the new connection");
+
         await supabase
           .from("bank_connections")
           .update({
@@ -47,6 +49,8 @@ export const reconnectConnection = schemaTask({
       });
 
       const accountsResponse = await accounts.json();
+
+      logger.info(accountsResponse);
 
       await Promise.all(
         accountsResponse.data.map(async (account) => {
