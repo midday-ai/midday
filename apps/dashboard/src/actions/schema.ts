@@ -429,8 +429,11 @@ export const updateEntriesSchema = z.object({
 
 export const manualSyncTransactionsSchema = z.object({
   connectionId: z.string().uuid(),
+});
+
+export const reconnectConnectionSchema = z.object({
+  connectionId: z.string().uuid(),
   provider: z.string(),
-  type: z.enum(["reconnect", "sync"]),
 });
 
 export const createGoCardLessLinkSchema = z.object({

@@ -77,8 +77,10 @@ export function Attachments({ prefix, data, onUpload }: Props) {
   };
 
   const handleOnSelectFile = (file) => {
+    const filename = stripSpecialCharacters(file.name);
+
     const item = {
-      name: file.name,
+      name: filename,
       size: file.data.size,
       type: file.data.content_type,
       path: file.data.file_path,

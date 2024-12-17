@@ -255,4 +255,8 @@ export const LogEvents = {
     name: "Create Customer Tag",
     channel: "customer",
   },
+  ReconnectConnection: {
+    name: "Reconnect Connection",
+    channel: "bank",
+  },
 };
