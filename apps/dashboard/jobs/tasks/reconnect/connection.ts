@@ -6,7 +6,7 @@ import { z } from "zod";
 
 export const reconnectConnection = schemaTask({
   id: "reconnect-connection",
-  maxDuration: 1000,
+  maxDuration: 300,
   retry: {
     maxAttempts: 2,
   },
