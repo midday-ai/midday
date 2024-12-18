@@ -17,6 +17,10 @@ export async function getChatsAction() {
     "30d": [],
   };
 
+  const now = new Date();
+  const oneWeekAgo = addWeeks(now, -1);
+  const oneMonthAgo = addMonths(now, -1);
+
   for (const obj of data) {
     const currentDate = new Date(obj.createdAt);
 
@@ -25,15 +29,15 @@ export async function getChatsAction() {
     }
 
     if (
-      !isToday(currentDate) &&
-      isBefore(currentDate, addWeeks(currentDate, 1))
+      isBefore(currentDate, now) &&
+      isAfter(currentDate, oneWeekAgo)
     ) {
       base["7d"].push(obj);
     }
 
     if (
-      isAfter(currentDate, addWeeks(currentDate, 1)) &&
-      isBefore(currentDate, addMonths(currentDate, 1))
+      isBefore(currentDate, oneWeekAgo) &&
+      isAfter(currentDate, oneMonthAgo)
     ) {
       base["30d"].push(obj);
     }
