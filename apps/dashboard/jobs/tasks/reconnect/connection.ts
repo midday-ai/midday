@@ -50,8 +50,6 @@ export const reconnectConnection = schemaTask({
 
       const accountsResponse = await accounts.json();
 
-      logger.info(accountsResponse);
-
       await Promise.all(
         accountsResponse.data.map(async (account) => {
           await supabase

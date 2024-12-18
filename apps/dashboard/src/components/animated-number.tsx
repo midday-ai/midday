@@ -18,8 +18,8 @@ export function AnimatedNumber({
   maximumFractionDigits,
   locale,
 }: Props) {
-  const { locale: currentLocale } = useUserContext((state) => state.data);
-  const localeToUse = locale || currentLocale;
+  const user = useUserContext((state) => state.data);
+  const localeToUse = locale || user?.locale;
 
   return (
     <NumberFlow
