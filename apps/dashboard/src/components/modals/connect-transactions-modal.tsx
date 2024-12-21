@@ -1,9 +1,11 @@
 "use client";
 
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
+import { createPluggyLinkTokenAction } from "@/actions/institutions/create-pluggy-link";
 import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
 import { getInstitutions } from "@/actions/institutions/get-institutions";
 import { useConnectParams } from "@/hooks/use-connect-params";
+import { usePluggyLink } from "@/hooks/use-pluggy-link";
 import type { Institutions } from "@midday-ai/engine/resources/institutions/institutions";
 import { track } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
@@ -49,6 +51,7 @@ type SearchResultProps = {
   provider: string;
   availableHistory: number;
   openPlaid: () => void;
+  openPluggy: () => void;
 };
 
 function SearchResult({
@@ -58,6 +61,7 @@ function SearchResult({
   provider,
   availableHistory,
   openPlaid,
+  openPluggy,
 }: SearchResultProps) {
   return (
     <div className="flex justify-between">
@@ -79,6 +83,7 @@ function SearchResult({
         provider={provider}
         openPlaid={openPlaid}
         availableHistory={availableHistory}
+        openPluggy={openPluggy}
       />
     </div>
   );
@@ -95,6 +100,7 @@ export function ConnectTransactionsModal({
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState<Institutions["data"]>([]);
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
+  const [pluggyToken, setPluggyToken] = useState<string | undefined>();
 
   const {
     countryCode,
@@ -140,6 +146,35 @@ export function ConnectTransactionsModal({
         event: LogEvents.ConnectBankCanceled.name,
         channel: LogEvents.ConnectBankCanceled.channel,
         provider: "plaid",
+      });
+    },
+  });
+
+  const { open: openPluggy } = usePluggyLink({
+    token: pluggyToken,
+    onSuccess: (itemData) => {
+      // const { access_token, item_id } = await exchangePublicToken(public_token);
+
+      // setParams({
+      //   step: "account",
+      //   provider: "pluggy",
+      //   token: access_token,
+      //   ref: item_id,
+      //   institution_id: metadata.institution?.institution_id,
+      // });
+      track({
+        event: LogEvents.ConnectBankAuthorized.name,
+        channel: LogEvents.ConnectBankAuthorized.channel,
+        provider: "pluggy",
+      });
+    },
+    onExit: () => {
+      setParams({ step: "connect" });
+
+      track({
+        event: LogEvents.ConnectBankCanceled.name,
+        channel: LogEvents.ConnectBankCanceled.channel,
+        provider: "pluggy",
       });
     },
   });
@@ -198,6 +233,21 @@ export function ConnectTransactionsModal({
 
     // NOTE: Only run where Plaid is supported
     if ((isOpen && countryCode === "US") || (isOpen && countryCode === "CA")) {
+      createLinkToken();
+    }
+  }, [isOpen, countryCode]);
+
+  useEffect(() => {
+    async function createLinkToken() {
+      const token = await createPluggyLinkTokenAction();
+
+      if (token) {
+        setPluggyToken(token);
+      }
+    }
+
+    // NOTE: Only run where Pluggy is supported (Brazil)
+    if (isOpen && countryCode === "BR") {
       createLinkToken();
     }
   }, [isOpen, countryCode]);
@@ -270,6 +320,10 @@ export function ConnectTransactionsModal({
                       openPlaid={() => {
                         setParams({ step: null });
                         openPlaid();
+                      }}
+                      openPluggy={() => {
+                        setParams({ step: null });
+                        openPluggy({ institutionId: institution.id });
                       }}
                     />
                   );

@@ -1,7 +1,8 @@
 import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
+import { PluggyApi } from "@/providers/pluggy/pluggy-api";
 import { getFileExtension, getLogoURL } from "@/utils/logo";
-import { getPopularity, getTellerData, matchLogoURL } from "./utils";
+import { getPopularity, getTellerData, matchLogoURL, slugify } from "./utils";
 
 export async function getGoCardLessInstitutions() {
   const provider = new GoCardLessApi({
@@ -67,11 +68,37 @@ export async function getPlaidInstitutions() {
   });
 }
 
+export async function getPluggyInstitutions() {
+  const provider = new PluggyApi({
+    // @ts-ignore
+    envs: {
+      PLUGGY_CLIENT_ID: process.env.PLUGGY_CLIENT_ID!,
+      PLUGGY_SECRET: process.env.PLUGGY_SECRET!,
+    },
+  });
+
+  const data = await provider.getInstitutions({ countries: ["BR"] });
+
+  return data.map((institution) => {
+    const extension = getFileExtension(institution.imageUrl);
+
+    return {
+      id: institution.id.toString(),
+      name: institution.name,
+      logo: getLogoURL(slugify(institution.name), extension),
+      countries: ["BR"],
+      popularity: getPopularity(institution.id.toString()),
+      provider: "pluggy",
+    };
+  });
+}
+
 export async function getInstitutions() {
   const data = await Promise.all([
-    getGoCardLessInstitutions(),
-    getTellerInstitutions(),
-    getPlaidInstitutions(),
+    // getGoCardLessInstitutions(),
+    // getTellerInstitutions(),
+    // getPlaidInstitutions(),
+    getPluggyInstitutions(),
   ]);
 
   return data.flat();
