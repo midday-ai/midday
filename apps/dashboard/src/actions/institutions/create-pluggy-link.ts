@@ -3,7 +3,7 @@
 import { client } from "@midday/engine/client";
 import { getSession } from "@midday/supabase/cached-queries";
 
-export const createPluggyLinkTokenAction = async (accessToken?: string) => {
+export const createPluggyLinkTokenAction = async () => {
   const {
     data: { session },
   } = await getSession();
@@ -24,8 +24,6 @@ export const createPluggyLinkTokenAction = async (accessToken?: string) => {
   }
 
   const { data } = await pluggyResponse.json();
-
-  console.log(data);
 
   return data.access_token;
 };
