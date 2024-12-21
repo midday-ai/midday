@@ -1,29 +1,46 @@
-import { PluggyClient } from "pluggy-sdk";
+import * as jwt from "jsonwebtoken";
+import xior from "xior";
+import type { XiorInstance, XiorRequestConfig } from "xior";
 import type {
   GetAccountBalanceResponse,
   GetConnectionStatusRequest,
   ProviderParams,
 } from "../types";
 import type {
+  ConnectTokenResponse,
   GetAccountsRequest,
   GetInstitutionsRequest,
   GetStatusResponse,
   GetTransactionsParams,
+  LinkTokenCreateRequest,
 } from "./types";
 
 export class PluggyApi {
-  #client: PluggyClient;
   #clientId: string;
   #clientSecret: string;
+  #apiKey?: string;
+
+  #baseUrl = "https://api.pluggy.ai";
 
   constructor(params: Omit<ProviderParams, "provider">) {
     this.#clientId = params.envs.PLUGGY_CLIENT_ID;
     this.#clientSecret = params.envs.PLUGGY_SECRET;
+  }
 
-    this.#client = new PluggyClient({
+  async #getApiKey() {
+    if (this.#apiKey && !this.#isJwtExpired(this.#apiKey)) {
+      return this.#apiKey;
+    }
+
+    const response = await this.#post("/auth", undefined, {
       clientId: this.#clientId,
       clientSecret: this.#clientSecret,
+      nonExpiring: false,
     });
+
+    this.#apiKey = response.apiKey;
+
+    return this.#apiKey;
   }
 
   #generateWebhookUrl(environment: "sandbox" | "production") {
@@ -34,8 +51,15 @@ export class PluggyApi {
     return "https://app.midday.ai/api/webhook/pluggy";
   }
 
+  #isJwtExpired(token: string) {
+    const decoded = jwt.decode(token, { complete: true });
+
+    // @ts-expect-error
+    return decoded.payload.exp <= Math.floor(Date.now() / 1000);
+  }
+
   async getAccounts({ id, institutionId }: GetAccountsRequest) {
-    const response = await this.#client.fetchAccounts(id);
+    const response = await this.#get(`/items/${id}/accounts`);
 
     const institution = await this.getInstitutionById(Number(institutionId));
 
@@ -47,12 +71,12 @@ export class PluggyApi {
 
   async getTransactions({ accountId, latest }: GetTransactionsParams) {
     if (latest) {
-      const response = await this.#client.fetchTransactions(accountId);
+      const response = await this.#get(`/items/${id}/transactions`);
 
       return response.results;
     }
 
-    const response = await this.#client.fetchAllTransactions(accountId);
+    const response = await this.#get(`/items/${id}/transactions`);
 
     return response;
   }
@@ -77,7 +101,7 @@ export class PluggyApi {
   async getAccountBalance(
     accountId: string,
   ): Promise<GetAccountBalanceResponse | undefined> {
-    const response = await this.#client.fetchAccount(accountId);
+    const response = await this.#get(`/items/${id}/accounts/${accountId}`);
 
     return {
       currency: response.currencyCode,
@@ -86,34 +110,83 @@ export class PluggyApi {
   }
 
   async getInstitutions({ countries }: GetInstitutionsRequest) {
-    const response = await this.#client.fetchConnectors({
-      countries,
+    const response = await this.#get("/connectors", undefined, {
+      countries: countries,
     });
 
     return response.results;
   }
 
   async getInstitutionById(id: number) {
-    return this.#client.fetchConnector(id);
+    return this.#get(`/connectors/${id}`);
   }
 
   async getConnectionStatus({ id }: GetConnectionStatusRequest) {
-    return this.#client.consentRetrieve(id);
+    return this.#get(`/consents/${id}`);
   }
 
   async deleteAccounts() {}
 
   async linkTokenCreate({
     userId,
-    webhookUrl,
     environment = "production",
-  }: LinkTokenCreateRequest) {
-    const { accessToken: connectToken } = await this.#client.createConnectToken(
-      ITEM_ID_TO_UPDATE,
-      {
-        clientUserId: userId,
-        webhook: this.#generateWebhookUrl(environment),
+  }: LinkTokenCreateRequest): Promise<ConnectTokenResponse> {
+    const apiKey = await this.#getApiKey();
+
+    const response = await this.#post("/connect_token", apiKey, {
+      clientUserId: userId,
+      webhookUrl: this.#generateWebhookUrl(environment),
+    });
+
+    return {
+      accessToken: response.accessToken,
+    };
+  }
+
+  async #getApi(apiKey?: string): Promise<XiorInstance> {
+    return xior.create({
+      baseURL: this.#baseUrl,
+      timeout: 30_000,
+      headers: {
+        Accept: "application/json",
+        "X-API-KEY": apiKey,
       },
-    );
+    });
+  }
+
+  async #get<TResponse>(
+    path: string,
+    apiKey?: string,
+    params?: Record<string, string>,
+    config?: XiorRequestConfig,
+  ): Promise<TResponse> {
+    const api = await this.#getApi(apiKey);
+
+    return api
+      .get<TResponse>(path, { params, ...config })
+      .then(({ data }) => data);
+  }
+
+  async #post<TResponse>(
+    path: string,
+    apiKey?: string,
+    body?: unknown,
+    config?: XiorRequestConfig,
+  ): Promise<TResponse> {
+    const api = await this.#getApi(apiKey);
+    return api.post<TResponse>(path, body, config).then(({ data }) => data);
+  }
+
+  async #_delete<TResponse>(
+    path: string,
+    apiKey?: string,
+    params?: Record<string, string>,
+    config?: XiorRequestConfig,
+  ): Promise<TResponse> {
+    const api = await this.#getApi(apiKey);
+
+    return api
+      .delete<TResponse>(path, { params, ...config })
+      .then(({ data }) => data);
   }
 }

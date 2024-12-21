@@ -3,6 +3,7 @@ import { useConnectParams } from "@/hooks/use-connect-params";
 import { useAction } from "next-safe-action/hooks";
 import { BankConnectButton } from "./bank-connect-button";
 import { GoCardLessConnect } from "./gocardless-connect";
+import { PluggyConnect } from "./pluggy-connect";
 import { TellerConnect } from "./teller-connect";
 
 type Props = {
@@ -10,12 +11,14 @@ type Props = {
   provider: string;
   availableHistory: number;
   openPlaid: () => void;
+  openPluggy: (props: { institutionId?: string }) => void;
 };
 
 export function ConnectBankProvider({
   id,
   provider,
   openPlaid,
+  openPluggy,
   availableHistory,
 }: Props) {
   const { setParams } = useConnectParams();
@@ -51,7 +54,7 @@ export function ConnectBankProvider({
         />
       );
     }
-    case "plaid":
+    case "plaid": {
       return (
         <BankConnectButton
           onClick={() => {
@@ -60,6 +63,17 @@ export function ConnectBankProvider({
           }}
         />
       );
+    }
+    case "pluggy": {
+      return (
+        <BankConnectButton
+          onClick={() => {
+            updateUsage();
+            openPluggy({ institutionId: id });
+          }}
+        />
+      );
+    }
     default:
       return null;
   }

@@ -18,10 +18,19 @@ export type GetStatusResponse = {
 };
 
 export type GetInstitutionsRequest = {
-  countries: string[];
+  countries?: string[];
 };
 
 export type GetAccountsRequest = {
   id: string;
   institutionId: string;
+};
+
+export type LinkTokenCreateRequest = {
+  userId: string;
+  environment?: "sandbox" | "production";
+};
+
+export type ConnectTokenResponse = {
+  accessToken: string;
 };

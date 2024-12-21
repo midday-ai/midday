@@ -20,6 +20,8 @@ export function InstitutionInfo({ provider, children }: Props) {
         return `With Plaid we can connect to 12,000+ financial institutions across the US, Canada, UK, and Europe are covered by Plaid's network`;
       case "teller":
         return "With Teller we can connect instantly to more than 5,000 financial institutions in the US.";
+      case "pluggy":
+        return "With Pluggy we can connect to all major financial institutions in Brazil.";
       default:
         break;
     }

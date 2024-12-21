@@ -1,4 +1,6 @@
 compatibility_date = "2024-11-11"
+compatibility_flags = [ "nodejs_compat" ]
+
 workers_dev = false
 logpush = true
 

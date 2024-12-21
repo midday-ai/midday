@@ -145,3 +145,24 @@ export const GoCardLessAgreementSchema = z
     }),
   })
   .openapi("GoCardLessAgreementSchema");
+
+export const PluggyLinkBodySchema = z
+  .object({
+    userId: z.string().openapi({
+      example: "9293961c-df93-4d6d-a2cc-fc3e353b2d10",
+    }),
+    environment: z.enum(["sandbox", "production"]).openapi({
+      example: "production",
+    }),
+  })
+  .openapi("PluggyLinkBodySchema");
+
+export const PluggyLinkSchema = z
+  .object({
+    data: z.object({
+      access_token: z.string().openapi({
+        example: "ojwmef9823f892n9h98h2efoqed9823hdodfcoj13er92hef",
+      }),
+    }),
+  })
+  .openapi("PluggyLinkSchema");

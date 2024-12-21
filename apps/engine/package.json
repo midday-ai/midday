@@ -11,19 +11,19 @@
   "dependencies": {
     "@hono/swagger-ui": "^0.5.0",
     "@hono/zod-openapi": "^0.18.3",
-    "@hono/zod-validator": "^0.4.1",
-    "hono": "^4.6.13",
+    "@hono/zod-validator": "^0.4.2",
+    "hono": "^4.6.14",
     "plaid": "^30.0.0",
-    "pluggy-sdk": "^0.64.0",
+    "pluggy-sdk": "^0.65.1",
     "typesense": "^1.8.2",
     "workers-ai-provider": "^0.0.10",
     "xior": "^0.6.1",
-    "zod": "^3.23.8"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20241205.0",
+    "@cloudflare/workers-types": "^4.20241218.0",
     "@types/bun": "^1.1.14",
-    "wrangler": "^3.93.0"
+    "wrangler": "^3.99.0"
   },
   "exports": {
     "./client": "./src/client/index.ts",

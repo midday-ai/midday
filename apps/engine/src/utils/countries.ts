@@ -36,11 +36,14 @@ export const PLAID_COUNTRIES = ["US", "CA"];
 
 export const TELLER_COUNTRIES = ["US"];
 
+export const PLUGGY_COUNTRIES = ["BR"];
+
 const combinedCountries = [
   ...new Set([
     ...GOCARDLESS_COUNTRIES,
     ...PLAID_COUNTRIES,
     ...TELLER_COUNTRIES,
+    ...PLUGGY_COUNTRIES,
   ]),
 ] as const;
 
