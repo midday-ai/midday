@@ -56,10 +56,16 @@ export const sendInvoiceEmail = schemaTask({
       ),
     });
 
-    logger.info("Invoice email sent", {
-      invoiceId,
-      response,
-    });
+    if (response.error) {
+      logger.error("Invoice email failed to send", {
+        invoiceId,
+        error: response.error,
+      });
+
+      throw new Error("Invoice email failed to send");
+    }
+
+    logger.info("Invoice email sent");
 
     await supabase
       .from("invoices")
