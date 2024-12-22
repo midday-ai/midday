@@ -77,7 +77,9 @@ export async function getPluggyInstitutions() {
     },
   });
 
-  const data = await provider.getInstitutions({ countries: ["BR"] });
+  const data = await provider.getInstitutions({
+    countries: ["BR"],
+  });
 
   return data.map((institution) => {
     const extension = getFileExtension(institution.imageUrl);

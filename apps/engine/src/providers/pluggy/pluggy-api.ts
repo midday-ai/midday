@@ -10,6 +10,7 @@ import type {
   ConnectTokenResponse,
   GetAccountsRequest,
   GetInstitutionsRequest,
+  GetInstitutionsResponse,
   GetStatusResponse,
   GetTransactionsParams,
   LinkTokenCreateRequest,
@@ -109,9 +110,15 @@ export class PluggyApi {
     };
   }
 
-  async getInstitutions({ countries }: GetInstitutionsRequest) {
-    const response = await this.#get("/connectors", undefined, {
-      countries: countries,
+  async getInstitutions({
+    countries,
+    sandbox,
+  }: GetInstitutionsRequest): Promise<GetInstitutionsResponse> {
+    const apiKey = await this.#getApiKey();
+
+    const response = await this.#get("/connectors", apiKey, {
+      countries,
+      sandbox: sandbox ? "true" : "false",
     });
 
     return response.results;

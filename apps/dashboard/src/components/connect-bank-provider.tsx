@@ -3,7 +3,6 @@ import { useConnectParams } from "@/hooks/use-connect-params";
 import { useAction } from "next-safe-action/hooks";
 import { BankConnectButton } from "./bank-connect-button";
 import { GoCardLessConnect } from "./gocardless-connect";
-import { PluggyConnect } from "./pluggy-connect";
 import { TellerConnect } from "./teller-connect";
 
 type Props = {

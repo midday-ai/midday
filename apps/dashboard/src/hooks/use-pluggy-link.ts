@@ -8,6 +8,8 @@ type Props = {
   onSuccess: (itemData: any) => void;
   onError: () => void;
   includeSandbox?: boolean;
+  theme?: "light" | "dark";
+  language?: string;
 };
 
 export function usePluggyLink({
@@ -17,6 +19,8 @@ export function usePluggyLink({
   onSuccess,
   onError,
   includeSandbox = false,
+  language = "pt",
+  theme,
 }: Props) {
   const [connectToken, setConnectToken] = useState<string>("");
   const [selectedConnectorId, setSelectedConnectorId] = useState<
@@ -34,6 +38,8 @@ export function usePluggyLink({
     onClose: onExit,
     onSuccess,
     onError,
+    theme,
+    language,
   });
 
   const handleOpen = ({ institutionId }: { institutionId?: string }) => {

@@ -20,6 +20,7 @@ import {
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
 import { useDebounce, useScript } from "@uidotdev/usehooks";
+import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
@@ -97,6 +98,7 @@ export function ConnectTransactionsModal({
   countryCode: initialCountryCode,
 }: ConnectTransactionsModalProps) {
   const router = useRouter();
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState<Institutions["data"]>([]);
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
@@ -152,6 +154,8 @@ export function ConnectTransactionsModal({
 
   const { open: openPluggy } = usePluggyLink({
     token: pluggyToken,
+    theme: theme === "dark" ? "dark" : "light",
+    language: "en",
     onSuccess: (itemData) => {
       // const { access_token, item_id } = await exchangePublicToken(public_token);
 

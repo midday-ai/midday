@@ -11,7 +11,9 @@ async function main() {
     },
   });
 
-  const data = await provider.getInstitutions({ countries: ["BR"] });
+  const data = await provider.getInstitutions({
+    countries: ["BR"],
+  });
 
   const tasks = data.map(async (institution) => {
     const extension = getFileExtension(institution.imageUrl);
