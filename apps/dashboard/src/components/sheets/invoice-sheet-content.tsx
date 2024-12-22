@@ -64,6 +64,7 @@ export function InvoiceSheetContent({
 
   const { watch } = useFormContext();
   const templateSize = watch("template.size");
+  const deliveryType = watch("template.delivery_type");
 
   const size = templateSize === "a4" ? 650 : 740;
   const isOpen = Boolean(type === "create" || type === "edit");
@@ -124,7 +125,7 @@ export function InvoiceSheetContent({
         teamId={teamId}
         customers={customers}
         isSubmitting={createInvoice.isPending}
-        onSubmit={({ id }) => createInvoice.execute({ id })}
+        onSubmit={({ id }) => createInvoice.execute({ id, deliveryType })}
         invoiceNumber={invoiceNumber}
       />
     </SheetContent>

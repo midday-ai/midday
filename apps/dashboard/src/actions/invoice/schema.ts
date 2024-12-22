@@ -154,6 +154,7 @@ export const invoiceFormSchema = z.object({
 
 export const createInvoiceSchema = z.object({
   id: z.string().uuid(),
+  deliveryType: z.enum(["create", "create_and_send"]),
 });
 
 export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;

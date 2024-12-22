@@ -32,10 +32,17 @@ export const sendInvoiceEmail = schemaTask({
       return;
     }
 
+    const customerEmail = invoice?.customer?.email;
+
+    if (!customerEmail) {
+      logger.error("Invoice customer email not found");
+      return;
+    }
+
     const response = await resend.emails.send({
       from: "Midday <middaybot@midday.ai>",
-      to: invoice?.customer.email,
-      replyTo: invoice?.team.email,
+      to: customerEmail,
+      replyTo: invoice?.team.email ?? undefined,
       subject: `${invoice?.team.name} sent you an invoice`,
       headers: {
         "X-Entity-Ref-ID": nanoid(),
@@ -58,7 +65,7 @@ export const sendInvoiceEmail = schemaTask({
       .from("invoices")
       .update({
         status: "unpaid",
-        sent_to: invoice?.customer.email,
+        sent_to: customerEmail,
       })
       .eq("id", invoiceId);
   },
