@@ -22,7 +22,7 @@ export const sendInvoiceEmail = schemaTask({
     const { data: invoice } = await supabase
       .from("invoices")
       .select(
-        "id, token, sent_to, customer:customer_id(name, website, email), team:team_id(name, email)",
+        "id, token, customer:customer_id(name, website, email), team:team_id(name, email)",
       )
       .eq("id", invoiceId)
       .single();
@@ -32,10 +32,10 @@ export const sendInvoiceEmail = schemaTask({
       return;
     }
 
-    await resend.emails.send({
+    const response = await resend.emails.send({
       from: "Midday <middaybot@midday.ai>",
       to: invoice?.customer.email,
-      reply_to: invoice?.team.email,
+      replyTo: invoice?.team.email,
       subject: `${invoice?.team.name} sent you an invoice`,
       headers: {
         "X-Entity-Ref-ID": nanoid(),
@@ -47,6 +47,11 @@ export const sendInvoiceEmail = schemaTask({
           link={`${getAppUrl()}/i/${invoice?.token}`}
         />,
       ),
+    });
+
+    logger.info("Invoice email sent", {
+      invoiceId,
+      response,
     });
 
     await supabase
