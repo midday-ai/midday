@@ -174,3 +174,15 @@ export async function batchPromises<T>(promises: Promise<T>[]): Promise<T[]> {
 
   return results;
 }
+
+export function slugify(text: string): string {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize("NFKD") // Normalize unicode characters
+    .replace(/\p{Diacritic}/gu, "") // Remove diacritics using Unicode property escapes
+    .replace(/[^\w\s-]/g, "") // Remove non-word chars
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+    .trim(); // Trim leading/trailing spaces and hyphens
+}
