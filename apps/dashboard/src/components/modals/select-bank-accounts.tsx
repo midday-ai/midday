@@ -227,7 +227,7 @@ export function SelectBankAccountsModal() {
   useEffect(() => {
     async function fetchData() {
       const { data } = await getAccounts({
-        provider: provider as "teller" | "plaid" | "gocardless",
+        provider: provider as "teller" | "plaid" | "gocardless" | "pluggy",
         id: ref ?? undefined,
         accessToken: token ?? undefined,
         institutionId: institution_id ?? undefined,
