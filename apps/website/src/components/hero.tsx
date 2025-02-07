@@ -8,12 +8,12 @@ export function Hero() {
   return (
     <section className="mt-[60px] lg:mt-[180px] min-h-[530px] relative lg:h-[calc(100vh-300px)]">
       <div className="flex flex-col">
-        <Link href="/updates/october-product-updates">
+        <Link href="/updates/january-product-update">
           <Button
             variant="outline"
             className="rounded-full border-border flex space-x-2 items-center"
           >
-            <span className="font-mono text-xs">October Product Updates</span>
+            <span className="font-mono text-xs">January Product Updates</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width={12}
