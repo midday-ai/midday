@@ -10,6 +10,8 @@ export type Bindings = {
   PLAID_CLIENT_ID: string;
   PLAID_ENVIRONMENT: string;
   PLAID_SECRET: string;
+  PLUGGY_CLIENT_ID: string;
+  PLUGGY_SECRET: string;
   TYPESENSE_API_KEY: string;
   TYPESENSE_ENDPOINT_AU: string;
   TYPESENSE_ENDPOINT_EU: string;

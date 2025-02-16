@@ -2,6 +2,7 @@ import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
 import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
+import { PluggyApi } from "@/providers/pluggy/pluggy-api";
 import { createErrorResponse } from "@/utils/error";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
@@ -17,6 +18,8 @@ import {
   PlaidExchangeSchema,
   PlaidLinkBodySchema,
   PlaidLinkSchema,
+  PluggyLinkBodySchema,
+  PluggyLinkSchema,
 } from "./schema";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>()
@@ -73,6 +76,70 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
         return c.json(
           {
             data,
+          },
+          200,
+        );
+      } catch (error) {
+        const errorResponse = createErrorResponse(error, c.get("requestId"));
+
+        return c.json(errorResponse, 400);
+      }
+    },
+  )
+  .openapi(
+    createRoute({
+      method: "post",
+      path: "/pluggy/link",
+      summary: "Auth Link (Pluggy)",
+      request: {
+        body: {
+          content: {
+            "application/json": {
+              schema: PluggyLinkBodySchema,
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: PluggyLinkSchema,
+            },
+          },
+          description: "Retrieve Link",
+        },
+        400: {
+          content: {
+            "application/json": {
+              schema: ErrorSchema,
+            },
+          },
+          description: "Returns an error",
+        },
+      },
+    }),
+    async (c) => {
+      const envs = env(c);
+
+      const { userId, environment } = await c.req.json();
+
+      const api = new PluggyApi({
+        kv: c.env.KV,
+        envs,
+      });
+
+      try {
+        const { accessToken } = await api.linkTokenCreate({
+          userId,
+          environment,
+        });
+
+        return c.json(
+          {
+            data: {
+              access_token: accessToken,
+            },
           },
           200,
         );

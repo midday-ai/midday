@@ -10,12 +10,14 @@ type Props = {
   provider: string;
   availableHistory: number;
   openPlaid: () => void;
+  openPluggy: (props: { institutionId?: string }) => void;
 };
 
 export function ConnectBankProvider({
   id,
   provider,
   openPlaid,
+  openPluggy,
   availableHistory,
 }: Props) {
   const { setParams } = useConnectParams();
@@ -51,7 +53,7 @@ export function ConnectBankProvider({
         />
       );
     }
-    case "plaid":
+    case "plaid": {
       return (
         <BankConnectButton
           onClick={() => {
@@ -60,6 +62,17 @@ export function ConnectBankProvider({
           }}
         />
       );
+    }
+    case "pluggy": {
+      return (
+        <BankConnectButton
+          onClick={() => {
+            updateUsage();
+            openPluggy({ institutionId: id });
+          }}
+        />
+      );
+    }
     default:
       return null;
   }
