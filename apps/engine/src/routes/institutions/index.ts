@@ -68,6 +68,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
         query_by: "name",
         filter_by: `countries:=[${countryCode}]`,
         limit: +limit,
+        sort_by: "popularity:desc",
       };
 
       try {
@@ -146,14 +147,12 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           .documents(id)
           .retrieve();
 
-        const originalData: Document =
-          typeof original === "string" && JSON.parse(original);
-
         const result = await typesense
           .collections("institutions")
           .documents(id)
           .update({
-            popularity: originalData?.popularity + 1 || 0,
+            // @ts-ignore
+            popularity: (original?.popularity ?? 0) + 1,
           });
 
         const data: Document =
