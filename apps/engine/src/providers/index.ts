@@ -1,4 +1,5 @@
 import { logger } from "@/utils/logger";
+import { EnableBankingProvider } from "./enablebanking/enablebanking-provider";
 import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 import { PlaidProvider } from "./plaid/plaid-provider";
 import { TellerProvider } from "./teller/teller-provider";
@@ -13,11 +14,15 @@ import type {
   GetTransactionsRequest,
   ProviderParams,
 } from "./types";
-
 export class Provider {
   #name?: string;
 
-  #provider: PlaidProvider | TellerProvider | GoCardLessProvider | null = null;
+  #provider:
+    | PlaidProvider
+    | TellerProvider
+    | GoCardLessProvider
+    | EnableBankingProvider
+    | null = null;
 
   constructor(params?: ProviderParams) {
     this.#name = params?.provider;
@@ -32,6 +37,9 @@ export class Provider {
       case "plaid":
         this.#provider = new PlaidProvider(params);
         break;
+      case "enablebanking":
+        this.#provider = new EnableBankingProvider(params);
+        break;
       default:
     }
   }
@@ -42,14 +50,20 @@ export class Provider {
     const teller = new TellerProvider(params);
     const plaid = new PlaidProvider(params);
     const gocardless = new GoCardLessProvider(params);
+    const enablebanking = new EnableBankingProvider(params);
 
     try {
-      const [isPlaidHealthy, isGocardlessHealthy, isTellerHealthy] =
-        await Promise.all([
-          plaid.getHealthCheck(),
-          gocardless.getHealthCheck(),
-          teller.getHealthCheck(),
-        ]);
+      const [
+        isPlaidHealthy,
+        isGocardlessHealthy,
+        isTellerHealthy,
+        isEnableBankingHealthy,
+      ] = await Promise.all([
+        plaid.getHealthCheck(),
+        gocardless.getHealthCheck(),
+        teller.getHealthCheck(),
+        enablebanking.getHealthCheck(),
+      ]);
 
       return {
         plaid: {
@@ -60,6 +74,9 @@ export class Provider {
         },
         teller: {
           healthy: isTellerHealthy,
+        },
+        enablebanking: {
+          healthy: isEnableBankingHealthy,
         },
       };
     } catch {

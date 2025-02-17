@@ -1,6 +1,6 @@
 import type { AccountType } from "@/utils/account";
 
-export type Providers = "teller" | "plaid" | "gocardless";
+export type Providers = "teller" | "plaid" | "gocardless" | "enablebanking";
 
 export type ProviderParams = {
   provider: Providers;
@@ -12,6 +12,8 @@ export type ProviderParams = {
     PLAID_CLIENT_ID: string;
     PLAID_SECRET: string;
     PLAID_ENVIRONMENT: string;
+    ENABLEBANKING_APPLICATION_ID: string;
+    ENABLE_BANKING_KEY_CONTENT: string;
   };
 };
 
@@ -113,6 +115,7 @@ export type GetHealthCheckResponse = {
   teller: HealthCheckResponse;
   gocardless: HealthCheckResponse;
   plaid: HealthCheckResponse;
+  enablebanking: HealthCheckResponse;
 };
 
 export type GetConnectionStatusResponse = ConnectionStatus;
