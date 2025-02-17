@@ -1,5 +1,6 @@
-import { Avatar, AvatarImage } from "@midday/ui/avatar";
+import { Avatar } from "@midday/ui/avatar";
 import Image from "next/image";
+import { useState } from "react";
 
 type Props = {
   src: string | null;
@@ -8,9 +9,11 @@ type Props = {
 };
 
 export function BankLogo({ src, alt, size = 34 }: Props) {
+  const [hasError, setHasError] = useState(false);
+
   return (
     <Avatar style={{ width: size, height: size }}>
-      {src && (
+      {src && !hasError && (
         <Image
           src={src}
           alt={alt}
@@ -18,12 +21,13 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
           width={size}
           height={size}
           quality={100}
+          onError={() => setHasError(true)}
         />
       )}
       <Image
         src="https://cdn-engine.midday.ai/default.jpg"
         alt={alt}
-        className="absolute -z-10"
+        className={`absolute ${!src || hasError ? "" : "-z-10"}`}
         width={size}
         height={size}
       />
