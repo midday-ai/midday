@@ -1,3 +1,5 @@
+import { Buffer } from "node:buffer";
+import fs from "node:fs";
 import * as jose from "jose";
 import xior, { type XiorInstance, type XiorRequestConfig } from "xior";
 import type { ProviderParams } from "../types";
@@ -12,32 +14,71 @@ export class EnableBankingApi {
   #baseUrl = "https://api.enablebanking.com";
   #applicationId: string;
   #keyContent: string;
-  #expiresIn = 23;
+
+  // Maximum allowed TTL is 24 hours (86400 seconds)
+  #expiresIn = 23; // hours
 
   constructor(params: Omit<ProviderParams, "provider">) {
     this.#applicationId = params.envs.ENABLEBANKING_APPLICATION_ID;
     this.#keyContent = params.envs.ENABLE_BANKING_KEY_CONTENT;
   }
 
-  private async generateJWT() {
-    const privateKey = Buffer.from(this.#keyContent, "base64");
+  private encodeData(data: object) {
+    return jose.base64url.encode(Buffer.from(JSON.stringify(data)));
+  }
 
-    const key = await jose.importPKCS8(privateKey.toString(), "RS256");
+  private getJWTHeader() {
+    return this.encodeData({
+      typ: "JWT",
+      alg: "RS256",
+      kid: this.#applicationId,
+    });
+  }
 
-    const jwt = await new jose.SignJWT({
+  private getJWTBody(exp: number) {
+    const timestamp = Math.floor(Date.now() / 1000);
+    return this.encodeData({
       iss: "enablebanking.com",
       aud: "api.enablebanking.com",
-    })
-      .setProtectedHeader({
-        typ: "JWT",
-        alg: "RS256",
-        kid: this.#applicationId,
-      })
-      .setIssuedAt()
-      .setExpirationTime(`${this.#expiresIn}h`)
-      .sign(key);
+      iat: timestamp,
+      exp: timestamp + exp,
+    });
+  }
 
-    return jwt;
+  async signWithKey(data: string) {
+    const decodedKey = Buffer.from(this.#keyContent, "base64").toString(
+      "utf-8",
+    );
+
+    const pemKey = decodedKey.includes("BEGIN PRIVATE KEY")
+      ? decodedKey
+      : `-----BEGIN PRIVATE KEY-----\n${decodedKey}\n-----END PRIVATE KEY-----`;
+
+    console.log(decodedKey.includes("BEGIN PRIVATE KEY"));
+
+    const privateKey = await jose.importPKCS8(pemKey, "RS256");
+
+    // Sign directly with RSA-SHA256
+    const signature = await crypto.subtle.sign(
+      {
+        name: "RSASSA-PKCS1-v1_5",
+        hash: { name: "SHA-256" },
+      },
+      // @ts-expect-error
+      privateKey,
+      new TextEncoder().encode(data),
+    );
+
+    return jose.base64url.encode(new Uint8Array(signature));
+  }
+
+  private async generateJWT() {
+    const exp = this.#expiresIn * 60 * 60;
+    const jwtHeaders = this.getJWTHeader();
+    const jwtBody = this.getJWTBody(exp);
+    const jwtSignature = await this.signWithKey(`${jwtHeaders}.${jwtBody}`);
+
+    return `${jwtHeaders}.${jwtBody}.${jwtSignature}`;
   }
 
   async #getApi(): Promise<XiorInstance> {
@@ -94,10 +135,13 @@ export class EnableBankingApi {
       continuation_key?: string;
     },
   ): Promise<GetTransactionsResponse> {
-    return this.#get<GetTransactionsResponse>(
-      `/accounts/${accountId}/transactions`,
-      params,
-    );
+    // return this.#get<GetTransactionsResponse>(
+    //   `/accounts/${accountId}/transactions`,
+    //   params,
+    // );
+
+    const katt = await this.#get<GetTransactionsResponse>("/aspsps", params);
+    console.log(katt);
   }
 
   async deleteSession(sessionId: string): Promise<void> {
