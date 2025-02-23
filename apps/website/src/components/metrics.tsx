@@ -6,13 +6,13 @@ export function Metrics() {
       <Link href="/open-startup">
         <div className="flex flex-col md:pr-8 text-center">
           <h4 className="text-[#878787] text-sm mb-4">Businesses</h4>
-          <span className="text-2xl font-mono text-stroke">12,800+</span>
+          <span className="text-2xl font-mono text-stroke">13,000+</span>
         </div>
       </Link>
       <Link href="/open-startup">
         <div className="flex flex-col md:px-8 text-center">
           <h4 className="text-[#878787] text-sm mb-4">Bank accounts</h4>
-          <span className="text-2xl font-mono text-stroke">5,200+</span>
+          <span className="text-2xl font-mono text-stroke">5,300+</span>
         </div>
       </Link>
       <Link href="/open-startup">
