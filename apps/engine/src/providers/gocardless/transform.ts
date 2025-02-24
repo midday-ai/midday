@@ -24,10 +24,6 @@ export const mapTransactionCategory = (transaction: Transaction) => {
     return "income";
   }
 
-  if (transaction?.proprietaryBankTransactionCode === "Transfer") {
-    return "transfer";
-  }
-
   return null;
 };
 

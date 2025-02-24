@@ -21,12 +21,6 @@ export const createGoCardLessLinkAction = authActionClient
       },
       ctx: { analytics, user },
     }) => {
-      await client.institutions[":id"].usage.$put({
-        param: {
-          id: institutionId,
-        },
-      });
-
       const redirectTo = new URL(redirectBase);
 
       redirectTo.searchParams.append("step", step);

@@ -66,7 +66,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
       const searchParameters = {
         q,
         query_by: "name",
-        filter_by: `countries:=[${countryCode}] && provider:!=enablebanking`,
+        filter_by: `countries:=[${countryCode}]`,
         limit: +limit,
         sort_by: "popularity:desc",
       };

@@ -76,6 +76,7 @@ function SearchResult({
 
       <ConnectBankProvider
         id={id}
+        name={name}
         provider={provider}
         openPlaid={openPlaid}
         availableHistory={availableHistory}

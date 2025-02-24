@@ -443,6 +443,10 @@ export const createGoCardLessLinkSchema = z.object({
   redirectBase: z.string(),
 });
 
+export const createEnableBankingLinkSchema = z.object({
+  institutionId: z.string(),
+});
+
 export const updateInstitutionUsageSchema = z.object({
   institutionId: z.string(),
 });

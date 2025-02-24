@@ -6,7 +6,7 @@ type GetAccountParams = {
   id?: string;
   accessToken?: string;
   institutionId?: string; // Plaid
-  provider: "gocardless" | "teller" | "plaid";
+  provider: "gocardless" | "teller" | "plaid" | "enablebanking";
 };
 
 export async function getAccounts({

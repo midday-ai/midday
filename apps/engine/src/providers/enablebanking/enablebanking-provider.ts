@@ -15,7 +15,13 @@ import type {
   ProviderParams,
 } from "../types";
 import { EnableBankingApi } from "./enablebanking-api";
-// import { transformAccount, transformTransaction } from "./transform";
+import {
+  transformAccount,
+  transformBalance,
+  transformConnectionStatus,
+  transformInstitution,
+  transformTransaction,
+} from "./transform";
 
 export class EnableBankingProvider implements Provider {
   #api: EnableBankingApi;
@@ -32,40 +38,41 @@ export class EnableBankingProvider implements Provider {
     params: GetInstitutionsRequest,
   ): Promise<GetInstitutionsResponse> {
     const response = await this.#api.getInstitutions();
-    // return response.aspsps.map(transformInstitution);
-    return [];
+    return response.aspsps.map(transformInstitution);
   }
 
-  async getAccounts(params: GetAccountsRequest): Promise<GetAccountsResponse> {
-    const response = await this.#api.getAccounts(params.id!);
-    // return response.accounts.map(transformAccount);
-    return [];
+  async getAccounts({ id }: GetAccountsRequest): Promise<GetAccountsResponse> {
+    if (!id) {
+      throw Error("Missing params");
+    }
+
+    const response = await this.#api.getAccounts({ id });
+    console.log(response);
+    return response.map(transformAccount);
   }
 
   async getAccountBalance(
     params: GetAccountBalanceRequest,
   ): Promise<GetAccountBalanceResponse> {
     const response = await this.#api.getAccountBalance(params.accountId);
-    // return transformBalance(response.balances[0]);
-    return { currency: "EUR", amount: 100 };
+    return transformBalance(response);
   }
 
   async getTransactions(
     params: GetTransactionsRequest,
   ): Promise<GetTransactionsResponse> {
-    const response = await this.#api.getTransactions(params.accountId);
-    return [];
+    const response = await this.#api.getTransactions(params);
+    return response.transactions.map(transformTransaction);
   }
 
-  async getConnectionStatus(
-    params: GetConnectionStatusRequest,
-  ): Promise<ConnectionStatus> {
-    try {
-      await this.#api.getAccounts(params.id!);
-      return { status: "connected" };
-    } catch (error) {
-      return { status: "disconnected" };
+  async getConnectionStatus({ id }: GetConnectionStatusRequest) {
+    if (!id) {
+      throw Error("Missing params");
     }
+
+    const response = await this.#api.getSession(id);
+
+    return transformConnectionStatus(response);
   }
 
   async deleteConnection(params: DeleteConnectionRequest): Promise<void> {

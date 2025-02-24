@@ -12,18 +12,18 @@
     "@hono/swagger-ui": "^0.5.0",
     "@hono/zod-openapi": "^0.18.3",
     "@hono/zod-validator": "^0.4.1",
-    "hono": "^4.6.13",
-    "jose": "^5.9.6",
-    "plaid": "^30.0.0",
+    "hono": "^4.7.2",
+    "jose": "^5.10.0",
+    "plaid": "^31.0.0",
     "typesense": "^1.8.2",
-    "workers-ai-provider": "^0.0.10",
-    "xior": "^0.6.1",
-    "zod": "^3.23.8"
+    "workers-ai-provider": "^0.0.11",
+    "xior": "^0.6.3",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20241205.0",
-    "@types/bun": "^1.1.14",
-    "wrangler": "^3.93.0"
+    "@cloudflare/workers-types": "^4.20250214.0",
+    "@types/bun": "^1.2.2",
+    "wrangler": "^3.109.2"
   },
   "exports": {
     "./client": "./src/client/index.ts",

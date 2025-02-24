@@ -145,3 +145,61 @@ export const GoCardLessAgreementSchema = z
     }),
   })
   .openapi("GoCardLessAgreementSchema");
+
+export const EnableBankingLinkBodySchema = z
+  .object({
+    institutionId: z.string().openapi({
+      example: "REVOLUT_REVOGB21",
+    }),
+    country: z.string().openapi({
+      example: "GB",
+    }),
+    teamId: z.string().openapi({
+      example: "1234567890",
+    }),
+    validUntil: z.string().openapi({
+      example: "2024-01-01",
+    }),
+    state: z.string().openapi({
+      example: "234234234",
+    }),
+  })
+  .openapi("EnableBankingLinkBodySchema");
+
+export const EnableBankingLinkResponseSchema = z
+  .object({
+    data: z.object({
+      link: z.string().openapi({
+        example: "https://ob.enablebanking.com/psd2/start/234234234",
+      }),
+    }),
+  })
+  .openapi("EnableBankingLinkResponseSchema");
+
+export const EnableBankingSessionQuerySchema = z
+  .object({
+    code: z.string().openapi({
+      example: "234234234",
+    }),
+  })
+  .openapi("EnableBankingSessionQuerySchema");
+
+export const EnableBankingSessionSchema = z
+  .object({
+    data: z.object({
+      session: z.string().openapi({
+        example: "234234234",
+      }),
+    }),
+  })
+  .openapi("EnableBankingSessionSchema");
+
+export const EnableBankingSessionParamsSchema = z.object({
+  sessionId: z.string().openapi({
+    description: "EnableBanking session id",
+    param: {
+      name: "sessionId",
+      in: "path",
+    },
+  }),
+});

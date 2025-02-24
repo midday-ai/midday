@@ -14,6 +14,7 @@ export type ProviderParams = {
     PLAID_ENVIRONMENT: string;
     ENABLEBANKING_APPLICATION_ID: string;
     ENABLE_BANKING_KEY_CONTENT: string;
+    ENABLEBANKING_REDIRECT_URL: string;
   };
 };
 
@@ -67,7 +68,7 @@ export type GetTransactionsRequest = {
 };
 
 export type GetAccountsRequest = {
-  id?: string; // GoCardLess
+  id?: string; // GoCardLess & EnableBanking
   accessToken?: string; // Teller & Plaid
   institutionId?: string; // Plaid
 };
