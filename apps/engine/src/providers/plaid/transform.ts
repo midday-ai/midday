@@ -189,6 +189,7 @@ export const transformAccount = ({
       provider: Providers.Enum.plaid,
     },
     resource_id: null,
+    expires_at: null,
   };
 };
 

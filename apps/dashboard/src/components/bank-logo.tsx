@@ -1,4 +1,5 @@
 import { Avatar } from "@midday/ui/avatar";
+import { cn } from "@midday/ui/cn";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -17,7 +18,7 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
         <Image
           src={src}
           alt={alt}
-          className="text-transparent"
+          className="text-transparent object-contain bg-primary"
           width={size}
           height={size}
           quality={100}
@@ -27,7 +28,11 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
       <Image
         src="https://cdn-engine.midday.ai/default.jpg"
         alt={alt}
-        className={`absolute ${!src || hasError ? "" : "-z-10"}`}
+        className={cn(
+          "absolute object-contain",
+          src && "opacity-0",
+          !src || hasError ? "" : "-z-10",
+        )}
         width={size}
         height={size}
       />

@@ -48,6 +48,7 @@ type SearchResultProps = {
   logo: string | null;
   provider: string;
   availableHistory: number;
+  maximumConsentValidity: number;
   openPlaid: () => void;
 };
 
@@ -58,6 +59,7 @@ function SearchResult({
   provider,
   availableHistory,
   openPlaid,
+  maximumConsentValidity,
 }: SearchResultProps) {
   return (
     <div className="flex justify-between">
@@ -76,8 +78,10 @@ function SearchResult({
 
       <ConnectBankProvider
         id={id}
+        name={name}
         provider={provider}
         openPlaid={openPlaid}
+        maximumConsentValidity={maximumConsentValidity}
         availableHistory={availableHistory}
       />
     </div>
@@ -262,9 +266,16 @@ export function ConnectTransactionsModal({
                       name={institution.name}
                       logo={institution.logo}
                       provider={institution.provider}
+                      // GoCardLess
                       availableHistory={
                         institution.available_history
                           ? +institution.available_history
+                          : 0
+                      }
+                      // EnableBanking
+                      maximumConsentValidity={
+                        institution.maximum_consent_validity
+                          ? +institution.maximum_consent_validity
                           : 0
                       }
                       openPlaid={() => {

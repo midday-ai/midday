@@ -171,7 +171,7 @@ export const connectBankAccountSchema = z.object({
   referenceId: z.string().nullable().optional(), // GoCardLess
   accessToken: z.string().nullable().optional(), // Teller
   enrollmentId: z.string().nullable().optional(), // Teller
-  provider: z.enum(["gocardless", "plaid", "teller"]),
+  provider: z.enum(["gocardless", "plaid", "teller", "enablebanking"]),
   accounts: z.array(
     z.object({
       account_id: z.string(),
@@ -183,6 +183,7 @@ export const connectBankAccountSchema = z.object({
       account_reference: z.string().nullable().optional(),
       enabled: z.boolean(),
       logo_url: z.string().nullable().optional(),
+      expires_at: z.string().nullable().optional(), // EnableBanking & GoCardLess
       type: z.enum([
         "credit",
         "depository",
@@ -441,6 +442,11 @@ export const createGoCardLessLinkSchema = z.object({
   step: z.string().optional(),
   availableHistory: z.number(),
   redirectBase: z.string(),
+});
+
+export const createEnableBankingLinkSchema = z.object({
+  institutionId: z.string(),
+  maximumConsentValidity: z.number(),
 });
 
 export const updateInstitutionUsageSchema = z.object({

@@ -10,19 +10,20 @@
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.5.0",
-    "@hono/zod-openapi": "^0.18.3",
-    "@hono/zod-validator": "^0.4.1",
-    "hono": "^4.6.13",
-    "plaid": "^30.0.0",
-    "typesense": "^1.8.2",
-    "workers-ai-provider": "^0.0.10",
-    "xior": "^0.6.1",
-    "zod": "^3.23.8"
+    "@hono/zod-openapi": "^0.18.4",
+    "@hono/zod-validator": "^0.4.3",
+    "hono": "^4.7.2",
+    "jose": "^6.0.6",
+    "plaid": "^31.1.0",
+    "typesense": "^2.0.2",
+    "workers-ai-provider": "^0.0.13",
+    "xior": "^0.6.3",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20241205.0",
-    "@types/bun": "^1.1.14",
-    "wrangler": "^3.93.0"
+    "@cloudflare/workers-types": "^4.20250224.0",
+    "@types/bun": "^1.2.3",
+    "wrangler": "^3.109.3"
   },
   "exports": {
     "./client": "./src/client/index.ts",

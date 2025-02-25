@@ -1,6 +1,6 @@
 import type { AccountType } from "@/utils/account";
 
-export type Providers = "teller" | "plaid" | "gocardless";
+export type Providers = "teller" | "plaid" | "gocardless" | "enablebanking";
 
 export type ProviderParams = {
   provider: Providers;
@@ -12,6 +12,9 @@ export type ProviderParams = {
     PLAID_CLIENT_ID: string;
     PLAID_SECRET: string;
     PLAID_ENVIRONMENT: string;
+    ENABLEBANKING_APPLICATION_ID: string;
+    ENABLE_BANKING_KEY_CONTENT: string;
+    ENABLEBANKING_REDIRECT_URL: string;
   };
 };
 
@@ -46,6 +49,7 @@ export type Account = {
   balance: Balance;
   enrollment_id: string | null; // Teller
   resource_id: string | null; // GoCardLess
+  expires_at: string | null; // EnableBanking & GoCardLess
 };
 
 export type ConnectionStatus = {
@@ -65,7 +69,7 @@ export type GetTransactionsRequest = {
 };
 
 export type GetAccountsRequest = {
-  id?: string; // GoCardLess
+  id?: string; // GoCardLess & EnableBanking
   accessToken?: string; // Teller & Plaid
   institutionId?: string; // Plaid
 };
@@ -113,11 +117,12 @@ export type GetHealthCheckResponse = {
   teller: HealthCheckResponse;
   gocardless: HealthCheckResponse;
   plaid: HealthCheckResponse;
+  enablebanking: HealthCheckResponse;
 };
 
 export type GetConnectionStatusResponse = ConnectionStatus;
 
 export type DeleteConnectionRequest = {
-  id: string; // GoCardLess
+  id: string; // GoCardLess & EnableBanking
   accessToken?: string; // Teller & Plaid
 };

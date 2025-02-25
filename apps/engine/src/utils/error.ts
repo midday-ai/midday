@@ -37,6 +37,10 @@ export class ProviderError extends Error {
       case "ITEM_CONCURRENTLY_DELETED":
       case "ACCESS_NOT_GRANTED":
 
+      // EnableBanking
+      case "ALREADY_AUTHORIZED":
+        return "already_authorized";
+
       // GoCardLess
       case "AccessExpiredError":
       case "AccountInactiveError":

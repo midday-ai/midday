@@ -1,6 +1,7 @@
 compatibility_date = "2024-11-11"
 workers_dev = false
 logpush = true
+compatibility_flags = ["nodejs_compat_v2"]
 
 [observability]
 enabled = true

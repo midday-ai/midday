@@ -59,6 +59,7 @@ exports[`Transform accounts 1`] = `
   },
   "currency": "CAD",
   "enrollment_id": null,
+  "expires_at": null,
   "id": "kKZWQnoZVqcBeN71qdyoh8mVoErgb7tL7gmBL",
   "institution": {
     "id": "ins_100546",

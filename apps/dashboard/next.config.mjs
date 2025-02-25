@@ -25,11 +25,6 @@ const config = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  logging: {
-    fetches: {
-      fullUrl: process.env.LOG_FETCHES === "true",
-    },
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
