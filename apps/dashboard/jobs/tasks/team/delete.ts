@@ -8,7 +8,9 @@ export const deleteTeam = schemaTask({
     teamId: z.string().uuid(),
     connections: z.array(
       z.object({
-        provider: z.enum(["teller", "plaid", "gocardless"]).nullable(),
+        provider: z
+          .enum(["teller", "plaid", "gocardless", "enablebanking"])
+          .nullable(),
         reference_id: z.string().nullable(),
         access_token: z.string().nullable(),
       }),

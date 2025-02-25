@@ -20,7 +20,7 @@ export const syncAccount = schemaTask({
     accountId: z.string(),
     accessToken: z.string().optional(),
     errorRetries: z.number().optional(),
-    provider: z.enum(["gocardless", "plaid", "teller"]),
+    provider: z.enum(["gocardless", "plaid", "teller", "enablebanking"]),
     manualSync: z.boolean().optional(),
     accountType: z.enum([
       "credit",
