@@ -447,6 +447,7 @@ export const createGoCardLessLinkSchema = z.object({
 export const createEnableBankingLinkSchema = z.object({
   institutionId: z.string(),
   maximumConsentValidity: z.number(),
+  country: z.string().optional().nullable(),
 });
 
 export const updateInstitutionUsageSchema = z.object({

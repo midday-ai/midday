@@ -23,7 +23,7 @@ export function ConnectBankProvider({
   availableHistory,
   maximumConsentValidity,
 }: Props) {
-  const { setParams } = useConnectParams();
+  const { setParams, countryCode } = useConnectParams();
   const updateInstitutionUsage = useAction(updateInstitutionUsageAction);
 
   const updateUsage = () => {
@@ -60,6 +60,7 @@ export function ConnectBankProvider({
       return (
         <EnableBankingConnect
           id={name}
+          country={countryCode}
           maximumConsentValidity={maximumConsentValidity}
           onSelect={() => {
             updateUsage();

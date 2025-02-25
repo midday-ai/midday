@@ -8,12 +8,14 @@ type Props = {
   id: string;
   onSelect: () => void;
   maximumConsentValidity: number;
+  country: string;
 };
 
 export function EnableBankingConnect({
   onSelect,
   id,
   maximumConsentValidity,
+  country,
 }: Props) {
   const { toast } = useToast();
 
@@ -33,6 +35,7 @@ export function EnableBankingConnect({
     createEnableBankingLink.execute({
       institutionId: id,
       maximumConsentValidity,
+      country: country === "" ? null : country,
     });
   };
 

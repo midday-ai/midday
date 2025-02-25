@@ -2,6 +2,8 @@
 
 import { client } from "@midday/engine/client";
 import { LogEvents } from "@midday/events/events";
+import { getCountryCode } from "@midday/location";
+import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import { authActionClient } from "../safe-action";
 import { createEnableBankingLinkSchema } from "../schema";
@@ -13,7 +15,12 @@ export const createEnableBankingLinkAction = authActionClient
   })
   .action(
     async ({
-      parsedInput: { institutionId, step = "account", maximumConsentValidity },
+      parsedInput: {
+        institutionId,
+        step = "account",
+        maximumConsentValidity,
+        country: countryCode,
+      },
       ctx: { analytics, user },
     }) => {
       analytics.track({
@@ -22,15 +29,18 @@ export const createEnableBankingLinkAction = authActionClient
         step,
       });
 
+      const country = countryCode ?? getCountryCode();
+
       try {
         const linkResponse = await client.auth.enablebanking.link.$post({
           json: {
             institutionId,
-            country: "SE",
+            country,
             teamId: user.team_id,
             validUntil: new Date(Date.now() + maximumConsentValidity * 1000)
               .toISOString()
               .replace(/\.\d+Z$/, ".000000+00:00"),
+            state: nanoid(),
           },
         });
 

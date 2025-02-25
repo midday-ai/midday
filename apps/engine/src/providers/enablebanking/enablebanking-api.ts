@@ -160,8 +160,8 @@ export class EnableBankingApi {
         },
         psu_type: "business",
         psu_id: teamId,
-        state,
         redirect_url: this.#redirectUrl,
+        state,
       });
 
       return response;

@@ -161,7 +161,9 @@ export const EnableBankingLinkBodySchema = z
       example: "2024-01-01",
     }),
     state: z.string().openapi({
-      example: "234234234",
+      example: "1234567890",
+      description:
+        "Arbitrary string. Same string will be returned in query parameter when redirecting to the URL passed via redirect_url parameter",
     }),
   })
   .openapi("EnableBankingLinkBodySchema");
