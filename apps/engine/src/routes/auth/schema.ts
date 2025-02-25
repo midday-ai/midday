@@ -169,7 +169,7 @@ export const EnableBankingLinkBodySchema = z
 export const EnableBankingLinkResponseSchema = z
   .object({
     data: z.object({
-      link: z.string().openapi({
+      url: z.string().openapi({
         example: "https://ob.enablebanking.com/psd2/start/234234234",
       }),
     }),
@@ -187,19 +187,9 @@ export const EnableBankingSessionQuerySchema = z
 export const EnableBankingSessionSchema = z
   .object({
     data: z.object({
-      session: z.string().openapi({
+      session_id: z.string().openapi({
         example: "234234234",
       }),
     }),
   })
   .openapi("EnableBankingSessionSchema");
-
-export const EnableBankingSessionParamsSchema = z.object({
-  sessionId: z.string().openapi({
-    description: "EnableBanking session id",
-    param: {
-      name: "sessionId",
-      in: "path",
-    },
-  }),
-});

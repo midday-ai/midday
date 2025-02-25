@@ -10,7 +10,6 @@ import { env } from "hono/adapter";
 import {
   EnableBankingLinkBodySchema,
   EnableBankingLinkResponseSchema,
-  EnableBankingSessionParamsSchema,
   EnableBankingSessionQuerySchema,
   EnableBankingSessionSchema,
   GoCardLessAgreementBodySchema,
@@ -390,7 +389,9 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
 
         return c.json(
           {
-            data,
+            data: {
+              url: data.url,
+            },
           },
           200,
         );
@@ -441,47 +442,20 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
       try {
         const data = await api.exchangeCode(code);
 
-        return c.json(data, 200);
+        return c.json(
+          {
+            data: {
+              session_id: data.session_id,
+            },
+          },
+          200,
+        );
       } catch (error) {
         const errorResponse = createErrorResponse(error, c.get("requestId"));
         console.log("errorResponse", errorResponse);
 
         return c.json(errorResponse, 400);
       }
-    },
-  )
-  .openapi(
-    createRoute({
-      method: "get",
-      path: "/enablebanking/session/:sessionId",
-      summary: "Get session (EnableBanking)",
-      request: {
-        params: EnableBankingSessionParamsSchema,
-      },
-      responses: {
-        200: {
-          content: {
-            "application/json": {
-              schema: EnableBankingSessionSchema,
-            },
-          },
-          description: "Retrieve Session",
-        },
-      },
-    }),
-    async (c) => {
-      const envs = env(c);
-
-      const { sessionId } = c.req.valid("param");
-
-      const api = new EnableBankingApi({
-        kv: c.env.KV,
-        envs,
-      });
-
-      const data = await api.getSession(sessionId);
-
-      return c.json(data, 200);
     },
   );
 

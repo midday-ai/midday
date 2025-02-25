@@ -227,7 +227,11 @@ export function SelectBankAccountsModal() {
   useEffect(() => {
     async function fetchData() {
       const { data } = await getAccounts({
-        provider: provider as "teller" | "plaid" | "gocardless",
+        provider: provider as
+          | "teller"
+          | "plaid"
+          | "gocardless"
+          | "enablebanking",
         id: ref ?? undefined,
         accessToken: token ?? undefined,
         institutionId: institution_id ?? undefined,
@@ -238,7 +242,11 @@ export function SelectBankAccountsModal() {
 
       if (!form.formState.isValid) {
         form.reset({
-          provider: provider as "gocardless" | "plaid" | "teller",
+          provider: provider as
+            | "gocardless"
+            | "plaid"
+            | "teller"
+            | "enablebanking",
           accessToken: token ?? undefined,
           enrollmentId: enrollment_id ?? undefined,
           // GoCardLess Requestion ID or Plaid Item ID

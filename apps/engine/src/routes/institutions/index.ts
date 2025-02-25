@@ -19,6 +19,7 @@ type Document = {
   name: string;
   logo: string | null;
   available_history: number | null;
+  maximum_consent_validity: number | null;
   provider: Providers;
   popularity: number;
 };
@@ -95,6 +96,9 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
               popularity: document.popularity,
               available_history: document.available_history
                 ? +document.available_history
+                : null,
+              maximum_consent_validity: document.maximum_consent_validity
+                ? +document.maximum_consent_validity
                 : null,
               provider: document.provider,
             })),

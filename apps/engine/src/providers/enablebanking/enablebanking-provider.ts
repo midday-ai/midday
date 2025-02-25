@@ -1,6 +1,5 @@
 import type { Provider } from "../interface";
 import type {
-  ConnectionStatus,
   DeleteAccountsRequest,
   DeleteConnectionRequest,
   GetAccountBalanceRequest,
@@ -9,7 +8,6 @@ import type {
   GetAccountsResponse,
   GetConnectionStatusRequest,
   GetInstitutionsRequest,
-  GetInstitutionsResponse,
   GetTransactionsRequest,
   GetTransactionsResponse,
   ProviderParams,
@@ -30,15 +28,13 @@ export class EnableBankingProvider implements Provider {
     this.#api = new EnableBankingApi(params);
   }
 
-  async getHealthCheck(): Promise<boolean> {
+  async getHealthCheck() {
     return this.#api.getHealthCheck();
   }
 
-  async getInstitutions(
-    params: GetInstitutionsRequest,
-  ): Promise<GetInstitutionsResponse> {
+  async getInstitutions(params: GetInstitutionsRequest) {
     const response = await this.#api.getInstitutions();
-    return response.aspsps.map(transformInstitution);
+    return response.map(transformInstitution);
   }
 
   async getAccounts({ id }: GetAccountsRequest): Promise<GetAccountsResponse> {
@@ -47,7 +43,6 @@ export class EnableBankingProvider implements Provider {
     }
 
     const response = await this.#api.getAccounts({ id });
-    console.log(response);
     return response.map(transformAccount);
   }
 
@@ -75,13 +70,11 @@ export class EnableBankingProvider implements Provider {
     return transformConnectionStatus(response);
   }
 
-  async deleteConnection(params: DeleteConnectionRequest): Promise<void> {
+  async deleteConnection(params: DeleteConnectionRequest) {
     await this.#api.deleteSession(params.id);
   }
 
-  async deleteAccounts(params: DeleteAccountsRequest): Promise<void> {
-    if (params.accountId) {
-      await this.#api.deleteSession(params.accountId);
-    }
+  async deleteAccounts(params: DeleteAccountsRequest) {
+    return;
   }
 }

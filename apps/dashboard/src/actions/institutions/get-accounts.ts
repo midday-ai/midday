@@ -3,7 +3,7 @@
 import { client } from "@midday/engine/client";
 
 type GetAccountParams = {
-  id?: string;
+  id?: string; // EnableBanking & GoCardLess
   accessToken?: string;
   institutionId?: string; // Plaid
   provider: "gocardless" | "teller" | "plaid" | "enablebanking";

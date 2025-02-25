@@ -21,32 +21,23 @@ export async function getEnableBankingInstitutions() {
 
   const data = await provider.getInstitutions();
 
-  return data.map(
-    (institution: {
-      name: string;
-      country: string;
-      logo: string;
-      maximum_consent_validity: number;
-      required_psu_headers: string[];
-      id: string;
-    }) => {
-      const hashId = generateDeterministicId(
-        institution.name,
-        institution.country,
-      );
+  return data.map((institution) => {
+    const hashId = generateDeterministicId(
+      institution.name,
+      institution.country,
+    );
 
-      return {
-        id: hashId,
-        name: institution.name,
-        logo: getLogoURL(encodeURIComponent(institution.name), "png"),
-        countries: [institution.country],
-        maximum_consent_validity: institution.maximum_consent_validity,
-        popularity: 1000,
-        required_psu_headers: institution.required_psu_headers ?? null,
-        provider: "enablebanking",
-      };
-    },
-  );
+    return {
+      id: hashId,
+      name: institution.name,
+      logo: getLogoURL(encodeURIComponent(institution.name), "png"),
+      countries: [institution.country],
+      maximum_consent_validity: institution.maximum_consent_validity,
+      popularity: 1000,
+      required_psu_headers: institution.required_psu_headers ?? null,
+      provider: "enablebanking",
+    };
+  });
 }
 
 export async function getGoCardLessInstitutions() {

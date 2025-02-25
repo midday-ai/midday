@@ -122,6 +122,6 @@ export type GetHealthCheckResponse = {
 export type GetConnectionStatusResponse = ConnectionStatus;
 
 export type DeleteConnectionRequest = {
-  id: string; // GoCardLess
+  id: string; // GoCardLess & EnableBanking
   accessToken?: string; // Teller & Plaid
 };

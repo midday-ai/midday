@@ -70,7 +70,7 @@ export class EnableBankingApi {
           name: "RSASSA-PKCS1-v1_5",
           hash: { name: "SHA-256" },
         },
-        // @ts-expect-error
+        // @ts-ignore
         privateKey,
         new TextEncoder().encode(data),
       );
@@ -198,7 +198,7 @@ export class EnableBankingApi {
     }
   }
 
-  async getInstitutions(): Promise<GetAspspsResponse> {
+  async getInstitutions(): Promise<GetAspspsResponse["aspsps"]> {
     const response = await this.#get<GetAspspsResponse>("/aspsps");
 
     return response.aspsps;

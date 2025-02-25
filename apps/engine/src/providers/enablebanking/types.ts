@@ -1,12 +1,55 @@
 export type Institution = {
-  name: string;
-  logo: string;
-  country: string;
-  psu_types: string[];
-  auth_methods: string[];
-  maximum_consent_validity: number;
+  auth_methods: Array<{
+    approach: string;
+    credentials: Array<{
+      description: string;
+      name: string;
+      required: boolean;
+      template: string;
+      title: string;
+    }>;
+    hidden_method: boolean;
+    name: string;
+    psu_type: string;
+  }>;
   beta: boolean;
   bic: string;
+  country: string;
+  logo: string;
+  maximum_consent_validity: number;
+  name: string;
+  payments: Array<{
+    allowed_auth_methods: string[];
+    charge_bearer_values: string[];
+    creditor_account_schemas: string[];
+    creditor_agent_bic_fi_required: boolean;
+    creditor_agent_clearing_system_member_id_required: boolean;
+    creditor_country_required: boolean;
+    creditor_name_required: boolean;
+    creditor_postal_address_required: boolean;
+    currencies: string[];
+    debtor_account_required: boolean;
+    debtor_account_schemas: string[];
+    debtor_contact_email_required: boolean;
+    debtor_contact_phone_required: boolean;
+    debtor_currency_required: boolean;
+    max_transactions: number;
+    payment_type: string;
+    priority_codes: string[];
+    psu_type: string;
+    reference_number_schemas: string[];
+    reference_number_supported: boolean;
+    regulatory_reporting_code_required: boolean;
+    remittance_information_lines: Array<{
+      max_length: number;
+      min_length: number;
+      pattern: string;
+    }>;
+    remittance_information_required: boolean;
+    requested_execution_date_max_period: number;
+    requested_execution_date_supported: boolean;
+  }>;
+  psu_types: string[];
   required_psu_headers: string[];
 };
 
@@ -95,60 +138,7 @@ export type GetSessionResponse = {
 };
 
 export interface GetAspspsResponse {
-  aspsps: Array<{
-    auth_methods: Array<{
-      approach: string;
-      credentials: Array<{
-        description: string;
-        name: string;
-        required: boolean;
-        template: string;
-        title: string;
-      }>;
-      hidden_method: boolean;
-      name: string;
-      psu_type: string;
-    }>;
-    beta: boolean;
-    bic: string;
-    country: string;
-    logo: string;
-    maximum_consent_validity: number;
-    name: string;
-    payments: Array<{
-      allowed_auth_methods: string[];
-      charge_bearer_values: string[];
-      creditor_account_schemas: string[];
-      creditor_agent_bic_fi_required: boolean;
-      creditor_agent_clearing_system_member_id_required: boolean;
-      creditor_country_required: boolean;
-      creditor_name_required: boolean;
-      creditor_postal_address_required: boolean;
-      currencies: string[];
-      debtor_account_required: boolean;
-      debtor_account_schemas: string[];
-      debtor_contact_email_required: boolean;
-      debtor_contact_phone_required: boolean;
-      debtor_currency_required: boolean;
-      max_transactions: number;
-      payment_type: string;
-      priority_codes: string[];
-      psu_type: string;
-      reference_number_schemas: string[];
-      reference_number_supported: boolean;
-      regulatory_reporting_code_required: boolean;
-      remittance_information_lines: Array<{
-        max_length: number;
-        min_length: number;
-        pattern: string;
-      }>;
-      remittance_information_required: boolean;
-      requested_execution_date_max_period: number;
-      requested_execution_date_supported: boolean;
-    }>;
-    psu_types: string[];
-    required_psu_headers: string[];
-  }>;
+  aspsps: Institution[];
 }
 
 export interface GetBalancesResponse {
@@ -174,7 +164,7 @@ export type AuthenticateResponse = {
     country: string;
   };
   state: string;
-  redirect_url: string;
+  url: string;
   psu_type: string;
   auth_method: string;
   credentials: {
