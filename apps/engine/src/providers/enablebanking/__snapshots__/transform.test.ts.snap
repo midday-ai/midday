@@ -1,0 +1,63 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform income transaction 1`] = `
+{
+  "amount": 25000,
+  "balance": null,
+  "category": "income",
+  "currency": "SEK",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-04-04",
+  "description": null,
+  "id": "rtrhrth",
+  "method": "payment",
+  "name": "Överf Saldo",
+  "status": "posted",
+}
+`;
+
+exports[`Transform expense transaction 1`] = `
+{
+  "amount": 25000,
+  "balance": null,
+  "category": "income",
+  "currency": "SEK",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-04-04",
+  "description": null,
+  "id": "rtrhrth",
+  "method": "payment",
+  "name": "Överf Saldo",
+  "status": "posted",
+}
+`;
+
+exports[`Transform account 1`] = `
+{
+  "balance": {
+    "amount": 90737.96,
+    "currency": "SEK",
+  },
+  "currency": "SEK",
+  "enrollment_id": null,
+  "id": "83435345-d61cb425f293",
+  "institution": {
+    "id": "477e20fa50a6",
+    "logo": "https://cdn-engine.midday.ai/SEB.png",
+    "name": "SEB",
+    "provider": "enablebanking",
+  },
+  "name": "Enkla Sparkontot Företag",
+  "resource_id": null,
+  "type": "depository",
+}
+`;
+
+exports[`Transform account balance 1`] = `
+{
+  "amount": 90737.96,
+  "currency": "SEK",
+}
+`;

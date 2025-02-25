@@ -181,12 +181,12 @@ export type GetAccountsRequest = {
 
 export type GetTransaction = {
   entry_reference: string;
-  merchant_category_code: string;
+  merchant_category_code: string | null;
   transaction_amount: {
     currency: string;
     amount: string;
   };
-  creditor?: {
+  creditor: {
     name: string;
     postal_address?: {
       address_line: string[];
@@ -200,19 +200,24 @@ export type GetTransaction = {
       sub_department: string;
       town_name: string;
     };
-  };
-  creditor_account?: {
+  } | null;
+  creditor_account: {
     iban: string;
-  };
-  creditor_agent?: {
+    other?: {
+      identification: string;
+      scheme_name: string;
+      issuer: string | null;
+    };
+  } | null;
+  creditor_agent: {
     bic_fi: string;
-    clearing_system_member_id?: {
+    clearing_system_member_id: {
       clearing_system_id: string;
       member_id: number;
-    };
-    name: string;
-  };
-  debtor?: {
+    } | null;
+    name: string | null;
+  } | null;
+  debtor: {
     name: string;
     postal_address?: {
       address_line: string[];
@@ -226,43 +231,43 @@ export type GetTransaction = {
       sub_department: string;
       town_name: string;
     };
-  };
-  debtor_account?: {
+  } | null;
+  debtor_account: {
     iban: string;
-  };
-  debtor_agent?: {
+  } | null;
+  debtor_agent: {
     bic_fi: string;
-    clearing_system_member_id?: {
+    clearing_system_member_id: {
       clearing_system_id: string;
       member_id: number;
-    };
-    name: string;
-  };
-  bank_transaction_code?: {
+    } | null;
+    name: string | null;
+  } | null;
+  bank_transaction_code: {
     description: string;
-    code: string;
-    sub_code: string;
-  };
+    code: string | null;
+    sub_code: string | null;
+  } | null;
   credit_debit_indicator: string;
   status: string;
   booking_date: string;
   value_date: string;
-  transaction_date: string;
-  balance_after_transaction?: {
+  transaction_date: string | null;
+  balance_after_transaction: {
     currency: string;
     amount: string;
-  };
-  reference_number?: string;
-  remittance_information?: string[];
-  debtor_account_additional_identification?: {
+  } | null;
+  reference_number: string | null;
+  remittance_information: string[] | null;
+  debtor_account_additional_identification: {
     identification: string;
     scheme_name: string;
-  };
-  creditor_account_additional_identification?: {
+  } | null;
+  creditor_account_additional_identification: {
     identification: string;
     scheme_name: string;
-  };
-  exchange_rate?: {
+  } | null;
+  exchange_rate: {
     unit_currency: string;
     exchange_rate: string;
     rate_type: string;
@@ -271,9 +276,9 @@ export type GetTransaction = {
       currency: string;
       amount: string;
     };
-  };
-  note?: string;
-  transaction_id: string;
+  } | null;
+  note: string | null;
+  transaction_id: string | null;
 };
 
 export type GetTransactionsRequest = {
