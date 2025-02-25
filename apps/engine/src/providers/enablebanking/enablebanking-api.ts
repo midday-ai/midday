@@ -20,7 +20,7 @@ export class EnableBankingApi {
   #keyContent: string;
 
   // Maximum allowed TTL is 24 hours (86400 seconds)
-  #expiresIn = 23; // hours
+  #expiresIn = 20; // hours
 
   constructor(params: Omit<ProviderParams, "provider">) {
     this.#applicationId =

@@ -24,8 +24,6 @@ export async function GET(request: NextRequest) {
     ...rest
   } = await sessionResponse.json();
 
-  console.log({ sessionData, errorCode, rest });
-
   if (sessionData?.session_id) {
     return NextResponse.redirect(
       new URL(
@@ -41,7 +39,5 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return NextResponse.json({
-    code,
-  });
+  return NextResponse.redirect(new URL("/", request.url));
 }

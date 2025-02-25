@@ -22,8 +22,6 @@ export const createEnableBankingLinkAction = authActionClient
         step,
       });
 
-      console.log({ maximumConsentValidity, institutionId, step });
-
       try {
         const linkResponse = await client.auth.enablebanking.link.$post({
           json: {
