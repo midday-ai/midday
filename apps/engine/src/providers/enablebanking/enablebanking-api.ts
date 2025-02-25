@@ -227,6 +227,7 @@ export class EnableBankingApi {
         return {
           ...details,
           institution: session.aspsp,
+          valid_until: session.access.valid_until,
           balance,
         };
       }),

@@ -1,6 +1,7 @@
 import { Providers } from "@/common/schema";
 import { getFileExtension, getLogoURL } from "@/utils/logo";
 import { capitalCase } from "change-case";
+import { addDays } from "date-fns";
 import type {
   Account as BaseAccount,
   Balance as BaseAccountBalance,
@@ -18,6 +19,7 @@ import type {
   TransformInstitution,
   TransformTransaction,
 } from "./types";
+import { getAccessValidForDays } from "./utils";
 
 export const mapTransactionCategory = (transaction: Transaction) => {
   if (+transaction.transactionAmount.amount > 0) {
@@ -197,6 +199,10 @@ export const transformAccount = ({
     balance: transformAccountBalance(balance),
     institution: transformInstitution(institution),
     resource_id: account.resourceId,
+    expires_at: addDays(
+      new Date(),
+      getAccessValidForDays({ institutionId: institution.id }),
+    ).toISOString(),
   };
 };
 

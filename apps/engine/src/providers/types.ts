@@ -49,6 +49,7 @@ export type Account = {
   balance: Balance;
   enrollment_id: string | null; // Teller
   resource_id: string | null; // GoCardLess
+  expires_at: string | null; // EnableBanking & GoCardLess
 };
 
 export type ConnectionStatus = {

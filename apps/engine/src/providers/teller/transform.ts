@@ -153,6 +153,7 @@ export const transformAccount = ({
     type: getType(type),
     balance: transformAccountBalance(balance),
     resource_id: null,
+    expires_at: null,
   };
 };
 

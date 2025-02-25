@@ -93,6 +93,7 @@ exports[`Transform accounts 1`] = `
   },
   "currency": "USD",
   "enrollment_id": "enr_os557c8pck2deoskak000",
+  "expires_at": null,
   "id": "acc_os557c2mge29shubl2000",
   "institution": {
     "id": "mercury",

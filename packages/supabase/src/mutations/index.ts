@@ -15,14 +15,14 @@ type CreateBankConnectionPayload = {
     balance: number;
     type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
     account_reference: string | null;
+    expires_at: string | null;
   }[];
-  balance: number;
   accessToken?: string;
   enrollmentId?: string;
   referenceId?: string;
   teamId: string;
   userId: string;
-  provider: "gocardless" | "teller" | "plaid";
+  provider: "gocardless" | "teller" | "plaid" | "enablebanking";
 };
 
 export async function createBankConnection(
@@ -44,15 +44,6 @@ export async function createBankConnection(
     return;
   }
 
-  // NOTE: GoCardLess connection expires after 90-180 days
-  const expiresAt =
-    provider === "gocardless"
-      ? addDays(
-          new Date(),
-          getAccessValidForDays({ institutionId: account.institution_id }),
-        ).toDateString()
-      : undefined;
-
   const bankConnection = await supabase
     .from("bank_connections")
     .upsert(
@@ -65,7 +56,7 @@ export async function createBankConnection(
         access_token: accessToken,
         enrollment_id: enrollmentId,
         reference_id: referenceId,
-        expires_at: expiresAt,
+        expires_at: account.expires_at,
       },
       {
         onConflict: "institution_id, team_id",

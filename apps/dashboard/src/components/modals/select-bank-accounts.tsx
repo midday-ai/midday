@@ -263,6 +263,7 @@ export function SelectBankAccountsModal() {
             balance: account.balance.amount,
             enabled: true,
             type: account.type,
+            expires_at: account.expires_at,
           })),
         });
       }

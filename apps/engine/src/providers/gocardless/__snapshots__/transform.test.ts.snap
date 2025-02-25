@@ -25,6 +25,7 @@ exports[`Transform accounts 1`] = `
   },
   "currency": "SEK",
   "enrollment_id": null,
+  "expires_at": "2025-08-24T12:08:44.224Z",
   "id": "b11e5627-cac8-41c9-a74a-2b88438fe07d",
   "institution": {
     "id": "PLEO_PLEODK00",

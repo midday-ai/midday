@@ -183,6 +183,7 @@ export const connectBankAccountSchema = z.object({
       account_reference: z.string().nullable().optional(),
       enabled: z.boolean(),
       logo_url: z.string().nullable().optional(),
+      expires_at: z.string().nullable().optional(), // EnableBanking & GoCardLess
       type: z.enum([
         "credit",
         "depository",

@@ -80,6 +80,13 @@ export const AccountSchema = z
         example: "GBRGZX62Y8",
       })
       .nullable(),
+    expires_at: z
+      .string()
+      .openapi({
+        description: "EnableBanking or GoCardLess access valid until",
+        example: "2024-03-06",
+      })
+      .nullable(),
   })
   .openapi("AccountSchema");
 

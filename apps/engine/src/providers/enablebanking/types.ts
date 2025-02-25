@@ -108,6 +108,7 @@ export interface GetAccountDetailsResponse {
     name: string;
   };
   balance: GetBalancesResponse["balances"][0];
+  valid_until: string;
 }
 
 export type SessionStatus =

@@ -53,6 +53,7 @@ export const transformAccount = (
   },
   enrollment_id: null,
   resource_id: null,
+  expires_at: account.valid_until,
 });
 
 export const transformBalance = (

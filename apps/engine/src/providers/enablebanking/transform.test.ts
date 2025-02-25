@@ -143,6 +143,7 @@ test("Transform account", () => {
         last_committed_transaction: "1234567890",
       },
       legal_age: true,
+      valid_until: "2024-03-06",
     }),
   ).toMatchSnapshot();
 });
