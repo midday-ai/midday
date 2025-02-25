@@ -33,7 +33,7 @@ export async function getEnableBankingInstitutions() {
       logo: getLogoURL(encodeURIComponent(institution.name), "png"),
       countries: [institution.country],
       maximum_consent_validity: institution.maximum_consent_validity,
-      popularity: 1000,
+      popularity: 10000,
       required_psu_headers: institution.required_psu_headers ?? null,
       provider: "enablebanking",
     };

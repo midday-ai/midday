@@ -42,6 +42,19 @@ function SearchSkeleton() {
   );
 }
 
+function formatProvider(provider: string) {
+  switch (provider) {
+    case "enablebanking":
+      return "Enable Banking";
+    case "gocardless":
+      return "GoCardLess";
+    case "plaid":
+      return "Plaid";
+    case "teller":
+      return "Teller";
+  }
+}
+
 type SearchResultProps = {
   id: string;
   name: string;
@@ -70,7 +83,7 @@ function SearchResult({
           <p className="text-sm font-medium leading-none">{name}</p>
           <InstitutionInfo provider={provider}>
             <span className="text-[#878787] text-xs capitalize">
-              Via {provider}
+              Via {formatProvider(provider)}
             </span>
           </InstitutionInfo>
         </div>
