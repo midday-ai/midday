@@ -3,7 +3,7 @@
 import { client } from "@midday/engine/client";
 import { LogEvents } from "@midday/events/events";
 import { getCountryCode } from "@midday/location";
-import { nanoid } from "nanoid";
+import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { redirect } from "next/navigation";
 import { authActionClient } from "../safe-action";
 import { createEnableBankingLinkSchema } from "../schema";
@@ -20,6 +20,7 @@ export const createEnableBankingLinkAction = authActionClient
         step = "account",
         maximumConsentValidity,
         country: countryCode,
+        type,
       },
       ctx: { analytics, user },
     }) => {
@@ -40,7 +41,9 @@ export const createEnableBankingLinkAction = authActionClient
             validUntil: new Date(Date.now() + maximumConsentValidity * 1000)
               .toISOString()
               .replace(/\.\d+Z$/, ".000000+00:00"),
-            state: nanoid(),
+            // NOTE: This is so we can track the type of link we are creating
+            // and redirect the user to the correct page
+            state: isDesktopApp() ? `desktop:${type}` : `web:${type}`,
           },
         });
 

@@ -192,6 +192,9 @@ export const EnableBankingSessionSchema = z
       session_id: z.string().openapi({
         example: "234234234",
       }),
+      expires_at: z.string().openapi({
+        example: "2024-01-01",
+      }),
     }),
   })
   .openapi("EnableBankingSessionSchema");
