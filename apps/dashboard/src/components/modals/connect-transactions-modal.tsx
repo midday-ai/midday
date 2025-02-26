@@ -4,7 +4,6 @@ import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-
 import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
 import { getInstitutions } from "@/actions/institutions/get-institutions";
 import { useConnectParams } from "@/hooks/use-connect-params";
-import type { Institutions } from "@midday-ai/engine/resources/institutions/institutions";
 import { track } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Button } from "@midday/ui/button";
@@ -105,12 +104,25 @@ type ConnectTransactionsModalProps = {
   countryCode: string;
 };
 
+type Institution = {
+  id: string;
+  name: string;
+  logo: string | null;
+  provider: string;
+  available_history?: number;
+  maximum_consent_validity?: number;
+};
+
+type Institutions = {
+  data: Institution[];
+};
+
 export function ConnectTransactionsModal({
   countryCode: initialCountryCode,
 }: ConnectTransactionsModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [results, setResults] = useState<Institutions["data"]>([]);
+  const [results, setResults] = useState<Institution[]>([]);
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
 
   const {
@@ -179,10 +191,11 @@ export function ConnectTransactionsModal({
   async function fetchData(query?: string) {
     try {
       setLoading(true);
-      const { data } = await getInstitutions({ countryCode, query });
+      // Fix the destructuring to handle the response structure correctly
+      const response = await getInstitutions({ countryCode, query });
       setLoading(false);
 
-      setResults(data);
+      setResults(response.data || []);
     } catch {
       setLoading(false);
       setResults([]);
@@ -190,8 +203,9 @@ export function ConnectTransactionsModal({
   }
 
   useEffect(() => {
+    // Fix the condition by properly grouping the expressions
     if (
-      (isOpen && !results?.length > 0) ||
+      (isOpen && (!results || results.length === 0)) ||
       countryCode !== initialCountryCode
     ) {
       fetchData();
@@ -267,7 +281,7 @@ export function ConnectTransactionsModal({
               <div className="h-[430px] space-y-4 overflow-auto scrollbar-hide pt-2 mt-2">
                 {loading && <SearchSkeleton />}
 
-                {results?.map((institution) => {
+                {results?.map((institution: Institution) => {
                   if (!institution) {
                     return null;
                   }

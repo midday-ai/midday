@@ -2359,7 +2359,12 @@ export type Database = {
         | "other_asset"
         | "loan"
         | "other_liability"
-      bank_providers: "gocardless" | "plaid" | "teller"
+      bank_providers:
+        | "gocardless"
+        | "plaid"
+        | "teller"
+        | "enablebanking"
+        | "pluggy"
       bankProviders: "gocardless" | "plaid" | "teller"
       connection_status: "disconnected" | "connected" | "unknown"
       inbox_status: "processing" | "pending" | "archived" | "new" | "deleted"

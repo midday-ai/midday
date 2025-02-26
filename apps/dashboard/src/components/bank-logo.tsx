@@ -30,8 +30,8 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
         alt={alt}
         className={cn(
           "absolute object-contain",
-          src && "opacity-0",
           !src || hasError ? "" : "-z-10",
+          !src && hasError && "opacity-0",
         )}
         width={size}
         height={size}

@@ -31,30 +31,48 @@ export const transformInstitution = (
   provider: "enablebanking",
 });
 
+function getAccountName(account: GetAccountDetailsResponse) {
+  if (account.product) {
+    return capitalCase(account.product);
+  }
+
+  if (account.name) {
+    return capitalCase(account.name);
+  }
+
+  if (account.details) {
+    return capitalCase(account.details);
+  }
+
+  return "Account";
+}
+
 export const transformAccount = (
   account: GetAccountDetailsResponse,
-): Account => ({
-  id: account.uid,
-  name: capitalCase(account.product) || capitalCase(account.name),
-  currency: account.currency,
-  type: "depository",
-  institution: {
-    id: hashInstitutionId(
-      account.institution.name,
-      account.institution.country,
-    ),
-    name: account.institution.name,
-    logo: getLogoURL(account.institution.name, "png"),
-    provider: "enablebanking",
-  },
-  balance: {
-    amount: Number.parseFloat(account.balance.balance_amount.amount),
+): Account => {
+  return {
+    id: account.uid,
+    name: getAccountName(account),
     currency: account.currency,
-  },
-  enrollment_id: null,
-  resource_id: null,
-  expires_at: account.valid_until,
-});
+    type: "depository",
+    institution: {
+      id: hashInstitutionId(
+        account.institution.name,
+        account.institution.country,
+      ),
+      name: account.institution.name,
+      logo: getLogoURL(account.institution.name, "png"),
+      provider: "enablebanking",
+    },
+    balance: {
+      amount: Number.parseFloat(account.balance.balance_amount.amount),
+      currency: account.currency,
+    },
+    enrollment_id: null,
+    resource_id: null,
+    expires_at: account.valid_until,
+  };
+};
 
 export const transformBalance = (
   balance: GetBalancesResponse["balances"][0],
