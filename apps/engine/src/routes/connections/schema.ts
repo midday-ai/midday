@@ -50,7 +50,7 @@ export const DeleteConnectionBodySchema = z.object({
     .string()
     .optional()
     .openapi({
-      description: "GoCardLess reference id",
+      description: "GoCardLess or Enable Banking reference id",
       param: {
         name: "id",
         in: "query",

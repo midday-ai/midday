@@ -646,3 +646,7 @@ export const inboxUploadSchema = z.array(
     file_path: z.array(z.string()),
   }),
 );
+
+export const deleteConnectionSchema = z.object({
+  connectionId: z.string(),
+});

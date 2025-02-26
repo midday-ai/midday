@@ -267,4 +267,8 @@ export const LogEvents = {
     name: "Reconnect Connection",
     channel: "bank",
   },
+  DeleteConnection: {
+    name: "Delete Connection",
+    channel: "bank",
+  },
 };

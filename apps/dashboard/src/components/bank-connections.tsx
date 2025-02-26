@@ -25,6 +25,7 @@ import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { BankAccount } from "./bank-account";
 import { BankLogo } from "./bank-logo";
+import { DeleteConnection } from "./delete-connection";
 import { ReconnectProvider } from "./reconnect-provider";
 import { SyncTransactions } from "./sync-transactions";
 
@@ -293,6 +294,7 @@ export function BankConnection({ connection }: BankConnectionProps) {
                 disabled={isSyncing}
                 onClick={handleManualSync}
               />
+              <DeleteConnection connectionId={connection.id} />
             </>
           )}
         </div>

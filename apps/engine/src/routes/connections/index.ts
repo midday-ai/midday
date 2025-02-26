@@ -77,7 +77,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
   )
   .openapi(
     createRoute({
-      method: "post",
+      method: "delete",
       path: "/delete",
       summary: "Delete Connection",
       request: {
