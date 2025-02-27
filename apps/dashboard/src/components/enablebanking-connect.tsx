@@ -36,6 +36,7 @@ export function EnableBankingConnect({
       institutionId: id,
       maximumConsentValidity,
       country: country === "" ? null : country,
+      isDesktop: isDesktopApp(),
     });
   };
 

@@ -3,7 +3,6 @@
 import { client } from "@midday/engine/client";
 import { LogEvents } from "@midday/events/events";
 import { getCountryCode } from "@midday/location";
-import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { redirect } from "next/navigation";
 import { authActionClient } from "../safe-action";
 import { createEnableBankingLinkSchema } from "../schema";
@@ -20,6 +19,7 @@ export const createEnableBankingLinkAction = authActionClient
         step = "account",
         maximumConsentValidity,
         country: countryCode,
+        isDesktop,
       },
       ctx: { analytics, user },
     }) => {
@@ -27,6 +27,7 @@ export const createEnableBankingLinkAction = authActionClient
         event: LogEvents.EnableBankingLinkCreated.name,
         institutionId,
         step,
+        isDesktop,
       });
 
       const country = countryCode ?? getCountryCode();
@@ -40,7 +41,7 @@ export const createEnableBankingLinkAction = authActionClient
             validUntil: new Date(Date.now() + maximumConsentValidity * 1000)
               .toISOString()
               .replace(/\.\d+Z$/, ".000000+00:00"),
-            state: isDesktopApp() ? "desktop:connect" : "web:connect",
+            state: isDesktop ? "desktop:connect" : "web:connect",
           },
         });
 
