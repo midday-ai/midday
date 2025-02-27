@@ -129,7 +129,7 @@ export const syncAccount = schemaTask({
       // This is to avoid memory issues with the DB
       for (let i = 0; i < transactionsData.length; i += BATCH_SIZE) {
         const transactionBatch = transactionsData.slice(i, i + BATCH_SIZE);
-        await upsertTransactions.trigger({
+        await upsertTransactions.triggerAndWait({
           transactions: transactionBatch,
           teamId,
           bankAccountId: id,

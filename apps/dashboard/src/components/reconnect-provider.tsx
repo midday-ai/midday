@@ -123,6 +123,9 @@ export function ReconnectProvider({
           isDesktop: isDesktopApp(),
         });
       }
+      case "enablebanking": {
+        return;
+      }
       case "teller":
         return openTeller();
       default:

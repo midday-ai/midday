@@ -3,6 +3,7 @@ import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const Lottie = dynamic(() => import("lottie-react"), {
@@ -26,6 +27,7 @@ export function LoadingTransactionsEvent({
 }: Props) {
   const [step, setStep] = useState(1);
   const { resolvedTheme } = useTheme();
+  const router = useRouter();
 
   const { status } = useInitialConnectionStatus({
     runId,
@@ -42,7 +44,7 @@ export function LoadingTransactionsEvent({
 
       setTimeout(() => {
         setRunId(undefined);
-        setStep(4);
+        router.push("/");
       }, 1000);
     }
   }, [status]);
