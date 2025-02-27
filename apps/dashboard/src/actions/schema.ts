@@ -448,7 +448,6 @@ export const createEnableBankingLinkSchema = z.object({
   institutionId: z.string(),
   maximumConsentValidity: z.number(),
   country: z.string().optional().nullable(),
-  type: z.enum(["reconnect", "connect"]),
 });
 
 export const updateInstitutionUsageSchema = z.object({

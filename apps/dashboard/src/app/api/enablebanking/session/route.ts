@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   } = await getSession();
 
   if (!session) {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/", requestUrl.origin));
   }
 
   const [type, method] = state?.split(":") ?? [];
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.redirect(
         new URL(
-          `/settings/accounts?id=${data.id}&step=reconnect`,
+          `/settings/accounts?id=${data?.id}&step=reconnect`,
           redirectBase,
         ),
       );

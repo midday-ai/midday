@@ -20,7 +20,6 @@ export const createEnableBankingLinkAction = authActionClient
         step = "account",
         maximumConsentValidity,
         country: countryCode,
-        type,
       },
       ctx: { analytics, user },
     }) => {
@@ -41,9 +40,7 @@ export const createEnableBankingLinkAction = authActionClient
             validUntil: new Date(Date.now() + maximumConsentValidity * 1000)
               .toISOString()
               .replace(/\.\d+Z$/, ".000000+00:00"),
-            // NOTE: This is so we can track the type of link we are creating
-            // and redirect the user to the correct page
-            state: isDesktopApp() ? `desktop:${type}` : `web:${type}`,
+            state: isDesktopApp() ? "desktop:connect" : "web:connect",
           },
         });
 
