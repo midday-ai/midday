@@ -80,8 +80,12 @@ export function calculateAvgBurnRate(data: BurnRateData[] | null) {
   return data?.reduce((acc, curr) => acc + curr.value, 0) / data?.length;
 }
 
-export function formatDate(date: string, dateFormat?: string) {
-  if (isSameYear(new Date(), new Date(date))) {
+export function formatDate(
+  date: string,
+  dateFormat?: string,
+  checkYear = true,
+) {
+  if (checkYear && isSameYear(new Date(), new Date(date))) {
     return format(new Date(date), "MMM d");
   }
 

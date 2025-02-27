@@ -96,7 +96,11 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "date",
     header: "Date",
     cell: ({ row, table }) => {
-      return formatDate(row.original.date, table.options.meta?.dateFormat);
+      return formatDate(
+        row.original.date,
+        table.options.meta?.dateFormat,
+        !table.options.meta?.hasSorting,
+      );
     },
   },
   {

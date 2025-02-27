@@ -34,6 +34,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   hasNextPage?: boolean;
   hasFilters?: boolean;
+  hasSorting?: boolean;
   loadMore: () => void;
   query?: string;
   pageSize: number;
@@ -44,7 +45,7 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   query,
-
+  hasSorting,
   data: initialData,
   pageSize,
   loadMore,
@@ -167,6 +168,7 @@ export function DataTable<TData, TValue>({
       updateTransaction: handleUpdateTransaction,
       deleteTransactions: handleDeleteTransactions,
       dateFormat,
+      hasSorting,
     },
     state: {
       rowSelection,

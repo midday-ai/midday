@@ -17,6 +17,7 @@ type Props = {
 
 export async function Table({ filter, page, sort, query }: Props) {
   const hasFilters = Object.values(filter).some((value) => value !== null);
+  const hasSorting = Object.values(sort ?? {}).some((value) => value !== null);
   const initialColumnVisibility = JSON.parse(
     cookies().get(Cookies.TransactionsColumns)?.value || "[]",
   );
@@ -69,6 +70,7 @@ export async function Table({ filter, page, sort, query }: Props) {
       hasFilters={hasFilters}
       page={page}
       query={query}
+      hasSorting={hasSorting}
     />
   );
 }
