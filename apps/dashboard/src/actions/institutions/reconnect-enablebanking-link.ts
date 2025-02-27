@@ -40,7 +40,7 @@ export const reconnectEnableBankingLinkAction = authActionClient
             validUntil: new Date(Date.now() + maximum_consent_validity * 1000)
               .toISOString()
               .replace(/\.\d+Z$/, ".000000+00:00"),
-            state: isDesktop ? "desktop:connect" : "web:connect",
+            state: isDesktop ? "desktop:reconnect" : "web:reconnect",
           },
         });
 
