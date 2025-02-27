@@ -1,13 +1,7 @@
 import { createHash } from "node:crypto";
 import { getLogoURL } from "@/utils/logo";
 import { capitalCase } from "change-case";
-import type {
-  Account,
-  Balance,
-  ConnectionStatus,
-  GetTransactionsResponse,
-  Transaction,
-} from "../types";
+import type { Account, Balance, ConnectionStatus, Transaction } from "../types";
 import type {
   GetAccountDetailsResponse,
   GetBalancesResponse,
@@ -17,9 +11,9 @@ import type {
   TransformInstitution,
 } from "./types";
 
-function hashInstitutionId(name: string, country?: string): string {
-  const input = `${name}${country || ""}`;
-  return createHash("sha256").update(input).digest("hex").slice(0, 12);
+export function hashInstitutionId(name: string, country?: string): string {
+  const input = `${name}-${country}`;
+  return createHash("md5").update(input).digest("hex").slice(0, 12);
 }
 
 export const transformInstitution = (

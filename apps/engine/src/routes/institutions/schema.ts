@@ -88,3 +88,15 @@ export const InstitutionParamsSchema = z
     }),
   })
   .openapi("InstitutionParamsSchema");
+
+export const InstitutionByIdParamsSchema = z
+  .object({
+    id: z.string().openapi({
+      param: {
+        name: "id",
+        in: "path",
+      },
+      example: "9293961c-df93-4d6d-a2cc-fc3e353b2d10",
+    }),
+  })
+  .openapi("InstitutionByIdParamsSchema");

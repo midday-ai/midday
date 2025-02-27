@@ -1,14 +1,9 @@
-import { createHash } from "node:crypto";
 import { EnableBankingApi } from "@/providers/enablebanking/enablebanking-api";
+import { hashInstitutionId } from "@/providers/enablebanking/transform";
 import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
 import { getFileExtension, getLogoURL } from "@/utils/logo";
 import { getPopularity, getTellerData, matchLogoURL } from "./utils";
-
-function generateDeterministicId(name: string, country: string): string {
-  const input = `${name}-${country}`;
-  return createHash("md5").update(input).digest("hex").slice(0, 12);
-}
 
 export async function getEnableBankingInstitutions() {
   const provider = new EnableBankingApi({
@@ -22,10 +17,7 @@ export async function getEnableBankingInstitutions() {
   const data = await provider.getInstitutions();
 
   return data.map((institution) => {
-    const hashId = generateDeterministicId(
-      institution.name,
-      institution.country,
-    );
+    const hashId = hashInstitutionId(institution.name, institution.country);
 
     return {
       id: hashId,
