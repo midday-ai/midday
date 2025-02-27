@@ -7,7 +7,9 @@ import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
+  InstitutionByIdParamsSchema,
   InstitutionParamsSchema,
+  InstitutionSchema,
   InstitutionsSchema,
   UpdateUsageParamsSchema,
   UpdateUsageSchema,
@@ -22,6 +24,7 @@ type Document = {
   maximum_consent_validity: number | null;
   provider: Providers;
   popularity: number;
+  countries: string[];
 };
 
 type SearchResult = {
@@ -164,7 +167,10 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
 
         return c.json(
           {
-            data,
+            data: {
+              ...data,
+              country: data.countries.at(0),
+            },
           },
           200,
         );
@@ -172,6 +178,72 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
         const errorResponse = createErrorResponse(error, c.get("requestId"));
 
         return c.json(errorResponse, 400);
+      }
+    },
+  )
+  .openapi(
+    createRoute({
+      method: "get",
+      path: "/:id",
+      summary: "Get Institution by ID",
+      request: {
+        params: InstitutionByIdParamsSchema,
+      },
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: InstitutionSchema,
+            },
+          },
+          description: "Retrieve institution by id",
+        },
+        404: {
+          content: {
+            "application/json": {
+              schema: ErrorSchema,
+            },
+          },
+          description: "Institution not found",
+        },
+        400: {
+          content: {
+            "application/json": {
+              schema: ErrorSchema,
+            },
+          },
+          description: "Institution not found",
+        },
+      },
+    }),
+    async (c) => {
+      const envs = env(c);
+      const { id } = c.req.valid("param");
+      const requestId = c.get("requestId");
+
+      const typesense = SearchClient(envs);
+
+      try {
+        const result = (await typesense
+          .collections("institutions")
+          .documents(id)
+          .retrieve()) as Document;
+
+        return c.json(
+          {
+            name: result.name,
+            provider: result.provider,
+            id: result.id,
+            logo: result.logo,
+            available_history: result.available_history,
+            maximum_consent_validity: result.maximum_consent_validity,
+            country: result.countries.at(0),
+          },
+          200,
+        );
+      } catch (error) {
+        const errorResponse = createErrorResponse(error, requestId);
+        return c.json(errorResponse, 404);
       }
     },
   );

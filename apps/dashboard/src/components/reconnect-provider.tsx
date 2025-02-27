@@ -1,4 +1,5 @@
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
+import { reconnectEnableBankingLinkAction } from "@/actions/institutions/reconnect-enablebanking-link";
 import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-gocardless-link";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
@@ -58,6 +59,27 @@ export function ReconnectProvider({
       setIsLoading(false);
     },
   });
+
+  const reconnectEnableBankingLink = useAction(
+    reconnectEnableBankingLinkAction,
+    {
+      onExecute: () => {
+        setIsLoading(true);
+      },
+      onError: () => {
+        setIsLoading(false);
+
+        toast({
+          duration: 2500,
+          variant: "error",
+          title: "Something went wrong please try again.",
+        });
+      },
+      onSuccess: () => {
+        setIsLoading(false);
+      },
+    },
+  );
 
   useScript("https://cdn.teller.io/connect/connect.js", {
     removeOnUnmount: false,
@@ -124,7 +146,10 @@ export function ReconnectProvider({
         });
       }
       case "enablebanking": {
-        return;
+        return reconnectEnableBankingLink.execute({
+          institutionId,
+          isDesktop: isDesktopApp(),
+        });
       }
       case "teller":
         return openTeller();
