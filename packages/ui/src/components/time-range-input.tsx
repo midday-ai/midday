@@ -1,7 +1,7 @@
 "use client";
 
 import { differenceInMinutes, parse } from "date-fns";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Icons } from "./icons";
 
 export function TimeRangeInput({
@@ -11,18 +11,12 @@ export function TimeRangeInput({
   value: { start: string; end: string };
   onChange: (value: { start: string; end: string }) => void;
 }) {
-  const [startTime, setStartTime] = useState(value.start);
-  const [endTime, setEndTime] = useState(value.end);
-  const [duration, setDuration] = useState("");
+  const startTime = value.start;
+  const endTime = value.end;
 
-  useEffect(() => {
-    setStartTime(value.start);
-    setEndTime(value.end);
-  }, [value]);
-
-  useEffect(() => {
+  const duration = useMemo(() => {
     if (!startTime || !endTime) {
-      return;
+      return "";
     }
 
     const start = parse(startTime, "HH:mm", new Date());
@@ -30,7 +24,7 @@ export function TimeRangeInput({
     const diff = differenceInMinutes(end, start);
     const hours = Math.floor(diff / 60);
     const minutes = diff % 60;
-    setDuration(`${hours}h ${minutes}min`);
+    return `${hours}h ${minutes}min`;
   }, [startTime, endTime]);
 
   return (
@@ -41,7 +35,6 @@ export function TimeRangeInput({
           type="time"
           value={startTime}
           onChange={(e) => {
-            setStartTime(e.target.value);
             onChange({ ...value, start: e.target.value });
           }}
           className="bg-transparent focus:outline-none text-sm"
@@ -55,7 +48,6 @@ export function TimeRangeInput({
           type="time"
           value={endTime}
           onChange={(e) => {
-            setEndTime(e.target.value);
             onChange({ ...value, end: e.target.value });
           }}
           className="bg-transparent focus:outline-none text-sm"
