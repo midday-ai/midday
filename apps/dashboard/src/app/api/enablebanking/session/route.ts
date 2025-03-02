@@ -50,6 +50,8 @@ export async function GET(request: NextRequest) {
   }
 
   if (method === "reconnect") {
+    // TODO: Update reference id to the new session id
+    // Find bank connection by account ids?
     const { data: sessionData } = await sessionResponse.json();
 
     if (sessionData?.session_id) {
