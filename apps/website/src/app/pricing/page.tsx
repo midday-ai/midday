@@ -111,15 +111,20 @@ export default function Page() {
               {/* Pro Plan */}
               <div className="flex flex-col p-8 border border-primary bg-background relative">
                 <div className="absolute top-0 right-0 mr-4 mt-4 rounded-full text-[#878787] text-[9px] font-normal border px-2 py-1 font-mono">
-                  Most popular
+                  Limited offer
                 </div>
                 <h2 className="text-xl text-left mb-2">Pro</h2>
-                <div className="mt-4 flex items-baseline">
-                  <span className="text-[40px] font-medium tracking-tight">
+                <div className="mt-1 flex items-baseline">
+                  <span className="text-2xl font-medium tracking-tight line-through text-[#878787]">
                     $99
                   </span>
-                  <span className="ml-1 text-2xl font-medium">/mo</span>
-                  <span className="ml-2 text-sm text-muted-foreground">
+
+                  <span className="ml-1 text-2xl font-medium tracking-tight">
+                    49
+                  </span>
+
+                  <span className="ml-1 text-xl font-medium">/mo</span>
+                  <span className="ml-2 text-xs text-muted-foreground">
                     Excl. VAT
                   </span>
                 </div>
