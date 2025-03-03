@@ -16,7 +16,7 @@ export function Plans({
   const isDesktop = isDesktopApp();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full mt-8">
       {/* Starter Plan */}
       <div className="flex flex-col p-6 border bg-background">
         <h2 className="text-xl mb-2 text-left">Starter</h2>
