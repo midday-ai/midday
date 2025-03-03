@@ -50,9 +50,6 @@ export async function UserMenu({ onlySignOut }) {
                     {userData.email}
                   </span>
                 </div>
-                <div className="border py-0.5 px-3 rounded-full text-[11px] font-normal">
-                  Beta
-                </div>
               </div>
             </DropdownMenuLabel>
 

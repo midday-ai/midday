@@ -7,10 +7,9 @@ import { useRouter } from "next/navigation";
 
 type Props = {
   onSubmit: () => void;
-  showFeedback: () => void;
 };
 
-export function ChatFooter({ onSubmit, showFeedback }: Props) {
+export function ChatFooter({ onSubmit }: Props) {
   const router = useRouter();
   const { setOpen } = useAssistantStore();
 
@@ -56,17 +55,6 @@ export function ChatFooter({ onSubmit, showFeedback }: Props) {
               >
                 <Icons.Discord className="w-[16px] h-[16px]" />
                 <span>Join Our Community</span>
-              </button>
-            </li>
-
-            <li>
-              <button
-                type="button"
-                className="flex space-x-2 items-center text-xs hover:bg-[#F2F1EF] dark:hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
-                onClick={showFeedback}
-              >
-                <Icons.ChatBubble className="w-[16px] h-[16px]" />
-                <span>Send feedback</span>
               </button>
             </li>
 

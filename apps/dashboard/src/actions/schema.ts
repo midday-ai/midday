@@ -195,10 +195,6 @@ export const connectBankAccountSchema = z.object({
   ),
 });
 
-export const sendFeedbackSchema = z.object({
-  feedback: z.string(),
-});
-
 export const updateTransactionSchema = z.object({
   id: z.string().uuid(),
   note: z.string().optional().nullable(),

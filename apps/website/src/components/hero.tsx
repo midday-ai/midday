@@ -49,13 +49,13 @@ export function Hero() {
             </Link>
 
             <a href="https://app.midday.ai">
-              <Button className="h-11 px-5">Try it for free</Button>
+              <Button className="h-11 px-5">Start free trial</Button>
             </a>
           </div>
         </div>
 
         <p className="text-xs text-[#707070] mt-4 font-mono">
-          Claim $49/mo deal, free during beta.
+          Start free trial, no credit card required.
         </p>
       </div>
 

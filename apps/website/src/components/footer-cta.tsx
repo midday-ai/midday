@@ -38,7 +38,7 @@ export function FooterCTA() {
 
           <a href="https://app.midday.ai">
             <Button className="h-12 px-5 bg-black text-white dark:bg-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80">
-              Try it for free
+              Start free trial
             </Button>
           </a>
         </div>
