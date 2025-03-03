@@ -17,7 +17,7 @@ interface Team {
   [key: string]: string | number | boolean | undefined; // More specific index signature
 }
 
-export async function Trail() {
+export async function Trial() {
   const userData = await getUser();
 
   const team = userData?.data?.team as Team | undefined;
