@@ -97,12 +97,14 @@ export default function Page() {
                 </div>
 
                 <div className="mt-8 border-t-[1px] border-border pt-8">
-                  <Button
-                    variant="outline"
-                    className="w-full h-12 border border-primary"
-                  >
-                    Start 14 day trial
-                  </Button>
+                  <Link href="https://app.midday.ai">
+                    <Button
+                      variant="outline"
+                      className="w-full h-12 border border-primary"
+                    >
+                      Start 14 day trial
+                    </Button>
+                  </Link>
                 </div>
               </div>
 
@@ -176,7 +178,9 @@ export default function Page() {
                 </div>
 
                 <div className="mt-8 border-t border-border pt-8">
-                  <Button className="w-full h-12">Start 14 day trial</Button>
+                  <Link href="https://app.midday.ai">
+                    <Button className="w-full h-12">Start 14 day trial</Button>
+                  </Link>
                 </div>
               </div>
             </div>
