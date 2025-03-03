@@ -155,11 +155,6 @@ export function TransactionsSearchFilter({
     inputRef.current?.focus();
   });
 
-  useHotkeys("meta+f", (evt) => {
-    evt.preventDefault();
-    setIsOpen((prev) => !prev);
-  });
-
   const handleSearch = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const value = evt.target.value;
 

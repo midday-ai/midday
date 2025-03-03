@@ -25,11 +25,6 @@ export function VaultActions({ disableActions }: { disableActions: boolean }) {
     document.getElementById("upload-files")?.click();
   });
 
-  useHotkeys("shift+meta+f", (evt) => {
-    evt.preventDefault();
-    handleCreateFolder();
-  });
-
   return (
     <div className="absolute -top-[55px] right-0">
       <DropdownMenu>
