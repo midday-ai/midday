@@ -59,7 +59,7 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">1 connected bank account</span>
+                      <span className="text-sm">1 Connected bank</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
@@ -140,7 +140,7 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">5 connected bank accounts</span>
+                      <span className="text-sm">5 Connected banks</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
@@ -152,7 +152,7 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">Unlimited inbox items</span>
+                      <span className="text-sm">500 inbox items per month</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
@@ -190,7 +190,7 @@ export default function Page() {
                 14 day trial (No credit card required)
               </p>
 
-              <p className="mt-4 text-xs text-muted-foreground font-mono">
+              <p className="mt-4 text-xs text-muted-foreground font-mono hidden md:block">
                 Need more? Feel free to contact us
               </p>
             </div>
