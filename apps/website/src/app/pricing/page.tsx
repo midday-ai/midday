@@ -71,7 +71,7 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">10 inbox items per month</span>
+                      <span className="text-sm">30 inbox items per month</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
@@ -91,7 +91,7 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">1 user only</span>
+                      <span className="text-sm">1 user</span>
                     </li>
                   </ul>
                 </div>
@@ -140,7 +140,7 @@ export default function Page() {
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
                       <span className="text-sm">
-                        Up to 30 invoices per month
+                        Up to 50 invoices per month
                       </span>
                     </li>
                     <li className="flex items-start">
@@ -196,7 +196,11 @@ export default function Page() {
               </p>
 
               <p className="mt-4 text-xs text-muted-foreground font-mono hidden md:block">
-                Need more? Feel free to contact us
+                Need more? Feel free to{" "}
+                <Link href="/support" className="underline">
+                  contact us
+                </Link>
+                .
               </p>
             </div>
           </div>

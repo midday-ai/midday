@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
+import Link from "next/link";
 import { Plans } from "../plans";
 
 export function ChoosePlanModal({
@@ -15,12 +16,14 @@ export function ChoosePlanModal({
   daysLeft,
   hasDiscount,
   discountPrice,
+  teamId,
 }: {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   daysLeft?: number;
   hasDiscount?: boolean;
   discountPrice?: number;
+  teamId: string;
 }) {
   const getTitle = () => {
     if (daysLeft && daysLeft > 0) {
@@ -58,12 +61,18 @@ export function ChoosePlanModal({
           </DialogHeader>
           <DialogDescription>{getDescription()}</DialogDescription>
 
-          <Plans discountPrice={discountPrice} />
+          <Plans discountPrice={discountPrice} teamId={teamId} />
 
-          {hasDiscount && (
+          {discountPrice ? (
             <p className="text-xs text-muted-foreground mt-4">
-              If you choose to not upgrade you will only have read access from
-              now on and loose out on your discount.
+              If you choose not to upgrade, you will only have read access from
+              now on and lose out on your discount,{" "}
+              <Link href="/support">contact us</Link> if you have any questions.
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground mt-4">
+              After the trial period ends, you'll have read-only access,{" "}
+              <Link href="/support">contact us</Link> if you have any questions.
             </p>
           )}
         </div>

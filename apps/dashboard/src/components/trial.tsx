@@ -1,9 +1,9 @@
+import { getProPlanPrice } from "@/utils/plans";
 import { UTCDate } from "@date-fns/utc";
 import { getUser } from "@midday/supabase/cached-queries";
 import {
   addDays,
   differenceInDays,
-  differenceInMonths,
   isFuture,
   isSameDay,
   parseISO,
@@ -14,7 +14,7 @@ interface Team {
   created_at: string;
   id: string;
   name?: string;
-  [key: string]: string | number | boolean | undefined; // More specific index signature
+  [key: string]: string | number | boolean | undefined;
 }
 
 export async function Trial() {
@@ -47,22 +47,12 @@ export async function Trial() {
     ? 14
     : Math.max(0, differenceInDays(trialEndDate, today));
 
-  // Calculate months since team creation
-  const monthsSinceCreation = differenceInMonths(today, createdAt);
+  // Get Pro plan price based on team creation date
+  const proPlanPrice = getProPlanPrice(team.created_at);
 
-  // Determine if discount applies and calculate discount price
-  let hasDiscount = false;
-  let discountPrice: number | undefined;
-
-  if (monthsSinceCreation > 8) {
-    // Teams created over 8 months ago get the Pro plan for $30
-    hasDiscount = true;
-    discountPrice = 30;
-  } else if (monthsSinceCreation > 0) {
-    // Teams registered before today get Pro plan for $49 minus months since creation
-    hasDiscount = true;
-    discountPrice = Math.max(49 - monthsSinceCreation, 30);
-  }
+  // Determine if discount applies
+  const hasDiscount = proPlanPrice < 99;
+  const discountPrice = hasDiscount ? proPlanPrice : undefined;
 
   const isTrialEnded = daysLeft <= 0;
 
@@ -81,6 +71,7 @@ export async function Trial() {
         daysLeft={daysLeft}
         hasDiscount={hasDiscount}
         discountPrice={discountPrice}
+        teamId={team.id}
       >
         Upgrade plan
       </ChoosePlanButton>
@@ -92,6 +83,7 @@ export async function Trial() {
       hasDiscount={hasDiscount}
       discountPrice={discountPrice}
       daysLeft={daysLeft}
+      teamId={team.id}
     >
       Pro trial - {daysLeft} days left
     </ChoosePlanButton>

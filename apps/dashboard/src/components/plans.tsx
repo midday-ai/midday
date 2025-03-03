@@ -1,9 +1,20 @@
+"use client";
+
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
+import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Check } from "lucide-react";
 import Link from "next/link";
 
-export function Plans({ discountPrice }: { discountPrice?: number }) {
+export function Plans({
+  discountPrice,
+  teamId,
+}: {
+  discountPrice?: number;
+  teamId: string;
+}) {
+  const isDesktop = isDesktopApp();
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-8">
       {/* Starter Plan */}
@@ -64,7 +75,9 @@ export function Plans({ discountPrice }: { discountPrice?: number }) {
         </div>
 
         <div className="mt-8 border-t-[1px] border-border pt-4">
-          <Link href="https://app.midday.ai">
+          <Link
+            href={`/api/checkout?plan=starter&teamId=${teamId}&isDesktop=${isDesktop}`}
+          >
             <Button
               variant="secondary"
               className="h-9 hover:bg-primary hover:text-secondary"
@@ -106,7 +119,7 @@ export function Plans({ discountPrice }: { discountPrice?: number }) {
           <ul className="mt-4 space-y-2">
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-              <span className="text-xs">Up to 30 invoices per month</span>
+              <span className="text-xs">Up to 50 invoices per month</span>
             </li>
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
@@ -148,7 +161,9 @@ export function Plans({ discountPrice }: { discountPrice?: number }) {
         </div>
 
         <div className="mt-8 border-t border-border pt-4">
-          <Link href="https://app.midday.ai">
+          <Link
+            href={`/api/checkout?plan=pro&teamId=${teamId}&isDesktop=${isDesktop}`}
+          >
             <Button className="h-9">Choose pro plan</Button>
           </Link>
         </div>
