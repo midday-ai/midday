@@ -2,6 +2,7 @@ import { AssistantButton } from "@/components/assistant/button";
 import { DesktopAssistantButton } from "@/components/assistant/button-desktop";
 import { ConnectionStatus } from "@/components/connection-status";
 import { NotificationCenter } from "@/components/notification-center";
+import { Trail } from "@/components/trail";
 import { UserMenu } from "@/components/user-menu";
 import { BrowserNavigation } from "@/desktop/components/browser-navigation";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -22,6 +23,10 @@ export function Header() {
 
       <div className="flex space-x-2 ml-auto">
         {isDesktopApp() && <DesktopAssistantButton />}
+
+        <Suspense>
+          <Trail />
+        </Suspense>
 
         <Suspense>
           <ConnectionStatus />
