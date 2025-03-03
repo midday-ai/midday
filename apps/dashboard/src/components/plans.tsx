@@ -1,22 +1,32 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
+import { SubmitButton } from "@midday/ui/submit-button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Check } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 export function Plans({
   discountPrice,
   teamId,
+  canChooseStarterPlan,
 }: {
   discountPrice?: number;
   teamId: string;
+  canChooseStarterPlan: boolean;
 }) {
   const isDesktop = isDesktopApp();
+  const [isLoading, setIsLoading] = useState(0);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full mt-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-7 w-full">
       {/* Starter Plan */}
       <div className="flex flex-col p-6 border bg-background">
         <h2 className="text-xl mb-2 text-left">Starter</h2>
@@ -75,23 +85,50 @@ export function Plans({
         </div>
 
         <div className="mt-8 border-t-[1px] border-border pt-4">
-          <Link
-            href={`/api/checkout?plan=starter&teamId=${teamId}&isDesktop=${isDesktop}`}
-          >
-            <Button
-              variant="secondary"
-              className="h-9 hover:bg-primary hover:text-secondary"
-            >
-              Choose starter plan
-            </Button>
-          </Link>
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href={`/api/checkout?plan=starter&teamId=${teamId}&isDesktop=${isDesktop}&planType=starter`}
+                  className={cn(
+                    !canChooseStarterPlan && "opacity-50 cursor-default",
+                  )}
+                  onClick={(evt) => {
+                    if (!canChooseStarterPlan) {
+                      evt.preventDefault();
+                      return;
+                    }
+
+                    setIsLoading(1);
+                  }}
+                >
+                  <SubmitButton
+                    variant="secondary"
+                    className={cn(
+                      "h-9 hover:bg-primary hover:text-secondary",
+                      !canChooseStarterPlan && "pointer-events-none",
+                    )}
+                    isSubmitting={isLoading === 1}
+                  >
+                    Choose starter plan
+                  </SubmitButton>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs max-w-[300px]">
+                <p>
+                  This plan is not applicable since you have exceeded the limits
+                  for this subscription (users or bank connections).
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
 
       {/* Pro Plan */}
       <div className="flex flex-col p-6 border border-primary bg-background relative">
         <div className="absolute top-6 right-6 rounded-full text-[#878787] text-[9px] font-normal border px-2 py-1 font-mono">
-          Most popular
+          Limited offer
         </div>
         <h2 className="text-xl text-left mb-2">Pro</h2>
         <div className="mt-1 flex items-baseline">
@@ -162,9 +199,15 @@ export function Plans({
 
         <div className="mt-8 border-t border-border pt-4">
           <Link
-            href={`/api/checkout?plan=pro&teamId=${teamId}&isDesktop=${isDesktop}`}
+            href={`/api/checkout?plan=pro&teamId=${teamId}&isDesktop=${isDesktop}&planType=pro`}
           >
-            <Button className="h-9">Choose pro plan</Button>
+            <SubmitButton
+              className="h-9"
+              onClick={() => setIsLoading(2)}
+              isSubmitting={isLoading === 2}
+            >
+              Choose pro plan
+            </SubmitButton>
           </Link>
         </div>
       </div>
