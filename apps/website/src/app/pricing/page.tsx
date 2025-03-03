@@ -6,6 +6,7 @@ import {
   AccordionTrigger,
 } from "@midday/ui/accordion";
 import { Button } from "@midday/ui/button";
+import { Check } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -18,48 +19,186 @@ export default function Page() {
   return (
     <>
       <div className="container">
-        <div className="min-h-[950px]">
-          <h1 className="mt-24 font-medium text-center text-[100px] md:text-[170px] mb-2 leading-none">
-            Free
-          </h1>
-
-          <h3 className="font-medium text-center text-[100px] md:text-[170px] mb-2 text-stroke leading-none">
-            while in beta
-          </h3>
-
+        <div>
           <div className="flex items-center flex-col text-center relative">
-            <div className="mt-12 mb-12" />
-            <p className="text-xl mt-4">Claim $49/mo deal</p>
+            <h1 className="mt-24 font-medium text-center text-5xl mb-4">
+              Simple, transparent pricing
+            </h1>
+            <p className="text-md text-muted-foreground mb-12 max-w-2xl">
+              Choose the plan that's right for you and start your 14-day trial
+              today.
+            </p>
 
-            <div className="mt-8">
-              <div className="flex items-center space-x-4">
-                <Link
-                  href="https://cal.com/pontus-midday/15min"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button
-                    variant="outline"
-                    className="border border-primary h-12 px-6"
-                  >
-                    Talk to us
-                  </Button>
-                </Link>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-5xl mt-8">
+              {/* Starter Plan */}
+              <div className="flex flex-col p-8 border bg-background">
+                <h2 className="text-xl mb-2 text-left">Starter</h2>
+                <div className="mt-4 flex items-baseline">
+                  <span className="text-[40px] font-medium tracking-tight">
+                    $29
+                  </span>
+                  <span className="ml-1 text-2xl font-medium">/mo</span>
+                  <span className="ml-2 text-sm text-muted-foreground">
+                    Excl. VAT
+                  </span>
+                </div>
+                <p className="mt-4 text-[#878787] text-left text-sm">
+                  For freelancers and solo founders who need the essentials.
+                </p>
 
-                <a
-                  target="_blank"
-                  rel="noreferrer"
-                  href="https://app.midday.ai"
-                >
-                  <Button className="h-12 px-5">Get Started</Button>
-                </a>
+                <div className="mt-8">
+                  <h3 className="text-xs font-medium uppercase tracking-wide text-left text-[#878787] font-mono">
+                    INCLUDING
+                  </h3>
+                  <ul className="mt-4 space-y-2">
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">
+                        Up to 2 invoices per month
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">1 connected bank account</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">Financial overview</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">Time Tracker</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">10 inbox items per month</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">Customer management</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">Export CSV & reports</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">Assistant</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">5GB Vault Storage</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">1 user only</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="mt-8 border-t-[1px] border-border pt-8">
+                  <Link href="https://app.midday.ai">
+                    <Button
+                      variant="outline"
+                      className="w-full h-12 border border-primary"
+                    >
+                      Start 14 day trial
+                    </Button>
+                  </Link>
+                </div>
               </div>
+
+              {/* Pro Plan */}
+              <div className="flex flex-col p-8 border border-primary bg-background relative">
+                <div className="absolute top-0 right-0 mr-4 mt-4 rounded-full text-[#878787] text-[9px] font-normal border px-2 py-1 font-mono">
+                  Most popular
+                </div>
+                <h2 className="text-xl text-left mb-2">Pro</h2>
+                <div className="mt-4 flex items-baseline">
+                  <span className="text-[40px] font-medium tracking-tight">
+                    $99
+                  </span>
+                  <span className="ml-1 text-2xl font-medium">/mo</span>
+                  <span className="ml-2 text-sm text-muted-foreground">
+                    Excl. VAT
+                  </span>
+                </div>
+                <p className="mt-4 text-[#878787] text-left text-sm">
+                  For growing teams and businesses that need more flexibility.
+                </p>
+
+                <div className="mt-8">
+                  <h3 className="text-xs font-medium uppercase tracking-wide text-left text-[#878787] font-mono">
+                    INCLUDING
+                  </h3>
+                  <ul className="mt-4 space-y-2">
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">
+                        Up to 30 invoices per month
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">5 connected bank accounts</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">Financial overview</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">Time Tracker</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">Unlimited inbox items</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">Customer management</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">Export CSV & reports</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">Assistant</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">50GB Vault Storage</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">10 users</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="mt-8 border-t border-border pt-8">
+                  <Link href="https://app.midday.ai">
+                    <Button className="w-full h-12">Start 14 day trial</Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 flex w-full max-w-5xl items-center justify-between">
+              <p className="mt-4 text-xs text-muted-foreground font-mono">
+                14 day trial (No credit card required)
+              </p>
+
+              <p className="mt-4 text-xs text-muted-foreground font-mono">
+                Need more? Feel free to contact us
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="container  max-w-[800px]">
-          <div className="-mt-[200px] ">
+        <div className="container max-w-[800px] mt-32">
+          <div>
             <div className="text-center">
               <h4 className="text-4xl">Frequently asked questions</h4>
             </div>
@@ -128,7 +267,10 @@ export default function Page() {
                   are also actively working towards SOC 2 Type II compliance. We
                   encrypt data at rest, and sensitive data on row level. We also
                   support 2FA authentication.
-                  <Link href="/policy">midday.ai/policy</Link>.
+                  <Link href="/policy" className="ml-1 underline">
+                    midday.ai/policy
+                  </Link>
+                  .
                 </AccordionContent>
               </AccordionItem>
 
@@ -155,8 +297,10 @@ export default function Page() {
                 <AccordionContent>
                   Sure, we're happy to answer any questions you might have. Just
                   send us an email at{" "}
-                  <a href="mailto:support@midday.ai">support@midday.ai</a> and
-                  we'll get back to you as soon as possible.
+                  <a href="mailto:support@midday.ai" className="underline">
+                    support@midday.ai
+                  </a>{" "}
+                  and we'll get back to you as soon as possible.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

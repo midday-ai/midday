@@ -8,7 +8,6 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Suspense } from "react";
 import { DesktopTrafficLight } from "./desktop-traffic-light";
-import { FeedbackForm } from "./feedback-form";
 import { MobileMenu } from "./mobile-menu";
 
 export function Header() {
@@ -23,8 +22,6 @@ export function Header() {
 
       <div className="flex space-x-2 ml-auto">
         {isDesktopApp() && <DesktopAssistantButton />}
-
-        <FeedbackForm />
 
         <Suspense>
           <ConnectionStatus />

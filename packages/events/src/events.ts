@@ -159,10 +159,6 @@ export const LogEvents = {
     name: "MFA Verify",
     channel: "security",
   },
-  SendFeedback: {
-    name: "Send Feedback",
-    channel: "feedback",
-  },
   InboxInbound: {
     name: "Inbox Inbound",
     channel: "inbox",

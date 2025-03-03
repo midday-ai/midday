@@ -22,7 +22,6 @@ export function Chat({
   onNewChat,
   input,
   setInput,
-  showFeedback,
 }) {
   const { submitUserMessage } = useActions();
   const { formRef, onKeyDown } = useEnterSubmit();
@@ -118,10 +117,7 @@ export function Chat({
           />
         </form>
 
-        <ChatFooter
-          onSubmit={() => onSubmit(input)}
-          showFeedback={showFeedback}
-        />
+        <ChatFooter onSubmit={() => onSubmit(input)} />
       </div>
     </div>
   );
