@@ -115,11 +115,11 @@ export default function Page() {
                 </div>
                 <h2 className="text-xl text-left mb-2">Pro</h2>
                 <div className="mt-1 flex items-baseline">
-                  <span className="text-2xl font-medium tracking-tight line-through text-[#878787]">
+                  <span className="text-[40px] font-medium tracking-tight line-through text-[#878787]">
                     $99
                   </span>
 
-                  <span className="ml-1 text-2xl font-medium tracking-tight">
+                  <span className="ml-1 text-[40px] font-medium tracking-tight">
                     49
                   </span>
 
