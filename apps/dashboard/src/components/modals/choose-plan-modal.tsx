@@ -27,7 +27,7 @@ export function ChoosePlanModal({
 }) {
   const getTitle = () => {
     if (daysLeft && daysLeft > 0) {
-      return `Pro trial - ${daysLeft} days left`;
+      return `Pro trial - ${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`;
     }
 
     return hasDiscount ? "Special Discount Offer" : "Choose plan";
@@ -36,7 +36,7 @@ export function ChoosePlanModal({
   const getDescription = () => {
     if (daysLeft !== undefined) {
       if (daysLeft > 0) {
-        return `Your trial will end in ${daysLeft} days, after the trail period you will have read access only.`;
+        return `Your trial will end in ${daysLeft} ${daysLeft === 1 ? "day" : "days"}, after the trial period you will have read access only.`;
       }
 
       return "Your trial period has ended. Please choose a plan to continue using all features.";
@@ -63,18 +63,10 @@ export function ChoosePlanModal({
 
           <Plans discountPrice={discountPrice} teamId={teamId} />
 
-          {discountPrice ? (
-            <p className="text-xs text-muted-foreground mt-4">
-              If you choose not to upgrade, you will only have read access from
-              now on and lose out on your discount,{" "}
-              <Link href="/support">contact us</Link> if you have any questions.
-            </p>
-          ) : (
-            <p className="text-xs text-muted-foreground mt-4">
-              After the trial period ends, you'll have read-only access,{" "}
-              <Link href="/support">contact us</Link> if you have any questions.
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground mt-4">
+            After the trial period ends, you'll have read-only access,{" "}
+            <Link href="/support">contact us</Link> if you have any questions.
+          </p>
         </div>
       </DialogContent>
     </Dialog>

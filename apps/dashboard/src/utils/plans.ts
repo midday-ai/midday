@@ -39,7 +39,8 @@ export const getDiscount = (createdAt: string) => {
     return DISCOUNTS.public_beta;
   }
 
-  return null;
+  // Change this to null after the public beta
+  return DISCOUNTS.public_beta;
 };
 
 export const getProPlanPrice = (createdAt: string) => {
@@ -56,7 +57,8 @@ export const getProPlanPrice = (createdAt: string) => {
     return 49;
   }
 
-  return 99;
+  // Change this to 99 after the public beta
+  return 49;
 };
 
 export async function updateTeamPlan(
