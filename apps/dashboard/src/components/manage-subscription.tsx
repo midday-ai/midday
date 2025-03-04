@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@midday/ui/card";
+import { Card } from "@midday/ui/card";
 import { SubmitButton } from "@midday/ui/submit-button";
 import Link from "next/link";
 import { useState } from "react";
