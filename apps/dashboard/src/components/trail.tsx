@@ -71,6 +71,9 @@ export async function Trail() {
     return null;
   }
 
+  // Disable trial for now
+  return null;
+
   if (isTrialEnded) {
     return (
       <ChoosePlanButton
