@@ -1,4 +1,5 @@
 import { createClient } from "@midday/supabase/server";
+import { Client } from "@midday/supabase/types";
 import { revalidateTag } from "next/cache";
 
 export const PLANS = {
@@ -25,7 +26,12 @@ export const DISCOUNTS = {
   },
 };
 
-export const getDiscount = (createdAt: string) => {
+export const getDiscount = (createdAt: string, planType: string) => {
+  // Starter plan doesn't have a discount
+  if (planType === "starter") {
+    return null;
+  }
+
   const createdAtDate = new Date(createdAt);
 
   const earlyAccessCutoff = new Date("2024-07-01");
@@ -65,7 +71,7 @@ export async function updateTeamPlan(
   teamId: string,
   data: {
     plan: string;
-    canceled_at?: Date;
+    canceled_at?: Date | null;
   },
 ) {
   const supabase = createClient();
@@ -89,4 +95,19 @@ export async function updateTeamPlan(
 
 export function getPlanByProductId(productId: string) {
   return Object.values(PLANS).find((plan) => plan.id === productId)?.key;
+}
+
+export async function canChooseStarterPlanQuery(teamId: string) {
+  const supabase = createClient();
+
+  const [teamMembersResponse, bankConnectionsResponse] = await Promise.all([
+    supabase.from("users_on_team").select("id").eq("team_id", teamId),
+    supabase.from("bank_connections").select("id").eq("team_id", teamId),
+  ]);
+
+  // Can only choose starter if team has 1 member and 1 bank connection
+  return (
+    (teamMembersResponse.data?.length ?? 0) < 2 &&
+    (bankConnectionsResponse.data?.length ?? 0) < 2
+  );
 }

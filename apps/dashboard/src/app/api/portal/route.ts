@@ -11,14 +11,14 @@ export async function GET(req: NextRequest) {
     throw new Error("You must be logged in");
   }
 
-  const customerId = req.nextUrl.searchParams.get("id");
+  const teamId = req.nextUrl.searchParams.get("id");
 
-  if (!customerId) {
-    throw new Error("Customer ID is required");
+  if (!teamId) {
+    throw new Error("Team ID is required");
   }
 
   const result = await api.customerSessions.create({
-    customerId,
+    customerId: teamId,
   });
 
   return NextResponse.redirect(result.customerPortalUrl);

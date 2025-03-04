@@ -1,5 +1,5 @@
 import { Cookies } from "@/utils/constants";
-import { getProPlanPrice } from "@/utils/plans";
+import { canChooseStarterPlanQuery, getProPlanPrice } from "@/utils/plans";
 import { UTCDate } from "@date-fns/utc";
 import { getUser } from "@midday/supabase/cached-queries";
 import {
@@ -32,11 +32,6 @@ export async function Trial() {
   const rawCreatedAt = parseISO(team.created_at);
   const today = new UTCDate();
 
-  // If the creation date is in the future, don't display the trial
-  if (isFuture(rawCreatedAt)) {
-    return null;
-  }
-
   // Convert to UTCDate for consistent calculation
   const createdAt = new UTCDate(rawCreatedAt);
 
@@ -63,15 +58,14 @@ export async function Trial() {
     return null;
   }
 
-  // Disable trial for now
-  return null;
+  const canChooseStarterPlan = await canChooseStarterPlanQuery(team.id);
 
   if (isTrialEnded) {
     const upgradeModalShown = cookies().has(Cookies.UpgradeModalShown);
 
-    cookies().set(Cookies.UpgradeModalShown, "true", {
-      maxAge: 60 * 60 * 24 * 3, // 3 days
-    });
+    // cookies().set(Cookies.UpgradeModalShown, "true", {
+    //   maxAge: 60 * 60 * 24 * 3, // 3 days
+    // });
 
     return (
       <ChoosePlanButton
@@ -80,6 +74,7 @@ export async function Trial() {
         hasDiscount={hasDiscount}
         discountPrice={discountPrice}
         teamId={team.id}
+        canChooseStarterPlan={canChooseStarterPlan}
       >
         Upgrade plan
       </ChoosePlanButton>
@@ -92,6 +87,7 @@ export async function Trial() {
       discountPrice={discountPrice}
       daysLeft={daysLeft}
       teamId={team.id}
+      canChooseStarterPlan={canChooseStarterPlan}
     >
       Pro trial - {daysLeft} days left
     </ChoosePlanButton>

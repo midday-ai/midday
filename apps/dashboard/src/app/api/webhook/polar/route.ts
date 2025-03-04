@@ -11,10 +11,10 @@ export const POST = Webhooks({
           break;
         }
 
-        await updateTeamPlan({
-          id: payload.data.customerId as string,
+        await updateTeamPlan(payload.data.customerId, {
           email: payload.data.customer.email ?? undefined,
           plan: getPlanByProductId(payload.data.productId),
+          canceled_at: null,
         });
 
         break;
@@ -22,8 +22,8 @@ export const POST = Webhooks({
 
       // Subscription has been explicitly canceled by the user
       case "subscription.canceled": {
-        await updateTeamPlan({
-          id: payload.data.customerId as string,
+        await updateTeamPlan(payload.data.customerId, {
+          plan: "trial",
           canceled_at: new Date(),
         });
 
@@ -37,8 +37,7 @@ export const POST = Webhooks({
           break;
         }
 
-        await updateTeamPlan({
-          id: payload.data.customerId as string,
+        await updateTeamPlan(payload.data.customerId, {
           plan: "trial",
           canceled_at: new Date(),
         });

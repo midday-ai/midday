@@ -868,6 +868,7 @@ export type Database = {
       teams: {
         Row: {
           base_currency: string | null
+          canceled_at: string | null
           created_at: string
           document_classification: boolean | null
           email: string | null
@@ -878,9 +879,11 @@ export type Database = {
           inbox_id: string | null
           logo_url: string | null
           name: string | null
+          plan: Database["public"]["Enums"]["plans"]
         }
         Insert: {
           base_currency?: string | null
+          canceled_at?: string | null
           created_at?: string
           document_classification?: boolean | null
           email?: string | null
@@ -891,9 +894,11 @@ export type Database = {
           inbox_id?: string | null
           logo_url?: string | null
           name?: string | null
+          plan?: Database["public"]["Enums"]["plans"]
         }
         Update: {
           base_currency?: string | null
+          canceled_at?: string | null
           created_at?: string
           document_classification?: boolean | null
           email?: string | null
@@ -904,6 +909,7 @@ export type Database = {
           inbox_id?: string | null
           logo_url?: string | null
           name?: string | null
+          plan?: Database["public"]["Enums"]["plans"]
         }
         Relationships: []
       }
@@ -2372,6 +2378,7 @@ export type Database = {
       invoice_delivery_type: "create" | "create_and_send"
       invoice_size: "a4" | "letter"
       invoice_status: "draft" | "overdue" | "paid" | "unpaid" | "canceled"
+      plans: "trial" | "starter" | "pro"
       reportTypes: "profit" | "revenue" | "burn_rate" | "expense"
       teamRoles: "owner" | "member"
       trackerStatus: "in_progress" | "completed"

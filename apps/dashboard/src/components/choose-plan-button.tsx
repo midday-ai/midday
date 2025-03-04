@@ -11,6 +11,7 @@ export function ChoosePlanButton({
   hasDiscount,
   discountPrice,
   teamId,
+  canChooseStarterPlan,
 }: {
   children: React.ReactNode;
   initialIsOpen?: boolean;
@@ -18,6 +19,7 @@ export function ChoosePlanButton({
   hasDiscount?: boolean;
   discountPrice?: number;
   teamId: string;
+  canChooseStarterPlan: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(initialIsOpen ?? false);
 
@@ -38,6 +40,7 @@ export function ChoosePlanButton({
         hasDiscount={hasDiscount}
         discountPrice={discountPrice}
         teamId={teamId}
+        canChooseStarterPlan={canChooseStarterPlan}
       />
     </>
   );

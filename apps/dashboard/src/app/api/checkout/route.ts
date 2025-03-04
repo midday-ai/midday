@@ -17,6 +17,7 @@ export const GET = async (req: NextRequest) => {
   const redirectPath = req.nextUrl.searchParams.get("redirectPath") ?? "/";
   const teamId = req.nextUrl.searchParams.get("teamId");
   const isDesktop = req.nextUrl.searchParams.get("isDesktop") === "true";
+  const planType = req.nextUrl.searchParams.get("planType");
 
   const selectedPlan = PLANS[plan as keyof typeof PLANS];
 
@@ -30,7 +31,7 @@ export const GET = async (req: NextRequest) => {
     throw new Error("Team not found");
   }
 
-  const discountId = getDiscount(userData.data.team.created_at);
+  const discountId = getDiscount(userData.data.team.created_at, planType);
 
   const { country } = geolocation(req);
 
