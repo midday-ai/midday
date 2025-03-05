@@ -55,7 +55,8 @@ export const GET = async (req: NextRequest) => {
       country: country ?? "US",
     },
     metadata: {
-      organizationId: teamId,
+      teamId,
+      companyName: userData.data.team.name,
     },
   });
 
