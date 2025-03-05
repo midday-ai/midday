@@ -37,7 +37,8 @@ export const GET = async (req: NextRequest) => {
 
   const { country } = geolocation(req);
 
-  const successUrl = new URL(redirectPath, req.nextUrl.origin);
+  const successUrl = new URL("/api/checkout/success", req.nextUrl.origin);
+  successUrl.searchParams.set("redirectPath", redirectPath);
 
   if (isDesktop) {
     successUrl.searchParams.set("isDesktop", "true");
