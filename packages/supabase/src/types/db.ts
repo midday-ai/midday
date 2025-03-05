@@ -49,6 +49,13 @@ export type Database = {
             foreignKeyName: "integrations_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "integrations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -131,6 +138,13 @@ export type Database = {
             foreignKeyName: "public_bank_accounts_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "public_bank_accounts_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -193,6 +207,13 @@ export type Database = {
             foreignKeyName: "bank_connections_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "bank_connections_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -234,6 +255,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tags"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_tags_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
           },
           {
             foreignKeyName: "customer_tags_team_id_fkey"
@@ -310,6 +338,13 @@ export type Database = {
             foreignKeyName: "customers_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "customers_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -368,6 +403,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storage_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
           },
           {
             foreignKeyName: "storage_team_id_fkey"
@@ -486,6 +528,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "transaction_attachments"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_inbox_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
           },
           {
             foreignKeyName: "public_inbox_team_id_fkey"
@@ -632,6 +681,13 @@ export type Database = {
             foreignKeyName: "invoice_settings_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: true
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "invoice_settings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: true
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -774,6 +830,13 @@ export type Database = {
             foreignKeyName: "invoices_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "invoices_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -831,6 +894,13 @@ export type Database = {
             foreignKeyName: "reports_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "reports_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -856,6 +926,13 @@ export type Database = {
           team_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tags_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
           {
             foreignKeyName: "tags_team_id_fkey"
             columns: ["team_id"]
@@ -979,6 +1056,13 @@ export type Database = {
             foreignKeyName: "tracker_entries_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "tracker_entries_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -1020,6 +1104,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tracker_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracker_project_tags_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
           },
           {
             foreignKeyName: "tracker_project_tags_team_id_fkey"
@@ -1086,6 +1177,13 @@ export type Database = {
             foreignKeyName: "tracker_projects_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "tracker_projects_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -1138,6 +1236,13 @@ export type Database = {
             foreignKeyName: "tracker_reports_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "tracker_reports_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -1175,6 +1280,13 @@ export type Database = {
           type?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "public_transaction_attachments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
           {
             foreignKeyName: "public_transaction_attachments_team_id_fkey"
             columns: ["team_id"]
@@ -1233,6 +1345,13 @@ export type Database = {
             foreignKeyName: "transaction_categories_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "transaction_categories_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -1275,6 +1394,13 @@ export type Database = {
             foreignKeyName: "transaction_enrichments_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "transaction_enrichments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -1309,6 +1435,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tags"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_tags_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
           },
           {
             foreignKeyName: "transaction_tags_team_id_fkey"
@@ -1427,6 +1560,13 @@ export type Database = {
             foreignKeyName: "public_transactions_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "public_transactions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -1475,6 +1615,13 @@ export type Database = {
           team_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "public_user_invites_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
           {
             foreignKeyName: "public_user_invites_team_id_fkey"
             columns: ["team_id"]
@@ -1536,6 +1683,13 @@ export type Database = {
             foreignKeyName: "users_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "users_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -1568,6 +1722,13 @@ export type Database = {
             foreignKeyName: "users_on_team_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "users_on_team_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
@@ -1582,7 +1743,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      team_limits_metrics: {
+        Row: {
+          inbox_created_this_month: number | null
+          invoices_created_this_month: number | null
+          number_of_bank_connections: number | null
+          number_of_users: number | null
+          team_id: string | null
+          total_document_size: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       amount_text: {
@@ -2150,6 +2321,19 @@ export type Database = {
           balance: number
           name: string
           logo_url: string
+        }[]
+      }
+      get_team_limits_metrics: {
+        Args: {
+          input_team_id: string
+        }
+        Returns: {
+          team_id: string
+          total_document_size: number
+          number_of_users: number
+          number_of_bank_connections: number
+          invoices_created_this_month: number
+          inbox_created_this_month: number
         }[]
       }
       get_total_balance: {

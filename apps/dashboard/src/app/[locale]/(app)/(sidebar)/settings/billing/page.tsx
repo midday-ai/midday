@@ -1,8 +1,11 @@
 import { ManageSubscription } from "@/components/manage-subscription";
 import { Plans } from "@/components/plans";
+import { UsageSkeleton } from "@/components/usage";
+import { UsageServer } from "@/components/usage.server";
 import { canChooseStarterPlanQuery, getProPlanPrice } from "@/utils/plans";
 import { getUser } from "@midday/supabase/cached-queries";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Billing | Midday",
@@ -37,6 +40,10 @@ export default async function Billing() {
           />
         </div>
       )}
+
+      <Suspense fallback={<UsageSkeleton />}>
+        <UsageServer teamId={team?.id} plan={team?.plan} />
+      </Suspense>
     </div>
   );
 }

@@ -43,7 +43,7 @@ export function Plans({
           <ul className="mt-4 space-y-2">
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-              <span className="text-xs">Up to 2 invoices per month</span>
+              <span className="text-xs">Up to 10 invoices per month</span>
             </li>
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
@@ -59,7 +59,7 @@ export function Plans({
             </li>
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-              <span className="text-xs">30 inbox items per month</span>
+              <span className="text-xs">50 inbox items per month</span>
             </li>
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
@@ -160,7 +160,7 @@ export function Plans({
             </li>
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-              <span className="text-xs">5 Connected banks</span>
+              <span className="text-xs">10 Connected banks</span>
             </li>
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />

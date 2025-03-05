@@ -1403,3 +1403,14 @@ export async function getBankAccountsBalancesQuery(
     team_id: teamId,
   });
 }
+
+export async function getTeamLimitsMetricsQuery(
+  supabase: Client,
+  teamId: string,
+) {
+  return supabase
+    .rpc("get_team_limits_metrics", {
+      input_team_id: teamId,
+    })
+    .single();
+}

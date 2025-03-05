@@ -54,7 +54,7 @@ export default function Page() {
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
                       <span className="text-sm">
-                        Up to 2 invoices per month
+                        Up to 10 invoices per month
                       </span>
                     </li>
                     <li className="flex items-start">
@@ -71,7 +71,7 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">30 inbox items per month</span>
+                      <span className="text-sm">50 inbox items per month</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
@@ -145,7 +145,7 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">5 Connected banks</span>
+                      <span className="text-sm">10 Connected banks</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />

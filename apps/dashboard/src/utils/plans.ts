@@ -111,3 +111,25 @@ export async function canChooseStarterPlanQuery(teamId: string) {
     (bankConnectionsResponse.data?.length ?? 0) < 2
   );
 }
+
+export function getPlanLimits(plan: string) {
+  switch (plan) {
+    case "starter":
+      return {
+        users: 1,
+        bankConnections: 1,
+        storage: 50,
+        inbox: 50,
+        invoices: 10,
+      };
+    case "trial":
+    case "pro":
+      return {
+        users: 10,
+        bankConnections: 10,
+        storage: 500,
+        inbox: 500,
+        invoices: 30,
+      };
+  }
+}
