@@ -30,6 +30,8 @@
     "@midday/utils": "workspace:*",
     "@novu/headless": "^2.0.3",
     "@number-flow/react": "^0.4.1",
+    "@polar-sh/nextjs": "^0.3.20",
+    "@polar-sh/sdk": "^0.28.0",
     "@react-google-maps/api": "^2.20.3",
     "@sentry/nextjs": "^8",
     "@supabase/sentry-js-integration": "^0.3.0",

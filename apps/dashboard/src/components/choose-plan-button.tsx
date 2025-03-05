@@ -10,12 +10,16 @@ export function ChoosePlanButton({
   daysLeft,
   hasDiscount,
   discountPrice,
+  teamId,
+  canChooseStarterPlan,
 }: {
   children: React.ReactNode;
   initialIsOpen?: boolean;
   daysLeft?: number;
   hasDiscount?: boolean;
   discountPrice?: number;
+  teamId: string;
+  canChooseStarterPlan: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(initialIsOpen ?? false);
 
@@ -28,12 +32,15 @@ export function ChoosePlanButton({
       >
         {children}
       </Button>
+
       <ChoosePlanModal
         isOpen={isOpen}
         onOpenChange={setIsOpen}
         daysLeft={daysLeft}
         hasDiscount={hasDiscount}
         discountPrice={discountPrice}
+        teamId={teamId}
+        canChooseStarterPlan={canChooseStarterPlan}
       />
     </>
   );

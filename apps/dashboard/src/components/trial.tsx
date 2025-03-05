@@ -1,23 +1,26 @@
+import { Cookies } from "@/utils/constants";
+import { canChooseStarterPlanQuery, getProPlanPrice } from "@/utils/plans";
 import { UTCDate } from "@date-fns/utc";
 import { getUser } from "@midday/supabase/cached-queries";
 import {
   addDays,
   differenceInDays,
-  differenceInMonths,
   isFuture,
   isSameDay,
   parseISO,
 } from "date-fns";
+import { cookies } from "next/headers";
 import { ChoosePlanButton } from "./choose-plan-button";
+import { FeedbackForm } from "./feedback-form";
 
 interface Team {
   created_at: string;
   id: string;
   name?: string;
-  [key: string]: string | number | boolean | undefined; // More specific index signature
+  [key: string]: string | number | boolean | undefined;
 }
 
-export async function Trail() {
+export async function Trial() {
   const userData = await getUser();
 
   const team = userData?.data?.team as Team | undefined;
@@ -26,14 +29,13 @@ export async function Trail() {
     return null;
   }
 
+  if (team.plan !== "trial") {
+    return <FeedbackForm />;
+  }
+
   // Parse dates using UTCDate for consistent timezone handling
   const rawCreatedAt = parseISO(team.created_at);
   const today = new UTCDate();
-
-  // If the creation date is in the future, don't display the trial
-  if (isFuture(rawCreatedAt)) {
-    return null;
-  }
 
   // Convert to UTCDate for consistent calculation
   const createdAt = new UTCDate(rawCreatedAt);
@@ -47,22 +49,12 @@ export async function Trail() {
     ? 14
     : Math.max(0, differenceInDays(trialEndDate, today));
 
-  // Calculate months since team creation
-  const monthsSinceCreation = differenceInMonths(today, createdAt);
+  // Get Pro plan price based on team creation date
+  const proPlanPrice = getProPlanPrice(team.created_at);
 
-  // Determine if discount applies and calculate discount price
-  let hasDiscount = false;
-  let discountPrice: number | undefined;
-
-  if (monthsSinceCreation > 8) {
-    // Teams created over 8 months ago get the Pro plan for $30
-    hasDiscount = true;
-    discountPrice = 30;
-  } else if (monthsSinceCreation > 0) {
-    // Teams registered before today get Pro plan for $49 minus months since creation
-    hasDiscount = true;
-    discountPrice = Math.max(49 - monthsSinceCreation, 30);
-  }
+  // Determine if discount applies
+  const hasDiscount = proPlanPrice < 99;
+  const discountPrice = hasDiscount ? proPlanPrice : undefined;
 
   const isTrialEnded = daysLeft <= 0;
 
@@ -71,16 +63,19 @@ export async function Trail() {
     return null;
   }
 
-  // Disable trial for now
-  return null;
+  const canChooseStarterPlan = await canChooseStarterPlanQuery(team.id);
 
   if (isTrialEnded) {
+    const upgradeModalShown = cookies().has(Cookies.UpgradeModalShown);
+
     return (
       <ChoosePlanButton
-        initialIsOpen={true}
+        initialIsOpen={!upgradeModalShown}
         daysLeft={daysLeft}
         hasDiscount={hasDiscount}
         discountPrice={discountPrice}
+        teamId={team.id}
+        canChooseStarterPlan={canChooseStarterPlan}
       >
         Upgrade plan
       </ChoosePlanButton>
@@ -92,6 +87,8 @@ export async function Trail() {
       hasDiscount={hasDiscount}
       discountPrice={discountPrice}
       daysLeft={daysLeft}
+      teamId={team.id}
+      canChooseStarterPlan={canChooseStarterPlan}
     >
       Pro trial - {daysLeft} days left
     </ChoosePlanButton>

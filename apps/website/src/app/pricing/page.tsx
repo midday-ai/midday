@@ -54,7 +54,7 @@ export default function Page() {
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
                       <span className="text-sm">
-                        Up to 2 invoices per month
+                        Up to 10 invoices per month
                       </span>
                     </li>
                     <li className="flex items-start">
@@ -71,7 +71,7 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">10 inbox items per month</span>
+                      <span className="text-sm">50 inbox items per month</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
@@ -87,11 +87,11 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">5GB Vault Storage</span>
+                      <span className="text-sm">10GB Vault Storage</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">1 user only</span>
+                      <span className="text-sm">1 user</span>
                     </li>
                   </ul>
                 </div>
@@ -140,12 +140,12 @@ export default function Page() {
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
                       <span className="text-sm">
-                        Up to 30 invoices per month
+                        Up to 50 invoices per month
                       </span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">5 Connected banks</span>
+                      <span className="text-sm">10 Connected banks</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
@@ -173,7 +173,7 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">50GB Vault Storage</span>
+                      <span className="text-sm">100GB Vault Storage</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
@@ -196,7 +196,11 @@ export default function Page() {
               </p>
 
               <p className="mt-4 text-xs text-muted-foreground font-mono hidden md:block">
-                Need more? Feel free to contact us
+                Need more? Feel free to{" "}
+                <Link href="/support" className="underline">
+                  contact us
+                </Link>
+                .
               </p>
             </div>
           </div>
