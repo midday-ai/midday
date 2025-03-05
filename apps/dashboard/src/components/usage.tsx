@@ -9,6 +9,7 @@ interface UsageItemProps {
   max: number;
   unit?: string;
   period?: string;
+  percentage?: number;
 }
 
 function CircularProgress({ value }: { value: number }) {
@@ -39,17 +40,62 @@ function CircularProgress({ value }: { value: number }) {
   );
 }
 
-function UsageItem({ label, current, max, unit, period }: UsageItemProps) {
-  const percentage = (current / max) * 100;
+// Helper function to format file size
+function formatFileSize(bytes: number): { value: number; unit: string } {
+  const KB = 1024;
+  const MB = KB * 1024;
+  const GB = MB * 1024;
+
+  if (bytes >= GB) {
+    return { value: bytes / GB, unit: "GB" };
+  }
+
+  if (bytes >= MB) {
+    return { value: bytes / MB, unit: "MB" };
+  }
+
+  return { value: Math.max(bytes / KB, 0.1), unit: "KB" };
+}
+
+function UsageItem({
+  label,
+  current,
+  max,
+  unit,
+  period,
+  percentage,
+}: UsageItemProps) {
+  // Calculate percentage if not explicitly provided
+  const calculatedPercentage =
+    percentage !== undefined
+      ? percentage
+      : Math.min((current / max) * 100, 100);
+
+  // Format values differently based on whether we have a unit or not
+  let formattedCurrent: string;
+  let formattedMax: string;
+
+  if (unit) {
+    // For values with units (like GB), show the decimal value
+    formattedCurrent = current.toFixed(1).replace(/\.0$/, "");
+    formattedMax = max.toFixed(1).replace(/\.0$/, "");
+  } else {
+    // For counts without units, use k formatting for large numbers
+    formattedCurrent =
+      current >= 1000 ? `${(current / 1000).toFixed(1)}k` : current.toString();
+
+    formattedMax = max >= 1000 ? `${(max / 1000).toFixed(1)}k` : max.toString();
+  }
 
   return (
     <div className="flex items-center justify-between py-3 px-4">
       <div className="flex items-center gap-4">
-        <CircularProgress value={percentage} />
+        <CircularProgress value={calculatedPercentage} />
         <span className="text-sm font-medium">{label}</span>
       </div>
       <div className="text-sm text-muted-foreground">
-        {current}/{max} {unit} {period && <span>per {period}</span>}
+        {formattedCurrent}/{formattedMax} {unit}{" "}
+        {period && <span>per {period}</span>}
       </div>
     </div>
   );
@@ -68,8 +114,15 @@ export function Usage({
     invoices_created_this_month: number;
   };
 }) {
-  // Convert bytes to GB
-  const storageInGB = Math.round(data.total_document_size / 1024 / 1024 / 1024);
+  const GB = 1024 * 1024 * 1024;
+
+  const selectedPlan = getPlanLimits(plan);
+
+  // Always convert to GB regardless of size
+  const storageInGB = data.total_document_size / GB;
+
+  // Max storage in bytes (50 GB)
+  const MAX_STORAGE_BYTES = 50 * GB;
 
   return (
     <div>
@@ -78,32 +131,32 @@ export function Usage({
       </h2>
 
       <Card className="divide-y">
-        <UsageItem
-          label="Users"
-          current={data.number_of_users}
-          max={getPlanLimits(plan).users}
-        />
+        <UsageItem label="Users" current={data.number_of_users} max={10} />
         <UsageItem
           label="Bank connections"
           current={data.number_of_bank_connections}
-          max={getPlanLimits(plan).bankConnections}
+          max={selectedPlan?.bankConnections}
         />
         <UsageItem
           label="Storage"
-          current={storageInGB}
-          max={getPlanLimits(plan).storage}
+          current={Number.parseFloat(storageInGB.toFixed(1))}
+          max={selectedPlan?.storage}
           unit="GB"
+          percentage={Math.min(
+            (data.total_document_size / MAX_STORAGE_BYTES) * 100,
+            100,
+          )}
         />
         <UsageItem
           label="Inbox"
           current={data.inbox_created_this_month}
-          max={getPlanLimits(plan).inbox}
+          max={selectedPlan.inbox}
           period="month"
         />
         <UsageItem
           label="Invoices"
           current={data.invoices_created_this_month}
-          max={getPlanLimits(plan).invoices}
+          max={selectedPlan.invoices}
           period="month"
         />
       </Card>

@@ -1,36 +1,65 @@
 import { createClient } from "@midday/supabase/server";
-import { Client } from "@midday/supabase/types";
 import { revalidateTag } from "next/cache";
 
+const POLAR_ENVIRONMENT = process.env.POLAR_ENVIRONMENT;
+
 export const PLANS = {
-  starter: {
-    id: "ac17601d-29a9-4530-ab9d-9f6ea39f7e32",
-    name: "Starter",
-    key: "starter",
+  production: {
+    starter: {
+      id: "ac17601d-29a9-4530-ab9d-9f6ea39f7e32",
+      name: "Starter",
+      key: "starter",
+    },
+    pro: {
+      id: "0a0a36b1-38d3-4082-85ca-f46cec9d8b1a",
+      name: "Pro",
+      key: "pro",
+    },
   },
-  pro: {
-    id: "0a0a36b1-38d3-4082-85ca-f46cec9d8b1a",
-    name: "Pro",
-    key: "pro",
+  sandbox: {
+    starter: {
+      id: "265b6845-4fca-4813-86b7-70fb606626dd",
+      name: "Starter",
+      key: "starter",
+    },
+    pro: {
+      id: "dc9e75d2-c1ef-4265-9265-f599e54eb172",
+      name: "Pro",
+      key: "pro",
+    },
   },
 };
 
 export const DISCOUNTS = {
-  early_access: {
-    id: "cdcfb924-1f42-40ba-af5e-c8fb1fe7981b",
-    name: "Early Access",
+  production: {
+    early_access: {
+      id: "cdcfb924-1f42-40ba-af5e-c8fb1fe7981b",
+      name: "Early Access",
+    },
+    public_beta: {
+      id: "ced3af53-fb27-41f5-abdd-070f382995b8",
+      name: "Public Beta",
+    },
   },
-  public_beta: {
-    id: "ced3af53-fb27-41f5-abdd-070f382995b8",
-    name: "Public Beta",
+  sandbox: {
+    early_access: {
+      id: "fb38e1fb-6947-4ac1-8a89-43f6e0113d78",
+      name: "Early Access",
+    },
+    public_beta: {
+      id: "fb5e65fc-39b2-4212-a51a-fa6d1bd813e6",
+      name: "Public Beta",
+    },
   },
 };
 
-export const getDiscount = (createdAt: string, planType: string) => {
+export const getDiscount = (createdAt: string, planType?: string | null) => {
   // Starter plan doesn't have a discount
-  if (planType === "starter") {
+  if (!planType || planType === "starter") {
     return null;
   }
+
+  const discounts = DISCOUNTS[POLAR_ENVIRONMENT as keyof typeof DISCOUNTS];
 
   const createdAtDate = new Date(createdAt);
 
@@ -38,15 +67,19 @@ export const getDiscount = (createdAt: string, planType: string) => {
   const publicBetaCutoff = new Date("2025-03-01");
 
   if (createdAtDate < earlyAccessCutoff) {
-    return DISCOUNTS.early_access;
+    return discounts.early_access;
   }
 
   if (createdAtDate >= earlyAccessCutoff && createdAtDate < publicBetaCutoff) {
-    return DISCOUNTS.public_beta;
+    return discounts.public_beta;
   }
 
   // Change this to null after the public beta
-  return DISCOUNTS.public_beta;
+  return discounts.public_beta;
+};
+
+export const getPlans = () => {
+  return PLANS[POLAR_ENVIRONMENT as keyof typeof PLANS];
 };
 
 export const getProPlanPrice = (createdAt: string) => {
@@ -67,23 +100,21 @@ export const getProPlanPrice = (createdAt: string) => {
   return 49;
 };
 
-export async function updateTeamPlan(
-  teamId: string,
-  data: {
-    plan: string;
-    canceled_at?: Date | null;
-  },
-) {
-  const supabase = createClient();
+type UpdateTeamPlanData = {
+  plan: "trial" | "starter" | "pro";
+  email?: string;
+  canceled_at?: string | null;
+};
 
-  const { data: teamData } = await supabase
+export async function updateTeamPlan(teamId: string, data: UpdateTeamPlanData) {
+  const supabase = createClient({ admin: true });
+
+  const { data: teamData, error } = await supabase
     .from("teams")
-    .update({
-      plan,
-      canceled_at,
-    })
+    .update(data)
     .eq("id", teamId)
-    .select("users_on_team(user_id)");
+    .select("users_on_team(user_id)")
+    .single();
 
   revalidateTag(`teams_${teamId}`);
 
@@ -94,7 +125,13 @@ export async function updateTeamPlan(
 }
 
 export function getPlanByProductId(productId: string) {
-  return Object.values(PLANS).find((plan) => plan.id === productId)?.key;
+  const plan = Object.values(getPlans()).find((plan) => plan.id === productId);
+
+  if (!plan) {
+    throw new Error("Plan not found");
+  }
+
+  return plan.key;
 }
 
 export async function canChooseStarterPlanQuery(teamId: string) {
@@ -118,7 +155,7 @@ export function getPlanLimits(plan: string) {
       return {
         users: 1,
         bankConnections: 1,
-        storage: 50,
+        storage: 10 * 1024 * 1024 * 1024, // 10GB in bytes
         inbox: 50,
         invoices: 10,
       };
@@ -127,9 +164,17 @@ export function getPlanLimits(plan: string) {
       return {
         users: 10,
         bankConnections: 10,
-        storage: 500,
+        storage: 100 * 1024 * 1024 * 1024, // 100GB in bytes
         inbox: 500,
         invoices: 30,
+      };
+    default:
+      return {
+        users: 1,
+        bankConnections: 1,
+        storage: 10 * 1024 * 1024 * 1024, // 10GB in bytes
+        inbox: 50,
+        invoices: 10,
       };
   }
 }

@@ -11,6 +11,7 @@ import {
 } from "date-fns";
 import { cookies } from "next/headers";
 import { ChoosePlanButton } from "./choose-plan-button";
+import { FeedbackForm } from "./feedback-form";
 
 interface Team {
   created_at: string;
@@ -26,6 +27,10 @@ export async function Trial() {
 
   if (!team) {
     return null;
+  }
+
+  if (team.plan !== "trial") {
+    return <FeedbackForm />;
   }
 
   // Parse dates using UTCDate for consistent timezone handling
@@ -62,10 +67,6 @@ export async function Trial() {
 
   if (isTrialEnded) {
     const upgradeModalShown = cookies().has(Cookies.UpgradeModalShown);
-
-    // cookies().set(Cookies.UpgradeModalShown, "true", {
-    //   maxAge: 60 * 60 * 24 * 3, // 3 days
-    // });
 
     return (
       <ChoosePlanButton

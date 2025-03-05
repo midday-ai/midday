@@ -1,5 +1,6 @@
 "use client";
 
+import { closeBillingModalAction } from "@/actions/close-billing-modal-action";
 import {
   Dialog,
   DialogContent,
@@ -7,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
+import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { Plans } from "../plans";
 
@@ -27,6 +29,13 @@ export function ChoosePlanModal({
   teamId: string;
   canChooseStarterPlan: boolean;
 }) {
+  const closeBillingModal = useAction(closeBillingModalAction);
+
+  const handleClose = (value: boolean) => {
+    closeBillingModal.execute();
+    onOpenChange(value);
+  };
+
   const getTitle = () => {
     if (daysLeft && daysLeft > 0) {
       return `Pro trial - ${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`;
@@ -55,7 +64,7 @@ export function ChoosePlanModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-[696px]">
         <div className="p-8">
           <DialogHeader>

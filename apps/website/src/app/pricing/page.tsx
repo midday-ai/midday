@@ -87,7 +87,7 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">5GB Vault Storage</span>
+                      <span className="text-sm">10GB Vault Storage</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
@@ -173,7 +173,7 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">50GB Vault Storage</span>
+                      <span className="text-sm">100GB Vault Storage</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />

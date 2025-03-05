@@ -1,4 +1,4 @@
-import { PLANS, getDiscount } from "@/utils/plans";
+import { getDiscount, getPlans } from "@/utils/plans";
 import { api } from "@/utils/polar";
 import { getSession, getUser } from "@midday/supabase/cached-queries";
 import { geolocation } from "@vercel/functions";
@@ -19,7 +19,9 @@ export const GET = async (req: NextRequest) => {
   const isDesktop = req.nextUrl.searchParams.get("isDesktop") === "true";
   const planType = req.nextUrl.searchParams.get("planType");
 
-  const selectedPlan = PLANS[plan as keyof typeof PLANS];
+  const plans = getPlans();
+
+  const selectedPlan = plans[plan as keyof typeof plans];
 
   if (!selectedPlan) {
     throw new Error("Invalid plan");
@@ -50,6 +52,9 @@ export const GET = async (req: NextRequest) => {
     discountId: discountId?.id,
     customerBillingAddress: {
       country: country ?? "US",
+    },
+    metadata: {
+      organizationId: teamId,
     },
   });
 

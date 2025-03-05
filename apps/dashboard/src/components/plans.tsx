@@ -75,7 +75,7 @@ export function Plans({
             </li>
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-              <span className="text-xs">5GB Vault Storage</span>
+              <span className="text-xs">10GB Vault Storage</span>
             </li>
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
@@ -114,12 +114,14 @@ export function Plans({
                   </SubmitButton>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[300px]">
-                <p>
-                  This plan is not applicable since you have exceeded the limits
-                  for this subscription (users or bank connections).
-                </p>
-              </TooltipContent>
+              {!canChooseStarterPlan && (
+                <TooltipContent className="text-xs max-w-[300px]">
+                  <p>
+                    This plan is not applicable since you have exceeded the
+                    limits for this subscription (users or bank connections).
+                  </p>
+                </TooltipContent>
+              )}
             </Tooltip>
           </TooltipProvider>
         </div>
@@ -188,7 +190,7 @@ export function Plans({
             </li>
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-              <span className="text-xs">50GB Vault Storage</span>
+              <span className="text-xs">100GB Vault Storage</span>
             </li>
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />

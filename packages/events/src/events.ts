@@ -171,6 +171,10 @@ export const LogEvents = {
     name: "Support Ticket",
     channel: "support",
   },
+  SendFeedback: {
+    name: "Send Feedback",
+    channel: "feedback",
+  },
   CategoryCreate: {
     name: "Category Create",
     channel: "category",
