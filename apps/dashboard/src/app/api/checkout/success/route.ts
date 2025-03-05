@@ -6,7 +6,12 @@ export const GET = async (req: NextRequest) => {
   const redirectPath = searchParams.get("redirectPath") ?? "/";
 
   if (isDesktop) {
-    return NextResponse.redirect(`midday://${redirectPath}`);
+    const url = new URL(req.url);
+
+    url.pathname = "/desktop/checkout/success";
+    url.searchParams.set("redirectPath", redirectPath);
+
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.redirect(new URL(redirectPath, req.url));
