@@ -1,6 +1,5 @@
 import { getPlanLimits } from "@/utils/plans";
 import { Card } from "@midday/ui/card";
-import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 
 interface UsageItemProps {
@@ -120,9 +119,7 @@ export function Usage({
 
   // Always convert to GB regardless of size
   const storageInGB = data.total_document_size / GB;
-
-  // Max storage in bytes (50 GB)
-  const MAX_STORAGE_BYTES = 50 * GB;
+  const maxStorageInGB = selectedPlan?.storage / GB;
 
   return (
     <div>
@@ -131,7 +128,11 @@ export function Usage({
       </h2>
 
       <Card className="divide-y">
-        <UsageItem label="Users" current={data.number_of_users} max={10} />
+        <UsageItem
+          label="Users"
+          current={data.number_of_users}
+          max={selectedPlan?.users}
+        />
         <UsageItem
           label="Bank connections"
           current={data.number_of_bank_connections}
@@ -139,11 +140,11 @@ export function Usage({
         />
         <UsageItem
           label="Storage"
-          current={Number.parseFloat(storageInGB.toFixed(1))}
+          current={storageInGB}
           max={selectedPlan?.storage}
           unit="GB"
           percentage={Math.min(
-            (data.total_document_size / MAX_STORAGE_BYTES) * 100,
+            (data.total_document_size / selectedPlan?.storage) * 100,
             100,
           )}
         />

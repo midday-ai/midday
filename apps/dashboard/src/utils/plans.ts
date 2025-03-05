@@ -164,7 +164,7 @@ export function getPlanLimits(plan: string) {
       return {
         users: 10,
         bankConnections: 10,
-        storage: 100 * 1024 * 1024 * 1024, // 100GB in bytes
+        storage: 100, // 100GB in bytes
         inbox: 500,
         invoices: 30,
       };
