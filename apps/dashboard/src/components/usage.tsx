@@ -118,8 +118,8 @@ export function Usage({
   const selectedPlan = getPlanLimits(plan);
 
   // Always convert to GB regardless of size
-  const storageInGB = data.total_document_size / GB;
-  const maxStorageInGB = selectedPlan?.storage / GB;
+  const storageInGB = data?.total_document_size ?? 0 / GB;
+  const maxStorageInGB = selectedPlan?.storage ?? 0 / GB;
 
   return (
     <div>
@@ -130,33 +130,33 @@ export function Usage({
       <Card className="divide-y">
         <UsageItem
           label="Users"
-          current={data.number_of_users}
+          current={data.number_of_users ?? 0}
           max={selectedPlan?.users}
         />
         <UsageItem
           label="Bank connections"
-          current={data.number_of_bank_connections}
+          current={data?.number_of_bank_connections ?? 0}
           max={selectedPlan?.bankConnections}
         />
-        <UsageItem
+        {/* <UsageItem
           label="Storage"
           current={storageInGB}
           max={selectedPlan?.storage}
           unit="GB"
           percentage={Math.min(
-            (data.total_document_size / selectedPlan?.storage) * 100,
+            (data?.total_document_size ?? 0 / selectedPlan?.storage) * 100,
             100,
           )}
-        />
+        /> */}
         <UsageItem
           label="Inbox"
-          current={data.inbox_created_this_month}
+          current={data?.inbox_created_this_month ?? 0}
           max={selectedPlan.inbox}
           period="month"
         />
         <UsageItem
           label="Invoices"
-          current={data.invoices_created_this_month}
+          current={data?.invoices_created_this_month ?? 0}
           max={selectedPlan.invoices}
           period="month"
         />
@@ -170,7 +170,7 @@ export function UsageSkeleton() {
   const skeletonItems = [
     "users",
     "connections",
-    "storage",
+    // "storage",
     "inbox",
     "invoices",
   ];
