@@ -23,6 +23,7 @@ type Props = {
   provider: string;
   enrollmentId: string | null;
   institutionId: string;
+  referenceId?: string;
   accessToken: string | null;
   onManualSync: () => void;
   variant?: "button" | "icon";
@@ -33,6 +34,7 @@ export function ReconnectProvider({
   provider,
   enrollmentId,
   institutionId,
+  referenceId,
   accessToken,
   onManualSync,
   variant,
@@ -149,6 +151,7 @@ export function ReconnectProvider({
         return reconnectEnableBankingLink.execute({
           institutionId,
           isDesktop: isDesktopApp(),
+          sessionId: referenceId,
         });
       }
       case "teller":

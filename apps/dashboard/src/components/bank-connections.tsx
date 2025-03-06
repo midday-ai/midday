@@ -38,6 +38,7 @@ interface BankConnectionProps {
     expires_at?: string;
     enrollment_id: string | null;
     institution_id: string;
+    reference_id?: string;
     last_accessed?: string;
     access_token: string | null;
     error?: string;
@@ -279,6 +280,7 @@ export function BankConnection({ connection }: BankConnectionProps) {
               institutionId={connection.institution_id}
               accessToken={connection.access_token}
               onManualSync={handleManualSync}
+              referenceId={connection.reference_id}
             />
           ) : (
             <>

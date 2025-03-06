@@ -455,6 +455,7 @@ export const createEnableBankingLinkSchema = z.object({
 export const reconnectEnableBankingLinkSchema = z.object({
   institutionId: z.string(),
   isDesktop: z.boolean(),
+  sessionId: z.string(),
 });
 
 export const updateInstitutionUsageSchema = z.object({

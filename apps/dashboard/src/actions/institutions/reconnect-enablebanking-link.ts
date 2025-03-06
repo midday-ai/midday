@@ -13,7 +13,7 @@ export const reconnectEnableBankingLinkAction = authActionClient
   })
   .action(
     async ({
-      parsedInput: { institutionId, isDesktop },
+      parsedInput: { institutionId, isDesktop, sessionId },
       ctx: { analytics, user },
     }) => {
       analytics.track({
@@ -28,7 +28,7 @@ export const reconnectEnableBankingLinkAction = authActionClient
         },
       });
 
-      const { maximum_consent_validity, country, name } =
+      const { maximum_consent_validity, country, name, type } =
         await institutionResponse.json();
 
       try {
@@ -37,10 +37,13 @@ export const reconnectEnableBankingLinkAction = authActionClient
             institutionId: name,
             country,
             teamId: user.team_id,
+            type,
             validUntil: new Date(Date.now() + maximum_consent_validity * 1000)
               .toISOString()
               .replace(/\.\d+Z$/, ".000000+00:00"),
-            state: isDesktop ? "desktop:reconnect" : "web:reconnect",
+            state: isDesktop
+              ? `desktop:reconnect:${sessionId}`
+              : `web:reconnect:${sessionId}`,
           },
         });
 

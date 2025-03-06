@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/", requestUrl.origin));
   }
 
-  const [type, method] = state?.split(":") ?? [];
+  const [type, method, sessionId] = state?.split(":") ?? [];
 
   const isDesktop = type === "desktop";
   const redirectBase = isDesktop ? "midday://" : requestUrl.origin;
@@ -50,8 +50,6 @@ export async function GET(request: NextRequest) {
   }
 
   if (method === "reconnect") {
-    // TODO: Update reference id to the new session id
-    // Find bank connection by account ids?
     const { data: sessionData } = await sessionResponse.json();
 
     if (sessionData?.session_id) {
@@ -61,7 +59,7 @@ export async function GET(request: NextRequest) {
           expires_at: sessionData.expires_at,
           status: "connected",
         })
-        .eq("reference_id", sessionData.session_id)
+        .eq("reference_id", sessionId)
         .select("id")
         .single();
 
