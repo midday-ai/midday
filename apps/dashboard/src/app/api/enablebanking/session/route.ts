@@ -23,8 +23,6 @@ export async function GET(request: NextRequest) {
 
   const [type, method, sessionId] = state?.split(":") ?? [];
 
-  console.log("enable-banking-session", type, method, sessionId);
-
   const isDesktop = type === "desktop";
   const redirectBase = isDesktop ? "midday://" : requestUrl.origin;
 
@@ -59,6 +57,7 @@ export async function GET(request: NextRequest) {
         .from("bank_connections")
         .update({
           expires_at: sessionData.expires_at,
+          reference_id: sessionData.session_id,
           status: "connected",
         })
         .eq("reference_id", sessionId)
