@@ -370,7 +370,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
     async (c) => {
       const envs = env(c);
 
-      const { institutionId, country, teamId, validUntil, state } =
+      const { institutionId, country, teamId, validUntil, state, type } =
         await c.req.json();
 
       const api = new EnableBankingApi({
@@ -385,6 +385,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           teamId,
           validUntil,
           state,
+          type,
         });
 
         return c.json(

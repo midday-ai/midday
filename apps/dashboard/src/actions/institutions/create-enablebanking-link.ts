@@ -20,6 +20,7 @@ export const createEnableBankingLinkAction = authActionClient
         maximumConsentValidity,
         country: countryCode,
         isDesktop,
+        type,
       },
       ctx: { analytics, user },
     }) => {
@@ -37,6 +38,7 @@ export const createEnableBankingLinkAction = authActionClient
           json: {
             institutionId,
             country,
+            type,
             teamId: user.team_id,
             validUntil: new Date(Date.now() + maximumConsentValidity * 1000)
               .toISOString()

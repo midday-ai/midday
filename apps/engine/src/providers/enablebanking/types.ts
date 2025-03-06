@@ -291,3 +291,12 @@ export type GetTransactionsResponse = {
   transactions: Array<GetTransaction>;
   continuation_key?: string;
 };
+
+export type AuthenticateRequest = {
+  country: string;
+  institutionId: string;
+  teamId: string;
+  validUntil: string;
+  state: string;
+  type: "personal" | "business";
+};

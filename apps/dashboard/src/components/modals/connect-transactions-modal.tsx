@@ -62,6 +62,7 @@ type SearchResultProps = {
   availableHistory: number;
   maximumConsentValidity: number;
   openPlaid: () => void;
+  type?: "personal" | "business";
 };
 
 function SearchResult({
@@ -72,6 +73,7 @@ function SearchResult({
   availableHistory,
   openPlaid,
   maximumConsentValidity,
+  type,
 }: SearchResultProps) {
   return (
     <div className="flex justify-between">
@@ -83,6 +85,7 @@ function SearchResult({
           <InstitutionInfo provider={provider}>
             <span className="text-[#878787] text-xs capitalize">
               Via {formatProvider(provider)}
+              {type ? ` • ${type}` : ""}
             </span>
           </InstitutionInfo>
         </div>
@@ -95,6 +98,7 @@ function SearchResult({
         openPlaid={openPlaid}
         maximumConsentValidity={maximumConsentValidity}
         availableHistory={availableHistory}
+        type={type}
       />
     </div>
   );
@@ -111,10 +115,7 @@ type Institution = {
   provider: string;
   available_history?: number;
   maximum_consent_validity?: number;
-};
-
-type Institutions = {
-  data: Institution[];
+  type?: "personal" | "business";
 };
 
 export function ConnectTransactionsModal({
@@ -305,6 +306,7 @@ export function ConnectTransactionsModal({
                           ? +institution.maximum_consent_validity
                           : 0
                       }
+                      type={institution?.type}
                       openPlaid={() => {
                         setParams({ step: null });
                         openPlaid();

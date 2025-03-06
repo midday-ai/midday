@@ -4,6 +4,7 @@ import * as jose from "jose";
 import xior, { type XiorInstance, type XiorRequestConfig } from "xior";
 import type { GetTransactionsRequest, ProviderParams } from "../types";
 import type {
+  AuthenticateRequest,
   AuthenticateResponse,
   GetAccountDetailsResponse,
   GetAccountsRequest,
@@ -138,14 +139,10 @@ export class EnableBankingApi {
     return api.post<TResponse>(path, body, config).then(({ data }) => data);
   }
 
-  async authenticate(params: {
-    country: string;
-    institutionId: string;
-    teamId: string;
-    validUntil: string;
-    state: string;
-  }): Promise<AuthenticateResponse> {
-    const { country, institutionId, teamId, validUntil, state } = params;
+  async authenticate(
+    params: AuthenticateRequest,
+  ): Promise<AuthenticateResponse> {
+    const { country, institutionId, teamId, validUntil, state, type } = params;
 
     try {
       const response = await this.#post<AuthenticateResponse>("/auth", {
@@ -158,7 +155,7 @@ export class EnableBankingApi {
           name: institutionId,
           country,
         },
-        psu_type: "business",
+        psu_type: type,
         psu_id: teamId,
         redirect_url: this.#redirectUrl,
         state,

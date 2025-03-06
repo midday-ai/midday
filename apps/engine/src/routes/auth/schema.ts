@@ -160,6 +160,9 @@ export const EnableBankingLinkBodySchema = z
     validUntil: z.string().openapi({
       example: "2024-01-01",
     }),
+    type: z.enum(["personal", "business"]).openapi({
+      example: "personal",
+    }),
     state: z.string().openapi({
       example: "1234567890",
       description:
