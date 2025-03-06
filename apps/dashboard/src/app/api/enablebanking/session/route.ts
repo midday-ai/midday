@@ -23,6 +23,8 @@ export async function GET(request: NextRequest) {
 
   const [type, method, sessionId] = state?.split(":") ?? [];
 
+  console.log("enable-banking-session", type, method, sessionId);
+
   const isDesktop = type === "desktop";
   const redirectBase = isDesktop ? "midday://" : requestUrl.origin;
 
