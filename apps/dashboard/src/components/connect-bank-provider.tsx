@@ -13,6 +13,7 @@ type Props = {
   availableHistory: number;
   maximumConsentValidity: number;
   openPlaid: () => void;
+  type?: "personal" | "business";
 };
 
 export function ConnectBankProvider({
@@ -22,6 +23,7 @@ export function ConnectBankProvider({
   openPlaid,
   availableHistory,
   maximumConsentValidity,
+  type,
 }: Props) {
   const { setParams, countryCode } = useConnectParams();
   const updateInstitutionUsage = useAction(updateInstitutionUsageAction);
@@ -62,6 +64,7 @@ export function ConnectBankProvider({
           id={name}
           country={countryCode}
           maximumConsentValidity={maximumConsentValidity}
+          type={type}
           onSelect={() => {
             updateUsage();
           }}

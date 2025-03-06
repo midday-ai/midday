@@ -25,6 +25,7 @@ type Document = {
   provider: Providers;
   popularity: number;
   countries: string[];
+  type?: "personal" | "business";
 };
 
 type SearchResult = {
@@ -104,6 +105,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
                 ? +document.maximum_consent_validity
                 : null,
               provider: document.provider,
+              type: document.type,
             })),
           },
           200,
@@ -238,6 +240,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
             available_history: result.available_history,
             maximum_consent_validity: result.maximum_consent_validity,
             country: result.countries.at(0),
+            type: result.type,
           },
           200,
         );

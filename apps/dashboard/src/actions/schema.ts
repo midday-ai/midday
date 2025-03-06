@@ -449,6 +449,7 @@ export const createEnableBankingLinkSchema = z.object({
   maximumConsentValidity: z.number(),
   country: z.string().optional().nullable(),
   isDesktop: z.boolean(),
+  type: z.enum(["personal", "business"]),
 });
 
 export const reconnectEnableBankingLinkSchema = z.object({
