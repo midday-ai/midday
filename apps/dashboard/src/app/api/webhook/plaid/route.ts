@@ -14,13 +14,14 @@ const ALLOWED_IPS = [
 ];
 
 const webhookSchema = z.object({
-  webhook_type: z.enum([
-    "TRANSACTIONS",
+  webhook_type: z.enum(["TRANSACTIONS"]).optional(),
+  webhook_code: z.enum([
+    "SYNC_UPDATES_AVAILABLE",
     "HISTORICAL_UPDATE",
-    "INITIAL_UPDATE",
+    "DEFAULT_UPDATE",
     "TRANSACTIONS_REMOVED",
+    "INITIAL_UPDATE",
   ]),
-  webhook_code: z.enum(["SYNC_UPDATES_AVAILABLE", "HISTORICAL_UPDATE"]),
   item_id: z.string(),
   error: z
     .object({
@@ -78,24 +79,29 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  switch (result.data.webhook_type) {
-    case "TRANSACTIONS": {
-      // Only run manual sync if the historical update is complete and the connection was created in the last 24 hours
-      const manualSync =
-        result.data.webhook_code === "HISTORICAL_UPDATE" &&
-        isAfter(new Date(connectionData.created_at), subDays(new Date(), 1));
+  if (result.data.webhook_type === "TRANSACTIONS") {
+    switch (result.data.webhook_code) {
+      case "SYNC_UPDATES_AVAILABLE":
+      case "DEFAULT_UPDATE":
+      case "INITIAL_UPDATE":
+      case "HISTORICAL_UPDATE": {
+        // Only run manual sync if the historical update is complete and the connection was created in the last 24 hours
+        const manualSync =
+          result.data.webhook_code === "HISTORICAL_UPDATE" &&
+          isAfter(new Date(connectionData.created_at), subDays(new Date(), 1));
 
-      logger("Triggering manual sync", {
-        connectionId: connectionData.id,
-        manualSync,
-      });
+        logger("Triggering manual sync", {
+          connectionId: connectionData.id,
+          manualSync,
+        });
 
-      await syncConnection.trigger({
-        connectionId: connectionData.id,
-        manualSync,
-      });
+        await syncConnection.trigger({
+          connectionId: connectionData.id,
+          manualSync,
+        });
 
-      break;
+        break;
+      }
     }
   }
 
