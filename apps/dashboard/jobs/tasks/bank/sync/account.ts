@@ -53,40 +53,25 @@ export const syncAccount = schemaTask({
         },
       });
 
-      logger.info("Params", {
-        query: {
-          provider,
-          id: accountId,
-          accessToken,
-        },
-      });
-
       if (!balanceResponse.ok) {
         throw new Error("Failed to get balance");
       }
 
       const { data: balanceData } = await balanceResponse.json();
 
-      logger.info("Balance data", { balanceData });
-
       // Only update the balance if it's greater than 0
       const balance = balanceData?.amount ?? undefined;
 
       // Reset error details and retries if we successfully got the balance
-      const { error: updateError } = await supabase
-        .from("bank_accounts")
-        .update({
-          balance,
-          error_details: null,
-          error_retries: null,
-        })
-        .eq("id", id);
-
-      logger.error("Failed to update balance", { error: updateError });
-
-      throw updateError;
+      // await supabase
+      //   .from("bank_accounts")
+      //   .update({
+      //     balance,
+      //     error_details: null,
+      //     error_retries: null,
+      //   })
+      //   .eq("id", id);
     } catch (error) {
-      logger.error(error);
       const parsedError = parseAPIError(error);
 
       logger.error("Failed to sync account balance", { error: parsedError });
