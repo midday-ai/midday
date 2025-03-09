@@ -61,11 +61,15 @@ export async function POST(req: NextRequest) {
 
   const supabase = createClient({ admin: true });
 
-  const { data: connectionData } = await supabase
+  const { data: connectionData, error: connectionError } = await supabase
     .from("bank_connections")
     .select("id, created_at")
     .eq("enrollment_id", payload.enrollment_id)
     .single();
+
+  console.log("payload", payload);
+  console.log("connectionData", connectionData);
+  console.log("connectionError", connectionError);
 
   if (!connectionData) {
     return NextResponse.json(
