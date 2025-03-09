@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  if (method === "reconnect") {
+  if (method === "reconnect" && sessionId) {
     const { data: sessionData } = await sessionResponse.json();
 
     if (sessionData?.session_id) {
