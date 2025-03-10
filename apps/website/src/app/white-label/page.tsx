@@ -53,8 +53,8 @@ export default function Page() {
                 Skip years of development and focus on growing your business.
                 Midday provides a fully-integrated platform out of the box,
                 eliminating the need for you to build complex core
-                functionalities like invoicing, task management, and user
-                inboxes from scratch. This allows you to accelerate your
+                functionalities like invoicing, CRM, financial overview, and
+                user inboxes from scratch. This allows you to accelerate your
                 product's time to market, helping you stay competitive and
                 provide value to your users much faster.
               </p>
