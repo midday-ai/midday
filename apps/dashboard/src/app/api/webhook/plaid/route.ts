@@ -14,7 +14,7 @@ const ALLOWED_IPS = [
 ];
 
 const webhookSchema = z.object({
-  webhook_type: z.enum(["TRANSACTIONS"]).optional(),
+  webhook_type: z.enum(["TRANSACTIONS"]),
   webhook_code: z.enum([
     "SYNC_UPDATES_AVAILABLE",
     "HISTORICAL_UPDATE",
