@@ -42,9 +42,9 @@ export default function Page() {
 
       <WhiteLabelPlans />
 
-      <div className="flex items-center flex-col text-center relative mt-28 mb-24">
+      <div className="flex items-center flex-col text-center relative mt-32 mb-24">
         <div className="max-w-[750px]">
-          <h4 className="font-medium text-xl md:text-2xl mb-4">Why?</h4>
+          <h4 className="font-medium text-xl md:text-4xl mb-4">Why?</h4>
 
           <div className="space-y-16 mt-12">
             <div>
