@@ -2,13 +2,7 @@ import { Cookies } from "@/utils/constants";
 import { canChooseStarterPlanQuery, getProPlanPrice } from "@/utils/plans";
 import { UTCDate } from "@date-fns/utc";
 import { getUser } from "@midday/supabase/cached-queries";
-import {
-  addDays,
-  differenceInDays,
-  isFuture,
-  isSameDay,
-  parseISO,
-} from "date-fns";
+import { addDays, differenceInDays, isSameDay, parseISO } from "date-fns";
 import { cookies } from "next/headers";
 import { ChoosePlanButton } from "./choose-plan-button";
 import { FeedbackForm } from "./feedback-form";
