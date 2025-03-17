@@ -52,12 +52,29 @@ export async function Trial() {
 
   const isTrialEnded = daysLeft <= 0;
 
-  // If the team was created before March 1st 2025, don't show the trial
-  if (new Date(team.created_at) < new Date("2025-03-01")) {
-    return null;
-  }
-
   const canChooseStarterPlan = await canChooseStarterPlanQuery(team.id);
+  const targetDate = new UTCDate("2025-04-15");
+
+  // If the team was created before March 1st 2025, show the trial until April 15th 2025
+  if (
+    new Date(team.created_at) < new Date("2025-03-01") &&
+    targetDate > today
+  ) {
+    const daysToLaunch = Math.max(0, differenceInDays(targetDate, today));
+
+    return (
+      <ChoosePlanButton
+        initialIsOpen={false}
+        daysLeft={daysToLaunch}
+        hasDiscount={hasDiscount}
+        discountPrice={discountPrice}
+        teamId={team.id}
+        canChooseStarterPlan={canChooseStarterPlan}
+      >
+        Pro trial - {daysToLaunch} days left
+      </ChoosePlanButton>
+    );
+  }
 
   if (isTrialEnded) {
     const upgradeModalShown = cookies().has(Cookies.UpgradeModalShown);
