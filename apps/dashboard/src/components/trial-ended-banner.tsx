@@ -17,6 +17,10 @@ export function TrialEndedBanner({ createdAt, plan }: TrialEndedBannerProps) {
   trialEndDate.setDate(trialEndDate.getDate() + 14);
   const isTrialEnded = new Date() > trialEndDate;
 
+  if (new Date(createdAt) < new Date("2025-03-01")) {
+    return null;
+  }
+
   // Only show if trial has ended and user is on trial plan
   if (
     !isTrialEnded ||

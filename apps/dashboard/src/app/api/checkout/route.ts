@@ -1,7 +1,6 @@
 import { getDiscount, getPlans } from "@/utils/plans";
 import { api } from "@/utils/polar";
 import { getSession, getUser } from "@midday/supabase/cached-queries";
-import { geolocation } from "@vercel/functions";
 import { type NextRequest, NextResponse } from "next/server";
 
 export const GET = async (req: NextRequest) => {
@@ -34,8 +33,6 @@ export const GET = async (req: NextRequest) => {
   }
 
   const discountId = getDiscount(userData.data.team.created_at, planType);
-
-  const { country } = geolocation(req);
 
   const successUrl = new URL("/api/checkout/success", req.nextUrl.origin);
   successUrl.searchParams.set("redirectPath", redirectPath);
