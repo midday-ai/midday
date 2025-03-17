@@ -101,7 +101,7 @@ export const getProPlanPrice = (createdAt: string) => {
 };
 
 type UpdateTeamPlanData = {
-  plan: "trial" | "starter" | "pro";
+  plan?: "trial" | "starter" | "pro";
   email?: string;
   canceled_at?: string | null;
 };

@@ -18,7 +18,6 @@ export const POST = Webhooks({
       // Subscription has been explicitly canceled by the user
       case "subscription.canceled": {
         await updateTeamPlan(payload.data.metadata.teamId as string, {
-          plan: "trial",
           canceled_at: new Date().toISOString(),
         });
 
@@ -27,7 +26,7 @@ export const POST = Webhooks({
 
       // Subscription has been revoked/peroid has ended with no renewal
       case "subscription.revoked": {
-        if (!payload.data.metadata.teamId || !payload.data.customer.email) {
+        if (!payload.data.metadata.teamId) {
           console.error("Customer ID or email is missing");
           break;
         }
