@@ -51,12 +51,9 @@ export const GET = async (req: NextRequest) => {
     customerEmail: userData.data.email ?? undefined,
     customerName: userData.data.full_name ?? undefined,
     discountId: discountId?.id,
-    customerBillingAddress: {
-      country: country ?? "US",
-    },
     metadata: {
-      teamId,
-      companyName: userData.data.team.name,
+      teamId: teamId ?? "",
+      companyName: userData.data.team?.name ?? "",
     },
   });
 
