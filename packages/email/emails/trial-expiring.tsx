@@ -1,16 +1,18 @@
 import { getEmailUrl } from "@midday/utils/envs";
 import {
   Body,
+  Button,
   Container,
   Font,
   Heading,
   Html,
+  Link,
   Preview,
+  Section,
   Tailwind,
   Text,
 } from "@react-email/components";
 import { Footer } from "../components/footer";
-import { GetStarted } from "../components/get-started";
 import { Logo } from "../components/logo";
 
 interface Props {
@@ -19,9 +21,9 @@ interface Props {
 
 const baseUrl = getEmailUrl();
 
-export const GetStartedEmail = ({ fullName = "Viktor Hofte" }: Props) => {
+export const TrialExpiringEmail = ({ fullName = "Viktor Hofte" }: Props) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, Just checking in to help you get started. Here are a few things you can try today.`;
+  const text = `Hi ${firstName}, Just a quick reminder—your Midday trial ends in 3 days. We hope you’ve had a great experience so far.`;
 
   return (
     <Html>
@@ -58,56 +60,41 @@ export const GetStartedEmail = ({ fullName = "Viktor Hofte" }: Props) => {
           >
             <Logo />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Get the most out of Midday
+              Your Midday Trial is Expiring Soon
             </Heading>
 
             <br />
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212]">
-              Just checking in to help you get started. Here are a few things
-              you can try today:
-              <br />
-              <ul className="list-none pl-0 text-[#121212] text-[14px]">
-                <li className="mb-2">
-                  <strong>Connect your bank account</strong> – Get a clear
-                  financial overview.
-                </li>
-
-                <li className="mb-2">
-                  <strong>Track your time</strong> – Stay on top of your hours
-                  and never lose billable time.
-                </li>
-
-                <li className="mb-2">
-                  <strong>Send your first invoice</strong> – Get paid faster and
-                  track overdue payments effortlessly.
-                </li>
-
-                <li className="mb-2">
-                  <strong>Reconcile transactions</strong> – Use Inbox to gather
-                  receipts and match them with transactions.
-                </li>
-
-                <li className="mb-2">
-                  <strong>Store important files</strong> – Keep contracts and
-                  agreements secure in Vault.
-                </li>
-
-                <li className="mb-2">
-                  <strong>Use the assistant</strong> – Gain insights and get a
-                  deeper understanding of your finances.
-                </li>
-
-                <li className="mb-2">
-                  <strong>Try the native desktop app</strong> – Faster access to
-                  stay in control of your business.
-                </li>
-              </ul>
+              Just a quick reminder—your Midday trial ends in 3 days. We hope
+              you’ve had a great experience so far.
               <br />
               <p className="text-[#121212] text-[14px]">
-                Let us know if you have any thoughts or feedback—we’d love to
-                hear from you. Just hit reply.
+                Since you joined during our limited Pro Plan offer, your
+                discount has already been applied to your account. You still
+                have time to claim it before your trial ends.
+              </p>
+              <br />
+              <Section className="text-center mt-[50px] mb-[50px]">
+                <Button
+                  className="bg-transparent text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
+                  href="https://app.midday.ai/settings/billing"
+                >
+                  Claim your discount
+                </Button>
+              </Section>
+              <br />
+              <p className="text-[#121212] text-[14px]">
+                If you’re unsure or have any questions, we’d love to hear from
+                you. You can reply to this email or schedule a quick{" "}
+                <Link
+                  href="https://cal.com/pontus-midday/15min"
+                  className="text-[#121212] underline"
+                >
+                  call with us
+                </Link>
+                , We’re always here to help.
               </p>
               <br />
               <p className="text-[#121212] text-[14px]">
@@ -119,10 +106,6 @@ export const GetStartedEmail = ({ fullName = "Viktor Hofte" }: Props) => {
 
             <br />
 
-            <GetStarted />
-
-            <br />
-
             <Footer />
           </Container>
         </Body>
@@ -131,4 +114,4 @@ export const GetStartedEmail = ({ fullName = "Viktor Hofte" }: Props) => {
   );
 };
 
-export default GetStartedEmail;
+export default TrialExpiringEmail;
