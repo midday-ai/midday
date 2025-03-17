@@ -22,11 +22,7 @@ export function TrialEndedBanner({ createdAt, plan }: TrialEndedBannerProps) {
   }
 
   // Only show if trial has ended and user is on trial plan
-  if (
-    !isTrialEnded ||
-    plan !== "trial" ||
-    pathname.includes("/settings/billing")
-  ) {
+  if (!isTrialEnded || plan !== "trial" || pathname.includes("/settings")) {
     return null;
   }
 
