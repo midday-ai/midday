@@ -1,3 +1,4 @@
+import { getEmailUrl } from "@midday/utils/envs";
 import {
   Body,
   Button,
@@ -18,9 +19,9 @@ interface Props {
   fullName: string;
 }
 
-export const TrialExpiringEmail = ({ fullName = "Viktor Hofte" }: Props) => {
+export const TrialEndedEmail = ({ fullName = "Viktor Hofte" }: Props) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, Just a quick reminder—your Midday trial ends in 3 days. We hope you’ve had a great experience so far.`;
+  const text = `Hi ${firstName}, Your Midday trial has now ended, which means you have read-only access to your data.`;
 
   return (
     <Html>
@@ -57,41 +58,39 @@ export const TrialExpiringEmail = ({ fullName = "Viktor Hofte" }: Props) => {
           >
             <Logo />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Your Midday Trial is Expiring Soon
+              Your Midday Trial Has Ended
             </Heading>
 
             <br />
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212]">
-              Just a quick reminder—your Midday trial ends in 3 days. We hope
-              you’ve had a great experience so far.
+              Your Midday trial has now ended, which means you have read-only
+              access to your data.
               <br />
               <p className="text-[#121212] text-[14px]">
-                Since you joined during our limited Pro Plan offer, your
-                discount has already been applied to your account. You still
-                have time to claim it before your trial ends.
+                We know running a business is stressful, so if you need more
+                time, your discount is still valid and applied to your account
+                for <strong>1 more day</strong>.
               </p>
               <br />
               <Section className="text-center mt-[50px] mb-[50px]">
                 <Button
                   className="bg-transparent text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
-                  href="https://app.midday.ai/settings/billing"
+                  href="https://app.midday.ai"
                 >
-                  Claim your discount
+                  Upgrade now
                 </Button>
               </Section>
               <br />
               <p className="text-[#121212] text-[14px]">
-                If you’re unsure or have any questions, we’d love to hear from
-                you. You can reply to this email or schedule a quick{" "}
-                <Link
-                  href="https://cal.com/pontus-midday/15min"
-                  className="text-[#121212] underline"
-                >
-                  call with us
-                </Link>
-                , We’re always here to help.
+                If you decide not to continue, we’d truly appreciate your honest
+                feedback—just reply and let us know why. We read every response.
+              </p>
+              <p className="text-[#121212] text-[14px]">
+                If this is the last time we hear from you, thanks for giving
+                Midday a try. We won’t send any more emails, but you’re always
+                welcome back.
               </p>
               <br />
               <p className="text-[#121212] text-[14px]">
@@ -111,4 +110,4 @@ export const TrialExpiringEmail = ({ fullName = "Viktor Hofte" }: Props) => {
   );
 };
 
-export default TrialExpiringEmail;
+export default TrialEndedEmail;

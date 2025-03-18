@@ -1,14 +1,9 @@
 import * as crypto from "node:crypto";
-import { env } from "@/env.mjs";
-import { logger } from "@/utils/logger";
-import { resend } from "@/utils/resend";
-import GetStartedEmail from "@midday/email/emails/get-started";
-import TrialExpiringEmail from "@midday/email/emails/trial-expiring";
-import WelcomeEmail from "@midday/email/emails/welcome";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
-import { render } from "@react-email/render";
-import { nanoid } from "nanoid";
+import { getUser } from "@midday/supabase/cached-queries";
+import { tasks } from "@trigger.dev/sdk/v3";
+import type { onboardTeam } from "jobs/tasks/team/onboarding";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -55,62 +50,14 @@ export async function POST(req: Request) {
     channel: LogEvents.Registered.channel,
   });
 
-  if (fullName) {
-    await resend.emails.send({
-      to: email,
-      subject: "Welcome to Midday",
-      from: "Pontus from Midday <pontus@midday.ai>",
-      html: await render(
-        WelcomeEmail({
-          fullName,
-        }),
-      ),
-      headers: {
-        "X-Entity-Ref-ID": nanoid(),
-      },
-    });
-  }
+  const user = await getUser();
 
-  try {
-    const [firstName, lastName] = fullName?.split(" ") ?? [];
-
-    await resend.contacts.create({
+  if (user?.data?.team_id) {
+    await tasks.trigger<typeof onboardTeam>("onboard-team", {
+      teamId: user.data.team_id,
+      fullName,
       email,
-      firstName,
-      lastName,
-      unsubscribed: false,
-      audienceId: env.RESEND_AUDIENCE_ID,
     });
-  } catch (error) {
-    logger(error as string);
-  }
-
-  try {
-    await resend.emails.send({
-      from: "Pontus from Midday <pontus@midday.ai>",
-      to: email,
-      subject: "Get the most out of Midday",
-      html: await render(
-        GetStartedEmail({
-          fullName,
-        }),
-      ),
-      scheduledAt: "in 3 days",
-    });
-
-    await resend.emails.send({
-      from: "Pontus from Midday <pontus@midday.ai>",
-      to: email,
-      subject: "Your trial is expiring soon",
-      html: await render(
-        TrialExpiringEmail({
-          fullName,
-        }),
-      ),
-      scheduledAt: "in 11 days",
-    });
-  } catch (error) {
-    logger(error as string);
   }
 
   return NextResponse.json({ success: true });
