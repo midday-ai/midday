@@ -1,7 +1,6 @@
 import * as crypto from "node:crypto";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
-import { getUser } from "@midday/supabase/cached-queries";
 import { tasks } from "@trigger.dev/sdk/v3";
 import type { onboardTeam } from "jobs/tasks/team/onboarding";
 import { headers } from "next/headers";
@@ -38,7 +37,8 @@ export async function POST(req: Request) {
 
   const email = body.record.email;
   const userId = body.record.id;
-  const fullName = body.record.raw_user_meta_data.full_name;
+  const fullName = body.record.full_name;
+  const teamId = body.record.team_id;
 
   const analytics = await setupAnalytics({
     userId,
@@ -50,15 +50,11 @@ export async function POST(req: Request) {
     channel: LogEvents.Registered.channel,
   });
 
-  const user = await getUser();
-
-  if (user?.data?.team_id) {
-    await tasks.trigger<typeof onboardTeam>("onboard-team", {
-      teamId: user.data.team_id,
-      fullName,
-      email,
-    });
-  }
+  await tasks.trigger<typeof onboardTeam>("onboard-team", {
+    teamId,
+    fullName,
+    email,
+  });
 
   return NextResponse.json({ success: true });
 }
