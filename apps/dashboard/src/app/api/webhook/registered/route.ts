@@ -35,10 +35,8 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
-  const email = body.record.email;
   const userId = body.record.id;
   const fullName = body.record.full_name;
-  const teamId = body.record.team_id;
 
   const analytics = await setupAnalytics({
     userId,
@@ -50,11 +48,15 @@ export async function POST(req: Request) {
     channel: LogEvents.Registered.channel,
   });
 
-  await tasks.trigger<typeof onboardTeam>("onboard-team", {
-    teamId,
-    fullName,
-    email,
-  });
+  await tasks.trigger<typeof onboardTeam>(
+    "onboard-team",
+    {
+      userId,
+    },
+    {
+      delay: "5m",
+    },
+  );
 
   return NextResponse.json({ success: true });
 }
