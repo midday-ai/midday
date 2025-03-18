@@ -47,7 +47,11 @@ export function Plans({
             </li>
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-              <span className="text-xs">1 Connected bank</span>
+              <span className="text-xs">2 Connected bank</span>
+            </li>
+            <li className="flex items-start">
+              <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+              <span className="text-xs">Unlimited bank accounts</span>
             </li>
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
@@ -163,6 +167,10 @@ export function Plans({
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
               <span className="text-xs">10 Connected banks</span>
+            </li>
+            <li className="flex items-start">
+              <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
+              <span className="text-xs">Unlimited bank accounts</span>
             </li>
             <li className="flex items-start">
               <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />

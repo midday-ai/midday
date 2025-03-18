@@ -59,7 +59,11 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">1 Connected bank</span>
+                      <span className="text-sm">2 bank connections</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">Unlimited bank accounts</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
@@ -146,6 +150,10 @@ export default function Page() {
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
                       <span className="text-sm">10 Connected banks</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
+                      <span className="text-sm">Unlimited bank accounts</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
