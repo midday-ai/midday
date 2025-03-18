@@ -54,7 +54,7 @@ export async function POST(req: Request) {
       userId,
     },
     {
-      delay: "5m",
+      delay: "15m",
     },
   );
 

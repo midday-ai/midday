@@ -42,8 +42,6 @@ export const onboardTeam = schemaTask({
       audienceId: process.env.RESEND_AUDIENCE_ID!,
     });
 
-    await wait.for({ minutes: 15 });
-
     if (await shouldSendEmail(user.team_id)) {
       await resend.emails.send({
         to: user.email,
