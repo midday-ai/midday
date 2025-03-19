@@ -259,7 +259,7 @@ export async function getTransactionsQuery(
     if (!Number.isNaN(Number.parseInt(searchQuery))) {
       query.eq("amount", Number(searchQuery));
     } else {
-      query.textSearch("fts_vector", `%${searchQuery}%:*`);
+      query.textSearch("fts_vector", `${searchQuery.replaceAll(" ", "+")}:*`);
     }
   }
 
@@ -406,7 +406,7 @@ export async function getSimilarTransactions(
     .from("transactions")
     .select("id, amount, team_id", { count: "exact" })
     .eq("team_id", teamId)
-    .textSearch("fts_vector", `%${name}%:*`)
+    .textSearch("fts_vector", `${name.replaceAll(" ", "+")}:*`)
     .throwOnError();
 }
 
@@ -660,7 +660,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   }
 
   if (searchQuery) {
-    query.textSearch("fts", `'${searchQuery}'`);
+    query.textSearch("fts", `${searchQuery.replaceAll(" ", "+")}:*`);
   }
 
   const { data } = await query;
@@ -871,7 +871,7 @@ export async function getInboxQuery(
     if (!Number.isNaN(Number.parseInt(searchQuery))) {
       query.like("inbox_amount_text", `%${searchQuery}%`);
     } else {
-      query.textSearch("fts", `${searchQuery}:*`);
+      query.textSearch("fts", `${searchQuery.replaceAll(" ", "+")}:*`);
     }
   }
 
@@ -1153,7 +1153,7 @@ export async function getInboxSearchQuery(
   if (!Number.isNaN(Number.parseInt(q))) {
     query.like("inbox_amount_text", `%${q}%`);
   } else {
-    query.textSearch("fts", `${q}:*`);
+    query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
   }
 
   const { data } = await query.range(0, limit);
@@ -1230,7 +1230,7 @@ export async function getInvoicesQuery(
     if (!Number.isNaN(Number.parseInt(searchQuery))) {
       query.eq("amount", Number(searchQuery));
     } else {
-      query.textSearch("fts", `%${searchQuery}%:*`);
+      query.textSearch("fts", `${searchQuery.replaceAll(" ", "+")}:*`);
     }
   }
 

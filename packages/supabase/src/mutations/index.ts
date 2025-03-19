@@ -289,7 +289,7 @@ export async function updateSimilarTransactionsCategory(
   return supabase
     .from("transactions")
     .update({ category_slug: transaction.data.category_slug })
-    .textSearch("fts_vector", `'${transaction.data.name}'`)
+    .textSearch("fts_vector", `${transaction.data.name.replaceAll(" ", "+")}:*`)
     .eq("team_id", team_id)
     .select("id, team_id");
 }
@@ -317,7 +317,10 @@ export async function updateSimilarTransactionsRecurring(
       recurring: transaction.data?.recurring,
       frequency: transaction.data?.frequency,
     })
-    .textSearch("fts_vector", `'${transaction.data.name}'`)
+    .textSearch(
+      "fts_vector",
+      `'${transaction.data.name.replaceAll(" ", "+")}:*'`,
+    )
     .eq("team_id", team_id)
     .select("id, team_id");
 }
