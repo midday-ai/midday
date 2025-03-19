@@ -48,7 +48,11 @@ export function TrialEndedModal({
     ((isFourteenDaysFromCreation && isOnOrAfterCutoffDate) ||
       (createdAfterMarch2025 && isFourteenDaysFromCreation));
 
-  if (pathname.includes("/settings") || !showModal) {
+  if (
+    pathname.includes("/settings") ||
+    pathname.includes("/support") ||
+    !showModal
+  ) {
     return null;
   }
 
