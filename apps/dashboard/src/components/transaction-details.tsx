@@ -137,14 +137,15 @@ export function TransactionDetails({
     const transactions = await getSimilarTransactions(supabase, {
       name: data?.name,
       teamId: teamId,
+      categorySlug: category.slug,
     });
 
-    if (transactions?.data && transactions.data.length > 1) {
+    if (transactions?.count) {
       toast({
         duration: 6000,
         variant: "ai",
         title: "Midday AI",
-        description: `Do you want to mark ${transactions?.data?.length} similar transactions from ${data?.name} as ${category.name} too?`,
+        description: `Do you want to mark ${transactions?.count} similar transactions from ${data?.name} as ${category.name} too?`,
         footer: (
           <div className="flex space-x-2 mt-4">
             <ToastAction altText="Cancel" className="pl-5 pr-5">
