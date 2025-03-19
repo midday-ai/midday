@@ -244,7 +244,7 @@ export async function getTransactionsQuery(
   } else {
     query
       .order("date", { ascending: false })
-      .order("created_at", { ascending: false });
+      .order("name", { ascending: false });
   }
 
   if (start && end) {
