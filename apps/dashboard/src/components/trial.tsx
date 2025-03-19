@@ -1,9 +1,7 @@
-import { Cookies } from "@/utils/constants";
 import { canChooseStarterPlanQuery, getProPlanPrice } from "@/utils/plans";
 import { UTCDate } from "@date-fns/utc";
 import { getUser } from "@midday/supabase/cached-queries";
 import { addDays, differenceInDays, isSameDay, parseISO } from "date-fns";
-import { cookies } from "next/headers";
 import { ChoosePlanButton } from "./choose-plan-button";
 import { FeedbackForm } from "./feedback-form";
 
@@ -77,11 +75,9 @@ export async function Trial() {
   }
 
   if (isTrialEnded) {
-    const upgradeModalShown = cookies().has(Cookies.UpgradeModalShown);
-
     return (
       <ChoosePlanButton
-        initialIsOpen={!upgradeModalShown}
+        initialIsOpen={false}
         daysLeft={daysLeft}
         hasDiscount={hasDiscount}
         discountPrice={discountPrice}

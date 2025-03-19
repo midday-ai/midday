@@ -3,7 +3,7 @@ import { DefaultSettings } from "@/components/default-settings.server";
 import { Header } from "@/components/header";
 import { GlobalSheets } from "@/components/sheets/global-sheets";
 import { Sidebar } from "@/components/sidebar";
-import { TrialEndedBanner } from "@/components/trial-ended-banner";
+import { TrialEnded } from "@/components/trial-ended.server";
 import { UserProvider } from "@/store/user/provider";
 import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode, getCurrency } from "@midday/location";
@@ -94,10 +94,6 @@ export default async function Layout({
           <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
             <Header />
             {children}
-            <TrialEndedBanner
-              createdAt={user.data.team?.created_at}
-              plan={user.data.team?.plan}
-            />
           </div>
 
           {/* This is used to make the header draggable on macOS */}
@@ -115,6 +111,14 @@ export default async function Layout({
 
           <Suspense>
             <GlobalSheets defaultCurrency={currency} />
+          </Suspense>
+
+          <Suspense>
+            <TrialEnded
+              createdAt={user.data.team?.created_at}
+              plan={user.data.team?.plan}
+              teamId={user.data.team?.id}
+            />
           </Suspense>
 
           <Suspense>

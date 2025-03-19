@@ -59,7 +59,7 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">2 bank connections</span>
+                      <span className="text-sm">2 connected banks</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
@@ -149,7 +149,7 @@ export default function Page() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
-                      <span className="text-sm">10 Connected banks</span>
+                      <span className="text-sm">10 connected banks</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />

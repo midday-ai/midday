@@ -1,6 +1,5 @@
 "use client";
 
-import { closeBillingModalAction } from "@/actions/close-billing-modal-action";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
-import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { Plans } from "../plans";
 
@@ -29,10 +27,7 @@ export function ChoosePlanModal({
   teamId: string;
   canChooseStarterPlan: boolean;
 }) {
-  const closeBillingModal = useAction(closeBillingModalAction);
-
   const handleClose = (value: boolean) => {
-    closeBillingModal.execute();
     onOpenChange(value);
   };
 
@@ -50,7 +45,7 @@ export function ChoosePlanModal({
         return `Your trial will end in ${daysLeft} ${daysLeft === 1 ? "day" : "days"}, after the trial period you will have read access only.`;
       }
 
-      return "Your trial period has ended. Please choose a plan to continue using all features.";
+      return "Your trial period has ended. Please choose a plan to continue using Midday.";
     }
 
     if (hasDiscount && discountPrice) {
