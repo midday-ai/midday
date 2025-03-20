@@ -1,0 +1,19 @@
+{
+  "name": "@midday/trpc",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    "./init": "./src/init.ts",
+    "./client": "./src/client.tsx",
+    "./server": "./src/server.ts",
+    "./routers/_app": "./src/routers/_app.ts"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.69.0",
+    "@trpc/client": "11.0.0-rc.840",
+    "@trpc/react-query": "11.0.0-rc.840",
+    "@trpc/server": "11.0.0-rc.840",
+    "server-only": "^0.0.1",
+    "superjson": "^2.2.2"
+  }
+}
