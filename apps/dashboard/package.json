@@ -19,6 +19,7 @@
     "@fast-csv/format": "5.0.0",
     "@hookform/resolvers": "^3.9.0",
     "@midday/app-store": "workspace:*",
+    "@midday/query": "workspace:*",
     "@midday/events": "workspace:*",
     "@midday/inbox": "workspace:*",
     "@midday/invoice": "workspace:*",

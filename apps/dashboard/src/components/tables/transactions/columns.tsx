@@ -7,6 +7,7 @@ import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
 import { formatDate } from "@/utils/format";
+import type { Transaction } from "@midday/query/transactions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,46 +40,6 @@ import {
 } from "@midday/ui/tooltip";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
-
-export type Transaction = {
-  id: string;
-  amount: number;
-  status: "posted" | "excluded" | "included" | "pending" | "completed";
-  frequency?: string;
-  recurring?: boolean;
-  manual?: boolean;
-  date: string;
-  category?: {
-    slug: string;
-    name: string;
-    color: string;
-  };
-  name: string;
-  description?: string;
-  currency: string;
-  method: string;
-  attachments?: {
-    id: string;
-    path: string;
-    name: string;
-    type: string;
-    size: number;
-  }[];
-  assigned?: {
-    avatar_url: string;
-    full_name: string;
-  };
-  bank_account?: {
-    name: string;
-    bank_connection: {
-      logo_url: string;
-    };
-  };
-  tags?: {
-    id: string;
-    name: string;
-  }[];
-};
 
 export const columns: ColumnDef<Transaction>[] = [
   {
@@ -114,7 +75,7 @@ export const columns: ColumnDef<Transaction>[] = [
               <TooltipTrigger asChild>
                 <span
                   className={cn(
-                    row.original?.category?.slug === "income" &&
+                    row.original?.category_slug === "income" &&
                       "text-[#00C969]",
                   )}
                 >
@@ -155,7 +116,7 @@ export const columns: ColumnDef<Transaction>[] = [
         <span
           className={cn(
             "text-sm",
-            row.original?.category?.slug === "income" && "text-[#00C969]",
+            row.original?.category_slug === "income" && "text-[#00C969]",
           )}
         >
           <FormatAmount
