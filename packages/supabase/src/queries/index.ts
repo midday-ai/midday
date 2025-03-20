@@ -242,11 +242,11 @@ export async function getTransactionsQuery(
       query.order(column, { ascending });
     }
   } else {
-    // NOTE: date can be on the same day (2020-01-01), so we need to order by name and amount to keep the order
+    // NOTE: date can be on the same day (2020-01-01), so we need to order by id and amount to keep the order
     query
       .order("date", { ascending: false })
       .order("name", { ascending: false })
-      .order("amount", { ascending: false });
+      .order("id", { ascending: false });
   }
 
   if (start && end) {

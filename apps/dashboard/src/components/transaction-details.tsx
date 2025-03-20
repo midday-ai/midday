@@ -140,7 +140,7 @@ export function TransactionDetails({
       categorySlug: category.slug,
     });
 
-    if (transactions?.count) {
+    if (transactions?.count && transactions.count > 1) {
       toast({
         duration: 6000,
         variant: "ai",
@@ -177,12 +177,12 @@ export function TransactionDetails({
       teamId: teamId,
     });
 
-    if (transactions?.data && transactions.data.length > 1) {
+    if (transactions?.count && transactions.count > 1) {
       toast({
         duration: 6000,
         variant: "ai",
         title: "Midday AI",
-        description: `Do you want to mark ${transactions?.data?.length} similar transactions from ${data?.name} as ${value ? "Recurring" : "Non Recurring"} too?`,
+        description: `Do you want to mark ${transactions?.count} similar transactions from ${data?.name} as ${value ? "Recurring" : "Non Recurring"} too?`,
         footer: (
           <div className="flex space-x-2 mt-4">
             <ToastAction altText="Cancel" className="pl-5 pr-5">
