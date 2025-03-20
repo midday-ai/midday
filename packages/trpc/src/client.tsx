@@ -9,11 +9,13 @@ import {
   splitLink,
 } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
+import type React from "react";
 import { useState } from "react";
 import superjson from "superjson";
 import { makeQueryClient } from "./query-client";
 import type { AppRouter } from "./routers/_app";
 
+// Create a new tRPC React client
 export const trpc = createTRPCReact<AppRouter>();
 
 let clientQueryClientSingleton: QueryClient;

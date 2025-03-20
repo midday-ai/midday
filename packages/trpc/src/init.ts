@@ -1,14 +1,17 @@
-import { getSession } from "@midday/supabase/cached-queries";
+import { createClient } from "@midday/supabase/src/client/server";
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 
 export const createTRPCContext = async () => {
+  const client = createClient();
+
   const {
     data: { session },
-  } = await getSession();
+  } = await client.auth.getSession();
 
   return {
     session,
+    client,
   };
 };
 

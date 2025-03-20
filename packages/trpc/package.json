@@ -13,6 +13,7 @@
     "@trpc/client": "11.0.0-rc.840",
     "@trpc/react-query": "11.0.0-rc.840",
     "@trpc/server": "11.0.0-rc.840",
+    "@midday/supabase": "workspace:*",
     "server-only": "^0.0.1",
     "superjson": "^2.2.2"
   }

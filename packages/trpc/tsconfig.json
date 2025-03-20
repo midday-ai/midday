@@ -1,5 +1,10 @@
 {
   "extends": "@midday/tsconfig/base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "module": "CommonJS"
+  },
   "include": ["src", "."],
   "exclude": ["node_modules"]
 }
