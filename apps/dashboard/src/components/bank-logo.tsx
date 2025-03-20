@@ -13,12 +13,15 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
   const [hasError, setHasError] = useState(false);
 
   return (
-    <Avatar style={{ width: size, height: size }}>
+    <Avatar
+      style={{ width: size, height: size }}
+      className="border border-border"
+    >
       {src && !hasError && (
         <Image
           src={src}
           alt={alt}
-          className="text-transparent object-contain bg-primary"
+          className="text-transparent object-contain bg-white"
           width={size}
           height={size}
           quality={100}
