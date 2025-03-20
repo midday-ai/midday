@@ -2,6 +2,7 @@ import { writeToString } from "@fast-csv/format";
 import { createClient } from "@midday/supabase/job";
 import { metadata, schemaTask } from "@trigger.dev/sdk/v3";
 import { BlobReader, BlobWriter, TextReader, ZipWriter } from "@zip.js/zip.js";
+import { format } from "date-fns";
 import { serializableToBlob } from "jobs/utils/blob";
 import { revalidateCache } from "jobs/utils/revalidate-cache";
 import { z } from "zod";
@@ -15,6 +16,7 @@ export const exportTransactions = schemaTask({
   schema: z.object({
     teamId: z.string().uuid(),
     locale: z.string(),
+    dateFormat: z.string().nullable().optional(),
     transactionIds: z.array(z.string().uuid()),
   }),
   maxDuration: 300,
@@ -24,10 +26,10 @@ export const exportTransactions = schemaTask({
   machine: {
     preset: "large-1x",
   },
-  run: async ({ teamId, locale, transactionIds }) => {
+  run: async ({ teamId, locale, transactionIds, dateFormat }) => {
     const supabase = createClient();
 
-    const filePath = `export-${new Date().toISOString()}`;
+    const filePath = `export-${format(new Date(), dateFormat ?? "yyyy-MM-dd")}`;
     const path = `${teamId}/exports`;
     const fileName = `${filePath}.zip`;
 
@@ -47,6 +49,7 @@ export const exportTransactions = schemaTask({
       const batchResult = await processExport.triggerAndWait({
         ids: transactionBatch,
         locale,
+        dateFormat,
       });
 
       results.push(batchResult);
@@ -85,6 +88,7 @@ export const exportTransactions = schemaTask({
         "Balance",
         "Account",
         "Note",
+        "Tags",
       ],
     });
 

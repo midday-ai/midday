@@ -23,6 +23,7 @@ export const exportTransactionsAction = authActionClient
       teamId: user.team_id,
       locale: user.locale,
       transactionIds,
+      dateFormat: user.date_format,
     });
 
     return event;

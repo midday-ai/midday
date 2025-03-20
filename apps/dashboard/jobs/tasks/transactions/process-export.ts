@@ -1,6 +1,7 @@
 import { createClient } from "@midday/supabase/job";
 import { download } from "@midday/supabase/storage";
 import { schemaTask } from "@trigger.dev/sdk/v3";
+import { format, parseISO } from "date-fns";
 import { blobToSerializable } from "jobs/utils/blob";
 import { processBatch } from "jobs/utils/process-batch";
 import { z } from "zod";
@@ -12,6 +13,7 @@ export const processExport = schemaTask({
   schema: z.object({
     ids: z.array(z.string().uuid()),
     locale: z.string(),
+    dateFormat: z.string().nullable().optional(),
   }),
   maxDuration: 300,
   queue: {
@@ -20,7 +22,7 @@ export const processExport = schemaTask({
   machine: {
     preset: "large-1x",
   },
-  run: async ({ ids, locale }) => {
+  run: async ({ ids, locale, dateFormat }) => {
     const supabase = createClient();
 
     const { data: transactionsData } = await supabase
@@ -37,7 +39,9 @@ export const processExport = schemaTask({
         vat:calculated_vat,
         attachments:transaction_attachments(*),
         category:transaction_categories(id, name, description),
-        bank_account:bank_accounts(id, name)
+        bank_account:bank_accounts(id, name),
+        tags:transaction_tags(id, tag:tags(id, name)),
+        status
       `)
       .in("id", ids)
       .throwOnError();
@@ -82,7 +86,7 @@ export const processExport = schemaTask({
       ?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .map((transaction) => [
         transaction.id,
-        transaction.date,
+        format(parseISO(transaction.date), dateFormat ?? "LLL dd, y"),
         transaction.name,
         transaction.description,
         transaction.amount,
@@ -99,7 +103,10 @@ export const processExport = schemaTask({
           : "",
         transaction?.category?.name ?? "",
         transaction?.category?.description ?? "",
-        transaction?.attachments?.length > 0 ? "✔️" : "❌",
+        transaction?.attachments?.length > 0 ||
+        transaction?.status === "completed"
+          ? "Completed"
+          : "Not completed",
 
         attachments
           .filter((a) => a.id === transaction.id)
@@ -109,6 +116,7 @@ export const processExport = schemaTask({
         transaction?.balance ?? "",
         transaction?.bank_account?.name ?? "",
         transaction?.note ?? "",
+        transaction?.tags?.map((t) => t.tag?.name).join(", ") ?? "",
       ]);
 
     return {
