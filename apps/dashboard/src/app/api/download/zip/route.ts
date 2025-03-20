@@ -12,50 +12,63 @@ export async function GET(req: NextRequest, res: NextResponse) {
   const requestUrl = new URL(req.url);
   const supabase = createClient();
   const user = await getUser();
-  const path = requestUrl.searchParams.get("path");
-  const filename = requestUrl.searchParams.get("filename");
+  const folder = requestUrl.searchParams.get("folder") || "";
 
-  const promises: any = [];
+  if (!user?.data) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  const promises: Promise<any>[] = [];
 
   const files = await getVaultRecursiveQuery(supabase, {
     teamId: user.data.team_id,
-    path,
+    folder,
   });
 
-  files.forEach((file) => {
+  for (const file of files) {
     promises.push(
       download(supabase, {
         bucket: "vault",
-        path: `${file.basePath}/${file.name}`,
+        path: file.name,
       }),
     );
-  });
+  }
 
   const response = await Promise.allSettled(promises);
 
   const zipFileWriter = new BlobWriter("application/zip");
   const zipWriter = new ZipWriter(zipFileWriter, { bufferedWrite: true });
 
-  const downloadedFiles = response.map((result, index) => {
-    if (result.status === "fulfilled") {
-      return {
-        name: files[index].name,
-        blob: result.value.data,
-      };
-    }
-  });
+  const downloadedFiles = response
+    .map((result, index) => {
+      if (result.status === "fulfilled") {
+        const fullPath = files[index].name;
+        const pathFromFolder = folder
+          ? fullPath.substring(fullPath.indexOf(folder))
+          : fullPath;
+        return {
+          name: pathFromFolder,
+          blob: result.value.data,
+        };
+      }
+      return null;
+    })
+    .filter(
+      (file): file is { name: string; blob: Blob } =>
+        file !== null && !!file.blob,
+    );
 
-  downloadedFiles.forEach((downloadedFile) => {
+  for (const downloadedFile of downloadedFiles) {
     if (downloadedFile?.blob) {
       zipWriter.add(downloadedFile.name, new BlobReader(downloadedFile.blob));
     }
-  });
+  }
 
   const responseHeaders = new Headers(res.headers);
 
   responseHeaders.set(
     "Content-Disposition",
-    `attachment; filename="${filename}.zip"`,
+    `attachment; filename="${folder}.zip"`,
   );
 
   const data = await zipWriter.close();

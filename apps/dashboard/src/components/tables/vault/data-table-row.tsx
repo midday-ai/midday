@@ -375,7 +375,7 @@ export function DataTableRow({ data }: { data: any }) {
                   <DropdownMenuItem>
                     {data.isFolder ? (
                       <a
-                        href={`/api/download/zip?path=${oldFilepath}/${data.name}&filename=${data.name}`}
+                        href={`/api/download/zip?folder=${data.name}`}
                         download
                         className="truncate w-full"
                       >
@@ -450,7 +450,7 @@ export function DataTableRow({ data }: { data: any }) {
           <ContextMenuItem>
             {data.isFolder ? (
               <a
-                href={`/api/download/zip?path=${oldFilepath}/${data.name}&filename=${data.name}`}
+                href={`/api/download/zip?folder=${data.name}`}
                 download
                 className="truncate"
               >
