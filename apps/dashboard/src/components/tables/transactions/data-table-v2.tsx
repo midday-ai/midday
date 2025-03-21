@@ -1,9 +1,11 @@
 "use client";
 
 import { useUserContext } from "@/store/user/hook";
-import { useTransactionsInfiniteQuery } from "@midday/query/transactions";
+import { getTransactions } from "@midday/query/queries";
+import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   flexRender,
   getCoreRowModel,
@@ -15,32 +17,47 @@ import { DataTableHeader } from "./data-table-header";
 export function DataTableV2() {
   const { team_id } = useUserContext((state) => state.data);
 
-  const { data, isLoading, error } = useTransactionsInfiniteQuery({
-    teamId: team_id,
-    to: 10,
-    from: 0,
+  const supabase = createClient();
+  const { data, isLoading, error } = useSuspenseQuery({
+    queryKey: ["transactions"],
+    queryFn: () =>
+      getTransactions(supabase, {
+        teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890",
+        to: 10,
+        from: 0,
+      }),
   });
 
-  const table = useReactTable({
-    getRowId: (row) => row.id,
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    // onRowSelectionChange: setRowSelection,
-    // onColumnVisibilityChange: setColumnVisibility,
-    // meta: {
-    //   setOpen,
-    //   copyUrl: handleCopyUrl,
-    //   updateTransaction: handleUpdateTransaction,
-    //   deleteTransactions: handleDeleteTransactions,
-    //   dateFormat,
-    //   hasSorting,
-    // },
-    // state: {
-    //   rowSelection,
-    //   columnVisibility,
-    // },
-  });
+  console.log(data, isLoading, error);
+
+  return null;
+
+  // const { data, isLoading, error } = useTransactionsInfiniteQuery({
+  //   teamId: team_id,
+  //   to: 10,
+  //   from: 0,
+  // });
+
+  // const table = useReactTable({
+  //   getRowId: (row) => row.id,
+  //   data,
+  //   columns,
+  //   getCoreRowModel: getCoreRowModel(),
+  //   // onRowSelectionChange: setRowSelection,
+  //   // onColumnVisibilityChange: setColumnVisibility,
+  //   // meta: {
+  //   //   setOpen,
+  //   //   copyUrl: handleCopyUrl,
+  //   //   updateTransaction: handleUpdateTransaction,
+  //   //   deleteTransactions: handleDeleteTransactions,
+  //   //   dateFormat,
+  //   //   hasSorting,
+  //   // },
+  //   // state: {
+  //   //   rowSelection,
+  //   //   columnVisibility,
+  //   // },
+  // });
 
   return (
     <div className="mb-8 relative">

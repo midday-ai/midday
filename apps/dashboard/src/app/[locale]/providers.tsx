@@ -2,6 +2,7 @@
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProviderClient } from "@/locales/client";
+import { QueryProvider } from "@midday/query/client";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import type { ReactNode } from "react";
 
@@ -19,14 +20,16 @@ type ProviderProps = {
 export function Providers({ locale, children }: ProviderProps) {
   return (
     <I18nProviderClient locale={locale}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        {children}
-      </ThemeProvider>
+      <QueryProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </QueryProvider>
     </I18nProviderClient>
   );
 }

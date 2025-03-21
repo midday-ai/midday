@@ -4,11 +4,14 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./transactions": "./src/transactions.ts"
+    "./transactions": "./src/transactions.ts",
+    "./server": "./src/server.ts",
+    "./query-client": "./src/query-client.ts",
+    "./queries": "./src/queries/index.ts",
+    "./client": "./src/client.tsx"
   },
   "dependencies": {
     "@midday/supabase": "workspace:*",
-    "@supabase-cache-helpers/postgrest-swr": "^1.11.0",
     "@tanstack/react-query": "^5.69.0"
   }
 }
