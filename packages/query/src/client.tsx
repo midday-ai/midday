@@ -1,12 +1,15 @@
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider as ReactQueryClientProvider } from "@tanstack/react-query";
+import { SupabaseContextProvider } from "./context-provider";
 import { getQueryClient } from "./query-client";
+export { stRPC } from "./index";
 
-export function QueryProvider(props: { children: React.ReactNode }) {
+// Export the full wrapped provider
+export function QueryClientProvider(props: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {props.children}
-    </QueryClientProvider>
+    <ReactQueryClientProvider client={queryClient}>
+      <SupabaseContextProvider>{props.children}</SupabaseContextProvider>
+    </ReactQueryClientProvider>
   );
 }

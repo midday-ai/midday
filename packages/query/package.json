@@ -5,7 +5,7 @@
   "type": "module",
   "exports": {
     "./transactions": "./src/transactions.ts",
-    "./server": "./src/server.ts",
+    "./server": "./src/server.tsx",
     "./query-client": "./src/query-client.ts",
     "./queries": "./src/queries/index.ts",
     "./client": "./src/client.tsx"
