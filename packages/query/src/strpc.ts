@@ -1,6 +1,10 @@
+import { createClient as createSupabaseClient } from "@midday/supabase/server";
 import type { Client } from "@midday/supabase/types";
 import type {
   MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryFunctionContext,
   UseMutationOptions,
   UseQueryOptions,
 } from "@tanstack/react-query";
@@ -8,6 +12,12 @@ import type { z } from "zod";
 
 interface Context {
   supabase: Client;
+}
+
+// Define a type for the query context we expect from TanStack Query
+interface QueryContext {
+  client: QueryClient;
+  signal: AbortSignal;
 }
 
 /**
@@ -27,14 +37,26 @@ export const t = {
             "queryKey" | "queryFn"
           >,
         ) => {
+          // Ensure queryKey is always a proper tuple format for TanStack Query
+          const queryKey = [handler.name, input] as [string, TInput];
+
           return {
-            queryKey: [handler.name, input],
-            queryFn: async ({ queryClient }) => {
-              const context = queryClient.getQueryData<Context>(["context"]);
-              if (!context?.supabase) {
-                throw new Error("Supabase client not found in context");
+            queryKey,
+            queryFn: async (context: QueryContext) => {
+              // Try to get the Supabase client from the QueryClient's context
+              const contextData = context.client.getQueryData<Context>([
+                "context",
+              ]);
+
+              if (!contextData?.supabase) {
+                throw new Error(
+                  "Supabase client not found in context. " +
+                    "Make sure to initialize the query client with context using " +
+                    "initializeQueryClient() on the server or SupabaseContextProvider on the client.",
+                );
               }
-              return handler({ ctx: context, input });
+
+              return handler({ ctx: contextData, input });
             },
             ...options,
           };
@@ -61,7 +83,11 @@ export const t = {
                   "context",
                 ]);
                 if (!contextData?.supabase) {
-                  throw new Error("Supabase client not found in context");
+                  throw new Error(
+                    "Supabase client not found in context. " +
+                      "Make sure to initialize the query client with context using " +
+                      "initializeQueryClient() on the server or SupabaseContextProvider on the client.",
+                  );
                 }
                 return handler({ ctx: contextData, input });
               })();
@@ -80,14 +106,29 @@ export const t = {
           "queryKey" | "queryFn"
         >,
       ) => {
+        // Store the handler name for the queryKey
+        const handlerName = handler.name || "unknownQuery";
+
+        // Ensure queryKey is always a proper tuple format for TanStack Query
+        const queryKey = [handlerName] as [string];
+
         return {
-          queryKey: [handler.name],
-          queryFn: async ({ queryClient }) => {
-            const context = queryClient.getQueryData<Context>(["context"]);
-            if (!context?.supabase) {
-              throw new Error("Supabase client not found in context");
+          queryKey,
+          queryFn: async (context: QueryContext) => {
+            // Try to get the Supabase client from the QueryClient's context
+            const contextData = context.client.getQueryData<Context>([
+              "context",
+            ]);
+
+            if (!contextData?.supabase) {
+              throw new Error(
+                "Supabase client not found in context. " +
+                  "Make sure to initialize the query client with context using " +
+                  "initializeQueryClient() on the server or SupabaseContextProvider on the client.",
+              );
             }
-            return handler({ ctx: context });
+
+            return handler({ ctx: contextData });
           },
           ...options,
         };
@@ -114,7 +155,11 @@ export const t = {
                 "context",
               ]);
               if (!contextData?.supabase) {
-                throw new Error("Supabase client not found in context");
+                throw new Error(
+                  "Supabase client not found in context. " +
+                    "Make sure to initialize the query client with context using " +
+                    "initializeQueryClient() on the server or SupabaseContextProvider on the client.",
+                );
               }
               return handler({ ctx: contextData, input });
             })();
@@ -145,6 +190,7 @@ export function createSTQuery<TInput, TOutput>(
   queryFn: (supabase: Client, input: TInput) => Promise<TOutput>,
 ) {
   const procedure = {
+    name: "queryFn", // Default name for the query
     queryOptions: (
       input: TInput,
       options?: Omit<
@@ -152,14 +198,24 @@ export function createSTQuery<TInput, TOutput>(
         "queryKey" | "queryFn"
       >,
     ) => {
+      // Ensure queryKey is always a proper tuple format for TanStack Query
+      const queryKey = [procedure.name, input] as [string, TInput];
+
       return {
-        queryKey: [procedure.name, input],
-        queryFn: async ({ queryClient }) => {
-          const context = queryClient.getQueryData<Context>(["context"]);
-          if (!context?.supabase) {
-            throw new Error("Supabase client not found in context");
+        queryKey,
+        queryFn: async (context: QueryContext) => {
+          // Try to get the Supabase client from the QueryClient's context
+          const contextData = context.client.getQueryData<Context>(["context"]);
+
+          if (!contextData?.supabase) {
+            throw new Error(
+              "Supabase client not found in context. " +
+                "Make sure to initialize the query client with context using " +
+                "initializeQueryClient() on the server or SupabaseContextProvider on the client.",
+            );
           }
-          return queryFn(context.supabase, input);
+
+          return queryFn(contextData.supabase, input);
         },
         ...options,
       };
@@ -192,7 +248,11 @@ export function createSTMutation<TInput, TOutput>(
             }
             const contextData = queryClient.getQueryData<Context>(["context"]);
             if (!contextData?.supabase) {
-              throw new Error("Supabase client not found in context");
+              throw new Error(
+                "Supabase client not found in context. " +
+                  "Make sure to initialize the query client with context using " +
+                  "initializeQueryClient() on the server or SupabaseContextProvider on the client.",
+              );
             }
             return mutationFn(contextData.supabase, input);
           })();

@@ -27,5 +27,5 @@ export function SupabaseContextProvider({
     };
   }, [queryClient, supabase]);
 
-  return <>{children}</>;
+  return children;
 }

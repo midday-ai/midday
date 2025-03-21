@@ -1,31 +1,43 @@
+import { createClient as createSupabaseBrowserClient } from "@midday/supabase/client";
 import {
   QueryClient,
   defaultShouldDehydrateQuery,
   isServer,
 } from "@tanstack/react-query";
+import superjson from "superjson";
 
 export function makeQueryClient() {
-  return new QueryClient({
+  const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000,
       },
       dehydrate: {
-        // include pending queries in dehydration
+        // serializeData: superjson.serialize,
+        // Use JSON.stringify and JSON.parse to ensure plain objects
+        // This is more compatible with React Server Components than superjson
+        // superjson can cause issues with RSC serialization
+        serializeData: (data) => JSON.parse(JSON.stringify(data)),
         shouldDehydrateQuery: (query) =>
           defaultShouldDehydrateQuery(query) ||
           query.state.status === "pending",
-        shouldRedactErrors: (error) => {
-          // We should not catch Next.js server errors
-          // as that's how Next.js detects dynamic pages
-          // so we cannot redact them.
-          // Next.js also automatically redacts errors for us
-          // with better digests.
-          return false;
-        },
+      },
+      hydrate: {
+        // deserializeData: superjson.deserialize,
+        // Deserialize as-is since we're already using plain objects
+        deserializeData: (data) => data,
       },
     },
   });
+
+  // Only initialize the client-side Supabase client
+  // Server-side initialization will be handled in the server module
+  if (!isServer) {
+    const supabase = createSupabaseBrowserClient();
+    queryClient.setQueryData(["context"], { supabase });
+  }
+
+  return queryClient;
 }
 
 let browserQueryClient: QueryClient | undefined = undefined;

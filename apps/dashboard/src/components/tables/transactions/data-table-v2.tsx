@@ -1,8 +1,7 @@
 "use client";
 
 import { useUserContext } from "@/store/user/hook";
-import { getTransactions } from "@midday/query/queries";
-import { createClient } from "@midday/supabase/client";
+import { stRPC } from "@midday/query/client";
 import { cn } from "@midday/ui/cn";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -17,16 +16,13 @@ import { DataTableHeader } from "./data-table-header";
 export function DataTableV2() {
   const { team_id } = useUserContext((state) => state.data);
 
-  const supabase = createClient();
-  const { data, isLoading, error } = useSuspenseQuery({
-    queryKey: ["transactions"],
-    queryFn: () =>
-      getTransactions(supabase, {
-        teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890",
-        to: 10,
-        from: 0,
-      }),
-  });
+  const { data, isLoading, error } = useSuspenseQuery(
+    stRPC.transactions.getTransactions.queryOptions({
+      teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890",
+      to: 10,
+      from: 0,
+    }),
+  );
 
   console.log(data, isLoading, error);
 
