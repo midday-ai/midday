@@ -1,4 +1,3 @@
-import { getEmailUrl } from "@midday/utils/envs";
 import {
   Body,
   Container,
@@ -16,8 +15,6 @@ import { Logo } from "../components/logo";
 interface Props {
   fullName: string;
 }
-
-const baseUrl = getEmailUrl();
 
 export const GetStartedEmail = ({ fullName = "Viktor Hofte" }: Props) => {
   const firstName = fullName.split(" ").at(0);

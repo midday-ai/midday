@@ -1,7 +1,8 @@
 export function getAppUrl() {
   if (
     process.env.VERCEL_ENV === "production" ||
-    process.env.NODE_ENV === "production"
+    process.env.NODE_ENV === "production" ||
+    process.env.TRIGGER_ENVIRONMENT === "production"
   ) {
     return "https://app.midday.ai";
   }
@@ -14,17 +15,22 @@ export function getAppUrl() {
 }
 
 export function getEmailUrl() {
-  if (process.env.NODE_ENV === "development") {
-    return "http://localhost:3000";
+  if (
+    process.env.VERCEL_ENV === "production" ||
+    process.env.NODE_ENV === "production" ||
+    process.env.TRIGGER_ENVIRONMENT === "production"
+  ) {
+    return "https://midday.ai";
   }
 
-  return "https://midday.ai";
+  return "http://localhost:3000";
 }
 
 export function getWebsiteUrl() {
   if (
     process.env.VERCEL_ENV === "production" ||
-    process.env.NODE_ENV === "production"
+    process.env.NODE_ENV === "production" ||
+    process.env.TRIGGER_ENVIRONMENT === "production"
   ) {
     return "https://midday.ai";
   }
