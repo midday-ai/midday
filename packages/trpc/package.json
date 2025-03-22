@@ -1,0 +1,23 @@
+{
+  "name": "@midday/trpc",
+  "version": "0.1.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@midday/supabase": "*",
+    "@tanstack/react-query": "^5.69.0",
+    "@trpc/client": "^11.0.0-rc.844",
+    "@trpc/react-query": "11.0.0-rc.844",
+    "@trpc/server": "^11.0.0-rc.844",
+    "@trpc/tanstack-react-query": "^11.0.0-rc.844",
+    "superjson": "^2.2.2",
+    "zod": "^3.22.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.14",
+    "typescript": "^5.1.6"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0"
+  }
+}

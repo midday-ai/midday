@@ -1,6 +1,8 @@
 import "server-only";
 
 import { createClient as createSupabaseClient } from "@midday/supabase/server";
+import { dehydrate } from "@tanstack/react-query";
+import { HydrationBoundary } from "@tanstack/react-query";
 import { cache } from "react";
 import { makeQueryClient } from "./query-client";
 import { appRouter } from "./routes/_app";
@@ -23,3 +25,13 @@ export const getQueryClient = cache(makeServerQueryClient);
 
 // Create the server-side router with the initialized query client
 export const stRPC = createSTRouter(appRouter);
+
+export function HydrateClient(props: { children: React.ReactNode }) {
+  const dehydratedState = dehydrate(getQueryClient());
+
+  return (
+    <HydrationBoundary state={dehydratedState}>
+      {props.children}
+    </HydrationBoundary>
+  );
+}

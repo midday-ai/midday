@@ -1,7 +1,6 @@
 import { DataTableV2 } from "@/components/tables/transactions/data-table-v2";
 import { Cookies } from "@/utils/constants";
-import { getQueryClient, stRPC } from "@midday/query/server";
-import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
+import { HydrateClient, getQueryClient, stRPC } from "@midday/query/server";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 
@@ -11,8 +10,6 @@ export const metadata: Metadata = {
 
 export default async function Transactions() {
   // const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
-
-  // Get query client (Supabase context is now automatically initialized)
   const queryClient = getQueryClient();
 
   queryClient.prefetchQuery(
@@ -24,8 +21,8 @@ export default async function Transactions() {
   );
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
+    <HydrateClient>
       <DataTableV2 />
-    </HydrationBoundary>
+    </HydrateClient>
   );
 }

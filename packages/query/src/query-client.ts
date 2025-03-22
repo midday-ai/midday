@@ -13,19 +13,20 @@ export function makeQueryClient() {
         staleTime: 60 * 1000,
       },
       dehydrate: {
-        // serializeData: superjson.serialize,
-        // Use JSON.stringify and JSON.parse to ensure plain objects
-        // This is more compatible with React Server Components than superjson
-        // superjson can cause issues with RSC serialization
-        serializeData: (data) => JSON.parse(JSON.stringify(data)),
+        // Two-step serialization:
+        // 1. Use superjson to handle special types (dates, maps, sets, etc.)
+        // 2. Convert to plain objects for RSC compatibility
+        serializeData: (data) => {
+          const serialized = superjson.serialize(data);
+          return JSON.parse(JSON.stringify(serialized));
+        },
         shouldDehydrateQuery: (query) =>
           defaultShouldDehydrateQuery(query) ||
           query.state.status === "pending",
       },
       hydrate: {
-        // deserializeData: superjson.deserialize,
-        // Deserialize as-is since we're already using plain objects
-        deserializeData: (data) => data,
+        // Deserialize using superjson to restore special types
+        deserializeData: (data) => superjson.deserialize(data),
       },
     },
   });

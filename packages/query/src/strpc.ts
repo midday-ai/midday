@@ -1,10 +1,7 @@
-import { createClient as createSupabaseClient } from "@midday/supabase/server";
 import type { Client } from "@midday/supabase/types";
 import type {
   MutationFunction,
   QueryClient,
-  QueryFunction,
-  QueryFunctionContext,
   UseMutationOptions,
   UseQueryOptions,
 } from "@tanstack/react-query";
@@ -21,6 +18,15 @@ interface QueryContext {
 }
 
 /**
+ * To allow easy interactions with groups of related queries, such as
+ * invalidating all queries of a router, we use an array as the path when
+ * storing in tanstack query.
+ **/
+export function createQueryKey(procedurePath: string[], input?: unknown) {
+  return input !== undefined ? [...procedurePath, input] : procedurePath;
+}
+
+/**
  * Router builder
  */
 export const t = {
@@ -33,12 +39,19 @@ export const t = {
         queryOptions: (
           input: TInput,
           options?: Omit<
-            UseQueryOptions<TOutput, Error, TOutput, [string, TInput?]>,
+            UseQueryOptions<TOutput, Error, TOutput, unknown[]>,
             "queryKey" | "queryFn"
           >,
         ) => {
-          // Ensure queryKey is always a proper tuple format for TanStack Query
-          const queryKey = [handler.name, input] as [string, TInput];
+          // Determine the path from the call stack - first try to find the caller structure
+          // This approach preserves compatibility with stRPC.transactions.getTransactions.queryOptions
+          const caller = new Error().stack?.split("\n")[2] || "";
+          const match = caller.match(/stRPC\.([^\.]+)\.([^\.]+)/);
+
+          // Build the procedure path
+          const routerName = match?.[1] || "unknown";
+          const procedureName = match?.[2] || handler.name || "unknown";
+          const queryKey = createQueryKey([routerName, procedureName], input);
 
           return {
             queryKey,
@@ -102,15 +115,18 @@ export const t = {
     ) => ({
       queryOptions: (
         options?: Omit<
-          UseQueryOptions<TOutput, Error, TOutput, [string]>,
+          UseQueryOptions<TOutput, Error, TOutput, unknown[]>,
           "queryKey" | "queryFn"
         >,
       ) => {
-        // Store the handler name for the queryKey
-        const handlerName = handler.name || "unknownQuery";
+        // Determine the path from the call stack
+        const caller = new Error().stack?.split("\n")[2] || "";
+        const match = caller.match(/stRPC\.([^\.]+)\.([^\.]+)/);
 
-        // Ensure queryKey is always a proper tuple format for TanStack Query
-        const queryKey = [handlerName] as [string];
+        // Build the procedure path
+        const routerName = match?.[1] || "unknown";
+        const procedureName = match?.[2] || handler.name || "unknown";
+        const queryKey = createQueryKey([routerName, procedureName]);
 
         return {
           queryKey,
@@ -171,9 +187,6 @@ export const t = {
   },
 };
 
-// Keep backward compatibility with createSTRouter, createSTQuery, and createSTMutation
-// You can gradually migrate to the new API
-
 /**
  * Function to create a router with the provided procedures
  */
@@ -194,12 +207,18 @@ export function createSTQuery<TInput, TOutput>(
     queryOptions: (
       input: TInput,
       options?: Omit<
-        UseQueryOptions<TOutput, Error, TOutput, [string, TInput?]>,
+        UseQueryOptions<TOutput, Error, TOutput, unknown[]>,
         "queryKey" | "queryFn"
       >,
     ) => {
-      // Ensure queryKey is always a proper tuple format for TanStack Query
-      const queryKey = [procedure.name, input] as [string, TInput];
+      // Determine the path from the call stack
+      const caller = new Error().stack?.split("\n")[2] || "";
+      const match = caller.match(/stRPC\.([^\.]+)\.([^\.]+)/);
+
+      // Build the procedure path
+      const routerName = match?.[1] || "unknown";
+      const procedureName = match?.[2] || procedure.name || "unknown";
+      const queryKey = createQueryKey([routerName, procedureName], input);
 
       return {
         queryKey,

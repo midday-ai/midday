@@ -24,36 +24,26 @@ export function DataTableV2() {
     }),
   );
 
-  console.log(data, isLoading, error);
-
-  return null;
-
-  // const { data, isLoading, error } = useTransactionsInfiniteQuery({
-  //   teamId: team_id,
-  //   to: 10,
-  //   from: 0,
-  // });
-
-  // const table = useReactTable({
-  //   getRowId: (row) => row.id,
-  //   data,
-  //   columns,
-  //   getCoreRowModel: getCoreRowModel(),
-  //   // onRowSelectionChange: setRowSelection,
-  //   // onColumnVisibilityChange: setColumnVisibility,
-  //   // meta: {
-  //   //   setOpen,
-  //   //   copyUrl: handleCopyUrl,
-  //   //   updateTransaction: handleUpdateTransaction,
-  //   //   deleteTransactions: handleDeleteTransactions,
-  //   //   dateFormat,
-  //   //   hasSorting,
-  //   // },
-  //   // state: {
-  //   //   rowSelection,
-  //   //   columnVisibility,
-  //   // },
-  // });
+  const table = useReactTable({
+    getRowId: (row) => row.id,
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    // onRowSelectionChange: setRowSelection,
+    // onColumnVisibilityChange: setColumnVisibility,
+    // meta: {
+    //   setOpen,
+    //   copyUrl: handleCopyUrl,
+    //   updateTransaction: handleUpdateTransaction,
+    //   deleteTransactions: handleDeleteTransactions,
+    //   dateFormat,
+    //   hasSorting,
+    // },
+    // state: {
+    //   rowSelection,
+    //   columnVisibility,
+    // },
+  });
 
   return (
     <div className="mb-8 relative">
