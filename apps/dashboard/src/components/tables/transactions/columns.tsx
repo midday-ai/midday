@@ -7,7 +7,6 @@ import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
 import { formatDate } from "@/utils/format";
-import type { Transaction } from "@midday/query/transactions";
 import {
   AlertDialog,
   AlertDialogAction,
