@@ -4,8 +4,10 @@ import { CreateTransactionSheet } from "@/components/sheets/create-transaction-s
 import { Table } from "@/components/tables/transactions";
 import { NoAccounts } from "@/components/tables/transactions/empty-states";
 import { Loading } from "@/components/tables/transactions/loading";
+import { ClientGreeting } from "@/components/transactions";
 import { TransactionsActions } from "@/components/transactions-actions";
 import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { Cookies } from "@/utils/constants";
 import {
   getCategories,
@@ -29,6 +31,20 @@ export default async function Transactions({
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
+  prefetch(
+    trpc.hello.queryOptions({
+      text: "world",
+    }),
+  );
+
+  return (
+    <HydrateClient>
+      <Suspense fallback={<div>Loading...</div>}>
+        <ClientGreeting />
+      </Suspense>
+    </HydrateClient>
+  );
+
   const {
     q: query,
     page,
