@@ -1,6 +1,7 @@
 "use client";
 
 import { generateTransactionsFilters } from "@/actions/ai/filters/generate-transactions-filters";
+import { useTransactionFilters } from "@/hooks/use-transaction-filters";
 import { formatAccountName } from "@/utils/format";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
@@ -19,13 +20,6 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
-import {
-  parseAsArrayOf,
-  parseAsInteger,
-  parseAsString,
-  parseAsStringLiteral,
-  useQueryStates,
-} from "nuqs";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { AmountRange } from "./amount-range";
@@ -108,34 +102,7 @@ export function TransactionsSearchFilter({
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const [filters, setFilters] = useQueryStates(
-    {
-      q: parseAsString,
-      attachments: parseAsStringLiteral(["exclude", "include"] as const),
-      start: parseAsString,
-      end: parseAsString,
-      categories: parseAsArrayOf(parseAsString),
-      tags: parseAsArrayOf(parseAsString),
-      accounts: parseAsArrayOf(parseAsString),
-      assignees: parseAsArrayOf(parseAsString),
-      amount_range: parseAsArrayOf(parseAsInteger),
-      recurring: parseAsArrayOf(
-        parseAsStringLiteral(["all", "weekly", "monthly", "annually"] as const),
-      ),
-      statuses: parseAsArrayOf(
-        parseAsStringLiteral([
-          "completed",
-          "uncompleted",
-          "archived",
-          "excluded",
-        ] as const),
-      ),
-    },
-    {
-      shallow: false,
-      history: "push",
-    },
-  );
+  const { filters, setFilters } = useTransactionFilters();
 
   useHotkeys(
     "esc",

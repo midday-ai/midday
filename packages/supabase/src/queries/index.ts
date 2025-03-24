@@ -158,21 +158,21 @@ export type GetTransactionsParams = {
   teamId: string;
   to: number;
   from: number;
-  sort?: [string, "asc" | "desc"];
-  searchQuery?: string;
+  sort?: string[] | null;
   filter?: {
-    statuses?: string[];
-    attachments?: "include" | "exclude";
-    categories?: string[];
-    tags?: string[];
-    accounts?: string[];
-    assignees?: string[];
-    type?: "income" | "expense";
-    start?: string;
-    end?: string;
-    recurring?: string[];
-    amount_range?: [number, number];
-    amount?: [string, string];
+    q?: string | null;
+    statuses?: string[] | null;
+    attachments?: "include" | "exclude" | null;
+    categories?: string[] | null;
+    tags?: string[] | null;
+    accounts?: string[] | null;
+    assignees?: string[] | null;
+    type?: "income" | "expense" | null;
+    start?: string | null;
+    end?: string | null;
+    recurring?: string[] | null;
+    amount_range?: number[] | null;
+    amount?: [string, string] | null;
   };
 };
 
@@ -180,9 +180,10 @@ export async function getTransactionsQuery(
   supabase: Client,
   params: GetTransactionsParams,
 ) {
-  const { from = 0, to, filter, sort, teamId, searchQuery } = params;
+  const { from = 0, to, filter, sort, teamId } = params;
 
   const {
+    q,
     statuses,
     attachments,
     categories,
@@ -193,8 +194,8 @@ export async function getTransactionsQuery(
     end,
     assignees,
     recurring,
-    amount_range,
     amount,
+    amount_range,
   } = filter || {};
 
   const columns = [
@@ -238,7 +239,7 @@ export async function getTransactionsQuery(
       query.order("category(name)", { ascending });
     } else if (column === "tags") {
       query.order("is_transaction_tagged", { ascending });
-    } else {
+    } else if (column) {
       query.order(column, { ascending });
     }
   } else {
@@ -257,11 +258,11 @@ export async function getTransactionsQuery(
     query.lte("date", toDate.toISOString());
   }
 
-  if (searchQuery) {
-    if (!Number.isNaN(Number.parseInt(searchQuery))) {
-      query.eq("amount", Number(searchQuery));
+  if (q) {
+    if (!Number.isNaN(Number.parseInt(q))) {
+      query.eq("amount", Number(q));
     } else {
-      query.textSearch("fts_vector", `${searchQuery.replaceAll(" ", "+")}:*`);
+      query.textSearch("fts_vector", `${q.replaceAll(" ", "+")}:*`);
     }
   }
 
@@ -379,7 +380,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
     "vat:calculated_vat",
   ];
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("transactions")
     .select(columns.join(","))
     .eq("id", id)

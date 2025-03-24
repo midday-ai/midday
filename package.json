@@ -1,11 +1,7 @@
 {
   "name": "midday",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*",
-    "packages/email/*"
-  ],
+  "workspaces": ["packages/*", "apps/*", "packages/email/*"],
   "scripts": {
     "build": "turbo build",
     "clean": "git clean -xdf node_modules",
@@ -28,8 +24,8 @@
   "dependencies": {
     "@biomejs/biome": "1.9.4",
     "@manypkg/cli": "^0.23.0",
-    "turbo": "2.3.3",
-    "typescript": "^5.7.2"
+    "turbo": "2.4.4",
+    "typescript": "^5.8.2"
   },
   "packageManager": "bun@1.1.38",
   "resolutions": {

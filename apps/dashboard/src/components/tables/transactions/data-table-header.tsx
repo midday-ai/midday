@@ -1,49 +1,55 @@
 "use client";
 
+import { useSortParams } from "@/hooks/use-sort-params";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
 import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-type Props = {
-  table?: any;
+interface TableColumn {
+  id: string;
+  getIsVisible: () => boolean;
+}
+
+interface TableInterface {
+  getAllLeafColumns: () => TableColumn[];
+  getIsAllPageRowsSelected: () => boolean;
+  getIsSomePageRowsSelected: () => boolean;
+  toggleAllPageRowsSelected: (value: boolean) => void;
+}
+
+interface Props {
+  table?: TableInterface;
   loading?: boolean;
-};
+}
 
 export function DataTableHeader({ table, loading }: Props) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
-  const [column, value] = searchParams.get("sort")
-    ? searchParams.get("sort")?.split(":")
-    : [];
+  const { params, setParams } = useSortParams();
+  const [column, value] = params.sort || [];
 
   const createSortQuery = useCallback(
     (name: string) => {
-      const params = new URLSearchParams(searchParams);
-      const prevSort = params.get("sort");
-
-      if (`${name}:asc` === prevSort) {
-        params.set("sort", `${name}:desc`);
-      } else if (`${name}:desc` === prevSort) {
-        params.delete("sort");
+      if (value === "asc") {
+        // If currently ascending, switch to descending
+        setParams({ sort: [name, "desc"] });
+      } else if (value === "desc") {
+        // If currently descending, clear sort
+        setParams({ sort: null });
       } else {
-        params.set("sort", `${name}:asc`);
+        // If not sorted on this column, set to ascending
+        setParams({ sort: [name, "asc"] });
       }
-
-      router.replace(`${pathname}?${params.toString()}`);
     },
-    [searchParams, router, pathname],
+    [value, setParams],
   );
 
-  const isVisible = (id) =>
+  const isVisible = (id: string) =>
     loading ||
     table
       ?.getAllLeafColumns()
       .find((col) => col.id === id)
-      .getIsVisible();
+      ?.getIsVisible();
 
   return (
     <TableHeader>
@@ -55,7 +61,7 @@ export function DataTableHeader({ table, loading }: Props) {
               (table?.getIsSomePageRowsSelected() && "indeterminate")
             }
             onCheckedChange={(value) =>
-              table.toggleAllPageRowsSelected(!!value)
+              table?.toggleAllPageRowsSelected(!!value)
             }
           />
         </TableHead>
