@@ -7,7 +7,7 @@
     "clean": "git clean -xdf .next .turbo node_modules",
     "jobs": "trigger dev",
     "jobs:deploy": "trigger deploy",
-    "dev": "TZ=UTC next dev -p 3001",
+    "dev": "TZ=UTC next dev -p 3001 --turbo",
     "lint": "next lint",
     "format": "biome format --write .",
     "start": "next start",
