@@ -429,11 +429,11 @@ export const updateEntriesSchema = z.object({
 });
 
 export const manualSyncTransactionsSchema = z.object({
-  connectionId: z.string().uuid(),
+  connectionId: z.string(),
 });
 
 export const reconnectConnectionSchema = z.object({
-  connectionId: z.string().uuid(),
+  connectionId: z.string(),
   provider: z.string(),
 });
 
