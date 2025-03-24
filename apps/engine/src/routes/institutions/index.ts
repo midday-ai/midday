@@ -164,8 +164,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
             popularity: (original?.popularity ?? 0) + 1,
           });
 
-        const data: Document =
-          typeof result === "string" ? JSON.parse(result) : [];
+        const data = result as Document;
 
         return c.json(
           {
