@@ -349,6 +349,7 @@ export async function getTransactionsQuery(
 
   // Convert cursor to offset
   const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+  // TODO: Use cursor instead of range
   const { data, count } = await query.range(offset, offset + pageSize - 1);
 
   // Generate next cursor (offset)
