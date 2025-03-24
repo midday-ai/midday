@@ -130,7 +130,7 @@ export function Usage({
       <Card className="divide-y">
         <UsageItem
           label="Users"
-          current={data.number_of_users ?? 0}
+          current={data?.number_of_users ?? 0}
           max={selectedPlan?.users}
         />
         <UsageItem
