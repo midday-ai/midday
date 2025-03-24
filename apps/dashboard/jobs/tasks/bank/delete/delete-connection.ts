@@ -5,7 +5,7 @@ import { z } from "zod";
 export const deleteConnection = schemaTask({
   id: "delete-connection",
   schema: z.object({
-    referenceId: z.string().uuid().optional().nullable(),
+    referenceId: z.string().optional().nullable(),
     provider: z.string(),
     accessToken: z.string().optional().nullable(),
   }),
