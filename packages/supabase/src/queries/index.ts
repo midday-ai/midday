@@ -8,6 +8,7 @@ import {
   subYears,
 } from "date-fns";
 import type { Client } from "../types";
+import { decodeCursor, encodeCursor } from "../utils/cursor";
 
 function transactionCategory(transaction) {
   return (
@@ -156,9 +157,9 @@ export async function getSpendingQuery(
 
 export type GetTransactionsParams = {
   teamId: string;
-  to: number;
-  from: number;
+  cursor?: string | null;
   sort?: string[] | null;
+  pageSize?: number;
   filter?: {
     q?: string | null;
     statuses?: string[] | null;
@@ -171,8 +172,8 @@ export type GetTransactionsParams = {
     start?: string | null;
     end?: string | null;
     recurring?: string[] | null;
-    amount_range?: number[] | null;
-    amount?: [string, string] | null;
+    amount_range?: string[] | null;
+    amount?: string[] | null;
   };
 };
 
@@ -180,7 +181,7 @@ export async function getTransactionsQuery(
   supabase: Client,
   params: GetTransactionsParams,
 ) {
-  const { from = 0, to, filter, sort, teamId } = params;
+  const { filter, sort, teamId, cursor, pageSize = 20 } = params;
 
   const {
     q,
@@ -225,25 +226,58 @@ export async function getTransactionsQuery(
     .select(columns.join(","), { count: "exact" })
     .eq("team_id", teamId);
 
+  // Handle cursor-based pagination
+  if (cursor) {
+    const decodedCursor = decodeCursor(cursor);
+    const { column, value } = decodedCursor;
+    const ascending = sort?.[1] === "asc";
+
+    // Build cursor conditions based on sort column
+    if (sort) {
+      const [sortColumn] = sort;
+
+      if (sortColumn === "date") {
+        query.or(`date.${ascending ? "gt" : "lt"}.${value}`);
+      } else if (sortColumn === "amount") {
+        query.or(`amount.${ascending ? "gt" : "lt"}.${value}`);
+      } else if (sortColumn === "name") {
+        query.or(`name.${ascending ? "gt" : "lt"}.${value}`);
+      } else {
+        // Default to ID-based cursor for other columns
+        query.or(`id.${ascending ? "gt" : "lt"}.${value}`);
+      }
+    } else {
+      // Default sorting
+      query.or(`date.lt.${value}`);
+    }
+  }
+
+  // Apply sorting
   if (sort) {
     const [column, value] = sort;
     const ascending = value === "asc";
 
     if (column === "attachment") {
       query.order("is_fulfilled", { ascending });
+      query.order("id", { ascending }); // Secondary sort for stability
     } else if (column === "assigned") {
       query.order("assigned(full_name)", { ascending });
+      query.order("id", { ascending });
     } else if (column === "bank_account") {
       query.order("bank_account(name)", { ascending });
+      query.order("id", { ascending });
     } else if (column === "category") {
       query.order("category(name)", { ascending });
+      query.order("id", { ascending });
     } else if (column === "tags") {
       query.order("is_transaction_tagged", { ascending });
+      query.order("id", { ascending });
     } else if (column) {
       query.order(column, { ascending });
+      query.order("id", { ascending }); // Always include ID as secondary sort
     }
   } else {
-    // NOTE: date can be on the same day (2020-01-01), so we need to order by id and amount to keep the order
+    // Default sorting
     query
       .order("date", { ascending: false })
       .order("name", { ascending: false })
@@ -342,25 +376,21 @@ export async function getTransactionsQuery(
     }
   }
 
-  const { data, count } = await query.range(from, to);
+  const { data, count } = await query.limit(pageSize);
 
-  const totalAmount = data
-    ?.reduce((acc, { amount, currency }) => {
-      const existingCurrency = acc.find((item) => item.currency === currency);
-
-      if (existingCurrency) {
-        existingCurrency.amount += amount;
-      } else {
-        acc.push({ amount, currency });
+  // Generate cursor for the last item
+  const lastItem = data?.at(-1);
+  const cursorData = lastItem
+    ? {
+        column: sort?.at(0) || "date",
+        value: lastItem[sort?.at(0) || "date"],
       }
-      return acc;
-    }, [])
-    .sort((a, b) => a?.amount - b?.amount);
+    : null;
 
   return {
     meta: {
-      totalAmount,
       count,
+      cursor: cursorData ? encodeCursor(cursorData) : null,
     },
     data: data?.map((transaction) => ({
       ...transaction,

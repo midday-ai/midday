@@ -16,7 +16,7 @@ export const transactionFilterParamsSchema = {
   tags: parseAsArrayOf(parseAsString),
   accounts: parseAsArrayOf(parseAsString),
   assignees: parseAsArrayOf(parseAsString),
-  amount_range: parseAsArrayOf(parseAsInteger),
+  amount_range: parseAsArrayOf(parseAsString),
   amount: parseAsArrayOf(parseAsString),
   recurring: parseAsArrayOf(
     parseAsStringLiteral(["all", "weekly", "monthly", "annually"] as const),
