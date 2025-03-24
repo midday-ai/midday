@@ -4,6 +4,7 @@ import { useSortParams } from "@/hooks/use-sort-params";
 import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
 import { useUserContext } from "@/store/user/hook";
 import { useTRPC } from "@/trpc/client";
+import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import {
@@ -11,7 +12,8 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useDeferredValue, useMemo } from "react";
+import { useDeferredValue, useEffect, useMemo } from "react";
+import { useInView } from "react-intersection-observer";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
 
@@ -20,6 +22,7 @@ export function DataTableV2() {
   const { filter } = useTransactionFilterParams();
   const deferredSearch = useDeferredValue(filter.q);
   const { params } = useSortParams();
+  const { ref, inView } = useInView();
 
   const trpc = useTRPC();
 
@@ -27,18 +30,28 @@ export function DataTableV2() {
     trpc.transactions.getTransactions.infiniteQueryOptions(
       {
         teamId: team_id,
-        // filter: {
-        //   ...filter,
-        //   q: deferredSearch,
-        // },
+        filter: {
+          ...filter,
+          q: deferredSearch,
+        },
         sort: params.sort,
       },
       {
-        getNextPageParam: (lastPage, pages) => lastPage.meta.count,
+        getNextPageParam: ({ meta }) => {
+          console.log(meta);
+          return meta?.cursor ?? undefined;
+        },
       },
     );
 
-  const { data } = useSuspenseInfiniteQuery(infiniteQueryOptions);
+  const { data, fetchNextPage } =
+    useSuspenseInfiniteQuery(infiniteQueryOptions);
+
+  useEffect(() => {
+    if (inView) {
+      fetchNextPage();
+    }
+  }, [inView]);
 
   const tableData = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) ?? [];
@@ -49,20 +62,6 @@ export function DataTableV2() {
     data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    // onRowSelectionChange: setRowSelection,
-    // onColumnVisibilityChange: setColumnVisibility,
-    // meta: {
-    //   setOpen,
-    //   copyUrl: handleCopyUrl,
-    //   updateTransaction: handleUpdateTransaction,
-    //   deleteTransactions: handleDeleteTransactions,
-    //   dateFormat,
-    //   hasSorting,
-    // },
-    // state: {
-    //   rowSelection,
-    //   columnVisibility,
-    // },
   });
 
   return (
@@ -104,6 +103,15 @@ export function DataTableV2() {
           )}
         </TableBody>
       </Table>
+
+      {/* {hasNextPage && ( */}
+      <div className="flex items-center justify-center mt-6" ref={ref}>
+        <div className="flex items-center space-x-2 px-6 py-5">
+          <Spinner />
+          <span className="text-sm text-[#606060]">Loading more...</span>
+        </div>
+      </div>
+      {/* )} */}
     </div>
   );
 }

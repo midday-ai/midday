@@ -8,7 +8,7 @@ export const transactionsRouter = createTRPCRouter({
     .input(
       z.object({
         teamId: z.string(),
-        cursor: z.number().optional(),
+        cursor: z.string().nullable().optional(),
         sort: z.array(z.string(), z.string()).nullable().optional(),
         filter: z
           .object({
@@ -22,7 +22,8 @@ export const transactionsRouter = createTRPCRouter({
             statuses: z.array(z.string()).nullable().optional(),
             recurring: z.array(z.string()).nullable().optional(),
             attachments: z.enum(["include", "exclude"]).nullable().optional(),
-            amount_range: z.array(z.number(), z.number()).nullable().optional(),
+            amount_range: z.array(z.string()).nullable().optional(),
+            amount: z.array(z.string()).nullable().optional(),
             type: z.enum(["income", "expense"]).nullable().optional(),
           })
           .optional(),
@@ -31,12 +32,6 @@ export const transactionsRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const supabase = createClient();
 
-      return getTransactionsQuery(supabase, {
-        ...input,
-        from: input.cursor || 0,
-        to: (input.cursor || 0) + 20,
-        filter: input.filter,
-        sort: input.sort,
-      });
+      return getTransactionsQuery(supabase, input);
     }),
 });

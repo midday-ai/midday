@@ -15,13 +15,13 @@ export default async function Transactions({
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
-  const filter = await transactionFilterParamsCache.parse(searchParams);
-  const { sort } = await sortParamsCache.parse(searchParams);
+  const filter = transactionFilterParamsCache.parse(searchParams);
+  const { sort } = sortParamsCache.parse(searchParams);
 
   prefetch(
     trpc.transactions.getTransactions.infiniteQueryOptions({
       teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890",
-      // filter,
+      filter,
       sort,
     }),
   );
