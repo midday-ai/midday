@@ -3,7 +3,6 @@ import { setupAnalytics } from "@midday/events/server";
 import { client as RedisClient } from "@midday/kv";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
-import * as Sentry from "@sentry/nextjs";
 import { Ratelimit } from "@upstash/ratelimit";
 import {
   DEFAULT_SERVER_ERROR_MESSAGE,
@@ -98,13 +97,11 @@ export const authActionClient = actionClientWithMeta
       analytics.track(metadata.track);
     }
 
-    return Sentry.withServerActionInstrumentation(metadata.name, async () => {
-      return next({
-        ctx: {
-          supabase,
-          analytics,
-          user: user.data,
-        },
-      });
+    return next({
+      ctx: {
+        supabase,
+        analytics,
+        user: user.data,
+      },
     });
   });

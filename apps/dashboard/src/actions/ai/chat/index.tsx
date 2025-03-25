@@ -189,39 +189,43 @@ export async function submitUserMessage(
   };
 }
 
+// Create a separate server action for handling AI state updates
+async function handleAIStateUpdate({
+  state,
+  done,
+}: { state: AIState; done: boolean }) {
+  "use server";
+
+  const settings = await getAssistantSettings();
+  const createdAt = new Date();
+  const userId = state.user.id;
+  const teamId = state.user.team_id;
+  const { chatId, messages } = state;
+
+  const firstMessageContent = messages?.at(0)?.content ?? "";
+  const title =
+    typeof firstMessageContent === "string"
+      ? firstMessageContent.substring(0, 100)
+      : "";
+
+  const chat: Chat = {
+    id: chatId,
+    title,
+    userId,
+    createdAt,
+    messages,
+    teamId,
+  };
+
+  if (done && settings?.enabled) {
+    await saveChat(chat);
+  }
+}
+
 export const AI = createAI<AIState, UIState>({
   actions: {
     submitUserMessage,
   },
   initialUIState: [],
-  onSetAIState: async ({ state, done }) => {
-    "use server";
-
-    const settings = await getAssistantSettings();
-
-    const createdAt = new Date();
-    const userId = state.user.id;
-    const teamId = state.user.team_id;
-
-    const { chatId, messages } = state;
-
-    const firstMessageContent = messages?.at(0)?.content ?? "";
-    const title =
-      typeof firstMessageContent === "string"
-        ? firstMessageContent.substring(0, 100)
-        : "";
-
-    const chat: Chat = {
-      id: chatId,
-      title,
-      userId,
-      createdAt,
-      messages,
-      teamId,
-    };
-
-    if (done && settings?.enabled) {
-      await saveChat(chat);
-    }
-  },
+  onSetAIState: handleAIStateUpdate,
 });
