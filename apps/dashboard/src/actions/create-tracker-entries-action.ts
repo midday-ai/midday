@@ -25,7 +25,7 @@ export const createTrackerEntriesAction = authActionClient
   })
   .action(
     async ({ parsedInput: { dates, ...params }, ctx: { supabase, user } }) => {
-      cookies().set(Cookies.LastProject, params.project_id);
+      (await cookies()).set(Cookies.LastProject, params.project_id);
 
       const entries = dates.map((date) => ({
         ...params,

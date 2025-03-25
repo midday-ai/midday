@@ -8,7 +8,8 @@ type Props = {
   searchParams: Record<string, string | string[] | undefined>;
 };
 
-const AllDonePage = ({ searchParams }: Props) => {
+const AllDonePage = async (props: Props) => {
+  const searchParams = await props.searchParams;
   const parsedSearchParams = searchParamsSchema.safeParse(searchParams);
 
   if (!parsedSearchParams.success) {

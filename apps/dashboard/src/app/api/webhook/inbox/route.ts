@@ -28,7 +28,7 @@ const FORWARD_FROM_EMAIL = "inbox@midday.ai";
 const resend = new Resend(env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
-  const clientIp = headers().get("x-forwarded-for") ?? "";
+  const clientIp = (await headers()).get("x-forwarded-for") ?? "";
 
   if (
     process.env.NODE_ENV !== "development" &&
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true });
   }
 
-  const supabase = createClient({ admin: true });
+  const supabase = await createClient({ admin: true });
 
   try {
     const { data: teamData } = await supabase

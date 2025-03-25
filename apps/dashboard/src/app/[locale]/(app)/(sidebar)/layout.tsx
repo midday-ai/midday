@@ -19,16 +19,16 @@ const AssistantModal = dynamic(
     import("@/components/assistant/assistant-modal").then(
       (mod) => mod.AssistantModal,
     ),
-  {
-    ssr: false,
-  },
+  // {
+  //   ssr: false,
+  // },
 );
 
 const ExportStatus = dynamic(
   () => import("@/components/export-status").then((mod) => mod.ExportStatus),
-  {
-    ssr: false,
-  },
+  // {
+  //   ssr: false,
+  // },
 );
 
 const SelectBankAccountsModal = dynamic(
@@ -36,24 +36,24 @@ const SelectBankAccountsModal = dynamic(
     import("@/components/modals/select-bank-accounts").then(
       (mod) => mod.SelectBankAccountsModal,
     ),
-  {
-    ssr: false,
-  },
+  // {
+  //   ssr: false,
+  // },
 );
 
 const ImportModal = dynamic(
   () =>
     import("@/components/modals/import-modal").then((mod) => mod.ImportModal),
-  {
-    ssr: false,
-  },
+  // {
+  //   ssr: false,
+  // },
 );
 
 const HotKeys = dynamic(
   () => import("@/components/hot-keys").then((mod) => mod.HotKeys),
-  {
-    ssr: false,
-  },
+  // {
+  //   ssr: false,
+  // },
 );
 
 const ConnectTransactionsModal = dynamic(
@@ -61,9 +61,9 @@ const ConnectTransactionsModal = dynamic(
     import("@/components/modals/connect-transactions-modal").then(
       (mod) => mod.ConnectTransactionsModal,
     ),
-  {
-    ssr: false,
-  },
+  // {
+  //   ssr: false,
+  // },
 );
 
 export default async function Layout({
@@ -72,8 +72,8 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   const user = await getUser();
-  const countryCode = getCountryCode();
-  const currency = getCurrency();
+  const countryCode = await getCountryCode();
+  const currency = await getCurrency();
 
   if (!user?.data?.team) {
     redirect("/teams");

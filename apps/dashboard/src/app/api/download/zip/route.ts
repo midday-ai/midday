@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest, res: NextResponse) {
   const requestUrl = new URL(req.url);
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const folder = requestUrl.searchParams.get("folder") || "";
 

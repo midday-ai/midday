@@ -45,7 +45,7 @@ export const updateEntriesAction = authActionClient
     }
 
     if (payload.project_id) {
-      cookies().set({
+      (await cookies()).set({
         name: Cookies.LastProject,
         value: payload.project_id,
         expires: addYears(new Date(), 1),

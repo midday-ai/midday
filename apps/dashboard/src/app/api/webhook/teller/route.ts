@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const supabase = createClient({ admin: true });
+  const supabase = await createClient({ admin: true });
 
   const { data: connectionData, error: connectionError } = await supabase
     .from("bank_connections")

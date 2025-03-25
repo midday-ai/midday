@@ -29,16 +29,11 @@ export function DataTableV2() {
   const infiniteQueryOptions =
     trpc.transactions.getTransactions.infiniteQueryOptions(
       {
-        teamId: team_id,
-        filter: {
-          ...filter,
-          q: deferredSearch,
-        },
-        sort: params.sort,
+        teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890",
+        cursor: "0",
       },
       {
         getNextPageParam: ({ meta }) => {
-          console.log(meta);
           return meta?.cursor ?? undefined;
         },
       },

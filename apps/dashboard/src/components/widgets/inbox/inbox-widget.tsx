@@ -8,7 +8,7 @@ import { InboxList } from "./inbox-list";
 
 export async function InboxWidget({ filter, disabled }) {
   const user = await getUser();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data } = disabled
     ? inboxData

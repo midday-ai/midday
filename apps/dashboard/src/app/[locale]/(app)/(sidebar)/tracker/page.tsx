@@ -18,17 +18,18 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     statuses: string;
     sort: string;
     q: string;
     start?: string;
     end?: string;
     customers?: string[];
-  };
+  }>;
 };
 
-export default async function Tracker({ searchParams }: Props) {
+export default async function Tracker(props: Props) {
+  const searchParams = await props.searchParams;
   const {
     sort: sortParams,
     statuses,

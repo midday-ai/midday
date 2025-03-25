@@ -19,8 +19,8 @@ type ProviderProps = {
 
 export function Providers({ locale, children }: ProviderProps) {
   return (
-    <I18nProviderClient locale={locale}>
-      <TRPCReactProvider>
+    <TRPCReactProvider>
+      <I18nProviderClient locale={locale}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -29,7 +29,7 @@ export function Providers({ locale, children }: ProviderProps) {
         >
           {children}
         </ThemeProvider>
-      </TRPCReactProvider>
-    </I18nProviderClient>
+      </I18nProviderClient>
+    </TRPCReactProvider>
   );
 }
