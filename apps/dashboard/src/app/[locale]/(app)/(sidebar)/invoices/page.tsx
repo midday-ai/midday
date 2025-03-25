@@ -20,11 +20,9 @@ export const metadata: Metadata = {
   title: "Invoices | Midday",
 };
 
-export default async function Page(
-  props: {
-    searchParams: Promise<Record<string, string | string[] | undefined>>;
-  }
-) {
+export default async function Page(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const searchParams = await props.searchParams;
   const {
     q: query,

@@ -10,11 +10,9 @@ export const metadata: Metadata = {
   title: "Transactions | Midday",
 };
 
-export default async function Transactions(
-  props: {
-    searchParams: Promise<Record<string, string | string[] | undefined>>;
-  }
-) {
+export default async function Transactions(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const searchParams = await props.searchParams;
   const filter = transactionFilterParamsCache.parse(searchParams);
   const { sort } = sortParamsCache.parse(searchParams);
