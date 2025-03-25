@@ -44,4 +44,7 @@ export default withSentryConfig(config, {
   widenClientFileUpload: true,
   hideSourceMaps: true,
   disableLogger: true,
+  sourcemaps: {
+    disable: true,
+  },
 });

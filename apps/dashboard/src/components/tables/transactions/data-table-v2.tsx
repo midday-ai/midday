@@ -42,6 +42,8 @@ export function DataTableV2() {
   const { data, fetchNextPage } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
 
+  console.log("data", data);
+
   useEffect(() => {
     if (inView) {
       fetchNextPage();
