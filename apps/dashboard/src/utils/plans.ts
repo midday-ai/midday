@@ -142,9 +142,9 @@ export async function canChooseStarterPlanQuery(teamId: string) {
     supabase.from("bank_connections").select("id").eq("team_id", teamId),
   ]);
 
-  // Can only choose starter if team has 1 member and 2 bank connections
+  // Can only choose starter if team has less than 2 members and less than or equal to 2 bank connection
   return (
-    (teamMembersResponse.data?.length ?? 0) === 1 &&
+    (teamMembersResponse.data?.length ?? 0) <= 2 &&
     (bankConnectionsResponse.data?.length ?? 0) <= 2
   );
 }

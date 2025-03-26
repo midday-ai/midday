@@ -86,7 +86,7 @@ export function Plans({
               </li>
               <li className="flex items-start">
                 <Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-                <span className="text-xs">1 user</span>
+                <span className="text-xs">2 users</span>
               </li>
             </ul>
           </div>
