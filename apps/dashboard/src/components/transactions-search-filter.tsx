@@ -74,35 +74,49 @@ export function TransactionsSearchFilter() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const trpc = useTRPC();
 
   useEffect(() => {
     const randomPlaceholder =
       PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)] ??
       "Search or filter";
+
     setPlaceholder(randomPlaceholder);
   }, []);
 
-  const { data: membersData } = useQuery(trpc.team.getMembers.queryOptions());
-  const { data: tagsData } = useQuery(trpc.tags.getTags.queryOptions());
+  const shouldFetch = isOpen || isFocused;
+
+  const { data: membersData } = useQuery({
+    ...trpc.team.getMembers.queryOptions(),
+    enabled: shouldFetch,
+  });
+
+  const { data: tagsData } = useQuery({
+    ...trpc.tags.getTags.queryOptions(),
+    enabled: shouldFetch,
+  });
 
   const members = membersData?.map((member) => ({
     id: member.user.id,
     name: member.user.full_name,
   }));
 
-  const { data: bankAccountsData } = useQuery(
-    trpc.bankAccounts.getBankAccounts.queryOptions(),
-  );
+  const { data: bankAccountsData } = useQuery({
+    ...trpc.bankAccounts.getBankAccounts.queryOptions(),
+    enabled: shouldFetch,
+  });
 
   const accounts = bankAccountsData?.data?.map((bankAccount) => ({
     id: bankAccount.id,
     name: bankAccount.name,
+    currency: bankAccount.currency,
   }));
 
-  const { data: categoriesData } = useQuery(
-    trpc.transactionCategories.get.queryOptions(),
-  );
+  const { data: categoriesData } = useQuery({
+    ...trpc.transactionCategories.get.queryOptions(),
+    enabled: shouldFetch,
+  });
 
   const categories = categoriesData?.map((category) => ({
     id: category.id,
@@ -215,6 +229,8 @@ export function TransactionsSearchFilter() {
             className="pl-9 w-full md:w-[350px] pr-8"
             value={prompt}
             onChange={handleSearch}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             autoComplete="off"
             autoCapitalize="none"
             autoCorrect="off"
@@ -393,7 +409,6 @@ export function TransactionsSearchFilter() {
                 className="p-0 w-[250px] h-[270px]"
               >
                 <SelectCategory
-                  uncategorized
                   onChange={(selected) => {
                     setFilter({
                       categories: filter?.categories?.includes(selected.slug)
@@ -423,7 +438,7 @@ export function TransactionsSearchFilter() {
                 alignOffset={-4}
                 className="py-2 max-h-[200px] overflow-y-auto max-w-[220px]"
               >
-                {tags?.length > 0 ? (
+                {tags && tags?.length > 0 ? (
                   tags?.map((tag) => (
                     <DropdownMenuCheckboxItem
                       key={tag.id}
