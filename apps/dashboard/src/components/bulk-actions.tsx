@@ -22,11 +22,12 @@ import { SelectUser } from "./select-user";
 
 type Props = {
   ids: string[];
-  tags: { id: string; name: string }[];
 };
 
-export function BulkActions({ ids, tags }: Props) {
+export function BulkActions({ ids }: Props) {
   const { toast } = useToast();
+
+  const tags = [];
 
   const { setRowSelection } = useTransactionsStore();
 

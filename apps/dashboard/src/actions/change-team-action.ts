@@ -1,5 +1,6 @@
 "use server";
 
+import { setTeamId } from "@/utils/team";
 import { LogEvents } from "@midday/events/events";
 import { updateUser } from "@midday/supabase/mutations";
 import { revalidateTag } from "next/cache";
@@ -18,6 +19,8 @@ export const changeTeamAction = authActionClient
   })
   .action(
     async ({ parsedInput: { teamId, redirectTo }, ctx: { supabase } }) => {
+      await setTeamId(teamId);
+
       const user = await updateUser(supabase, { team_id: teamId });
 
       if (!user?.data) {

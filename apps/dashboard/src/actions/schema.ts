@@ -296,19 +296,6 @@ export type InviteTeamMembersFormValues = z.infer<
   typeof inviteTeamMembersSchema
 >;
 
-export const createCategoriesSchema = z.object({
-  categories: z.array(
-    z.object({
-      name: z.string().optional(),
-      description: z.string().optional(),
-      color: z.string().optional(),
-      vat: z.string().optional(),
-    }),
-  ),
-});
-
-export type CreateCategoriesFormValues = z.infer<typeof createCategoriesSchema>;
-
 export const updateCategorySchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1),

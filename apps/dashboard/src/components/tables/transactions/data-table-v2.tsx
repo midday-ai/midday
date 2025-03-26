@@ -2,7 +2,6 @@
 
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
-import { useUserContext } from "@/store/user/hook";
 import { useTRPC } from "@/trpc/client";
 import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
@@ -18,7 +17,6 @@ import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
 
 export function DataTableV2() {
-  const { team_id } = useUserContext((state) => state.data);
   const { filter } = useTransactionFilterParams();
   const deferredSearch = useDeferredValue(filter.q);
   const { params } = useSortParams();
@@ -26,23 +24,23 @@ export function DataTableV2() {
 
   const trpc = useTRPC();
 
-  const infiniteQueryOptions =
-    trpc.transactions.getTransactions.infiniteQueryOptions(
-      {
-        teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890",
-        cursor: "0",
+  const infiniteQueryOptions = trpc.transactions.get.infiniteQueryOptions(
+    {
+      filter: {
+        ...filter,
+        q: deferredSearch,
       },
-      {
-        getNextPageParam: ({ meta }) => {
-          return meta?.cursor ?? undefined;
-        },
+      sort: params.sort,
+    },
+    {
+      getNextPageParam: ({ meta }) => {
+        return meta?.cursor ?? undefined;
       },
-    );
+    },
+  );
 
-  const { data, fetchNextPage } =
+  const { data, fetchNextPage, hasNextPage } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
-
-  console.log("data", data);
 
   useEffect(() => {
     if (inView) {
@@ -101,14 +99,14 @@ export function DataTableV2() {
         </TableBody>
       </Table>
 
-      {/* {hasNextPage && ( */}
-      <div className="flex items-center justify-center mt-6" ref={ref}>
-        <div className="flex items-center space-x-2 px-6 py-5">
-          <Spinner />
-          <span className="text-sm text-[#606060]">Loading more...</span>
+      {hasNextPage && (
+        <div className="flex items-center justify-center mt-6" ref={ref}>
+          <div className="flex items-center space-x-2 px-6 py-5">
+            <Spinner />
+            <span className="text-sm text-[#606060]">Loading more...</span>
+          </div>
         </div>
-      </div>
-      {/* )} */}
+      )}
     </div>
   );
 }

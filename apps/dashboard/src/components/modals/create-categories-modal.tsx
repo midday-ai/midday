@@ -1,8 +1,3 @@
-import { createCategoriesAction } from "@/actions/create-categories-action";
-import {
-  type CreateCategoriesFormValues,
-  createCategoriesSchema,
-} from "@/actions/schema";
 import { InputColor } from "@/components/input-color";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
@@ -38,50 +33,52 @@ const newItem = {
 export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
   const { toast } = useToast();
 
-  const createCategories = useAction(createCategoriesAction, {
-    onSuccess: () => {
-      onOpenChange(false);
+  return null;
 
-      toast({
-        title: "Successfully created categories.",
-        variant: "success",
-        duration: 3500,
-      });
-    },
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
+  // const createCategories = useAction(createCategoriesAction, {
+  //   onSuccess: () => {
+  //     onOpenChange(false);
 
-  const form = useForm<CreateCategoriesFormValues>({
-    resolver: zodResolver(createCategoriesSchema),
-    defaultValues: {
-      categories: [newItem],
-    },
-  });
+  //     toast({
+  //       title: "Successfully created categories.",
+  //       variant: "success",
+  //       duration: 3500,
+  //     });
+  //   },
+  //   onError: () => {
+  //     toast({
+  //       duration: 3500,
+  //       variant: "error",
+  //       title: "Something went wrong please try again.",
+  //     });
+  //   },
+  // });
 
-  useEffect(() => {
-    form.reset({
-      categories: [newItem],
-    });
-  }, [isOpen]);
+  // const form = useForm<CreateCategoriesFormValues>({
+  //   resolver: zodResolver(createCategoriesSchema),
+  //   defaultValues: {
+  //     categories: [newItem],
+  //   },
+  // });
 
-  const onSubmit = form.handleSubmit((data) => {
-    createCategories.execute({
-      categories: data.categories.filter(
-        (category) => category.name !== undefined,
-      ),
-    });
-  });
+  // useEffect(() => {
+  //   form.reset({
+  //     categories: [newItem],
+  //   });
+  // }, [isOpen]);
 
-  const { fields, append } = useFieldArray({
-    name: "categories",
-    control: form.control,
-  });
+  // const onSubmit = form.handleSubmit((data) => {
+  //   createCategories.execute({
+  //     categories: data.categories.filter(
+  //       (category) => category.name !== undefined,
+  //     ),
+  //   });
+  // });
+
+  // const { fields, append } = useFieldArray({
+  //   name: "categories",
+  //   control: form.control,
+  // });
 
   return (
     <DialogContent className="max-w-[455px]">

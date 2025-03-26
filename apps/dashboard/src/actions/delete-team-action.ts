@@ -1,5 +1,6 @@
 "use server";
 
+import { deleteTeamId } from "@/utils/team";
 import { LogEvents } from "@midday/events/events";
 import { deleteTeam } from "jobs/tasks/team/delete";
 import { revalidateTag } from "next/cache";
@@ -22,6 +23,8 @@ export const deleteTeamAction = authActionClient
       .eq("id", teamId)
       .select("id, bank_connections(access_token, provider, reference_id)")
       .single();
+
+    await deleteTeamId();
 
     await deleteTeam.trigger({
       teamId,

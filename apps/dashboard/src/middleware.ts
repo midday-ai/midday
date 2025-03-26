@@ -2,6 +2,7 @@ import { updateSession } from "@midday/supabase/middleware";
 import { createClient } from "@midday/supabase/server";
 import { createI18nMiddleware } from "next-international/middleware";
 import { type NextRequest, NextResponse } from "next/server";
+import { selectedTeamIdCookieName } from "./utils/team";
 
 const I18nMiddleware = createI18nMiddleware({
   locales: ["en"],
@@ -64,6 +65,15 @@ export async function middleware(request: NextRequest) {
     }
 
     return NextResponse.redirect(`${url.origin}/setup`);
+  }
+
+  // Check for team selection
+  if (
+    session &&
+    !newUrl.pathname.startsWith("/teams") &&
+    !request.cookies.has(selectedTeamIdCookieName)
+  ) {
+    return NextResponse.redirect(`${url.origin}/teams`);
   }
 
   const { data: mfaData } =
