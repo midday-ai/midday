@@ -1,5 +1,7 @@
 import { DataTableV2 } from "@/components/tables/transactions/data-table-v2";
 import { Loading } from "@/components/tables/transactions/loading";
+import { TransactionsActions } from "@/components/transactions-actions";
+import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
 import { sortParamsCache } from "@/hooks/use-sort-params";
 import { transactionFilterParamsCache } from "@/hooks/use-transaction-filter-params";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
@@ -18,14 +20,19 @@ export default async function Transactions(props: {
   const { sort } = sortParamsCache.parse(searchParams);
 
   prefetch(
-    trpc.transactions.getTransactions.infiniteQueryOptions({
-      teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890",
-      cursor: "0",
+    trpc.transactions.get.infiniteQueryOptions({
+      filter,
+      sort,
     }),
   );
 
   return (
     <>
+      <div className="flex justify-between py-6">
+        <TransactionsSearchFilter />
+        <TransactionsActions />
+      </div>
+
       <HydrateClient>
         <Suspense fallback={<Loading />}>
           <DataTableV2 />

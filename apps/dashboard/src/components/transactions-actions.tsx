@@ -24,10 +24,9 @@ import { useAction } from "next-safe-action/hooks";
 
 type Props = {
   isEmpty: boolean;
-  tags: { id: string; name: string }[];
 };
 
-export function TransactionsActions({ isEmpty, tags }: Props) {
+export function TransactionsActions({ isEmpty }: Props) {
   const { toast } = useToast();
   const { setRowSelection, canDelete, rowSelection } = useTransactionsStore();
 
@@ -55,7 +54,7 @@ export function TransactionsActions({ isEmpty, tags }: Props) {
             <div className="h-8 w-[1px] bg-border ml-4 mr-4" />
 
             <div className="flex space-x-2">
-              <BulkActions ids={transactionIds} tags={tags} />
+              <BulkActions ids={transactionIds} />
 
               <div>
                 {canDelete && (

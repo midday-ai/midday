@@ -1,7 +1,8 @@
 "use client";
 
 import { generateTransactionsFilters } from "@/actions/ai/filters/generate-transactions-filters";
-import { useTransactionFilters } from "@/hooks/use-transaction-filters";
+import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
+import { useTRPC } from "@/trpc/client";
 import { formatAccountName } from "@/utils/format";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
@@ -18,35 +19,14 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
+import { useQuery } from "@tanstack/react-query";
 import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { AmountRange } from "./amount-range";
 import { FilterList } from "./filter-list";
 import { SelectCategory } from "./select-category";
-
-type Props = {
-  placeholder: string;
-  categories?: {
-    id: string;
-    slug: string;
-    name: string;
-  }[];
-  accounts?: {
-    id: string;
-    name: string;
-    currency: string;
-  }[];
-  members?: {
-    id: string;
-    name: string;
-  }[];
-  tags?: {
-    id: string;
-    name: string;
-  }[];
-};
 
 const defaultSearch = {
   q: null,
@@ -88,27 +68,60 @@ const PLACEHOLDERS = [
   "Without receipts this month",
 ];
 
-const placeholder =
-  PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)];
-
-export function TransactionsSearchFilter({
-  categories,
-  accounts,
-  members,
-  tags,
-}: Props) {
+export function TransactionsSearchFilter() {
   const [prompt, setPrompt] = useState("");
+  const [placeholder, setPlaceholder] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const trpc = useTRPC();
 
-  const { filters, setFilters } = useTransactionFilters();
+  useEffect(() => {
+    const randomPlaceholder =
+      PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)] ??
+      "Search or filter";
+    setPlaceholder(randomPlaceholder);
+  }, []);
+
+  const { data: membersData } = useQuery(trpc.team.getMembers.queryOptions());
+  const { data: tagsData } = useQuery(trpc.tags.getTags.queryOptions());
+
+  const members = membersData?.map((member) => ({
+    id: member.user.id,
+    name: member.user.full_name,
+  }));
+
+  const { data: bankAccountsData } = useQuery(
+    trpc.bankAccounts.getBankAccounts.queryOptions(),
+  );
+
+  const accounts = bankAccountsData?.data?.map((bankAccount) => ({
+    id: bankAccount.id,
+    name: bankAccount.name,
+  }));
+
+  const { data: categoriesData } = useQuery(
+    trpc.transactionCategories.get.queryOptions(),
+  );
+
+  const categories = categoriesData?.map((category) => ({
+    id: category.id,
+    name: category.name,
+    slug: category.slug,
+  }));
+
+  const tags = tagsData?.map((tag) => ({
+    id: tag.id,
+    name: tag.name,
+  }));
+
+  const { filter, setFilter } = useTransactionFilterParams();
 
   useHotkeys(
     "esc",
     () => {
       setPrompt("");
-      setFilters(defaultSearch);
+      setFilter(defaultSearch);
       setIsOpen(false);
     },
     {
@@ -128,7 +141,7 @@ export function TransactionsSearchFilter({
     if (value) {
       setPrompt(value);
     } else {
-      setFilters(defaultSearch);
+      setFilter(defaultSearch);
       setPrompt("");
     }
   };
@@ -169,19 +182,19 @@ export function TransactionsSearchFilter({
         }
       }
 
-      setFilters({
+      setFilter({
         q: null,
         ...finalObject,
       });
 
       setStreaming(false);
     } else {
-      setFilters({ q: prompt.length > 0 ? prompt : null });
+      setFilter({ q: prompt.length > 0 ? prompt : null });
     }
   };
 
   const hasValidFilters =
-    Object.entries(filters).filter(
+    Object.entries(filter).filter(
       ([key, value]) => value !== null && key !== "q",
     ).length > 0;
 
@@ -224,9 +237,9 @@ export function TransactionsSearchFilter({
         </form>
 
         <FilterList
-          filters={filters}
+          filters={filter}
           loading={streaming}
-          onRemove={setFilters}
+          onRemove={setFilter}
           categories={categories}
           accounts={accounts}
           members={members}
@@ -234,7 +247,7 @@ export function TransactionsSearchFilter({
           attachmentsFilters={attachmentsFilters}
           tags={tags}
           recurringFilters={recurringFilters}
-          amountRange={filters.amount_range}
+          amountRange={filter.amount_range}
         />
       </div>
 
@@ -262,8 +275,8 @@ export function TransactionsSearchFilter({
                   initialFocus
                   toDate={new Date()}
                   selected={{
-                    from: filters.start && new Date(filters.start),
-                    to: filters.end && new Date(filters.end),
+                    from: filter.start && new Date(filter.start),
+                    to: filter.end && new Date(filter.end),
                   }}
                   onSelect={(range) => {
                     if (!range) return;
@@ -271,13 +284,13 @@ export function TransactionsSearchFilter({
                     const newRange = {
                       start: range.from
                         ? formatISO(range.from, { representation: "date" })
-                        : filters.start,
+                        : filter.start,
                       end: range.to
                         ? formatISO(range.to, { representation: "date" })
-                        : filters.end,
+                        : filter.end,
                     };
 
-                    setFilters(newRange);
+                    setFilter(newRange);
                   }}
                 />
               </DropdownMenuSubContent>
@@ -318,14 +331,14 @@ export function TransactionsSearchFilter({
                 {statusFilters.map(({ id, name }) => (
                   <DropdownMenuCheckboxItem
                     key={id}
-                    checked={filters?.statuses?.includes(id)}
+                    checked={filter?.statuses?.includes(id)}
                     onCheckedChange={() => {
-                      setFilters({
-                        statuses: filters?.statuses?.includes(id)
-                          ? filters.statuses.filter((s) => s !== id).length > 0
-                            ? filters.statuses.filter((s) => s !== id)
+                      setFilter({
+                        statuses: filter?.statuses?.includes(id)
+                          ? filter.statuses.filter((s) => s !== id).length > 0
+                            ? filter.statuses.filter((s) => s !== id)
                             : null
-                          : [...(filters?.statuses ?? []), id],
+                          : [...(filter?.statuses ?? []), id],
                       });
                     }}
                   >
@@ -352,9 +365,9 @@ export function TransactionsSearchFilter({
                 {attachmentsFilters.map(({ id, name }) => (
                   <DropdownMenuCheckboxItem
                     key={id}
-                    checked={filters?.attachments?.includes(id)}
+                    checked={filter?.attachments?.includes(id)}
                     onCheckedChange={() => {
-                      setFilters({
+                      setFilter({
                         attachments: id,
                       });
                     }}
@@ -382,15 +395,13 @@ export function TransactionsSearchFilter({
                 <SelectCategory
                   uncategorized
                   onChange={(selected) => {
-                    setFilters({
-                      categories: filters?.categories?.includes(selected.slug)
-                        ? filters.categories.filter((s) => s !== selected.slug)
+                    setFilter({
+                      categories: filter?.categories?.includes(selected.slug)
+                        ? filter.categories.filter((s) => s !== selected.slug)
                             .length > 0
-                          ? filters.categories.filter(
-                              (s) => s !== selected.slug,
-                            )
+                          ? filter.categories.filter((s) => s !== selected.slug)
                           : null
-                        : [...(filters?.categories ?? []), selected.slug],
+                        : [...(filter?.categories ?? []), selected.slug],
                     });
                   }}
                   headless
@@ -416,15 +427,14 @@ export function TransactionsSearchFilter({
                   tags?.map((tag) => (
                     <DropdownMenuCheckboxItem
                       key={tag.id}
-                      checked={filters?.tags?.includes(tag.id)}
+                      checked={filter?.tags?.includes(tag.id)}
                       onCheckedChange={() => {
-                        setFilters({
-                          tags: filters?.tags?.includes(tag.id)
-                            ? filters.tags.filter((s) => s !== tag.id).length >
-                              0
-                              ? filters.tags.filter((s) => s !== tag.id)
+                        setFilter({
+                          tags: filter?.tags?.includes(tag.id)
+                            ? filter.tags.filter((s) => s !== tag.id).length > 0
+                              ? filter.tags.filter((s) => s !== tag.id)
                               : null
-                            : [...(filters?.tags ?? []), tag.id],
+                            : [...(filter?.tags ?? []), tag.id],
                         });
                       }}
                     >
@@ -455,13 +465,13 @@ export function TransactionsSearchFilter({
                   <DropdownMenuCheckboxItem
                     key={account.id}
                     onCheckedChange={() => {
-                      setFilters({
-                        accounts: filters?.accounts?.includes(account.id)
-                          ? filters.accounts.filter((s) => s !== account.id)
+                      setFilter({
+                        accounts: filter?.accounts?.includes(account.id)
+                          ? filter.accounts.filter((s) => s !== account.id)
                               .length > 0
-                            ? filters.accounts.filter((s) => s !== account.id)
+                            ? filter.accounts.filter((s) => s !== account.id)
                             : null
-                          : [...(filters?.accounts ?? []), account.id],
+                          : [...(filter?.accounts ?? []), account.id],
                       });
                     }}
                   >
@@ -491,14 +501,14 @@ export function TransactionsSearchFilter({
                 {recurringFilters.map(({ id, name }) => (
                   <DropdownMenuCheckboxItem
                     key={id}
-                    checked={filters?.statuses?.includes(id)}
+                    checked={filter?.recurring?.includes(id)}
                     onCheckedChange={() => {
-                      setFilters({
-                        recurring: filters?.recurring?.includes(id)
-                          ? filters.recurring.filter((s) => s !== id).length > 0
-                            ? filters.recurring.filter((s) => s !== id)
+                      setFilter({
+                        recurring: filter?.recurring?.includes(id)
+                          ? filter.recurring.filter((s) => s !== id).length > 0
+                            ? filter.recurring.filter((s) => s !== id)
                             : null
-                          : [...(filters?.recurring ?? []), id],
+                          : [...(filter?.recurring ?? []), id],
                       });
                     }}
                   >

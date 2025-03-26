@@ -171,7 +171,7 @@ export type GetTransactionsParams = {
     start?: string | null;
     end?: string | null;
     recurring?: string[] | null;
-    amount_range?: string[] | null;
+    amount_range?: number[] | null;
     amount?: string[] | null;
   };
 };
@@ -362,6 +362,8 @@ export async function getTransactionsQuery(
     meta: {
       count,
       cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
     },
     data: data?.map((transaction) => ({
       ...transaction,
