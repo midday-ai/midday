@@ -6,6 +6,7 @@ import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
 import { OpenURL } from "@/components/open-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { getUrl } from "@/utils/environment";
 import { formatDate, getDueDateStatus } from "@/utils/format";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
@@ -182,7 +183,7 @@ export const columns: ColumnDef<Invoice>[] = [
       const handleCopyLink = async () => {
         try {
           await navigator.clipboard.writeText(
-            `${window.location.origin}/i/${row.original.token}`,
+            `${getUrl()}/i/${row.original.token}`,
           );
 
           toast({
@@ -224,9 +225,7 @@ export const columns: ColumnDef<Invoice>[] = [
               )}
 
               <DropdownMenuItem>
-                <OpenURL
-                  href={`${window.location.origin}/i/${row.original.token}`}
-                >
+                <OpenURL href={`${getUrl()}/i/${row.original.token}`}>
                   Open invoice
                 </OpenURL>
               </DropdownMenuItem>

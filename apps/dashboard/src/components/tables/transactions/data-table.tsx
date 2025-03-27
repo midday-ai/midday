@@ -8,7 +8,7 @@ import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { useTransactionsStore } from "@/store/transactions";
 import { useUserContext } from "@/store/user/hook";
 import { Cookies } from "@/utils/constants";
-import { Button } from "@midday/ui/button";
+import { getUrl } from "@/utils/environment";
 import { cn } from "@midday/ui/cn";
 import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
@@ -143,9 +143,7 @@ export function DataTable<TData, TValue>({
 
   const handleCopyUrl = async (id: string) => {
     try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/transactions?id=${id}`,
-      );
+      await navigator.clipboard.writeText(`${getUrl()}/transactions?id=${id}`);
 
       toast({
         duration: 4000,

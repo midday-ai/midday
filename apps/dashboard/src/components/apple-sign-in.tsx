@@ -1,5 +1,6 @@
 "use client";
 
+import { getUrl } from "@/utils/environment";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
@@ -15,7 +16,7 @@ export function AppleSignIn() {
     setLoading(true);
 
     if (isDesktopApp()) {
-      const redirectTo = new URL("/api/auth/callback", window.location.origin);
+      const redirectTo = new URL("/api/auth/callback", getUrl());
 
       redirectTo.searchParams.append("provider", "apple");
       redirectTo.searchParams.append("client", "desktop");
@@ -33,7 +34,7 @@ export function AppleSignIn() {
       await supabase.auth.signInWithOAuth({
         provider: "apple",
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback?provider=apple`,
+          redirectTo: `${getUrl()}/api/auth/callback?provider=apple`,
         },
       });
     }

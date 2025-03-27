@@ -1,6 +1,7 @@
 "use client";
 
 import { createReportAction } from "@/actions/report/create-report-action";
+import { getUrl } from "@/utils/environment";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
@@ -57,7 +58,7 @@ export function ShareReport({ defaultValue, type, setOpen }: Props) {
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     createReport.execute({
-      baseUrl: window.location.origin,
+      baseUrl: getUrl(),
       from,
       to,
       type,

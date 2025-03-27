@@ -1,5 +1,6 @@
 "use client";
 
+import { getUrl } from "@/utils/environment";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
@@ -18,7 +19,7 @@ export function GoogleSignIn() {
     setLoading(true);
 
     if (isDesktopApp()) {
-      const redirectTo = new URL("/api/auth/callback", window.location.origin);
+      const redirectTo = new URL("/api/auth/callback", getUrl());
 
       redirectTo.searchParams.append("provider", "google");
       redirectTo.searchParams.append("client", "desktop");
@@ -33,7 +34,7 @@ export function GoogleSignIn() {
         },
       });
     } else {
-      const redirectTo = new URL("/api/auth/callback", window.location.origin);
+      const redirectTo = new URL("/api/auth/callback", getUrl());
 
       if (returnTo) {
         redirectTo.searchParams.append("return_to", returnTo);
