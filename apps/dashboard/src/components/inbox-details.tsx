@@ -1,4 +1,5 @@
 import { useUserContext } from "@/store/user/hook";
+import { getUrl } from "@/utils/environment";
 import { formatDate } from "@/utils/format";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
@@ -68,9 +69,7 @@ export function InboxDetails({
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/inbox?id=${item.id}`,
-      );
+      await navigator.clipboard.writeText(`${getUrl()}/inbox?id=${item.id}`);
 
       toast({
         duration: 4000,

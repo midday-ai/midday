@@ -219,11 +219,6 @@ export const deleteTransactionSchema = z.object({
   ids: z.array(z.string()),
 });
 
-export const deleteCategoriesSchema = z.object({
-  ids: z.array(z.string()),
-  revalidatePath: z.string(),
-});
-
 export const bulkUpdateTransactionsSchema = z.object({
   type: z.enum([
     "category",
@@ -295,16 +290,6 @@ export const inviteTeamMembersSchema = z.object({
 export type InviteTeamMembersFormValues = z.infer<
   typeof inviteTeamMembersSchema
 >;
-
-export const updateCategorySchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(1),
-  color: z.string(),
-  description: z.string().optional().nullable(),
-  vat: z.string().optional().nullable(),
-});
-
-export type UpdateCategoriesFormValues = z.infer<typeof updateCategorySchema>;
 
 export const deleteInviteSchema = z.object({
   id: z.string(),

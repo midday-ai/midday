@@ -1,5 +1,6 @@
 import { draftInvoiceAction } from "@/actions/invoice/draft-invoice-action";
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
+import { getUrl } from "@/utils/environment";
 import { formatRelativeTime } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
@@ -162,7 +163,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
               <>
                 {(draftInvoice.isPending || lastEditedText) && <span>-</span>}
                 <OpenURL
-                  href={`${window.location.origin}/i/${token}`}
+                  href={`${getUrl()}/i/${token}`}
                   className="flex items-center gap-1"
                 >
                   <Icons.ExternalLink className="size-3" />

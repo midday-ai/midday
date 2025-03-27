@@ -4,7 +4,7 @@ import { TransactionsActions } from "@/components/transactions-actions";
 import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
 import { sortParamsCache } from "@/hooks/use-sort-params";
 import { transactionFilterParamsCache } from "@/hooks/use-transaction-filter-params";
-import { HydrateClient, prefetch, trpc } from "@/trpc/server";
+import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -19,7 +19,10 @@ export default async function Transactions(props: {
   const filter = transactionFilterParamsCache.parse(searchParams);
   const { sort } = sortParamsCache.parse(searchParams);
 
-  prefetch(
+  const queryClient = getQueryClient();
+
+  // NOTE: Because we prefetch using Next.js Link, we can use this to actually fetch the data
+  const transactions = await queryClient.fetchInfiniteQuery(
     trpc.transactions.get.infiniteQueryOptions({
       filter,
       sort,
