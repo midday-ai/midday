@@ -1,4 +1,4 @@
-import { DataTableV2 } from "@/components/tables/transactions/data-table-v2";
+import { DataTable } from "@/components/tables/transactions/data-table";
 import { Loading } from "@/components/tables/transactions/loading";
 import { TransactionsActions } from "@/components/transactions-actions";
 import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
@@ -22,7 +22,7 @@ export default async function Transactions(props: {
   const queryClient = getQueryClient();
 
   // NOTE: Because we prefetch using Next.js Link, we can use this to actually fetch the data
-  const transactions = await queryClient.fetchInfiniteQuery(
+  await queryClient.fetchInfiniteQuery(
     trpc.transactions.get.infiniteQueryOptions({
       filter,
       sort,
@@ -38,7 +38,7 @@ export default async function Transactions(props: {
 
       <HydrateClient>
         <Suspense fallback={<Loading />}>
-          <DataTableV2 />
+          <DataTable />
         </Suspense>
       </HydrateClient>
     </>

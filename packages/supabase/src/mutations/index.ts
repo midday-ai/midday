@@ -114,25 +114,6 @@ export async function updateBankConnection(
     .single();
 }
 
-type CreateTransactionsData = {
-  transactions: any[];
-  teamId: string;
-};
-
-export async function createTransactions(
-  supabase: Client,
-  data: CreateTransactionsData,
-) {
-  const { transactions, teamId } = data;
-
-  return supabase.from("transactions").insert(
-    transactions.map((transaction) => ({
-      ...transaction,
-      team_id: teamId,
-    })),
-  );
-}
-
 export async function updateTransaction(
   supabase: Client,
   id: string,
@@ -567,4 +548,19 @@ export async function deleteTransactionCategory(supabase: Client, id: string) {
     .delete()
     .eq("id", id)
     .eq("system", false);
+}
+
+type DeleteTransactionsParams = {
+  ids: string[];
+};
+
+export async function deleteTransactions(
+  supabase: Client,
+  params: DeleteTransactionsParams,
+) {
+  return supabase
+    .from("transactions")
+    .delete()
+    .in("id", params.ids)
+    .eq("manual", true);
 }

@@ -1,10 +1,10 @@
 "use client";
 
-import { deleteTransactionsAction } from "@/actions/delete-transactions-action";
 import { AddTransactions } from "@/components/add-transactions";
 import { BulkActions } from "@/components/bulk-actions";
 import { ColumnVisibility } from "@/components/column-visibility";
 import { useTransactionsStore } from "@/store/transactions";
+import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,32 +18,22 @@ import {
 } from "@midday/ui/alert-dialog";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useToast } from "@midday/ui/use-toast";
+import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 
-type Props = {
-  isEmpty: boolean;
-};
-
-export function TransactionsActions({ isEmpty }: Props) {
-  const { toast } = useToast();
+export function TransactionsActions() {
   const { setRowSelection, canDelete, rowSelection } = useTransactionsStore();
+  const trpc = useTRPC();
+
+  const deleteTransactionsMutation = useMutation(
+    trpc.transactions.deleteMany.mutationOptions({
+      onSuccess: () => {
+        setRowSelection({});
+      },
+    }),
+  );
 
   const transactionIds = Object.keys(rowSelection);
-
-  const deleteTransactions = useAction(deleteTransactionsAction, {
-    onSuccess: () => {
-      setRowSelection({});
-    },
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
 
   if (transactionIds?.length) {
     return (
@@ -85,10 +75,10 @@ export function TransactionsActions({ isEmpty }: Props) {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                deleteTransactions.execute({ ids: transactionIds });
+                deleteTransactionsMutation.mutate({ ids: transactionIds });
               }}
             >
-              {deleteTransactions.status === "executing" ? (
+              {deleteTransactionsMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 "Confirm"
@@ -102,7 +92,7 @@ export function TransactionsActions({ isEmpty }: Props) {
 
   return (
     <div className="space-x-2 hidden md:flex">
-      <ColumnVisibility disabled={isEmpty} />
+      <ColumnVisibility />
       <AddTransactions />
     </div>
   );

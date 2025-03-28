@@ -1,13 +1,7 @@
-import { createAttachmentsAction } from "@/actions/create-attachments-action";
-import { createTransactionTagAction } from "@/actions/create-transaction-tag-action";
-import { deleteTransactionTagAction } from "@/actions/delete-transaction-tag-action";
-import type { UpdateTransactionValues } from "@/actions/schema";
-import { updateSimilarTransactionsCategoryAction } from "@/actions/update-similar-transactions-action";
-import { updateSimilarTransactionsRecurringAction } from "@/actions/update-similar-transactions-recurring";
-import { useUserContext } from "@/store/user/hook";
-import { createClient } from "@midday/supabase/client";
-import { getTransactionQuery } from "@midday/supabase/queries";
-import { getSimilarTransactions } from "@midday/supabase/queries";
+"use client";
+
+import { useTransactionParams } from "@/hooks/use-transaction-params";
+import { useTRPC } from "@/trpc/client";
 import {
   Accordion,
   AccordionContent,
@@ -26,13 +20,8 @@ import {
 } from "@midday/ui/select";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Switch } from "@midday/ui/switch";
-import { ToastAction } from "@midday/ui/toast";
-import { useToast } from "@midday/ui/use-toast";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
-import { useQueryState } from "nuqs";
-import { useEffect, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 import { AssignUser } from "./assign-user";
 import { Attachments } from "./attachments";
 import { FormatAmount } from "./format-amount";
@@ -41,167 +30,33 @@ import { SelectCategory } from "./select-category";
 import { SelectTags } from "./select-tags";
 import { TransactionBankAccount } from "./transaction-bank-account";
 
-type Props = {
-  data: any;
-  ids?: string[];
-  updateTransaction: (
-    values: UpdateTransactionValues,
-    optimisticData: any,
-  ) => void;
-};
+export function TransactionDetails() {
+  const trpc = useTRPC();
+  const { transactionId } = useTransactionParams();
 
-export function TransactionDetails({
-  data: initialData,
-  ids,
-  updateTransaction,
-}: Props) {
-  const [data, setData] = useState(initialData);
-  const [transactionId, setTransactionId] = useQueryState("id");
-  const { toast } = useToast();
-  const supabase = createClient();
-  const [isLoading, setLoading] = useState(true);
-  const updateSimilarTransactionsCategory = useAction(
-    updateSimilarTransactionsCategoryAction,
-  );
-  const updateSimilarTransactionsRecurring = useAction(
-    updateSimilarTransactionsRecurringAction,
-  );
-  const createAttachments = useAction(createAttachmentsAction);
-  const createTransactionTag = useAction(createTransactionTagAction);
-  const deleteTransactionTag = useAction(deleteTransactionTagAction);
+  const queryClient = useQueryClient();
 
-  const { team_id: teamId } = useUserContext((state) => state.data);
+  const { data, isLoading } = useQuery({
+    ...trpc.transactions.getById.queryOptions({ id: transactionId! }),
+    enabled: Boolean(transactionId),
+    staleTime: 60 * 1000,
+    initialData: () => {
+      const pages = queryClient
+        .getQueriesData({ queryKey: trpc.transactions.get.infiniteQueryKey() })
+        .flatMap(([, data]) => data?.pages ?? [])
+        .flatMap((page) => page.data ?? []);
 
-  useHotkeys("esc", () => setTransactionId(null));
-
-  const enabled = Boolean(ids?.length);
-
-  useHotkeys(
-    "ArrowUp, ArrowDown",
-    ({ key }) => {
-      if (key === "ArrowUp") {
-        const currentIndex = ids?.indexOf(data?.id) ?? 0;
-        const prevId = ids[currentIndex - 1];
-
-        if (prevId) {
-          setTransactionId(prevId);
-        }
-      }
-
-      if (key === "ArrowDown") {
-        const currentIndex = ids?.indexOf(data?.id) ?? 0;
-        const nextId = ids[currentIndex + 1];
-
-        if (nextId) {
-          setTransactionId(nextId);
-        }
-      }
+      return pages.find((d) => d.id === transactionId);
     },
-    { enabled },
-  );
+  });
 
-  useEffect(() => {
-    if (initialData) {
-      setData(initialData);
-      setLoading(false);
-    }
-  }, [initialData]);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const transaction = await getTransactionQuery(supabase, data?.id);
-        setData(transaction);
-        setLoading(false);
-      } catch {
-        setLoading(false);
-      }
-    }
-
-    if (!data) {
-      fetchData();
-    }
-  }, [data]);
-
-  const handleOnChangeCategory = async (category: {
-    id: string;
-    name: string;
-    slug: string;
-    color: string;
-  }) => {
-    updateTransaction(
-      { id: data?.id, category_slug: category.slug },
-      { category },
-    );
-
-    const transactions = await getSimilarTransactions(supabase, {
-      name: data?.name,
-      teamId: teamId,
-      categorySlug: category.slug,
-    });
-
-    if (transactions?.count && transactions.count > 1) {
-      toast({
-        duration: 6000,
-        variant: "ai",
-        title: "Midday AI",
-        description: `Do you want to mark ${transactions?.count} similar transactions from ${data?.name} as ${category.name} too?`,
-        footer: (
-          <div className="flex space-x-2 mt-4">
-            <ToastAction altText="Cancel" className="pl-5 pr-5">
-              Cancel
-            </ToastAction>
-            <ToastAction
-              altText="Yes"
-              onClick={() => {
-                updateSimilarTransactionsCategory.execute({ id: data?.id });
-              }}
-              className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Yes
-            </ToastAction>
-          </div>
-        ),
-      });
-    }
-  };
-
-  const handleOnChangeRecurring = async (value: boolean) => {
-    updateTransaction(
-      { id: data?.id, recurring: value, frequency: value ? "monthly" : null },
-      { recurring: value, frequency: value ? "monthly" : null },
-    );
-
-    const transactions = await getSimilarTransactions(supabase, {
-      name: data?.name,
-      teamId: teamId,
-    });
-
-    if (transactions?.count && transactions.count > 1) {
-      toast({
-        duration: 6000,
-        variant: "ai",
-        title: "Midday AI",
-        description: `Do you want to mark ${transactions?.count} similar transactions from ${data?.name} as ${value ? "Recurring" : "Non Recurring"} too?`,
-        footer: (
-          <div className="flex space-x-2 mt-4">
-            <ToastAction altText="Cancel" className="pl-5 pr-5">
-              Cancel
-            </ToastAction>
-            <ToastAction
-              altText="Yes"
-              onClick={() => {
-                updateSimilarTransactionsRecurring.execute({ id: data?.id });
-              }}
-              className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Yes
-            </ToastAction>
-          </div>
-        ),
-      });
-    }
-  };
+  if (!data) {
+    return <div>Transaction not found</div>;
+  }
 
   const defaultValue = ["attachment"];
 
@@ -261,12 +116,12 @@ export function TransactionDetails({
                 </span>
               )}
               <div className="h-3">
-                {data?.vat > 0 && (
+                {/* {data?.vat > 0 && (
                   <span className="text-[#606060] text-xs select-text">
                     VAT{" "}
                     <FormatAmount amount={data.vat} currency={data.currency} />
                   </span>
-                )}
+                )} */}
               </div>
             </div>
           </div>
@@ -288,7 +143,7 @@ export function TransactionDetails({
           <SelectCategory
             id={transactionId}
             selected={data?.category}
-            onChange={handleOnChangeCategory}
+            // onChange={handleOnChangeCategory}
           />
         </div>
 
@@ -297,16 +152,21 @@ export function TransactionDetails({
             Assign
           </Label>
 
-          <AssignUser
-            isLoading={isLoading}
-            selectedId={data?.assigned?.id ?? undefined}
-            onSelect={(user) => {
-              updateTransaction(
-                { assigned_id: user?.id, id: data?.id },
-                { assigned: user },
-              );
-            }}
-          />
+          {isLoading ? (
+            <div className="h-[36px] border">
+              <Skeleton className="h-[14px] w-[60%] absolute left-3 top-[39px]" />
+            </div>
+          ) : (
+            <AssignUser
+              selectedId={data?.assigned?.id ?? undefined}
+              // onSelect={(user) => {
+              //   updateTransaction(
+              //     { assigned_id: user?.id, id: data?.id },
+              //     { assigned: user },
+              //   );
+              // }}
+            />
+          )}
         </div>
       </div>
 
@@ -321,18 +181,18 @@ export function TransactionDetails({
             value: tag.tag.name,
             id: tag.tag.id,
           }))}
-          onSelect={(tag) => {
-            createTransactionTag.execute({
-              tagId: tag.id,
-              transactionId: data?.id,
-            });
-          }}
-          onRemove={(tag) => {
-            deleteTransactionTag.execute({
-              tagId: tag.id,
-              transactionId: data?.id,
-            });
-          }}
+          // onSelect={(tag) => {
+          //   createTransactionTag.execute({
+          //     tagId: tag.id,
+          //     transactionId: data?.id,
+          //   });
+          // }}
+          // onRemove={(tag) => {
+          //   deleteTransactionTag.execute({
+          //     tagId: tag.id,
+          //     transactionId: data?.id,
+          //   });
+          // }}
         />
       </div>
 
@@ -343,16 +203,16 @@ export function TransactionDetails({
             <Attachments
               prefix={data?.id}
               data={data?.attachments}
-              onUpload={(files) => {
-                if (files) {
-                  createAttachments.execute(
-                    files.map((file) => ({
-                      ...file,
-                      transaction_id: data?.id,
-                    })),
-                  );
-                }
-              }}
+              // onUpload={(files) => {
+              //   if (files) {
+              //     createAttachments.execute(
+              //       files.map((file) => ({
+              //         ...file,
+              //         transaction_id: data?.id,
+              //       })),
+              //     );
+              //   }
+              // }}
             />
           </AccordionContent>
         </AccordionItem>
@@ -372,12 +232,12 @@ export function TransactionDetails({
 
             <Switch
               checked={data?.internal}
-              onCheckedChange={() => {
-                updateTransaction(
-                  { id: data?.id, internal: !data?.internal },
-                  { internal: !data?.internal },
-                );
-              }}
+              // onCheckedChange={() => {
+              //   updateTransaction(
+              //     { id: data?.id, internal: !data?.internal },
+              //     { internal: !data?.internal },
+              //   );
+              // }}
             />
           </div>
         </div>
@@ -394,21 +254,21 @@ export function TransactionDetails({
               </div>
               <Switch
                 checked={data?.recurring}
-                onCheckedChange={handleOnChangeRecurring}
+                // onCheckedChange={handleOnChangeRecurring}
               />
             </div>
 
             {data?.recurring && (
               <Select
                 value={data?.frequency}
-                onValueChange={(value) => {
-                  updateTransaction(
-                    { id: data?.id, frequency: value },
-                    { frequency: value },
-                  );
+                // onValueChange={(value) => {
+                //   updateTransaction(
+                //     { id: data?.id, frequency: value },
+                //     { frequency: value },
+                //   );
 
-                  updateSimilarTransactionsRecurring.execute({ id: data?.id });
-                }}
+                //   updateSimilarTransactionsRecurring.execute({ id: data?.id });
+                // }}
               >
                 <SelectTrigger className="w-full mt-4">
                   <SelectValue placeholder="Select frequency" />
@@ -437,7 +297,7 @@ export function TransactionDetails({
             <Note
               id={data?.id}
               defaultValue={data?.note}
-              updateTransaction={updateTransaction}
+              // updateTransaction={updateTransaction}
             />
           </AccordionContent>
         </AccordionItem>

@@ -3,7 +3,7 @@ import { getTeamBankAccountsQuery } from "@midday/supabase/queries";
 import { z } from "zod";
 
 export const bankAccountsRouter = createTRPCRouter({
-  getBankAccounts: protectedProcedure
+  accounts: protectedProcedure
     .input(
       z.object({
         enabled: z.boolean().optional(),

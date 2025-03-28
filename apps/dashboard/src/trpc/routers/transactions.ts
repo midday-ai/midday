@@ -1,4 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { deleteTransactions } from "@midday/supabase/mutations";
 import {
   getTransactionQuery,
   getTransactionsQuery,
@@ -37,10 +38,18 @@ export const transactionsRouter = createTRPCRouter({
       });
     }),
 
+  deleteMany: protectedProcedure
+    .input(z.object({ ids: z.array(z.string()) }))
+    .mutation(async ({ input, ctx: { supabase } }) => {
+      return deleteTransactions(supabase, { ids: input.ids });
+    }),
+
   getById: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ input, ctx: { supabase } }) => {
-      return getTransactionQuery(supabase, input.id);
+      const { data } = await getTransactionQuery(supabase, input.id);
+
+      return data;
     }),
 
   getAmountRange: protectedProcedure.query(
