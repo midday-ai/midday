@@ -1,5 +1,3 @@
-import { withSentryConfig } from "@sentry/nextjs";
-
 /** @type {import("next").NextConfig} */
 const config = {
   poweredByHeader: false,
@@ -37,13 +35,4 @@ const config = {
   },
 };
 
-export default withSentryConfig(config, {
-  silent: !process.env.CI,
-  telemetry: false,
-  widenClientFileUpload: true,
-  hideSourceMaps: true,
-  disableLogger: true,
-  sourcemaps: {
-    disable: true,
-  },
-});
+export default config;

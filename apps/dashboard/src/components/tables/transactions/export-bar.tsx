@@ -8,15 +8,14 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
-type Props = {
-  selected: boolean;
-};
-
-export function ExportBar({ selected }: Props) {
+export function ExportBar() {
   const { toast } = useToast();
   const { setExportData } = useExportStore();
   const { rowSelection, setRowSelection } = useTransactionsStore();
   const [isOpen, setOpen] = useState(false);
+
+  const ids = Object.keys(rowSelection);
+  const totalSelected = ids.length;
 
   const { execute, status } = useAction(exportTransactionsAction, {
     onSuccess: ({ data }) => {
@@ -41,12 +40,12 @@ export function ExportBar({ selected }: Props) {
   });
 
   useEffect(() => {
-    if (selected) {
+    if (totalSelected) {
       setOpen(true);
     } else {
       setOpen(false);
     }
-  }, [selected]);
+  }, [totalSelected]);
 
   return (
     <AnimatePresence>
@@ -56,7 +55,7 @@ export function ExportBar({ selected }: Props) {
         initial={{ y: 100 }}
       >
         <div className="mx-2 md:mx-0 backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-full">
-          <span className="text-sm">{selected} selected</span>
+          <span className="text-sm">{totalSelected} selected</span>
 
           <div className="flex items-center space-x-4">
             <button
@@ -68,13 +67,13 @@ export function ExportBar({ selected }: Props) {
             </button>
             <Button
               className="h-8 text-sm"
-              onClick={() => execute(Object.keys(rowSelection))}
+              onClick={() => execute(ids)}
               disabled={status === "executing"}
             >
               {status === "executing" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                `Export (${selected})`
+                `Export (${totalSelected})`
               )}
             </Button>
           </div>

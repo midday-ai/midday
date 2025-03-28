@@ -146,12 +146,12 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
   });
 
   const { data: tagsData } = useQuery({
-    ...trpc.tags.tags.queryOptions(),
+    ...trpc.tags.get.queryOptions(),
     enabled: shouldFetch,
   });
 
   const { data: bankAccountsData } = useQuery({
-    ...trpc.bankAccounts.accounts.queryOptions({
+    ...trpc.bankAccounts.get.queryOptions({
       enabled: shouldFetch,
     }),
   });

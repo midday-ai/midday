@@ -33,7 +33,6 @@
     "@polar-sh/nextjs": "^0.3.23",
     "@polar-sh/sdk": "^0.32.2",
     "@react-google-maps/api": "^2.20.6",
-    "@sentry/nextjs": "^9",
     "@tanstack/react-query": "^5.69.0",
     "@tanstack/react-query-devtools": "^5.69.0",
     "@tanstack/react-table": "^8.21.2",

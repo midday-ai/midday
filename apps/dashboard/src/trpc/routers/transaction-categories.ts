@@ -16,15 +16,6 @@ export const transactionCategoriesRouter = createTRPCRouter({
     return data;
   }),
 
-  // create: protectedProcedure
-  //   .input(createCategorySchema)
-  //   .mutation(async ({ input, ctx: { supabase, teamId } }) => {
-  //     return createCategory(supabase, {
-  //       ...input,
-  //       teamId,
-  //     });
-  //   }),
-
   createMany: protectedProcedure
     .input(
       z.array(

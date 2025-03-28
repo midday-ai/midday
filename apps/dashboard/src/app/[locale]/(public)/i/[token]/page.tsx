@@ -1,6 +1,5 @@
 import CustomerHeader from "@/components/customer-header";
 import InvoiceToolbar from "@/components/invoice-toolbar";
-import { InvoiceCommentsSheet } from "@/components/sheets/invoice-comments";
 import { UTCDate } from "@date-fns/utc";
 import { HtmlTemplate } from "@midday/invoice/templates/html";
 import { verify } from "@midday/invoice/token";
@@ -124,8 +123,6 @@ export default async function Page(props: Props) {
           customer={invoice.customer}
           viewedAt={invoice.viewed_at}
         />
-
-        <InvoiceCommentsSheet />
 
         <div className="fixed bottom-4 right-4 hidden md:block">
           <a
