@@ -30,7 +30,7 @@ export function ColumnVisibility() {
                     id={column.id}
                     checked={column.getIsVisible()}
                     onCheckedChange={(checked) =>
-                      column.toggleVisibility(checked)
+                      column.toggleVisibility(checked === true)
                     }
                   />
                   <label

@@ -1,18 +1,9 @@
 "use client";
 
 import { Button } from "@midday/ui/button";
-import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
-import { useEffect } from "react";
 
-export default function ErrorPage({
-  reset,
-  error,
-}: { reset: () => void; error: Error & { digest?: string } }) {
-  useEffect(() => {
-    Sentry.captureException(error);
-  }, [error]);
-
+export default function ErrorPage({ reset }: { reset: () => void }) {
   return (
     <div className="h-[calc(100vh-200px)] w-full">
       <div className="mt-8 flex flex-col items-center justify-center h-full">

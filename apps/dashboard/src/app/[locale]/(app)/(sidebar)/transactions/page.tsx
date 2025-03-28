@@ -5,7 +5,9 @@ import { TransactionsSearchFilter } from "@/components/transactions-search-filte
 import { sortParamsCache } from "@/hooks/use-sort-params";
 import { transactionFilterParamsCache } from "@/hooks/use-transaction-filter-params";
 import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
+import { Cookies } from "@/utils/constants";
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
@@ -15,6 +17,11 @@ export const metadata: Metadata = {
 export default async function Transactions(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const cookieStore = await cookies();
+
+  const initialColumnVisibility = JSON.parse(
+    cookieStore.get(Cookies.TransactionsColumns)?.value || "[]",
+  );
   const searchParams = await props.searchParams;
   const filter = transactionFilterParamsCache.parse(searchParams);
   const { sort } = sortParamsCache.parse(searchParams);
@@ -38,7 +45,7 @@ export default async function Transactions(props: {
 
       <HydrateClient>
         <Suspense fallback={<Loading />}>
-          <DataTable />
+          <DataTable initialColumnVisibility={initialColumnVisibility} />
         </Suspense>
       </HydrateClient>
     </>
