@@ -5,6 +5,7 @@ import { CustomerEditSheet } from "./customer-edit-sheet";
 import { InvoiceCommentsSheet } from "./invoice-comments";
 import { InvoiceCreateSheetServer } from "./invoice-create-sheet.server";
 import { TrackerSheetsServer } from "./tracker-sheets.server";
+import { TransactionSheet } from "./transaction-sheet";
 
 type Props = {
   defaultCurrency: string;
@@ -27,6 +28,7 @@ export async function GlobalSheets({ defaultCurrency }: Props) {
       <CustomerCreateSheet />
       <CustomerEditSheet />
       <InvoiceCommentsSheet />
+      <TransactionSheet />
 
       <Suspense fallback={null}>
         {/* We preload the invoice data (template, invoice number etc) */}

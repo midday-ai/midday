@@ -37,7 +37,6 @@ export const transactionCategoriesRouter = createTRPCRouter({
       ),
     )
     .mutation(async ({ input, ctx: { supabase, teamId } }) => {
-      console.log(input);
       return createTransactionCategories(supabase, {
         teamId,
         categories: input,

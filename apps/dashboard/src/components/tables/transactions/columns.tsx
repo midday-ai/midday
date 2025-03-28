@@ -75,8 +75,10 @@ export type Transaction = {
     };
   };
   tags?: {
-    id: string;
-    name: string;
+    tag: {
+      id: string;
+      name: string;
+    };
   }[];
 };
 
@@ -172,8 +174,8 @@ export const columns: ColumnDef<Transaction>[] = [
     cell: ({ row }) => {
       return (
         <Category
-          name={row.original?.category?.name}
-          color={row.original?.category?.color}
+          name={row.original?.category?.name ?? ""}
+          color={row.original?.category?.color ?? ""}
         />
       );
     },
@@ -186,9 +188,9 @@ export const columns: ColumnDef<Transaction>[] = [
         <div className="relative">
           <ScrollArea className="max-w-[170px] whitespace-nowrap">
             <div className="flex items-center space-x-2">
-              {row.original.tags?.map((tag) => (
+              {row.original.tags?.map(({ tag }) => (
                 <Badge key={tag.id} variant="tag" className="whitespace-nowrap">
-                  {tag.tag.name}
+                  {tag.name}
                 </Badge>
               ))}
             </div>
@@ -240,8 +242,8 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "status",
     cell: ({ row }) => {
       const fullfilled =
-        row.original?.status === "completed" ||
-        row?.original?.attachments?.length > 0;
+        row.original.status === "completed" ||
+        (row.original.attachments?.length ?? 0) > 0;
 
       return <TransactionStatus fullfilled={fullfilled} />;
     },

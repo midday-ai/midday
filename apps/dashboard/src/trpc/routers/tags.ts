@@ -2,7 +2,7 @@ import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { getTagsQuery } from "@midday/supabase/queries";
 
 export const tagsRouter = createTRPCRouter({
-  getTags: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
+  tags: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
     const { data } = await getTagsQuery(supabase, teamId);
 
     return data;

@@ -373,26 +373,21 @@ export async function getTransactionsQuery(
 }
 
 export async function getTransactionQuery(supabase: Client, id: string) {
-  const columns = [
-    "*",
-    "assigned:assigned_id(*)",
-    "category:category_slug(id, name, vat)",
-    "attachments:transaction_attachments(*)",
-    "tags:transaction_tags(id, tag:tags(id, name))",
-    "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
-    "vat:calculated_vat",
-  ];
-
   const { data } = await supabase
     .from("transactions")
-    .select(columns.join(","))
+    .select(`
+      *,
+      assigned:assigned_id(*),
+      attachments:transaction_attachments(*),
+      tags:transaction_tags(id, tag:tags(id, name)),
+      bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url)),
+      vat:calculated_vat
+    `)
     .eq("id", id)
-    .single()
-    .throwOnError();
+    .single();
 
   return {
-    ...data,
-    category: transactionCategory(data),
+    data,
   };
 }
 
@@ -1414,6 +1409,3 @@ export async function getTeamLimitsMetricsQuery(
     })
     .single();
 }
-
-
-
