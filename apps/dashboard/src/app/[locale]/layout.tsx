@@ -68,13 +68,22 @@ export const viewport = {
 export const preferredRegion = ["fra1", "sfo1", "iad1"];
 export const maxDuration = 60;
 
-export default function Layout({
-  children,
-  params: { locale },
-}: {
-  children: ReactElement;
-  params: { locale: string };
-}) {
+export default async function Layout(
+  props: {
+    children: ReactElement;
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  const {
+    children
+  } = props;
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <body

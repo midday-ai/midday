@@ -11,8 +11,10 @@ export const changeInboxFilterAction = authActionClient
   .metadata({
     name: "change-inbox-filter",
   })
-  .action(({ parsedInput: value }) => {
-    cookies().set({
+  .action(async ({ parsedInput: value }) => {
+    const cookieStore = await cookies();
+
+    cookieStore.set({
       name: Cookies.InboxFilter,
       value: value,
       expires: addYears(new Date(), 1),

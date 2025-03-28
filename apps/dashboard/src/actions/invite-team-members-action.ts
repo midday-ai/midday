@@ -28,8 +28,8 @@ export const inviteTeamMembersAction = authActionClient
     }) => {
       const { t } = getI18n({ locale: user.locale });
 
-      const location = headers().get("x-vercel-ip-city") ?? "Unknown";
-      const ip = headers().get("x-forwarded-for") ?? "127.0.0.1";
+      const location = (await headers()).get("x-vercel-ip-city") ?? "Unknown";
+      const ip = (await headers()).get("x-forwarded-for") ?? "127.0.0.1";
 
       const data = invites?.map((invite) => ({
         ...invite,

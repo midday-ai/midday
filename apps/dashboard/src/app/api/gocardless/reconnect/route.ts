@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const requestUrl = new URL(req.url);
   const id = requestUrl.searchParams.get("id");
   const referenceId = requestUrl.searchParams.get("reference_id") ?? undefined;

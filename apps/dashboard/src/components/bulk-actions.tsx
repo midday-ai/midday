@@ -2,6 +2,7 @@
 
 import { bulkUpdateTransactionsAction } from "@/actions/bulk-update-transactions-action";
 import { useTransactionsStore } from "@/store/transactions";
+import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -16,17 +17,23 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import { useAction } from "next-safe-action/hooks";
 import { SelectCategory } from "./select-category";
 import { SelectUser } from "./select-user";
 
 type Props = {
   ids: string[];
-  tags: { id: string; name: string }[];
 };
 
-export function BulkActions({ ids, tags }: Props) {
+export function BulkActions({ ids }: Props) {
+  const trpc = useTRPC();
   const { toast } = useToast();
+
+  const { data: tags } = useQuery({
+    ...trpc.tags.get.queryOptions(),
+    enabled: ids.length > 0,
+  });
 
   const { setRowSelection } = useTransactionsStore();
 
@@ -102,8 +109,8 @@ export function BulkActions({ ids, tags }: Props) {
                 alignOffset={-4}
                 className="py-2 max-h-[200px] overflow-y-auto max-w-[220px]"
               >
-                {tags?.length > 0 ? (
-                  tags?.map((tag) => (
+                {tags && tags.length > 0 ? (
+                  tags.map((tag) => (
                     <DropdownMenuCheckboxItem
                       key={tag.id}
                       checked={ids.includes(tag.id)}

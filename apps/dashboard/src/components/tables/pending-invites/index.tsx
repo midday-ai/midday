@@ -4,7 +4,7 @@ import { createClient } from "@midday/supabase/server";
 import { DataTable } from "./table";
 
 export async function PendingInvitesTable() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getTeamUser();
   const teamInvites = await getTeamInvitesQuery(supabase, user.data.team_id);
 

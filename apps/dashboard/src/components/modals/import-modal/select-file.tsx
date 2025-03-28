@@ -1,7 +1,6 @@
 import { getTransactionsFromLayout } from "@/actions/transactions/get-transactions-from-layout";
 import { useUpload } from "@/hooks/use-upload";
 import { useUserContext } from "@/store/user/hook";
-import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { Spinner } from "@midday/ui/spinner";
 import { stripSpecialCharacters } from "@midday/utils";
@@ -14,7 +13,6 @@ import { useCsvContext } from "./context";
 import { readLines } from "./utils";
 
 export function SelectFile() {
-  const supabase = createClient();
   const { watch, control, setFileColumns, setFirstRows, setValue } =
     useCsvContext();
   const [error, setError] = useState<string | null>(null);

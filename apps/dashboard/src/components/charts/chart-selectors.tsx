@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import { ChartFiltersServer } from "./chart-filters.server";
 
 export async function ChartSelectors({ defaultValue }) {
-  const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
+  const chartType = (await cookies()).get(Cookies.ChartType)?.value ?? "profit";
 
   return (
     <div className="flex justify-between mt-6 space-x-2">

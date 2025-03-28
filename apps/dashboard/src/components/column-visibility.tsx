@@ -4,13 +4,13 @@ import { Checkbox } from "@midday/ui/checkbox";
 import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 
-export function ColumnVisibility({ disabled }: { disabled?: boolean }) {
+export function ColumnVisibility() {
   const { columns } = useTransactionsStore();
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="icon" disabled={disabled}>
+        <Button variant="outline" size="icon">
           <Icons.Tune size={18} />
         </Button>
       </PopoverTrigger>
@@ -30,7 +30,7 @@ export function ColumnVisibility({ disabled }: { disabled?: boolean }) {
                     id={column.id}
                     checked={column.getIsVisible()}
                     onCheckedChange={(checked) =>
-                      column.toggleVisibility(checked)
+                      column.toggleVisibility(checked === true)
                     }
                   />
                   <label

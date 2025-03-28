@@ -156,23 +156,23 @@ export async function getSpendingQuery(
 
 export type GetTransactionsParams = {
   teamId: string;
-  to: number;
-  from: number;
-  sort?: [string, "asc" | "desc"];
-  searchQuery?: string;
+  cursor?: string | null;
+  sort?: string[] | null;
+  pageSize?: number;
   filter?: {
-    statuses?: string[];
-    attachments?: "include" | "exclude";
-    categories?: string[];
-    tags?: string[];
-    accounts?: string[];
-    assignees?: string[];
-    type?: "income" | "expense";
-    start?: string;
-    end?: string;
-    recurring?: string[];
-    amount_range?: [number, number];
-    amount?: [string, string];
+    q?: string | null;
+    statuses?: string[] | null;
+    attachments?: "include" | "exclude" | null;
+    categories?: string[] | null;
+    tags?: string[] | null;
+    accounts?: string[] | null;
+    assignees?: string[] | null;
+    type?: "income" | "expense" | null;
+    start?: string | null;
+    end?: string | null;
+    recurring?: string[] | null;
+    amount_range?: number[] | null;
+    amount?: string[] | null;
   };
 };
 
@@ -180,9 +180,10 @@ export async function getTransactionsQuery(
   supabase: Client,
   params: GetTransactionsParams,
 ) {
-  const { from = 0, to, filter, sort, teamId, searchQuery } = params;
+  const { filter, sort, teamId, cursor, pageSize = 40 } = params;
 
   const {
+    q,
     statuses,
     attachments,
     categories,
@@ -193,8 +194,8 @@ export async function getTransactionsQuery(
     end,
     assignees,
     recurring,
-    amount_range,
     amount,
+    amount_range,
   } = filter || {};
 
   const columns = [
@@ -221,32 +222,37 @@ export async function getTransactionsQuery(
 
   const query = supabase
     .from("transactions")
-    .select(columns.join(","), { count: "exact" })
+    // .select(columns.join(","), { count: "exact" }) // Only do this if you need the count
+    .select(columns.join(","))
     .eq("team_id", teamId);
 
+  // Apply sorting
   if (sort) {
     const [column, value] = sort;
     const ascending = value === "asc";
 
     if (column === "attachment") {
       query.order("is_fulfilled", { ascending });
+      query.order("id", { ascending }); // Secondary sort for stability
     } else if (column === "assigned") {
       query.order("assigned(full_name)", { ascending });
+      query.order("id", { ascending });
     } else if (column === "bank_account") {
       query.order("bank_account(name)", { ascending });
+      query.order("id", { ascending });
     } else if (column === "category") {
       query.order("category(name)", { ascending });
+      query.order("id", { ascending });
     } else if (column === "tags") {
       query.order("is_transaction_tagged", { ascending });
-    } else {
+      query.order("id", { ascending });
+    } else if (column) {
       query.order(column, { ascending });
+      query.order("id", { ascending }); // Always include ID as secondary sort
     }
   } else {
-    // NOTE: date can be on the same day (2020-01-01), so we need to order by id and amount to keep the order
-    query
-      .order("date", { ascending: false })
-      .order("name", { ascending: false })
-      .order("id", { ascending: false });
+    // Default sorting
+    query.order("date", { ascending: false }).order("id", { ascending: false }); // Always include ID as secondary sort
   }
 
   if (start && end) {
@@ -257,11 +263,11 @@ export async function getTransactionsQuery(
     query.lte("date", toDate.toISOString());
   }
 
-  if (searchQuery) {
-    if (!Number.isNaN(Number.parseInt(searchQuery))) {
-      query.eq("amount", Number(searchQuery));
+  if (q) {
+    if (!Number.isNaN(Number.parseInt(q))) {
+      query.eq("amount", Number(q));
     } else {
-      query.textSearch("fts_vector", `${searchQuery.replaceAll(" ", "+")}:*`);
+      query.textSearch("fts_vector", `${q.replaceAll(" ", "+")}:*`);
     }
   }
 
@@ -341,25 +347,23 @@ export async function getTransactionsQuery(
     }
   }
 
-  const { data, count } = await query.range(from, to);
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+  // TODO: Use cursor instead of range
+  const { data, count } = await query.range(offset, offset + pageSize - 1);
 
-  const totalAmount = data
-    ?.reduce((acc, { amount, currency }) => {
-      const existingCurrency = acc.find((item) => item.currency === currency);
-
-      if (existingCurrency) {
-        existingCurrency.amount += amount;
-      } else {
-        acc.push({ amount, currency });
-      }
-      return acc;
-    }, [])
-    .sort((a, b) => a?.amount - b?.amount);
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
 
   return {
     meta: {
-      totalAmount,
       count,
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
     },
     data: data?.map((transaction) => ({
       ...transaction,
@@ -369,26 +373,21 @@ export async function getTransactionsQuery(
 }
 
 export async function getTransactionQuery(supabase: Client, id: string) {
-  const columns = [
-    "*",
-    "assigned:assigned_id(*)",
-    "category:category_slug(id, name, vat)",
-    "attachments:transaction_attachments(*)",
-    "tags:transaction_tags(id, tag:tags(id, name))",
-    "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
-    "vat:calculated_vat",
-  ];
-
   const { data } = await supabase
     .from("transactions")
-    .select(columns.join(","))
+    .select(`
+      *,
+      assigned:assigned_id(*),
+      attachments:transaction_attachments(*),
+      tags:transaction_tags(id, tag:tags(id, name)),
+      bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url)),
+      vat:calculated_vat
+    `)
     .eq("id", id)
-    .single()
-    .throwOnError();
+    .single();
 
   return {
-    ...data,
-    category: transactionCategory(data),
+    data,
   };
 }
 

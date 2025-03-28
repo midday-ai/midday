@@ -9,7 +9,7 @@ import { createClient } from "@midday/supabase/server";
 import { redirect } from "next/navigation";
 
 export const deleteUserAction = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
 
   const { data: membersData } = await supabase

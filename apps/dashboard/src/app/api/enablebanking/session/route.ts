@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const state = searchParams.get("state");
   const requestUrl = new URL(request.url);
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { session },

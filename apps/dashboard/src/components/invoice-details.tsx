@@ -1,3 +1,4 @@
+import { getUrl } from "@/utils/environment";
 import { createClient } from "@midday/supabase/client";
 import { getInvoiceQuery } from "@midday/supabase/queries";
 import {
@@ -233,10 +234,10 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
           <span className="text-sm text-[#606060]">Invoice link</span>
           <div className="flex w-full gap-2">
             <div className="flex-1 min-w-0 relative">
-              <CopyInput value={`${window.location.origin}/i/${token}`} />
+              <CopyInput value={`${getUrl()}/i/${token}`} />
 
               <div className="absolute right-9 top-[11px]">
-                <OpenURL href={`${window.location.origin}/i/${token}`}>
+                <OpenURL href={`${getUrl()}/i/${token}`}>
                   <Icons.OpenInNew />
                 </OpenURL>
               </div>

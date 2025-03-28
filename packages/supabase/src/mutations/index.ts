@@ -114,25 +114,6 @@ export async function updateBankConnection(
     .single();
 }
 
-type CreateTransactionsData = {
-  transactions: any[];
-  teamId: string;
-};
-
-export async function createTransactions(
-  supabase: Client,
-  data: CreateTransactionsData,
-) {
-  const { transactions, teamId } = data;
-
-  return supabase.from("transactions").insert(
-    transactions.map((transaction) => ({
-      ...transaction,
-      team_id: teamId,
-    })),
-  );
-}
-
 export async function updateTransaction(
   supabase: Client,
   id: string,
@@ -515,4 +496,71 @@ export async function createProject(
   params: CreateProjectParams,
 ) {
   return supabase.from("tracker_projects").insert(params).select().single();
+}
+
+type CreateTransactionCategoryParams = {
+  teamId: string;
+  categories: {
+    name: string;
+    color?: string;
+    description?: string;
+    vat?: number;
+  }[];
+};
+
+export async function createTransactionCategories(
+  supabase: Client,
+  params: CreateTransactionCategoryParams,
+) {
+  const { teamId, categories } = params;
+
+  return supabase.from("transaction_categories").insert(
+    categories.map((category) => ({
+      ...category,
+      team_id: teamId,
+    })),
+  );
+}
+
+type UpdateTransactionCategoryParams = {
+  id: string;
+  name: string;
+  color: string | null;
+  description: string | null;
+  vat: number | null;
+};
+
+export async function updateTransactionCategory(
+  supabase: Client,
+  params: UpdateTransactionCategoryParams,
+) {
+  const { id, name, color, description, vat } = params;
+
+  return supabase
+    .from("transaction_categories")
+    .update({ name, color, description, vat })
+    .eq("id", id);
+}
+
+export async function deleteTransactionCategory(supabase: Client, id: string) {
+  return supabase
+    .from("transaction_categories")
+    .delete()
+    .eq("id", id)
+    .eq("system", false);
+}
+
+type DeleteTransactionsParams = {
+  ids: string[];
+};
+
+export async function deleteTransactions(
+  supabase: Client,
+  params: DeleteTransactionsParams,
+) {
+  return supabase
+    .from("transactions")
+    .delete()
+    .in("id", params.ids)
+    .eq("manual", true);
 }

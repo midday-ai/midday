@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default async function Page() {
   const { data: userData } = await getUser();
 
-  const timezones = getTimezones();
+  const timezones = await getTimezones();
 
   return (
     <div className="space-y-12">

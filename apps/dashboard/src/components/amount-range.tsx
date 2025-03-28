@@ -1,35 +1,35 @@
 "use client";
 
 import { useSliderWithInput } from "@/hooks/use-slider-with-input";
-import { useUserContext } from "@/store/user/hook";
-import { createClient } from "@midday/supabase/client";
+import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import { Slider } from "@midday/ui/slider";
+import { useQuery } from "@tanstack/react-query";
 import { parseAsArrayOf, parseAsInteger, useQueryState } from "nuqs";
-import { useEffect, useState } from "react";
-
-type Item = {
-  id: string;
-  amount: number;
-};
+import { useEffect } from "react";
 
 export function AmountRange() {
-  const [items, setItems] = useState<Item[]>([]);
   const tick_count = 40;
-  const supabase = createClient();
-  const { team_id } = useUserContext((state) => state.data);
 
-  const minValue =
-    items.length > 0 ? Math.min(...items.map((item) => item.amount)) : 0;
-  const maxValue =
-    items.length > 0 ? Math.max(...items.map((item) => item.amount)) : 0;
+  const trpc = useTRPC();
+
+  const { data: items, isLoading } = useQuery(
+    trpc.transactions.getAmountRange.queryOptions(),
+  );
 
   const [amountRange, setAmountRange] = useQueryState(
     "amount_range",
     parseAsArrayOf(parseAsInteger),
   );
+
+  const minValue = items?.length
+    ? Math.min(...items.map((item) => item.amount))
+    : 0;
+  const maxValue = items?.length
+    ? Math.max(...items.map((item) => item.amount))
+    : 0;
 
   const {
     sliderValue,
@@ -44,6 +44,12 @@ export function AmountRange() {
     initialValue: amountRange || [],
   });
 
+  useEffect(() => {
+    setValues([minValue, maxValue]);
+  }, [minValue, maxValue]);
+
+  if (isLoading) return null;
+
   const amountStep = (maxValue - minValue) / tick_count;
 
   const itemCounts = Array(tick_count)
@@ -51,9 +57,11 @@ export function AmountRange() {
     .map((_, tick) => {
       const rangeMin = minValue + tick * amountStep;
       const rangeMax = minValue + (tick + 1) * amountStep;
-      return items.filter(
-        (item) => item.amount >= rangeMin && item.amount < rangeMax,
-      ).length;
+      return (
+        items?.filter(
+          (item) => item.amount >= rangeMin && item.amount < rangeMax,
+        ).length ?? 0
+      );
     });
 
   const maxCount = Math.max(...itemCounts);
@@ -63,8 +71,10 @@ export function AmountRange() {
   };
 
   const countItemsInRange = (min: number, max: number) => {
-    return items.filter((item) => item.amount >= min && item.amount <= max)
-      .length;
+    return (
+      items?.filter((item) => item.amount >= min && item.amount <= max)
+        .length ?? 0
+    );
   };
 
   const isBarInSelectedRange = (
@@ -76,31 +86,14 @@ export function AmountRange() {
     const rangeMin = minValue + index * amountStep;
     const rangeMax = minValue + (index + 1) * amountStep;
     return (
-      countItemsInRange(sliderValue[0], sliderValue[1]) > 0 &&
-      rangeMin <= sliderValue[1] &&
-      rangeMax >= sliderValue[0]
+      countItemsInRange(
+        sliderValue[0] ?? minValue,
+        sliderValue[1] ?? maxValue,
+      ) > 0 &&
+      rangeMin <= (sliderValue[1] ?? maxValue) &&
+      rangeMax >= (sliderValue[0] ?? minValue)
     );
   };
-
-  useEffect(() => {
-    async function fetchItems() {
-      const { data } = await supabase
-        .rpc("get_transactions_amount_range_data", {
-          team_id,
-        })
-        .select("*");
-
-      setItems(data);
-    }
-
-    if (!items.length) {
-      fetchItems();
-    }
-  }, []);
-
-  useEffect(() => {
-    setValues([minValue, maxValue]);
-  }, [minValue, maxValue]);
 
   const totalCount = countItemsInRange(
     sliderValue[0] ?? minValue,
@@ -153,10 +146,10 @@ export function AmountRange() {
             inputMode="decimal"
             value={inputValues[0]}
             onChange={(e) => handleInputChange(e, 0)}
-            onBlur={() => validateAndUpdateValue(inputValues[0], 0)}
+            onBlur={() => validateAndUpdateValue(inputValues[0] ?? "", 0)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                validateAndUpdateValue(inputValues[0], 0);
+                validateAndUpdateValue(inputValues[0] ?? "", 0);
               }
             }}
             aria-label="Enter minimum amount"
@@ -174,10 +167,10 @@ export function AmountRange() {
             inputMode="decimal"
             value={inputValues[1]}
             onChange={(e) => handleInputChange(e, 1)}
-            onBlur={() => validateAndUpdateValue(inputValues[1], 1)}
+            onBlur={() => validateAndUpdateValue(inputValues[1] ?? "", 1)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                validateAndUpdateValue(inputValues[1], 1);
+                validateAndUpdateValue(inputValues[1] ?? "", 1);
               }
             }}
             aria-label="Enter maximum amount"

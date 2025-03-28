@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Teams() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
 
   const teams = await getTeamsByUserIdQuery(supabase, user?.data?.id);

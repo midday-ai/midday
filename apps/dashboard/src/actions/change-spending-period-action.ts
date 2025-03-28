@@ -13,7 +13,7 @@ export const changeSpendingPeriodAction = authActionClient
     name: "change-spending-period",
   })
   .action(async ({ parsedInput: params, ctx: { user } }) => {
-    cookies().set({
+    (await cookies()).set({
       name: Cookies.SpendingPeriod,
       value: JSON.stringify(params),
       expires: addYears(new Date(), 1),
