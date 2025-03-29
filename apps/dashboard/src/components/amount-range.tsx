@@ -12,6 +12,7 @@ import { useEffect, useRef } from "react";
 
 export function AmountRange() {
   const tick_count = 30;
+  const minInputRef = useRef<HTMLInputElement>(null);
   const maxInputRef = useRef<HTMLInputElement>(null);
 
   const trpc = useTRPC();
@@ -55,18 +56,6 @@ export function AmountRange() {
 
   const amountStep = (maxValue - minValue) / tick_count;
 
-  const itemCounts = Array(tick_count)
-    .fill(0)
-    .map((_, tick) => {
-      const rangeMin = minValue + tick * amountStep;
-      const rangeMax = minValue + (tick + 1) * amountStep;
-      return (
-        items?.filter(
-          (item) => item.amount >= rangeMin && item.amount < rangeMax,
-        ).length ?? 0
-      );
-    });
-
   const handleSliderValueChange = (values: number[]) => {
     handleSliderChange(values);
   };
@@ -75,24 +64,6 @@ export function AmountRange() {
     return (
       items?.filter((item) => item.amount >= min && item.amount <= max)
         .length ?? 0
-    );
-  };
-
-  const isBarInSelectedRange = (
-    index: number,
-    minValue: number,
-    amountStep: number,
-    sliderValue: number[],
-  ) => {
-    const rangeMin = minValue + index * amountStep;
-    const rangeMax = minValue + (index + 1) * amountStep;
-    return (
-      countItemsInRange(
-        sliderValue[0] ?? minValue,
-        sliderValue[1] ?? maxValue,
-      ) > 0 &&
-      rangeMin <= (sliderValue[1] ?? maxValue) &&
-      rangeMax >= (sliderValue[0] ?? minValue)
     );
   };
 
@@ -128,18 +99,16 @@ export function AmountRange() {
               value={inputValues[0] || ""}
               onChange={(e) => handleInputChange(e, 0)}
               onFocus={(e) => e.target.select()}
+              onBlur={() => validateAndUpdateValue(inputValues[0] ?? "", 0)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
                   validateAndUpdateValue(inputValues[0] ?? "", 0);
                   maxInputRef.current?.focus();
                 }
-                if (e.key === "Tab" && !e.shiftKey) {
-                  // Validate on tab but don't prevent default
-                  validateAndUpdateValue(inputValues[0] ?? "", 0);
-                }
               }}
               aria-label="Enter minimum amount"
+              getInputRef={minInputRef}
             />
           </div>
           <div className="space-y-1 flex-1">
@@ -155,13 +124,10 @@ export function AmountRange() {
               value={inputValues[1] || ""}
               onChange={(e) => handleInputChange(e, 1)}
               onFocus={(e) => e.target.select()}
+              onBlur={() => validateAndUpdateValue(inputValues[1] ?? "", 1)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  validateAndUpdateValue(inputValues[1] ?? "", 1);
-                }
-                if (e.key === "Tab" && e.shiftKey) {
-                  // Validate on tab but don't prevent default
                   validateAndUpdateValue(inputValues[1] ?? "", 1);
                 }
               }}
