@@ -5,28 +5,26 @@ import { TransactionsSearchFilter } from "@/components/transactions-search-filte
 import { sortParamsCache } from "@/hooks/use-sort-params";
 import { transactionFilterParamsCache } from "@/hooks/use-transaction-filter-params";
 import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
-import { Cookies } from "@/utils/constants";
+import { getInitialColumnVisibility } from "@/utils/columns";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Transactions | Midday",
 };
 
-export default async function Transactions(props: {
+type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const cookieStore = await cookies();
+};
 
-  const initialColumnVisibility = JSON.parse(
-    cookieStore.get(Cookies.TransactionsColumns)?.value || "[]",
-  );
+export default async function Transactions(props: Props) {
+  const queryClient = getQueryClient();
   const searchParams = await props.searchParams;
+
   const filter = transactionFilterParamsCache.parse(searchParams);
   const { sort } = sortParamsCache.parse(searchParams);
 
-  const queryClient = getQueryClient();
+  const initialColumnVisibility = await getInitialColumnVisibility();
 
   // NOTE: Because we prefetch using Next.js Link, we can use this to actually fetch the data
   await queryClient.fetchInfiniteQuery(

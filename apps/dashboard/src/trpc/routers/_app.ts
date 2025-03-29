@@ -4,11 +4,13 @@ import { bankAccountsRouter } from "./bank-accounts";
 import { tagsRouter } from "./tags";
 import { teamRouter } from "./team";
 import { transactionCategoriesRouter } from "./transaction-categories";
+import { transactionTagsRouter } from "./transaction-tags";
 import { transactionsRouter } from "./transactions";
 
 export const appRouter = createTRPCRouter({
   transactions: transactionsRouter,
   transactionCategories: transactionCategoriesRouter,
+  transactionTags: transactionTagsRouter,
   team: teamRouter,
   bankAccounts: bankAccountsRouter,
   tags: tagsRouter,

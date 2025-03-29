@@ -1,5 +1,8 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { deleteTransactions } from "@midday/supabase/mutations";
+import {
+  deleteTransactions,
+  updateTransaction,
+} from "@midday/supabase/mutations";
 import {
   getTransactionQuery,
   getTransactionsQuery,
@@ -55,7 +58,7 @@ export const transactionsRouter = createTRPCRouter({
   getAmountRange: protectedProcedure.query(
     async ({ ctx: { supabase, teamId } }) => {
       const { data } = await supabase.rpc(
-        "get_transactions_amount_range_data",
+        "get_transactions_amount_full_range_data",
         {
           team_id: teamId,
         },
@@ -64,4 +67,26 @@ export const transactionsRouter = createTRPCRouter({
       return data;
     },
   ),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        category_slug: z.string().nullable().optional(),
+        status: z
+          .enum(["pending", "archived", "completed", "posted", "excluded"])
+          .nullable()
+          .optional(),
+        internal: z.boolean().optional(),
+        recurring: z.boolean().optional(),
+        frequency: z.string().nullable().optional(),
+        note: z.string().nullable().optional(),
+        assigned_id: z.string().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx: { supabase } }) => {
+      const { data } = await updateTransaction(supabase, input);
+
+      return data;
+    }),
 });

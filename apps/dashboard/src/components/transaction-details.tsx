@@ -20,7 +20,7 @@ import {
 } from "@midday/ui/select";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Switch } from "@midday/ui/switch";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { AssignUser } from "./assign-user";
 import { Attachments } from "./attachments";
@@ -50,12 +50,68 @@ export function TransactionDetails() {
     },
   });
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const updateTransactionMutation = useMutation(
+    trpc.transactions.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+      },
+      onMutate: async (variables) => {
+        await queryClient.cancelQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
 
-  if (!data) {
-    return <div>Transaction not found</div>;
+        const previousData = queryClient.getQueryData(
+          trpc.transactions.getById.queryKey({ id: transactionId! }),
+        );
+
+        queryClient.setQueryData(
+          trpc.transactions.getById.queryKey({ id: transactionId! }),
+          (old: any) => ({
+            ...old,
+            ...variables,
+          }),
+        );
+
+        return { previousData };
+      },
+      onError: (_, __, context) => {
+        queryClient.setQueryData(
+          trpc.transactions.getById.queryKey({ id: transactionId! }),
+          context?.previousData,
+        );
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
+      },
+    }),
+  );
+
+  const createTransactionTagMutation = useMutation(
+    trpc.transactionTags.create.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
+      },
+    }),
+  );
+
+  const deleteTransactionTagMutation = useMutation(
+    trpc.transactionTags.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
+      },
+    }),
+  );
+
+  if (isLoading || !data) {
+    return null;
   }
 
   const defaultValue = ["attachment"];
@@ -80,7 +136,7 @@ export function TransactionDetails() {
             <div className="flex items-center justify-between">
               {data?.bank_account?.bank_connection?.logo_url && (
                 <TransactionBankAccount
-                  name={data?.bank_account?.name}
+                  name={data?.bank_account?.name ?? undefined}
                   logoUrl={data.bank_account.bank_connection.logo_url}
                   className="text-[#606060] text-xs"
                 />
@@ -106,7 +162,7 @@ export function TransactionDetails() {
                 <span
                   className={cn(
                     "text-4xl font-mono select-text",
-                    data?.category?.slug === "income" && "text-[#00C969]",
+                    data?.category_slug === "income" && "text-[#00C969]",
                   )}
                 >
                   <FormatAmount
@@ -116,12 +172,12 @@ export function TransactionDetails() {
                 </span>
               )}
               <div className="h-3">
-                {/* {data?.vat > 0 && (
+                {data?.vat ? (
                   <span className="text-[#606060] text-xs select-text">
                     VAT{" "}
                     <FormatAmount amount={data.vat} currency={data.currency} />
                   </span>
-                )} */}
+                ) : null}
               </div>
             </div>
           </div>
@@ -142,8 +198,15 @@ export function TransactionDetails() {
 
           <SelectCategory
             id={transactionId}
-            selected={data?.category}
-            // onChange={handleOnChangeCategory}
+            selected={data?.category ?? undefined}
+            onChange={(category) => {
+              if (category) {
+                updateTransactionMutation.mutate({
+                  id: data?.id,
+                  category_slug: category.slug,
+                });
+              }
+            }}
           />
         </div>
 
@@ -159,12 +222,14 @@ export function TransactionDetails() {
           ) : (
             <AssignUser
               selectedId={data?.assigned?.id ?? undefined}
-              // onSelect={(user) => {
-              //   updateTransaction(
-              //     { assigned_id: user?.id, id: data?.id },
-              //     { assigned: user },
-              //   );
-              // }}
+              onSelect={(user) => {
+                if (user) {
+                  updateTransactionMutation.mutate({
+                    id: data?.id,
+                    assigned_id: user.id,
+                  });
+                }
+              }}
             />
           )}
         </div>
@@ -181,18 +246,18 @@ export function TransactionDetails() {
             value: tag.tag.name,
             id: tag.tag.id,
           }))}
-          // onSelect={(tag) => {
-          //   createTransactionTag.execute({
-          //     tagId: tag.id,
-          //     transactionId: data?.id,
-          //   });
-          // }}
-          // onRemove={(tag) => {
-          //   deleteTransactionTag.execute({
-          //     tagId: tag.id,
-          //     transactionId: data?.id,
-          //   });
-          // }}
+          onSelect={(tag) => {
+            createTransactionTagMutation.mutate({
+              tagId: tag.id,
+              transactionId: data?.id,
+            });
+          }}
+          onRemove={(tag) => {
+            deleteTransactionTagMutation.mutate({
+              tagId: tag.id,
+              transactionId: data?.id,
+            });
+          }}
         />
       </div>
 
@@ -232,12 +297,12 @@ export function TransactionDetails() {
 
             <Switch
               checked={data?.internal}
-              // onCheckedChange={() => {
-              //   updateTransaction(
-              //     { id: data?.id, internal: !data?.internal },
-              //     { internal: !data?.internal },
-              //   );
-              // }}
+              onCheckedChange={(checked) => {
+                updateTransactionMutation.mutate({
+                  id: data?.id,
+                  internal: checked,
+                });
+              }}
             />
           </div>
         </div>
@@ -254,21 +319,24 @@ export function TransactionDetails() {
               </div>
               <Switch
                 checked={data?.recurring}
-                // onCheckedChange={handleOnChangeRecurring}
+                onCheckedChange={(checked) => {
+                  updateTransactionMutation.mutate({
+                    id: data?.id,
+                    recurring: checked,
+                  });
+                }}
               />
             </div>
 
             {data?.recurring && (
               <Select
                 value={data?.frequency}
-                // onValueChange={(value) => {
-                //   updateTransaction(
-                //     { id: data?.id, frequency: value },
-                //     { frequency: value },
-                //   );
-
-                //   updateSimilarTransactionsRecurring.execute({ id: data?.id });
-                // }}
+                onValueChange={(value) => {
+                  updateTransactionMutation.mutate({
+                    id: data?.id,
+                    frequency: value,
+                  });
+                }}
               >
                 <SelectTrigger className="w-full mt-4">
                   <SelectValue placeholder="Select frequency" />
@@ -295,9 +363,13 @@ export function TransactionDetails() {
           <AccordionTrigger>Note</AccordionTrigger>
           <AccordionContent className="select-text">
             <Note
-              id={data?.id}
-              defaultValue={data?.note}
-              // updateTransaction={updateTransaction}
+              defaultValue={data?.note ?? ""}
+              onChange={(value) => {
+                updateTransactionMutation.mutate({
+                  id: data?.id,
+                  note: value,
+                });
+              }}
             />
           </AccordionContent>
         </AccordionItem>

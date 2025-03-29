@@ -198,32 +198,29 @@ export async function getTransactionsQuery(
     amount_range,
   } = filter || {};
 
-  const columns = [
-    "id",
-    "date",
-    "amount",
-    "currency",
-    "method",
-    "status",
-    "note",
-    "manual",
-    "internal",
-    "recurring",
-    "frequency",
-    "name",
-    "description",
-    "assigned:assigned_id(*)",
-    "category:transaction_categories(id, name, color, slug)",
-    "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
-    "attachments:transaction_attachments(id, name, size, path, type)",
-    "tags:transaction_tags(id, tag_id, tag:tags(id, name))",
-    "vat:calculated_vat",
-  ];
-
   const query = supabase
     .from("transactions")
-    // .select(columns.join(","), { count: "exact" }) // Only do this if you need the count
-    .select(columns.join(","))
+    .select(`
+      id,
+      date,
+      amount,
+      currency,
+      method,
+      status,
+      note,
+      manual,
+      internal,
+      recurring,
+      frequency,
+      name,
+      description,
+      assigned:assigned_id(*),
+      category:transaction_categories(id, name, color, slug),
+      bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url)),
+      attachments:transaction_attachments(id, name, size, path, type),
+      tags:transaction_tags(id, tag_id, tag:tags(id, name)),
+      vat:calculated_vat
+    `)
     .eq("team_id", teamId);
 
   // Apply sorting

@@ -37,7 +37,7 @@ export function ColumnVisibility() {
                     htmlFor={column.id}
                     className="text-sm peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    {column.columnDef.header}
+                    {column.columnDef.header?.toString() ?? column.id}
                   </label>
                 </div>
               );

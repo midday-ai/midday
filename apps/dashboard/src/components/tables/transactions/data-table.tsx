@@ -18,6 +18,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { useInView } from "react-intersection-observer";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
@@ -26,16 +27,14 @@ import { ExportBar } from "./export-bar";
 export function DataTable({
   initialColumnVisibility,
 }: { initialColumnVisibility?: VisibilityState }) {
+  const trpc = useTRPC();
   const { filter } = useTransactionFilterParams();
-  const { setRowSelection, rowSelection, setColumns, setCanDelete } =
-    useTransactionsStore();
-
+  const { setRowSelection, rowSelection, setColumns } = useTransactionsStore();
   const deferredSearch = useDeferredValue(filter.q);
   const { params } = useSortParams();
   const { ref, inView } = useInView();
 
-  const trpc = useTRPC();
-  const { setTransactionId } = useTransactionParams();
+  const { transactionId, setTransactionId } = useTransactionParams();
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility ?? {},
@@ -69,6 +68,10 @@ export function DataTable({
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
+  const ids = useMemo(() => {
+    return tableData.map((row) => row.id);
+  }, [tableData]);
+
   const table = useReactTable({
     getRowId: (row) => row.id,
     data: tableData,
@@ -79,6 +82,17 @@ export function DataTable({
     state: {
       rowSelection,
       columnVisibility,
+    },
+    meta: {
+      setOpen: (id: string) => {
+        console.log("setOpen", id);
+      },
+      copyUrl: (id: string) => {
+        console.log("copyUrl", id);
+      },
+      updateTransaction: (data: { id: string; status: string }) => {
+        console.log("updateTransaction", data);
+      },
     },
   });
 
@@ -92,6 +106,30 @@ export function DataTable({
       data: columnVisibility,
     });
   }, [columnVisibility]);
+
+  useHotkeys(
+    "ArrowUp, ArrowDown",
+    ({ key }) => {
+      if (key === "ArrowUp" && transactionId) {
+        const currentIndex = ids?.indexOf(transactionId) ?? 0;
+        const prevId = ids[currentIndex - 1];
+
+        if (prevId) {
+          setTransactionId(prevId);
+        }
+      }
+
+      if (key === "ArrowDown" && transactionId) {
+        const currentIndex = ids?.indexOf(transactionId) ?? 0;
+        const nextId = ids[currentIndex + 1];
+
+        if (nextId) {
+          setTransactionId(nextId);
+        }
+      }
+    },
+    { enabled: !!transactionId },
+  );
 
   return (
     <div className="relative">
