@@ -1,14 +1,12 @@
-import type { UpdateTransactionValues } from "@/actions/schema";
 import { Textarea } from "@midday/ui/textarea";
 import { useState } from "react";
 
 type Props = {
-  id: string;
   defaultValue: string;
-  updateTransaction: (values: UpdateTransactionValues) => void;
+  onChange: (value: string | null) => void;
 };
 
-export function Note({ id, defaultValue, updateTransaction }: Props) {
+export function Note({ defaultValue, onChange }: Props) {
   const [value, setValue] = useState(defaultValue);
 
   return (
@@ -20,10 +18,7 @@ export function Note({ id, defaultValue, updateTransaction }: Props) {
       className="min-h-[100px] resize-none"
       onBlur={() => {
         if (value !== defaultValue) {
-          updateTransaction({
-            id,
-            note: value?.length > 0 ? value : null,
-          });
+          onChange(value?.length > 0 ? value : null);
         }
       }}
       onChange={(evt) => setValue(evt.target.value)}

@@ -3,15 +3,16 @@
 import { useSliderWithInput } from "@/hooks/use-slider-with-input";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
-import { Input } from "@midday/ui/input";
+import { CurrencyInput } from "@midday/ui/currency-input";
 import { Label } from "@midday/ui/label";
 import { Slider } from "@midday/ui/slider";
 import { useQuery } from "@tanstack/react-query";
 import { parseAsArrayOf, parseAsInteger, useQueryState } from "nuqs";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export function AmountRange() {
-  const tick_count = 40;
+  const tick_count = 30;
+  const maxInputRef = useRef<HTMLInputElement>(null);
 
   const trpc = useTRPC();
 
@@ -41,12 +42,14 @@ export function AmountRange() {
   } = useSliderWithInput({
     minValue,
     maxValue,
-    initialValue: amountRange || [],
+    initialValue: amountRange || [minValue, maxValue],
   });
 
   useEffect(() => {
-    setValues([minValue, maxValue]);
-  }, [minValue, maxValue]);
+    if (minValue !== undefined && maxValue !== undefined) {
+      setValues([minValue, maxValue]);
+    }
+  }, [minValue, maxValue, setValues]);
 
   if (isLoading) return null;
 
@@ -63,8 +66,6 @@ export function AmountRange() {
         ).length ?? 0
       );
     });
-
-  const maxCount = Math.max(...itemCounts);
 
   const handleSliderValueChange = (values: number[]) => {
     handleSliderChange(values);
@@ -102,81 +103,82 @@ export function AmountRange() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <div className="flex h-12 w-full items-end px-3" aria-hidden="true">
-          {itemCounts.map((count, i) => (
-            <div
-              key={`histogram-bar-${i.toString()}`}
-              className="flex flex-1 justify-center"
-              style={{
-                height: `${(count / maxCount) * 100}%`,
-              }}
-            >
-              <span
-                data-selected={isBarInSelectedRange(
-                  i,
-                  minValue,
-                  amountStep,
-                  sliderValue,
-                )}
-                className="h-full w-full bg-primary/20"
-              />
-            </div>
-          ))}
-        </div>
-        <Slider
-          value={sliderValue}
-          onValueChange={handleSliderValueChange}
-          min={minValue}
-          max={maxValue}
-          aria-label="Amount range"
-        />
-      </div>
-
       <div className="flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="min-amount" className="text-xs">
-            Min amount
-          </Label>
+        <form
+          className="flex w-full items-center justify-between gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (sliderValue[0] !== undefined && sliderValue[1] !== undefined) {
+              setAmountRange([sliderValue[0], sliderValue[1]], {
+                shallow: false,
+              });
+            }
+          }}
+        >
+          <div className="space-y-1 flex-1">
+            <Label htmlFor="min-amount" className="text-xs">
+              Min amount
+            </Label>
 
-          <Input
-            id="min-amount"
-            className="w-full font-mono text-xs"
-            type="text"
-            inputMode="decimal"
-            value={inputValues[0]}
-            onChange={(e) => handleInputChange(e, 0)}
-            onBlur={() => validateAndUpdateValue(inputValues[0] ?? "", 0)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                validateAndUpdateValue(inputValues[0] ?? "", 0);
-              }
-            }}
-            aria-label="Enter minimum amount"
-          />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="max-amount" className="text-xs">
-            Max amount
-          </Label>
+            <CurrencyInput
+              id="min-amount"
+              className="w-full font-mono text-xs"
+              type="text"
+              inputMode="decimal"
+              value={inputValues[0] || ""}
+              onChange={(e) => handleInputChange(e, 0)}
+              onFocus={(e) => e.target.select()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  validateAndUpdateValue(inputValues[0] ?? "", 0);
+                  maxInputRef.current?.focus();
+                }
+                if (e.key === "Tab" && !e.shiftKey) {
+                  // Validate on tab but don't prevent default
+                  validateAndUpdateValue(inputValues[0] ?? "", 0);
+                }
+              }}
+              aria-label="Enter minimum amount"
+            />
+          </div>
+          <div className="space-y-1 flex-1">
+            <Label htmlFor="max-amount" className="text-xs">
+              Max amount
+            </Label>
 
-          <Input
-            id="max-amount"
-            className="w-full font-mono text-xs"
-            type="text"
-            inputMode="decimal"
-            value={inputValues[1]}
-            onChange={(e) => handleInputChange(e, 1)}
-            onBlur={() => validateAndUpdateValue(inputValues[1] ?? "", 1)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                validateAndUpdateValue(inputValues[1] ?? "", 1);
-              }
-            }}
-            aria-label="Enter maximum amount"
-          />
-        </div>
+            <CurrencyInput
+              id="max-amount"
+              className="w-full font-mono text-xs"
+              type="text"
+              inputMode="decimal"
+              value={inputValues[1] || ""}
+              onChange={(e) => handleInputChange(e, 1)}
+              onFocus={(e) => e.target.select()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  validateAndUpdateValue(inputValues[1] ?? "", 1);
+                }
+                if (e.key === "Tab" && e.shiftKey) {
+                  // Validate on tab but don't prevent default
+                  validateAndUpdateValue(inputValues[1] ?? "", 1);
+                }
+              }}
+              aria-label="Enter maximum amount"
+              getInputRef={maxInputRef}
+            />
+          </div>
+        </form>
       </div>
+
+      <Slider
+        value={sliderValue}
+        onValueChange={handleSliderValueChange}
+        min={minValue}
+        max={maxValue}
+        aria-label="Amount range"
+      />
 
       <Button
         className="w-full text-xs"

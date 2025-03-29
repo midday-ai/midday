@@ -1,9 +1,4 @@
-import { createTagAction } from "@/actions/create-tag-action";
-import { deleteTagAction } from "@/actions/delete-tag-action";
-import { updateTagAction } from "@/actions/update-tag-action";
-import { useUserContext } from "@/store/user/hook";
-import { createClient } from "@midday/supabase/client";
-import { getTagsQuery } from "@midday/supabase/queries";
+import { useTRPC } from "@/trpc/client";
 import {
   Dialog,
   DialogContent,
@@ -16,12 +11,12 @@ import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import MultipleSelector, { type Option } from "@midday/ui/multiple-selector";
 import { SubmitButton } from "@midday/ui/submit-button";
-import { useAction } from "next-safe-action/hooks";
-import React, { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useState } from "react";
 
 type Props = {
   tags?: Option[];
-  onSelect?: (tag: Option) => void;
+  onSelect?: (tag: Option & { id: string }) => void;
   onRemove?: (tag: Option & { id: string }) => void;
   onChange?: (tags: Option[]) => void;
   onCreate?: (tag: Option) => void;
@@ -34,83 +29,68 @@ export function SelectTags({
   onChange,
   onCreate,
 }: Props) {
-  const supabase = createClient();
   const [isOpen, setIsOpen] = useState(false);
-  const [data, setData] = useState<Option[]>(tags ?? []);
   const [selected, setSelected] = useState<Option[]>(tags ?? []);
   const [editingTag, setEditingTag] = useState<Option | null>(null);
 
-  const { team_id: teamId } = useUserContext((state) => state.data);
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const { data } = useQuery(trpc.tags.get.queryOptions());
 
-  const deleteTag = useAction(deleteTagAction, {
-    onSuccess: () => {
-      setIsOpen(false);
-      setEditingTag(null);
-    },
-  });
+  const updateTagMutation = useMutation(
+    trpc.tags.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.tags.get.queryKey(),
+        });
+      },
+    }),
+  );
 
-  const createTag = useAction(createTagAction, {
-    onSuccess: ({ data }) => {
-      if (data) {
-        const newTag: Option = {
-          label: data.name,
-          value: data.name,
-          id: data.id,
-        };
-        onSelect?.(newTag);
-        onCreate?.(newTag);
-      }
-    },
-  });
+  const deleteTagMutation = useMutation(
+    trpc.tags.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.tags.get.queryKey(),
+        });
+      },
+    }),
+  );
 
-  const updateTag = useAction(updateTagAction, {
-    onSuccess: () => {
-      setIsOpen(false);
-      setEditingTag(null);
-    },
-  });
+  const createTagMutation = useMutation(
+    trpc.tags.create.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: trpc.tags.get.queryKey() });
+      },
+    }),
+  );
 
-  useEffect(() => {
-    async function fetchData() {
-      const { data } = await getTagsQuery(supabase, teamId);
-
-      if (data?.length) {
-        setData(
-          data.map((tag) => ({
-            label: tag.name,
-            value: tag.name,
-            id: tag.id,
-          })),
-        );
-      }
-    }
-
-    fetchData();
-  }, [teamId]);
+  const transformedTags = data?.map((tag) => ({
+    value: tag.id,
+    label: tag.name,
+  }));
 
   const handleDelete = () => {
-    deleteTag.execute({ id: editingTag?.id });
-    setSelected(selected.filter((tag) => tag.id !== editingTag?.id));
-    setData(data.filter((tag) => tag.id !== editingTag?.id));
+    if (editingTag) {
+      deleteTagMutation.mutate({ id: editingTag.value });
+      setSelected(selected.filter((tag) => tag.id !== editingTag.value));
+    }
   };
 
   const handleUpdate = () => {
-    updateTag.execute({ id: editingTag?.id, name: editingTag?.value });
-
-    setData(
-      data.map((tag) =>
-        tag.id === editingTag?.id
-          ? { ...tag, label: editingTag.value, value: editingTag.value }
-          : tag,
-      ),
-    );
+    if (editingTag) {
+      updateTagMutation.mutate({
+        id: editingTag.value,
+        name: editingTag.value,
+      });
+    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <div className="w-full">
         <MultipleSelector
-          options={data}
+          options={transformedTags ?? []}
           value={selected}
           placeholder="Select tags"
           creatable
@@ -133,7 +113,7 @@ export function SelectTags({
             </div>
           )}
           onCreate={(option) => {
-            createTag.execute({ name: option.value });
+            createTagMutation.mutate({ name: option.value });
           }}
           onChange={(options) => {
             setSelected(options);
@@ -174,24 +154,30 @@ export function SelectTags({
           <div className="space-y-2 w-full flex flex-col mt-4">
             <Label>Name</Label>
             <Input
-              value={editingTag?.value}
-              onChange={(event) =>
-                setEditingTag({ ...editingTag, value: event.target.value })
-              }
+              value={editingTag?.label}
+              onChange={(event) => {
+                if (editingTag) {
+                  setEditingTag({
+                    id: editingTag.id,
+                    label: event.target.value,
+                    value: editingTag.value,
+                  });
+                }
+              }}
             />
           </div>
 
           <DialogFooter className="mt-8 w-full">
             <div className="space-y-2 w-full flex flex-col">
               <SubmitButton
-                isSubmitting={updateTag.isExecuting}
+                isSubmitting={updateTagMutation.isPending}
                 onClick={handleUpdate}
               >
                 Save
               </SubmitButton>
 
               <SubmitButton
-                isSubmitting={deleteTag.isExecuting}
+                isSubmitting={deleteTagMutation.isPending}
                 variant="outline"
                 onClick={handleDelete}
               >

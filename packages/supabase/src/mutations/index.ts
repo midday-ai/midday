@@ -114,11 +114,22 @@ export async function updateBankConnection(
     .single();
 }
 
+type UpdateTransactionData = {
+  id: string;
+  category_slug?: string | null;
+  status?: "pending" | "archived" | "completed" | "posted" | "excluded" | null;
+  internal?: boolean;
+  note?: string | null;
+  assigned_id?: string | null;
+  recurring?: boolean;
+};
+
 export async function updateTransaction(
   supabase: Client,
-  id: string,
-  data: any,
+  params: UpdateTransactionData,
 ) {
+  const { id, ...data } = params;
+
   return supabase
     .from("transactions")
     .update(data)
@@ -563,4 +574,74 @@ export async function deleteTransactions(
     .delete()
     .in("id", params.ids)
     .eq("manual", true);
+}
+
+type CreateTagParams = {
+  teamId: string;
+  name: string;
+};
+
+export async function createTag(supabase: Client, params: CreateTagParams) {
+  return supabase
+    .from("tags")
+    .insert({
+      name: params.name,
+      team_id: params.teamId,
+    })
+    .select("id, name")
+    .single();
+}
+
+type DeleteTagParams = {
+  id: string;
+};
+
+export async function deleteTag(supabase: Client, params: DeleteTagParams) {
+  return supabase.from("tags").delete().eq("id", params.id);
+}
+
+type UpdateTagParams = {
+  id: string;
+  name: string;
+};
+
+export async function updateTag(supabase: Client, params: UpdateTagParams) {
+  const { id, name } = params;
+
+  return supabase.from("tags").update({ name }).eq("id", id);
+}
+
+type CreateTransactionTagParams = {
+  teamId: string;
+  transactionId: string;
+  tagId: string;
+};
+
+export async function createTransactionTag(
+  supabase: Client,
+  params: CreateTransactionTagParams,
+) {
+  return supabase.from("transaction_tags").insert({
+    team_id: params.teamId,
+    transaction_id: params.transactionId,
+    tag_id: params.tagId,
+  });
+}
+
+type DeleteTransactionTagParams = {
+  transactionId: string;
+  tagId: string;
+};
+
+export async function deleteTransactionTag(
+  supabase: Client,
+  params: DeleteTransactionTagParams,
+) {
+  const { transactionId, tagId } = params;
+
+  return supabase
+    .from("transaction_tags")
+    .delete()
+    .eq("transaction_id", transactionId)
+    .eq("tag_id", tagId);
 }

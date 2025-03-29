@@ -102,7 +102,13 @@ export function FilterList({
       }
 
       case "amount_range": {
-        return `${amountRange?.[0]} - ${amountRange?.[1]}`;
+        return `${amountRange?.[0]?.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })} - ${amountRange?.[1]?.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`;
       }
 
       case "attachments": {

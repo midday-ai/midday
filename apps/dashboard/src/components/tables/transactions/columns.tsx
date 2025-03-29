@@ -19,7 +19,6 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { ScrollArea, ScrollBar } from "@midday/ui/scroll-area";
 import { TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import type {
   ColumnDef,
@@ -72,9 +71,9 @@ export type Transaction = {
 interface TableMeta<TData> extends ReactTableMeta<TData> {
   dateFormat?: string;
   hasSorting?: boolean;
-  setOpen?: (id: string) => void;
-  copyUrl?: (id: string) => void;
-  updateTransaction?: (data: { id: string; status: string }) => void;
+  setOpen: (id: string) => void;
+  copyUrl: (id: string) => void;
+  updateTransaction: (data: { id: string; status: string }) => void;
 }
 
 const SelectCell = memo(
@@ -378,10 +377,6 @@ export const columns: ColumnDef<Transaction>[] = [
     enableHiding: false,
     cell: ({ row, table }) => {
       const meta = table.options.meta as TableMeta<Transaction> | undefined;
-
-      if (!meta?.setOpen || !meta?.copyUrl || !meta?.updateTransaction) {
-        return null;
-      }
 
       return (
         <ActionsCell
