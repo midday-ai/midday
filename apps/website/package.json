@@ -16,31 +16,26 @@
     "@midday/ui": "workspace:*",
     "@openpanel/nextjs": "^1.0.7",
     "@openstatus/react": "^0.0.3",
-    "@team-plain/typescript-sdk": "5.5.0",
+    "@team-plain/typescript-sdk": "5.8.0",
     "@uidotdev/usehooks": "^2.4.1",
     "date-fns": "^4.1.0",
-    "framer-motion": "^11.13.5",
+    "framer-motion": "^12.6.2",
     "geist": "^1.3.1",
-    "next": "15.1.0",
+    "next": "15.2.4",
     "next-mdx-remote": "^5.0.0",
-    "next-safe-action": "^7.9.9",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
+    "next-safe-action": "^7.10.4",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
     "react-hls-player": "^3.0.7",
     "react-use-draggable-scroll": "^0.4.7",
-    "resend": "^4.0.1",
+    "resend": "^4.2.0",
     "server-only": "^0.0.1",
     "sharp": "^0.33.5",
-    "sugar-high": "^0.7.5"
+    "sugar-high": "^0.9.3"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^22.10.1",
-    "@types/react": "19.0.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-alpha.3"
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
+    "@types/node": "^22.13.14",
+    "@types/react": "19.0.12"
   }
 }

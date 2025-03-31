@@ -18,16 +18,21 @@ import {
 } from "@midday/ui/alert-dialog";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
 export function TransactionsActions() {
   const { setRowSelection, canDelete, rowSelection } = useTransactionsStore();
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
   const deleteTransactionsMutation = useMutation(
     trpc.transactions.deleteMany.mutationOptions({
       onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+
         setRowSelection({});
       },
     }),

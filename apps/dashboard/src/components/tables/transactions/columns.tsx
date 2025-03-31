@@ -71,9 +71,9 @@ export type Transaction = {
 interface TableMeta<TData> extends ReactTableMeta<TData> {
   dateFormat?: string;
   hasSorting?: boolean;
-  setOpen: (id: string) => void;
-  copyUrl: (id: string) => void;
-  updateTransaction: (data: { id: string; status: string }) => void;
+  setOpen?: (id: string) => void;
+  copyUrl?: (id: string) => void;
+  updateTransaction?: (data: { id: string; status: string }) => void;
 }
 
 const SelectCell = memo(

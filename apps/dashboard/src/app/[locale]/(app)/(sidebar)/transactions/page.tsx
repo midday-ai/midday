@@ -24,9 +24,8 @@ export default async function Transactions(props: Props) {
   const filter = transactionFilterParamsCache.parse(searchParams);
   const { sort } = sortParamsCache.parse(searchParams);
 
-  const initialColumnVisibility = await getInitialColumnVisibility();
+  const columnVisibility = getInitialColumnVisibility();
 
-  // NOTE: Because we prefetch using Next.js Link, we can use this to actually fetch the data
   await queryClient.fetchInfiniteQuery(
     trpc.transactions.get.infiniteQueryOptions({
       filter,
@@ -43,7 +42,7 @@ export default async function Transactions(props: Props) {
 
       <HydrateClient>
         <Suspense fallback={<Loading />}>
-          <DataTable initialColumnVisibility={initialColumnVisibility} />
+          <DataTable columnVisibility={columnVisibility} />
         </Suspense>
       </HydrateClient>
     </>

@@ -14,7 +14,15 @@ export const transactionCategoriesRouter = createTRPCRouter({
       teamId,
     });
 
-    return data;
+    return [
+      ...(data ?? []),
+      {
+        id: "uncategorized",
+        name: "Uncategorized",
+        color: "#606060",
+        slug: "uncategorized",
+      },
+    ];
   }),
 
   create: protectedProcedure

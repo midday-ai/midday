@@ -2,7 +2,7 @@ import { useTRPC } from "@/trpc/client";
 import { getColorFromName } from "@/utils/categories";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
 import { Spinner } from "@midday/ui/spinner";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CategoryColor } from "./category";
 
 type Selected = {
@@ -43,6 +43,7 @@ export function SelectCategory({
   hideLoading,
 }: Props) {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { data, isLoading } = useQuery(
     trpc.transactionCategories.get.queryOptions(),
   );
@@ -52,12 +53,18 @@ export function SelectCategory({
   const createCategoryMutation = useMutation(
     trpc.transactionCategories.create.mutationOptions({
       onSuccess: (data) => {
-        // onChange({
-        //   id: data.id,
-        //   name: data.name,
-        //   color: data.color,
-        //   slug: data.slug,
-        // });
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactionCategories.get.queryKey(),
+        });
+
+        if (data) {
+          onChange({
+            id: data.id,
+            name: data.name,
+            color: data.color,
+            slug: data.slug,
+          });
+        }
       },
     }),
   );

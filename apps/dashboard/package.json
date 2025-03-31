@@ -14,7 +14,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^1.3.4",
+    "@ai-sdk/openai": "^1.3.6",
     "@date-fns/tz": "^1.2.0",
     "@fast-csv/format": "5.0.0",
     "@hookform/resolvers": "^4.1.3",
@@ -31,7 +31,7 @@
     "@novu/headless": "^2.6.6",
     "@number-flow/react": "^0.5.8",
     "@polar-sh/nextjs": "^0.3.23",
-    "@polar-sh/sdk": "^0.32.2",
+    "@polar-sh/sdk": "^0.32.3",
     "@react-google-maps/api": "^2.20.6",
     "@tanstack/react-query": "^5.71.1",
     "@tanstack/react-query-devtools": "^5.71.1",
@@ -48,7 +48,7 @@
     "@uidotdev/usehooks": "^2.4.1",
     "@upstash/ratelimit": "^2.0.5",
     "@zip.js/zip.js": "2.7.52",
-    "ai": "^4.2.9",
+    "ai": "^4.2.10",
     "change-case": "^5.4.4",
     "client-only": "^0.0.1",
     "date-fns": "^4.1.0",
