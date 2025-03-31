@@ -392,21 +392,30 @@ type GetSimilarTransactionsParams = {
   name: string;
   teamId: string;
   categorySlug?: string;
+  frequency?: "weekly" | "monthly" | "annually" | "irregular";
 };
 
 export async function getSimilarTransactions(
   supabase: Client,
   params: GetSimilarTransactionsParams,
 ) {
-  const { name, teamId, categorySlug } = params;
+  const { name, teamId, categorySlug, frequency } = params;
 
-  return supabase
+  const query = supabase
     .from("transactions")
-    .select("id, amount, team_id", { count: "exact" })
+    .select("id, amount, team_id")
     .eq("team_id", teamId)
-    .textSearch("fts_vector", `${name.replaceAll(" ", "+")}:*`)
-    .neq("category_slug", categorySlug)
-    .throwOnError();
+    .textSearch("fts_vector", `${name.replaceAll(" ", "+")}:*`);
+
+  if (categorySlug) {
+    query.neq("category_slug", categorySlug);
+  }
+
+  if (frequency) {
+    query.eq("frequency", frequency);
+  }
+
+  return query;
 }
 
 type GetBankAccountsCurrenciesParams = {

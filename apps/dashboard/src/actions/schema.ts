@@ -104,18 +104,6 @@ export const changeTransactionsPeriodSchema = z.enum([
   "expense",
 ]);
 
-export const createAttachmentsSchema = z.array(
-  z.object({
-    path: z.array(z.string()),
-    name: z.string(),
-    size: z.number(),
-    transaction_id: z.string(),
-    type: z.string(),
-  }),
-);
-
-export const deleteAttachmentSchema = z.string();
-
 export const exportTransactionsSchema = z.array(z.string());
 
 export const deleteFileSchema = z.object({
@@ -177,43 +165,6 @@ export const connectBankAccountSchema = z.object({
 
 export const sendFeedbackSchema = z.object({
   feedback: z.string(),
-});
-
-export const updateTransactionSchema = z.object({
-  id: z.string().uuid(),
-  note: z.string().optional().nullable(),
-  category_slug: z.string().optional(),
-  tag_id: z.string().uuid().optional(),
-  assigned_id: z.string().uuid().optional(),
-  recurring: z.boolean().optional().nullable(),
-  frequency: z.enum(["weekly", "monthly", "annually"]).optional().nullable(),
-  status: z
-    .enum(["deleted", "excluded", "posted", "completed", "archived"])
-    .optional(),
-  internal: z.boolean().optional().nullable(),
-});
-
-export type UpdateTransactionValues = z.infer<typeof updateTransactionSchema>;
-
-export const bulkUpdateTransactionsSchema = z.object({
-  type: z.enum([
-    "category",
-    "note",
-    "assigned",
-    "status",
-    "recurring",
-    "tags",
-    "archive",
-  ]),
-  data: z.array(updateTransactionSchema),
-});
-
-export const updateSimilarTransactionsCategorySchema = z.object({
-  id: z.string(),
-});
-
-export const updateSimilarTransactionsRecurringSchema = z.object({
-  id: z.string(),
 });
 
 export const changeTeamSchema = z.object({

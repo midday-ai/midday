@@ -9,15 +9,21 @@ import {
 } from "@midday/ui/dialog";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
-import MultipleSelector, { type Option } from "@midday/ui/multiple-selector";
+import MultipleSelector from "@midday/ui/multiple-selector";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 
+type Option = {
+  value: string;
+  label: string;
+  id: string;
+};
+
 type Props = {
   tags?: Option[];
-  onSelect?: (tag: Option & { id: string }) => void;
-  onRemove?: (tag: Option & { id: string }) => void;
+  onSelect?: (tag: Option) => void;
+  onRemove?: (tag: Option) => void;
   onChange?: (tags: Option[]) => void;
   onCreate?: (tag: Option) => void;
 };
@@ -68,20 +74,23 @@ export function SelectTags({
   const transformedTags = data?.map((tag) => ({
     value: tag.id,
     label: tag.name,
+    id: tag.id,
   }));
 
   const handleDelete = () => {
     if (editingTag) {
-      deleteTagMutation.mutate({ id: editingTag.value });
-      setSelected(selected.filter((tag) => tag.id !== editingTag.value));
+      deleteTagMutation.mutate({ id: editingTag.id });
+
+      setSelected(selected.filter((tag) => tag.id !== editingTag.id));
+      setIsOpen(false);
     }
   };
 
   const handleUpdate = () => {
     if (editingTag) {
       updateTagMutation.mutate({
-        id: editingTag.value,
-        name: editingTag.value,
+        id: editingTag.id,
+        name: editingTag.label,
       });
     }
   };
@@ -113,7 +122,24 @@ export function SelectTags({
             </div>
           )}
           onCreate={(option) => {
-            createTagMutation.mutate({ name: option.value });
+            createTagMutation.mutate(
+              { name: option.value },
+              {
+                onSuccess: (data) => {
+                  if (data) {
+                    const newTag = {
+                      id: data.id,
+                      label: data.name,
+                      value: data.name,
+                    };
+
+                    setSelected([...selected, newTag]);
+                    onCreate?.(newTag);
+                    onSelect?.(newTag);
+                  }
+                },
+              },
+            );
           }}
           onChange={(options) => {
             setSelected(options);

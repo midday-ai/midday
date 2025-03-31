@@ -1,9 +1,13 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import {
   deleteTransactions,
+  updateSimilarTransactionsCategory,
+  updateSimilarTransactionsRecurring,
   updateTransaction,
+  updateTransactions,
 } from "@midday/supabase/mutations";
 import {
+  getSimilarTransactions,
   getTransactionQuery,
   getTransactionsQuery,
 } from "@midday/supabase/queries";
@@ -86,6 +90,87 @@ export const transactionsRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx: { supabase } }) => {
       const { data } = await updateTransaction(supabase, input);
+
+      return data;
+    }),
+
+  updateMany: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string()),
+        category_slug: z.string().nullable().optional(),
+        status: z
+          .enum(["pending", "archived", "completed", "posted", "excluded"])
+          .nullable()
+          .optional(),
+        frequency: z
+          .enum(["weekly", "monthly", "annually", "irregular"])
+          .nullable()
+          .optional(),
+        internal: z.boolean().optional(),
+        note: z.string().nullable().optional(),
+        assigned_id: z.string().nullable().optional(),
+        recurring: z.boolean().optional(),
+        tag_id: z.string().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx: { supabase, teamId } }) => {
+      const { data } = await updateTransactions(supabase, {
+        ...input,
+        team_id: teamId,
+      });
+
+      return data;
+    }),
+
+  getSimilarTransactions: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        categorySlug: z.string().optional(),
+        frequency: z
+          .enum(["weekly", "monthly", "annually", "irregular"])
+          .optional(),
+      }),
+    )
+    .query(async ({ input, ctx: { supabase, teamId } }) => {
+      const { data } = await getSimilarTransactions(supabase, {
+        name: input.name,
+        categorySlug: input.categorySlug,
+        frequency: input.frequency,
+        teamId,
+      });
+
+      return data;
+    }),
+
+  updateSimilarTransactionsCategory: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        categorySlug: z.string().optional(),
+        frequency: z
+          .enum(["weekly", "monthly", "annually", "irregular"])
+          .optional(),
+        recurring: z.boolean().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx: { supabase, teamId } }) => {
+      const { data } = await updateSimilarTransactionsCategory(supabase, {
+        ...input,
+        team_id: teamId,
+      });
+
+      return data;
+    }),
+
+  updateSimilarTransactionsRecurring: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ input, ctx: { supabase, teamId } }) => {
+      const { data } = await updateSimilarTransactionsRecurring(supabase, {
+        id: input.id,
+        team_id: teamId,
+      });
 
       return data;
     }),

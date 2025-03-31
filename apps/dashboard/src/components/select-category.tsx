@@ -2,7 +2,7 @@ import { useTRPC } from "@/trpc/client";
 import { getColorFromName } from "@/utils/categories";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
 import { Spinner } from "@midday/ui/spinner";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { CategoryColor } from "./category";
 
 type Selected = {
@@ -49,16 +49,18 @@ export function SelectCategory({
 
   const categories = data?.map(transformCategory) ?? [];
 
-  // const createCategories = useAction(createCategoriesAction, {
-  //   onSuccess: ({ data }) => {
-  //     const category = data?.at(0);
-
-  //     if (category) {
-  //       setData((prev) => [transformCategory(category), ...prev]);
-  //       onChange(category);
-  //     }
-  //   },
-  // });
+  const createCategoryMutation = useMutation(
+    trpc.transactionCategories.create.mutationOptions({
+      onSuccess: (data) => {
+        // onChange({
+        //   id: data.id,
+        //   name: data.name,
+        //   color: data.color,
+        //   slug: data.slug,
+        // });
+      },
+    }),
+  );
 
   const selectedValue = selected ? transformCategory(selected) : undefined;
 
@@ -73,7 +75,7 @@ export function SelectCategory({
   return (
     <ComboboxDropdown
       headless={headless}
-      // disabled={createCategories.status === "executing"}
+      disabled={createCategoryMutation.isPending}
       placeholder="Select category"
       searchPlaceholder="Search category"
       items={categories}
@@ -86,19 +88,14 @@ export function SelectCategory({
           slug: item.slug,
         });
       }}
-      {...(!headless &&
-        {
-          // onCreate: (value) => {
-          //   createCategories.execute({
-          //     categories: [
-          //       {
-          //         name: value,
-          //         color: getColorFromName(value),
-          //       },
-          //     ],
-          //   });
-          // },
-        })}
+      {...(!headless && {
+        onCreate: (value) => {
+          createCategoryMutation.mutate({
+            name: value,
+            color: getColorFromName(value),
+          });
+        },
+      })}
       renderSelectedItem={(selectedItem) => (
         <div className="flex items-center space-x-2">
           <CategoryColor color={selectedItem.color} />

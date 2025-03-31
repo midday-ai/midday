@@ -1,6 +1,5 @@
 "use client";
 
-import { bulkUpdateTransactionsAction } from "@/actions/bulk-update-transactions-action";
 import { useTransactionsStore } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
@@ -17,8 +16,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SelectCategory } from "./select-category";
 import { SelectUser } from "./select-user";
 
@@ -29,35 +27,40 @@ type Props = {
 export function BulkActions({ ids }: Props) {
   const trpc = useTRPC();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { setRowSelection } = useTransactionsStore();
+
+  const updateTransactionsMutation = useMutation(
+    trpc.transactions.updateMany.mutationOptions({
+      onSuccess: (_, data) => {
+        // Invalidate the transaction list query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+
+        // Reset the row selection
+        setRowSelection({});
+
+        toast({
+          title: `Updated ${data?.ids.length} transactions.`,
+          variant: "success",
+          duration: 3500,
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Something went wrong please try again.",
+          duration: 3500,
+          variant: "error",
+        });
+      },
+    }),
+  );
 
   const { data: tags } = useQuery({
     ...trpc.tags.get.queryOptions(),
     enabled: ids.length > 0,
-  });
-
-  const { setRowSelection } = useTransactionsStore();
-
-  const bulkUpdateTransactions = useAction(bulkUpdateTransactionsAction, {
-    onExecute: ({ input }) => {
-      if (input.type === "status") {
-        setRowSelection({});
-      }
-    },
-    onSuccess: ({ data }) => {
-      setRowSelection({});
-      toast({
-        title: `Updated ${data?.length} transactions.`,
-        variant: "success",
-        duration: 3500,
-      });
-    },
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
   });
 
   return (
@@ -82,12 +85,9 @@ export function BulkActions({ ids }: Props) {
               >
                 <SelectCategory
                   onChange={(selected) => {
-                    bulkUpdateTransactions.execute({
-                      type: "category",
-                      data: ids.map((transaction) => ({
-                        id: transaction,
-                        category_slug: selected.slug,
-                      })),
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      category_slug: selected.slug,
                     });
                   }}
                   headless
@@ -115,12 +115,9 @@ export function BulkActions({ ids }: Props) {
                       key={tag.id}
                       checked={ids.includes(tag.id)}
                       onCheckedChange={() => {
-                        bulkUpdateTransactions.execute({
-                          type: "tags",
-                          data: ids.map((transaction) => ({
-                            id: transaction,
-                            tag_id: tag.id,
-                          })),
+                        updateTransactionsMutation.mutate({
+                          ids,
+                          tag_id: tag.id,
                         });
                       }}
                     >
@@ -145,12 +142,9 @@ export function BulkActions({ ids }: Props) {
               <DropdownMenuSubContent sideOffset={14}>
                 <DropdownMenuCheckboxItem
                   onCheckedChange={() => {
-                    bulkUpdateTransactions.execute({
-                      type: "status",
-                      data: ids.map((transaction) => ({
-                        id: transaction,
-                        internal: true,
-                      })),
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      internal: true,
                     });
                   }}
                 >
@@ -158,12 +152,9 @@ export function BulkActions({ ids }: Props) {
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
                   onCheckedChange={() => {
-                    bulkUpdateTransactions.execute({
-                      type: "status",
-                      data: ids.map((transaction) => ({
-                        id: transaction,
-                        internal: false,
-                      })),
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      internal: false,
                     });
                   }}
                 >
@@ -184,12 +175,9 @@ export function BulkActions({ ids }: Props) {
               <DropdownMenuSubContent sideOffset={14}>
                 <DropdownMenuCheckboxItem
                   onCheckedChange={() => {
-                    bulkUpdateTransactions.execute({
-                      type: "status",
-                      data: ids.map((transaction) => ({
-                        id: transaction,
-                        status: "archived",
-                      })),
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      status: "archived",
                     });
                   }}
                 >
@@ -197,12 +185,9 @@ export function BulkActions({ ids }: Props) {
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
                   onCheckedChange={() => {
-                    bulkUpdateTransactions.execute({
-                      type: "status",
-                      data: ids.map((transaction) => ({
-                        id: transaction,
-                        status: "posted",
-                      })),
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      status: "posted",
                     });
                   }}
                 >
@@ -226,12 +211,9 @@ export function BulkActions({ ids }: Props) {
               >
                 <SelectUser
                   onSelect={(selected) => {
-                    bulkUpdateTransactions.execute({
-                      type: "assigned",
-                      data: ids.map((transaction) => ({
-                        id: transaction,
-                        assigned_id: selected?.id,
-                      })),
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      assigned_id: selected?.id,
                     });
                   }}
                 />
@@ -250,12 +232,9 @@ export function BulkActions({ ids }: Props) {
               <DropdownMenuSubContent sideOffset={14}>
                 <DropdownMenuCheckboxItem
                   onCheckedChange={() => {
-                    bulkUpdateTransactions.execute({
-                      type: "status",
-                      data: ids.map((transaction) => ({
-                        id: transaction,
-                        status: "completed",
-                      })),
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      status: "completed",
                     });
                   }}
                 >
@@ -263,12 +242,9 @@ export function BulkActions({ ids }: Props) {
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
                   onCheckedChange={() => {
-                    bulkUpdateTransactions.execute({
-                      type: "status",
-                      data: ids.map((transaction) => ({
-                        id: transaction,
-                        status: "posted",
-                      })),
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      status: "posted",
                     });
                   }}
                 >
@@ -308,13 +284,14 @@ export function BulkActions({ ids }: Props) {
                   <DropdownMenuCheckboxItem
                     key={item.value}
                     onCheckedChange={() => {
-                      bulkUpdateTransactions.execute({
-                        type: "recurring",
-                        data: ids.map((transaction) => ({
-                          id: transaction,
-                          frequency: item.value,
-                          recurring: item.value !== null,
-                        })),
+                      updateTransactionsMutation.mutate({
+                        ids,
+                        frequency: item.value as
+                          | "weekly"
+                          | "monthly"
+                          | "annually"
+                          | "irregular",
+                        recurring: item.value !== null,
                       });
                     }}
                   >

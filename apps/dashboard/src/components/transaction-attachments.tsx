@@ -1,11 +1,12 @@
 "use client";
 
-import { deleteAttachmentAction } from "@/actions/delete-attachment-action";
 import { useUpload } from "@/hooks/use-upload";
 import { useUserContext } from "@/store/user/hook";
+import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { AttachmentItem } from "./attachment-item";
@@ -18,29 +19,54 @@ type Attachment = {
   size: number;
 };
 
-type ReturnedAttachment = {
-  path: string[];
-  name: string;
-  size: number;
-  type: string;
-};
-
 type Props = {
-  prefix: string;
+  id: string;
   data?: Attachment[];
-  onUpload: (files: ReturnedAttachment[]) => void;
 };
 
-export function Attachments({ prefix, data, onUpload }: Props) {
+export function TransactionAttachments({ id, data }: Props) {
   const { toast } = useToast();
   const [files, setFiles] = useState<Attachment[]>([]);
   const { uploadFile } = useUpload();
 
   const { team_id: teamId } = useUserContext((state) => state.data);
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
-  const handleOnDelete = async (id: string) => {
+  const createAttachmentsMutation = useMutation(
+    trpc.transactionAttachments.createMany.mutationOptions({
+      onSuccess: () => {
+        // invalidate the transaction list query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+        // invalidate the transaction details query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id }),
+        });
+      },
+    }),
+  );
+
+  const deleteattachmentMutation = useMutation(
+    trpc.transactionAttachments.delete.mutationOptions({
+      onSuccess: () => {
+        // invalidate the transaction details query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id }),
+        });
+
+        // invalidate the transaction list query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+      },
+    }),
+  );
+
+  const handleOnDelete = (id: string) => {
     setFiles((files) => files.filter((file) => file?.id !== id));
-    await deleteAttachmentAction(id);
+    deleteattachmentMutation.mutate({ id });
   };
 
   const onDrop = async (acceptedFiles: Array<Attachment>) => {
@@ -60,8 +86,8 @@ export function Attachments({ prefix, data, onUpload }: Props) {
 
         const { path } = await uploadFile({
           bucket: "vault",
-          path: [teamId, "transactions", prefix, filename],
-          file: acceptedFile,
+          path: [teamId, "transactions", id, filename],
+          file: acceptedFile as File,
         });
 
         return {
@@ -73,7 +99,12 @@ export function Attachments({ prefix, data, onUpload }: Props) {
       }),
     );
 
-    onUpload(uploadedFiles);
+    createAttachmentsMutation.mutate(
+      uploadedFiles.map((file) => ({
+        ...file,
+        transaction_id: id,
+      })),
+    );
   };
 
   const handleOnSelectFile = (file) => {
@@ -84,10 +115,11 @@ export function Attachments({ prefix, data, onUpload }: Props) {
       size: file.data.size,
       type: file.data.content_type,
       path: file.data.file_path,
+      transaction_id: id,
     };
 
     setFiles((prev) => [item, ...prev]);
-    onUpload([item]);
+    createAttachmentsMutation.mutate([item]);
   };
 
   useEffect(() => {
