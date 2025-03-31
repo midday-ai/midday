@@ -1,4 +1,4 @@
-import { searchAction } from "@/actions/search-action";
+import { useTRPC } from "@/trpc/client";
 import { Combobox } from "@midday/ui/combobox";
 import {
   HoverCard,
@@ -6,10 +6,10 @@ import {
   HoverCardTrigger,
 } from "@midday/ui/hover-card";
 import { isSupportedFilePreview } from "@midday/utils";
+import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { format } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 
@@ -19,27 +19,18 @@ type Props = {
 };
 
 export function SelectAttachment({ placeholder, onSelect }: Props) {
-  const [items, setItems] = useState([]);
-  const [isLoading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
 
-  const debouncedSearchTerm = useDebounce(query, 300);
+  const debouncedSearchTerm = useDebounce(query, 50);
+  const trpc = useTRPC();
 
-  const search = useAction(searchAction, {
-    onSuccess: ({ data }) => {
-      setItems(data);
-      setLoading(false);
-    },
-    onError: () => setLoading(false),
+  const { data: items, isLoading } = useQuery({
+    ...trpc.inbox.search.queryOptions({
+      query: debouncedSearchTerm,
+      limit: 10,
+    }),
+    enabled: Boolean(debouncedSearchTerm),
   });
-
-  useEffect(() => {
-    if (debouncedSearchTerm) {
-      search.execute({ query: debouncedSearchTerm, type: "inbox" });
-    } else {
-      setLoading(false);
-    }
-  }, [debouncedSearchTerm]);
 
   const options = items?.map((item) => ({
     id: item.id,
@@ -74,7 +65,7 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
             >
               <FilePreview
                 src={`/api/proxy?filePath=vault/${item?.file_path?.join("/")}`}
-                name={item.name}
+                name={item.display_name}
                 type={item.content_type}
                 width={280}
                 height={365}
@@ -92,7 +83,6 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
       className="border border-border p-2 pl-10"
       placeholder={placeholder}
       onValueChange={(query) => {
-        setLoading(true);
         setQuery(query);
       }}
       onSelect={onSelect}

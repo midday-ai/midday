@@ -20,14 +20,16 @@ import {
 } from "@midday/ui/select";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Switch } from "@midday/ui/switch";
+import { ToastAction } from "@midday/ui/toast";
+import { toast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { AssignUser } from "./assign-user";
-import { Attachments } from "./attachments";
 import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
 import { SelectTags } from "./select-tags";
+import { TransactionAttachments } from "./transaction-attachments";
 import { TransactionBankAccount } from "./transaction-bank-account";
 
 export function TransactionDetails() {
@@ -58,33 +60,108 @@ export function TransactionDetails() {
         });
       },
       onMutate: async (variables) => {
-        await queryClient.cancelQueries({
-          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
-        });
+        // Cancel any outgoing refetches
+        await Promise.all([
+          queryClient.cancelQueries({
+            queryKey: trpc.transactions.getById.queryKey({
+              id: transactionId!,
+            }),
+          }),
+          queryClient.cancelQueries({
+            queryKey: trpc.transactions.get.infiniteQueryKey(),
+          }),
+        ]);
 
-        const previousData = queryClient.getQueryData(
-          trpc.transactions.getById.queryKey({ id: transactionId! }),
-        );
+        // Snapshot the previous values
+        const previousData = {
+          details: queryClient.getQueryData(
+            trpc.transactions.getById.queryKey({ id: transactionId! }),
+          ),
+          list: queryClient.getQueryData(
+            trpc.transactions.get.infiniteQueryKey(),
+          ),
+        };
 
+        // Optimistically update details view
         queryClient.setQueryData(
           trpc.transactions.getById.queryKey({ id: transactionId! }),
-          (old: any) => ({
-            ...old,
-            ...variables,
-          }),
+          (old) => {
+            if (variables.category_slug) {
+              const categories = queryClient.getQueryData(
+                trpc.transactionCategories.get.queryKey(),
+              );
+              const category = categories?.find(
+                (c) => c.slug === variables.category_slug,
+              );
+
+              if (category) {
+                return {
+                  ...old,
+                  ...variables,
+                  category,
+                };
+              }
+            }
+
+            return {
+              ...old,
+              ...variables,
+            };
+          },
+        );
+
+        // Optimistically update list view
+        queryClient.setQueryData(
+          trpc.transactions.get.infiniteQueryKey(),
+          (old: any) => {
+            if (!old?.pages) return old;
+
+            return {
+              ...old,
+              pages: old.pages.map((page: any) => ({
+                ...page,
+                data: page.data.map((transaction: any) =>
+                  transaction.id === transactionId
+                    ? {
+                        ...transaction,
+                        ...variables,
+                        ...(variables.category_slug && {
+                          category: queryClient
+                            .getQueryData(
+                              trpc.transactionCategories.get.queryKey(),
+                            )
+                            ?.find((c) => c.slug === variables.category_slug),
+                        }),
+                      }
+                    : transaction,
+                ),
+              })),
+            };
+          },
         );
 
         return { previousData };
       },
       onError: (_, __, context) => {
+        // Revert both caches on error
         queryClient.setQueryData(
           trpc.transactions.getById.queryKey({ id: transactionId! }),
-          context?.previousData,
+          context?.previousData.details,
+        );
+        queryClient.setQueryData(
+          trpc.transactions.get.infiniteQueryKey(),
+          context?.previousData.list,
         );
       },
       onSettled: () => {
+        // invalidate the transaction details query
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
+
+        // invalidate the transaction list query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
       },
     }),
@@ -93,8 +170,14 @@ export function TransactionDetails() {
   const createTransactionTagMutation = useMutation(
     trpc.transactionTags.create.mutationOptions({
       onSuccess: () => {
+        // invalidate the transaction details query
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
+
+        // invalidate the transaction list query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
       },
     }),
@@ -103,6 +186,28 @@ export function TransactionDetails() {
   const deleteTransactionTagMutation = useMutation(
     trpc.transactionTags.delete.mutationOptions({
       onSuccess: () => {
+        // invalidate the transaction details query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
+
+        // invalidate the transaction list query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+      },
+    }),
+  );
+
+  const updateSimilarTransactionsCategoryMutation = useMutation(
+    trpc.transactions.updateSimilarTransactionsCategory.mutationOptions({
+      onSuccess: () => {
+        // invalidate the transaction list query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+
+        // invalidate the transaction details query
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
         });
@@ -199,12 +304,50 @@ export function TransactionDetails() {
           <SelectCategory
             id={transactionId}
             selected={data?.category ?? undefined}
-            onChange={(category) => {
+            onChange={async (category) => {
               if (category) {
                 updateTransactionMutation.mutate({
                   id: data?.id,
                   category_slug: category.slug,
                 });
+
+                const similarTransactions = await queryClient.fetchQuery(
+                  trpc.transactions.getSimilarTransactions.queryOptions({
+                    name: data.name,
+                    categorySlug: category.slug,
+                  }),
+                );
+
+                if (
+                  similarTransactions?.length &&
+                  similarTransactions.length > 1
+                ) {
+                  toast({
+                    duration: 6000,
+                    variant: "ai",
+                    title: "Midday AI",
+                    description: `Do you want to mark ${similarTransactions?.length} similar transactions from ${data?.name} as ${category.name} too?`,
+                    footer: (
+                      <div className="flex space-x-2 mt-4">
+                        <ToastAction altText="Cancel" className="pl-5 pr-5">
+                          Cancel
+                        </ToastAction>
+                        <ToastAction
+                          altText="Yes"
+                          onClick={() => {
+                            updateSimilarTransactionsCategoryMutation.mutate({
+                              name: data.name,
+                              categorySlug: category.slug,
+                            });
+                          }}
+                          className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
+                        >
+                          Yes
+                        </ToastAction>
+                      </div>
+                    ),
+                  });
+                }
               }
             }}
           />
@@ -249,13 +392,13 @@ export function TransactionDetails() {
           onSelect={(tag) => {
             createTransactionTagMutation.mutate({
               tagId: tag.id,
-              transactionId: data?.id,
+              transactionId: transactionId!,
             });
           }}
           onRemove={(tag) => {
             deleteTransactionTagMutation.mutate({
               tagId: tag.id,
-              transactionId: data?.id,
+              transactionId: transactionId!,
             });
           }}
         />
@@ -265,20 +408,7 @@ export function TransactionDetails() {
         <AccordionItem value="attachment">
           <AccordionTrigger>Attachment</AccordionTrigger>
           <AccordionContent className="select-text">
-            <Attachments
-              prefix={data?.id}
-              data={data?.attachments}
-              // onUpload={(files) => {
-              //   if (files) {
-              //     createAttachments.execute(
-              //       files.map((file) => ({
-              //         ...file,
-              //         transaction_id: data?.id,
-              //       })),
-              //     );
-              //   }
-              // }}
-            />
+            <TransactionAttachments id={data?.id} data={data?.attachments} />
           </AccordionContent>
         </AccordionItem>
 
@@ -296,7 +426,7 @@ export function TransactionDetails() {
             </div>
 
             <Switch
-              checked={data?.internal}
+              checked={data?.internal ?? false}
               onCheckedChange={(checked) => {
                 updateTransactionMutation.mutate({
                   id: data?.id,
@@ -318,7 +448,7 @@ export function TransactionDetails() {
                 </p>
               </div>
               <Switch
-                checked={data?.recurring}
+                checked={data?.recurring ?? false}
                 onCheckedChange={(checked) => {
                   updateTransactionMutation.mutate({
                     id: data?.id,
@@ -330,12 +460,59 @@ export function TransactionDetails() {
 
             {data?.recurring && (
               <Select
-                value={data?.frequency}
-                onValueChange={(value) => {
+                value={data?.frequency ?? undefined}
+                onValueChange={async (value) => {
                   updateTransactionMutation.mutate({
                     id: data?.id,
                     frequency: value,
                   });
+
+                  const similarTransactions = await queryClient.fetchQuery(
+                    trpc.transactions.getSimilarTransactions.queryOptions({
+                      name: data.name,
+                      frequency: value as
+                        | "weekly"
+                        | "monthly"
+                        | "annually"
+                        | "irregular",
+                    }),
+                  );
+
+                  if (
+                    similarTransactions?.length &&
+                    similarTransactions.length > 1
+                  ) {
+                    toast({
+                      duration: 6000,
+                      variant: "ai",
+                      title: "Midday AI",
+                      description: `Do you want to mark ${similarTransactions?.length} similar transactions from ${data?.name} as recurring (${value}) too?`,
+                      footer: (
+                        <div className="flex space-x-2 mt-4">
+                          <ToastAction altText="Cancel" className="pl-5 pr-5">
+                            Cancel
+                          </ToastAction>
+                          <ToastAction
+                            altText="Yes"
+                            onClick={() => {
+                              updateSimilarTransactionsCategoryMutation.mutate({
+                                name: data.name,
+                                recurring: true,
+                                frequency: value as
+                                  | "weekly"
+                                  | "monthly"
+                                  | "annually"
+                                  | "irregular",
+                              });
+                            }}
+                            className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
+                          >
+                            Yes
+                          </ToastAction>
+                        </div>
+                      ),
+                    });
+                  }
                 }}
               >
                 <SelectTrigger className="w-full mt-4">

@@ -138,6 +138,43 @@ export async function updateTransaction(
     .single();
 }
 
+type UpdateTransactionsData = {
+  ids: string[];
+  team_id: string;
+  category_slug?: string | null;
+  status?: "pending" | "archived" | "completed" | "posted" | "excluded" | null;
+  internal?: boolean;
+  note?: string | null;
+  assigned_id?: string | null;
+  tag_id?: string | null;
+  recurring?: boolean;
+  frequency?: "weekly" | "monthly" | "annually" | "irregular" | null;
+};
+
+export async function updateTransactions(
+  supabase: Client,
+  data: UpdateTransactionsData,
+) {
+  const { ids, tag_id, team_id, ...input } = data;
+
+  if (tag_id) {
+    // Save transaction tags for each transaction
+    await supabase.from("transaction_tags").insert(
+      ids.map((id) => ({
+        transaction_id: id,
+        tag_id,
+        team_id,
+      })),
+    );
+  }
+
+  return supabase
+    .from("transactions")
+    .update(input)
+    .in("id", ids)
+    .select("id, category, category_slug, team_id, name, status, internal");
+}
+
 export async function updateUser(supabase: Client, data: any) {
   const {
     data: { session },
@@ -258,30 +295,27 @@ export async function updateBankAccount(
 }
 
 type UpdateSimilarTransactionsCategoryParams = {
-  id: string;
   team_id: string;
+  name: string;
+  category_slug?: string | null;
+  frequency?: "weekly" | "monthly" | "annually" | "irregular";
+  recurring?: boolean;
 };
 
 export async function updateSimilarTransactionsCategory(
   supabase: Client,
   params: UpdateSimilarTransactionsCategoryParams,
 ) {
-  const { id, team_id } = params;
-
-  const transaction = await supabase
-    .from("transactions")
-    .select("name, category_slug")
-    .eq("id", id)
-    .single();
-
-  if (!transaction?.data?.category_slug) {
-    return null;
-  }
+  const { name, team_id, category_slug, frequency, recurring } = params;
 
   return supabase
     .from("transactions")
-    .update({ category_slug: transaction.data.category_slug })
-    .textSearch("fts_vector", `${transaction.data.name.replaceAll(" ", "+")}:*`)
+    .update({
+      category_slug,
+      recurring,
+      frequency,
+    })
+    .textSearch("fts_vector", `${name.replaceAll(" ", "+")}:*`)
     .eq("team_id", team_id)
     .select("id, team_id");
 }
@@ -311,11 +345,16 @@ export async function updateSimilarTransactionsRecurring(
     })
     .textSearch(
       "fts_vector",
-      `'${transaction.data.name.replaceAll(" ", "+")}:*'`,
+      `${transaction.data?.name?.replaceAll(" ", "+")}:*`,
     )
     .eq("team_id", team_id)
     .select("id, team_id");
 }
+
+type CreateAttachmentsParams = {
+  attachments: Attachment[];
+  teamId: string;
+};
 
 export type Attachment = {
   type: string;
@@ -327,32 +366,40 @@ export type Attachment = {
 
 export async function createAttachments(
   supabase: Client,
-  attachments: Attachment[],
+  params: CreateAttachmentsParams,
 ) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
+  const { attachments, teamId } = params;
 
-  const { data } = await supabase
+  return supabase
     .from("transaction_attachments")
     .insert(
       attachments.map((attachment) => ({
         ...attachment,
-        team_id: userData?.team_id,
+        team_id: teamId,
       })),
     )
     .select();
-
-  return data;
 }
 
 export async function deleteAttachment(supabase: Client, id: string) {
-  const { data } = await supabase
+  const response = await supabase
     .from("transaction_attachments")
     .delete()
     .eq("id", id)
     .select("id, transaction_id, name, team_id")
     .single();
 
-  return data;
+  // Find inbox by transaction_id and set transaction_id to null
+  if (response?.data?.transaction_id) {
+    await supabase
+      .from("inbox")
+      .update({
+        transaction_id: null,
+      })
+      .eq("transaction_id", response.data.transaction_id);
+  }
+
+  return response;
 }
 
 type CreateTeamParams = {
@@ -509,7 +556,7 @@ export async function createProject(
   return supabase.from("tracker_projects").insert(params).select().single();
 }
 
-type CreateTransactionCategoryParams = {
+type CreateTransactionCategoriesParams = {
   teamId: string;
   categories: {
     name: string;
@@ -521,7 +568,7 @@ type CreateTransactionCategoryParams = {
 
 export async function createTransactionCategories(
   supabase: Client,
-  params: CreateTransactionCategoryParams,
+  params: CreateTransactionCategoriesParams,
 ) {
   const { teamId, categories } = params;
 
@@ -531,6 +578,33 @@ export async function createTransactionCategories(
       team_id: teamId,
     })),
   );
+}
+
+type CreateTransactionCategoryParams = {
+  teamId: string;
+  name: string;
+  color?: string;
+  description?: string;
+  vat?: number;
+};
+
+export async function createTransactionCategory(
+  supabase: Client,
+  params: CreateTransactionCategoryParams,
+) {
+  const { teamId, name, color, description, vat } = params;
+
+  return supabase
+    .from("transaction_categories")
+    .insert({
+      name,
+      color,
+      description,
+      vat,
+      team_id: teamId,
+    })
+    .select()
+    .single();
 }
 
 type UpdateTransactionCategoryParams = {

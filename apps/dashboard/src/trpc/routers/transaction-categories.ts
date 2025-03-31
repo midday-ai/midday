@@ -1,6 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import {
   createTransactionCategories,
+  createTransactionCategory,
   deleteTransactionCategory,
   updateTransactionCategory,
 } from "@midday/supabase/mutations";
@@ -16,22 +17,39 @@ export const transactionCategoriesRouter = createTRPCRouter({
     return data;
   }),
 
+  create: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        color: z.string().optional(),
+        description: z.string().optional(),
+        vat: z.number().optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx: { supabase, teamId } }) => {
+      const { data } = await createTransactionCategory(supabase, {
+        teamId,
+        ...input,
+      });
+
+      return data;
+    }),
+
   createMany: protectedProcedure
     .input(
       z.array(
         z.object({
           name: z.string(),
-          description: z.string().optional(),
-          color: z.string().optional(),
-          vat: z.number().optional(),
         }),
       ),
     )
     .mutation(async ({ input, ctx: { supabase, teamId } }) => {
-      return createTransactionCategories(supabase, {
+      const { data } = await createTransactionCategories(supabase, {
         teamId,
         categories: input,
       });
+
+      return data;
     }),
 
   update: protectedProcedure
@@ -45,12 +63,16 @@ export const transactionCategoriesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx: { supabase } }) => {
-      return updateTransactionCategory(supabase, input);
+      const { data } = await updateTransactionCategory(supabase, input);
+
+      return data;
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx: { supabase } }) => {
-      return deleteTransactionCategory(supabase, input.id);
+      const { data } = await deleteTransactionCategory(supabase, input.id);
+
+      return data;
     }),
 });

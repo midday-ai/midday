@@ -11,7 +11,6 @@ import { parseAsArrayOf, parseAsInteger, useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
 
 export function AmountRange() {
-  const tick_count = 30;
   const minInputRef = useRef<HTMLInputElement>(null);
   const maxInputRef = useRef<HTMLInputElement>(null);
 
@@ -54,8 +53,6 @@ export function AmountRange() {
 
   if (isLoading) return null;
 
-  const amountStep = (maxValue - minValue) / tick_count;
-
   const handleSliderValueChange = (values: number[]) => {
     handleSliderChange(values);
   };
@@ -80,9 +77,7 @@ export function AmountRange() {
           onSubmit={(e) => {
             e.preventDefault();
             if (sliderValue[0] !== undefined && sliderValue[1] !== undefined) {
-              setAmountRange([sliderValue[0], sliderValue[1]], {
-                shallow: false,
-              });
+              setAmountRange([sliderValue[0], sliderValue[1]]);
             }
           }}
         >
@@ -92,7 +87,6 @@ export function AmountRange() {
             </Label>
 
             <CurrencyInput
-              id="min-amount"
               className="w-full font-mono text-xs"
               type="text"
               inputMode="decimal"
@@ -117,7 +111,6 @@ export function AmountRange() {
             </Label>
 
             <CurrencyInput
-              id="max-amount"
               className="w-full font-mono text-xs"
               type="text"
               inputMode="decimal"

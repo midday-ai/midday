@@ -50,6 +50,7 @@ interface FilterCheckboxItemProps {
   id: string;
   name: string;
   checked?: boolean;
+  className?: string;
   onCheckedChange: () => void;
 }
 
@@ -124,12 +125,14 @@ function FilterCheckboxItem({
   name,
   checked = false,
   onCheckedChange,
+  className,
 }: FilterCheckboxItemProps) {
   return (
     <DropdownMenuCheckboxItem
       key={id}
       checked={checked}
       onCheckedChange={onCheckedChange}
+      className={className}
     >
       {name}
     </DropdownMenuCheckboxItem>
@@ -457,6 +460,7 @@ export function TransactionsSearchFilter() {
         <FilterMenuItem icon={Icons.Category} label="Categories">
           <div className="w-[250px] h-[270px]">
             <SelectCategory
+              headless
               onChange={(selected) =>
                 updateArrayFilter(
                   selected.slug,
@@ -465,27 +469,28 @@ export function TransactionsSearchFilter() {
                   "categories",
                 )
               }
-              headless
             />
           </div>
         </FilterMenuItem>
 
         <FilterMenuItem icon={Icons.Status} label="Tags">
-          {tags && tags.length > 0 ? (
-            tags.map((tag) => (
-              <FilterCheckboxItem
-                key={tag.id}
-                id={tag.id}
-                name={tag.name}
-                checked={filter?.tags?.includes(tag.id)}
-                onCheckedChange={() =>
-                  updateArrayFilter(tag.id, filter.tags, setFilter, "tags")
-                }
-              />
-            ))
-          ) : (
-            <p className="text-sm text-[#878787] px-2">No tags found</p>
-          )}
+          <div className="max-h-[400px] overflow-y-auto">
+            {tags && tags.length > 0 ? (
+              tags.map((tag) => (
+                <FilterCheckboxItem
+                  key={tag.id}
+                  id={tag.id}
+                  name={tag.name}
+                  checked={filter?.tags?.includes(tag.id)}
+                  onCheckedChange={() =>
+                    updateArrayFilter(tag.id, filter.tags, setFilter, "tags")
+                  }
+                />
+              ))
+            ) : (
+              <p className="text-sm text-[#878787] px-2">No tags found</p>
+            )}
+          </div>
         </FilterMenuItem>
 
         <FilterMenuItem icon={Icons.Accounts} label="Accounts">
