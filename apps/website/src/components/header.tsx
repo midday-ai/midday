@@ -205,7 +205,7 @@ export function Header() {
           </ContextMenuTrigger>
 
           <ContextMenuContent
-            className="w-[200px] dark:bg-[]dark:bg-[#121212] bg-[#fff] rounded-none"
+            className="w-[200px] rounded-none"
             alignOffset={20}
           >
             <div className="divide-y">
