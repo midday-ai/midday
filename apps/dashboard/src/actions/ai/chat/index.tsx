@@ -14,7 +14,7 @@ import {
 import { startOfMonth, subMonths } from "date-fns";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
-import { getAssistantSettings, saveChat } from "../storage";
+import { saveChat } from "../storage";
 import type { AIState, Chat, ClientMessage, UIState } from "../types";
 import { getBurnRateTool } from "./tools/burn-rate";
 import { getForecastTool } from "./tools/forecast";
@@ -196,7 +196,6 @@ async function handleAIStateUpdate({
 }: { state: AIState; done: boolean }) {
   "use server";
 
-  const settings = await getAssistantSettings();
   const createdAt = new Date();
   const userId = state.user.id;
   const teamId = state.user.team_id;
@@ -217,7 +216,7 @@ async function handleAIStateUpdate({
     teamId,
   };
 
-  if (done && settings?.enabled) {
+  if (done) {
     await saveChat(chat);
   }
 }
