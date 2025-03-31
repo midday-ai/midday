@@ -1,23 +1,13 @@
-import { UTCDate } from "@date-fns/utc";
 import {
   addDays,
   endOfMonth,
   formatISO,
   isWithinInterval,
+  parseISO,
   startOfMonth,
   subYears,
 } from "date-fns";
 import type { Client } from "../types";
-
-function transactionCategory(transaction) {
-  return (
-    transaction?.category ?? {
-      id: "uncategorized",
-      name: "Uncategorized",
-      color: "#606060",
-    }
-  );
-}
 
 export function getPercentageIncrease(a: number, b: number) {
   return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
@@ -198,9 +188,7 @@ export async function getTransactionsQuery(
     amount_range,
   } = filter || {};
 
-  const query = supabase
-    .from("transactions")
-    .select(`
+  const columns = `
       id,
       date,
       amount,
@@ -220,7 +208,11 @@ export async function getTransactionsQuery(
       attachments:transaction_attachments(id, name, size, path, type),
       tags:transaction_tags(id, tag_id, tag:tags(id, name)),
       vat:calculated_vat
-    `)
+    `;
+
+  const query = supabase
+    .from("transactions")
+    .select(columns)
     .eq("team_id", teamId);
 
   // Apply sorting
@@ -253,11 +245,8 @@ export async function getTransactionsQuery(
   }
 
   if (start && end) {
-    const fromDate = new UTCDate(start);
-    const toDate = new UTCDate(end);
-
-    query.gte("date", fromDate.toISOString());
-    query.lte("date", toDate.toISOString());
+    query.gte("date", start);
+    query.lte("date", end);
   }
 
   if (q) {
@@ -297,11 +286,9 @@ export async function getTransactionsQuery(
 
   if (tags) {
     query
-      .select(
-        [...columns, "temp_filter_tags:transaction_tags!inner()"].join(","),
-      )
+      .in("temp_filter_tags.tag_id", tags)
       .eq("team_id", teamId)
-      .in("temp_filter_tags.tag_id", tags);
+      .select(`${columns}, temp_filter_tags:transaction_tags!inner()`);
   }
 
   if (recurring) {
@@ -346,8 +333,9 @@ export async function getTransactionsQuery(
 
   // Convert cursor to offset
   const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
   // TODO: Use cursor instead of range
-  const { data, count } = await query.range(offset, offset + pageSize - 1);
+  const { data } = await query.range(offset, offset + pageSize - 1);
 
   // Generate next cursor (offset)
   const nextCursor =
@@ -357,15 +345,11 @@ export async function getTransactionsQuery(
 
   return {
     meta: {
-      count,
       cursor: nextCursor,
       hasPreviousPage: offset > 0,
       hasNextPage: data && data.length === pageSize,
     },
-    data: data?.map((transaction) => ({
-      ...transaction,
-      category: transactionCategory(transaction),
-    })),
+    data,
   };
 }
 
@@ -376,6 +360,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
       *,
       assigned:assigned_id(*),
       attachments:transaction_attachments(*),
+      category:transaction_categories(id, name, color, slug),
       tags:transaction_tags(id, tag:tags(id, name)),
       bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url)),
       vat:calculated_vat
@@ -444,13 +429,10 @@ export async function getBurnRateQuery(
 ) {
   const { teamId, from, to, currency } = params;
 
-  const fromDate = new UTCDate(from);
-  const toDate = new UTCDate(to);
-
   const { data } = await supabase.rpc("get_burn_rate_v4", {
     team_id: teamId,
-    date_from: startOfMonth(fromDate).toDateString(),
-    date_to: endOfMonth(toDate).toDateString(),
+    date_from: startOfMonth(parseISO(from)).toDateString(),
+    date_to: endOfMonth(parseISO(to)).toDateString(),
     base_currency: currency,
   });
 
@@ -473,13 +455,10 @@ export async function getRunwayQuery(
 ) {
   const { teamId, from, to, currency } = params;
 
-  const fromDate = new UTCDate(from);
-  const toDate = new UTCDate(to);
-
   return supabase.rpc("get_runway_v4", {
     team_id: teamId,
-    date_from: startOfMonth(fromDate).toDateString(),
-    date_to: endOfMonth(toDate).toDateString(),
+    date_from: startOfMonth(parseISO(from)).toDateString(),
+    date_to: endOfMonth(parseISO(to)).toDateString(),
     base_currency: currency,
   });
 }
@@ -500,20 +479,17 @@ export async function getMetricsQuery(
 
   const rpc = type === "profit" ? "get_profit_v3" : "get_revenue_v3";
 
-  const fromDate = new UTCDate(from);
-  const toDate = new UTCDate(to);
-
   const [{ data: prevData }, { data: currentData }] = await Promise.all([
     supabase.rpc(rpc, {
       team_id: teamId,
-      date_from: subYears(startOfMonth(fromDate), 1).toDateString(),
-      date_to: subYears(endOfMonth(toDate), 1).toDateString(),
+      date_from: subYears(startOfMonth(parseISO(from)), 1).toDateString(),
+      date_to: subYears(endOfMonth(parseISO(to)), 1).toDateString(),
       base_currency: currency,
     }),
     supabase.rpc(rpc, {
       team_id: teamId,
-      date_from: startOfMonth(fromDate).toDateString(),
-      date_to: endOfMonth(toDate).toDateString(),
+      date_from: startOfMonth(parseISO(from)).toDateString(),
+      date_to: endOfMonth(parseISO(to)).toDateString(),
       base_currency: currency,
     }),
   ]);
@@ -576,13 +552,10 @@ export async function getExpensesQuery(
 ) {
   const { teamId, from, to, currency } = params;
 
-  const fromDate = new UTCDate(from);
-  const toDate = new UTCDate(to);
-
   const { data } = await supabase.rpc("get_expenses", {
     team_id: teamId,
-    date_from: startOfMonth(fromDate).toDateString(),
-    date_to: endOfMonth(toDate).toDateString(),
+    date_from: startOfMonth(parseISO(from)).toDateString(),
+    date_to: endOfMonth(parseISO(to)).toDateString(),
     base_currency: currency,
   });
 
@@ -1019,7 +992,7 @@ export async function getTrackerRecordsByDateQuery(
       "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency, customer:customer_id(id, name))",
     )
     .eq("team_id", teamId)
-    .eq("date", formatISO(new UTCDate(date), { representation: "date" }));
+    .eq("date", formatISO(parseISO(date), { representation: "date" }));
 
   if (projectId) {
     query.eq("project_id", projectId);
@@ -1066,8 +1039,8 @@ export async function getTrackerRecordsByRangeQuery(
       "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
     )
     .eq("team_id", params.teamId)
-    .gte("date", new UTCDate(params.from).toISOString())
-    .lte("date", new UTCDate(params.to).toISOString())
+    .gte("date", params.from)
+    .lte("date", params.to)
     .order("created_at");
 
   if (params.userId) {
@@ -1216,11 +1189,8 @@ export async function getInvoicesQuery(
   }
 
   if (start && end) {
-    const fromDate = new UTCDate(start);
-    const toDate = new UTCDate(end);
-
-    query.gte("due_date", fromDate.toISOString());
-    query.lte("due_date", toDate.toISOString());
+    query.gte("due_date", from);
+    query.lte("due_date", to);
   }
 
   if (customers?.length) {

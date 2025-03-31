@@ -10,32 +10,58 @@ import { Cookies } from "@/utils/constants";
 import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { toast } from "@midday/ui/use-toast";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseInfiniteQuery,
+} from "@tanstack/react-query";
 import {
   type VisibilityState,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { use, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useInView } from "react-intersection-observer";
+import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
+import { NoResults, NoTransactions } from "./empty-states";
 import { ExportBar } from "./export-bar";
+import { Loading } from "./loading";
 
 export function DataTable({
-  initialColumnVisibility,
-}: { initialColumnVisibility?: VisibilityState }) {
+  columnVisibility: columnVisibilityPromise,
+}: { columnVisibility: Promise<VisibilityState> }) {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { filter } = useTransactionFilterParams();
-  const { setRowSelection, rowSelection, setColumns } = useTransactionsStore();
+  const { setRowSelection, rowSelection, setColumns, setCanDelete } =
+    useTransactionsStore();
   const deferredSearch = useDeferredValue(filter.q);
   const { params } = useSortParams();
   const { ref, inView } = useInView();
-
   const { transactionId, setTransactionId } = useTransactionParams();
+  const { hasFilters } = useTransactionFilterParams();
 
+  const updateTransactionMutation = useMutation(
+    trpc.transactions.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+        toast({
+          title: "Transaction updated",
+          variant: "success",
+        });
+      },
+    }),
+  );
+
+  const showBottomBar = hasFilters && !Object.keys(rowSelection).length;
+  const initialColumnVisibility = use(columnVisibilityPromise);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility ?? {},
   );
@@ -69,11 +95,11 @@ export function DataTable({
   }, [data]);
 
   const ids = useMemo(() => {
-    return tableData.map((row) => row.id);
+    return tableData.map((row) => row?.id);
   }, [tableData]);
 
   const table = useReactTable({
-    getRowId: (row) => row.id,
+    getRowId: (row) => row?.id,
     data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -85,13 +111,34 @@ export function DataTable({
     },
     meta: {
       setOpen: (id: string) => {
-        console.log("setOpen", id);
+        setTransactionId(id);
       },
       copyUrl: (id: string) => {
-        console.log("copyUrl", id);
+        try {
+          window.navigator.clipboard.writeText(
+            `${process.env.NEXT_PUBLIC_URL}/transactions/?transactionId=${id}`,
+          );
+          toast({
+            title: "Transaction URL copied to clipboard",
+            variant: "success",
+          });
+        } catch {
+          toast({
+            title: "Failed to copy transaction URL to clipboard",
+            variant: "error",
+          });
+        }
       },
       updateTransaction: (data: { id: string; status: string }) => {
-        console.log("updateTransaction", data);
+        updateTransactionMutation.mutate({
+          id: data.id,
+          status: data.status as
+            | "pending"
+            | "archived"
+            | "completed"
+            | "posted"
+            | "excluded",
+        });
       },
     },
   });
@@ -106,6 +153,26 @@ export function DataTable({
       data: columnVisibility,
     });
   }, [columnVisibility]);
+
+  useEffect(() => {
+    const transactions = tableData.filter((transaction) => {
+      if (!transaction?.id) return false;
+      const found = rowSelection[transaction.id];
+
+      if (found) {
+        return !transaction?.manual;
+      }
+      return false;
+    });
+
+    if (Object.keys(rowSelection)?.length > 0) {
+      if (transactions.length === 0) {
+        setCanDelete(true);
+      } else {
+        setCanDelete(false);
+      }
+    }
+  }, [rowSelection]);
 
   useHotkeys(
     "ArrowUp, ArrowDown",
@@ -130,6 +197,24 @@ export function DataTable({
     },
     { enabled: !!transactionId },
   );
+
+  if (!tableData.length && !hasFilters) {
+    return (
+      <div className="relative h-[calc(100vh-200px)] overflow-hidden">
+        <NoTransactions />
+        <Loading isEmpty />
+      </div>
+    );
+  }
+
+  if (!tableData.length && hasFilters) {
+    return (
+      <div className="relative h-[calc(100vh-200px)] overflow-hidden">
+        <NoResults />
+        <Loading isEmpty />
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
@@ -190,6 +275,15 @@ export function DataTable({
       </TooltipProvider>
 
       <ExportBar />
+
+      {showBottomBar && (
+        <BottomBar
+          transactions={tableData.map((row) => ({
+            amount: row?.amount ?? 0,
+            currency: row?.currency ?? "",
+          }))}
+        />
+      )}
     </div>
   );
 }

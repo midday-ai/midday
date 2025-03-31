@@ -11,40 +11,65 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
+import { useMemo } from "react";
 
-type Props = {
-  count: number;
-  show: boolean;
-  totalAmount?: {
-    amount: number;
-    currency: string;
-  }[];
+type Transaction = {
+  amount: number;
+  currency: string;
 };
 
-export function BottomBar({ count, show, totalAmount }: Props) {
-  const { locale } = useUserContext((state) => state.data);
-  const multiCurrency = totalAmount && totalAmount.length > 1;
-  const t = useI18n();
-  const first = totalAmount && totalAmount.at(0);
+type Props = {
+  transactions: Transaction[];
+};
 
-  const amountPerCurrency =
-    totalAmount &&
-    totalAmount
-      .map((total) =>
-        formatAmount({
-          amount: total?.amount,
-          currency: total.currency,
-          locale,
-        }),
-      )
-      .join(", ");
+export function BottomBar({ transactions }: Props) {
+  const { locale } = useUserContext((state) => state.data);
+  const t = useI18n();
+  const first = transactions.at(0);
+
+  const totalAmount = useMemo(() => {
+    const totals: Transaction[] = [];
+
+    for (const transaction of transactions) {
+      if (!transaction.amount || !transaction.currency) continue;
+
+      const existingTotal = totals.find(
+        (total) => total.currency === transaction.currency,
+      );
+
+      if (existingTotal) {
+        existingTotal.amount += transaction.amount;
+      } else {
+        totals.push({
+          currency: transaction.currency,
+          amount: transaction.amount,
+        });
+      }
+    }
+
+    return totals;
+  }, [transactions]);
+
+  const multiCurrency = totalAmount && totalAmount.length > 1;
+
+  const amountPerCurrency = totalAmount
+    .map((total) =>
+      formatAmount({
+        amount: total?.amount,
+        currency: total.currency,
+        locale,
+      }),
+    )
+    .join(", ");
 
   return (
     <AnimatePresence>
       <motion.div
         className="h-12 fixed bottom-2 left-0 right-0 pointer-events-none flex justify-center"
-        animate={{ y: show ? 0 : 100 }}
-        initial={{ y: 100 }}
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 100, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
       >
         <div className="pointer-events-auto backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-full space-x-2">
           <TooltipProvider delayDuration={0}>
@@ -73,7 +98,7 @@ export function BottomBar({ count, show, totalAmount }: Props) {
           </TooltipProvider>
 
           <span className="text-sm text-[#878787]">
-            ({t("bottom_bar.transactions", { count })})
+            ({t("bottom_bar.transactions", { count: transactions.length })})
           </span>
         </div>
       </motion.div>

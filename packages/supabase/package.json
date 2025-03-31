@@ -10,16 +10,15 @@
     "db:generate": "supabase gen types --lang=typescript --project-id $PROJECT_ID --schema public > src/types/db.ts"
   },
   "dependencies": {
-    "@date-fns/utc": "^2.1.0",
-    "@supabase/postgrest-js": "^1.19.3",
+    "@supabase/postgrest-js": "^1.19.4",
     "@supabase/ssr": "^0.6.1",
     "date-fns": "^4.1.0",
-    "react": "19.0.0",
+    "react": "19.1.0",
     "server-only": "^0.0.1",
-    "supabase": "^2.20.3"
+    "supabase": "^2.20.5"
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.49.3",
+    "@supabase/supabase-js": "^2.49.4",
     "typescript": "^5.8.2"
   },
   "exports": {
