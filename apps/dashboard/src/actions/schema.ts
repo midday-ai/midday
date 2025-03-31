@@ -376,10 +376,6 @@ export const createBankAccountSchema = z.object({
   currency: z.string().optional(),
 });
 
-export const assistantSettingsSchema = z.object({
-  enabled: z.boolean().optional(),
-});
-
 export const parseDateSchema = z
   .date()
   .transform((value) => new Date(value))
