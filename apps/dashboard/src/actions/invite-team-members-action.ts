@@ -37,7 +37,7 @@ export const inviteTeamMembersAction = authActionClient
         invited_by: user.id,
       }));
 
-      const { data: invtesData } = await supabase
+      const { data: invitesData } = await supabase
         .from("user_invites")
         .upsert(data, {
           onConflict: "email, team_id",
@@ -45,7 +45,7 @@ export const inviteTeamMembersAction = authActionClient
         })
         .select("email, code, user:invited_by(*), team:team_id(*)");
 
-      const emails = invtesData?.map(async (invites) => ({
+      const emails = invitesData?.map(async (invites) => ({
         from: "Midday <middaybot@midday.ai>",
         to: [invites.email],
         subject: t("invite.subject", {
