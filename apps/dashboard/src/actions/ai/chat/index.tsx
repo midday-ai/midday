@@ -4,7 +4,6 @@ import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { openai } from "@ai-sdk/openai";
 import { client as RedisClient } from "@midday/kv";
 import { getUser } from "@midday/supabase/cached-queries";
-import { Ratelimit } from "@upstash/ratelimit";
 import {
   createAI,
   createStreamableValue,
@@ -27,42 +26,13 @@ import { getRevenueTool } from "./tools/revenue";
 import { getRunwayTool } from "./tools/runway";
 import { getSpendingTool } from "./tools/spending";
 
-const ratelimit = new Ratelimit({
-  limiter: Ratelimit.fixedWindow(10, "10s"),
-  redis: RedisClient,
-});
-
 export async function submitUserMessage(
   content: string,
 ): Promise<ClientMessage> {
   "use server";
   const ip = (await headers()).get("x-forwarded-for");
-  const { success } = await ratelimit.limit(ip);
 
   const aiState = getMutableAIState<typeof AI>();
-
-  if (!success) {
-    aiState.update({
-      ...aiState.get(),
-      messages: [
-        ...aiState.get().messages,
-        {
-          id: nanoid(),
-          role: "assistant",
-          content:
-            "Not so fast, tiger. You've reached your message limit. Please wait a minute and try again.",
-        },
-      ],
-    });
-
-    return {
-      id: nanoid(),
-      role: "assistant",
-      display: (
-        <BotMessage content="Not so fast, tiger. You've reached your message limit. Please wait a minute and try again." />
-      ),
-    };
-  }
 
   const user = await getUser();
   const teamId = user?.data?.team_id as string;

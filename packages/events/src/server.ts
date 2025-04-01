@@ -10,6 +10,7 @@ type Props = {
 export const setupAnalytics = async (options?: Props) => {
   const { userId, fullName } = options ?? {};
   const cookieStore = await cookies();
+
   const trackingConsent =
     !cookieStore.has("tracking-consent") ||
     cookieStore.get("tracking-consent")?.value === "1";

@@ -3,8 +3,6 @@ import { createClient } from "@midday/supabase/server";
 import { download } from "@midday/supabase/storage";
 import type { NextRequest, NextResponse } from "next/server";
 
-export const preferredRegion = ["fra1", "sfo1", "iad1"];
-
 export async function GET(req: NextRequest, res: NextResponse) {
   const supabase = await createClient();
   const user = await getUser();
