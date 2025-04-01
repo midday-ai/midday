@@ -18,16 +18,22 @@ export const changeTeamAction = authActionClient
     },
   })
   .action(
-    async ({ parsedInput: { teamId, redirectTo }, ctx: { supabase } }) => {
+    async ({
+      parsedInput: { teamId, redirectTo },
+      ctx: { supabase, user },
+    }) => {
       await setTeamId(teamId);
 
-      const user = await updateUser(supabase, { team_id: teamId });
+      const { data } = await updateUser(supabase, {
+        id: user.id,
+        team_id: teamId,
+      });
 
-      if (!user?.data) {
+      if (!data) {
         return;
       }
 
-      revalidateTag(`user_${user.data.id}`);
+      revalidateTag(`user_${data.id}`);
 
       redirect(redirectTo);
     },

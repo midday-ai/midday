@@ -1,7 +1,7 @@
 "use client";
 
-import { updateUserAction } from "@/actions/update-user-action";
 import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 import {
   Card,
   CardContent,
@@ -10,24 +10,18 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
-import { useOptimisticAction } from "next-safe-action/hooks";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 
 type Props = {
-  timezone: string;
   timezones: { tzCode: string; name: string }[];
 };
 
-export function ChangeTimezone({ timezone, timezones }: Props) {
+export function ChangeTimezone({ timezones }: Props) {
   const t = useI18n();
+  const trpc = useTRPC();
 
-  const { execute, optimisticState } = useOptimisticAction(updateUserAction, {
-    currentState: { timezone },
-    updateFn: (state, newTimezone) => {
-      return {
-        timezone: newTimezone.timezone ?? state.timezone,
-      };
-    },
-  });
+  const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
+  const updateUserMutation = useMutation(trpc.user.update.mutationOptions());
 
   const timezoneItems = timezones.map((tz, id) => ({
     id: id.toString(),
@@ -47,13 +41,13 @@ export function ChangeTimezone({ timezone, timezones }: Props) {
           <ComboboxDropdown
             placeholder={t("timezone.placeholder")}
             selectedItem={timezoneItems.find(
-              (item) => item.value === optimisticState.timezone,
+              (item) => item.value === user.timezone,
             )}
             searchPlaceholder={t("timezone.searchPlaceholder")}
             items={timezoneItems}
             className="text-xs py-1"
             onSelect={(item) => {
-              execute({ timezone: item.value });
+              updateUserMutation.mutate({ timezone: item.value });
             }}
           />
         </div>

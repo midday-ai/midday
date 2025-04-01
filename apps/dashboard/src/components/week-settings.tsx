@@ -1,6 +1,6 @@
 "use client";
 
-import { updateUserAction } from "@/actions/update-user-action";
+import { useTRPC } from "@/trpc/client";
 import {
   Card,
   CardContent,
@@ -9,14 +9,13 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { Switch } from "@midday/ui/switch";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 
-type Props = {
-  weekStartsOnMonday: boolean;
-};
+export function WeekSettings() {
+  const trpc = useTRPC();
+  const updateUserMutation = useMutation(trpc.user.update.mutationOptions());
 
-export function WeekSettings({ weekStartsOnMonday }: Props) {
-  const action = useAction(updateUserAction);
+  const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
 
   return (
     <Card className="flex justify-between items-center">
@@ -29,10 +28,10 @@ export function WeekSettings({ weekStartsOnMonday }: Props) {
 
       <CardContent>
         <Switch
-          checked={weekStartsOnMonday}
-          disabled={action.status === "executing"}
+          checked={user.week_starts_on_monday ?? false}
+          disabled={updateUserMutation.isPending}
           onCheckedChange={(week_starts_on_monday: boolean) => {
-            action.execute({ week_starts_on_monday });
+            updateUserMutation.mutate({ week_starts_on_monday });
           }}
         />
       </CardContent>

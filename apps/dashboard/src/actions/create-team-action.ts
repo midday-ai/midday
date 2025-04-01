@@ -17,21 +17,23 @@ export const createTeamAction = authActionClient
       channel: LogEvents.CreateTeam.channel,
     },
   })
-  .action(async ({ parsedInput: { name, redirectTo }, ctx: { supabase } }) => {
-    const currency = await getCurrency();
-    const team_id = await createTeam(supabase, { name, currency });
-    const user = await updateUser(supabase, { team_id });
+  .action(
+    async ({ parsedInput: { name, redirectTo }, ctx: { supabase, user } }) => {
+      const currency = await getCurrency();
+      const team_id = await createTeam(supabase, { name, currency });
+      const { data } = await updateUser(supabase, { id: user.id, team_id });
 
-    if (!user?.data) {
-      return;
-    }
+      if (!data) {
+        return;
+      }
 
-    revalidateTag(`user_${user.data.id}`);
-    revalidateTag(`teams_${user.data.id}`);
+      revalidateTag(`user_${data.id}`);
+      revalidateTag(`teams_${data.id}`);
 
-    if (redirectTo) {
-      redirect(redirectTo);
-    }
+      if (redirectTo) {
+        redirect(redirectTo);
+      }
 
-    return team_id;
-  });
+      return team_id;
+    },
+  );

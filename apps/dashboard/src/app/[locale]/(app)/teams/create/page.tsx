@@ -3,7 +3,6 @@ import { UserMenu } from "@/components/user-menu";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Create Team | Midday",
@@ -20,9 +19,7 @@ export default async function CreateTeam() {
         </div>
 
         <div className="mr-5 mt-4 md:mr-10 md:mt-10">
-          <Suspense>
-            <UserMenu onlySignOut />
-          </Suspense>
+          <UserMenu onlySignOut />
         </div>
       </header>
 

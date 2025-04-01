@@ -1,5 +1,6 @@
 "use client";
 
+import { useTRPC } from "@/trpc/client";
 import {
   Card,
   CardDescription,
@@ -7,15 +8,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { AvatarUpload } from "./avatar-upload";
 
-type Props = {
-  userId: string;
-  avatarUrl: string;
-  fullName: string;
-};
+export function UserAvatar() {
+  const trpc = useTRPC();
 
-export function UserAvatar({ userId, avatarUrl, fullName }: Props) {
+  const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
+
   return (
     <Card>
       <div className="flex justify-between items-center pr-6">
@@ -27,11 +27,7 @@ export function UserAvatar({ userId, avatarUrl, fullName }: Props) {
           </CardDescription>
         </CardHeader>
 
-        <AvatarUpload
-          userId={userId}
-          avatarUrl={avatarUrl}
-          fullName={fullName}
-        />
+        <AvatarUpload userId={user.id} avatarUrl={user.avatar_url} />
       </div>
       <CardFooter>An avatar is optional but strongly recommended.</CardFooter>
     </Card>

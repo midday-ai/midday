@@ -1,9 +1,7 @@
 "use client";
 
-import { type UpdateUserFormValues, updateUserSchema } from "@/actions/schema";
-import { updateUserAction } from "@/actions/update-user-action";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@midday/ui/button";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 import {
   Card,
   CardContent,
@@ -20,28 +18,28 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
+import { SubmitButton } from "@midday/ui/submit-button";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { z } from "zod";
 
-type Props = {
-  email: string;
-};
+const formSchema = z.object({
+  email: z.string().email(),
+});
 
-export function ChangeEmail({ email }: Props) {
-  const action = useAction(updateUserAction);
+export function ChangeEmail() {
+  const trpc = useTRPC();
+  const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
+  const updateUserMutation = useMutation(trpc.user.update.mutationOptions());
 
-  const form = useForm<UpdateUserFormValues>({
-    resolver: zodResolver(updateUserSchema),
+  const form = useZodForm(formSchema, {
     defaultValues: {
-      email,
+      email: user.email ?? undefined,
     },
   });
 
   const onSubmit = form.handleSubmit((data) => {
-    action.execute({
-      email: data?.email,
-      revalidatePath: "/account",
+    updateUserMutation.mutate({
+      email: data.email,
     });
   });
 
@@ -81,18 +79,12 @@ export function ChangeEmail({ email }: Props) {
             <div>
               This is your primary email address for notifications and more.
             </div>
-            <Button
+            <SubmitButton
               type="submit"
-              disabled={
-                action.status === "executing" || !form.formState.isDirty
-              }
+              isSubmitting={updateUserMutation.isPending}
             >
-              {action.status === "executing" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Save"
-              )}
-            </Button>
+              Save
+            </SubmitButton>
           </CardFooter>
         </Card>
       </form>
