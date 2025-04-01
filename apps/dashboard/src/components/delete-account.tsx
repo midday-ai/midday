@@ -1,6 +1,7 @@
 "use client";
 
-import { deleteUserAction } from "@/actions/delete-user-action";
+import { useTRPC } from "@/trpc/client";
+import { createClient } from "@midday/supabase/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,11 +23,25 @@ import {
 } from "@midday/ui/card";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
+import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export function DeleteAccount() {
-  const [isPending, startTransition] = useTransition();
+  const supabase = createClient();
+  const trpc = useTRPC();
+  const router = useRouter();
+
+  const deleteUserMutation = useMutation(
+    trpc.user.delete.mutationOptions({
+      onSuccess: async () => {
+        await supabase.auth.signOut();
+        router.push("/");
+      },
+    }),
+  );
+
   const [value, setValue] = useState("");
 
   return (
@@ -74,10 +89,10 @@ export function DeleteAccount() {
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                onClick={() => startTransition(() => deleteUserAction())}
+                onClick={() => deleteUserMutation.mutate()}
                 disabled={value !== "DELETE"}
               >
-                {isPending ? (
+                {deleteUserMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Continue"

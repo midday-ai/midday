@@ -1,4 +1,5 @@
-import { updateUser } from "@midday/supabase/mutations";
+import { resend } from "@/utils/resend";
+import { deleteUser, updateUser } from "@midday/supabase/mutations";
 import { getUserQuery } from "@midday/supabase/queries";
 import { z } from "zod";
 import { protectedProcedure } from "../init";
@@ -34,4 +35,18 @@ export const userRouter = createTRPCRouter({
 
       return data;
     }),
+
+  delete: protectedProcedure.mutation(
+    async ({ ctx: { supabase, session } }) => {
+      await deleteUser(supabase, {
+        id: session.user.id,
+      });
+
+      // Remove user from resend audience
+      await resend.contacts.remove({
+        email: session.user.email!,
+        audienceId: process.env.RESEND_AUDIENCE_ID!,
+      });
+    },
+  ),
 });

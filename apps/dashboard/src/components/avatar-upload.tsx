@@ -5,7 +5,7 @@ import { useTRPC } from "@/trpc/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Icons } from "@midday/ui/icons";
 import { stripSpecialCharacters } from "@midday/utils";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { forwardRef } from "react";
@@ -22,7 +22,17 @@ export const AvatarUpload = forwardRef<HTMLInputElement, Props>(
     const [avatar, setAvatar] = useState(initialAvatarUrl);
     const inputRef = useRef<HTMLInputElement>(null);
     const trpc = useTRPC();
-    const updateUserMutation = useMutation(trpc.user.update.mutationOptions());
+    const queryClient = useQueryClient();
+
+    const updateUserMutation = useMutation(
+      trpc.user.update.mutationOptions({
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: trpc.user.me.queryKey(),
+          });
+        },
+      }),
+    );
 
     const { isLoading, uploadFile } = useUpload();
 

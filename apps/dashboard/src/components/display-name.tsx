@@ -1,7 +1,7 @@
 "use client";
 
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
-import { useTRPC } from "@/trpc/client";
 import {
   Card,
   CardContent,
@@ -19,8 +19,6 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -28,9 +26,8 @@ const formSchema = z.object({
 });
 
 export function DisplayName() {
-  const trpc = useTRPC();
-  const updateUserMutation = useMutation(trpc.user.update.mutationOptions());
-  const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
+  const { data: user } = useUserQuery();
+  const updateUserMutation = useUserMutation();
 
   const form = useZodForm(formSchema, {
     defaultValues: {

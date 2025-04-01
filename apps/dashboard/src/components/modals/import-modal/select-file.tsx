@@ -1,6 +1,6 @@
 import { getTransactionsFromLayout } from "@/actions/transactions/get-transactions-from-layout";
 import { useUpload } from "@/hooks/use-upload";
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { cn } from "@midday/ui/cn";
 import { Spinner } from "@midday/ui/spinner";
 import { stripSpecialCharacters } from "@midday/utils";
@@ -19,7 +19,7 @@ export function SelectFile() {
   const [isLoading, setIsLoading] = useState(false);
   const { uploadFile } = useUpload();
 
-  const { team_id: teamId } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   const getTransactions = useAction(getTransactionsFromLayout, {
     onSuccess: ({ data }) => {
@@ -56,7 +56,7 @@ export function SelectFile() {
 
         const { path } = await uploadFile({
           bucket: "vault",
-          path: [teamId, "imports", filename],
+          path: [user?.team_id, "imports", filename],
           file,
         });
 

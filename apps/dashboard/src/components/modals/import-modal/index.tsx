@@ -3,7 +3,7 @@
 import { importTransactionsAction } from "@/actions/transactions/import-transactions";
 import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useUpload } from "@/hooks/use-upload";
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import { Button } from "@midday/ui/button";
@@ -47,7 +47,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
     null,
   );
 
-  const { team_id: teamId } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   const [pageNumber, setPageNumber] = useState<number>(0);
   const page = pages[pageNumber];
@@ -220,7 +220,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                         const filename = stripSpecialCharacters(data.file.name);
                         const { path } = await uploadFile({
                           bucket: "vault",
-                          path: [teamId, "imports", filename],
+                          path: [user?.team_id, "imports", filename],
                           file,
                         });
 

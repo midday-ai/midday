@@ -1,6 +1,6 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 import {
   Card,
   CardContent,
@@ -9,13 +9,10 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { Switch } from "@midday/ui/switch";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 
 export function WeekSettings() {
-  const trpc = useTRPC();
-  const updateUserMutation = useMutation(trpc.user.update.mutationOptions());
-
-  const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
+  const { data: user } = useUserQuery();
+  const updateUserMutation = useUserMutation();
 
   return (
     <Card className="flex justify-between items-center">

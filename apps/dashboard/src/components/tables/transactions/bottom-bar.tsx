@@ -1,7 +1,7 @@
 "use client";
 
+import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
-import { useUserContext } from "@/store/user/hook";
 import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -23,7 +23,7 @@ type Props = {
 };
 
 export function BottomBar({ transactions }: Props) {
-  const { locale } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
   const t = useI18n();
   const first = transactions.at(0);
 
@@ -57,7 +57,7 @@ export function BottomBar({ transactions }: Props) {
       formatAmount({
         amount: total?.amount,
         currency: total.currency,
-        locale,
+        locale: user?.locale,
       }),
     )
     .join(", ");
@@ -83,7 +83,7 @@ export function BottomBar({ transactions }: Props) {
                       formatAmount({
                         amount: first?.amount,
                         currency: first?.currency,
-                        locale,
+                        locale: user?.locale,
                         maximumFractionDigits: 0,
                         minimumFractionDigits: 0,
                       })}

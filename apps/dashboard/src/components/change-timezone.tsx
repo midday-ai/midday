@@ -1,7 +1,7 @@
 "use client";
 
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
-import { useTRPC } from "@/trpc/client";
 import {
   Card,
   CardContent,
@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 
 type Props = {
   timezones: { tzCode: string; name: string }[];
@@ -18,10 +17,9 @@ type Props = {
 
 export function ChangeTimezone({ timezones }: Props) {
   const t = useI18n();
-  const trpc = useTRPC();
 
-  const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
-  const updateUserMutation = useMutation(trpc.user.update.mutationOptions());
+  const { data: user } = useUserQuery();
+  const updateUserMutation = useUserMutation();
 
   const timezoneItems = timezones.map((tz, id) => ({
     id: id.toString(),
