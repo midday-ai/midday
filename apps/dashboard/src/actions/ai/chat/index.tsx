@@ -2,7 +2,6 @@
 
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { openai } from "@ai-sdk/openai";
-import { client as RedisClient } from "@midday/kv";
 import { getUser } from "@midday/supabase/cached-queries";
 import {
   createAI,
@@ -12,7 +11,6 @@ import {
 } from "ai/rsc";
 import { startOfMonth, subMonths } from "date-fns";
 import { nanoid } from "nanoid";
-import { headers } from "next/headers";
 import { saveChat } from "../storage";
 import type { AIState, Chat, ClientMessage, UIState } from "../types";
 import { getBurnRateTool } from "./tools/burn-rate";
@@ -30,7 +28,6 @@ export async function submitUserMessage(
   content: string,
 ): Promise<ClientMessage> {
   "use server";
-  const ip = (await headers()).get("x-forwarded-for");
 
   const aiState = getMutableAIState<typeof AI>();
 

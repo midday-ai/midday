@@ -1,6 +1,6 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
+import { useUserQuery } from "@/hooks/use-user";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import {
   DropdownMenu,
@@ -12,7 +12,6 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { SignOut } from "./sign-out";
 import { ThemeSwitch } from "./theme-switch";
@@ -22,8 +21,7 @@ type Props = {
 };
 
 export function UserMenu({ onlySignOut }: Props) {
-  const trpc = useTRPC();
-  const { data: user } = useQuery(trpc.user.me.queryOptions());
+  const { data: user } = useUserQuery();
 
   return (
     <DropdownMenu>

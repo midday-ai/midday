@@ -186,22 +186,35 @@ export async function updateUser(supabase: Client, data: UpdateUserParams) {
   return supabase.from("users").update(input).eq("id", id).select().single();
 }
 
-export async function deleteUser(supabase: Client) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+type DeleteUserParams = {
+  id: string;
+};
 
-  if (!session?.user) {
-    return;
-  }
+export async function deleteUser(supabase: Client, params: DeleteUserParams) {
+  const { id } = params;
+
+  const { data: membersData } = await supabase
+    .from("users_on_team")
+    .select("team_id, team:team_id(id, name, members:users_on_team(id))")
+    .eq("user_id", id);
+
+  // Delete teams with only one member
+  const teamIds = membersData
+    ?.filter(({ team }) => team?.members.length === 1)
+    .map(({ team_id }) => team_id);
 
   await Promise.all([
-    supabase.auth.admin.deleteUser(session.user.id),
-    supabase.from("users").delete().eq("id", session.user.id),
-    supabase.auth.signOut(),
+    supabase.auth.admin.deleteUser(id),
+    supabase.from("users").delete().eq("id", id),
+    supabase
+      .from("teams")
+      .delete()
+      .in("id", teamIds ?? []),
   ]);
 
-  return session.user.id;
+  return {
+    id,
+  };
 }
 
 export async function updateTeam(supabase: Client, data: any) {

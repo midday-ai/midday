@@ -1,6 +1,6 @@
 "use client";
 
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount } from "@/utils/format";
 
 type Props = {
@@ -18,10 +18,10 @@ export function FormatAmount({
   minimumFractionDigits,
   locale,
 }: Props) {
-  const { data } = useUserContext((state) => state);
+  const { data: user } = useUserQuery();
 
   return formatAmount({
-    locale: locale || data?.locale,
+    locale: locale || user?.locale,
     amount: amount,
     currency: currency,
     maximumFractionDigits,

@@ -3,7 +3,7 @@
 import { generateCsvMapping } from "@/actions/ai/generate-csv-mapping";
 import { SelectAccount } from "@/components/select-account";
 import { SelectCurrency } from "@/components/select-currency";
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount } from "@/utils/format";
 import { formatAmountValue, formatDate } from "@midday/import";
 import {
@@ -13,7 +13,6 @@ import {
   AccordionTrigger,
 } from "@midday/ui/accordion";
 import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import {
   Select,
@@ -189,7 +188,7 @@ function FieldRow({
 }) {
   const { label, required } = mappableFields[field];
   const { control, watch, fileColumns, firstRows } = useCsvContext();
-  const { locale, timezone } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   const value = watch(field);
   const inverted = watch("inverted");
@@ -204,14 +203,14 @@ function FieldRow({
     if (!description) return;
 
     if (field === "date") {
-      return formatDate(description, timezone);
+      return formatDate(description, user?.timezone);
     }
 
     if (field === "amount") {
       const amount = formatAmountValue({ amount: description, inverted });
 
       if (currency) {
-        return formatAmount({ currency, amount, locale });
+        return formatAmount({ currency, amount, locale: user?.locale });
       }
 
       return amount;
@@ -224,7 +223,11 @@ function FieldRow({
       const balance = +(amount * -1);
 
       if (currency) {
-        return formatAmount({ currency, amount: balance, locale });
+        return formatAmount({
+          currency,
+          amount: balance,
+          locale: user?.locale,
+        });
       }
 
       return balance;

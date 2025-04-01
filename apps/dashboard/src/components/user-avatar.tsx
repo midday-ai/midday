@@ -1,6 +1,6 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
+import { useUserQuery } from "@/hooks/use-user";
 import {
   Card,
   CardDescription,
@@ -8,13 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { AvatarUpload } from "./avatar-upload";
 
 export function UserAvatar() {
-  const trpc = useTRPC();
-
-  const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
+  const { data: user } = useUserQuery();
 
   return (
     <Card>

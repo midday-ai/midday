@@ -1,6 +1,6 @@
 "use client";
 
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount } from "@/utils/format";
 import { CategoryColor } from "../category";
 
@@ -19,7 +19,7 @@ export function SpendingCategoryItem({
   currency,
   percentage,
 }: Props) {
-  const { locale } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   return (
     <div className="px-3 py-1 flex justify-between items-center space-x-12">
@@ -30,7 +30,7 @@ export function SpendingCategoryItem({
             formatAmount({
               amount: amount,
               currency,
-              locale,
+              locale: user?.locale,
               maximumFractionDigits: 0,
               minimumFractionDigits: 0,
             })}

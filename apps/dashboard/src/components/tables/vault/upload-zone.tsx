@@ -1,7 +1,7 @@
 "use client";
 
 import { invalidateCacheAction } from "@/actions/invalidate-cache-action";
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { useVaultContext } from "@/store/vault/hook";
 import { resumableUpload } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
@@ -32,8 +32,7 @@ export function UploadZone({ children }: Props) {
   const folders = params?.folders ?? [];
   const { toast, dismiss, update } = useToast();
   const { createFolder } = useVaultContext((s) => s);
-
-  const { team_id: teamId } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   const isDefaultFolder = [
     "exports",
@@ -72,7 +71,7 @@ export function UploadZone({ children }: Props) {
 
     setShowProgress(true);
 
-    const filePath = [teamId, ...folders];
+    const filePath = [user?.team_id, ...folders];
 
     try {
       await Promise.all(
@@ -110,7 +109,7 @@ export function UploadZone({ children }: Props) {
       setShowProgress(false);
       setToastId(null);
       dismiss(toastId);
-      invalidateCacheAction([`vault_${teamId}`]);
+      invalidateCacheAction([`vault_${user?.team_id}`]);
     } catch {
       toast({
         duration: 2500,

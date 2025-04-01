@@ -1,7 +1,7 @@
 "use client";
 
 import { useUpload } from "@/hooks/use-upload";
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
@@ -28,9 +28,8 @@ export function TransactionAttachments({ id, data }: Props) {
   const { toast } = useToast();
   const [files, setFiles] = useState<Attachment[]>([]);
   const { uploadFile } = useUpload();
-
-  const { team_id: teamId } = useUserContext((state) => state.data);
   const trpc = useTRPC();
+  const { data: user } = useUserQuery();
   const queryClient = useQueryClient();
 
   const createAttachmentsMutation = useMutation(
@@ -86,7 +85,7 @@ export function TransactionAttachments({ id, data }: Props) {
 
         const { path } = await uploadFile({
           bucket: "vault",
-          path: [teamId, "transactions", id, filename],
+          path: [user?.team_id, "transactions", id, filename],
           file: acceptedFile as File,
         });
 

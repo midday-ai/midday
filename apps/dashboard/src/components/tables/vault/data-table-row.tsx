@@ -9,8 +9,8 @@ import { AssignedUser } from "@/components/assigned-user";
 import { FileIcon } from "@/components/file-icon";
 import { FilePreview } from "@/components/file-preview";
 import { SelectTag } from "@/components/select-tag";
+import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
-import { useUserContext } from "@/store/user/hook";
 import { useVaultContext } from "@/store/vault/hook";
 import { formatDate, formatSize } from "@/utils/format";
 import {
@@ -179,7 +179,7 @@ export function DataTableRow({ data }: { data: any }) {
   const params = useParams();
   const updateDocument = useAction(updateDocumentAction);
   const { deleteItem, createFolder } = useVaultContext((s) => s);
-  const { date_format: dateFormat } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   const folders = params?.folders ?? [];
   const isDefaultFolder = [
@@ -300,7 +300,9 @@ export function DataTableRow({ data }: { data: any }) {
               <Tag name={data.tag} />
             </TableCell>
             <TableCell>
-              {data?.created_at ? formatDate(data.created_at, dateFormat) : "-"}
+              {data?.created_at
+                ? formatDate(data.created_at, user?.date_format)
+                : "-"}
             </TableCell>
             <TableCell>
               <DropdownMenu>

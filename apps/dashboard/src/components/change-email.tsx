@@ -1,7 +1,7 @@
 "use client";
 
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
-import { useTRPC } from "@/trpc/client";
 import {
   Card,
   CardContent,
@@ -19,7 +19,6 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -27,9 +26,8 @@ const formSchema = z.object({
 });
 
 export function ChangeEmail() {
-  const trpc = useTRPC();
-  const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
-  const updateUserMutation = useMutation(trpc.user.update.mutationOptions());
+  const { data: user } = useUserQuery();
+  const updateUserMutation = useUserMutation();
 
   const form = useZodForm(formSchema, {
     defaultValues: {

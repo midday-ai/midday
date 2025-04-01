@@ -1,7 +1,7 @@
 "use client";
 
+import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
-import { useUserContext } from "@/store/user/hook";
 import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { format } from "date-fns";
@@ -18,7 +18,7 @@ import {
 
 const ToolTipContent = ({ payload = [] }) => {
   const t = useI18n();
-  const { locale } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   const current = payload[0]?.payload;
 
@@ -40,7 +40,7 @@ const ToolTipContent = ({ payload = [] }) => {
                 minimumFractionDigits: 0,
                 currency: current.currency,
                 amount: current.total,
-                locale,
+                locale: user?.locale,
               })}
             </p>
           </div>
@@ -57,7 +57,7 @@ const ToolTipContent = ({ payload = [] }) => {
                 currency: current.currency,
                 maximumFractionDigits: 0,
                 minimumFractionDigits: 0,
-                locale,
+                locale: user?.locale,
               })}
             </p>
           </div>
