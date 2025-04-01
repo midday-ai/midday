@@ -1,11 +1,11 @@
+import { useQueryStates } from "nuqs";
 import {
+  createLoader,
   parseAsArrayOf,
   parseAsInteger,
   parseAsString,
   parseAsStringLiteral,
-  useQueryStates,
-} from "nuqs";
-import { createSearchParamsCache } from "nuqs/server";
+} from "nuqs/server";
 
 export const transactionFilterParamsSchema = {
   q: parseAsString,
@@ -41,6 +41,6 @@ export function useTransactionFilterParams() {
   };
 }
 
-export const transactionFilterParamsCache = createSearchParamsCache(
+export const loadTransactionFilterParams = createLoader(
   transactionFilterParamsSchema,
 );

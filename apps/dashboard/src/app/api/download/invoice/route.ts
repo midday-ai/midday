@@ -4,9 +4,6 @@ import { createClient } from "@midday/supabase/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 
-export const preferredRegion = ["fra1", "sfo1", "iad1"];
-export const dynamic = "force-dynamic";
-
 const paramsSchema = z.object({
   id: z.string().uuid(),
   size: z.enum(["letter", "a4"]).default("a4"),

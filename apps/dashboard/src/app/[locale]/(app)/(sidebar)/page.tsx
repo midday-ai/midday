@@ -10,10 +10,6 @@ import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 
-// NOTE: GoCardLess serverAction needs this currently
-// (Fetch accounts takes up to 20s and default limit is 15s)
-export const maxDuration = 30;
-
 export const metadata: Metadata = {
   title: "Overview | Midday",
 };
@@ -24,7 +20,9 @@ const defaultValue = {
   period: "monthly",
 };
 
-export default async function Overview(props) {
+export default async function Overview(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const searchParams = await props.searchParams;
   const accounts = await getTeamBankAccounts();
   const chartType = (await cookies()).get(Cookies.ChartType)?.value ?? "profit";
@@ -32,7 +30,7 @@ export default async function Overview(props) {
   const hideConnectFlow = (await cookies()).has(Cookies.HideConnectFlow);
 
   const initialPeriod = (await cookies()).has(Cookies.SpendingPeriod)
-    ? JSON.parse((await cookies()).get(Cookies.SpendingPeriod)?.value)
+    ? JSON.parse((await cookies()).get(Cookies.SpendingPeriod)?.value ?? "")
     : {
         id: "this_year",
         from: startOfYear(new Date()).toISOString(),

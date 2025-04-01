@@ -6,6 +6,7 @@ import { Toaster } from "@midday/ui/toaster";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { ReactElement } from "react";
 import { Providers } from "./providers";
 
@@ -65,24 +66,14 @@ export const viewport = {
   ],
 };
 
-export const preferredRegion = ["fra1", "sfo1", "iad1"];
-export const maxDuration = 60;
-
-export default async function Layout(
-  props: {
-    children: ReactElement;
-    params: Promise<{ locale: string }>;
-  }
-) {
-  const params = await props.params;
-
-  const {
-    locale
-  } = params;
-
-  const {
-    children
-  } = props;
+export default async function Layout({
+  children,
+  params,
+}: {
+  children: ReactElement;
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -92,9 +83,11 @@ export default async function Layout(
           "whitespace-pre-line overscroll-none antialiased",
         )}
       >
-        <Providers locale={locale}>{children}</Providers>
-        <Toaster />
-        <Analytics />
+        <NuqsAdapter>
+          <Providers locale={locale}>{children}</Providers>
+          <Toaster />
+          <Analytics />
+        </NuqsAdapter>
       </body>
     </html>
   );

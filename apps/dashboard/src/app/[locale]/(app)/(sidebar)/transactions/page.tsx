@@ -2,11 +2,12 @@ import { DataTable } from "@/components/tables/transactions/data-table";
 import { Loading } from "@/components/tables/transactions/loading";
 import { TransactionsActions } from "@/components/transactions-actions";
 import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
-import { sortParamsCache } from "@/hooks/use-sort-params";
-import { transactionFilterParamsCache } from "@/hooks/use-transaction-filter-params";
+import { loadSortParams } from "@/hooks/use-sort-params";
+import { loadTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
 import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import { getInitialColumnVisibility } from "@/utils/columns";
 import type { Metadata } from "next";
+import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
@@ -14,15 +15,15 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<SearchParams>;
 };
 
 export default async function Transactions(props: Props) {
   const queryClient = getQueryClient();
   const searchParams = await props.searchParams;
 
-  const filter = transactionFilterParamsCache.parse(searchParams);
-  const { sort } = sortParamsCache.parse(searchParams);
+  const filter = await loadTransactionFilterParams(searchParams);
+  const { sort } = await loadSortParams(searchParams);
 
   const columnVisibility = getInitialColumnVisibility();
 
