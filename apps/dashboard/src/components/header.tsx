@@ -5,7 +5,6 @@ import { NotificationCenter } from "@/components/notification-center";
 import { Trial } from "@/components/trial";
 import { UserMenu } from "@/components/user-menu";
 import { BrowserNavigation } from "@/desktop/components/browser-navigation";
-import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Suspense } from "react";
 import { DesktopTrafficLight } from "./desktop-traffic-light";
@@ -34,9 +33,7 @@ export function Header() {
 
         <NotificationCenter />
 
-        <Suspense fallback={<Skeleton className="h-8 w-8 rounded-full" />}>
-          <UserMenu />
-        </Suspense>
+        <UserMenu />
       </div>
     </header>
   );

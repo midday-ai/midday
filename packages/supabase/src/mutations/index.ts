@@ -175,21 +175,15 @@ export async function updateTransactions(
     .select("id, category, category_slug, team_id, name, status, internal");
 }
 
-export async function updateUser(supabase: Client, data: any) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+type UpdateUserParams = {
+  id: string;
+  full_name?: string | null;
+};
 
-  if (!session?.user) {
-    return;
-  }
+export async function updateUser(supabase: Client, data: UpdateUserParams) {
+  const { id, ...input } = data;
 
-  return supabase
-    .from("users")
-    .update(data)
-    .eq("id", session.user.id)
-    .select()
-    .single();
+  return supabase.from("users").update(input).eq("id", id).select().single();
 }
 
 export async function deleteUser(supabase: Client) {

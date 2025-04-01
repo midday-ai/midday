@@ -1,0 +1,37 @@
+import { updateUser } from "@midday/supabase/mutations";
+import { getUserQuery } from "@midday/supabase/queries";
+import { z } from "zod";
+import { protectedProcedure } from "../init";
+import { createTRPCRouter } from "../init";
+
+export const userRouter = createTRPCRouter({
+  me: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
+    const { data } = await getUserQuery(supabase, session.user.id);
+
+    return data;
+  }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        full_name: z.string().min(2).max(32).optional(),
+        email: z.string().email().optional(),
+        avatar_url: z.string().url().optional(),
+        locale: z.string().optional(),
+        week_starts_on_monday: z.boolean().optional(),
+        timezone: z.string().optional(),
+        time_format: z.number().optional(),
+        date_format: z
+          .enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd"])
+          .optional(),
+      }),
+    )
+    .mutation(async ({ ctx: { supabase, session }, input }) => {
+      const { data } = await updateUser(supabase, {
+        id: session.user.id,
+        ...input,
+      });
+
+      return data;
+    }),
+});

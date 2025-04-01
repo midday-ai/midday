@@ -1,6 +1,6 @@
 "use client";
 
-import { updateUserAction } from "@/actions/update-user-action";
+import { useTRPC } from "@/trpc/client";
 import {
   Card,
   CardContent,
@@ -15,14 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 
-type Props = {
-  dateFormat: string;
-};
+export function DateFormatSettings() {
+  const trpc = useTRPC();
+  const updateUserMutation = useMutation(trpc.user.update.mutationOptions());
 
-export function DateFormatSettings({ dateFormat }: Props) {
-  const action = useAction(updateUserAction);
+  const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
 
   return (
     <Card className="flex justify-between items-center">
@@ -35,9 +34,9 @@ export function DateFormatSettings({ dateFormat }: Props) {
 
       <CardContent>
         <Select
-          defaultValue={dateFormat}
+          defaultValue={user.date_format ?? undefined}
           onValueChange={(value) => {
-            action.execute({
+            updateUserMutation.mutate({
               date_format: value as "dd/MM/yyyy" | "MM/dd/yyyy" | "yyyy-MM-dd",
             });
           }}

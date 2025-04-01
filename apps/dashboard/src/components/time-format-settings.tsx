@@ -1,6 +1,6 @@
 "use client";
 
-import { updateUserAction } from "@/actions/update-user-action";
+import { useTRPC } from "@/trpc/client";
 import {
   Card,
   CardContent,
@@ -15,14 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 
-type Props = {
-  timeFormat: string;
-};
+export function TimeFormatSettings() {
+  const trpc = useTRPC();
+  const updateUserMutation = useMutation(trpc.user.update.mutationOptions());
 
-export function TimeFormatSettings({ timeFormat }: Props) {
-  const action = useAction(updateUserAction);
+  const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
 
   return (
     <Card className="flex justify-between items-center">
@@ -35,9 +34,9 @@ export function TimeFormatSettings({ timeFormat }: Props) {
 
       <CardContent>
         <Select
-          defaultValue={timeFormat.toString()}
+          defaultValue={user.time_format.toString()}
           onValueChange={(value) => {
-            action.execute({ time_format: +value });
+            updateUserMutation.mutate({ time_format: +value });
           }}
         >
           <SelectTrigger className="w-[180px]">

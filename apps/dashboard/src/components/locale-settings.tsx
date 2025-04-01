@@ -1,7 +1,7 @@
 "use client";
 
-import { updateUserAction } from "@/actions/update-user-action";
 import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 import { countries } from "@midday/location/countries-intl";
 import {
   Card,
@@ -11,23 +11,15 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
-import { useOptimisticAction } from "next-safe-action/hooks";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 
-type Props = {
-  locale: string;
-};
-
-export function LocaleSettings({ locale }: Props) {
+export function LocaleSettings() {
   const t = useI18n();
 
-  const { execute, optimisticState } = useOptimisticAction(updateUserAction, {
-    currentState: { locale },
-    updateFn: (state, newLocale) => {
-      return {
-        locale: newLocale.locale ?? state.locale,
-      };
-    },
-  });
+  const trpc = useTRPC();
+  const updateUserMutation = useMutation(trpc.user.update.mutationOptions());
+
+  const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
 
   const localeItems = Object.values(countries).map((c, index) => ({
     id: index.toString(),
@@ -47,13 +39,13 @@ export function LocaleSettings({ locale }: Props) {
           <ComboboxDropdown
             placeholder={t("locale.placeholder")}
             selectedItem={localeItems.find(
-              (item) => item.value === optimisticState.locale,
+              (item) => item.value === user.locale,
             )}
             searchPlaceholder={t("locale.searchPlaceholder")}
             items={localeItems}
             className="text-xs py-1"
             onSelect={(item) => {
-              execute({ locale: item.value });
+              updateUserMutation.mutate({ locale: item.value });
             }}
           />
         </div>

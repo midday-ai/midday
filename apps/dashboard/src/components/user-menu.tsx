@@ -1,4 +1,6 @@
-import { getUser } from "@midday/supabase/cached-queries";
+"use client";
+
+import { useTRPC } from "@/trpc/client";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import {
   DropdownMenu,
@@ -10,21 +12,27 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { SignOut } from "./sign-out";
 import { ThemeSwitch } from "./theme-switch";
 
-export async function UserMenu({ onlySignOut }) {
-  const { data: userData } = await getUser();
+type Props = {
+  onlySignOut?: boolean;
+};
+
+export function UserMenu({ onlySignOut }: Props) {
+  const trpc = useTRPC();
+  const { data: user } = useQuery(trpc.user.me.queryOptions());
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="rounded-full w-8 h-8 cursor-pointer">
-          {userData?.avatar_url && (
+          {user?.avatar_url && (
             <AvatarImageNext
-              src={userData?.avatar_url}
-              alt={userData?.full_name}
+              src={user?.avatar_url}
+              alt={user?.full_name ?? ""}
               width={32}
               height={32}
               quality={100}
@@ -32,7 +40,7 @@ export async function UserMenu({ onlySignOut }) {
           )}
           <AvatarFallback>
             <span className="text-xs">
-              {userData?.full_name?.charAt(0)?.toUpperCase()}
+              {user?.full_name?.charAt(0)?.toUpperCase()}
             </span>
           </AvatarFallback>
         </Avatar>
@@ -44,10 +52,10 @@ export async function UserMenu({ onlySignOut }) {
               <div className="flex justify-between items-center">
                 <div className="flex flex-col">
                   <span className="truncate line-clamp-1 max-w-[155px] block">
-                    {userData?.full_name}
+                    {user?.full_name}
                   </span>
                   <span className="truncate text-xs text-[#606060] font-normal">
-                    {userData.email}
+                    {user?.email}
                   </span>
                 </div>
               </div>
