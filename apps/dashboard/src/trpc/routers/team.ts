@@ -4,8 +4,10 @@ import {
   createTeam,
   declineTeamInvite,
   leaveTeam,
+  updateTeam,
 } from "@midday/supabase/mutations";
 import {
+  getTeamByIdQuery,
   getTeamMembersQuery,
   getTeamsByUserIdQuery,
 } from "@midday/supabase/queries";
@@ -13,6 +15,33 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const teamRouter = createTRPCRouter({
+  current: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
+    const { data } = await getTeamByIdQuery(supabase, teamId!);
+
+    return data;
+  }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().min(2).max(32).optional(),
+        email: z.string().email().optional(),
+        inbox_email: z.string().email().optional().nullable(),
+        inbox_forwarding: z.boolean().optional().nullable(),
+        logo_url: z.string().url().optional(),
+        base_currency: z.string().optional(),
+        document_classification: z.boolean().optional(),
+      }),
+    )
+    .mutation(async ({ ctx: { supabase, teamId }, input }) => {
+      const { data } = await updateTeam(supabase, {
+        id: teamId,
+        name: input.name,
+      });
+
+      return data;
+    }),
+
   members: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
     const { data } = await getTeamMembersQuery(supabase, teamId);
 

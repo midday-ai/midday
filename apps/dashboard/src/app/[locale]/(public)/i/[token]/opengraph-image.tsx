@@ -5,7 +5,6 @@ import { createClient } from "@midday/supabase/server";
 import { ImageResponse } from "next/og";
 
 export const contentType = "image/png";
-export const runtime = "edge";
 
 const CDN_URL = "https://cdn.midday.ai";
 

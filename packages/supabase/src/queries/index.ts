@@ -1388,3 +1388,7 @@ export async function getTeamLimitsMetricsQuery(
 export async function getInstalledAppsQuery(supabase: Client, teamId: string) {
   return supabase.from("apps").select("app_id, settings").eq("team_id", teamId);
 }
+
+export async function getTeamByIdQuery(supabase: Client, teamId: string) {
+  return supabase.from("teams").select("*").eq("id", teamId).single();
+}
