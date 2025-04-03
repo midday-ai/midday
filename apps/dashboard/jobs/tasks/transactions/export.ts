@@ -4,7 +4,6 @@ import { metadata, schemaTask } from "@trigger.dev/sdk/v3";
 import { BlobReader, BlobWriter, TextReader, ZipWriter } from "@zip.js/zip.js";
 import { format } from "date-fns";
 import { serializableToBlob } from "jobs/utils/blob";
-import { revalidateCache } from "jobs/utils/revalidate-cache";
 import { z } from "zod";
 import { processExport } from "./process-export";
 
@@ -119,8 +118,6 @@ export const exportTransactions = schemaTask({
         upsert: true,
         contentType: "application/zip",
       });
-
-    revalidateCache({ tag: "vault", id: teamId });
 
     metadata.set("progress", 100);
 

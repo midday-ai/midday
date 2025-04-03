@@ -29,13 +29,18 @@ export const teamRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
+        currency: z.string(),
+        logoUrl: z.string().optional(),
       }),
     )
-    .mutation(async ({ ctx: { supabase }, input }) => {
-      const { data: teamId } = await createTeam(supabase, input);
+    .mutation(async ({ ctx: { supabase, session }, input }) => {
+      const { data } = await createTeam(supabase, {
+        ...input,
+        userId: session.user.id,
+      });
 
       return {
-        teamId,
+        data,
       };
     }),
 
