@@ -1,9 +1,8 @@
 "use client";
 
-import { createTeamAction } from "@/actions/create-team-action";
-import { createTeamSchema } from "@/actions/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@midday/ui/button";
+import { changeTeamAction } from "@/actions/change-team-action";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 import {
   Form,
   FormControl,
@@ -12,23 +11,42 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-import { Loader2 } from "lucide-react";
+import { SubmitButton } from "@midday/ui/submit-button";
+import { useMutation } from "@tanstack/react-query";
 import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
-import type { z } from "zod";
+import { z } from "zod";
+
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: "Team name must be at least 2 characters.",
+  }),
+});
 
 export function CreateTeamForm() {
-  const createTeam = useAction(createTeamAction);
+  const trpc = useTRPC();
+  const changeTeam = useAction(changeTeamAction);
 
-  const form = useForm<z.infer<typeof createTeamSchema>>({
-    resolver: zodResolver(createTeamSchema),
+  const createTeamMutation = useMutation(
+    trpc.team.create.mutationOptions({
+      onSuccess: ({ teamId }) => {
+        if (!teamId) return;
+
+        changeTeam.execute({
+          teamId,
+          redirectTo: "/teams/invite",
+        });
+      },
+    }),
+  );
+
+  const form = useZodForm(formSchema, {
     defaultValues: {
       name: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof createTeamSchema>) {
-    createTeam.execute({ name: values.name, redirectTo: "/teams/invite" });
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    createTeamMutation.mutate({ name: values.name });
   }
 
   return (
@@ -57,17 +75,13 @@ export function CreateTeamForm() {
           )}
         />
 
-        <Button
+        <SubmitButton
           className="mt-6 w-full"
           type="submit"
-          disabled={createTeam.status === "executing"}
+          isSubmitting={createTeamMutation.isPending}
         >
-          {createTeam.status === "executing" ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Next"
-          )}
-        </Button>
+          Next
+        </SubmitButton>
       </form>
     </Form>
   );

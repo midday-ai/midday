@@ -1,6 +1,6 @@
 import { resend } from "@/utils/resend";
 import { deleteUser, updateUser } from "@midday/supabase/mutations";
-import { getTeamsByUserIdQuery, getUserQuery } from "@midday/supabase/queries";
+import { getUserInvitesQuery, getUserQuery } from "@midday/supabase/queries";
 import { z } from "zod";
 import { protectedProcedure } from "../init";
 import { createTRPCRouter } from "../init";
@@ -50,8 +50,12 @@ export const userRouter = createTRPCRouter({
     },
   ),
 
-  teams: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
-    const { data } = await getTeamsByUserIdQuery(supabase, session.user.id);
+  invites: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
+    if (!session.user.email) {
+      return [];
+    }
+
+    const { data } = await getUserInvitesQuery(supabase, session.user.email);
 
     return data;
   }),

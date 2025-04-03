@@ -1,5 +1,13 @@
+"use client";
+
+import { Invites } from "./invites";
 import { DataTable } from "./table";
 
-export async function TeamsTable() {
-  return <DataTable data={[]} />;
+export function TeamsTable() {
+  return (
+    <div className="flex flex-col gap-4">
+      <DataTable />
+      <Invites />
+    </div>
+  );
 }

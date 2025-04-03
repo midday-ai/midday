@@ -158,13 +158,6 @@ export const changeTeamSchema = z.object({
   redirectTo: z.string(),
 });
 
-export const createTeamSchema = z.object({
-  name: z.string().min(2, {
-    message: "Team name must be at least 2 characters.",
-  }),
-  redirectTo: z.string().optional(),
-});
-
 export const changeUserRoleSchema = z.object({
   userId: z.string(),
   teamId: z.string(),
@@ -175,13 +168,6 @@ export const changeUserRoleSchema = z.object({
 export const deleteTeamMemberSchema = z.object({
   userId: z.string(),
   teamId: z.string(),
-  revalidatePath: z.string().optional(),
-});
-
-export const leaveTeamSchema = z.object({
-  teamId: z.string(),
-  redirectTo: z.string().optional(),
-  role: z.enum(["owner", "member"]),
   revalidatePath: z.string().optional(),
 });
 
@@ -203,21 +189,6 @@ export const inviteTeamMembersSchema = z.object({
 export type InviteTeamMembersFormValues = z.infer<
   typeof inviteTeamMembersSchema
 >;
-
-export const deleteInviteSchema = z.object({
-  id: z.string(),
-  revalidatePath: z.string().optional(),
-});
-
-export const acceptInviteSchema = z.object({
-  id: z.string(),
-  revalidatePath: z.string().optional(),
-});
-
-export const declineInviteSchema = z.object({
-  id: z.string(),
-  revalidatePath: z.string().optional(),
-});
 
 export const inboxFilterSchema = z.enum(["done", "todo", "all"]);
 
