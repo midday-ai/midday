@@ -1,8 +1,7 @@
 import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
-import { Suspense } from "react";
 import { MainMenu } from "./main-menu";
-import { TeamMenu } from "./team-menu";
+import { TeamDropdown } from "./team-dropdown";
 
 export function Sidebar() {
   return (
@@ -17,9 +16,7 @@ export function Sidebar() {
         <MainMenu />
       </div>
 
-      <Suspense>
-        <TeamMenu />
-      </Suspense>
+      <TeamDropdown />
     </aside>
   );
 }

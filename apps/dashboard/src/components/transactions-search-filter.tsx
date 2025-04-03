@@ -143,11 +143,6 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
   const trpc = useTRPC();
   const shouldFetch = isOpen || isFocused;
 
-  const { data: membersData } = useQuery({
-    ...trpc.team.members.queryOptions(),
-    enabled: shouldFetch,
-  });
-
   const { data: tagsData } = useQuery({
     ...trpc.tags.get.queryOptions(),
     enabled: shouldFetch,
@@ -165,10 +160,6 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
   });
 
   return {
-    members: membersData?.map((member) => ({
-      id: member.user.id,
-      name: member.user.full_name ?? "",
-    })),
     tags: tagsData?.map((tag) => ({
       id: tag.id,
       name: tag.name,
@@ -209,10 +200,7 @@ export function TransactionsSearchFilter() {
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const { filter = defaultSearch, setFilter } = useTransactionFilterParams();
-  const { members, tags, accounts, categories } = useFilterData(
-    isOpen,
-    isFocused,
-  );
+  const { tags, accounts, categories } = useFilterData(isOpen, isFocused);
 
   useEffect(() => {
     const randomPlaceholder =
@@ -379,7 +367,6 @@ export function TransactionsSearchFilter() {
           onRemove={setFilter}
           categories={categories}
           accounts={accounts}
-          members={members}
           statusFilters={statusFilters}
           attachmentsFilters={attachmentsFilters}
           tags={tags}

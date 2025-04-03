@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
+import { Label } from "@midday/ui/label";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
 import { useAction } from "next-safe-action/hooks";
@@ -20,6 +21,8 @@ const formSchema = z.object({
   name: z.string().min(2, {
     message: "Team name must be at least 2 characters.",
   }),
+  currency: z.string(),
+  logo: z.string().optional(),
 });
 
 export function CreateTeamForm() {
@@ -28,11 +31,11 @@ export function CreateTeamForm() {
 
   const createTeamMutation = useMutation(
     trpc.team.create.mutationOptions({
-      onSuccess: ({ teamId }) => {
-        if (!teamId) return;
+      onSuccess: ({ data }) => {
+        if (!data) return;
 
         changeTeam.execute({
-          teamId,
+          teamId: data.id,
           redirectTo: "/teams/invite",
         });
       },
@@ -42,15 +45,23 @@ export function CreateTeamForm() {
   const form = useZodForm(formSchema, {
     defaultValues: {
       name: "",
+      currency: "USD",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    createTeamMutation.mutate({ name: values.name });
+    createTeamMutation.mutate({
+      name: values.name,
+      currency: values.currency,
+      logoUrl: values.logo,
+    });
   }
 
   return (
     <Form {...form}>
+      <Label className="text-sm font-normal" htmlFor="name">
+        Company name
+      </Label>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           control={form.control}
@@ -60,7 +71,7 @@ export function CreateTeamForm() {
               <FormControl>
                 <Input
                   autoFocus
-                  className="mt-3"
+                  className="mt-2"
                   placeholder="Ex: Acme Marketing or Acme Co"
                   autoComplete="off"
                   autoCapitalize="none"

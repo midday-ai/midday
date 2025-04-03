@@ -26,15 +26,13 @@ export default async function CreateTeam() {
       <div className="flex min-h-screen justify-center items-center overflow-hidden p-6 md:p-0">
         <div className="relative z-20 m-auto flex w-full max-w-[340px] flex-col">
           <div>
-            <h1 className="text-2xl font-medium mb-8">
-              What’s the name of your company or team?
-            </h1>
+            <h1 className="text-2xl font-medium mb-4">Set up your business</h1>
           </div>
 
-          <div className="mb-2">
+          <div className="mb-8">
             <p className="text-sm">
-              This will be the name of your Midday workspace — choose something
-              that your team will recognize.
+              Tell us a bit about your business to get started. We’ll use this
+              info to customize your experience.
             </p>
           </div>
 
