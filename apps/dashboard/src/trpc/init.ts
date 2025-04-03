@@ -31,8 +31,6 @@ export const createCallerFactory = t.createCallerFactory;
 export const protectedProcedure = t.procedure.use(async (opts) => {
   const { teamId, session } = opts.ctx;
 
-
- 
   if (!session) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }

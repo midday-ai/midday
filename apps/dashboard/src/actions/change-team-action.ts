@@ -3,7 +3,6 @@
 import { setTeamId } from "@/utils/team";
 import { LogEvents } from "@midday/events/events";
 import { updateUser } from "@midday/supabase/mutations";
-import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { authActionClient } from "./safe-action";
 import { changeTeamSchema } from "./schema";
@@ -32,8 +31,6 @@ export const changeTeamAction = authActionClient
       if (!data) {
         return;
       }
-
-      revalidateTag(`user_${data.id}`);
 
       redirect(redirectTo);
     },

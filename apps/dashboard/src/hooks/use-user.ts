@@ -28,14 +28,14 @@ export function useUserMutation() {
         const previousData = queryClient.getQueryData(trpc.user.me.queryKey());
 
         // Optimistically update
-        queryClient.setQueryData(trpc.user.me.queryKey(), (old) => ({
+        queryClient.setQueryData(trpc.user.me.queryKey(), (old: any) => ({
           ...old,
           ...newData,
         }));
 
         return { previousData };
       },
-      onError: (err, newData, context) => {
+      onError: (_, __, context) => {
         // Rollback on error
         queryClient.setQueryData(
           trpc.user.me.queryKey(),

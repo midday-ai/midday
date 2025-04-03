@@ -178,6 +178,7 @@ export async function updateTransactions(
 type UpdateUserParams = {
   id: string;
   full_name?: string | null;
+  team_id?: string | null;
 };
 
 export async function updateUser(supabase: Client, data: UpdateUserParams) {
@@ -415,12 +416,10 @@ type CreateTeamParams = {
 };
 
 export async function createTeam(supabase: Client, params: CreateTeamParams) {
-  const { data } = await supabase.rpc("create_team_v2", {
+  return supabase.rpc("create_team_v2", {
     name: params.name,
     currency: params.currency,
   });
-
-  return data;
 }
 
 type LeaveTeamParams = {
@@ -429,21 +428,25 @@ type LeaveTeamParams = {
 };
 
 export async function leaveTeam(supabase: Client, params: LeaveTeamParams) {
-  await supabase
-    .from("users")
-    .update({
-      team_id: null,
-    })
-    .eq("id", params.userId)
-    .eq("team_id", params.teamId);
+  const [, response] = await Promise.all([
+    supabase
+      .from("users")
+      .update({
+        team_id: null,
+      })
+      .eq("id", params.userId)
+      .eq("team_id", params.teamId),
 
-  return supabase
-    .from("users_on_team")
-    .delete()
-    .eq("team_id", params.teamId)
-    .eq("user_id", params.userId)
-    .select()
-    .single();
+    supabase
+      .from("users_on_team")
+      .delete()
+      .eq("team_id", params.teamId)
+      .eq("user_id", params.userId)
+      .select()
+      .single(),
+  ]);
+
+  return response;
 }
 
 export async function joinTeamByInviteCode(supabase: Client, code: string) {
@@ -725,4 +728,119 @@ export async function deleteTransactionTag(
     .delete()
     .eq("transaction_id", transactionId)
     .eq("tag_id", tagId);
+}
+
+type AcceptTeamInviteParams = {
+  userId: string;
+  teamId: string;
+};
+
+export async function acceptTeamInvite(
+  supabase: Client,
+  params: AcceptTeamInviteParams,
+) {
+  const { userId, teamId } = params;
+
+  const { data: inviteData } = await supabase
+    .from("user_invites")
+    .select("*")
+    .eq("team_id", teamId)
+    .eq("email", userId)
+    .single();
+
+  if (!inviteData) {
+    return;
+  }
+
+  await Promise.all([
+    supabase.from("users_on_team").insert({
+      user_id: userId,
+      role: inviteData.role,
+      team_id: teamId,
+    }),
+    supabase.from("user_invites").delete().eq("id", inviteData.id),
+  ]);
+}
+
+type DeclineTeamInviteParams = {
+  email: string;
+  teamId: string;
+};
+
+export async function declineTeamInvite(
+  supabase: Client,
+  params: DeclineTeamInviteParams,
+) {
+  const { email, teamId } = params;
+
+  return supabase
+    .from("user_invites")
+    .delete()
+    .eq("email", email)
+    .eq("team_id", teamId);
+}
+
+type DisconnectAppParams = {
+  appId: string;
+  teamId: string;
+};
+
+export async function disconnectApp(
+  supabase: Client,
+  params: DisconnectAppParams,
+) {
+  const { appId, teamId } = params;
+
+  return supabase
+    .from("apps")
+    .delete()
+    .eq("app_id", appId)
+    .eq("team_id", teamId)
+    .select()
+    .single();
+}
+
+type UpdateAppSettingsParams = {
+  appId: string;
+  teamId: string;
+  option: {
+    id: string;
+    value: string | number | boolean;
+  };
+};
+
+export async function updateAppSettings(
+  supabase: Client,
+  params: UpdateAppSettingsParams,
+) {
+  const { appId, teamId, option } = params;
+
+  const { data: existingApp } = await supabase
+    .from("apps")
+    .select("settings")
+    .eq("app_id", appId)
+    .eq("team_id", teamId)
+    .single();
+
+  const updatedSettings = existingApp?.settings?.map((setting) => {
+    if (setting.id === option.id) {
+      return { ...setting, value: option.value };
+    }
+
+    return setting;
+  });
+
+  const { data } = await supabase
+    .from("apps")
+    .update({ settings: updatedSettings })
+    .eq("app_id", appId)
+    .eq("team_id", teamId)
+    .select()
+    .single();
+
+  if (!data) {
+    throw new Error("Failed to update app settings");
+  }
+
+  return data;
 }

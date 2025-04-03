@@ -763,8 +763,7 @@ export async function getUserInvitesQuery(supabase: Client, email: string) {
   return supabase
     .from("user_invites")
     .select("id, email, code, role, user:invited_by(*), team:team_id(*)")
-    .eq("email", email)
-    .throwOnError();
+    .eq("email", email);
 }
 
 type GetUserInviteQueryParams = {
@@ -1384,4 +1383,8 @@ export async function getTeamLimitsMetricsQuery(
       input_team_id: teamId,
     })
     .single();
+}
+
+export async function getInstalledAppsQuery(supabase: Client, teamId: string) {
+  return supabase.from("apps").select("app_id, settings").eq("team_id", teamId);
 }

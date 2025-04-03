@@ -1,7 +1,7 @@
+import { Apps } from "@/components/apps";
 import { AppsHeader } from "@/components/apps-header";
-import { AppsServer } from "@/components/apps.server";
 import { AppsSkeleton } from "@/components/apps.skeleton";
-import { getUser } from "@midday/supabase/cached-queries";
+import { prefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -10,14 +10,14 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const { data } = await getUser();
+  prefetch(trpc.apps.installed.queryOptions());
 
   return (
     <div className="mt-4">
-      <AppsHeader  />
+      <AppsHeader />
 
       <Suspense fallback={<AppsSkeleton />}>
-        <AppsServer user={data} />
+        <Apps />
       </Suspense>
     </div>
   );
