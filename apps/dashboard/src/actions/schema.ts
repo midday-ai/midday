@@ -34,10 +34,6 @@ export const updateTeamSchema = z.object({
 
 export type UpdateTeamFormValues = z.infer<typeof updateTeamSchema>;
 
-export const subscribeSchema = z.object({
-  email: z.string().email(),
-});
-
 export const deleteBankAccountSchema = z.object({
   id: z.string().uuid(),
 });
