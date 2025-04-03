@@ -1,6 +1,5 @@
 "use client";
 
-import { deleteTeamAction } from "@/actions/delete-team-action";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,17 +26,13 @@ import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-interface DeleteTeamProps {
-  teamId: string;
-}
-
-export function DeleteTeam({ teamId }: DeleteTeamProps) {
+export function DeleteTeam() {
   const [value, setValue] = useState("");
 
   const router = useRouter();
-  const deleteTeam = useAction(deleteTeamAction, {
-    onSuccess: () => router.push("/teams"),
-  });
+  // const deleteTeam = useAction(deleteTeamAction, {
+  //   onSuccess: () => router.push("/teams"),
+  // });
 
   return (
     <Card className="border-destructive">
@@ -83,7 +78,7 @@ export function DeleteTeam({ teamId }: DeleteTeamProps) {
 
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
+              {/* <AlertDialogAction
                 onClick={() => deleteTeam.execute({ teamId })}
                 disabled={value !== "DELETE"}
               >
@@ -92,7 +87,7 @@ export function DeleteTeam({ teamId }: DeleteTeamProps) {
                 ) : (
                   "Confirm"
                 )}
-              </AlertDialogAction>
+              </AlertDialogAction> */}
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

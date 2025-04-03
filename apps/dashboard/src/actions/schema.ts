@@ -167,10 +167,6 @@ export const deleteTeamMemberSchema = z.object({
   revalidatePath: z.string().optional(),
 });
 
-export const deleteTeamSchema = z.object({
-  teamId: z.string(),
-});
-
 export const inviteTeamMembersSchema = z.object({
   invites: z.array(
     z.object({

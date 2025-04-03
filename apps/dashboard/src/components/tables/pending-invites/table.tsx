@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteInviteAction } from "@/actions/delete-invite-action";
+// import { deleteInviteAction } from "@/actions/delete-invite-action";
 import { InviteTeamMembersModal } from "@/components/modals/invite-team-members-modal";
 import { useI18n } from "@/locales/client";
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
@@ -61,22 +61,22 @@ export const columns: ColumnDef<Payment>[] = [
       const t = useI18n();
       const { toast } = useToast();
 
-      const deleteInvite = useAction(deleteInviteAction, {
-        onSuccess: () => {
-          toast({
-            title: "Team invite removed.",
-            duration: 3500,
-            variant: "success",
-          });
-        },
-        onError: () => {
-          toast({
-            duration: 3500,
-            variant: "error",
-            title: "Something went wrong please try again.",
-          });
-        },
-      });
+      // const deleteInvite = useAction(deleteInviteAction, {
+      //   onSuccess: () => {
+      //     toast({
+      //       title: "Team invite removed.",
+      //       duration: 3500,
+      //       variant: "success",
+      //     });
+      //   },
+      //   onError: () => {
+      //     toast({
+      //       duration: 3500,
+      //       variant: "error",
+      //       title: "Something went wrong please try again.",
+      //     });
+      //   },
+      // });
 
       return (
         <div className="flex justify-end">
@@ -95,12 +95,12 @@ export const columns: ColumnDef<Payment>[] = [
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
                     className="text-destructive"
-                    onClick={() =>
-                      deleteInvite.execute({
-                        id: row.original.id,
-                        revalidatePath: "settings/members",
-                      })
-                    }
+                    // onClick={() =>
+                    //   deleteInvite.execute({
+                    //     id: row.original.id,
+                    //     revalidatePath: "settings/members",
+                    //   })
+                    // }
                   >
                     Remove
                   </DropdownMenuItem>

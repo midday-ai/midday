@@ -25,7 +25,10 @@ export function TeamDropdown() {
 
   const changeTeam = useAction(changeTeamAction, {
     onSuccess: () => {
+      // Invalidate queries to refresh the data
       queryClient.invalidateQueries({ queryKey: trpc.user.me.queryKey() });
+      queryClient.invalidateQueries({ queryKey: trpc.team.current.queryKey() });
+
       setIsChangingTeam(false);
     },
   });

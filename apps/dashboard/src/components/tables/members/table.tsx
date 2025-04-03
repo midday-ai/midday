@@ -2,7 +2,7 @@
 
 import { changeUserRoleAction } from "@/actions/change-user-role-action";
 import { deleteTeamMemberAction } from "@/actions/delete-team-member-action";
-import { leaveTeamAction } from "@/actions/leave-team-action";
+// import { leaveTeamAction } from "@/actions/leave-team-action";
 import { InviteTeamMembersModal } from "@/components/modals/invite-team-members-modal";
 import { useI18n } from "@/locales/client";
 import {
@@ -122,17 +122,17 @@ export const columns: ColumnDef[] = [
         },
       });
 
-      const leaveTeam = useAction(leaveTeamAction, {
-        onSuccess: () => router.push("/teams"),
-        onError: () => {
-          toast({
-            duration: 3500,
-            variant: "error",
-            title:
-              "You cannot leave since you are the only remaining owner of the team. Delete this team instead.",
-          });
-        },
-      });
+      // const leaveTeam = useAction(leaveTeamAction, {
+      //   onSuccess: () => router.push("/teams"),
+      //   onError: () => {
+      //     toast({
+      //       duration: 3500,
+      //       variant: "error",
+      //       title:
+      //         "You cannot leave since you are the only remaining owner of the team. Delete this team instead.",
+      //     });
+      //   },
+      // });
 
       return (
         <div className="flex justify-end">
@@ -242,7 +242,7 @@ export const columns: ColumnDef[] = [
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
+                          {/* <AlertDialogAction
                             disabled={leaveTeam.status === "executing"}
                             onClick={() =>
                               leaveTeam.execute({
@@ -256,7 +256,7 @@ export const columns: ColumnDef[] = [
                             ) : (
                               "Confirm"
                             )}
-                          </AlertDialogAction>
+                          </AlertDialogAction> */}
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
