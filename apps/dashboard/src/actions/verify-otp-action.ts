@@ -10,7 +10,6 @@ import { verifyOtpSchema } from "./schema";
 
 export const verifyOtpAction = actionClient
   .schema(verifyOtpSchema)
-
   .action(async ({ parsedInput: { email, token } }) => {
     const supabase = await createClient();
 

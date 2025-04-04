@@ -1,5 +1,8 @@
 "use client";
 
+import { deleteTeamAction } from "@/actions/delete-team-action";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,18 +24,26 @@ import {
 } from "@midday/ui/card";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
+import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function DeleteTeam() {
   const [value, setValue] = useState("");
+  const trpc = useTRPC();
+  const { data: user } = useUserQuery();
+  const deleteTeam = useAction(deleteTeamAction);
 
-  const router = useRouter();
-  // const deleteTeam = useAction(deleteTeamAction, {
-  //   onSuccess: () => router.push("/teams"),
-  // });
+  console.log(user?.team_id);
+
+  const deleteTeamMutation = useMutation(
+    trpc.team.delete.mutationOptions({
+      onSuccess: () => {
+        deleteTeam.execute({ teamId: user?.team_id! });
+      },
+    }),
+  );
 
   return (
     <Card className="border-destructive">
@@ -78,16 +89,18 @@ export function DeleteTeam() {
 
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              {/* <AlertDialogAction
-                onClick={() => deleteTeam.execute({ teamId })}
+              <AlertDialogAction
+                onClick={() =>
+                  deleteTeamMutation.mutate({ teamId: user?.team_id! })
+                }
                 disabled={value !== "DELETE"}
               >
-                {deleteTeam.status === "executing" ? (
+                {deleteTeamMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Confirm"
                 )}
-              </AlertDialogAction> */}
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

@@ -1,5 +1,3 @@
-"use client";
-
 import { Invites } from "./invites";
 import { DataTable } from "./table";
 
