@@ -1,11 +1,7 @@
 "use client";
 
-import { inviteTeamMembersAction } from "@/actions/invite-team-members-action";
-import {
-  type InviteTeamMembersFormValues,
-  inviteTeamMembersSchema,
-} from "@/actions/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
@@ -16,27 +12,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { useToast } from "@midday/ui/use-toast";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
+import { SubmitButton } from "@midday/ui/submit-button";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray } from "react-hook-form";
+import { z } from "zod";
 
-export function InviteForm() {
-  const { toast } = useToast();
+const formSchema = z.object({
+  invites: z.array(
+    z.object({
+      email: z.string().email(),
+      role: z.enum(["owner", "member"]),
+    }),
+  ),
+});
 
-  const inviteMembers = useAction(inviteTeamMembersAction, {
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
+type InviteFormProps = {
+  onSuccess?: () => void;
+  skippable?: boolean;
+};
 
-  const form = useForm<InviteTeamMembersFormValues>({
-    resolver: zodResolver(inviteTeamMembersSchema),
+export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
+  const trpc = useTRPC();
+  const inviteMutation = useMutation(
+    trpc.team.invite.mutationOptions({
+      onSuccess: () => {
+        onSuccess?.();
+      },
+    }),
+  );
+
+  const form = useZodForm(formSchema, {
     defaultValues: {
       invites: [
         {
@@ -48,11 +54,7 @@ export function InviteForm() {
   });
 
   const onSubmit = form.handleSubmit((data) => {
-    inviteMembers.execute({
-      // Remove invites without email (last appended invite validation)
-      invites: data.invites.filter((invite) => invite.email !== undefined),
-      redirectTo: "/",
-    });
+    inviteMutation.mutate(data.invites.filter((invite) => invite.email !== ""));
   });
 
   const { fields, append } = useFieldArray({
@@ -62,7 +64,7 @@ export function InviteForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={onSubmit}>
         {fields.map((field, index) => (
           <div
             className="flex items-center justify-between mt-3 space-x-4"
@@ -118,7 +120,7 @@ export function InviteForm() {
           variant="outline"
           type="button"
           className="mt-4 border-none bg-[#F2F1EF] text-[11px] dark:bg-[#1D1D1D]"
-          onClick={() => append({ email: undefined, role: "member" })}
+          onClick={() => append({ email: "", role: "member" })}
         >
           Add more
         </Button>
@@ -133,25 +135,26 @@ export function InviteForm() {
           </div>
 
           <div className="flex items-center justify-between">
-            <Link href="/">
-              <Button
-                variant="ghost"
-                className="p-0 hover:bg-transparent font-normal"
-              >
-                Skip this step
-              </Button>
-            </Link>
+            {skippable ? (
+              <Link href="/">
+                <Button
+                  variant="ghost"
+                  className="p-0 hover:bg-transparent font-normal"
+                >
+                  Skip this step
+                </Button>
+              </Link>
+            ) : (
+              <div />
+            )}
 
-            <Button
+            <SubmitButton
               type="submit"
-              disabled={inviteMembers.status === "executing"}
+              isSubmitting={inviteMutation.isPending}
+              disabled={inviteMutation.isPending}
             >
-              {inviteMembers.status === "executing" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Send invites"
-              )}
-            </Button>
+              Send invites
+            </SubmitButton>
           </div>
         </div>
       </form>

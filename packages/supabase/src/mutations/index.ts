@@ -867,3 +867,97 @@ export async function updateAppSettings(
 
   return data;
 }
+
+type DeleteTeamParams = {
+  teamId: string;
+};
+
+export async function deleteTeam(supabase: Client, params: DeleteTeamParams) {
+  const { teamId } = params;
+
+  const { data } = await supabase
+    .from("teams")
+    .delete()
+    .eq("id", teamId)
+    .select("id, bank_connections(access_token, provider, reference_id)")
+    .single();
+
+  if (!data) {
+    return;
+  }
+
+  await supabase.from("teams").delete().eq("id", data.id);
+
+  return data;
+}
+
+type UpdateTeamMemberParams = {
+  userId: string;
+  teamId: string;
+  role: "owner" | "member";
+};
+
+export async function updateTeamMember(
+  supabase: Client,
+  params: UpdateTeamMemberParams,
+) {
+  const { userId, teamId, role } = params;
+
+  return supabase
+    .from("users_on_team")
+    .update({ role })
+    .eq("user_id", userId)
+    .eq("team_id", teamId)
+    .select()
+    .single();
+}
+
+type CreateTeamInvitesParams = {
+  teamId: string;
+  invites: {
+    email: string;
+    role: "owner" | "member";
+    invited_by: string;
+  }[];
+};
+
+export async function createTeamInvites(
+  supabase: Client,
+  params: CreateTeamInvitesParams,
+) {
+  const { teamId, invites } = params;
+
+  return supabase
+    .from("user_invites")
+    .upsert(
+      invites.map((invite) => ({
+        ...invite,
+        team_id: teamId,
+      })),
+      {
+        onConflict: "email, team_id",
+        ignoreDuplicates: false,
+      },
+    )
+    .select("email, code, user:invited_by(*), team:team_id(*)");
+}
+
+type DeleteTeamInviteParams = {
+  teamId: string;
+  inviteId: string;
+};
+
+export async function deleteTeamInvite(
+  supabase: Client,
+  params: DeleteTeamInviteParams,
+) {
+  const { teamId, inviteId } = params;
+
+  return supabase
+    .from("user_invites")
+    .delete()
+    .eq("id", inviteId)
+    .eq("team_id", teamId)
+    .select()
+    .single();
+}

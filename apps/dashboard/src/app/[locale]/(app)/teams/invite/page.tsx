@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Invite Team Member | Midday",
 };
 
-export default async function InviteMembers() {
+export default function InviteMembers() {
   return (
     <>
       <header className="w-full absolute left-0 right-0 flex justify-between items-center">

@@ -16,12 +16,6 @@ import { useState } from "react";
 import { columns } from "./columns";
 import { DataTableHeader } from "./table-header";
 
-declare module "@tanstack/react-table" {
-  interface ColumnMeta<TData, TValue> {
-    className?: string;
-  }
-}
-
 export function DataTable() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const trpc = useTRPC();
