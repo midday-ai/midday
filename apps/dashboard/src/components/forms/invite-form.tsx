@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import { SubmitButton } from "@midday/ui/submit-button";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useFieldArray } from "react-hook-form";
 import { z } from "zod";
@@ -34,9 +34,14 @@ type InviteFormProps = {
 
 export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const inviteMutation = useMutation(
     trpc.team.invite.mutationOptions({
       onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.team.invites.queryKey(),
+        });
+
         onSuccess?.();
       },
     }),
