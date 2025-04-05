@@ -412,36 +412,19 @@ export async function deleteAttachment(supabase: Client, id: string) {
 
 type CreateTeamParams = {
   name: string;
-  currency?: string;
-  logoUrl?: string;
-  userId: string;
+  baseCurrency: string;
 };
 
 export async function createTeam(supabase: Client, params: CreateTeamParams) {
-  const { data } = await supabase
-    .from("teams")
-    .insert({
-      name: params.name,
-      currency: params.currency,
-      logo_url: params.logoUrl,
-    })
-    .select("id")
-    .single();
-
-  if (!data) {
-    return {
-      data: null,
-    };
-  }
-
-  await supabase.from("users_on_team").insert({
-    user_id: params.userId,
-    team_id: data?.id,
-    role: "owner",
+  const { data: teamId } = await supabase.rpc("create_team_v2", {
+    name: params.name,
+    currency: params.baseCurrency,
   });
 
   return {
-    data,
+    data: {
+      id: teamId,
+    },
   };
 }
 
