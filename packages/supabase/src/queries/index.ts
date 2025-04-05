@@ -66,8 +66,7 @@ export async function getTeamBankAccountsQuery(
     .select("*, bank:bank_connections(*)")
     .eq("team_id", teamId)
     .order("created_at", { ascending: true })
-    .order("name", { ascending: false })
-    .throwOnError();
+    .order("name", { ascending: false });
 
   if (enabled) {
     query.eq("enabled", enabled);

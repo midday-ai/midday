@@ -187,13 +187,7 @@ export function SelectBankAccountsModal() {
   }, [error, setParams]);
 
   const onClose = () => {
-    setParams(
-      { step: null },
-      {
-        // NOTE: Rerender so the overview modal is visible
-        shallow: false,
-      },
-    );
+    setParams({ step: null });
   };
 
   const connectBankAction = useAction(connectBankAccountAction, {

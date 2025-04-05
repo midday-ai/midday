@@ -97,7 +97,7 @@ export function InvoiceSheetContent({
           <Button
             onClick={() => {
               setInvoice(null);
-              setParams(null, { shallow: false });
+              setParams(null);
 
               setTimeout(() => {
                 setParams({ type: "create" });

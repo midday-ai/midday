@@ -62,20 +62,15 @@ export function TrackerSearchFilter({
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const [filters, setFilters] = useQueryStates(
-    {
-      q: parseAsString,
-      start: parseAsString,
-      end: parseAsString,
-      statuses: parseAsArrayOf(
-        parseAsStringLiteral(["in_progress", "completed"]),
-      ),
-      customers: parseAsArrayOf(parseAsString),
-    },
-    {
-      shallow: false,
-    },
-  );
+  const [filters, setFilters] = useQueryStates({
+    q: parseAsString,
+    start: parseAsString,
+    end: parseAsString,
+    statuses: parseAsArrayOf(
+      parseAsStringLiteral(["in_progress", "completed"]),
+    ),
+    customers: parseAsArrayOf(parseAsString),
+  });
 
   useHotkeys(
     "esc",

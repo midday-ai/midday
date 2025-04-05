@@ -45,10 +45,7 @@ export function NoResults() {
           </p>
         </div>
 
-        <Button
-          variant="outline"
-          onClick={() => setParams(null, { shallow: false })}
-        >
+        <Button variant="outline" onClick={() => setParams(null)}>
           Clear filters
         </Button>
       </div>

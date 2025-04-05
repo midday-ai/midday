@@ -1,5 +1,8 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { getTeamBankAccountsQuery } from "@midday/supabase/queries";
+import {
+  getBankAccountsCurrenciesQuery,
+  getTeamBankAccountsQuery,
+} from "@midday/supabase/queries";
 import { z } from "zod";
 
 export const bankAccountsRouter = createTRPCRouter({
@@ -15,4 +18,12 @@ export const bankAccountsRouter = createTRPCRouter({
         enabled: input.enabled ?? true,
       });
     }),
+
+  currencies: protectedProcedure.query(
+    async ({ ctx: { supabase, teamId } }) => {
+      return getBankAccountsCurrenciesQuery(supabase, {
+        teamId: teamId!,
+      });
+    },
+  ),
 });
