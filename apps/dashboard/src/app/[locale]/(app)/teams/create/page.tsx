@@ -1,5 +1,6 @@
 import { CreateTeamForm } from "@/components/forms/create-team-form";
 import { UserMenu } from "@/components/user-menu";
+import { getCurrency } from "@midday/location";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -8,7 +9,9 @@ export const metadata: Metadata = {
   title: "Create Team | Midday",
 };
 
-export default async function CreateTeam() {
+export default function CreateTeam() {
+  const currency = getCurrency();
+
   return (
     <>
       <header className="w-full absolute left-0 right-0 flex justify-between items-center">
@@ -36,7 +39,7 @@ export default async function CreateTeam() {
             </p>
           </div>
 
-          <CreateTeamForm />
+          <CreateTeamForm defaultCurrencyPromise={currency} />
         </div>
       </div>
     </>

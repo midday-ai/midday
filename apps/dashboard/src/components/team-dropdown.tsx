@@ -87,7 +87,7 @@ export function TeamDropdown() {
               mass: 1.2,
             }}
           >
-            <Link href="/teams/create">
+            <Link href="/teams/create" onClick={() => setActive(false)}>
               <Button
                 className="w-[32px] h-[32px]"
                 size="icon"

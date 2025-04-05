@@ -1,20 +1,23 @@
 "use client";
 
 import { changeTeamAction } from "@/actions/change-team-action";
+import { SelectCurrency } from "@/components/select-currency";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
+import { uniqueCurrencies } from "@midday/location/currencies";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-import { Label } from "@midday/ui/label";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
 import { useAction } from "next-safe-action/hooks";
+import { use } from "react";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -25,7 +28,12 @@ const formSchema = z.object({
   logo: z.string().optional(),
 });
 
-export function CreateTeamForm() {
+type Props = {
+  defaultCurrencyPromise: Promise<string>;
+};
+
+export function CreateTeamForm({ defaultCurrencyPromise }: Props) {
+  const currency = use(defaultCurrencyPromise);
   const trpc = useTRPC();
   const changeTeam = useAction(changeTeamAction);
 
@@ -45,7 +53,7 @@ export function CreateTeamForm() {
   const form = useZodForm(formSchema, {
     defaultValues: {
       name: "",
-      currency: "USD",
+      currency,
     },
   });
 
@@ -59,15 +67,13 @@ export function CreateTeamForm() {
 
   return (
     <Form {...form}>
-      <Label className="text-sm font-normal" htmlFor="name">
-        Company name
-      </Label>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
+              <FormLabel>Company name</FormLabel>
               <FormControl>
                 <Input
                   autoFocus
@@ -79,6 +85,21 @@ export function CreateTeamForm() {
                   spellCheck="false"
                   {...field}
                 />
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="currency"
+          render={({ field }) => (
+            <FormItem className="mt-4">
+              <FormLabel>Currency</FormLabel>
+              <FormControl>
+                <SelectCurrency currencies={uniqueCurrencies} {...field} />
               </FormControl>
 
               <FormMessage />
