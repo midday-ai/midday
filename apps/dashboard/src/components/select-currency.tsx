@@ -15,7 +15,7 @@ export function SelectCurrency({
   headless,
   className,
 }: Props) {
-  const data = currencies.map((currency) => ({
+  const data = currencies?.map((currency) => ({
     id: currency.toLowerCase(),
     value: currency.toUpperCase(),
     label: currency,
@@ -25,7 +25,7 @@ export function SelectCurrency({
     <ComboboxDropdown
       headless={headless}
       placeholder="Select currency"
-      selectedItem={data.find((item) => item.id === value?.toLowerCase())}
+      selectedItem={data?.find((item) => item.id === value?.toLowerCase())}
       searchPlaceholder="Search currencies"
       items={data}
       className={className}

@@ -2,9 +2,7 @@
 
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { openai } from "@ai-sdk/openai";
-import { client as RedisClient } from "@midday/kv";
 import { getUser } from "@midday/supabase/cached-queries";
-import { Ratelimit } from "@upstash/ratelimit";
 import {
   createAI,
   createStreamableValue,
@@ -13,8 +11,7 @@ import {
 } from "ai/rsc";
 import { startOfMonth, subMonths } from "date-fns";
 import { nanoid } from "nanoid";
-import { headers } from "next/headers";
-import { getAssistantSettings, saveChat } from "../storage";
+import { saveChat } from "../storage";
 import type { AIState, Chat, ClientMessage, UIState } from "../types";
 import { getBurnRateTool } from "./tools/burn-rate";
 import { getForecastTool } from "./tools/forecast";
@@ -27,42 +24,12 @@ import { getRevenueTool } from "./tools/revenue";
 import { getRunwayTool } from "./tools/runway";
 import { getSpendingTool } from "./tools/spending";
 
-const ratelimit = new Ratelimit({
-  limiter: Ratelimit.fixedWindow(10, "10s"),
-  redis: RedisClient,
-});
-
 export async function submitUserMessage(
   content: string,
 ): Promise<ClientMessage> {
   "use server";
-  const ip = headers().get("x-forwarded-for");
-  const { success } = await ratelimit.limit(ip);
 
   const aiState = getMutableAIState<typeof AI>();
-
-  if (!success) {
-    aiState.update({
-      ...aiState.get(),
-      messages: [
-        ...aiState.get().messages,
-        {
-          id: nanoid(),
-          role: "assistant",
-          content:
-            "Not so fast, tiger. You've reached your message limit. Please wait a minute and try again.",
-        },
-      ],
-    });
-
-    return {
-      id: nanoid(),
-      role: "assistant",
-      display: (
-        <BotMessage content="Not so fast, tiger. You've reached your message limit. Please wait a minute and try again." />
-      ),
-    };
-  }
 
   const user = await getUser();
   const teamId = user?.data?.team_id as string;
@@ -189,39 +156,42 @@ export async function submitUserMessage(
   };
 }
 
+// Create a separate server action for handling AI state updates
+async function handleAIStateUpdate({
+  state,
+  done,
+}: { state: AIState; done: boolean }) {
+  "use server";
+
+  const createdAt = new Date();
+  const userId = state.user.id;
+  const teamId = state.user.team_id;
+  const { chatId, messages } = state;
+
+  const firstMessageContent = messages?.at(0)?.content ?? "";
+  const title =
+    typeof firstMessageContent === "string"
+      ? firstMessageContent.substring(0, 100)
+      : "";
+
+  const chat: Chat = {
+    id: chatId,
+    title,
+    userId,
+    createdAt,
+    messages,
+    teamId,
+  };
+
+  if (done) {
+    await saveChat(chat);
+  }
+}
+
 export const AI = createAI<AIState, UIState>({
   actions: {
     submitUserMessage,
   },
   initialUIState: [],
-  onSetAIState: async ({ state, done }) => {
-    "use server";
-
-    const settings = await getAssistantSettings();
-
-    const createdAt = new Date();
-    const userId = state.user.id;
-    const teamId = state.user.team_id;
-
-    const { chatId, messages } = state;
-
-    const firstMessageContent = messages?.at(0)?.content ?? "";
-    const title =
-      typeof firstMessageContent === "string"
-        ? firstMessageContent.substring(0, 100)
-        : "";
-
-    const chat: Chat = {
-      id: chatId,
-      title,
-      userId,
-      createdAt,
-      messages,
-      teamId,
-    };
-
-    if (done && settings?.enabled) {
-      await saveChat(chat);
-    }
-  },
+  onSetAIState: handleAIStateUpdate,
 });

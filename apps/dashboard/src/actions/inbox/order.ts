@@ -12,8 +12,8 @@ export const inboxOrderAction = authActionClient
   .metadata({
     name: "inbox-order",
   })
-  .action(({ parsedInput: value }) => {
-    cookies().set({
+  .action(async ({ parsedInput: value }) => {
+    (await cookies()).set({
       name: Cookies.InboxOrder,
       value: value.toString(),
       expires: addYears(new Date(), 1),

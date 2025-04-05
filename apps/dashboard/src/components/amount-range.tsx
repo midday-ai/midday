@@ -1,35 +1,36 @@
 "use client";
 
 import { useSliderWithInput } from "@/hooks/use-slider-with-input";
-import { useUserContext } from "@/store/user/hook";
-import { createClient } from "@midday/supabase/client";
+import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
-import { Input } from "@midday/ui/input";
+import { CurrencyInput } from "@midday/ui/currency-input";
 import { Label } from "@midday/ui/label";
 import { Slider } from "@midday/ui/slider";
+import { useQuery } from "@tanstack/react-query";
 import { parseAsArrayOf, parseAsInteger, useQueryState } from "nuqs";
-import { useEffect, useState } from "react";
-
-type Item = {
-  id: string;
-  amount: number;
-};
+import { useEffect, useRef } from "react";
 
 export function AmountRange() {
-  const [items, setItems] = useState<Item[]>([]);
-  const tick_count = 40;
-  const supabase = createClient();
-  const { team_id } = useUserContext((state) => state.data);
+  const minInputRef = useRef<HTMLInputElement>(null);
+  const maxInputRef = useRef<HTMLInputElement>(null);
 
-  const minValue =
-    items.length > 0 ? Math.min(...items.map((item) => item.amount)) : 0;
-  const maxValue =
-    items.length > 0 ? Math.max(...items.map((item) => item.amount)) : 0;
+  const trpc = useTRPC();
+
+  const { data: items, isLoading } = useQuery(
+    trpc.transactions.getAmountRange.queryOptions(),
+  );
 
   const [amountRange, setAmountRange] = useQueryState(
     "amount_range",
     parseAsArrayOf(parseAsInteger),
   );
+
+  const minValue = items?.length
+    ? Math.min(...items.map((item) => item.amount))
+    : 0;
+  const maxValue = items?.length
+    ? Math.max(...items.map((item) => item.amount))
+    : 0;
 
   const {
     sliderValue,
@@ -41,66 +42,27 @@ export function AmountRange() {
   } = useSliderWithInput({
     minValue,
     maxValue,
-    initialValue: amountRange || [],
+    initialValue: amountRange || [minValue, maxValue],
   });
 
-  const amountStep = (maxValue - minValue) / tick_count;
+  useEffect(() => {
+    if (minValue !== undefined && maxValue !== undefined) {
+      setValues([minValue, maxValue]);
+    }
+  }, [minValue, maxValue, setValues]);
 
-  const itemCounts = Array(tick_count)
-    .fill(0)
-    .map((_, tick) => {
-      const rangeMin = minValue + tick * amountStep;
-      const rangeMax = minValue + (tick + 1) * amountStep;
-      return items.filter(
-        (item) => item.amount >= rangeMin && item.amount < rangeMax,
-      ).length;
-    });
-
-  const maxCount = Math.max(...itemCounts);
+  if (isLoading) return null;
 
   const handleSliderValueChange = (values: number[]) => {
     handleSliderChange(values);
   };
 
   const countItemsInRange = (min: number, max: number) => {
-    return items.filter((item) => item.amount >= min && item.amount <= max)
-      .length;
-  };
-
-  const isBarInSelectedRange = (
-    index: number,
-    minValue: number,
-    amountStep: number,
-    sliderValue: number[],
-  ) => {
-    const rangeMin = minValue + index * amountStep;
-    const rangeMax = minValue + (index + 1) * amountStep;
     return (
-      countItemsInRange(sliderValue[0], sliderValue[1]) > 0 &&
-      rangeMin <= sliderValue[1] &&
-      rangeMax >= sliderValue[0]
+      items?.filter((item) => item.amount >= min && item.amount <= max)
+        .length ?? 0
     );
   };
-
-  useEffect(() => {
-    async function fetchItems() {
-      const { data } = await supabase
-        .rpc("get_transactions_amount_range_data", {
-          team_id,
-        })
-        .select("*");
-
-      setItems(data);
-    }
-
-    if (!items.length) {
-      fetchItems();
-    }
-  }, []);
-
-  useEffect(() => {
-    setValues([minValue, maxValue]);
-  }, [minValue, maxValue]);
 
   const totalCount = countItemsInRange(
     sliderValue[0] ?? minValue,
@@ -109,81 +71,73 @@ export function AmountRange() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <div className="flex h-12 w-full items-end px-3" aria-hidden="true">
-          {itemCounts.map((count, i) => (
-            <div
-              key={`histogram-bar-${i.toString()}`}
-              className="flex flex-1 justify-center"
-              style={{
-                height: `${(count / maxCount) * 100}%`,
-              }}
-            >
-              <span
-                data-selected={isBarInSelectedRange(
-                  i,
-                  minValue,
-                  amountStep,
-                  sliderValue,
-                )}
-                className="h-full w-full bg-primary/20"
-              />
-            </div>
-          ))}
-        </div>
-        <Slider
-          value={sliderValue}
-          onValueChange={handleSliderValueChange}
-          min={minValue}
-          max={maxValue}
-          aria-label="Amount range"
-        />
-      </div>
-
       <div className="flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <Label htmlFor="min-amount" className="text-xs">
-            Min amount
-          </Label>
+        <form
+          className="flex w-full items-center justify-between gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (sliderValue[0] !== undefined && sliderValue[1] !== undefined) {
+              setAmountRange([sliderValue[0], sliderValue[1]]);
+            }
+          }}
+        >
+          <div className="space-y-1 flex-1">
+            <Label htmlFor="min-amount" className="text-xs">
+              Min amount
+            </Label>
 
-          <Input
-            id="min-amount"
-            className="w-full font-mono text-xs"
-            type="text"
-            inputMode="decimal"
-            value={inputValues[0]}
-            onChange={(e) => handleInputChange(e, 0)}
-            onBlur={() => validateAndUpdateValue(inputValues[0], 0)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                validateAndUpdateValue(inputValues[0], 0);
-              }
-            }}
-            aria-label="Enter minimum amount"
-          />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="max-amount" className="text-xs">
-            Max amount
-          </Label>
+            <CurrencyInput
+              className="w-full font-mono text-xs"
+              type="text"
+              inputMode="decimal"
+              value={inputValues[0] || ""}
+              onChange={(e) => handleInputChange(e, 0)}
+              onFocus={(e) => e.target.select()}
+              onBlur={() => validateAndUpdateValue(inputValues[0] ?? "", 0)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  validateAndUpdateValue(inputValues[0] ?? "", 0);
+                  maxInputRef.current?.focus();
+                }
+              }}
+              aria-label="Enter minimum amount"
+              getInputRef={minInputRef}
+            />
+          </div>
+          <div className="space-y-1 flex-1">
+            <Label htmlFor="max-amount" className="text-xs">
+              Max amount
+            </Label>
 
-          <Input
-            id="max-amount"
-            className="w-full font-mono text-xs"
-            type="text"
-            inputMode="decimal"
-            value={inputValues[1]}
-            onChange={(e) => handleInputChange(e, 1)}
-            onBlur={() => validateAndUpdateValue(inputValues[1], 1)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                validateAndUpdateValue(inputValues[1], 1);
-              }
-            }}
-            aria-label="Enter maximum amount"
-          />
-        </div>
+            <CurrencyInput
+              className="w-full font-mono text-xs"
+              type="text"
+              inputMode="decimal"
+              value={inputValues[1] || ""}
+              onChange={(e) => handleInputChange(e, 1)}
+              onFocus={(e) => e.target.select()}
+              onBlur={() => validateAndUpdateValue(inputValues[1] ?? "", 1)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  validateAndUpdateValue(inputValues[1] ?? "", 1);
+                }
+              }}
+              aria-label="Enter maximum amount"
+              getInputRef={maxInputRef}
+            />
+          </div>
+        </form>
       </div>
+
+      <Slider
+        value={sliderValue}
+        onValueChange={handleSliderValueChange}
+        min={minValue}
+        max={maxValue}
+        aria-label="Amount range"
+      />
 
       <Button
         className="w-full text-xs"
@@ -191,9 +145,7 @@ export function AmountRange() {
         disabled={totalCount === 0}
         onClick={() => {
           if (sliderValue[0] !== undefined && sliderValue[1] !== undefined) {
-            setAmountRange([sliderValue[0], sliderValue[1]], {
-              shallow: false,
-            });
+            setAmountRange([sliderValue[0], sliderValue[1]]);
           }
         }}
       >

@@ -1,59 +1,37 @@
-import type { UpdateTransactionValues } from "@/actions/schema";
+"use client";
+
+import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { Drawer, DrawerContent } from "@midday/ui/drawer";
 import { useMediaQuery } from "@midday/ui/hooks";
 import { Sheet, SheetContent } from "@midday/ui/sheet";
 import React from "react";
 import { TransactionDetails } from "../transaction-details";
 
-type Props = {
-  setOpen: (open: boolean) => void;
-  isOpen: boolean;
-  data: any;
-  ids?: string[];
-  updateTransaction: (
-    values: UpdateTransactionValues,
-    optimisticData: any,
-  ) => void;
-};
-
-export function TransactionSheet({
-  setOpen,
-  isOpen,
-  data,
-  ids,
-  updateTransaction,
-}: Props) {
+export function TransactionSheet() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const { transactionId, setTransactionId } = useTransactionParams();
+  const isOpen = Boolean(transactionId);
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setTransactionId(null);
+    }
+  };
 
   if (isDesktop) {
     return (
-      <Sheet open={isOpen} onOpenChange={setOpen}>
+      <Sheet open={isOpen} onOpenChange={handleOpenChange}>
         <SheetContent>
-          <TransactionDetails
-            data={data}
-            ids={ids}
-            updateTransaction={updateTransaction}
-          />
+          <TransactionDetails />
         </SheetContent>
       </Sheet>
     );
   }
 
   return (
-    <Drawer
-      open={isOpen}
-      onOpenChange={(open: boolean) => {
-        if (!open) {
-          setOpen(false);
-        }
-      }}
-    >
+    <Drawer open={isOpen} onOpenChange={handleOpenChange}>
       <DrawerContent className="p-6">
-        <TransactionDetails
-          data={data}
-          ids={ids}
-          updateTransaction={updateTransaction}
-        />
+        <TransactionDetails />
       </DrawerContent>
     </Drawer>
   );

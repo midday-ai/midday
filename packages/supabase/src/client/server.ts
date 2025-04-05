@@ -1,5 +1,5 @@
-import { type CookieOptions, createServerClient } from "@supabase/ssr";
-import { cookies, headers } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import type { Database } from "../types";
 
 const conWarn = console.warn;
@@ -36,10 +36,9 @@ type CreateClientOptions = {
   schema?: "public" | "storage";
 };
 
-export const createClient = (options?: CreateClientOptions) => {
+export async function createClient(options?: CreateClientOptions) {
   const { admin = false, ...rest } = options ?? {};
-
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   const key = admin
     ? process.env.SUPABASE_SERVICE_KEY!
@@ -59,29 +58,22 @@ export const createClient = (options?: CreateClientOptions) => {
     {
       ...rest,
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
-        set(name: string, value: string, options: CookieOptions) {
+        setAll(cookiesToSet) {
           try {
-            cookieStore.set({ name, value, ...options });
-          } catch (error) {}
-        },
-        remove(name: string, options: CookieOptions) {
-          try {
-            cookieStore.set({ name, value: "", ...options });
-          } catch (error) {}
+            for (const { name, value, options } of cookiesToSet) {
+              cookieStore.set(name, value, options);
+            }
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
         },
       },
       auth,
-      global: {
-        headers: {
-          // Pass user agent from browser
-          "user-agent": headers().get("user-agent") as string,
-          // https://supabase.com/docs/guides/platform/read-replicas#experimental-routing
-          "sb-lb-routing-mode": "alpha-all-services",
-        },
-      },
     },
   );
-};
+}

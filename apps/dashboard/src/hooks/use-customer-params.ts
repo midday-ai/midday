@@ -5,17 +5,14 @@ import {
   useQueryStates,
 } from "nuqs";
 
-export function useCustomerParams(options?: { shallow: boolean }) {
-  const [params, setParams] = useQueryStates(
-    {
-      customerId: parseAsString,
-      createCustomer: parseAsBoolean,
-      sort: parseAsArrayOf(parseAsString),
-      name: parseAsString,
-      q: parseAsString,
-    },
-    options,
-  );
+export function useCustomerParams() {
+  const [params, setParams] = useQueryStates({
+    customerId: parseAsString,
+    createCustomer: parseAsBoolean,
+    sort: parseAsArrayOf(parseAsString),
+    name: parseAsString,
+    q: parseAsString,
+  });
 
   return {
     ...params,

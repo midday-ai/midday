@@ -1,9 +1,7 @@
 "use client";
 
-import { UpdateTeamFormValues, updateTeamSchema } from "@/actions/schema";
-import { updateTeamAction } from "@/actions/update-team-action";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@midday/ui/button";
+import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
+import { useZodForm } from "@/hooks/use-zod-form";
 import {
   Card,
   CardContent,
@@ -20,22 +18,25 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
+import { SubmitButton } from "@midday/ui/submit-button";
+import { z } from "zod";
 
-export function TeamName({ name }) {
-  const action = useAction(updateTeamAction);
-  const form = useForm<UpdateTeamFormValues>({
-    resolver: zodResolver(updateTeamSchema),
+const formSchema = z.object({
+  name: z.string().min(2).max(32),
+});
+
+export function TeamName() {
+  const { data } = useTeamQuery();
+  const updateTeamMutation = useTeamMutation();
+
+  const form = useZodForm(formSchema, {
     defaultValues: {
-      name,
-      revalidatePath: "/settings",
+      name: data?.name ?? "",
     },
   });
 
   const onSubmit = form.handleSubmit((data) => {
-    action.execute(data);
+    updateTeamMutation.mutate(data);
   });
 
   return (
@@ -64,7 +65,7 @@ export function TeamName({ name }) {
                       autoCapitalize="none"
                       autoCorrect="off"
                       spellCheck="false"
-                      maxLength="32"
+                      maxLength={32}
                     />
                   </FormControl>
                   <FormMessage />
@@ -75,13 +76,12 @@ export function TeamName({ name }) {
 
           <CardFooter className="flex justify-between">
             <div>Please use 32 characters at maximum.</div>
-            <Button type="submit" disabled={action.status === "executing"}>
-              {action.status === "executing" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Save"
-              )}
-            </Button>
+            <SubmitButton
+              isSubmitting={updateTeamMutation.isPending}
+              disabled={updateTeamMutation.isPending}
+            >
+              Save
+            </SubmitButton>
           </CardFooter>
         </Card>
       </form>

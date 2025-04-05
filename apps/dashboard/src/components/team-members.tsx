@@ -1,8 +1,8 @@
-import { PendingInvitesTable } from "@/components/tables/pending-invites";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { Suspense } from "react";
-import { MembersTable } from "./tables/members";
-import { PendingInvitesSkeleton } from "./tables/pending-invites/table";
+import { DataTable as MembersTable } from "./tables/members";
+import { DataTable as PendingInvitesTable } from "./tables/pending-invites";
+import { PendingInvitesSkeleton } from "./tables/pending-invites/skeleton";
 
 export function TeamMembers() {
   return (

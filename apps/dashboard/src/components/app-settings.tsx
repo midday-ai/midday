@@ -1,7 +1,7 @@
-import { updateAppSettingsAction } from "@/actions/update-app-settings-action";
+import { useTRPC } from "@/trpc/client";
 import { Label } from "@midday/ui/label";
 import { Switch } from "@midday/ui/switch";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 type AppSettingsItem = {
   id: string;
@@ -19,7 +19,18 @@ function AppSettingsItem({
   setting: AppSettingsItem;
   appId: string;
 }) {
-  const updateAppSettings = useAction(updateAppSettingsAction);
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const updateAppSettingsMutation = useMutation(
+    trpc.apps.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.apps.installed.queryKey(),
+        });
+      },
+    }),
+  );
 
   switch (setting.type) {
     case "switch":
@@ -30,11 +41,11 @@ function AppSettingsItem({
             <p className="text-xs text-[#878787]">{setting.description}</p>
           </div>
           <Switch
-            disabled={updateAppSettings.isPending}
+            disabled={updateAppSettingsMutation.isPending}
             checked={Boolean(setting.value)}
             onCheckedChange={(checked) => {
-              updateAppSettings.execute({
-                app_id: appId,
+              updateAppSettingsMutation.mutate({
+                appId,
                 option: {
                   id: setting.id,
                   value: Boolean(checked),

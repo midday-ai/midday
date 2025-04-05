@@ -5,12 +5,11 @@ import { createClient } from "@midday/supabase/server";
 import { ImageResponse } from "next/og";
 
 export const contentType = "image/png";
-export const runtime = "edge";
 
 const CDN_URL = "https://cdn.midday.ai";
 
 export default async function Image({ params }: { params: { token: string } }) {
-  const supabase = createClient({ admin: true });
+  const supabase = await createClient({ admin: true });
 
   const { id } = await verify(params.token);
   const { data: invoice } = await getInvoiceQuery(supabase, id);

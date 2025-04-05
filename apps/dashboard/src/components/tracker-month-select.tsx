@@ -17,25 +17,19 @@ export function TrackerMonthSelect({ className, dateFormat = "MMM" }: Props) {
     : new TZDate(new Date(), "UTC");
 
   const selectPrevMonth = () => {
-    setParams(
-      {
-        date: formatISO(startOfMonth(addMonths(currentDate, -1)), {
-          representation: "date",
-        }),
-      },
-      { shallow: false },
-    );
+    setParams({
+      date: formatISO(startOfMonth(addMonths(currentDate, -1)), {
+        representation: "date",
+      }),
+    });
   };
 
   const selectNextMonth = () => {
-    setParams(
-      {
-        date: formatISO(startOfMonth(addMonths(currentDate, 1)), {
-          representation: "date",
-        }),
-      },
-      { shallow: false },
-    );
+    setParams({
+      date: formatISO(startOfMonth(addMonths(currentDate, 1)), {
+        representation: "date",
+      }),
+    });
   };
 
   return (

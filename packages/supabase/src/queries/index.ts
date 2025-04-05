@@ -1,23 +1,13 @@
-import { UTCDate } from "@date-fns/utc";
 import {
   addDays,
   endOfMonth,
   formatISO,
   isWithinInterval,
+  parseISO,
   startOfMonth,
   subYears,
 } from "date-fns";
 import type { Client } from "../types";
-
-function transactionCategory(transaction) {
-  return (
-    transaction?.category ?? {
-      id: "uncategorized",
-      name: "Uncategorized",
-      color: "#606060",
-    }
-  );
-}
 
 export function getPercentageIncrease(a: number, b: number) {
   return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
@@ -76,8 +66,7 @@ export async function getTeamBankAccountsQuery(
     .select("*, bank:bank_connections(*)")
     .eq("team_id", teamId)
     .order("created_at", { ascending: true })
-    .order("name", { ascending: false })
-    .throwOnError();
+    .order("name", { ascending: false });
 
   if (enabled) {
     query.eq("enabled", enabled);
@@ -98,8 +87,7 @@ export async function getTeamMembersQuery(supabase: Client, teamId: string) {
     `,
     )
     .eq("team_id", teamId)
-    .order("created_at")
-    .throwOnError();
+    .order("created_at");
 
   return {
     data,
@@ -156,23 +144,23 @@ export async function getSpendingQuery(
 
 export type GetTransactionsParams = {
   teamId: string;
-  to: number;
-  from: number;
-  sort?: [string, "asc" | "desc"];
-  searchQuery?: string;
+  cursor?: string | null;
+  sort?: string[] | null;
+  pageSize?: number;
   filter?: {
-    statuses?: string[];
-    attachments?: "include" | "exclude";
-    categories?: string[];
-    tags?: string[];
-    accounts?: string[];
-    assignees?: string[];
-    type?: "income" | "expense";
-    start?: string;
-    end?: string;
-    recurring?: string[];
-    amount_range?: [number, number];
-    amount?: [string, string];
+    q?: string | null;
+    statuses?: string[] | null;
+    attachments?: "include" | "exclude" | null;
+    categories?: string[] | null;
+    tags?: string[] | null;
+    accounts?: string[] | null;
+    assignees?: string[] | null;
+    type?: "income" | "expense" | null;
+    start?: string | null;
+    end?: string | null;
+    recurring?: string[] | null;
+    amount_range?: number[] | null;
+    amount?: string[] | null;
   };
 };
 
@@ -180,9 +168,10 @@ export async function getTransactionsQuery(
   supabase: Client,
   params: GetTransactionsParams,
 ) {
-  const { from = 0, to, filter, sort, teamId, searchQuery } = params;
+  const { filter, sort, teamId, cursor, pageSize = 40 } = params;
 
   const {
+    q,
     statuses,
     attachments,
     categories,
@@ -193,75 +182,76 @@ export async function getTransactionsQuery(
     end,
     assignees,
     recurring,
-    amount_range,
     amount,
+    amount_range,
   } = filter || {};
 
-  const columns = [
-    "id",
-    "date",
-    "amount",
-    "currency",
-    "method",
-    "status",
-    "note",
-    "manual",
-    "internal",
-    "recurring",
-    "frequency",
-    "name",
-    "description",
-    "assigned:assigned_id(*)",
-    "category:transaction_categories(id, name, color, slug)",
-    "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
-    "attachments:transaction_attachments(id, name, size, path, type)",
-    "tags:transaction_tags(id, tag_id, tag:tags(id, name))",
-    "vat:calculated_vat",
-  ];
+  const columns = `
+      id,
+      date,
+      amount,
+      currency,
+      method,
+      status,
+      note,
+      manual,
+      internal,
+      recurring,
+      frequency,
+      name,
+      description,
+      assigned:assigned_id(*),
+      category:transaction_categories(id, name, color, slug),
+      bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url)),
+      attachments:transaction_attachments(id, name, size, path, type),
+      tags:transaction_tags(id, tag_id, tag:tags(id, name)),
+      vat:calculated_vat
+    `;
 
   const query = supabase
     .from("transactions")
-    .select(columns.join(","), { count: "exact" })
+    .select(columns)
     .eq("team_id", teamId);
 
+  // Apply sorting
   if (sort) {
     const [column, value] = sort;
     const ascending = value === "asc";
 
     if (column === "attachment") {
       query.order("is_fulfilled", { ascending });
+      query.order("id", { ascending }); // Secondary sort for stability
     } else if (column === "assigned") {
       query.order("assigned(full_name)", { ascending });
+      query.order("id", { ascending });
     } else if (column === "bank_account") {
       query.order("bank_account(name)", { ascending });
+      query.order("id", { ascending });
     } else if (column === "category") {
       query.order("category(name)", { ascending });
+      query.order("id", { ascending });
     } else if (column === "tags") {
       query.order("is_transaction_tagged", { ascending });
-    } else {
+      query.order("id", { ascending });
+    } else if (column) {
       query.order(column, { ascending });
+      query.order("id", { ascending }); // Always include ID as secondary sort
     }
   } else {
-    // NOTE: date can be on the same day (2020-01-01), so we need to order by id and amount to keep the order
-    query
-      .order("date", { ascending: false })
-      .order("name", { ascending: false })
-      .order("id", { ascending: false });
+    // Default sorting
+    query.order("date", { ascending: false }).order("id", { ascending: false }); // Always include ID as secondary sort
   }
 
   if (start && end) {
-    const fromDate = new UTCDate(start);
-    const toDate = new UTCDate(end);
-
-    query.gte("date", fromDate.toISOString());
-    query.lte("date", toDate.toISOString());
+    query.gte("date", start);
+    query.lte("date", end);
   }
 
-  if (searchQuery) {
-    if (!Number.isNaN(Number.parseInt(searchQuery))) {
-      query.eq("amount", Number(searchQuery));
+  if (q) {
+    if (!Number.isNaN(Number.parseInt(q))) {
+      query.eq("amount", Number(q));
     } else {
-      query.textSearch("fts_vector", `${searchQuery.replaceAll(" ", "+")}:*`);
+      query.textSearch("fts_vector", `${q.replaceAll(" ", "+")}:*`);
     }
   }
 
@@ -294,11 +284,9 @@ export async function getTransactionsQuery(
 
   if (tags) {
     query
-      .select(
-        [...columns, "temp_filter_tags:transaction_tags!inner()"].join(","),
-      )
+      .in("temp_filter_tags.tag_id", tags)
       .eq("team_id", teamId)
-      .in("temp_filter_tags.tag_id", tags);
+      .select(`${columns}, temp_filter_tags:transaction_tags!inner()`);
   }
 
   if (recurring) {
@@ -341,54 +329,45 @@ export async function getTransactionsQuery(
     }
   }
 
-  const { data, count } = await query.range(from, to);
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
 
-  const totalAmount = data
-    ?.reduce((acc, { amount, currency }) => {
-      const existingCurrency = acc.find((item) => item.currency === currency);
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
 
-      if (existingCurrency) {
-        existingCurrency.amount += amount;
-      } else {
-        acc.push({ amount, currency });
-      }
-      return acc;
-    }, [])
-    .sort((a, b) => a?.amount - b?.amount);
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
 
   return {
     meta: {
-      totalAmount,
-      count,
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
     },
-    data: data?.map((transaction) => ({
-      ...transaction,
-      category: transactionCategory(transaction),
-    })),
+    data,
   };
 }
 
 export async function getTransactionQuery(supabase: Client, id: string) {
-  const columns = [
-    "*",
-    "assigned:assigned_id(*)",
-    "category:category_slug(id, name, vat)",
-    "attachments:transaction_attachments(*)",
-    "tags:transaction_tags(id, tag:tags(id, name))",
-    "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
-    "vat:calculated_vat",
-  ];
-
   const { data } = await supabase
     .from("transactions")
-    .select(columns.join(","))
+    .select(`
+      *,
+      assigned:assigned_id(*),
+      attachments:transaction_attachments(*),
+      category:transaction_categories(id, name, color, slug),
+      tags:transaction_tags(id, tag:tags(id, name)),
+      bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url)),
+      vat:calculated_vat
+    `)
     .eq("id", id)
-    .single()
-    .throwOnError();
+    .single();
 
   return {
-    ...data,
-    category: transactionCategory(data),
+    data,
   };
 }
 
@@ -396,21 +375,30 @@ type GetSimilarTransactionsParams = {
   name: string;
   teamId: string;
   categorySlug?: string;
+  frequency?: "weekly" | "monthly" | "annually" | "irregular";
 };
 
 export async function getSimilarTransactions(
   supabase: Client,
   params: GetSimilarTransactionsParams,
 ) {
-  const { name, teamId, categorySlug } = params;
+  const { name, teamId, categorySlug, frequency } = params;
 
-  return supabase
+  const query = supabase
     .from("transactions")
-    .select("id, amount, team_id", { count: "exact" })
+    .select("id, amount, team_id")
     .eq("team_id", teamId)
-    .textSearch("fts_vector", `${name.replaceAll(" ", "+")}:*`)
-    .neq("category_slug", categorySlug)
-    .throwOnError();
+    .textSearch("fts_vector", `${name.replaceAll(" ", "+")}:*`);
+
+  if (categorySlug) {
+    query.neq("category_slug", categorySlug);
+  }
+
+  if (frequency) {
+    query.eq("frequency", frequency);
+  }
+
+  return query;
 }
 
 type GetBankAccountsCurrenciesParams = {
@@ -439,13 +427,10 @@ export async function getBurnRateQuery(
 ) {
   const { teamId, from, to, currency } = params;
 
-  const fromDate = new UTCDate(from);
-  const toDate = new UTCDate(to);
-
   const { data } = await supabase.rpc("get_burn_rate_v4", {
     team_id: teamId,
-    date_from: startOfMonth(fromDate).toDateString(),
-    date_to: endOfMonth(toDate).toDateString(),
+    date_from: startOfMonth(parseISO(from)).toDateString(),
+    date_to: endOfMonth(parseISO(to)).toDateString(),
     base_currency: currency,
   });
 
@@ -468,13 +453,10 @@ export async function getRunwayQuery(
 ) {
   const { teamId, from, to, currency } = params;
 
-  const fromDate = new UTCDate(from);
-  const toDate = new UTCDate(to);
-
   return supabase.rpc("get_runway_v4", {
     team_id: teamId,
-    date_from: startOfMonth(fromDate).toDateString(),
-    date_to: endOfMonth(toDate).toDateString(),
+    date_from: startOfMonth(parseISO(from)).toDateString(),
+    date_to: endOfMonth(parseISO(to)).toDateString(),
     base_currency: currency,
   });
 }
@@ -495,20 +477,17 @@ export async function getMetricsQuery(
 
   const rpc = type === "profit" ? "get_profit_v3" : "get_revenue_v3";
 
-  const fromDate = new UTCDate(from);
-  const toDate = new UTCDate(to);
-
   const [{ data: prevData }, { data: currentData }] = await Promise.all([
     supabase.rpc(rpc, {
       team_id: teamId,
-      date_from: subYears(startOfMonth(fromDate), 1).toDateString(),
-      date_to: subYears(endOfMonth(toDate), 1).toDateString(),
+      date_from: subYears(startOfMonth(parseISO(from)), 1).toDateString(),
+      date_to: subYears(endOfMonth(parseISO(to)), 1).toDateString(),
       base_currency: currency,
     }),
     supabase.rpc(rpc, {
       team_id: teamId,
-      date_from: startOfMonth(fromDate).toDateString(),
-      date_to: endOfMonth(toDate).toDateString(),
+      date_from: startOfMonth(parseISO(from)).toDateString(),
+      date_to: endOfMonth(parseISO(to)).toDateString(),
       base_currency: currency,
     }),
   ]);
@@ -571,13 +550,10 @@ export async function getExpensesQuery(
 ) {
   const { teamId, from, to, currency } = params;
 
-  const fromDate = new UTCDate(from);
-  const toDate = new UTCDate(to);
-
   const { data } = await supabase.rpc("get_expenses", {
     team_id: teamId,
-    date_from: startOfMonth(fromDate).toDateString(),
-    date_to: endOfMonth(toDate).toDateString(),
+    date_from: startOfMonth(parseISO(from)).toDateString(),
+    date_to: endOfMonth(parseISO(to)).toDateString(),
     base_currency: currency,
   });
 
@@ -595,7 +571,7 @@ export async function getExpensesQuery(
       type: "expense",
       currency: data?.at(0)?.currency,
     },
-    result: data.map((item) => ({
+    result: data?.map((item) => ({
       ...item,
       value: item.value,
       recurring: item.recurring_value,
@@ -785,8 +761,7 @@ export async function getUserInvitesQuery(supabase: Client, email: string) {
   return supabase
     .from("user_invites")
     .select("id, email, code, role, user:invited_by(*), team:team_id(*)")
-    .eq("email", email)
-    .throwOnError();
+    .eq("email", email);
 }
 
 type GetUserInviteQueryParams = {
@@ -1014,7 +989,7 @@ export async function getTrackerRecordsByDateQuery(
       "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency, customer:customer_id(id, name))",
     )
     .eq("team_id", teamId)
-    .eq("date", formatISO(new UTCDate(date), { representation: "date" }));
+    .eq("date", formatISO(parseISO(date), { representation: "date" }));
 
   if (projectId) {
     query.eq("project_id", projectId);
@@ -1061,8 +1036,8 @@ export async function getTrackerRecordsByRangeQuery(
       "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
     )
     .eq("team_id", params.teamId)
-    .gte("date", new UTCDate(params.from).toISOString())
-    .lte("date", new UTCDate(params.to).toISOString())
+    .gte("date", params.from)
+    .lte("date", params.to)
     .order("created_at");
 
   if (params.userId) {
@@ -1211,11 +1186,8 @@ export async function getInvoicesQuery(
   }
 
   if (start && end) {
-    const fromDate = new UTCDate(start);
-    const toDate = new UTCDate(end);
-
-    query.gte("due_date", fromDate.toISOString());
-    query.lte("due_date", toDate.toISOString());
+    query.gte("due_date", from);
+    query.lte("due_date", to);
   }
 
   if (customers?.length) {
@@ -1409,4 +1381,12 @@ export async function getTeamLimitsMetricsQuery(
       input_team_id: teamId,
     })
     .single();
+}
+
+export async function getInstalledAppsQuery(supabase: Client, teamId: string) {
+  return supabase.from("apps").select("app_id, settings").eq("team_id", teamId);
+}
+
+export async function getTeamByIdQuery(supabase: Client, teamId: string) {
+  return supabase.from("teams").select("*").eq("id", teamId).single();
 }

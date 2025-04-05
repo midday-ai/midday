@@ -1,5 +1,6 @@
 import { SetupForm } from "@/components/setup-form";
-import { getSession, getUser } from "@midday/supabase/cached-queries";
+import { getQueryClient, trpc } from "@/trpc/server";
+import { HydrateClient } from "@/trpc/server";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -10,9 +11,10 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const { data } = await getUser();
+  const queryClient = getQueryClient();
+  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
 
-  if (!data?.id) {
+  if (!user?.id) {
     return redirect("/");
   }
 
@@ -31,11 +33,9 @@ export default async function Page() {
             Add your name and an optional avatar.
           </p>
 
-          <SetupForm
-            userId={data.id}
-            avatarUrl={data.avatar_url}
-            fullName={data.full_name}
-          />
+          <HydrateClient>
+            <SetupForm />
+          </HydrateClient>
         </div>
       </div>
     </div>

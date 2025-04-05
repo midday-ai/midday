@@ -1,5 +1,6 @@
 "use client";
 
+import { useUserQuery } from "@/hooks/use-user";
 import {
   Card,
   CardDescription,
@@ -9,13 +10,9 @@ import {
 } from "@midday/ui/card";
 import { AvatarUpload } from "./avatar-upload";
 
-type Props = {
-  userId: string;
-  avatarUrl: string;
-  fullName: string;
-};
+export function UserAvatar() {
+  const { data: user } = useUserQuery();
 
-export function UserAvatar({ userId, avatarUrl, fullName }: Props) {
   return (
     <Card>
       <div className="flex justify-between items-center pr-6">
@@ -27,11 +24,7 @@ export function UserAvatar({ userId, avatarUrl, fullName }: Props) {
           </CardDescription>
         </CardHeader>
 
-        <AvatarUpload
-          userId={userId}
-          avatarUrl={avatarUrl}
-          fullName={fullName}
-        />
+        <AvatarUpload userId={user.id} avatarUrl={user.avatar_url} />
       </div>
       <CardFooter>An avatar is optional but strongly recommended.</CardFooter>
     </Card>

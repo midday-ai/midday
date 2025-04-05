@@ -10,9 +10,8 @@ import { verifyOtpSchema } from "./schema";
 
 export const verifyOtpAction = actionClient
   .schema(verifyOtpSchema)
-
   .action(async ({ parsedInput: { email, token } }) => {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     await supabase.auth.verifyOtp({
       email,
@@ -20,7 +19,7 @@ export const verifyOtpAction = actionClient
       type: "email",
     });
 
-    cookies().set(Cookies.PreferredSignInProvider, "otp", {
+    (await cookies()).set(Cookies.PreferredSignInProvider, "otp", {
       expires: addYears(new Date(), 1),
     });
 

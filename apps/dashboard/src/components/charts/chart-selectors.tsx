@@ -1,23 +1,35 @@
-import { ChartMore } from "@/components/charts/chart-more";
+"use client";
+
 import { ChartPeriod } from "@/components/charts/chart-period";
 import { ChartType } from "@/components/charts/chart-type";
-import { Cookies } from "@/utils/constants";
-import { cookies } from "next/headers";
-import { ChartFiltersServer } from "./chart-filters.server";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
+import { ChartFilters } from "./chart-filters";
 
-export async function ChartSelectors({ defaultValue }) {
-  const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
+export function ChartSelectors() {
+  const trpc = useTRPC();
+  const { data: currencies } = useQuery(
+    trpc.bankAccounts.currencies.queryOptions(),
+  );
 
   return (
     <div className="flex justify-between mt-6 space-x-2">
       <div className="flex space-x-2">
-        <ChartType initialValue={chartType} />
+        <ChartType />
       </div>
 
       <div className="flex space-x-2">
-        <ChartPeriod defaultValue={defaultValue} />
-        <ChartFiltersServer />
-        <ChartMore defaultValue={defaultValue} type={chartType} />
+        <ChartPeriod />
+        <ChartFilters
+          currencies={
+            currencies?.data?.map((currency) => {
+              return {
+                id: currency.currency,
+                name: currency.currency,
+              };
+            }) ?? []
+          }
+        />
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ import {
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 export function TableHeader() {
-  const { setParams, sort } = useCustomerParams({ shallow: false });
+  const { setParams, sort } = useCustomerParams();
   const [column, value] = sort || [];
 
   const createSortQuery = (name: string) => {

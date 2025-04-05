@@ -1,5 +1,5 @@
 import { createBankAccountAction } from "@/actions/create-bank-account-action";
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { formatAccountName } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { getTeamBankAccountsQuery } from "@midday/supabase/queries";
@@ -24,8 +24,7 @@ type Props = {
 export function SelectAccount({ placeholder, onChange, value }: Props) {
   const [data, setData] = useState([]);
   const supabase = createClient();
-
-  const { team_id: teamId } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   const createBankAccount = useAction(createBankAccountAction, {
     onSuccess: async ({ data: result }) => {
@@ -39,7 +38,7 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
   useEffect(() => {
     async function fetchData() {
       const repsonse = await getTeamBankAccountsQuery(supabase, {
-        teamId,
+        teamId: user?.team_id,
       });
 
       setData(

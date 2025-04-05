@@ -1,6 +1,6 @@
 "use client";
 
-import { updateUserAction } from "@/actions/update-user-action";
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 import {
   Card,
   CardContent,
@@ -15,14 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { useAction } from "next-safe-action/hooks";
 
-type Props = {
-  timeFormat: string;
-};
-
-export function TimeFormatSettings({ timeFormat }: Props) {
-  const action = useAction(updateUserAction);
+export function TimeFormatSettings() {
+  const updateUserMutation = useUserMutation();
+  const { data: user } = useUserQuery();
 
   return (
     <Card className="flex justify-between items-center">
@@ -35,9 +31,9 @@ export function TimeFormatSettings({ timeFormat }: Props) {
 
       <CardContent>
         <Select
-          defaultValue={timeFormat.toString()}
+          defaultValue={user?.time_format?.toString() ?? undefined}
           onValueChange={(value) => {
-            action.execute({ time_format: +value });
+            updateUserMutation.mutate({ time_format: +value });
           }}
         >
           <SelectTrigger className="w-[180px]">

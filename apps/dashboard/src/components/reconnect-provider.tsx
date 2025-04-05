@@ -1,6 +1,7 @@
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
 import { reconnectEnableBankingLinkAction } from "@/actions/institutions/reconnect-enablebanking-link";
 import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-gocardless-link";
+import { getUrl } from "@/utils/environment";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -143,7 +144,7 @@ export function ReconnectProvider({
           id,
           institutionId,
           availableHistory: 60,
-          redirectTo: `${window.location.origin}/api/gocardless/reconnect`,
+          redirectTo: `${getUrl()}/api/gocardless/reconnect`,
           isDesktop: isDesktopApp(),
         });
       }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import { TZDate } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
@@ -181,7 +181,7 @@ type CalendarHeaderProps = {
 };
 
 function CalendarHeader({ meta, data }: CalendarHeaderProps) {
-  const { locale } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   const projectTotals = Object.entries(data).reduce(
     (acc, [_, events]) => {
@@ -255,7 +255,7 @@ function CalendarHeader({ meta, data }: CalendarHeaderProps) {
                   amount: meta?.totalAmount,
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
-                  locale,
+                  locale: user?.locale,
                 })} this month`
               : "Nothing billable yet"}
           </p>
@@ -291,7 +291,7 @@ function CalendarHeader({ meta, data }: CalendarHeaderProps) {
                               amount: project.amount,
                               minimumFractionDigits: 0,
                               maximumFractionDigits: 0,
-                              locale,
+                              locale: user?.locale,
                             })}
                           </span>
                         </div>

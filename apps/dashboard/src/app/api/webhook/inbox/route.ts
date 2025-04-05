@@ -1,5 +1,5 @@
-import { env } from "@/env.mjs";
 import { logger } from "@/utils/logger";
+import { resend } from "@/utils/resend";
 import { getAllowedAttachments, prepareDocument } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
@@ -10,10 +10,8 @@ import { inboxDocument } from "jobs/tasks/inbox/document";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 
 export const runtime = "nodejs";
-export const maxDuration = 300; // 5min
 
 // https://postmarkapp.com/support/article/800-ips-for-firewalls#webhooks
 const ipRange = [
@@ -25,10 +23,8 @@ const ipRange = [
 
 const FORWARD_FROM_EMAIL = "inbox@midday.ai";
 
-const resend = new Resend(env.RESEND_API_KEY);
-
 export async function POST(req: Request) {
-  const clientIp = headers().get("x-forwarded-for") ?? "";
+  const clientIp = (await headers()).get("x-forwarded-for") ?? "";
 
   if (
     process.env.NODE_ENV !== "development" &&
@@ -75,7 +71,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true });
   }
 
-  const supabase = createClient({ admin: true });
+  const supabase = await createClient({ admin: true });
 
   try {
     const { data: teamData } = await supabase

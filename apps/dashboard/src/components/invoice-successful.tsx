@@ -1,3 +1,4 @@
+import { getUrl } from "@/utils/environment";
 import { formatEditorContent } from "@midday/invoice/format-to-html";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
@@ -104,9 +105,7 @@ export function InvoiceSuccessful({ invoice }: Props) {
           </span>
           <div className="flex w-full gap-2 mt-1">
             <div className="flex-1 min-w-0">
-              <CopyInput
-                value={`${window.location.origin}/i/${invoice.token}`}
-              />
+              <CopyInput value={`${getUrl()}/i/${invoice.token}`} />
             </div>
 
             <a
