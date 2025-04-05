@@ -1,3 +1,5 @@
+"use client";
+
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
