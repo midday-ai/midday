@@ -7,22 +7,29 @@ import { loadMetricsParams } from "@/hooks/use-metrics-params";
 import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import { cn } from "@midday/ui/cn";
 import type { Metadata } from "next";
+import { after } from "next/server";
 
 export const metadata: Metadata = {
   title: "Overview | Midday",
 };
 
-export default async function Overview(props: {
+type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+};
+
+export default async function Overview(props: Props) {
   const queryClient = getQueryClient();
   const searchParams = await props.searchParams;
 
   const { from, to } = loadMetricsParams(searchParams);
-  // const accounts = await getTeamBankAccounts();
 
   // Preload the data for the charts
-  await Promise.allSettled([
+  const [accounts] = await Promise.allSettled([
+    queryClient.fetchQuery(
+      trpc.bankAccounts.get.queryOptions({
+        enabled: true,
+      }),
+    ),
     queryClient.fetchQuery(
       trpc.metrics.expense.queryOptions({
         from,
@@ -55,8 +62,8 @@ export default async function Overview(props: {
     ),
   ]);
 
-  // const isEmpty = !accounts?.data?.length;
-  const isEmpty = false;
+  const isEmpty =
+    accounts.status === "fulfilled" ? !accounts.value?.data?.length : true;
 
   return (
     <HydrateClient>
