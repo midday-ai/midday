@@ -31,7 +31,7 @@ export function DataTable() {
 
   const table = useReactTable({
     getRowId: (row) => row.id,
-    data,
+    data: data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -40,8 +40,8 @@ export function DataTable() {
       columnFilters,
     },
     meta: {
-      currentUser: data.find((member) => member.user.id === user?.id),
-      totalOwners: data.filter((member) => member.role === "owner").length,
+      currentUser: data?.find((member) => member?.user?.id === user?.id),
+      totalOwners: data?.filter((member) => member?.role === "owner").length,
     },
   });
 

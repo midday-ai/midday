@@ -88,8 +88,7 @@ export async function getTeamMembersQuery(supabase: Client, teamId: string) {
     `,
     )
     .eq("team_id", teamId)
-    .order("created_at")
-    .throwOnError();
+    .order("created_at");
 
   return {
     data,
@@ -573,7 +572,7 @@ export async function getExpensesQuery(
       type: "expense",
       currency: data?.at(0)?.currency,
     },
-    result: data.map((item) => ({
+    result: data?.map((item) => ({
       ...item,
       value: item.value,
       recurring: item.recurring_value,

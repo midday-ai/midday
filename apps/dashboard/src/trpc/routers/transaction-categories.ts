@@ -11,7 +11,7 @@ import { z } from "zod";
 export const transactionCategoriesRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
     const { data } = await getCategoriesQuery(supabase, {
-      teamId,
+      teamId: teamId!,
     });
 
     return [
@@ -36,7 +36,7 @@ export const transactionCategoriesRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx: { supabase, teamId } }) => {
       const { data } = await createTransactionCategory(supabase, {
-        teamId,
+        teamId: teamId!,
         ...input,
       });
 
@@ -53,7 +53,7 @@ export const transactionCategoriesRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx: { supabase, teamId } }) => {
       const { data } = await createTransactionCategories(supabase, {
-        teamId,
+        teamId: teamId!,
         categories: input,
       });
 

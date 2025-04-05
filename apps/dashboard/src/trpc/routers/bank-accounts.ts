@@ -11,7 +11,7 @@ export const bankAccountsRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx: { supabase, teamId } }) => {
       return getTeamBankAccountsQuery(supabase, {
-        teamId,
+        teamId: teamId!,
         enabled: input.enabled ?? true,
       });
     }),

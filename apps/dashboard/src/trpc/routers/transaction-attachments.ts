@@ -20,7 +20,7 @@ export const transactionAttachmentsRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx: { supabase, teamId } }) => {
       const { data } = await createAttachments(supabase, {
-        teamId,
+        teamId: teamId!,
         attachments: input,
       });
 

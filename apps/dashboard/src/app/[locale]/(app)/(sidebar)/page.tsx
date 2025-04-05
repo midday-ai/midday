@@ -3,76 +3,57 @@ import { Charts } from "@/components/charts/charts";
 import { EmptyState } from "@/components/charts/empty-state";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
-import { Cookies } from "@/utils/constants";
-import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
-import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Overview | Midday",
 };
 
-const defaultValue = {
-  from: subMonths(startOfMonth(new Date()), 12).toISOString(),
-  to: new Date().toISOString(),
-  period: "monthly",
-};
+// const defaultValue = {
+//   from: subMonths(startOfMonth(new Date()), 12).toISOString(),
+//   to: new Date().toISOString(),
+//   period: "monthly",
+// };
 
 export default async function Overview(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const searchParams = await props.searchParams;
-  const accounts = await getTeamBankAccounts();
-  const chartType = (await cookies()).get(Cookies.ChartType)?.value ?? "profit";
+  // const searchParams = await props.searchParams;
+  // const accounts = await getTeamBankAccounts();
 
-  const hideConnectFlow = (await cookies()).has(Cookies.HideConnectFlow);
-
-  const initialPeriod = (await cookies()).has(Cookies.SpendingPeriod)
-    ? JSON.parse((await cookies()).get(Cookies.SpendingPeriod)?.value ?? "")
-    : {
-        id: "this_year",
-        from: startOfYear(new Date()).toISOString(),
-        to: new Date().toISOString(),
-      };
-
-  const value = {
-    ...(searchParams.from && { from: searchParams.from }),
-    ...(searchParams.to && { to: searchParams.to }),
-  };
-
-  const isEmpty = !accounts?.data?.length;
+  // const isEmpty = !accounts?.data?.length;
+  const isEmpty = false;
 
   return (
     <>
       <div>
         <div className="h-[530px] mb-4">
-          <ChartSelectors defaultValue={defaultValue} />
+          {/* <ChartSelectors defaultValue={defaultValue} /> */}
 
           <div className="mt-8 relative">
             {isEmpty && <EmptyState />}
 
             <div className={cn(isEmpty && "blur-[8px] opacity-20")}>
-              <Charts
+              {/* <Charts
                 value={value}
                 defaultValue={defaultValue}
                 disabled={isEmpty}
                 type={chartType}
                 currency={searchParams.currency}
-              />
+              /> */}
             </div>
           </div>
         </div>
 
-        <Widgets
+        {/* <Widgets
           initialPeriod={initialPeriod}
           disabled={isEmpty}
           searchParams={searchParams}
-        />
+        /> */}
       </div>
 
-      <OverviewModal defaultOpen={isEmpty && !hideConnectFlow} />
+      {/* <OverviewModal defaultOpen={isEmpty && !hideConnectFlow} /> */}
     </>
   );
 }

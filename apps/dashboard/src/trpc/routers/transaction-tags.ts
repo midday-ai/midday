@@ -16,7 +16,7 @@ export const transactionTagsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx: { supabase, teamId }, input }) => {
       const { data } = await createTransactionTag(supabase, {
-        teamId,
+        teamId: teamId!,
         transactionId: input.transactionId,
         tagId: input.tagId,
       });

@@ -53,7 +53,7 @@ export const teamRouter = createTRPCRouter({
     }),
 
   members: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
-    const { data } = await getTeamMembersQuery(supabase, teamId);
+    const { data } = await getTeamMembersQuery(supabase, teamId!);
 
     return data;
   }),
@@ -87,11 +87,11 @@ export const teamRouter = createTRPCRouter({
         input.teamId,
       );
 
-      const currentUser = teamMembersData.find(
+      const currentUser = teamMembersData?.find(
         (member) => member.user.id === session.user.id,
       );
 
-      const totalOwners = teamMembersData.filter(
+      const totalOwners = teamMembersData?.filter(
         (member) => member.role === "owner",
       ).length;
 

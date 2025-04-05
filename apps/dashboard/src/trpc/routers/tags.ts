@@ -5,7 +5,7 @@ import { z } from "zod";
 
 export const tagsRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
-    const { data } = await getTagsQuery(supabase, teamId);
+    const { data } = await getTagsQuery(supabase, teamId!);
 
     return data;
   }),
@@ -18,7 +18,7 @@ export const tagsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx: { supabase, teamId }, input }) => {
       const { data } = await createTag(supabase, {
-        teamId,
+        teamId: teamId!,
         name: input.name,
       });
 

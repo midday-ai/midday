@@ -41,7 +41,7 @@ export const transactionsRouter = createTRPCRouter({
     .query(async ({ input, ctx: { supabase, teamId } }) => {
       return getTransactionsQuery(supabase, {
         ...input,
-        teamId,
+        teamId: teamId!,
       });
     }),
 
@@ -64,7 +64,7 @@ export const transactionsRouter = createTRPCRouter({
       const { data } = await supabase.rpc(
         "get_transactions_amount_full_range_data",
         {
-          team_id: teamId,
+          team_id: teamId!,
         },
       );
 
@@ -117,7 +117,7 @@ export const transactionsRouter = createTRPCRouter({
     .mutation(async ({ input, ctx: { supabase, teamId } }) => {
       const { data } = await updateTransactions(supabase, {
         ...input,
-        team_id: teamId,
+        team_id: teamId!,
       });
 
       return data;
@@ -138,7 +138,7 @@ export const transactionsRouter = createTRPCRouter({
         name: input.name,
         categorySlug: input.categorySlug,
         frequency: input.frequency,
-        teamId,
+        teamId: teamId!,
       });
 
       return data;
@@ -158,7 +158,7 @@ export const transactionsRouter = createTRPCRouter({
     .mutation(async ({ input, ctx: { supabase, teamId } }) => {
       const { data } = await updateSimilarTransactionsCategory(supabase, {
         ...input,
-        team_id: teamId,
+        team_id: teamId!,
       });
 
       return data;
@@ -169,7 +169,7 @@ export const transactionsRouter = createTRPCRouter({
     .mutation(async ({ input, ctx: { supabase, teamId } }) => {
       const { data } = await updateSimilarTransactionsRecurring(supabase, {
         id: input.id,
-        team_id: teamId,
+        team_id: teamId!,
       });
 
       return data;
