@@ -27,7 +27,7 @@ export default function CreateTeam() {
       </header>
 
       <div className="flex min-h-screen justify-center items-center overflow-hidden p-6 md:p-0">
-        <div className="relative z-20 m-auto flex w-full max-w-[340px] flex-col">
+        <div className="relative z-20 m-auto flex w-full max-w-[400px] flex-col">
           <div>
             <h1 className="text-2xl font-medium mb-4">Set up your business</h1>
           </div>

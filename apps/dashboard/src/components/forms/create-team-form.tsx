@@ -8,6 +8,7 @@ import { uniqueCurrencies } from "@midday/location/currencies";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -24,8 +25,7 @@ const formSchema = z.object({
   name: z.string().min(2, {
     message: "Team name must be at least 2 characters.",
   }),
-  currency: z.string(),
-  logo: z.string().optional(),
+  baseCurrency: z.string(),
 });
 
 type Props = {
@@ -53,15 +53,14 @@ export function CreateTeamForm({ defaultCurrencyPromise }: Props) {
   const form = useZodForm(formSchema, {
     defaultValues: {
       name: "",
-      currency,
+      baseCurrency: currency,
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     createTeamMutation.mutate({
       name: values.name,
-      currency: values.currency,
-      logoUrl: values.logo,
+      baseCurrency: values.baseCurrency,
     });
   }
 
@@ -94,14 +93,18 @@ export function CreateTeamForm({ defaultCurrencyPromise }: Props) {
 
         <FormField
           control={form.control}
-          name="currency"
+          name="baseCurrency"
           render={({ field }) => (
-            <FormItem className="mt-4">
-              <FormLabel>Currency</FormLabel>
+            <FormItem className="mt-4 border-b border-border pb-4">
+              <FormLabel>Base currency</FormLabel>
               <FormControl>
                 <SelectCurrency currencies={uniqueCurrencies} {...field} />
               </FormControl>
 
+              <FormDescription>
+                If you have multiple accounts in different currencies, this will
+                be the default currency for your team. You can change it later.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
