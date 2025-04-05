@@ -1,4 +1,6 @@
-import { getExpenses } from "@midday/supabase/cached-queries";
+"use client";
+
+import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -7,27 +9,29 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { AnimatedNumber } from "../animated-number";
 import { expenseChartExampleData } from "./data";
 import { StackedBarChart } from "./stacked-bar-chart";
 
-type Props = {
-  value: any;
-  defaultValue: any;
-  disabled?: boolean;
-  currency?: string;
-};
+export function ExpenseChart({ disabled }) {
+  const trpc = useTRPC();
 
-export async function ExpenseChart({
-  value,
-  defaultValue,
-  disabled,
-  currency,
-}: Props) {
-  const data = disabled
-    ? expenseChartExampleData
-    : await getExpenses({ ...defaultValue, ...value, currency });
+  const { data } = useQuery(
+    trpc.metrics.expense.queryOptions({
+      from: "2024-01-01",
+      to: "2025-01-31",
+    }),
+  );
+
+  if (!data) {
+    return null;
+  }
+
+  // const data = disabled
+  //   ? expenseChartExampleData
+  //   : await getExpenses({ ...defaultValue, ...value, currency });
 
   return (
     <div className={cn(disabled && "pointer-events-none select-none")}>

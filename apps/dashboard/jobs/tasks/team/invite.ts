@@ -1,7 +1,7 @@
 import { resend } from "@/utils/resend";
+import { InviteEmail } from "@midday/email/emails/invite";
 import { getI18n } from "@midday/email/locales";
-import { render } from "@midday/email/render";
-import { InviteEmail } from "@midday/email/templates/invite";
+import { render } from "@react-email/render";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { nanoid } from "nanoid";
 import { z } from "zod";

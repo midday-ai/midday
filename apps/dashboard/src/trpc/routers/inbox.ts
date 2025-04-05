@@ -14,7 +14,7 @@ export const inboxRouter = createTRPCRouter({
       const { query, limit = 10 } = input;
 
       return getInboxSearchQuery(supabase, {
-        teamId,
+        teamId: teamId!,
         q: query,
         limit,
       });

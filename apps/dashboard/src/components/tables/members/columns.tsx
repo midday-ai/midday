@@ -175,7 +175,6 @@ export const columns: ColumnDef<TeamMember>[] = [
                 {t(`roles.${row.original.role || "member"}`)}
               </span>
             )}
-
             {meta?.currentUser?.role === "owner" && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
