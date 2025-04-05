@@ -53,7 +53,7 @@ export const metricsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx: { supabase, teamId }, input }) => {
-      const data = await getBurnRateQuery(supabase, {
+      const { data } = await getBurnRateQuery(supabase, {
         teamId: teamId!,
         from: input.from,
         to: input.to,
@@ -70,7 +70,7 @@ export const metricsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx: { supabase, teamId }, input }) => {
-      const data = await getRunwayQuery(supabase, {
+      const { data } = await getRunwayQuery(supabase, {
         teamId: teamId!,
         from: input.from,
         to: input.to,

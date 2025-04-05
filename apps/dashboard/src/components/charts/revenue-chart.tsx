@@ -1,5 +1,3 @@
-"use client";
-
 import { useMetricsParams } from "@/hooks/use-metrics-params";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
@@ -13,23 +11,24 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { AnimatedNumber } from "../animated-number";
-import { expenseChartExampleData } from "./data";
-import { StackedBarChart } from "./stacked-bar-chart";
+import { FormatAmount } from "../format-amount";
+import { BarChart } from "./bar-chart";
+import { chartExampleData } from "./data";
 
 type Props = {
   disabled?: boolean;
 };
 
-export function ExpenseChart({ disabled }: Props) {
+export function RevenueChart({ disabled }: Props) {
   const trpc = useTRPC();
   const { params } = useMetricsParams();
 
   const { data } = useQuery({
-    ...trpc.metrics.expense.queryOptions({
+    ...trpc.metrics.revenue.queryOptions({
       from: params.from,
       to: params.to,
     }),
-    placeholderData: (previousData) => previousData ?? expenseChartExampleData,
+    placeholderData: (previousData) => previousData ?? chartExampleData,
   });
 
   return (
@@ -37,13 +36,22 @@ export function ExpenseChart({ disabled }: Props) {
       <div className="space-y-2 mb-14 inline-block select-text">
         <h1 className="text-4xl font-mono">
           <AnimatedNumber
-            value={data?.summary?.averageExpense ?? 0}
+            value={data?.summary?.currentTotal ?? 0}
             currency={data?.summary?.currency ?? "USD"}
           />
         </h1>
 
         <div className="text-sm text-[#606060] flex items-center space-x-2">
-          <p className="text-sm text-[#606060]">Average expenses</p>
+          <p className="text-sm text-[#606060]">
+            vs{" "}
+            <FormatAmount
+              maximumFractionDigits={0}
+              minimumFractionDigits={0}
+              amount={data?.summary?.prevTotal ?? 0}
+              currency={data?.meta?.currency ?? "USD"}
+            />{" "}
+            last period
+          </p>
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -56,14 +64,15 @@ export function ExpenseChart({ disabled }: Props) {
               >
                 <div className="space-y-2">
                   <h3 className="font-medium text-primary">
-                    Expenses Overview
+                    Revenue represents your total income from all sources.
                   </h3>
                   <p>
-                    Expenses include all outgoing transactions, including
-                    recurring ones. The chart shows total expenses and recurring
-                    costs, helping you identify spending patterns and fixed
-                    costs.
+                    Explanation: This is your gross income before expenses. If
+                    the revenue appears too high, internal transfers may have
+                    been marked as income. You can fix this by excluding the
+                    transactions from the calculations.
                   </p>
+
                   <p>
                     All amounts are converted into your{" "}
                     <Link
@@ -81,7 +90,7 @@ export function ExpenseChart({ disabled }: Props) {
         </div>
       </div>
 
-      <StackedBarChart data={data} />
+      <BarChart data={data} />
     </div>
   );
 }

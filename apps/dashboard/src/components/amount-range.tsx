@@ -145,9 +145,7 @@ export function AmountRange() {
         disabled={totalCount === 0}
         onClick={() => {
           if (sliderValue[0] !== undefined && sliderValue[1] !== undefined) {
-            setAmountRange([sliderValue[0], sliderValue[1]], {
-              shallow: false,
-            });
+            setAmountRange([sliderValue[0], sliderValue[1]]);
           }
         }}
       >

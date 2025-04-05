@@ -196,7 +196,7 @@ export function ConnectTransactionsModal({
       const response = await getInstitutions({ countryCode, query });
       setLoading(false);
 
-      setResults(response.data || []);
+      setResults(response?.data || []);
     } catch {
       setLoading(false);
       setResults([]);

@@ -68,13 +68,6 @@ export const changeSpendingPeriodSchema = z.object({
   to: z.string().datetime(),
 });
 
-export const changeChartTypeSchema = z.enum([
-  "profit",
-  "revenue",
-  "expense",
-  "burn_rate",
-]);
-
 export const changeChartPeriodSchema = z.object({
   from: z.string().optional(),
   to: z.string().optional(),
@@ -214,19 +207,6 @@ export const deleteProjectSchema = z.object({
 
 export const deleteEntriesSchema = z.object({
   id: z.string().uuid(),
-});
-
-export const createReportSchema = z.object({
-  baseUrl: z.string().url(),
-  from: z.string(),
-  to: z.string(),
-  type: changeChartTypeSchema,
-  expiresAt: z.string().datetime().optional(),
-});
-
-export const createProjectReportSchema = z.object({
-  baseUrl: z.string().url(),
-  projectId: z.string().uuid(),
 });
 
 export const updateEntriesSchema = z.object({

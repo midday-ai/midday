@@ -22,8 +22,8 @@ export default async function Transactions(props: Props) {
   const queryClient = getQueryClient();
   const searchParams = await props.searchParams;
 
-  const filter = await loadTransactionFilterParams(searchParams);
-  const { sort } = await loadSortParams(searchParams);
+  const filter = loadTransactionFilterParams(searchParams);
+  const { sort } = loadSortParams(searchParams);
 
   const columnVisibility = getInitialColumnVisibility();
 
