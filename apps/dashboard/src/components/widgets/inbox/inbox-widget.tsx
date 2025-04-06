@@ -1,30 +1,33 @@
+"use client";
+
 import { CopyInput } from "@/components/copy-input";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { getInboxEmail } from "@midday/inbox";
-import { getUser } from "@midday/supabase/cached-queries";
-import { getInboxQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
-import { inboxData } from "./data";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import type { InboxOption } from "./data";
 import { InboxList } from "./inbox-list";
 
-export async function InboxWidget({ filter, disabled }) {
-  const user = await getUser();
-  const supabase = await createClient();
+type Props = {
+  disabled: boolean;
+  filter: InboxOption;
+};
 
-  const { data } = disabled
-    ? inboxData
-    : await getInboxQuery(supabase, {
-        to: 15,
-        from: 0,
-        teamId: user.data.team_id,
-        done: filter === "done",
-        todo: filter === "todo",
-      });
+export function InboxWidget({ disabled, filter }: Props) {
+  const trpc = useTRPC();
+  const { data: user } = useUserQuery();
+  const { data } = useSuspenseQuery(
+    trpc.inbox.get.queryOptions({
+      done: filter === "done",
+      todo: filter === "todo",
+    }),
+  );
 
   if (!data?.length) {
     return (
       <div className="flex flex-col space-y-4 items-center justify-center h-full text-center">
         <div>
-          <CopyInput value={getInboxEmail(user?.data?.team?.inbox_id)} />
+          <CopyInput value={getInboxEmail(user?.team?.inbox_id ?? "")} />
         </div>
 
         <p className="text-sm text-[#606060]">

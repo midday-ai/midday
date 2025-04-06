@@ -1,8 +1,5 @@
 export const Cookies = {
   PreferredSignInProvider: "preferred-signin-provider",
-  SpendingPeriod: "spending-period",
-  ChartType: "chart-type",
-  TransactionsPeriod: "transactions-period",
   TransactionsColumns: "transactions-columns",
   MfaSetupVisited: "mfa-setup-visited",
   InboxFilter: "inbox-filter-v2",

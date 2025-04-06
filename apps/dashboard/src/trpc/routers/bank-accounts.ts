@@ -1,5 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import {
+  getBankAccountsBalancesQuery,
   getBankAccountsCurrenciesQuery,
   getTeamBankAccountsQuery,
 } from "@midday/supabase/queries";
@@ -26,4 +27,10 @@ export const bankAccountsRouter = createTRPCRouter({
       });
     },
   ),
+
+  balances: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
+    const { data } = await getBankAccountsBalancesQuery(supabase, teamId!);
+
+    return data;
+  }),
 });

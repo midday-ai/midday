@@ -62,23 +62,6 @@ export const updateSubscriberPreferenceSchema = z.object({
   enabled: z.boolean(),
 });
 
-export const changeSpendingPeriodSchema = z.object({
-  id: z.string(),
-  from: z.string().datetime(),
-  to: z.string().datetime(),
-});
-
-export const changeChartPeriodSchema = z.object({
-  from: z.string().optional(),
-  to: z.string().optional(),
-});
-
-export const changeTransactionsPeriodSchema = z.enum([
-  "all",
-  "income",
-  "expense",
-]);
-
 export const exportTransactionsSchema = z.array(z.string());
 
 export const deleteFileSchema = z.object({

@@ -9,6 +9,8 @@ import { HydrateClient, batchPrefetch, trpc } from "@/trpc/server";
 import { getQueryClient } from "@/trpc/server";
 import { cn } from "@midday/ui/cn";
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
+
 export const metadata: Metadata = {
   title: "Overview | Midday",
 };
@@ -22,6 +24,9 @@ export default async function Overview(props: Props) {
   const searchParams = await props.searchParams;
   const { from, to } = loadMetricsParams(searchParams);
 
+  const cookieStore = await cookies();
+  const hideConnectFlow = cookieStore.get("hideConnectFlow")?.value === "true";
+
   batchPrefetch([
     trpc.assistant.history.queryOptions(),
     trpc.metrics.spending.queryOptions({
@@ -34,6 +39,13 @@ export default async function Overview(props: Props) {
     trpc.metrics.profit.queryOptions({ from, to }),
     trpc.metrics.burnRate.queryOptions({ from, to }),
     trpc.metrics.runway.queryOptions({ from, to }),
+    trpc.inbox.get.queryOptions({ done: false, todo: false }),
+    trpc.bankAccounts.balances.queryOptions(),
+    trpc.vault.activity.queryOptions({ pageSize: 10 }),
+    trpc.transactions.get.queryOptions({
+      pageSize: 15,
+      filter: { type: undefined },
+    }),
   ]);
 
   // Preload the data for the first visible chart
@@ -71,7 +83,7 @@ export default async function Overview(props: Props) {
         <Widgets disabled={false} />
       </div>
 
-      {/* <OverviewModal defaultOpen={isEmpty && !hideConnectFlow} /> */}
+      <OverviewModal defaultOpen={isEmpty && !hideConnectFlow} />
     </HydrateClient>
   );
 }

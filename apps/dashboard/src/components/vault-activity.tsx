@@ -18,10 +18,9 @@ export async function VaultActivity() {
   const supabase = await createClient();
   const { data: userData } = await getUser();
 
-  const { data: storageData } = await getVaultActivityQuery(
-    supabase,
-    userData?.team_id,
-  );
+  const { data: storageData } = await getVaultActivityQuery(supabase, {
+    teamId: userData?.team_id,
+  });
 
   const files = storageData
     ?.filter((file) => file.path_tokens.pop() !== ".emptyFolderPlaceholder")

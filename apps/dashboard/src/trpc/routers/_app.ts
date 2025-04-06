@@ -14,6 +14,7 @@ import { transactionCategoriesRouter } from "./transaction-categories";
 import { transactionTagsRouter } from "./transaction-tags";
 import { transactionsRouter } from "./transactions";
 import { userRouter } from "./user";
+import { vaultRouter } from "./vault";
 
 export const appRouter = createTRPCRouter({
   transactions: transactionsRouter,
@@ -30,6 +31,7 @@ export const appRouter = createTRPCRouter({
   assistant: assistantRouter,
   tracker: trackerRouter,
   invoice: invoiceRouter,
+  vault: vaultRouter,
 });
 
 // export type definition of API
