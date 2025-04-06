@@ -154,9 +154,9 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
     }),
   });
 
+  // We want to fetch the categories data on mount
   const { data: categoriesData } = useQuery({
     ...trpc.transactionCategories.get.queryOptions(),
-    enabled: shouldFetch,
   });
 
   return {
@@ -364,7 +364,15 @@ export function TransactionsSearchFilter() {
         <FilterList
           filters={processFiltersForList()}
           loading={streaming}
-          onRemove={setFilter}
+          onRemove={(filters) => {
+            // If the only filter is q, set it to null and clear the prompt
+            if ("q" in filters) {
+              setFilter({ q: null });
+              setPrompt("");
+            }
+
+            setFilter(filters);
+          }}
           categories={categories}
           accounts={accounts}
           statusFilters={statusFilters}

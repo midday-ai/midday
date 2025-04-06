@@ -35,12 +35,10 @@ export function DeleteTeam() {
   const { data: user } = useUserQuery();
   const deleteTeam = useAction(deleteTeamAction);
 
-  console.log(user?.team_id);
-
   const deleteTeamMutation = useMutation(
     trpc.team.delete.mutationOptions({
       onSuccess: () => {
-        deleteTeam.execute({ teamId: user?.team_id! });
+        deleteTeam.execute();
       },
     }),
   );

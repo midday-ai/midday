@@ -1,19 +1,18 @@
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { Drawer, DrawerContent } from "@midday/ui/drawer";
 import { useMediaQuery } from "@midday/ui/hooks";
 import { Sheet, SheetContent } from "@midday/ui/sheet";
 import React from "react";
 import { InvoiceDetails } from "../invoice-details";
-import type { Invoice } from "../tables/invoices/columns";
 
 type Props = {
-  setOpen: (id?: string) => void;
+  setOpen: (open: boolean) => void;
   isOpen: boolean;
-  data?: Invoice;
-  locale: string;
+  data?: NonNullable<RouterOutputs["invoice"]["get"]>[number];
 };
 
-export function InvoiceDetailsSheet({ setOpen, isOpen, data, locale }: Props) {
+export function InvoiceDetailsSheet({ setOpen, isOpen, data }: Props) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { invoiceId } = useInvoiceParams();
 

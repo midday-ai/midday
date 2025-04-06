@@ -6,37 +6,30 @@ import {
   CarouselPrevious,
 } from "@midday/ui/carousel";
 import * as React from "react";
-import { Spending } from "./charts/spending";
-import { Transactions } from "./charts/transactions";
-import { WidgetsNavigation } from "./widgets-navigation";
-import { AccountBalance } from "./widgets/account-balance";
-import { Inbox } from "./widgets/inbox";
-import { Insights } from "./widgets/insights";
-import { Invoice } from "./widgets/invoice";
-import { Tracker } from "./widgets/tracker";
-import { Vault } from "./widgets/vault";
+import { Assistant } from "./assistant";
+import { Invoice } from "./invoice";
+import { WidgetsNavigation } from "./navigation";
+import { Spending } from "./spending";
+import { Tracker } from "./tracker";
+// import { Vault } from "./vault";
+// import { Inbox } from "./inbox";
+// import { Transactions } from "./widgets/transactions";
+// import { AccountBalance } from "./widgets/account-balance";
 
 type Props = {
   disabled: boolean;
-  initialPeriod: Date | string;
-  searchParams: { [key: string]: string | string[] | undefined };
 };
 
-export function Widgets({ disabled, initialPeriod, searchParams }: Props) {
+export async function Widgets({ disabled }: Props) {
   const items = [
-    <Insights key="insights" />,
-    <Spending
-      disabled={disabled}
-      initialPeriod={initialPeriod}
-      key="spending"
-      currency={searchParams?.currency}
-    />,
-    <Tracker key="tracker" date={searchParams?.date} hideDaysIndicators />,
-    <Transactions key="transactions" disabled={disabled} />,
+    <Assistant key="assistant" />,
+    <Spending disabled={disabled} key="spending" />,
     <Invoice key="invoice" />,
-    <Inbox key="inbox" disabled={disabled} />,
-    <AccountBalance key="account-balance" />,
-    <Vault key="vault" />,
+    <Tracker key="tracker" />,
+    // <Transactions key="transactions" disabled={disabled} />,
+    // <Inbox key="inbox" disabled={disabled} />,
+    // <AccountBalance key="account-balance" />,
+    // <Vault key="vault" />,
   ];
 
   return (

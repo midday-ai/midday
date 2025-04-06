@@ -1,11 +1,10 @@
 "use client";
 
+import { CategoryColor } from "@/components/category";
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount } from "@/utils/format";
-import { CategoryColor } from "../category";
 
 type Props = {
-  name: string;
   color: string;
   amount: number;
   currency: string;
@@ -13,7 +12,6 @@ type Props = {
 };
 
 export function SpendingCategoryItem({
-  name,
   color,
   amount,
   currency,
@@ -24,7 +22,8 @@ export function SpendingCategoryItem({
   return (
     <div className="px-3 py-1 flex justify-between items-center space-x-12">
       <div className="text-sm font-medium flex items-center space-x-2">
-        <CategoryColor name={name} color={color} />
+        <CategoryColor color={color} />
+
         <p>
           {amount &&
             formatAmount({
@@ -36,6 +35,7 @@ export function SpendingCategoryItem({
             })}
         </p>
       </div>
+
       <p className="text-sm text-[#606060] truncate">{percentage}%</p>
     </div>
   );

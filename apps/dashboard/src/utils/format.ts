@@ -24,7 +24,7 @@ export function formatSize(bytes: number): string {
 type FormatAmountParams = {
   currency: string;
   amount: number;
-  locale?: string;
+  locale?: string | null;
   maximumFractionDigits?: number;
   minimumFractionDigits?: number;
 };

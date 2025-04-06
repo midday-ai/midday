@@ -18,29 +18,8 @@ import { useEffect, useState } from "react";
 import { TrackerHeader } from "./tracker-header";
 import { TrackerIndicator } from "./tracker-indicator";
 
-type TrackerMeta = {
-  totalDuration?: number;
-};
-
-type TrackerRecord = {
-  id: string;
-  duration: number;
-  date: string;
-};
-
-type Props = {
-  date?: string;
-  meta?: TrackerMeta;
-  data?: Record<string, TrackerRecord[]>;
-  weekStartsOnMonday?: boolean;
-};
-
-export function TrackerWidget({
-  date: initialDate,
-  meta,
-  data,
-  weekStartsOnMonday = false,
-}: Props) {
+export function TrackerWidget() {
+  return null;
   const {
     date: currentDate,
     range,
