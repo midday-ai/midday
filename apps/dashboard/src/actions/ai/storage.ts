@@ -45,12 +45,12 @@ export async function clearChats({
   await pipeline.exec();
 }
 
-export async function getLatestChat() {
-  const user = await getUser();
+type GetLatestChatParams = {
+  teamId: string;
+  userId: string;
+};
 
-  const teamId = user?.data?.team_id;
-  const userId = user?.data?.id;
-
+export async function getLatestChat({ teamId, userId }: GetLatestChatParams) {
   try {
     const chat: string[] = await RedisClient.zrange(
       `chat:${teamId}:user:${userId}`,
