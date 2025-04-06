@@ -1,6 +1,5 @@
 "use client";
 
-import { changeInboxFilterAction } from "@/actions/inbox/filter";
 import { useI18n } from "@/locales/client";
 import {
   DropdownMenu,
@@ -9,25 +8,17 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { useOptimisticAction } from "next-safe-action/hooks";
 import Link from "next/link";
-
-const options = ["all", "todo", "done"];
+import { type InboxOption, options } from "./data";
 
 type Props = {
-  filter: string;
+  filter: InboxOption;
   disabled: boolean;
+  setFilter: (filter: InboxOption) => void;
 };
 
-export function InboxHeader({ filter, disabled }: Props) {
+export function InboxHeader({ filter, disabled, setFilter }: Props) {
   const t = useI18n();
-  const { execute, optimisticState } = useOptimisticAction(
-    changeInboxFilterAction,
-    {
-      currentState: filter,
-      updateFn: (_, newState) => newState,
-    },
-  );
 
   return (
     <div className="flex justify-between">
@@ -40,7 +31,7 @@ export function InboxHeader({ filter, disabled }: Props) {
       <DropdownMenu>
         <DropdownMenuTrigger disabled={disabled}>
           <div className="flex items-center space-x-2">
-            <span>{t(`inbox_filter.${optimisticState}`)}</span>
+            <span>{t(`inbox_filter.${filter}`)}</span>
             <Icons.ChevronDown />
           </div>
         </DropdownMenuTrigger>
@@ -48,8 +39,8 @@ export function InboxHeader({ filter, disabled }: Props) {
           {options.map((option) => (
             <DropdownMenuCheckboxItem
               key={option}
-              onCheckedChange={() => execute(option)}
-              checked={option === optimisticState}
+              onCheckedChange={() => setFilter(option)}
+              checked={option === filter}
             >
               {t(`inbox_filter.${option}`)}
             </DropdownMenuCheckboxItem>

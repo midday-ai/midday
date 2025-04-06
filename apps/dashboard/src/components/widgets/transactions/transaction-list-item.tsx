@@ -1,12 +1,15 @@
 "use client";
 
+import { FormatAmount } from "@/components/format-amount";
+import { TransactionStatus } from "@/components/transaction-status";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
-import { FormatAmount } from "../format-amount";
-import { TransactionStatus } from "../transaction-status";
 
 type Props = {
-  transaction: any;
+  transaction: NonNullable<
+    RouterOutputs["transactions"]["get"]["data"]
+  >[number];
   disabled?: boolean;
 };
 

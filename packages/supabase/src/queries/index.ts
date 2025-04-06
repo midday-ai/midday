@@ -675,12 +675,22 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   };
 }
 
-export async function getVaultActivityQuery(supabase: Client, teamId: string) {
+type GetVaultActivityParams = {
+  teamId: string;
+  pageSize?: number;
+};
+
+export async function getVaultActivityQuery(
+  supabase: Client,
+  params: GetVaultActivityParams,
+) {
+  const { teamId, pageSize = 20 } = params;
+
   return supabase
     .from("documents")
     .select("id, name, metadata, path_tokens, tag, team_id")
     .eq("team_id", teamId)
-    .limit(20)
+    .limit(pageSize)
     .not("name", "ilike", "%.folderPlaceholder")
     .order("created_at", { ascending: false });
 }
@@ -805,27 +815,25 @@ export async function getInboxQuery(
     ascending = false,
   } = params;
 
-  const columns = [
-    "id",
-    "file_name",
-    "file_path",
-    "display_name",
-    "transaction_id",
-    "amount",
-    "currency",
-    "content_type",
-    "date",
-    "status",
-    "forwarded_to",
-    "created_at",
-    "website",
-    "description",
-    "transaction:transactions(id, amount, currency, name, date)",
-  ];
-
   const query = supabase
     .from("inbox")
-    .select(columns.join(","))
+    .select(`
+      id,
+      file_name,
+      file_path, 
+      display_name,
+      transaction_id,
+      amount,
+      currency,
+      content_type,
+      date,
+      status,
+      forwarded_to,
+      created_at,
+      website,
+      description,
+      transaction:transactions(id, amount, currency, name, date)
+    `)
     .eq("team_id", teamId)
     .order("created_at", { ascending })
     .neq("status", "deleted");
@@ -1026,10 +1034,6 @@ export async function getTrackerRecordsByRangeQuery(
   supabase: Client,
   params: GetTrackerRecordsByRangeParams,
 ) {
-  if (!params.teamId) {
-    return null;
-  }
-
   const query = supabase
     .from("tracker_entries")
     .select(
@@ -1077,7 +1081,7 @@ export async function getTrackerRecordsByRangeQuery(
       from: params.from,
       to: params.to,
     },
-    data: result,
+    result,
   };
 }
 

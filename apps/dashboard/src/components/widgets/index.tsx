@@ -6,15 +6,15 @@ import {
   CarouselPrevious,
 } from "@midday/ui/carousel";
 import * as React from "react";
+import { AccountBalance } from "./account-balance";
 import { Assistant } from "./assistant";
+import { Inbox } from "./inbox";
 import { Invoice } from "./invoice";
 import { WidgetsNavigation } from "./navigation";
 import { Spending } from "./spending";
 import { Tracker } from "./tracker";
-// import { Vault } from "./vault";
-// import { Inbox } from "./inbox";
-// import { Transactions } from "./widgets/transactions";
-// import { AccountBalance } from "./widgets/account-balance";
+import { Transactions } from "./transactions/transactions";
+import { Vault } from "./vault";
 
 type Props = {
   disabled: boolean;
@@ -25,11 +25,11 @@ export async function Widgets({ disabled }: Props) {
     <Assistant key="assistant" />,
     <Spending disabled={disabled} key="spending" />,
     <Invoice key="invoice" />,
+    <Transactions disabled={disabled} key="transactions" />,
     <Tracker key="tracker" />,
-    // <Transactions key="transactions" disabled={disabled} />,
-    // <Inbox key="inbox" disabled={disabled} />,
-    // <AccountBalance key="account-balance" />,
-    // <Vault key="vault" />,
+    <Inbox key="inbox" disabled={disabled} />,
+    <AccountBalance key="account-balance" />,
+    <Vault key="vault" />,
   ];
 
   return (

@@ -1,6 +1,5 @@
 "use client";
 
-import { changeTransactionsPeriodAction } from "@/actions/change-transactions-period-action";
 import { useI18n } from "@/locales/client";
 import {
   DropdownMenu,
@@ -9,26 +8,17 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { useOptimisticAction } from "next-safe-action/hooks";
 import Link from "next/link";
-
-const options = ["all", "income", "expense"] as const;
-type TransactionType = (typeof options)[number];
+import { type TransactionType, options } from "./data";
 
 type Props = {
-  type: "all" | "income" | "expense";
+  type: TransactionType;
+  setType: (type: TransactionType) => void;
   disabled: boolean;
 };
 
-export function TransactionsPeriod({ type, disabled }: Props) {
+export function TransactionsPeriod({ type, setType, disabled }: Props) {
   const t = useI18n();
-  const { execute, optimisticState } = useOptimisticAction(
-    changeTransactionsPeriodAction,
-    {
-      currentState: type,
-      updateFn: (_, newState) => newState,
-    },
-  );
 
   return (
     <div className="flex justify-between">
@@ -41,7 +31,7 @@ export function TransactionsPeriod({ type, disabled }: Props) {
       <DropdownMenu>
         <DropdownMenuTrigger disabled={disabled}>
           <div className="flex items-center space-x-2">
-            <span>{t(`transactions_period.${optimisticState}`)}</span>
+            <span>{t(`transactions_period.${type}`)}</span>
             <Icons.ChevronDown />
           </div>
         </DropdownMenuTrigger>
@@ -49,8 +39,8 @@ export function TransactionsPeriod({ type, disabled }: Props) {
           {options.map((option) => (
             <DropdownMenuCheckboxItem
               key={option}
-              onCheckedChange={() => execute(option as TransactionType)}
-              checked={option === optimisticState}
+              onCheckedChange={() => setType(option)}
+              checked={option === type}
             >
               {t(`transactions_period.${option}`)}
             </DropdownMenuCheckboxItem>
