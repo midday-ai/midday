@@ -6,11 +6,11 @@ import { z } from "zod";
 import { authActionClient } from "./safe-action";
 
 export const deleteTeamAction = authActionClient
-  .schema(z.object({ teamId: z.string() }))
+  .schema(z.void())
   .metadata({
     name: "delete-team",
   })
-  .action(async ({ parsedInput: { teamId } }) => {
+  .action(async () => {
     await deleteTeamId();
 
     redirect("/teams");

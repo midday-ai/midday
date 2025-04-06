@@ -19,6 +19,7 @@ export const transactionsRouter = createTRPCRouter({
       z.object({
         cursor: z.string().nullable().optional(),
         sort: z.array(z.string(), z.string()).nullable().optional(),
+        pageSize: z.number().optional(),
         filter: z
           .object({
             q: z.string().nullable().optional(),

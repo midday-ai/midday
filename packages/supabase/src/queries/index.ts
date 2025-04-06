@@ -1138,8 +1138,8 @@ export async function getTeamSettingsQuery(supabase: Client, teamId: string) {
 
 export type GetInvoicesQueryParams = {
   teamId: string;
-  from?: number;
-  to?: number;
+  cursor?: string | null;
+  pageSize?: number;
   searchQuery?: string | null;
   filter?: {
     statuses?: string[] | null;
@@ -1154,7 +1154,7 @@ export async function getInvoicesQuery(
   supabase: Client,
   params: GetInvoicesQueryParams,
 ) {
-  const { teamId, filter, searchQuery, sort, from = 0, to = 25 } = params;
+  const { teamId, filter, searchQuery, sort, cursor, pageSize = 25 } = params;
   const { statuses, start, end, customers } = filter || {};
 
   const query = supabase
@@ -1186,8 +1186,8 @@ export async function getInvoicesQuery(
   }
 
   if (start && end) {
-    query.gte("due_date", from);
-    query.lte("due_date", to);
+    query.gte("due_date", start);
+    query.lte("due_date", end);
   }
 
   if (customers?.length) {
@@ -1202,11 +1202,23 @@ export async function getInvoicesQuery(
     }
   }
 
-  const { data, count } = await query.range(from, to);
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
+
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
 
   return {
     meta: {
-      count,
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
     },
     data,
   };
@@ -1214,7 +1226,7 @@ export async function getInvoicesQuery(
 
 export type GetInvoiceSummaryParams = {
   teamId: string;
-  status?: "paid" | "cancelled";
+  status: "paid" | "canceled" | "overdue" | "unpaid" | "draft";
 };
 
 export async function getInvoiceSummaryQuery(

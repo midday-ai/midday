@@ -5,7 +5,7 @@ import { useAssistantStore } from "@/store/assistant";
 import { shuffle } from "@midday/utils";
 import { useEffect, useState } from "react";
 
-export function InsightList() {
+export function AssistantList() {
   const { setOpen } = useAssistantStore();
   const [items, setItems] = useState([]);
 

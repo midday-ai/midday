@@ -4,7 +4,7 @@ import { useAssistantStore } from "@/store/assistant";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 
-export function InsightInput() {
+export function AssistantInput() {
   const { setOpen } = useAssistantStore();
 
   return (

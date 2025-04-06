@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 interface PaymentScoreVisualizerProps {
   score: number;
-  paymentStatus: "good" | "average" | "bad" | "none";
+  paymentStatus: string;
 }
 
 export function PaymentScoreVisualizer({

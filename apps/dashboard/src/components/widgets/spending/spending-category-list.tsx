@@ -1,5 +1,7 @@
 "use client";
 
+import { Category } from "@/components/category";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import {
   HoverCard,
   HoverCardContent,
@@ -8,37 +10,43 @@ import {
 import { Progress } from "@midday/ui/progress";
 import { formatISO } from "date-fns";
 import Link from "next/link";
-import { Category } from "../category";
 import { SpendingCategoryItem } from "./spending-category-item";
 
 type Props = {
-  categories: any;
-  period: any;
+  selectedPeriod: {
+    from: string;
+    to: string;
+  };
+  data: RouterOutputs["metrics"]["spending"];
   disabled: boolean;
 };
 
-export function SpendingCategoryList({ categories, period, disabled }: Props) {
+export function SpendingCategoryList({
+  data,
+  selectedPeriod,
+  disabled,
+}: Props) {
   return (
     <ul className="mt-8 space-y-4 overflow-auto scrollbar-hide aspect-square pb-14">
-      {categories.map(({ slug, name, color, percentage, amount, currency }) => {
+      {data?.map((category) => {
         return (
-          <li key={slug}>
+          <li key={category.slug}>
             <HoverCard openDelay={10} closeDelay={10}>
               <HoverCardTrigger asChild>
                 <Link
                   className="flex items-center"
-                  href={`/transactions?categories=${slug}&start=${formatISO(period?.from, { representation: "date" })}&end=${formatISO(period?.to, { representation: "date" })}`}
+                  href={`/transactions?categories=${category.slug}&start=${formatISO(new Date(selectedPeriod.from), { representation: "date" })}&end=${formatISO(new Date(selectedPeriod.to), { representation: "date" })}`}
                 >
                   <Category
-                    key={slug}
-                    name={name}
-                    color={color}
+                    key={category.slug}
+                    name={category.name}
+                    color={category.color}
                     className="text-sm text-primary space-x-3 w-[90%]"
                   />
 
                   <Progress
                     className="w-full rounded-none h-[6px]"
-                    value={percentage}
+                    value={category.percentage}
                   />
                 </Link>
               </HoverCardTrigger>
@@ -46,11 +54,10 @@ export function SpendingCategoryList({ categories, period, disabled }: Props) {
               {!disabled && (
                 <HoverCardContent className="border shadow-sm bg-background py-1 px-0">
                   <SpendingCategoryItem
-                    color={color}
-                    name={name}
-                    amount={amount}
-                    currency={currency}
-                    percentage={percentage}
+                    color={category.color}
+                    amount={category.amount}
+                    currency={category.currency}
+                    percentage={category.percentage}
                   />
                 </HoverCardContent>
               )}

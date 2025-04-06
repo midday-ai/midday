@@ -1,7 +1,9 @@
 "use client";
 
+import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -10,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo } from "react";
 
@@ -18,19 +21,22 @@ type Transaction = {
   currency: string;
 };
 
-type Props = {
-  transactions: Transaction[];
-};
-
-export function BottomBar({ transactions }: Props) {
+export function BottomBar() {
   const { data: user } = useUserQuery();
   const t = useI18n();
-  const first = transactions.at(0);
+  const trpc = useTRPC();
+  const { filter } = useTransactionFilterParams();
+  const { data: transactions, isLoading } = useQuery({
+    ...trpc.transactions.get.queryOptions({
+      filter,
+      pageSize: 10000,
+    }),
+  });
 
   const totalAmount = useMemo(() => {
     const totals: Transaction[] = [];
 
-    for (const transaction of transactions) {
+    for (const transaction of transactions?.data ?? []) {
       if (!transaction.amount || !transaction.currency) continue;
 
       const existingTotal = totals.find(
@@ -57,10 +63,12 @@ export function BottomBar({ transactions }: Props) {
       formatAmount({
         amount: total?.amount,
         currency: total.currency,
-        locale: user?.locale,
+        locale: user?.locale ?? undefined,
       }),
     )
     .join(", ");
+
+  if (isLoading) return null;
 
   return (
     <AnimatePresence>
@@ -79,11 +87,12 @@ export function BottomBar({ transactions }: Props) {
                 <span className="text-sm">
                   {multiCurrency
                     ? t("bottom_bar.multi_currency")
-                    : first &&
+                    : totalAmount.length > 0 &&
+                      totalAmount[0] &&
                       formatAmount({
-                        amount: first?.amount,
-                        currency: first?.currency,
-                        locale: user?.locale,
+                        amount: totalAmount[0].amount,
+                        currency: totalAmount[0].currency,
+                        locale: user?.locale ?? undefined,
                         maximumFractionDigits: 0,
                         minimumFractionDigits: 0,
                       })}
@@ -98,7 +107,11 @@ export function BottomBar({ transactions }: Props) {
           </TooltipProvider>
 
           <span className="text-sm text-[#878787]">
-            ({t("bottom_bar.transactions", { count: transactions.length })})
+            (
+            {t("bottom_bar.transactions", {
+              count: transactions?.data?.length ?? 0,
+            })}
+            )
           </span>
         </div>
       </motion.div>
