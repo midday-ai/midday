@@ -7,6 +7,7 @@ import { defaultPeriod } from "@/components/widgets/spending/data";
 import { loadMetricsParams } from "@/hooks/use-metrics-params";
 import { HydrateClient, batchPrefetch, trpc } from "@/trpc/server";
 import { getQueryClient } from "@/trpc/server";
+import { Cookies } from "@/utils/constants";
 import { cn } from "@midday/ui/cn";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -25,14 +26,11 @@ export default async function Overview(props: Props) {
   const { from, to } = loadMetricsParams(searchParams);
 
   const cookieStore = await cookies();
-  const hideConnectFlow = cookieStore.get("hideConnectFlow")?.value === "true";
+  const hideConnectFlow =
+    cookieStore.get(Cookies.HideConnectFlow)?.value === "true";
 
   batchPrefetch([
     trpc.assistant.history.queryOptions(),
-    trpc.metrics.spending.queryOptions({
-      from: defaultPeriod.from,
-      to: defaultPeriod.to,
-    }),
     trpc.invoice.get.queryOptions({ pageSize: 10 }),
     trpc.invoice.paymentStatus.queryOptions(),
     trpc.metrics.expense.queryOptions({ from, to }),
@@ -42,6 +40,10 @@ export default async function Overview(props: Props) {
     trpc.inbox.get.queryOptions({ done: false, todo: false }),
     trpc.bankAccounts.balances.queryOptions(),
     trpc.vault.activity.queryOptions({ pageSize: 10 }),
+    trpc.metrics.spending.queryOptions({
+      from: defaultPeriod.from,
+      to: defaultPeriod.to,
+    }),
     trpc.transactions.get.queryOptions({
       pageSize: 15,
       filter: { type: undefined },

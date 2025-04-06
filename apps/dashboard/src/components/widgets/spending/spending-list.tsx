@@ -1,6 +1,6 @@
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { defaultPeriod, options } from "./data";
+import { defaultPeriod, options, spendingExampleData } from "./data";
 import { SpendingCategoryList } from "./spending-category-list";
 
 type Props = {
@@ -21,7 +21,9 @@ export function SpendingList({ period, disabled }: Props) {
     }),
   );
 
-  if (!data?.length) {
+  const spending = data?.length ? data : spendingExampleData;
+
+  if (!spending?.length) {
     return (
       <div className="flex items-center justify-center aspect-square">
         <p className="text-sm text-[#606060]">
@@ -33,7 +35,7 @@ export function SpendingList({ period, disabled }: Props) {
 
   return (
     <SpendingCategoryList
-      data={data}
+      data={spending}
       selectedPeriod={selectedPeriod}
       disabled={disabled}
     />
