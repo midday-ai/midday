@@ -72,16 +72,16 @@ export async function GET(request: NextRequest) {
       console.log("sessionData", sessionData);
 
       // Update bank account_ids based on the persisted identification_hash (account_reference)
-      await Promise.all(
-        sessionData?.accounts_data?.map((account) =>
-          supabase
-            .from("bank_accounts")
-            .update({
-              account_id: account.uid,
-            })
-            .eq("account_reference", account.identification_hash),
-        ),
-      );
+      // await Promise.all(
+      //   sessionData?.accounts_data?.map((account) =>
+      //     supabase
+      //       .from("bank_accounts")
+      //       .update({
+      //         account_id: account.uid,
+      //       })
+      //       .eq("account_reference", account.identification_hash),
+      //   ),
+      // );
 
       return NextResponse.redirect(
         new URL(

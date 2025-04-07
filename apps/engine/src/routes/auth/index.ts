@@ -443,6 +443,8 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
       try {
         const data = await api.exchangeCode(code);
 
+        console.log("data", data);
+
         return c.json(
           {
             data: {

@@ -36,7 +36,7 @@ export const reconnectEnableBankingLinkAction = authActionClient
           json: {
             institutionId: name,
             country,
-            teamId: user.team_id,
+            teamId: user.team_id!,
             type,
             validUntil: new Date(Date.now() + maximum_consent_validity * 1000)
               .toISOString()
