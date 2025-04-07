@@ -291,6 +291,7 @@ export function BankConnection({ connection }: BankConnectionProps) {
                 institutionId={connection.institution_id}
                 accessToken={connection.access_token}
                 onManualSync={handleManualSync}
+                referenceId={connection.reference_id}
               />
               <SyncTransactions
                 disabled={isSyncing}
