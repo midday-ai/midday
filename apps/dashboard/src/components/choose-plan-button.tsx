@@ -28,7 +28,7 @@ export function ChoosePlanButton({
       <Button
         onClick={() => setIsOpen(true)}
         variant="outline"
-        className="rounded-full font-normal h-[32px] p-0 px-3 text-xs text-[#878787]"
+        className="rounded-full font-normal h-8 md:h-9 p-0 px-2 md:px-3 text-xs md:text-sm text-[#878787] whitespace-nowrap"
       >
         {children}
       </Button>

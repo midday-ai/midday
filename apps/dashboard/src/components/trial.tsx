@@ -69,7 +69,9 @@ export async function Trial() {
         teamId={team.id}
         canChooseStarterPlan={canChooseStarterPlan}
       >
-        Pro trial - {daysToLaunch} days left
+        <span className="hidden sm:inline">Pro trial -</span>
+        <span className="sm:hidden">Pro -</span>
+        {" "}{daysToLaunch} days left
       </ChoosePlanButton>
     );
   }
@@ -97,7 +99,9 @@ export async function Trial() {
       teamId={team.id}
       canChooseStarterPlan={canChooseStarterPlan}
     >
-      Pro trial - {daysLeft} days left
+      <span className="hidden sm:inline">Pro trial -</span>
+      <span className="sm:hidden">Pro -</span>
+      {" "}{daysLeft} days left
     </ChoosePlanButton>
   );
 }
