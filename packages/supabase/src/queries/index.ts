@@ -1280,7 +1280,7 @@ export async function getCustomersQuery(
     .eq("team_id", teamId);
 
   if (q) {
-    query.ilike("name", `%${q}%`);
+    query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
   }
 
   if (sort?.length === 2) {

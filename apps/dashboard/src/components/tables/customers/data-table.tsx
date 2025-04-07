@@ -18,6 +18,7 @@ import {
 import React, { useDeferredValue, useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import { columns } from "./columns";
+import { EmptyState, NoResults } from "./empty-states";
 import { CustomerRow } from "./row";
 import { TableHeader } from "./table-header";
 
@@ -26,7 +27,7 @@ export function DataTable() {
   const { setParams } = useCustomerParams();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const { filter } = useCustomerFilterParams();
+  const { filter, hasFilters } = useCustomerFilterParams();
   const { params } = useSortParams();
 
   const deferredSearch = useDeferredValue(filter.q);
@@ -76,6 +77,14 @@ export function DataTable() {
       //   deleteCustomer: handleDeleteCustomer,
     },
   });
+
+  if (!tableData.length && hasFilters) {
+    return <NoResults />;
+  }
+
+  if (!tableData.length) {
+    return <EmptyState />;
+  }
 
   return (
     <>
