@@ -51,7 +51,7 @@ exports[`Transform account 1`] = `
     "provider": "enablebanking",
   },
   "name": "Enkla Sparkontot Företag",
-  "resource_id": null,
+  "resource_id": "3234.3GP8GRsZp9MO9sZwxoW/Fy+5rUBIsFLHcrXP8GZ/rv4=",
   "type": "depository",
 }
 `;
