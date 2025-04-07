@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
           supabase
             .from("bank_accounts")
             .update({
-              account_id: account.account_id,
+              account_id: account.uid,
             })
             .eq("account_reference", account.identification_hash),
         ),
