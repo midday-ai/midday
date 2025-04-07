@@ -1,29 +1,34 @@
 import { CustomersHeader } from "@/components/customers-header";
 import { ErrorFallback } from "@/components/error-fallback";
-import { CustomersTable } from "@/components/tables/customers";
+import { DataTable } from "@/components/tables/customers/data-table";
 import { CustomersSkeleton } from "@/components/tables/customers/skeleton";
+import { loadCustomerFilterParams } from "@/hooks/use-customer-filter-params";
+import { loadSortParams } from "@/hooks/use-sort-params";
+import { prefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
-import { searchParamsCache } from "./search-params";
 
 export const metadata: Metadata = {
   title: "Customers | Midday",
 };
 
-export default async function Page(
-  props: {
-    searchParams: Promise<Record<string, string | string[] | undefined>>;
-  }
-) {
+type Props = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function Page(props: Props) {
   const searchParams = await props.searchParams;
-  const {
-    q: query,
-    sort,
-    start,
-    end,
-    page,
-  } = searchParamsCache.parse(searchParams);
+
+  const filter = loadCustomerFilterParams(searchParams);
+  const { sort } = loadSortParams(searchParams);
+
+  prefetch(
+    trpc.customers.get.infiniteQueryOptions({
+      filter,
+      sort,
+    }),
+  );
 
   return (
     <div className="flex flex-col pt-6 gap-6">
@@ -31,13 +36,7 @@ export default async function Page(
 
       <ErrorBoundary errorComponent={ErrorFallback}>
         <Suspense fallback={<CustomersSkeleton />}>
-          <CustomersTable
-            query={query}
-            sort={sort}
-            start={start}
-            end={end}
-            page={page}
-          />
+          <DataTable />
         </Suspense>
       </ErrorBoundary>
     </div>

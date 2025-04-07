@@ -7,6 +7,7 @@ import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
+import { getWebsiteLogo } from "@/utils/logos";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -102,7 +103,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
                 <Avatar className="size-5">
                   {row.customer?.website && (
                     <AvatarImageNext
-                      src={`https://img.logo.dev/${row.customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                      src={getWebsiteLogo(row.customer?.website)}
                       alt={`${row.customer?.name} logo`}
                       width={20}
                       height={20}

@@ -6,6 +6,7 @@ import { FormatAmount } from "@/components/format-amount";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { formatDate } from "@/utils/format";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
@@ -26,47 +27,9 @@ import type {
 } from "@tanstack/react-table";
 import { memo, useCallback } from "react";
 
-export type Transaction = {
-  id: string;
-  amount: number;
-  status: "posted" | "excluded" | "included" | "pending" | "completed";
-  frequency?: string;
-  recurring?: boolean;
-  manual?: boolean;
-  date: string;
-  category?: {
-    slug: string;
-    name: string;
-    color: string;
-  };
-  name: string;
-  description?: string;
-  currency: string;
-  method: string;
-  attachments?: {
-    id: string;
-    path: string;
-    name: string;
-    type: string;
-    size: number;
-  }[];
-  assigned?: {
-    avatar_url: string;
-    full_name: string;
-  };
-  bank_account?: {
-    name: string;
-    bank_connection: {
-      logo_url: string;
-    };
-  };
-  tags?: {
-    tag: {
-      id: string;
-      name: string;
-    };
-  }[];
-};
+type Transaction = NonNullable<
+  NonNullable<RouterOutputs["transactions"]["get"]>["data"]
+>[number];
 
 interface TableMeta<TData> extends ReactTableMeta<TData> {
   dateFormat?: string;
@@ -298,8 +261,8 @@ export const columns: ColumnDef<Transaction>[] = [
     cell: ({ row }) => (
       <DescriptionCell
         name={row.original.name}
-        description={row.original.description}
-        status={row.original.status}
+        description={row.original.description ?? undefined}
+        status={row.original.status ?? undefined}
         categorySlug={row.original?.category?.slug}
       />
     ),
@@ -335,8 +298,10 @@ export const columns: ColumnDef<Transaction>[] = [
     header: "Account",
     cell: ({ row }) => (
       <TransactionBankAccount
-        name={row.original?.bank_account?.name}
-        logoUrl={row.original?.bank_account?.bank_connection?.logo_url}
+        name={row.original?.bank_account?.name ?? undefined}
+        logoUrl={
+          row.original?.bank_account?.bank_connection?.logo_url ?? undefined
+        }
       />
     ),
   },

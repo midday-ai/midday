@@ -1,10 +1,10 @@
 "use client";
 
 import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
+import { LoadMore } from "@/components/load-more";
 import { InvoiceDetailsSheet } from "@/components/sheets/invoice-details-sheet";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useUserQuery } from "@/hooks/use-user";
-import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody } from "@midday/ui/table";
 import {
   getCoreRowModel,
@@ -116,14 +116,7 @@ export function DataTable({
         </TableBody>
       </Table>
 
-      {hasNextPage && (
-        <div className="flex items-center justify-center mt-6" ref={ref}>
-          <div className="flex items-center space-x-2 px-6 py-5">
-            <Spinner />
-            <span className="text-sm text-[#606060]">Loading more...</span>
-          </div>
-        </div>
-      )}
+      <LoadMore ref={ref} hasNextPage={hasNextPage} />
 
       <InvoiceDetailsSheet
         data={selectedInvoice}
