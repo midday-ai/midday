@@ -944,3 +944,7 @@ export async function deleteTeamInvite(
     .select()
     .single();
 }
+
+export async function deleteCustomer(supabase: Client, id: string) {
+  return supabase.from("customers").delete().eq("id", id).select("id");
+}

@@ -3,6 +3,7 @@ import { createTRPCRouter } from "../init";
 import { appsRouter } from "./apps";
 import { assistantRouter } from "./assistant";
 import { bankAccountsRouter } from "./bank-accounts";
+import { customersRouter } from "./customers";
 import { inboxRouter } from "./inbox";
 import { invoiceRouter } from "./invoice";
 import { metricsRouter } from "./metrics";
@@ -32,6 +33,7 @@ export const appRouter = createTRPCRouter({
   tracker: trackerRouter,
   invoice: invoiceRouter,
   vault: vaultRouter,
+  customers: customersRouter,
 });
 
 // export type definition of API

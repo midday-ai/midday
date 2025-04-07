@@ -1,4 +1,5 @@
 import { getUrl } from "@/utils/environment";
+import { getWebsiteLogo } from "@/utils/logos";
 import { createClient } from "@midday/supabase/client";
 import { getInvoiceQuery } from "@midday/supabase/queries";
 import {
@@ -133,7 +134,7 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
           <Avatar className="size-5">
             {customer?.website && (
               <AvatarImageNext
-                src={`https://img.logo.dev/${customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                src={getWebsiteLogo(customer?.website)}
                 alt={`${customer?.name} logo`}
                 width={20}
                 height={20}

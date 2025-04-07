@@ -8,6 +8,7 @@ import { OpenURL } from "@/components/open-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { getUrl } from "@/utils/environment";
 import { formatDate, getDueDateStatus } from "@/utils/format";
+import { getWebsiteLogo } from "@/utils/logos";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -105,7 +106,7 @@ export const columns: ColumnDef<Invoice>[] = [
           <Avatar className="size-5">
             {customer?.website && (
               <AvatarImageNext
-                src={`https://img.logo.dev/${customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                src={getWebsiteLogo(customer?.website)}
                 alt={`${name} logo`}
                 width={20}
                 height={20}

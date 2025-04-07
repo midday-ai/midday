@@ -1255,17 +1255,21 @@ export async function getPaymentStatusQuery(supabase: Client, teamId: string) {
 
 export type GetCustomersQueryParams = {
   teamId: string;
-  from?: number;
-  to?: number;
-  searchQuery?: string | null;
+  filter?: {
+    q?: string | null;
+  };
   sort?: string[] | null;
+  cursor?: string | null;
+  pageSize?: number;
 };
 
 export async function getCustomersQuery(
   supabase: Client,
   params: GetCustomersQueryParams,
 ) {
-  const { teamId, from = 0, to = 100, searchQuery, sort } = params;
+  const { teamId, filter, sort, cursor, pageSize = 25 } = params;
+
+  const { q } = filter || {};
 
   const query = supabase
     .from("customers")
@@ -1273,33 +1277,46 @@ export async function getCustomersQuery(
       "*, invoices:invoices(id), projects:tracker_projects(id), tags:customer_tags(id, tag:tags(id, name))",
       { count: "exact" },
     )
-    .eq("team_id", teamId)
-    .range(from, to);
+    .eq("team_id", teamId);
 
-  if (searchQuery) {
-    query.ilike("name", `%${searchQuery}%`);
+  if (q) {
+    query.ilike("name", `%${q}%`);
   }
 
-  if (sort) {
+  if (sort?.length === 2) {
     const [column, value] = sort;
     const ascending = value === "asc";
 
     if (column === "invoices") {
-      query.order("invoices(id)", { ascending });
+      query.order("get_invoice_count", { ascending });
     } else if (column === "projects") {
-      query.order("projects(id)", { ascending });
-    } else {
+      query.order("get_project_count", { ascending });
+    } else if (column === "tags") {
+      query.order("is_customer_tagged", { ascending });
+    } else if (column) {
       query.order(column, { ascending });
     }
   } else {
     query.order("created_at", { ascending: false });
   }
 
-  const { data, count } = await query;
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
+
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
 
   return {
     meta: {
-      count,
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
     },
     data,
   };

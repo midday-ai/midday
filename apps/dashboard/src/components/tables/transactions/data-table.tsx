@@ -1,6 +1,7 @@
 "use client";
 
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
+import { LoadMore } from "@/components/load-more";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
@@ -263,14 +264,7 @@ export function DataTable({
             </TableBody>
           </Table>
 
-          {hasNextPage && (
-            <div className="flex items-center justify-center mt-6" ref={ref}>
-              <div className="flex items-center space-x-2 py-5">
-                <Spinner />
-                <span className="text-sm text-[#606060]">Loading more...</span>
-              </div>
-            </div>
-          )}
+          <LoadMore ref={ref} hasNextPage={hasNextPage} />
         </Tooltip>
       </TooltipProvider>
 

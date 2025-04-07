@@ -1,7 +1,6 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
-import { Spinner } from "@midday/ui/spinner";
+import { LoadMore } from "@/components/load-more";
 import { Table, TableBody } from "@midday/ui/table";
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
@@ -94,14 +93,7 @@ export function DataTable({
         </TableBody>
       </Table>
 
-      {hasNextPage && (
-        <div className="flex items-center justify-center mt-6" ref={ref}>
-          <Button variant="outline" className="space-x-2 px-6 py-5">
-            <Spinner />
-            <span className="text-sm text-[#606060]">Loading more...</span>
-          </Button>
-        </div>
-      )}
+      <LoadMore ref={ref} hasNextPage={hasNextPage} />
     </>
   );
 }

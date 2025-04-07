@@ -1,6 +1,6 @@
 "use client";
 
-import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useSortParams } from "@/hooks/use-sort-params";
 import { Button } from "@midday/ui/button";
 import {
   TableHeader as BaseTableHeader,
@@ -10,11 +10,12 @@ import {
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 export function TableHeader() {
-  const { setParams, sort } = useCustomerParams();
-  const [column, value] = sort || [];
+  const { params, setParams } = useSortParams();
+
+  const [column, value] = params.sort || [];
 
   const createSortQuery = (name: string) => {
-    const [currentColumn, currentValue] = sort || [];
+    const [currentColumn, currentValue] = params.sort || [];
 
     if (name === currentColumn) {
       if (currentValue === "asc") {
@@ -69,7 +70,7 @@ export function TableHeader() {
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
-            // onClick={() => createSortQuery("customer")}
+            onClick={() => createSortQuery("invoices")}
           >
             <span>Invoices</span>
             {"invoices" === column && value === "asc" && (
@@ -82,7 +83,7 @@ export function TableHeader() {
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
-            // onClick={() => createSortQuery("projects")}
+            onClick={() => createSortQuery("projects")}
           >
             <span>Projects</span>
             {"projects" === column && value === "asc" && (

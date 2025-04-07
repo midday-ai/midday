@@ -1,6 +1,7 @@
 import { useUserQuery } from "@/hooks/use-user";
 import { getUrl } from "@/utils/environment";
 import { formatDate } from "@/utils/format";
+import { getWebsiteLogo } from "@/utils/logos";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -153,7 +154,7 @@ export function InboxDetails({
                         "rounded-full overflow-hidden",
                         showFallback && "hidden",
                       )}
-                      src={`https://img.logo.dev/${item.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ`}
+                      src={getWebsiteLogo(item.website)}
                       quality={100}
                       onError={() => {
                         setShowFallback(true);
