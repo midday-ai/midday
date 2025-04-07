@@ -443,14 +443,12 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
       try {
         const data = await api.exchangeCode(code);
 
-        console.log("data", data);
-
         return c.json(
           {
             data: {
               session_id: data.session_id,
               expires_at: data.access.valid_until,
-              accounts_data: data.accounts_data,
+              accounts: data.accounts,
             },
           },
           200,

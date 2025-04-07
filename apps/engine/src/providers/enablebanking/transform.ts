@@ -5,6 +5,7 @@ import type { Account, Balance, ConnectionStatus, Transaction } from "../types";
 import type {
   GetAccountDetailsResponse,
   GetBalancesResponse,
+  GetExchangeCodeResponse,
   GetSessionResponse,
   GetTransaction,
   Institution,
@@ -65,6 +66,18 @@ export const transformAccount = (
     enrollment_id: null,
     resource_id: account.identification_hash,
     expires_at: account.valid_until,
+  };
+};
+
+export const transformSessionData = (session: GetExchangeCodeResponse) => {
+  return {
+    session_id: session.session_id,
+    expires_at: session.access.valid_until,
+    access: session.access,
+    accounts: session.accounts.map((account) => ({
+      account_reference: account.identification_hash,
+      account_id: account.uid,
+    })),
   };
 };
 

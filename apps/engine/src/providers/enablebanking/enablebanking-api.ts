@@ -3,6 +3,7 @@ import { ProviderError } from "@/utils/error";
 import * as jose from "jose";
 import xior, { type XiorInstance, type XiorRequestConfig } from "xior";
 import type { GetTransactionsRequest, ProviderParams } from "../types";
+import { transformSessionData } from "./transform";
 import type {
   AuthenticateRequest,
   AuthenticateResponse,
@@ -10,6 +11,7 @@ import type {
   GetAccountsRequest,
   GetAspspsResponse,
   GetBalancesResponse,
+  GetExchangeCodeResponse,
   GetSessionResponse,
   GetTransactionsResponse,
 } from "./types";
@@ -170,11 +172,11 @@ export class EnableBankingApi {
 
   async exchangeCode(code: string) {
     try {
-      const response = await this.#post<GetSessionResponse>("/sessions", {
+      const response = await this.#post<GetExchangeCodeResponse>("/sessions", {
         code,
       });
 
-      return response;
+      return transformSessionData(response);
     } catch (error) {
       console.log(error);
       throw new ProviderError({

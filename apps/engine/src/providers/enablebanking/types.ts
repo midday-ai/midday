@@ -121,6 +121,48 @@ export type SessionStatus =
   | "RETURNED_FROM_BANK"
   | "REVOKED";
 
+export type GetExchangeCodeResponse = {
+  access: {
+    valid_until: string;
+    accounts?: null;
+    balances: boolean;
+    transactions: boolean;
+  };
+  accounts: Array<{
+    account_id: {
+      iban: string;
+      other: {
+        identification: string;
+        scheme_name: string;
+      };
+    };
+    all_account_ids: Array<{
+      identification: string;
+      scheme_name: string;
+    }>;
+    account_servicer: {
+      clearing_system_member_id: {
+        clearing_system_id: string;
+        member_id: string;
+      };
+    };
+    name: string;
+    cash_account_type: string;
+    product: string;
+    currency: string;
+    uid: string;
+    identification_hash: string;
+    identification_hashes: string[];
+  }>;
+  aspsp: {
+    country: string;
+    name: string;
+  };
+  psu_type: "business" | "personal";
+  session_id: string;
+  status: SessionStatus;
+};
+
 export type GetSessionResponse = {
   access: {
     valid_until: string;
@@ -129,10 +171,6 @@ export type GetSessionResponse = {
     transactions: boolean;
   };
   accounts: string[];
-  accounts_data: {
-    identification_hash: string;
-    uid: string;
-  }[];
   aspsp: {
     country: string;
     name: string;
