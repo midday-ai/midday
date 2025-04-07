@@ -63,7 +63,7 @@ export const transformAccount = (
       currency: account.currency,
     },
     enrollment_id: null,
-    resource_id: null,
+    resource_id: account.identification_hash,
     expires_at: account.valid_until,
   };
 };

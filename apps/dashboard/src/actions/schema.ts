@@ -180,7 +180,7 @@ export const connectBankAccountSchema = z.object({
       currency: z.string(),
       name: z.string(),
       institution_id: z.string(),
-      account_reference: z.string().nullable().optional(),
+      account_reference: z.string().nullable().optional(), // EnableBanking & GoCardLess
       enabled: z.boolean(),
       logo_url: z.string().nullable().optional(),
       expires_at: z.string().nullable().optional(), // EnableBanking & GoCardLess
