@@ -14,6 +14,7 @@ export function useCustomerFilterParams() {
   return {
     filter,
     setFilter,
+    hasFilters: Object.values(filter).some((value) => value !== null),
   };
 }
 
