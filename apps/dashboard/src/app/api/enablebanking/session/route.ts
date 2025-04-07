@@ -36,6 +36,10 @@ export async function GET(request: NextRequest) {
     },
   });
 
+  if (sessionResponse.status !== 200) {
+    return NextResponse.redirect(new URL("/?error=invalid_code", redirectBase));
+  }
+
   if (method === "connect") {
     const { data: sessionData } = await sessionResponse.json();
 

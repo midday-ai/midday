@@ -131,7 +131,7 @@ export type GetSessionResponse = {
   accounts: string[];
   accounts_data: {
     identification_hash: string;
-    account_id: string;
+    uid: string;
   }[];
   aspsp: {
     country: string;
