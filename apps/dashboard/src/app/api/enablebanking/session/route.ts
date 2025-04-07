@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
           status: "connected",
         })
         .eq("reference_id", sessionId)
-        .select("id")
+        .select("id, team_id")
         .single();
 
       // Update bank account_ids based on the persisted identification_hash (account_reference)
@@ -77,7 +77,8 @@ export async function GET(request: NextRequest) {
             .update({
               account_id: account.account_id,
             })
-            .eq("account_reference", account.account_reference),
+            .eq("account_reference", account.account_reference)
+            .eq("team_id", data?.team_id!),
         ),
       );
 
