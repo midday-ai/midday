@@ -65,6 +65,8 @@ export async function GET(request: NextRequest) {
         .select("id")
         .single();
 
+      console.log("sessionData", sessionData);
+
       // Update bank account_ids based on the persisted identification_hash (account_reference)
       await Promise.all(
         sessionData?.accounts_data?.map((account) =>
