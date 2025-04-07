@@ -448,6 +448,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
             data: {
               session_id: data.session_id,
               expires_at: data.access.valid_until,
+              accounts_data: data.accounts_data,
             },
           },
           200,

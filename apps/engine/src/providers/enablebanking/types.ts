@@ -129,6 +129,10 @@ export type GetSessionResponse = {
     transactions: boolean;
   };
   accounts: string[];
+  accounts_data: {
+    identification_hash: string;
+    account_id: string;
+  }[];
   aspsp: {
     country: string;
     name: string;

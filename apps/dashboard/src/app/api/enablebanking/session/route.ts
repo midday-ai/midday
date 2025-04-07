@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
   if (method === "reconnect" && sessionId) {
     const { data: sessionData } = await sessionResponse.json();
 
+    // Update the bank connection session
     if (sessionData?.session_id) {
       const { data } = await supabase
         .from("bank_connections")
@@ -63,6 +64,18 @@ export async function GET(request: NextRequest) {
         .eq("reference_id", sessionId)
         .select("id")
         .single();
+
+      // Update bank account_ids based on the persisted identification_hash (account_reference)
+      await Promise.all(
+        sessionData.accounts_data.map((account) =>
+          supabase
+            .from("bank_accounts")
+            .update({
+              account_id: account.account_id,
+            })
+            .eq("account_reference", account.identification_hash),
+        ),
+      );
 
       return NextResponse.redirect(
         new URL(
