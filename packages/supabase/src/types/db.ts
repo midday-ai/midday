@@ -2357,6 +2357,16 @@ export type Database = {
         }
         Returns: number
       }
+      get_transactions_amount_full_range_data: {
+        Args: {
+          team_id: string
+          amount_type?: string
+        }
+        Returns: {
+          amount: number
+          currency: string
+        }[]
+      }
       get_transactions_amount_range_data: {
         Args: {
           team_id: string

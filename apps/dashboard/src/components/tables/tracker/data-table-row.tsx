@@ -5,8 +5,9 @@ import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
+import { getWebsiteLogo } from "@/utils/logos";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,7 +71,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
   const { toast } = useToast();
   const { setParams } = useTrackerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
-  const { locale } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   const deleteAction = useAction(deleteProjectAction, {
     onError: () => {
@@ -102,7 +103,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
                 <Avatar className="size-5">
                   {row.customer?.website && (
                     <AvatarImageNext
-                      src={`https://img.logo.dev/${row.customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                      src={getWebsiteLogo(row.customer?.website)}
                       alt={`${row.customer?.name} logo`}
                       width={20}
                       height={20}
@@ -134,7 +135,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
                 amount: row.total_amount,
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
-                locale,
+                locale: user?.locale,
               })}
             </span>
           </DataTableCell>

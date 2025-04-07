@@ -3,38 +3,33 @@
 import { AddAccountButton } from "@/components/add-account-button";
 import { FormatAmount } from "@/components/format-amount";
 import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 import { formatAccountName } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useState } from "react";
 
-type Props = {
-  data: {
-    id: string;
-    name: string;
-    balance: number;
-    currency: string;
-    logo_url?: string;
-  }[];
-};
-
-export function AccountBalance({ data }: Props) {
+export function AccountBalance() {
   const [activeIndex, setActiveIndex] = useState(0);
   const t = useI18n();
+  const trpc = useTRPC();
 
-  const formattedData = data.map((account) => {
-    if (account.name === "total_balance") {
-      return {
-        ...account,
-        id: account.name,
-        name: t("account_balance.total_balance"),
-      };
-    }
+  const { data } = useSuspenseQuery(trpc.bankAccounts.balances.queryOptions());
+  const formattedData = data
+    ?.map((account) => {
+      if (account.name === "total_balance") {
+        return {
+          ...account,
+          id: account.name,
+          name: t("account_balance.total_balance"),
+        };
+      }
+      return account;
+    })
+    .sort((a, b) => b.balance - a.balance);
 
-    return account;
-  });
-
-  const activeAccount = formattedData.at(activeIndex);
+  const activeAccount = formattedData?.at(activeIndex);
 
   if (!activeAccount) {
     return (
@@ -44,6 +39,7 @@ export function AccountBalance({ data }: Props) {
           Get your balance in real-time by connecting <br />
           your bank account.
         </p>
+
         <AddAccountButton />
       </div>
     );
@@ -80,7 +76,7 @@ export function AccountBalance({ data }: Props) {
         </div>
       </div>
 
-      {formattedData.length > 1 && (
+      {formattedData?.length && formattedData.length > 1 && (
         <div className="flex space-x-2">
           {formattedData.map((account, idx) => (
             <button

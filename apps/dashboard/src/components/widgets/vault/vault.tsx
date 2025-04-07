@@ -1,5 +1,6 @@
 import { FilePreview } from "@/components/file-preview";
 import { Tag } from "@/components/tables/vault/tag";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import {
   HoverCard,
   HoverCardContent,
@@ -8,20 +9,30 @@ import {
 import { isSupportedFilePreview } from "@midday/utils";
 
 type Props = {
-  files: {
-    id: string;
-    name: string;
-    tag?: string;
-    mimetype: string;
-    team_id: string;
-    filePath: string;
-  }[];
+  files: RouterOutputs["vault"]["activity"];
 };
 
 export function Vault({ files }: Props) {
+  const formattedFiles = files?.map((file) => {
+    const [_, ...pathWithoutTeamId] = file?.path_tokens ?? [];
+    const name = file.name?.split("/").at(-1) ?? "No name";
+    const downloadPath = pathWithoutTeamId?.join("/");
+
+    return {
+      id: file.id,
+      name,
+      // @ts-expect-error
+      mimetype: file.metadata?.mimetype,
+      team_id: file.team_id,
+      tag: file.tag ?? undefined,
+      src: `/api/proxy?filePath=vault/${file.path_tokens?.join("/")}`,
+      downloadUrl: `/api/download/file?path=${downloadPath}&filename=${name}`,
+    };
+  });
+
   return (
     <ul className="bullet-none divide-y cursor-pointer overflow-auto scrollbar-hide aspect-square pb-24">
-      {files?.map((file) => {
+      {formattedFiles?.map((file) => {
         const filePreviewSupported = isSupportedFilePreview(file.mimetype);
 
         return (
@@ -43,8 +54,8 @@ export function Vault({ files }: Props) {
                   <FilePreview
                     width={280}
                     height={365}
-                    src={`/api/proxy?filePath=vault/${file.team_id}/${file.filePath}/${file.name}`}
-                    downloadUrl={`/api/download/file?path=${file.filePath}/${file.name}&filename=${file.name}`}
+                    src={file.src}
+                    downloadUrl={file.downloadUrl}
                     name={file.name}
                     type={file?.mimetype}
                   />

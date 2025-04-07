@@ -1,6 +1,6 @@
 "use client";
 
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import NumberFlow from "@number-flow/react";
 
 type Props = {
@@ -18,7 +18,7 @@ export function AnimatedNumber({
   maximumFractionDigits,
   locale,
 }: Props) {
-  const user = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
   const localeToUse = locale || user?.locale;
 
   return (

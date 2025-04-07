@@ -23,14 +23,9 @@ type Props = {
 };
 
 export function ChartFilters({ currencies }: Props) {
-  const [{ currency }, setCurrency] = useQueryStates(
-    {
-      currency: parseAsString,
-    },
-    {
-      shallow: false,
-    },
-  );
+  const [{ currency }, setCurrency] = useQueryStates({
+    currency: parseAsString,
+  });
 
   const allCurrencies = [
     {

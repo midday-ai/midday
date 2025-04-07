@@ -39,9 +39,7 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { setParams, statuses, start, end, q, customers } = useInvoiceParams({
-    shallow: false,
-  });
+  const { setParams, statuses, start, end, q, customers } = useInvoiceParams();
 
   const t = useI18n();
 

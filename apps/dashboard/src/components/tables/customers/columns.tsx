@@ -1,6 +1,8 @@
 "use client";
 
 import { useCustomerParams } from "@/hooks/use-customer-params";
+import type { RouterOutputs } from "@/trpc/routers/_app";
+import { getWebsiteLogo } from "@/utils/logos";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
@@ -16,17 +18,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import * as React from "react";
 
-export type Customer = {
-  id: string;
-  name: string;
-  customer_name?: string;
-  website: string;
-  contact?: string;
-  email: string;
-  invoices: { id: string }[];
-  projects: { id: string }[];
-  tags: { tag: { id: string; name: string } }[];
-};
+export type Customer = NonNullable<RouterOutputs["customers"]["get"]>[number];
 
 export const columns: ColumnDef<Customer>[] = [
   {
@@ -42,7 +34,7 @@ export const columns: ColumnDef<Customer>[] = [
           <Avatar className="size-5">
             {row.original.website && (
               <AvatarImageNext
-                src={`https://img.logo.dev/${row.original.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                src={getWebsiteLogo(row.original.website)}
                 alt={`${name} logo`}
                 width={20}
                 height={20}
@@ -150,9 +142,9 @@ export const columns: ColumnDef<Customer>[] = [
               </DropdownMenuItem>
 
               <DropdownMenuItem
-                onClick={() =>
-                  table.options.meta?.deleteCustomer(row.original.id)
-                }
+                // onClick={() =>
+                //   table.options.meta?.deleteCustomer(row.original.id)
+                // }
                 className="text-[#FF3638]"
               >
                 Delete

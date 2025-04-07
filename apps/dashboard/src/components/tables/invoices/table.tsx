@@ -1,10 +1,10 @@
 "use client";
 
 import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
+import { LoadMore } from "@/components/load-more";
 import { InvoiceDetailsSheet } from "@/components/sheets/invoice-details-sheet";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { useUserContext } from "@/store/user/hook";
-import { Spinner } from "@midday/ui/spinner";
+import { useUserQuery } from "@/hooks/use-user";
 import { Table, TableBody } from "@midday/ui/table";
 import {
   getCoreRowModel,
@@ -44,7 +44,7 @@ export function DataTable({
   const { setParams, invoiceId, type } = useInvoiceParams();
 
   const deleteInvoice = useAction(deleteInvoiceAction);
-  const { date_format: dateFormat } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   const selectedInvoice = data.find((invoice) => invoice?.id === invoiceId);
 
@@ -72,7 +72,7 @@ export function DataTable({
     getFilteredRowModel: getFilteredRowModel(),
     meta: {
       deleteInvoice: handleDeleteInvoice,
-      dateFormat,
+      dateFormat: user?.date_format,
     },
   });
 
@@ -116,14 +116,7 @@ export function DataTable({
         </TableBody>
       </Table>
 
-      {hasNextPage && (
-        <div className="flex items-center justify-center mt-6" ref={ref}>
-          <div className="flex items-center space-x-2 px-6 py-5">
-            <Spinner />
-            <span className="text-sm text-[#606060]">Loading more...</span>
-          </div>
-        </div>
-      )}
+      <LoadMore ref={ref} hasNextPage={hasNextPage} />
 
       <InvoiceDetailsSheet
         data={selectedInvoice}

@@ -42,18 +42,13 @@ export function VaultSearchFilter({ members }: { members: any[] }) {
 
   const t = useI18n();
 
-  const [filters, setFilters] = useQueryStates(
-    {
-      q: parseAsString,
-      start: parseAsString,
-      end: parseAsString,
-      owners: parseAsArrayOf(parseAsString),
-      tags: parseAsArrayOf(parseAsString),
-    },
-    {
-      shallow: false,
-    },
-  );
+  const [filters, setFilters] = useQueryStates({
+    q: parseAsString,
+    start: parseAsString,
+    end: parseAsString,
+    owners: parseAsArrayOf(parseAsString),
+    tags: parseAsArrayOf(parseAsString),
+  });
 
   const tags = TAGS.map((tag) => ({
     id: tag,

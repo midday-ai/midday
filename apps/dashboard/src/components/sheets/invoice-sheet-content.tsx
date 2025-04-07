@@ -2,6 +2,7 @@
 
 import { createInvoiceAction } from "@/actions/invoice/create-invoice-action";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { getUrl } from "@/utils/environment";
 import { Button } from "@midday/ui/button";
 import { SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useAction } from "next-safe-action/hooks";
@@ -89,14 +90,14 @@ export function InvoiceSheetContent({
         </div>
 
         <div className="flex mt-auto absolute bottom-6 justify-end gap-4 right-6 left-6">
-          <OpenURL href={`${window.location.origin}/i/${invoice.token}`}>
+          <OpenURL href={`${getUrl()}/i/${invoice.token}`}>
             <Button variant="secondary">View invoice</Button>
           </OpenURL>
 
           <Button
             onClick={() => {
               setInvoice(null);
-              setParams(null, { shallow: false });
+              setParams(null);
 
               setTimeout(() => {
                 setParams({ type: "create" });

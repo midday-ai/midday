@@ -1,9 +1,7 @@
 "use client";
 
-import { type UpdateUserFormValues, updateUserSchema } from "@/actions/schema";
-import { updateUserAction } from "@/actions/update-user-action";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@midday/ui/button";
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
+import { useZodForm } from "@/hooks/use-zod-form";
 import {
   Card,
   CardContent,
@@ -20,25 +18,25 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
+import { SubmitButton } from "@midday/ui/submit-button";
+import { z } from "zod";
 
-type Props = {
-  fullName: string;
-};
+const formSchema = z.object({
+  full_name: z.string().min(1).max(32).optional(),
+});
 
-export function DisplayName({ fullName }: Props) {
-  const action = useAction(updateUserAction);
-  const form = useForm<UpdateUserFormValues>({
-    resolver: zodResolver(updateUserSchema),
+export function DisplayName() {
+  const { data: user } = useUserQuery();
+  const updateUserMutation = useUserMutation();
+
+  const form = useZodForm(formSchema, {
     defaultValues: {
-      full_name: fullName,
+      full_name: user?.full_name ?? undefined,
     },
   });
 
   const onSubmit = form.handleSubmit((data) => {
-    action.execute({
+    updateUserMutation.mutate({
       full_name: data?.full_name,
     });
   });
@@ -80,13 +78,13 @@ export function DisplayName({ fullName }: Props) {
 
           <CardFooter className="flex justify-between">
             <div>Please use 32 characters at maximum.</div>
-            <Button type="submit" disabled={action.status === "executing"}>
-              {action.status === "executing" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Save"
-              )}
-            </Button>
+            <SubmitButton
+              type="submit"
+              disabled={updateUserMutation.isPending}
+              isSubmitting={updateUserMutation.isPending}
+            >
+              Save
+            </SubmitButton>
           </CardFooter>
         </Card>
       </form>

@@ -2,7 +2,7 @@
 
 import { BotCard } from "@/components/chat/messages";
 import { FormatAmount } from "@/components/format-amount";
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { formatDate } from "@/utils/format";
 
 type Props = {
@@ -22,14 +22,14 @@ export function SpendingUI({
   startDate,
   endDate,
 }: Props) {
-  const { date_format: dateFormat } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   if (!amount) {
     return (
       <BotCard>
         We couldn't find any spending in this category {category} between{" "}
-        {formatDate(startDate, dateFormat)} and{" "}
-        {formatDate(endDate, dateFormat)}
+        {formatDate(startDate, user?.date_format)} and{" "}
+        {formatDate(endDate, user?.date_format)}
       </BotCard>
     );
   }
@@ -38,8 +38,8 @@ export function SpendingUI({
     <BotCard>
       You have spent{" "}
       <FormatAmount amount={Math.abs(amount)} currency={currency} /> on {name}{" "}
-      between {formatDate(startDate, dateFormat)} and{" "}
-      {formatDate(endDate, dateFormat)}
+      between {formatDate(startDate, user?.date_format)} and{" "}
+      {formatDate(endDate, user?.date_format)}
     </BotCard>
   );
 }

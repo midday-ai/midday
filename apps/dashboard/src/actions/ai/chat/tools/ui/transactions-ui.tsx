@@ -3,8 +3,7 @@
 import { BotCard } from "@/components/chat/messages";
 import { FormatAmount } from "@/components/format-amount";
 import { TransactionStatus } from "@/components/transaction-status";
-import { useI18n } from "@/locales/client";
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { formatDate } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
 import {
@@ -26,8 +25,7 @@ type Props = {
 };
 
 export function TransactionsUI({ meta, data, q, filter, sort }: Props) {
-  const t = useI18n();
-  const { date_format: dateFormat } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   if (!meta.count) {
     return (
@@ -84,7 +82,7 @@ export function TransactionsUI({ meta, data, q, filter, sort }: Props) {
                     <span className="line-clamp-1">{transaction.name}</span>
                   </TableCell>
                   <TableCell className="font-normal">
-                    {formatDate(transaction.date, dateFormat)}
+                    {formatDate(transaction.date, user?.date_format)}
                   </TableCell>
                   <TableCell
                     className={cn(

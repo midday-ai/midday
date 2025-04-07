@@ -1,13 +1,6 @@
-import { getBankAccountsBalances } from "@midday/supabase/cached-queries";
 import { AccountBalance } from "./account-balance";
 
-export function AccountBalanceSkeleton() {
-  return null;
-}
-
-export async function AccountBalanceWidget() {
-  const accountsData = await getBankAccountsBalances();
-
+export function AccountBalanceWidget() {
   return (
     <div className="h-full">
       <div className="flex justify-between">
@@ -16,7 +9,7 @@ export async function AccountBalanceWidget() {
         </div>
       </div>
 
-      <AccountBalance data={accountsData?.data} />
+      <AccountBalance />
     </div>
   );
 }

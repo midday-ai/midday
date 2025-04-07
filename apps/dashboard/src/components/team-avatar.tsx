@@ -1,6 +1,6 @@
 "use client";
 
-import { updateTeamAction } from "@/actions/update-team-action";
+import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
 import { useUpload } from "@/hooks/use-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import {
@@ -12,13 +12,13 @@ import {
 } from "@midday/ui/card";
 import { stripSpecialCharacters } from "@midday/utils";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useRef } from "react";
 
-export function TeamAvatar({ teamId, logoUrl, name }) {
-  const action = useAction(updateTeamAction);
+export function TeamAvatar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { isLoading, uploadFile } = useUpload();
+  const { data } = useTeamQuery();
+  const { mutate: updateTeam } = useTeamMutation();
 
   const handleUpload = async (evt: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = evt.target;
@@ -28,12 +28,12 @@ export function TeamAvatar({ teamId, logoUrl, name }) {
 
     const { url } = await uploadFile({
       bucket: "avatars",
-      path: [teamId, filename],
+      path: [data?.id, filename],
       file: selectedFile[0] as File,
     });
 
     if (url) {
-      action.execute({ logo_url: url, revalidatePath: "/settings" });
+      updateTeam({ logo_url: url });
     }
   };
 
@@ -57,14 +57,13 @@ export function TeamAvatar({ teamId, logoUrl, name }) {
           ) : (
             <>
               <AvatarImage
-                src={logoUrl}
-                alt={name}
+                src={data?.logo_url ?? undefined}
+                alt={data?.name ?? undefined}
                 width={64}
                 height={64}
-                quality={100}
               />
               <AvatarFallback>
-                <span className="text-md">{name?.charAt(0)}</span>
+                <span className="text-md">{data?.name?.charAt(0)}</span>
               </AvatarFallback>
             </>
           )}

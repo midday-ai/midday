@@ -4,7 +4,16 @@ import { cn } from "@midday/ui/cn";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export function SecondaryMenu({ items }) {
+type Item = {
+  path: string;
+  label: string;
+};
+
+type Props = {
+  items: Item[];
+};
+
+export function SecondaryMenu({ items }: Props) {
   const pathname = usePathname();
 
   return (
@@ -18,7 +27,7 @@ export function SecondaryMenu({ items }) {
             className={cn(
               "text-[#606060]",
               pathname === item.path &&
-                "text-primary font-medium underline underline-offset-8"
+                "text-primary font-medium underline underline-offset-8",
             )}
           >
             <span>{item.label}</span>

@@ -16,7 +16,7 @@ export type Settings = {
 };
 
 export async function getDefaultSettings(): Promise<Settings> {
-  const countryCode = getCountryCode();
+  const countryCode = await getCountryCode();
 
   const { data: userData } = await getUser();
 
@@ -25,8 +25,8 @@ export async function getDefaultSettings(): Promise<Settings> {
     currencies[countryCode as keyof typeof currencies] ??
     "USD";
 
-  const timezone = userData?.timezone ?? getTimezone();
-  const locale = userData?.locale ?? getLocale();
+  const timezone = userData?.timezone ?? (await getTimezone());
+  const locale = userData?.locale ?? (await getLocale());
 
   // Default to letter size for US/CA, A4 for rest of world
   const size = ["US", "CA"].includes(countryCode) ? "letter" : "a4";

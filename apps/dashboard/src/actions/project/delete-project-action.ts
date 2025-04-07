@@ -19,7 +19,7 @@ export const deleteProjectAction = authActionClient
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
     await supabase.from("tracker_projects").delete().eq("id", params.id);
 
-    cookies().delete(Cookies.LastProject);
+    (await cookies()).delete(Cookies.LastProject);
 
     revalidateTag(`tracker_projects_${user.team_id}`);
   });

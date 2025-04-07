@@ -1,4 +1,4 @@
-import { disconnectAppAction } from "@/actions/disconnect-app-action";
+import { useTRPC } from "@/trpc/client";
 import {
   Accordion,
   AccordionContent,
@@ -9,7 +9,7 @@ import { Button } from "@midday/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
@@ -35,23 +35,33 @@ export function App({
   short_description: string;
   description: string;
   settings: Record<string, any>;
-  onInitialize: () => void;
+  onInitialize: () => Promise<void>;
   images: string[];
   active?: boolean;
   installed?: boolean;
   category: string;
   userSettings: Record<string, any>;
 }) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const [isLoading, setLoading] = useState(false);
   const [params, setParams] = useQueryStates({
     app: parseAsString,
     settings: parseAsBoolean,
   });
 
-  const [isLoading, setLoading] = useState(false);
-  const disconnectApp = useAction(disconnectAppAction);
+  const disconnectAppMutation = useMutation(
+    trpc.apps.disconnect.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.apps.installed.queryKey(),
+        });
+      },
+    }),
+  );
 
   const handleDisconnect = () => {
-    disconnectApp.execute({ appId: id });
+    disconnectAppMutation.mutate({ appId: id });
   };
 
   const handleOnInitialize = async () => {
@@ -105,7 +115,7 @@ export function App({
               className="w-full"
               onClick={handleDisconnect}
             >
-              {disconnectApp.status === "executing"
+              {disconnectAppMutation.isPending
                 ? "Disconnecting..."
                 : "Disconnect"}
             </Button>
@@ -125,7 +135,7 @@ export function App({
           <SheetHeader>
             <div className="mb-4">
               <Image
-                src={images[0]}
+                src={images[0] ?? ""}
                 alt={name}
                 width={465}
                 height={290}
@@ -157,7 +167,7 @@ export function App({
                     className="w-full"
                     onClick={handleDisconnect}
                   >
-                    {disconnectApp.status === "executing"
+                    {disconnectAppMutation.isPending
                       ? "Disconnecting..."
                       : "Disconnect"}
                   </Button>
@@ -191,7 +201,7 @@ export function App({
                 </AccordionContent>
               </AccordionItem>
 
-              {settings && (
+              {settings && Object.keys(settings).length > 0 && (
                 <AccordionItem value="settings" className="border-none">
                   <AccordionTrigger>Settings</AccordionTrigger>
                   <AccordionContent className="text-[#878787] text-sm">

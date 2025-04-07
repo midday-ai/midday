@@ -31,7 +31,7 @@ export const createEnableBankingLinkAction = authActionClient
         isDesktop,
       });
 
-      const country = countryCode ?? getCountryCode();
+      const country = countryCode ?? (await getCountryCode());
 
       try {
         const linkResponse = await client.auth.enablebanking.link.$post({

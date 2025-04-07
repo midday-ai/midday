@@ -1,20 +1,21 @@
 "use client";
 
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { apps } from "@midday/app-store";
 import { Button } from "@midday/ui/button";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { App } from "./app";
 
-export type User = {
-  id: string;
-  team_id: string;
-};
+export function Apps() {
+  const trpc = useTRPC();
+  const { data: installedApps } = useSuspenseQuery(
+    trpc.apps.installed.queryOptions(),
+  );
 
-export function Apps({
-  user,
-  installedApps,
-  settings,
-}: { user: User; installedApps: string[]; settings: Record<string, any>[] }) {
+  const { data: user } = useUserQuery();
+
   const searchParams = useSearchParams();
   const isInstalledPage = searchParams.get("tab") === "installed";
   const search = searchParams.get("q");
@@ -34,8 +35,8 @@ export function Apps({
           installed={installedApps?.includes(app.id)}
           {...app}
           userSettings={
-            settings.find((setting) => setting.app_id === app.id)?.settings ??
-            []
+            installedApps.find((setting) => setting?.app_id === app.id)
+              ?.settings ?? []
           }
           onInitialize={() => app.onInitialize(user)}
         />

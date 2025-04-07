@@ -1,3 +1,4 @@
+import { getWebsiteLogo } from "@/utils/logos";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { InvoiceStatus } from "./invoice-status";
 
@@ -15,7 +16,7 @@ export default function CustomerHeader({ name, website, status }: Props) {
           <Avatar className="size-5 object-contain border border-border">
             {website && (
               <AvatarImageNext
-                src={`https://img.logo.dev/${website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                src={getWebsiteLogo(website)}
                 alt={`${name} logo`}
                 width={20}
                 height={20}

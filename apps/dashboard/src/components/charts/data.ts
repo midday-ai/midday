@@ -1,13 +1,11 @@
-import { getColorFromName } from "@/utils/categories";
-
 export const chartExampleData = {
   summary: {
     currency: "USD",
-    currentTotal: 800000,
-    prevTotal: 300000,
+    currentTotal: 0,
+    prevTotal: 0,
   },
   meta: {
-    type: "profit",
+    type: "profit" as "profit" | "revenue",
     period: "monthly",
     currency: "USD",
   },
@@ -25,7 +23,6 @@ export const chartExampleData = {
         value: 20300,
       },
       precentage: {
-        currency: "USD",
         value: 110,
         status: "positive",
       },
@@ -43,7 +40,6 @@ export const chartExampleData = {
         value: 14000,
       },
       precentage: {
-        currency: "USD",
         value: 1000,
         status: "positive",
       },
@@ -61,7 +57,6 @@ export const chartExampleData = {
         value: 18000,
       },
       precentage: {
-        currency: "USD",
         value: 1000,
         status: "positive",
       },
@@ -81,7 +76,6 @@ export const chartExampleData = {
         status: "positive",
       },
       precentage: {
-        currency: "USD",
         value: 1000,
         status: "positive",
       },
@@ -101,7 +95,6 @@ export const chartExampleData = {
         status: "positive",
       },
       precentage: {
-        currency: "USD",
         value: 1000,
         status: "positive",
       },
@@ -110,6 +103,7 @@ export const chartExampleData = {
       date: "Thu Jun 01 2023",
       previous: {
         date: "2022-6-1",
+        currency: "USD",
         value: 300,
         status: "negative",
       },
@@ -120,7 +114,6 @@ export const chartExampleData = {
         status: "positive",
       },
       precentage: {
-        currency: "USD",
         value: 1000,
         status: "positive",
       },
@@ -140,7 +133,6 @@ export const chartExampleData = {
         status: "positive",
       },
       precentage: {
-        currency: "USD",
         value: 1000,
         status: "positive",
       },
@@ -160,7 +152,6 @@ export const chartExampleData = {
         status: "positive",
       },
       precentage: {
-        currency: "USD",
         value: 43,
         status: "positive",
       },
@@ -174,13 +165,12 @@ export const chartExampleData = {
         status: "positive",
       },
       current: {
-        currency: "USD",
         date: "2023-9-1",
+        currency: "USD",
         value: -3000,
         status: "negative",
       },
       precentage: {
-        currency: "USD",
         value: 53,
         status: "positive",
       },
@@ -194,13 +184,12 @@ export const chartExampleData = {
         status: "positive",
       },
       current: {
-        currency: "USD",
         date: "2023-10-1",
+        currency: "USD",
         value: 20000,
         status: "negative",
       },
       precentage: {
-        currency: "USD",
         value: 0,
         status: "positive",
       },
@@ -220,148 +209,9 @@ export const chartExampleData = {
         status: "negative",
       },
       precentage: {
-        currency: "USD",
         value: 0,
         status: "negative",
       },
-    },
-  ],
-};
-
-export const spendingExampleData = {
-  meta: {
-    count: 100,
-    totalAmount: 234234,
-    currency: "USD",
-  },
-  data: [
-    {
-      slug: "rent",
-      color: getColorFromName("Rent"),
-      name: "Rent",
-      currency: "USD",
-      amount: 0,
-      precentage: 0,
-    },
-    {
-      slug: "meals",
-      color: getColorFromName("Meals"),
-      name: "Meals",
-      currency: "USD",
-      amount: 0,
-      precentage: 0,
-    },
-    {
-      slug: "other",
-      color: getColorFromName("Other"),
-      name: "Other",
-      currency: "USD",
-      amount: 0,
-      precentage: 0,
-    },
-    {
-      slug: "internet_and_telephone",
-      color: getColorFromName("Internet and Telephone"),
-      name: "Internet and Telephone",
-      currency: "USD",
-      amount: 0,
-      precentage: 0,
-    },
-    {
-      slug: "facilities_expenses",
-      color: getColorFromName("Facilities Expenses"),
-      name: "Facilities Expenses",
-      currency: "USD",
-      amount: 0,
-      precentage: 0,
-    },
-    {
-      slug: "transfer",
-      color: getColorFromName("Transfer"),
-      name: "Transfer",
-      currency: "USD",
-      amount: 0,
-      precentage: 0,
-    },
-    {
-      slug: "software",
-      color: getColorFromName("Software"),
-      name: "Software",
-      currency: "USD",
-      amount: 0,
-      precentage: 0,
-    },
-    {
-      slug: "equipment",
-      color: getColorFromName("Equipment"),
-      name: "Equipment",
-      currency: "USD",
-      amount: 0,
-      precentage: 0,
-    },
-    {
-      slug: "office_supplies",
-      color: getColorFromName("Office Supplies"),
-      name: "Office Supplies",
-      currency: "USD",
-      amount: 0,
-      precentage: 0,
-    },
-    {
-      slug: "uncategorized",
-      color: getColorFromName("Uncategorized"),
-      name: "Uncategorized",
-      currency: "USD",
-      amount: 0,
-      precentage: 0,
-    },
-    {
-      slug: "fees",
-      color: getColorFromName("Fees"),
-      name: "Fees",
-      currency: "USD",
-      amount: 0,
-      precentage: 0,
-    },
-    {
-      slug: "travel",
-      color: getColorFromName("Travel"),
-      name: "Travel",
-      currency: "USD",
-      amount: 0,
-      precentage: 0,
-    },
-  ],
-};
-
-export const transactionExampleData = {
-  data: [
-    { id: 1, name: "Spotify", amount: -199, currency: "USD" },
-    { id: 2, name: "Netflix", amount: -179, currency: "USD" },
-    { id: 3, name: "WeWork", amount: -6700, currency: "USD" },
-    {
-      id: 4,
-      name: "Acme Inc",
-      amount: 76300,
-      currency: "USD",
-    },
-    {
-      id: 5,
-      name: "GitHub",
-      amount: -99,
-      currency: "USD",
-    },
-    {
-      id: 6,
-      name: "Supabase",
-      amount: -299,
-      currency: "USD",
-    },
-    {
-      id: 7,
-      name: "Acme Inc",
-      amount: 86300,
-      currency: "USD",
     },
   ],
 };
@@ -379,155 +229,114 @@ export const expenseChartExampleData = {
   result: [
     {
       date: "2023-01-01",
-      total: {
-        value: 20300,
-        currency: "USD",
-      },
-      recurring: {
-        value: 1000,
-        currency: "USD",
-      },
+      value: 20300,
+      recurring: 1000,
+      total: 20300,
+      recurring_value: 1000,
+      currency: "USD",
     },
     {
       date: "2023-02-01",
-      total: {
-        value: 14000,
-        currency: "USD",
-      },
-      recurring: {
-        value: 1000,
-        currency: "USD",
-      },
+      value: 14000,
+      recurring: 1000,
+      total: 14000,
+      recurring_value: 1000,
+      currency: "USD",
     },
     {
       date: "2023-03-01",
-      total: {
-        value: 18000,
-        currency: "USD",
-      },
-      recurring: {
-        value: 1000,
-        currency: "USD",
-      },
+      value: 18000,
+      recurring: 1000,
+      total: 18000,
+      recurring_value: 1000,
+      currency: "USD",
     },
     {
       date: "2023-04-01",
-      total: {
-        value: 10000,
-        currency: "USD",
-      },
-      recurring: {
-        value: 1000,
-        currency: "USD",
-      },
+      value: 10000,
+      recurring: 1000,
+      total: 10000,
+      recurring_value: 1000,
+      currency: "USD",
     },
     {
       date: "2023-05-01",
-      total: {
-        value: 12000,
-        currency: "USD",
-      },
-      recurring: {
-        value: 1000,
-        currency: "USD",
-      },
+      value: 12000,
+      recurring: 1000,
+      total: 12000,
+      recurring_value: 1000,
+      currency: "USD",
     },
     {
       date: "2023-06-01",
-      total: {
-        value: 2800,
-        currency: "USD",
-      },
-      recurring: {
-        value: 1000,
-        currency: "USD",
-      },
+      value: 2800,
+      recurring: 1000,
+      total: 2800,
+      recurring_value: 1000,
+      currency: "USD",
     },
     {
       date: "2023-07-01",
-      total: {
-        value: 1000,
-        currency: "USD",
-      },
-      recurring: {
-        value: 1000,
-        currency: "USD",
-      },
+      value: 1000,
+      recurring: 1000,
+      total: 1000,
+      recurring_value: 1000,
+      currency: "USD",
     },
     {
       date: "2023-08-01",
-      total: {
-        value: 1000,
-        currency: "USD",
-      },
-      recurring: {
-        value: 1000,
-        currency: "USD",
-      },
+      value: 1000,
+      recurring: 1000,
+      total: 1000,
+      recurring_value: 1000,
+      currency: "USD",
     },
     {
       date: "2023-09-01",
-      total: {
-        value: 3000,
-        currency: "USD",
-      },
-      recurring: {
-        value: 1000,
-        currency: "USD",
-      },
+      value: 3000,
+      recurring: 1000,
+      total: 3000,
+      recurring_value: 1000,
+      currency: "USD",
     },
     {
       date: "2023-10-01",
-      total: {
-        value: 20000,
-        currency: "USD",
-      },
-      recurring: {
-        value: 1000,
-        currency: "USD",
-      },
+      value: 20000,
+      recurring: 1000,
+      total: 20000,
+      recurring_value: 1000,
+      currency: "USD",
     },
     {
       date: "2023-11-01",
-      total: {
-        value: 20000,
-        currency: "USD",
-      },
-      recurring: {
-        value: 1000,
-        currency: "USD",
-      },
+      value: 20000,
+      recurring: 1000,
+      total: 20000,
+      recurring_value: 1000,
+      currency: "USD",
     },
     {
       date: "2023-12-01",
-      total: {
-        value: 15000,
-        currency: "USD",
-      },
-      recurring: {
-        value: 1000,
-        currency: "USD",
-      },
+      value: 15000,
+      recurring: 1000,
+      total: 15000,
+      recurring_value: 1000,
+      currency: "USD",
     },
   ],
 };
 
 export const burnRateExamleData = [
-  {
-    data: [
-      { value: 1000, date: "2024-01-01", currency: "USD" },
-      { value: 4000, date: "2024-01-02", currency: "USD" },
-      { value: 3000, date: "2024-01-03", currency: "USD" },
-      { value: 12000, date: "2024-01-04", currency: "USD" },
-      { value: 5000, date: "2024-01-05", currency: "USD" },
-      { value: 6000, date: "2024-01-06", currency: "USD" },
-      { value: 4500, date: "2024-01-07", currency: "USD" },
-      { value: 8000, date: "2024-01-08", currency: "USD" },
-      { value: 9000, date: "2024-01-09", currency: "USD" },
-      { value: 500, date: "2024-01-10", currency: "USD" },
-      { value: 1000, date: "2024-01-11", currency: "USD" },
-      { value: 500, date: "2024-01-12", currency: "USD" },
-    ],
-  },
-  { data: 12 },
+  { value: 1000, date: "2024-01-01", currency: "USD" },
+  { value: 4000, date: "2024-01-02", currency: "USD" },
+  { value: 3000, date: "2024-01-03", currency: "USD" },
+  { value: 12000, date: "2024-01-04", currency: "USD" },
+  { value: 5000, date: "2024-01-05", currency: "USD" },
+  { value: 6000, date: "2024-01-06", currency: "USD" },
+  { value: 4500, date: "2024-01-07", currency: "USD" },
+  { value: 8000, date: "2024-01-08", currency: "USD" },
+  { value: 9000, date: "2024-01-09", currency: "USD" },
+  { value: 500, date: "2024-01-10", currency: "USD" },
+  { value: 1000, date: "2024-01-11", currency: "USD" },
+  { value: 500, date: "2024-01-12", currency: "USD" },
 ];

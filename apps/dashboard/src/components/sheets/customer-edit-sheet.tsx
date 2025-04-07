@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteCustomerAction } from "@/actions/delete-customer-action";
+// import { deleteCustomerAction } from "@/actions/delete-customer-action";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { createClient } from "@midday/supabase/client";
 import { getCustomerQuery } from "@midday/supabase/queries";
@@ -23,7 +23,6 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
-import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useState } from "react";
 import { CustomerForm } from "../forms/customer-form";
 import type { Customer } from "../invoice/customer-details";
@@ -35,13 +34,13 @@ export function CustomerEditSheet() {
   const isOpen = Boolean(customerId);
   const supabase = createClient();
 
-  const deleteCustomer = useAction(deleteCustomerAction, {
-    onSuccess: () => {
-      setParams({
-        customerId: null,
-      });
-    },
-  });
+  // const deleteCustomer = useAction(deleteCustomerAction, {
+  //   onSuccess: () => {
+  //     setParams({
+  //       customerId: null,
+  //     });
+  //   },
+  // });
 
   useEffect(() => {
     async function fetchCustomer() {
@@ -98,9 +97,9 @@ export function CustomerEditSheet() {
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() =>
-                          deleteCustomer.execute({ id: customerId })
-                        }
+                      // onClick={() =>
+                      // deleteCustomer.execute({ id: customerId })
+                      // }
                       >
                         Delete
                       </AlertDialogAction>

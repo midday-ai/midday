@@ -1,4 +1,4 @@
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { formatDate } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -8,7 +8,7 @@ import { InboxStatus } from "./inbox-status";
 
 export function InboxItem({ item }) {
   const [selectedId, setSelectedId] = useQueryState("inboxId");
-  const { date_format: dateFormat } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   const isSelected = selectedId === item.id;
   const isProcessing = item.status === "processing" || item.status === "new";
@@ -45,7 +45,9 @@ export function InboxItem({ item }) {
             )}
           >
             {isProcessing && <Skeleton className="h-3 w-[50px] rounded-sm" />}
-            {!isProcessing && item?.date && formatDate(item.date, dateFormat)}
+            {!isProcessing &&
+              item?.date &&
+              formatDate(item.date, user?.date_format)}
           </div>
         </div>
 

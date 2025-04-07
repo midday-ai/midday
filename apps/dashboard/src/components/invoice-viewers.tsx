@@ -1,6 +1,7 @@
 "use client";
 
 import { formatRelativeTime } from "@/utils/format";
+import { getWebsiteLogo } from "@/utils/logos";
 import { createClient } from "@midday/supabase/client";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import {
@@ -101,7 +102,7 @@ export function InvoiceViewers({ customer, viewedAt }: Props) {
                 <Avatar className="size-5 object-contain border border-border">
                   {customer?.website && (
                     <AvatarImageNext
-                      src={`https://img.logo.dev/${customer.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                      src={getWebsiteLogo(customer.website)}
                       alt={`${customer.name} logo`}
                       width={20}
                       height={20}

@@ -9,7 +9,7 @@ export async function UsageServer({
   teamId: string;
   plan: string;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data } = await getTeamLimitsMetricsQuery(supabase, teamId);
 

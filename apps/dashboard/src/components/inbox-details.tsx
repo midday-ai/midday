@@ -1,5 +1,7 @@
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
+import { getUrl } from "@/utils/environment";
 import { formatDate } from "@/utils/format";
+import { getWebsiteLogo } from "@/utils/logos";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -13,7 +15,6 @@ import { Separator } from "@midday/ui/separator";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FilePreview } from "./file-preview";
@@ -58,7 +59,7 @@ export function InboxDetails({
   const { toast } = useToast();
   const [isOpen, setOpen] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
-  const { date_format: dateFormat } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   const isProcessing = item?.status === "processing" || item?.status === "new";
 
@@ -68,9 +69,7 @@ export function InboxDetails({
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/inbox?id=${item.id}`,
-      );
+      await navigator.clipboard.writeText(`${getUrl()}/inbox?id=${item.id}`);
 
       toast({
         duration: 4000,
@@ -155,7 +154,7 @@ export function InboxDetails({
                         "rounded-full overflow-hidden",
                         showFallback && "hidden",
                       )}
-                      src={`https://img.logo.dev/${item.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ`}
+                      src={getWebsiteLogo(item.website)}
                       quality={100}
                       onError={() => {
                         setShowFallback(true);
@@ -201,7 +200,7 @@ export function InboxDetails({
                 {isProcessing && !item.date && (
                   <Skeleton className="h-3 w-[50px] rounded-sm" />
                 )}
-                {item.date && formatDate(item.date, dateFormat)}
+                {item.date && formatDate(item.date, user?.date_format)}
               </div>
 
               <div className="flex space-x-4 items-center ml-auto mt-1">
