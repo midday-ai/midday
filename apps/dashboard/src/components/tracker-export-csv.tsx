@@ -26,10 +26,10 @@ type Props = {
   name: string;
   projectId: string;
   teamId: string;
-  userId: string;
 };
 
-export function TrackerExportCSV({ name, teamId, projectId, userId }: Props) {
+export function TrackerExportCSV({ name, teamId, projectId }: Props) {
+  return null;
   const [includeTeam, setIncludeTeam] = useState(false);
   const [date, setDate] = useState<DateRange | undefined>({
     from: startOfMonth(new Date()),

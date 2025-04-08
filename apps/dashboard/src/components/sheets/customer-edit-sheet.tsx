@@ -110,7 +110,7 @@ export function CustomerEditSheet() {
           )}
         </SheetHeader>
 
-        <CustomerForm data={customer} />
+        <CustomerForm data={customer} key={customer?.id} />
       </SheetContent>
     </Sheet>
   );

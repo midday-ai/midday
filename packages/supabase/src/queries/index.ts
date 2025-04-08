@@ -891,45 +891,32 @@ export async function getTrackerProjectQuery(
 
 export type GetTrackerProjectsQueryParams = {
   teamId: string;
-  to?: number;
-  from?: number;
-  start?: string;
-  end?: string;
-  sort?: [string, "asc" | "desc"];
-  search?: {
-    query?: string;
-    fuzzy?: boolean;
-  };
+  cursor?: string | null;
+  pageSize?: number;
   filter?: {
-    status?: "in_progress" | "completed";
-    customers?: string[];
+    q?: string | null;
+    start?: string | null;
+    end?: string | null;
+    status?: "in_progress" | "completed" | null;
+    customers?: string[] | null;
+    tags?: string[] | null;
   };
+  sort?: string[] | null;
 };
 
 export async function getTrackerProjectsQuery(
   supabase: Client,
   params: GetTrackerProjectsQueryParams,
 ) {
-  const {
-    from = 0,
-    to = 10,
-    filter,
-    sort,
-    teamId,
-    search,
-    start,
-    end,
-  } = params;
-  const { status, customers } = filter || {};
+  const { filter, sort, teamId, cursor, pageSize = 25 } = params;
+  const { status, customers, q, start, end, tags } = filter || {};
+
+  const columns =
+    "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount, customer:customer_id(id, name, website), tags:tracker_project_tags(id, tag:tags(id, name))";
 
   const query = supabase
     .from("tracker_projects")
-    .select(
-      "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount, customer:customer_id(id, name, website), tags:tracker_project_tags(id, tag:tags(id, name))",
-      {
-        count: "exact",
-      },
-    )
+    .select(columns)
     .eq("team_id", teamId);
 
   if (status) {
@@ -941,40 +928,65 @@ export async function getTrackerProjectsQuery(
     query.lte("created_at", end);
   }
 
-  if (search?.query && search?.fuzzy) {
-    query.ilike("name", `%${search.query}%`);
+  if (q) {
+    query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
   }
 
   if (customers?.length) {
     query.in("customer_id", customers);
   }
 
-  if (sort) {
-    const [column, value] = sort;
+  if (tags) {
+    query
+      .in("temp_filter_tags.tag_id", tags)
+      .eq("team_id", teamId)
+      .select(`${columns}, temp_filter_tags:tracker_project_tags!inner()`);
+  }
+
+  if (sort?.length === 2) {
+    const [column, direction] = sort;
+    const ascending = direction === "asc";
+
     if (column === "time") {
-      query.order("total_duration", { ascending: value === "asc" });
+      query.order("total_duration", { ascending });
     } else if (column === "amount") {
-      // query.order("total_amount", { ascending: value === "asc" });
+      query.order("get_project_total_amount", { ascending });
     } else if (column === "assigned") {
-      // query.order("assigned_id", { ascending: value === "asc" });
+      query.order("get_project_assigned_users_count", { ascending });
     } else if (column === "customer") {
-      query.order("customer(name)", { ascending: value === "asc" });
+      query.order("customer(name)", { ascending });
     } else if (column === "tags") {
-      query.order("is_project_tagged", { ascending: value === "asc" });
-    } else {
-      query.order(column, { ascending: value === "asc" });
+      query.order("is_project_tagged", { ascending });
+    } else if (column) {
+      query.order(column, { ascending });
     }
   } else {
     query.order("created_at", { ascending: false });
   }
 
-  const { data, count } = await query.range(from, to);
+  if (cursor) {
+    query.lt("created_at", cursor);
+  }
+
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
+
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
 
   return {
     meta: {
-      count,
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
     },
-    data,
+    data: data || [],
   };
 }
 

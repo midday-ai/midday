@@ -8,16 +8,18 @@ import { createTRPCRouter } from "../init";
 export const customersRouter = createTRPCRouter({
   get: protectedProcedure
     .input(
-      z.object({
-        filter: z
-          .object({
-            q: z.string().nullable().optional(),
-          })
-          .optional(),
-        sort: z.array(z.string(), z.string()).nullable().optional(),
-        cursor: z.string().optional(),
-        pageSize: z.number().optional(),
-      }),
+      z
+        .object({
+          filter: z
+            .object({
+              q: z.string().nullable().optional(),
+            })
+            .optional(),
+          sort: z.array(z.string(), z.string()).nullable().optional(),
+          cursor: z.string().optional(),
+          pageSize: z.number().optional(),
+        })
+        .optional(),
     )
     .query(async ({ ctx: { teamId, supabase }, input }) => {
       return getCustomersQuery(supabase, {

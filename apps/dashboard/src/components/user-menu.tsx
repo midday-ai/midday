@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import Link from "next/link";
@@ -63,10 +62,7 @@ export function UserMenu({ onlySignOut }: Props) {
 
             <DropdownMenuGroup>
               <Link prefetch href="/account">
-                <DropdownMenuItem>
-                  Account
-                  <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-                </DropdownMenuItem>
+                <DropdownMenuItem>Account</DropdownMenuItem>
               </Link>
 
               <Link prefetch href="/account/support">
@@ -74,10 +70,7 @@ export function UserMenu({ onlySignOut }: Props) {
               </Link>
 
               <Link prefetch href="/account/teams">
-                <DropdownMenuItem>
-                  Teams
-                  <DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
-                </DropdownMenuItem>
+                <DropdownMenuItem>Teams</DropdownMenuItem>
               </Link>
             </DropdownMenuGroup>
 

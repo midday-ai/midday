@@ -119,7 +119,6 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
   };
 
   const filters = {
-    q,
     end,
     start,
     statuses,
