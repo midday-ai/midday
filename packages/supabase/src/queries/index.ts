@@ -347,7 +347,7 @@ export async function getTransactionsQuery(
       hasPreviousPage: offset > 0,
       hasNextPage: data && data.length === pageSize,
     },
-    data,
+    data: data ?? [],
   };
 }
 
@@ -1318,7 +1318,7 @@ export async function getCustomersQuery(
       hasPreviousPage: offset > 0,
       hasNextPage: data && data.length === pageSize,
     },
-    data,
+    data: data ?? [],
   };
 }
 

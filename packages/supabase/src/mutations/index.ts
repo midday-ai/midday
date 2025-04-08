@@ -948,3 +948,94 @@ export async function deleteTeamInvite(
 export async function deleteCustomer(supabase: Client, id: string) {
   return supabase.from("customers").delete().eq("id", id).select("id");
 }
+
+type UpsertCustomerParams = {
+  id?: string;
+  teamId: string;
+  name: string;
+  email: string;
+  token?: string;
+  country?: string | null;
+  address_line_1?: string | null;
+  address_line_2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  note?: string | null;
+  website?: string | null;
+  phone?: string | null;
+  contact?: string | null;
+  tags?:
+    | {
+        id: string;
+        value: string;
+      }[]
+    | null;
+};
+
+export async function upsertCustomer(
+  supabase: Client,
+  params: UpsertCustomerParams,
+) {
+  const { id, tags, teamId, ...input } = params;
+
+  const result = await supabase
+    .from("customers")
+    .upsert(
+      {
+        ...input,
+        id,
+        team_id: teamId,
+      },
+      {
+        onConflict: "id",
+      },
+    )
+    .select("id, name")
+    .single();
+
+  if (tags?.length) {
+    await supabase.from("customer_tags").insert(
+      tags.map((tag) => ({
+        tag_id: tag.id,
+        customer_id: result?.data?.id!,
+        team_id: teamId,
+      })),
+    );
+  }
+
+  return result;
+}
+
+type CreateCustomerTagParams = {
+  teamId: string;
+  customerId: string;
+  tagId: string;
+};
+
+export async function createCustomerTag(
+  supabase: Client,
+  params: CreateCustomerTagParams,
+) {
+  return supabase.from("customer_tags").insert({
+    customer_id: params.customerId,
+    tag_id: params.tagId,
+    team_id: params.teamId,
+  });
+}
+
+type DeleteCustomerTagParams = {
+  customerId: string;
+  tagId: string;
+};
+
+export async function deleteCustomerTag(
+  supabase: Client,
+  params: DeleteCustomerTagParams,
+) {
+  return supabase
+    .from("customer_tags")
+    .delete()
+    .eq("customer_id", params.customerId)
+    .eq("tag_id", params.tagId);
+}

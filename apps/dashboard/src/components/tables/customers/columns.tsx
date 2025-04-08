@@ -14,18 +14,24 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { ScrollArea, ScrollBar } from "@midday/ui/scroll-area";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, RowData } from "@tanstack/react-table";
 import Link from "next/link";
 import * as React from "react";
 
-export type Customer = NonNullable<RouterOutputs["customers"]["get"]>[number];
+declare module "@tanstack/react-table" {
+  interface TableMeta<TData extends RowData> {
+    deleteCustomer: (id: string) => void;
+  }
+}
+
+export type Customer = RouterOutputs["customers"]["get"]["data"][number];
 
 export const columns: ColumnDef<Customer>[] = [
   {
     header: "Name",
     accessorKey: "name",
     cell: ({ row }) => {
-      const name = row.original.name ?? row.original.customer_name;
+      const name = row.original.name;
 
       if (!name) return "-";
 
@@ -142,9 +148,9 @@ export const columns: ColumnDef<Customer>[] = [
               </DropdownMenuItem>
 
               <DropdownMenuItem
-                // onClick={() =>
-                //   table.options.meta?.deleteCustomer(row.original.id)
-                // }
+                onClick={() =>
+                  table.options.meta?.deleteCustomer(row.original.id)
+                }
                 className="text-[#FF3638]"
               >
                 Delete
