@@ -6,11 +6,7 @@ import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useTRPC } from "@/trpc/client";
 import { Table, TableBody } from "@midday/ui/table";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseInfiniteQuery,
-} from "@tanstack/react-query";
+import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -27,23 +23,8 @@ export function DataTable() {
   const { ref, inView } = useInView();
   const { setParams } = useCustomerParams();
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const { filter, hasFilters } = useCustomerFilterParams();
   const { params } = useSortParams();
-
-  const deleteCustomerMutation = useMutation(
-    trpc.customers.delete.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.customers.get.infiniteQueryKey(),
-        });
-      },
-    }),
-  );
-
-  const handleDeleteCustomer = (id: string) => {
-    deleteCustomerMutation.mutate({ id });
-  };
 
   const deferredSearch = useDeferredValue(filter.q);
 
@@ -56,14 +37,24 @@ export function DataTable() {
       },
     },
     {
-      getNextPageParam: ({ meta }) => {
-        return meta?.cursor ?? undefined;
-      },
+      getNextPageParam: ({ meta }) => meta?.cursor,
     },
   );
 
-  const { data, fetchNextPage, hasNextPage } =
+  const { data, fetchNextPage, hasNextPage, refetch } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
+
+  const deleteCustomerMutation = useMutation(
+    trpc.customers.delete.mutationOptions({
+      onSuccess: () => {
+        refetch();
+      },
+    }),
+  );
+
+  const handleDeleteCustomer = (id: string) => {
+    deleteCustomerMutation.mutate({ id });
+  };
 
   useEffect(() => {
     if (inView) {

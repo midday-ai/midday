@@ -8,15 +8,10 @@ import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useTransactionsStore } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
 import { Cookies } from "@/utils/constants";
-import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseInfiniteQuery,
-} from "@tanstack/react-query";
+import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import {
   type VisibilityState,
   flexRender,
@@ -37,7 +32,6 @@ export function DataTable({
   columnVisibility: columnVisibilityPromise,
 }: { columnVisibility: Promise<VisibilityState> }) {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const { filter } = useTransactionFilterParams();
   const { setRowSelection, rowSelection, setColumns, setCanDelete } =
     useTransactionsStore();
@@ -46,20 +40,6 @@ export function DataTable({
   const { ref, inView } = useInView();
   const { transactionId, setTransactionId } = useTransactionParams();
   const { hasFilters } = useTransactionFilterParams();
-
-  const updateTransactionMutation = useMutation(
-    trpc.transactions.update.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.transactions.get.infiniteQueryKey(),
-        });
-        toast({
-          title: "Transaction updated",
-          variant: "success",
-        });
-      },
-    }),
-  );
 
   const showBottomBar = hasFilters && !Object.keys(rowSelection).length;
   const initialColumnVisibility = use(columnVisibilityPromise);
@@ -76,14 +56,25 @@ export function DataTable({
       sort: params.sort,
     },
     {
-      getNextPageParam: ({ meta }) => {
-        return meta?.cursor ?? undefined;
-      },
+      getNextPageParam: ({ meta }) => meta?.cursor,
     },
   );
 
-  const { data, fetchNextPage, hasNextPage } =
+  const { data, fetchNextPage, hasNextPage, refetch } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
+
+  const updateTransactionMutation = useMutation(
+    trpc.transactions.update.mutationOptions({
+      onSuccess: () => {
+        refetch();
+
+        toast({
+          title: "Transaction updated",
+          variant: "success",
+        });
+      },
+    }),
+  );
 
   useEffect(() => {
     if (inView) {
