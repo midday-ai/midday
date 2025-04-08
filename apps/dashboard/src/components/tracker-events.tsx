@@ -1,12 +1,16 @@
 "use client";
-
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
 
-export function TrackerEvents({
-  data,
-  isToday,
-}: { data: TrackerEvent[]; isToday: boolean }) {
+type Props = {
+  data:
+    | RouterOutputs["tracker"]["recordsByRange"]["result"][string]
+    | undefined;
+  isToday: boolean;
+};
+
+export function TrackerEvents({ data, isToday }: Props) {
   return (
     <div className="flex flex-col space-y-2 font-sans w-full">
       {data && data.length > 0 && (

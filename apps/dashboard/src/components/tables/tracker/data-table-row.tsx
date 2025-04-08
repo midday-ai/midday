@@ -34,7 +34,6 @@ import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
-import type { TrackerProject } from "./data-table";
 
 type DataTableCellProps = {
   children: React.ReactNode;

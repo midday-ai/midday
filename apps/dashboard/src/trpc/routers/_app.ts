@@ -11,6 +11,7 @@ import { metricsRouter } from "./metrics";
 import { tagsRouter } from "./tags";
 import { teamRouter } from "./team";
 import { trackerRouter } from "./tracker";
+import { trackerProjectsRouter } from "./tracker-projects";
 import { transactionAttachmentsRouter } from "./transaction-attachments";
 import { transactionCategoriesRouter } from "./transaction-categories";
 import { transactionTagsRouter } from "./transaction-tags";
@@ -36,6 +37,7 @@ export const appRouter = createTRPCRouter({
   vault: vaultRouter,
   customers: customersRouter,
   customerTags: customerTagsRouter,
+  trackerProjects: trackerProjectsRouter,
 });
 
 // export type definition of API
