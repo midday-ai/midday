@@ -125,16 +125,19 @@ export function VaultSearchFilter({ members }: { members: any[] }) {
     setStreaming(false);
   };
 
-  const hasValidFilters =
-    Object.entries(filters).filter(
-      ([key, value]) => value !== null && key !== "q",
-    ).length > 0;
+  const validFilters = Object.fromEntries(
+    Object.entries(filters).filter(([key]) => key !== "q"),
+  );
+
+  const hasValidFilters = Object.values(validFilters).some(
+    (value) => value !== null,
+  );
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex space-x-4 items-center">
         <FilterList
-          filters={filters}
+          filters={validFilters}
           loading={streaming}
           onRemove={setFilters}
           members={members}

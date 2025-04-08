@@ -109,7 +109,6 @@ export function TrackerCalendar() {
     setLocalRange([null, null]);
   };
 
-  // Fix for linter error: Type 'string[] | null' is not assignable to type '[string, string] | null'.
   const validRange: [string, string] | null =
     range && range.length === 2 ? [range[0]!, range[1]!] : null;
 

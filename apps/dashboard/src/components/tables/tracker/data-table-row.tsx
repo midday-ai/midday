@@ -63,10 +63,9 @@ export function Row({ children }: RowProps) {
 
 type DataTableRowProps = {
   row: TrackerProject;
-  userId: string;
 };
 
-export function DataTableRow({ row, userId }: DataTableRowProps) {
+export function DataTableRow({ row }: DataTableRowProps) {
   const { toast } = useToast();
   const { setParams } = useTrackerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
@@ -239,7 +238,6 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
             name={row.name}
             projectId={row.id}
             teamId={row.team_id}
-            userId={userId}
           />
 
           <DropdownMenuSeparator />

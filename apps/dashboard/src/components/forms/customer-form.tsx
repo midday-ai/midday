@@ -614,7 +614,9 @@ export function CustomerForm({ data }: Props) {
 
             <SubmitButton
               isSubmitting={upsertCustomerMutation.isPending}
-              disabled={upsertCustomerMutation.isPending}
+              disabled={
+                upsertCustomerMutation.isPending || !form.formState.isDirty
+              }
             >
               {isEdit ? "Update" : "Create"}
             </SubmitButton>

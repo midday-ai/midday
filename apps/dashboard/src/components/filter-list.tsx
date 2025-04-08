@@ -36,7 +36,7 @@ type FilterKey =
   | "customers"
   | "assignees"
   | "owners"
-  | "q";
+  | "status";
 
 type FilterValue = {
   start: string;
@@ -51,7 +51,7 @@ type FilterValue = {
   customers: string[];
   assignees: string[];
   owners: string[];
-  q: string;
+  status: string;
 };
 
 interface FilterValueProps {
@@ -139,6 +139,12 @@ export function FilterList({
           .join(", ");
       }
 
+      case "status": {
+        const statusValue = value as FilterValue["status"];
+        if (!statusValue) return null;
+        return statusFilters.find((filter) => filter.id === statusValue)?.name;
+      }
+
       case "categories": {
         const categoriesValue = value as FilterValue["categories"];
         if (!categoriesValue) return null;
@@ -194,9 +200,6 @@ export function FilterList({
           })
           .join(", ");
       }
-
-      case "q":
-        return value as FilterValue["q"];
 
       default:
         return null;

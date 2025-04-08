@@ -4,7 +4,7 @@ import { Loading } from "@/components/tables/tracker/loading";
 import { TrackerCalendar } from "@/components/tracker-calendar";
 import { TrackerSearchFilter } from "@/components/tracker-search-filter";
 import { loadSortParams } from "@/hooks/use-sort-params";
-import { loadUserTrackerFilterParams } from "@/hooks/user-tracker-filter-params";
+import { loadTrackerFilterParams } from "@/hooks/use-tracker-filter-params";
 import { prefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -19,7 +19,7 @@ type Props = {
 
 export default async function Page(props: Props) {
   const searchParams = await props.searchParams;
-  const filter = loadUserTrackerFilterParams(searchParams);
+  const filter = loadTrackerFilterParams(searchParams);
   const { sort } = loadSortParams(searchParams);
 
   prefetch(

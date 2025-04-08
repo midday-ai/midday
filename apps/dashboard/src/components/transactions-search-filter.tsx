@@ -141,16 +141,18 @@ function FilterCheckboxItem({
 
 function useFilterData(isOpen: boolean, isFocused: boolean) {
   const trpc = useTRPC();
+  const { filter } = useTransactionFilterParams();
+
   const shouldFetch = isOpen || isFocused;
 
   const { data: tagsData } = useQuery({
     ...trpc.tags.get.queryOptions(),
-    enabled: shouldFetch,
+    enabled: shouldFetch || Boolean(filter.tags?.length),
   });
 
   const { data: bankAccountsData } = useQuery({
     ...trpc.bankAccounts.get.queryOptions({
-      enabled: shouldFetch,
+      enabled: shouldFetch || Boolean(filter.accounts?.length),
     }),
   });
 
@@ -284,15 +286,18 @@ export function TransactionsSearchFilter() {
     }
   };
 
-  const hasValidFilters =
-    Object.entries(filter).filter(
-      ([key, value]) => value !== null && key !== "q",
-    ).length > 0;
+  const validFilters = Object.fromEntries(
+    Object.entries(filter).filter(([key]) => key !== "q"),
+  );
+
+  const hasValidFilters = Object.values(validFilters).some(
+    (value) => value !== null,
+  );
 
   const processFiltersForList = () => {
     return Object.fromEntries(
       Object.entries({
-        ...filter,
+        ...validFilters,
         start: filter.start ?? undefined,
         end: filter.end ?? undefined,
         amount_range: filter.amount_range
@@ -305,7 +310,6 @@ export function TransactionsSearchFilter() {
         assignees: filter.assignees ?? undefined,
         statuses: filter.statuses ?? undefined,
         recurring: filter.recurring ?? undefined,
-        q: filter.q ?? undefined,
       }).filter(([_, value]) => value !== undefined && value !== null),
     );
   };
@@ -364,15 +368,7 @@ export function TransactionsSearchFilter() {
         <FilterList
           filters={processFiltersForList()}
           loading={streaming}
-          onRemove={(filters) => {
-            // If the only filter is q, set it to null and clear the prompt
-            if ("q" in filters) {
-              setFilter({ q: null });
-              setPrompt("");
-            }
-
-            setFilter(filters);
-          }}
+          onRemove={setFilter}
           categories={categories}
           accounts={accounts}
           statusFilters={statusFilters}
