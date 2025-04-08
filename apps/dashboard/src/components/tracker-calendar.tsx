@@ -40,6 +40,10 @@ export function TrackerCalendar() {
   } = useTrackerParams();
 
   const [isDragging, setIsDragging] = useState(false);
+  const [localRange, setLocalRange] = useState<[string | null, string | null]>([
+    null,
+    null,
+  ]);
 
   const { calendarDays, firstWeek } = useCalendarDates(
     new TZDate(currentDate, "UTC"),
@@ -59,7 +63,7 @@ export function TrackerCalendar() {
 
   useHotkeys(
     "arrowLeft",
-    () => handleMonthChange(-1, new TZDate(currentDate, "UTC"), setParams),
+    () => handleMonthChange(-1, new TZDate(currentDate, "UTC")),
     {
       enabled: !selectedDate,
     },
@@ -67,7 +71,7 @@ export function TrackerCalendar() {
 
   useHotkeys(
     "arrowRight",
-    () => handleMonthChange(1, new TZDate(currentDate, "UTC"), setParams),
+    () => handleMonthChange(1, new TZDate(currentDate, "UTC")),
     {
       enabled: !selectedDate,
     },
@@ -79,30 +83,35 @@ export function TrackerCalendar() {
 
   const handleMouseDown = (date: TZDate) => {
     setIsDragging(true);
-    // setLocalRange([formatISO(date, { representation: "date" }), null]);
+    const formatted = formatISO(date, { representation: "date" });
+    setLocalRange([formatted, null]);
+    setParams({ selectedDate: null, range: null });
   };
 
   const handleMouseEnter = (date: TZDate) => {
-    if (isDragging) {
-      // setLocalRange((prev) => [
-      //   prev[0],
-      //   formatISO(date, { representation: "date" }),
-      // ]);
+    if (isDragging && localRange[0]) {
+      setLocalRange((prev) => [
+        prev[0],
+        formatISO(date, { representation: "date" }),
+      ]);
     }
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
-    // if (localRange[0] && localRange[1]) {
-    //   let start = new TZDate(localRange[0], "UTC");
-    //   let end = new TZDate(localRange[1], "UTC");
-    //   if (start > end) [start, end] = [end, start];
+    if (localRange[0] && localRange[1]) {
+      let start = new TZDate(localRange[0], "UTC");
+      let end = new TZDate(localRange[1], "UTC");
+      if (start > end) [start, end] = [end, start];
 
-    //   setParams({ range: [localRange[0], localRange[1]] });
-    // } else if (localRange[0]) {
-    //   setParams({ selectedDate: localRange[0] });
-    // }
-    // setLocalRange(["", null]);
+      const formattedStart = formatISO(start, { representation: "date" });
+      const formattedEnd = formatISO(end, { representation: "date" });
+
+      setParams({ range: [formattedStart, formattedEnd], selectedDate: null });
+    } else if (localRange[0]) {
+      setParams({ selectedDate: localRange[0], range: null });
+    }
+    setLocalRange([null, null]);
   };
 
   return (
@@ -115,8 +124,8 @@ export function TrackerCalendar() {
           currentDate={new TZDate(currentDate, "UTC")}
           selectedDate={selectedDate}
           data={data?.result}
-          // range={range}
-          // localRange={localRange}
+          range={range}
+          localRange={localRange}
           isDragging={isDragging}
           weekStartsOnMonday={weekStartsOnMonday}
           handleMouseDown={handleMouseDown}
@@ -156,11 +165,8 @@ function useCalendarDates(currentDate: TZDate, weekStartsOnMonday: boolean) {
   };
 }
 
-function handleMonthChange(
-  direction: number,
-  currentDate: TZDate,
-  setParams: (params: any) => void,
-) {
+function handleMonthChange(direction: number, currentDate: TZDate) {
+  const { setParams } = useTrackerParams();
   const newDate =
     direction > 0 ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
   setParams({
@@ -194,10 +200,10 @@ type CalendarGridProps = {
   firstWeek: TZDate[];
   calendarDays: TZDate[];
   currentDate: TZDate;
-  selectedDate: string;
-  data: RouterOutputs["tracker"]["recordsByRange"]["result"];
+  selectedDate: string | null;
+  data: RouterOutputs["tracker"]["recordsByRange"]["result"] | undefined;
   range: [string, string] | null;
-  localRange: [string, string | null];
+  localRange: [string | null, string | null];
   isDragging: boolean;
   weekStartsOnMonday: boolean;
   handleMouseDown: (date: TZDate) => void;
@@ -214,6 +220,7 @@ function CalendarGrid({
   range,
   localRange,
   isDragging,
+  weekStartsOnMonday,
   handleMouseDown,
   handleMouseEnter,
   handleMouseUp,
@@ -250,10 +257,10 @@ function CalendarGrid({
 type CalendarDayProps = {
   date: TZDate;
   currentDate: TZDate;
-  selectedDate: string;
-  data: RouterOutputs["tracker"]["recordsByRange"]["result"];
+  selectedDate: string | null;
+  data: RouterOutputs["tracker"]["recordsByRange"]["result"] | undefined;
   range: [string, string] | null;
-  localRange: [string, string | null];
+  localRange: [string | null, string | null];
   isDragging: boolean;
   handleMouseDown: (date: TZDate) => void;
   handleMouseEnter: (date: TZDate) => void;
@@ -274,6 +281,8 @@ function CalendarDay({
 }: CalendarDayProps) {
   const isCurrentMonth = date.getMonth() === currentDate.getMonth();
   const formattedDate = formatISO(date, { representation: "date" });
+
+  const dayData = data?.[formattedDate];
 
   const isInRange = useCallback(
     (date: TZDate) => checkIsInRange(date, isDragging, localRange, range),
@@ -311,7 +320,7 @@ function CalendarDay({
       )}
     >
       <div>{format(date, "d")}</div>
-      <TrackerEvents data={data?.[formattedDate]} isToday={isToday(date)} />
+      <TrackerEvents data={dayData} isToday={isToday(date)} />
     </div>
   );
 }
@@ -319,24 +328,22 @@ function CalendarDay({
 function checkIsInRange(
   date: TZDate,
   isDragging: boolean,
-  localRange: [string, string | null],
+  localRange: [string | null, string | null],
   range: [string, string] | null,
-) {
+): boolean {
   if (isDragging && localRange[0] && localRange[1]) {
     const start = new TZDate(localRange[0], "UTC");
     const end = new TZDate(localRange[1], "UTC");
-    return (
-      date >= new TZDate(Math.min(start.getTime(), end.getTime()), "UTC") &&
-      date <= new TZDate(Math.max(start.getTime(), end.getTime()), "UTC")
-    );
+    const minDate = new TZDate(Math.min(start.getTime(), end.getTime()), "UTC");
+    const maxDate = new TZDate(Math.max(start.getTime(), end.getTime()), "UTC");
+    return date > minDate && date < maxDate;
   }
-  if (range && range.length === 2) {
+  if (!isDragging && range && range.length === 2) {
     const start = new TZDate(range[0], "UTC");
     const end = new TZDate(range[1], "UTC");
-    return (
-      date >= new TZDate(Math.min(start.getTime(), end.getTime()), "UTC") &&
-      date <= new TZDate(Math.max(start.getTime(), end.getTime()), "UTC")
-    );
+    const minDate = new TZDate(Math.min(start.getTime(), end.getTime()), "UTC");
+    const maxDate = new TZDate(Math.max(start.getTime(), end.getTime()), "UTC");
+    return date > minDate && date < maxDate;
   }
   return false;
 }
@@ -344,9 +351,10 @@ function checkIsInRange(
 function checkIsFirstSelectedDate(
   date: TZDate,
   isDragging: boolean,
-  localRange: [string, string | null],
+  localRange: [string | null, string | null],
   range: [string, string] | null,
-) {
+): boolean {
+  const formattedDate = formatISO(date, { representation: "date" });
   if (isDragging && localRange[0]) {
     const start = new TZDate(localRange[0], "UTC");
     const end = localRange[1] ? new TZDate(localRange[1], "UTC") : start;
@@ -354,22 +362,16 @@ function checkIsFirstSelectedDate(
       Math.min(start.getTime(), end.getTime()),
       "UTC",
     );
-    return (
-      formatISO(date, { representation: "date" }) ===
-      formatISO(firstDate, { representation: "date" })
-    );
+    return formattedDate === formatISO(firstDate, { representation: "date" });
   }
-  if (range && range.length > 0) {
+  if (!isDragging && range && range.length === 2) {
     const start = new TZDate(range[0], "UTC");
     const end = new TZDate(range[1], "UTC");
     const firstDate = new TZDate(
       Math.min(start.getTime(), end.getTime()),
       "UTC",
     );
-    return (
-      formatISO(date, { representation: "date" }) ===
-      formatISO(firstDate, { representation: "date" })
-    );
+    return formattedDate === formatISO(firstDate, { representation: "date" });
   }
   return false;
 }
@@ -377,9 +379,10 @@ function checkIsFirstSelectedDate(
 function checkIsLastSelectedDate(
   date: TZDate,
   isDragging: boolean,
-  localRange: [string, string | null],
+  localRange: [string | null, string | null],
   range: [string, string] | null,
-) {
+): boolean {
+  const formattedDate = formatISO(date, { representation: "date" });
   if (isDragging && localRange[0] && localRange[1]) {
     const start = new TZDate(localRange[0], "UTC");
     const end = new TZDate(localRange[1], "UTC");
@@ -387,22 +390,16 @@ function checkIsLastSelectedDate(
       Math.max(start.getTime(), end.getTime()),
       "UTC",
     );
-    return (
-      formatISO(date, { representation: "date" }) ===
-      formatISO(lastDate, { representation: "date" })
-    );
+    return formattedDate === formatISO(lastDate, { representation: "date" });
   }
-  if (range && range.length === 2) {
+  if (!isDragging && range && range.length === 2) {
     const start = new TZDate(range[0], "UTC");
     const end = new TZDate(range[1], "UTC");
     const lastDate = new TZDate(
       Math.max(start.getTime(), end.getTime()),
       "UTC",
     );
-    return (
-      formatISO(date, { representation: "date" }) ===
-      formatISO(lastDate, { representation: "date" })
-    );
+    return formattedDate === formatISO(lastDate, { representation: "date" });
   }
   return false;
 }
