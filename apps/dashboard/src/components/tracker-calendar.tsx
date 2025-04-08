@@ -2,17 +2,12 @@
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
-import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
+import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { TZDate } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
 import NumberFlow from "@number-flow/react";
+import { useQuery } from "@tanstack/react-query";
 import { useClickAway } from "@uidotdev/usehooks";
 import {
   addMonths,
@@ -31,32 +26,35 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { TrackerEvents } from "./tracker-events";
 import { TrackerMonthSelect } from "./tracker-month-select";
 
-type Props = {
-  weekStartsOnMonday?: boolean;
-  timeFormat: number;
-};
+export function TrackerCalendar() {
+  const { data: user } = useUserQuery();
+  const trpc = useTRPC();
 
-export function TrackerCalendar({
-  weekStartsOnMonday = false,
-  timeFormat,
-  data,
-  meta,
-}: Props) {
+  const weekStartsOnMonday = user?.week_starts_on_monday ?? false;
+
   const {
     date: currentDate,
     range,
     setParams,
     selectedDate,
   } = useTrackerParams();
-  const [localRange, setLocalRange] = useState<[string, string | null]>([
-    "",
-    null,
-  ]);
+
   const [isDragging, setIsDragging] = useState(false);
 
   const { calendarDays, firstWeek } = useCalendarDates(
     new TZDate(currentDate, "UTC"),
     weekStartsOnMonday,
+  );
+
+  const { data } = useQuery(
+    trpc.tracker.recordsByRange.queryOptions({
+      from: formatISO(startOfMonth(new Date(currentDate)), {
+        representation: "date",
+      }),
+      to: formatISO(endOfMonth(new Date(currentDate)), {
+        representation: "date",
+      }),
+    }),
   );
 
   useHotkeys(
@@ -81,49 +79,44 @@ export function TrackerCalendar({
 
   const handleMouseDown = (date: TZDate) => {
     setIsDragging(true);
-    setLocalRange([formatISO(date, { representation: "date" }), null]);
+    // setLocalRange([formatISO(date, { representation: "date" }), null]);
   };
 
   const handleMouseEnter = (date: TZDate) => {
     if (isDragging) {
-      setLocalRange((prev) => [
-        prev[0],
-        formatISO(date, { representation: "date" }),
-      ]);
+      // setLocalRange((prev) => [
+      //   prev[0],
+      //   formatISO(date, { representation: "date" }),
+      // ]);
     }
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
-    if (localRange[0] && localRange[1]) {
-      let start = new TZDate(localRange[0], "UTC");
-      let end = new TZDate(localRange[1], "UTC");
-      if (start > end) [start, end] = [end, start];
+    // if (localRange[0] && localRange[1]) {
+    //   let start = new TZDate(localRange[0], "UTC");
+    //   let end = new TZDate(localRange[1], "UTC");
+    //   if (start > end) [start, end] = [end, start];
 
-      setParams({ range: [localRange[0], localRange[1]] });
-    } else if (localRange[0]) {
-      setParams({ selectedDate: localRange[0] });
-    }
-    setLocalRange(["", null]);
+    //   setParams({ range: [localRange[0], localRange[1]] });
+    // } else if (localRange[0]) {
+    //   setParams({ selectedDate: localRange[0] });
+    // }
+    // setLocalRange(["", null]);
   };
 
   return (
     <div ref={ref}>
       <div className="mt-8">
-        <CalendarHeader
-          meta={meta}
-          data={data}
-          timeFormat={timeFormat}
-          weekStartsOnMonday={weekStartsOnMonday}
-        />
+        <CalendarHeader totalDuration={data?.meta?.totalDuration} />
         <CalendarGrid
           firstWeek={firstWeek}
           calendarDays={calendarDays}
           currentDate={new TZDate(currentDate, "UTC")}
           selectedDate={selectedDate}
-          data={data}
-          range={range}
-          localRange={localRange}
+          data={data?.result}
+          // range={range}
+          // localRange={localRange}
           isDragging={isDragging}
           weekStartsOnMonday={weekStartsOnMonday}
           handleMouseDown={handleMouseDown}
@@ -176,133 +169,19 @@ function handleMonthChange(
 }
 
 type CalendarHeaderProps = {
-  meta: { totalDuration?: number };
-  data: Record<string, TrackerEvent[]>;
+  totalDuration?: number;
 };
 
-function CalendarHeader({ meta, data }: CalendarHeaderProps) {
-  const { data: user } = useUserQuery();
-
-  const projectTotals = Object.entries(data).reduce(
-    (acc, [_, events]) => {
-      for (const event of events) {
-        const projectName = event.project?.name;
-        if (projectName) {
-          if (!acc[projectName]) {
-            acc[projectName] = {
-              duration: 0,
-              amount: 0,
-              currency: event.project.currency,
-              rate: event.project.rate,
-            };
-          }
-          const project = acc[projectName];
-          project.duration += event.duration;
-          project.amount = (project.duration / 3600) * project.rate;
-        }
-      }
-      return acc;
-    },
-    {} as Record<
-      string,
-      { duration: number; amount: number; currency: string; rate: number }
-    >,
-  );
-
-  const sortedProjects = Object.entries(projectTotals)
-    .sort(([, a], [, b]) => b.duration - a.duration)
-    .map(([name, { duration, amount, currency }]) => ({
-      name,
-      duration,
-      amount,
-      currency,
-    }));
-
-  const mostUsedCurrency = Object.values(projectTotals).reduce(
-    (acc, { currency }) => {
-      if (currency !== null) {
-        acc[currency] = (acc[currency] || 0) + 1;
-      }
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
-
-  const dominantCurrency =
-    Object.entries(mostUsedCurrency).length > 0
-      ? Object.entries(mostUsedCurrency).reduce((a, b) =>
-          a[1] > b[1] ? a : b,
-        )[0]
-      : null;
-
+function CalendarHeader({ totalDuration }: CalendarHeaderProps) {
   return (
     <div className="flex items-center justify-between mb-6">
       <div className="space-y-2 select-text">
         <h1 className="text-4xl font-mono">
           <NumberFlow
-            value={
-              meta?.totalDuration ? Math.round(meta.totalDuration / 3600) : 0
-            }
+            value={totalDuration ? Math.round(totalDuration / 3600) : 0}
           />
           <span className="relative">h</span>
         </h1>
-
-        <div className="text-sm text-[#606060] flex items-center space-x-2">
-          <p className="text-sm text-[#606060]">
-            {dominantCurrency
-              ? `${formatAmount({
-                  currency: dominantCurrency,
-                  amount: meta?.totalAmount,
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                  locale: user?.locale,
-                })} this month`
-              : "Nothing billable yet"}
-          </p>
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger>
-                <Icons.Info className="h-4 w-4 mt-1" />
-              </TooltipTrigger>
-              <TooltipContent
-                className="text-xs text-[#878787] w-[250px] p-0 dark:bg-background"
-                side="bottom"
-                sideOffset={10}
-              >
-                <div>
-                  <div className="text-primary pb-2 border-b border-border px-4 pt-2">
-                    Breakdown
-                  </div>
-                  <ul className="space-y-2 flex flex-col p-4">
-                    {!Object.keys(projectTotals).length && (
-                      <span>No tracked time.</span>
-                    )}
-                    {sortedProjects.map((project) => (
-                      <li key={project.name} className="flex justify-between">
-                        <span>{project.name}</span>
-
-                        <div className="flex space-x-2 items-center">
-                          <span className="text-primary text-xs">
-                            {secondsToHoursAndMinutes(project.duration)}
-                          </span>
-                          <span className="text-primary text-xs">
-                            {formatAmount({
-                              currency: project.currency,
-                              amount: project.amount,
-                              minimumFractionDigits: 0,
-                              maximumFractionDigits: 0,
-                              locale: user?.locale,
-                            })}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
       </div>
       <div className="flex space-x-2">
         <TrackerMonthSelect dateFormat="MMMM" />
@@ -316,7 +195,7 @@ type CalendarGridProps = {
   calendarDays: TZDate[];
   currentDate: TZDate;
   selectedDate: string;
-  data: Record<string, TrackerEvent[]>;
+  data: RouterOutputs["tracker"]["recordsByRange"]["result"];
   range: [string, string] | null;
   localRange: [string, string | null];
   isDragging: boolean;
@@ -372,7 +251,7 @@ type CalendarDayProps = {
   date: TZDate;
   currentDate: TZDate;
   selectedDate: string;
-  data: Record<string, TrackerEvent[]>;
+  data: RouterOutputs["tracker"]["recordsByRange"]["result"];
   range: [string, string] | null;
   localRange: [string, string | null];
   isDragging: boolean;
@@ -432,7 +311,7 @@ function CalendarDay({
       )}
     >
       <div>{format(date, "d")}</div>
-      <TrackerEvents data={data[formattedDate]} isToday={isToday(date)} />
+      <TrackerEvents data={data?.[formattedDate]} isToday={isToday(date)} />
     </div>
   );
 }

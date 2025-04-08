@@ -1,88 +1,49 @@
 import { OpenTrackerSheet } from "@/components/open-tracker-sheet";
-import { Table } from "@/components/tables/tracker";
+import { DataTable } from "@/components/tables/tracker";
 import { Loading } from "@/components/tables/tracker/loading";
 import { TrackerCalendar } from "@/components/tracker-calendar";
 import { TrackerSearchFilter } from "@/components/tracker-search-filter";
-import {
-  getCustomers,
-  getTrackerRecordsByRange,
-  getUser,
-} from "@midday/supabase/cached-queries";
-import { endOfMonth, formatISO, startOfMonth } from "date-fns";
+import { loadSortParams } from "@/hooks/use-sort-params";
+import { loadUserTrackerFilterParams } from "@/hooks/user-tracker-filter-params";
+import { prefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { searchParamsCache } from "./search-params";
 
 export const metadata: Metadata = {
   title: "Tracker | Midday",
 };
 
 type Props = {
-  searchParams: Promise<{
-    statuses: string;
-    sort: string;
-    q: string;
-    start?: string;
-    end?: string;
-    customers?: string[];
-  }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function Tracker(props: Props) {
+export default async function Page(props: Props) {
   const searchParams = await props.searchParams;
-  const {
-    sort: sortParams,
-    statuses,
-    customers,
-  } = searchParamsCache.parse(searchParams);
+  const filter = loadUserTrackerFilterParams(searchParams);
+  const { sort } = loadSortParams(searchParams);
 
-  const sort = sortParams?.split(":") ?? ["status", "asc"];
-
-  const currentDate =
-    searchParams?.date ?? formatISO(new Date(), { representation: "date" });
-
-  const [{ data: userData }, { data, meta }, { data: customersData }] =
-    await Promise.all([
-      getUser(),
-      getTrackerRecordsByRange({
-        from: formatISO(startOfMonth(new Date(currentDate)), {
-          representation: "date",
-        }),
-        to: formatISO(endOfMonth(new Date(currentDate)), {
-          representation: "date",
-        }),
-      }),
-      getCustomers(),
-    ]);
+  prefetch(
+    trpc.trackerProjects.get.infiniteQueryOptions({
+      filter,
+      sort,
+    }),
+  );
 
   return (
     <div>
-      <TrackerCalendar
-        weekStartsOnMonday={userData?.week_starts_on_monday}
-        timeFormat={userData?.time_format}
-        data={data}
-        meta={meta}
-      />
+      <TrackerCalendar />
 
       <div className="mt-14 mb-6 flex items-center justify-between space-x-4">
         <h2 className="text-md font-medium">Projects</h2>
 
         <div className="flex space-x-2">
-          <TrackerSearchFilter customers={customersData} />
+          <TrackerSearchFilter />
           <OpenTrackerSheet />
         </div>
       </div>
 
       <Suspense fallback={<Loading />}>
-        <Table
-          status={statuses}
-          sort={sort}
-          q={searchParams?.q}
-          start={searchParams?.start}
-          end={searchParams?.end}
-          userId={userData?.id}
-          customerIds={customers}
-        />
+        <DataTable />
       </Suspense>
     </div>
   );
