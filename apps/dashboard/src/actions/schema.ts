@@ -347,31 +347,6 @@ export const filterInvoiceSchema = z.object({
     .describe("The customers to filter by"),
 });
 
-export const createCustomerSchema = z.object({
-  id: z.string().uuid().optional(),
-  name: z.string(),
-  email: z.string().email(),
-  country: z.string().nullable().optional(),
-  address_line_1: z.string().nullable().optional(),
-  address_line_2: z.string().nullable().optional(),
-  city: z.string().nullable().optional(),
-  state: z.string().nullable().optional(),
-  zip: z.string().nullable().optional(),
-  note: z.string().nullable().optional(),
-  website: z.string().nullable().optional(),
-  phone: z.string().nullable().optional(),
-  contact: z.string().nullable().optional(),
-  tags: z
-    .array(
-      z.object({
-        id: z.string().uuid(),
-        value: z.string(),
-      }),
-    )
-    .optional()
-    .nullable(),
-});
-
 export const inboxUploadSchema = z.array(
   z.object({
     mimetype: z.string(),

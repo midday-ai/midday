@@ -85,7 +85,7 @@ export function TransactionDetails() {
         // Optimistically update details view
         queryClient.setQueryData(
           trpc.transactions.getById.queryKey({ id: transactionId! }),
-          (old) => {
+          (old: any) => {
             if (variables.category_slug) {
               const categories = queryClient.getQueryData(
                 trpc.transactionCategories.get.queryKey(),

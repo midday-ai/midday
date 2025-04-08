@@ -27,9 +27,7 @@ import type {
 } from "@tanstack/react-table";
 import { memo, useCallback } from "react";
 
-type Transaction = NonNullable<
-  NonNullable<RouterOutputs["transactions"]["get"]>["data"]
->[number];
+type Transaction = RouterOutputs["transactions"]["get"]["data"][number];
 
 interface TableMeta<TData> extends ReactTableMeta<TData> {
   dateFormat?: string;

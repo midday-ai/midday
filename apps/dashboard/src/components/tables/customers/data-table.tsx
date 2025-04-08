@@ -7,6 +7,7 @@ import { useSortParams } from "@/hooks/use-sort-params";
 import { useTRPC } from "@/trpc/client";
 import { Table, TableBody } from "@midday/ui/table";
 import {
+  useMutation,
   useQueryClient,
   useSuspenseInfiniteQuery,
 } from "@tanstack/react-query";
@@ -29,6 +30,20 @@ export function DataTable() {
   const queryClient = useQueryClient();
   const { filter, hasFilters } = useCustomerFilterParams();
   const { params } = useSortParams();
+
+  const deleteCustomerMutation = useMutation(
+    trpc.customers.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.customers.get.infiniteQueryKey(),
+        });
+      },
+    }),
+  );
+
+  const handleDeleteCustomer = (id: string) => {
+    deleteCustomerMutation.mutate({ id });
+  };
 
   const deferredSearch = useDeferredValue(filter.q);
 
@@ -70,11 +85,12 @@ export function DataTable() {
 
   const table = useReactTable({
     data: tableData,
+    getRowId: (row) => row.id,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     meta: {
-      //   deleteCustomer: handleDeleteCustomer,
+      deleteCustomer: handleDeleteCustomer,
     },
   });
 
