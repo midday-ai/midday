@@ -1,11 +1,9 @@
 "use client";
 
-import { createProjectAction } from "@/actions/project/create-project-action";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerProjectsQuery } from "@midday/supabase/queries";
 import { Combobox } from "@midday/ui/combobox";
 import { useToast } from "@midday/ui/use-toast";
-import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -45,19 +43,19 @@ export function TrackerSelectProject({
     onSelect(selected);
   };
 
-  const createProject = useAction(createProjectAction, {
-    onSuccess: ({ data: project }) => {
-      onCreate?.(project);
-      handleSelect(project);
-    },
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
+  // const createProject = useAction(createProjectAction, {
+  //   onSuccess: ({ data: project }) => {
+  //     onCreate?.(project);
+  //     handleSelect(project);
+  //   },
+  //   onError: () => {
+  //     toast({
+  //       duration: 3500,
+  //       variant: "error",
+  //       title: "Something went wrong please try again.",
+  //     });
+  //   },
+  // });
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -98,7 +96,7 @@ export function TrackerSelectProject({
       options={data}
       value={value}
       isLoading={isLoading}
-      onCreate={(name) => createProject.execute({ name })}
+      // onCreate={(name) => createProject.execute({ name })}
     />
   );
 }

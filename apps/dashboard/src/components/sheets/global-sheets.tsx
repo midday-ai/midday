@@ -1,32 +1,32 @@
+"use client";
+
 import { AssistantModal } from "@/components/assistant/assistant-modal";
 import { ConnectTransactionsModal } from "@/components/modals/connect-transactions-modal";
 import { ImportModal } from "@/components/modals/import-modal";
 import { SelectBankAccountsModal } from "@/components/modals/select-bank-accounts";
-import { getCountryCode, getCurrency } from "@midday/location";
 import { uniqueCurrencies } from "@midday/location/currencies";
-import { getUser } from "@midday/supabase/cached-queries";
-import { Suspense } from "react";
+import { use } from "react";
 import { CustomerCreateSheet } from "./customer-create-sheet";
 import { CustomerEditSheet } from "./customer-edit-sheet";
-import { InvoiceCreateSheetServer } from "./invoice-create-sheet.server";
-import { TrackerSheetsServer } from "./tracker-sheets.server";
+import { TrackerCreateSheet } from "./tracker-create-sheet";
+import { TrackerScheduleSheet } from "./tracker-schedule-sheet";
+import { TrackerUpdateSheet } from "./tracker-update-sheet";
 import { TransactionSheet } from "./transaction-sheet";
 
-export async function GlobalSheets() {
-  const currency = await getCurrency();
-  const countryCode = await getCountryCode();
-  const { data: userData } = await getUser();
+type Props = {
+  currencyPromise: Promise<string>;
+  countryCodePromise: Promise<string>;
+};
+
+export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
+  const currency = use(currencyPromise);
+  const countryCode = use(countryCodePromise);
 
   return (
     <>
-      <Suspense fallback={null}>
-        <TrackerSheetsServer
-          teamId={userData?.team_id}
-          userId={userData?.id}
-          timeFormat={userData?.time_format}
-          defaultCurrency={currency}
-        />
-      </Suspense>
+      <TrackerUpdateSheet defaultCurrency={currency} />
+      <TrackerCreateSheet defaultCurrency={currency} />
+      <TrackerScheduleSheet defaultCurrency={currency} />
 
       <CustomerCreateSheet />
       <CustomerEditSheet />
@@ -37,10 +37,7 @@ export async function GlobalSheets() {
       <SelectBankAccountsModal />
       <ImportModal currencies={uniqueCurrencies} defaultCurrency={currency} />
 
-      <Suspense fallback={null}>
-        {/* We preload the invoice data (template, invoice number etc) */}
-        <InvoiceCreateSheetServer teamId={userData?.team_id} />
-      </Suspense>
+      {/* <InvoiceCreateSheetServer teamId={userData?.team_id} />  */}
     </>
   );
 }

@@ -554,24 +554,6 @@ export async function updateInboxById(
   return inbox;
 }
 
-type CreateProjectParams = {
-  name: string;
-  description?: string;
-  estimate?: number;
-  billable?: boolean;
-  rate?: number;
-  currency?: string;
-  customer_id?: string;
-  team_id: string;
-};
-
-export async function createProject(
-  supabase: Client,
-  params: CreateProjectParams,
-) {
-  return supabase.from("tracker_projects").insert(params).select().single();
-}
-
 type CreateTransactionCategoriesParams = {
   teamId: string;
   categories: {
@@ -991,51 +973,134 @@ export async function upsertCustomer(
         onConflict: "id",
       },
     )
-    .select("id, name")
+    .select("id, name, tags:customer_tags(id, tag:tags(id, name))")
     .single();
 
-  if (tags?.length) {
+  const customerId = result.data?.id;
+  const currentTags = result.data?.tags || [];
+
+  const currentTagIds = new Set(currentTags.map((ct) => ct.tag.id));
+  const inputTagIds = new Set(tags?.map((t) => t.id) || []);
+
+  // Tags to insert (in input but not current)
+  const tagsToInsert = tags?.filter((tag) => !currentTagIds.has(tag.id)) || [];
+
+  // Tag IDs to delete (in current but not input)
+  const tagIdsToDelete = currentTags
+    .filter((ct) => !inputTagIds.has(ct.tag.id))
+    .map((ct) => ct.tag.id);
+
+  // Perform inserts
+  if (tagsToInsert.length > 0) {
     await supabase.from("customer_tags").insert(
-      tags.map((tag) => ({
+      tagsToInsert.map((tag) => ({
         tag_id: tag.id,
-        customer_id: result?.data?.id!,
+        customer_id: customerId!,
         team_id: teamId,
       })),
     );
   }
 
+  // Perform deletes
+  if (tagIdsToDelete.length > 0) {
+    await supabase
+      .from("customer_tags")
+      .delete()
+      .eq("customer_id", customerId!)
+      .in("tag_id", tagIdsToDelete);
+  }
+
   return result;
 }
 
-type CreateCustomerTagParams = {
+type UpsertTrackerProjectParams = {
+  id?: string;
+  name: string;
+  description?: string | null;
+  estimate?: number | null;
+  billable?: boolean | null;
+  rate?: number | null;
+  currency?: string | null;
+  customer_id?: string | null;
   teamId: string;
-  customerId: string;
-  tagId: string;
+  tags?:
+    | {
+        id: string;
+        value: string;
+      }[]
+    | null;
 };
 
-export async function createCustomerTag(
+export async function upsertTrackerProject(
   supabase: Client,
-  params: CreateCustomerTagParams,
+  params: UpsertTrackerProjectParams,
 ) {
-  return supabase.from("customer_tags").insert({
-    customer_id: params.customerId,
-    tag_id: params.tagId,
-    team_id: params.teamId,
-  });
+  const { tags, teamId, ...projectData } = params;
+
+  const result = await supabase
+    .from("tracker_projects")
+    .upsert(
+      {
+        ...projectData,
+        team_id: teamId,
+      },
+      {
+        onConflict: "id",
+      },
+    )
+    .select("*, tags:tracker_project_tags(id, tag:tags(id, name))")
+    .single();
+
+  const projectId = result.data?.id;
+
+  // Get current tags for the project
+  const { data: currentTagsData } = await supabase
+    .from("tracker_project_tags")
+    .select("tag_id")
+    .eq("tracker_project_id", projectId!);
+
+  const currentTagIds = new Set(currentTagsData?.map((t) => t.tag_id) || []);
+  const inputTagIds = new Set(tags?.map((t) => t.id) || []);
+
+  // Tags to insert (in input but not current)
+  const tagsToInsert = tags?.filter((tag) => !currentTagIds.has(tag.id)) || [];
+
+  // Tag IDs to delete (in current but not input)
+  const tagIdsToDelete =
+    currentTagsData
+      ?.filter((tag) => !inputTagIds.has(tag.tag_id))
+      .map((t) => t.tag_id) || [];
+
+  // Perform inserts
+  if (tagsToInsert.length > 0) {
+    await supabase.from("tracker_project_tags").insert(
+      tagsToInsert.map((tag) => ({
+        tag_id: tag.id,
+        tracker_project_id: projectId!,
+        team_id: params.teamId,
+      })),
+    );
+  }
+
+  // Perform deletes
+  if (tagIdsToDelete.length > 0) {
+    await supabase
+      .from("tracker_project_tags")
+      .delete()
+      .eq("tracker_project_id", projectId!)
+      .in("tag_id", tagIdsToDelete);
+  }
+
+  return result;
 }
 
-type DeleteCustomerTagParams = {
-  customerId: string;
-  tagId: string;
+type DeleteTrackerProjectParams = {
+  id: string;
 };
 
-export async function deleteCustomerTag(
+export async function deleteTrackerProject(
   supabase: Client,
-  params: DeleteCustomerTagParams,
+  params: DeleteTrackerProjectParams,
 ) {
-  return supabase
-    .from("customer_tags")
-    .delete()
-    .eq("customer_id", params.customerId)
-    .eq("tag_id", params.tagId);
+  return supabase.from("tracker_projects").delete().eq("id", params.id);
 }

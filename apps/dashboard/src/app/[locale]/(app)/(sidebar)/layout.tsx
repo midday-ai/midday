@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/sidebar";
 import { TrialEnded } from "@/components/trial-ended.server";
 import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import { setupAnalytics } from "@midday/events/server";
+import { getCountryCode, getCurrency } from "@midday/location";
 import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -20,6 +21,8 @@ export default async function Layout({
   // NOTE: Right now we want to fetch the user and hydrate the client
   // Next steps would be to prefetch and suspense
   const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
+  const currencyPromise = getCurrency();
+  const countryCodePromise = getCountryCode();
 
   if (!user?.team) {
     redirect("/teams");
@@ -46,7 +49,10 @@ export default async function Layout({
           <ExportStatus />
 
           <Suspense>
-            <GlobalSheets />
+            <GlobalSheets
+              currencyPromise={currencyPromise}
+              countryCodePromise={countryCodePromise}
+            />
           </Suspense>
 
           <Suspense>

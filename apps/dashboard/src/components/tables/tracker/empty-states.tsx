@@ -8,8 +8,8 @@ export function EmptyState() {
   const { setParams } = useTrackerParams();
 
   return (
-    <div className="flex items-center justify-center ">
-      <div className="flex flex-col items-center mt-14">
+    <div className="flex items-center justify-center h-[350px]">
+      <div className="flex flex-col items-center -mt-20">
         <div className="text-center mb-6 space-y-2">
           <h2 className="font-medium text-lg">No projects</h2>
           <p className="text-[#606060] text-sm">
@@ -37,8 +37,8 @@ export function NoResults() {
   const { setFilter } = useTrackerFilterParams();
 
   return (
-    <div className="flex items-center justify-center ">
-      <div className="flex flex-col items-center mt-14">
+    <div className="flex items-center justify-center h-[350px]">
+      <div className="flex flex-col items-center -mt-20">
         <div className="text-center mb-6 space-y-2">
           <h2 className="font-medium text-lg">No results</h2>
           <p className="text-[#606060] text-sm">

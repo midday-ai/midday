@@ -93,6 +93,7 @@ type Props = {
 export function CustomerForm({ data }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const isEdit = !!data;
 
   const { setParams: setCustomerParams, name } = useCustomerParams();
   const { setParams: setInvoiceParams, invoiceId } = useInvoiceParams();
@@ -118,36 +119,6 @@ export function CustomerForm({ data }: Props) {
       },
     }),
   );
-
-  const customerTagsCreateMutation = useMutation(
-    trpc.customerTags.create.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.customers.get.infiniteQueryKey(),
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: trpc.customers.getById.queryKey(),
-        });
-      },
-    }),
-  );
-
-  const customerTagsDeleteMutation = useMutation(
-    trpc.customerTags.delete.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.customers.get.infiniteQueryKey(),
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: trpc.customers.getById.queryKey(),
-        });
-      },
-    }),
-  );
-
-  const isEdit = !!data;
 
   const form = useZodForm(formSchema, {
     defaultValues: {
@@ -497,53 +468,32 @@ export function CustomerForm({ data }: Props) {
                           label: tag.value,
                         }))}
                         onRemove={(tag) => {
-                          customerTagsDeleteMutation.mutate({
-                            tagId: tag.id,
-                            customerId: data?.id!,
-                          });
+                          form.setValue(
+                            "tags",
+                            form
+                              .getValues("tags")
+                              ?.filter((t) => t.id !== tag.id),
+                            {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            },
+                          );
                         }}
-                        // Only for create customers
-                        onCreate={(tag) => {
-                          if (!isEdit) {
-                            form.setValue(
-                              "tags",
-                              [
-                                ...(form.getValues("tags") ?? []),
-                                {
-                                  value: tag.value ?? "",
-                                  id: tag.id ?? "",
-                                },
-                              ],
-                              {
-                                shouldDirty: true,
-                                shouldValidate: true,
-                              },
-                            );
-                          }
-                        }}
-                        // Only for edit customers
                         onSelect={(tag) => {
-                          if (isEdit) {
-                            customerTagsCreateMutation.mutate({
-                              tagId: tag.id,
-                              customerId: data.id!,
-                            });
-                          } else {
-                            form.setValue(
-                              "tags",
-                              [
-                                ...(form.getValues("tags") ?? []),
-                                {
-                                  value: tag.value ?? "",
-                                  id: tag.id ?? "",
-                                },
-                              ],
+                          form.setValue(
+                            "tags",
+                            [
+                              ...(form.getValues("tags") ?? []),
                               {
-                                shouldDirty: true,
-                                shouldValidate: true,
+                                value: tag.value ?? "",
+                                id: tag.id ?? "",
                               },
-                            );
-                          }
+                            ],
+                            {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            },
+                          );
                         }}
                       />
 
