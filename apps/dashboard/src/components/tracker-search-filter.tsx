@@ -306,7 +306,7 @@ export function TrackerSearchFilter() {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Face className="mr-2 h-4 w-4" />
+              <Icons.Status className="mr-2 h-4 w-4" />
               <span>Tags</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>

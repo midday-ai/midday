@@ -1,4 +1,5 @@
 "use client";
+
 import { Skeleton } from "@midday/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { DataTableHeader } from "./data-table-header";

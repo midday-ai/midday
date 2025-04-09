@@ -872,19 +872,19 @@ export async function getInboxQuery(
   };
 }
 
-type GetTrackerProjectQueryParams = {
+type GetTrackerProjectByIdQueryParams = {
   teamId: string;
-  projectId: string;
+  id: string;
 };
 
-export async function getTrackerProjectQuery(
+export async function getTrackerProjectByIdQuery(
   supabase: Client,
-  params: GetTrackerProjectQueryParams,
+  params: GetTrackerProjectByIdQueryParams,
 ) {
   return supabase
     .from("tracker_projects")
     .select("*, tags:tracker_project_tags(id, tag:tags(id, name))")
-    .eq("id", params.projectId)
+    .eq("id", params.id)
     .eq("team_id", params.teamId)
     .single();
 }

@@ -143,26 +143,6 @@ export const updateInboxSchema = z.object({
 
 export type UpdateInboxFormValues = z.infer<typeof updateInboxSchema>;
 
-export const createProjectSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-  estimate: z.number().optional(),
-  billable: z.boolean().optional().default(false),
-  rate: z.number().min(1).optional(),
-  currency: z.string().optional(),
-  status: z.enum(["in_progress", "completed"]).optional(),
-  customer_id: z.string().uuid().nullable().optional(),
-  tags: z
-    .array(
-      z.object({
-        id: z.string().uuid(),
-        value: z.string(),
-      }),
-    )
-    .optional()
-    .nullable(),
-});
-
 export const updateProjectSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1).optional(),

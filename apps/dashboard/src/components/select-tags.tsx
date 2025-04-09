@@ -25,16 +25,9 @@ type Props = {
   onSelect?: (tag: Option) => void;
   onRemove?: (tag: Option) => void;
   onChange?: (tags: Option[]) => void;
-  onCreate?: (tag: Option) => void;
 };
 
-export function SelectTags({
-  tags,
-  onSelect,
-  onRemove,
-  onChange,
-  onCreate,
-}: Props) {
+export function SelectTags({ tags, onSelect, onRemove, onChange }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<Option[]>(tags ?? []);
   const [editingTag, setEditingTag] = useState<Option | null>(null);
@@ -46,6 +39,7 @@ export function SelectTags({
   const updateTagMutation = useMutation(
     trpc.tags.update.mutationOptions({
       onSuccess: () => {
+        setIsOpen(false);
         queryClient.invalidateQueries({
           queryKey: trpc.tags.get.queryKey(),
         });
@@ -71,11 +65,13 @@ export function SelectTags({
     }),
   );
 
-  const transformedTags = data?.map((tag) => ({
-    value: tag.id,
-    label: tag.name,
-    id: tag.id,
-  }));
+  const transformedTags = data
+    ?.map((tag) => ({
+      value: tag.id,
+      label: tag.name,
+      id: tag.id,
+    }))
+    .filter((tag) => !selected.some((s) => s.id === tag.id));
 
   const handleDelete = () => {
     if (editingTag) {
@@ -134,7 +130,6 @@ export function SelectTags({
                     };
 
                     setSelected([...selected, newTag]);
-                    onCreate?.(newTag);
                     onSelect?.(newTag);
                   }
                 },
