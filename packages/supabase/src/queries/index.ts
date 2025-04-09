@@ -1113,6 +1113,7 @@ export async function getCategoriesQuery(
     .select("id, name, color, slug, description, system, vat")
     .eq("team_id", teamId)
     .order("created_at", { ascending: false })
+    .order("name", { ascending: true })
     .range(0, limit);
 }
 

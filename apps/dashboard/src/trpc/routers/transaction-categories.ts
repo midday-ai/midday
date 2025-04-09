@@ -48,6 +48,9 @@ export const transactionCategoriesRouter = createTRPCRouter({
       z.array(
         z.object({
           name: z.string(),
+          color: z.string().optional(),
+          description: z.string().optional(),
+          vat: z.number().optional(),
         }),
       ),
     )
