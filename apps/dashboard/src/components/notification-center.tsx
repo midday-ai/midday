@@ -208,12 +208,12 @@ export function NotificationCenter() {
         <Button
           variant="outline"
           size="icon"
-          className="rounded-full w-8 h-8 flex items-center relative"
+          className="rounded-full w-8 h-8 md:w-9 md:h-9 flex items-center justify-center relative"
         >
           {hasUnseenNotifications && (
-            <div className="w-1.5 h-1.5 bg-[#FFD02B] rounded-full absolute top-0 right-0" />
+            <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#FFD02B] rounded-full absolute top-0 right-0" />
           )}
-          <Icons.Notifications size={16} />
+          <Icons.Notifications size={16} className="h-4 w-4 md:h-[18px] md:w-[18px]" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
