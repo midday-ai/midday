@@ -41,7 +41,6 @@ type Props = {
 export function TrackerEntriesForm({
   eventId,
   userId,
-  teamId,
   onCreate,
   projectId,
   start,
@@ -52,8 +51,6 @@ export function TrackerEntriesForm({
 }: Props) {
   const { projectId: selectedProjectId } = useTrackerParams();
   const { latestProjectId } = useLatestProjectId();
-
-  console.log(latestProjectId);
 
   const isUpdate = eventId && eventId !== NEW_EVENT_ID;
 
@@ -132,7 +129,6 @@ export function TrackerEntriesForm({
                       onSelectProject(project);
                     }
                   }}
-                  teamId={teamId}
                   selectedId={field.value}
                   onSelect={(selected) => {
                     if (selected) {

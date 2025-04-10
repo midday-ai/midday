@@ -29,7 +29,7 @@ export function getTrackerDates(
   return [new Date()];
 }
 
-export const formatHour = (hour: number, timeFormat: number) => {
+export const formatHour = (hour: number, timeFormat?: number | null) => {
   const date = new Date();
   date.setHours(hour, 0, 0, 0);
   return format(date, timeFormat === 12 ? "hh:mm a" : "HH:mm");
