@@ -1,5 +1,6 @@
 import { Buffer } from "node:buffer";
 import { ProviderError } from "@/utils/error";
+import { formatISO, subDays } from "date-fns";
 import * as jose from "jose";
 import xior, { type XiorInstance, type XiorRequestConfig } from "xior";
 import type { GetTransactionsRequest, ProviderParams } from "../types";
@@ -264,6 +265,11 @@ export class EnableBankingApi {
       {
         strategy: latest ? "default" : "longest",
         transaction_status: "BOOK",
+        ...(latest && {
+          date_from: formatISO(subDays(new Date(), 5), {
+            representation: "date",
+          }),
+        }),
       },
     );
   }
