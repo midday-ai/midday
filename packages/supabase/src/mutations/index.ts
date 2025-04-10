@@ -1102,5 +1102,51 @@ export async function deleteTrackerProject(
   supabase: Client,
   params: DeleteTrackerProjectParams,
 ) {
-  return supabase.from("tracker_projects").delete().eq("id", params.id);
+  return supabase
+    .from("tracker_projects")
+    .delete()
+    .eq("id", params.id)
+    .select("id")
+    .single();
+}
+
+type CreateTrackerEntriesParams = {
+  teamId: string;
+  entries: {
+    start: string;
+    stop: string;
+    dates: string[];
+    assigned_id: string;
+    project_id: string;
+    description?: string | null;
+    duration: number;
+  }[];
+};
+
+export async function createTrackerEntries(
+  supabase: Client,
+  params: CreateTrackerEntriesParams,
+) {
+  const data = params.entries.map((entry) => ({
+    ...entry,
+    team_id: params.teamId,
+  }));
+
+  return supabase
+    .from("tracker_entries")
+    .insert(data)
+    .select(
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
+    );
+}
+
+type DeleteTrackerEntryParams = {
+  id: string;
+};
+
+export async function deleteTrackerEntry(
+  supabase: Client,
+  params: DeleteTrackerEntryParams,
+) {
+  return supabase.from("tracker_entries").delete().eq("id", params.id);
 }

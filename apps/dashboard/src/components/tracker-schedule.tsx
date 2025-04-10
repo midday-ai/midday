@@ -1,7 +1,5 @@
 "use client";
 
-import { createTrackerEntriesAction } from "@/actions/create-tracker-entries-action";
-import { deleteTrackerEntryAction } from "@/actions/delete-tracker-entry";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import {
@@ -36,10 +34,9 @@ import {
   setMinutes,
   startOfDay,
 } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { TrackerRecordForm } from "./forms/tracker-record-form";
+import { TrackerEntriesForm } from "./forms/tracker-entries-form";
 import { TrackerDaySelect } from "./tracker-day-select";
 
 interface TrackerRecord {
@@ -93,42 +90,42 @@ export function TrackerSchedule({
     projectId ?? null,
   );
 
-  const createTrackerEntries = useAction(createTrackerEntriesAction, {
-    onSuccess: (result) => {
-      if (!result.data) return;
+  // const createTrackerEntries = useAction(createTrackerEntriesAction, {
+  //   onSuccess: (result) => {
+  //     if (!result.data) return;
 
-      setData((prevData) => {
-        const processedData = result?.data.map((event) =>
-          transformTrackerData(event, selectedDate),
-        );
-        return [
-          ...prevData.filter((event) => event.id !== NEW_EVENT_ID),
-          ...processedData,
-        ];
-      });
+  //     setData((prevData) => {
+  //       const processedData = result?.data.map((event) =>
+  //         transformTrackerData(event, selectedDate),
+  //       );
+  //       return [
+  //         ...prevData.filter((event) => event.id !== NEW_EVENT_ID),
+  //         ...processedData,
+  //       ];
+  //     });
 
-      setTotalDuration((prevTotalDuration) => {
-        const newEventsDuration = result.data.reduce((total, event) => {
-          const start = event.start
-            ? new Date(event.start)
-            : new Date(`${event.date || selectedDate}T09:00:00`);
-          const end = event.stop
-            ? new Date(event.stop)
-            : addSeconds(start, event.duration || 0);
-          return total + differenceInSeconds(end, start);
-        }, 0);
+  //     setTotalDuration((prevTotalDuration) => {
+  //       const newEventsDuration = result.data.reduce((total, event) => {
+  //         const start = event.start
+  //           ? new Date(event.start)
+  //           : new Date(`${event.date || selectedDate}T09:00:00`);
+  //         const end = event.stop
+  //           ? new Date(event.stop)
+  //           : addSeconds(start, event.duration || 0);
+  //         return total + differenceInSeconds(end, start);
+  //       }, 0);
 
-        return prevTotalDuration + newEventsDuration;
-      });
+  //       return prevTotalDuration + newEventsDuration;
+  //     });
 
-      const lastEvent = result.data.at(-1);
-      setSelectedEvent(
-        lastEvent ? transformTrackerData(lastEvent, selectedDate) : null,
-      );
-    },
-  });
+  //     const lastEvent = result.data.at(-1);
+  //     setSelectedEvent(
+  //       lastEvent ? transformTrackerData(lastEvent, selectedDate) : null,
+  //     );
+  //   },
+  // });
 
-  const deleteTrackerEntry = useAction(deleteTrackerEntryAction);
+  // const deleteTrackerEntry = useAction(deleteTrackerEntryAction);
 
   const sortedRange = range?.sort((a, b) => a.localeCompare(b));
 
@@ -175,7 +172,7 @@ export function TrackerSchedule({
 
   const handleDeleteEvent = (eventId: string) => {
     if (eventId !== NEW_EVENT_ID) {
-      deleteTrackerEntry.execute({ id: eventId });
+      // deleteTrackerEntry.execute({ id: eventId });
       setData((prevData) => prevData.filter((event) => event.id !== eventId));
       setSelectedEvent(null);
 
@@ -372,7 +369,7 @@ export function TrackerSchedule({
       duration: Math.max(0, differenceInSeconds(endDate, startDate)),
     };
 
-    createTrackerEntries.execute(newEvent);
+    // createTrackerEntries.execute(newEvent);
   };
 
   return (
@@ -502,10 +499,10 @@ export function TrackerSchedule({
         </div>
       </ScrollArea>
 
-      <TrackerRecordForm
+      <TrackerEntriesForm
         eventId={currentOrNewEvent?.id}
         onCreate={handleCreateEvent}
-        isSaving={createTrackerEntries.isExecuting}
+        // isSaving={createTrackerEntries.isExecuting}
         userId={userId}
         teamId={teamId}
         projectId={selectedProjectId}

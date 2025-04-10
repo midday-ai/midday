@@ -1,6 +1,7 @@
 "use client";
 
 import { TrackerProjectForm } from "@/components/forms/tracker-project-form";
+import { useLatestProjectId } from "@/hooks/use-latest-project-id";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useTRPC } from "@/trpc/client";
 import {
@@ -26,13 +27,13 @@ import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
-
 type Props = {
   defaultCurrency: string;
 };
 
 export function TrackerUpdateSheet({ defaultCurrency }: Props) {
   const { setParams, update, projectId } = useTrackerParams();
+  const { latestProjectId, setLatestProjectId } = useLatestProjectId();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
@@ -58,9 +59,13 @@ export function TrackerUpdateSheet({ defaultCurrency }: Props) {
     ),
   );
 
-  const deleteProjectMutation = useMutation(
+  const deleteTrackerProjectMutation = useMutation(
     trpc.trackerProjects.delete.mutationOptions({
-      onSuccess: () => {
+      onSuccess: (result) => {
+        if (result && result.id === latestProjectId) {
+          setLatestProjectId(null);
+        }
+
         setParams(null);
 
         queryClient.invalidateQueries({
@@ -113,7 +118,9 @@ export function TrackerUpdateSheet({ defaultCurrency }: Props) {
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => deleteProjectMutation.mutate({ id: projectId! })}
+            onClick={() =>
+              deleteTrackerProjectMutation.mutate({ id: projectId! })
+            }
           >
             Continue
           </AlertDialogAction>

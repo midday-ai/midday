@@ -1,3 +1,6 @@
+"use client";
+
+import { useLatestProjectId } from "@/hooks/use-latest-project-id";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { NEW_EVENT_ID } from "@/utils/tracker";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,7 +38,7 @@ type Props = {
   isSaving: boolean;
 };
 
-export function TrackerRecordForm({
+export function TrackerEntriesForm({
   eventId,
   userId,
   teamId,
@@ -48,6 +51,9 @@ export function TrackerRecordForm({
   isSaving,
 }: Props) {
   const { projectId: selectedProjectId } = useTrackerParams();
+  const { latestProjectId } = useLatestProjectId();
+
+  console.log(latestProjectId);
 
   const isUpdate = eventId && eventId !== NEW_EVENT_ID;
 
@@ -56,7 +62,7 @@ export function TrackerRecordForm({
     defaultValues: {
       id: eventId,
       assigned_id: userId,
-      project_id: selectedProjectId ?? undefined,
+      project_id: selectedProjectId ?? latestProjectId ?? undefined,
       start,
       end,
       description: description ?? undefined,
