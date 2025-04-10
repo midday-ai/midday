@@ -27,6 +27,7 @@ import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
+
 type Props = {
   defaultCurrency: string;
 };
@@ -66,7 +67,7 @@ export function TrackerUpdateSheet({ defaultCurrency }: Props) {
           setLatestProjectId(null);
         }
 
-        setParams(null);
+        setParams({ projectId: null, update: null });
 
         queryClient.invalidateQueries({
           queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
@@ -77,7 +78,10 @@ export function TrackerUpdateSheet({ defaultCurrency }: Props) {
 
   return (
     <AlertDialog>
-      <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
+      <Sheet
+        open={isOpen}
+        onOpenChange={() => setParams({ update: null, projectId: null })}
+      >
         <SheetContent>
           <SheetHeader className="mb-8 flex justify-between items-center flex-row">
             <h2 className="text-xl">Edit Project</h2>

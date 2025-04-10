@@ -5,11 +5,7 @@ import { Sheet, SheetContent } from "@midday/ui/sheet";
 import React from "react";
 import { TrackerSchedule } from "../tracker-schedule";
 
-type Props = {
-  defaultCurrency: string;
-};
-
-export function TrackerScheduleSheet({ defaultCurrency }: Props) {
+export function TrackerScheduleSheet() {
   const { setParams, projectId, range, selectedDate, update, create } =
     useTrackerParams();
 
@@ -19,9 +15,14 @@ export function TrackerScheduleSheet({ defaultCurrency }: Props) {
     (Boolean(projectId) || range?.length === 2 || Boolean(selectedDate));
 
   return (
-    <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={() =>
+        setParams({ projectId: null, range: null, selectedDate: null })
+      }
+    >
       <SheetContent>
-        <TrackerSchedule defaultCurrency={defaultCurrency} />
+        <TrackerSchedule />
       </SheetContent>
     </Sheet>
   );

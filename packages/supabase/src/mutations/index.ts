@@ -1110,31 +1110,35 @@ export async function deleteTrackerProject(
     .single();
 }
 
-type CreateTrackerEntriesParams = {
+type UpsertTrackerEntriesParams = {
+  id?: string;
   teamId: string;
-  entries: {
-    start: string;
-    stop: string;
-    dates: string[];
-    assigned_id: string;
-    project_id: string;
-    description?: string | null;
-    duration: number;
-  }[];
+  start: string;
+  stop: string;
+  dates: string[];
+  assigned_id: string;
+  project_id: string;
+  description?: string | null;
+  duration: number;
 };
 
-export async function createTrackerEntries(
+export async function upsertTrackerEntries(
   supabase: Client,
-  params: CreateTrackerEntriesParams,
+  params: UpsertTrackerEntriesParams,
 ) {
-  const data = params.entries.map((entry) => ({
-    ...entry,
-    team_id: params.teamId,
+  const { dates, teamId, id, ...rest } = params;
+
+  const entries = dates.map((date) => ({
+    ...rest,
+    date,
+    team_id: teamId,
   }));
 
   return supabase
     .from("tracker_entries")
-    .insert(data)
+    .upsert(entries, {
+      ignoreDuplicates: false,
+    })
     .select(
       "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
     );

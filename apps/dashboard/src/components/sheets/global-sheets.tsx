@@ -26,7 +26,7 @@ export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
     <>
       <TrackerUpdateSheet defaultCurrency={currency} />
       <TrackerCreateSheet defaultCurrency={currency} />
-      <TrackerScheduleSheet defaultCurrency={currency} />
+      <TrackerScheduleSheet />
 
       <CustomerCreateSheet />
       <CustomerEditSheet />

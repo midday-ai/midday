@@ -115,15 +115,19 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
             </span>
           </DataTableCell>
           <DataTableCell onClick={onClick} className="cursor-pointer">
-            <span className="text-sm">
-              {formatAmount({
-                currency: row.currency ?? "USD",
-                amount: row.total_amount ?? 0,
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-                locale: user?.locale,
-              })}
-            </span>
+            {row.currency ? (
+              <span className="text-sm">
+                {formatAmount({
+                  currency: row.currency,
+                  amount: row.total_amount ?? 0,
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                  locale: user?.locale,
+                })}
+              </span>
+            ) : (
+              "-"
+            )}
           </DataTableCell>
           <DataTableCell onClick={onClick} className="cursor-pointer">
             {row.description}

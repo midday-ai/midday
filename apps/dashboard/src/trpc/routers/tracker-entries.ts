@@ -1,19 +1,22 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import {
-  createTrackerEntries,
   deleteTrackerEntry,
+  upsertTrackerEntries,
 } from "@midday/supabase/mutations";
-import { getTagsQuery } from "@midday/supabase/queries";
+import { getTrackerRecordsByDateQuery } from "@midday/supabase/queries";
 import { z } from "zod";
 
 export const trackerEntriesRouter = createTRPCRouter({
-  get: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
-    const { data } = await getTagsQuery(supabase, teamId!);
+  byDate: protectedProcedure
+    .input(z.object({ date: z.string() }))
+    .query(async ({ ctx: { supabase, teamId }, input }) => {
+      return getTrackerRecordsByDateQuery(supabase, {
+        date: input.date,
+        teamId: teamId!,
+      });
+    }),
 
-    return data;
-  }),
-
-  createMany: protectedProcedure
+  upsert: protectedProcedure
     .input(
       z.object({
         id: z.string().optional(),
@@ -22,13 +25,13 @@ export const trackerEntriesRouter = createTRPCRouter({
         dates: z.array(z.string()),
         assigned_id: z.string(),
         project_id: z.string(),
-        description: z.string().optional(),
+        description: z.string().optional().nullable(),
         duration: z.number(),
       }),
     )
     .mutation(async ({ ctx: { supabase, teamId }, input }) => {
-      const { data } = await createTrackerEntries(supabase, {
-        entries: [input],
+      const { data } = await upsertTrackerEntries(supabase, {
+        ...input,
         teamId: teamId!,
       });
 
