@@ -1,6 +1,5 @@
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { UTCDate } from "@date-fns/utc";
-import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import {
@@ -35,8 +34,6 @@ export function TrackerExportCSV({ name, teamId, projectId }: Props) {
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
-
-  const supabase = createClient();
 
   async function downloadCSV() {
     const query = supabase

@@ -1,11 +1,11 @@
 "use client";
 
-import { deleteProjectAction } from "@/actions/project/delete-project-action";
-import { TrackerExportCSV } from "@/components/tracker-export-csv";
+// import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
 import {
@@ -31,8 +31,6 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea, ScrollBar } from "@midday/ui/scroll-area";
 import { TableCell, TableRow } from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
-import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 
 type DataTableCellProps = {
@@ -62,24 +60,14 @@ export function Row({ children }: RowProps) {
 }
 
 type DataTableRowProps = {
-  row: TrackerProject;
+  row: RouterOutputs["trackerProjects"]["get"]["data"][number];
+  onDelete: ({ id }: { id: string }) => void;
 };
 
-export function DataTableRow({ row }: DataTableRowProps) {
-  const { toast } = useToast();
+export function DataTableRow({ row, onDelete }: DataTableRowProps) {
   const { setParams } = useTrackerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
   const { data: user } = useUserQuery();
-
-  const deleteAction = useAction(deleteProjectAction, {
-    onError: () => {
-      toast({
-        duration: 2500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
 
   const onClick = () => {
     setParams({
@@ -122,15 +110,15 @@ export function DataTableRow({ row }: DataTableRowProps) {
           <DataTableCell onClick={onClick} className="cursor-pointer">
             <span className="text-sm">
               {row.estimate
-                ? `${secondsToHoursAndMinutes(row.total_duration)} / ${secondsToHoursAndMinutes(row.estimate * 3600)}`
-                : secondsToHoursAndMinutes(row?.total_duration)}
+                ? `${secondsToHoursAndMinutes(row.total_duration ?? 0)} / ${secondsToHoursAndMinutes(row.estimate * 3600)}`
+                : secondsToHoursAndMinutes(row?.total_duration ?? 0)}
             </span>
           </DataTableCell>
           <DataTableCell onClick={onClick} className="cursor-pointer">
             <span className="text-sm">
               {formatAmount({
-                currency: row.currency,
-                amount: row.total_amount,
+                currency: row.currency ?? "USD",
+                amount: row.total_amount ?? 0,
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
                 locale: user?.locale,
@@ -164,6 +152,7 @@ export function DataTableRow({ row }: DataTableRowProps) {
           </DataTableCell>
           <DataTableCell onClick={onClick} className="cursor-pointer">
             <div className="flex items-center space-x-2">
+              {/* @ts-expect-error */}
               {row.users?.map((user) => (
                 <Avatar key={user.user_id} className="size-4">
                   <AvatarImageNext
@@ -200,9 +189,7 @@ export function DataTableRow({ row }: DataTableRowProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteAction.execute({ id: row.id })}
-            >
+            <AlertDialogAction onClick={() => onDelete({ id: row.id })}>
               Continue
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -221,24 +208,18 @@ export function DataTableRow({ row }: DataTableRowProps) {
                 selectedCustomerId: row.customer?.id,
                 type: "create",
                 currency: row.currency,
-                lineItems: [
-                  {
-                    name: row.name,
-                    price: row.rate ?? 0,
-                    quantity: 1,
-                  },
-                ],
+                lineItems: {
+                  name: row.name,
+                  price: row.rate ?? 0,
+                  quantity: 1,
+                },
               })
             }
           >
             Create invoice
           </DropdownMenuItem>
 
-          <TrackerExportCSV
-            name={row.name}
-            projectId={row.id}
-            teamId={row.team_id}
-          />
+          {/* <TrackerExportCSV name={row.name} projectId={row.id} /> */}
 
           <DropdownMenuSeparator />
 

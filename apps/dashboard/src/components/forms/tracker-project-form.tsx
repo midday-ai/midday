@@ -3,6 +3,7 @@
 import { SearchCustomers } from "@/components/search-customers";
 import { SelectTags } from "@/components/select-tags";
 import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useLatestProjectId } from "@/hooks/use-latest-project-id";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
@@ -65,10 +66,13 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
   const queryClient = useQueryClient();
   const { setParams: setTrackerParams } = useTrackerParams();
   const { setParams: setCustomerParams } = useCustomerParams();
+  const { setLatestProjectId } = useLatestProjectId();
 
   const upsertTrackerProjectMutation = useMutation(
     trpc.trackerProjects.upsert.mutationOptions({
-      onSuccess: () => {
+      onSuccess: (result) => {
+        setLatestProjectId(result?.id ?? null);
+
         queryClient.invalidateQueries({
           queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
         });
