@@ -51,9 +51,9 @@ export async function Trial() {
   const isTrialEnded = daysLeft <= 0;
 
   const canChooseStarterPlan = await canChooseStarterPlanQuery(team.id);
-  const targetDate = new UTCDate("2025-04-15");
+  const targetDate = new UTCDate("2025-04-16");
 
-  // If the team was created before March 1st 2025, show the trial until April 15th 2025
+  // If the team was created before March 1st 2025, show the trial until April 16th 2025
   if (
     new Date(team.created_at) < new Date("2025-03-01") &&
     targetDate > today
@@ -69,7 +69,7 @@ export async function Trial() {
         teamId={team.id}
         canChooseStarterPlan={canChooseStarterPlan}
       >
-        Pro trial - {daysToLaunch} days left
+        Pro trial - {daysToLaunch} {daysToLaunch === 1 ? "day" : "days"} left
       </ChoosePlanButton>
     );
   }
@@ -97,7 +97,7 @@ export async function Trial() {
       teamId={team.id}
       canChooseStarterPlan={canChooseStarterPlan}
     >
-      Pro trial - {daysLeft} days left
+      Pro trial - {daysLeft} {daysLeft === 1 ? "day" : "days"} left
     </ChoosePlanButton>
   );
 }
