@@ -1,13 +1,13 @@
 "use client";
 
-import { createClient } from "@midday/supabase/client";
-import { getTrackerProjectsQuery } from "@midday/supabase/queries";
+import { useLatestProjectId } from "@/hooks/use-latest-project-id";
+import { useTRPC } from "@/trpc/client";
 import { Combobox } from "@midday/ui/combobox";
 import { useToast } from "@midday/ui/use-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 type Props = {
-  teamId: string;
   selectedId?: string;
   onSelect: (selected: Option) => void;
   onCreate: (project: { id: string; name: string }) => void;
@@ -19,72 +19,68 @@ type Option = {
 };
 
 export function TrackerSelectProject({
-  teamId,
   selectedId,
   onSelect,
   onCreate,
 }: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
-  const supabase = createClient();
-  const [data, setData] = useState([]);
-  const [isLoading, setLoading] = useState(false);
   const [value, setValue] = useState<Option | undefined>();
+  const { setLatestProjectId } = useLatestProjectId();
+
+  const { data, isLoading, refetch } = useQuery(
+    trpc.trackerProjects.get.queryOptions({
+      pageSize: 100,
+    }),
+  );
+
+  const upsertTrackerProjectMutation = useMutation(
+    trpc.trackerProjects.upsert.mutationOptions({
+      onSuccess: (result) => {
+        if (result) {
+          onCreate(result);
+          handleSelect(result);
+          setLatestProjectId(result?.id ?? null);
+          refetch();
+
+          queryClient.invalidateQueries({
+            queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
+          });
+        }
+      },
+      onError: () => {
+        toast({
+          duration: 3500,
+          variant: "error",
+          title: "Something went wrong please try again.",
+        });
+      },
+    }),
+  );
+
+  const options =
+    data?.data.map((project) => ({
+      id: project.id,
+      name: project.customer?.name
+        ? `${project.name} · ${project.customer.name}`
+        : project.name,
+    })) ?? [];
 
   useEffect(() => {
-    const foundProject = data?.find((project) => project?.id === selectedId);
+    const foundProject = options?.find((project) => project?.id === selectedId);
 
     if (foundProject) {
       setValue({ id: foundProject.id, name: foundProject.name });
     }
-  }, [selectedId]);
+  }, [selectedId, data]);
 
-  const handleSelect = (selected: Option) => {
-    setValue(selected);
-    onSelect(selected);
-  };
-
-  // const createProject = useAction(createProjectAction, {
-  //   onSuccess: ({ data: project }) => {
-  //     onCreate?.(project);
-  //     handleSelect(project);
-  //   },
-  //   onError: () => {
-  //     toast({
-  //       duration: 3500,
-  //       variant: "error",
-  //       title: "Something went wrong please try again.",
-  //     });
-  //   },
-  // });
-
-  const fetchProjects = async () => {
-    setLoading(true);
-
-    const { data: projectsData } = await getTrackerProjectsQuery(supabase, {
-      teamId,
-      sort: ["status", "asc"],
-    });
-
-    setLoading(false);
-    setData(projectsData);
-
-    const foundProject = projectsData.find(
-      (project) => project?.id === selectedId,
-    );
-
-    if (foundProject) {
-      setValue({
-        id: foundProject.id,
-        name: foundProject.customer?.name
-          ? `${foundProject.name} · ${foundProject.customer.name}`
-          : foundProject.name,
-      });
+  const handleSelect = (selected?: Option) => {
+    if (selected) {
+      setValue(selected);
+      onSelect(selected);
     }
   };
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
 
   return (
     <Combobox
@@ -93,10 +89,14 @@ export function TrackerSelectProject({
       classNameList="-top-[4px] border-t-0 rounded-none rounded-b-md"
       className="w-full bg-transparent px-12 border py-3"
       onSelect={handleSelect}
-      options={data}
+      options={options}
       value={value}
       isLoading={isLoading}
-      // onCreate={(name) => createProject.execute({ name })}
+      onCreate={(name) => {
+        if (name) {
+          upsertTrackerProjectMutation.mutate({ name });
+        }
+      }}
     />
   );
 }

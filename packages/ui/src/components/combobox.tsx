@@ -16,7 +16,6 @@ export type Option = Record<"id" | "name", string> & Record<string, string>;
 
 type ComboboxProps = {
   options: Option[];
-  emptyMessage: string;
   value?: Option;
   onSelect?: (value?: Option) => void;
   onCreate?: (value?: string) => void;

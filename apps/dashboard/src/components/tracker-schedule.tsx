@@ -1,6 +1,7 @@
 "use client";
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import {
   NEW_EVENT_ID,
@@ -12,8 +13,6 @@ import {
   transformTrackerData,
   updateEventTime,
 } from "@/utils/tracker";
-import { createClient } from "@midday/supabase/client";
-import { getTrackerRecordsByDateQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
 import {
   ContextMenu,
@@ -54,21 +53,12 @@ const ROW_HEIGHT = 36;
 const SLOT_HEIGHT = 9;
 
 type Props = {
-  teamId: string;
-  userId: string;
-  timeFormat: number;
-  projectId?: string;
+  defaultCurrency: string;
 };
 
-export function TrackerSchedule({
-  teamId,
-  userId,
-  timeFormat,
-  projectId,
-}: Props) {
-  const supabase = createClient();
-
+export function TrackerSchedule({ defaultCurrency }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { data: user } = useUserQuery();
   const { selectedDate, range } = useTrackerParams();
   const [selectedEvent, setSelectedEvent] = useState<TrackerRecord | null>(
     null,
@@ -87,7 +77,7 @@ export function TrackerSchedule({
   const [moveStartY, setMoveStartY] = useState(0);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    projectId ?? null,
+    null,
   );
 
   // const createTrackerEntries = useAction(createTrackerEntriesAction, {
@@ -129,31 +119,31 @@ export function TrackerSchedule({
 
   const sortedRange = range?.sort((a, b) => a.localeCompare(b));
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const trackerData = await getTrackerRecordsByDateQuery(supabase, {
-        teamId,
-        userId,
-        date: selectedDate,
-      });
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const trackerData = await getTrackerRecordsByDateQuery(supabase, {
+  //       teamId,
+  //       userId,
+  //       date: selectedDate,
+  //     });
 
-      if (trackerData?.data) {
-        const processedData = trackerData.data.map((event: any) =>
-          transformTrackerData(event, selectedDate),
-        );
+  //     if (trackerData?.data) {
+  //       const processedData = trackerData.data.map((event: any) =>
+  //         transformTrackerData(event, selectedDate),
+  //       );
 
-        setData(processedData);
-        setTotalDuration(trackerData.meta?.totalDuration || 0);
-      } else {
-        setData([]);
-        setTotalDuration(0);
-      }
-    };
+  //       setData(processedData);
+  //       setTotalDuration(trackerData.meta?.totalDuration || 0);
+  //     } else {
+  //       setData([]);
+  //       setTotalDuration(0);
+  //     }
+  //   };
 
-    if (selectedDate) {
-      fetchData();
-    }
-  }, [selectedDate, teamId]);
+  //   if (selectedDate) {
+  //     fetchData();
+  //   }
+  // }, [selectedDate, teamId]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -350,7 +340,7 @@ export function TrackerSchedule({
     project_id: string;
     description?: string;
   }) => {
-    const dates = getDates(selectedDate, sortedRange);
+    const dates = getDates(selectedDate, sortedRange ?? null);
     const baseDate =
       dates[0] || selectedDate || format(new Date(), "yyyy-MM-dd");
 
@@ -362,7 +352,7 @@ export function TrackerSchedule({
       start: startDate.toISOString(),
       stop: endDate.toISOString(),
       dates,
-      team_id: teamId,
+      // team_id: teamId,
       assigned_id: values.assigned_id,
       project_id: values.project_id,
       description: values.description || "",
@@ -391,7 +381,7 @@ export function TrackerSchedule({
                 className="pr-4 flex font-mono flex-col"
                 style={{ height: `${ROW_HEIGHT}px` }}
               >
-                {formatHour(hour, timeFormat)}
+                {formatHour(hour, user?.time_format)}
               </div>
             ))}
           </div>
@@ -503,8 +493,8 @@ export function TrackerSchedule({
         eventId={currentOrNewEvent?.id}
         onCreate={handleCreateEvent}
         // isSaving={createTrackerEntries.isExecuting}
-        userId={userId}
-        teamId={teamId}
+        userId={user?.id}
+        // teamId={teamId}
         projectId={selectedProjectId}
         description={currentOrNewEvent?.description}
         start={
