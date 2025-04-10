@@ -2,6 +2,8 @@
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import {
   NEW_EVENT_ID,
@@ -22,12 +24,13 @@ import {
   ContextMenuTrigger,
 } from "@midday/ui/context-menu";
 import { ScrollArea } from "@midday/ui/scroll-area";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addMinutes,
-  addSeconds,
   differenceInSeconds,
   endOfDay,
   format,
+  parse,
   parseISO,
   setHours,
   setMinutes,
@@ -38,25 +41,16 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { TrackerEntriesForm } from "./forms/tracker-entries-form";
 import { TrackerDaySelect } from "./tracker-day-select";
 
-interface TrackerRecord {
-  id: string;
-  start: Date;
-  end: Date;
-  project: {
-    id: string;
-    name: string;
-  };
-  description?: string;
-}
+type TrackerRecord = NonNullable<
+  RouterOutputs["trackerEntries"]["byDate"]["data"]
+>[number];
 
 const ROW_HEIGHT = 36;
 const SLOT_HEIGHT = 9;
 
-type Props = {
-  defaultCurrency: string;
-};
-
-export function TrackerSchedule({ defaultCurrency }: Props) {
+export function TrackerSchedule() {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const scrollRef = useRef<HTMLDivElement>(null);
   const { data: user } = useUserQuery();
   const { selectedDate, range } = useTrackerParams();
@@ -80,70 +74,60 @@ export function TrackerSchedule({ defaultCurrency }: Props) {
     null,
   );
 
-  // const createTrackerEntries = useAction(createTrackerEntriesAction, {
-  //   onSuccess: (result) => {
-  //     if (!result.data) return;
+  const { data: trackerData, refetch } = useQuery(
+    trpc.trackerEntries.byDate.queryOptions(
+      {
+        date: selectedDate ?? "",
+      },
+      {
+        enabled: !!selectedDate,
+      },
+    ),
+  );
 
-  //     setData((prevData) => {
-  //       const processedData = result?.data.map((event) =>
-  //         transformTrackerData(event, selectedDate),
-  //       );
-  //       return [
-  //         ...prevData.filter((event) => event.id !== NEW_EVENT_ID),
-  //         ...processedData,
-  //       ];
-  //     });
+  const deleteTrackerEntry = useMutation(
+    trpc.trackerEntries.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.tracker.recordsByRange.queryKey(),
+        });
 
-  //     setTotalDuration((prevTotalDuration) => {
-  //       const newEventsDuration = result.data.reduce((total, event) => {
-  //         const start = event.start
-  //           ? new Date(event.start)
-  //           : new Date(`${event.date || selectedDate}T09:00:00`);
-  //         const end = event.stop
-  //           ? new Date(event.stop)
-  //           : addSeconds(start, event.duration || 0);
-  //         return total + differenceInSeconds(end, start);
-  //       }, 0);
+        refetch();
+      },
+    }),
+  );
 
-  //       return prevTotalDuration + newEventsDuration;
-  //     });
+  const upsertTrackerEntry = useMutation(
+    trpc.trackerEntries.upsert.mutationOptions({
+      onSuccess: (result) => {
+        if (result) {
+          // setSelectedEvent(result.at(-1));
 
-  //     const lastEvent = result.data.at(-1);
-  //     setSelectedEvent(
-  //       lastEvent ? transformTrackerData(lastEvent, selectedDate) : null,
-  //     );
-  //   },
-  // });
+          queryClient.invalidateQueries({
+            queryKey: trpc.tracker.recordsByRange.queryKey(),
+          });
 
-  // const deleteTrackerEntry = useAction(deleteTrackerEntryAction);
+          refetch();
+        }
+      },
+    }),
+  );
 
   const sortedRange = range?.sort((a, b) => a.localeCompare(b));
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     const trackerData = await getTrackerRecordsByDateQuery(supabase, {
-  //       teamId,
-  //       userId,
-  //       date: selectedDate,
-  //     });
+  useEffect(() => {
+    if (trackerData) {
+      const processedData = trackerData.data?.map((event) =>
+        transformTrackerData(event, selectedDate),
+      );
 
-  //     if (trackerData?.data) {
-  //       const processedData = trackerData.data.map((event: any) =>
-  //         transformTrackerData(event, selectedDate),
-  //       );
-
-  //       setData(processedData);
-  //       setTotalDuration(trackerData.meta?.totalDuration || 0);
-  //     } else {
-  //       setData([]);
-  //       setTotalDuration(0);
-  //     }
-  //   };
-
-  //   if (selectedDate) {
-  //     fetchData();
-  //   }
-  // }, [selectedDate, teamId]);
+      setData(processedData ?? []);
+      setTotalDuration(trackerData.meta?.totalDuration || 0);
+    } else {
+      setData([]);
+      setTotalDuration(0);
+    }
+  }, [trackerData]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -162,7 +146,8 @@ export function TrackerSchedule({ defaultCurrency }: Props) {
 
   const handleDeleteEvent = (eventId: string) => {
     if (eventId !== NEW_EVENT_ID) {
-      // deleteTrackerEntry.execute({ id: eventId });
+      deleteTrackerEntry.mutate({ id: eventId });
+
       setData((prevData) => prevData.filter((event) => event.id !== eventId));
       setSelectedEvent(null);
 
@@ -352,14 +337,35 @@ export function TrackerSchedule({ defaultCurrency }: Props) {
       start: startDate.toISOString(),
       stop: endDate.toISOString(),
       dates,
-      // team_id: teamId,
       assigned_id: values.assigned_id,
       project_id: values.project_id,
-      description: values.description || "",
+      description: values.description ?? null,
       duration: Math.max(0, differenceInSeconds(endDate, startDate)),
     };
 
-    // createTrackerEntries.execute(newEvent);
+    upsertTrackerEntry.mutate(newEvent);
+  };
+
+  const handleTimeChange = ({ start, end }: { start: string; end: string }) => {
+    if (currentOrNewEvent) {
+      const baseDate = selectedDate || format(new Date(), "yyyy-MM-dd");
+      const startDate = parse(start, "HH:mm", new Date(`${baseDate}T00:00:00`));
+      const endDate = parse(end, "HH:mm", new Date(`${baseDate}T00:00:00`));
+
+      setData((prevData) =>
+        prevData.map((event) =>
+          event.id === currentOrNewEvent.id
+            ? { ...event, start: startDate, end: endDate }
+            : event,
+        ),
+      );
+
+      setSelectedEvent((prev) =>
+        prev && prev.id === currentOrNewEvent.id
+          ? { ...prev, start: startDate, end: endDate }
+          : prev,
+      );
+    }
   };
 
   return (
@@ -490,11 +496,10 @@ export function TrackerSchedule({ defaultCurrency }: Props) {
       </ScrollArea>
 
       <TrackerEntriesForm
-        eventId={currentOrNewEvent?.id}
+        eventId={currentOrNewEvent?.id ?? undefined}
         onCreate={handleCreateEvent}
         // isSaving={createTrackerEntries.isExecuting}
         userId={user?.id}
-        // teamId={teamId}
         projectId={selectedProjectId}
         description={currentOrNewEvent?.description}
         start={
@@ -521,6 +526,7 @@ export function TrackerSchedule({ defaultCurrency }: Props) {
             );
           }
         }}
+        onTimeChange={handleTimeChange}
       />
     </div>
   );

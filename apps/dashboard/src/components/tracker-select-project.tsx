@@ -77,6 +77,7 @@ export function TrackerSelectProject({
 
   const handleSelect = (selected?: Option) => {
     if (selected) {
+      setLatestProjectId(selected?.id);
       setValue(selected);
       onSelect(selected);
     }

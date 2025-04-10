@@ -36,6 +36,7 @@ type Props = {
   onSelectProject: (selected: { id: string; name: string }) => void;
   description?: string;
   isSaving: boolean;
+  onTimeChange: (time: { start: string; end: string }) => void;
 };
 
 export function TrackerEntriesForm({
@@ -48,6 +49,7 @@ export function TrackerEntriesForm({
   onSelectProject,
   description,
   isSaving,
+  onTimeChange,
 }: Props) {
   const { projectId: selectedProjectId } = useTrackerParams();
   const { latestProjectId } = useLatestProjectId();
@@ -113,6 +115,7 @@ export function TrackerEntriesForm({
           onChange={(value) => {
             form.setValue("start", value.start);
             form.setValue("end", value.end);
+            onTimeChange(value);
           }}
         />
 
@@ -150,9 +153,9 @@ export function TrackerEntriesForm({
               <FormControl>
                 <AssignUser
                   selectedId={form.watch("assigned_id")}
-                  onSelect={(assignedId: string) => {
-                    if (assignedId) {
-                      field.onChange(assignedId);
+                  onSelect={(user) => {
+                    if (user?.id) {
+                      field.onChange(user.id);
                     }
                   }}
                 />

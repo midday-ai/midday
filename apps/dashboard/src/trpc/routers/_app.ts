@@ -10,6 +10,7 @@ import { metricsRouter } from "./metrics";
 import { tagsRouter } from "./tags";
 import { teamRouter } from "./team";
 import { trackerRouter } from "./tracker";
+import { trackerEntriesRouter } from "./tracker-entries";
 import { trackerProjectsRouter } from "./tracker-projects";
 import { transactionAttachmentsRouter } from "./transaction-attachments";
 import { transactionCategoriesRouter } from "./transaction-categories";
@@ -36,6 +37,7 @@ export const appRouter = createTRPCRouter({
   customers: customersRouter,
   trackerProjects: trackerProjectsRouter,
   transactionTags: transactionTagsRouter,
+  trackerEntries: trackerEntriesRouter,
 });
 
 // export type definition of API
