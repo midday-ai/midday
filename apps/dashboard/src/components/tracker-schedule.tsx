@@ -29,7 +29,8 @@ import {
   addMinutes,
   differenceInSeconds,
   endOfDay,
-  format,
+  isAfter,
+  isValid,
   parse,
   parseISO,
   setHours,
@@ -347,6 +348,10 @@ export function TrackerSchedule() {
     setSelectedEvent(event);
   };
 
+  const getBaseDate = () => {
+    return selectedDate ? parseISO(selectedDate) : startOfDay(new Date());
+  };
+
   const handleCreateEvent = (values: {
     id?: string;
     start: string;
@@ -356,14 +361,22 @@ export function TrackerSchedule() {
     description?: string;
   }) => {
     const dates = getDates(selectedDate, sortedRange ?? null);
-    const baseDate =
-      dates[0] || selectedDate || format(new Date(), "yyyy-MM-dd");
+    const baseDate = getBaseDate();
 
-    const startDate = parseISO(`${baseDate}T${values.start}`);
-    const endDate = parseISO(`${baseDate}T${values.end}`);
+    const startDate = parse(values.start, "HH:mm", baseDate);
+    const endDate = parse(values.end, "HH:mm", baseDate);
+
+    if (
+      !isValid(startDate) ||
+      !isValid(endDate) ||
+      isAfter(startDate, endDate)
+    ) {
+      console.error("Invalid start or end time in handleCreateEvent");
+      return;
+    }
 
     const newEvent = {
-      id: values.id,
+      id: values.id === NEW_EVENT_ID ? undefined : values.id,
       start: startDate.toISOString(),
       stop: endDate.toISOString(),
       dates,
@@ -376,27 +389,129 @@ export function TrackerSchedule() {
     upsertTrackerEntry.mutate(newEvent);
   };
 
-  const handleTimeChange = ({ start, end }: { start: string; end: string }) => {
-    if (currentOrNewEvent) {
-      const baseDate = selectedDate || format(new Date(), "yyyy-MM-dd");
-      const startDate = parse(start, "HH:mm", new Date(`${baseDate}T00:00:00`));
-      const endDate = parse(end, "HH:mm", new Date(`${baseDate}T00:00:00`));
+  const handleTimeChange = ({
+    start,
+    end,
+  }: { start?: string; end?: string }) => {
+    const baseDate = getBaseDate();
+    let currentEvent = data.find((ev) => ev.id === selectedEvent?.id) || null;
+    let eventCreated = false;
 
-      setData((prevData) =>
-        prevData.map((event) =>
-          event.id === currentOrNewEvent.id
-            ? { ...event, start: startDate, end: endDate }
-            : event,
-        ),
-      );
+    const isCompleteStartTime =
+      start && (/^\d{4}$/.test(start) || /^\d{2}:\d{2}$/.test(start));
 
-      setSelectedEvent((prev) =>
-        prev && prev.id === currentOrNewEvent.id
-          ? { ...prev, start: startDate, end: endDate }
-          : prev,
-      );
+    if (
+      start && // Must have some start input
+      isCompleteStartTime && // Check format is complete
+      (!currentEvent || currentEvent.id !== NEW_EVENT_ID) &&
+      !data.some((ev) => ev.id === NEW_EVENT_ID)
+    ) {
+      // Format HHMM to HH:mm if necessary
+      let formattedStartTimeStr = start;
+      if (/^\d{4}$/.test(start)) {
+        formattedStartTimeStr = `${start.substring(0, 2)}:${start.substring(2)}`;
+      }
+
+      const startTime = parse(formattedStartTimeStr, "HH:mm", baseDate);
+
+      if (isValid(startTime)) {
+        // Default end time: 15 mins after start
+        const endTime = addMinutes(startTime, 15);
+
+        const newEvent = createNewEvent(
+          getSlotFromDate(startTime),
+          selectedProjectId,
+          selectedDate,
+        );
+
+        if (newEvent) {
+          const timedNewEvent = updateEventTime(newEvent, startTime, endTime);
+          // This state update triggers the re-render
+          setData((prevData) => [
+            ...prevData.filter((ev) => ev.id !== NEW_EVENT_ID),
+            timedNewEvent,
+          ]);
+          setSelectedEvent(timedNewEvent);
+          currentEvent = timedNewEvent; // Update ref for subsequent updates in this call
+          eventCreated = true;
+        }
+      }
+    } else if (currentEvent && !eventCreated) {
+      // Only proceed if start or end actually has a value passed in this call
+      if (start !== undefined || end !== undefined) {
+        let newStart = currentEvent.start;
+        let startChanged = false;
+        // Update start time if 'start' prop is provided
+        if (start !== undefined) {
+          // Try parsing only if it looks like a complete format (HHMM or HH:mm)
+          const isCompleteFormat =
+            /^\d{4}$/.test(start) || /^\d{2}:\d{2}$/.test(start);
+          if (isCompleteFormat) {
+            let formattedStart = start;
+            if (/^\d{4}$/.test(start))
+              formattedStart = `${start.substring(0, 2)}:${start.substring(2)}`;
+
+            const parsedStart = parse(formattedStart, "HH:mm", baseDate);
+            // Check if valid and different from current start
+            if (
+              isValid(parsedStart) &&
+              parsedStart.getTime() !== currentEvent.start.getTime()
+            ) {
+              newStart = parsedStart;
+              startChanged = true;
+            }
+          }
+        }
+
+        let newEnd = currentEvent.end;
+        let endChanged = false;
+        // Update end time if 'end' prop is provided
+        if (end !== undefined) {
+          // Try parsing only if it looks like a *complete* format
+          const isCompleteFormat =
+            /^\d{4}$/.test(end) || /^\d{2}:\d{2}$/.test(end);
+          if (isCompleteFormat) {
+            let formattedEnd = end;
+            if (/^\d{4}$/.test(end))
+              formattedEnd = `${end.substring(0, 2)}:${end.substring(2)}`;
+
+            const parsedEnd = parse(formattedEnd, "HH:mm", baseDate);
+            // Check if valid and different from current end
+            if (
+              isValid(parsedEnd) &&
+              parsedEnd.getTime() !== currentEvent.end.getTime()
+            ) {
+              newEnd = parsedEnd;
+              endChanged = true;
+            }
+          }
+        }
+
+        // Only update state if times actually changed, are valid, and end is after start
+        if (
+          (startChanged || endChanged) &&
+          isValid(newStart) &&
+          isValid(newEnd) &&
+          isAfter(newEnd, newStart)
+        ) {
+          const updatedEvent = updateEventTime(currentEvent, newStart, newEnd);
+          // This state update triggers the re-render
+          setData((prevData) =>
+            prevData.map((event) =>
+              event.id === currentEvent?.id ? updatedEvent : event,
+            ),
+          );
+          if (selectedEvent?.id === currentEvent.id) {
+            setSelectedEvent(updatedEvent);
+          }
+        }
+      }
     }
   };
+
+  // Find the event to pass to the form, preferring NEW_EVENT_ID if it exists
+  const formEvent =
+    data.find((event) => event.id === NEW_EVENT_ID) || selectedEvent;
 
   return (
     <div className="w-full">
@@ -526,34 +641,57 @@ export function TrackerSchedule() {
       </ScrollArea>
 
       <TrackerEntriesForm
-        eventId={currentOrNewEvent?.id ?? undefined}
+        // Stabilize key: Use "new" if it's the NEW_EVENT_ID, otherwise use actual id or fallback to "new"
+        key={formEvent?.id === NEW_EVENT_ID ? "new" : (formEvent?.id ?? "new")}
+        eventId={formEvent?.id}
         onCreate={handleCreateEvent}
         isSaving={upsertTrackerEntry.isPending}
         userId={user?.id}
-        projectId={selectedProjectId}
-        description={currentOrNewEvent?.description}
+        projectId={formEvent?.project?.id ?? selectedProjectId}
+        description={formEvent?.description ?? undefined}
         start={
-          currentOrNewEvent
-            ? getTimeFromDate(currentOrNewEvent.start)
+          formEvent && isValid(formEvent.start)
+            ? getTimeFromDate(formEvent.start)
             : undefined
         }
         end={
-          currentOrNewEvent ? getTimeFromDate(currentOrNewEvent.end) : undefined
+          formEvent && isValid(formEvent.end)
+            ? getTimeFromDate(formEvent.end)
+            : undefined
         }
         onSelectProject={(project) => {
           setSelectedProjectId(project.id);
 
-          if (selectedEvent) {
+          const eventToUpdate = data.find((ev) => ev.id === selectedEvent?.id);
+
+          if (eventToUpdate) {
+            const updatedEvent = {
+              ...eventToUpdate,
+              project: {
+                ...(eventToUpdate.project ?? {}),
+                id: project.id,
+                name: project.name,
+              },
+            };
+
             setData((prevData) =>
-              prevData.map((event) =>
-                event.id === selectedEvent.id
-                  ? {
-                      ...event,
-                      project: { id: project.id, name: project.name },
-                    }
-                  : event,
+              prevData.map((ev) =>
+                ev.id === eventToUpdate.id ? updatedEvent : ev,
               ),
             );
+
+            setSelectedEvent(updatedEvent);
+
+            if (eventToUpdate.id !== NEW_EVENT_ID) {
+              handleCreateEvent({
+                id: eventToUpdate.id,
+                start: getTimeFromDate(eventToUpdate.start),
+                end: getTimeFromDate(eventToUpdate.end),
+                project_id: project.id,
+                assigned_id: eventToUpdate.assigned_id,
+                description: eventToUpdate.description ?? undefined,
+              });
+            }
           }
         }}
         onTimeChange={handleTimeChange}
