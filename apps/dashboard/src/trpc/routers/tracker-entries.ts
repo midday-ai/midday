@@ -3,7 +3,10 @@ import {
   deleteTrackerEntry,
   upsertTrackerEntries,
 } from "@midday/supabase/mutations";
-import { getTrackerRecordsByDateQuery } from "@midday/supabase/queries";
+import {
+  getTrackerRecordsByDateQuery,
+  getTrackerRecordsByRangeQuery,
+} from "@midday/supabase/queries";
 import { z } from "zod";
 
 export const trackerEntriesRouter = createTRPCRouter({
@@ -13,6 +16,22 @@ export const trackerEntriesRouter = createTRPCRouter({
       return getTrackerRecordsByDateQuery(supabase, {
         date: input.date,
         teamId: teamId!,
+      });
+    }),
+
+  byRange: protectedProcedure
+    .input(
+      z.object({
+        from: z.string(),
+        to: z.string(),
+        projectId: z.string().optional(),
+      }),
+    )
+    .query(async ({ input, ctx: { supabase, session, teamId } }) => {
+      return getTrackerRecordsByRangeQuery(supabase, {
+        teamId: teamId!,
+        userId: session.user.id,
+        ...input,
       });
     }),
 

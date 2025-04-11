@@ -83,7 +83,7 @@ export function TrackerSchedule() {
         staleTime: 60 * 1000,
         initialData: () => {
           const data = queryClient.getQueriesData({
-            queryKey: trpc.tracker.recordsByRange.queryKey(),
+            queryKey: trpc.trackerEntries.byRange.queryKey(),
           });
 
           if (!data.length || !selectedDate) {
@@ -116,7 +116,11 @@ export function TrackerSchedule() {
     trpc.trackerEntries.delete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.tracker.recordsByRange.queryKey(),
+          queryKey: trpc.trackerEntries.byRange.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
         });
 
         refetch();
@@ -135,7 +139,11 @@ export function TrackerSchedule() {
           );
 
           queryClient.invalidateQueries({
-            queryKey: trpc.tracker.recordsByRange.queryKey(),
+            queryKey: trpc.trackerEntries.byRange.queryKey(),
+          });
+
+          queryClient.invalidateQueries({
+            queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
           });
 
           refetch();

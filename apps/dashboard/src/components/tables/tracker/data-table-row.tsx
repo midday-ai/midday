@@ -1,6 +1,6 @@
 "use client";
 
-// import { TrackerExportCSV } from "@/components/tracker-export-csv";
+import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
@@ -206,24 +206,7 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
             Edit
           </DropdownMenuItem>
 
-          <DropdownMenuItem
-            onClick={() =>
-              setInvoiceParams({
-                selectedCustomerId: row.customer?.id,
-                type: "create",
-                currency: row.currency,
-                lineItems: {
-                  name: row.name,
-                  price: row.rate ?? 0,
-                  quantity: 1,
-                },
-              })
-            }
-          >
-            Create invoice
-          </DropdownMenuItem>
-
-          {/* <TrackerExportCSV name={row.name} projectId={row.id} /> */}
+          <TrackerExportCSV name={row.name} projectId={row.id} />
 
           <DropdownMenuSeparator />
 

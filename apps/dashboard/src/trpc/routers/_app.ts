@@ -9,7 +9,6 @@ import { invoiceRouter } from "./invoice";
 import { metricsRouter } from "./metrics";
 import { tagsRouter } from "./tags";
 import { teamRouter } from "./team";
-import { trackerRouter } from "./tracker";
 import { trackerEntriesRouter } from "./tracker-entries";
 import { trackerProjectsRouter } from "./tracker-projects";
 import { transactionAttachmentsRouter } from "./transaction-attachments";
@@ -31,7 +30,6 @@ export const appRouter = createTRPCRouter({
   apps: appsRouter,
   metrics: metricsRouter,
   assistant: assistantRouter,
-  tracker: trackerRouter,
   invoice: invoiceRouter,
   vault: vaultRouter,
   customers: customersRouter,

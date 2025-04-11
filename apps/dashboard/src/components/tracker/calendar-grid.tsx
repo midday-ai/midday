@@ -8,7 +8,7 @@ type CalendarGridProps = {
   calendarDays: TZDate[];
   currentDate: TZDate;
   selectedDate: string | null;
-  data: RouterOutputs["tracker"]["recordsByRange"]["result"] | undefined;
+  data: RouterOutputs["trackerEntries"]["byRange"]["result"] | undefined;
   range: [string, string] | null; // Adjusted type based on potential linter error
   localRange: [string | null, string | null];
   isDragging: boolean;
