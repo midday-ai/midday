@@ -130,19 +130,6 @@ export const changeTeamSchema = z.object({
   redirectTo: z.string(),
 });
 
-export const inboxFilterSchema = z.enum(["done", "todo", "all"]);
-
-export const updateInboxSchema = z.object({
-  id: z.string(),
-  status: z.enum(["deleted", "pending"]).optional(),
-  display_name: z.string().optional(),
-  amount: z.string().optional(),
-  currency: z.string().optional(),
-  transaction_id: z.string().nullable().optional(),
-});
-
-export type UpdateInboxFormValues = z.infer<typeof updateInboxSchema>;
-
 export const deleteEntriesSchema = z.object({
   id: z.string().uuid(),
 });
@@ -197,14 +184,6 @@ export const verifyOtpSchema = z.object({
   token: z.string(),
   email: z.string(),
 });
-
-export const searchSchema = z.object({
-  query: z.string().min(1),
-  type: z.enum(["inbox", "categories"]),
-  limit: z.number().optional(),
-});
-
-export const inboxOrder = z.boolean();
 
 export const getVatRateSchema = z.object({
   name: z.string().min(2),
@@ -301,14 +280,6 @@ export const filterInvoiceSchema = z.object({
     .optional()
     .describe("The customers to filter by"),
 });
-
-export const inboxUploadSchema = z.array(
-  z.object({
-    mimetype: z.string(),
-    size: z.number(),
-    file_path: z.array(z.string()),
-  }),
-);
 
 export const deleteConnectionSchema = z.object({
   connectionId: z.string(),

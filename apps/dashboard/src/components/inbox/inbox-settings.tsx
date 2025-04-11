@@ -1,5 +1,6 @@
 import { type UpdateTeamFormValues, updateTeamSchema } from "@/actions/schema";
 import { updateTeamAction } from "@/actions/update-team-action";
+import { CopyInput } from "@/components/copy-input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getInboxEmail } from "@midday/inbox";
 import { Button } from "@midday/ui/button";
@@ -19,7 +20,6 @@ import { Switch } from "@midday/ui/switch";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
-import { CopyInput } from "./copy-input";
 
 type Props = {
   forwardEmail: string;

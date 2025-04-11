@@ -1,4 +1,9 @@
+import { FilePreview } from "@/components/file-preview";
+import { FormatAmount } from "@/components/format-amount";
+import { EditInboxModal } from "@/components/modals/edit-inbox-modal";
+import { SelectTransaction } from "@/components/select-transaction";
 import { useUserQuery } from "@/hooks/use-user";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getUrl } from "@/utils/environment";
 import { formatDate } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
@@ -17,45 +22,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { FilePreview } from "./file-preview";
-import { FormatAmount } from "./format-amount";
-import { EditInboxModal } from "./modals/edit-inbox-modal";
-import { SelectTransaction } from "./select-transaction";
-
-type InboxItem = {
-  id: string;
-  status?: string;
-  file_path?: string[];
-  file_name?: string;
-  website?: string;
-  display_name?: string;
-  amount?: number;
-  currency?: string;
-  date?: string;
-  forwarded_to?: string;
-  content_type?: string;
-  description?: string;
-  transaction?: any;
-  locale?: string;
-};
 
 type Props = {
-  item: InboxItem;
-  onDelete: () => void;
-  onSelectTransaction: () => void;
-  teamId: string;
-  isEmpty?: boolean;
-  currencies: string[];
+  item: RouterOutputs["inbox"]["get"]["data"][number];
 };
 
-export function InboxDetails({
-  item,
-  onDelete,
-  onSelectTransaction,
-  teamId,
-  isEmpty,
-  currencies,
-}: Props) {
+export function InboxDetails({ item }: Props) {
   const { toast } = useToast();
   const [isOpen, setOpen] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
@@ -79,14 +51,14 @@ export function InboxDetails({
     } catch {}
   };
 
-  if (isEmpty) {
-    return <div className="hidden md:block w-[1160px]" />;
-  }
+  // if (isEmpty) {
+  //   return <div className="hidden md:block w-[1160px]" />;
+  // }
 
   const fallback = showFallback || (!item?.website && item?.display_name);
 
   return (
-    <div className="h-[calc(100vh-120px)] overflow-hidden flex-col border w-[1160px] hidden md:flex">
+    <div className="h-[calc(100vh-120px)] overflow-hidden flex-col border w-[700px] hidden md:flex shrink-0 -mt-[54px]">
       <div className="flex items-center p-2">
         <div className="flex items-center gap-2">
           <Tooltip>
@@ -95,7 +67,7 @@ export function InboxDetails({
                 variant="ghost"
                 size="icon"
                 disabled={!item}
-                onClick={onDelete}
+                // onClick={onDelete}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -252,18 +224,18 @@ export function InboxDetails({
             )}
           </div>
 
-          <div className="h-12 dark:bg-[#1A1A1A] bg-[#F6F6F3] justify-between items-center flex border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-full fixed bottom-14 right-[160px] z-50 w-[400px]">
-            <SelectTransaction
+          {/* <div className="h-12 dark:bg-[#1A1A1A] bg-[#F6F6F3] justify-between items-center flex border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-full fixed bottom-14 right-[160px] z-50 w-[400px]"> */}
+          {/* <SelectTransaction
               placeholder="Select transaction"
               teamId={teamId}
               inboxId={item.id}
               selectedTransaction={item?.transaction}
               onSelect={onSelectTransaction}
               key={item.id}
-            />
-          </div>
+            /> */}
+          {/* </div> */}
 
-          <EditInboxModal
+          {/* <EditInboxModal
             isOpen={isOpen}
             onOpenChange={setOpen}
             id={item.id}
@@ -273,7 +245,7 @@ export function InboxDetails({
               currency: item.currency,
               display_name: item?.display_name,
             }}
-          />
+          /> */}
         </div>
       ) : (
         <div className="p-8 text-center text-muted-foreground">

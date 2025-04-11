@@ -1,6 +1,6 @@
 "use client";
 
-import { inboxOrderAction } from "@/actions/inbox/order";
+import { useInboxParams } from "@/hooks/use-inbox-params";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -9,20 +9,9 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { useOptimisticAction } from "next-safe-action/hooks";
 
-type Props = {
-  ascending: boolean;
-};
-
-export function InboxOrdering({ ascending }: Props) {
-  const { execute: inboxOrder, optimisticState } = useOptimisticAction(
-    inboxOrderAction,
-    {
-      currentState: ascending,
-      updateFn: (_, state) => !state,
-    },
-  );
+export function InboxOrdering() {
+  const { params, setParams } = useInboxParams();
 
   return (
     <DropdownMenu>
@@ -33,15 +22,15 @@ export function InboxOrdering({ ascending }: Props) {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuCheckboxItem
-          checked={!optimisticState}
-          onCheckedChange={() => inboxOrder(false)}
+          checked={params.order === "asc"}
+          onCheckedChange={() => setParams({ order: "asc" })}
         >
           Most recent
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
-          checked={optimisticState}
-          onCheckedChange={() => inboxOrder(true)}
+          checked={params.order === "desc"}
+          onCheckedChange={() => setParams({ order: "desc" })}
         >
           Oldest first
         </DropdownMenuCheckboxItem>

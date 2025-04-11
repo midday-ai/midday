@@ -1,9 +1,3 @@
-import { updateInboxAction } from "@/actions/inbox/update";
-import {
-  type UpdateInboxFormValues,
-  updateInboxSchema,
-} from "@/actions/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -14,10 +8,6 @@ import {
 } from "@midday/ui/dialog";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { SelectCurrency } from "../select-currency";
 
 type Props = {
@@ -39,26 +29,22 @@ export function EditInboxModal({
   defaultValue,
   currencies,
 }: Props) {
-  const updateCategory = useAction(updateInboxAction, {
-    onSuccess: () => onOpenChange(false),
-  });
+  return null;
 
-  const form = useForm<UpdateInboxFormValues>({
-    resolver: zodResolver(updateInboxSchema),
-  });
+  // const form = useForm<UpdateInboxFormValues>({
+  //   resolver: zodResolver(updateInboxSchema),
+  // });
 
-  useEffect(() => {
-    form.reset({
-      id,
-      display_name: defaultValue.display_name,
-      amount: defaultValue.amount?.toString(),
-      currency: defaultValue.currency ?? undefined,
-    });
-  }, [id]);
+  // useEffect(() => {
+  //   form.reset({
+  //     id,
+  //     display_name: defaultValue.display_name,
+  //     amount: defaultValue.amount?.toString(),
+  //     currency: defaultValue.currency ?? undefined,
+  //   });
+  // }, [id]);
 
-  function onSubmit(values: UpdateInboxFormValues) {
-    updateCategory.execute(values);
-  }
+  function onSubmit(values) {}
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -119,15 +105,15 @@ export function EditInboxModal({
               <DialogFooter className="mt-8 w-full">
                 <div className="space-y-4 w-full">
                   <Button
-                    disabled={updateCategory.status === "executing"}
+                    // disabled={updateCategory.status === "executing"}
                     className="w-full"
                     type="submit"
                   >
-                    {updateCategory.status === "executing" ? (
+                    {/* {updateCategory.status === "executing" ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       "Save"
-                    )}
+                    )} */}
                   </Button>
                 </div>
               </DialogFooter>

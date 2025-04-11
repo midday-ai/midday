@@ -1,14 +1,14 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
-import { InboxStatus } from "@/components/inbox-status";
+import { InboxStatus } from "@/components/inbox/inbox-status";
 import type { RouterOutputs } from "@/trpc/routers/_app";
 import { Icons } from "@midday/ui/icons";
 import { format } from "date-fns";
 import Link from "next/link";
 
 type Props = {
-  data: RouterOutputs["inbox"]["get"];
+  data: RouterOutputs["inbox"]["get"]["data"];
 };
 
 export function InboxList({ data }: Props) {
