@@ -18,8 +18,8 @@ import { TrackerSelectProject } from "../tracker-select-project";
 const formSchema = z.object({
   id: z.string().optional(),
   duration: z.number().min(1),
-  project_id: z.string(),
-  assigned_id: z.string().optional(),
+  project_id: z.string().uuid(),
+  assigned_id: z.string().uuid().optional(),
   description: z.string().optional(),
   start: z.string(),
   end: z.string(),
@@ -61,7 +61,7 @@ export function TrackerEntriesForm({
     defaultValues: {
       id: eventId,
       assigned_id: userId,
-      project_id: selectedProjectId ?? latestProjectId ?? undefined,
+      project_id: selectedProjectId || latestProjectId || undefined,
       start,
       end,
       description: description ?? undefined,

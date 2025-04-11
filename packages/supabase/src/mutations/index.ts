@@ -1126,12 +1126,12 @@ export async function upsertTrackerEntries(
   supabase: Client,
   params: UpsertTrackerEntriesParams,
 ) {
-  const { dates, teamId, id, ...rest } = params;
-
+  const { dates, id, teamId, ...rest } = params;
   const entries = dates.map((date) => ({
+    team_id: teamId,
+    ...(id ? { id } : {}),
     ...rest,
     date,
-    team_id: teamId,
   }));
 
   return supabase

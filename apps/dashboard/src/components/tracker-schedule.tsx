@@ -101,7 +101,11 @@ export function TrackerSchedule() {
     trpc.trackerEntries.upsert.mutationOptions({
       onSuccess: (result) => {
         if (result) {
-          // setSelectedEvent(result.at(-1));
+          const lastEvent = result.at(-1);
+
+          setSelectedEvent(
+            lastEvent ? transformTrackerData(lastEvent, selectedDate) : null,
+          );
 
           queryClient.invalidateQueries({
             queryKey: trpc.tracker.recordsByRange.queryKey(),
@@ -498,7 +502,7 @@ export function TrackerSchedule() {
       <TrackerEntriesForm
         eventId={currentOrNewEvent?.id ?? undefined}
         onCreate={handleCreateEvent}
-        // isSaving={createTrackerEntries.isExecuting}
+        isSaving={upsertTrackerEntry.isPending}
         userId={user?.id}
         projectId={selectedProjectId}
         description={currentOrNewEvent?.description}
