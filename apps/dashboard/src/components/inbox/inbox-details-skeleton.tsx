@@ -5,10 +5,8 @@ import { Skeleton } from "@midday/ui/skeleton";
 
 export function InboxDetailsSkeleton() {
   return (
-    <div className="h-[calc(100vh-120px)] overflow-hidden flex-col border w-[1160px] hidden md:flex">
-      <div className="flex items-center py-2 h-[52px]">
-        <div className="flex items-center gap-2" />
-      </div>
+    <div className="h-[calc(100vh-120px)] overflow-hidden flex-col border w-[700px] hidden md:flex shrink-0 -mt-[54px]">
+      <div className="flex items-center p-2 h-[52px] w-full" />
 
       <Separator />
       <div className="flex flex-1 flex-col">
@@ -16,17 +14,18 @@ export function InboxDetailsSkeleton() {
           <div className="flex items-start gap-4 text-sm">
             <Skeleton className="h-[40px] w-[40px] rounded-full" />
             <div className="grid gap-1 space-y-1">
-              <Skeleton className="h-3 w-[100px]" />
-              <Skeleton className="h-2 w-[120px]" />
+              <Skeleton className="h-4 w-[120px]" />
+              <Skeleton className="h-3 w-[50px]" />
             </div>
           </div>
           <div className="grid gap-1 ml-auto text-right">
-            <Skeleton className="h-2 w-[100px] ml-auto" />
-            <Skeleton className="h-2 w-[50px] ml-auto" />
+            <Skeleton className="h-3 w-[70px] ml-auto" />
           </div>
         </div>
-
         <Separator />
+        <div className="relative h-full p-4">
+          <Skeleton className="h-full w-full" />
+        </div>
       </div>
     </div>
   );

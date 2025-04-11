@@ -24,7 +24,7 @@ import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Props = {
-  item: RouterOutputs["inbox"]["get"]["data"][number];
+  item?: RouterOutputs["inbox"]["get"]["data"][number];
 };
 
 export function InboxDetails({ item }: Props) {
