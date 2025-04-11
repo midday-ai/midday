@@ -4,7 +4,7 @@ import { DataTable } from "@/components/tables/customers/data-table";
 import { CustomersSkeleton } from "@/components/tables/customers/skeleton";
 import { loadCustomerFilterParams } from "@/hooks/use-customer-filter-params";
 import { loadSortParams } from "@/hooks/use-sort-params";
-import { prefetch, trpc } from "@/trpc/server";
+import { getQueryClient, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
@@ -18,12 +18,14 @@ type Props = {
 };
 
 export default async function Page(props: Props) {
+  const queryClient = getQueryClient();
   const searchParams = await props.searchParams;
 
   const filter = loadCustomerFilterParams(searchParams);
   const { sort } = loadSortParams(searchParams);
 
-  prefetch(
+  // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
+  await queryClient.fetchInfiniteQuery(
     trpc.customers.get.infiniteQueryOptions({
       filter,
       sort,
