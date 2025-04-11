@@ -74,16 +74,42 @@ export function TrackerSchedule() {
     null,
   );
 
-  const { data: trackerData, refetch } = useQuery(
-    trpc.trackerEntries.byDate.queryOptions(
-      {
-        date: selectedDate ?? "",
-      },
+  const { data: trackerData, refetch } = useQuery({
+    ...trpc.trackerEntries.byDate.queryOptions(
+      { date: selectedDate ?? "" },
       {
         enabled: !!selectedDate,
+        staleTime: 60 * 1000,
+        initialData: () => {
+          const data = queryClient.getQueriesData({
+            queryKey: trpc.tracker.recordsByRange.queryKey(),
+          });
+
+          if (!data.length || !selectedDate) {
+            return {
+              data: [],
+              meta: { totalDuration: 0 },
+            };
+          }
+
+          const [, rangeData] = data.at(0);
+          if (!rangeData?.result?.[selectedDate]) {
+            return {
+              data: [],
+              meta: { totalDuration: 0 },
+            };
+          }
+
+          return {
+            data: rangeData.result[selectedDate],
+            meta: {
+              totalDuration: rangeData.meta.totalDuration || 0,
+            },
+          };
+        },
       },
     ),
-  );
+  });
 
   const deleteTrackerEntry = useMutation(
     trpc.trackerEntries.delete.mutationOptions({
