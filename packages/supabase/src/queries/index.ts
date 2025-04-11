@@ -1,8 +1,6 @@
 import {
-  addDays,
   endOfMonth,
   formatISO,
-  isWithinInterval,
   parseISO,
   startOfMonth,
   subYears,
@@ -793,12 +791,13 @@ export async function getUserInviteQuery(
 
 type GetInboxQueryParams = {
   teamId: string;
-  from?: number;
-  to?: number;
-  done?: boolean;
-  todo?: boolean;
-  ascending?: boolean;
-  searchQuery?: string;
+  cursor?: string | null;
+  order?: string | null;
+  pageSize?: number;
+  filter?: {
+    q?: string | null;
+    done?: boolean;
+  };
 };
 
 export async function getInboxQuery(
@@ -806,13 +805,11 @@ export async function getInboxQuery(
   params: GetInboxQueryParams,
 ) {
   const {
-    from = 0,
-    to = 10,
     teamId,
-    done,
-    todo,
-    searchQuery,
-    ascending = false,
+    filter: { q, done } = {},
+    cursor,
+    order,
+    pageSize = 10,
   } = params;
 
   const query = supabase
@@ -835,40 +832,42 @@ export async function getInboxQuery(
       transaction:transactions(id, amount, currency, name, date)
     `)
     .eq("team_id", teamId)
-    .order("created_at", { ascending })
+    .order("created_at", { ascending: order === "asc" })
     .neq("status", "deleted");
 
   if (done) {
     query.not("transaction_id", "is", null);
-  }
-
-  if (todo) {
+  } else {
     query.is("transaction_id", null);
   }
 
-  if (searchQuery) {
-    if (!Number.isNaN(Number.parseInt(searchQuery))) {
-      query.like("inbox_amount_text", `%${searchQuery}%`);
+  if (q) {
+    if (!Number.isNaN(Number.parseInt(q))) {
+      query.like("inbox_amount_text", `%${q}%`);
     } else {
-      query.textSearch("fts", `${searchQuery.replaceAll(" ", "+")}:*`);
+      query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
     }
   }
 
-  const { data } = await query.range(from, to);
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
+
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
 
   return {
-    data: data?.map((item) => {
-      const pending = isWithinInterval(new Date(), {
-        start: new Date(item.created_at),
-        end: addDays(new Date(item.created_at), 45),
-      });
-
-      return {
-        ...item,
-        pending,
-        review: !pending && !item.transaction_id,
-      };
-    }),
+    meta: {
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
+    },
+    data: data || [],
   };
 }
 

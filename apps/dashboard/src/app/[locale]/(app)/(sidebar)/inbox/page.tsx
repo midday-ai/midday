@@ -1,9 +1,11 @@
 import { Inbox } from "@/components/inbox";
-import { InboxViewSkeleton } from "@/components/inbox-skeleton";
-import { Cookies } from "@/utils/constants";
-import { uniqueCurrencies } from "@midday/location/currencies";
+import { InboxViewSkeleton } from "@/components/inbox/inbox-skeleton";
+import { InboxView } from "@/components/inbox/inbox-view";
+import { loadInboxFilterParams } from "@/hooks/use-inbox-filter-params";
+import { loadInboxParams } from "@/hooks/use-inbox-params";
+import { getQueryClient, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
+import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
@@ -11,24 +13,30 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<SearchParams>;
 };
 
-export default async function InboxPage(props: Props) {
+export default async function Page(props: Props) {
+  const queryClient = getQueryClient();
   const searchParams = await props.searchParams;
-  const ascending =
-    (await cookies()).get(Cookies.InboxOrder)?.value === "true" ?? false;
+  const filter = loadInboxFilterParams(searchParams);
+  const params = loadInboxParams(searchParams);
+
+  await queryClient.fetchInfiniteQuery(
+    trpc.inbox.get.infiniteQueryOptions({
+      order: params.order,
+      filter: {
+        ...filter,
+        done: false,
+      },
+    }),
+  );
 
   return (
-    <Suspense
-      key={ascending.toString()}
-      fallback={<InboxViewSkeleton ascending />}
-    >
-      <Inbox
-        ascending={ascending}
-        query={searchParams?.q}
-        currencies={uniqueCurrencies}
-      />
-    </Suspense>
+    <Inbox>
+      <Suspense fallback={<InboxViewSkeleton ascending />}>
+        <InboxView />
+      </Suspense>
+    </Inbox>
   );
 }

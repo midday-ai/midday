@@ -1,7 +1,5 @@
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { ScrollArea } from "@midday/ui/scroll-area";
-import { AnimatePresence, motion } from "framer-motion";
 import { InboxItem } from "./inbox-item";
 
 type InboxListProps = {
@@ -50,40 +48,11 @@ export function InboxList({ items, hasQuery, onClear }: InboxListProps) {
     );
   }
 
-  // Only run when first item has status=new or deleted
-  const initialAnimation = items?.at(0)?.status === "new" && {
-    opacity: 0,
-    height: 0,
-  };
-
-  const exitAnimation = !hasQuery && {
-    opacity: 0,
-    height: 0,
-  };
-
   return (
-    <ScrollArea className="h-screen" hideScrollbar>
-      <div className="flex flex-col gap-4 pb-[250px]">
-        <AnimatePresence initial={false}>
-          {items?.map((item) => {
-            return (
-              <motion.div
-                key={item.id}
-                initial={initialAnimation}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={exitAnimation}
-                transition={{
-                  opacity: { duration: 0.2 },
-                  height: { type: "spring", bounce: 0.3, duration: 0.5 },
-                }}
-                className="w-full"
-              >
-                <InboxItem key={item.id} item={item} />
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
-    </ScrollArea>
+    <div className="flex flex-col gap-4">
+      {items?.map((item) => {
+        return <InboxItem key={item.id} item={item} />;
+      })}
+    </div>
   );
 }

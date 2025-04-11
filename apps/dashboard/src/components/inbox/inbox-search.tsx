@@ -1,18 +1,14 @@
+import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useHotkeys } from "react-hotkeys-hook";
 
-type Props = {
-  value: string;
-  onChange: (value: string | null) => void;
-  onClear?: () => void;
-  onArrowDown?: () => void;
-};
+export function InboxSearch() {
+  const { params, setParams } = useInboxFilterParams();
 
-export function InboxSearch({ value, onChange, onClear, onArrowDown }: Props) {
-  useHotkeys("esc", () => onClear?.(), {
+  useHotkeys("esc", () => setParams({ q: null }), {
     enableOnFormTags: true,
-    enabled: Boolean(value),
+    enabled: Boolean(params.q),
   });
 
   return (
@@ -25,21 +21,21 @@ export function InboxSearch({ value, onChange, onClear, onArrowDown }: Props) {
             // @ts-ignore
             evt.target?.blur();
             evt.preventDefault();
-            onArrowDown?.();
+            // onArrowDown?.();
           }
         }}
         className="pl-8"
-        value={value}
+        value={params.q ?? ""}
         onChange={(evt) => {
           const value = evt.target.value;
-          onChange(value.length ? value : null);
+          setParams({ q: value.length ? value : null });
         }}
       />
 
-      {value && (
+      {params.q && (
         <Icons.Close
           className="w-[18px] h-[18px] top-[9px] absolute right-2"
-          onClick={() => onClear?.()}
+          onClick={() => setParams({ q: null })}
         />
       )}
     </div>

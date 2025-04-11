@@ -1,23 +1,28 @@
+import { FormatAmount } from "@/components/format-amount";
+import { InboxStatus } from "@/components/inbox/inbox-status";
+import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { formatDate } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
-import { useQueryState } from "nuqs";
-import { FormatAmount } from "./format-amount";
-import { InboxStatus } from "./inbox-status";
 
-export function InboxItem({ item }) {
-  const [selectedId, setSelectedId] = useQueryState("inboxId");
+type Props = {
+  item: RouterOutputs["inbox"]["get"]["data"][number];
+};
+
+export function InboxItem({ item }: Props) {
+  const { params, setParams } = useInboxParams();
   const { data: user } = useUserQuery();
 
-  const isSelected = selectedId === item.id;
+  const isSelected = params.inboxId === item.id;
   const isProcessing = item.status === "processing" || item.status === "new";
 
   return (
     <button
       type="button"
       onClick={() => {
-        setSelectedId(item.id);
+        setParams({ inboxId: item.id });
       }}
       key={item.id}
       className={cn(

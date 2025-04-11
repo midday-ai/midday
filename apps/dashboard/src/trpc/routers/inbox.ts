@@ -6,21 +6,22 @@ export const inboxRouter = createTRPCRouter({
   get: protectedProcedure
     .input(
       z.object({
-        from: z.number().optional(),
-        to: z.number().optional(),
-        done: z.boolean().optional(),
-        todo: z.boolean().optional(),
-        ascending: z.boolean().optional(),
-        searchQuery: z.string().optional(),
+        cursor: z.string().nullable().optional(),
+        order: z.string().nullable().optional(),
+        pageSize: z.number().optional(),
+        filter: z
+          .object({
+            q: z.string().nullable().optional(),
+            done: z.boolean().optional(),
+          })
+          .optional(),
       }),
     )
     .query(async ({ ctx: { supabase, teamId }, input }) => {
-      const { data } = await getInboxQuery(supabase, {
+      return getInboxQuery(supabase, {
         teamId: teamId!,
         ...input,
       });
-
-      return data;
     }),
 
   search: protectedProcedure

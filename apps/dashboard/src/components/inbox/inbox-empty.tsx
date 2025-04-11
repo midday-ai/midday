@@ -1,6 +1,6 @@
+import { CopyInput } from "@/components/copy-input";
 import { getInboxEmail } from "@midday/inbox";
 import { Icons } from "@midday/ui/icons";
-import { CopyInput } from "./copy-input";
 
 type Props = {
   inboxId: string;

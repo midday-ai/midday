@@ -1,28 +1,25 @@
 "use client";
 
-import { inboxUploadAction } from "@/actions/inbox-upload-action";
+import { useUserQuery } from "@/hooks/use-user";
 import { resumableUpload } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
-import { useAction } from "next-safe-action/hooks";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 type Props = {
-  teamId: string;
   children: ReactNode;
 };
 
-export function UploadZone({ children, teamId }: Props) {
+export function UploadZone({ children }: Props) {
+  const { data: user } = useUserQuery();
   const supabase = createClient();
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
   const [toastId, setToastId] = useState(null);
   const uploadProgress = useRef([]);
   const { toast, dismiss, update } = useToast();
-
-  const inboxUpload = useAction(inboxUploadAction);
 
   useEffect(() => {
     if (!toastId && showProgress) {
@@ -55,7 +52,7 @@ export function UploadZone({ children, teamId }: Props) {
     setShowProgress(true);
 
     // Add uploaded folder so we can filter background job on this
-    const path = [teamId, "inbox"];
+    const path = [user?.team_id, "inbox"];
 
     try {
       const results = await Promise.all(
@@ -81,13 +78,13 @@ export function UploadZone({ children, teamId }: Props) {
       );
 
       // Trigger the upload jobs
-      inboxUpload.execute(
-        results.map((result) => ({
-          file_path: [...path, result.filename],
-          mimetype: result.file.type,
-          size: result.file.size,
-        })),
-      );
+      // inboxUpload.execute(
+      //   results.map((result) => ({
+      //     file_path: [...path, result.filename],
+      //     mimetype: result.file.type,
+      //     size: result.file.size,
+      //   })),
+      // );
 
       // Reset once done
       uploadProgress.current = [];

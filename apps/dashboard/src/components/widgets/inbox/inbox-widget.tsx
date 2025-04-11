@@ -18,12 +18,13 @@ export function InboxWidget({ disabled, filter }: Props) {
   const { data: user } = useUserQuery();
   const { data } = useSuspenseQuery(
     trpc.inbox.get.queryOptions({
-      done: filter === "done",
-      todo: filter === "todo",
+      filter: {
+        done: filter === "done",
+      },
     }),
   );
 
-  if (!data?.length) {
+  if (!data?.data?.length) {
     return (
       <div className="flex flex-col space-y-4 items-center justify-center h-full text-center">
         <div>
@@ -39,5 +40,5 @@ export function InboxWidget({ disabled, filter }: Props) {
     );
   }
 
-  return <InboxList data={data} />;
+  return <InboxList data={data.data} />;
 }

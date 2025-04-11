@@ -1,7 +1,7 @@
 "use client";
 
 import { ErrorFallback } from "@/components/error-fallback";
-import { InboxListSkeleton } from "@/components/inbox-list-skeleton";
+import { InboxListSkeleton } from "@/components/inbox/inbox-list-skeleton";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense, useState } from "react";
 import type { InboxOption } from "./data";
