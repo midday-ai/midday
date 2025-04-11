@@ -137,9 +137,11 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
                   {...field}
                   value={field.value ?? ""}
                   autoComplete="off"
+                  placeholder="Project name"
                   autoCapitalize="none"
                   autoCorrect="off"
                   spellCheck="false"
+                  autoFocus
                 />
               </FormControl>
               <FormDescription>

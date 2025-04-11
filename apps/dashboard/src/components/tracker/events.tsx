@@ -5,7 +5,7 @@ import { cn } from "@midday/ui/cn";
 
 type Props = {
   data:
-    | RouterOutputs["tracker"]["recordsByRange"]["result"][string]
+    | RouterOutputs["trackerEntries"]["byRange"]["result"][string]
     | undefined;
   isToday: boolean;
 };

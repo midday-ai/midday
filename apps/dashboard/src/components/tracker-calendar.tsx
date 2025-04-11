@@ -46,7 +46,7 @@ export function TrackerCalendar() {
   );
 
   const { data } = useQuery(
-    trpc.tracker.recordsByRange.queryOptions({
+    trpc.trackerEntries.byRange.queryOptions({
       from: formatISO(startOfMonth(currentTZDate), {
         representation: "date",
       }),

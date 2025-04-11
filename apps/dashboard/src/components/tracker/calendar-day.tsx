@@ -15,7 +15,7 @@ type CalendarDayProps = {
   currentDate: TZDate;
   selectedDate: string | null;
   dayData:
-    | RouterOutputs["tracker"]["recordsByRange"]["result"][string]
+    | RouterOutputs["trackerEntries"]["byRange"]["result"][string]
     | undefined;
   range: [string, string] | null;
   localRange: [string | null, string | null];

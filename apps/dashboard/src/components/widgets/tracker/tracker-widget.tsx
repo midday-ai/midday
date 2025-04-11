@@ -32,7 +32,7 @@ export function TrackerWidget() {
   const trpc = useTRPC();
 
   const { data } = useQuery(
-    trpc.tracker.recordsByRange.queryOptions({
+    trpc.trackerEntries.byRange.queryOptions({
       from: formatISO(startOfMonth(new Date(currentDate)), {
         representation: "date",
       }),

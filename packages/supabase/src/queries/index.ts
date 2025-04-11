@@ -1065,6 +1065,7 @@ export async function getTrackerRecordsByRangeQuery(
   }
 
   const { data } = await query;
+
   const result = data?.reduce((acc, item) => {
     const key = item.date;
 
@@ -1082,7 +1083,7 @@ export async function getTrackerRecordsByRangeQuery(
 
   const totalAmount = data?.reduce(
     (amount, { project, duration = 0 }) =>
-      amount + (project?.rate ?? 0) * (duration / 3600),
+      amount + (project?.rate ?? 0) * (duration ?? 0 / 3600),
     0,
   );
 
