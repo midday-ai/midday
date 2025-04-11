@@ -11,6 +11,7 @@ export function useInboxFilterParams() {
   return {
     params,
     setParams,
+    hasFilter: Object.values(params).some((value) => value !== null),
   };
 }
 

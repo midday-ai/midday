@@ -3,7 +3,6 @@
 import { LoadMore } from "@/components/load-more";
 import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { TAB_ITEMS, useInboxParams } from "@/hooks/use-inbox-params";
-import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { TabsContent } from "@midday/ui/tabs";
@@ -12,16 +11,15 @@ import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import { InboxDetails } from "./inbox-details";
-import { InboxEmpty } from "./inbox-empty";
-import { InboxList } from "./inbox-list";
+import { InboxEmpty, NoResults } from "./inbox-empty";
+import { InboxItem } from "./inbox-item";
 
 export function InboxView() {
   const trpc = useTRPC();
   const { ref, inView } = useInView();
   const { toast } = useToast();
-  const { data: user } = useUserQuery();
   const { params } = useInboxParams();
-  const { params: filter } = useInboxFilterParams();
+  const { params: filter, hasFilter } = useInboxFilterParams();
 
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
     {
@@ -49,8 +47,12 @@ export function InboxView() {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
+  if (hasFilter) {
+    return <NoResults />;
+  }
+
   if (!tableData?.length) {
-    return <InboxEmpty inboxId={user?.team?.inbox_id} />;
+    return <InboxEmpty />;
   }
 
   const selectedItem =
@@ -64,8 +66,14 @@ export function InboxView() {
           hideScrollbar
         >
           {TAB_ITEMS.map((value) => (
-            <TabsContent key={value} value={value} className="m-0 h-full">
-              <InboxList items={tableData} />
+            <TabsContent
+              key={value}
+              value={value}
+              className="m-0 h-full space-y-4"
+            >
+              {tableData.map((item) => (
+                <InboxItem key={item.id} item={item} />
+              ))}
             </TabsContent>
           ))}
 

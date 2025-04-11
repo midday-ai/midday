@@ -1,13 +1,16 @@
 "use client";
 
-// import { InboxHeader } from "./inbox-header";
+import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
+import { InboxListSkeleton } from "./inbox-list-skeleton";
 
-type Props = {
-  forwardEmail?: string;
-  inboxId?: string;
-  ascending: boolean;
-};
+export function InboxViewSkeleton() {
+  return (
+    <div className="flex flex-row space-x-8 mt-4">
+      <div className="w-full h-full">
+        <InboxListSkeleton numberOfItems={10} />
+      </div>
 
-export function InboxViewSkeleton({ forwardEmail, inboxId, ascending }: Props) {
-  return null;
+      <InboxDetailsSkeleton />
+    </div>
+  );
 }

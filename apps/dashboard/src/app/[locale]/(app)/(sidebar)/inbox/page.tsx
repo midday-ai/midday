@@ -22,19 +22,20 @@ export default async function Page(props: Props) {
   const filter = loadInboxFilterParams(searchParams);
   const params = loadInboxParams(searchParams);
 
+  // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
   await queryClient.fetchInfiniteQuery(
     trpc.inbox.get.infiniteQueryOptions({
       order: params.order,
       filter: {
         ...filter,
-        done: false,
+        done: params.tab === "done",
       },
     }),
   );
 
   return (
     <Inbox>
-      <Suspense fallback={<InboxViewSkeleton ascending />}>
+      <Suspense fallback={<InboxViewSkeleton />}>
         <InboxView />
       </Suspense>
     </Inbox>
