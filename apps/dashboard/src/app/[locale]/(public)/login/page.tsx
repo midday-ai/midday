@@ -4,7 +4,6 @@ import { DesktopCommandMenuSignIn } from "@/components/desktop-command-menu-sign
 import { GithubSignIn } from "@/components/github-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { OTPSignIn } from "@/components/otp-sign-in";
-import { SlackSignIn } from "@/components/slack-sign-in";
 import { Cookies } from "@/utils/constants";
 import { isEU } from "@midday/location";
 import {
@@ -51,19 +50,6 @@ export default async function Page(params) {
       moreSignInOptions = (
         <>
           <GoogleSignIn />
-          <SlackSignIn />
-          <GithubSignIn />
-          <OTPSignIn className="border-t-[1px] border-border pt-8" />
-        </>
-      );
-      break;
-
-    case "slack":
-      preferredSignInOption = <SlackSignIn />;
-      moreSignInOptions = (
-        <>
-          <GoogleSignIn />
-          <AppleSignIn />
           <GithubSignIn />
           <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
@@ -76,7 +62,6 @@ export default async function Page(params) {
         <>
           <GoogleSignIn />
           <AppleSignIn />
-          <SlackSignIn />
           <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
       );
@@ -88,7 +73,6 @@ export default async function Page(params) {
         <>
           <AppleSignIn />
           <GithubSignIn />
-          <SlackSignIn />
           <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
       );
@@ -101,7 +85,6 @@ export default async function Page(params) {
           <GoogleSignIn />
           <AppleSignIn />
           <GithubSignIn />
-          <SlackSignIn />
         </>
       );
       break;
@@ -110,7 +93,6 @@ export default async function Page(params) {
       if (device?.vendor === "Apple") {
         moreSignInOptions = (
           <>
-            <SlackSignIn />
             <GithubSignIn />
             <OTPSignIn className="border-t-[1px] border-border pt-8" />
           </>
@@ -119,7 +101,6 @@ export default async function Page(params) {
         moreSignInOptions = (
           <>
             <AppleSignIn />
-            <SlackSignIn />
             <GithubSignIn />
             <OTPSignIn className="border-t-[1px] border-border pt-8" />
           </>
