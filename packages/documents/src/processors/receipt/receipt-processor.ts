@@ -34,7 +34,9 @@ export class ReceiptProcessor {
         website: z
           .string()
           .nullable()
-          .describe("Website of store/merchant (e.g., example.com)"),
+          .describe(
+            "Website of store/merchant (e.g., example.com), if not available use the Store Name to find the website",
+          ),
         payment_method: z
           .string()
           .nullable()

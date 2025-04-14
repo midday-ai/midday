@@ -49,7 +49,9 @@ export class InvoiceProcessor {
         website: z
           .string()
           .nullable()
-          .describe("Website of vendor (e.g., example.com)"),
+          .describe(
+            "Website of vendor (e.g., example.com), if not available use the Vendor Name to find the website",
+          ),
         email: z.string().nullable().describe("Email of the vendor/seller"),
         line_items: z
           .array(
@@ -138,7 +140,6 @@ export class InvoiceProcessor {
         vendor_address: result.vendor_address,
         vendor_name: result.vendor_name,
         email: result.email,
-        line_items: result.line_items,
       },
     };
   }

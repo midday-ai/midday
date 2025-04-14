@@ -44,8 +44,6 @@ export const processAttachment = schemaTask({
       .from("vault")
       .createSignedUrl(file_path.join("/"), 60);
 
-    console.log(data);
-
     if (!data) {
       throw Error("File not found");
     }
@@ -65,9 +63,8 @@ export const processAttachment = schemaTask({
           currency: result.currency,
           display_name: result.name,
           website: result.website,
-          date: result.date && new Date(result.date).toISOString(),
+          date: result.date,
           // type: result.type,
-          description: result.description,
           status: "pending",
         })
         .eq("id", inboxData.id)

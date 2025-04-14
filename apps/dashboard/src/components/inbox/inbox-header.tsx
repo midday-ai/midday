@@ -5,6 +5,7 @@ import { InboxSearch } from "@/components/inbox/inbox-search";
 import { InboxSettingsModal } from "@/components/inbox/modals/inbox-settings-modal";
 import { TAB_ITEMS } from "@/hooks/use-inbox-params";
 import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
 import { TabsList, TabsTrigger } from "@midday/ui/tabs";
 
 export function InboxHeader() {
@@ -30,9 +31,10 @@ export function InboxHeader() {
 
         <Button
           variant="outline"
+          size="icon"
           onClick={() => document.getElementById("upload-files")?.click()}
         >
-          Upload
+          <Icons.Add size={17} />
         </Button>
       </div>
     </div>
