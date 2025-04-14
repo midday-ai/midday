@@ -39,12 +39,12 @@ export const inboxDocument = schemaTask({
     }
 
     try {
-      const document = new DocumentClient({
-        contentType: inboxData.content_type!,
-      });
+      const document = new DocumentClient();
 
-      const result = await document.getDocument({
+      const result = await document.getInvoiceOrReceipt({
         content: Buffer.from(buffer).toString("base64"),
+        documentType:
+          inboxData.content_type === "application/pdf" ? "invoice" : "receipt",
       });
 
       const { data: updatedInbox } = await supabase

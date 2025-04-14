@@ -825,14 +825,13 @@ export async function getInboxQuery(
       content_type,
       date,
       status,
-      forwarded_to,
       created_at,
       website,
       description,
       transaction:transactions(id, amount, currency, name, date)
     `)
     .eq("team_id", teamId)
-    .order("created_at", { ascending: order === "asc" })
+    .order("created_at", { ascending: order === "desc" })
     .neq("status", "deleted");
 
   if (done) {

@@ -146,10 +146,20 @@ export function TransactionAttachments({ id, data }: Props) {
         });
       }
     },
-    maxSize: 3000000, // 3MB
+    maxSize: 10000000, // 10MB
     accept: {
-      "image/png": [".png"],
-      "image/jpeg": [".jpg", ".jpeg"],
+      "image/*": [
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".webp",
+        ".heic",
+        ".heif",
+        ".avif",
+        ".tiff",
+        ".bmp",
+      ],
       "application/pdf": [".pdf"],
     },
   });

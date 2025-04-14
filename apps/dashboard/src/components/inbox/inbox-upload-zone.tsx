@@ -1,10 +1,12 @@
 "use client";
 
 import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { resumableUpload } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
+import { useMutation } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -13,6 +15,7 @@ type Props = {
 };
 
 export function UploadZone({ children }: Props) {
+  const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const supabase = createClient();
   const [progress, setProgress] = useState(0);
@@ -20,6 +23,9 @@ export function UploadZone({ children }: Props) {
   const [toastId, setToastId] = useState(null);
   const uploadProgress = useRef([]);
   const { toast, dismiss, update } = useToast();
+  const processAttachmentsMutation = useMutation(
+    trpc.inbox.processAttachments.mutationOptions(),
+  );
 
   useEffect(() => {
     if (!toastId && showProgress) {
@@ -78,13 +84,13 @@ export function UploadZone({ children }: Props) {
       );
 
       // Trigger the upload jobs
-      // inboxUpload.execute(
-      //   results.map((result) => ({
-      //     file_path: [...path, result.filename],
-      //     mimetype: result.file.type,
-      //     size: result.file.size,
-      //   })),
-      // );
+      processAttachmentsMutation.mutate(
+        results.map((result) => ({
+          file_path: [...path, result.filename],
+          mimetype: result.file.type,
+          size: result.file.size,
+        })),
+      );
 
       // Reset once done
       uploadProgress.current = [];
@@ -127,11 +133,21 @@ export function UploadZone({ children }: Props) {
         });
       }
     },
-    maxSize: 3000000, // 3MB
-    maxFiles: 10,
+    maxSize: 10000000, // 10MB
+    maxFiles: 25,
     accept: {
-      "image/png": [".png"],
-      "image/jpeg": [".jpg", ".jpeg"],
+      "image/*": [
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".webp",
+        ".heic",
+        ".heif",
+        ".avif",
+        ".tiff",
+        ".bmp",
+      ],
       "application/pdf": [".pdf"],
     },
   });

@@ -138,15 +138,42 @@ export function UploadZone({ children }: Props) {
         });
       }
     },
-    maxSize: 8000000, // 8MB
+    maxSize: 10000000, // 10MB
     accept: {
-      "image/png": [".png"],
-      "image/jpeg": [".jpg", ".jpeg"],
+      "image/*": [
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".webp",
+        ".heic",
+        ".heif",
+        ".avif",
+        ".tiff",
+        ".bmp",
+      ],
       "application/pdf": [".pdf"],
       "application/zip": [".zip"],
       "text/csv": [".csv"],
       "application/vnd.openxmlformats-officedocument.presentationml.presentation":
         [".pptx"],
+      "application/vnd.ms-powerpoint": [".ppt"],
+      "application/msword": [".doc"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
+      "application/vnd.ms-excel": [".xls"],
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+        ".xlsx",
+      ],
+      "text/plain": [".txt"],
+      "application/rtf": [".rtf"],
+      "application/x-rar-compressed": [".rar"],
+      "application/x-7z-compressed": [".7z"],
+      "application/xml": [".xml"],
+      "application/json": [".json"],
+      "application/vnd.oasis.opendocument.text": [".odt"],
+      "application/vnd.oasis.opendocument.spreadsheet": [".ods"],
+      "application/vnd.oasis.opendocument.presentation": [".odp"],
     },
   });
 

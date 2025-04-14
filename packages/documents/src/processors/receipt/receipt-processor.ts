@@ -5,7 +5,7 @@ import type { Processor } from "../../interface";
 import type { GetDocumentRequest } from "../../types";
 import { getDomainFromEmail } from "../../utils";
 
-export class InvoiceProcessor implements Processor {
+export class ReceiptProcessor implements Processor {
   async #processDocument({ documentUrl }: GetDocumentRequest) {
     if (!documentUrl) {
       throw new Error("Document URL is required");
@@ -14,17 +14,9 @@ export class InvoiceProcessor implements Processor {
     const result = await generateObject({
       model: mistral("mistral-small-latest"),
       schema: z.object({
-        invoice_number: z
+        date: z
           .string()
-          .nullable()
-          .describe("Unique identifier for the invoice"),
-        invoice_date: z
-          .string()
-          .nullable()
-          .describe("Date of invoice in ISO 8601 format (YYYY-MM-DD)"),
-        due_date: z
-          .string()
-          .describe("Payment due date in ISO 8601 format (YYYY-MM-DD)"),
+          .describe("Date of receipt in ISO 8601 format (YYYY-MM-DD)"),
         currency: z
           .string()
           .describe(
@@ -36,28 +28,19 @@ export class InvoiceProcessor implements Processor {
           .nullable()
           .describe("Subtotal amount before tax"),
         tax_amount: z.number().nullable().describe("Tax amount"),
-        vendor_name: z
+        store_name: z
           .string()
           .nullable()
-          .describe("Name of the vendor/seller"),
-        vendor_address: z
-          .string()
-          .nullable()
-          .describe("Complete address of the vendor"),
-        customer_name: z
-          .string()
-          .nullable()
-          .describe("Name of the customer/buyer"),
-        customer_address: z
-          .string()
-          .nullable()
-          .describe("Complete address of the customer"),
+          .describe("Name of the store/merchant"),
         website: z
           .string()
           .nullable()
           .describe("Domain-only website of vendor (e.g., example.com)"),
-        email: z.string().nullable().describe("Email of the vendor/seller"),
-        line_items: z
+        payment_method: z
+          .string()
+          .nullable()
+          .describe("Method of payment (e.g., cash, credit card, debit card)"),
+        items: z
           .array(
             z.object({
               description: z
@@ -69,38 +52,46 @@ export class InvoiceProcessor implements Processor {
               total_price: z
                 .number()
                 .nullable()
-                .describe("Total price for this line item"),
+                .describe("Total price for this item"),
+              discount: z
+                .number()
+                .nullable()
+                .describe("Discount amount applied to this item if any"),
             }),
           )
-          .describe("Array of items listed in the document"),
-        payment_instructions: z
+          .describe("Array of items purchased"),
+        cashier_name: z
           .string()
           .nullable()
-          .describe("Payment terms or instructions"),
-        notes: z.string().nullable().describe("Additional notes or comments"),
+          .describe("Name or ID of the cashier"),
+        email: z.string().nullable().describe("Email of the store/merchant"),
+        register_number: z
+          .string()
+          .nullable()
+          .describe("POS terminal or register number"),
       }),
       temperature: 0,
       messages: [
         {
           role: "system",
           content: `
-            You are a multilingual document parser that extracts structured data from financial documents such as invoices and receipts.
+            You are a multilingual document parser specialized in extracting structured data from retail receipts and point-of-sale documents.
+            Focus on identifying transaction details, itemized purchases, payment information, and store details.
           `,
         },
         {
           role: "user",
           content: [
             {
-              type: "file",
-              data: documentUrl,
-              mimeType: "application/pdf",
+              type: "image",
+              image: documentUrl,
             },
           ],
         },
       ],
       providerOptions: {
         mistral: {
-          documentPageLimit: 10,
+          documentImageLimit: 4,
         },
       },
     });
@@ -119,7 +110,7 @@ export class InvoiceProcessor implements Processor {
     return getDomainFromEmail(email);
   }
 
-  public async getInvoice(params: GetDocumentRequest) {
+  public async getReceipt(params: GetDocumentRequest) {
     const result = await this.#processDocument(params);
 
     const website = this.#getWebsite({
@@ -130,19 +121,15 @@ export class InvoiceProcessor implements Processor {
     return {
       ...result,
       website,
-      type: "invoice",
-      description: result.notes,
-      date: result.due_date,
+      type: "receipt",
+      date: result.date,
       amount: result.total_amount,
       currency: result.currency,
-      name: result.vendor_name,
+      name: result.store_name,
       metadata: {
-        invoice_date: result.invoice_date,
-        payment_instructions: result.payment_instructions,
-        invoice_number: result.invoice_number,
-        customer_name: result.customer_name,
-        customer_address: result.customer_address,
-        vendor_address: result.vendor_address,
+        register_number: result.register_number,
+        cashier_name: result.cashier_name,
+        email: result.email,
       },
     };
   }

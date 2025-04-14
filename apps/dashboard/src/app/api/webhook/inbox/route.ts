@@ -1,17 +1,13 @@
 import { logger } from "@/utils/logger";
-import { resend } from "@/utils/resend";
-import { getAllowedAttachments, prepareDocument } from "@midday/documents";
+import { getAllowedAttachments } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
-import { client as RedisClient } from "@midday/kv";
 import { createClient } from "@midday/supabase/server";
 import { inboxDocument } from "jobs/tasks/inbox/document";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-
-export const runtime = "nodejs";
 
 // https://postmarkapp.com/support/article/800-ips-for-firewalls#webhooks
 const ipRange = [
@@ -47,15 +43,8 @@ export async function POST(req: Request) {
     );
   }
 
-  const {
-    MessageID,
-    FromFull,
-    Subject,
-    Attachments,
-    TextBody,
-    HtmlBody,
-    OriginalRecipient,
-  } = parsedBody.data;
+  const { MessageID, FromFull, Subject, Attachments, OriginalRecipient } =
+    parsedBody.data;
 
   const inboxId = getInboxIdFromEmail(OriginalRecipient);
 
@@ -90,69 +79,12 @@ export async function POST(req: Request) {
 
     const teamId = teamData?.id;
 
-    const fallbackName = Subject ?? FromFull?.Name;
-    const forwardEmail = teamData?.inbox_email;
-    const forwardingEnabled = teamData?.inbox_forwarding && forwardEmail;
-
-    if (forwardingEnabled) {
-      const messageKey = `message-id:${MessageID}`;
-      const isForwarded = await RedisClient.exists(messageKey);
-
-      if (!isForwarded) {
-        const { error } = await resend.emails.send({
-          from: `${FromFull?.Name} <${FORWARD_FROM_EMAIL}>`,
-          to: [forwardEmail],
-          subject: fallbackName,
-          text: TextBody,
-          html: HtmlBody,
-          attachments: Attachments?.map((a) => ({
-            filename: a.Name,
-            content: a.Content,
-          })),
-          react: null,
-          headers: {
-            "X-Entity-Ref-ID": nanoid(),
-          },
-        });
-
-        if (!error) {
-          await RedisClient.set(messageKey, true, { ex: 9600 });
-        }
-      }
-    }
-
     const allowedAttachments = getAllowedAttachments(Attachments);
 
-    // If no attachments we just want to forward the email
-    if (!allowedAttachments?.length && forwardEmail) {
-      const messageKey = `message-id:${MessageID}`;
-      const isForwarded = await RedisClient.exists(messageKey);
-
-      if (!isForwarded) {
-        const { error } = await resend.emails.send({
-          from: `${FromFull?.Name} <${FORWARD_FROM_EMAIL}>`,
-          to: [forwardEmail],
-          subject: fallbackName,
-          text: TextBody,
-          html: HtmlBody,
-          attachments: Attachments?.map((a) => ({
-            filename: a.Name,
-            content: a.Content,
-          })),
-          react: null,
-          headers: {
-            "X-Entity-Ref-ID": nanoid(),
-          },
-        });
-
-        if (!error) {
-          await RedisClient.set(messageKey, true, { ex: 9600 });
-        }
-      }
-
-      return NextResponse.json({
-        success: true,
-      });
+    if (!allowedAttachments?.length) {
+      logger("No allowed attachments");
+      // No attachments
+      return NextResponse.json({ success: true });
     }
 
     // Transform and upload files, filtering out attachments smaller than 100kb except PDFs
@@ -166,33 +98,29 @@ export async function POST(req: Request) {
           ),
       )
       ?.map(async (attachment) => {
-        const { content, mimeType, size, fileName, name } =
-          await prepareDocument(attachment);
-
         // Add a random 4 character string to the end of the file name
         // to make it unique before the extension
-        const uniqueFileName = fileName.replace(
+        const uniqueFileName = attachment.Name.replace(
           /(\.[^.]+)$/,
           (ext) => `_${nanoid(4)}${ext}`,
         );
 
         const { data } = await supabase.storage
           .from("vault")
-          .upload(`${teamId}/inbox/${uniqueFileName}`, content, {
-            contentType: mimeType,
+          .upload(`${teamId}/inbox/${uniqueFileName}`, attachment.Content, {
+            contentType: attachment.ContentType,
             upsert: true,
           });
 
         return {
           // NOTE: If we can't parse the name using OCR this will be the fallback name
-          display_name: Subject || name,
+          display_name: Subject || attachment.Name,
           team_id: teamId,
           file_path: data?.path.split("/"),
           file_name: uniqueFileName,
-          content_type: mimeType,
-          forwarded_to: forwardingEnabled ? forwardEmail : null,
+          content_type: attachment.ContentType,
           reference_id: `${MessageID}_${uniqueFileName}`,
-          size,
+          size: attachment.ContentLength,
         };
       });
 

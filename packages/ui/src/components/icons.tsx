@@ -2,7 +2,6 @@ import { ArchiveIcon } from "@radix-ui/react-icons";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiGithub } from "react-icons/fi";
 import {
-  MdAdd,
   MdAddLink,
   MdArrowBack,
   MdArrowLeft,
@@ -11,7 +10,6 @@ import {
   MdArrowUpward,
   MdAttachMoney,
   MdAutoAwesome,
-  MdBarChart,
   MdChangeHistory,
   MdChevronLeft,
   MdChevronRight,
@@ -42,8 +40,8 @@ import {
   MdMoreHoriz,
   MdOutlineAccountBalance,
   MdOutlineAccountCircle,
+  MdOutlineAdd,
   MdOutlineApps,
-  MdOutlineArchive,
   MdOutlineArrowDownward,
   MdOutlineArrowForward,
   MdOutlineArrowOutward,
@@ -687,7 +685,7 @@ export const Icons = {
   Tracker: MdOutlineTimer,
   Time: MdOutlineMoreTime,
   WorkInProgress: MdOutlineHandyman,
-  Add: MdAdd,
+  Add: MdOutlineAdd,
   DashboardCustomize: MdOutlineDashboardCustomize,
   Copy: MdOutlineContentCopy,
   InboxEmpty: MdOutlineMoveToInbox,
