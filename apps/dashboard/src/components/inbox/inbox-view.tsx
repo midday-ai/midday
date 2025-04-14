@@ -3,11 +3,13 @@
 import { LoadMore } from "@/components/load-more";
 import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { TAB_ITEMS, useInboxParams } from "@/hooks/use-inbox-params";
+import { useRealtime } from "@/hooks/use-realtime";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { TabsContent } from "@midday/ui/tabs";
-import { useToast } from "@midday/ui/use-toast";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import { InboxDetails } from "./inbox-details";
@@ -17,8 +19,8 @@ import { InboxItem } from "./inbox-item";
 export function InboxView() {
   const trpc = useTRPC();
   const { ref, inView } = useInView();
-  const { toast } = useToast();
-  const { params } = useInboxParams();
+  const { data: user } = useUserQuery();
+  const { params, setParams } = useInboxParams();
   const { params: filter, hasFilter } = useInboxFilterParams();
 
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
@@ -34,8 +36,27 @@ export function InboxView() {
     },
   );
 
-  const { data, fetchNextPage, hasNextPage } =
+  const { data, fetchNextPage, hasNextPage, refetch } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
+
+  useRealtime({
+    channelName: "realtime_inbox",
+    table: "inbox",
+    filter: `team_id=eq.${user?.team_id}`,
+    onEvent: (payload) => {
+      switch (payload.eventType) {
+        case "INSERT":
+        case "UPDATE": {
+          refetch();
+          setParams({
+            ...params,
+            inboxId: payload.new.id,
+          });
+          break;
+        }
+      }
+    },
+  });
 
   useEffect(() => {
     if (inView) {
@@ -65,17 +86,31 @@ export function InboxView() {
           className="relative w-full h-[calc(100vh-180px)] overflow-hidden"
           hideScrollbar
         >
-          {TAB_ITEMS.map((value) => (
-            <TabsContent
-              key={value}
-              value={value}
-              className="m-0 h-full space-y-4"
-            >
-              {tableData.map((item) => (
-                <InboxItem key={item.id} item={item} />
-              ))}
-            </TabsContent>
-          ))}
+          <AnimatePresence initial={false}>
+            {TAB_ITEMS.map((value) => (
+              <TabsContent
+                key={value}
+                value={value}
+                className="m-0 h-full space-y-4"
+              >
+                {tableData.map((item) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{
+                      opacity: { duration: 0.2 },
+                      height: { duration: 0.3 },
+                    }}
+                  >
+                    <InboxItem item={item} />
+                  </motion.div>
+                ))}
+              </TabsContent>
+            ))}
+          </AnimatePresence>
 
           <LoadMore ref={ref} hasNextPage={hasNextPage} />
         </ScrollArea>

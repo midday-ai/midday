@@ -30,3 +30,9 @@ export function getDomainFromEmail(email?: string | null): string | null {
 
   return domain;
 }
+
+export function removeProtocolFromDomain(domain: string | null): string | null {
+  if (!domain) return null;
+
+  return domain.replace(/^(https?:\/\/)/, "");
+}

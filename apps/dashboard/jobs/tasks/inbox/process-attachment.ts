@@ -58,32 +58,30 @@ export const processAttachment = schemaTask({
         documentType: mimetype === "application/pdf" ? "invoice" : "receipt",
       });
 
-      console.log(result);
-
-      //     const { data: updatedInbox } = await supabase
-      //       .from("inbox")
-      //       .update({
-      //         amount: result.amount,
-      //         currency: result.currency,
-      //         display_name: result.name,
-      //         website: result.website,
-      //         date: result.date && new Date(result.date).toISOString(),
-      //         type: result.type,
-      //         description: result.description,
-      //         status: "pending",
-      //       })
-      //       .eq("id", inboxData.id)
-      //       .select()
-      //       .single();
+      const { data: updatedInbox } = await supabase
+        .from("inbox")
+        .update({
+          amount: result.amount,
+          currency: result.currency,
+          display_name: result.name,
+          website: result.website,
+          date: result.date && new Date(result.date).toISOString(),
+          // type: result.type,
+          description: result.description,
+          status: "pending",
+        })
+        .eq("id", inboxData.id)
+        .select()
+        .single();
 
       //     // TODO: Send event to match inbox
     } catch {
       //     // If we end up here we could not parse the document
       //     // But we want to update the status so we show the record with fallback name
-      //     await supabase
-      //       .from("inbox")
-      //       .update({ status: "pending" })
-      //       .eq("id", inboxData.id);
+      await supabase
+        .from("inbox")
+        .update({ status: "pending" })
+        .eq("id", inboxData.id);
     }
   },
 });

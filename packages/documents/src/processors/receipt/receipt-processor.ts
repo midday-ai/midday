@@ -1,11 +1,10 @@
 import { mistral } from "@ai-sdk/mistral";
 import { generateObject } from "ai";
 import { z } from "zod";
-import type { Processor } from "../../interface";
 import type { GetDocumentRequest } from "../../types";
-import { getDomainFromEmail } from "../../utils";
+import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
 
-export class ReceiptProcessor implements Processor {
+export class ReceiptProcessor {
   async #processDocument({ documentUrl }: GetDocumentRequest) {
     if (!documentUrl) {
       throw new Error("Document URL is required");
@@ -35,7 +34,7 @@ export class ReceiptProcessor implements Processor {
         website: z
           .string()
           .nullable()
-          .describe("Domain-only website of vendor (e.g., example.com)"),
+          .describe("Website of store/merchant (e.g., example.com)"),
         payment_method: z
           .string()
           .nullable()
@@ -70,7 +69,6 @@ export class ReceiptProcessor implements Processor {
           .nullable()
           .describe("POS terminal or register number"),
       }),
-      temperature: 0,
       messages: [
         {
           role: "system",
@@ -107,7 +105,7 @@ export class ReceiptProcessor implements Processor {
       return website;
     }
 
-    return getDomainFromEmail(email);
+    return removeProtocolFromDomain(getDomainFromEmail(email));
   }
 
   public async getReceipt(params: GetDocumentRequest) {

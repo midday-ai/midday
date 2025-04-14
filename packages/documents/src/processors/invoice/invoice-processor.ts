@@ -1,11 +1,10 @@
 import { mistral } from "@ai-sdk/mistral";
 import { generateObject } from "ai";
 import { z } from "zod";
-import type { Processor } from "../../interface";
 import type { GetDocumentRequest } from "../../types";
-import { getDomainFromEmail } from "../../utils";
+import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
 
-export class InvoiceProcessor implements Processor {
+export class InvoiceProcessor {
   async #processDocument({ documentUrl }: GetDocumentRequest) {
     if (!documentUrl) {
       throw new Error("Document URL is required");
@@ -30,12 +29,7 @@ export class InvoiceProcessor implements Processor {
           .describe(
             "Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK)",
           ),
-        total_amount: z.number().describe("Total amount including tax"),
-        subtotal_amount: z
-          .number()
-          .nullable()
-          .describe("Subtotal amount before tax"),
-        tax_amount: z.number().nullable().describe("Tax amount"),
+        total_amount: z.number().describe("Total amount for the invoice"),
         vendor_name: z
           .string()
           .nullable()
@@ -55,7 +49,7 @@ export class InvoiceProcessor implements Processor {
         website: z
           .string()
           .nullable()
-          .describe("Domain-only website of vendor (e.g., example.com)"),
+          .describe("Website of vendor (e.g., example.com)"),
         email: z.string().nullable().describe("Email of the vendor/seller"),
         line_items: z
           .array(
@@ -79,7 +73,6 @@ export class InvoiceProcessor implements Processor {
           .describe("Payment terms or instructions"),
         notes: z.string().nullable().describe("Additional notes or comments"),
       }),
-      temperature: 0,
       messages: [
         {
           role: "system",
@@ -116,7 +109,7 @@ export class InvoiceProcessor implements Processor {
       return website;
     }
 
-    return getDomainFromEmail(email);
+    return removeProtocolFromDomain(getDomainFromEmail(email));
   }
 
   public async getInvoice(params: GetDocumentRequest) {
@@ -143,6 +136,9 @@ export class InvoiceProcessor implements Processor {
         customer_name: result.customer_name,
         customer_address: result.customer_address,
         vendor_address: result.vendor_address,
+        vendor_name: result.vendor_name,
+        email: result.email,
+        line_items: result.line_items,
       },
     };
   }
