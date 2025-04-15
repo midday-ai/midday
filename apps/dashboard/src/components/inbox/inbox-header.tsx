@@ -10,7 +10,7 @@ import { TabsList, TabsTrigger } from "@midday/ui/tabs";
 
 export function InboxHeader() {
   return (
-    <div className="flex justify-center items-center space-x-4 mb-4 mt-4 w-full pr-[732px]">
+    <div className="flex justify-center items-center space-x-4 mb-4 mt-4 w-full pr-[627px]">
       <TabsList>
         {TAB_ITEMS.map((item) => (
           <TabsTrigger key={item} value={item}>

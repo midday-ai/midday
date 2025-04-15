@@ -4,7 +4,8 @@ import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
 import { createClient } from "@midday/supabase/server";
-import { inboxDocument } from "jobs/tasks/inbox/document";
+import { tasks } from "@trigger.dev/sdk/v3";
+import type { processAttachment } from "jobs/tasks/inbox/process-attachment";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -138,20 +139,23 @@ export async function POST(req: Request) {
     const { data: inboxData } = await supabase
       .from("inbox")
       .insert(insertData)
-      .select("id")
+      .select("id, file_path, content_type, size")
       .throwOnError();
 
     if (!inboxData?.length) {
       throw Error("No records");
     }
 
-    // Trigger the document task job
-    await Promise.all(
-      inboxData.map((inbox) =>
-        inboxDocument.trigger({
-          inboxId: inbox.id,
-        }),
-      ),
+    await tasks.batchTrigger<typeof processAttachment>(
+      "process-attachment",
+      inboxData.map((item) => ({
+        payload: {
+          file_path: item.file_path!,
+          mimetype: item.content_type!,
+          size: item.size!,
+          teamId: teamId!,
+        },
+      })),
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

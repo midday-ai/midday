@@ -13,6 +13,7 @@ const config = {
     ],
   },
   transpilePackages: ["@midday/ui", "@midday/tailwind", "@midday/invoice"],
+  serverExternalPackages: ["pdf-to-img", "@react-pdf/renderer"],
   eslint: {
     ignoreDuringBuilds: true,
   },

@@ -1,0 +1,45 @@
+"use client";
+
+import { useState } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/TextLayer.css";
+import { ScrollArea } from "@midday/ui/scroll-area";
+import { Skeleton } from "@midday/ui/skeleton";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+interface PdfViewerProps {
+  url: string;
+}
+
+export function PdfViewer({ url }: PdfViewerProps) {
+  const [numPages, setNumPages] = useState<number>();
+
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
+    setNumPages(numPages);
+  }
+
+  return (
+    <div className="flex flex-col w-full h-full pdf-viewer overflow-hidden">
+      <ScrollArea className="w-full flex-1">
+        <Document
+          file={url}
+          onLoadSuccess={onDocumentLoadSuccess}
+          loading={
+            <Skeleton className="w-full h-[calc(100vh-theme(spacing.24))]" />
+          }
+        >
+          {numPages &&
+            Array.from(new Array(numPages), (_, index) => (
+              <Page
+                key={`page_${index + 1}`}
+                pageNumber={index + 1}
+                renderAnnotationLayer={false}
+                renderTextLayer={true}
+              />
+            ))}
+        </Document>
+      </ScrollArea>
+    </div>
+  );
+}

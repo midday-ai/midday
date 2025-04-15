@@ -1,8 +1,8 @@
+import { FileViewer } from "@/components/file-viewer";
 import { formatSize } from "@/utils/format";
 import { Button } from "@midday/ui/button";
 import { Skeleton } from "@midday/ui/skeleton";
 import { X } from "lucide-react";
-import { FilePreview } from "./file-preview";
 
 type Props = {
   file: any;
@@ -17,15 +17,9 @@ export function AttachmentItem({ file, onDelete }: Props) {
           {file.isUploading ? (
             <Skeleton className="w-full h-full" />
           ) : (
-            <FilePreview
-              src={`/api/proxy?filePath=vault/${file?.path?.join("/")}`}
-              name={file.name}
-              type={file.type}
-              preview
-              width={45}
-              height={100}
-              // Wait for the sheet to open before loading the file
-              delay={100}
+            <FileViewer
+              mimeType={file.type}
+              url={`/api/proxy?filePath=vault/${file?.path?.join("/")}`}
             />
           )}
         </div>

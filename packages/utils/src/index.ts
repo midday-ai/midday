@@ -13,29 +13,3 @@ export function shuffle(array: any) {
   }
   return array;
 }
-
-export enum FileType {
-  Pdf = "application/pdf",
-  Heic = "image/heic",
-}
-
-export const isSupportedFilePreview = (type: FileType) => {
-  if (!type) {
-    return false;
-  }
-
-  if (type === FileType.Heic) {
-    return false;
-  }
-
-  if (type?.startsWith("image")) {
-    return true;
-  }
-
-  switch (type) {
-    case FileType.Pdf:
-      return true;
-    default:
-      return false;
-  }
-};

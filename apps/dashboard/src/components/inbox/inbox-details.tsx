@@ -1,7 +1,5 @@
-import { FilePreview } from "@/components/file-preview";
+import { FileViewer } from "@/components/file-viewer";
 import { FormatAmount } from "@/components/format-amount";
-import { EditInboxModal } from "@/components/modals/edit-inbox-modal";
-import { SelectTransaction } from "@/components/select-transaction";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -67,6 +65,7 @@ export function InboxDetails({ item }: Props) {
   }, [item]);
 
   const handleCopyLink = async () => {
+    if (!item) return;
     try {
       await navigator.clipboard.writeText(`${getUrl()}/inbox?id=${item.id}`);
 
@@ -85,7 +84,7 @@ export function InboxDetails({ item }: Props) {
   const fallback = showFallback || (!item?.website && item?.display_name);
 
   return (
-    <div className="h-[calc(100vh-120px)] overflow-hidden flex-col border w-[700px] hidden md:flex shrink-0 -mt-[54px]">
+    <div className="h-[calc(100vh-120px)] overflow-hidden flex-col border w-[595px] hidden md:flex shrink-0 -mt-[54px]">
       <div className="flex items-center p-2">
         <div className="flex items-center gap-2">
           <Tooltip>
@@ -137,7 +136,7 @@ export function InboxDetails({ item }: Props) {
       <Separator />
 
       {item?.id ? (
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-col flex-grow min-h-0">
           <div className="flex items-start p-4">
             <div className="flex items-start gap-4 text-sm relative">
               {isProcessing ? (
@@ -185,7 +184,7 @@ export function InboxDetails({ item }: Props) {
                   {isProcessing && !item.currency && (
                     <Skeleton className="h-3 w-[50px] rounded-sm" />
                   )}
-                  {item.currency && (
+                  {item.currency && item.amount != null && (
                     <FormatAmount
                       amount={item.amount}
                       currency={item.currency}
@@ -217,39 +216,17 @@ export function InboxDetails({ item }: Props) {
                     </TooltipContent>
                   </Tooltip>
                 )}
-
-                {item.forwarded_to && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Icons.Forwarded />
-                    </TooltipTrigger>
-                    <TooltipContent
-                      className="px-3 py-1.5 text-xs"
-                      side="left"
-                      sideOffset={8}
-                    >
-                      Forwarded to {item.forwarded_to}
-                    </TooltipContent>
-                  </Tooltip>
-                )}
               </div>
             </div>
           </div>
           <Separator />
 
-          <div className="relative h-full">
-            {item?.file_path && (
-              <FilePreview
-                src={`/api/proxy?filePath=vault/${item?.file_path.join("/")}`}
-                name={item.name}
-                type={item.content_type}
-                disableFullscreen
-                isFullscreen
-                width={680}
-                height={780}
-              />
-            )}
-          </div>
+          {item?.file_path && (
+            <FileViewer
+              mimeType={item.content_type}
+              url={`/api/proxy?filePath=vault/${item?.file_path.join("/")}`}
+            />
+          )}
 
           {/* <div className="h-12 dark:bg-[#1A1A1A] bg-[#F6F6F3] justify-between items-center flex border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-full fixed bottom-14 right-[160px] z-50 w-[400px]"> */}
           {/* <SelectTransaction
