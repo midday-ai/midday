@@ -1,16 +1,8 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { getVaultActivityQuery, getVaultQuery } from "@midday/supabase/queries";
+import { getVaultActivityQuery } from "@midday/supabase/queries";
 import { z } from "zod";
 
 export const vaultRouter = createTRPCRouter({
-  get: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
-    const { data } = await getVaultQuery(supabase, {
-      teamId: teamId!,
-    });
-
-    return data;
-  }),
-
   activity: protectedProcedure
     .input(
       z.object({

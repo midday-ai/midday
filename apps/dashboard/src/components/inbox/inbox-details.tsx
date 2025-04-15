@@ -2,7 +2,9 @@ import { FilePreview } from "@/components/file-preview";
 import { FormatAmount } from "@/components/format-amount";
 import { EditInboxModal } from "@/components/modals/edit-inbox-modal";
 import { SelectTransaction } from "@/components/select-transaction";
+import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getUrl } from "@/utils/environment";
 import { formatDate } from "@/utils/format";
@@ -20,6 +22,7 @@ import { Separator } from "@midday/ui/separator";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -28,10 +31,34 @@ type Props = {
 };
 
 export function InboxDetails({ item }: Props) {
+  const { setParams, params } = useInboxParams();
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isOpen, setOpen] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
   const { data: user } = useUserQuery();
+
+  const deleteInboxMutation = useMutation(
+    trpc.inbox.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
+        });
+
+        setParams({
+          ...params,
+          inboxId: null,
+        });
+      },
+    }),
+  );
+
+  const handleOnDelete = () => {
+    if (item?.id) {
+      deleteInboxMutation.mutate({ id: item.id });
+    }
+  };
 
   const isProcessing = item?.status === "processing" || item?.status === "new";
 
@@ -67,7 +94,7 @@ export function InboxDetails({ item }: Props) {
                 variant="ghost"
                 size="icon"
                 disabled={!item}
-                // onClick={onDelete}
+                onClick={handleOnDelete}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

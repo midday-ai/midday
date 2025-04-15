@@ -1,5 +1,4 @@
 import { FilePreview } from "@/components/file-preview";
-import { Tag } from "@/components/tables/vault/tag";
 import type { RouterOutputs } from "@/trpc/routers/_app";
 import {
   HoverCard,
@@ -24,7 +23,6 @@ export function Vault({ files }: Props) {
       // @ts-expect-error
       mimetype: file.metadata?.mimetype,
       team_id: file.team_id,
-      tag: file.tag ?? undefined,
       src: `/api/proxy?filePath=vault/${file.path_tokens?.join("/")}`,
       downloadUrl: `/api/download/file?path=${downloadPath}&filename=${name}`,
     };
@@ -42,10 +40,6 @@ export function Vault({ files }: Props) {
                 <div className="flex items-center py-3">
                   <div className="w-[55%]">
                     <span className="text-sm line-clamp-1">{file.name}</span>
-                  </div>
-
-                  <div className="ml-auto w-[40%] flex justify-end">
-                    <Tag name={file.tag} />
                   </div>
                 </div>
               </HoverCardTrigger>

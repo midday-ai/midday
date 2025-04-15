@@ -1,5 +1,4 @@
 import type { MutableAIState } from "@/actions/ai/types";
-import { getVaultQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { nanoid } from "nanoid";
 import { z } from "zod";
@@ -20,17 +19,14 @@ export function getDocumentsTool({ aiState, teamId }: Args) {
       const { name } = args;
       const supabase = await createClient();
 
-      const { data } = await getVaultQuery(supabase, {
-        teamId,
-        searchQuery: name,
-      });
+      return null;
 
-      const formattedData = data?.map((item) => ({
-        ...item,
-        content_type: item?.metadata?.mimetype,
-        display_name: item?.name,
-        file_path: item?.path_tokens,
-      }));
+      // const formattedData = data?.map((item) => ({
+      //   ...item,
+      //   content_type: item?.metadata?.mimetype,
+      //   display_name: item?.name,
+      //   file_path: item?.path_tokens,
+      // }));
 
       const props = {
         data: formattedData,

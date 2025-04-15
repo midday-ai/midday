@@ -1,8 +1,9 @@
-// import { DocumentClient } from "@midday/documents";
 import { DocumentClient } from "@midday/documents";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
+import { convertHeic } from "../document/convert-heic";
+import { generatePreview } from "../document/generate-preview";
 
 export const processAttachment = schemaTask({
   id: "process-attachment",
@@ -18,6 +19,23 @@ export const processAttachment = schemaTask({
   },
   run: async ({ teamId, mimetype, size, file_path }) => {
     const supabase = createClient();
+
+    // If the file is a PDF we need to generate a preview (we don't need to wait for it)
+    if (
+      mimetype === "application/pdf" ||
+      mimetype === "application/octet-stream"
+    ) {
+      await generatePreview.trigger({
+        file_path,
+      });
+    }
+
+    // If the file is a HEIC we need to convert it to a JPG
+    if (mimetype === "image/heic") {
+      await convertHeic.triggerAndWait({
+        file_path,
+      });
+    }
 
     const filename = file_path.at(-1);
 
@@ -56,7 +74,7 @@ export const processAttachment = schemaTask({
         documentType: mimetype === "application/pdf" ? "invoice" : "receipt",
       });
 
-      const { data: updatedInbox } = await supabase
+      await supabase
         .from("inbox")
         .update({
           amount: result.amount,
@@ -71,7 +89,7 @@ export const processAttachment = schemaTask({
         .select()
         .single();
 
-      //     // TODO: Send event to match inbox
+      // TODO: Send event to match inbox
     } catch {
       //     // If we end up here we could not parse the document
       //     // But we want to update the status so we show the record with fallback name

@@ -9,12 +9,31 @@ import { useTRPC } from "@/trpc/client";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { TabsContent } from "@midday/ui/tabs";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, type Variants, motion } from "framer-motion";
 import { useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import { InboxDetails } from "./inbox-details";
 import { InboxEmpty, NoResults } from "./inbox-empty";
 import { InboxItem } from "./inbox-item";
+
+const itemVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 10,
+    scale: 0.98,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.1, ease: "easeOut" },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.98,
+    transition: { duration: 0.08, ease: "easeIn" },
+  },
+};
 
 export function InboxView() {
   const trpc = useTRPC();
@@ -93,17 +112,14 @@ export function InboxView() {
                 value={value}
                 className="m-0 h-full space-y-4"
               >
-                {tableData.map((item) => (
+                {tableData.map((item, index) => (
                   <motion.div
                     key={item.id}
                     layout
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{
-                      opacity: { duration: 0.2 },
-                      height: { duration: 0.3 },
-                    }}
+                    variants={itemVariants}
+                    initial={false}
+                    animate="visible"
+                    exit="exit"
                   >
                     <InboxItem item={item} />
                   </motion.div>

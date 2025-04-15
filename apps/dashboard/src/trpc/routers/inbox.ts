@@ -1,4 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { deleteInbox } from "@midday/supabase/mutations";
 import { getInboxQuery, getInboxSearchQuery } from "@midday/supabase/queries";
 import { tasks } from "@trigger.dev/sdk/v3";
 import type { processAttachment } from "jobs/tasks/inbox/process-attachment";
@@ -24,6 +25,12 @@ export const inboxRouter = createTRPCRouter({
         teamId: teamId!,
         ...input,
       });
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx: { supabase }, input }) => {
+      return deleteInbox(supabase, { id: input.id });
     }),
 
   processAttachments: protectedProcedure

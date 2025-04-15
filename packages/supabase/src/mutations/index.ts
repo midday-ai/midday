@@ -1154,3 +1154,11 @@ export async function deleteTrackerEntry(
 ) {
   return supabase.from("tracker_entries").delete().eq("id", params.id);
 }
+
+type DeleteInboxParams = {
+  id: string;
+};
+
+export async function deleteInbox(supabase: Client, params: DeleteInboxParams) {
+  return supabase.from("inbox").delete().eq("id", params.id);
+}

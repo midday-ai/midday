@@ -103,7 +103,7 @@ export const inboxSlackUpload = schemaTask({
           display_name: result.name,
           website: result.website,
           date: result.date ? new Date(result.date).toISOString() : null,
-          type: result.type,
+          // type: result.type,
           description: result.description,
           status: "pending",
         })
