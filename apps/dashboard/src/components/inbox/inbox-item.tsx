@@ -9,13 +9,15 @@ import { Skeleton } from "@midday/ui/skeleton";
 
 type Props = {
   item: RouterOutputs["inbox"]["get"]["data"][number];
+  index: number;
 };
 
-export function InboxItem({ item }: Props) {
+export function InboxItem({ item, index }: Props) {
   const { params, setParams } = useInboxParams();
   const { data: user } = useUserQuery();
 
-  const isSelected = params.inboxId === item.id;
+  const isSelected =
+    params.inboxId === item.id || (!params.inboxId && index === 0);
   const isProcessing = item.status === "processing" || item.status === "new";
 
   return (
@@ -36,7 +38,7 @@ export function InboxItem({ item }: Props) {
             <div className="flex items-center space-x-2 select-text">
               <div className="font-semibold">
                 {isProcessing ? (
-                  <Skeleton className="h-3 w-[120px] rounded-sm mb-1" />
+                  <Skeleton className="h-3 w-[120px] mb-1" />
                 ) : (
                   item.display_name
                 )}
@@ -49,7 +51,7 @@ export function InboxItem({ item }: Props) {
               isSelected ? "text-foreground" : "text-muted-foreground",
             )}
           >
-            {isProcessing && <Skeleton className="h-3 w-[50px] rounded-sm" />}
+            {isProcessing && <Skeleton className="h-3 w-[50px]" />}
             {!isProcessing &&
               item?.date &&
               formatDate(item.date, user?.date_format)}
@@ -58,7 +60,7 @@ export function InboxItem({ item }: Props) {
 
         <div className="flex">
           <div className="text-xs font-medium select-text">
-            {isProcessing && <Skeleton className="h-3 w-[50px] rounded-sm" />}
+            {isProcessing && <Skeleton className="h-3 w-[50px]" />}
             {!isProcessing && item?.currency && item?.amount && (
               <FormatAmount amount={item.amount} currency={item.currency} />
             )}

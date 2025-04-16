@@ -650,7 +650,7 @@ type GetInboxQueryParams = {
   pageSize?: number;
   filter?: {
     q?: string | null;
-    done?: boolean;
+    done?: boolean | null;
   };
 };
 
@@ -663,7 +663,7 @@ export async function getInboxQuery(
     filter: { q, done } = {},
     cursor,
     order,
-    pageSize = 10,
+    pageSize = 20,
   } = params;
 
   const query = supabase
@@ -690,8 +690,6 @@ export async function getInboxQuery(
 
   if (done) {
     query.not("transaction_id", "is", null);
-  } else {
-    query.is("transaction_id", null);
   }
 
   if (q) {
@@ -722,6 +720,29 @@ export async function getInboxQuery(
     },
     data: data || [],
   };
+}
+
+export async function getInboxByIdQuery(supabase: Client, id: string) {
+  return supabase
+    .from("inbox")
+    .select(`
+      id,
+      file_name,
+      file_path, 
+      display_name,
+      transaction_id,
+      amount,
+      currency,
+      content_type,
+      date,
+      status,
+      created_at,
+      website,
+      description,
+      transaction:transactions(id, amount, currency, name, date)
+    `)
+    .eq("id", id)
+    .single();
 }
 
 type GetTrackerProjectByIdQueryParams = {

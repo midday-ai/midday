@@ -3,6 +3,7 @@ import { createLoader, parseAsBoolean, parseAsString } from "nuqs/server";
 
 export const inboxFilterParamsSchema = {
   q: parseAsString,
+  done: parseAsBoolean,
 };
 
 export function useInboxFilterParams() {

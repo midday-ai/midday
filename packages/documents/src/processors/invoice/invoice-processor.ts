@@ -50,7 +50,7 @@ export class InvoiceProcessor {
           .string()
           .nullable()
           .describe(
-            "Website of vendor (e.g., example.com), if not available use the Vendor Name to find the website",
+            "The root domain name of the vendor (e.g., 'example.com', not 'www.example.com' or 'shop.example.com'). If not explicitly mentioned in the document, infer it from the vendor's email address or search online using the Vendor Name. Prioritize the root domain.",
           ),
         email: z.string().nullable().describe("Email of the vendor/seller"),
         line_items: z

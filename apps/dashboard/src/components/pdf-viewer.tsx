@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css";
+import { cn } from "@midday/ui/cn";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Skeleton } from "@midday/ui/skeleton";
 
@@ -20,7 +21,12 @@ export function PdfViewer({ url }: PdfViewerProps) {
   }
 
   return (
-    <div className="flex flex-col w-full h-full pdf-viewer overflow-hidden">
+    <div
+      className={cn(
+        "flex flex-col w-full h-full pdf-viewer overflow-hidden",
+        numPages && "bg-white",
+      )}
+    >
       <ScrollArea className="w-full flex-1">
         <Document
           file={url}
@@ -32,7 +38,7 @@ export function PdfViewer({ url }: PdfViewerProps) {
           {numPages &&
             Array.from(new Array(numPages), (_, index) => (
               <Page
-                key={`page_${index + 1}`}
+                key={`${url}_${index + 1}`}
                 pageNumber={index + 1}
                 renderAnnotationLayer={false}
                 renderTextLayer={true}

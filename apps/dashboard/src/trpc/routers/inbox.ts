@@ -1,6 +1,11 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { InboxConnector } from "@midday/inbox/connector";
 import { deleteInbox } from "@midday/supabase/mutations";
-import { getInboxQuery, getInboxSearchQuery } from "@midday/supabase/queries";
+import {
+  getInboxByIdQuery,
+  getInboxQuery,
+  getInboxSearchQuery,
+} from "@midday/supabase/queries";
 import { tasks } from "@trigger.dev/sdk/v3";
 import type { processAttachment } from "jobs/tasks/inbox/process-attachment";
 import { z } from "zod";
@@ -15,7 +20,7 @@ export const inboxRouter = createTRPCRouter({
         filter: z
           .object({
             q: z.string().nullable().optional(),
-            done: z.boolean().optional(),
+            done: z.boolean().nullable().optional(),
           })
           .optional(),
       }),
@@ -25,6 +30,14 @@ export const inboxRouter = createTRPCRouter({
         teamId: teamId!,
         ...input,
       });
+    }),
+
+  getById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx: { supabase }, input }) => {
+      const { data } = await getInboxByIdQuery(supabase, input.id);
+
+      return data ?? null;
     }),
 
   delete: protectedProcedure
@@ -72,5 +85,13 @@ export const inboxRouter = createTRPCRouter({
         q: query,
         limit,
       });
+    }),
+
+  connect: protectedProcedure
+    .input(z.object({ provider: z.enum(["gmail", "outlook"]) }))
+    .mutation(async ({ input }) => {
+      const connector = new InboxConnector(input.provider);
+
+      return connector.connect();
     }),
 });

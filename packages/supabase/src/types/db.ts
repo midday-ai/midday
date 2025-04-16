@@ -282,6 +282,7 @@ export type Database = {
           country_code: string | null
           created_at: string
           email: string
+          fts: unknown | null
           id: string
           name: string
           note: string | null
@@ -302,6 +303,7 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           email: string
+          fts?: unknown | null
           id?: string
           name: string
           note?: string | null
@@ -322,6 +324,7 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           email?: string
+          fts?: unknown | null
           id?: string
           name?: string
           note?: string | null
@@ -548,6 +551,57 @@ export type Database = {
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inbox_accounts: {
+        Row: {
+          access_token: string
+          created_at: string
+          email: string
+          enabled: boolean
+          id: string
+          last_accessed: string
+          provider: Database["public"]["Enums"]["inbox_account_providers"]
+          refresh_token: string
+          team_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          email: string
+          enabled?: boolean
+          id?: string
+          last_accessed: string
+          provider: Database["public"]["Enums"]["inbox_account_providers"]
+          refresh_token: string
+          team_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          email?: string
+          enabled?: boolean
+          id?: string
+          last_accessed?: string
+          provider?: Database["public"]["Enums"]["inbox_account_providers"]
+          refresh_token?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_accounts_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "inbox_accounts_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -1129,6 +1183,7 @@ export type Database = {
           customer_id: string | null
           description: string | null
           estimate: number | null
+          fts: unknown | null
           id: string
           name: string
           rate: number | null
@@ -1146,6 +1201,7 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           estimate?: number | null
+          fts?: unknown | null
           id?: string
           name: string
           rate?: number | null
@@ -1159,6 +1215,7 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           estimate?: number | null
+          fts?: unknown | null
           id?: string
           name?: string
           rate?: number | null
@@ -1757,9 +1814,7 @@ export type Database = {
     }
     Functions: {
       amount_text: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": Database["public"]["Tables"]["transactions"]["Row"] }
         Returns: string
       }
       calculate_amount_similarity: {
@@ -1781,17 +1836,11 @@ export type Database = {
         Returns: number
       }
       calculate_date_proximity_score: {
-        Args: {
-          t_date: string
-          i_date: string
-        }
+        Args: { t_date: string; i_date: string }
         Returns: number
       }
       calculate_date_similarity: {
-        Args: {
-          transaction_date: string
-          inbox_date: string
-        }
+        Args: { transaction_date: string; inbox_date: string }
         Returns: number
       }
       calculate_match_score: {
@@ -1802,10 +1851,7 @@ export type Database = {
         Returns: number
       }
       calculate_name_similarity_score: {
-        Args: {
-          transaction_name: string
-          inbox_name: string
-        }
+        Args: { transaction_name: string; inbox_name: string }
         Returns: number
       }
       calculate_overall_similarity: {
@@ -1816,21 +1862,15 @@ export type Database = {
         Returns: number
       }
       calculate_total_sum: {
-        Args: {
-          target_currency: string
-        }
+        Args: { target_currency: string }
         Returns: number
       }
       calculate_total_sum2: {
-        Args: {
-          target_currency: string
-        }
+        Args: { target_currency: string }
         Returns: number
       }
       calculate_transaction_differences_v2: {
-        Args: {
-          p_team_id: string
-        }
+        Args: { p_team_id: string }
         Returns: {
           transaction_group: string
           date: string
@@ -1854,15 +1894,11 @@ export type Database = {
         }[]
       }
       calculated_vat: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": Database["public"]["Tables"]["transactions"]["Row"] }
         Returns: number
       }
       classify_frequency_v2: {
-        Args: {
-          p_team_id: string
-        }
+        Args: { p_team_id: string }
         Returns: {
           transaction_group: string
           team_id: string
@@ -1873,46 +1909,30 @@ export type Database = {
         }[]
       }
       create_team: {
-        Args: {
-          name: string
-        }
+        Args: { name: string }
         Returns: string
       }
       create_team_v2: {
-        Args: {
-          name: string
-          currency?: string
-        }
+        Args: { name: string; currency?: string }
         Returns: string
       }
-      determine_transaction_frequency:
-        | {
-            Args: {
-              p_avg_days_between: number
-              p_transaction_count: number
-            }
-            Returns: string
-          }
-        | {
-            Args: {
+      determine_transaction_frequency: {
+        Args:
+          | {
               p_avg_days_between: number
               p_transaction_count: number
               p_is_recurring: boolean
               p_latest_frequency: string
             }
-            Returns: string
-          }
+          | { p_avg_days_between: number; p_transaction_count: number }
+        Returns: string
+      }
       extract_product_names: {
-        Args: {
-          products_json: Json
-        }
+        Args: { products_json: Json }
         Returns: string
       }
       find_matching_inbox_item: {
-        Args: {
-          input_transaction_id: string
-          specific_inbox_id?: string
-        }
+        Args: { input_transaction_id: string; specific_inbox_id?: string }
         Returns: {
           inbox_id: string
           transaction_id: string
@@ -1922,52 +1942,31 @@ export type Database = {
         }[]
       }
       generate_hmac: {
-        Args: {
-          secret_key: string
-          message: string
-        }
+        Args: { secret_key: string; message: string }
         Returns: string
       }
       generate_id: {
-        Args: {
-          size: number
-        }
+        Args: { size: number }
         Returns: string
       }
       generate_inbox: {
-        Args: {
-          size: number
-        }
+        Args: { size: number }
         Returns: string
       }
-      generate_inbox_fts:
-        | {
-            Args: {
-              display_name: string
-              products_json: Json
-            }
-            Returns: unknown
-          }
-        | {
-            Args: {
-              display_name_text: string
-              product_names: string
-            }
-            Returns: unknown
-          }
-        | {
-            Args: {
+      generate_inbox_fts: {
+        Args:
+          | { display_name: string; products_json: Json }
+          | {
               display_name_text: string
               product_names: string
               amount: number
               due_date: string
             }
-            Returns: unknown
-          }
+          | { display_name_text: string; product_names: string }
+        Returns: unknown
+      }
       get_all_transactions_by_account: {
-        Args: {
-          account_id: string
-        }
+        Args: { account_id: string }
         Returns: {
           amount: number
           assigned_id: string | null
@@ -1997,15 +1996,11 @@ export type Database = {
         }[]
       }
       get_assigned_users_for_project: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": Database["public"]["Tables"]["tracker_projects"]["Row"] }
         Returns: Json
       }
       get_bank_account_currencies: {
-        Args: {
-          team_id: string
-        }
+        Args: { team_id: string }
         Returns: {
           currency: string
         }[]
@@ -2062,27 +2057,18 @@ export type Database = {
         }[]
       }
       get_current_burn_rate: {
-        Args: {
-          team_id: string
-          currency: string
-        }
+        Args: { team_id: string; currency: string }
         Returns: number
       }
       get_current_burn_rate_v2: {
-        Args: {
-          team_id: string
-          base_currency?: string
-        }
+        Args: { team_id: string; base_currency?: string }
         Returns: {
           currency: string
           value: number
         }[]
       }
       get_current_burn_rate_v3: {
-        Args: {
-          team_id: string
-          base_currency?: string
-        }
+        Args: { team_id: string; base_currency?: string }
         Returns: {
           currency: string
           value: number
@@ -2090,6 +2076,10 @@ export type Database = {
       }
       get_current_user_team_id: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_customer_name: {
+        Args: { customer_id: string }
         Returns: string
       }
       get_expenses: {
@@ -2106,6 +2096,12 @@ export type Database = {
           currency: string
         }[]
       }
+      get_invoice_count: {
+        Args: {
+          customer_record: Database["public"]["Tables"]["customers"]["Row"]
+        }
+        Returns: number
+      }
       get_invoice_summary: {
         Args: {
           team_id: string
@@ -2118,15 +2114,11 @@ export type Database = {
         }[]
       }
       get_next_invoice_number: {
-        Args: {
-          team_id: string
-        }
+        Args: { team_id: string }
         Returns: string
       }
       get_payment_score: {
-        Args: {
-          team_id: string
-        }
+        Args: { team_id: string }
         Returns: {
           score: number
           payment_status: string
@@ -2183,10 +2175,20 @@ export type Database = {
           currency: string
         }[]
       }
-      get_project_total_amount: {
+      get_project_assigned_users_count: {
         Args: {
-          "": unknown
+          tracker_project_record: Database["public"]["Tables"]["tracker_projects"]["Row"]
         }
+        Returns: number
+      }
+      get_project_count: {
+        Args: {
+          customer_record: Database["public"]["Tables"]["customers"]["Row"]
+        }
+        Returns: number
+      }
+      get_project_total_amount: {
+        Args: { "": Database["public"]["Tables"]["tracker_projects"]["Row"] }
         Returns: number
       }
       get_revenue: {
@@ -2312,9 +2314,7 @@ export type Database = {
         }[]
       }
       get_team_bank_accounts_balances: {
-        Args: {
-          team_id: string
-        }
+        Args: { team_id: string }
         Returns: {
           id: string
           currency: string
@@ -2324,9 +2324,7 @@ export type Database = {
         }[]
       }
       get_team_limits_metrics: {
-        Args: {
-          input_team_id: string
-        }
+        Args: { input_team_id: string }
         Returns: {
           team_id: string
           total_document_size: number
@@ -2337,50 +2335,33 @@ export type Database = {
         }[]
       }
       get_total_balance: {
-        Args: {
-          team_id: string
-          currency: string
-        }
+        Args: { team_id: string; currency: string }
         Returns: number
       }
       get_total_balance_v2: {
-        Args: {
-          team_id: string
-          currency: string
-        }
+        Args: { team_id: string; currency: string }
         Returns: number
       }
       get_total_balance_v3: {
-        Args: {
-          team_id: string
-          currency: string
-        }
+        Args: { team_id: string; currency: string }
         Returns: number
       }
       get_transactions_amount_full_range_data: {
-        Args: {
-          team_id: string
-          amount_type?: string
-        }
+        Args: { team_id: string; amount_type?: string }
         Returns: {
           amount: number
           currency: string
         }[]
       }
       get_transactions_amount_range_data: {
-        Args: {
-          team_id: string
-          amount_type?: string
-        }
+        Args: { team_id: string; amount_type?: string }
         Returns: {
           id: string
           amount: number
         }[]
       }
       group_transactions_v2: {
-        Args: {
-          p_team_id: string
-        }
+        Args: { p_team_id: string }
         Returns: {
           transaction_group: string
           date: string
@@ -2390,39 +2371,27 @@ export type Database = {
         }[]
       }
       gtrgm_compress: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       gtrgm_decompress: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       gtrgm_in: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       gtrgm_options: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: undefined
       }
       gtrgm_out: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       identify_similar_transactions_v2: {
-        Args: {
-          p_team_id: string
-        }
+        Args: { p_team_id: string }
         Returns: {
           original_transaction_name: string
           similar_transaction_name: string
@@ -2430,41 +2399,37 @@ export type Database = {
         }[]
       }
       identify_transaction_group: {
-        Args: {
-          p_name: string
-          p_team_id: string
-        }
+        Args: { p_name: string; p_team_id: string }
         Returns: string
       }
       inbox_amount_text: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": Database["public"]["Tables"]["inbox"]["Row"] }
         Returns: string
       }
-      is_fulfilled: {
+      is_customer_tagged: {
         Args: {
-          "": unknown
+          customer_record: Database["public"]["Tables"]["customers"]["Row"]
         }
+        Returns: boolean
+      }
+      is_fulfilled: {
+        Args: { "": Database["public"]["Tables"]["transactions"]["Row"] }
         Returns: boolean
       }
       is_project_tagged: {
         Args: {
-          project: unknown
+          project: Database["public"]["Tables"]["tracker_projects"]["Row"]
         }
         Returns: boolean
       }
       is_transaction_tagged: {
         Args: {
-          transaction: unknown
+          transaction: Database["public"]["Tables"]["transactions"]["Row"]
         }
         Returns: boolean
       }
       match_transaction_with_inbox: {
-        Args: {
-          p_transaction_id: string
-          p_inbox_id?: string
-        }
+        Args: { p_transaction_id: string; p_inbox_id?: string }
         Returns: {
           inbox_id: string
           transaction_id: string
@@ -2482,39 +2447,21 @@ export type Database = {
         Returns: string
       }
       nanoid_optimized: {
-        Args: {
-          size: number
-          alphabet: string
-          mask: number
-          step: number
-        }
+        Args: { size: number; alphabet: string; mask: number; step: number }
         Returns: string
       }
-      project_members:
-        | {
-            Args: {
-              "": unknown
-            }
-            Returns: {
-              id: string
-              avatar_url: string
-              full_name: string
-            }[]
-          }
-        | {
-            Args: {
-              "": unknown
-            }
-            Returns: {
-              id: string
-              avatar_url: string
-              full_name: string
-            }[]
-          }
+      project_members: {
+        Args:
+          | { "": Database["public"]["Tables"]["tracker_projects"]["Row"] }
+          | { "": Database["public"]["Tables"]["tracker_entries"]["Row"] }
+        Returns: {
+          id: string
+          avatar_url: string
+          full_name: string
+        }[]
+      }
       set_limit: {
-        Args: {
-          "": number
-        }
+        Args: { "": number }
         Returns: number
       }
       show_limit: {
@@ -2522,33 +2469,23 @@ export type Database = {
         Returns: number
       }
       show_trgm: {
-        Args: {
-          "": string
-        }
+        Args: { "": string }
         Returns: string[]
       }
       slugify: {
-        Args: {
-          value: string
-        }
+        Args: { value: string }
         Returns: string
       }
       total_duration: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": Database["public"]["Tables"]["tracker_projects"]["Row"] }
         Returns: number
       }
       unaccent: {
-        Args: {
-          "": string
-        }
+        Args: { "": string }
         Returns: string
       }
       unaccent_init: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
     }
@@ -2567,6 +2504,7 @@ export type Database = {
         | "pluggy"
       bankProviders: "gocardless" | "plaid" | "teller"
       connection_status: "disconnected" | "connected" | "unknown"
+      inbox_account_providers: "gmail" | "outlook"
       inbox_status: "processing" | "pending" | "archived" | "new" | "deleted"
       inbox_type: "invoice" | "expense"
       invoice_delivery_type: "create" | "create_and_send"
@@ -2629,27 +2567,29 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -2657,20 +2597,22 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -2678,20 +2620,22 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -2699,21 +2643,23 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
@@ -2722,6 +2668,86 @@ export type CompositeTypes<
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      account_type: [
+        "depository",
+        "credit",
+        "other_asset",
+        "loan",
+        "other_liability",
+      ],
+      bank_providers: [
+        "gocardless",
+        "plaid",
+        "teller",
+        "enablebanking",
+        "pluggy",
+      ],
+      bankProviders: ["gocardless", "plaid", "teller"],
+      connection_status: ["disconnected", "connected", "unknown"],
+      inbox_account_providers: ["gmail", "outlook"],
+      inbox_status: ["processing", "pending", "archived", "new", "deleted"],
+      inbox_type: ["invoice", "expense"],
+      invoice_delivery_type: ["create", "create_and_send"],
+      invoice_size: ["a4", "letter"],
+      invoice_status: ["draft", "overdue", "paid", "unpaid", "canceled"],
+      plans: ["trial", "starter", "pro"],
+      reportTypes: ["profit", "revenue", "burn_rate", "expense"],
+      teamRoles: ["owner", "member"],
+      trackerStatus: ["in_progress", "completed"],
+      transaction_frequency: [
+        "weekly",
+        "biweekly",
+        "monthly",
+        "semi_monthly",
+        "annually",
+        "irregular",
+        "unknown",
+      ],
+      transactionCategories: [
+        "travel",
+        "office_supplies",
+        "meals",
+        "software",
+        "rent",
+        "income",
+        "equipment",
+        "transfer",
+        "internet_and_telephone",
+        "facilities_expenses",
+        "activity",
+        "uncategorized",
+        "taxes",
+        "other",
+        "salary",
+        "fees",
+      ],
+      transactionMethods: [
+        "payment",
+        "card_purchase",
+        "card_atm",
+        "transfer",
+        "other",
+        "unknown",
+        "ach",
+        "interest",
+        "deposit",
+        "wire",
+        "fee",
+      ],
+      transactionStatus: [
+        "posted",
+        "pending",
+        "excluded",
+        "completed",
+        "archived",
+      ],
+    },
+  },
+} as const

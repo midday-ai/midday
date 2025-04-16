@@ -35,7 +35,7 @@ export class ReceiptProcessor {
           .string()
           .nullable()
           .describe(
-            "Website of store/merchant (e.g., example.com), if not available use the Store Name to find the website",
+            "Look for the store/merchant's website URL directly on the receipt (often found near the address, phone number, or logo). It typically ends in .com, .org, .net, etc. If no website URL is explicitly printed, try to infer it from the store name or domain name in an email address if present, but prioritize finding it directly on the receipt.",
           ),
         payment_method: z
           .string()

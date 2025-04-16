@@ -1162,3 +1162,49 @@ type DeleteInboxParams = {
 export async function deleteInbox(supabase: Client, params: DeleteInboxParams) {
   return supabase.from("inbox").delete().eq("id", params.id);
 }
+
+type CreateInboxAccountParams = {
+  teamId: string;
+  accessToken: string;
+  refreshToken: string;
+  email: string;
+  lastAccessed: string;
+  provider: "gmail" | "outlook";
+};
+
+export async function createInboxAccount(
+  supabase: Client,
+  params: CreateInboxAccountParams,
+) {
+  return supabase.from("inbox_accounts").insert({
+    access_token: params.accessToken,
+    refresh_token: params.refreshToken,
+    last_accessed: params.lastAccessed,
+    team_id: params.teamId,
+    email: params.email,
+    provider: params.provider,
+  });
+}
+
+type DeleteInboxAccountParams = {
+  id: string;
+};
+
+export async function deleteInboxAccount(
+  supabase: Client,
+  params: DeleteInboxAccountParams,
+) {
+  return supabase.from("inbox_accounts").delete().eq("id", params.id);
+}
+
+type UpdateInboxAccountParams = {
+  id: string;
+  enabled: boolean;
+};
+
+export async function updateInboxAccount(
+  supabase: Client,
+  params: UpdateInboxAccountParams,
+) {
+  return supabase.from("inbox_accounts").update(params).eq("id", params.id);
+}

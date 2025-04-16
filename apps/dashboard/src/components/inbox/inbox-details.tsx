@@ -3,7 +3,6 @@ import { FormatAmount } from "@/components/format-amount";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getUrl } from "@/utils/environment";
 import { formatDate } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
@@ -15,20 +14,19 @@ import {
   DropdownMenuItem,
 } from "@midday/ui/dropdown-menu";
 import { DropdownMenu, DropdownMenuTrigger } from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
 import { Separator } from "@midday/ui/separator";
 import { Skeleton } from "@midday/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
 
 type Props = {
-  item?: RouterOutputs["inbox"]["get"]["data"][number];
+  firstItemId: string | undefined;
 };
 
-export function InboxDetails({ item }: Props) {
+export function InboxDetails({ firstItemId }: Props) {
   const { setParams, params } = useInboxParams();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -36,6 +34,25 @@ export function InboxDetails({ item }: Props) {
   const [isOpen, setOpen] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
   const { data: user } = useUserQuery();
+
+  const id = params.inboxId || firstItemId;
+
+  const { data, isLoading } = useQuery(
+    trpc.inbox.getById.queryOptions(
+      { id: id! },
+      {
+        enabled: !!id,
+        initialData: () => {
+          const pages = queryClient
+            .getQueriesData({ queryKey: trpc.inbox.get.infiniteQueryKey() })
+            .flatMap(([, data]) => data?.pages ?? [])
+            .flatMap((page) => page.data ?? []);
+
+          return pages.find((d) => d.id === id);
+        },
+      },
+    ),
+  );
 
   const deleteInboxMutation = useMutation(
     trpc.inbox.delete.mutationOptions({
@@ -53,21 +70,22 @@ export function InboxDetails({ item }: Props) {
   );
 
   const handleOnDelete = () => {
-    if (item?.id) {
-      deleteInboxMutation.mutate({ id: item.id });
+    if (data?.id) {
+      deleteInboxMutation.mutate({ id: data.id });
     }
   };
 
-  const isProcessing = item?.status === "processing" || item?.status === "new";
+  const isProcessing = data?.status === "processing" || data?.status === "new";
 
   useEffect(() => {
     setShowFallback(false);
-  }, [item]);
+  }, [data]);
 
   const handleCopyLink = async () => {
-    if (!item) return;
+    if (!data) return;
+
     try {
-      await navigator.clipboard.writeText(`${getUrl()}/inbox?id=${item.id}`);
+      await navigator.clipboard.writeText(`${getUrl()}/inbox?id=${data.id}`);
 
       toast({
         duration: 4000,
@@ -77,37 +95,30 @@ export function InboxDetails({ item }: Props) {
     } catch {}
   };
 
-  // if (isEmpty) {
-  //   return <div className="hidden md:block w-[1160px]" />;
-  // }
+  const fallback = showFallback || (!data?.website && data?.display_name);
 
-  const fallback = showFallback || (!item?.website && item?.display_name);
+  if (isLoading) {
+    return <InboxDetailsSkeleton />;
+  }
 
   return (
-    <div className="h-[calc(100vh-120px)] overflow-hidden flex-col border w-[595px] hidden md:flex shrink-0 -mt-[54px]">
+    <div className="h-[calc(100vh-120px)] overflow-hidden flex-col border w-[615px] hidden md:flex shrink-0 -mt-[54px]">
       <div className="flex items-center p-2">
         <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={!item}
-                onClick={handleOnDelete}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="px-3 py-1.5 text-xs">
-              Delete
-            </TooltipContent>
-          </Tooltip>
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={!data}
+            onClick={handleOnDelete}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
 
         <div className="ml-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!item}>
+              <Button variant="ghost" size="icon" disabled={!data}>
                 <MoreVertical className="h-4 w-4" />
                 <span className="sr-only">More</span>
               </Button>
@@ -118,9 +129,9 @@ export function InboxDetails({ item }: Props) {
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <a
-                  href={`/api/download/file?path=${item?.file_path
+                  href={`/api/download/file?path=${data?.file_path
                     ?.slice(1)
-                    .join("/")}&filename=${item?.file_name}`}
+                    .join("/")}&filename=${data?.file_name}`}
                   download
                 >
                   Download
@@ -135,7 +146,7 @@ export function InboxDetails({ item }: Props) {
       </div>
       <Separator />
 
-      {item?.id ? (
+      {data?.id ? (
         <div className="flex flex-col flex-grow min-h-0">
           <div className="flex items-start p-4">
             <div className="flex items-start gap-4 text-sm relative">
@@ -143,16 +154,16 @@ export function InboxDetails({ item }: Props) {
                 <Skeleton className="h-[40px] w-[40px] rounded-full" />
               ) : (
                 <Avatar>
-                  {item.website && (
+                  {data.website && (
                     <AvatarImageNext
-                      alt={item.website}
+                      alt={data.website}
                       width={40}
                       height={40}
                       className={cn(
                         "rounded-full overflow-hidden",
                         showFallback && "hidden",
                       )}
-                      src={getWebsiteLogo(item.website)}
+                      src={getWebsiteLogo(data.website)}
                       quality={100}
                       onError={() => {
                         setShowFallback(true);
@@ -162,7 +173,7 @@ export function InboxDetails({ item }: Props) {
 
                   {fallback && (
                     <AvatarFallback>
-                      {item?.display_name
+                      {data?.display_name
                         ?.split(" ")
                         .slice(0, 2)
                         .map((chunk) => chunk[0])
@@ -175,19 +186,19 @@ export function InboxDetails({ item }: Props) {
               <div className="grid gap-1 select-text">
                 <div className="font-semibold">
                   {isProcessing ? (
-                    <Skeleton className="h-3 w-[120px] rounded-sm mb-1" />
+                    <Skeleton className="h-3 w-[120px] mb-1" />
                   ) : (
-                    item.display_name
+                    data.display_name
                   )}
                 </div>
                 <div className="line-clamp-1 text-xs">
-                  {isProcessing && !item.currency && (
-                    <Skeleton className="h-3 w-[50px] rounded-sm" />
+                  {isProcessing && !data.currency && (
+                    <Skeleton className="h-3 w-[50px]" />
                   )}
-                  {item.currency && item.amount != null && (
+                  {data.currency && data.amount != null && (
                     <FormatAmount
-                      amount={item.amount}
-                      currency={item.currency}
+                      amount={data.amount}
+                      currency={data.currency}
                     />
                   )}
                 </div>
@@ -195,61 +206,21 @@ export function InboxDetails({ item }: Props) {
             </div>
             <div className="grid gap-1 ml-auto text-right">
               <div className="text-xs text-muted-foreground select-text">
-                {isProcessing && !item.date && (
-                  <Skeleton className="h-3 w-[50px] rounded-sm" />
+                {isProcessing && !data.date && (
+                  <Skeleton className="h-3 w-[50px]" />
                 )}
-                {item.date && formatDate(item.date, user?.date_format)}
-              </div>
-
-              <div className="flex space-x-4 items-center ml-auto mt-1">
-                {item.description && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Icons.Info />
-                    </TooltipTrigger>
-                    <TooltipContent
-                      className="px-3 py-1.5 text-xs"
-                      side="left"
-                      sideOffset={8}
-                    >
-                      {item.description}
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+                {data.date && formatDate(data.date, user?.date_format)}
               </div>
             </div>
           </div>
           <Separator />
 
-          {item?.file_path && (
+          {data?.file_path && (
             <FileViewer
-              mimeType={item.content_type}
-              url={`/api/proxy?filePath=vault/${item?.file_path.join("/")}`}
+              mimeType={data.content_type}
+              url={`/api/proxy?filePath=vault/${data?.file_path.join("/")}`}
             />
           )}
-
-          {/* <div className="h-12 dark:bg-[#1A1A1A] bg-[#F6F6F3] justify-between items-center flex border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-full fixed bottom-14 right-[160px] z-50 w-[400px]"> */}
-          {/* <SelectTransaction
-              placeholder="Select transaction"
-              teamId={teamId}
-              inboxId={item.id}
-              selectedTransaction={item?.transaction}
-              onSelect={onSelectTransaction}
-              key={item.id}
-            /> */}
-          {/* </div> */}
-
-          {/* <EditInboxModal
-            isOpen={isOpen}
-            onOpenChange={setOpen}
-            id={item.id}
-            currencies={currencies}
-            defaultValue={{
-              amount: item?.amount,
-              currency: item.currency,
-              display_name: item?.display_name,
-            }}
-          /> */}
         </div>
       ) : (
         <div className="p-8 text-center text-muted-foreground">

@@ -1,4 +1,5 @@
 import { Inbox } from "@/components/inbox";
+import { InboxGetStarted } from "@/components/inbox/inbox-get-started";
 import { InboxViewSkeleton } from "@/components/inbox/inbox-skeleton";
 import { InboxView } from "@/components/inbox/inbox-view";
 import { loadInboxFilterParams } from "@/hooks/use-inbox-filter-params";
@@ -23,15 +24,19 @@ export default async function Page(props: Props) {
   const params = loadInboxParams(searchParams);
 
   // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
-  await queryClient.fetchInfiniteQuery(
+  const data = await queryClient.fetchInfiniteQuery(
     trpc.inbox.get.infiniteQueryOptions({
       order: params.order,
-      filter: {
-        ...filter,
-        done: params.tab === "done",
-      },
+      filter,
     }),
   );
+
+  if (
+    data.pages[0]?.data.length === 0 &&
+    !Object.values(filter).some((value) => value !== null)
+  ) {
+    return <InboxGetStarted />;
+  }
 
   return (
     <Inbox>
