@@ -13,11 +13,11 @@ import type {
 } from "./types";
 
 export class GmailProvider implements OAuthProviderInterface {
-  private oauth2Client: Auth.OAuth2Client;
-  private gmail: gmail_v1.Gmail | null = null;
-  private accountId: string | null = null;
+  #oauth2Client: Auth.OAuth2Client;
+  #gmail: gmail_v1.Gmail | null = null;
+  #accountId: string | null = null;
 
-  private readonly scopes = [
+  #scopes = [
     "https://www.googleapis.com/auth/gmail.readonly",
     "https://www.googleapis.com/auth/userinfo.email",
   ];
@@ -27,29 +27,29 @@ export class GmailProvider implements OAuthProviderInterface {
     const clientSecret = process.env.GMAIL_CLIENT_SECRET;
     const redirectUri = process.env.GMAIL_REDIRECT_URI;
 
-    this.oauth2Client = new google.auth.OAuth2(
+    this.#oauth2Client = new google.auth.OAuth2(
       clientId,
       clientSecret,
       redirectUri,
     );
 
-    this.oauth2Client.on(
+    this.#oauth2Client.on(
       "tokens",
       async (tokens: Credentials | null | undefined) => {
-        if (!this.accountId) {
+        if (!this.#accountId) {
           return;
         }
 
         if (tokens?.refresh_token) {
           await updateRefreshToken({
-            accountId: this.accountId,
+            accountId: this.#accountId,
             refreshToken: tokens.refresh_token,
           });
         }
 
         if (tokens?.access_token) {
           await updateAccessToken({
-            accountId: this.accountId,
+            accountId: this.#accountId,
             accessToken: tokens.access_token,
             expiryDate: new Date(tokens.expiry_date!).toISOString(),
           });
@@ -59,21 +59,21 @@ export class GmailProvider implements OAuthProviderInterface {
   }
 
   setAccountId(accountId: string): void {
-    this.accountId = accountId;
+    this.#accountId = accountId;
   }
 
-  getAuthUrl(): string {
-    return this.oauth2Client.generateAuthUrl({
+  async getAuthUrl(): Promise<string> {
+    return this.#oauth2Client.generateAuthUrl({
       access_type: "offline",
       prompt: "consent",
-      scope: this.scopes,
+      scope: this.#scopes,
       state: "gmail",
     });
   }
 
   async exchangeCodeForTokens(code: string): Promise<Tokens> {
     try {
-      const { tokens } = await this.oauth2Client.getToken(code);
+      const { tokens } = await this.#oauth2Client.getToken(code);
       if (!tokens.access_token) {
         throw new Error("Failed to obtain access token.");
       }
@@ -108,14 +108,14 @@ export class GmailProvider implements OAuthProviderInterface {
       token_type: tokens.token_type as Credentials["token_type"],
     };
 
-    this.oauth2Client.setCredentials(googleCredentials);
-    this.gmail = google.gmail({ version: "v1", auth: this.oauth2Client });
+    this.#oauth2Client.setCredentials(googleCredentials);
+    this.#gmail = google.gmail({ version: "v1", auth: this.#oauth2Client });
   }
 
   async getUserInfo(): Promise<UserInfo | undefined> {
     try {
       const oauth2 = google.oauth2({
-        auth: this.oauth2Client,
+        auth: this.#oauth2Client,
         version: "v2",
       });
 
@@ -133,14 +133,14 @@ export class GmailProvider implements OAuthProviderInterface {
   }
 
   async getAttachments(options: GetAttachmentsOptions): Promise<Attachment[]> {
-    if (!this.gmail) {
+    if (!this.#gmail) {
       throw new Error("Gmail client not initialized. Set tokens first.");
     }
 
     const { maxResults = 10 } = options;
 
     try {
-      const listResponse = await this.gmail.users.messages.list({
+      const listResponse = await this.#gmail.users.messages.list({
         userId: "me",
         maxResults: maxResults,
         q: "has:attachment filename:pdf",
@@ -158,7 +158,7 @@ export class GmailProvider implements OAuthProviderInterface {
         .map((m: gmail_v1.Schema$Message) => m.id!)
         .filter((id): id is string => Boolean(id))
         .map((id: string) =>
-          this.gmail!.users.messages.get({
+          this.#gmail!.users.messages.get({
             userId: "me",
             id: id,
             format: "full",
@@ -231,7 +231,7 @@ export class GmailProvider implements OAuthProviderInterface {
     }
 
     try {
-      const rawAttachments = await this.fetchAttachments(
+      const rawAttachments = await this.#fetchAttachments(
         message.id,
         message.payload.parts,
       );
@@ -264,7 +264,7 @@ export class GmailProvider implements OAuthProviderInterface {
     }
   }
 
-  private async fetchAttachments(
+  async #fetchAttachments(
     messageId: string,
     parts: gmail_v1.Schema$MessagePart[],
   ): Promise<EmailAttachment[]> {
@@ -272,7 +272,7 @@ export class GmailProvider implements OAuthProviderInterface {
     let attachmentsCount = 0;
     const maxAttachments = 5;
 
-    if (!this.gmail) return attachments;
+    if (!this.#gmail) return attachments;
 
     for (const part of parts) {
       if (attachmentsCount >= maxAttachments) {
@@ -293,7 +293,7 @@ export class GmailProvider implements OAuthProviderInterface {
       ) {
         try {
           const attachmentResponse =
-            await this.gmail.users.messages.attachments.get({
+            await this.#gmail.users.messages.attachments.get({
               userId: "me",
               messageId: messageId,
               id: part.body.attachmentId,
@@ -321,7 +321,7 @@ export class GmailProvider implements OAuthProviderInterface {
       }
 
       if (part.parts) {
-        const nestedAttachments = await this.fetchAttachments(
+        const nestedAttachments = await this.#fetchAttachments(
           messageId,
           part.parts,
         );

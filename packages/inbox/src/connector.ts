@@ -39,7 +39,7 @@ export class InboxConnector extends Connector {
     }
   }
 
-  connect() {
+  async connect(): Promise<string> {
     return this.#provider.getAuthUrl();
   }
 

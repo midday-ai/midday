@@ -27,7 +27,7 @@ export interface GetAttachmentsOptions {
 }
 
 export abstract class Connector {
-  abstract connect(): string;
+  abstract connect(): Promise<string>;
   abstract exchangeCodeForAccount(
     params: ExchangeCodeForAccountParams,
   ): Promise<Account | null>;
@@ -67,7 +67,7 @@ export interface OAuthProviderInterface {
   /**
    * Generates the authorization URL for the user to grant permission.
    */
-  getAuthUrl(): string;
+  getAuthUrl(): Promise<string>;
 
   /**
    * Exchanges the authorization code received from the callback for access and refresh tokens.

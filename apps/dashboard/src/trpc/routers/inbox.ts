@@ -92,6 +92,6 @@ export const inboxRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const connector = new InboxConnector(input.provider);
 
-      return connector.connect();
+      return await connector.connect();
     }),
 });
