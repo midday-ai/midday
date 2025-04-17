@@ -15,10 +15,12 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.16",
+    "@azure/identity": "^4.9.0",
     "@date-fns/tz": "^1.2.0",
     "@date-fns/utc": "^2.1.0",
     "@fast-csv/format": "5.0.2",
     "@hookform/resolvers": "^5.0.1",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
     "@midday/app-store": "workspace:*",
     "@midday/events": "workspace:*",
     "@midday/inbox": "workspace:*",
