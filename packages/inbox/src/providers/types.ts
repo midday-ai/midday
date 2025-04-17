@@ -92,4 +92,10 @@ export interface OAuthProviderInterface {
    * Fetches user info from the provider.
    */
   getUserInfo(): Promise<UserInfo | undefined>;
+
+  /**
+   * Sets the account ID for the provider.
+   * @param accountId - The account ID.
+   */
+  setAccountId(accountId: string): void;
 }

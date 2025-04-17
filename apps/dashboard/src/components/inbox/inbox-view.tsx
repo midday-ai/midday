@@ -11,32 +11,14 @@ import {
   useQueryClient,
   useSuspenseInfiniteQuery,
 } from "@tanstack/react-query";
-import { AnimatePresence, type Variants, motion } from "framer-motion";
-import { useEffect, useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import { useDebouncedCallback } from "use-debounce";
 import { InboxDetails } from "./inbox-details";
 import { NoResults } from "./inbox-empty";
 import { InboxItem } from "./inbox-item";
-
-const itemVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 10,
-    scale: 0.98,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.1, ease: "easeOut" },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.98,
-    transition: { duration: 0.08, ease: "easeIn" },
-  },
-};
+import { InboxViewSkeleton } from "./inbox-skeleton";
 
 export function InboxView() {
   const trpc = useTRPC();
@@ -45,6 +27,8 @@ export function InboxView() {
   const { data: user } = useUserQuery();
   const { params, setParams } = useInboxParams();
   const { params: filter, hasFilter } = useInboxFilterParams();
+
+  const allSeenIdsRef = useRef(new Set<string>());
 
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
     {
@@ -71,17 +55,7 @@ export function InboxView() {
     queryClient.invalidateQueries({
       queryKey: trpc.inbox.getById.queryKey(),
     });
-
-    // Set the first item as the selected item
-    const inboxId = tableData.at(0)?.id;
-
-    if (inboxId) {
-      setParams({
-        ...params,
-        inboxId,
-      });
-    }
-  }, 500);
+  }, 300);
 
   useRealtime({
     channelName: "realtime_inbox",
@@ -100,6 +74,36 @@ export function InboxView() {
     }
   }, [inView]);
 
+  const newItemIds = useMemo(() => {
+    const newIds = new Set<string>();
+
+    for (const item of tableData) {
+      if (!allSeenIdsRef.current.has(item.id)) {
+        newIds.add(item.id);
+        allSeenIdsRef.current.add(item.id);
+      }
+    }
+
+    return newIds;
+  }, [tableData]);
+
+  useEffect(() => {
+    // Set the first item as the selected item
+    const inboxId = tableData.at(0)?.id;
+
+    if (inboxId) {
+      setParams({
+        ...params,
+        inboxId,
+      });
+    }
+  }, [tableData]);
+
+  // If user is connected, and we don't have any data, we need to show a skeleton
+  if (params.connected && !tableData?.length) {
+    return <InboxViewSkeleton />;
+  }
+
   if (hasFilter && !tableData?.length) {
     return <NoResults />;
   }
@@ -113,18 +117,33 @@ export function InboxView() {
         >
           <AnimatePresence initial={false}>
             <div className="m-0 h-full space-y-4">
-              {tableData.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  layout
-                  variants={itemVariants}
-                  initial={false}
-                  animate="visible"
-                  exit="exit"
-                >
-                  <InboxItem item={item} index={index} />
-                </motion.div>
-              ))}
+              {tableData.map((item, index) => {
+                const isNewItem = newItemIds.has(item.id);
+
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={
+                      isNewItem ? { opacity: 0, y: -30, scale: 0.95 } : false
+                    }
+                    animate={
+                      isNewItem ? { opacity: 1, y: 0, scale: 1 } : "visible"
+                    }
+                    transition={
+                      isNewItem
+                        ? {
+                            duration: 0.4,
+                            ease: [0.23, 1, 0.32, 1],
+                            delay: index < 5 ? index * 0.05 : 0,
+                          }
+                        : undefined
+                    }
+                    exit="exit"
+                  >
+                    <InboxItem item={item} index={index} />
+                  </motion.div>
+                );
+              })}
             </div>
           </AnimatePresence>
 

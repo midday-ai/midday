@@ -34,7 +34,11 @@ export function DateFormatSettings() {
           defaultValue={user.date_format ?? undefined}
           onValueChange={(value) => {
             updateUserMutation.mutate({
-              date_format: value as "dd/MM/yyyy" | "MM/dd/yyyy" | "yyyy-MM-dd",
+              date_format: value as
+                | "dd/MM/yyyy"
+                | "MM/dd/yyyy"
+                | "yyyy-MM-dd"
+                | "DD.MM.YYYY",
             });
           }}
         >
@@ -45,6 +49,7 @@ export function DateFormatSettings() {
             <SelectItem value="dd/MM/yyyy">dd/MM/yyyy</SelectItem>
             <SelectItem value="MM/dd/yyyy">MM/dd/yyyy</SelectItem>
             <SelectItem value="yyyy-MM-dd">yyyy-MM-dd</SelectItem>
+            <SelectItem value="DD.MM.YYYY">DD.MM.YYYY</SelectItem>
           </SelectContent>
         </Select>
       </CardContent>

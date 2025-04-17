@@ -2,9 +2,9 @@
 
 import { InboxOrdering } from "@/components/inbox/inbox-ordering";
 import { InboxSearch } from "@/components/inbox/inbox-search";
-import { InboxSettingsModal } from "@/components/inbox/modals/inbox-settings-modal";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { InboxSettingsModal } from "../modals/inbox-settings-modal";
 
 export function InboxHeader() {
   return (
@@ -13,11 +13,7 @@ export function InboxHeader() {
 
       <div className="flex space-x-2">
         <InboxOrdering />
-        {/* <InboxSettingsModal
-          forwardEmail={forwardEmail}
-          inboxId={inboxId}
-          inboxForwarding={inboxForwarding}
-        /> */}
+        <InboxSettingsModal />
 
         <Button
           variant="outline"

@@ -27,7 +27,6 @@ export const syncInboxAccount = schemaTask({
       .from("inbox_accounts")
       .select("id, provider, team_id")
       .eq("id", id)
-      .eq("enabled", true)
       .single();
 
     if (!data) {

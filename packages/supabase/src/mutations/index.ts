@@ -1213,12 +1213,21 @@ export async function deleteInboxAccount(
 
 type UpdateInboxAccountParams = {
   id: string;
-  enabled: boolean;
+  refreshToken?: string;
+  accessToken?: string;
+  expiryDate?: string;
 };
 
 export async function updateInboxAccount(
   supabase: Client,
   params: UpdateInboxAccountParams,
 ) {
-  return supabase.from("inbox_accounts").update(params).eq("id", params.id);
+  return supabase
+    .from("inbox_accounts")
+    .update({
+      refresh_token: params.refreshToken,
+      access_token: params.accessToken,
+      expiry_date: params.expiryDate,
+    })
+    .eq("id", params.id);
 }

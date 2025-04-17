@@ -1311,6 +1311,19 @@ export async function getTeamByIdQuery(supabase: Client, teamId: string) {
   return supabase.from("teams").select("*").eq("id", teamId).single();
 }
 
+export async function getInboxAccountsQuery(supabase: Client, teamId: string) {
+  return supabase
+    .from("inbox_accounts")
+    .select("id, email, provider, last_accessed")
+    .eq("team_id", teamId);
+}
+
 export async function getInboxAccountByIdQuery(supabase: Client, id: string) {
-  return supabase.from("inbox_accounts").select("*").eq("id", id).single();
+  return supabase
+    .from("inbox_accounts")
+    .select(
+      "id, email, provider, access_token, refresh_token, expiry_date, last_accessed",
+    )
+    .eq("id", id)
+    .single();
 }

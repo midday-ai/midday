@@ -1,5 +1,6 @@
 import { FileViewer } from "@/components/file-viewer";
 import { FormatAmount } from "@/components/format-amount";
+import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -28,6 +29,7 @@ type Props = {
 
 export function InboxDetails({ firstItemId }: Props) {
   const { setParams, params } = useInboxParams();
+  const { params: filterParams } = useInboxFilterParams();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -56,14 +58,49 @@ export function InboxDetails({ firstItemId }: Props) {
 
   const deleteInboxMutation = useMutation(
     trpc.inbox.delete.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onMutate: async ({ id }) => {
+        // Cancel outgoing refetches
+        await queryClient.cancelQueries({
           queryKey: trpc.inbox.get.infiniteQueryKey(),
         });
+
+        // Get current data
+        const previousData = queryClient.getQueriesData({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
+        });
+
+        // Optimistically update infinite query data
+        queryClient.setQueriesData(
+          { queryKey: trpc.inbox.get.infiniteQueryKey() },
+          (old: any) => ({
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              data: page.data.filter((item: any) => item.id !== id),
+            })),
+            pageParams: old.pageParams,
+          }),
+        );
 
         setParams({
           ...params,
           inboxId: null,
+        });
+
+        return { previousData };
+      },
+      onError: (_, __, context) => {
+        // Restore previous data on error
+        if (context?.previousData) {
+          queryClient.setQueriesData(
+            { queryKey: trpc.inbox.get.infiniteQueryKey() },
+            context.previousData,
+          );
+        }
+      },
+      onSettled: () => {
+        // Refetch after error or success
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
         });
       },
     }),
@@ -219,6 +256,8 @@ export function InboxDetails({ firstItemId }: Props) {
             <FileViewer
               mimeType={data.content_type}
               url={`/api/proxy?filePath=vault/${data?.file_path.join("/")}`}
+              // If the order changes, the file viewer will remount otherwise the PDF worker will crash
+              key={`${params.order}-${JSON.stringify(filterParams)}`}
             />
           )}
         </div>

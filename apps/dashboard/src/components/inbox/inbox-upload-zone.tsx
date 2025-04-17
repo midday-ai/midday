@@ -12,9 +12,16 @@ import { useDropzone } from "react-dropzone";
 
 type Props = {
   children: ReactNode;
+  onUpload?: (
+    results: {
+      file_path: string[];
+      mimetype: string;
+      size: number;
+    }[],
+  ) => void;
 };
 
-export function UploadZone({ children }: Props) {
+export function UploadZone({ children, onUpload }: Props) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const supabase = createClient();
@@ -105,6 +112,7 @@ export function UploadZone({ children }: Props) {
       setShowProgress(false);
       setToastId(null);
       dismiss(toastId);
+      onUpload?.(results);
     } catch {
       toast({
         duration: 2500,

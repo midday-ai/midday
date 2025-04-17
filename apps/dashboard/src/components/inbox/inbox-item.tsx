@@ -28,7 +28,7 @@ export function InboxItem({ item, index }: Props) {
       }}
       key={item.id}
       className={cn(
-        "flex flex-col w-full items-start gap-2 border p-4 text-left text-sm",
+        "flex flex-col w-full items-start gap-2 border p-4 text-left text-sm h-[90px]",
         isSelected && "bg-accent border-[#DCDAD2] dark:border-[#2C2C2C]",
       )}
     >

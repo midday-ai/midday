@@ -2,6 +2,7 @@ import type { Credentials } from "google-auth-library";
 import { type Auth, type gmail_v1, google } from "googleapis";
 import { decodeBase64Url, ensurePdfExtension } from "../attachments";
 import { generateDeterministicId } from "../generate-id";
+import { updateAccessToken, updateRefreshToken } from "../tokens";
 import type {
   Attachment,
   EmailAttachment,
@@ -32,14 +33,33 @@ export class GmailProvider implements OAuthProviderInterface {
       redirectUri,
     );
 
-    this.oauth2Client.on("tokens", (tokens: Credentials | null | undefined) => {
-      if (tokens?.refresh_token) {
-        console.log("New refresh token received:", tokens.refresh_token);
-      }
-      if (tokens?.access_token) {
-        console.log("Access token refreshed:", tokens.access_token);
-      }
-    });
+    this.oauth2Client.on(
+      "tokens",
+      async (tokens: Credentials | null | undefined) => {
+        if (!this.accountId) {
+          return;
+        }
+
+        if (tokens?.refresh_token) {
+          await updateRefreshToken({
+            accountId: this.accountId,
+            refreshToken: tokens.refresh_token,
+          });
+        }
+
+        if (tokens?.access_token) {
+          await updateAccessToken({
+            accountId: this.accountId,
+            accessToken: tokens.access_token,
+            expiryDate: new Date(tokens.expiry_date!).toISOString(),
+          });
+        }
+      },
+    );
+  }
+
+  setAccountId(accountId: string): void {
+    this.accountId = accountId;
   }
 
   getAuthUrl(): string {
@@ -57,6 +77,7 @@ export class GmailProvider implements OAuthProviderInterface {
       if (!tokens.access_token) {
         throw new Error("Failed to obtain access token.");
       }
+
       const validTokens: Tokens = {
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token ?? undefined,
@@ -194,7 +215,19 @@ export class GmailProvider implements OAuthProviderInterface {
     if (fromHeader) {
       const emailMatch = fromHeader.match(/<([^>]+)>/);
       const email = emailMatch ? emailMatch[1] : fromHeader;
-      senderDomain = email?.split("@")[1];
+      const domain = email?.split("@")[1];
+
+      // Extract root domain (remove subdomains)
+      if (domain) {
+        const domainParts = domain.split(".");
+        const partsCount = domainParts.length;
+
+        // Get the root domain (last two parts or just the domain if it's a simple domain)
+        senderDomain =
+          partsCount >= 2
+            ? `${domainParts[partsCount - 2]}.${domainParts[partsCount - 1]}`
+            : domain;
+      }
     }
 
     try {
@@ -249,7 +282,15 @@ export class GmailProvider implements OAuthProviderInterface {
         break;
       }
 
-      if (part.filename && part.body?.attachmentId) {
+      // Only process parts with PDF or octet-stream MIME types
+      const mimeType = part.mimeType ?? "application/octet-stream";
+
+      if (
+        part.filename &&
+        part.body?.attachmentId &&
+        (mimeType === "application/pdf" ||
+          mimeType === "application/octet-stream")
+      ) {
         try {
           const attachmentResponse =
             await this.gmail.users.messages.attachments.get({
@@ -261,7 +302,7 @@ export class GmailProvider implements OAuthProviderInterface {
           if (attachmentResponse.data.data) {
             attachments.push({
               filename: part.filename,
-              mimeType: part.mimeType ?? "application/octet-stream",
+              mimeType: mimeType,
               size: attachmentResponse.data.size ?? 0,
               data: attachmentResponse.data.data,
             });
@@ -294,6 +335,7 @@ export class GmailProvider implements OAuthProviderInterface {
         }
       }
     }
+
     return attachments.slice(0, maxAttachments);
   }
 }

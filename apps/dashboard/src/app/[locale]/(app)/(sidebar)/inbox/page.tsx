@@ -32,6 +32,7 @@ export default async function Page(props: Props) {
   );
 
   if (
+    !params.connected &&
     data.pages[0]?.data.length === 0 &&
     !Object.values(filter).some((value) => value !== null)
   ) {

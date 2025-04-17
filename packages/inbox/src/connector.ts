@@ -71,6 +71,9 @@ export class InboxConnector extends Connector {
       throw new Error("Account not found");
     }
 
+    // Set the account ID
+    this.#provider.setAccountId(account.data.id);
+
     // Set tokens to configure provider auth client
     this.#provider.setTokens({
       access_token: decrypt(account.data.access_token),

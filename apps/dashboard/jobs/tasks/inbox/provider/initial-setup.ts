@@ -1,8 +1,8 @@
 import { schedules, schemaTask } from "@trigger.dev/sdk/v3";
 import { generateQuarterDailyCronTag } from "jobs/utils/generate-cron-tag";
 import { z } from "zod";
-import { processAttachment } from "../process-attachment";
 import { inboxSyncScheduler } from "./sheduler";
+import { syncInboxAccount } from "./sync-account";
 
 export const initialInboxSetup = schemaTask({
   id: "initial-inbox-setup",
@@ -27,14 +27,8 @@ export const initialInboxSetup = schemaTask({
       deduplicationKey: `${id}-${inboxSyncScheduler.id}`,
     });
 
-    // Do initial sync of the email account
-
-    // processAttachment.batchTrigger({
-    //   teamId: id,
-    //   mimetype: "text/plain",
-    //   size: 100,
-    //   file_path: ["test.txt"],
-    //   displayName: "test.txt",
-    // });
+    await syncInboxAccount.trigger({
+      id,
+    });
   },
 });

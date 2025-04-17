@@ -1,9 +1,15 @@
 import { useQueryStates } from "nuqs";
-import { createLoader, parseAsString, parseAsStringLiteral } from "nuqs/server";
+import {
+  createLoader,
+  parseAsBoolean,
+  parseAsString,
+  parseAsStringLiteral,
+} from "nuqs/server";
 
 export const inboxParamsSchema = {
   inboxId: parseAsString,
   order: parseAsStringLiteral(["asc", "desc"]).withDefault("asc"),
+  connected: parseAsBoolean,
 };
 
 export function useInboxParams() {

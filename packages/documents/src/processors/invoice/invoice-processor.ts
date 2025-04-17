@@ -33,7 +33,9 @@ export class InvoiceProcessor {
         vendor_name: z
           .string()
           .nullable()
-          .describe("Name of the vendor/seller"),
+          .describe(
+            "The legal registered business name of the company issuing the invoice. Look for names that include entity types like 'Inc.', 'Ltd', 'AB', 'GmbH', 'LLC', etc. This name is typically found in the letterhead, header, or footer of the invoice. Do not extract brands, divisions, or 'Trading as' names unless no legal name is visible. If multiple company names appear, prioritize the one that appears to be issuing the invoice rather than subsidiaries or parent companies.",
+          ),
         vendor_address: z
           .string()
           .nullable()
