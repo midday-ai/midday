@@ -11,12 +11,14 @@ export const processAttachment = schemaTask({
     mimetype: z.string(),
     size: z.number(),
     file_path: z.array(z.string()),
+    referenceId: z.string().optional(),
+    website: z.string().optional(),
   }),
   maxDuration: 300,
   queue: {
     concurrencyLimit: 100,
   },
-  run: async ({ teamId, mimetype, size, file_path }) => {
+  run: async ({ teamId, mimetype, size, file_path, referenceId, website }) => {
     const supabase = createClient();
 
     // If the file is a HEIC we need to convert it to a JPG
@@ -38,6 +40,8 @@ export const processAttachment = schemaTask({
         file_name: filename,
         content_type: mimetype,
         size,
+        reference_id: referenceId,
+        website,
       })
       .select("*")
       .single()
@@ -60,7 +64,7 @@ export const processAttachment = schemaTask({
 
       const result = await document.getInvoiceOrReceipt({
         documentUrl: data?.signedUrl,
-        documentType: mimetype === "application/pdf" ? "invoice" : "receipt",
+        mimetype,
       });
 
       await supabase
@@ -68,8 +72,8 @@ export const processAttachment = schemaTask({
         .update({
           amount: result.amount,
           currency: result.currency,
-          display_name: result.name,
-          website: result.website,
+          display_name: result.name ?? undefined,
+          website: result.website ?? undefined,
           date: result.date,
           // type: result.type,
           status: "pending",

@@ -92,7 +92,7 @@ export const inboxSlackUpload = schemaTask({
 
       const result = await document.getInvoiceOrReceipt({
         content: Buffer.from(fileData).toString("base64"),
-        documentType: mimetype === "application/pdf" ? "invoice" : "receipt",
+        mimetype,
       });
 
       const { data: updatedInbox } = await supabase

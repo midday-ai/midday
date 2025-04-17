@@ -2,12 +2,26 @@
 
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
 import { ConnectOutlook } from "@/components/inbox/connect-outlook";
+import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
 import { getInboxEmail } from "@midday/inbox";
+import { useRouter } from "next/navigation";
 import { CopyInput } from "../copy-input";
 
 export function InboxGetStarted() {
+  const router = useRouter();
   const { data: user } = useUserQuery();
+
+  useRealtime({
+    channelName: "realtime_inbox",
+    table: "inbox",
+    filter: `team_id=eq.${user?.team_id}`,
+    onEvent: (payload) => {
+      if (payload.eventType === "INSERT") {
+        router.push("/inbox");
+      }
+    },
+  });
 
   return (
     <div className="h-[calc(100vh-150px)] flex items-center justify-center">

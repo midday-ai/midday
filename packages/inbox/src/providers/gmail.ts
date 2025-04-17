@@ -1,21 +1,24 @@
 import type { Credentials } from "google-auth-library";
 import { type Auth, type gmail_v1, google } from "googleapis";
+import { decodeBase64Url, ensurePdfExtension } from "../attachments";
+import { generateDeterministicId } from "../generate-id";
 import type {
-  Email,
+  Attachment,
   EmailAttachment,
+  GetAttachmentsOptions,
   OAuthProviderInterface,
   Tokens,
+  UserInfo,
 } from "./types";
 
 export class GmailProvider implements OAuthProviderInterface {
   private oauth2Client: Auth.OAuth2Client;
   private gmail: gmail_v1.Gmail | null = null;
+  private accountId: string | null = null;
 
   private readonly scopes = [
     "https://www.googleapis.com/auth/gmail.readonly",
-    "openid",
     "https://www.googleapis.com/auth/userinfo.email",
-    "https://www.googleapis.com/auth/userinfo.profile",
   ];
 
   constructor() {
@@ -75,6 +78,7 @@ export class GmailProvider implements OAuthProviderInterface {
     if (!tokens.access_token) {
       throw new Error("Access token is required.");
     }
+
     const googleCredentials: Credentials = {
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
@@ -82,51 +86,12 @@ export class GmailProvider implements OAuthProviderInterface {
       scope: tokens.scope,
       token_type: tokens.token_type as Credentials["token_type"],
     };
+
     this.oauth2Client.setCredentials(googleCredentials);
     this.gmail = google.gmail({ version: "v1", auth: this.oauth2Client });
   }
 
-  async refreshToken(): Promise<Tokens> {
-    if (!this.oauth2Client.credentials.refresh_token) {
-      throw new Error(
-        "No refresh token available to refresh the access token.",
-      );
-    }
-    try {
-      const { credentials } = await this.oauth2Client.refreshAccessToken();
-      if (!credentials.access_token) {
-        throw new Error("Failed to refresh access token.");
-      }
-      const validTokens: Tokens = {
-        access_token: credentials.access_token,
-        refresh_token: credentials.refresh_token ?? undefined,
-        expiry_date: credentials.expiry_date ?? undefined,
-        scope: credentials.scope ?? undefined,
-        token_type: credentials.token_type ?? undefined,
-      };
-      this.setTokens(validTokens);
-      return validTokens;
-    } catch (error: unknown) {
-      console.error("Error refreshing access token:", error);
-      const isAxiosError = (
-        err: unknown,
-      ): err is { response?: { data?: { error?: string } } } =>
-        typeof err === "object" && err !== null && "response" in err;
-
-      if (
-        isAxiosError(error) &&
-        error.response?.data?.error === "invalid_grant"
-      ) {
-        throw new Error(
-          "Refresh token is invalid or revoked. Re-authentication required.",
-        );
-      }
-      const message = error instanceof Error ? error.message : "Unknown error";
-      throw new Error(`Failed to refresh access token: ${message}`);
-    }
-  }
-
-  async getUserInfo() {
+  async getUserInfo(): Promise<UserInfo | undefined> {
     try {
       const oauth2 = google.oauth2({
         auth: this.oauth2Client,
@@ -146,14 +111,12 @@ export class GmailProvider implements OAuthProviderInterface {
     }
   }
 
-  async getEmails(
-    options: { maxResults?: number; includeAttachments?: boolean } = {},
-  ): Promise<Email[]> {
+  async getAttachments(options: GetAttachmentsOptions): Promise<Attachment[]> {
     if (!this.gmail) {
       throw new Error("Gmail client not initialized. Set tokens first.");
     }
 
-    const { maxResults = 10, includeAttachments = false } = options;
+    const { maxResults = 10 } = options;
 
     try {
       const listResponse = await this.gmail.users.messages.list({
@@ -170,152 +133,102 @@ export class GmailProvider implements OAuthProviderInterface {
         return [];
       }
 
-      const messageIds = messages.map((m: gmail_v1.Schema$Message) => m.id!);
+      const messageDetailsPromises = messages
+        .map((m: gmail_v1.Schema$Message) => m.id!)
+        .filter((id): id is string => Boolean(id))
+        .map((id: string) =>
+          this.gmail!.users.messages.get({
+            userId: "me",
+            id: id,
+            format: "full",
+          })
+            .then((res) => res.data)
+            .catch((err: unknown) => {
+              console.error(
+                `Failed to fetch message ${id}:`,
+                err instanceof Error ? err.message : err,
+              );
+              return null;
+            }),
+        );
 
-      const emailDataPromises = messageIds.map(
-        (
-          id: string | null | undefined,
-        ): Promise<gmail_v1.Schema$Message | null> =>
-          id
-            ? this.gmail!.users.messages.get({
-                userId: "me",
-                id: id,
-                format: "full",
-              })
-                .then((res) => res.data)
-                .catch((err: unknown) => {
-                  console.error(
-                    `Failed to fetch message ${id}:`,
-                    err instanceof Error ? err.message : err,
-                  );
-                  return null;
-                })
-            : Promise.resolve(null),
-      );
-
-      const fetchedMessages = (await Promise.all(emailDataPromises)).filter(
-        (msg): msg is gmail_v1.Schema$Message => msg !== null,
-      );
+      const fetchedMessages = (
+        await Promise.all(messageDetailsPromises)
+      ).filter((msg): msg is gmail_v1.Schema$Message => msg !== null);
 
       if (fetchedMessages.length === 0) {
         console.log("All filtered messages failed to fetch details.");
         return [];
       }
 
-      const emails = await Promise.all(
-        fetchedMessages.map(
-          async (message: gmail_v1.Schema$Message): Promise<Email | null> => {
-            if (!message.id || !message.threadId) {
-              console.warn(
-                "Skipping message due to missing ID or ThreadID:",
-                message,
-              );
-              return null;
-            }
-            const headers = message.payload?.headers ?? [];
-            const findHeader = (name: string): string | undefined =>
-              headers.find(
-                (h: gmail_v1.Schema$MessagePartHeader) =>
-                  h.name?.toLowerCase() === name.toLowerCase(),
-              )?.value ?? undefined;
-
-            const dateString = findHeader("date");
-
-            const email: Email = {
-              id: message.id,
-              threadId: message.threadId,
-              snippet: message.snippet ?? "",
-              subject: findHeader("subject"),
-              from: findHeader("from"),
-              to: findHeader("to")
-                ?.split(",")
-                .map((s: string) => s.trim()),
-              date: dateString ? new Date(dateString) : undefined,
-              body: this.parseBody(message.payload),
-              attachments: [],
-            };
-
-            if (includeAttachments && message.payload?.parts) {
-              const allAttachments = await this.fetchAttachments(
-                message.id,
-                message.payload.parts,
-              );
-              email.attachments = allAttachments;
-            }
-
-            return email;
-          },
-        ),
+      const allAttachmentsPromises = fetchedMessages.map((message) =>
+        this.#processMessageToAttachments(message),
       );
 
-      return emails.filter(
-        (email: Email | null): email is Email => email !== null,
-      );
+      const attachmentsArray = await Promise.all(allAttachmentsPromises);
+      const flattenedAttachments = attachmentsArray.flat();
+
+      return flattenedAttachments;
     } catch (error: unknown) {
-      console.error("Error fetching emails:", error);
-
-      const isApiError = (
-        err: unknown,
-      ): err is { code?: number; message?: string } =>
-        typeof err === "object" &&
-        err !== null &&
-        ("code" in err || "message" in err);
-
-      if (isApiError(error) && error.code === 401) {
-        console.warn(
-          "Received 401 Unauthorized. Access token might be expired or invalid. Consider refreshing the token.",
-        );
-        throw new Error(
-          "Unauthorized access. Token may be expired or invalid.",
-        );
-      }
       const message = error instanceof Error ? error.message : "Unknown error";
-      throw new Error(`Failed to fetch emails: ${message}`);
+      throw new Error(`Failed to fetch attachments: ${message}`);
     }
   }
 
-  private parseBody(
-    payload?: gmail_v1.Schema$MessagePart | null,
-  ): Email["body"] {
-    if (!payload) return {};
-
-    let textBody: string | undefined;
-    let htmlBody: string | undefined;
-
-    const findPart = (
-      parts: gmail_v1.Schema$MessagePart[],
-      mimeType: string,
-    ): gmail_v1.Schema$MessagePart | undefined => {
-      for (const part of parts) {
-        if (part.mimeType === mimeType) {
-          return part;
-        }
-        if (part.parts) {
-          const found = findPart(part.parts, mimeType);
-          if (found) return found;
-        }
-      }
-      return undefined;
-    };
-
-    if (payload.mimeType === "text/plain" && payload.body?.data) {
-      textBody = Buffer.from(payload.body.data, "base64").toString("utf-8");
-    } else if (payload.mimeType === "text/html" && payload.body?.data) {
-      htmlBody = Buffer.from(payload.body.data, "base64").toString("utf-8");
-    } else if (payload.parts) {
-      const textPart = findPart(payload.parts, "text/plain");
-      if (textPart?.body?.data) {
-        textBody = Buffer.from(textPart.body.data, "base64").toString("utf-8");
-      }
-      const htmlPart = findPart(payload.parts, "text/html");
-      if (htmlPart?.body?.data) {
-        htmlBody = Buffer.from(htmlPart.body.data, "base64").toString("utf-8");
-      }
-    } else if (payload.body?.data) {
-      textBody = Buffer.from(payload.body.data, "base64").toString("utf-8");
+  async #processMessageToAttachments(
+    message: gmail_v1.Schema$Message,
+  ): Promise<Attachment[]> {
+    if (!message.id || !message.payload?.parts) {
+      console.warn(
+        `Skipping message ${message.id} due to missing ID or parts.`,
+      );
+      return [];
     }
 
-    return { text: textBody, html: htmlBody };
+    // Find the 'From' header to extract sender details
+    const fromHeader = message.payload?.headers?.find(
+      (h) => h.name === "From",
+    )?.value;
+    let senderDomain: string | undefined;
+
+    if (fromHeader) {
+      const emailMatch = fromHeader.match(/<([^>]+)>/);
+      const email = emailMatch ? emailMatch[1] : fromHeader;
+      senderDomain = email?.split("@")[1];
+    }
+
+    try {
+      const rawAttachments = await this.fetchAttachments(
+        message.id,
+        message.payload.parts,
+      );
+
+      const attachments: Attachment[] = rawAttachments.map((att) => {
+        const filename = ensurePdfExtension(att.filename);
+        const referenceId = generateDeterministicId(
+          `${message.id}_${filename}`,
+        );
+
+        return {
+          id: referenceId,
+          filename,
+          mimeType: att.mimeType,
+          size: att.size,
+          data: decodeBase64Url(att.data),
+          website: senderDomain,
+          referenceId: referenceId,
+        };
+      });
+
+      return attachments;
+    } catch (error: unknown) {
+      const messageText =
+        error instanceof Error ? error.message : "Unknown error";
+      console.error(
+        `Failed to process attachments for message ${message.id}: ${messageText}`,
+      );
+      return [];
+    }
   }
 
   private async fetchAttachments(
@@ -323,9 +236,19 @@ export class GmailProvider implements OAuthProviderInterface {
     parts: gmail_v1.Schema$MessagePart[],
   ): Promise<EmailAttachment[]> {
     const attachments: EmailAttachment[] = [];
+    let attachmentsCount = 0;
+    const maxAttachments = 5;
+
     if (!this.gmail) return attachments;
 
     for (const part of parts) {
+      if (attachmentsCount >= maxAttachments) {
+        console.log(
+          `Reached maximum attachment limit (${maxAttachments}) for message ${messageId}. Skipping further attachments.`,
+        );
+        break;
+      }
+
       if (part.filename && part.body?.attachmentId) {
         try {
           const attachmentResponse =
@@ -342,6 +265,7 @@ export class GmailProvider implements OAuthProviderInterface {
               size: attachmentResponse.data.size ?? 0,
               data: attachmentResponse.data.data,
             });
+            attachmentsCount++;
           }
         } catch (error: unknown) {
           const attachmentIdentifier =
@@ -354,14 +278,22 @@ export class GmailProvider implements OAuthProviderInterface {
           );
         }
       }
+
       if (part.parts) {
         const nestedAttachments = await this.fetchAttachments(
           messageId,
           part.parts,
         );
         attachments.push(...nestedAttachments);
+        attachmentsCount = attachments.length;
+        if (attachmentsCount >= maxAttachments) {
+          console.log(
+            `Reached maximum attachment limit (${maxAttachments}) after processing nested parts for message ${messageId}.`,
+          );
+          break;
+        }
       }
     }
-    return attachments;
+    return attachments.slice(0, maxAttachments);
   }
 }

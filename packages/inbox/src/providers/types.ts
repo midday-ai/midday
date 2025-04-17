@@ -5,27 +5,35 @@ export interface EmailAttachment {
   data: string; // Base64 encoded data
 }
 
-export interface Email {
+export interface Attachment {
   id: string;
-  threadId: string;
-  snippet: string;
-  subject?: string;
-  from?: string;
-  to?: string[];
-  date?: Date;
-  body?: {
-    text?: string;
-    html?: string;
-  };
-  attachments?: EmailAttachment[];
+  filename: string;
+  mimeType: string;
+  size: number;
+  referenceId: string;
+  data: Buffer;
+  website?: string;
+}
+
+export interface Account {
+  id: string;
+  provider: OAuthProvider;
+  external_id: string;
+}
+
+export interface GetAttachmentsOptions {
+  id: string;
+  maxResults?: number;
 }
 
 export abstract class Connector {
   abstract connect(): string;
   abstract exchangeCodeForAccount(
     params: ExchangeCodeForAccountParams,
-  ): Promise<void>;
-  abstract getEmails(options?: { limit?: number }): Promise<Email[]>;
+  ): Promise<Account | null>;
+  abstract getAttachments(
+    options?: GetAttachmentsOptions,
+  ): Promise<Attachment[]>;
 }
 
 export interface OAuthProviderCredentials {
@@ -75,19 +83,10 @@ export interface OAuthProviderInterface {
   setTokens(tokens: Tokens): void;
 
   /**
-   * Refreshes the access token using the refresh token.
-   * Updates the client's credentials.
+   * Fetches attachments from the provider.
+   * @param options - Options for fetching attachments (e.g., max results, id).
    */
-  refreshToken(): Promise<Tokens>;
-
-  /**
-   * Fetches emails from the provider.
-   * @param options - Options for fetching emails (e.g., max results, include attachments).
-   */
-  getEmails(options?: {
-    maxResults?: number;
-    includeAttachments?: boolean;
-  }): Promise<Email[]>;
+  getAttachments(options: GetAttachmentsOptions): Promise<Attachment[]>;
 
   /**
    * Fetches user info from the provider.

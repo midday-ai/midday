@@ -36,3 +36,13 @@ export function removeProtocolFromDomain(domain: string | null): string | null {
 
   return domain.replace(/^(https?:\/\/)/, "");
 }
+
+export function getDocumentTypeFromMimeType(mimetype: string): string {
+  switch (mimetype) {
+    case "application/pdf":
+    case "application/octet-stream":
+      return "invoice";
+    default:
+      return "receipt";
+  }
+}

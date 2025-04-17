@@ -1,13 +1,16 @@
 import { decrypt, encrypt } from "@midday/encryption";
 import { createClient } from "@midday/supabase/job";
-import { createInboxAccount } from "@midday/supabase/mutations";
+import { upsertInboxAccount } from "@midday/supabase/mutations";
+import { getInboxAccountByIdQuery } from "@midday/supabase/queries";
 import type { Client } from "@midday/supabase/types";
 import { GmailProvider } from "./providers/gmail";
 import { OutlookProvider } from "./providers/outlook";
 import {
+  type Account,
+  type Attachment,
   Connector,
-  type Email,
   type ExchangeCodeForAccountParams,
+  type GetAttachmentsOptions,
   type OAuthProvider,
   type OAuthProviderInterface,
 } from "./providers/types";
@@ -40,7 +43,9 @@ export class InboxConnector extends Connector {
     return this.#provider.getAuthUrl();
   }
 
-  async exchangeCodeForAccount(params: ExchangeCodeForAccountParams) {
+  async exchangeCodeForAccount(
+    params: ExchangeCodeForAccountParams,
+  ): Promise<Account | null> {
     const tokens = await this.#provider.exchangeCodeForTokens(params.code);
 
     // Set tokens to configure provider auth client
@@ -49,25 +54,36 @@ export class InboxConnector extends Connector {
       refresh_token: tokens.refresh_token ?? "",
     });
 
-    await this.#saveAccount({
+    const account = await this.#saveAccount({
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token ?? "",
       teamId: params.teamId,
+      expiryDate: new Date(tokens.expiry_date!).toISOString(),
     });
+
+    return account;
   }
 
-  async getEmails(options?: { limit?: number }): Promise<Email[]> {
-    try {
-      const emails = await this.#provider.getEmails({
-        maxResults: options?.limit,
-      });
+  async getAttachments(options: GetAttachmentsOptions): Promise<Attachment[]> {
+    const account = await getInboxAccountByIdQuery(this.#supabase, options.id);
 
-      return emails;
+    if (!account.data) {
+      throw new Error("Account not found");
+    }
+
+    // Set tokens to configure provider auth client
+    this.#provider.setTokens({
+      access_token: decrypt(account.data.access_token),
+      refresh_token: decrypt(account.data.refresh_token),
+    });
+
+    try {
+      return this.#provider.getAttachments({
+        id: account.data.id,
+        maxResults: options.maxResults,
+      });
     } catch (error) {
-      // Handle potential token expiration/errors
-      console.error("Failed to fetch emails:", error);
-      // Attempt token refresh if possible, or re-throw
-      throw new Error("Failed to fetch emails.");
+      throw new Error("Failed to fetch attachments.");
     }
   }
 
@@ -75,6 +91,7 @@ export class InboxConnector extends Connector {
     accessToken: string;
     refreshToken: string;
     teamId: string;
+    expiryDate: string;
   }) {
     if (!params.teamId || !this.#provider) {
       throw new Error("Team ID or provider is not set");
@@ -82,17 +99,19 @@ export class InboxConnector extends Connector {
 
     const userInfo = await this.#provider.getUserInfo();
 
-    if (!userInfo?.email) {
+    if (!userInfo?.email || !userInfo.id) {
       throw new Error("User info does not contain an email address.");
     }
 
-    const { data } = await createInboxAccount(this.#supabase, {
+    const { data } = await upsertInboxAccount(this.#supabase, {
       teamId: params.teamId,
       provider: this.#providerName,
       accessToken: encrypt(params.accessToken),
       refreshToken: encrypt(params.refreshToken),
       email: userInfo.email,
       lastAccessed: new Date().toISOString(),
+      externalId: userInfo.id,
+      expiryDate: params.expiryDate,
     });
 
     return data;

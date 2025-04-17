@@ -1,9 +1,7 @@
-export type MimeType = "application/pdf" | "image/jpeg";
-
 export type GetDocumentRequest = {
   content?: string;
   documentUrl?: string;
-  documentType?: "invoice" | "receipt";
+  mimetype: string;
 };
 
 export type GetInvoiceOrReceiptResponse = {

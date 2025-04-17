@@ -1,5 +1,7 @@
 import { getTeamId } from "@/utils/team";
 import { InboxConnector } from "@midday/inbox/connector";
+import { tasks } from "@trigger.dev/sdk/v3";
+import type { syncInboxAccount } from "jobs/tasks/inbox/provider/sync-account";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -17,16 +19,24 @@ export async function GET(request: Request) {
 
   try {
     const connector = new InboxConnector(state);
-    const acount = await connector.exchangeCodeForAccount({ code, teamId });
+    const account = await connector.exchangeCodeForAccount({ code, teamId });
 
-    console.log({ acount });
+    if (!account) {
+      return NextResponse.redirect(
+        new URL("/inbox?connect=failed", request.url),
+        { status: 302 },
+      );
+    }
 
-    // Trigger initial setup
-    const eventId = "12wefwef23e23";
+    await tasks.trigger<typeof syncInboxAccount>("sync-inbox-account", {
+      id: account.id,
+    });
 
     return NextResponse.redirect(
-      new URL(`/inbox?event_id=${eventId}`, request.url),
-      { status: 302 },
+      new URL(`/inbox?success=true&provider=${state}`, request.url),
+      {
+        status: 302,
+      },
     );
   } catch (error) {
     console.error(error);

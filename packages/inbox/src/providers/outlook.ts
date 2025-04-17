@@ -1,4 +1,9 @@
-import type { OAuthProvider, OAuthProviderInterface, Tokens } from "./types";
+import type {
+  GetAttachmentsOptions,
+  OAuthProvider,
+  OAuthProviderInterface,
+  Tokens,
+} from "./types";
 
 export class OutlookProvider implements OAuthProviderInterface {
   getAuthUrl(): string {
@@ -22,7 +27,7 @@ export class OutlookProvider implements OAuthProviderInterface {
     return Promise.resolve({} as Tokens);
   }
 
-  getEmails(options?: { maxResults?: number; includeAttachments?: boolean }) {
+  getAttachments(options: GetAttachmentsOptions) {
     return Promise.resolve([]);
   }
 

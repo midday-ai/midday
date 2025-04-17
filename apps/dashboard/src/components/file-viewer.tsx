@@ -19,14 +19,11 @@ type Props = {
 };
 
 export function FileViewer({ mimeType, url }: Props) {
-  if (mimeType === "application/pdf") {
-    return (
-      <DynamicPdfViewer
-        url={url}
-        // We need to flush because of the React PDF Document Instance
-        key={Math.random()}
-      />
-    );
+  if (
+    mimeType === "application/pdf" ||
+    mimeType === "application/octet-stream"
+  ) {
+    return <DynamicPdfViewer url={url} key={url} />;
   }
 
   if (mimeType?.startsWith("image/")) {

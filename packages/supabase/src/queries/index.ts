@@ -1310,3 +1310,7 @@ export async function getInstalledAppsQuery(supabase: Client, teamId: string) {
 export async function getTeamByIdQuery(supabase: Client, teamId: string) {
   return supabase.from("teams").select("*").eq("id", teamId).single();
 }
+
+export async function getInboxAccountByIdQuery(supabase: Client, id: string) {
+  return supabase.from("inbox_accounts").select("*").eq("id", id).single();
+}

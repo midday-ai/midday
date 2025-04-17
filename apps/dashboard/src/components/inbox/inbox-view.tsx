@@ -14,6 +14,7 @@ import {
 import { AnimatePresence, type Variants, motion } from "framer-motion";
 import { useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
+import { useDebouncedCallback } from "use-debounce";
 import { InboxDetails } from "./inbox-details";
 import { NoResults } from "./inbox-empty";
 import { InboxItem } from "./inbox-item";
@@ -60,27 +61,35 @@ export function InboxView() {
   const { data, fetchNextPage, hasNextPage, refetch } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
 
+  const tableData = useMemo(() => {
+    return data?.pages.flatMap((page) => page.data) ?? [];
+  }, [data]);
+
+  const debouncedEventHandler = useDebouncedCallback(() => {
+    refetch();
+
+    queryClient.invalidateQueries({
+      queryKey: trpc.inbox.getById.queryKey(),
+    });
+
+    // Set the first item as the selected item
+    const inboxId = tableData.at(0)?.id;
+
+    if (inboxId) {
+      setParams({
+        ...params,
+        inboxId,
+      });
+    }
+  }, 500);
+
   useRealtime({
     channelName: "realtime_inbox",
     table: "inbox",
     filter: `team_id=eq.${user?.team_id}`,
     onEvent: (payload) => {
-      switch (payload.eventType) {
-        case "INSERT":
-        case "UPDATE": {
-          refetch();
-
-          // Invalidate the query for the inbox details
-          queryClient.invalidateQueries({
-            queryKey: trpc.inbox.getById.queryKey(),
-          });
-
-          setParams({
-            ...params,
-            inboxId: payload.new.id,
-          });
-          break;
-        }
+      if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+        debouncedEventHandler();
       }
     },
   });
@@ -90,10 +99,6 @@ export function InboxView() {
       fetchNextPage();
     }
   }, [inView]);
-
-  const tableData = useMemo(() => {
-    return data?.pages.flatMap((page) => page.data) ?? [];
-  }, [data]);
 
   if (hasFilter && !tableData?.length) {
     return <NoResults />;

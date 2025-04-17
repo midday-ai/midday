@@ -120,7 +120,7 @@ export async function POST(req: Request) {
           file_path: data?.path.split("/"),
           file_name: uniqueFileName,
           content_type: attachment.ContentType,
-          reference_id: `${MessageID}_${uniqueFileName}`,
+          reference_id: `${MessageID}_${attachment.Name}`,
           size: attachment.ContentLength,
         };
       });

@@ -561,6 +561,8 @@ export type Database = {
           created_at: string
           email: string
           enabled: boolean
+          expiry_date: string
+          external_id: string
           id: string
           last_accessed: string
           provider: Database["public"]["Enums"]["inbox_account_providers"]
@@ -572,6 +574,8 @@ export type Database = {
           created_at?: string
           email: string
           enabled?: boolean
+          expiry_date: string
+          external_id: string
           id?: string
           last_accessed: string
           provider: Database["public"]["Enums"]["inbox_account_providers"]
@@ -583,6 +587,8 @@ export type Database = {
           created_at?: string
           email?: string
           enabled?: boolean
+          expiry_date?: string
+          external_id?: string
           id?: string
           last_accessed?: string
           provider?: Database["public"]["Enums"]["inbox_account_providers"]
