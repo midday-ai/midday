@@ -1,5 +1,4 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { InboxConnector } from "@midday/inbox/connector";
 import { deleteInbox } from "@midday/supabase/mutations";
 import {
   getInboxByIdQuery,
@@ -85,13 +84,5 @@ export const inboxRouter = createTRPCRouter({
         q: query,
         limit,
       });
-    }),
-
-  connect: protectedProcedure
-    .input(z.object({ provider: z.enum(["gmail", "outlook"]) }))
-    .mutation(async ({ input }) => {
-      const connector = new InboxConnector(input.provider);
-
-      return await connector.connect();
     }),
 });

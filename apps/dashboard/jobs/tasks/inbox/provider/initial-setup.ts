@@ -1,3 +1,5 @@
+import { createClient } from "@midday/supabase/job";
+import { updateInboxAccount } from "@midday/supabase/mutations";
 import { schedules, schemaTask } from "@trigger.dev/sdk/v3";
 import { generateQuarterDailyCronTag } from "jobs/utils/generate-cron-tag";
 import { z } from "zod";
@@ -16,15 +18,22 @@ export const initialInboxSetup = schemaTask({
   run: async (payload) => {
     const { id } = payload;
 
+    const supabase = createClient();
+
     // Schedule the inbox sync task to run every 6 hours at a random time to distribute load
     // Use a deduplication key to prevent duplicate schedules for the same team
     // Add inbox account id as externalId to use it in the inboxSyncScheduler task
-    await schedules.create({
+    const schedule = await schedules.create({
       task: inboxSyncScheduler.id,
       cron: generateQuarterDailyCronTag(id),
       timezone: "UTC",
       externalId: id,
       deduplicationKey: `${id}-${inboxSyncScheduler.id}`,
+    });
+
+    await updateInboxAccount(supabase, {
+      id,
+      scheduleId: schedule.id,
     });
 
     await syncInboxAccount.trigger({

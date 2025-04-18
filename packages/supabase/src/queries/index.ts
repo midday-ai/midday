@@ -1327,3 +1327,13 @@ export async function getInboxAccountByIdQuery(supabase: Client, id: string) {
     .eq("id", id)
     .single();
 }
+
+export async function getExistingInboxAttachmentsQuery(
+  supabase: Client,
+  inputArray: string[],
+) {
+  return supabase
+    .from("inbox")
+    .select("reference_id")
+    .in("reference_id", inputArray);
+}

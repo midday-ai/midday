@@ -33,7 +33,6 @@ export function InboxDetails({ firstItemId }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [isOpen, setOpen] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
   const { data: user } = useUserQuery();
 
@@ -161,9 +160,6 @@ export function InboxDetails({ firstItemId }: Props) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setOpen(true)}>
-                Edit
-              </DropdownMenuItem>
               <DropdownMenuItem>
                 <a
                   href={`/api/download/file?path=${data?.file_path

@@ -11,7 +11,7 @@ export function ConnectGmail() {
   const router = useRouter();
 
   const connectMutation = useMutation(
-    trpc.inbox.connect.mutationOptions({
+    trpc.inboxAccounts.connect.mutationOptions({
       onSuccess: (authUrl) => {
         if (authUrl) {
           router.push(authUrl);

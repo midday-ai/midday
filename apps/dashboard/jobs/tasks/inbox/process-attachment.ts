@@ -75,6 +75,9 @@ export const processAttachment = schemaTask({
           display_name: result.name ?? undefined,
           website: result.website ?? undefined,
           date: result.date,
+          tax_amount: result.tax_amount,
+          tax_rate: result.tax_rate,
+          tax_type: result.tax_type,
           // type: result.type,
           status: "pending",
         })

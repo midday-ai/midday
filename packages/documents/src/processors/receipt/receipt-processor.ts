@@ -26,7 +26,14 @@ export class ReceiptProcessor {
           .number()
           .nullable()
           .describe("Subtotal amount before tax"),
-        tax_amount: z.number().nullable().describe("Tax amount"),
+        tax_amount: z.number().describe("Tax amount"),
+        tax_rate: z
+          .number()
+          .optional()
+          .describe("Tax rate percentage (e.g., 20 for 20%)"),
+        tax_type: z
+          .enum(["vat", "sales_tax", "gst", "hst", "unknown"])
+          .describe("Type of tax applied"),
         store_name: z
           .string()
           .nullable()
@@ -126,6 +133,9 @@ export class ReceiptProcessor {
       amount: result.total_amount,
       currency: result.currency,
       name: result.store_name,
+      tax_amount: result.tax_amount,
+      tax_rate: result.tax_rate,
+      tax_type: result.tax_type,
       metadata: {
         register_number: result.register_number,
         cashier_name: result.cashier_name,

@@ -12,6 +12,9 @@ export type GetInvoiceOrReceiptResponse = {
   website?: string | null;
   type?: string | null;
   description?: string | null;
+  tax_amount?: number | null;
+  tax_rate?: number | null;
+  tax_type?: string | null;
   metadata?: Record<string, string | number | boolean | null>;
 };
 

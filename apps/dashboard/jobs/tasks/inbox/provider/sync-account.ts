@@ -1,9 +1,12 @@
 import { InboxConnector } from "@midday/inbox/connector";
 import { createClient } from "@midday/supabase/job";
+import { getExistingInboxAttachmentsQuery } from "@midday/supabase/queries";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { processBatch } from "jobs/utils/process-batch";
 import { z } from "zod";
 import { processAttachment } from "../process-attachment";
+
+const MAX_ATTACHMENTS = 10;
 
 export const syncInboxAccount = schemaTask({
   id: "sync-inbox-account",
@@ -37,11 +40,24 @@ export const syncInboxAccount = schemaTask({
 
     const attachments = await connector.getAttachments({
       id,
-      maxResults: 5,
+      maxResults: MAX_ATTACHMENTS,
     });
 
+    // Filter out attachments that are already saved in the database
+    const existingAttachments = await getExistingInboxAttachmentsQuery(
+      supabase,
+      attachments.map((attachment) => attachment.referenceId),
+    );
+
+    const filteredAttachments = attachments.filter(
+      (attachment) =>
+        !existingAttachments.data?.some(
+          (existing) => existing.reference_id === attachment.referenceId,
+        ),
+    );
+
     const uploadedAttachments = await processBatch(
-      attachments,
+      filteredAttachments,
       5,
       async (batch) => {
         const results = [];

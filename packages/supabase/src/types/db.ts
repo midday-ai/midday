@@ -468,6 +468,9 @@ export type Database = {
           reference_id: string | null
           size: number | null
           status: Database["public"]["Enums"]["inbox_status"] | null
+          tax_amount: number | null
+          tax_rate: number | null
+          tax_type: string | null
           team_id: string | null
           transaction_id: string | null
           type: Database["public"]["Enums"]["inbox_type"] | null
@@ -494,6 +497,9 @@ export type Database = {
           reference_id?: string | null
           size?: number | null
           status?: Database["public"]["Enums"]["inbox_status"] | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          tax_type?: string | null
           team_id?: string | null
           transaction_id?: string | null
           type?: Database["public"]["Enums"]["inbox_type"] | null
@@ -519,6 +525,9 @@ export type Database = {
           reference_id?: string | null
           size?: number | null
           status?: Database["public"]["Enums"]["inbox_status"] | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          tax_type?: string | null
           team_id?: string | null
           transaction_id?: string | null
           type?: Database["public"]["Enums"]["inbox_type"] | null
@@ -560,39 +569,39 @@ export type Database = {
           access_token: string
           created_at: string
           email: string
-          enabled: boolean
           expiry_date: string
           external_id: string
           id: string
           last_accessed: string
           provider: Database["public"]["Enums"]["inbox_account_providers"]
           refresh_token: string
+          schedule_id: string | null
           team_id: string
         }
         Insert: {
           access_token: string
           created_at?: string
           email: string
-          enabled?: boolean
           expiry_date: string
           external_id: string
           id?: string
           last_accessed: string
           provider: Database["public"]["Enums"]["inbox_account_providers"]
           refresh_token: string
+          schedule_id?: string | null
           team_id: string
         }
         Update: {
           access_token?: string
           created_at?: string
           email?: string
-          enabled?: boolean
           expiry_date?: string
           external_id?: string
           id?: string
           last_accessed?: string
           provider?: Database["public"]["Enums"]["inbox_account_providers"]
           refresh_token?: string
+          schedule_id?: string | null
           team_id?: string
         }
         Relationships: [
@@ -1924,13 +1933,13 @@ export type Database = {
       }
       determine_transaction_frequency: {
         Args:
+          | { p_avg_days_between: number; p_transaction_count: number }
           | {
               p_avg_days_between: number
               p_transaction_count: number
               p_is_recurring: boolean
               p_latest_frequency: string
             }
-          | { p_avg_days_between: number; p_transaction_count: number }
         Returns: string
       }
       extract_product_names: {
@@ -1962,13 +1971,13 @@ export type Database = {
       generate_inbox_fts: {
         Args:
           | { display_name: string; products_json: Json }
+          | { display_name_text: string; product_names: string }
           | {
               display_name_text: string
               product_names: string
               amount: number
               due_date: string
             }
-          | { display_name_text: string; product_names: string }
         Returns: unknown
       }
       get_all_transactions_by_account: {
@@ -2458,8 +2467,8 @@ export type Database = {
       }
       project_members: {
         Args:
-          | { "": Database["public"]["Tables"]["tracker_projects"]["Row"] }
           | { "": Database["public"]["Tables"]["tracker_entries"]["Row"] }
+          | { "": Database["public"]["Tables"]["tracker_projects"]["Row"] }
         Returns: {
           id: string
           avatar_url: string

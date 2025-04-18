@@ -1208,7 +1208,12 @@ export async function deleteInboxAccount(
   supabase: Client,
   params: DeleteInboxAccountParams,
 ) {
-  return supabase.from("inbox_accounts").delete().eq("id", params.id);
+  return supabase
+    .from("inbox_accounts")
+    .delete()
+    .eq("id", params.id)
+    .select("id, schedule_id")
+    .single();
 }
 
 type UpdateInboxAccountParams = {
@@ -1216,6 +1221,7 @@ type UpdateInboxAccountParams = {
   refreshToken?: string;
   accessToken?: string;
   expiryDate?: string;
+  scheduleId?: string;
 };
 
 export async function updateInboxAccount(
@@ -1228,6 +1234,7 @@ export async function updateInboxAccount(
       refresh_token: params.refreshToken,
       access_token: params.accessToken,
       expiry_date: params.expiryDate,
+      schedule_id: params.scheduleId,
     })
     .eq("id", params.id);
 }

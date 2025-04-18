@@ -30,6 +30,17 @@ export class InvoiceProcessor {
             "Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK)",
           ),
         total_amount: z.number().describe("Total amount for the invoice"),
+        tax_amount: z
+          .number()
+          .nullable()
+          .describe("Tax amount for the invoice"),
+        tax_rate: z
+          .number()
+          .nullable()
+          .describe("Tax rate as a percentage value (e.g., 20 for 20%)"),
+        tax_type: z
+          .enum(["vat", "sales_tax", "gst", "hst", "unknown"])
+          .describe("Type of tax applied to the invoice"),
         vendor_name: z
           .string()
           .nullable()
@@ -133,6 +144,9 @@ export class InvoiceProcessor {
       amount: result.total_amount,
       currency: result.currency,
       name: result.vendor_name,
+      tax_amount: result.tax_amount,
+      tax_rate: result.tax_rate,
+      tax_type: result.tax_type,
       metadata: {
         invoice_date: result.invoice_date,
         payment_instructions: result.payment_instructions,
