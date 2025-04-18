@@ -1,4 +1,7 @@
-import { getExpenses } from "@midday/supabase/cached-queries";
+"use client";
+
+import { useMetricsParams } from "@/hooks/use-metrics-params";
+import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -7,27 +10,27 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { AnimatedNumber } from "../animated-number";
 import { expenseChartExampleData } from "./data";
 import { StackedBarChart } from "./stacked-bar-chart";
 
 type Props = {
-  value: any;
-  defaultValue: any;
   disabled?: boolean;
-  currency?: string;
 };
 
-export async function ExpenseChart({
-  value,
-  defaultValue,
-  disabled,
-  currency,
-}: Props) {
-  const data = disabled
-    ? expenseChartExampleData
-    : await getExpenses({ ...defaultValue, ...value, currency });
+export function ExpenseChart({ disabled }: Props) {
+  const trpc = useTRPC();
+  const { params } = useMetricsParams();
+
+  const { data } = useQuery({
+    ...trpc.metrics.expense.queryOptions({
+      from: params.from,
+      to: params.to,
+    }),
+    placeholderData: (previousData) => previousData ?? expenseChartExampleData,
+  });
 
   return (
     <div className={cn(disabled && "pointer-events-none select-none")}>
@@ -77,7 +80,8 @@ export async function ExpenseChart({
           </TooltipProvider>
         </div>
       </div>
-      <StackedBarChart data={data} disabled={disabled} />
+
+      <StackedBarChart data={data} />
     </div>
   );
 }

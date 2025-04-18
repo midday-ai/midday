@@ -1,31 +1,38 @@
 "use client";
 
-import { updateUserAction } from "@/actions/update-user-action";
 import { useUpload } from "@/hooks/use-upload";
+import { useTRPC } from "@/trpc/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Icons } from "@midday/ui/icons";
 import { stripSpecialCharacters } from "@midday/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useRef, useState } from "react";
 import { forwardRef } from "react";
 
 type Props = {
   userId: string;
-  avatarUrl?: string;
-  fullName?: string;
+  avatarUrl?: string | null;
   onUpload?: (url: string) => void;
   size?: number;
 };
 
 export const AvatarUpload = forwardRef<HTMLInputElement, Props>(
-  (
-    { userId, avatarUrl: initialAvatarUrl, fullName, size = 65, onUpload },
-    ref,
-  ) => {
-    const action = useAction(updateUserAction);
+  ({ userId, avatarUrl: initialAvatarUrl, size = 65, onUpload }, ref) => {
     const [avatar, setAvatar] = useState(initialAvatarUrl);
     const inputRef = useRef<HTMLInputElement>(null);
+    const trpc = useTRPC();
+    const queryClient = useQueryClient();
+
+    const updateUserMutation = useMutation(
+      trpc.user.update.mutationOptions({
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: trpc.user.me.queryKey(),
+          });
+        },
+      }),
+    );
 
     const { isLoading, uploadFile } = useUpload();
 
@@ -42,7 +49,7 @@ export const AvatarUpload = forwardRef<HTMLInputElement, Props>(
       });
 
       if (url) {
-        action.execute({ avatar_url: url });
+        updateUserMutation.mutate({ avatar_url: url });
         setAvatar(url);
         onUpload?.(url);
       }
@@ -64,7 +71,7 @@ export const AvatarUpload = forwardRef<HTMLInputElement, Props>(
           <Loader2 className="size-4 animate-spin" />
         ) : (
           <>
-            <AvatarImage src={avatar} />
+            <AvatarImage src={avatar ?? undefined} />
             <AvatarFallback>
               <Icons.AccountCircle className="size-5" />
             </AvatarFallback>

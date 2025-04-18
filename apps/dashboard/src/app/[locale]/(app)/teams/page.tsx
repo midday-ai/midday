@@ -7,14 +7,13 @@ import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Teams | Midday",
 };
 
 export default async function Teams() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
 
   const teams = await getTeamsByUserIdQuery(supabase, user?.data?.id);
@@ -33,9 +32,7 @@ export default async function Teams() {
         </div>
 
         <div className="mr-5 mt-4 md:mr-10 md:mt-10">
-          <Suspense>
-            <UserMenu onlySignOut />
-          </Suspense>
+          <UserMenu onlySignOut />
         </div>
       </header>
 

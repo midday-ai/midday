@@ -1,109 +1,162 @@
-import {
-  type AnalyzeResultOperationOutput,
-  getLongRunningPoller,
-  isUnexpected,
-} from "@azure-rest/ai-document-intelligence";
-import { capitalCase } from "change-case";
-import type { Processor } from "../../interface";
-import { client } from "../../provider/azure";
+import { mistral } from "@ai-sdk/mistral";
+import { generateObject } from "ai";
+import { z } from "zod";
 import type { GetDocumentRequest } from "../../types";
-import {
-  extractRootDomain,
-  getCurrency,
-  getDomainFromEmail,
-} from "../../utils";
-import { LlmProcessor } from "../llm/llm-processor";
+import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
 
-export class InvoiceProcessor implements Processor {
-  async #processDocument(content: string) {
-    const initialResponse = await client
-      .path("/documentModels/{modelId}:analyze", "prebuilt-invoice")
-      .post({
-        contentType: "application/json",
-        body: {
-          base64Source: content,
-        },
-        queryParameters: {
-          features: ["queryFields"],
-          queryFields: ["VendorEmail", "CustomerEmail"],
-          split: "none",
-        },
-      });
-
-    if (isUnexpected(initialResponse)) {
-      throw initialResponse.body.error;
+export class InvoiceProcessor {
+  async #processDocument({ documentUrl }: GetDocumentRequest) {
+    if (!documentUrl) {
+      throw new Error("Document URL is required");
     }
 
-    const poller = await getLongRunningPoller(client, initialResponse);
-    const result = (await poller.pollUntilDone())
-      .body as AnalyzeResultOperationOutput;
+    const result = await generateObject({
+      model: mistral("mistral-small-latest"),
+      schema: z.object({
+        invoice_number: z
+          .string()
+          .nullable()
+          .describe("Unique identifier for the invoice"),
+        invoice_date: z
+          .string()
+          .nullable()
+          .describe("Date of invoice in ISO 8601 format (YYYY-MM-DD)"),
+        due_date: z
+          .string()
+          .describe("Payment due date in ISO 8601 format (YYYY-MM-DD)"),
+        currency: z
+          .string()
+          .describe(
+            "Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK)",
+          ),
+        total_amount: z.number().describe("Total amount for the invoice"),
+        tax_amount: z
+          .number()
+          .nullable()
+          .describe("Tax amount for the invoice"),
+        tax_rate: z
+          .number()
+          .nullable()
+          .describe("Tax rate as a percentage value (e.g., 20 for 20%)"),
+        tax_type: z
+          .enum(["vat", "sales_tax", "gst", "hst", "unknown"])
+          .describe("Type of tax applied to the invoice"),
+        vendor_name: z
+          .string()
+          .nullable()
+          .describe(
+            "The legal registered business name of the company issuing the invoice. Look for names that include entity types like 'Inc.', 'Ltd', 'AB', 'GmbH', 'LLC', etc. This name is typically found in the letterhead, header, or footer of the invoice. Do not extract brands, divisions, or 'Trading as' names unless no legal name is visible. If multiple company names appear, prioritize the one that appears to be issuing the invoice rather than subsidiaries or parent companies.",
+          ),
+        vendor_address: z
+          .string()
+          .nullable()
+          .describe("Complete address of the vendor"),
+        customer_name: z
+          .string()
+          .nullable()
+          .describe("Name of the customer/buyer"),
+        customer_address: z
+          .string()
+          .nullable()
+          .describe("Complete address of the customer"),
+        website: z
+          .string()
+          .nullable()
+          .describe(
+            "The root domain name of the vendor (e.g., 'example.com', not 'www.example.com' or 'shop.example.com'). If not explicitly mentioned in the document, infer it from the vendor's email address or search online using the Vendor Name. Prioritize the root domain.",
+          ),
+        email: z.string().nullable().describe("Email of the vendor/seller"),
+        line_items: z
+          .array(
+            z.object({
+              description: z
+                .string()
+                .nullable()
+                .describe("Description of the item"),
+              quantity: z.number().nullable().describe("Quantity of items"),
+              unit_price: z.number().nullable().describe("Price per unit"),
+              total_price: z
+                .number()
+                .nullable()
+                .describe("Total price for this line item"),
+            }),
+          )
+          .describe("Array of items listed in the document"),
+        payment_instructions: z
+          .string()
+          .nullable()
+          .describe("Payment terms or instructions"),
+        notes: z.string().nullable().describe("Additional notes or comments"),
+      }),
+      messages: [
+        {
+          role: "system",
+          content: `
+            You are a multilingual document parser that extracts structured data from financial documents such as invoices and receipts.
+          `,
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "file",
+              data: documentUrl,
+              mimeType: "application/pdf",
+            },
+          ],
+        },
+      ],
+      providerOptions: {
+        mistral: {
+          documentPageLimit: 10,
+        },
+      },
+    });
 
-    return this.#extractData(result);
+    return result.object;
   }
 
-  #getWebsiteFromFields(
-    fields?: Record<string, { valueString?: string }>,
-    content?: string,
-  ) {
-    const website =
-      // First try to get the email domain
-      getDomainFromEmail(fields?.VendorEmail?.valueString) ||
-      fields?.Website?.valueString ||
-      // Then try to get the website from the content
-      extractRootDomain(content) ||
-      null;
-
-    return website;
-  }
-
-  async #extractData(data: AnalyzeResultOperationOutput) {
-    const fields = data.analyzeResult?.documents?.[0]?.fields;
-    const content = data.analyzeResult?.content;
-
-    const website = this.#getWebsiteFromFields(fields, content);
-
-    const result = {
-      name:
-        (fields?.VendorName?.valueString &&
-          capitalCase(fields?.VendorName?.valueString)) ??
-        null,
-      date:
-        fields?.DueDate?.valueDate || fields?.InvoiceDate?.valueDate || null,
-      currency: getCurrency(fields?.InvoiceTotal),
-      amount: fields?.InvoiceTotal?.valueCurrency?.amount ?? null,
-      type: "invoice",
-      website,
-    };
-
-    // Return if all values are not null
-    if (Object.values(result).every((value) => value !== null)) {
-      return result;
+  #getWebsite({
+    website,
+    email,
+  }: { website: string | null; email: string | null }) {
+    if (website) {
+      return website;
     }
 
-    const fallback = content ? await this.#fallbackToLlm(content) : null;
+    return removeProtocolFromDomain(getDomainFromEmail(email));
+  }
 
-    // Only replace null values from LLM
-    const mappedResult = Object.fromEntries(
-      Object.entries(result).map(([key, value]) => [
-        key,
-        value ?? fallback?.[key as keyof typeof result] ?? null,
-      ]),
-    );
+  public async getInvoice(params: GetDocumentRequest) {
+    const result = await this.#processDocument(params);
+
+    const website = this.#getWebsite({
+      website: result.website,
+      email: result.email,
+    });
 
     return {
-      ...mappedResult,
-      // We only have description from LLM
-      description: fallback?.description ?? null,
+      ...result,
+      website,
+      type: "invoice",
+      description: result.notes,
+      date: result.due_date,
+      amount: result.total_amount,
+      currency: result.currency,
+      name: result.vendor_name,
+      tax_amount: result.tax_amount,
+      tax_rate: result.tax_rate,
+      tax_type: result.tax_type,
+      metadata: {
+        invoice_date: result.invoice_date,
+        payment_instructions: result.payment_instructions,
+        invoice_number: result.invoice_number,
+        customer_name: result.customer_name,
+        customer_address: result.customer_address,
+        vendor_address: result.vendor_address,
+        vendor_name: result.vendor_name,
+        email: result.email,
+      },
     };
-  }
-
-  async #fallbackToLlm(content: string) {
-    const llm = new LlmProcessor();
-    const fallbackData = await llm.getStructuredData(content);
-    return { ...fallbackData, type: "invoice" };
-  }
-
-  public async getDocument(params: GetDocumentRequest) {
-    return this.#processDocument(params.content);
   }
 }

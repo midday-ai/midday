@@ -1,13 +1,7 @@
-import { createAttachmentsAction } from "@/actions/create-attachments-action";
-import { createTransactionTagAction } from "@/actions/create-transaction-tag-action";
-import { deleteTransactionTagAction } from "@/actions/delete-transaction-tag-action";
-import type { UpdateTransactionValues } from "@/actions/schema";
-import { updateSimilarTransactionsCategoryAction } from "@/actions/update-similar-transactions-action";
-import { updateSimilarTransactionsRecurringAction } from "@/actions/update-similar-transactions-recurring";
-import { useUserContext } from "@/store/user/hook";
-import { createClient } from "@midday/supabase/client";
-import { getTransactionQuery } from "@midday/supabase/queries";
-import { getSimilarTransactions } from "@midday/supabase/queries";
+"use client";
+
+import { useTransactionParams } from "@/hooks/use-transaction-params";
+import { useTRPC } from "@/trpc/client";
 import {
   Accordion,
   AccordionContent,
@@ -27,181 +21,203 @@ import {
 import { Skeleton } from "@midday/ui/skeleton";
 import { Switch } from "@midday/ui/switch";
 import { ToastAction } from "@midday/ui/toast";
-import { useToast } from "@midday/ui/use-toast";
+import { toast } from "@midday/ui/use-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
-import { useQueryState } from "nuqs";
-import { useEffect, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 import { AssignUser } from "./assign-user";
-import { Attachments } from "./attachments";
 import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
 import { SelectTags } from "./select-tags";
+import { TransactionAttachments } from "./transaction-attachments";
 import { TransactionBankAccount } from "./transaction-bank-account";
 
-type Props = {
-  data: any;
-  ids?: string[];
-  updateTransaction: (
-    values: UpdateTransactionValues,
-    optimisticData: any,
-  ) => void;
-};
+export function TransactionDetails() {
+  const trpc = useTRPC();
+  const { transactionId } = useTransactionParams();
 
-export function TransactionDetails({
-  data: initialData,
-  ids,
-  updateTransaction,
-}: Props) {
-  const [data, setData] = useState(initialData);
-  const [transactionId, setTransactionId] = useQueryState("id");
-  const { toast } = useToast();
-  const supabase = createClient();
-  const [isLoading, setLoading] = useState(true);
-  const updateSimilarTransactionsCategory = useAction(
-    updateSimilarTransactionsCategoryAction,
-  );
-  const updateSimilarTransactionsRecurring = useAction(
-    updateSimilarTransactionsRecurringAction,
-  );
-  const createAttachments = useAction(createAttachmentsAction);
-  const createTransactionTag = useAction(createTransactionTagAction);
-  const deleteTransactionTag = useAction(deleteTransactionTagAction);
+  const queryClient = useQueryClient();
 
-  const { team_id: teamId } = useUserContext((state) => state.data);
+  const { data, isLoading } = useQuery({
+    ...trpc.transactions.getById.queryOptions({ id: transactionId! }),
+    enabled: Boolean(transactionId),
+    staleTime: 60 * 1000,
+    initialData: () => {
+      const pages = queryClient
+        .getQueriesData({ queryKey: trpc.transactions.get.infiniteQueryKey() })
+        .flatMap(([, data]) => data?.pages ?? [])
+        .flatMap((page) => page.data ?? []);
 
-  useHotkeys("esc", () => setTransactionId(null));
-
-  const enabled = Boolean(ids?.length);
-
-  useHotkeys(
-    "ArrowUp, ArrowDown",
-    ({ key }) => {
-      if (key === "ArrowUp") {
-        const currentIndex = ids?.indexOf(data?.id) ?? 0;
-        const prevId = ids[currentIndex - 1];
-
-        if (prevId) {
-          setTransactionId(prevId);
-        }
-      }
-
-      if (key === "ArrowDown") {
-        const currentIndex = ids?.indexOf(data?.id) ?? 0;
-        const nextId = ids[currentIndex + 1];
-
-        if (nextId) {
-          setTransactionId(nextId);
-        }
-      }
+      return pages.find((d) => d.id === transactionId);
     },
-    { enabled },
+  });
+
+  const updateTransactionMutation = useMutation(
+    trpc.transactions.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+      },
+      onMutate: async (variables) => {
+        // Cancel any outgoing refetches
+        await Promise.all([
+          queryClient.cancelQueries({
+            queryKey: trpc.transactions.getById.queryKey({
+              id: transactionId!,
+            }),
+          }),
+          queryClient.cancelQueries({
+            queryKey: trpc.transactions.get.infiniteQueryKey(),
+          }),
+        ]);
+
+        // Snapshot the previous values
+        const previousData = {
+          details: queryClient.getQueryData(
+            trpc.transactions.getById.queryKey({ id: transactionId! }),
+          ),
+          list: queryClient.getQueryData(
+            trpc.transactions.get.infiniteQueryKey(),
+          ),
+        };
+
+        // Optimistically update details view
+        queryClient.setQueryData(
+          trpc.transactions.getById.queryKey({ id: transactionId! }),
+          (old: any) => {
+            if (variables.category_slug) {
+              const categories = queryClient.getQueryData(
+                trpc.transactionCategories.get.queryKey(),
+              );
+              const category = categories?.find(
+                (c) => c.slug === variables.category_slug,
+              );
+
+              if (category) {
+                return {
+                  ...old,
+                  ...variables,
+                  category,
+                };
+              }
+            }
+
+            return {
+              ...old,
+              ...variables,
+            };
+          },
+        );
+
+        // Optimistically update list view
+        queryClient.setQueryData(
+          trpc.transactions.get.infiniteQueryKey(),
+          (old: any) => {
+            if (!old?.pages) return old;
+
+            return {
+              ...old,
+              pages: old.pages.map((page: any) => ({
+                ...page,
+                data: page.data.map((transaction: any) =>
+                  transaction.id === transactionId
+                    ? {
+                        ...transaction,
+                        ...variables,
+                        ...(variables.category_slug && {
+                          category: queryClient
+                            .getQueryData(
+                              trpc.transactionCategories.get.queryKey(),
+                            )
+                            ?.find((c) => c.slug === variables.category_slug),
+                        }),
+                      }
+                    : transaction,
+                ),
+              })),
+            };
+          },
+        );
+
+        return { previousData };
+      },
+      onError: (_, __, context) => {
+        // Revert both caches on error
+        queryClient.setQueryData(
+          trpc.transactions.getById.queryKey({ id: transactionId! }),
+          context?.previousData.details,
+        );
+        queryClient.setQueryData(
+          trpc.transactions.get.infiniteQueryKey(),
+          context?.previousData.list,
+        );
+      },
+      onSettled: () => {
+        // invalidate the transaction details query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
+
+        // invalidate the transaction list query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+      },
+    }),
   );
 
-  useEffect(() => {
-    if (initialData) {
-      setData(initialData);
-      setLoading(false);
-    }
-  }, [initialData]);
+  const createTransactionTagMutation = useMutation(
+    trpc.transactionTags.create.mutationOptions({
+      onSuccess: () => {
+        // invalidate the transaction details query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const transaction = await getTransactionQuery(supabase, data?.id);
-        setData(transaction);
-        setLoading(false);
-      } catch {
-        setLoading(false);
-      }
-    }
+        // invalidate the transaction list query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+      },
+    }),
+  );
 
-    if (!data) {
-      fetchData();
-    }
-  }, [data]);
+  const deleteTransactionTagMutation = useMutation(
+    trpc.transactionTags.delete.mutationOptions({
+      onSuccess: () => {
+        // invalidate the transaction details query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
 
-  const handleOnChangeCategory = async (category: {
-    id: string;
-    name: string;
-    slug: string;
-    color: string;
-  }) => {
-    updateTransaction(
-      { id: data?.id, category_slug: category.slug },
-      { category },
-    );
+        // invalidate the transaction list query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+      },
+    }),
+  );
 
-    const transactions = await getSimilarTransactions(supabase, {
-      name: data?.name,
-      teamId: teamId,
-      categorySlug: category.slug,
-    });
+  const updateSimilarTransactionsCategoryMutation = useMutation(
+    trpc.transactions.updateSimilarTransactionsCategory.mutationOptions({
+      onSuccess: () => {
+        // invalidate the transaction list query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
 
-    if (transactions?.count && transactions.count > 1) {
-      toast({
-        duration: 6000,
-        variant: "ai",
-        title: "Midday AI",
-        description: `Do you want to mark ${transactions?.count} similar transactions from ${data?.name} as ${category.name} too?`,
-        footer: (
-          <div className="flex space-x-2 mt-4">
-            <ToastAction altText="Cancel" className="pl-5 pr-5">
-              Cancel
-            </ToastAction>
-            <ToastAction
-              altText="Yes"
-              onClick={() => {
-                updateSimilarTransactionsCategory.execute({ id: data?.id });
-              }}
-              className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Yes
-            </ToastAction>
-          </div>
-        ),
-      });
-    }
-  };
+        // invalidate the transaction details query
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
+      },
+    }),
+  );
 
-  const handleOnChangeRecurring = async (value: boolean) => {
-    updateTransaction(
-      { id: data?.id, recurring: value, frequency: value ? "monthly" : null },
-      { recurring: value, frequency: value ? "monthly" : null },
-    );
-
-    const transactions = await getSimilarTransactions(supabase, {
-      name: data?.name,
-      teamId: teamId,
-    });
-
-    if (transactions?.count && transactions.count > 1) {
-      toast({
-        duration: 6000,
-        variant: "ai",
-        title: "Midday AI",
-        description: `Do you want to mark ${transactions?.count} similar transactions from ${data?.name} as ${value ? "Recurring" : "Non Recurring"} too?`,
-        footer: (
-          <div className="flex space-x-2 mt-4">
-            <ToastAction altText="Cancel" className="pl-5 pr-5">
-              Cancel
-            </ToastAction>
-            <ToastAction
-              altText="Yes"
-              onClick={() => {
-                updateSimilarTransactionsRecurring.execute({ id: data?.id });
-              }}
-              className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Yes
-            </ToastAction>
-          </div>
-        ),
-      });
-    }
-  };
+  if (isLoading || !data) {
+    return null;
+  }
 
   const defaultValue = ["attachment"];
 
@@ -225,7 +241,7 @@ export function TransactionDetails({
             <div className="flex items-center justify-between">
               {data?.bank_account?.bank_connection?.logo_url && (
                 <TransactionBankAccount
-                  name={data?.bank_account?.name}
+                  name={data?.bank_account?.name ?? undefined}
                   logoUrl={data.bank_account.bank_connection.logo_url}
                   className="text-[#606060] text-xs"
                 />
@@ -251,7 +267,7 @@ export function TransactionDetails({
                 <span
                   className={cn(
                     "text-4xl font-mono select-text",
-                    data?.category?.slug === "income" && "text-[#00C969]",
+                    data?.category_slug === "income" && "text-[#00C969]",
                   )}
                 >
                   <FormatAmount
@@ -261,12 +277,12 @@ export function TransactionDetails({
                 </span>
               )}
               <div className="h-3">
-                {data?.vat > 0 && (
+                {data?.vat ? (
                   <span className="text-[#606060] text-xs select-text">
                     VAT{" "}
                     <FormatAmount amount={data.vat} currency={data.currency} />
                   </span>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
@@ -287,8 +303,53 @@ export function TransactionDetails({
 
           <SelectCategory
             id={transactionId}
-            selected={data?.category}
-            onChange={handleOnChangeCategory}
+            selected={data?.category ?? undefined}
+            onChange={async (category) => {
+              if (category) {
+                updateTransactionMutation.mutate({
+                  id: data?.id,
+                  category_slug: category.slug,
+                });
+
+                const similarTransactions = await queryClient.fetchQuery(
+                  trpc.transactions.getSimilarTransactions.queryOptions({
+                    name: data.name,
+                    categorySlug: category.slug,
+                  }),
+                );
+
+                if (
+                  similarTransactions?.length &&
+                  similarTransactions.length > 1
+                ) {
+                  toast({
+                    duration: 6000,
+                    variant: "ai",
+                    title: "Midday AI",
+                    description: `Do you want to mark ${similarTransactions?.length} similar transactions from ${data?.name} as ${category.name} too?`,
+                    footer: (
+                      <div className="flex space-x-2 mt-4">
+                        <ToastAction altText="Cancel" className="pl-5 pr-5">
+                          Cancel
+                        </ToastAction>
+                        <ToastAction
+                          altText="Yes"
+                          onClick={() => {
+                            updateSimilarTransactionsCategoryMutation.mutate({
+                              name: data.name,
+                              categorySlug: category.slug,
+                            });
+                          }}
+                          className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
+                        >
+                          Yes
+                        </ToastAction>
+                      </div>
+                    ),
+                  });
+                }
+              }
+            }}
           />
         </div>
 
@@ -297,16 +358,23 @@ export function TransactionDetails({
             Assign
           </Label>
 
-          <AssignUser
-            isLoading={isLoading}
-            selectedId={data?.assigned?.id ?? undefined}
-            onSelect={(user) => {
-              updateTransaction(
-                { assigned_id: user?.id, id: data?.id },
-                { assigned: user },
-              );
-            }}
-          />
+          {isLoading ? (
+            <div className="h-[36px] border">
+              <Skeleton className="h-[14px] w-[60%] absolute left-3 top-[39px]" />
+            </div>
+          ) : (
+            <AssignUser
+              selectedId={data?.assigned?.id ?? undefined}
+              onSelect={(user) => {
+                if (user) {
+                  updateTransactionMutation.mutate({
+                    id: data?.id,
+                    assigned_id: user.id,
+                  });
+                }
+              }}
+            />
+          )}
         </div>
       </div>
 
@@ -322,15 +390,15 @@ export function TransactionDetails({
             id: tag.tag.id,
           }))}
           onSelect={(tag) => {
-            createTransactionTag.execute({
+            createTransactionTagMutation.mutate({
               tagId: tag.id,
-              transactionId: data?.id,
+              transactionId: transactionId!,
             });
           }}
           onRemove={(tag) => {
-            deleteTransactionTag.execute({
+            deleteTransactionTagMutation.mutate({
               tagId: tag.id,
-              transactionId: data?.id,
+              transactionId: transactionId!,
             });
           }}
         />
@@ -340,20 +408,7 @@ export function TransactionDetails({
         <AccordionItem value="attachment">
           <AccordionTrigger>Attachment</AccordionTrigger>
           <AccordionContent className="select-text">
-            <Attachments
-              prefix={data?.id}
-              data={data?.attachments}
-              onUpload={(files) => {
-                if (files) {
-                  createAttachments.execute(
-                    files.map((file) => ({
-                      ...file,
-                      transaction_id: data?.id,
-                    })),
-                  );
-                }
-              }}
-            />
+            <TransactionAttachments id={data?.id} data={data?.attachments} />
           </AccordionContent>
         </AccordionItem>
 
@@ -371,12 +426,12 @@ export function TransactionDetails({
             </div>
 
             <Switch
-              checked={data?.internal}
-              onCheckedChange={() => {
-                updateTransaction(
-                  { id: data?.id, internal: !data?.internal },
-                  { internal: !data?.internal },
-                );
+              checked={data?.internal ?? false}
+              onCheckedChange={(checked) => {
+                updateTransactionMutation.mutate({
+                  id: data?.id,
+                  internal: checked,
+                });
               }}
             />
           </div>
@@ -393,21 +448,71 @@ export function TransactionDetails({
                 </p>
               </div>
               <Switch
-                checked={data?.recurring}
-                onCheckedChange={handleOnChangeRecurring}
+                checked={data?.recurring ?? false}
+                onCheckedChange={(checked) => {
+                  updateTransactionMutation.mutate({
+                    id: data?.id,
+                    recurring: checked,
+                  });
+                }}
               />
             </div>
 
             {data?.recurring && (
               <Select
-                value={data?.frequency}
-                onValueChange={(value) => {
-                  updateTransaction(
-                    { id: data?.id, frequency: value },
-                    { frequency: value },
+                value={data?.frequency ?? undefined}
+                onValueChange={async (value) => {
+                  updateTransactionMutation.mutate({
+                    id: data?.id,
+                    frequency: value,
+                  });
+
+                  const similarTransactions = await queryClient.fetchQuery(
+                    trpc.transactions.getSimilarTransactions.queryOptions({
+                      name: data.name,
+                      frequency: value as
+                        | "weekly"
+                        | "monthly"
+                        | "annually"
+                        | "irregular",
+                    }),
                   );
 
-                  updateSimilarTransactionsRecurring.execute({ id: data?.id });
+                  if (
+                    similarTransactions?.length &&
+                    similarTransactions.length > 1
+                  ) {
+                    toast({
+                      duration: 6000,
+                      variant: "ai",
+                      title: "Midday AI",
+                      description: `Do you want to mark ${similarTransactions?.length} similar transactions from ${data?.name} as recurring (${value}) too?`,
+                      footer: (
+                        <div className="flex space-x-2 mt-4">
+                          <ToastAction altText="Cancel" className="pl-5 pr-5">
+                            Cancel
+                          </ToastAction>
+                          <ToastAction
+                            altText="Yes"
+                            onClick={() => {
+                              updateSimilarTransactionsCategoryMutation.mutate({
+                                name: data.name,
+                                recurring: true,
+                                frequency: value as
+                                  | "weekly"
+                                  | "monthly"
+                                  | "annually"
+                                  | "irregular",
+                              });
+                            }}
+                            className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
+                          >
+                            Yes
+                          </ToastAction>
+                        </div>
+                      ),
+                    });
+                  }
                 }}
               >
                 <SelectTrigger className="w-full mt-4">
@@ -435,9 +540,13 @@ export function TransactionDetails({
           <AccordionTrigger>Note</AccordionTrigger>
           <AccordionContent className="select-text">
             <Note
-              id={data?.id}
-              defaultValue={data?.note}
-              updateTransaction={updateTransaction}
+              defaultValue={data?.note ?? ""}
+              onChange={(value) => {
+                updateTransactionMutation.mutate({
+                  id: data?.id,
+                  note: value,
+                });
+              }}
             />
           </AccordionContent>
         </AccordionItem>

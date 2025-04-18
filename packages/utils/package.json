@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "^5.5.4"
+    "typescript": "^5.8.2"
   },
   "exports": {
     ".": "./src/index.ts",

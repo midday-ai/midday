@@ -23,10 +23,46 @@ const itemVariant = {
   show: { y: 0, opacity: 1 },
 };
 
-type Props = {
-  filters: { [key: string]: string | number | boolean | string[] | number[] };
+type FilterKey =
+  | "start"
+  | "end"
+  | "amount_range"
+  | "attachments"
+  | "recurring"
+  | "statuses"
+  | "categories"
+  | "tags"
+  | "accounts"
+  | "customers"
+  | "assignees"
+  | "owners"
+  | "status";
+
+type FilterValue = {
+  start: string;
+  end: string;
+  amount_range: string;
+  attachments: string;
+  recurring: string[];
+  statuses: string[];
+  categories: string[];
+  tags: string[];
+  accounts: string[];
+  customers: string[];
+  assignees: string[];
+  owners: string[];
+  status: string;
+};
+
+interface FilterValueProps {
+  key: FilterKey;
+  value: FilterValue[FilterKey];
+}
+
+interface Props {
+  filters: Partial<FilterValue>;
   loading: boolean;
-  onRemove: (key: string) => void;
+  onRemove: (filters: { [key: string]: null }) => void;
   categories?: { id: string; name: string; slug: string }[];
   accounts?: { id: string; name: string; currency: string }[];
   members?: { id: string; name: string }[];
@@ -36,7 +72,7 @@ type Props = {
   recurringFilters: { id: string; name: string }[];
   tags?: { id: string; name: string; slug?: string }[];
   amountRange?: [number, number];
-};
+}
 
 export function FilterList({
   filters,
@@ -52,30 +88,39 @@ export function FilterList({
   recurringFilters,
   amountRange,
 }: Props) {
-  const renderFilter = ({ key, value }) => {
+  const renderFilter = ({ key, value }: FilterValueProps) => {
     switch (key) {
       case "start": {
-        if (key === "start" && value && filters.end) {
-          return formatDateRange(new Date(value), new Date(filters.end), {
+        const startValue = value as FilterValue["start"];
+        if (startValue && filters.end) {
+          return formatDateRange(new Date(startValue), new Date(filters.end), {
             includeTime: false,
           });
         }
 
-        return (
-          key === "start" && value && format(new Date(value), "MMM d, yyyy")
-        );
+        return startValue && format(new Date(startValue), "MMM d, yyyy");
       }
 
       case "amount_range": {
-        return `${amountRange?.[0]} - ${amountRange?.[1]}`;
+        return `${amountRange?.[0]?.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })} - ${amountRange?.[1]?.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`;
       }
 
       case "attachments": {
-        return attachmentsFilters?.find((filter) => filter.id === value)?.name;
+        const attachmentValue = value as FilterValue["attachments"];
+        return attachmentsFilters?.find(
+          (filter) => filter.id === attachmentValue,
+        )?.name;
       }
 
       case "recurring": {
-        return value
+        const recurringValue = value as FilterValue["recurring"];
+        return recurringValue
           ?.map(
             (slug) =>
               recurringFilters?.find((filter) => filter.id === slug)?.name,
@@ -84,7 +129,9 @@ export function FilterList({
       }
 
       case "statuses": {
-        return value
+        const statusesValue = value as FilterValue["statuses"];
+        if (!statusesValue) return null;
+        return statusesValue
           .map(
             (status) =>
               statusFilters.find((filter) => filter.id === status)?.name,
@@ -92,8 +139,16 @@ export function FilterList({
           .join(", ");
       }
 
+      case "status": {
+        const statusValue = value as FilterValue["status"];
+        if (!statusValue) return null;
+        return statusFilters.find((filter) => filter.id === statusValue)?.name;
+      }
+
       case "categories": {
-        return value
+        const categoriesValue = value as FilterValue["categories"];
+        if (!categoriesValue) return null;
+        return categoriesValue
           .map(
             (slug) =>
               categories?.find((category) => category.slug === slug)?.name,
@@ -102,7 +157,9 @@ export function FilterList({
       }
 
       case "tags": {
-        return value
+        const tagsValue = value as FilterValue["tags"];
+        if (!tagsValue) return null;
+        return tagsValue
           .map(
             (id) =>
               tags?.find((tag) => tag?.id === id || tag?.slug === id)?.name,
@@ -111,7 +168,9 @@ export function FilterList({
       }
 
       case "accounts": {
-        return value
+        const accountsValue = value as FilterValue["accounts"];
+        if (!accountsValue) return null;
+        return accountsValue
           .map((id) => {
             const account = accounts?.find((account) => account.id === id);
             return formatAccountName({
@@ -123,14 +182,18 @@ export function FilterList({
       }
 
       case "customers": {
-        return value
+        const customersValue = value as FilterValue["customers"];
+        if (!customersValue) return null;
+        return customersValue
           .map((id) => customers?.find((customer) => customer.id === id)?.name)
           .join(", ");
       }
 
       case "assignees":
       case "owners": {
-        return value
+        const membersValue = value as FilterValue["assignees"];
+        if (!membersValue) return null;
+        return membersValue
           .map((id) => {
             const member = members?.find((member) => member.id === id);
             return member?.name;
@@ -138,15 +201,12 @@ export function FilterList({
           .join(", ");
       }
 
-      case "q":
-        return value;
-
       default:
         return null;
     }
   };
 
-  const handleOnRemove = (key: string) => {
+  const handleOnRemove = (key: FilterKey) => {
     if (key === "start" || key === "end") {
       onRemove({ start: null, end: null });
       return;
@@ -177,17 +237,18 @@ export function FilterList({
         Object.entries(filters)
           .filter(([key, value]) => value !== null && key !== "end")
           .map(([key, value]) => {
+            const filterKey = key as FilterKey;
             return (
               <motion.li key={key} variants={itemVariant}>
                 <Button
                   className="rounded-full h-8 px-3 bg-secondary hover:bg-secondary font-normal text-[#878787] flex space-x-1 items-center group"
-                  onClick={() => handleOnRemove(key)}
+                  onClick={() => handleOnRemove(filterKey)}
                 >
                   <Icons.Clear className="scale-0 group-hover:scale-100 transition-all w-0 group-hover:w-4" />
                   <span>
                     {renderFilter({
-                      key,
-                      value,
+                      key: filterKey,
+                      value: value as FilterValue[FilterKey],
                     })}
                   </span>
                 </Button>

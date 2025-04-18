@@ -4,26 +4,6 @@ import { client as RedisClient } from "@midday/kv";
 import { getSession, getUser } from "@midday/supabase/cached-queries";
 import type { Chat, SettingsResponse } from "./types";
 
-export async function getAssistantSettings(): Promise<SettingsResponse> {
-  const user = await getUser();
-
-  const teamId = user?.data?.team_id;
-  const userId = user?.data?.id;
-
-  const defaultSettings: SettingsResponse = {
-    enabled: true,
-  };
-
-  const settings = await RedisClient.get(
-    `assistant:${teamId}:user:${userId}:settings`,
-  );
-
-  return {
-    ...defaultSettings,
-    ...(settings || {}),
-  };
-}
-
 type SetAassistant = {
   settings: SettingsResponse;
   userId: string;
@@ -65,15 +45,12 @@ export async function clearChats({
   await pipeline.exec();
 }
 
-export async function getLatestChat() {
-  const settings = await getAssistantSettings();
-  if (!settings?.enabled) return null;
+type GetLatestChatParams = {
+  teamId: string;
+  userId: string;
+};
 
-  const user = await getUser();
-
-  const teamId = user?.data?.team_id;
-  const userId = user?.data?.id;
-
+export async function getLatestChat({ teamId, userId }: GetLatestChatParams) {
   try {
     const chat: string[] = await RedisClient.zrange(
       `chat:${teamId}:user:${userId}`,

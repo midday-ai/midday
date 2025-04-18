@@ -1,8 +1,9 @@
 "use client";
 
-import { createTrackerEntriesAction } from "@/actions/create-tracker-entries-action";
-import { deleteTrackerEntryAction } from "@/actions/delete-tracker-entry";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import {
   NEW_EVENT_ID,
@@ -14,8 +15,6 @@ import {
   transformTrackerData,
   updateEventTime,
 } from "@/utils/tracker";
-import { createClient } from "@midday/supabase/client";
-import { getTrackerRecordsByDateQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
 import {
   ContextMenu,
@@ -25,53 +24,36 @@ import {
   ContextMenuTrigger,
 } from "@midday/ui/context-menu";
 import { ScrollArea } from "@midday/ui/scroll-area";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addMinutes,
-  addSeconds,
   differenceInSeconds,
   endOfDay,
-  format,
+  isAfter,
+  isValid,
+  parse,
   parseISO,
   setHours,
   setMinutes,
   startOfDay,
 } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { TrackerRecordForm } from "./forms/tracker-record-form";
+import { TrackerEntriesForm } from "./forms/tracker-entries-form";
 import { TrackerDaySelect } from "./tracker-day-select";
 
-interface TrackerRecord {
-  id: string;
-  start: Date;
-  end: Date;
-  project: {
-    id: string;
-    name: string;
-  };
-  description?: string;
-}
+type TrackerRecord = NonNullable<
+  RouterOutputs["trackerEntries"]["byDate"]["data"]
+>[number];
 
 const ROW_HEIGHT = 36;
 const SLOT_HEIGHT = 9;
 
-type Props = {
-  teamId: string;
-  userId: string;
-  timeFormat: number;
-  projectId?: string;
-};
-
-export function TrackerSchedule({
-  teamId,
-  userId,
-  timeFormat,
-  projectId,
-}: Props) {
-  const supabase = createClient();
-
+export function TrackerSchedule() {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { data: user } = useUserQuery();
   const { selectedDate, range } = useTrackerParams();
   const [selectedEvent, setSelectedEvent] = useState<TrackerRecord | null>(
     null,
@@ -90,73 +72,101 @@ export function TrackerSchedule({
   const [moveStartY, setMoveStartY] = useState(0);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    projectId ?? null,
+    null,
   );
 
-  const createTrackerEntries = useAction(createTrackerEntriesAction, {
-    onSuccess: (result) => {
-      if (!result.data) return;
+  const { data: trackerData, refetch } = useQuery({
+    ...trpc.trackerEntries.byDate.queryOptions(
+      { date: selectedDate ?? "" },
+      {
+        enabled: !!selectedDate,
+        staleTime: 60 * 1000,
+        initialData: () => {
+          const data = queryClient.getQueriesData({
+            queryKey: trpc.trackerEntries.byRange.queryKey(),
+          });
 
-      setData((prevData) => {
-        const processedData = result?.data.map((event) =>
-          transformTrackerData(event, selectedDate),
-        );
-        return [
-          ...prevData.filter((event) => event.id !== NEW_EVENT_ID),
-          ...processedData,
-        ];
-      });
+          if (!data.length || !selectedDate) {
+            return {
+              data: [],
+              meta: { totalDuration: 0 },
+            };
+          }
 
-      setTotalDuration((prevTotalDuration) => {
-        const newEventsDuration = result.data.reduce((total, event) => {
-          const start = event.start
-            ? new Date(event.start)
-            : new Date(`${event.date || selectedDate}T09:00:00`);
-          const end = event.stop
-            ? new Date(event.stop)
-            : addSeconds(start, event.duration || 0);
-          return total + differenceInSeconds(end, start);
-        }, 0);
+          const [, rangeData] = data.at(0);
+          if (!rangeData?.result?.[selectedDate]) {
+            return {
+              data: [],
+              meta: { totalDuration: 0 },
+            };
+          }
 
-        return prevTotalDuration + newEventsDuration;
-      });
-
-      const lastEvent = result.data.at(-1);
-      setSelectedEvent(
-        lastEvent ? transformTrackerData(lastEvent, selectedDate) : null,
-      );
-    },
+          return {
+            data: rangeData.result[selectedDate],
+            meta: {
+              totalDuration: rangeData.meta.totalDuration || 0,
+            },
+          };
+        },
+      },
+    ),
   });
 
-  const deleteTrackerEntry = useAction(deleteTrackerEntryAction);
+  const deleteTrackerEntry = useMutation(
+    trpc.trackerEntries.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.trackerEntries.byRange.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
+        });
+
+        refetch();
+      },
+    }),
+  );
+
+  const upsertTrackerEntry = useMutation(
+    trpc.trackerEntries.upsert.mutationOptions({
+      onSuccess: (result) => {
+        if (result) {
+          const lastEvent = result.at(-1);
+
+          setSelectedEvent(
+            lastEvent ? transformTrackerData(lastEvent, selectedDate) : null,
+          );
+
+          queryClient.invalidateQueries({
+            queryKey: trpc.trackerEntries.byRange.queryKey(),
+          });
+
+          queryClient.invalidateQueries({
+            queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
+          });
+
+          refetch();
+        }
+      },
+    }),
+  );
 
   const sortedRange = range?.sort((a, b) => a.localeCompare(b));
 
   useEffect(() => {
-    const fetchData = async () => {
-      const trackerData = await getTrackerRecordsByDateQuery(supabase, {
-        teamId,
-        userId,
-        date: selectedDate,
-      });
+    if (trackerData) {
+      const processedData = trackerData.data?.map((event) =>
+        transformTrackerData(event, selectedDate),
+      );
 
-      if (trackerData?.data) {
-        const processedData = trackerData.data.map((event: any) =>
-          transformTrackerData(event, selectedDate),
-        );
-
-        setData(processedData);
-        setTotalDuration(trackerData.meta?.totalDuration || 0);
-      } else {
-        setData([]);
-        setTotalDuration(0);
-      }
-    };
-
-    if (selectedDate) {
-      fetchData();
+      setData(processedData ?? []);
+      setTotalDuration(trackerData.meta?.totalDuration || 0);
+    } else {
+      setData([]);
+      setTotalDuration(0);
     }
-  }, [selectedDate, teamId]);
+  }, [trackerData]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -175,7 +185,8 @@ export function TrackerSchedule({
 
   const handleDeleteEvent = (eventId: string) => {
     if (eventId !== NEW_EVENT_ID) {
-      deleteTrackerEntry.execute({ id: eventId });
+      deleteTrackerEntry.mutate({ id: eventId });
+
       setData((prevData) => prevData.filter((event) => event.id !== eventId));
       setSelectedEvent(null);
 
@@ -345,6 +356,10 @@ export function TrackerSchedule({
     setSelectedEvent(event);
   };
 
+  const getBaseDate = () => {
+    return selectedDate ? parseISO(selectedDate) : startOfDay(new Date());
+  };
+
   const handleCreateEvent = (values: {
     id?: string;
     start: string;
@@ -353,27 +368,158 @@ export function TrackerSchedule({
     project_id: string;
     description?: string;
   }) => {
-    const dates = getDates(selectedDate, sortedRange);
-    const baseDate =
-      dates[0] || selectedDate || format(new Date(), "yyyy-MM-dd");
+    const dates = getDates(selectedDate, sortedRange ?? null);
+    const baseDate = getBaseDate();
 
-    const startDate = parseISO(`${baseDate}T${values.start}`);
-    const endDate = parseISO(`${baseDate}T${values.end}`);
+    const startDate = parse(values.start, "HH:mm", baseDate);
+    const endDate = parse(values.end, "HH:mm", baseDate);
+
+    if (
+      !isValid(startDate) ||
+      !isValid(endDate) ||
+      isAfter(startDate, endDate)
+    ) {
+      console.error("Invalid start or end time in handleCreateEvent");
+      return;
+    }
 
     const newEvent = {
-      id: values.id,
+      id: values.id === NEW_EVENT_ID ? undefined : values.id,
       start: startDate.toISOString(),
       stop: endDate.toISOString(),
       dates,
-      team_id: teamId,
       assigned_id: values.assigned_id,
       project_id: values.project_id,
-      description: values.description || "",
+      description: values.description ?? null,
       duration: Math.max(0, differenceInSeconds(endDate, startDate)),
     };
 
-    createTrackerEntries.execute(newEvent);
+    upsertTrackerEntry.mutate(newEvent);
   };
+
+  const handleTimeChange = ({
+    start,
+    end,
+  }: { start?: string; end?: string }) => {
+    const baseDate = getBaseDate();
+    let currentEvent = data.find((ev) => ev.id === selectedEvent?.id) || null;
+    let eventCreated = false;
+
+    const isCompleteStartTime =
+      start && (/^\d{4}$/.test(start) || /^\d{2}:\d{2}$/.test(start));
+
+    if (
+      start && // Must have some start input
+      isCompleteStartTime && // Check format is complete
+      (!currentEvent || currentEvent.id !== NEW_EVENT_ID) &&
+      !data.some((ev) => ev.id === NEW_EVENT_ID)
+    ) {
+      // Format HHMM to HH:mm if necessary
+      let formattedStartTimeStr = start;
+      if (/^\d{4}$/.test(start)) {
+        formattedStartTimeStr = `${start.substring(0, 2)}:${start.substring(2)}`;
+      }
+
+      const startTime = parse(formattedStartTimeStr, "HH:mm", baseDate);
+
+      if (isValid(startTime)) {
+        // Default end time: 15 mins after start
+        const endTime = addMinutes(startTime, 15);
+
+        const newEvent = createNewEvent(
+          getSlotFromDate(startTime),
+          selectedProjectId,
+          selectedDate,
+        );
+
+        if (newEvent) {
+          const timedNewEvent = updateEventTime(newEvent, startTime, endTime);
+          // This state update triggers the re-render
+          setData((prevData) => [
+            ...prevData.filter((ev) => ev.id !== NEW_EVENT_ID),
+            timedNewEvent,
+          ]);
+          setSelectedEvent(timedNewEvent);
+          currentEvent = timedNewEvent; // Update ref for subsequent updates in this call
+          eventCreated = true;
+        }
+      }
+    } else if (currentEvent && !eventCreated) {
+      // Only proceed if start or end actually has a value passed in this call
+      if (start !== undefined || end !== undefined) {
+        let newStart = currentEvent.start;
+        let startChanged = false;
+        // Update start time if 'start' prop is provided
+        if (start !== undefined) {
+          // Try parsing only if it looks like a complete format (HHMM or HH:mm)
+          const isCompleteFormat =
+            /^\d{4}$/.test(start) || /^\d{2}:\d{2}$/.test(start);
+          if (isCompleteFormat) {
+            let formattedStart = start;
+            if (/^\d{4}$/.test(start))
+              formattedStart = `${start.substring(0, 2)}:${start.substring(2)}`;
+
+            const parsedStart = parse(formattedStart, "HH:mm", baseDate);
+            // Check if valid and different from current start
+            if (
+              isValid(parsedStart) &&
+              parsedStart.getTime() !== currentEvent.start.getTime()
+            ) {
+              newStart = parsedStart;
+              startChanged = true;
+            }
+          }
+        }
+
+        let newEnd = currentEvent.end;
+        let endChanged = false;
+        // Update end time if 'end' prop is provided
+        if (end !== undefined) {
+          // Try parsing only if it looks like a *complete* format
+          const isCompleteFormat =
+            /^\d{4}$/.test(end) || /^\d{2}:\d{2}$/.test(end);
+          if (isCompleteFormat) {
+            let formattedEnd = end;
+            if (/^\d{4}$/.test(end))
+              formattedEnd = `${end.substring(0, 2)}:${end.substring(2)}`;
+
+            const parsedEnd = parse(formattedEnd, "HH:mm", baseDate);
+            // Check if valid and different from current end
+            if (
+              isValid(parsedEnd) &&
+              parsedEnd.getTime() !== currentEvent.end.getTime()
+            ) {
+              newEnd = parsedEnd;
+              endChanged = true;
+            }
+          }
+        }
+
+        // Only update state if times actually changed, are valid, and end is after start
+        if (
+          (startChanged || endChanged) &&
+          isValid(newStart) &&
+          isValid(newEnd) &&
+          isAfter(newEnd, newStart)
+        ) {
+          const updatedEvent = updateEventTime(currentEvent, newStart, newEnd);
+          // This state update triggers the re-render
+          setData((prevData) =>
+            prevData.map((event) =>
+              event.id === currentEvent?.id ? updatedEvent : event,
+            ),
+          );
+          if (selectedEvent?.id === currentEvent.id) {
+            setSelectedEvent(updatedEvent);
+          }
+        }
+      }
+    }
+  };
+
+  // Find the event to pass to the form, preferring NEW_EVENT_ID if it exists
+  const formEvent =
+    data.find((event) => event.id === NEW_EVENT_ID) || selectedEvent;
 
   return (
     <div className="w-full">
@@ -394,7 +540,7 @@ export function TrackerSchedule({
                 className="pr-4 flex font-mono flex-col"
                 style={{ height: `${ROW_HEIGHT}px` }}
               >
-                {formatHour(hour, timeFormat)}
+                {formatHour(hour, user?.time_format)}
               </div>
             ))}
           </div>
@@ -502,38 +648,61 @@ export function TrackerSchedule({
         </div>
       </ScrollArea>
 
-      <TrackerRecordForm
-        eventId={currentOrNewEvent?.id}
+      <TrackerEntriesForm
+        // Stabilize key: Use "new" if it's the NEW_EVENT_ID, otherwise use actual id or fallback to "new"
+        key={formEvent?.id === NEW_EVENT_ID ? "new" : (formEvent?.id ?? "new")}
+        eventId={formEvent?.id}
         onCreate={handleCreateEvent}
-        isSaving={createTrackerEntries.isExecuting}
-        userId={userId}
-        teamId={teamId}
-        projectId={selectedProjectId}
-        description={currentOrNewEvent?.description}
+        isSaving={upsertTrackerEntry.isPending}
+        userId={user?.id}
+        projectId={formEvent?.project?.id ?? selectedProjectId}
+        description={formEvent?.description ?? undefined}
         start={
-          currentOrNewEvent
-            ? getTimeFromDate(currentOrNewEvent.start)
+          formEvent && isValid(formEvent.start)
+            ? getTimeFromDate(formEvent.start)
             : undefined
         }
         end={
-          currentOrNewEvent ? getTimeFromDate(currentOrNewEvent.end) : undefined
+          formEvent && isValid(formEvent.end)
+            ? getTimeFromDate(formEvent.end)
+            : undefined
         }
         onSelectProject={(project) => {
           setSelectedProjectId(project.id);
 
-          if (selectedEvent) {
+          const eventToUpdate = data.find((ev) => ev.id === selectedEvent?.id);
+
+          if (eventToUpdate) {
+            const updatedEvent = {
+              ...eventToUpdate,
+              project: {
+                ...(eventToUpdate.project ?? {}),
+                id: project.id,
+                name: project.name,
+              },
+            };
+
             setData((prevData) =>
-              prevData.map((event) =>
-                event.id === selectedEvent.id
-                  ? {
-                      ...event,
-                      project: { id: project.id, name: project.name },
-                    }
-                  : event,
+              prevData.map((ev) =>
+                ev.id === eventToUpdate.id ? updatedEvent : ev,
               ),
             );
+
+            setSelectedEvent(updatedEvent);
+
+            if (eventToUpdate.id !== NEW_EVENT_ID) {
+              handleCreateEvent({
+                id: eventToUpdate.id,
+                start: getTimeFromDate(eventToUpdate.start),
+                end: getTimeFromDate(eventToUpdate.end),
+                project_id: project.id,
+                assigned_id: eventToUpdate.assigned_id,
+                description: eventToUpdate.description ?? undefined,
+              });
+            }
           }
         }}
+        onTimeChange={handleTimeChange}
       />
     </div>
   );

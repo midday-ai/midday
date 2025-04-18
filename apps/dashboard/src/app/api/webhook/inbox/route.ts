@@ -1,19 +1,14 @@
-import { env } from "@/env.mjs";
 import { logger } from "@/utils/logger";
-import { getAllowedAttachments, prepareDocument } from "@midday/documents";
+import { getAllowedAttachments } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
-import { client as RedisClient } from "@midday/kv";
 import { createClient } from "@midday/supabase/server";
-import { inboxDocument } from "jobs/tasks/inbox/document";
+import { tasks } from "@trigger.dev/sdk/v3";
+import type { processAttachment } from "jobs/tasks/inbox/process-attachment";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
-
-export const runtime = "nodejs";
-export const maxDuration = 300; // 5min
 
 // https://postmarkapp.com/support/article/800-ips-for-firewalls#webhooks
 const ipRange = [
@@ -25,10 +20,8 @@ const ipRange = [
 
 const FORWARD_FROM_EMAIL = "inbox@midday.ai";
 
-const resend = new Resend(env.RESEND_API_KEY);
-
 export async function POST(req: Request) {
-  const clientIp = headers().get("x-forwarded-for") ?? "";
+  const clientIp = (await headers()).get("x-forwarded-for") ?? "";
 
   if (
     process.env.NODE_ENV !== "development" &&
@@ -51,15 +44,8 @@ export async function POST(req: Request) {
     );
   }
 
-  const {
-    MessageID,
-    FromFull,
-    Subject,
-    Attachments,
-    TextBody,
-    HtmlBody,
-    OriginalRecipient,
-  } = parsedBody.data;
+  const { MessageID, FromFull, Subject, Attachments, OriginalRecipient } =
+    parsedBody.data;
 
   const inboxId = getInboxIdFromEmail(OriginalRecipient);
 
@@ -75,7 +61,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true });
   }
 
-  const supabase = createClient({ admin: true });
+  const supabase = await createClient({ admin: true });
 
   try {
     const { data: teamData } = await supabase
@@ -94,69 +80,12 @@ export async function POST(req: Request) {
 
     const teamId = teamData?.id;
 
-    const fallbackName = Subject ?? FromFull?.Name;
-    const forwardEmail = teamData?.inbox_email;
-    const forwardingEnabled = teamData?.inbox_forwarding && forwardEmail;
-
-    if (forwardingEnabled) {
-      const messageKey = `message-id:${MessageID}`;
-      const isForwarded = await RedisClient.exists(messageKey);
-
-      if (!isForwarded) {
-        const { error } = await resend.emails.send({
-          from: `${FromFull?.Name} <${FORWARD_FROM_EMAIL}>`,
-          to: [forwardEmail],
-          subject: fallbackName,
-          text: TextBody,
-          html: HtmlBody,
-          attachments: Attachments?.map((a) => ({
-            filename: a.Name,
-            content: a.Content,
-          })),
-          react: null,
-          headers: {
-            "X-Entity-Ref-ID": nanoid(),
-          },
-        });
-
-        if (!error) {
-          await RedisClient.set(messageKey, true, { ex: 9600 });
-        }
-      }
-    }
-
     const allowedAttachments = getAllowedAttachments(Attachments);
 
-    // If no attachments we just want to forward the email
-    if (!allowedAttachments?.length && forwardEmail) {
-      const messageKey = `message-id:${MessageID}`;
-      const isForwarded = await RedisClient.exists(messageKey);
-
-      if (!isForwarded) {
-        const { error } = await resend.emails.send({
-          from: `${FromFull?.Name} <${FORWARD_FROM_EMAIL}>`,
-          to: [forwardEmail],
-          subject: fallbackName,
-          text: TextBody,
-          html: HtmlBody,
-          attachments: Attachments?.map((a) => ({
-            filename: a.Name,
-            content: a.Content,
-          })),
-          react: null,
-          headers: {
-            "X-Entity-Ref-ID": nanoid(),
-          },
-        });
-
-        if (!error) {
-          await RedisClient.set(messageKey, true, { ex: 9600 });
-        }
-      }
-
-      return NextResponse.json({
-        success: true,
-      });
+    if (!allowedAttachments?.length) {
+      logger("No allowed attachments");
+      // No attachments
+      return NextResponse.json({ success: true });
     }
 
     // Transform and upload files, filtering out attachments smaller than 100kb except PDFs
@@ -170,33 +99,29 @@ export async function POST(req: Request) {
           ),
       )
       ?.map(async (attachment) => {
-        const { content, mimeType, size, fileName, name } =
-          await prepareDocument(attachment);
-
         // Add a random 4 character string to the end of the file name
         // to make it unique before the extension
-        const uniqueFileName = fileName.replace(
+        const uniqueFileName = attachment.Name.replace(
           /(\.[^.]+)$/,
           (ext) => `_${nanoid(4)}${ext}`,
         );
 
         const { data } = await supabase.storage
           .from("vault")
-          .upload(`${teamId}/inbox/${uniqueFileName}`, content, {
-            contentType: mimeType,
+          .upload(`${teamId}/inbox/${uniqueFileName}`, attachment.Content, {
+            contentType: attachment.ContentType,
             upsert: true,
           });
 
         return {
           // NOTE: If we can't parse the name using OCR this will be the fallback name
-          display_name: Subject || name,
+          display_name: Subject || attachment.Name,
           team_id: teamId,
           file_path: data?.path.split("/"),
           file_name: uniqueFileName,
-          content_type: mimeType,
-          forwarded_to: forwardingEnabled ? forwardEmail : null,
-          reference_id: `${MessageID}_${uniqueFileName}`,
-          size,
+          content_type: attachment.ContentType,
+          reference_id: `${MessageID}_${attachment.Name}`,
+          size: attachment.ContentLength,
         };
       });
 
@@ -214,20 +139,23 @@ export async function POST(req: Request) {
     const { data: inboxData } = await supabase
       .from("inbox")
       .insert(insertData)
-      .select("id")
+      .select("id, file_path, content_type, size")
       .throwOnError();
 
     if (!inboxData?.length) {
       throw Error("No records");
     }
 
-    // Trigger the document task job
-    await Promise.all(
-      inboxData.map((inbox) =>
-        inboxDocument.trigger({
-          inboxId: inbox.id,
-        }),
-      ),
+    await tasks.batchTrigger<typeof processAttachment>(
+      "process-attachment",
+      inboxData.map((item) => ({
+        payload: {
+          file_path: item.file_path!,
+          mimetype: item.content_type!,
+          size: item.size!,
+          teamId: teamId!,
+        },
+      })),
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

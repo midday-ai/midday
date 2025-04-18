@@ -1,8 +1,11 @@
 "use client";
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { sortDates } from "@/utils/tracker";
 import { cn } from "@midday/ui/cn";
+import { useQuery } from "@tanstack/react-query";
 import { useClickAway } from "@uidotdev/usehooks";
 import {
   eachDayOfInterval,
@@ -18,48 +21,42 @@ import { useEffect, useState } from "react";
 import { TrackerHeader } from "./tracker-header";
 import { TrackerIndicator } from "./tracker-indicator";
 
-type TrackerMeta = {
-  totalDuration?: number;
-};
-
-type TrackerRecord = {
-  id: string;
-  duration: number;
-  date: string;
-};
-
-type Props = {
-  date?: string;
-  meta?: TrackerMeta;
-  data?: Record<string, TrackerRecord[]>;
-  weekStartsOnMonday?: boolean;
-};
-
-export function TrackerWidget({
-  date: initialDate,
-  meta,
-  data,
-  weekStartsOnMonday = false,
-}: Props) {
+export function TrackerWidget() {
   const {
     date: currentDate,
     range,
     setParams,
     selectedDate,
-  } = useTrackerParams(initialDate);
+  } = useTrackerParams(new Date().toISOString());
 
+  const trpc = useTRPC();
+
+  const { data } = useQuery(
+    trpc.trackerEntries.byRange.queryOptions({
+      from: formatISO(startOfMonth(new Date(currentDate)), {
+        representation: "date",
+      }),
+      to: formatISO(endOfMonth(new Date(currentDate)), {
+        representation: "date",
+      }),
+    }),
+  );
+
+  const { data: user } = useUserQuery();
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<string | null>(null);
   const [dragEnd, setDragEnd] = useState<string | null>(null);
 
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(currentDate);
+  const monthStart = startOfMonth(new Date(currentDate));
+  const monthEnd = endOfMonth(new Date(currentDate));
   const calendarStart = startOfWeek(monthStart, {
-    weekStartsOn: weekStartsOnMonday ? 1 : 0,
+    weekStartsOn: user?.week_starts_on_monday ? 1 : 0,
   });
+
   const calendarEnd = endOfWeek(monthEnd, {
-    weekStartsOn: weekStartsOnMonday ? 1 : 0,
+    weekStartsOn: user?.week_starts_on_monday ? 1 : 0,
   });
+
   const calendarDays = eachDayOfInterval({
     start: calendarStart,
     end: calendarEnd,
@@ -69,7 +66,9 @@ export function TrackerWidget({
 
   const firstWeek = eachDayOfInterval({
     start: calendarStart,
-    end: endOfWeek(calendarStart, { weekStartsOn: weekStartsOnMonday ? 1 : 0 }),
+    end: endOfWeek(calendarStart, {
+      weekStartsOn: user?.week_starts_on_monday ? 1 : 0,
+    }),
   });
 
   const ref = useClickAway<HTMLDivElement>(() => {
@@ -79,7 +78,9 @@ export function TrackerWidget({
   });
 
   const getEventCount = (date: Date) => {
-    return data?.[formatISO(date, { representation: "date" })]?.length ?? 0;
+    const formattedDate = formatISO(date, { representation: "date" });
+    const result = data?.result ?? {};
+    return result[formattedDate]?.length ?? 0;
   };
 
   const handleMouseDown = (date: Date) => {
@@ -124,7 +125,7 @@ export function TrackerWidget({
 
   return (
     <div ref={ref}>
-      <TrackerHeader totalDuration={meta?.totalDuration} />
+      <TrackerHeader totalDuration={data?.meta?.totalDuration} />
 
       <div className="mt-4">
         <div className="grid grid-cols-7 gap-px border border-border bg-border">

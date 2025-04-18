@@ -1,24 +1,15 @@
 import { logger } from "@/utils/logger";
 import { setupAnalytics } from "@midday/events/server";
-import { client as RedisClient } from "@midday/kv";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
-import * as Sentry from "@sentry/nextjs";
-import { Ratelimit } from "@upstash/ratelimit";
 import {
   DEFAULT_SERVER_ERROR_MESSAGE,
   createSafeActionClient,
 } from "next-safe-action";
-import { headers } from "next/headers";
 import { z } from "zod";
 
-const ratelimit = new Ratelimit({
-  limiter: Ratelimit.fixedWindow(10, "10s"),
-  redis: RedisClient,
-});
-
 export const actionClient = createSafeActionClient({
-  handleReturnedServerError(e) {
+  handleServerError(e) {
     if (e instanceof Error) {
       return e.message;
     }
@@ -28,13 +19,6 @@ export const actionClient = createSafeActionClient({
 });
 
 export const actionClientWithMeta = createSafeActionClient({
-  handleReturnedServerError(e) {
-    if (e instanceof Error) {
-      return e.message;
-    }
-
-    return DEFAULT_SERVER_ERROR_MESSAGE;
-  },
   defineMetadataSchema() {
     return z.object({
       name: z.string(),
@@ -45,6 +29,13 @@ export const actionClientWithMeta = createSafeActionClient({
         })
         .optional(),
     });
+  },
+  handleServerError(e) {
+    if (e instanceof Error) {
+      return e.message;
+    }
+
+    return DEFAULT_SERVER_ERROR_MESSAGE;
   },
 });
 
@@ -63,27 +54,8 @@ export const authActionClient = actionClientWithMeta
     return result;
   })
   .use(async ({ next, metadata }) => {
-    const ip = headers().get("x-forwarded-for");
-
-    const { success, remaining } = await ratelimit.limit(
-      `${ip}-${metadata.name}`,
-    );
-
-    if (!success) {
-      throw new Error("Too many requests");
-    }
-
-    return next({
-      ctx: {
-        ratelimit: {
-          remaining,
-        },
-      },
-    });
-  })
-  .use(async ({ next, metadata }) => {
     const user = await getUser();
-    const supabase = createClient();
+    const supabase = await createClient();
 
     if (!user?.data) {
       throw new Error("Unauthorized");
@@ -98,13 +70,11 @@ export const authActionClient = actionClientWithMeta
       analytics.track(metadata.track);
     }
 
-    return Sentry.withServerActionInstrumentation(metadata.name, async () => {
-      return next({
-        ctx: {
-          supabase,
-          analytics,
-          user: user.data,
-        },
-      });
+    return next({
+      ctx: {
+        supabase,
+        analytics,
+        user: user.data,
+      },
     });
   });

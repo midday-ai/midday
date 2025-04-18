@@ -1,6 +1,6 @@
 "use client";
 
-import { updateUserAction } from "@/actions/update-user-action";
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 import {
   Card,
   CardContent,
@@ -9,14 +9,10 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { Switch } from "@midday/ui/switch";
-import { useAction } from "next-safe-action/hooks";
 
-type Props = {
-  weekStartsOnMonday: boolean;
-};
-
-export function WeekSettings({ weekStartsOnMonday }: Props) {
-  const action = useAction(updateUserAction);
+export function WeekSettings() {
+  const { data: user } = useUserQuery();
+  const updateUserMutation = useUserMutation();
 
   return (
     <Card className="flex justify-between items-center">
@@ -29,10 +25,10 @@ export function WeekSettings({ weekStartsOnMonday }: Props) {
 
       <CardContent>
         <Switch
-          checked={weekStartsOnMonday}
-          disabled={action.status === "executing"}
+          checked={user.week_starts_on_monday ?? false}
+          disabled={updateUserMutation.isPending}
           onCheckedChange={(week_starts_on_monday: boolean) => {
-            action.execute({ week_starts_on_monday });
+            updateUserMutation.mutate({ week_starts_on_monday });
           }}
         />
       </CardContent>

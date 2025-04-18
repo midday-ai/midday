@@ -1,37 +1,43 @@
-import { getUser } from "@midday/supabase/cached-queries";
-import { Suspense } from "react";
+"use client";
+
+import { AssistantModal } from "@/components/assistant/assistant-modal";
+import { ConnectTransactionsModal } from "@/components/modals/connect-transactions-modal";
+import { ImportModal } from "@/components/modals/import-modal";
+import { SelectBankAccountsModal } from "@/components/modals/select-bank-accounts";
+import { uniqueCurrencies } from "@midday/location/currencies";
+import { use } from "react";
 import { CustomerCreateSheet } from "./customer-create-sheet";
 import { CustomerEditSheet } from "./customer-edit-sheet";
-import { InvoiceCommentsSheet } from "./invoice-comments";
-import { InvoiceCreateSheetServer } from "./invoice-create-sheet.server";
-import { TrackerSheetsServer } from "./tracker-sheets.server";
+import { TrackerCreateSheet } from "./tracker-create-sheet";
+import { TrackerScheduleSheet } from "./tracker-schedule-sheet";
+import { TrackerUpdateSheet } from "./tracker-update-sheet";
+import { TransactionSheet } from "./transaction-sheet";
 
 type Props = {
-  defaultCurrency: string;
+  currencyPromise: Promise<string>;
+  countryCodePromise: Promise<string>;
 };
 
-export async function GlobalSheets({ defaultCurrency }: Props) {
-  const { data: userData } = await getUser();
+export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
+  const currency = use(currencyPromise);
+  const countryCode = use(countryCodePromise);
 
   return (
     <>
-      <Suspense fallback={null}>
-        <TrackerSheetsServer
-          teamId={userData?.team_id}
-          userId={userData?.id}
-          timeFormat={userData?.time_format}
-          defaultCurrency={defaultCurrency}
-        />
-      </Suspense>
+      <TrackerUpdateSheet defaultCurrency={currency} />
+      <TrackerCreateSheet defaultCurrency={currency} />
+      <TrackerScheduleSheet />
 
       <CustomerCreateSheet />
       <CustomerEditSheet />
-      <InvoiceCommentsSheet />
+      <TransactionSheet />
 
-      <Suspense fallback={null}>
-        {/* We preload the invoice data (template, invoice number etc) */}
-        <InvoiceCreateSheetServer teamId={userData?.team_id} />
-      </Suspense>
+      <AssistantModal />
+      <ConnectTransactionsModal countryCode={countryCode} />
+      <SelectBankAccountsModal />
+      <ImportModal currencies={uniqueCurrencies} defaultCurrency={currency} />
+
+      {/* <InvoiceCreateSheetServer teamId={userData?.team_id} />  */}
     </>
   );
 }

@@ -11,7 +11,7 @@ export function getMostFrequentCurrency(
   }, new Map<string, number>());
 
   if (currencyFrequency.size === 1) {
-    return currencyFrequency.keys().next().value;
+    return currencyFrequency.keys().next().value ?? null;
   }
 
   const mostFrequent = [...currencyFrequency.entries()].reduce((a, b) =>

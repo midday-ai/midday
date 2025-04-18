@@ -3,7 +3,7 @@
 import { BarChart } from "@/components/charts/bar-chart";
 import { BotCard } from "@/components/chat/messages";
 import { FormatAmount } from "@/components/format-amount";
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { formatDate } from "@/utils/format";
 
 type Props = {
@@ -13,7 +13,7 @@ type Props = {
 };
 
 export function ProfitUI({ data, startDate, endDate }: Props) {
-  const { date_format: dateFormat } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   if (!data?.result?.length) {
     return (
@@ -26,8 +26,8 @@ export function ProfitUI({ data, startDate, endDate }: Props) {
     <BotCard className="font-sans space-y-16">
       <div>
         <p className="font-mono">
-          Based on the period from {formatDate(startDate, dateFormat)} and{" "}
-          {formatDate(endDate, dateFormat)} your current profit is{" "}
+          Based on the period from {formatDate(startDate, user?.date_format)}{" "}
+          and {formatDate(endDate, user?.date_format)} your current profit is{" "}
           <FormatAmount
             amount={data.summary.currentTotal}
             currency={data.summary.currency}

@@ -1,6 +1,8 @@
 "use client";
 
 import { generateTransactionsFilters } from "@/actions/ai/filters/generate-transactions-filters";
+import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
+import { useTRPC } from "@/trpc/client";
 import { formatAccountName } from "@/utils/format";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
@@ -17,43 +19,42 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
+import { useQuery } from "@tanstack/react-query";
 import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
-import {
-  parseAsArrayOf,
-  parseAsInteger,
-  parseAsString,
-  parseAsStringLiteral,
-  useQueryStates,
-} from "nuqs";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { AmountRange } from "./amount-range";
 import { FilterList } from "./filter-list";
 import { SelectCategory } from "./select-category";
 
-type Props = {
-  placeholder: string;
-  categories?: {
-    id: string;
-    slug: string;
-    name: string;
-  }[];
-  accounts?: {
-    id: string;
-    name: string;
-    currency: string;
-  }[];
-  members?: {
-    id: string;
-    name: string;
-  }[];
-  tags?: {
-    id: string;
-    name: string;
-  }[];
-};
+type StatusFilter = "completed" | "uncompleted" | "archived" | "excluded";
+type AttachmentFilter = "include" | "exclude";
+type RecurringFilter = "all" | "weekly" | "monthly" | "annually";
 
+interface BaseFilterItem {
+  name: string;
+}
+
+interface FilterItem<T extends string> extends BaseFilterItem {
+  id: T;
+}
+
+interface FilterMenuItemProps {
+  icon: (typeof Icons)[keyof typeof Icons];
+  label: string;
+  children: React.ReactNode;
+}
+
+interface FilterCheckboxItemProps {
+  id: string;
+  name: string;
+  checked?: boolean;
+  className?: string;
+  onCheckedChange: () => void;
+}
+
+// Static data
 const defaultSearch = {
   q: null,
   attachments: null,
@@ -64,26 +65,9 @@ const defaultSearch = {
   assignees: null,
   statuses: null,
   recurring: null,
+  tags: null,
+  amount_range: null,
 };
-
-const statusFilters = [
-  { id: "completed", name: "Completed" },
-  { id: "uncompleted", name: "Uncompleted" },
-  { id: "archived", name: "Archived" },
-  { id: "excluded", name: "Excluded" },
-];
-
-const attachmentsFilters = [
-  { id: "include", name: "Has attachments" },
-  { id: "exclude", name: "No attachments" },
-];
-
-const recurringFilters = [
-  { id: "all", name: "All recurring" },
-  { id: "weekly", name: "Weekly recurring" },
-  { id: "monthly", name: "Monthly recurring" },
-  { id: "annually", name: "Annually recurring" },
-];
 
 const PLACEHOLDERS = [
   "Software and taxes last month",
@@ -94,54 +78,145 @@ const PLACEHOLDERS = [
   "Without receipts this month",
 ];
 
-const placeholder =
-  PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)];
+const statusFilters: FilterItem<StatusFilter>[] = [
+  { id: "completed", name: "Completed" },
+  { id: "uncompleted", name: "Uncompleted" },
+  { id: "archived", name: "Archived" },
+  { id: "excluded", name: "Excluded" },
+];
 
-export function TransactionsSearchFilter({
-  categories,
-  accounts,
-  members,
-  tags,
-}: Props) {
+const attachmentsFilters: FilterItem<AttachmentFilter>[] = [
+  { id: "include", name: "Has attachments" },
+  { id: "exclude", name: "No attachments" },
+];
+
+const recurringFilters: FilterItem<RecurringFilter>[] = [
+  { id: "all", name: "All recurring" },
+  { id: "weekly", name: "Weekly recurring" },
+  { id: "monthly", name: "Monthly recurring" },
+  { id: "annually", name: "Annually recurring" },
+];
+
+// Reusable components
+function FilterMenuItem({ icon: Icon, label, children }: FilterMenuItemProps) {
+  return (
+    <DropdownMenuGroup>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger>
+          <Icon className="mr-2 size-4" />
+          <span>{label}</span>
+        </DropdownMenuSubTrigger>
+        <DropdownMenuPortal>
+          <DropdownMenuSubContent
+            sideOffset={14}
+            alignOffset={-4}
+            className="p-0"
+          >
+            {children}
+          </DropdownMenuSubContent>
+        </DropdownMenuPortal>
+      </DropdownMenuSub>
+    </DropdownMenuGroup>
+  );
+}
+
+function FilterCheckboxItem({
+  id,
+  name,
+  checked = false,
+  onCheckedChange,
+  className,
+}: FilterCheckboxItemProps) {
+  return (
+    <DropdownMenuCheckboxItem
+      key={id}
+      checked={checked}
+      onCheckedChange={onCheckedChange}
+      className={className}
+    >
+      {name}
+    </DropdownMenuCheckboxItem>
+  );
+}
+
+function useFilterData(isOpen: boolean, isFocused: boolean) {
+  const trpc = useTRPC();
+  const { filter } = useTransactionFilterParams();
+
+  const shouldFetch = isOpen || isFocused;
+
+  const { data: tagsData } = useQuery({
+    ...trpc.tags.get.queryOptions(),
+    enabled: shouldFetch || Boolean(filter.tags?.length),
+  });
+
+  const { data: bankAccountsData } = useQuery({
+    ...trpc.bankAccounts.get.queryOptions({
+      enabled: shouldFetch || Boolean(filter.accounts?.length),
+    }),
+  });
+
+  // We want to fetch the categories data on mount
+  const { data: categoriesData } = useQuery({
+    ...trpc.transactionCategories.get.queryOptions(),
+  });
+
+  return {
+    tags: tagsData?.map((tag) => ({
+      id: tag.id,
+      name: tag.name,
+    })),
+    accounts: bankAccountsData?.data?.map((bankAccount) => ({
+      id: bankAccount.id,
+      name: bankAccount.name ?? "",
+      currency: bankAccount.currency ?? "",
+    })),
+    categories: categoriesData?.map((category) => ({
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+    })),
+  };
+}
+
+function updateArrayFilter(
+  value: string,
+  currentValues: string[] | null,
+  setFilter: (update: Record<string, unknown>) => void,
+  key: string,
+) {
+  const newValues = currentValues?.includes(value)
+    ? currentValues.filter((v) => v !== value).length > 0
+      ? currentValues.filter((v) => v !== value)
+      : null
+    : [...(currentValues ?? []), value];
+
+  setFilter({ [key]: newValues });
+}
+
+export function TransactionsSearchFilter() {
   const [prompt, setPrompt] = useState("");
+  const [placeholder, setPlaceholder] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const { filter = defaultSearch, setFilter } = useTransactionFilterParams();
+  const { tags, accounts, categories } = useFilterData(isOpen, isFocused);
 
-  const [filters, setFilters] = useQueryStates(
-    {
-      q: parseAsString,
-      attachments: parseAsStringLiteral(["exclude", "include"] as const),
-      start: parseAsString,
-      end: parseAsString,
-      categories: parseAsArrayOf(parseAsString),
-      tags: parseAsArrayOf(parseAsString),
-      accounts: parseAsArrayOf(parseAsString),
-      assignees: parseAsArrayOf(parseAsString),
-      amount_range: parseAsArrayOf(parseAsInteger),
-      recurring: parseAsArrayOf(
-        parseAsStringLiteral(["all", "weekly", "monthly", "annually"] as const),
-      ),
-      statuses: parseAsArrayOf(
-        parseAsStringLiteral([
-          "completed",
-          "uncompleted",
-          "archived",
-          "excluded",
-        ] as const),
-      ),
-    },
-    {
-      shallow: false,
-      history: "push",
-    },
-  );
+  useEffect(() => {
+    const randomPlaceholder =
+      PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)] ??
+      "Search or filter";
+
+    setPlaceholder(randomPlaceholder);
+  }, []);
 
   useHotkeys(
     "esc",
     () => {
       setPrompt("");
-      setFilters(defaultSearch);
+      setFilter(defaultSearch);
       setIsOpen(false);
     },
     {
@@ -157,17 +232,15 @@ export function TransactionsSearchFilter({
 
   const handleSearch = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const value = evt.target.value;
-
     if (value) {
       setPrompt(value);
     } else {
-      setFilters(defaultSearch);
+      setFilter(defaultSearch);
       setPrompt("");
     }
   };
 
   const handleSubmit = async () => {
-    // If the user is typing a query with multiple words, we want to stream the results
     if (prompt.split(" ").length > 1) {
       setStreaming(true);
 
@@ -202,21 +275,55 @@ export function TransactionsSearchFilter({
         }
       }
 
-      setFilters({
+      setFilter({
         q: null,
         ...finalObject,
       });
 
       setStreaming(false);
     } else {
-      setFilters({ q: prompt.length > 0 ? prompt : null });
+      setFilter({ q: prompt.length > 0 ? prompt : null });
     }
   };
 
-  const hasValidFilters =
-    Object.entries(filters).filter(
-      ([key, value]) => value !== null && key !== "q",
-    ).length > 0;
+  const validFilters = Object.fromEntries(
+    Object.entries(filter).filter(([key]) => key !== "q"),
+  );
+
+  const hasValidFilters = Object.values(validFilters).some(
+    (value) => value !== null,
+  );
+
+  const processFiltersForList = () => {
+    return Object.fromEntries(
+      Object.entries({
+        ...validFilters,
+        start: filter.start ?? undefined,
+        end: filter.end ?? undefined,
+        amount_range: filter.amount_range
+          ? `${filter.amount_range[0]}-${filter.amount_range[1]}`
+          : undefined,
+        attachments: filter.attachments ?? undefined,
+        categories: filter.categories ?? undefined,
+        tags: filter.tags ?? undefined,
+        accounts: filter.accounts ?? undefined,
+        assignees: filter.assignees ?? undefined,
+        statuses: filter.statuses ?? undefined,
+        recurring: filter.recurring ?? undefined,
+      }).filter(([_, value]) => value !== undefined && value !== null),
+    );
+  };
+
+  const getAmountRange = () => {
+    if (
+      !filter.amount_range ||
+      !Array.isArray(filter.amount_range) ||
+      filter.amount_range.length < 2
+    ) {
+      return undefined;
+    }
+    return [filter.amount_range[0], filter.amount_range[1]] as [number, number];
+  };
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -235,6 +342,8 @@ export function TransactionsSearchFilter({
             className="pl-9 w-full md:w-[350px] pr-8"
             value={prompt}
             onChange={handleSearch}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             autoComplete="off"
             autoCapitalize="none"
             autoCorrect="off"
@@ -257,17 +366,16 @@ export function TransactionsSearchFilter({
         </form>
 
         <FilterList
-          filters={filters}
+          filters={processFiltersForList()}
           loading={streaming}
-          onRemove={setFilters}
+          onRemove={setFilter}
           categories={categories}
           accounts={accounts}
-          members={members}
           statusFilters={statusFilters}
           attachmentsFilters={attachmentsFilters}
           tags={tags}
           recurringFilters={recurringFilters}
-          amountRange={filters.amount_range}
+          amountRange={getAmountRange()}
         />
       </div>
 
@@ -278,270 +386,139 @@ export function TransactionsSearchFilter({
         alignOffset={-11}
         side="top"
       >
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.CalendarMonth className="mr-2 size-4" />
-              <span>Date</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                alignOffset={-4}
-                className="p-0"
-              >
-                <Calendar
-                  mode="range"
-                  initialFocus
-                  toDate={new Date()}
-                  selected={{
-                    from: filters.start && new Date(filters.start),
-                    to: filters.end && new Date(filters.end),
-                  }}
-                  onSelect={(range) => {
-                    if (!range) return;
+        <FilterMenuItem icon={Icons.CalendarMonth} label="Date">
+          <Calendar
+            mode="range"
+            initialFocus
+            toDate={new Date()}
+            selected={{
+              from: filter.start ? new Date(filter.start) : undefined,
+              to: filter.end ? new Date(filter.end) : undefined,
+            }}
+            onSelect={(range) => {
+              if (!range) return;
 
-                    const newRange = {
-                      start: range.from
-                        ? formatISO(range.from, { representation: "date" })
-                        : filters.start,
-                      end: range.to
-                        ? formatISO(range.to, { representation: "date" })
-                        : filters.end,
-                    };
+              const newRange = {
+                start: range.from
+                  ? formatISO(range.from, { representation: "date" })
+                  : null,
+                end: range.to
+                  ? formatISO(range.to, { representation: "date" })
+                  : null,
+              };
 
-                    setFilters(newRange);
-                  }}
+              setFilter(newRange);
+            }}
+          />
+        </FilterMenuItem>
+
+        <FilterMenuItem icon={Icons.Amount} label="Amount">
+          <div className="w-[280px] p-4">
+            <AmountRange />
+          </div>
+        </FilterMenuItem>
+
+        <FilterMenuItem icon={Icons.Status} label="Status">
+          {statusFilters.map(({ id, name }) => (
+            <FilterCheckboxItem
+              key={id}
+              id={id}
+              name={name}
+              checked={filter?.statuses?.includes(id)}
+              onCheckedChange={() =>
+                updateArrayFilter(id, filter.statuses, setFilter, "statuses")
+              }
+            />
+          ))}
+        </FilterMenuItem>
+
+        <FilterMenuItem icon={Icons.Attachments} label="Attachments">
+          {attachmentsFilters.map(({ id, name }) => (
+            <FilterCheckboxItem
+              key={id}
+              id={id}
+              name={name}
+              checked={filter?.attachments === id}
+              onCheckedChange={() => {
+                setFilter({
+                  attachments: id,
+                });
+              }}
+            />
+          ))}
+        </FilterMenuItem>
+
+        <FilterMenuItem icon={Icons.Category} label="Categories">
+          <div className="w-[250px] h-[270px]">
+            <SelectCategory
+              headless
+              onChange={(selected) =>
+                updateArrayFilter(
+                  selected.slug,
+                  filter.categories,
+                  setFilter,
+                  "categories",
+                )
+              }
+            />
+          </div>
+        </FilterMenuItem>
+
+        <FilterMenuItem icon={Icons.Status} label="Tags">
+          <div className="max-h-[400px] overflow-y-auto">
+            {tags && tags.length > 0 ? (
+              tags.map((tag) => (
+                <FilterCheckboxItem
+                  key={tag.id}
+                  id={tag.id}
+                  name={tag.name}
+                  checked={filter?.tags?.includes(tag.id)}
+                  onCheckedChange={() =>
+                    updateArrayFilter(tag.id, filter.tags, setFilter, "tags")
+                  }
                 />
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
+              ))
+            ) : (
+              <p className="text-sm text-[#878787] px-2">No tags found</p>
+            )}
+          </div>
+        </FilterMenuItem>
 
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Amount className="mr-2 size-4" />
-              <span>Amount</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                alignOffset={-4}
-                className="w-[280px] p-4"
-              >
-                <AmountRange />
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
+        <FilterMenuItem icon={Icons.Accounts} label="Accounts">
+          {accounts?.map((account) => (
+            <FilterCheckboxItem
+              key={account.id}
+              id={account.id}
+              name={formatAccountName({
+                name: account.name,
+                currency: account.currency,
+              })}
+              checked={filter?.accounts?.includes(account.id)}
+              onCheckedChange={() =>
+                updateArrayFilter(
+                  account.id,
+                  filter.accounts,
+                  setFilter,
+                  "accounts",
+                )
+              }
+            />
+          ))}
+        </FilterMenuItem>
 
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Status className="mr-2 size-4" />
-              <span>Status</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                alignOffset={-4}
-                className="p-0"
-              >
-                {statusFilters.map(({ id, name }) => (
-                  <DropdownMenuCheckboxItem
-                    key={id}
-                    checked={filters?.statuses?.includes(id)}
-                    onCheckedChange={() => {
-                      setFilters({
-                        statuses: filters?.statuses?.includes(id)
-                          ? filters.statuses.filter((s) => s !== id).length > 0
-                            ? filters.statuses.filter((s) => s !== id)
-                            : null
-                          : [...(filters?.statuses ?? []), id],
-                      });
-                    }}
-                  >
-                    {name}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Attachments className="mr-2 size-4" />
-              <span>Attachments</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                alignOffset={-4}
-                className="p-0"
-              >
-                {attachmentsFilters.map(({ id, name }) => (
-                  <DropdownMenuCheckboxItem
-                    key={id}
-                    checked={filters?.attachments?.includes(id)}
-                    onCheckedChange={() => {
-                      setFilters({
-                        attachments: id,
-                      });
-                    }}
-                  >
-                    {name}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Category className="mr-2 size-4" />
-              <span>Categories</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                alignOffset={-101}
-                className="p-0 w-[250px] h-[270px]"
-              >
-                <SelectCategory
-                  uncategorized
-                  onChange={(selected) => {
-                    setFilters({
-                      categories: filters?.categories?.includes(selected.slug)
-                        ? filters.categories.filter((s) => s !== selected.slug)
-                            .length > 0
-                          ? filters.categories.filter(
-                              (s) => s !== selected.slug,
-                            )
-                          : null
-                        : [...(filters?.categories ?? []), selected.slug],
-                    });
-                  }}
-                  headless
-                />
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Status className="mr-2 h-4 w-4" />
-              <span>Tags</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                alignOffset={-4}
-                className="py-2 max-h-[200px] overflow-y-auto max-w-[220px]"
-              >
-                {tags?.length > 0 ? (
-                  tags?.map((tag) => (
-                    <DropdownMenuCheckboxItem
-                      key={tag.id}
-                      checked={filters?.tags?.includes(tag.id)}
-                      onCheckedChange={() => {
-                        setFilters({
-                          tags: filters?.tags?.includes(tag.id)
-                            ? filters.tags.filter((s) => s !== tag.id).length >
-                              0
-                              ? filters.tags.filter((s) => s !== tag.id)
-                              : null
-                            : [...(filters?.tags ?? []), tag.id],
-                        });
-                      }}
-                    >
-                      {tag.name}
-                    </DropdownMenuCheckboxItem>
-                  ))
-                ) : (
-                  <p className="text-sm text-[#878787] px-2">No tags found</p>
-                )}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Accounts className="mr-2 size-4" />
-              <span>Accounts</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                alignOffset={-4}
-                className="p-0"
-              >
-                {accounts?.map((account) => (
-                  <DropdownMenuCheckboxItem
-                    key={account.id}
-                    onCheckedChange={() => {
-                      setFilters({
-                        accounts: filters?.accounts?.includes(account.id)
-                          ? filters.accounts.filter((s) => s !== account.id)
-                              .length > 0
-                            ? filters.accounts.filter((s) => s !== account.id)
-                            : null
-                          : [...(filters?.accounts ?? []), account.id],
-                      });
-                    }}
-                  >
-                    {formatAccountName({
-                      name: account.name,
-                      currency: account.currency,
-                    })}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Repeat className="mr-2 size-4" />
-              <span>Recurring</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                alignOffset={-4}
-                className="p-0"
-              >
-                {recurringFilters.map(({ id, name }) => (
-                  <DropdownMenuCheckboxItem
-                    key={id}
-                    checked={filters?.statuses?.includes(id)}
-                    onCheckedChange={() => {
-                      setFilters({
-                        recurring: filters?.recurring?.includes(id)
-                          ? filters.recurring.filter((s) => s !== id).length > 0
-                            ? filters.recurring.filter((s) => s !== id)
-                            : null
-                          : [...(filters?.recurring ?? []), id],
-                      });
-                    }}
-                  >
-                    {name}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
+        <FilterMenuItem icon={Icons.Repeat} label="Recurring">
+          {recurringFilters.map(({ id, name }) => (
+            <FilterCheckboxItem
+              key={id}
+              id={id}
+              name={name}
+              checked={filter?.recurring?.includes(id)}
+              onCheckedChange={() =>
+                updateArrayFilter(id, filter.recurring, setFilter, "recurring")
+              }
+            />
+          ))}
+        </FilterMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -13,8 +13,6 @@ import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { baseUrl } from "./sitemap";
 
-export const preferredRegion = ["fra1", "sfo1", "iad1"];
-
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {

@@ -3,15 +3,12 @@ import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 
-export const preferredRegion = ["fra1", "sfo1", "iad1"];
-export const dynamic = "force-dynamic";
-
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const state = searchParams.get("state");
   const requestUrl = new URL(request.url);
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { session },

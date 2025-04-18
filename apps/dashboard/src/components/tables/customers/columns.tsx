@@ -1,6 +1,8 @@
 "use client";
 
 import { useCustomerParams } from "@/hooks/use-customer-params";
+import type { RouterOutputs } from "@/trpc/routers/_app";
+import { getWebsiteLogo } from "@/utils/logos";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
@@ -12,28 +14,24 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { ScrollArea, ScrollBar } from "@midday/ui/scroll-area";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, RowData } from "@tanstack/react-table";
 import Link from "next/link";
 import * as React from "react";
 
-export type Customer = {
-  id: string;
-  name: string;
-  customer_name?: string;
-  website: string;
-  contact?: string;
-  email: string;
-  invoices: { id: string }[];
-  projects: { id: string }[];
-  tags: { tag: { id: string; name: string } }[];
-};
+declare module "@tanstack/react-table" {
+  interface TableMeta<TData extends RowData> {
+    deleteCustomer: (id: string) => void;
+  }
+}
+
+export type Customer = RouterOutputs["customers"]["get"]["data"][number];
 
 export const columns: ColumnDef<Customer>[] = [
   {
     header: "Name",
     accessorKey: "name",
     cell: ({ row }) => {
-      const name = row.original.name ?? row.original.customer_name;
+      const name = row.original.name;
 
       if (!name) return "-";
 
@@ -42,7 +40,7 @@ export const columns: ColumnDef<Customer>[] = [
           <Avatar className="size-5">
             {row.original.website && (
               <AvatarImageNext
-                src={`https://img.logo.dev/${row.original.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                src={getWebsiteLogo(row.original.website)}
                 alt={`${name} logo`}
                 width={20}
                 height={20}

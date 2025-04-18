@@ -1,7 +1,7 @@
+import { Apps } from "@/components/apps";
 import { AppsHeader } from "@/components/apps-header";
-import { AppsServer } from "@/components/apps.server";
 import { AppsSkeleton } from "@/components/apps.skeleton";
-import { getUser } from "@midday/supabase/cached-queries";
+import { getQueryClient, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -10,14 +10,17 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const { data } = await getUser();
+  const queryClient = getQueryClient();
+
+  // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
+  await queryClient.fetchQuery(trpc.apps.installed.queryOptions());
 
   return (
     <div className="mt-4">
-      <AppsHeader  />
+      <AppsHeader />
 
       <Suspense fallback={<AppsSkeleton />}>
-        <AppsServer user={data} />
+        <Apps />
       </Suspense>
     </div>
   );

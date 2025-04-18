@@ -1,213 +1,160 @@
 "use client";
 
-import { deleteTransactionsAction } from "@/actions/delete-transactions-action";
-import type { UpdateTransactionValues } from "@/actions/schema";
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
-import { updateTransactionAction } from "@/actions/update-transaction-action";
-import { TransactionSheet } from "@/components/sheets/transaction-sheet";
+import { LoadMore } from "@/components/load-more";
+import { useSortParams } from "@/hooks/use-sort-params";
+import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
+import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useTransactionsStore } from "@/store/transactions";
-import { useUserContext } from "@/store/user/hook";
+import { useTRPC } from "@/trpc/client";
 import { Cookies } from "@/utils/constants";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
-import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
+import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
+import { toast } from "@midday/ui/use-toast";
+import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import {
-  type ColumnDef,
   type VisibilityState,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useAction } from "next-safe-action/hooks";
-import { useQueryState } from "nuqs";
-import { useEffect } from "react";
-import { useState } from "react";
+import { use, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { useInView } from "react-intersection-observer";
 import { BottomBar } from "./bottom-bar";
+import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
+import { NoResults, NoTransactions } from "./empty-states";
 import { ExportBar } from "./export-bar";
+import { Loading } from "./loading";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  hasNextPage?: boolean;
-  hasFilters?: boolean;
-  hasSorting?: boolean;
-  loadMore: () => void;
-  query?: string;
-  pageSize: number;
-  meta: Record<string, string>;
-  initialColumnVisibility: VisibilityState;
-}
-
-export function DataTable<TData, TValue>({
-  columns,
-  query,
-  hasSorting,
-  data: initialData,
-  pageSize,
-  loadMore,
-  meta: pageMeta,
-  hasFilters,
-  hasNextPage: initialHasNextPage,
-  initialColumnVisibility,
-}: DataTableProps<TData, TValue>) {
-  const { toast } = useToast();
-  const [data, setData] = useState(initialData);
-  const [from, setFrom] = useState(pageSize);
-  const { ref, inView } = useInView();
-  const { date_format: dateFormat } = useUserContext((state) => state.data);
-
-  const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
-  const { setColumns, setCanDelete, rowSelection, setRowSelection } =
+export function DataTable({
+  columnVisibility: columnVisibilityPromise,
+}: { columnVisibility: Promise<VisibilityState> }) {
+  const trpc = useTRPC();
+  const { filter } = useTransactionFilterParams();
+  const { setRowSelection, rowSelection, setColumns, setCanDelete } =
     useTransactionsStore();
+  const deferredSearch = useDeferredValue(filter.q);
+  const { params } = useSortParams();
+  const { ref, inView } = useInView();
+  const { transactionId, setTransactionId } = useTransactionParams();
+  const { hasFilters } = useTransactionFilterParams();
 
-  const [transactionId, setTransactionId] = useQueryState("id");
-  const selectedRows = Object.keys(rowSelection).length;
-
-  const showBottomBar =
-    (hasFilters && !selectedRows) || (query && !selectedRows);
-
+  const showBottomBar = hasFilters && !Object.keys(rowSelection).length;
+  const initialColumnVisibility = use(columnVisibilityPromise);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility ?? {},
   );
 
-  const updateTransaction = useAction(updateTransactionAction, {
-    onSuccess: ({ data }) => {
-      if (data?.status === "excluded") {
+  const infiniteQueryOptions = trpc.transactions.get.infiniteQueryOptions(
+    {
+      filter: {
+        ...filter,
+        q: deferredSearch,
+      },
+      sort: params.sort,
+    },
+    {
+      getNextPageParam: ({ meta }) => meta?.cursor,
+    },
+  );
+
+  const { data, fetchNextPage, hasNextPage, refetch } =
+    useSuspenseInfiniteQuery(infiniteQueryOptions);
+
+  const updateTransactionMutation = useMutation(
+    trpc.transactions.update.mutationOptions({
+      onSuccess: () => {
+        refetch();
+
         toast({
-          duration: 3500,
-          title: "Transaction excluded",
-          description:
-            "You can view excluded transactions by adding the filter excluded.",
+          title: "Transaction updated",
+          variant: "success",
         });
-      }
-    },
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
+      },
+    }),
+  );
 
-  const handleUpdateTransaction = (
-    values: UpdateTransactionValues,
-    optimisticData?: any,
-  ) => {
-    setData((prev) => {
-      return prev.map((item) => {
-        if (item.id === values.id) {
-          return {
-            ...item,
-            ...values,
-            ...(optimisticData ?? {}),
-          };
-        }
-
-        return item;
-      });
-    });
-
-    updateTransaction.execute(values);
-  };
-
-  const deleteTransactions = useAction(deleteTransactionsAction, {
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
-
-  const handleDeleteTransactions = ({ ids }) => {
-    setData((prev) => {
-      return prev.filter((item) => !ids?.includes(item.id));
-    });
-
-    deleteTransactions.execute({ ids });
-  };
-
-  const setOpen = (id: string | boolean) => {
-    if (id) {
-      setTransactionId(id);
-    } else {
-      setTransactionId(null);
+  useEffect(() => {
+    if (inView) {
+      fetchNextPage();
     }
-  };
+  }, [inView]);
 
-  const handleCopyUrl = async (id: string) => {
-    try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/transactions?id=${id}`,
-      );
+  const tableData = useMemo(() => {
+    return data?.pages.flatMap((page) => page.data) ?? [];
+  }, [data]);
 
-      toast({
-        duration: 4000,
-        title: "Copied URL to clipboard.",
-        variant: "success",
-      });
-    } catch {}
-  };
+  const ids = useMemo(() => {
+    return tableData.map((row) => row?.id);
+  }, [tableData]);
 
   const table = useReactTable({
-    getRowId: (row) => row.id,
-    data,
+    getRowId: (row) => row?.id,
+    data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
-    meta: {
-      setOpen,
-      copyUrl: handleCopyUrl,
-      updateTransaction: handleUpdateTransaction,
-      deleteTransactions: handleDeleteTransactions,
-      dateFormat,
-      hasSorting,
-    },
     state: {
       rowSelection,
       columnVisibility,
     },
+    meta: {
+      setOpen: (id: string) => {
+        setTransactionId(id);
+      },
+      copyUrl: (id: string) => {
+        try {
+          window.navigator.clipboard.writeText(
+            `${process.env.NEXT_PUBLIC_URL}/transactions/?transactionId=${id}`,
+          );
+          toast({
+            title: "Transaction URL copied to clipboard",
+            variant: "success",
+          });
+        } catch {
+          toast({
+            title: "Failed to copy transaction URL to clipboard",
+            variant: "error",
+          });
+        }
+      },
+      updateTransaction: (data: { id: string; status: string }) => {
+        updateTransactionMutation.mutate({
+          id: data.id,
+          status: data.status as
+            | "pending"
+            | "archived"
+            | "completed"
+            | "posted"
+            | "excluded",
+        });
+      },
+    },
   });
-
-  const loadMoreData = async () => {
-    const formatedFrom = from;
-    const to = formatedFrom + pageSize * 2;
-
-    try {
-      const { data, meta } = await loadMore({
-        from: formatedFrom,
-        to,
-      });
-
-      setData((prev) => [...prev, ...data]);
-      setFrom(to);
-      setHasNextPage(meta.count > to);
-    } catch {
-      setHasNextPage(false);
-    }
-  };
-
-  const selectedTransaction = data.find(
-    (transaction) => transaction?.id === transactionId,
-  );
 
   useEffect(() => {
     setColumns(table.getAllLeafColumns());
   }, [columnVisibility]);
 
   useEffect(() => {
-    const transactions = data.filter((transaction) => {
+    updateColumnVisibilityAction({
+      key: Cookies.TransactionsColumns,
+      data: columnVisibility,
+    });
+  }, [columnVisibility]);
+
+  useEffect(() => {
+    const transactions = tableData.filter((transaction) => {
+      if (!transaction?.id) return false;
       const found = rowSelection[transaction.id];
+
       if (found) {
         return !transaction?.manual;
       }
+      return false;
     });
 
     if (Object.keys(rowSelection)?.length > 0) {
@@ -219,98 +166,109 @@ export function DataTable<TData, TValue>({
     }
   }, [rowSelection]);
 
-  useEffect(() => {
-    updateColumnVisibilityAction({
-      key: Cookies.TransactionsColumns,
-      data: columnVisibility,
-    });
-  }, [columnVisibility]);
+  useHotkeys(
+    "ArrowUp, ArrowDown",
+    ({ key }) => {
+      if (key === "ArrowUp" && transactionId) {
+        const currentIndex = ids?.indexOf(transactionId) ?? 0;
+        const prevId = ids[currentIndex - 1];
 
-  useEffect(() => {
-    if (inView) {
-      loadMoreData();
-    }
-  }, [inView]);
+        if (prevId) {
+          setTransactionId(prevId);
+        }
+      }
 
-  useEffect(() => {
-    setData(initialData);
-  }, [initialData]);
+      if (key === "ArrowDown" && transactionId) {
+        const currentIndex = ids?.indexOf(transactionId) ?? 0;
+        const nextId = ids[currentIndex + 1];
+
+        if (nextId) {
+          setTransactionId(nextId);
+        }
+      }
+    },
+    { enabled: !!transactionId },
+  );
+
+  if (!tableData.length && !hasFilters) {
+    return (
+      <div className="relative h-[calc(100vh-200px)] overflow-hidden">
+        <NoTransactions />
+        <Loading isEmpty />
+      </div>
+    );
+  }
+
+  if (!tableData.length && hasFilters) {
+    return (
+      <div className="relative h-[calc(100vh-200px)] overflow-hidden">
+        <NoResults />
+        <Loading isEmpty />
+      </div>
+    );
+  }
 
   return (
-    <div className="mb-8 relative">
-      <Table>
-        <DataTableHeader table={table} />
+    <div className="relative">
+      <TooltipProvider delayDuration={20}>
+        <Tooltip>
+          <Table>
+            <DataTableHeader table={table} />
 
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className="h-[40px] md:h-[45px] cursor-pointer select-text"
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    className={cn(
-                      "px-3 md:px-4 py-2",
-                      (cell.column.id === "select" ||
-                        cell.column.id === "actions" ||
-                        cell.column.id === "category" ||
-                        cell.column.id === "bank_account" ||
-                        cell.column.id === "assigned" ||
-                        cell.column.id === "method" ||
-                        cell.column.id === "status") &&
-                        "hidden md:table-cell",
-                    )}
-                    onClick={() => {
-                      if (
-                        cell.column.id !== "select" &&
-                        cell.column.id !== "actions"
-                      ) {
-                        setOpen(row.id);
-                      }
-                    }}
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className="h-[40px] md:h-[45px] cursor-pointer select-text"
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        onClick={() => {
+                          if (
+                            cell.column.id !== "select" &&
+                            cell.column.id !== "actions"
+                          ) {
+                            setTransactionId(row.original.id);
+                          }
+                        }}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
                   </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
 
-      {hasNextPage && (
-        <div className="flex items-center justify-center mt-6" ref={ref}>
-          <div className="flex items-center space-x-2 px-6 py-5">
-            <Spinner />
-            <span className="text-sm text-[#606060]">Loading more...</span>
-          </div>
-        </div>
+          <LoadMore ref={ref} hasNextPage={hasNextPage} />
+        </Tooltip>
+      </TooltipProvider>
+
+      <ExportBar />
+
+      {showBottomBar && (
+        <BottomBar
+          transactions={tableData.map((row) => ({
+            amount: row?.amount ?? 0,
+            currency: row?.currency ?? "",
+          }))}
+        />
       )}
-
-      <TransactionSheet
-        isOpen={Boolean(transactionId)}
-        setOpen={setOpen}
-        data={selectedTransaction}
-        ids={data?.map(({ id }) => id)}
-        updateTransaction={handleUpdateTransaction}
-      />
-
-      <BottomBar
-        show={showBottomBar}
-        count={pageMeta?.count}
-        totalAmount={pageMeta?.totalAmount}
-      />
-
-      <ExportBar selected={selectedRows} />
     </div>
   );
 }

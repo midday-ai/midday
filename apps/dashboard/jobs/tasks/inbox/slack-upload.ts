@@ -2,7 +2,7 @@ import {
   createSlackWebClient,
   downloadFile,
 } from "@midday/app-store/slack-client";
-import { DocumentClient, prepareDocument } from "@midday/documents";
+import { DocumentClient } from "@midday/documents";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { format } from "date-fns";
@@ -57,20 +57,13 @@ export const inboxSlackUpload = schemaTask({
       throw Error("No file data");
     }
 
-    const document = await prepareDocument({
-      Content: Buffer.from(fileData).toString("base64"),
-      ContentType: mimetype,
-      ContentLength: size,
-      Name: name,
-    });
-
-    const pathTokens = [teamId, "inbox", document.fileName];
+    const pathTokens = [teamId, "inbox", name];
 
     // Upload file to vault
     await supabase.storage
       .from("vault")
-      .upload(pathTokens.join("/"), new Uint8Array(document.content), {
-        contentType: document.mimeType,
+      .upload(pathTokens.join("/"), new Uint8Array(fileData), {
+        contentType: mimetype,
         upsert: true,
       });
 
@@ -78,12 +71,12 @@ export const inboxSlackUpload = schemaTask({
       .from("inbox")
       .insert({
         // NOTE: If we can't parse the name using OCR this will be the fallback name
-        display_name: document.name,
+        display_name: name,
         team_id: teamId,
         file_path: pathTokens,
-        file_name: document.fileName,
-        content_type: document.mimeType,
-        reference_id: `${id}_${document.fileName}`,
+        file_name: name,
+        content_type: mimetype,
+        reference_id: `${id}_${name}`,
         size,
       })
       .select("*")
@@ -95,12 +88,11 @@ export const inboxSlackUpload = schemaTask({
     }
 
     try {
-      const document = new DocumentClient({
-        contentType: inboxData.content_type!,
-      });
+      const document = new DocumentClient();
 
-      const result = await document.getDocument({
+      const result = await document.getInvoiceOrReceipt({
         content: Buffer.from(fileData).toString("base64"),
+        mimetype,
       });
 
       const { data: updatedInbox } = await supabase
@@ -111,7 +103,7 @@ export const inboxSlackUpload = schemaTask({
           display_name: result.name,
           website: result.website,
           date: result.date ? new Date(result.date).toISOString() : null,
-          type: result.type,
+          // type: result.type,
           description: result.description,
           status: "pending",
         })

@@ -1,11 +1,5 @@
-import { getTransactionsFromLayout } from "@/actions/transactions/get-transactions-from-layout";
-import { useUpload } from "@/hooks/use-upload";
-import { useUserContext } from "@/store/user/hook";
-import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { Spinner } from "@midday/ui/spinner";
-import { stripSpecialCharacters } from "@midday/utils";
-import { useAction } from "next-safe-action/hooks";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
@@ -14,31 +8,10 @@ import { useCsvContext } from "./context";
 import { readLines } from "./utils";
 
 export function SelectFile() {
-  const supabase = createClient();
   const { watch, control, setFileColumns, setFirstRows, setValue } =
     useCsvContext();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { uploadFile } = useUpload();
-
-  const { team_id: teamId } = useUserContext((state) => state.data);
-
-  const getTransactions = useAction(getTransactionsFromLayout, {
-    onSuccess: ({ data }) => {
-      const { columns, results } = data;
-
-      setValue("table", results);
-      setFileColumns(columns);
-
-      // Skip the first row because it can be the header row
-      setFirstRows(results.slice(1, 4));
-      setIsLoading(false);
-    },
-    onError: () => {
-      setError("Something went wrong while processing the file.");
-      setIsLoading(false);
-    },
-  });
 
   const file = watch("file");
 
@@ -49,27 +22,6 @@ export function SelectFile() {
     }
 
     setIsLoading(true);
-
-    if (file?.type !== "text/csv") {
-      try {
-        setValue("import_type", "image");
-
-        const filename = stripSpecialCharacters(file.name);
-
-        const { path } = await uploadFile({
-          bucket: "vault",
-          path: [teamId, "imports", filename],
-          file,
-        });
-
-        getTransactions.execute({ filePath: path });
-      } catch (error) {
-        setError("Something went wrong while processing the file.");
-        setIsLoading(false);
-      }
-
-      return;
-    }
 
     setValue("import_type", "csv");
 

@@ -1,13 +1,13 @@
-import type { Invoice as InvoiceType } from "@/components/tables/invoices/columns";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { EmptyState } from "./empty-state";
 import { InvoiceRow } from "./invoice-row";
 
 type Props = {
-  invoices: InvoiceType[];
+  invoices: RouterOutputs["invoice"]["get"];
 };
 
 export function Invoice({ invoices }: Props) {
-  if (!invoices.length) {
+  if (!invoices?.length) {
     return <EmptyState />;
   }
 

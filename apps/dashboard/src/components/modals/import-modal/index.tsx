@@ -3,7 +3,7 @@
 import { importTransactionsAction } from "@/actions/transactions/import-transactions";
 import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useUpload } from "@/hooks/use-upload";
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import { Button } from "@midday/ui/button";
@@ -17,7 +17,6 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
-import { ErrorBoundary } from "@sentry/nextjs";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
@@ -48,7 +47,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
     null,
   );
 
-  const { team_id: teamId } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   const [pageNumber, setPageNumber] = useState<number>(0);
   const page = pages[pageNumber];
@@ -171,119 +170,115 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
   return (
     <Dialog open={isOpen} onOpenChange={onclose}>
       <DialogContent>
-        <ErrorBoundary>
-          <div className="p-4 pb-0">
-            <DialogHeader>
-              <div className="flex space-x-4 items-center mb-4">
-                {!params.hide && (
-                  <button
-                    type="button"
-                    className="items-center border bg-accent p-1"
-                    onClick={() => setParams({ step: "connect" })}
-                  >
-                    <Icons.ArrowBack />
-                  </button>
-                )}
-                <DialogTitle className="m-0 p-0">
-                  {page === "select-file" && "Select file"}
-                  {page === "confirm-import" && "Confirm import"}
-                </DialogTitle>
-              </div>
-              <DialogDescription>
-                {page === "select-file" &&
-                  "Upload a CSV file or a screenshot of your transactions."}
-                {page === "confirm-import" &&
-                  "We’ve mapped each column to what we believe is correct, but please review the data below to confirm it’s accurate."}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="relative">
-              <AnimatedSizeContainer height>
-                <ImportCsvContext.Provider
-                  value={{
-                    fileColumns,
-                    setFileColumns,
-                    firstRows,
-                    setFirstRows,
-                    control,
-                    watch,
-                    setValue,
-                  }}
+        <div className="p-4 pb-0">
+          <DialogHeader>
+            <div className="flex space-x-4 items-center mb-4">
+              {!params.hide && (
+                <button
+                  type="button"
+                  className="items-center border bg-accent p-1"
+                  onClick={() => setParams({ step: "connect" })}
                 >
-                  <div>
-                    <form
-                      className="flex flex-col gap-y-4"
-                      onSubmit={handleSubmit(async (data) => {
-                        let filePath = undefined;
-
-                        setIsImporting(true);
-
-                        if (data.import_type === "csv") {
-                          const filename = stripSpecialCharacters(
-                            data.file.name,
-                          );
-                          const { path } = await uploadFile({
-                            bucket: "vault",
-                            path: [teamId, "imports", filename],
-                            file,
-                          });
-
-                          filePath = path;
-                        }
-
-                        importTransactions.execute({
-                          filePath,
-                          currency: data.currency,
-                          bankAccountId: data.bank_account_id,
-                          currentBalance: data.balance,
-                          inverted: data.inverted,
-                          table: data.table,
-                          importType: data.import_type,
-                          mappings: {
-                            amount: data.amount,
-                            date: data.date,
-                            description: data.description,
-                          },
-                        });
-                      })}
-                    >
-                      {page === "select-file" && <SelectFile />}
-                      {page === "confirm-import" && (
-                        <>
-                          <FieldMapping currencies={currencies} />
-
-                          <Button
-                            disabled={!isValid || isImporting}
-                            className="mt-4"
-                          >
-                            {isImporting ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              "Confirm import"
-                            )}
-                          </Button>
-
-                          <button
-                            type="button"
-                            className="text-sm mb-4 text-[#878787]"
-                            onClick={() => {
-                              setPageNumber(0);
-                              reset();
-                              setFileColumns(null);
-                              setFirstRows(null);
-                            }}
-                          >
-                            Choose another file
-                          </button>
-                        </>
-                      )}
-                    </form>
-                  </div>
-                </ImportCsvContext.Provider>
-              </AnimatedSizeContainer>
+                  <Icons.ArrowBack />
+                </button>
+              )}
+              <DialogTitle className="m-0 p-0">
+                {page === "select-file" && "Select file"}
+                {page === "confirm-import" && "Confirm import"}
+              </DialogTitle>
             </div>
+            <DialogDescription>
+              {page === "select-file" &&
+                "Upload a CSV file or a screenshot of your transactions."}
+              {page === "confirm-import" &&
+                "We’ve mapped each column to what we believe is correct, but please review the data below to confirm it’s accurate."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="relative">
+            <AnimatedSizeContainer height>
+              <ImportCsvContext.Provider
+                value={{
+                  fileColumns,
+                  setFileColumns,
+                  firstRows,
+                  setFirstRows,
+                  control,
+                  watch,
+                  setValue,
+                }}
+              >
+                <div>
+                  <form
+                    className="flex flex-col gap-y-4"
+                    onSubmit={handleSubmit(async (data) => {
+                      let filePath = undefined;
+
+                      setIsImporting(true);
+
+                      if (data.import_type === "csv") {
+                        const filename = stripSpecialCharacters(data.file.name);
+                        const { path } = await uploadFile({
+                          bucket: "vault",
+                          path: [user?.team_id, "imports", filename],
+                          file,
+                        });
+
+                        filePath = path;
+                      }
+
+                      importTransactions.execute({
+                        filePath,
+                        currency: data.currency,
+                        bankAccountId: data.bank_account_id,
+                        currentBalance: data.balance,
+                        inverted: data.inverted,
+                        table: data.table,
+                        importType: data.import_type,
+                        mappings: {
+                          amount: data.amount,
+                          date: data.date,
+                          description: data.description,
+                        },
+                      });
+                    })}
+                  >
+                    {page === "select-file" && <SelectFile />}
+                    {page === "confirm-import" && (
+                      <>
+                        <FieldMapping currencies={currencies} />
+
+                        <Button
+                          disabled={!isValid || isImporting}
+                          className="mt-4"
+                        >
+                          {isImporting ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            "Confirm import"
+                          )}
+                        </Button>
+
+                        <button
+                          type="button"
+                          className="text-sm mb-4 text-[#878787]"
+                          onClick={() => {
+                            setPageNumber(0);
+                            reset();
+                            setFileColumns(null);
+                            setFirstRows(null);
+                          }}
+                        >
+                          Choose another file
+                        </button>
+                      </>
+                    )}
+                  </form>
+                </div>
+              </ImportCsvContext.Provider>
+            </AnimatedSizeContainer>
           </div>
-        </ErrorBoundary>
+        </div>
       </DialogContent>
     </Dialog>
   );

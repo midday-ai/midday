@@ -1,10 +1,14 @@
 "use client";
 
-import { createProjectTagAction } from "@/actions/project/create-project-tag-action";
-import { deleteProjectTagAction } from "@/actions/project/delete-project-tag-action";
-import type { Customer } from "@/components/invoice/customer-details";
+import { SearchCustomers } from "@/components/search-customers";
+import { SelectTags } from "@/components/select-tags";
+import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useLatestProjectId } from "@/hooks/use-latest-project-id";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { uniqueCurrencies } from "@midday/location/currencies";
-import { Button } from "@midday/ui/button";
 import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
 import { CurrencyInput } from "@midday/ui/currency-input";
 import {
@@ -25,37 +29,99 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { Switch } from "@midday/ui/switch";
 import { Textarea } from "@midday/ui/textarea";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useEffect, useState } from "react";
-import { SearchCustomer } from "../search-customer";
-import { SelectTags } from "../select-tags";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
+
+const formSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  estimate: z.number().optional(),
+  billable: z.boolean().optional().default(false),
+  rate: z.number().min(1).optional(),
+  currency: z.string().optional(),
+  status: z.enum(["in_progress", "completed"]).optional(),
+  customer_id: z.string().uuid().nullable().optional(),
+  tags: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        value: z.string(),
+      }),
+    )
+    .optional(),
+});
 
 type Props = {
-  onSubmit: (data: any) => void;
-  isSaving: boolean;
-  form: any;
-  customers: Customer[];
+  data?: RouterOutputs["trackerProjects"]["getById"];
+  defaultCurrency: string;
 };
 
-export function TrackerProjectForm({
-  onSubmit,
-  isSaving,
-  form,
-  customers,
-}: Props) {
-  const [isOpen, setIsOpen] = useState(false);
+export function TrackerProjectForm({ data, defaultCurrency }: Props) {
+  const isEdit = !!data;
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const { setParams: setTrackerParams } = useTrackerParams();
+  const { setParams: setCustomerParams } = useCustomerParams();
+  const { setLatestProjectId } = useLatestProjectId();
 
-  const deleteProjectTag = useAction(deleteProjectTagAction);
-  const createProjectTag = useAction(createProjectTagAction);
+  const upsertTrackerProjectMutation = useMutation(
+    trpc.trackerProjects.upsert.mutationOptions({
+      onSuccess: (result) => {
+        setLatestProjectId(result?.id ?? null);
 
-  const isEdit = form.getValues("id") !== undefined;
+        queryClient.invalidateQueries({
+          queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
+        });
 
-  useEffect(() => {
-    setIsOpen(Boolean(form.getValues("billable")));
-  }, [form.getValues()]);
+        queryClient.invalidateQueries({
+          queryKey: trpc.trackerProjects.getById.queryKey(),
+        });
+
+        // Close the tracker project form
+        setTrackerParams(null);
+      },
+    }),
+  );
+
+  const form = useZodForm(formSchema, {
+    defaultValues: {
+      id: data?.id,
+      name: data?.name ?? undefined,
+      description: data?.description ?? undefined,
+      rate: data?.rate ?? undefined,
+      status: data?.status ?? "in_progress",
+      billable: data?.billable ?? false,
+      estimate: data?.estimate ?? 0,
+      currency: data?.currency ?? defaultCurrency,
+      customer_id: data?.customer_id ?? undefined,
+      tags:
+        data?.tags?.map((tag) => ({
+          id: tag.tag?.id ?? "",
+          value: tag.tag?.name ?? "",
+        })) ?? undefined,
+    },
+  });
+
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+    const formattedData = {
+      ...data,
+      id: data.id || undefined,
+      description: data.description || null,
+      rate: data.rate || null,
+      currency: data.currency || null,
+      billable: data.billable || false,
+      estimate: data.estimate || null,
+      status: data.status || "in_progress",
+      customer_id: data.customer_id || null,
+      tags: data.tags?.length ? data.tags : null,
+    };
+
+    upsertTrackerProjectMutation.mutate(formattedData);
+  };
 
   return (
     <Form {...form}>
@@ -69,10 +135,13 @@ export function TrackerProjectForm({
               <FormControl>
                 <Input
                   {...field}
+                  value={field.value ?? ""}
                   autoComplete="off"
+                  placeholder="Project name"
                   autoCapitalize="none"
                   autoCorrect="off"
                   spellCheck="false"
+                  autoFocus
                 />
               </FormControl>
               <FormDescription>
@@ -90,10 +159,25 @@ export function TrackerProjectForm({
             <FormItem>
               <FormLabel>Customer</FormLabel>
               <FormControl>
-                <SearchCustomer
-                  data={customers}
-                  onSelect={(id) => field.onChange(id)}
-                  selectedId={field.value}
+                <SearchCustomers
+                  onSelect={(id) =>
+                    field.onChange(id, {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
+                  selectedId={field.value ?? undefined}
+                  onCreate={(name) => {
+                    setCustomerParams({
+                      name,
+                      createCustomer: true,
+                    });
+                  }}
+                  onEdit={(id) => {
+                    setCustomerParams({
+                      customerId: id,
+                    });
+                  }}
                 />
               </FormControl>
               <FormDescription>
@@ -110,37 +194,36 @@ export function TrackerProjectForm({
           </Label>
 
           <SelectTags
-            tags={form.getValues("tags")}
+            tags={(form.getValues("tags") ?? []).map((tag) => ({
+              id: tag.id,
+              value: tag.value,
+              label: tag.value,
+            }))}
             onRemove={(tag) => {
-              deleteProjectTag.execute({
-                tagId: tag.id,
-                projectId: form.getValues("id"),
-              });
+              form.setValue(
+                "tags",
+                form.getValues("tags")?.filter((t) => t.id !== tag.id),
+                {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                },
+              );
             }}
-            // Only for create projects
-            onCreate={(tag) => {
-              if (!isEdit) {
-                form.setValue(
-                  "tags",
-                  [
-                    ...(form.getValues("tags") ?? []),
-                    { id: tag.id, value: tag.name },
-                  ],
-                  {
-                    shouldDirty: true,
-                    shouldValidate: true,
-                  },
-                );
-              }
-            }}
-            // Only for edit projects
             onSelect={(tag) => {
-              if (isEdit) {
-                createProjectTag.execute({
-                  tagId: tag.id,
-                  projectId: form.getValues("id"),
-                });
-              }
+              form.setValue(
+                "tags",
+                [
+                  ...(form.getValues("tags") ?? []),
+                  {
+                    value: tag.value ?? "",
+                    id: tag.id ?? "",
+                  },
+                ],
+                {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                },
+              );
             }}
           />
 
@@ -222,7 +305,7 @@ export function TrackerProjectForm({
           />
         </div>
 
-        <Collapsible open={isOpen}>
+        <Collapsible open={form.watch("billable")}>
           <FormItem className="flex justify-between items-center">
             <FormLabel>Billable</FormLabel>
 
@@ -234,10 +317,7 @@ export function TrackerProjectForm({
                   <FormControl>
                     <Switch
                       checked={field.value}
-                      onCheckedChange={(value) => {
-                        setIsOpen((prev) => !prev);
-                        field.onChange(value);
-                      }}
+                      onCheckedChange={field.onChange}
                     />
                   </FormControl>
                 </FormItem>
@@ -300,12 +380,15 @@ export function TrackerProjectForm({
         </Collapsible>
 
         <div className="fixed bottom-8 w-full sm:max-w-[455px] right-8">
-          <Button
+          <SubmitButton
             className="w-full"
-            disabled={isSaving || !form.formState.isValid}
+            disabled={
+              upsertTrackerProjectMutation.isPending || !form.formState.isDirty
+            }
+            isSubmitting={upsertTrackerProjectMutation.isPending}
           >
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
-          </Button>
+            {isEdit ? "Update" : "Create"}
+          </SubmitButton>
         </div>
       </form>
     </Form>

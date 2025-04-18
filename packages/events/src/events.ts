@@ -1,8 +1,4 @@
 export const LogEvents = {
-  Waitlist: {
-    name: "User Joined Waitlist",
-    channel: "waitlist",
-  },
   SignIn: {
     name: "User Signed In",
     channel: "login",
@@ -11,33 +7,13 @@ export const LogEvents = {
     name: "User Signed Out",
     channel: "login",
   },
+  ChangeTeam: {
+    name: "Change Team",
+    channel: "team",
+  },
   Registered: {
     name: "User Registered",
     channel: "registered",
-  },
-  ProjectCreated: {
-    name: "Project Created",
-    channel: "tracker",
-  },
-  ProjectDeleted: {
-    name: "Project Deleted",
-    channel: "tracker",
-  },
-  ProjectUpdated: {
-    name: "Project Updated",
-    channel: "tracker",
-  },
-  ProjectReport: {
-    name: "Project Report",
-    channel: "report",
-  },
-  TrackerCreateEntry: {
-    name: "Tracker Create Entry",
-    channel: "tracker",
-  },
-  TrackerDeleteEntry: {
-    name: "Tracker Delete Entry",
-    channel: "tracker",
   },
   ConnectBankCompleted: {
     name: "Connect Bank Completed",
@@ -75,64 +51,8 @@ export const LogEvents = {
     name: "Update Bank",
     channel: "bank",
   },
-  OverviewReport: {
-    name: "Overview Report",
-    channel: "report",
-  },
-  AcceptInvite: {
-    name: "Accept Invite",
-    channel: "invite",
-  },
-  DeleteInvite: {
-    name: "Delete Invite",
-    channel: "invite",
-  },
-  DeclineInvite: {
-    name: "Decline Invite",
-    channel: "invite",
-  },
-  InviteTeamMembers: {
-    name: "Invite Team Member",
-    channel: "invite",
-  },
-  UserRoleChange: {
-    name: "User Role Change",
-    channel: "user",
-  },
-  DeleteUser: {
-    name: "Delete User",
-    channel: "user",
-  },
-  ChangeTeam: {
-    name: "Change Team",
-    channel: "team",
-  },
-  CreateTeam: {
-    name: "Create Team",
-    channel: "team",
-  },
-  LeaveTeam: {
-    name: "Leave Team",
-    channel: "team",
-  },
-  DeleteTeam: {
-    name: "Delete Team",
-    channel: "team",
-  },
-  DeleteTeamMember: {
-    name: "Delete Team Member",
-    channel: "team",
-  },
-  CreateAttachment: {
-    name: "Create Attachment",
-    channel: "transaction",
-  },
   ExportTransactions: {
     name: "Export Transaction",
-    channel: "transaction",
-  },
-  DeleteAttachment: {
-    name: "Delete Attachment",
     channel: "transaction",
   },
   TransactionsManualSync: {
@@ -175,18 +95,6 @@ export const LogEvents = {
     name: "Send Feedback",
     channel: "feedback",
   },
-  CategoryCreate: {
-    name: "Category Create",
-    channel: "category",
-  },
-  CategoryDelete: {
-    name: "Category Delete",
-    channel: "category",
-  },
-  CreateTransaction: {
-    name: "Create Transaction",
-    channel: "transaction",
-  },
   UpdateBaseCurrency: {
     name: "Update Base Currency",
     channel: "transaction",
@@ -195,65 +103,13 @@ export const LogEvents = {
     name: "Update Currency",
     channel: "transaction",
   },
-  DisconnectApp: {
-    name: "Disconnect App",
-    channel: "app",
-  },
-  UpdateAppSettings: {
-    name: "Update App Settings",
-    channel: "app",
-  },
   GoCardLessLinkCreated: {
     name: "GoCardLess Link Created",
     channel: "gocardless",
   },
-  CreateCustomer: {
-    name: "Create Customer",
-    channel: "customer",
-  },
-  DeleteCustomer: {
-    name: "Delete Customer",
-    channel: "customer",
-  },
-  CreateTag: {
-    name: "Create Tag",
-    channel: "tag",
-  },
-  CreateTransactionTag: {
-    name: "Create Transaction Tag",
-    channel: "tag",
-  },
-  DeleteTransactionTag: {
-    name: "Delete Transaction Tag",
-    channel: "tag",
-  },
-  DeleteProjectTag: {
-    name: "Delete Project Tag",
-    channel: "tag",
-  },
-  CreateProjectTag: {
-    name: "Create Project Tag",
-    channel: "tag",
-  },
-  DeleteTag: {
-    name: "Delete Tag",
-    channel: "tag",
-  },
-  UpdateTag: {
-    name: "Update Tag",
-    channel: "tag",
-  },
   InboxUpload: {
     name: "Inbox Upload",
     channel: "inbox",
-  },
-  DeleteCustomerTag: {
-    name: "Delete Customer Tag",
-    channel: "customer",
-  },
-  CreateCustomerTag: {
-    name: "Create Customer Tag",
-    channel: "customer",
   },
   ReconnectConnection: {
     name: "Reconnect Connection",

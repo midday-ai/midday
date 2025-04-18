@@ -1,18 +1,14 @@
-import { createCategoriesAction } from "@/actions/create-categories-action";
-import { useUserContext } from "@/store/user/hook";
+import { useTRPC } from "@/trpc/client";
 import { getColorFromName } from "@/utils/categories";
-import { createClient } from "@midday/supabase/client";
-import { getCategoriesQuery } from "@midday/supabase/queries";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
 import { Spinner } from "@midday/ui/spinner";
-import { useAction } from "next-safe-action/hooks";
-import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CategoryColor } from "./category";
 
 type Selected = {
   id: string;
   name: string;
-  color: string;
+  color: string | null;
   slug: string;
 };
 
@@ -21,14 +17,21 @@ type Props = {
   onChange: (selected: Selected) => void;
   headless?: boolean;
   hideLoading?: boolean;
-  uncategorized?: boolean;
 };
 
-function transformCategory(category) {
+function transformCategory(category: {
+  id: string;
+  name: string;
+  color: string | null;
+  slug: string;
+  description: string | null;
+  system: boolean | null;
+  vat: number | null;
+}) {
   return {
     id: category.id,
     label: category.name,
-    color: category.color,
+    color: category.color ?? getColorFromName(category.name),
     slug: category.slug,
   };
 }
@@ -38,55 +41,33 @@ export function SelectCategory({
   onChange,
   headless,
   hideLoading,
-  uncategorized,
 }: Props) {
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const supabase = createClient();
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery(
+    trpc.transactionCategories.get.queryOptions(),
+  );
 
-  const { team_id: teamId } = useUserContext((state) => state.data);
+  const categories = data?.map(transformCategory) ?? [];
 
-  useEffect(() => {
-    async function fetchData() {
-      const response = await getCategoriesQuery(supabase, {
-        teamId,
-        limit: 1000,
-      });
+  const createCategoryMutation = useMutation(
+    trpc.transactionCategories.create.mutationOptions({
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactionCategories.get.queryKey(),
+        });
 
-      if (response.data) {
-        setData([
-          ...response.data.map(transformCategory),
-          ...(uncategorized
-            ? [
-                {
-                  id: "uncategorized",
-                  label: "Uncategorized",
-                  color: "#606060",
-                  slug: "uncategorized",
-                },
-              ]
-            : []),
-        ]);
-      }
-
-      setIsLoading(false);
-    }
-
-    if (!data.length) {
-      fetchData();
-    }
-  }, [data]);
-
-  const createCategories = useAction(createCategoriesAction, {
-    onSuccess: ({ data }) => {
-      const category = data?.at(0);
-
-      if (category) {
-        setData((prev) => [transformCategory(category), ...prev]);
-        onChange(category);
-      }
-    },
-  });
+        if (data) {
+          onChange({
+            id: data.id,
+            name: data.name,
+            color: data.color,
+            slug: data.slug,
+          });
+        }
+      },
+    }),
+  );
 
   const selectedValue = selected ? transformCategory(selected) : undefined;
 
@@ -101,10 +82,10 @@ export function SelectCategory({
   return (
     <ComboboxDropdown
       headless={headless}
-      disabled={createCategories.status === "executing"}
+      disabled={createCategoryMutation.isPending}
       placeholder="Select category"
       searchPlaceholder="Search category"
-      items={data}
+      items={categories}
       selectedItem={selectedValue}
       onSelect={(item) => {
         onChange({
@@ -116,13 +97,9 @@ export function SelectCategory({
       }}
       {...(!headless && {
         onCreate: (value) => {
-          createCategories.execute({
-            categories: [
-              {
-                name: value,
-                color: getColorFromName(value),
-              },
-            ],
+          createCategoryMutation.mutate({
+            name: value,
+            color: getColorFromName(value),
           });
         },
       })}

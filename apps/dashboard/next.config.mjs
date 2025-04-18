@@ -1,12 +1,3 @@
-import "./src/env.mjs";
-
-import bundleAnalyzer from "@next/bundle-analyzer";
-import { withSentryConfig } from "@sentry/nextjs";
-
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-});
-
 /** @type {import("next").NextConfig} */
 const config = {
   poweredByHeader: false,
@@ -22,16 +13,14 @@ const config = {
     ],
   },
   transpilePackages: ["@midday/ui", "@midday/tailwind", "@midday/invoice"],
+  serverExternalPackages: ["pdf-to-img", "@react-pdf/renderer"],
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    instrumentationHook: process.env.NODE_ENV === "production",
-    serverComponentsExternalPackages: ["@trigger.dev/sdk"],
-  },
+  devIndicators: false,
   async headers() {
     return [
       {
@@ -47,14 +36,4 @@ const config = {
   },
 };
 
-export default withSentryConfig(withBundleAnalyzer(config), {
-  silent: !process.env.CI,
-  telemetry: false,
-  widenClientFileUpload: true,
-  hideSourceMaps: true,
-  disableLogger: true,
-  tunnelRoute: "/monitoring",
-  sourcemaps: {
-    disable: true,
-  },
-});
+export default config;

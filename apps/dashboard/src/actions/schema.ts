@@ -1,38 +1,6 @@
 import { isValid } from "date-fns";
 import { z } from "zod";
 
-export const updateUserSchema = z.object({
-  full_name: z.string().min(2).max(32).optional(),
-  email: z.string().email().optional(),
-  avatar_url: z.string().url().optional(),
-  locale: z.string().optional(),
-  week_starts_on_monday: z.boolean().optional(),
-  timezone: z.string().optional(),
-  time_format: z.number().optional(),
-  date_format: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd"]).optional(),
-  revalidatePath: z.string().optional(),
-});
-
-export const createTagSchema = z.object({ name: z.string() });
-export const createTransactionTagSchema = z.object({
-  tagId: z.string(),
-  transactionId: z.string(),
-});
-
-export const deleteTagSchema = z.object({
-  id: z.string(),
-});
-
-export const updateTagSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-});
-
-export const deleteTransactionTagSchema = z.object({
-  tagId: z.string(),
-  transactionId: z.string(),
-});
-
 export const deleteProjectTagSchema = z.object({
   tagId: z.string(),
   projectId: z.string(),
@@ -42,8 +10,6 @@ export const createProjectTagSchema = z.object({
   tagId: z.string(),
   projectId: z.string(),
 });
-
-export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
 
 export const trackingConsentSchema = z.boolean();
 
@@ -67,10 +33,6 @@ export const updateTeamSchema = z.object({
 });
 
 export type UpdateTeamFormValues = z.infer<typeof updateTeamSchema>;
-
-export const subscribeSchema = z.object({
-  email: z.string().email(),
-});
 
 export const deleteBankAccountSchema = z.object({
   id: z.string().uuid(),
@@ -99,42 +61,6 @@ export const updateSubscriberPreferenceSchema = z.object({
   type: z.string(),
   enabled: z.boolean(),
 });
-
-export const changeSpendingPeriodSchema = z.object({
-  id: z.string(),
-  from: z.string().datetime(),
-  to: z.string().datetime(),
-});
-
-export const changeChartTypeSchema = z.enum([
-  "profit",
-  "revenue",
-  "expense",
-  "burn_rate",
-]);
-
-export const changeChartPeriodSchema = z.object({
-  from: z.string().optional(),
-  to: z.string().optional(),
-});
-
-export const changeTransactionsPeriodSchema = z.enum([
-  "all",
-  "income",
-  "expense",
-]);
-
-export const createAttachmentsSchema = z.array(
-  z.object({
-    path: z.array(z.string()),
-    name: z.string(),
-    size: z.number(),
-    transaction_id: z.string(),
-    type: z.string(),
-  }),
-);
-
-export const deleteAttachmentSchema = z.string();
 
 export const exportTransactionsSchema = z.array(z.string());
 
@@ -199,221 +125,13 @@ export const sendFeedbackSchema = z.object({
   feedback: z.string(),
 });
 
-export const updateTransactionSchema = z.object({
-  id: z.string().uuid(),
-  note: z.string().optional().nullable(),
-  category_slug: z.string().optional(),
-  tag_id: z.string().uuid().optional(),
-  assigned_id: z.string().uuid().optional(),
-  recurring: z.boolean().optional().nullable(),
-  frequency: z.enum(["weekly", "monthly", "annually"]).optional().nullable(),
-  status: z
-    .enum(["deleted", "excluded", "posted", "completed", "archived"])
-    .optional(),
-  internal: z.boolean().optional().nullable(),
-});
-
-export type UpdateTransactionValues = z.infer<typeof updateTransactionSchema>;
-
-export const deleteTransactionSchema = z.object({
-  ids: z.array(z.string()),
-});
-
-export const deleteCategoriesSchema = z.object({
-  ids: z.array(z.string()),
-  revalidatePath: z.string(),
-});
-
-export const bulkUpdateTransactionsSchema = z.object({
-  type: z.enum([
-    "category",
-    "note",
-    "assigned",
-    "status",
-    "recurring",
-    "tags",
-    "archive",
-  ]),
-  data: z.array(updateTransactionSchema),
-});
-
-export const updateSimilarTransactionsCategorySchema = z.object({
-  id: z.string(),
-});
-
-export const updateSimilarTransactionsRecurringSchema = z.object({
-  id: z.string(),
-});
-
-export const updaterMenuSchema = z.array(
-  z.object({
-    path: z.string(),
-    name: z.string(),
-  }),
-);
-
 export const changeTeamSchema = z.object({
   teamId: z.string(),
   redirectTo: z.string(),
 });
 
-export const createTeamSchema = z.object({
-  name: z.string().min(2, {
-    message: "Team name must be at least 2 characters.",
-  }),
-  redirectTo: z.string().optional(),
-});
-
-export const changeUserRoleSchema = z.object({
-  userId: z.string(),
-  teamId: z.string(),
-  role: z.enum(["owner", "member"]),
-  revalidatePath: z.string().optional(),
-});
-
-export const deleteTeamMemberSchema = z.object({
-  userId: z.string(),
-  teamId: z.string(),
-  revalidatePath: z.string().optional(),
-});
-
-export const leaveTeamSchema = z.object({
-  teamId: z.string(),
-  redirectTo: z.string().optional(),
-  role: z.enum(["owner", "member"]),
-  revalidatePath: z.string().optional(),
-});
-
-export const deleteTeamSchema = z.object({
-  teamId: z.string(),
-});
-
-export const inviteTeamMembersSchema = z.object({
-  invites: z.array(
-    z.object({
-      email: z.string().email().optional(),
-      role: z.enum(["owner", "member"]),
-    }),
-  ),
-  redirectTo: z.string().optional(),
-  revalidatePath: z.string().optional(),
-});
-
-export type InviteTeamMembersFormValues = z.infer<
-  typeof inviteTeamMembersSchema
->;
-
-export const createCategoriesSchema = z.object({
-  categories: z.array(
-    z.object({
-      name: z.string().optional(),
-      description: z.string().optional(),
-      color: z.string().optional(),
-      vat: z.string().optional(),
-    }),
-  ),
-});
-
-export type CreateCategoriesFormValues = z.infer<typeof createCategoriesSchema>;
-
-export const updateCategorySchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(1),
-  color: z.string(),
-  description: z.string().optional().nullable(),
-  vat: z.string().optional().nullable(),
-});
-
-export type UpdateCategoriesFormValues = z.infer<typeof updateCategorySchema>;
-
-export const deleteInviteSchema = z.object({
-  id: z.string(),
-  revalidatePath: z.string().optional(),
-});
-
-export const acceptInviteSchema = z.object({
-  id: z.string(),
-  revalidatePath: z.string().optional(),
-});
-
-export const declineInviteSchema = z.object({
-  id: z.string(),
-  revalidatePath: z.string().optional(),
-});
-
-export const inboxFilterSchema = z.enum(["done", "todo", "all"]);
-
-export const updateInboxSchema = z.object({
-  id: z.string(),
-  status: z.enum(["deleted", "pending"]).optional(),
-  display_name: z.string().optional(),
-  amount: z.string().optional(),
-  currency: z.string().optional(),
-  transaction_id: z.string().nullable().optional(),
-});
-
-export type UpdateInboxFormValues = z.infer<typeof updateInboxSchema>;
-
-export const createProjectSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-  estimate: z.number().optional(),
-  billable: z.boolean().optional().default(false),
-  rate: z.number().min(1).optional(),
-  currency: z.string().optional(),
-  status: z.enum(["in_progress", "completed"]).optional(),
-  customer_id: z.string().uuid().nullable().optional(),
-  tags: z
-    .array(
-      z.object({
-        id: z.string().uuid(),
-        value: z.string(),
-      }),
-    )
-    .optional()
-    .nullable(),
-});
-
-export const updateProjectSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(1).optional(),
-  description: z.string().optional(),
-  estimate: z.number().optional(),
-  billable: z.boolean().optional().default(false),
-  rate: z.number().min(1).optional(),
-  currency: z.string().optional(),
-  status: z.enum(["in_progress", "completed"]).optional(),
-  customer_id: z.string().uuid().nullable().optional(),
-  tags: z
-    .array(
-      z.object({
-        id: z.string().uuid(),
-        value: z.string(),
-      }),
-    )
-    .optional()
-    .nullable(),
-});
-
-export const deleteProjectSchema = z.object({
-  id: z.string().uuid(),
-});
-
 export const deleteEntriesSchema = z.object({
   id: z.string().uuid(),
-});
-
-export const createReportSchema = z.object({
-  baseUrl: z.string().url(),
-  from: z.string(),
-  to: z.string(),
-  type: changeChartTypeSchema,
-  expiresAt: z.string().datetime().optional(),
-});
-
-export const createProjectReportSchema = z.object({
-  baseUrl: z.string().url(),
-  projectId: z.string().uuid(),
 });
 
 export const updateEntriesSchema = z.object({
@@ -467,14 +185,6 @@ export const verifyOtpSchema = z.object({
   email: z.string(),
 });
 
-export const searchSchema = z.object({
-  query: z.string().min(1),
-  type: z.enum(["inbox", "categories"]),
-  limit: z.number().optional(),
-});
-
-export const inboxOrder = z.boolean();
-
 export const getVatRateSchema = z.object({
   name: z.string().min(2),
 });
@@ -482,34 +192,6 @@ export const getVatRateSchema = z.object({
 export const createBankAccountSchema = z.object({
   name: z.string(),
   currency: z.string().optional(),
-});
-
-export const createTransactionsSchema = z.object({
-  accountId: z.string().uuid(),
-  currency: z.string(),
-  transactions: z.array(
-    z.object({
-      internal_id: z.string(),
-      bank_account_id: z.string().uuid(),
-      date: z.coerce.date(),
-      name: z.string(),
-      amount: z.number(),
-      currency: z.string(),
-      team_id: z.string(),
-      status: z.enum(["posted"]),
-      method: z.enum(["other"]),
-      manual: z.boolean(),
-      category_slug: z.enum(["income"]).nullable(),
-    }),
-  ),
-});
-
-export type CreateTransactionsFormValues = z.infer<
-  typeof createTransactionsSchema
->;
-
-export const assistantSettingsSchema = z.object({
-  enabled: z.boolean().optional(),
 });
 
 export const parseDateSchema = z
@@ -598,62 +280,6 @@ export const filterInvoiceSchema = z.object({
     .optional()
     .describe("The customers to filter by"),
 });
-
-export const createTransactionSchema = z.object({
-  name: z.string(),
-  amount: z.number(),
-  currency: z.string(),
-  date: z.string(),
-  bank_account_id: z.string(),
-  assigned_id: z.string().optional(),
-  category_slug: z.string().optional(),
-  note: z.string().optional(),
-  attachments: z
-    .array(
-      z.object({
-        path: z.array(z.string()),
-        name: z.string(),
-        size: z.number(),
-        type: z.string(),
-      }),
-    )
-    .optional(),
-});
-
-export type CreateTransactionSchema = z.infer<typeof createTransactionSchema>;
-
-export const createCustomerSchema = z.object({
-  id: z.string().uuid().optional(),
-  name: z.string(),
-  email: z.string().email(),
-  country: z.string().nullable().optional(),
-  address_line_1: z.string().nullable().optional(),
-  address_line_2: z.string().nullable().optional(),
-  city: z.string().nullable().optional(),
-  state: z.string().nullable().optional(),
-  zip: z.string().nullable().optional(),
-  note: z.string().nullable().optional(),
-  website: z.string().nullable().optional(),
-  phone: z.string().nullable().optional(),
-  contact: z.string().nullable().optional(),
-  tags: z
-    .array(
-      z.object({
-        id: z.string().uuid(),
-        value: z.string(),
-      }),
-    )
-    .optional()
-    .nullable(),
-});
-
-export const inboxUploadSchema = z.array(
-  z.object({
-    mimetype: z.string(),
-    size: z.number(),
-    file_path: z.array(z.string()),
-  }),
-);
 
 export const deleteConnectionSchema = z.object({
   connectionId: z.string(),

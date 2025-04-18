@@ -1,9 +1,7 @@
 "use client";
 
-import { deleteCustomerAction } from "@/actions/delete-customer-action";
 import { useCustomerParams } from "@/hooks/use-customer-params";
-import { createClient } from "@midday/supabase/client";
-import { getCustomerQuery } from "@midday/supabase/queries";
+import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,43 +21,43 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
-import { useAction } from "next-safe-action/hooks";
-import React, { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CustomerForm } from "../forms/customer-form";
-import type { Customer } from "../invoice/customer-details";
 
 export function CustomerEditSheet() {
-  const [customer, setCustomer] = useState<Customer | null>(null);
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { setParams, customerId } = useCustomerParams();
 
   const isOpen = Boolean(customerId);
-  const supabase = createClient();
 
-  const deleteCustomer = useAction(deleteCustomerAction, {
-    onSuccess: () => {
-      setParams({
-        customerId: null,
-      });
-    },
-  });
+  const { data: customer } = useQuery(
+    trpc.customers.getById.queryOptions(
+      { id: customerId! },
+      {
+        enabled: isOpen,
+        staleTime: 60 * 1000,
+        initialData: () => {
+          const pages = queryClient
+            .getQueriesData({ queryKey: trpc.customers.get.infiniteQueryKey() })
+            .flatMap(([, data]) => data?.pages ?? [])
+            .flatMap((page) => page.data ?? []);
 
-  useEffect(() => {
-    async function fetchCustomer() {
-      if (customerId) {
-        const { data } = await getCustomerQuery(supabase, customerId);
+          return pages.find((d) => d.id === customerId);
+        },
+      },
+    ),
+  );
 
-        if (data) {
-          setCustomer(data as Customer);
-        }
-      }
-    }
-
-    if (customerId) {
-      fetchCustomer();
-    } else {
-      setCustomer(null);
-    }
-  }, [customerId, supabase]);
+  const deleteCustomerMutation = useMutation(
+    trpc.customers.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.customers.get.infiniteQueryKey(),
+        });
+      },
+    }),
+  );
 
   return (
     <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
@@ -99,7 +97,7 @@ export function CustomerEditSheet() {
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() =>
-                          deleteCustomer.execute({ id: customerId })
+                          deleteCustomerMutation.mutate({ id: customerId })
                         }
                       >
                         Delete
@@ -112,7 +110,7 @@ export function CustomerEditSheet() {
           )}
         </SheetHeader>
 
-        <CustomerForm data={customer} />
+        <CustomerForm data={customer} key={customer?.id} />
       </SheetContent>
     </Sheet>
   );

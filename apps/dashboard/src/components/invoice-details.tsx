@@ -1,3 +1,5 @@
+import { getUrl } from "@/utils/environment";
+import { getWebsiteLogo } from "@/utils/logos";
 import { createClient } from "@midday/supabase/client";
 import { getInvoiceQuery } from "@midday/supabase/queries";
 import {
@@ -132,7 +134,7 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
           <Avatar className="size-5">
             {customer?.website && (
               <AvatarImageNext
-                src={`https://img.logo.dev/${customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                src={getWebsiteLogo(customer?.website)}
                 alt={`${customer?.name} logo`}
                 width={20}
                 height={20}
@@ -233,10 +235,10 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
           <span className="text-sm text-[#606060]">Invoice link</span>
           <div className="flex w-full gap-2">
             <div className="flex-1 min-w-0 relative">
-              <CopyInput value={`${window.location.origin}/i/${token}`} />
+              <CopyInput value={`${getUrl()}/i/${token}`} />
 
               <div className="absolute right-9 top-[11px]">
-                <OpenURL href={`${window.location.origin}/i/${token}`}>
+                <OpenURL href={`${getUrl()}/i/${token}`}>
                   <Icons.OpenInNew />
                 </OpenURL>
               </div>

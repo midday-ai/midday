@@ -2,7 +2,6 @@ import { ArchiveIcon } from "@radix-ui/react-icons";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiGithub } from "react-icons/fi";
 import {
-  MdAdd,
   MdAddLink,
   MdArrowBack,
   MdArrowLeft,
@@ -11,7 +10,6 @@ import {
   MdArrowUpward,
   MdAttachMoney,
   MdAutoAwesome,
-  MdBarChart,
   MdChangeHistory,
   MdChevronLeft,
   MdChevronRight,
@@ -42,8 +40,8 @@ import {
   MdMoreHoriz,
   MdOutlineAccountBalance,
   MdOutlineAccountCircle,
+  MdOutlineAdd,
   MdOutlineApps,
-  MdOutlineArchive,
   MdOutlineArrowDownward,
   MdOutlineArrowForward,
   MdOutlineArrowOutward,
@@ -582,18 +580,6 @@ export const Icons = {
       <path d="M760-120q-39 0-70-22.5T647-200H440q-66 0-113-47t-47-113q0-66 47-113t113-47h80q33 0 56.5-23.5T600-600q0-33-23.5-56.5T520-680H313q-13 35-43.5 57.5T200-600q-50 0-85-35t-35-85q0-50 35-85t85-35q39 0 69.5 22.5T313-760h207q66 0 113 47t47 113q0 66-47 113t-113 47h-80q-33 0-56.5 23.5T360-360q0 33 23.5 56.5T440-280h207q13-35 43.5-57.5T760-360q50 0 85 35t35 85q0 50-35 85t-85 35ZM200-680q17 0 28.5-11.5T240-720q0-17-11.5-28.5T200-760q-17 0-28.5 11.5T160-720q0 17 11.5 28.5T200-680Z" />
     </svg>
   ),
-  CreateTransaction: (props: any) => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={props.size ?? 24}
-      height={props.size ?? 24}
-      fill="currentColor"
-      viewBox="0 -960 960 960"
-      {...props}
-    >
-      <path d="M640-121v-120H520v-80h120v-120h80v120h120v80H720v120h-80ZM160-240v-80h283q-3 21-2.5 40t3.5 40H160Zm0-160v-80h386q-23 16-41.5 36T472-400H160Zm0-160v-80h600v80H160Zm0-160v-80h600v80H160Z" />
-    </svg>
-  ),
   Import: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -649,6 +635,85 @@ export const Icons = {
       <path d="m720-80-56-56 63-64H480v-80h247l-63-64 56-56 160 160L720-80ZM80-440v-120h120v120H80Zm300 0q-58 0-99-41t-41-99v-160q0-58 41-99t99-41q58 0 99 41t41 99v160q0 58-41 99t-99 41Zm360 0q-58 0-99-41t-41-99v-160q0-58 41-99t99-41q58 0 99 41t41 99v160q0 58-41 99t-99 41Zm-360-80q25 0 42.5-17.5T440-580v-160q0-25-17.5-42.5T380-800q-25 0-42.5 17.5T320-740v160q0 25 17.5 42.5T380-520Zm360 0q25 0 42.5-17.5T800-580v-160q0-25-17.5-42.5T740-800q-25 0-42.5 17.5T680-740v160q0 25 17.5 42.5T740-520Z" />
     </svg>
   ),
+  Gmail: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      viewBox="0 0 48 48"
+      {...props}
+    >
+      <path
+        fill="#4caf50"
+        d="m45 16.2-5 2.75-5 4.75V40h7a3 3 0 0 0 3-3V16.2z"
+      />
+      <path
+        fill="#1e88e5"
+        d="m3 16.2 3.614 1.71L13 23.7V40H6a3 3 0 0 1-3-3V16.2z"
+      />
+      <path
+        fill="#e53935"
+        d="m35 11.2-11 8.25-11-8.25-1 5.8 1 6.7 11 8.25 11-8.25 1-6.7z"
+      />
+      <path
+        fill="#c62828"
+        d="M3 12.298V16.2l10 7.5V11.2L9.876 8.859A4.298 4.298 0 0 0 3 12.298z"
+      />
+      <path
+        fill="#fbc02d"
+        d="M45 12.298V16.2l-10 7.5V11.2l3.124-2.341A4.298 4.298 0 0 1 45 12.298z"
+      />
+    </svg>
+  ),
+  Outlook: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      viewBox="0 0 48 48"
+      {...props}
+    >
+      <path
+        fill="#1a237e"
+        d="m43.607 23.752-7.162-4.172v11.594H44v-6.738a.793.793 0 0 0-.393-.684z"
+      />
+      <path
+        fill="#0c4999"
+        d="M33.919 8.84h9.046V7.732c0-.957-.775-1.732-1.731-1.732H17.667c-.956 0-1.732.775-1.732 1.732V8.84h17.984z"
+      />
+      <path
+        fill="#0f73d9"
+        d="M33.919 33.522h7.314c.956 0 1.732-.775 1.732-1.732v-6.827h-9.046v8.559z"
+      />
+      <path
+        fill="#0f439d"
+        d="M15.936 24.964v6.827c0 .956.775 1.732 1.732 1.732h7.273v-8.558h-9.005z"
+      />
+      <path fill="#2ecdfd" d="M33.919 8.84h9.046v8.027h-9.046z" />
+      <path fill="#1c5fb0" d="M15.936 8.84h9.005v8.027h-9.005z" />
+      <path fill="#1467c7" d="M24.94 24.964h8.979v8.558H24.94z" />
+      <path fill="#1690d5" d="M24.94 8.84h8.979v8.027H24.94z" />
+      <path fill="#1bb4ff" d="M33.919 16.867h9.046v8.096h-9.046z" />
+      <path fill="#074daf" d="M15.936 16.867h9.005v8.096h-9.005z" />
+      <path fill="#2076d4" d="M24.94 16.867h8.979v8.096H24.94z" />
+      <path
+        fill="#2ed0ff"
+        d="M15.441 42h26.87c.933 0 1.689-.756 1.689-1.689V24.438s-.03.658-1.751 1.617c-1.3.724-27.505 15.511-27.505 15.511s.234.434.697.434z"
+      />
+      <path
+        fill="#139fe2"
+        d="M42.279 41.997 15.689 42A1.689 1.689 0 0 1 14 40.311V25.067l29.363 16.562c-.245.196-.556.368-1.084.368z"
+      />
+      <path
+        fill="#00488d"
+        d="M22.319 34H5.681A1.682 1.682 0 0 1 4 32.319V15.681C4 14.753 4.753 14 5.681 14h16.638c.928 0 1.681.753 1.681 1.681v16.638c0 .928-.753 1.681-1.681 1.681z"
+      />
+      <path
+        fill="#fff"
+        d="M13.914 18.734c-3.131 0-5.017 2.392-5.017 5.343s1.879 5.342 5.017 5.342c3.139 0 5.017-2.392 5.017-5.342 0-2.951-1.886-5.343-5.017-5.343zm0 8.882c-1.776 0-2.838-1.584-2.838-3.539s1.067-3.539 2.838-3.539c1.771 0 2.839 1.585 2.839 3.539s-1.064 3.539-2.839 3.539z"
+      />
+    </svg>
+  ),
   Fence: MdFence,
   Refresh: MdRefresh,
   Currency: MdAttachMoney,
@@ -699,7 +764,7 @@ export const Icons = {
   Tracker: MdOutlineTimer,
   Time: MdOutlineMoreTime,
   WorkInProgress: MdOutlineHandyman,
-  Add: MdAdd,
+  Add: MdOutlineAdd,
   DashboardCustomize: MdOutlineDashboardCustomize,
   Copy: MdOutlineContentCopy,
   InboxEmpty: MdOutlineMoveToInbox,

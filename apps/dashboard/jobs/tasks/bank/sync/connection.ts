@@ -1,7 +1,6 @@
 import { client } from "@midday/engine/client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
-import { revalidateCache } from "jobs/utils/revalidate-cache";
 import { triggerSequenceAndWait } from "jobs/utils/trigger-sequence";
 import { z } from "zod";
 import { transactionNotifications } from "../notifications/transactions";
@@ -145,9 +144,6 @@ export const syncConnection = schemaTask({
             error,
           });
         }
-
-        // Revalidate the bank cache (transactions, accounts, connections)
-        await revalidateCache({ tag: "bank", id: data.team_id });
       }
 
       if (connectionData.status === "disconnected") {

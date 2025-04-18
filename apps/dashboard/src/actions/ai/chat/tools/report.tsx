@@ -40,7 +40,7 @@ export function createReport({
     generate: async (args) => {
       const { currency, startDate, endDate, type, expiresAt } = args;
 
-      const supabase = createClient();
+      const supabase = await createClient();
 
       const { data } = await supabase
         .from("reports")

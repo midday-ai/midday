@@ -22,38 +22,38 @@ function getUIComponentFromMessage(message) {
   }
 
   if (message.role === "tool") {
-    return message.content.map((tool) => {
+    return message.content.map((tool, idx) => {
       switch (tool.toolName) {
         case "getRunway": {
-          return <RunwayUI {...tool.result} />;
+          return <RunwayUI {...tool.result} key={idx.toString()} />;
         }
 
         case "getBurnRate": {
-          return <BurnRateUI {...tool.result} />;
+          return <BurnRateUI {...tool.result} key={idx.toString()} />;
         }
 
         case "getSpending": {
-          return <SpendingUI {...tool.result} />;
+          return <SpendingUI {...tool.result} key={idx.toString()} />;
         }
 
         case "getTransactions": {
-          return <TransactionsUI {...tool.result} />;
+          return <TransactionsUI {...tool.result} key={idx.toString()} />;
         }
 
         case "getDocuments": {
-          return <DocumentsUI {...tool.result} />;
+          return <DocumentsUI {...tool.result} key={idx.toString()} />;
         }
 
         case "createReport": {
-          return <ReportUI {...tool.result} />;
+          return <ReportUI {...tool.result} key={idx.toString()} />;
         }
 
         case "getProfit": {
-          return <ProfitUI {...tool.result} />;
+          return <ProfitUI {...tool.result} key={idx.toString()} />;
         }
 
         case "getRevenue": {
-          return <RevenueUI {...tool.result} />;
+          return <RevenueUI {...tool.result} key={idx.toString()} />;
         }
 
         default:

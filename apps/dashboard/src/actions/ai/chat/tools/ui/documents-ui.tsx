@@ -1,15 +1,14 @@
 "use client";
 
 import { BotCard } from "@/components/chat/messages";
-import { FilePreview } from "@/components/file-preview";
-import type { FileType } from "@midday/utils";
+import { FileViewer } from "@/components/file-viewer";
 
 type Document = {
   id: string;
   display_name: string;
   size: number;
   file_path: string[];
-  content_type: FileType;
+  content_type: string;
 };
 
 type Props = {
@@ -34,23 +33,11 @@ export function DocumentsUI({ data }: Props) {
 
       <div className="w-full overflow-auto space-x-4 flex scrollbar-hide max-w-[671px] pr-4">
         {data?.map((item) => {
-          const filename = item.file_path?.at(-1);
-          const [, ...rest] = item.file_path;
-          // Without team_id
-          const downloadPath = rest.join("/");
-
           return (
             <div key={item.id}>
-              <FilePreview
-                width={150}
-                height={198}
-                preview
-                disableFullscreen
-                name={item.display_name}
-                type={item.content_type}
-                download
-                downloadUrl={`/api/download/file?path=${downloadPath}&filename=${filename}`}
-                src={`/api/proxy?filePath=vault/${item?.file_path?.join("/")}`}
+              <FileViewer
+                mimeType={item.content_type}
+                url={`/api/proxy?filePath=vault/${item?.file_path?.join("/")}`}
               />
             </div>
           );

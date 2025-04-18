@@ -1,4 +1,3 @@
-import type { DocumentFieldOutput } from "@azure-rest/ai-document-intelligence";
 import type { Attachments } from "./types";
 
 export const allowedMimeTypes = [
@@ -16,29 +15,6 @@ export function getAllowedAttachments(attachments?: Attachments) {
   );
 }
 
-export function getCurrency(field?: DocumentFieldOutput) {
-  return field?.valueCurrency?.currencyCode ?? "USD";
-}
-
-export function extractRootDomain(content?: string) {
-  const domainPattern =
-    /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})(?:\/|$)/g;
-
-  const match = content?.match(domainPattern);
-
-  if (!match) {
-    return null;
-  }
-
-  const matchWithoutProtocol = match
-    .at(0)
-    ?.replace(/(?:https?:\/\/)?(?:www\.)?/, "");
-
-  const rootDomain = matchWithoutProtocol?.split("/").at(0);
-
-  return rootDomain;
-}
-
 export function getDomainFromEmail(email?: string | null): string | null {
   const emailPattern = /^[^\s@]+@([^\s@]+)$/;
   const match = email?.match(emailPattern);
@@ -53,4 +29,20 @@ export function getDomainFromEmail(email?: string | null): string | null {
   }
 
   return domain;
+}
+
+export function removeProtocolFromDomain(domain: string | null): string | null {
+  if (!domain) return null;
+
+  return domain.replace(/^(https?:\/\/)/, "");
+}
+
+export function getDocumentTypeFromMimeType(mimetype: string): string {
+  switch (mimetype) {
+    case "application/pdf":
+    case "application/octet-stream":
+      return "invoice";
+    default:
+      return "receipt";
+  }
 }

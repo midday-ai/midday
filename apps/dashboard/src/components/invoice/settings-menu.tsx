@@ -20,6 +20,7 @@ const dateFormats = [
   { value: "dd/MM/yyyy", label: "DD/MM/YYYY" },
   { value: "MM/dd/yyyy", label: "MM/DD/YYYY" },
   { value: "yyyy-MM-dd", label: "YYYY-MM-DD" },
+  { value: "DD.MM.YYYY", label: "DD.MM.YYYY" },
 ];
 
 const invoiceSizes = [

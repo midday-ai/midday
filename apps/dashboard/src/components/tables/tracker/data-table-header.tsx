@@ -1,36 +1,30 @@
 "use client";
 
+import { useSortParams } from "@/hooks/use-sort-params";
 import { Button } from "@midday/ui/button";
 import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
 
 export function DataTableHeader() {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
-  const [column, value] = searchParams.get("sort")
-    ? searchParams.get("sort")?.split(":")
-    : [];
+  const { params, setParams } = useSortParams();
 
-  const createSortQuery = useCallback(
-    (name: string) => {
-      const params = new URLSearchParams(searchParams);
-      const prevSort = params.get("sort");
+  const [column, value] = params.sort || [];
 
-      if (`${name}:asc` === prevSort) {
-        params.set("sort", `${name}:desc`);
-      } else if (`${name}:desc` === prevSort) {
-        params.delete("sort");
+  const createSortQuery = (name: string) => {
+    const [currentColumn, currentValue] = params.sort || [];
+
+    if (name === currentColumn) {
+      if (currentValue === "asc") {
+        setParams({ sort: [name, "desc"] });
+      } else if (currentValue === "desc") {
+        setParams({ sort: null });
       } else {
-        params.set("sort", `${name}:asc`);
+        setParams({ sort: [name, "asc"] });
       }
-
-      router.replace(`${pathname}?${params.toString()}`);
-    },
-    [searchParams, router, pathname],
-  );
+    } else {
+      setParams({ sort: [name, "asc"] });
+    }
+  };
 
   return (
     <TableHeader>
@@ -71,7 +65,7 @@ export function DataTableHeader() {
             {"time" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead className="w-[160px]">
+        <TableHead className="w-[190px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"

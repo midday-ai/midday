@@ -1,6 +1,6 @@
 "use client";
 
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount } from "@/utils/format";
 import { format } from "date-fns";
 import React from "react";
@@ -20,7 +20,7 @@ type ToolTipContentProps = {
 
 const ToolTipContent = ({ payload }: ToolTipContentProps) => {
   const { value = 0, date, currency } = payload.at(0)?.payload ?? {};
-  const { locale } = useUserContext((state) => state.data);
+  const { data: user } = useUserQuery();
 
   return (
     <div className="w-[240px] border shadow-sm bg-background">
@@ -32,7 +32,7 @@ const ToolTipContent = ({ payload }: ToolTipContentProps) => {
               minimumFractionDigits: 0,
               currency,
               amount: value,
-              locale,
+              locale: user?.locale,
             })}
           </p>
           <p className="text-xs text-[#606060] text-right">

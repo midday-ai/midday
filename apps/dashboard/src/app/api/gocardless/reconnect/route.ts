@@ -4,9 +4,6 @@ import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
-export const preferredRegion = ["fra1", "sfo1", "iad1"];
-
 export async function GET(req: NextRequest) {
   const {
     data: { session },
@@ -16,7 +13,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const requestUrl = new URL(req.url);
   const id = requestUrl.searchParams.get("id");
   const referenceId = requestUrl.searchParams.get("reference_id") ?? undefined;

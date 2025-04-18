@@ -175,18 +175,12 @@ export function ConnectTransactionsModal({
   });
 
   const handleOnClose = () => {
-    setParams(
-      {
-        step: null,
-        countryCode: null,
-        q: null,
-        ref: null,
-      },
-      {
-        // NOTE: Rerender so the overview modal is visible
-        shallow: false,
-      },
-    );
+    setParams({
+      step: null,
+      countryCode: null,
+      q: null,
+      ref: null,
+    });
   };
 
   async function fetchData(query?: string) {
@@ -196,7 +190,7 @@ export function ConnectTransactionsModal({
       const response = await getInstitutions({ countryCode, query });
       setLoading(false);
 
-      setResults(response.data || []);
+      setResults(response?.data || []);
     } catch {
       setLoading(false);
       setResults([]);

@@ -1,10 +1,8 @@
 "use client";
 
-import { useUserContext } from "@/store/user/hook";
-import { createClient } from "@midday/supabase/client";
-import { getTeamMembersQuery } from "@midday/supabase/queries";
+import { useTRPC } from "@/trpc/client";
 import { Spinner } from "@midday/ui/spinner";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AssignedUser } from "./assigned-user";
 
 type User = {
@@ -14,35 +12,14 @@ type User = {
 };
 
 type Props = {
-  selectedId?: string;
   onSelect: (selected: User) => void;
 };
 
-export function SelectUser({ selectedId, onSelect }: Props) {
-  const [value, setValue] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const supabase = createClient();
-  const [users, setUsers] = useState<User[]>([]);
+export function SelectUser({ onSelect }: Props) {
+  const trpc = useTRPC();
+  const { data: users, isLoading } = useQuery(trpc.team.members.queryOptions());
 
-  const { team_id: teamId } = useUserContext((state) => state.data);
-
-  useEffect(() => {
-    setValue(selectedId);
-  }, [selectedId]);
-
-  useEffect(() => {
-    async function getUsers() {
-      const { data: membersData } = await getTeamMembersQuery(supabase, teamId);
-
-      setUsers(membersData?.map(({ user }) => user));
-      setIsLoading(false);
-    }
-
-    setIsLoading(true);
-    getUsers();
-  }, [supabase]);
-
-  if (!selectedId && isLoading) {
+  if (isLoading) {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <Spinner />
@@ -50,7 +27,7 @@ export function SelectUser({ selectedId, onSelect }: Props) {
     );
   }
 
-  return users.map((user) => {
+  return users?.map(({ user }) => {
     return (
       <button
         type="button"

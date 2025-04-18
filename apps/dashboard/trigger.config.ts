@@ -16,7 +16,7 @@ export default defineConfig({
     },
   },
   build: {
-    external: ["sharp"],
+    external: ["sharp", "canvas"],
   },
   dirs: ["./jobs/tasks"],
 });
