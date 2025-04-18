@@ -3,10 +3,6 @@ export function getUrl() {
     return process.env.NEXT_PUBLIC_URL;
   }
 
-  if (process.env.VERCEL_TARGET_ENV === "beta") {
-    return "https://beta.midday.ai";
-  }
-
   if (process.env.VERCEL_TARGET_ENV === "preview") {
     return `https://${process.env.VERCEL_URL}`;
   }
