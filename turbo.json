@@ -33,7 +33,15 @@
         "OPENPANEL_SECRET_KEY",
         "SLACK_CLIENT_SECRET",
         "SLACK_CLIENT_ID",
-        "SLACK_SIGNING_SECRET"
+        "SLACK_SIGNING_SECRET",
+        "NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL",
+        "GMAIL_CLIENT_ID",
+        "GMAIL_CLIENT_SECRET",
+        "GMAIL_REDIRECT_URI",
+        "OUTLOOK_CLIENT_ID",
+        "OUTLOOK_CLIENT_SECRET",
+        "OUTLOOK_REDIRECT_URI",
+        "MIDDAY_ENCRYPTION_KEY"
       ],
       "inputs": ["$TURBO_DEFAULT$", ".env"],
       "dependsOn": ["^build"],
