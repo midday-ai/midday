@@ -17,6 +17,9 @@ export const syncInboxAccount = schemaTask({
   queue: {
     concurrencyLimit: 10,
   },
+  machine: {
+    preset: "medium-1x",
+  },
   run: async (payload) => {
     const { id } = payload;
 
