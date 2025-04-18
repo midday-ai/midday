@@ -1,13 +1,15 @@
-import { AI } from "@/actions/ai/chat";
+// import { AI } from "@/actions/ai/chat";
 import { ExportStatus } from "@/components/export-status";
 import { Header } from "@/components/header";
 import { GlobalSheets } from "@/components/sheets/global-sheets";
 import { Sidebar } from "@/components/sidebar";
-import { TrialEnded } from "@/components/trial-ended.server";
-import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
+// import { TrialEnded } from "@/components/trial-ended.server";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
+import { getTeamId } from "@/utils/team";
 import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode, getCurrency } from "@midday/location";
-import { nanoid } from "nanoid";
+// import { getSession } from "@midday/supabase/cached-queries";
+// import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -16,21 +18,21 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const queryClient = getQueryClient();
-
-  // NOTE: Right now we want to fetch the user and hydrate the client
-  // Next steps would be to prefetch and suspense
-  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
   const currencyPromise = getCurrency();
   const countryCodePromise = getCountryCode();
+  const team = await getTeamId();
 
-  if (!user?.team) {
+  prefetch(trpc.user.me.queryOptions());
+
+  if (!team) {
     redirect("/teams");
   }
 
-  if (user) {
-    await setupAnalytics({ userId: user.id });
-  }
+  // const user = await getSession();
+
+  // if (user.data.session) {
+  //   await setupAnalytics({ userId: user.data.session.user.id });
+  // }
 
   return (
     <HydrateClient>
@@ -38,31 +40,37 @@ export default async function Layout({
         {/* This is used to make the header draggable on macOS */}
         <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-4 pointer-events-none" />
 
-        <AI initialAIState={{ user, messages: [], chatId: nanoid() }}>
-          <Sidebar />
+        {/* <AI
+          initialAIState={{
+            user: user.data.session?.user ?? null,
+            messages: [],
+            chatId: nanoid(),
+          }}
+        > */}
+        <Sidebar />
 
-          <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
-            <Header />
-            {children}
-          </div>
+        <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
+          <Header />
+          {children}
+        </div>
 
-          <ExportStatus />
+        <ExportStatus />
 
-          <Suspense>
-            <GlobalSheets
-              currencyPromise={currencyPromise}
-              countryCodePromise={countryCodePromise}
-            />
-          </Suspense>
+        <Suspense>
+          <GlobalSheets
+            currencyPromise={currencyPromise}
+            countryCodePromise={countryCodePromise}
+          />
+        </Suspense>
 
-          <Suspense>
+        {/* <Suspense>
             <TrialEnded
               createdAt={user.team?.created_at}
               plan={user.team?.plan}
               teamId={user.team.id}
             />
-          </Suspense>
-        </AI>
+          </Suspense> */}
+        {/* </AI> */}
       </div>
     </HydrateClient>
   );

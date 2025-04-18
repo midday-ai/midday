@@ -1,8 +1,8 @@
 "use server";
 
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
+import { getTeamId } from "@/utils/team";
 import { openai } from "@ai-sdk/openai";
-import { getUser } from "@midday/supabase/cached-queries";
 import {
   createAI,
   createStreamableValue,
@@ -19,7 +19,7 @@ import { getDocumentsTool } from "./tools/get-documents";
 import { getInvoicesTool } from "./tools/get-invoces";
 import { getTransactionsTool } from "./tools/get-transactions";
 import { getProfitTool } from "./tools/profit";
-import { createReport } from "./tools/report";
+// import { createReport } from "./tools/report";
 import { getRevenueTool } from "./tools/revenue";
 import { getRunwayTool } from "./tools/runway";
 import { getSpendingTool } from "./tools/spending";
@@ -31,8 +31,7 @@ export async function submitUserMessage(
 
   const aiState = getMutableAIState<typeof AI>();
 
-  const user = await getUser();
-  const teamId = user?.data?.team_id as string;
+  const teamId = await getTeamId();
 
   const defaultValues = {
     from: subMonths(startOfMonth(new Date()), 12).toISOString(),
@@ -139,13 +138,13 @@ export async function submitUserMessage(
       getTransactions: getTransactionsTool({ aiState }),
       getInvoices: getInvoicesTool({ aiState, teamId }),
       getDocuments: getDocumentsTool({ aiState, teamId }),
-      createReport: createReport({
-        aiState,
-        userId: user?.data?.id ?? "",
-        teamId,
-        dateFrom: defaultValues.from,
-        dateTo: defaultValues.to,
-      }),
+      // createReport: createReport({
+      //   aiState,
+      //   userId: user?.data?.id ?? "",
+      //   teamId,
+      //   dateFrom: defaultValues.from,
+      //   dateTo: defaultValues.to,
+      // }),
     },
   });
 
@@ -164,9 +163,12 @@ async function handleAIStateUpdate({
   "use server";
 
   const createdAt = new Date();
-  const userId = state.user.id;
-  const teamId = state.user.team_id;
+  const teamId = await getTeamId();
   const { chatId, messages } = state;
+
+  if (!teamId) {
+    return;
+  }
 
   const firstMessageContent = messages?.at(0)?.content ?? "";
   const title =
@@ -177,7 +179,6 @@ async function handleAIStateUpdate({
   const chat: Chat = {
     id: chatId,
     title,
-    userId,
     createdAt,
     messages,
     teamId,

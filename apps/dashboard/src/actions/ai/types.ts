@@ -9,7 +9,6 @@ export interface Chat extends Record<string, unknown> {
   id: string;
   title: string;
   createdAt: Date;
-  userId: string;
   teamId: string;
   messages: Message[];
 }
@@ -27,7 +26,7 @@ export type User = {
 
 export type AIState = {
   chatId: string;
-  user: User;
+  user: User | null;
   messages: Message[];
 };
 
