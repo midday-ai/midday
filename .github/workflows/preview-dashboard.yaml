@@ -8,6 +8,7 @@ on:
   push:
     branches-ignore:
       - main
+      - beta
     paths:
       - apps/dashboard/**
       - packages/**
