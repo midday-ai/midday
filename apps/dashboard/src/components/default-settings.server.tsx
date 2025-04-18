@@ -5,11 +5,11 @@ import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 
 export async function DefaultSettings() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
-  const locale = getLocale();
-  const timezone = getTimezone();
-  const dateFormat = getDateFormat();
+  const locale = await getLocale();
+  const timezone = await getTimezone();
+  const dateFormat = await getDateFormat();
 
   try {
     const user = await getUser();

@@ -8,7 +8,7 @@ import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function signOutAction() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { session },
   } = await getSession();

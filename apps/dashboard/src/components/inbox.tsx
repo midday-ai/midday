@@ -11,7 +11,7 @@ type Props = {
 };
 
 export async function Inbox({ ascending, query, currencies }: Props) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
 
   const teamId = user?.data?.team_id as string;

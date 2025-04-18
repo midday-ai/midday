@@ -39,7 +39,7 @@ export const createProjectAction = authActionClient
         );
       }
 
-      cookies().set({
+      (await cookies()).set({
         name: Cookies.LastProject,
         value: data.id,
         expires: addYears(new Date(), 1),

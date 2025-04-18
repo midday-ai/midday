@@ -18,7 +18,7 @@ export function getDocumentsTool({ aiState, teamId }: Args) {
     }),
     generate: async (args) => {
       const { name } = args;
-      const supabase = createClient();
+      const supabase = await createClient();
 
       const { data } = await getVaultQuery(supabase, {
         teamId,

@@ -245,13 +245,6 @@ export const updateSimilarTransactionsRecurringSchema = z.object({
   id: z.string(),
 });
 
-export const updaterMenuSchema = z.array(
-  z.object({
-    path: z.string(),
-    name: z.string(),
-  }),
-);
-
 export const changeTeamSchema = z.object({
   teamId: z.string(),
   redirectTo: z.string(),

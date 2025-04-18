@@ -13,7 +13,7 @@ export function MFAListSkeleton() {
 }
 
 export async function MFAList() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data } = await supabase.auth.mfa.listFactors();
   const t = await getI18n();

@@ -7,7 +7,7 @@ import { createClient } from "@midday/supabase/server";
 import { DataTable } from "./table";
 
 export async function TeamsTable() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
 
   const [teams, invites] = await Promise.all([

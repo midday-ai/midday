@@ -11,12 +11,13 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export default async function InboxPage({ searchParams }: Props) {
+export default async function InboxPage(props: Props) {
+  const searchParams = await props.searchParams;
   const ascending =
-    cookies().get(Cookies.InboxOrder)?.value === "true" ?? false;
+    (await cookies()).get(Cookies.InboxOrder)?.value === "true" ?? false;
 
   return (
     <Suspense

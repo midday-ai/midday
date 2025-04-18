@@ -23,7 +23,7 @@ export function VaultWidgetHeader() {
 }
 
 export async function VaultWidget() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: userData } = await getUser();
 
   const { data: storageData } = await getVaultActivityQuery(

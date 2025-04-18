@@ -15,7 +15,7 @@ const defaultFolders = [
 ];
 
 export async function VaultActivity() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: userData } = await getUser();
 
   const { data: storageData } = await getVaultActivityQuery(

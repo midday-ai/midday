@@ -107,9 +107,9 @@ type UpdateTeamPlanData = {
 };
 
 export async function updateTeamPlan(teamId: string, data: UpdateTeamPlanData) {
-  const supabase = createClient({ admin: true });
+  const supabase = await createClient({ admin: true });
 
-  const { data: teamData, error } = await supabase
+  const { data: teamData } = await supabase
     .from("teams")
     .update(data)
     .eq("id", teamId)
@@ -135,7 +135,7 @@ export function getPlanByProductId(productId: string) {
 }
 
 export async function canChooseStarterPlanQuery(teamId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const [teamMembersResponse, bankConnectionsResponse] = await Promise.all([
     supabase.from("users_on_team").select("id").eq("team_id", teamId),

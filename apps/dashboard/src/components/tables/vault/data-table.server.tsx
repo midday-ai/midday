@@ -19,7 +19,7 @@ export async function DataTableServer({
   teamId,
 }: Props) {
   const parentId = folders.at(-1);
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data } = await getVaultQuery(supabase, {
     teamId,

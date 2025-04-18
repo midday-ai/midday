@@ -2,7 +2,7 @@ import { createClient } from "@midday/supabase/server";
 import { Apps } from "./apps";
 
 export async function AppsServer({ user }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data } = await supabase
     .from("apps")

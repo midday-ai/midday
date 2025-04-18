@@ -18,7 +18,7 @@ export const createTeamAction = authActionClient
     },
   })
   .action(async ({ parsedInput: { name, redirectTo }, ctx: { supabase } }) => {
-    const currency = getCurrency();
+    const currency = await getCurrency();
     const team_id = await createTeam(supabase, { name, currency });
     const user = await updateUser(supabase, { team_id });
 

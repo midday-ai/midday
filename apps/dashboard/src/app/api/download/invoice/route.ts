@@ -14,7 +14,7 @@ const paramsSchema = z.object({
 });
 
 export async function GET(req: NextRequest) {
-  const supabase = createClient({ admin: true });
+  const supabase = await createClient({ admin: true });
   const requestUrl = new URL(req.url);
 
   const result = paramsSchema.safeParse(

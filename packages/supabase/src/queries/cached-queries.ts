@@ -49,7 +49,7 @@ import {
 export const getTransactions = async (
   params: Omit<GetTransactionsParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -71,7 +71,7 @@ export const getTransactions = async (
 
 // Cache per request
 export const getSession = cache(async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   return supabase.auth.getSession();
 });
@@ -88,7 +88,7 @@ export const getUser = cache(async () => {
     return null;
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   return unstable_cache(
     async () => {
@@ -104,7 +104,7 @@ export const getUser = cache(async () => {
 });
 
 export const getTeamUser = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data } = await getUser();
 
   return unstable_cache(
@@ -123,7 +123,7 @@ export const getTeamUser = async () => {
 };
 
 export const getBankConnectionsByTeamId = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -146,7 +146,7 @@ export const getBankConnectionsByTeamId = async () => {
 export const getTeamBankAccounts = async (
   params?: Omit<GetTeamBankAccountsParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -168,7 +168,7 @@ export const getTeamBankAccounts = async (
 };
 
 export const getTeamMembers = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -192,7 +192,7 @@ export const getTeamMembers = async () => {
 export const getSpending = async (
   params: Omit<GetSpendingParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -213,7 +213,7 @@ export const getSpending = async (
 };
 
 export const getBankAccountsCurrencies = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -237,7 +237,7 @@ export const getBankAccountsCurrencies = async () => {
 };
 
 export const getMetrics = async (params: Omit<GetMetricsParams, "teamId">) => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -259,7 +259,7 @@ export const getMetrics = async (params: Omit<GetMetricsParams, "teamId">) => {
 };
 
 export const getExpenses = async (params: GetExpensesQueryParams) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -280,7 +280,7 @@ export const getExpenses = async (params: GetExpensesQueryParams) => {
 };
 
 export const getTeams = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getUser();
   const userId = user?.data?.id;
@@ -302,7 +302,7 @@ export const getTeams = async () => {
 };
 
 export const getTeamInvites = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -324,7 +324,7 @@ export const getTeamInvites = async () => {
 };
 
 export const getUserInvites = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const user = await getUser();
   const email = user?.data?.email;
@@ -344,7 +344,7 @@ export const getUserInvites = async () => {
 export const getTrackerProjects = async (
   params: Omit<GetTrackerProjectsQueryParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -363,7 +363,7 @@ export const getTrackerProjects = async (
 export const getTrackerRecordsByRange = async (
   params: Omit<GetTrackerRecordsByRangeParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -386,7 +386,7 @@ export const getTrackerRecordsByRange = async (
 export const getBurnRate = async (
   params: Omit<GetBurnRateQueryParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -405,7 +405,7 @@ export const getBurnRate = async (
 export const getRunway = async (
   params: Omit<GetRunwayQueryParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -424,7 +424,7 @@ export const getRunway = async (
 export const getCategories = async (
   params?: Omit<GetCategoriesParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -441,7 +441,7 @@ export const getCategories = async (
 };
 
 export const getTeamSettings = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -464,7 +464,7 @@ export const getTeamSettings = async () => {
 export const getInvoiceSummary = async (
   params?: Omit<GetInvoiceSummaryParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -481,7 +481,7 @@ export const getInvoiceSummary = async (
 };
 
 export const getPaymentStatus = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -504,7 +504,7 @@ export const getPaymentStatus = async () => {
 export const getCustomers = async (
   params?: Omit<GetCustomersQueryParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -527,7 +527,7 @@ export const getCustomers = async (
 export const getInvoices = async (
   params?: Omit<GetInvoicesQueryParams, "teamId">,
 ) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -548,7 +548,7 @@ export const getInvoices = async (
 };
 
 export const getInvoiceTemplates = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -569,7 +569,7 @@ export const getInvoiceTemplates = async () => {
 };
 
 export const getLastInvoiceNumber = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -590,7 +590,7 @@ export const getLastInvoiceNumber = async () => {
 };
 
 export const getTags = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -611,7 +611,7 @@ export const getTags = async () => {
 };
 
 export const getBankAccountsBalances = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 

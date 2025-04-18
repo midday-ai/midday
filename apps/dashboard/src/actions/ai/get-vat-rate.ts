@@ -13,7 +13,7 @@ export const getVatRateAction = authActionClient
     name: "get-vat-rate",
   })
   .action(async ({ parsedInput: { name } }) => {
-    const country = getCountry();
+    const country = await getCountry();
 
     const { object } = await generateObject({
       model: openai("gpt-4o-mini"),

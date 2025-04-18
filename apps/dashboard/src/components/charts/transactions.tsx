@@ -10,7 +10,7 @@ import {
 import { TransactionsPeriod } from "./transactions-period";
 
 export async function Transactions({ disabled }) {
-  const type = cookies().get("transactions-period")?.value ?? "all";
+  const type = (await cookies()).get("transactions-period")?.value ?? "all";
 
   return (
     <div className="border aspect-square overflow-hidden relative p-4 md:p-8">

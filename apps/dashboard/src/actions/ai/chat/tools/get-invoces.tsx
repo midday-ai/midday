@@ -18,7 +18,7 @@ export function getInvoicesTool({ aiState, teamId }: Args) {
     }),
     generate: async (args) => {
       const { name, amount } = args;
-      const supabase = createClient();
+      const supabase = await createClient();
 
       const searchQuery = name || amount;
 

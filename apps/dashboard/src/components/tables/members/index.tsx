@@ -4,7 +4,7 @@ import { createClient } from "@midday/supabase/server";
 import { DataTable } from "./table";
 
 export async function MembersTable() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const user = await getTeamUser();
   const teamMembers = await getTeamMembersQuery(supabase, user.data.team_id);
 

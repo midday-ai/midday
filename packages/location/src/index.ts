@@ -5,29 +5,35 @@ import { currencies } from "./currencies";
 import { EU_COUNTRY_CODES } from "./eu-countries";
 import timezones from "./timezones.json";
 
-export function getCountryCode() {
-  return headers().get("x-vercel-ip-country") || "SE";
+export async function getCountryCode() {
+  const headersList = await headers();
+
+  return headersList.get("x-vercel-ip-country") || "SE";
 }
 
-export function getTimezone() {
-  return headers().get("x-vercel-ip-timezone") || "Europe/Berlin";
+export async function getTimezone() {
+  const headersList = await headers();
+
+  return headersList.get("x-vercel-ip-timezone") || "Europe/Berlin";
 }
 
-export function getLocale() {
-  return headers().get("x-vercel-ip-locale") || "en-US";
+export async function getLocale() {
+  const headersList = await headers();
+
+  return headersList.get("x-vercel-ip-locale") || "en-US";
 }
 
 export function getTimezones() {
   return timezones;
 }
-export function getCurrency() {
-  const countryCode = getCountryCode();
+export async function getCurrency() {
+  const countryCode = await getCountryCode();
 
   return currencies[countryCode as keyof typeof currencies];
 }
 
-export function getDateFormat() {
-  const country = getCountryCode();
+export async function getDateFormat() {
+  const country = await getCountryCode();
 
   // US uses MM/dd/yyyy
   if (country === "US") {
@@ -47,26 +53,8 @@ export function getDateFormat() {
   return "yyyy-MM-dd";
 }
 
-export function getCountryInfo() {
-  const country = getCountryCode();
-
-  const countryInfo = countries.find((x) => x.cca2 === country);
-
-  const currencyCode =
-    countryInfo && Object.keys(countryInfo.currencies)?.at(0);
-  const currency = countryInfo?.currencies[currencyCode];
-  const languages =
-    countryInfo && Object.values(countryInfo.languages).join(", ");
-
-  return {
-    currencyCode,
-    currency,
-    languages,
-  };
-}
-
-export function isEU() {
-  const countryCode = getCountryCode();
+export async function isEU() {
+  const countryCode = await getCountryCode();
 
   if (countryCode && EU_COUNTRY_CODES.includes(countryCode)) {
     return true;
@@ -75,8 +63,8 @@ export function isEU() {
   return false;
 }
 
-export function getCountry() {
-  const country = getCountryCode();
+export async function getCountry() {
+  const country = await getCountryCode();
 
   return flags[country];
 }
