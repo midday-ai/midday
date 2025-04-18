@@ -1,11 +1,6 @@
 import "./src/env.mjs";
 
-import bundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
-
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-});
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -28,9 +23,6 @@ const config = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    serverComponentsExternalPackages: ["@trigger.dev/sdk"],
-  },
   async headers() {
     return [
       {
@@ -46,14 +38,10 @@ const config = {
   },
 };
 
-export default withSentryConfig(withBundleAnalyzer(config), {
+export default withSentryConfig(config, {
   silent: !process.env.CI,
   telemetry: false,
   widenClientFileUpload: true,
   hideSourceMaps: true,
   disableLogger: true,
-  tunnelRoute: "/monitoring",
-  sourcemaps: {
-    disable: true,
-  },
 });

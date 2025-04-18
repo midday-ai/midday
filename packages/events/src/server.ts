@@ -9,9 +9,10 @@ type Props = {
 
 export const setupAnalytics = async (options?: Props) => {
   const { userId, fullName } = options ?? {};
+  const cookieStore = await cookies();
   const trackingConsent =
-    !cookies().has("tracking-consent") ||
-    cookies().get("tracking-consent")?.value === "1";
+    !cookieStore.has("tracking-consent") ||
+    cookieStore.get("tracking-consent")?.value === "1";
 
   const client = new OpenPanel({
     clientId: process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID!,
