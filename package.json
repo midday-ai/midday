@@ -27,7 +27,7 @@
     "turbo": "2.5.0",
     "typescript": "^5.8.3"
   },
-  "packageManager": "bun@1.2.8",
+  "packageManager": "bun@1.2.10",
   "resolutions": {
     "jackspeak": "2.1.1"
   }
