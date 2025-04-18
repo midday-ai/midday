@@ -30,7 +30,7 @@ jobs:
       - name: 📤 Pull Vercel Environment Information
         run: bunx vercel pull --yes --environment=beta --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts
-        run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel build --target=beta --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🔄 Deploy Background Jobs
         env:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
