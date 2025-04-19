@@ -26,16 +26,6 @@ const config = {
   async redirects() {
     return [
       {
-        source: "/.well-known/microsoft-identity-association.json",
-        destination: "/api/.well-known/microsoft-identity-association",
-        permanent: false,
-      },
-      {
-        source: "/.well-known/security.txt",
-        destination: "/api/.well-known/security",
-        permanent: false,
-      },
-      {
         source: "/en/(.*)",
         destination: "/",
         permanent: true,
