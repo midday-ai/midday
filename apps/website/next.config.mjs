@@ -30,13 +30,13 @@ const config = {
         permanent: true,
       },
       {
-        source: "/public-beta",
-        destination: "/",
+        source: "/.well-known/microsoft-identity-association.json",
+        destination: "/api/.well-known/microsoft-identity-association",
         permanent: true,
       },
       {
-        source: "/pitch",
-        destination: "/",
+        source: "/.well-known/security.txt",
+        destination: "/api/.well-known/security",
         permanent: true,
       },
     ];
