@@ -1,12 +1,15 @@
 "use client";
 
+import { useUserQuery } from "@/hooks/use-user";
 import { Card } from "@midday/ui/card";
 import { SubmitButton } from "@midday/ui/submit-button";
 import Link from "next/link";
 import { useState } from "react";
 
-export function ManageSubscription({ teamId }: { teamId: string }) {
+export function ManageSubscription() {
   const [isLoading, setIsLoading] = useState(false);
+
+  const { data: user } = useUserQuery();
 
   return (
     <div>
@@ -22,7 +25,7 @@ export function ManageSubscription({ teamId }: { teamId: string }) {
 
         <div className="mt-auto">
           <Link
-            href={`/api/portal?id=${teamId}`}
+            href={`/api/portal?id=${user?.team?.id}`}
             className="text-sm text-muted-foreground hover:text-primary"
             onClick={() => setIsLoading(true)}
           >
