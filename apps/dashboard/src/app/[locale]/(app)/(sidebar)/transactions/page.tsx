@@ -36,17 +36,15 @@ export default async function Transactions(props: Props) {
   );
 
   return (
-    <>
+    <HydrateClient>
       <div className="flex justify-between py-6">
         <TransactionsSearchFilter />
         <TransactionsActions />
       </div>
 
-      <HydrateClient>
-        <Suspense fallback={<Loading />}>
-          <DataTable columnVisibility={columnVisibility} />
-        </Suspense>
-      </HydrateClient>
-    </>
+      <Suspense fallback={<Loading />}>
+        <DataTable columnVisibility={columnVisibility} />
+      </Suspense>
+    </HydrateClient>
   );
 }

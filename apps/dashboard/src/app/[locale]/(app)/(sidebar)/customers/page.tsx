@@ -4,7 +4,7 @@ import { DataTable } from "@/components/tables/customers/data-table";
 import { CustomersSkeleton } from "@/components/tables/customers/skeleton";
 import { loadCustomerFilterParams } from "@/hooks/use-customer-filter-params";
 import { loadSortParams } from "@/hooks/use-sort-params";
-import { getQueryClient, trpc } from "@/trpc/server";
+import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
@@ -33,14 +33,16 @@ export default async function Page(props: Props) {
   );
 
   return (
-    <div className="flex flex-col pt-6 gap-6">
-      <CustomersHeader />
+    <HydrateClient>
+      <div className="flex flex-col pt-6 gap-6">
+        <CustomersHeader />
 
-      <ErrorBoundary errorComponent={ErrorFallback}>
-        <Suspense fallback={<CustomersSkeleton />}>
-          <DataTable />
-        </Suspense>
-      </ErrorBoundary>
-    </div>
+        <ErrorBoundary errorComponent={ErrorFallback}>
+          <Suspense fallback={<CustomersSkeleton />}>
+            <DataTable />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+    </HydrateClient>
   );
 }

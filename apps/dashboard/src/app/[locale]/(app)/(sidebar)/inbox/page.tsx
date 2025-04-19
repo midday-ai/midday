@@ -4,7 +4,7 @@ import { InboxViewSkeleton } from "@/components/inbox/inbox-skeleton";
 import { InboxView } from "@/components/inbox/inbox-view";
 import { loadInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { loadInboxParams } from "@/hooks/use-inbox-params";
-import { getQueryClient, trpc } from "@/trpc/server";
+import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
@@ -40,10 +40,12 @@ export default async function Page(props: Props) {
   }
 
   return (
-    <Inbox>
-      <Suspense fallback={<InboxViewSkeleton />}>
-        <InboxView />
-      </Suspense>
-    </Inbox>
+    <HydrateClient>
+      <Inbox>
+        <Suspense fallback={<InboxViewSkeleton />}>
+          <InboxView />
+        </Suspense>
+      </Inbox>
+    </HydrateClient>
   );
 }

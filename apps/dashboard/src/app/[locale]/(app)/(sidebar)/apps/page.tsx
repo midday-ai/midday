@@ -1,7 +1,7 @@
 import { Apps } from "@/components/apps";
 import { AppsHeader } from "@/components/apps-header";
 import { AppsSkeleton } from "@/components/apps.skeleton";
-import { getQueryClient, trpc } from "@/trpc/server";
+import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -16,12 +16,14 @@ export default async function Page() {
   await queryClient.fetchQuery(trpc.apps.installed.queryOptions());
 
   return (
-    <div className="mt-4">
-      <AppsHeader />
+    <HydrateClient>
+      <div className="mt-4">
+        <AppsHeader />
 
-      <Suspense fallback={<AppsSkeleton />}>
-        <Apps />
-      </Suspense>
-    </div>
+        <Suspense fallback={<AppsSkeleton />}>
+          <Apps />
+        </Suspense>
+      </div>
+    </HydrateClient>
   );
 }
