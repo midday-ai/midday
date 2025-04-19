@@ -7,6 +7,7 @@ import { useAIState } from "ai/rsc";
 type Props = {
   role: "assistant" | "user";
 };
+
 export function ChatAvatar({ role }: Props) {
   const [aiState] = useAIState<typeof AI>();
 

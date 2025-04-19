@@ -12,6 +12,7 @@ import {
   updateTeamMember,
 } from "@midday/supabase/mutations";
 import {
+  getAvailablePlansQuery,
   getTeamByIdQuery,
   getTeamInvitesQuery,
   getTeamMembersQuery,
@@ -225,4 +226,12 @@ export const teamRouter = createTRPCRouter({
         inviteId: input.inviteId,
       });
     }),
+
+  availablePlans: protectedProcedure.query(
+    async ({ ctx: { supabase, teamId } }) => {
+      const { data } = await getAvailablePlansQuery(supabase, teamId!);
+
+      return data;
+    },
+  ),
 });

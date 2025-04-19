@@ -23,9 +23,7 @@ export function Header() {
       <div className="flex space-x-2 ml-auto">
         {isDesktopApp() && <DesktopAssistantButton />}
 
-        <Suspense>
-          <Trial />
-        </Suspense>
+        <Trial />
 
         <Suspense>
           <ConnectionStatus />

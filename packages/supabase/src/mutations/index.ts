@@ -1238,3 +1238,24 @@ export async function updateInboxAccount(
     })
     .eq("id", params.id);
 }
+
+type UpdateTeamPlanData = {
+  id: string;
+  plan?: "trial" | "starter" | "pro";
+  email?: string | null;
+  canceled_at?: string | null;
+};
+
+export async function updateTeamPlan(
+  supabase: Client,
+  data: UpdateTeamPlanData,
+) {
+  const { id, ...rest } = data;
+
+  return supabase
+    .from("teams")
+    .update(rest)
+    .eq("id", id)
+    .select("users_on_team(user_id)")
+    .single();
+}

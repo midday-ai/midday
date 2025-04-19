@@ -1,5 +1,6 @@
 "use client";
 
+import { useUserQuery } from "@/hooks/use-user";
 import {
   Dialog,
   DialogContent,
@@ -7,52 +8,31 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
-import { differenceInDays, isAfter, isEqual, parseISO } from "date-fns";
+import { differenceInDays } from "date-fns";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plans } from "../plans";
 
-interface TrialEndedBannerProps {
-  createdAt: string;
-  plan: string;
-  teamId: string;
-  discountPrice?: number;
-  canChooseStarterPlan: boolean;
-}
-
-export function TrialEndedModal({
-  createdAt,
-  plan,
-  teamId,
-  discountPrice,
-  canChooseStarterPlan,
-}: TrialEndedBannerProps) {
+export function TrialEndedModal() {
+  const { data: user } = useUserQuery();
   const pathname = usePathname();
-  const daysFromCreation = differenceInDays(new Date(), new Date(createdAt));
-  const isFourteenDaysFromCreation = daysFromCreation >= 14;
-  const cutoffDate = parseISO("2025-04-15");
-  const today = new Date();
-  const isOnOrAfterCutoffDate =
-    isAfter(today, cutoffDate) || isEqual(today, cutoffDate);
-  const createdAfterMarch2025 = isAfter(
-    new Date(createdAt),
-    parseISO("2025-03-01"),
+  const daysFromCreation = differenceInDays(
+    new Date(),
+    new Date(user?.team?.created_at),
   );
 
-  // Show modal if:
-  // 1. On trial plan AND created more than 14 days ago AND date is 2025-04-15 or later
-  // OR
-  // 2. On trial plan AND created after 2025-03-01 AND it's been 14 days or more since creation
-  const showModal =
-    plan === "trial" &&
-    ((isFourteenDaysFromCreation && isOnOrAfterCutoffDate) ||
-      (createdAfterMarch2025 && isFourteenDaysFromCreation));
+  const isFourteenDaysFromCreation = daysFromCreation >= 14;
+  const showModal = user?.team?.plan === "trial" && isFourteenDaysFromCreation;
 
   if (
     pathname.includes("/settings") ||
     pathname.includes("/support") ||
     !showModal
   ) {
+    return null;
+  }
+
+  if (!user?.team?.id) {
     return null;
   }
 
@@ -68,11 +48,7 @@ export function TrialEndedModal({
             and it's time to choose a plan to continue using Midday.
           </DialogDescription>
 
-          <Plans
-            discountPrice={discountPrice}
-            teamId={teamId}
-            canChooseStarterPlan={canChooseStarterPlan}
-          />
+          <Plans />
 
           <p className="text-xs text-muted-foreground mt-4">
             If you decide not to continue, you can remove your account and data
