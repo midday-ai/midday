@@ -8,7 +8,7 @@ import { InboxSettingsModal } from "../modals/inbox-settings-modal";
 
 export function InboxHeader() {
   return (
-    <div className="flex justify-center items-center space-x-4 mb-4 mt-4 w-full pr-[647px]">
+    <div className="flex justify-center items-center space-x-4 mb-4 mt-6 w-full pr-[647px]">
       <InboxSearch />
 
       <div className="flex space-x-2">

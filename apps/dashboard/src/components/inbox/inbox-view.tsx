@@ -151,7 +151,7 @@ export function InboxView() {
         </ScrollArea>
       </div>
 
-      <InboxDetails firstItemId={tableData.at(0)?.id} />
+      <InboxDetails />
     </div>
   );
 }

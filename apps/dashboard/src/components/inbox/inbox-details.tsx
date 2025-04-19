@@ -23,11 +23,7 @@ import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
 
-type Props = {
-  firstItemId: string | undefined;
-};
-
-export function InboxDetails({ firstItemId }: Props) {
+export function InboxDetails() {
   const { setParams, params } = useInboxParams();
   const { params: filterParams } = useInboxFilterParams();
   const trpc = useTRPC();
@@ -36,7 +32,7 @@ export function InboxDetails({ firstItemId }: Props) {
   const [showFallback, setShowFallback] = useState(false);
   const { data: user } = useUserQuery();
 
-  const id = params.inboxId || firstItemId;
+  const id = params.inboxId;
 
   const { data, isLoading } = useQuery(
     trpc.inbox.getById.queryOptions(
@@ -138,7 +134,7 @@ export function InboxDetails({ firstItemId }: Props) {
   }
 
   return (
-    <div className="h-[calc(100vh-120px)] overflow-hidden flex-col border w-[615px] hidden md:flex shrink-0 -mt-[54px]">
+    <div className="h-[calc(100vh-125px)] overflow-hidden flex-col border w-[615px] hidden md:flex shrink-0 -mt-[54px]">
       <div className="flex items-center p-2">
         <div className="flex items-center gap-2">
           <Button
