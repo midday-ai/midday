@@ -50,13 +50,9 @@ export function InboxSettingsModal() {
             )}
           </div>
 
-          <div className="flex flex-col gap-2 mt-6">
-            <span className="text-sm font-medium">Connected accounts</span>
-          </div>
-
           <InboxConnectedAccounts />
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 mt-6">
             <ConnectGmail />
             <ConnectOutlook />
           </div>

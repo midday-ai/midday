@@ -19,35 +19,41 @@ export function InboxConnectedAccounts() {
     }),
   );
 
-  if (!data) return null;
+  if (!data?.data?.length) return null;
 
   return (
-    <div className="flex flex-col gap-2 mb-6 divide-y divide-border border-b-[1px]">
-      {data?.data?.map((account) => (
-        <div
-          key={account.id}
-          className="flex items-center justify-between py-0.5"
-        >
-          <div className="flex flex-col justify-between w-full pr-4">
-            <div className="text-sm flex justify-between">
-              <span className="flex-2 text-sm">{account.email}</span>
-              <span className="text-muted-foreground text-xs">
-                {formatDistanceToNow(new Date(account.last_accessed))} ago
-              </span>
-            </div>
-          </div>
+    <div>
+      <div className="flex flex-col gap-2 mt-6">
+        <span className="text-sm font-medium">Connected accounts</span>
+      </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() =>
-              deleteInboxAccountMutation.mutate({ id: account.id })
-            }
+      <div className="flex flex-col gap-2 mb-6 divide-y divide-border border-b-[1px]">
+        {data?.data?.map((account) => (
+          <div
+            key={account.id}
+            className="flex items-center justify-between py-0.5"
           >
-            <Icons.Delete />
-          </Button>
-        </div>
-      ))}
+            <div className="flex flex-col justify-between w-full pr-4">
+              <div className="text-sm flex justify-between">
+                <span className="flex-2 text-sm">{account.email}</span>
+                <span className="text-muted-foreground text-xs">
+                  {formatDistanceToNow(new Date(account.last_accessed))} ago
+                </span>
+              </div>
+            </div>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                deleteInboxAccountMutation.mutate({ id: account.id })
+              }
+            >
+              <Icons.Delete />
+            </Button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
