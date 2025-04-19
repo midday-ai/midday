@@ -13,6 +13,7 @@ import {
 } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { useInView } from "react-intersection-observer";
 import { useDebouncedCallback } from "use-debounce";
 import { InboxDetails } from "./inbox-details";
@@ -98,6 +99,43 @@ export function InboxView() {
       });
     }
   }, [tableData]);
+
+  // Arrow key navigation
+  useHotkeys(
+    "up",
+    (event) => {
+      event.preventDefault();
+      const currentIndex = tableData.findIndex(
+        (item) => item.id === params.inboxId,
+      );
+      if (currentIndex > 0) {
+        const prevItem = tableData[currentIndex - 1];
+        setParams({
+          ...params,
+          inboxId: prevItem.id,
+        });
+      }
+    },
+    [tableData, params, setParams],
+  );
+
+  useHotkeys(
+    "down",
+    (event) => {
+      event.preventDefault();
+      const currentIndex = tableData.findIndex(
+        (item) => item.id === params.inboxId,
+      );
+      if (currentIndex < tableData.length - 1) {
+        const nextItem = tableData[currentIndex + 1];
+        setParams({
+          ...params,
+          inboxId: nextItem.id,
+        });
+      }
+    },
+    [tableData, params, setParams],
+  );
 
   // If user is connected, and we don't have any data, we need to show a skeleton
   if (params.connected && !tableData?.length) {
