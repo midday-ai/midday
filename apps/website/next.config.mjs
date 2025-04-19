@@ -2,6 +2,7 @@
 const config = {
   poweredByHeader: false,
   reactStrictMode: true,
+  trailingSlash: true,
   transpilePackages: ["@midday/ui", "@midday/tailwind", "next-mdx-remote"],
   eslint: {
     ignoreDuringBuilds: true,
@@ -25,18 +26,18 @@ const config = {
   async redirects() {
     return [
       {
-        source: "/en/(.*)",
-        destination: "/",
-        permanent: true,
-      },
-      {
         source: "/.well-known/microsoft-identity-association.json",
         destination: "/api/.well-known/microsoft-identity-association",
-        permanent: true,
+        permanent: false,
       },
       {
         source: "/.well-known/security.txt",
         destination: "/api/.well-known/security",
+        permanent: false,
+      },
+      {
+        source: "/en/(.*)",
+        destination: "/",
         permanent: true,
       },
     ];
