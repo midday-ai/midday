@@ -143,7 +143,7 @@ export class GmailProvider implements OAuthProviderInterface {
       const listResponse = await this.#gmail.users.messages.list({
         userId: "me",
         maxResults: maxResults,
-        q: "has:attachment filename:pdf",
+        q: "-from:me has:attachment filename:pdf",
       });
 
       const messages = listResponse.data.messages;
