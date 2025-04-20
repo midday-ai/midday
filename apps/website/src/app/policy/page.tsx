@@ -212,6 +212,25 @@ export default function Page() {
             </li>
           </ul>
 
+          <h2>Use of Google User Data</h2>
+          <p className="leading-7 mt-8">
+            Midday's use of information received from Google APIs will adhere to
+            the Google API Services User Data Policy, including the Limited Use
+            requirements.
+          </p>
+          <p className="leading-7 mt-8">
+            We do not use any data obtained from Google Workspace APIs —
+            including Gmail data — to develop, improve, or train generalized
+            artificial intelligence (AI) or machine learning (ML) models.
+          </p>
+          <p className="leading-7 mt-8">
+            User data accessed via Gmail scopes is used strictly for the purpose
+            of reading and extracting relevant information from emails (such as
+            invoices and receipts) to help users automate and manage their
+            business finances. This data is never shared, sold, or used for
+            advertising purposes.
+          </p>
+
           <h2>
             Legal Basis for Processing Personal Data under the General Data
             Protection Regulation (GDPR)
