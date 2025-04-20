@@ -101,6 +101,16 @@ export function InboxDetails() {
     }),
   );
 
+  const updateInboxMutation = useMutation(
+    trpc.inbox.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
+        });
+      },
+    }),
+  );
+
   const handleOnDelete = () => {
     if (data?.id) {
       deleteInboxMutation.mutate({ id: data.id });
@@ -165,6 +175,16 @@ export function InboxDetails() {
                 >
                   Download
                 </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  updateInboxMutation.mutate({
+                    id: data?.id,
+                    status: data?.status === "done" ? "pending" : "done",
+                  })
+                }
+              >
+                {data?.status === "done" ? "Mark as unhandled" : "Mark as done"}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleCopyLink}>
                 Copy Link

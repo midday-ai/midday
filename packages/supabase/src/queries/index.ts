@@ -651,6 +651,7 @@ type GetInboxQueryParams = {
   filter?: {
     q?: string | null;
     done?: boolean | null;
+    status?: "new" | "archived" | "processing" | "done" | "pending" | null;
   };
 };
 
@@ -660,7 +661,7 @@ export async function getInboxQuery(
 ) {
   const {
     teamId,
-    filter: { q, done } = {},
+    filter: { q, done, status } = {},
     cursor,
     order,
     pageSize = 20,
@@ -690,6 +691,10 @@ export async function getInboxQuery(
 
   if (done) {
     query.not("transaction_id", "is", null);
+  }
+
+  if (status) {
+    query.eq("status", status);
   }
 
   if (q) {

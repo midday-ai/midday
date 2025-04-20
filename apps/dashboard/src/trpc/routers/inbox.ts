@@ -1,5 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { deleteInbox } from "@midday/supabase/mutations";
+import { updateInbox } from "@midday/supabase/mutations";
 import {
   getInboxByIdQuery,
   getInboxQuery,
@@ -84,5 +85,16 @@ export const inboxRouter = createTRPCRouter({
         q: query,
         limit,
       });
+    }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        status: z.enum(["new", "archived", "processing", "done", "pending"]),
+      }),
+    )
+    .mutation(async ({ ctx: { supabase, teamId }, input }) => {
+      return updateInbox(supabase, { ...input, teamId: teamId! });
     }),
 });

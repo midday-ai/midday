@@ -2520,7 +2520,13 @@ export type Database = {
       bankProviders: "gocardless" | "plaid" | "teller"
       connection_status: "disconnected" | "connected" | "unknown"
       inbox_account_providers: "gmail" | "outlook"
-      inbox_status: "processing" | "pending" | "archived" | "new" | "deleted"
+      inbox_status:
+        | "processing"
+        | "pending"
+        | "archived"
+        | "new"
+        | "deleted"
+        | "done"
       inbox_type: "invoice" | "expense"
       invoice_delivery_type: "create" | "create_and_send"
       invoice_size: "a4" | "letter"
@@ -2707,7 +2713,14 @@ export const Constants = {
       bankProviders: ["gocardless", "plaid", "teller"],
       connection_status: ["disconnected", "connected", "unknown"],
       inbox_account_providers: ["gmail", "outlook"],
-      inbox_status: ["processing", "pending", "archived", "new", "deleted"],
+      inbox_status: [
+        "processing",
+        "pending",
+        "archived",
+        "new",
+        "deleted",
+        "done",
+      ],
       inbox_type: ["invoice", "expense"],
       invoice_delivery_type: ["create", "create_and_send"],
       invoice_size: ["a4", "letter"],

@@ -496,19 +496,16 @@ export async function joinTeamByInviteCode(supabase: Client, code: string) {
   return null;
 }
 
-type UpdateInboxByIdParams = {
+type UpdateInboxParams = {
   id: string;
+  teamId: string;
   display_name?: string;
-  status?: "deleted";
+  status?: "deleted" | "new" | "archived" | "processing" | "done" | "pending";
   attachment_id?: string;
   transaction_id?: string;
-  teamId: string;
 };
 
-export async function updateInboxById(
-  supabase: Client,
-  params: UpdateInboxByIdParams,
-) {
+export async function updateInbox(supabase: Client, params: UpdateInboxParams) {
   const { id, teamId, ...data } = params;
 
   const inbox = await supabase
