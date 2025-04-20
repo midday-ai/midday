@@ -212,7 +212,9 @@ export default function Page() {
             </li>
           </ul>
 
-          <h2>Use of Google User Data</h2>
+          <br />
+
+          <strong>Use of Google User Data</strong>
           <p className="leading-7 mt-8">
             Midday's use of information received from Google APIs will adhere to
             the Google API Services User Data Policy, including the Limited Use
@@ -230,6 +232,8 @@ export default function Page() {
             business finances. This data is never shared, sold, or used for
             advertising purposes.
           </p>
+
+          <br />
 
           <h2>
             Legal Basis for Processing Personal Data under the General Data
