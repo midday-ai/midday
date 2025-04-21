@@ -21,6 +21,7 @@
     "./tasks/inbox/process": "./src/tasks/inbox/process.ts",
     "./tasks/inbox/process-attachment": "./src/tasks/inbox/process-attachment.ts",
     "./tasks/inbox/provider/initial-setup": "./src/tasks/inbox/provider/initial-setup.ts",
+    "./tasks/inbox/slack-upload": "./src/tasks/inbox/slack-upload.ts",
     "./tasks/invoice/generate": "./src/tasks/invoice/generate.ts",
     "./tasks/invoice/send": "./src/tasks/invoice/send.ts",
     "./tasks/notification/send": "./src/tasks/notification/send.ts",

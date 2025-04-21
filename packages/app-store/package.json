@@ -14,7 +14,8 @@
     "@slack/bolt": "^3.22.0",
     "@slack/web-api": "^7.5.0",
     "ai": "^3.4.9",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "@midday/jobs": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",

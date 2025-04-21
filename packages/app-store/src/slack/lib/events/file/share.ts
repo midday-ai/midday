@@ -1,5 +1,6 @@
-import { inboxSlackUpload } from "@midday/dashboard/jobs/tasks/inbox/slack-upload";
+import type { inboxSlackUpload } from "@midday/jobs/tasks/inbox/slack-upload";
 import type { FileShareMessageEvent } from "@slack/web-api";
+import { tasks } from "@trigger.dev/sdk/v3";
 
 export async function fileShare(
   event: FileShareMessageEvent,
@@ -14,7 +15,8 @@ export async function fileShare(
   }));
 
   if (files && files.length > 0) {
-    await inboxSlackUpload.batchTrigger(
+    await tasks.batchTrigger<typeof inboxSlackUpload>(
+      "inbox-slack-upload",
       files.map((file) => ({
         payload: {
           teamId,

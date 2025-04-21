@@ -156,6 +156,7 @@
       "version": "1.0.0",
       "dependencies": {
         "@ai-sdk/openai": "^0.0.66",
+        "@midday/jobs": "workspace:*",
         "@slack/bolt": "^3.22.0",
         "@slack/web-api": "^7.5.0",
         "ai": "^3.4.9",
