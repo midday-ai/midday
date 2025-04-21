@@ -16,7 +16,7 @@ export function NoResults() {
           <p className="text-[#606060] text-sm">Try another search term</p>
         </div>
 
-        <Button variant="outline" onClick={() => setParams({ q: null })}>
+        <Button variant="outline" onClick={() => setParams(null)}>
           Clear search
         </Button>
       </div>

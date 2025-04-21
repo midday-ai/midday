@@ -21,6 +21,7 @@ import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
 
 export function InboxDetails() {
@@ -116,6 +117,11 @@ export function InboxDetails() {
       deleteInboxMutation.mutate({ id: data.id });
     }
   };
+
+  useHotkeys("meta+backspace", (event) => {
+    event.preventDefault();
+    handleOnDelete();
+  });
 
   const isProcessing = data?.status === "processing" || data?.status === "new";
 

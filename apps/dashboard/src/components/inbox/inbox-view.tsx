@@ -108,11 +108,12 @@ export function InboxView() {
       const currentIndex = tableData.findIndex(
         (item) => item.id === params.inboxId,
       );
+
       if (currentIndex > 0) {
         const prevItem = tableData[currentIndex - 1];
         setParams({
           ...params,
-          inboxId: prevItem.id,
+          inboxId: prevItem?.id,
         });
       }
     },
@@ -126,11 +127,12 @@ export function InboxView() {
       const currentIndex = tableData.findIndex(
         (item) => item.id === params.inboxId,
       );
+
       if (currentIndex < tableData.length - 1) {
         const nextItem = tableData[currentIndex + 1];
         setParams({
           ...params,
-          inboxId: nextItem.id,
+          inboxId: nextItem?.id,
         });
       }
     },

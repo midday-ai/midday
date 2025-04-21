@@ -20,7 +20,7 @@ export const inboxRouter = createTRPCRouter({
         filter: z
           .object({
             q: z.string().nullable().optional(),
-            done: z.boolean().nullable().optional(),
+            status: z.enum(["done", "pending"]).nullable().optional(),
           })
           .optional(),
       }),

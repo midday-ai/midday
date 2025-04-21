@@ -650,7 +650,6 @@ type GetInboxQueryParams = {
   pageSize?: number;
   filter?: {
     q?: string | null;
-    done?: boolean | null;
     status?: "new" | "archived" | "processing" | "done" | "pending" | null;
   };
 };
@@ -661,7 +660,7 @@ export async function getInboxQuery(
 ) {
   const {
     teamId,
-    filter: { q, done, status } = {},
+    filter: { q, status } = {},
     cursor,
     order,
     pageSize = 20,
@@ -689,10 +688,7 @@ export async function getInboxQuery(
     .order("created_at", { ascending: order === "desc" })
     .neq("status", "deleted");
 
-  if (done) {
-    query.not("transaction_id", "is", null);
-  }
-
+  // If status is not done, filter by status
   if (status) {
     query.eq("status", status);
   }

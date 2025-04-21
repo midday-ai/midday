@@ -1,9 +1,9 @@
 import { useQueryStates } from "nuqs";
-import { createLoader, parseAsBoolean, parseAsString } from "nuqs/server";
+import { createLoader, parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 export const inboxFilterParamsSchema = {
   q: parseAsString,
-  done: parseAsBoolean,
+  status: parseAsStringLiteral(["done", "pending"]),
 };
 
 export function useInboxFilterParams() {
