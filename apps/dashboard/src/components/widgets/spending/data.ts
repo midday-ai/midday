@@ -68,7 +68,7 @@ export const spendingExampleData = [
     percentage: 0,
   },
   {
-    slug: "internet_and_telephone",
+    slug: "internet-and-telephone",
     color: getColorFromName("Internet and Telephone") || "#8ED1FC",
     name: "Internet and Telephone",
     currency: "USD",
@@ -76,7 +76,7 @@ export const spendingExampleData = [
     percentage: 0,
   },
   {
-    slug: "facilities_expenses",
+    slug: "facilities-expenses",
     color: getColorFromName("Facilities Expenses") || "#0693E3",
     name: "Facilities Expenses",
     currency: "USD",
@@ -108,7 +108,7 @@ export const spendingExampleData = [
     percentage: 0,
   },
   {
-    slug: "office_supplies",
+    slug: "office-supplies",
     color: getColorFromName("Office Supplies") || "#9900EF",
     name: "Office Supplies",
     currency: "USD",
