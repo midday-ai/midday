@@ -1,0 +1,23 @@
+{
+  "name": "@midday/jobs",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "trigger dev",
+    "deploy": "trigger deploy"
+  },
+  "dependencies": {
+    "heic-convert": "1.2.4",
+    "pdf-to-img": "^4.4.0",
+    "@midday/engine": "workspace:*",
+    "@midday/email": "workspace:*",
+    "@midday/supabase": "workspace:*",
+    "@fast-csv/format": "5.0.2",
+    "@zip.js/zip.js": "2.7.60",
+    "sharp": "^0.34.1"
+  },
+  "devDependencies": {
+    "trigger.dev": "3.3.17",
+    "@types/heic-convert": "2.1.0"
+  }
+}

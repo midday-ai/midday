@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "main": "index.ts",
+  "exports": {
+    "./emails/*": "./emails/*.tsx",
+    "./locales": "./locales/index.ts"
+  },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
