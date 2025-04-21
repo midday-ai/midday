@@ -2,9 +2,10 @@
 
 import { getMostFrequentCurrency } from "@/utils/currency";
 import { LogEvents } from "@midday/events/events";
+import type { initialBankSetup } from "@midday/jobs/tasks/bank/setup/initial";
 import { getTeamSettings } from "@midday/supabase/cached-queries";
 import { createBankConnection } from "@midday/supabase/mutations";
-import { initialBankSetup } from "jobs/tasks/bank/setup/initial";
+import { tasks } from "@trigger.dev/sdk/v3";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { connectBankAccountSchema } from "./schema";
@@ -59,10 +60,13 @@ export const connectBankAccountAction = authActionClient
         provider,
       });
 
-      const event = await initialBankSetup.trigger({
-        teamId,
-        connectionId: bankConnection?.id,
-      });
+      const event = await tasks.trigger<typeof initialBankSetup>(
+        "initial-bank-setup",
+        {
+          teamId,
+          connectionId: bankConnection?.id,
+        },
+      );
 
       revalidateTag(`bank_accounts_${teamId}`);
       revalidateTag(`bank_accounts_currencies_${teamId}`);

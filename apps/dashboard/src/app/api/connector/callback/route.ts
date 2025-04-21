@@ -1,7 +1,7 @@
 import { getTeamId } from "@/utils/team";
 import { InboxConnector } from "@midday/inbox/connector";
+import type { initialInboxSetup } from "@midday/jobs/tasks/inbox/provider/initial-setup";
 import { tasks } from "@trigger.dev/sdk/v3";
-import type { initialInboxSetup } from "jobs/tasks/inbox/provider/initial-setup";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {

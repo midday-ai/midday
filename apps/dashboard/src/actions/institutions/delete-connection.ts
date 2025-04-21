@@ -1,7 +1,8 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { deleteConnection } from "jobs/tasks/bank/delete/delete-connection";
+import type { deleteConnection } from "@midday/jobs/tasks/bank/delete/delete-connection";
+import { tasks } from "@trigger.dev/sdk/v3";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "../safe-action";
 import { deleteConnectionSchema } from "../schema";
@@ -37,11 +38,14 @@ export const deleteConnectionAction = authActionClient
         return;
       }
 
-      const event = await deleteConnection.trigger({
-        referenceId: data.reference_id,
-        provider: data.provider,
-        accessToken: data.access_token,
-      });
+      const event = await tasks.trigger<typeof deleteConnection>(
+        "delete-connection",
+        {
+          referenceId: data.reference_id,
+          provider: data.provider,
+          accessToken: data.access_token,
+        },
+      );
 
       return data;
     },

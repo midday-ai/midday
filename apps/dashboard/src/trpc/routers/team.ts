@@ -1,4 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import type { deleteTeam as deleteTeamTask } from "@midday/jobs/tasks/team/delete";
+import type { inviteTeamMembers } from "@midday/jobs/tasks/team/invite";
 import {
   acceptTeamInvite,
   createTeam,
@@ -20,8 +22,6 @@ import {
 } from "@midday/supabase/queries";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
-import type { deleteTeam as deleteTeamTask } from "jobs/tasks/team/delete";
-import type { inviteTeamMembers } from "jobs/tasks/team/invite";
 import { headers } from "next/headers";
 import { z } from "zod";
 

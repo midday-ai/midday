@@ -1,4 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import type { processAttachment } from "@midday/jobs/tasks/inbox/process-attachment";
 import { deleteInbox } from "@midday/supabase/mutations";
 import { updateInbox } from "@midday/supabase/mutations";
 import {
@@ -7,7 +8,6 @@ import {
   getInboxSearchQuery,
 } from "@midday/supabase/queries";
 import { tasks } from "@trigger.dev/sdk/v3";
-import type { processAttachment } from "jobs/tasks/inbox/process-attachment";
 import { z } from "zod";
 
 export const inboxRouter = createTRPCRouter({

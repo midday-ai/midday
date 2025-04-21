@@ -1,8 +1,9 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
+import type { updateBaseCurrency } from "@midday/jobs/tasks/transactions/update-base-currency";
 import { updateTeam } from "@midday/supabase/mutations";
-import { updateBaseCurrency } from "jobs/tasks/transactions/update-base-currency";
+import { tasks } from "@trigger.dev/sdk/v3";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
@@ -34,10 +35,13 @@ export const updateCurrencyAction = authActionClient
       revalidateTag(`team_settings_${user.team_id}`);
       revalidatePath("/settings/accounts");
 
-      const event = await updateBaseCurrency.trigger({
-        teamId: user.team_id,
-        baseCurrency,
-      });
+      const event = await tasks.trigger<typeof updateBaseCurrency>(
+        "update-base-currency",
+        {
+          teamId: user.team_id,
+          baseCurrency,
+        },
+      );
 
       return event;
     },
