@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { cn } from "../utils";
 import { Button, type ButtonProps } from "./button";
+import { Spinner } from "./spinner";
 
 export function SubmitButton({
   children,
@@ -18,12 +19,13 @@ export function SubmitButton({
       {...props}
       className={cn(props.className, "relative")}
     >
-      {isSubmitting ? (
+      <span style={{ visibility: isSubmitting ? "hidden" : "visible" }}>
+        {children}
+      </span>
+      {isSubmitting && (
         <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Spinner />
         </span>
-      ) : (
-        children
       )}
     </Button>
   );
