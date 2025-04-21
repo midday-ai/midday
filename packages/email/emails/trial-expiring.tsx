@@ -65,40 +65,36 @@ export const TrialExpiringEmail = ({ fullName = "Viktor Hofte" }: Props) => {
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212]">
               Just a quick reminder—your Midday trial ends in 3 days. We hope
-              you’ve had a great experience so far.
+              you've had a great experience so far.
+            </Text>
+            <Text className="text-[#121212] text-[14px]">
+              Since you joined during our limited Pro Plan offer, your discount
+              has already been applied to your account. You still have time to
+              claim it before your trial ends.
+            </Text>
+            <Section className="text-center mt-[50px] mb-[50px]">
+              <Button
+                className="bg-transparent text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
+                href="https://app.midday.ai/settings/billing"
+              >
+                Claim your discount
+              </Button>
+            </Section>
+            <Text className="text-[#121212] text-[14px]">
+              If you're unsure or have any questions, we'd love to hear from
+              you. You can reply to this email or schedule a quick{" "}
+              <Link
+                href="https://cal.com/pontus-midday/15min"
+                className="text-[#121212] underline"
+              >
+                call with us
+              </Link>
+              . We're always here to help.
+            </Text>
+            <Text className="text-[#121212] text-[14px]">
+              Best,
               <br />
-              <p className="text-[#121212] text-[14px]">
-                Since you joined during our limited Pro Plan offer, your
-                discount has already been applied to your account. You still
-                have time to claim it before your trial ends.
-              </p>
-              <br />
-              <Section className="text-center mt-[50px] mb-[50px]">
-                <Button
-                  className="bg-transparent text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
-                  href="https://app.midday.ai/settings/billing"
-                >
-                  Claim your discount
-                </Button>
-              </Section>
-              <br />
-              <p className="text-[#121212] text-[14px]">
-                If you’re unsure or have any questions, we’d love to hear from
-                you. You can reply to this email or schedule a quick{" "}
-                <Link
-                  href="https://cal.com/pontus-midday/15min"
-                  className="text-[#121212] underline"
-                >
-                  call with us
-                </Link>
-                , We’re always here to help.
-              </p>
-              <br />
-              <p className="text-[#121212] text-[14px]">
-                Best,
-                <br />
-                Pontus & Viktor
-              </p>
+              Pontus & Viktor
             </Text>
 
             <br />

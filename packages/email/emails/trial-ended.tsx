@@ -67,37 +67,33 @@ export const TrialEndedEmail = ({ fullName = "Viktor Hofte" }: Props) => {
             <Text className="text-[#121212]">
               Your Midday trial has now ended, which means you have read-only
               access to your data.
+            </Text>
+            <Text className="text-[#121212] text-[14px]">
+              We know running a business is stressful, so if you need more time,
+              your discount is still valid and applied to your account for{" "}
+              <strong>1 more day</strong>.
+            </Text>
+            <Section className="text-center mt-[50px] mb-[50px]">
+              <Button
+                className="bg-transparent text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
+                href="https://app.midday.ai"
+              >
+                Upgrade now
+              </Button>
+            </Section>
+            <Text className="text-[#121212] text-[14px]">
+              If you decide not to continue, we'd truly appreciate your honest
+              feedback—just reply and let us know why. We read every response.
+            </Text>
+            <Text className="text-[#121212] text-[14px]">
+              If this is the last time we hear from you, thanks for giving
+              Midday a try. We won't send any more emails, but you're always
+              welcome back.
+            </Text>
+            <Text className="text-[#121212] text-[14px]">
+              Best,
               <br />
-              <p className="text-[#121212] text-[14px]">
-                We know running a business is stressful, so if you need more
-                time, your discount is still valid and applied to your account
-                for <strong>1 more day</strong>.
-              </p>
-              <br />
-              <Section className="text-center mt-[50px] mb-[50px]">
-                <Button
-                  className="bg-transparent text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
-                  href="https://app.midday.ai"
-                >
-                  Upgrade now
-                </Button>
-              </Section>
-              <br />
-              <p className="text-[#121212] text-[14px]">
-                If you decide not to continue, we’d truly appreciate your honest
-                feedback—just reply and let us know why. We read every response.
-              </p>
-              <p className="text-[#121212] text-[14px]">
-                If this is the last time we hear from you, thanks for giving
-                Midday a try. We won’t send any more emails, but you’re always
-                welcome back.
-              </p>
-              <br />
-              <p className="text-[#121212] text-[14px]">
-                Best,
-                <br />
-                Pontus & Viktor
-              </p>
+              Pontus & Viktor
             </Text>
 
             <br />

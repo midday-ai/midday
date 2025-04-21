@@ -8,7 +8,6 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import { TripleColumn } from "responsive-react-email";
 
 const baseUrl = getEmailUrl();
 
@@ -25,194 +24,133 @@ export function Footer() {
 
       <br />
 
-      <TripleColumn
-        pX={0}
-        pY={0}
-        styles={{ textAlign: "left" }}
-        columnOneContent={
-          <Section className="text-left p-0 m-0">
-            <Row>
-              <Text className="font-medium">Features</Text>
-            </Row>
+      <Row>
+        <Column style={{ width: "33%", paddingRight: "10px" }}>
+          <Text className="font-medium">Features</Text>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/bOp4NOx"
+          >
+            Overview
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/VFcNsmQ"
+          >
+            Inbox
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/uA06kWO"
+          >
+            Vault
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/x7Fow9L"
+          >
+            Tracker
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/fkYXc95"
+          >
+            Invoice
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/dEnP9h5"
+          >
+            Pricing
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/E24P3oY"
+          >
+            Engine
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://midday.ai/download"
+          >
+            Download
+          </Link>
+        </Column>
 
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/bOp4NOx"
-              >
-                Overview
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/VFcNsmQ"
-              >
-                Inbox
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/uA06kWO"
-              >
-                Vault
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/x7Fow9L"
-              >
-                Tracker
-              </Link>
-            </Row>
+        <Column style={{ width: "33%", paddingRight: "10px" }}>
+          <Text className="font-medium">Resources</Text>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/fhEy5CL"
+          >
+            Homepage
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://git.new/midday"
+          >
+            Github
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/ZrhEMbR"
+          >
+            Support
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/rofdWKi"
+          >
+            Terms of service
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/TJIL5mQ"
+          >
+            Privacy policy
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/IQ1kcN0"
+          >
+            Branding
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/x5ohOs7"
+          >
+            Feature Request
+          </Link>
+        </Column>
 
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/fkYXc95"
-              >
-                Invoice
-              </Link>
-            </Row>
-
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/dEnP9h5"
-              >
-                Pricing
-              </Link>
-            </Row>
-
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/E24P3oY"
-              >
-                Engine
-              </Link>
-            </Row>
-
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://midday.ai/download"
-              >
-                Download
-              </Link>
-            </Row>
-          </Section>
-        }
-        columnOneStyles={{ paddingRight: 0, paddingLeft: 0, width: 185 }}
-        columnTwoContent={
-          <Section className="text-left p-0 m-0">
-            <Row>
-              <Text className="font-medium">Resources</Text>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/fhEy5CL"
-              >
-                Homepage
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://git.new/midday"
-              >
-                Github
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/ZrhEMbR"
-              >
-                Support
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/rofdWKi"
-              >
-                Terms of service
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/TJIL5mQ"
-              >
-                Privacy policy
-              </Link>
-            </Row>
-
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/IQ1kcN0"
-              >
-                Branding
-              </Link>
-            </Row>
-
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/x5ohOs7"
-              >
-                Feature Request
-              </Link>
-            </Row>
-          </Section>
-        }
-        columnTwoStyles={{ paddingRight: 0, paddingLeft: 0, width: 185 }}
-        columnThreeContent={
-          <Section className="text-left p-0 m-0">
-            <Row>
-              <Text className="font-medium">Company</Text>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/186swoH"
-              >
-                Story
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/QWyX8Um"
-              >
-                Updates
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/Dd7M8cl"
-              >
-                Open startup
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/M2Hv420"
-              >
-                OSS Friends
-              </Link>
-            </Row>
-          </Section>
-        }
-        columnThreeStyles={{ paddingRight: 0, paddingLeft: 0, width: 185 }}
-      />
+        <Column style={{ width: "33%" }}>
+          <Text className="font-medium">Company</Text>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/186swoH"
+          >
+            Story
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/QWyX8Um"
+          >
+            Updates
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/Dd7M8cl"
+          >
+            Open startup
+          </Link>
+          <Link
+            className="text-[#707070] text-[14px] block mb-1.5"
+            href="https://go.midday.ai/M2Hv420"
+          >
+            OSS Friends
+          </Link>
+        </Column>
+      </Row>
 
       <br />
       <br />
@@ -238,7 +176,6 @@ export function Footer() {
             />
           </Link>
         </Column>
-
         <Column className="align-middle w-[40px]">
           <Link href="https://go.midday.ai/anPiuRx">
             <Img
@@ -249,7 +186,6 @@ export function Footer() {
             />
           </Link>
         </Column>
-
         <Column className="align-middle">
           <Link href="https://go.midday.ai/Ct3xybK">
             <Img
@@ -265,35 +201,29 @@ export function Footer() {
       <br />
       <br />
 
-      <Row>
-        <Text className="text-[#B8B8B8] text-xs">
-          Midday Labs AB - Torsgatan 59 113 37, Stockholm, Sweden.
-        </Text>
-      </Row>
+      <Text className="text-[#B8B8B8] text-xs">
+        Midday Labs AB - Torsgatan 59 113 37, Stockholm, Sweden.
+      </Text>
 
-      <Row>
-        <Link
-          className="text-[#707070] text-[14px]"
-          href="https://app.midday.ai/settings/notifications"
-          title="Unsubscribe"
-        >
-          Notification preferences
-        </Link>
-      </Row>
+      <Link
+        className="text-[#707070] text-[14px] block"
+        href="https://app.midday.ai/settings/notifications"
+        title="Unsubscribe"
+      >
+        Notification preferences
+      </Link>
 
       <br />
       <br />
 
-      <Row>
-        <Link href="https://go.midday.ai/FZwOHud">
-          <Img
-            src={`${baseUrl}/email/logo-footer.png`}
-            width="100"
-            alt="Midday"
-            className="block"
-          />
-        </Link>
-      </Row>
+      <Link href="https://go.midday.ai/FZwOHud">
+        <Img
+          src={`${baseUrl}/email/logo-footer.png`}
+          width="100"
+          alt="Midday"
+          className="block"
+        />
+      </Link>
     </Section>
   );
 }
