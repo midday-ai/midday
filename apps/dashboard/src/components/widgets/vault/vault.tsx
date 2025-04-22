@@ -11,9 +11,9 @@ export function Vault({ files }: Props) {
         return (
           <li key={file.id}>
             <div className="flex items-center py-3">
-              <div className="w-[55%]">
-                <span className="text-sm line-clamp-1">{file.name}</span>
-              </div>
+              <span className="text-sm line-clamp-1">
+                {file.name?.split("/").pop()}
+              </span>
             </div>
           </li>
         );

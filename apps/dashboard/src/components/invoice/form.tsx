@@ -4,10 +4,10 @@ import { getUrl } from "@/utils/environment";
 import { formatRelativeTime } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
-import { useDebounce } from "@uidotdev/usehooks";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
+import { useDebounceCallback } from "usehooks-ts";
 import { OpenURL } from "../open-url";
 import { type Customer, CustomerDetails } from "./customer-details";
 import { EditBlock } from "./edit-block";
@@ -69,16 +69,20 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
 
   const isDirty = form.formState.isDirty;
   const invoiceNumberValid = !form.getFieldState("invoice_number").error;
-  const debouncedValues = useDebounce(formValues, 500);
+
+  const draftInvoiceDebounced = useDebounceCallback(
+    (values: InvoiceFormValues) => {
+      if (isDirty && form.watch("customer_id") && invoiceNumberValid) {
+        draftInvoice.execute(transformFormValuesToDraft(values));
+      }
+    },
+    500,
+  );
 
   useEffect(() => {
     const currentFormValues = form.getValues();
-
-    // Only draft the invoice if the customer is selected and the invoice number is valid
-    if (isDirty && form.watch("customer_id") && invoiceNumberValid) {
-      draftInvoice.execute(transformFormValuesToDraft(currentFormValues));
-    }
-  }, [debouncedValues, isDirty, invoiceNumberValid]);
+    draftInvoiceDebounced(currentFormValues);
+  }, [formValues, isDirty, invoiceNumberValid]);
 
   useEffect(() => {
     const updateLastEditedText = () => {

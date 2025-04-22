@@ -6,7 +6,6 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { TZDate } from "@date-fns/tz";
 import { useQuery } from "@tanstack/react-query";
-import { useClickAway } from "@uidotdev/usehooks";
 import {
   addMonths,
   endOfMonth,
@@ -14,12 +13,14 @@ import {
   startOfMonth,
   subMonths,
 } from "date-fns";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import { useOnClickOutside } from "usehooks-ts";
 import { CalendarGrid } from "./tracker/calendar-grid";
 import { CalendarHeader } from "./tracker/calendar-header";
 
 export function TrackerCalendar() {
+  const ref = useRef(null);
   const { data: user } = useUserQuery();
   const trpc = useTRPC();
 
@@ -72,7 +73,7 @@ export function TrackerCalendar() {
     enabled: !selectedDate,
   });
 
-  const ref = useClickAway<HTMLDivElement>(() => {
+  useOnClickOutside(ref, () => {
     if (range && range.length === 1) setParams({ range: null });
   });
 

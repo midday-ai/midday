@@ -15,7 +15,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useInView } from "react-intersection-observer";
-import { useDebouncedCallback } from "use-debounce";
+import { useDebounceCallback } from "usehooks-ts";
 import { InboxDetails } from "./inbox-details";
 import { NoResults } from "./inbox-empty";
 import { InboxItem } from "./inbox-item";
@@ -50,13 +50,13 @@ export function InboxView() {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
-  const debouncedEventHandler = useDebouncedCallback(() => {
+  const debouncedEventHandler = useDebounceCallback(() => {
     refetch();
 
     queryClient.invalidateQueries({
       queryKey: trpc.inbox.getById.queryKey(),
     });
-  }, 300);
+  }, 50);
 
   useRealtime({
     channelName: "realtime_inbox",
@@ -89,13 +89,10 @@ export function InboxView() {
   }, [tableData]);
 
   useEffect(() => {
-    // Set the first item as the selected item
-    const inboxId = tableData.at(0)?.id;
-
-    if (inboxId) {
+    if (!params.inboxId) {
       setParams({
         ...params,
-        inboxId,
+        inboxId: tableData.at(0)?.id,
       });
     }
   }, [tableData]);

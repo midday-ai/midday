@@ -22,13 +22,15 @@ export function ConnectGmail() {
 
   return (
     <SubmitButton
-      className="px-6 py-4 w-full font-medium flex space-x-2 h-[40px]"
+      className="px-6 py-4 w-full font-medium h-[40px]"
       variant="outline"
       onClick={() => connectMutation.mutate({ provider: "gmail" })}
       isSubmitting={connectMutation.isPending}
     >
-      <Icons.Gmail />
-      <span>Connect your Gmail</span>
+      <div className="flex items-center space-x-2">
+        <Icons.Gmail />
+        <span>Connect your Gmail</span>
+      </div>
     </SubmitButton>
   );
 }

@@ -23,6 +23,7 @@ import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
+import { MatchTransaction } from "./match-transaction";
 
 export function InboxDetails() {
   const { setParams, params } = useInboxParams();
@@ -65,6 +66,25 @@ export function InboxDetails() {
           queryKey: trpc.inbox.get.infiniteQueryKey(),
         });
 
+        // Flatten the data from all pages to find the current index and the next item
+        const allInboxes = previousData
+          .flatMap(([, data]) => data?.pages ?? [])
+          .flatMap((page) => page.data ?? []);
+
+        const currentIndex = allInboxes.findIndex((item) => item.id === id);
+        let nextInboxId: string | null = null;
+
+        if (allInboxes.length > 1) {
+          if (currentIndex === allInboxes.length - 1) {
+            // If it was the last item, select the previous one
+            nextInboxId = allInboxes[currentIndex - 1]?.id ?? null;
+          } else if (currentIndex !== -1) {
+            // Otherwise, select the next one
+            nextInboxId = allInboxes[currentIndex + 1]?.id ?? null;
+          }
+        }
+        // If list had 0 or 1 item, or index not found, nextInboxId remains null
+
         // Optimistically update infinite query data
         queryClient.setQueriesData(
           { queryKey: trpc.inbox.get.infiniteQueryKey() },
@@ -79,7 +99,7 @@ export function InboxDetails() {
 
         setParams({
           ...params,
-          inboxId: null,
+          inboxId: nextInboxId,
         });
 
         return { previousData };
@@ -150,7 +170,7 @@ export function InboxDetails() {
   }
 
   return (
-    <div className="h-[calc(100vh-125px)] overflow-hidden flex-col border w-[615px] hidden md:flex shrink-0 -mt-[54px]">
+    <div className="h-[calc(100vh-125px)] overflow-hidden flex-col border w-[614px] hidden md:flex shrink-0 -mt-[54px]">
       <div className="flex items-center p-2">
         <div className="flex items-center gap-2">
           <Button
@@ -202,7 +222,7 @@ export function InboxDetails() {
       <Separator />
 
       {data?.id ? (
-        <div className="flex flex-col flex-grow min-h-0">
+        <div className="flex flex-col flex-grow min-h-0 relative">
           <div className="flex items-start p-4">
             <div className="flex items-start gap-4 text-sm relative">
               {isProcessing ? (
@@ -268,7 +288,12 @@ export function InboxDetails() {
               </div>
             </div>
           </div>
+
           <Separator />
+
+          <div className="absolute bottom-4 left-4 right-4 z-50">
+            <MatchTransaction />
+          </div>
 
           {data?.file_path && (
             <FileViewer

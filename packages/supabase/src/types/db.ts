@@ -2443,14 +2443,19 @@ export type Database = {
         }
         Returns: boolean
       }
-      match_transaction_with_inbox: {
-        Args: { p_transaction_id: string; p_inbox_id?: string }
+      match_transactions_to_inbox: {
+        Args: { p_team_id: string; p_inbox_id: string; p_max_results?: number }
         Returns: {
-          inbox_id: string
           transaction_id: string
-          transaction_name: string
-          score: number
-          file_name: string
+          name: string
+          transaction_amount: number
+          transaction_currency: string
+          transaction_date: string
+          name_score: number
+          amount_score: number
+          currency_score: number
+          date_score: number
+          confidence_score: number
         }[]
       }
       nanoid: {
@@ -2473,6 +2478,41 @@ export type Database = {
           id: string
           avatar_url: string
           full_name: string
+        }[]
+      }
+      search_transactions: {
+        Args: {
+          team_id: string
+          inbox_id?: string
+          query?: string
+          max_results?: number
+        }
+        Returns: {
+          transaction_id: string
+          name: string
+          transaction_amount: number
+          transaction_currency: string
+          transaction_date: string
+          name_score: number
+          amount_score: number
+          currency_score: number
+          date_score: number
+          confidence_score: number
+        }[]
+      }
+      search_transactions_direct: {
+        Args: { p_team_id: string; p_query: string; p_max_results?: number }
+        Returns: {
+          transaction_id: string
+          name: string
+          transaction_amount: number
+          transaction_currency: string
+          transaction_date: string
+          name_score: number
+          amount_score: number
+          currency_score: number
+          date_score: number
+          confidence_score: number
         }[]
       }
       set_limit: {

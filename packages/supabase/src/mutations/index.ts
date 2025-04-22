@@ -499,56 +499,155 @@ export async function joinTeamByInviteCode(supabase: Client, code: string) {
 type UpdateInboxParams = {
   id: string;
   teamId: string;
-  display_name?: string;
   status?: "deleted" | "new" | "archived" | "processing" | "done" | "pending";
-  attachment_id?: string;
-  transaction_id?: string;
 };
 
 export async function updateInbox(supabase: Client, params: UpdateInboxParams) {
   const { id, teamId, ...data } = params;
 
-  const inbox = await supabase
+  return supabase
     .from("inbox")
     .update(data)
     .eq("id", id)
-    .select()
+    .select(`
+      id,
+      file_name,
+      file_path, 
+      display_name,
+      transaction_id,
+      amount,
+      currency,
+      content_type,
+      date,
+      status,
+      created_at,
+      website,
+      description,
+      transaction:transactions(id, amount, currency, name, date)
+    `)
+    .single();
+}
+
+type MatchTransactionParams = {
+  id: string;
+  transactionId: string;
+  teamId: string;
+};
+
+export async function matchTransaction(
+  supabase: Client,
+  params: MatchTransactionParams,
+) {
+  const { id, transactionId, teamId } = params;
+
+  const { data: inboxData } = await supabase
+    .from("inbox")
+    .select(`
+      id,
+      content_type,
+      file_path,
+      size,
+      file_name
+    `)
+    .eq("id", id)
     .single();
 
-  const { data: inboxData } = inbox;
-
-  if (inboxData && params.transaction_id) {
+  if (inboxData) {
     const { data: attachmentData } = await supabase
       .from("transaction_attachments")
       .insert({
         type: inboxData.content_type,
         path: inboxData.file_path,
-        transaction_id: params.transaction_id,
+        transaction_id: transactionId,
         size: inboxData.size,
         name: inboxData.file_name,
         team_id: teamId,
       })
-      .select()
+      .select("id")
       .single();
 
     if (attachmentData) {
-      return supabase
+      await supabase
         .from("inbox")
-        .update({ attachment_id: attachmentData.id })
+        .update({
+          attachment_id: attachmentData.id,
+          transaction_id: transactionId,
+          status: "done",
+        })
         .eq("id", params.id)
         .select()
         .single();
     }
-  } else {
-    if (inboxData?.attachment_id) {
-      return supabase
-        .from("transaction_attachments")
-        .delete()
-        .eq("id", inboxData.attachment_id);
-    }
+
+    return supabase
+      .from("inbox")
+      .select(`
+        id,
+        file_name,
+        file_path, 
+        display_name,
+        transaction_id,
+        amount,
+        currency,
+        content_type,
+        date,
+        status,
+        created_at,
+        website,
+        description,
+        transaction:transactions(id, amount, currency, name, date)
+      `)
+      .eq("id", id)
+      .single();
+  }
+}
+
+export async function unmatchTransaction(supabase: Client, id: string) {
+  const { data: inboxData } = await supabase
+    .from("inbox")
+    .select(`
+      id,
+      transaction_id,
+      attachment_id
+    `)
+    .eq("id", id)
+    .single();
+
+  await supabase
+    .from("inbox")
+    .update({ transaction_id: null, attachment_id: null, status: "pending" })
+    .eq("id", id)
+    .select("transaction_id")
+    .single();
+
+  // Delete transaction attachment
+  if (inboxData?.transaction_id) {
+    await supabase
+      .from("transaction_attachments")
+      .delete()
+      .eq("transaction_id", inboxData?.transaction_id);
   }
 
-  return inbox;
+  return supabase
+    .from("inbox")
+    .select(`
+      id,
+      file_name,
+      file_path, 
+      display_name,
+      transaction_id,
+      amount,
+      currency,
+      content_type,
+      date,
+      status,
+      created_at,
+      website,
+      description,
+      transaction:transactions(id, amount, currency, name, date)
+    `)
+    .eq("id", id)
+    .single();
 }
 
 type CreateTransactionCategoriesParams = {

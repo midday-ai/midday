@@ -1359,3 +1359,37 @@ export async function getAvailablePlansQuery(supabase: Client, teamId: string) {
     },
   };
 }
+
+export type SearchTransactionMatchParams = {
+  teamId: string;
+  inboxId?: string;
+  query?: string;
+  maxResults?: number;
+};
+
+export async function searchTransactionMatchQuery(
+  supabase: Client,
+  params: SearchTransactionMatchParams,
+) {
+  const { teamId, query, inboxId, maxResults = 5 } = params;
+
+  if (query) {
+    return supabase.rpc("search_transactions_direct", {
+      p_team_id: teamId,
+      p_query: query,
+      p_max_results: maxResults,
+    });
+  }
+
+  if (inboxId) {
+    return supabase.rpc("match_transactions_to_inbox", {
+      p_team_id: teamId,
+      p_inbox_id: inboxId,
+      p_max_results: maxResults,
+    });
+  }
+
+  return {
+    data: [],
+  };
+}

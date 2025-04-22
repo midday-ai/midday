@@ -10,6 +10,7 @@ import {
   getSimilarTransactions,
   getTransactionQuery,
   getTransactionsQuery,
+  searchTransactionMatchQuery,
 } from "@midday/supabase/queries";
 import { z } from "zod";
 
@@ -171,6 +172,25 @@ export const transactionsRouter = createTRPCRouter({
       const { data } = await updateSimilarTransactionsRecurring(supabase, {
         id: input.id,
         team_id: teamId!,
+      });
+
+      return data;
+    }),
+
+  searchTransactionMatch: protectedProcedure
+    .input(
+      z.object({
+        query: z.string().optional(),
+        inboxId: z.string().uuid().optional(),
+        maxResults: z.number().optional(),
+      }),
+    )
+    .query(async ({ input, ctx: { supabase, teamId } }) => {
+      const { data } = await searchTransactionMatchQuery(supabase, {
+        query: input.query,
+        teamId: teamId!,
+        inboxId: input.inboxId,
+        maxResults: input.maxResults,
       });
 
       return data;

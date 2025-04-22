@@ -6,7 +6,6 @@ import { useTRPC } from "@/trpc/client";
 import { sortDates } from "@/utils/tracker";
 import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
-import { useClickAway } from "@uidotdev/usehooks";
 import {
   eachDayOfInterval,
   endOfMonth,
@@ -17,11 +16,13 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useOnClickOutside } from "usehooks-ts";
 import { TrackerHeader } from "./tracker-header";
 import { TrackerIndicator } from "./tracker-indicator";
 
 export function TrackerWidget() {
+  const ref = useRef(null);
   const {
     date: currentDate,
     range,
@@ -71,7 +72,7 @@ export function TrackerWidget() {
     }),
   });
 
-  const ref = useClickAway<HTMLDivElement>(() => {
+  useOnClickOutside(ref, () => {
     if (range?.length === 1) {
       setParams({ range: null });
     }

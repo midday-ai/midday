@@ -7,13 +7,14 @@ import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useClickAway } from "@uidotdev/usehooks";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useOnClickOutside } from "usehooks-ts";
 
 export function TeamDropdown() {
+  const ref = useRef(null);
   const { data: user } = useUserQuery();
   const queryClient = useQueryClient();
 
@@ -48,7 +49,7 @@ export function TeamDropdown() {
       return a.team.id.localeCompare(b.team.id);
     }) ?? [];
 
-  const ref = useClickAway<HTMLDivElement>(() => {
+  useOnClickOutside(() => {
     if (!isChangingTeam) {
       setActive(false);
     }

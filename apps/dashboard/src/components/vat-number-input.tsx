@@ -9,10 +9,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { useDebounce } from "@uidotdev/usehooks";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
+import { useDebounceValue } from "usehooks-ts";
 
 type Props = {
   value: string;
@@ -26,7 +26,7 @@ export function VatNumberInput({
   countryCode,
   ...props
 }: Props) {
-  const [vatNumber, setVatNumber] = useState(value || "");
+  const [vatNumber, setVatNumber] = useDebounceValue(value || "", 100);
   const [companyName, setCompanyName] = useState("");
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
 
@@ -39,20 +39,14 @@ export function VatNumberInput({
     },
   });
 
-  const debouncedVatNumber = useDebounce(vatNumber, 300);
-
   useEffect(() => {
-    if (
-      debouncedVatNumber.length > 7 &&
-      countryCode &&
-      value !== debouncedVatNumber
-    ) {
+    if (vatNumber.length > 7 && countryCode && value !== vatNumber) {
       validateVatNumber.execute({
-        vat_number: debouncedVatNumber,
+        vat_number: vatNumber,
         country_code: countryCode,
       });
     }
-  }, [debouncedVatNumber, countryCode]);
+  }, [vatNumber, countryCode]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;

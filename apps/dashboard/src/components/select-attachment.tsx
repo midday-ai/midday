@@ -1,8 +1,7 @@
 import { useTRPC } from "@/trpc/client";
 import { Combobox } from "@midday/ui/combobox";
 import { useQuery } from "@tanstack/react-query";
-import { useDebounce } from "@uidotdev/usehooks";
-import { useState } from "react";
+import { useDebounceValue } from "usehooks-ts";
 import { FileViewer } from "./file-viewer";
 
 type Props = {
@@ -11,17 +10,16 @@ type Props = {
 };
 
 export function SelectAttachment({ placeholder, onSelect }: Props) {
-  const [query, setQuery] = useState("");
+  const [debouncedValue, setValue] = useDebounceValue("", 100);
 
-  const debouncedSearchTerm = useDebounce(query, 50);
   const trpc = useTRPC();
 
   const { data: items, isLoading } = useQuery({
     ...trpc.inbox.search.queryOptions({
-      query: debouncedSearchTerm,
+      query: debouncedValue,
       limit: 10,
     }),
-    enabled: Boolean(debouncedSearchTerm),
+    enabled: Boolean(debouncedValue),
   });
 
   const options = items?.map((item) => ({
@@ -43,7 +41,7 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
       className="border border-border p-2 pl-10"
       placeholder={placeholder}
       onValueChange={(query) => {
-        setQuery(query);
+        setValue(query);
       }}
       onSelect={onSelect}
       options={isLoading ? [] : options}

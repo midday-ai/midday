@@ -16,10 +16,10 @@ import {
 } from "@midday/ui/dialog";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
-import { useDebounce, useScript } from "@uidotdev/usehooks";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
+import { useDebounceCallback, useScript } from "usehooks-ts";
 import { BankLogo } from "../bank-logo";
 import { ConnectBankProvider } from "../connect-bank-provider";
 import { CountrySelector } from "../country-selector";
@@ -125,7 +125,6 @@ export function ConnectTransactionsModal({
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState<Institution[]>([]);
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
-
   const {
     countryCode,
     q: query,
@@ -134,7 +133,6 @@ export function ConnectTransactionsModal({
   } = useConnectParams(initialCountryCode);
 
   const isOpen = step === "connect";
-  const debouncedSearchTerm = useDebounce(query, 200);
 
   // NOTE: Load SDKs here so it's not unmonted
   useScript("https://cdn.teller.io/connect/connect.js", {
@@ -183,10 +181,9 @@ export function ConnectTransactionsModal({
     });
   };
 
-  async function fetchData(query?: string) {
+  const fetchData = useDebounceCallback(async (query?: string) => {
     try {
       setLoading(true);
-      // Fix the destructuring to handle the response structure correctly
       const response = await getInstitutions({ countryCode, query });
       setLoading(false);
 
@@ -195,7 +192,7 @@ export function ConnectTransactionsModal({
       setLoading(false);
       setResults([]);
     }
-  }
+  }, 200);
 
   useEffect(() => {
     // Fix the condition by properly grouping the expressions
@@ -209,9 +206,9 @@ export function ConnectTransactionsModal({
 
   useEffect(() => {
     if (isOpen) {
-      fetchData(debouncedSearchTerm ?? undefined);
+      fetchData(query ?? undefined);
     }
-  }, [debouncedSearchTerm, isOpen]);
+  }, [query, isOpen]);
 
   useEffect(() => {
     async function createLinkToken() {

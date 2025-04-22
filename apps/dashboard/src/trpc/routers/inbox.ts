@@ -1,6 +1,10 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import type { processAttachment } from "@midday/jobs/tasks/inbox/process-attachment";
-import { deleteInbox } from "@midday/supabase/mutations";
+import {
+  deleteInbox,
+  matchTransaction,
+  unmatchTransaction,
+} from "@midday/supabase/mutations";
 import { updateInbox } from "@midday/supabase/mutations";
 import {
   getInboxByIdQuery,
@@ -96,5 +100,22 @@ export const inboxRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx: { supabase, teamId }, input }) => {
       return updateInbox(supabase, { ...input, teamId: teamId! });
+    }),
+
+  matchTransaction: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        transactionId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx: { supabase, teamId }, input }) => {
+      return matchTransaction(supabase, { ...input, teamId: teamId! });
+    }),
+
+  unmatchTransaction: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx: { supabase }, input }) => {
+      return unmatchTransaction(supabase, input.id);
     }),
 });

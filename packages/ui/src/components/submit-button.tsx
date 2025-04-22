@@ -1,4 +1,3 @@
-import { Loader2 } from "lucide-react";
 import { cn } from "../utils";
 import { Button, type ButtonProps } from "./button";
 import { Spinner } from "./spinner";

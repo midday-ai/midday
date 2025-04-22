@@ -1,5 +1,6 @@
 import { cn } from "@midday/ui/cn";
-import { useClickAway } from "@uidotdev/usehooks";
+import { useRef } from "react";
+import { useOnClickOutside } from "usehooks-ts";
 import { SidebarItems } from "./sidebar-items";
 import { Toolbar } from "./toolbar";
 
@@ -18,7 +19,9 @@ export function SidebarList({
   onSelect,
   onNewChat,
 }: Props) {
-  const ref = useClickAway(() => {
+  const ref = useRef(null);
+
+  useOnClickOutside(ref, () => {
     setExpanded(false);
   });
 
@@ -28,7 +31,7 @@ export function SidebarList({
         ref={ref}
         className={cn(
           "w-[220px] h-screen md:h-[477px] bg-background dark:bg-[#131313] absolute -left-[220px] top-0 bottom-[1px] duration-200 ease-out transition-all border-border border-r-[1px] z-20 invisible",
-          isExpanded && "visible translate-x-full"
+          isExpanded && "visible translate-x-full",
         )}
       >
         <SidebarItems onSelect={onSelect} chatId={chatId} />
@@ -39,7 +42,7 @@ export function SidebarList({
       <div
         className={cn(
           "duration-200 ease-out transition-all z-10 fixed left-[1px] right-[1px] top-[1px] bottom-[1px] invisible opacity-0 bg-background",
-          isExpanded && "visible opacity-80"
+          isExpanded && "visible opacity-80",
         )}
       />
     </div>

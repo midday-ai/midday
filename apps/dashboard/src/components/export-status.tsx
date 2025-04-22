@@ -12,22 +12,22 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
-import ms from "ms";
+import { addDays, addYears } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
 const options = [
   {
     label: "Expire in 1 week",
-    expireIn: ms("7d"),
+    expireIn: addDays(new Date(), 7),
   },
   {
     label: "Expire in 1 month",
-    expireIn: ms("30d"),
+    expireIn: addDays(new Date(), 30),
   },
   {
     label: "Expire in 1 year",
-    expireIn: ms("1y"),
+    expireIn: addYears(new Date(), 1),
   },
 ];
 
