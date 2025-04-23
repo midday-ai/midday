@@ -1,7 +1,6 @@
 import { createClient } from "@midday/supabase/server";
 import type { NextRequest } from "next/server";
 import { pdf } from "pdf-to-img";
-import * as PDFJS from "pdfjs-dist";
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient({ admin: true });
