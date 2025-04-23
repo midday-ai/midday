@@ -1,6 +1,26 @@
+import { createRequire } from "node:module";
 import path from "node:path";
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import {
+  GlobalWorkerOptions,
+  getDocument,
+} from "pdfjs-dist/legacy/build/pdf.mjs";
 import { NodeCanvasFactory } from "./canvas-factory";
+
+// Resolve pdfjs-dist worker path directly
+const require = createRequire(import.meta.url);
+try {
+  const workerSrcPath = require.resolve(
+    "pdfjs-dist/legacy/build/pdf.worker.mjs",
+  );
+  GlobalWorkerOptions.workerSrc = workerSrcPath;
+  console.log("PDF.js worker source set to:", workerSrcPath);
+} catch (error) {
+  console.error(
+    "Failed to resolve pdf.worker.mjs path. PDF rendering might fail.",
+    error,
+  );
+  // Optionally, set a fallback or handle the error appropriately
+}
 
 const pdfjsPath = path.join(process.cwd(), "node_modules/pdfjs-dist");
 
