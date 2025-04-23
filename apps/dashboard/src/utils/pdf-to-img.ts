@@ -1,16 +1,14 @@
-import { createRequire } from "node:module";
-import path from "node:path";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 
-const pdfjsPath = path.dirname(
-  createRequire(import.meta.url).resolve("pdfjs-dist/package.json"),
-);
+// const pdfjsPath = path.dirname(
+//   createRequire(import.meta.url).resolve("pdfjs-dist/package.json"),
+// );
 
 export async function getPdfImage(data: string) {
   const loadingTask = getDocument({
     data,
-    standardFontDataUrl: path.join(pdfjsPath, `standard_fonts${path.sep}`),
-    cMapUrl: path.join(pdfjsPath, `cmaps${path.sep}`),
+    // standardFontDataUrl: path.join(pdfjsPath, `standard_fonts${path.sep}`),
+    // cMapUrl: path.join(pdfjsPath, `cmaps${path.sep}`),
     cMapPacked: true,
   });
 
