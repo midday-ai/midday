@@ -1,8 +1,6 @@
 import { getPdfImage } from "@/utils/pdf-to-img";
 import { createClient } from "@midday/supabase/server";
 import type { NextRequest } from "next/server";
-// @ts-expect-error
-import * as PDFJS from "pdfjs-dist/build/pdf.min.mjs";
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient({ admin: true });
