@@ -1,23 +1,14 @@
-import { createRequire } from "node:module";
-import path from "node:path";
 import {
   GlobalWorkerOptions,
   getDocument,
 } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { NodeCanvasFactory } from "./canvas-factory";
 
-// Resolve pdfjs-dist path
-const require = createRequire(import.meta.url);
-const pdfjsDistPath = path.dirname(require.resolve("pdfjs-dist/package.json"));
+// Set worker source using a relative path - assuming bundler includes it
+// This might require adjustment based on build output.
+GlobalWorkerOptions.workerSrc = "pdfjs-dist/legacy/build/pdf.worker.mjs";
 
-// Set worker source
-// Make sure 'pdfjs-dist' is installed and accessible
-GlobalWorkerOptions.workerSrc = path.join(
-  pdfjsDistPath,
-  "legacy/build/pdf.worker.mjs",
-);
-
-export async function getPdfImage(data: string | Uint8Array | Buffer) {
+export async function getPdfImage(data: ArrayBuffer) {
   const canvasFactory = new NodeCanvasFactory();
   const loadingTask = getDocument({
     data,

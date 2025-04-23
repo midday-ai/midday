@@ -27,6 +27,33 @@ export const PLANS = {
   },
 };
 
+export const DISCOUNTS = {
+  production: {
+    public_beta: {
+      id: "ced3af53-fb27-41f5-abdd-070f382995b8",
+      name: "Public Beta",
+    },
+  },
+  sandbox: {
+    public_beta: {
+      id: "fb5e65fc-39b2-4212-a51a-fa6d1bd813e6",
+      name: "Public Beta",
+    },
+  },
+};
+
+export const getDiscount = (planType?: string | null) => {
+  // Starter plan doesn't have a discount
+  if (!planType || planType === "starter") {
+    return null;
+  }
+
+  const discounts = DISCOUNTS[POLAR_ENVIRONMENT as keyof typeof DISCOUNTS];
+
+  // Change this to null after the public beta
+  return discounts.public_beta;
+};
+
 export const getPlans = () => {
   return PLANS[POLAR_ENVIRONMENT as keyof typeof PLANS];
 };

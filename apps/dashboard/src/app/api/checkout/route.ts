@@ -32,7 +32,7 @@ export const GET = async (req: NextRequest) => {
     throw new Error("Team not found");
   }
 
-  const discountId = getDiscount(userData.data.team.created_at, planType);
+  const discountId = getDiscount(planType);
 
   const successUrl = new URL("/api/checkout/success", req.nextUrl.origin);
   successUrl.searchParams.set("redirectPath", redirectPath);

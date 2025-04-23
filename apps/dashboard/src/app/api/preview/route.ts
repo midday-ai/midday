@@ -28,11 +28,6 @@ export async function GET(request: NextRequest) {
     const pdfBuffer = await pdfBlob.arrayBuffer();
     const document = await getPdfImage(pdfBuffer);
 
-    // Get the first page (page numbers are 1-based)
-    // if (document.length < 1) {
-    //   throw new Error("PDF document is empty, cannot generate preview.");
-    // }
-
     return new Response(document, {
       headers: {
         "Content-Type": "image/png",
