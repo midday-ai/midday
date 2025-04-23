@@ -3,11 +3,16 @@
 import { dub } from "@/utils/dub";
 import { LogEvents } from "@midday/events/events";
 import { share } from "@midday/supabase/storage";
+import { z } from "zod";
 import { authActionClient } from "./safe-action";
-import { shareFileSchema } from "./schema";
 
 export const shareFileAction = authActionClient
-  .schema(shareFileSchema)
+  .schema(
+    z.object({
+      fullPath: z.string(),
+      expireIn: z.number(),
+    }),
+  )
   .metadata({
     name: "share-file",
     track: {
@@ -15,10 +20,10 @@ export const shareFileAction = authActionClient
       channel: LogEvents.ShareFile.channel,
     },
   })
-  .action(async ({ parsedInput: value, ctx: { supabase, user } }) => {
+  .action(async ({ parsedInput: value, ctx: { supabase } }) => {
     const response = await share(supabase, {
       bucket: "vault",
-      path: `${user.team_id}/${value.filepath}`,
+      path: value.fullPath,
       expireIn: value.expireIn,
       options: {
         download: true,

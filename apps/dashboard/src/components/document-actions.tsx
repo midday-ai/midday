@@ -7,7 +7,7 @@ import { useCopyToClipboard } from "usehooks-ts";
 
 type Props = {
   showDelete?: boolean;
-  downloadUrl?: string;
+  downloadUrl: string;
 };
 
 export function DocumentActions({ showDelete = false, downloadUrl }: Props) {
@@ -31,17 +31,11 @@ export function DocumentActions({ showDelete = false, downloadUrl }: Props) {
 
   return (
     <div className="flex flex-row">
-      {downloadUrl && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            window.open(downloadUrl, "_blank");
-          }}
-        >
+      <a href={downloadUrl} download>
+        <Button variant="ghost" size="icon">
           <Icons.ArrowCoolDown className="size-4" />
         </Button>
-      )}
+      </a>
 
       <Button variant="ghost" size="icon" onClick={handleCopy}>
         {isCopied ? (

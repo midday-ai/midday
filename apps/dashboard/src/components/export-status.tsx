@@ -19,15 +19,15 @@ import { useEffect, useState } from "react";
 const options = [
   {
     label: "Expire in 1 week",
-    expireIn: addDays(new Date(), 7),
+    expireIn: Math.floor(addDays(new Date(), 7).getTime() / 1000),
   },
   {
     label: "Expire in 1 month",
-    expireIn: addDays(new Date(), 30),
+    expireIn: Math.floor(addDays(new Date(), 30).getTime() / 1000),
   },
   {
     label: "Expire in 1 year",
-    expireIn: addYears(new Date(), 1),
+    expireIn: Math.floor(addYears(new Date(), 1).getTime() / 1000),
   },
 ];
 
@@ -60,8 +60,8 @@ export function ExportStatus() {
     dismiss(toastId);
   };
 
-  const handleOnShare = ({ expireIn, filename }) => {
-    shareFile.execute({ expireIn, filepath: `exports/${filename}` });
+  const handleOnShare = ({ expireIn, fullPath }) => {
+    shareFile.execute({ expireIn, fullPath });
     dismiss(toastId);
   };
 
@@ -120,7 +120,7 @@ export function ExportStatus() {
                     onClick={() =>
                       handleOnShare({
                         expireIn: option.expireIn,
-                        filename: result.fileName,
+                        fullPath: result.fullPath,
                       })
                     }
                   >
@@ -131,7 +131,7 @@ export function ExportStatus() {
             </DropdownMenu>
 
             <a
-              href={`/api/download/file?path=exports/${result.fileName}&filename=${result.fileName}`}
+              href={`/api/download/file?path=${result.fullPath}&filename=${result.fileName}`}
               download
             >
               <Button size="sm" onClick={handleOnDownload}>

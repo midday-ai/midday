@@ -88,11 +88,6 @@ export const mfaVerifySchema = z.object({
   code: z.string(),
 });
 
-export const shareFileSchema = z.object({
-  filepath: z.string(),
-  expireIn: z.number(),
-});
-
 export const connectBankAccountSchema = z.object({
   referenceId: z.string().nullable().optional(), // GoCardLess
   accessToken: z.string().nullable().optional(), // Teller

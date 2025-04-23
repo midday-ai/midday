@@ -194,9 +194,9 @@ export function InboxDetails() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem>
                 <a
-                  href={`/api/download/file?path=${data?.file_path
-                    ?.slice(1)
-                    .join("/")}&filename=${data?.file_name}`}
+                  href={`/api/download/file?path=${data?.file_path?.join(
+                    "/",
+                  )}&filename=${data?.file_name}`}
                   download
                 >
                   Download

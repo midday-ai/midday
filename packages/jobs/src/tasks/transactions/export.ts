@@ -123,6 +123,7 @@ export const exportTransactions = schemaTask({
 
     return {
       filePath,
+      fullPath: `${path}/${fileName}`,
       fileName,
       totalItems: rows.length,
     };
