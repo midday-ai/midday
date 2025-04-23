@@ -1,26 +1,41 @@
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { createRequire } from "node:module";
+import path from "node:path";
+import {
+  GlobalWorkerOptions,
+  getDocument,
+} from "pdfjs-dist/legacy/build/pdf.mjs";
+import { NodeCanvasFactory } from "./canvas-factory";
 
-// const pdfjsPath = path.dirname(
-//   createRequire(import.meta.url).resolve("pdfjs-dist/package.json"),
-// );
+// Resolve pdfjs-dist path
+const require = createRequire(import.meta.url);
+const pdfjsDistPath = path.dirname(require.resolve("pdfjs-dist/package.json"));
 
-export async function getPdfImage(data: string) {
+// Set worker source
+// Make sure 'pdfjs-dist' is installed and accessible
+GlobalWorkerOptions.workerSrc = path.join(
+  pdfjsDistPath,
+  "legacy/build/pdf.worker.mjs",
+);
+
+export async function getPdfImage(data: string | Uint8Array | Buffer) {
+  const canvasFactory = new NodeCanvasFactory();
   const loadingTask = getDocument({
     data,
-    // standardFontDataUrl: path.join(pdfjsPath, `standard_fonts${path.sep}`),
-    // cMapUrl: path.join(pdfjsPath, `cmaps${path.sep}`),
     cMapPacked: true,
+    isEvalSupported: false, // Generally recommended for Node.js
   });
 
   try {
     const pdfDocument = await loadingTask.promise;
     console.log("# PDF document loaded.");
 
+    // Use page 1 for the image
     const page = await pdfDocument.getPage(1);
 
-    const canvasFactory = pdfDocument.canvasFactory;
+    // Use a higher scale for better resolution
     const viewport = page.getViewport({ scale: 2.0 });
 
+    // Use the explicitly created canvas factory
     const canvasAndContext = canvasFactory.create(
       viewport.width,
       viewport.height,
@@ -29,14 +44,23 @@ export async function getPdfImage(data: string) {
     const renderContext = {
       canvasContext: canvasAndContext.context,
       viewport,
+      canvasFactory, // Pass factory to render context
     };
 
+    // @ts-expect-error
     const renderTask = page.render(renderContext);
     await renderTask.promise;
 
-    return canvasAndContext.canvas.toBuffer("image/png");
+    // Return image as PNG buffer
+    const canvas = canvasAndContext.canvas;
+    return canvas.toBuffer("image/png");
   } catch (error) {
-    console.error(error);
+    console.error("Error processing PDF:", error);
+    // Consider more specific error handling or re-throwing
     return null;
+  } finally {
+    // Clean up resources
+    // loadingTask.destroy(); // This method might not exist on the task, check pdfDocument
+    // pdfDocument?.destroy(); // Ensure cleanup if pdfDocument was loaded
   }
 }
