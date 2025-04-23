@@ -36,7 +36,6 @@
   },
   "dependencies": {
     "heic-convert": "1.2.4",
-    "pdf-to-img": "^4.4.0",
     "@midday/engine": "workspace:*",
     "@midday/email": "workspace:*",
     "@midday/supabase": "workspace:*",
