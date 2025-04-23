@@ -3,6 +3,7 @@ import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 import { convertHeic } from "../document/convert-heic";
+import { processDocument } from "../document/process-document";
 
 export const processAttachment = schemaTask({
   id: "process-attachment",
@@ -84,6 +85,12 @@ export const processAttachment = schemaTask({
         .eq("id", inboxData.id)
         .select()
         .single();
+
+      // NOTE: Process the document for classification
+      await processDocument.trigger({
+        mimetype,
+        file_path,
+      });
 
       // TODO: Send event to match inbox
     } catch {

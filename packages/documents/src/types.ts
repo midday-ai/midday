@@ -27,3 +27,7 @@ export interface Attachment {
 }
 
 export type Attachments = Attachment[];
+
+export type DocumentClassifierRequest = {
+  content: string;
+};

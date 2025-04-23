@@ -353,10 +353,84 @@ export type Database = {
           },
         ]
       }
+      document_tag_assignments: {
+        Row: {
+          document_id: string
+          tag_id: string
+        }
+        Insert: {
+          document_id: string
+          tag_id: string
+        }
+        Update: {
+          document_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_tag_assignments_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_tag_assignments_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "document_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_tags: {
+        Row: {
+          created_at: string
+          embedding: string | null
+          id: string
+          slug: string
+          team_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          slug: string
+          team_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          slug?: string
+          team_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_tags_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "document_tags_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           body: string | null
+          content: string | null
           created_at: string | null
+          date: string | null
           fts: unknown | null
           id: string
           metadata: Json | null
@@ -365,13 +439,16 @@ export type Database = {
           owner_id: string | null
           parent_id: string | null
           path_tokens: string[] | null
+          summary: string | null
           tag: string | null
           team_id: string | null
           title: string | null
         }
         Insert: {
           body?: string | null
+          content?: string | null
           created_at?: string | null
+          date?: string | null
           fts?: unknown | null
           id?: string
           metadata?: Json | null
@@ -380,13 +457,16 @@ export type Database = {
           owner_id?: string | null
           parent_id?: string | null
           path_tokens?: string[] | null
+          summary?: string | null
           tag?: string | null
           team_id?: string | null
           title?: string | null
         }
         Update: {
           body?: string | null
+          content?: string | null
           created_at?: string | null
+          date?: string | null
           fts?: unknown | null
           id?: string
           metadata?: Json | null
@@ -395,6 +475,7 @@ export type Database = {
           owner_id?: string | null
           parent_id?: string | null
           path_tokens?: string[] | null
+          summary?: string | null
           tag?: string | null
           team_id?: string | null
           title?: string | null

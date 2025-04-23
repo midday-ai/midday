@@ -35,12 +35,13 @@
     "./tasks/reconnect/connection": "./src/tasks/reconnect/connection.ts"
   },
   "dependencies": {
-    "heic-convert": "1.2.4",
-    "@midday/engine": "workspace:*",
-    "@midday/email": "workspace:*",
-    "@midday/supabase": "workspace:*",
     "@fast-csv/format": "5.0.2",
+    "@midday/email": "workspace:*",
+    "@midday/engine": "workspace:*",
+    "@midday/supabase": "workspace:*",
+    "@sindresorhus/slugify": "^2.2.1",
     "@zip.js/zip.js": "2.7.60",
+    "heic-convert": "1.2.4",
     "sharp": "^0.34.1"
   },
   "devDependencies": {

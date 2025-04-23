@@ -46,3 +46,10 @@ export function getDocumentTypeFromMimeType(mimetype: string): string {
       return "receipt";
   }
 }
+
+export function getContentSample(text: string, maxTokens = 1200): string {
+  const words = text.split(/\s+/);
+  const approxWordsPerToken = 0.75; // Rough estimate
+  const maxWords = Math.floor(maxTokens / approxWordsPerToken);
+  return words.slice(0, maxWords).join(" ");
+}

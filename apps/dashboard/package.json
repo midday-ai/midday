@@ -48,7 +48,7 @@
     "change-case": "^5.4.4",
     "date-fns": "^4.1.0",
     "dub": "^0.61.8",
-    "framer-motion": "^12.7.5",
+    "framer-motion": "^12.8.0",
     "geist": "^1.3.1",
     "little-date": "^1.0.0",
     "lottie-react": "^2.4.1",
