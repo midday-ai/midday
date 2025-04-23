@@ -16,14 +16,15 @@ const DynamicPdfViewer = dynamic(
 type Props = {
   mimeType: string | null;
   url: string;
+  maxWidth?: number;
 };
 
-export function FileViewer({ mimeType, url }: Props) {
+export function FileViewer({ mimeType, url, maxWidth }: Props) {
   if (
     mimeType === "application/pdf" ||
     mimeType === "application/octet-stream"
   ) {
-    return <DynamicPdfViewer url={url} key={url} />;
+    return <DynamicPdfViewer url={url} key={url} maxWidth={maxWidth} />;
   }
 
   if (mimeType?.startsWith("image/")) {

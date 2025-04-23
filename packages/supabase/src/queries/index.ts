@@ -1393,3 +1393,29 @@ export async function searchTransactionMatchQuery(
     data: [],
   };
 }
+
+export type GetDocumentQueryParams = {
+  teamId: string;
+  id?: string;
+  filePath?: string;
+};
+
+export async function getDocumentQuery(
+  supabase: Client,
+  params: GetDocumentQueryParams,
+) {
+  const query = supabase
+    .from("documents")
+    .select("id, name, path_tokens, metadata, created_at")
+    .eq("team_id", params.teamId);
+
+  if (params.id) {
+    query.eq("id", params.id);
+  }
+
+  if (params.filePath) {
+    query.eq("name", params.filePath);
+  }
+
+  return query.single();
+}

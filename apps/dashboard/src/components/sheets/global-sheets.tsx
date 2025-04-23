@@ -9,6 +9,7 @@ import { use } from "react";
 import { TrialEndedModal } from "../modals/trial-ended-modal";
 import { CustomerCreateSheet } from "./customer-create-sheet";
 import { CustomerEditSheet } from "./customer-edit-sheet";
+import { DocumentSheet } from "./document-sheet";
 import { TrackerCreateSheet } from "./tracker-create-sheet";
 import { TrackerScheduleSheet } from "./tracker-schedule-sheet";
 import { TrackerUpdateSheet } from "./tracker-update-sheet";
@@ -38,6 +39,7 @@ export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
       <SelectBankAccountsModal />
       <ImportModal currencies={uniqueCurrencies} defaultCurrency={currency} />
       <TrialEndedModal />
+      <DocumentSheet />
 
       {/* <InvoiceCreateSheetServer teamId={userData?.team_id} />  */}
     </>

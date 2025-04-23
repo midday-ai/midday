@@ -5,10 +5,15 @@ import { pdf } from "pdf-to-img";
 export async function GET(request: NextRequest) {
   const supabase = await createClient({ admin: true });
   const { searchParams } = new URL(request.url);
-  const filePath = searchParams.get("filePath");
+  let filePath = searchParams.get("filePath");
 
   if (!filePath) {
     return new Response("No file path provided", { status: 400 });
+  }
+
+  // Remove 'vault/' prefix if it exists
+  if (filePath.startsWith("vault/")) {
+    filePath = filePath.substring("vault/".length);
   }
 
   const { data: pdfBlob, error: downloadError } = await supabase.storage

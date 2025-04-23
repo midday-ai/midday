@@ -11,9 +11,10 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.vers
 
 interface PdfViewerProps {
   url: string;
+  maxWidth?: number;
 }
 
-export function PdfViewer({ url }: PdfViewerProps) {
+export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
   const [numPages, setNumPages] = useState<number>();
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
@@ -23,7 +24,7 @@ export function PdfViewer({ url }: PdfViewerProps) {
   return (
     <div
       className={cn(
-        "flex flex-col w-full h-full pdf-viewer overflow-hidden",
+        "flex flex-col w-full h-full overflow-hidden",
         numPages && "bg-white",
       )}
     >
@@ -38,6 +39,7 @@ export function PdfViewer({ url }: PdfViewerProps) {
           {numPages &&
             Array.from(new Array(numPages), (_, index) => (
               <Page
+                width={maxWidth}
                 key={`${url}_${index + 1}`}
                 pageNumber={index + 1}
                 renderAnnotationLayer={false}

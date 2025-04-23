@@ -1,4 +1,7 @@
-import { FileViewer } from "@/components/file-viewer";
+"use client";
+
+import { FilePreview } from "@/components/file-preview";
+import { useDocumentParams } from "@/hooks/use-document-params";
 import { formatSize } from "@/utils/format";
 import { Button } from "@midday/ui/button";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -10,6 +13,8 @@ type Props = {
 };
 
 export function AttachmentItem({ file, onDelete }: Props) {
+  const { setParams } = useDocumentParams();
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex space-x-4 items-center">
@@ -17,10 +22,16 @@ export function AttachmentItem({ file, onDelete }: Props) {
           {file.isUploading ? (
             <Skeleton className="w-full h-full" />
           ) : (
-            <FileViewer
-              mimeType={file.type}
-              url={`/api/proxy?filePath=vault/${file?.path?.join("/")}`}
-            />
+            <button
+              onClick={() => setParams({ filePath: file.path.join("/") })}
+              className="w-full h-full"
+              type="button"
+            >
+              <FilePreview
+                mimeType={file.type}
+                filePath={`${file?.path?.join("/")}`}
+              />
+            </button>
           )}
         </div>
 
