@@ -2,6 +2,7 @@ import { createClient } from "@midday/supabase/server";
 import type { NextRequest } from "next/server";
 import { pdf } from "pdf-to-img";
 import * as pdfjs from "pdfjs-dist/build/pdf.mjs";
+import "@ungap/with-resolvers";
 
 export async function GET(request: NextRequest) {
   await import("pdfjs-dist/build/pdf.worker.min.mjs");
