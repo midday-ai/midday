@@ -1,11 +1,8 @@
+import { getPdfImage } from "@/utils/pdf-to-img";
 import { createClient } from "@midday/supabase/server";
 import type { NextRequest } from "next/server";
-import { pdf } from "pdf-to-img";
-import * as pdfjs from "pdfjs-dist/build/pdf.mjs";
 
 export async function GET(request: NextRequest) {
-  await import("pdfjs-dist/build/pdf.worker.min.mjs");
-
   const supabase = await createClient({ admin: true });
   const { searchParams } = new URL(request.url);
   let filePath = searchParams.get("filePath");
@@ -28,17 +25,15 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const pdfBuffer = Buffer.from(await pdfBlob.arrayBuffer());
-    const document = await pdf(pdfBuffer, { scale: 2 });
+    const pdfBuffer = await pdfBlob.arrayBuffer();
+    const document = await getPdfImage(pdfBuffer);
 
     // Get the first page (page numbers are 1-based)
-    if (document.length < 1) {
-      throw new Error("PDF document is empty, cannot generate preview.");
-    }
+    // if (document.length < 1) {
+    //   throw new Error("PDF document is empty, cannot generate preview.");
+    // }
 
-    const firstPageBuffer = await document.getPage(1);
-
-    return new Response(firstPageBuffer, {
+    return new Response(document, {
       headers: {
         "Content-Type": "image/png",
         "Cache-Control": "public, max-age=31536000, immutable",
