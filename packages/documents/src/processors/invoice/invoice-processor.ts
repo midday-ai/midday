@@ -1,6 +1,8 @@
 import { mistral } from "@ai-sdk/mistral";
 import { generateObject } from "ai";
-import { z } from "zod";
+import { extractText, getDocumentProxy } from "unpdf";
+import { invoicePrompt } from "../../prompt";
+import { invoiceSchema } from "../../schema";
 import type { GetDocumentRequest } from "../../types";
 import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
 
@@ -10,107 +12,74 @@ export class InvoiceProcessor {
       throw new Error("Document URL is required");
     }
 
+    try {
+      const result = await generateObject({
+        model: mistral("mistral-small-latest"),
+        schema: invoiceSchema,
+        messages: [
+          {
+            role: "system",
+            content: invoicePrompt,
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "file",
+                data: documentUrl,
+                mimeType: "application/pdf",
+              },
+            ],
+          },
+        ],
+        providerOptions: {
+          mistral: {
+            documentPageLimit: 10,
+          },
+        },
+      });
+
+      return result.object;
+    } catch {
+      // Fallback to text extraction
+      return this.#fallbackExtract(documentUrl);
+    }
+  }
+
+  async #fallbackExtract(documentUrl: string) {
+    if (!documentUrl) {
+      throw new Error("Document URL is required");
+    }
+
+    const response = await fetch(documentUrl);
+    const content = await response.arrayBuffer();
+    const pdf = await getDocumentProxy(content);
+
+    const { text } = await extractText(pdf, {
+      mergePages: true,
+    });
+
+    // Unsupported Unicode escape sequence
+    const cleanedText = text.replaceAll("\u0000", "");
+
     const result = await generateObject({
       model: mistral("mistral-small-latest"),
-      schema: z.object({
-        invoice_number: z
-          .string()
-          .nullable()
-          .describe("Unique identifier for the invoice"),
-        invoice_date: z
-          .string()
-          .nullable()
-          .describe("Date of invoice in ISO 8601 format (YYYY-MM-DD)"),
-        due_date: z
-          .string()
-          .describe("Payment due date in ISO 8601 format (YYYY-MM-DD)"),
-        currency: z
-          .string()
-          .describe(
-            "Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK)",
-          ),
-        total_amount: z.number().describe("Total amount for the invoice"),
-        tax_amount: z
-          .number()
-          .nullable()
-          .describe("Tax amount for the invoice"),
-        tax_rate: z
-          .number()
-          .nullable()
-          .describe("Tax rate as a percentage value (e.g., 20 for 20%)"),
-        tax_type: z
-          .enum(["vat", "sales_tax", "gst", "hst", "unknown"])
-          .describe("Type of tax applied to the invoice"),
-        vendor_name: z
-          .string()
-          .nullable()
-          .describe(
-            "The legal registered business name of the company issuing the invoice. Look for names that include entity types like 'Inc.', 'Ltd', 'AB', 'GmbH', 'LLC', etc. This name is typically found in the letterhead, header, or footer of the invoice. Do not extract brands, divisions, or 'Trading as' names unless no legal name is visible. If multiple company names appear, prioritize the one that appears to be issuing the invoice rather than subsidiaries or parent companies.",
-          ),
-        vendor_address: z
-          .string()
-          .nullable()
-          .describe("Complete address of the vendor"),
-        customer_name: z
-          .string()
-          .nullable()
-          .describe("Name of the customer/buyer"),
-        customer_address: z
-          .string()
-          .nullable()
-          .describe("Complete address of the customer"),
-        website: z
-          .string()
-          .nullable()
-          .describe(
-            "The root domain name of the vendor (e.g., 'example.com', not 'www.example.com' or 'shop.example.com'). If not explicitly mentioned in the document, infer it from the vendor's email address or search online using the Vendor Name. Prioritize the root domain.",
-          ),
-        email: z.string().nullable().describe("Email of the vendor/seller"),
-        line_items: z
-          .array(
-            z.object({
-              description: z
-                .string()
-                .nullable()
-                .describe("Description of the item"),
-              quantity: z.number().nullable().describe("Quantity of items"),
-              unit_price: z.number().nullable().describe("Price per unit"),
-              total_price: z
-                .number()
-                .nullable()
-                .describe("Total price for this line item"),
-            }),
-          )
-          .describe("Array of items listed in the document"),
-        payment_instructions: z
-          .string()
-          .nullable()
-          .describe("Payment terms or instructions"),
-        notes: z.string().nullable().describe("Additional notes or comments"),
-      }),
+      schema: invoiceSchema,
       messages: [
         {
           role: "system",
-          content: `
-            You are a multilingual document parser that extracts structured data from financial documents such as invoices and receipts.
-          `,
+          content: invoicePrompt,
         },
         {
           role: "user",
           content: [
             {
-              type: "file",
-              data: documentUrl,
-              mimeType: "application/pdf",
+              type: "text",
+              text: cleanedText,
             },
           ],
         },
       ],
-      providerOptions: {
-        mistral: {
-          documentPageLimit: 10,
-        },
-      },
     });
 
     return result.object;
@@ -147,6 +116,7 @@ export class InvoiceProcessor {
       tax_amount: result.tax_amount,
       tax_rate: result.tax_rate,
       tax_type: result.tax_type,
+      language: result.language,
       metadata: {
         invoice_date: result.invoice_date,
         payment_instructions: result.payment_instructions,

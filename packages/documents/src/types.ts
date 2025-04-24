@@ -31,3 +31,7 @@ export type Attachments = Attachment[];
 export type DocumentClassifierRequest = {
   content: string;
 };
+
+export type DocumentClassifierImageRequest = {
+  content: ArrayBuffer;
+};

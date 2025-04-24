@@ -22,6 +22,7 @@ export const classifyDocument = schemaTask({
         summary: result.summary,
         content,
         date: result.date,
+        language: result.language,
       })
       .eq("name", fileName)
       .select()

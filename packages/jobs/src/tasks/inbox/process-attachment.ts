@@ -79,14 +79,14 @@ export const processAttachment = schemaTask({
           tax_amount: result.tax_amount,
           tax_rate: result.tax_rate,
           tax_type: result.tax_type,
-          // type: result.type,
+          type: result.type as "invoice" | "expense" | null | undefined,
           status: "pending",
         })
         .eq("id", inboxData.id)
         .select()
         .single();
 
-      // NOTE: Process the document for classification
+      // NOTE: Process documents and images for classification
       await processDocument.trigger({
         mimetype,
         file_path,

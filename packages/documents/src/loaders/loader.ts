@@ -16,8 +16,7 @@ export async function loadDocument({
 
   switch (metadata.mimetype) {
     case "application/pdf":
-    case "application/x-pdf":
-    case "application/octet-stream": {
+    case "application/x-pdf": {
       const arrayBuffer = await content.arrayBuffer();
       const pdf = await getDocumentProxy(arrayBuffer);
 

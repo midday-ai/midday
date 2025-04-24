@@ -4,7 +4,9 @@ import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 import { classifyDocument } from "./classify-document";
+import { classifyImage } from "./classify-image";
 
+// NOTE: Process documents and images for classification
 export const processDocument = schemaTask({
   id: "process-document",
   schema: z.object({
@@ -17,6 +19,16 @@ export const processDocument = schemaTask({
   },
   run: async ({ mimetype, file_path }) => {
     const supabase = createClient();
+
+    // If the file is an image, we have a special classifier for it
+    // NOTE: We don't want to classify images in the inbox (we have a special classifier for that)
+    if (mimetype.startsWith("image/") && !file_path.includes("inbox")) {
+      await classifyImage.trigger({
+        file_path,
+      });
+
+      return;
+    }
 
     const { data: fileData } = await supabase.storage
       .from("vault")

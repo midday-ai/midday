@@ -61,8 +61,11 @@ export function InboxItem({ item, index }: Props) {
         <div className="flex">
           <div className="text-xs font-medium select-text">
             {isProcessing && <Skeleton className="h-3 w-[50px]" />}
-            {!isProcessing && item?.currency && item?.amount && (
-              <FormatAmount amount={item.amount} currency={item.currency} />
+            {!isProcessing && item?.currency && (
+              <FormatAmount
+                amount={item.amount ?? 0}
+                currency={item.currency}
+              />
             )}
           </div>
 

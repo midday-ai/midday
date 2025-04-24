@@ -24,6 +24,10 @@ export async function GET(request: NextRequest) {
     return new Response("Error downloading file", { status: 500 });
   }
 
+  if (pdfBlob.type !== "application/pdf") {
+    return new Response("File is not a PDF", { status: 400 });
+  }
+
   try {
     const pdfBuffer = await pdfBlob.arrayBuffer();
     const document = await getPdfImage(pdfBuffer);
