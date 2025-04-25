@@ -1,43 +1,62 @@
 "use client";
 
+import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
 
 type Props = {
   showDelete?: boolean;
-  downloadUrl: string;
+  filePath: string[];
 };
 
-export function DocumentActions({ showDelete = false, downloadUrl }: Props) {
+export function DocumentActions({ showDelete = false, filePath }: Props) {
   const [, copy] = useCopyToClipboard();
   const [isCopied, setIsCopied] = useState(false);
+  const trpc = useTRPC();
 
-  useEffect(() => {
-    if (isCopied) {
-      const timer = setTimeout(() => {
-        setIsCopied(false);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isCopied]);
+  const filename = filePath?.at(-1);
 
-  function handleCopy() {
-    const url = window.location.href;
-    copy(url);
-    setIsCopied(true);
-  }
+  const shareDocumentMutation = useMutation(
+    trpc.documents.share.mutationOptions({
+      onMutate: () => {
+        setIsCopied(true);
+      },
+      onSuccess: (data) => {
+        if (data.signedUrl) {
+          copy(data.signedUrl);
+
+          setTimeout(() => {
+            setIsCopied(false);
+          }, 3000);
+        }
+      },
+    }),
+  );
 
   return (
     <div className="flex flex-row">
-      <a href={downloadUrl} download>
+      <a
+        href={`/api/download/file?path=${filePath?.join("/")}&filename=${filename}`}
+        download
+      >
         <Button variant="ghost" size="icon">
           <Icons.ArrowCoolDown className="size-4" />
         </Button>
       </a>
 
-      <Button variant="ghost" size="icon" onClick={handleCopy}>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() =>
+          shareDocumentMutation.mutate({
+            filePath: filePath.join("/"),
+            expireIn: 60 * 60 * 24 * 30, // 30 days
+          })
+        }
+      >
         {isCopied ? (
           <Icons.Check className="size-4" />
         ) : (

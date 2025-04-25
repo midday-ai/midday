@@ -75,6 +75,7 @@ import {
   MdOutlineFileDownload,
   MdOutlineFilterList,
   MdOutlineForwardToInbox,
+  MdOutlineGridView,
   MdOutlineHandyman,
   MdOutlineHourglassTop,
   MdOutlineInbox,
@@ -93,6 +94,7 @@ import {
   MdOutlinePlayArrow,
   MdOutlineQrCode2,
   MdOutlineQuestionAnswer,
+  MdOutlineReorder,
   MdOutlineRepeat,
   MdOutlineSettings,
   MdOutlineSpellcheck,
@@ -857,4 +859,6 @@ export const Icons = {
   ArrowOutward: MdOutlineArrowOutward,
   Straighten: MdOutlineSquareFoot,
   Files: MdOutlineInventory2,
+  GridView: MdOutlineGridView,
+  ListView: MdOutlineReorder,
 };

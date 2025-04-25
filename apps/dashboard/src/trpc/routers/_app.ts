@@ -18,7 +18,6 @@ import { transactionCategoriesRouter } from "./transaction-categories";
 import { transactionTagsRouter } from "./transaction-tags";
 import { transactionsRouter } from "./transactions";
 import { userRouter } from "./user";
-import { vaultRouter } from "./vault";
 
 export const appRouter = createTRPCRouter({
   apps: appsRouter,
@@ -38,7 +37,6 @@ export const appRouter = createTRPCRouter({
   transactions: transactionsRouter,
   transactionTags: transactionTagsRouter,
   user: userRouter,
-  vault: vaultRouter,
   documents: documentsRouter,
 });
 

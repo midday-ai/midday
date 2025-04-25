@@ -18,8 +18,9 @@ export function DocumentDetails() {
   const isOpen = Boolean(params.filePath || params.id);
 
   const { data, isLoading } = useQuery({
-    ...trpc.documents.getByPath.queryOptions({
+    ...trpc.documents.getById.queryOptions({
       filePath: params.filePath!,
+      id: params.id!,
     }),
     enabled: isOpen,
   });
@@ -31,9 +32,9 @@ export function DocumentDetails() {
   return (
     <div className="flex flex-col flex-grow min-h-0 relative h-full w-full">
       <SheetHeader className="mb-4 flex justify-between items-center flex-row">
-        <div className="min-w-0 flex-1 max-w-[50%] flex flex-row gap-2 items-end">
+        <div className="min-w-0 flex-1 max-w-[70%] flex flex-row gap-2 items-end">
           <h2 className="text-lg truncate flex-0">
-            {data?.name?.split("/").pop()}
+            {data?.title ?? data?.name?.split("/").at(-1)}
           </h2>
           <span className="text-sm text-muted-foreground whitespace-nowrap">
             {data?.metadata?.size && formatSize(data?.metadata?.size)}
@@ -42,29 +43,28 @@ export function DocumentDetails() {
 
         <DocumentActions
           showDelete={Boolean(params.id)}
-          downloadUrl={`/api/download/file?path=${data?.path_tokens?.join(
-            "/",
-          )}&filename=${data?.name?.split("/").pop()}`}
+          filePath={data?.path_tokens}
         />
       </SheetHeader>
 
-      <ScrollArea className="h-full max-h-[763px] p-0 pb-8" hideScrollbar>
-        <div className="flex flex-col flex-grow min-h-0 relative h-full w-full">
+      <div className="h-full max-h-[763px] p-0 pb-8 overflow-x-auto scrollbar-hide">
+        <div className="flex flex-col flex-grow min-h-0 relative h-full w-full items-center justify-center">
           <FileViewer
             url={`/api/proxy?filePath=vault/${data?.path_tokens?.join("/")}`}
             mimeType={data?.metadata?.mimetype}
             maxWidth={565}
           />
         </div>
-      </ScrollArea>
+      </div>
 
       <div className="pt-4 border-t border-border">
-        <p className="text-sm text-[#878787] mb-4 line-clamp-2">
-          Invoice sent to Acme Corp for $4,200 regarding the Expansion Project.
-          Generated Jan 5 and marked as paid.
-        </p>
+        {data?.summary && (
+          <p className="text-sm text-[#878787] mb-4 line-clamp-2">
+            {data?.summary}
+          </p>
+        )}
 
-        <DocumentTags />
+        <DocumentTags tags={data?.tags} />
       </div>
     </div>
   );

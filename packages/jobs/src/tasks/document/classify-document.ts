@@ -9,8 +9,9 @@ export const classifyDocument = schemaTask({
   schema: z.object({
     content: z.string(),
     fileName: z.string(),
+    teamId: z.string(),
   }),
-  run: async ({ content, fileName }) => {
+  run: async ({ content, fileName, teamId }) => {
     const supabase = createClient();
     const classifier = new DocumentClassifier();
     const result = await classifier.classifyDocument({ content });
@@ -23,9 +24,12 @@ export const classifyDocument = schemaTask({
         content,
         date: result.date,
         language: result.language,
+        // If the document has no tags, we consider it as processed
+        processing_status:
+          !result.tags || result.tags.length === 0 ? "completed" : undefined,
       })
       .eq("name", fileName)
-      .select()
+      .select("id")
       .single();
 
     if (error) {
@@ -36,6 +40,7 @@ export const classifyDocument = schemaTask({
       await embedDocumentTags.trigger({
         documentId: data.id,
         tags: result.tags,
+        teamId,
       });
     }
 

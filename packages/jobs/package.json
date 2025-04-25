@@ -32,7 +32,8 @@
     "./tasks/transactions/import": "./src/tasks/transactions/import.ts",
     "./tasks/transactions/update-base-currency": "./src/tasks/transactions/update-base-currency.ts",
     "./tasks/user/setup": "./src/tasks/user/setup.ts",
-    "./tasks/reconnect/connection": "./src/tasks/reconnect/connection.ts"
+    "./tasks/reconnect/connection": "./src/tasks/reconnect/connection.ts",
+    "./tasks/document/process-document": "./src/tasks/document/process-document.ts"
   },
   "dependencies": {
     "@fast-csv/format": "5.0.2",

@@ -39,7 +39,7 @@ export default async function Overview(props: Props) {
     trpc.metrics.runway.queryOptions({ from, to }),
     trpc.inbox.get.queryOptions({ filter: { done: false } }),
     trpc.bankAccounts.balances.queryOptions(),
-    trpc.vault.activity.queryOptions({ pageSize: 10 }),
+    trpc.documents.get.queryOptions({ pageSize: 10 }),
     trpc.metrics.spending.queryOptions({
       from: defaultPeriod.from,
       to: defaultPeriod.to,

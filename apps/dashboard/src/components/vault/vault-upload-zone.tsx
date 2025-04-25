@@ -21,7 +21,7 @@ type Props = {
   ) => void;
 };
 
-export function UploadZone({ children, onUpload }: Props) {
+export function VaultUploadZone({ onUpload, children }: Props) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const supabase = createClient();
@@ -30,8 +30,9 @@ export function UploadZone({ children, onUpload }: Props) {
   const [toastId, setToastId] = useState(null);
   const uploadProgress = useRef([]);
   const { toast, dismiss, update } = useToast();
-  const processAttachmentsMutation = useMutation(
-    trpc.inbox.processAttachments.mutationOptions(),
+
+  const processDocumentMutation = useMutation(
+    trpc.documents.processDocument.mutationOptions(),
   );
 
   useEffect(() => {
@@ -91,7 +92,7 @@ export function UploadZone({ children, onUpload }: Props) {
       );
 
       // Trigger the upload jobs
-      processAttachmentsMutation.mutate(
+      processDocumentMutation.mutate(
         results.map((result) => ({
           file_path: [...path, result.filename],
           mimetype: result.file.type,
@@ -141,31 +142,49 @@ export function UploadZone({ children, onUpload }: Props) {
         });
       }
     },
-    maxSize: 10000000, // 10MB
+    maxSize: 25000000, // 25MB
     maxFiles: 25,
     accept: {
       "image/*": [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif", ".avif"],
       "application/pdf": [".pdf"],
+      "application/msword": [".doc"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
+      "application/vnd.ms-excel": [".xls"],
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+        ".xlsx",
+      ],
+      "application/vnd.ms-powerpoint": [".ppt"],
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+        [".pptx"],
+      "text/plain": [".txt"],
+      "text/csv": [".csv"],
+      "application/rtf": [".rtf"],
+      "application/zip": [".zip"],
     },
   });
-
   return (
     <div
-      {...getRootProps({ onClick: (evt) => evt.stopPropagation() })}
       className="relative h-full"
+      {...getRootProps({ onClick: (evt) => evt.stopPropagation() })}
     >
-      <div className="absolute top-0 bottom-0 right-0 left-0 z-[51] pointer-events-none">
+      <div className="absolute top-0 right-0 left-0 z-[51] w-full pointer-events-none h-[calc(100vh-150px)]">
         <div
           className={cn(
-            "bg-background dark:bg-[#1A1A1A] h-full flex items-center justify-center text-center invisible",
-            isDragActive && "visible",
+            "bg-background dark:bg-[#1A1A1A] h-full w-full flex items-center justify-center text-center",
+            isDragActive ? "visible" : "invisible",
           )}
         >
           <input {...getInputProps()} id="upload-files" />
-          <p className="text-xs">
-            Drop your receipts here. <br />
-            Maximum of 25 files at a time.
-          </p>
+
+          <div className="flex flex-col items-center justify-center gap-2">
+            <p className="text-xs">
+              Drop your documents and files here. <br />
+              Maximum of 25 files at a time.
+            </p>
+
+            <span className="text-xs text-[#878787]">Max file size 25MB</span>
+          </div>
         </div>
       </div>
 

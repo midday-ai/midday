@@ -578,26 +578,6 @@ export async function getExpensesQuery(
   };
 }
 
-type GetVaultActivityParams = {
-  teamId: string;
-  pageSize?: number;
-};
-
-export async function getVaultActivityQuery(
-  supabase: Client,
-  params: GetVaultActivityParams,
-) {
-  const { teamId, pageSize = 20 } = params;
-
-  return supabase
-    .from("documents")
-    .select("id, name, metadata, path_tokens, tag, team_id")
-    .eq("team_id", teamId)
-    .limit(pageSize)
-    .not("name", "ilike", "%.folderPlaceholder")
-    .order("created_at", { ascending: false });
-}
-
 export async function getTeamsByUserIdQuery(supabase: Client, userId: string) {
   return supabase
     .from("users_on_team")
@@ -1406,7 +1386,9 @@ export async function getDocumentQuery(
 ) {
   const query = supabase
     .from("documents")
-    .select("id, name, path_tokens, metadata, created_at")
+    .select(
+      "id, name, path_tokens, title, metadata, created_at, summary, tags:document_tag_assignments(tag:document_tags(id, name, slug))",
+    )
     .eq("team_id", params.teamId);
 
   if (params.id) {
@@ -1418,4 +1400,60 @@ export async function getDocumentQuery(
   }
 
   return query.single();
+}
+
+type GetDocumentsParams = {
+  teamId: string;
+  pageSize?: number;
+  cursor?: string | null;
+  filter?: {
+    tags?: string[] | null;
+  };
+};
+
+export async function getDocumentsQuery(
+  supabase: Client,
+  params: GetDocumentsParams,
+) {
+  const { teamId, pageSize = 20, cursor, filter } = params;
+
+  const { tags } = filter || {};
+
+  const columns =
+    "id, name, metadata, path_tokens, processing_status, title, summary, team_id, created_at, tags:document_tag_assignments(tag:document_tags(id, name, slug))";
+
+  const query = supabase
+    .from("documents")
+    .select(columns)
+    .eq("team_id", teamId)
+    .not("name", "ilike", "%.folderPlaceholder")
+    .order("created_at", { ascending: false });
+
+  if (tags) {
+    query
+      .in("temp_filter_tags.tag_id", tags)
+      .eq("team_id", teamId)
+      .select(`${columns}, temp_filter_tags:document_tag_assignments!inner()`);
+  }
+
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
+
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
+
+  return {
+    meta: {
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
+    },
+    data: data ?? [],
+  };
 }

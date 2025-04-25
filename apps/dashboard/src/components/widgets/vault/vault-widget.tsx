@@ -6,11 +6,14 @@ import { Vault } from "./vault";
 
 export function VaultWidget() {
   const trpc = useTRPC();
-  const { data } = useSuspenseQuery(
-    trpc.vault.activity.queryOptions({ pageSize: 10 }),
+
+  const { data: documents } = useSuspenseQuery(
+    trpc.documents.get.queryOptions({
+      pageSize: 10,
+    }),
   );
 
-  if (!data?.length) {
+  if (!documents.data.length) {
     return (
       <div className="flex items-center justify-center aspect-square">
         <p className="text-sm text-[#606060] -mt-12">No files found</p>
@@ -18,5 +21,5 @@ export function VaultWidget() {
     );
   }
 
-  return <Vault files={data} />;
+  return <Vault files={documents.data} />;
 }

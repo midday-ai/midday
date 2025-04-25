@@ -90,6 +90,7 @@ export const processAttachment = schemaTask({
       await processDocument.trigger({
         mimetype,
         file_path,
+        teamId,
       });
 
       // TODO: Send event to match inbox

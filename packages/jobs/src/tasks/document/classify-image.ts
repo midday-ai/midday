@@ -8,8 +8,9 @@ export const classifyImage = schemaTask({
   id: "classify-image",
   schema: z.object({
     file_path: z.array(z.string()),
+    teamId: z.string(),
   }),
-  run: async ({ file_path }) => {
+  run: async ({ file_path, teamId }) => {
     const supabase = createClient();
     const classifier = new DocumentClassifier();
 

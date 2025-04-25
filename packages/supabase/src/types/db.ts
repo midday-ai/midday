@@ -357,14 +357,17 @@ export type Database = {
         Row: {
           document_id: string
           tag_id: string
+          team_id: string
         }
         Insert: {
           document_id: string
           tag_id: string
+          team_id: string
         }
         Update: {
           document_id?: string
           tag_id?: string
+          team_id?: string
         }
         Relationships: [
           {
@@ -381,32 +384,61 @@ export type Database = {
             referencedRelation: "document_tags"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "document_tag_assignments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "document_tag_assignments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      document_tag_embeddings: {
+        Row: {
+          embedding: string | null
+          name: string
+          slug: string
+        }
+        Insert: {
+          embedding?: string | null
+          name: string
+          slug: string
+        }
+        Update: {
+          embedding?: string | null
+          name?: string
+          slug?: string
+        }
+        Relationships: []
       }
       document_tags: {
         Row: {
           created_at: string
-          embedding: string | null
           id: string
+          name: string
           slug: string
-          team_id: string | null
-          title: string
+          team_id: string
         }
         Insert: {
           created_at?: string
-          embedding?: string | null
           id?: string
+          name: string
           slug: string
-          team_id?: string | null
-          title: string
+          team_id: string
         }
         Update: {
           created_at?: string
-          embedding?: string | null
           id?: string
+          name?: string
           slug?: string
-          team_id?: string | null
-          title?: string
+          team_id?: string
         }
         Relationships: [
           {
@@ -432,13 +464,18 @@ export type Database = {
           created_at: string | null
           date: string | null
           fts: unknown | null
+          fts_document: unknown | null
           id: string
+          language: string | null
           metadata: Json | null
           name: string | null
           object_id: string | null
           owner_id: string | null
           parent_id: string | null
           path_tokens: string[] | null
+          processing_status:
+            | Database["public"]["Enums"]["document_processing_status"]
+            | null
           summary: string | null
           tag: string | null
           team_id: string | null
@@ -450,13 +487,18 @@ export type Database = {
           created_at?: string | null
           date?: string | null
           fts?: unknown | null
+          fts_document?: unknown | null
           id?: string
+          language?: string | null
           metadata?: Json | null
           name?: string | null
           object_id?: string | null
           owner_id?: string | null
           parent_id?: string | null
           path_tokens?: string[] | null
+          processing_status?:
+            | Database["public"]["Enums"]["document_processing_status"]
+            | null
           summary?: string | null
           tag?: string | null
           team_id?: string | null
@@ -468,13 +510,18 @@ export type Database = {
           created_at?: string | null
           date?: string | null
           fts?: unknown | null
+          fts_document?: unknown | null
           id?: string
+          language?: string | null
           metadata?: Json | null
           name?: string | null
           object_id?: string | null
           owner_id?: string | null
           parent_id?: string | null
           path_tokens?: string[] | null
+          processing_status?:
+            | Database["public"]["Enums"]["document_processing_status"]
+            | null
           summary?: string | null
           tag?: string | null
           team_id?: string | null
@@ -2640,6 +2687,11 @@ export type Database = {
         | "pluggy"
       bankProviders: "gocardless" | "plaid" | "teller"
       connection_status: "disconnected" | "connected" | "unknown"
+      document_processing_status:
+        | "pending"
+        | "processing"
+        | "completed"
+        | "failed"
       inbox_account_providers: "gmail" | "outlook"
       inbox_status:
         | "processing"
@@ -2833,6 +2885,12 @@ export const Constants = {
       ],
       bankProviders: ["gocardless", "plaid", "teller"],
       connection_status: ["disconnected", "connected", "unknown"],
+      document_processing_status: [
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+      ],
       inbox_account_providers: ["gmail", "outlook"],
       inbox_status: [
         "processing",

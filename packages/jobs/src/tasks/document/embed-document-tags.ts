@@ -8,48 +8,55 @@ export const embedDocumentTags = schemaTask({
   id: "embed-document-tags",
   schema: z.object({
     documentId: z.string(),
-    tags: z.array(z.string()).min(1), // Ensure tags array is not empty
+    teamId: z.string(),
+    tags: z.array(z.string()).min(1),
   }),
   queue: {
     concurrencyLimit: 25,
   },
-  run: async ({ documentId, tags }) => {
+  run: async ({ documentId, tags, teamId }) => {
     const supabase = createClient();
     const embed = new Embed();
 
-    // 1. Find existing tags by title
-    const { data: existingTagsData, error: existingTagsError } = await supabase
-      .from("document_tags")
-      .select("id, title") // Select title instead of tag
-      .in("title", tags); // Filter by title
+    // 1. Generate slugs for all incoming tags
+    const tagsWithSlugs = tags.map((tag) => ({
+      name: tag,
+      slug: slugify(tag),
+    }));
+    const slugs = tagsWithSlugs.map((t) => t.slug);
 
-    if (existingTagsError) {
-      console.error("Error fetching existing tags:", existingTagsError);
+    // 2. Check existing embeddings in document_tag_embeddings
+    const { data: existingEmbeddingsData, error: existingEmbeddingsError } =
+      await supabase
+        .from("document_tag_embeddings")
+        .select("slug")
+        .in("slug", slugs);
+
+    if (existingEmbeddingsError) {
+      console.error(
+        "Error fetching existing embeddings:",
+        existingEmbeddingsError,
+      );
       throw new Error(
-        `Failed to fetch existing tags: ${existingTagsError.message}`,
+        `Failed to fetch existing embeddings: ${existingEmbeddingsError.message}`,
       );
     }
 
-    // Type assertion for safety, assuming data is not null if no error
-    const typedExistingTagsData =
-      (existingTagsData as { id: string; title: string }[]) || [];
-
-    const existingTagsMap = new Map(
-      typedExistingTagsData.map((t) => [t.title, t.id]), // Map title to id
+    const existingEmbeddingSlugs = new Set(
+      (existingEmbeddingsData || []).map((e: { slug: string }) => e.slug),
     );
-    const existingTagIds = typedExistingTagsData.map((t) => t.id);
 
-    // 2. Identify new tags
-    const newTags = tags.filter((tag) => !existingTagsMap.has(tag));
-    let newTagIds: string[] = [];
+    // 3. Identify tags needing new embeddings
+    const tagsToEmbed = tagsWithSlugs.filter(
+      (tag) => !existingEmbeddingSlugs.has(tag.slug),
+    );
+    const newTagNames = tagsToEmbed.map((t) => t.name);
 
-    // 3. Embed and insert new tags if any
-    if (newTags.length > 0) {
-      // Get embeddings from the result object
-      const embedResult = await embed.embedMany(newTags);
+    // 4. Generate and insert new embeddings if any
+    if (newTagNames.length > 0) {
+      const embedResult = await embed.embedMany(newTagNames);
 
-      // Add check for embeddings existence and length
-      if (!embedResult || embedResult.length !== newTags.length) {
+      if (!embedResult || embedResult.length !== newTagNames.length) {
         console.error(
           "Embeddings result is missing or length mismatch:",
           embedResult,
@@ -59,44 +66,66 @@ export const embedDocumentTags = schemaTask({
 
       const embeddings = embedResult;
 
-      const newTagsToInsert = newTags.map((tag, index) => ({
-        title: tag,
-        slug: slugify(tag),
+      const newEmbeddingsToInsert = tagsToEmbed.map((tag, index) => ({
+        name: tag.name,
+        slug: tag.slug,
         embedding: JSON.stringify(embeddings[index]),
       }));
 
-      const { data: insertedTagsData, error: insertTagsError } = await supabase
-        .from("document_tags")
-        .insert(newTagsToInsert)
-        .select("id");
+      // Upsert embeddings to handle potential race conditions or duplicates
+      const { error: insertEmbeddingsError } = await supabase
+        .from("document_tag_embeddings")
+        .upsert(newEmbeddingsToInsert, { onConflict: "slug" });
 
-      if (insertTagsError) {
-        console.error("Error inserting new tags:", insertTagsError);
+      if (insertEmbeddingsError) {
+        console.error("Error inserting new embeddings:", insertEmbeddingsError);
         throw new Error(
-          `Failed to insert new tags: ${insertTagsError.message}`,
+          `Failed to insert new embeddings: ${insertEmbeddingsError.message}`,
         );
       }
-      // Type assertion for safety
-      // Explicitly check insertedTagsData before mapping
-      if (insertedTagsData) {
-        newTagIds = (insertedTagsData as { id: string }[]).map((t) => t.id);
-      } else {
-        // Handle the case where insert succeeded but returned no data (optional, could also log warning)
-        newTagIds = [];
-      }
+      console.log(
+        `Successfully inserted/updated ${newEmbeddingsToInsert.length} embeddings.`,
+      );
+    } else {
+      console.log("No new tags to embed.");
     }
 
-    // 4. Combine all relevant tag IDs
-    const allTagIds = [...existingTagIds, ...newTagIds];
+    // 5. Upsert all tags into document_tags for the team
+    const tagsToUpsert = tagsWithSlugs.map((tag) => ({
+      name: tag.name,
+      slug: tag.slug,
+      team_id: teamId,
+    }));
 
-    // 5. Create assignments in document_tag_assignments using upsert
+    const { data: upsertedTagsData, error: upsertTagsError } = await supabase
+      .from("document_tags")
+      .upsert(tagsToUpsert, {
+        onConflict: "slug, team_id",
+      })
+      .select("id, slug");
+
+    if (upsertTagsError) {
+      console.error("Error upserting document tags:", upsertTagsError);
+      throw new Error(
+        `Failed to upsert document tags: ${upsertTagsError.message}`,
+      );
+    }
+
+    if (!upsertedTagsData || upsertedTagsData.length === 0) {
+      console.error("Upsert operation returned no data for document tags.");
+      throw new Error("Failed to get IDs from upserted document tags.");
+    }
+
+    const allTagIds = upsertedTagsData.map((t) => t.id);
+
+    // 6. Create assignments in document_tag_assignments using upsert
     if (allTagIds.length > 0) {
       const assignmentsToInsert = allTagIds.map((tagId) => ({
         document_id: documentId,
         tag_id: tagId,
+        team_id: teamId, // Include team_id here as well
       }));
 
-      // Use upsert directly on the table reference
       const { error: assignmentError } = await supabase
         .from("document_tag_assignments")
         .upsert(assignmentsToInsert, {
@@ -109,11 +138,18 @@ export const embedDocumentTags = schemaTask({
           `Failed to create tag assignments: ${assignmentError.message}`,
         );
       }
-      console.log(
-        `Successfully assigned ${allTagIds.length} tags to document ${documentId}`,
-      );
+
+      // Update the document processing status to completed
+      await supabase
+        .from("documents")
+        .update({
+          processing_status: "completed",
+        })
+        .eq("id", documentId);
     } else {
-      console.log(`No tags to assign for document ${documentId}`);
+      console.log(
+        `No tags resulted from the upsert process for document ${documentId}, cannot assign.`,
+      );
     }
   },
 });

@@ -2,6 +2,7 @@ import { getAccessValidForDays } from "@midday/engine/gocardless/utils";
 import { addDays } from "date-fns";
 import { getCurrentUserTeamQuery, getUserInviteQuery } from "../queries";
 import type { Client } from "../types";
+import { remove } from "../utils/storage";
 
 type CreateBankConnectionPayload = {
   accounts: {
@@ -1354,4 +1355,35 @@ export async function updateTeamPlan(
     .eq("id", id)
     .select("users_on_team(user_id)")
     .single();
+}
+
+type DeleteDocumentParams = {
+  id: string;
+};
+
+export async function deleteDocument(
+  supabase: Client,
+  params: DeleteDocumentParams,
+) {
+  const { data } = await supabase
+    .from("documents")
+    .delete()
+    .eq("id", params.id)
+    .select("id, path_tokens")
+    .single();
+
+  if (!data || !data.path_tokens) {
+    return {
+      data: null,
+    };
+  }
+
+  await remove(supabase, {
+    bucket: "vault",
+    path: data.path_tokens,
+  });
+
+  return {
+    data,
+  };
 }
