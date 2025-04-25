@@ -1,8 +1,7 @@
 "use client";
 
-import { generateTrackerFilters } from "@/actions/ai/filters/generate-tracker-filters";
 import { FilterList } from "@/components/filter-list";
-import { useTrackerFilterParams } from "@/hooks/use-tracker-filter-params";
+import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useTRPC } from "@/trpc/client";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
@@ -32,30 +31,30 @@ const statusFilters = [
 ];
 
 export function VaultSearchFilter() {
-  const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const trpc = useTRPC();
 
-  const { filter, setFilter } = useTrackerFilterParams();
+  const { filter, setFilter } = useDocumentFilterParams();
+  const [prompt, setPrompt] = useState(filter.q ?? "");
 
   const shouldFetch = isOpen;
 
-  const { data: customersData } = useQuery({
-    ...trpc.customers.get.queryOptions(),
-    enabled: shouldFetch || Boolean(filter.customers?.length),
-  });
+  // const { data: customersData } = useQuery({
+  //   ...trpc.customers.get.queryOptions(),
+  //   enabled: shouldFetch || Boolean(filter.customers?.length),
+  // });
 
-  const { data: membersData } = useQuery({
-    ...trpc.team.members.queryOptions(),
-    enabled: shouldFetch || Boolean(filter.customers?.length),
-  });
+  // const { data: membersData } = useQuery({
+  //   ...trpc.team.members.queryOptions(),
+  //   enabled: shouldFetch || Boolean(filter.customers?.length),
+  // });
 
-  const { data: tagsData } = useQuery({
-    ...trpc.tags.get.queryOptions(),
-    enabled: shouldFetch || Boolean(filter.tags?.length),
-  });
+  // const { data: tagsData } = useQuery({
+  //   ...trpc.tags.get.queryOptions(),
+  //   enabled: shouldFetch || Boolean(filter.tags?.length),
+  // });
 
   useHotkeys(
     "esc",
@@ -86,50 +85,52 @@ export function VaultSearchFilter() {
   };
 
   const handleSubmit = async () => {
+    setFilter({ q: prompt.length > 0 ? prompt : null });
+
     // If the user is typing a query with multiple words, we want to stream the results
-    if (prompt.split(" ").length > 1) {
-      setStreaming(true);
+    // if (prompt.split(" ").length > 1) {
+    //   setStreaming(true);
 
-      const { object } = await generateTrackerFilters(
-        prompt,
-        `
-        Customers: ${customersData?.data?.map((customer) => customer.name).join(", ")}
-        Tags: ${tagsData?.map((tag) => tag.name).join(", ")}
-        `,
-      );
+    //   const { object } = await generateTrackerFilters(
+    //     prompt,
+    //     `
+    //     Customers: ${customersData?.data?.map((customer) => customer.name).join(", ")}
+    //     Tags: ${tagsData?.map((tag) => tag.name).join(", ")}
+    //     `,
+    //   );
 
-      let finalObject = {};
+    //   let finalObject = {};
 
-      for await (const partialObject of readStreamableValue(object)) {
-        if (partialObject) {
-          finalObject = {
-            ...finalObject,
-            ...partialObject,
-            status: partialObject?.status ?? null,
-            start: partialObject?.start ?? null,
-            end: partialObject?.end ?? null,
-            q: partialObject?.name ?? null,
-            tags: partialObject?.tags ?? null,
-            customers:
-              partialObject?.customers?.map(
-                (name: string) =>
-                  customersData?.data?.find(
-                    (customer) => customer.name === name,
-                  )?.id,
-              ) ?? null,
-          };
-        }
-      }
+    //   for await (const partialObject of readStreamableValue(object)) {
+    //     if (partialObject) {
+    //       finalObject = {
+    //         ...finalObject,
+    //         ...partialObject,
+    //         status: partialObject?.status ?? null,
+    //         start: partialObject?.start ?? null,
+    //         end: partialObject?.end ?? null,
+    //         q: partialObject?.name ?? null,
+    //         tags: partialObject?.tags ?? null,
+    //         customers:
+    //           partialObject?.customers?.map(
+    //             (name: string) =>
+    //               customersData?.data?.find(
+    //                 (customer) => customer.name === name,
+    //               )?.id,
+    //           ) ?? null,
+    //       };
+    //     }
+    //   }
 
-      setFilter({
-        q: null,
-        ...finalObject,
-      });
+    //   setFilter({
+    //     q: null,
+    //     ...finalObject,
+    //   });
 
-      setStreaming(false);
-    } else {
-      setFilter({ q: prompt.length > 0 ? prompt : null });
-    }
+    //   setStreaming(false);
+    // } else {
+    //   setFilter({ q: prompt.length > 0 ? prompt : null });
+    // }
   };
 
   const validFilters = Object.fromEntries(
@@ -183,13 +184,13 @@ export function VaultSearchFilter() {
         filters={validFilters}
         loading={streaming}
         onRemove={setFilter}
-        members={membersData}
-        customers={customersData?.data}
-        statusFilters={statusFilters}
-        tags={tagsData}
+        // members={membersData}
+        // customers={customersData?.data}
+        // statusFilters={statusFilters}
+        // tags={tagsData}
       />
 
-      <DropdownMenuContent
+      {/* <DropdownMenuContent
         className="w-[350px]"
         align="end"
         sideOffset={19}
@@ -337,7 +338,7 @@ export function VaultSearchFilter() {
             </DropdownMenuPortal>
           </DropdownMenuSub>
         </DropdownMenuGroup>
-      </DropdownMenuContent>
+      </DropdownMenuContent> */}
     </DropdownMenu>
   );
 }

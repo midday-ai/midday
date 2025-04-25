@@ -1376,8 +1376,8 @@ export async function searchTransactionMatchQuery(
 
 export type GetDocumentQueryParams = {
   teamId: string;
-  id?: string;
-  filePath?: string;
+  id?: string | null;
+  filePath?: string | null;
 };
 
 export async function getDocumentQuery(
@@ -1417,7 +1417,7 @@ export async function getDocumentsQuery(
 ) {
   const { teamId, pageSize = 20, cursor, filter } = params;
 
-  const { tags } = filter || {};
+  const { tags, q } = filter || {};
 
   const columns =
     "id, name, metadata, path_tokens, processing_status, title, summary, team_id, created_at, tags:document_tag_assignments(tag:document_tags(id, name, slug))";
@@ -1434,6 +1434,10 @@ export async function getDocumentsQuery(
       .in("temp_filter_tags.tag_id", tags)
       .eq("team_id", teamId)
       .select(`${columns}, temp_filter_tags:document_tag_assignments!inner()`);
+  }
+
+  if (q) {
+    query.textSearch("fts_document", `${q.replaceAll(" ", "+")}:*`);
   }
 
   // Convert cursor to offset

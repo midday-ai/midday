@@ -1,6 +1,7 @@
 "use client";
 
 import { VaultItem } from "@/components/vault/vault-item";
+import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -19,9 +20,12 @@ export function VaultGrid() {
   const { data: user } = useUserQuery();
   const { ref, inView } = useInView();
 
+  const { filter } = useDocumentFilterParams();
+
   const infiniteQueryOptions = trpc.documents.get.infiniteQueryOptions(
     {
       pageSize: 20,
+      filter,
     },
     {
       getNextPageParam: ({ meta }) => meta?.cursor,

@@ -195,7 +195,6 @@ function updateArrayFilter(
 }
 
 export function TransactionsSearchFilter() {
-  const [prompt, setPrompt] = useState("");
   const [placeholder, setPlaceholder] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
@@ -203,6 +202,7 @@ export function TransactionsSearchFilter() {
   const [isFocused, setIsFocused] = useState(false);
   const { filter = defaultSearch, setFilter } = useTransactionFilterParams();
   const { tags, accounts, categories } = useFilterData(isOpen, isFocused);
+  const [prompt, setPrompt] = useState(filter.q ?? "");
 
   useEffect(() => {
     const randomPlaceholder =
