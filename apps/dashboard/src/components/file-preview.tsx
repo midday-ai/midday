@@ -2,8 +2,7 @@
 
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
-import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   mimeType: string;
@@ -27,6 +26,15 @@ export function FilePreview({ mimeType, filePath }: Props) {
     src = `/api/preview?filePath=${filePath}`;
   }
 
+  useEffect(() => {
+    if (src) {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => setIsLoading(false);
+      img.onerror = () => setIsLoading(false);
+    }
+  }, [src]);
+
   return (
     <div className="w-full h-full relative">
       {isLoading && <Skeleton className="absolute inset-0 w-full h-full" />}
@@ -36,10 +44,8 @@ export function FilePreview({ mimeType, filePath }: Props) {
         className={cn(
           "w-full h-full object-contain",
           isLoading ? "opacity-0" : "opacity-100",
-          "transition-opacity duration-300",
+          "transition-opacity duration-100",
         )}
-        onLoad={() => setIsLoading(false)}
-        onError={() => setIsLoading(false)}
       />
     </div>
   );

@@ -18,30 +18,32 @@ export function VaultItem({ data }: Props) {
   const isLoading = data.processing_status === "pending";
 
   return (
-    <div className="border relative flex text-muted-foreground p-4 flex-col gap-3 hover:bg-muted dark:hover:bg-[#141414] transition-colors duration-200 group">
+    <div className="h-72 border relative flex text-muted-foreground p-4 flex-col gap-3 hover:bg-muted dark:hover:bg-[#141414] transition-colors duration-200 group">
       <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <VaultItemActions id={data.id} filePath={data.path_tokens} />
+        <VaultItemActions id={data.id} filePath={data.path_tokens ?? []} />
       </div>
 
       <button
         type="button"
         className={cn(
           "w-[60px] h-[84px] flex items-center justify-center",
-          data?.metadata?.mimetype?.startsWith("image/") && "bg-border",
+          (data?.metadata as { mimetype?: string })?.mimetype?.startsWith(
+            "image/",
+          ) && "bg-border",
         )}
         onClick={() => {
           setParams({ id: data.id });
         }}
       >
         <FilePreview
-          filePath={data?.path_tokens?.join("/")}
-          mimeType={data?.metadata?.mimetype}
+          filePath={data?.path_tokens?.join("/") ?? ""}
+          mimeType={(data?.metadata as { mimetype?: string })?.mimetype ?? ""}
         />
       </button>
 
       <button
         type="button"
-        className="mb-10 flex flex-col text-left"
+        className="flex flex-col text-left"
         onClick={() => {
           setParams({ id: data.id });
         }}
