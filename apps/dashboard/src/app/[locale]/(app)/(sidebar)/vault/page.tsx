@@ -1,3 +1,4 @@
+import { VaultGridSkeleton } from "@/components/vault/vault-grid-skeleton";
 import { VaultHeader } from "@/components/vault/vault-header";
 import { VaultView } from "@/components/vault/vault-view";
 import { loadDocumentFilterParams } from "@/hooks/use-document-filter-params";
@@ -30,7 +31,7 @@ export default async function Page(props: Props) {
     <div>
       <VaultHeader />
 
-      <Suspense>
+      <Suspense fallback={<VaultGridSkeleton />}>
         <VaultView />
       </Suspense>
     </div>
