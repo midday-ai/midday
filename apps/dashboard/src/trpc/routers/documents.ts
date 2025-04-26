@@ -1,4 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
 import type { processDocument } from "@midday/jobs/tasks/document/process-document";
 import { deleteDocument } from "@midday/supabase/mutations";
 import { getDocumentQuery, getDocumentsQuery } from "@midday/supabase/queries";
@@ -78,14 +79,38 @@ export const documentsRouter = createTRPCRouter({
         }),
       ),
     )
-    .mutation(async ({ ctx: { teamId }, input }) => {
+    .mutation(async ({ ctx: { teamId, supabase }, input }) => {
+      console.log(input);
+      const supportedDocuments = input.filter((item) =>
+        isMimeTypeSupportedForProcessing(item.mimetype),
+      );
+
+      const unsupportedDocuments = input.filter(
+        (item) => !isMimeTypeSupportedForProcessing(item.mimetype),
+      );
+
+      if (unsupportedDocuments.length > 0) {
+        const unsupportedNames = unsupportedDocuments.map((doc) =>
+          doc.file_path.join("/"),
+        );
+
+        await supabase
+          .from("documents")
+          .update({ processing_status: "completed" })
+          .in("name", unsupportedNames);
+      }
+
+      if (supportedDocuments.length === 0) {
+        return;
+      }
+
+      // Trigger processing task only for supported documents
       return tasks.batchTrigger<typeof processDocument>(
         "process-document",
-        input.map((item) => ({
+        supportedDocuments.map((item) => ({
           payload: {
             file_path: item.file_path,
             mimetype: item.mimetype,
-            size: item.size,
             teamId: teamId!,
           },
         })),

@@ -26,8 +26,6 @@ export const classifyImage = schemaTask({
 
     const result = await classifier.classifyImage({ content });
 
-    console.log(result);
-
     const { data, error } = await supabase
       .from("documents")
       .update({

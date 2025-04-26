@@ -1,9 +1,10 @@
 import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
 import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
-import { EPubLoader } from "@langchain/community/document_loaders/fs/epub";
 import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx";
 import { TextLoader } from "langchain/document_loaders/fs/text";
+import { parseOfficeAsync } from "officeparser";
 import { extractText, getDocumentProxy } from "unpdf";
+import { extractTextFromRtf } from "../utils";
 
 export async function loadDocument({
   content,
@@ -39,13 +40,18 @@ export async function loadDocument({
       break;
     }
 
+    case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+    case "application/vnd.oasis.opendocument.text":
+    case "application/vnd.oasis.opendocument.spreadsheet":
     case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    case "application/msword":
+    case "application/vnd.ms-excel":
+    case "application/vnd.oasis.opendocument.presentation":
     case "application/docx": {
-      const loader = new DocxLoader(content);
-      document = await loader
-        .load()
-        .then((docs) => docs.map((doc) => doc.pageContent).join("\n"));
+      const arrayBuffer = await content.arrayBuffer();
+      const result = await parseOfficeAsync(Buffer.from(arrayBuffer));
 
+      document = result;
       break;
     }
 
@@ -58,13 +64,12 @@ export async function loadDocument({
         .then((docs) => docs.map((doc) => doc.pageContent).join("\n"));
       break;
     }
-    case "application/epub+zip": {
-      const text = await content.text();
-      const loader = new EPubLoader(text);
 
-      document = await loader
-        .load()
-        .then((docs) => docs.map((doc) => doc.pageContent).join("\n"));
+    case "application/rtf": {
+      const arrayBuffer = await content.arrayBuffer();
+      const text = extractTextFromRtf(Buffer.from(arrayBuffer));
+
+      document = text;
       break;
     }
 

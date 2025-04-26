@@ -1,7 +1,6 @@
 "use client";
 
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
-// import { ConnectOutlook } from "@/components/inbox/connect-outlook";
 import { useUserQuery } from "@/hooks/use-user";
 import { getInboxEmail } from "@midday/inbox";
 import {

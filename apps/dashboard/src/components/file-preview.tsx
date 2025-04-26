@@ -1,5 +1,6 @@
 "use client";
 
+import { FilePreviewIcon } from "@/components/file-preview-icon";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 import { useEffect, useState } from "react";
@@ -12,7 +13,7 @@ type Props = {
 export function FilePreview({ mimeType, filePath }: Props) {
   const [isLoading, setIsLoading] = useState(true);
 
-  let src = "";
+  let src = null;
 
   if (mimeType.startsWith("image/")) {
     src = `/api/proxy?filePath=${filePath}`;
@@ -35,9 +36,14 @@ export function FilePreview({ mimeType, filePath }: Props) {
     }
   }, [src]);
 
+  if (!src) {
+    return <FilePreviewIcon mimetype={mimeType} />;
+  }
+
   return (
     <div className="w-full h-full relative">
       {isLoading && <Skeleton className="absolute inset-0 w-full h-full" />}
+
       <img
         src={src}
         alt="File Preview"

@@ -13,7 +13,8 @@ import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { useDebounceCallback } from "usehooks-ts";
 import { LoadMore } from "../load-more";
-import { NoDocuments, NoResults } from "./empty-states";
+import { NoResults } from "./empty-states";
+import { VaultGetStarted } from "./vault-get-started";
 
 export function VaultGrid() {
   const trpc = useTRPC();
@@ -68,7 +69,7 @@ export function VaultGrid() {
   }
 
   if (!documents?.length && !isFetching) {
-    return <NoDocuments />;
+    return <VaultGetStarted />;
   }
 
   return (

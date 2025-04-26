@@ -53,3 +53,84 @@ export function getContentSample(text: string, maxTokens = 1200): string {
   const maxWords = Math.floor(maxTokens / approxWordsPerToken);
   return words.slice(0, maxWords).join(" ");
 }
+
+const supportedMimeTypesForProcessing = new Set([
+  "application/pdf",
+  "application/x-pdf",
+  "text/csv",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/docx",
+  "text/plain",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/pptx",
+  "application/rtf",
+  "text/markdown",
+  "application/vnd.oasis.opendocument.text",
+  "image/heic", // Handled via conversion
+  // "application/vnd.apple.pages",
+  // "application/x-iwork-pages-sffpages",
+  // "applicatiosn/epub+zip",
+]);
+
+/**
+ * Checks if a given MIME type is supported for document or image processing.
+ * This includes types loadable by `loadDocument` and image types handled by `classifyImage`.
+ * @param mimetype The MIME type string to check.
+ * @returns True if the MIME type is supported, false otherwise.
+ */
+export function isMimeTypeSupportedForProcessing(mimetype: string): boolean {
+  // Check exact matches first
+  if (supportedMimeTypesForProcessing.has(mimetype)) {
+    return true;
+  }
+
+  // Check if it's any other image type (handled by classifyImage)
+  if (mimetype.startsWith("image/")) {
+    return true;
+  }
+
+  return false;
+}
+
+export function extractTextFromRtf(buffer: Buffer): string {
+  let rtfContent = buffer.toString("utf-8");
+
+  // Remove font tables, color tables, and other metadata groups
+  rtfContent = rtfContent.replace(
+    /{\\(?:fonttbl|colortbl|stylesheet)[^}]*}/gi,
+    "",
+  );
+
+  // Remove RTF header
+  rtfContent = rtfContent.replace(/^{\\rtf1[^}]*}/i, "");
+
+  // Remove embedded pictures, objects
+  rtfContent = rtfContent.replace(/{\\\*\\shppict[^}]*}/gi, "");
+  rtfContent = rtfContent.replace(/{\\object[^}]*}/gi, "");
+  rtfContent = rtfContent.replace(/{\\pict[^}]*}/gi, "");
+
+  // Remove Unicode characters like \u1234? (keep the fallback '?')
+  rtfContent = rtfContent.replace(/\\u-?\d+\??/g, "");
+
+  // Remove all other RTF control words
+  rtfContent = rtfContent.replace(/\\[a-z]+\d* ?/gi, "");
+
+  // Remove escaped hex like \'ab
+  rtfContent = rtfContent.replace(/\\'[0-9a-f]{2}/gi, "");
+
+  // Remove any leftover braces
+  rtfContent = rtfContent.replace(/[{}]/g, "");
+
+  // Replace known RTF newline/tab symbols
+  rtfContent = rtfContent
+    .replace(/\\par[d]?/gi, "\n")
+    .replace(/\\tab/gi, "\t")
+    .replace(/\\line/gi, "\n");
+
+  // Collapse multiple spaces and newlines
+  rtfContent = rtfContent.replace(/\r?\n\s*\r?\n/g, "\n"); // multiple newlines -> single
+  rtfContent = rtfContent.replace(/[ \t]{2,}/g, " "); // multiple spaces/tabs -> single
+
+  // Final clean trim
+  return rtfContent.trim();
+}

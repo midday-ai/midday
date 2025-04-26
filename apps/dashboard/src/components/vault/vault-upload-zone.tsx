@@ -150,19 +150,26 @@ export function VaultUploadZone({ onUpload, children }: Props) {
       "application/msword": [".doc"],
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         [".docx"],
+      "application/vnd.oasis.opendocument.text": [".odt"],
       "application/vnd.ms-excel": [".xls"],
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
         ".xlsx",
       ],
+      "application/vnd.oasis.opendocument.spreadsheet": [".ods"],
       "application/vnd.ms-powerpoint": [".ppt"],
       "application/vnd.openxmlformats-officedocument.presentationml.presentation":
         [".pptx"],
+      "application/vnd.oasis.opendocument.presentation": [".odp"],
       "text/plain": [".txt"],
       "text/csv": [".csv"],
+      "text/markdown": [".md"],
       "application/rtf": [".rtf"],
       "application/zip": [".zip"],
+      // "application/epub+zip": [".epub"],
+      // "application/vnd.apple.pages": [".pages"],
     },
   });
+
   return (
     <div
       className="relative h-full"
