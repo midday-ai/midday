@@ -1,5 +1,6 @@
 "use client";
 
+import { generateVaultFilters } from "@/actions/ai/filters/generate-vault-filters";
 import { FilterList } from "@/components/filter-list";
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useTRPC } from "@/trpc/client";
@@ -25,11 +26,6 @@ import { formatISO } from "date-fns";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-const statusFilters = [
-  { id: "in_progress", name: "In Progress" },
-  { id: "completed", name: "Completed" },
-];
-
 export function VaultSearchFilter() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
@@ -41,20 +37,10 @@ export function VaultSearchFilter() {
 
   const shouldFetch = isOpen;
 
-  // const { data: customersData } = useQuery({
-  //   ...trpc.customers.get.queryOptions(),
-  //   enabled: shouldFetch || Boolean(filter.customers?.length),
-  // });
-
-  // const { data: membersData } = useQuery({
-  //   ...trpc.team.members.queryOptions(),
-  //   enabled: shouldFetch || Boolean(filter.customers?.length),
-  // });
-
-  // const { data: tagsData } = useQuery({
-  //   ...trpc.tags.get.queryOptions(),
-  //   enabled: shouldFetch || Boolean(filter.tags?.length),
-  // });
+  const { data: tagsData } = useQuery({
+    ...trpc.documentTags.get.queryOptions(),
+    enabled: shouldFetch || Boolean(filter.tags?.length),
+  });
 
   useHotkeys(
     "esc",
@@ -85,52 +71,35 @@ export function VaultSearchFilter() {
   };
 
   const handleSubmit = async () => {
-    setFilter({ q: prompt.length > 0 ? prompt : null });
-
     // If the user is typing a query with multiple words, we want to stream the results
-    // if (prompt.split(" ").length > 1) {
-    //   setStreaming(true);
+    if (prompt.split(" ").length > 1) {
+      setStreaming(true);
 
-    //   const { object } = await generateTrackerFilters(
-    //     prompt,
-    //     `
-    //     Customers: ${customersData?.data?.map((customer) => customer.name).join(", ")}
-    //     Tags: ${tagsData?.map((tag) => tag.name).join(", ")}
-    //     `,
-    //   );
+      const { object } = await generateVaultFilters(prompt);
 
-    //   let finalObject = {};
+      let finalObject = {};
 
-    //   for await (const partialObject of readStreamableValue(object)) {
-    //     if (partialObject) {
-    //       finalObject = {
-    //         ...finalObject,
-    //         ...partialObject,
-    //         status: partialObject?.status ?? null,
-    //         start: partialObject?.start ?? null,
-    //         end: partialObject?.end ?? null,
-    //         q: partialObject?.name ?? null,
-    //         tags: partialObject?.tags ?? null,
-    //         customers:
-    //           partialObject?.customers?.map(
-    //             (name: string) =>
-    //               customersData?.data?.find(
-    //                 (customer) => customer.name === name,
-    //               )?.id,
-    //           ) ?? null,
-    //       };
-    //     }
-    //   }
+      for await (const partialObject of readStreamableValue(object)) {
+        if (partialObject) {
+          finalObject = {
+            ...finalObject,
+            ...partialObject,
+            start: partialObject?.start ?? null,
+            end: partialObject?.end ?? null,
+            q: partialObject?.name ?? null,
+          };
+        }
+      }
 
-    //   setFilter({
-    //     q: null,
-    //     ...finalObject,
-    //   });
+      setFilter({
+        q: null,
+        ...finalObject,
+      });
 
-    //   setStreaming(false);
-    // } else {
-    //   setFilter({ q: prompt.length > 0 ? prompt : null });
-    // }
+      setStreaming(false);
+    } else {
+      setFilter({ q: prompt.length > 0 ? prompt : null });
+    }
   };
 
   const validFilters = Object.fromEntries(
@@ -178,19 +147,16 @@ export function VaultSearchFilter() {
             </button>
           </DropdownMenuTrigger>
         </form>
+
+        <FilterList
+          filters={validFilters}
+          loading={streaming}
+          onRemove={setFilter}
+          tags={tagsData}
+        />
       </div>
 
-      <FilterList
-        filters={validFilters}
-        loading={streaming}
-        onRemove={setFilter}
-        // members={membersData}
-        // customers={customersData?.data}
-        // statusFilters={statusFilters}
-        // tags={tagsData}
-      />
-
-      {/* <DropdownMenuContent
+      <DropdownMenuContent
         className="w-[350px]"
         align="end"
         sideOffset={19}
@@ -240,73 +206,6 @@ export function VaultSearchFilter() {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.ProjectStatus className="mr-2 h-4 w-4 rotate-180" />
-              <span>Status</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                alignOffset={-4}
-                className="p-0"
-              >
-                {statusFilters.map(({ id, name }) => (
-                  <DropdownMenuCheckboxItem
-                    key={id}
-                    checked={filter?.statuses?.includes(id)}
-                    onCheckedChange={() => {
-                      setFilter({
-                        status: id ?? null,
-                      });
-                    }}
-                  >
-                    {name}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Face className="mr-2 h-4 w-4" />
-              <span>Customer</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                alignOffset={-4}
-                className="p-0"
-              >
-                {customersData?.data?.map((customer) => (
-                  <DropdownMenuCheckboxItem
-                    key={customer.id}
-                    onCheckedChange={() => {
-                      setFilter({
-                        customers: filter?.customers?.includes(customer.id)
-                          ? filter.customers.filter((s) => s !== customer.id)
-                          : [...(filter?.customers ?? []), customer.id],
-                      });
-                    }}
-                  >
-                    {customer.name}
-                  </DropdownMenuCheckboxItem>
-                ))}
-
-                {!customersData?.data?.length && (
-                  <DropdownMenuItem disabled>
-                    No customers found
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
               <Icons.Status className="mr-2 h-4 w-4" />
               <span>Tags</span>
             </DropdownMenuSubTrigger>
@@ -314,7 +213,7 @@ export function VaultSearchFilter() {
               <DropdownMenuSubContent
                 sideOffset={14}
                 alignOffset={-4}
-                className="p-0"
+                className="p-0 max-h-[300px] overflow-y-auto"
               >
                 {tagsData?.map((tag) => (
                   <DropdownMenuCheckboxItem
@@ -338,7 +237,7 @@ export function VaultSearchFilter() {
             </DropdownMenuPortal>
           </DropdownMenuSub>
         </DropdownMenuGroup>
-      </DropdownMenuContent> */}
+      </DropdownMenuContent>
     </DropdownMenu>
   );
 }

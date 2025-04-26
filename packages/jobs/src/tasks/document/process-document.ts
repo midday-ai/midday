@@ -5,6 +5,7 @@ import { schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 import { classifyDocument } from "./classify-document";
 import { classifyImage } from "./classify-image";
+import { convertHeic } from "./convert-heic";
 
 // NOTE: Process documents and images for classification
 export const processDocument = schemaTask({
@@ -22,11 +23,18 @@ export const processDocument = schemaTask({
     const supabase = createClient();
 
     try {
+      // If the file is a HEIC we need to convert it to a JPG
+      if (mimetype === "image/heic") {
+        await convertHeic.triggerAndWait({
+          file_path,
+        });
+      }
+
       // If the file is an image, we have a special classifier for it
       // NOTE: We don't want to classify images in the inbox (we have a special classifier for that)
       if (mimetype.startsWith("image/") && !file_path.includes("inbox")) {
         await classifyImage.trigger({
-          file_path,
+          fileName: file_path.join("/"),
           teamId,
         });
 

@@ -159,6 +159,7 @@ export const documentClassifierSchema = z.object({
 });
 
 export const imageClassifierSchema = z.object({
+  title: z.string().nullable().describe("The title of the document."),
   summary: z
     .string()
     .nullable()
@@ -171,5 +172,18 @@ export const imageClassifierSchema = z.object({
     .nullable()
     .describe(
       "Up to 5 relevant keywords describing business-related visual content (e.g., 'Logo', 'Branding', 'Letterhead', 'Invoice Design', 'Product Photo', 'Marketing Material', 'Website Screenshot'). Prioritize brand elements and document types.",
+    ),
+  content: z.string().nullable().describe("The content of the document."),
+  language: z
+    .string()
+    .nullable()
+    .describe(
+      "The language of the document as a PostgreSQL text search configuration name (e.g., 'english', 'swedish', 'german', 'french')",
+    ),
+  date: z
+    .string()
+    .nullable()
+    .describe(
+      "The single most relevant date found in the document (e.g., issue date, signing date) in ISO 8601 format (YYYY-MM-DD)",
     ),
 });

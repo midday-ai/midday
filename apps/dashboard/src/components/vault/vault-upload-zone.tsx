@@ -65,15 +65,15 @@ export function VaultUploadZone({ onUpload, children }: Props) {
 
     setShowProgress(true);
 
-    // Add uploaded folder so we can filter background job on this
-    const path = [user?.team_id, "inbox"];
+    // Add uploaded (team_id)
+    const path = [user?.team_id];
 
     try {
       const results = await Promise.all(
         files.map(async (file, idx) =>
           resumableUpload(supabase, {
             bucket: "vault",
-            path,
+            path: [user?.team_id],
             file,
             onProgress: (bytesUploaded, bytesTotal) => {
               uploadProgress.current[idx] = (bytesUploaded / bytesTotal) * 100;

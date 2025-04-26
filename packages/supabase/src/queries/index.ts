@@ -1407,7 +1407,10 @@ type GetDocumentsParams = {
   pageSize?: number;
   cursor?: string | null;
   filter?: {
+    q?: string | null;
     tags?: string[] | null;
+    start?: string | null;
+    end?: string | null;
   };
 };
 
@@ -1417,7 +1420,7 @@ export async function getDocumentsQuery(
 ) {
   const { teamId, pageSize = 20, cursor, filter } = params;
 
-  const { tags, q } = filter || {};
+  const { tags, q, start, end } = filter || {};
 
   const columns =
     "id, name, metadata, path_tokens, processing_status, title, summary, team_id, created_at, tags:document_tag_assignments(tag:document_tags(id, name, slug))";
@@ -1440,6 +1443,11 @@ export async function getDocumentsQuery(
     query.textSearch("fts_document", `${q.replaceAll(" ", "+")}:*`);
   }
 
+  if (start && end) {
+    query.gte("date", start);
+    query.lte("date", end);
+  }
+
   // Convert cursor to offset
   const offset = cursor ? Number.parseInt(cursor, 10) : 0;
 
@@ -1460,4 +1468,12 @@ export async function getDocumentsQuery(
     },
     data: data ?? [],
   };
+}
+
+export async function getDocumentTagsQuery(supabase: Client, teamId: string) {
+  return supabase
+    .from("document_tags")
+    .select("id, name")
+    .eq("team_id", teamId)
+    .order("created_at", { ascending: false });
 }

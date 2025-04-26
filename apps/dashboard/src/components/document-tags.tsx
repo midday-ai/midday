@@ -23,7 +23,7 @@ export function DocumentTags({ tags }: Props) {
             key={tag.tag.id}
             type="button"
             onClick={() => {
-              router.push(`/vault?tags=${tag.tag.slug}`);
+              router.push(`/vault?tags=${tag.tag.id}`);
             }}
           >
             <Badge variant="tag-rounded">{tag.tag.name}</Badge>

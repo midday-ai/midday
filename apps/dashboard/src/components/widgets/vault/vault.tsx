@@ -36,7 +36,7 @@ export function Vault({ files }: Props) {
                 <button
                   type="button"
                   onClick={() => {
-                    router.push(`/vault?tags=${firstTag?.tag.slug}`);
+                    router.push(`/vault?tags=${firstTag?.tag.id}`);
                   }}
                 >
                   <Badge variant="tag-rounded" className="text-xs">

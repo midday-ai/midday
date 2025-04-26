@@ -13,6 +13,7 @@ import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { useDebounceCallback } from "usehooks-ts";
 import { LoadMore } from "../load-more";
+import { NoDocuments, NoResults } from "./empty-states";
 
 export function VaultGrid() {
   const trpc = useTRPC();
@@ -20,7 +21,7 @@ export function VaultGrid() {
   const { data: user } = useUserQuery();
   const { ref, inView } = useInView();
 
-  const { filter } = useDocumentFilterParams();
+  const { filter, hasFilters } = useDocumentFilterParams();
 
   const infiniteQueryOptions = trpc.documents.get.infiniteQueryOptions(
     {
@@ -61,6 +62,14 @@ export function VaultGrid() {
       }
     },
   });
+
+  if (hasFilters && !documents?.length) {
+    return <NoResults />;
+  }
+
+  if (!documents?.length && !isFetching) {
+    return <NoDocuments />;
+  }
 
   return (
     <div>

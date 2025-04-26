@@ -36,7 +36,7 @@ export function VaultItemTags({ tags, isLoading }: Props) {
           type="button"
           onClick={() => {
             setFilter({
-              tags: [tag.tag.slug],
+              tags: [tag.tag.id],
             });
           }}
         >

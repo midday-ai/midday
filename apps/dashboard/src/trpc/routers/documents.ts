@@ -47,7 +47,7 @@ export const documentsRouter = createTRPCRouter({
 
   share: protectedProcedure
     .input(z.object({ filePath: z.string(), expireIn: z.number() }))
-    .mutation(async ({ input, ctx: { supabase, teamId } }) => {
+    .mutation(async ({ input, ctx: { supabase } }) => {
       console.log(input);
       const { data } = await share(supabase, {
         bucket: "vault",

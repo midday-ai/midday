@@ -226,20 +226,6 @@ export const filterTransactionsSchema = z.object({
     .describe("The amount range to filter by"),
 });
 
-export const filterVaultSchema = z.object({
-  name: z.string().optional().describe("The name to search for"),
-  tags: z.array(z.string()).optional().describe("The tags to filter by"),
-  start: parseDateSchema
-    .optional()
-    .describe("The start date when to retrieve from. Return ISO-8601 format."),
-  end: parseDateSchema
-    .optional()
-    .describe(
-      "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
-    ),
-  owners: z.array(z.string()).optional().describe("The owners to filter by"),
-});
-
 export const filterTrackerSchema = z.object({
   name: z.string().optional().describe("The name to search for"),
   start: parseDateSchema

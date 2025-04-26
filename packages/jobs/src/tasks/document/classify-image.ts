@@ -7,16 +7,16 @@ import { embedDocumentTags } from "./embed-document-tags";
 export const classifyImage = schemaTask({
   id: "classify-image",
   schema: z.object({
-    file_path: z.array(z.string()),
     teamId: z.string(),
+    fileName: z.string(),
   }),
-  run: async ({ file_path, teamId }) => {
+  run: async ({ teamId, fileName }) => {
     const supabase = createClient();
     const classifier = new DocumentClassifier();
 
     const { data: fileData } = await supabase.storage
       .from("vault")
-      .download(file_path.join("/"));
+      .download(fileName);
 
     if (!fileData) {
       throw new Error("File not found");
@@ -28,29 +28,34 @@ export const classifyImage = schemaTask({
 
     console.log(result);
 
-    // const { data, error } = await supabase
-    //   .from("documents")
-    //   .update({
-    //     title: result.title,
-    //     summary: result.summary,
-    //     content,
-    //     date: result.date,
-    //   })
-    //   .eq("name", fileName)
-    //   .select()
-    //   .single();
+    const { data, error } = await supabase
+      .from("documents")
+      .update({
+        title: result.title,
+        summary: result.summary,
+        content: result.content,
+        date: result.date,
+        language: result.language,
+        // If the document has no tags, we consider it as processed
+        processing_status:
+          !result.tags || result.tags.length === 0 ? "completed" : undefined,
+      })
+      .eq("name", fileName)
+      .select("id")
+      .single();
 
-    // if (error) {
-    //   throw new Error(error.message);
-    // }
+    if (error) {
+      throw new Error(error.message);
+    }
 
-    // if (result.tags && result.tags.length > 0) {
-    //   await embedDocumentTags.trigger({
-    //     documentId: data.id,
-    //     tags: result.tags,
-    //   });
-    // }
+    if (result.tags && result.tags.length > 0) {
+      await embedDocumentTags.trigger({
+        documentId: data.id,
+        tags: result.tags,
+        teamId,
+      });
+    }
 
-    // return result;
+    return result;
   },
 });

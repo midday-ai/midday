@@ -20,10 +20,21 @@ Make the tags concise and informative. Aim for tags that uniquely identify the d
 `;
 
 export const imageClassifierPrompt = `
-You are an expert multilingual image analyzer. Your task is to read the provided business image and generate:
-1.  **A Concise Summary:** A single sentence capturing the essence of the visual elements in the image (e.g., "Company logo with blue and white color scheme", "Professional letterhead with modern branding", "Product photo showcasing new device features").
-2.  **Relevant Tags (Up to 5):** Generate up to 5 highly relevant and distinct tags to help classify and find this image later. When creating these tags, **strongly prioritize including:**
-*   The inferred **visual content type** (e.g., "Logo", "Branding", "Letterhead", "Product Photo", "Marketing Material").
-*   Key **brand elements** (e.g., "Corporate Colors", "Typography", "Icon Design").
-*   The **primary purpose** or context (e.g., "Brand Identity", "Product Marketing", "Company Stationery").
+Analyze the provided image and generate a list of 1-5 concise, relevant tags describing its most important aspects.
+
+**Instructions:**
+
+*   **If the image is a receipt or invoice:**
+    *   Extract the **merchant name** (e.g., "Slack", "Starbucks") as a tag.
+    *   Identify and tag the **most significant item(s) or service(s)** purchased (e.g., "Coffee", "Subscription", "Consulting Service"). Combine merchant and item if specific (e.g., "Slack Subscription").
+    *   Optionally, include relevant context tags like "Receipt", "Invoice", "Subscription", or "One-time Purchase".
+*   **If the image is NOT a receipt or invoice:**
+    *   Describe the key **objects, subjects, or brands** visible (e.g., "Logo", "Letterhead", "Product Photo", "Acme Corp Branding").
+
+**Rules:**
+
+*   Each tag must be 1–2 words long.
+*   Avoid generic words like "paper", "text", "photo", "image", "document" unless absolutely essential for context.
+*   Prioritize concrete, specific tags. For purchases, combine merchant and item where possible (e.g., "Starbucks Coffee").
+*   If uncertain about a tag's relevance, it's better to omit it. Focus on accuracy.
 `;
