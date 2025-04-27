@@ -11,10 +11,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, RowData } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 
 type Document = RouterOutputs["documents"]["get"]["data"][number];
+
+declare module "@tanstack/react-table" {
+  interface TableMeta<TData extends RowData> {
+    handleDelete: (id: string) => void;
+    handleShare: (filePath: string[]) => void;
+  }
+}
 
 export const columns: ColumnDef<Document>[] = [
   {
@@ -82,8 +89,14 @@ export const columns: ColumnDef<Document>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const { setParams } = useDocumentParams();
+
+      if (!table.options.meta) {
+        return null;
+      }
+
+      const { handleDelete, handleShare } = table.options.meta;
 
       return (
         <DropdownMenu>
@@ -101,9 +114,34 @@ export const columns: ColumnDef<Document>[] = [
             >
               View details
             </DropdownMenuItem>
-            <DropdownMenuItem>Download</DropdownMenuItem>
-            <DropdownMenuItem>Copy link</DropdownMenuItem>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
+            <DropdownMenuItem>
+              <a
+                href={`/api/download/file?path=${row.original.path_tokens?.join(
+                  "/",
+                )}&filename=${row.original.name?.split("/").at(-1)}`}
+                download
+              >
+                Download
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                if (row.original.path_tokens) {
+                  handleShare(row.original.path_tokens);
+                }
+              }}
+              disabled={!row.original.path_tokens}
+            >
+              Copy link
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => {
+                handleDelete(row.original.id);
+              }}
+            >
+              Delete
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

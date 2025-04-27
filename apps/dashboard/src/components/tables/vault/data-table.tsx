@@ -7,7 +7,12 @@ import { useDocumentsStore } from "@/store/vault";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import {
+  type InfiniteData,
+  useMutation,
+  useQueryClient,
+  useSuspenseInfiniteQuery,
+} from "@tanstack/react-query";
 import {
   flexRender,
   getCoreRowModel,
@@ -16,16 +21,20 @@ import {
 import * as React from "react";
 import { useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
+import { useCopyToClipboard } from "usehooks-ts";
+import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
 
 export function DataTable() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { ref, inView } = useInView();
 
-  const { filter, hasFilters } = useDocumentFilterParams();
+  const { filter } = useDocumentFilterParams();
   const { setRowSelection, rowSelection } = useDocumentsStore();
   const { setParams } = useDocumentParams();
+  const [, copy] = useCopyToClipboard();
 
   const infiniteQueryOptions = trpc.documents.get.infiniteQueryOptions(
     {
@@ -37,8 +46,78 @@ export function DataTable() {
     },
   );
 
-  const { data, fetchNextPage, hasNextPage, refetch, isFetching } =
+  const { data, fetchNextPage, hasNextPage } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
+
+  const deleteDocumentMutation = useMutation(
+    trpc.documents.delete.mutationOptions({
+      onMutate: async ({ id }) => {
+        setParams({ id: null });
+
+        // Cancel outgoing refetches
+        await queryClient.cancelQueries({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+
+        // Get current data
+        const previousData = queryClient.getQueriesData({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+
+        // Optimistically update infinite query data
+        queryClient.setQueriesData(
+          { queryKey: trpc.documents.get.infiniteQueryKey() },
+          (old: InfiniteData<any>) => ({
+            pages: old.pages.map((page) => ({
+              ...page,
+              data: page.data.filter((item: any) => item.id !== id),
+            })),
+            pageParams: old.pageParams,
+          }),
+        );
+
+        return { previousData };
+      },
+      onError: (_, __, context) => {
+        // Restore previous data on error
+        if (context?.previousData) {
+          queryClient.setQueriesData(
+            { queryKey: trpc.documents.get.infiniteQueryKey() },
+            context.previousData,
+          );
+        }
+      },
+      onSettled: () => {
+        // Refetch after error or success
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+      },
+    }),
+  );
+
+  const shareDocumentMutation = useMutation(
+    trpc.documents.share.mutationOptions({
+      onSuccess: (data) => {
+        if (data?.signedUrl) {
+          copy(data.signedUrl);
+        }
+      },
+    }),
+  );
+
+  const handleDelete = (id: string) => {
+    deleteDocumentMutation.mutate({
+      id,
+    });
+  };
+
+  const handleShare = (filePath: string[]) => {
+    shareDocumentMutation.mutate({
+      filePath: filePath?.join("/") ?? "",
+      expireIn: 60 * 60 * 24 * 30, // 30 days
+    });
+  };
 
   useEffect(() => {
     if (inView) {
@@ -50,13 +129,17 @@ export function DataTable() {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
-  const showBottomBar = hasFilters && !Object.keys(rowSelection).length;
+  const showBottomBar = Object.keys(rowSelection).length;
 
   const table = useReactTable({
     data: documents,
     columns,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
+    meta: {
+      handleDelete,
+      handleShare,
+    },
     state: {
       rowSelection,
     },
@@ -103,6 +186,8 @@ export function DataTable() {
           )}
         </TableBody>
       </Table>
+
+      {showBottomBar && <BottomBar />}
 
       <LoadMore ref={ref} hasNextPage={hasNextPage} />
     </div>
