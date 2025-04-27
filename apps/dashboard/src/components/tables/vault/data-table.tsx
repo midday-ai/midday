@@ -129,7 +129,7 @@ export function DataTable() {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
-  const showBottomBar = Object.keys(rowSelection).length;
+  const showBottomBar = Object.keys(rowSelection).length > 0;
 
   const table = useReactTable({
     data: documents,

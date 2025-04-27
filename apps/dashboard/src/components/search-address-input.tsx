@@ -88,7 +88,7 @@ export function SearchAddressInput({
   emptyMessage = "No results found.",
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
-
+  const ref = useRef<HTMLDivElement>(null);
   const [isOpen, setOpen] = useState(false);
   const [selected, setSelected] = useState<Option | null>(null);
   const [inputValue, setInputValue] = useState<string>(defaultValue || "");
