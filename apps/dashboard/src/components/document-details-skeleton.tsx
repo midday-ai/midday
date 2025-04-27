@@ -35,10 +35,10 @@ export function DocumentDetailsSkeleton({ fullView }: Props) {
           <Skeleton className="h-6 w-20 rounded-full" />
           <Skeleton className="h-6 w-16 rounded-full" />
         </div>
-      </div>
 
-      <div className="relative mt-8">
-        <VaultRelatedFilesSkeleton />
+        <div className="mt-8">
+          <VaultRelatedFilesSkeleton fullView={fullView} />
+        </div>
       </div>
     </div>
   );

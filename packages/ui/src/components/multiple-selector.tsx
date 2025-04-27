@@ -77,8 +77,6 @@ interface MultipleSelectorProps {
     React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>,
     "value" | "placeholder" | "disabled"
   >;
-  /** hide the clear all button. */
-  hideClearAllButton?: boolean;
 
   renderOption?: (option: Option) => React.ReactNode;
 }
@@ -115,13 +113,13 @@ function transToGroupOption(options: Option[], groupBy?: string) {
   }
 
   const groupOption: GroupOption = {};
-  options.forEach((option) => {
+  for (const option of options) {
     const key = (option[groupBy] as string) || "";
     if (!groupOption[key]) {
       groupOption[key] = [];
     }
     groupOption[key].push(option);
-  });
+  }
   return groupOption;
 }
 
@@ -193,7 +191,7 @@ const MultipleSelector = React.forwardRef<
       emptyIndicator,
       maxSelected = Number.MAX_SAFE_INTEGER,
       onMaxSelected,
-      hidePlaceholderWhenSelected,
+      hidePlaceholderWhenSelected = true,
       disabled,
       groupBy,
       className,
@@ -203,7 +201,6 @@ const MultipleSelector = React.forwardRef<
       triggerSearchOnFocus = false,
       commandProps,
       inputProps,
-      hideClearAllButton = false,
       renderOption,
     }: MultipleSelectorProps,
     ref: React.Ref<MultipleSelectorRef>,
@@ -261,8 +258,8 @@ const MultipleSelector = React.forwardRef<
             if (input.value === "" && selected.length > 0) {
               const lastSelectOption = selected[selected.length - 1];
               // If last item is fixed, we should not remove it.
-              if (!lastSelectOption.fixed) {
-                handleUnselect(selected[selected.length - 1]);
+              if (lastSelectOption && !lastSelectOption.fixed) {
+                handleUnselect(lastSelectOption);
               }
             }
           }
@@ -461,9 +458,9 @@ const MultipleSelector = React.forwardRef<
       >
         <div
           className={cn(
-            "min-h-10 border border-border text-sm",
+            "min-h-10 border-b border-border text-sm",
             {
-              "px-3 py-2": selected.length !== 0,
+              "py-1": selected.length !== 0,
               "cursor-text": !disabled && selected.length !== 0,
             },
             className,
@@ -485,7 +482,7 @@ const MultipleSelector = React.forwardRef<
                   )}
                   data-fixed={option.fixed}
                   data-disabled={disabled || undefined}
-                  variant="tag"
+                  variant="tag-rounded"
                 >
                   {option.label}
                   <button
@@ -540,29 +537,12 @@ const MultipleSelector = React.forwardRef<
                 "flex-1 bg-transparent outline-none placeholder:text-muted-foreground",
                 {
                   "w-full": hidePlaceholderWhenSelected,
-                  "px-3 py-2": selected.length === 0,
+                  "py-1": selected.length === 0,
                   "ml-1": selected.length !== 0,
                 },
                 inputProps?.className,
               )}
             />
-            <button
-              type="button"
-              onClick={() => {
-                setSelected(selected.filter((s) => s.fixed));
-                onChange?.(selected.filter((s) => s.fixed));
-              }}
-              className={cn(
-                "absolute right-0 h-6 w-6 p-0",
-                (hideClearAllButton ||
-                  disabled ||
-                  selected.length < 1 ||
-                  selected.filter((s) => s.fixed).length === selected.length) &&
-                  "hidden",
-              )}
-            >
-              <X className="size-4 text-muted-foreground hover:text-foreground" />
-            </button>
           </div>
         </div>
         <div className="relative">

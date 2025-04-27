@@ -141,7 +141,10 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
                       href={`/transactions?tags=${tag.tag.id}`}
                       key={tag.id}
                     >
-                      <Badge variant="tag" className="whitespace-nowrap">
+                      <Badge
+                        variant="tag-rounded"
+                        className="whitespace-nowrap"
+                      >
                         {tag.tag.name}
                       </Badge>
                     </Link>

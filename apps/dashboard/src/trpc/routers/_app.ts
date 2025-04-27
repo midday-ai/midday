@@ -4,6 +4,7 @@ import { appsRouter } from "./apps";
 import { assistantRouter } from "./assistant";
 import { bankAccountsRouter } from "./bank-accounts";
 import { customersRouter } from "./customers";
+import { documentTagAssignmentsRouter } from "./document-tag-assignments";
 import { documentTagsRouter } from "./document-tags";
 import { documentsRouter } from "./documents";
 import { inboxRouter } from "./inbox";
@@ -40,6 +41,7 @@ export const appRouter = createTRPCRouter({
   user: userRouter,
   documents: documentsRouter,
   documentTags: documentTagsRouter,
+  documentTagAssignments: documentTagAssignmentsRouter,
 });
 
 // export type definition of API

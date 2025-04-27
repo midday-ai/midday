@@ -1387,3 +1387,94 @@ export async function deleteDocument(
     data,
   };
 }
+
+type CreateDocumentTagParams = {
+  name: string;
+  teamId: string;
+  slug: string;
+};
+
+export async function createDocumentTag(
+  supabase: Client,
+  params: CreateDocumentTagParams,
+) {
+  return supabase
+    .from("document_tags")
+    .insert({
+      name: params.name,
+      slug: params.slug,
+      team_id: params.teamId,
+    })
+    .select("id, name, slug")
+    .single();
+}
+
+type DeleteDocumentTagParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function deleteDocumentTag(
+  supabase: Client,
+  params: DeleteDocumentTagParams,
+) {
+  return supabase
+    .from("document_tags")
+    .delete()
+    .eq("id", params.id)
+    .eq("team_id", params.teamId)
+    .select("id")
+    .single();
+}
+
+type CreateDocumentTagAssignmentParams = {
+  documentId: string;
+  tagId: string;
+  teamId: string;
+};
+
+export async function createDocumentTagAssignment(
+  supabase: Client,
+  params: CreateDocumentTagAssignmentParams,
+) {
+  return supabase.from("document_tag_assignments").insert({
+    document_id: params.documentId,
+    tag_id: params.tagId,
+    team_id: params.teamId,
+  });
+}
+
+type DeleteDocumentTagAssignmentParams = {
+  documentId: string;
+  tagId: string;
+  teamId: string;
+};
+
+export async function deleteDocumentTagAssignment(
+  supabase: Client,
+  params: DeleteDocumentTagAssignmentParams,
+) {
+  return supabase
+    .from("document_tag_assignments")
+    .delete()
+    .eq("document_id", params.documentId)
+    .eq("tag_id", params.tagId)
+    .eq("team_id", params.teamId);
+}
+
+type CreateDocumentTagEmbeddingParams = {
+  slug: string;
+  name: string;
+  embedding: string;
+};
+
+export async function createDocumentTagEmbedding(
+  supabase: Client,
+  params: CreateDocumentTagEmbeddingParams,
+) {
+  return supabase.from("document_tag_embeddings").insert({
+    embedding: params.embedding,
+    slug: params.slug,
+    name: params.name,
+  });
+}

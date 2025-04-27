@@ -1,4 +1,3 @@
-import { Skeleton } from "@midday/ui/skeleton";
 import { VaultItemSkeleton } from "./vault-item-skeleton";
 
 type Props = {
@@ -7,10 +6,9 @@ type Props = {
 
 export function VaultRelatedFilesSkeleton({ fullView }: Props) {
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between">
-        {/* Title Skeleton */}
-        <Skeleton className="h-5 w-24" />
+    <div className="relative">
+      <div className="flex flex-col mb-4">
+        <h2 className="text-sm font-medium">Related Files</h2>
       </div>
 
       {/* Carousel Content Skeleton */}

@@ -64,7 +64,7 @@ export function DocumentDetails() {
           </p>
         )}
 
-        <DocumentTags tags={data?.tags} />
+        <DocumentTags tags={data?.tags} id={data?.id} />
 
         {fullView && (
           <div className="mt-8">

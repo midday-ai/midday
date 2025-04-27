@@ -1,9 +1,10 @@
 "use client";
 
+import { useDocumentParams } from "@/hooks/use-document-params";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
 
@@ -16,6 +17,8 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
   const [, copy] = useCopyToClipboard();
   const [isCopied, setIsCopied] = useState(false);
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const { setParams, params } = useDocumentParams();
 
   const filename = filePath?.at(-1);
 
@@ -32,6 +35,53 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
             setIsCopied(false);
           }, 3000);
         }
+      },
+    }),
+  );
+
+  const deleteDocumentMutation = useMutation(
+    trpc.documents.delete.mutationOptions({
+      onMutate: async ({ id }) => {
+        setParams({ id: null });
+
+        // Cancel outgoing refetches
+        await queryClient.cancelQueries({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+
+        // Get current data
+        const previousData = queryClient.getQueriesData({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+
+        // Optimistically update infinite query data
+        queryClient.setQueriesData(
+          { queryKey: trpc.documents.get.infiniteQueryKey() },
+          (old: InfiniteData<any>) => ({
+            pages: old.pages.map((page) => ({
+              ...page,
+              data: page.data.filter((item: any) => item.id !== id),
+            })),
+            pageParams: old.pageParams,
+          }),
+        );
+
+        return { previousData };
+      },
+      onError: (_, __, context) => {
+        // Restore previous data on error
+        if (context?.previousData) {
+          queryClient.setQueriesData(
+            { queryKey: trpc.documents.get.infiniteQueryKey() },
+            context.previousData,
+          );
+        }
+      },
+      onSettled: () => {
+        // Refetch after error or success
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
       },
     }),
   );
@@ -65,7 +115,15 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
       </Button>
 
       {showDelete && (
-        <Button variant="ghost" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() =>
+            deleteDocumentMutation.mutate({
+              id: params.id!,
+            })
+          }
+        >
           <Icons.Delete className="size-4" />
         </Button>
       )}

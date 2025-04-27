@@ -1,35 +1,81 @@
 "use client";
 
+import { VaultSelectTags } from "@/components/vault/vault-select-tags";
+import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@/trpc/routers/_app";
-import { Badge } from "@midday/ui/badge";
-import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-type Tag = NonNullable<RouterOutputs["documents"]["getByPath"]>["tags"][number];
+// Assuming the correct procedure to fetch a single document is 'getById'
+type Tag = NonNullable<RouterOutputs["documents"]["getById"]>["tags"][number];
 
-type Props = {
+interface Props {
+  id: string;
   tags?: Tag[];
-};
+}
 
-export function DocumentTags({ tags }: Props) {
-  const router = useRouter();
+export function DocumentTags({ id, tags }: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const createDocumentTagAssignmentMutation = useMutation(
+    trpc.documentTagAssignments.create.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.documentTags.get.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.getById.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+      },
+    }),
+  );
+
+  const deleteDocumentTagAssignmentMutation = useMutation(
+    trpc.documentTagAssignments.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.documentTags.get.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.getById.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+      },
+    }),
+  );
 
   if (!tags) return null;
 
   return (
-    <div className="flex w-full overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide">
-      <div className="flex gap-2">
-        {tags?.map((tag: Tag) => (
-          <button
-            key={tag.tag.id}
-            type="button"
-            onClick={() => {
-              router.push(`/vault?tags=${tag.tag.id}`);
-            }}
-          >
-            <Badge variant="tag-rounded">{tag.tag.name}</Badge>
-          </button>
-        ))}
-      </div>
-    </div>
+    <VaultSelectTags
+      tags={tags.map((tag) => ({
+        value: tag.tag.id,
+        label: tag.tag.name,
+        id: tag.tag.id,
+      }))}
+      onSelect={(tag) => {
+        if (tag.id) {
+          createDocumentTagAssignmentMutation.mutate({
+            tagId: tag.id,
+            documentId: id,
+          });
+        }
+      }}
+      onRemove={(tag) => {
+        deleteDocumentTagAssignmentMutation.mutate({
+          tagId: tag.id,
+          documentId: id,
+        });
+      }}
+    />
   );
 }

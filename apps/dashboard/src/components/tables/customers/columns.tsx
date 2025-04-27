@@ -106,7 +106,7 @@ export const columns: ColumnDef<Customer>[] = [
             <div className="flex items-center space-x-2">
               {row.original.tags?.map(({ tag }) => (
                 <Link href={`/transactions?tags=${tag.id}`} key={tag.id}>
-                  <Badge variant="tag" className="whitespace-nowrap">
+                  <Badge variant="tag-rounded" className="whitespace-nowrap">
                     {tag.name}
                   </Badge>
                 </Link>

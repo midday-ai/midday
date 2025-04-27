@@ -128,7 +128,11 @@ const TagsCell = memo(
     <div className="relative">
       <div className="flex items-center space-x-2">
         {tags?.map(({ tag }) => (
-          <Badge key={tag.id} variant="tag" className="whitespace-nowrap">
+          <Badge
+            key={tag.id}
+            variant="tag-rounded"
+            className="whitespace-nowrap"
+          >
             {tag.name}
           </Badge>
         ))}

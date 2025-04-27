@@ -1,4 +1,11 @@
+import { Embed } from "@midday/documents/embed";
+import {
+  createDocumentTag,
+  createDocumentTagEmbedding,
+  deleteDocumentTag,
+} from "@midday/supabase/mutations";
 import { getDocumentTagsQuery } from "@midday/supabase/queries";
+import slugify from "@sindresorhus/slugify";
 import { z } from "zod";
 import { protectedProcedure } from "../init";
 import { createTRPCRouter } from "../init";
@@ -10,36 +17,46 @@ export const documentTagsRouter = createTRPCRouter({
     return data;
   }),
 
-  //   create: protectedProcedure
-  //     .input(
-  //       z.object({
-  //           transactionId: z.string(),
-  //           tagId: z.string(),
-  //         }),
-  //       )
-  //       .mutation(async ({ ctx: { supabase, teamId }, input }) => {
-  //         const { data } = await createTransactionTag(supabase, {
-  //           teamId: teamId!,
-  //           transactionId: input.transactionId,
-  //           tagId: input.tagId,
-  //         });
+  create: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx: { supabase, teamId }, input }) => {
+      const { data } = await createDocumentTag(supabase, {
+        teamId: teamId!,
+        name: input.name,
+        slug: slugify(input.name),
+      });
 
-  //         return data;
-  //       }),
+      // If a tag is created, we need to embed it
+      if (data) {
+        const embedService = new Embed();
+        const embedding = await embedService.embed(input.name);
 
-  // delete: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       transactionId: z.string(),
-  //       tagId: z.string(),
-  //     }),
-  //   )
-  //   .mutation(async ({ ctx: { supabase }, input }) => {
-  //     const { data } = await deleteTransactionTag(supabase, {
-  //       transactionId: input.transactionId,
-  //       tagId: input.tagId,
-  //     });
+        await createDocumentTagEmbedding(supabase, {
+          slug: data.slug,
+          name: input.name,
+          embedding: JSON.stringify(embedding),
+        });
+      }
 
-  //     return data;
-  //   }),
+      return data;
+    }),
+
+  delete: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx: { supabase, teamId }, input }) => {
+      const { data } = await deleteDocumentTag(supabase, {
+        id: input.id,
+        teamId: teamId!,
+      });
+
+      return data;
+    }),
 });
