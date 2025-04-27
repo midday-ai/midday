@@ -1,5 +1,5 @@
-import { VaultGridSkeleton } from "@/components/vault/vault-grid-skeleton";
 import { VaultHeader } from "@/components/vault/vault-header";
+import { VaultSkeleton } from "@/components/vault/vault-skeleton";
 import { VaultView } from "@/components/vault/vault-view";
 import { loadDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { prefetch, trpc } from "@/trpc/server";
@@ -31,7 +31,7 @@ export default async function Page(props: Props) {
     <div>
       <VaultHeader />
 
-      <Suspense fallback={<VaultGridSkeleton />}>
+      <Suspense fallback={<VaultSkeleton />}>
         <VaultView />
       </Suspense>
     </div>
