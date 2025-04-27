@@ -4,10 +4,10 @@ import { DocumentActions } from "@/components/document-actions";
 import { DocumentDetailsSkeleton } from "@/components/document-details-skeleton";
 import { DocumentTags } from "@/components/document-tags";
 import { FileViewer } from "@/components/file-viewer";
+import { VaultRelatedFiles } from "@/components/vault/vault-related-files";
 import { useDocumentParams } from "@/hooks/use-document-params";
 import { useTRPC } from "@/trpc/client";
 import { formatSize } from "@/utils/format";
-import { ScrollArea } from "@midday/ui/scroll-area";
 import { SheetHeader } from "@midday/ui/sheet";
 import { useQuery } from "@tanstack/react-query";
 
@@ -16,6 +16,7 @@ export function DocumentDetails() {
   const { params } = useDocumentParams();
 
   const isOpen = Boolean(params.filePath || params.id);
+  const fullView = Boolean(params.id);
 
   const { data, isLoading } = useQuery({
     ...trpc.documents.getById.queryOptions({
@@ -26,7 +27,7 @@ export function DocumentDetails() {
   });
 
   if (isLoading) {
-    return <DocumentDetailsSkeleton />;
+    return <DocumentDetailsSkeleton fullView={fullView} />;
   }
 
   return (
@@ -37,20 +38,19 @@ export function DocumentDetails() {
             {data?.title ?? data?.name?.split("/").at(-1)}
           </h2>
           <span className="text-sm text-muted-foreground whitespace-nowrap">
+            {/* @ts-expect-error - size is not typed (JSONB) */}
             {data?.metadata?.size && formatSize(data?.metadata?.size)}
           </span>
         </div>
 
-        <DocumentActions
-          showDelete={Boolean(params.id)}
-          filePath={data?.path_tokens}
-        />
+        <DocumentActions showDelete={fullView} filePath={data?.path_tokens} />
       </SheetHeader>
 
       <div className="h-full max-h-[763px] p-0 pb-8 overflow-x-auto scrollbar-hide">
         <div className="flex flex-col flex-grow min-h-0 relative h-full w-full items-center justify-center">
           <FileViewer
             url={`/api/proxy?filePath=vault/${data?.path_tokens?.join("/")}`}
+            // @ts-expect-error - mimetype is not typed (JSONB)
             mimeType={data?.metadata?.mimetype}
             maxWidth={565}
           />
@@ -65,6 +65,12 @@ export function DocumentDetails() {
         )}
 
         <DocumentTags tags={data?.tags} />
+
+        {fullView && (
+          <div className="mt-8">
+            <VaultRelatedFiles />
+          </div>
+        )}
       </div>
     </div>
   );

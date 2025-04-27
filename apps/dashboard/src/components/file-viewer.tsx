@@ -2,6 +2,7 @@
 
 import { Skeleton } from "@midday/ui/skeleton";
 import dynamic from "next/dynamic";
+import { FilePreviewIcon } from "./file-preview-icon";
 
 const DynamicImageViewer = dynamic(
   () => import("@/components/image-viewer").then((mod) => mod.ImageViewer),
@@ -31,5 +32,9 @@ export function FileViewer({ mimeType, url, maxWidth }: Props) {
     return <DynamicImageViewer url={url} />;
   }
 
-  return null;
+  return (
+    <div className="size-16">
+      <FilePreviewIcon mimetype={mimeType} />
+    </div>
+  );
 }

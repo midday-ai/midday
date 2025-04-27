@@ -2,7 +2,11 @@ import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
 import type { processDocument } from "@midday/jobs/tasks/document/process-document";
 import { deleteDocument } from "@midday/supabase/mutations";
-import { getDocumentQuery, getDocumentsQuery } from "@midday/supabase/queries";
+import {
+  getDocumentQuery,
+  getDocumentsQuery,
+  getRelatedFilesQuery,
+} from "@midday/supabase/queries";
 import { share } from "@midday/supabase/storage";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
@@ -46,6 +50,15 @@ export const documentsRouter = createTRPCRouter({
       return data;
     }),
 
+  getRelatedFiles: protectedProcedure
+    .input(z.object({ id: z.string(), pageSize: z.number() }))
+    .query(async ({ input, ctx: { supabase, teamId } }) => {
+      return getRelatedFilesQuery(supabase, {
+        id: input.id,
+        teamId: teamId!,
+        pageSize: input.pageSize,
+      });
+    }),
   share: protectedProcedure
     .input(z.object({ filePath: z.string(), expireIn: z.number() }))
     .mutation(async ({ input, ctx: { supabase } }) => {

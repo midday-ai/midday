@@ -3,7 +3,7 @@
 import { Icons } from "@midday/ui/icons";
 
 type Props = {
-  mimetype: string;
+  mimetype?: string | null;
 };
 
 export function FilePreviewIcon({ mimetype }: Props) {

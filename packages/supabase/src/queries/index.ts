@@ -1470,6 +1470,28 @@ export async function getDocumentsQuery(
   };
 }
 
+export type GetRelatedFilesParams = {
+  teamId: string;
+  id: string;
+  pageSize: number;
+};
+
+export async function getRelatedFilesQuery(
+  supabase: Client,
+  params: GetRelatedFilesParams,
+) {
+  const { teamId, id, pageSize } = params;
+
+  const { data } = await supabase.rpc("match_similar_documents_by_title", {
+    source_document_id: id,
+    p_team_id: teamId,
+    match_threshold: 0.3,
+    match_count: pageSize,
+  });
+
+  return data;
+}
+
 export async function getDocumentTagsQuery(supabase: Client, teamId: string) {
   return supabase
     .from("document_tags")

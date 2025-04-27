@@ -10,23 +10,34 @@ import { VaultItemActions } from "./vault-item-actions";
 
 type Props = {
   data: RouterOutputs["documents"]["get"]["data"][number];
+  small?: boolean;
 };
 
-export function VaultItem({ data }: Props) {
+export function VaultItem({ data, small }: Props) {
   const { setParams } = useDocumentParams();
 
   const isLoading = data.processing_status === "pending";
 
   return (
-    <div className="h-72 border relative flex text-muted-foreground p-4 flex-col gap-3 hover:bg-muted dark:hover:bg-[#141414] transition-colors duration-200 group">
+    <div
+      className={cn(
+        "h-72 border relative flex text-muted-foreground p-4 flex-col gap-3 hover:bg-muted dark:hover:bg-[#141414] transition-colors duration-200 group",
+        small && "h-48",
+      )}
+    >
       <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <VaultItemActions id={data.id} filePath={data.path_tokens ?? []} />
+        <VaultItemActions
+          id={data.id}
+          filePath={data.path_tokens ?? []}
+          hideDelete={small}
+        />
       </div>
 
       <button
         type="button"
         className={cn(
           "w-[60px] h-[84px] flex items-center justify-center",
+          small && "w-[45px] h-[63px]",
           (data?.metadata as { mimetype?: string })?.mimetype?.startsWith(
             "image/",
           ) && "bg-border",
@@ -35,10 +46,17 @@ export function VaultItem({ data }: Props) {
           setParams({ id: data.id });
         }}
       >
-        <FilePreview
-          filePath={data?.path_tokens?.join("/") ?? ""}
-          mimeType={(data?.metadata as { mimetype?: string })?.mimetype ?? ""}
-        />
+        {/* @ts-expect-error - mimetype is not typed (JSONB) */}
+        {data?.metadata?.mimetype === "image/heic" && isLoading ? (
+          // NOTE: We convert the heic images to jpeg in the backend, so we need to wait for the image to be processed
+          // Otherwise the image will be a broken image, and the cache will not be updated
+          <Skeleton className="absolute inset-0 w-full h-full" />
+        ) : (
+          <FilePreview
+            filePath={data?.path_tokens?.join("/") ?? ""}
+            mimeType={(data?.metadata as { mimetype?: string })?.mimetype ?? ""}
+          />
+        )}
       </button>
 
       <button
@@ -67,7 +85,7 @@ export function VaultItem({ data }: Props) {
         )}
       </button>
 
-      <VaultItemTags tags={data?.tags} isLoading={isLoading} />
+      {!small && <VaultItemTags tags={data?.tags} isLoading={isLoading} />}
     </div>
   );
 }

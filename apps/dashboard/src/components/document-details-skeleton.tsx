@@ -2,8 +2,13 @@
 
 import { SheetHeader } from "@midday/ui/sheet";
 import { Skeleton } from "@midday/ui/skeleton";
+import { VaultRelatedFilesSkeleton } from "./vault/vault-related-files-skeleton";
 
-export function DocumentDetailsSkeleton() {
+type Props = {
+  fullView?: boolean;
+};
+
+export function DocumentDetailsSkeleton({ fullView }: Props) {
   return (
     <div className="flex flex-col flex-grow min-h-0 relative h-full w-full">
       <SheetHeader className="mb-4 flex justify-between items-center flex-row">
@@ -30,6 +35,10 @@ export function DocumentDetailsSkeleton() {
           <Skeleton className="h-6 w-20 rounded-full" />
           <Skeleton className="h-6 w-16 rounded-full" />
         </div>
+      </div>
+
+      <div className="relative mt-8">
+        <VaultRelatedFilesSkeleton />
       </div>
     </div>
   );

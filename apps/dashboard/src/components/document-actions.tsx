@@ -9,7 +9,7 @@ import { useCopyToClipboard } from "usehooks-ts";
 
 type Props = {
   showDelete?: boolean;
-  filePath: string[];
+  filePath?: string[] | null;
 };
 
 export function DocumentActions({ showDelete = false, filePath }: Props) {
@@ -25,7 +25,7 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
         setIsCopied(true);
       },
       onSuccess: (data) => {
-        if (data.signedUrl) {
+        if (data?.signedUrl) {
           copy(data.signedUrl);
 
           setTimeout(() => {
@@ -52,7 +52,7 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
         size="icon"
         onClick={() =>
           shareDocumentMutation.mutate({
-            filePath: filePath.join("/"),
+            filePath: filePath?.join("/") ?? "",
             expireIn: 60 * 60 * 24 * 30, // 30 days
           })
         }

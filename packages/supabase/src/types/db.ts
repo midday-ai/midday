@@ -2571,6 +2571,24 @@ export type Database = {
         }
         Returns: boolean
       }
+      match_similar_documents_by_title: {
+        Args: {
+          source_document_id: string
+          p_team_id: string
+          match_threshold: number
+          match_count: number
+        }
+        Returns: {
+          id: string
+          name: string
+          metadata: Json
+          path_tokens: string[]
+          tag: string
+          title: string
+          summary: string
+          title_similarity: number
+        }[]
+      }
       match_transactions_to_inbox: {
         Args: { p_team_id: string; p_inbox_id: string; p_max_results?: number }
         Returns: {

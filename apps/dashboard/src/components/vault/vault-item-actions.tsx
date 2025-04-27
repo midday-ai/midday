@@ -14,9 +14,10 @@ import { useCopyToClipboard } from "usehooks-ts";
 type Props = {
   id: string;
   filePath: string[];
+  hideDelete?: boolean;
 };
 
-export function VaultItemActions({ id, filePath }: Props) {
+export function VaultItemActions({ id, filePath, hideDelete }: Props) {
   const [, copy] = useCopyToClipboard();
   const [isCopied, setIsCopied] = useState(false);
   const trpc = useTRPC();
@@ -31,7 +32,7 @@ export function VaultItemActions({ id, filePath }: Props) {
         setIsCopied(true);
       },
       onSuccess: (data) => {
-        if (data.signedUrl) {
+        if (data?.signedUrl) {
           copy(data.signedUrl);
 
           setTimeout(() => {
@@ -113,14 +114,16 @@ export function VaultItemActions({ id, filePath }: Props) {
         )}
       </Button>
 
-      <Button
-        variant="outline"
-        size="icon"
-        className="rounded-full size-7"
-        onClick={() => deleteDocumentMutation.mutate({ id })}
-      >
-        <Icons.Delete className="size-3.5" />
-      </Button>
+      {!hideDelete && (
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-full size-7"
+          onClick={() => deleteDocumentMutation.mutate({ id })}
+        >
+          <Icons.Delete className="size-3.5" />
+        </Button>
+      )}
     </div>
   );
 }
