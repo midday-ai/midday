@@ -9,10 +9,11 @@ import { useDocumentParams } from "@/hooks/use-document-params";
 import { useTRPC } from "@/trpc/client";
 import { formatSize } from "@/utils/format";
 import { SheetHeader } from "@midday/ui/sheet";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function DocumentDetails() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { params } = useDocumentParams();
 
   const isOpen = Boolean(params.filePath || params.id);
@@ -24,8 +25,19 @@ export function DocumentDetails() {
       id: params.id!,
     }),
     enabled: isOpen,
-  });
+    staleTime: 60 * 1000,
+    initialData: () => {
+      const pages = queryClient
+        .getQueriesData({ queryKey: trpc.documents.get.infiniteQueryKey() })
+        .flatMap(([, data]) => data?.pages ?? [])
+        .flatMap((page) => page.data ?? []);
 
+      return pages.find(
+        (d) =>
+          d.id === params.id || d.path_tokens?.join("/") === params.filePath,
+      );
+    },
+  });
   if (isLoading) {
     return <DocumentDetailsSkeleton fullView={fullView} />;
   }
@@ -46,7 +58,7 @@ export function DocumentDetails() {
         <DocumentActions showDelete={fullView} filePath={data?.path_tokens} />
       </SheetHeader>
 
-      <div className="h-full max-h-[763px] p-0 pb-8 overflow-x-auto scrollbar-hide">
+      <div className="h-full max-h-[763px] p-0 pb-4 overflow-x-auto scrollbar-hide">
         <div className="flex flex-col flex-grow min-h-0 relative h-full w-full items-center justify-center">
           <FileViewer
             url={`/api/proxy?filePath=vault/${data?.path_tokens?.join("/")}`}
@@ -57,7 +69,7 @@ export function DocumentDetails() {
         </div>
       </div>
 
-      <div className="pt-4 border-t border-border">
+      <div>
         {data?.summary && (
           <p className="text-sm text-[#878787] mb-4 line-clamp-2">
             {data?.summary}
@@ -66,11 +78,7 @@ export function DocumentDetails() {
 
         <DocumentTags tags={data?.tags} id={data?.id} />
 
-        {fullView && (
-          <div className="mt-8">
-            <VaultRelatedFiles />
-          </div>
-        )}
+        {fullView && <VaultRelatedFiles />}
       </div>
     </div>
   );

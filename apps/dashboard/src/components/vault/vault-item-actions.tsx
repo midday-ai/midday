@@ -26,8 +26,8 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
   const downloadUrl = `/api/download/file?path=${filePath.join("/")}`;
   const fileName = filePath.at(-1);
 
-  const shareDocumentMutation = useMutation(
-    trpc.documents.share.mutationOptions({
+  const signedUrlMutation = useMutation(
+    trpc.documents.signedUrl.mutationOptions({
       onMutate: () => {
         setIsCopied(true);
       },
@@ -100,7 +100,7 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
         variant="outline"
         size="icon"
         onClick={() =>
-          shareDocumentMutation.mutate({
+          signedUrlMutation.mutate({
             filePath: filePath.join("/"),
             expireIn: 60 * 60 * 24 * 30, // 30 days
           })

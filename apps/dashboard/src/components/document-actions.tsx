@@ -23,7 +23,7 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
   const filename = filePath?.at(-1);
 
   const shareDocumentMutation = useMutation(
-    trpc.documents.share.mutationOptions({
+    trpc.documents.signedUrl.mutationOptions({
       onMutate: () => {
         setIsCopied(true);
       },

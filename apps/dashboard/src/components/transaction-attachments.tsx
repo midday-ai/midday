@@ -32,6 +32,10 @@ export function TransactionAttachments({ id, data }: Props) {
   const { data: user } = useUserQuery();
   const queryClient = useQueryClient();
 
+  const processDocumentMutation = useMutation(
+    trpc.documents.processDocument.mutationOptions(),
+  );
+
   const createAttachmentsMutation = useMutation(
     trpc.transactionAttachments.createMany.mutationOptions({
       onSuccess: () => {
@@ -102,6 +106,14 @@ export function TransactionAttachments({ id, data }: Props) {
       uploadedFiles.map((file) => ({
         ...file,
         transaction_id: id,
+      })),
+    );
+
+    processDocumentMutation.mutate(
+      uploadedFiles.map((file) => ({
+        file_path: file.path,
+        mimetype: file.type,
+        size: file.size,
       })),
     );
   };

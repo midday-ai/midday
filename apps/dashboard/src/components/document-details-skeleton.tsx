@@ -4,11 +4,7 @@ import { SheetHeader } from "@midday/ui/sheet";
 import { Skeleton } from "@midday/ui/skeleton";
 import { VaultRelatedFilesSkeleton } from "./vault/vault-related-files-skeleton";
 
-type Props = {
-  fullView?: boolean;
-};
-
-export function DocumentDetailsSkeleton({ fullView }: Props) {
+export function DocumentDetailsSkeleton() {
   return (
     <div className="flex flex-col flex-grow min-h-0 relative h-full w-full">
       <SheetHeader className="mb-4 flex justify-between items-center flex-row">
@@ -18,16 +14,16 @@ export function DocumentDetailsSkeleton({ fullView }: Props) {
       </SheetHeader>
 
       {/* Mimic ScrollArea and FileViewer */}
-      <div className="h-full max-h-[763px] p-0 pb-8 overflow-hidden">
+      <div className="h-full max-h-[763px] p-0 overflow-hidden">
         <Skeleton className="h-full w-full" />
       </div>
 
       {/* Mimic Footer section */}
-      <div className="pt-4 border-t border-border">
+      <div className="pt-4">
         <Skeleton className="h-4 w-full mb-4" />
         <Skeleton className="h-4 w-1/3 mb-4" />
 
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap mb-6">
           <Skeleton className="h-6 w-20 rounded-full" />
           <Skeleton className="h-6 w-16 rounded-full" />
           <Skeleton className="h-6 w-24 rounded-full" />
@@ -36,9 +32,7 @@ export function DocumentDetailsSkeleton({ fullView }: Props) {
           <Skeleton className="h-6 w-16 rounded-full" />
         </div>
 
-        <div className="mt-8">
-          <VaultRelatedFilesSkeleton fullView={fullView} />
-        </div>
+        <VaultRelatedFilesSkeleton />
       </div>
     </div>
   );

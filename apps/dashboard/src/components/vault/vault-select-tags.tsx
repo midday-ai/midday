@@ -12,9 +12,9 @@ type Option = {
 
 type Props = {
   tags: Option[];
-  onSelect: (tag: Option) => void;
-  onRemove: (tag: Option) => void;
-  onChange: (tags: Option[]) => void;
+  onSelect?: (tag: Option) => void;
+  onRemove?: (tag: Option) => void;
+  onChange?: (tags: Option[]) => void;
 };
 
 export function VaultSelectTags({ tags, onSelect, onRemove, onChange }: Props) {
@@ -68,7 +68,7 @@ export function VaultSelectTags({ tags, onSelect, onRemove, onChange }: Props) {
                 onClick={(event) => {
                   event.stopPropagation();
                   deleteTagMutation.mutate({
-                    id: option.id,
+                    id: option.id!,
                   });
                 }}
                 className="text-gray-500"

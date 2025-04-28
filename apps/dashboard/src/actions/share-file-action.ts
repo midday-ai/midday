@@ -2,7 +2,7 @@
 
 import { dub } from "@/utils/dub";
 import { LogEvents } from "@midday/events/events";
-import { share } from "@midday/supabase/storage";
+import { signedUrl } from "@midday/supabase/storage";
 import { z } from "zod";
 import { authActionClient } from "./safe-action";
 
@@ -21,7 +21,7 @@ export const shareFileAction = authActionClient
     },
   })
   .action(async ({ parsedInput: value, ctx: { supabase } }) => {
-    const response = await share(supabase, {
+    const response = await signedUrl(supabase, {
       bucket: "vault",
       path: value.fullPath,
       expireIn: value.expireIn,

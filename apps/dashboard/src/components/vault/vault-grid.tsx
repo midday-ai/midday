@@ -2,6 +2,7 @@
 
 import { VaultItem } from "@/components/vault/vault-item";
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
+import { useDocumentParams } from "@/hooks/use-document-params";
 import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -9,7 +10,7 @@ import {
   useQueryClient,
   useSuspenseInfiniteQuery,
 } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import { useDebounceCallback } from "usehooks-ts";
 import { LoadMore } from "../load-more";
@@ -23,6 +24,7 @@ export function VaultGrid() {
   const { ref, inView } = useInView();
 
   const { filter, hasFilters } = useDocumentFilterParams();
+  const { params } = useDocumentParams();
 
   const infiniteQueryOptions = trpc.documents.get.infiniteQueryOptions(
     {
@@ -37,7 +39,9 @@ export function VaultGrid() {
   const { data, fetchNextPage, hasNextPage, refetch, isFetching } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
 
-  const documents = data?.pages.flatMap((page) => page.data) ?? [];
+  const documents = useMemo(() => {
+    return data?.pages.flatMap((page) => page.data) ?? [];
+  }, [data]);
 
   useEffect(() => {
     if (inView) {
@@ -58,7 +62,10 @@ export function VaultGrid() {
     table: "documents",
     filter: `team_id=eq.${user?.team_id}`,
     onEvent: (payload) => {
-      if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+      if (
+        payload.eventType === "INSERT" ||
+        (payload.eventType === "UPDATE" && params.view === "grid")
+      ) {
         debouncedEventHandler();
       }
     },

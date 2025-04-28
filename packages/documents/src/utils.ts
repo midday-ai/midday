@@ -131,6 +131,39 @@ export function extractTextFromRtf(buffer: Buffer): string {
   rtfContent = rtfContent.replace(/\r?\n\s*\r?\n/g, "\n"); // multiple newlines -> single
   rtfContent = rtfContent.replace(/[ \t]{2,}/g, " "); // multiple spaces/tabs -> single
 
-  // Final clean trim
+  // Final clean trim§
   return rtfContent.trim();
+}
+
+export function cleanText(text: string): string {
+  // Remove control characters (C0 and C1 controls)
+  // Using Unicode escapes to avoid eslint `no-control-regex` error
+  // \u0000-\u001F corresponds to \x00-\x1F
+  // \u007F-\u009F corresponds to \x7F-\x9F
+  let cleanedText = text.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+
+  // Normalize spaces: replace multiple spaces, tabs, or line breaks with a single space
+  cleanedText = cleanedText.replace(/\s+/g, " ").trim();
+
+  // The previous version removed too many characters with /[^\x20-\x7E]/g
+  // It also had potentially overly aggressive punctuation cleaning.
+  // This simpler version focuses on removing control chars and normalizing space.
+
+  // Optional: Further specific cleaning can be added here if needed,
+  // for example, removing zero-width spaces:
+  // cleanedText = cleanedText.replace(/[\u200B-\u200D\uFEFF]/g, '');
+
+  return cleanedText;
+}
+
+export function limitWords(text: string, maxWords: number): string {
+  if (!text) return "";
+
+  const words = text.split(/\s+/); // Split by any whitespace
+
+  if (words.length <= maxWords) {
+    return text;
+  }
+
+  return words.slice(0, maxWords).join(" ");
 }

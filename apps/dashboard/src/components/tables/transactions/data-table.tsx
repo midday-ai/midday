@@ -18,6 +18,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { AnimatePresence } from "framer-motion";
 import { use, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useInView } from "react-intersection-observer";
@@ -261,14 +262,16 @@ export function DataTable({
 
       <ExportBar />
 
-      {showBottomBar && (
-        <BottomBar
-          transactions={tableData.map((row) => ({
-            amount: row?.amount ?? 0,
-            currency: row?.currency ?? "",
-          }))}
-        />
-      )}
+      <AnimatePresence>
+        {showBottomBar && (
+          <BottomBar
+            transactions={tableData.map((row) => ({
+              amount: row?.amount ?? 0,
+              currency: row?.currency ?? "",
+            }))}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

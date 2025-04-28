@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import { Skeleton } from "@midday/ui/skeleton";
 import type { ColumnDef, RowData } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 
@@ -45,11 +46,13 @@ export const columns: ColumnDef<Document>[] = [
     id: "title",
     accessorKey: "title",
     cell: ({ row }) => {
-      return (
-        <span className="font-medium text-sm">
-          {row.original.title ?? row.original.name?.split("/").at(-1)}
-        </span>
-      );
+      const isLoading = row.original.processing_status === "pending";
+
+      if (isLoading) {
+        return <Skeleton className="w-52 h-4" />;
+      }
+
+      return row.original.title ?? row.original.name?.split("/").at(-1);
     },
   },
   {
@@ -57,6 +60,18 @@ export const columns: ColumnDef<Document>[] = [
     accessorKey: "tags",
     cell: ({ row }) => {
       const { setFilter } = useDocumentFilterParams();
+
+      const isLoading = row.original.processing_status === "pending";
+
+      if (isLoading) {
+        return (
+          <div className="flex gap-2 flex-wrap">
+            <Skeleton className="h-6 w-20 rounded-full" />
+            <Skeleton className="h-6 w-16 rounded-full" />
+            <Skeleton className="h-6 w-24 rounded-full" />
+          </div>
+        );
+      }
 
       return (
         <div className="relative">

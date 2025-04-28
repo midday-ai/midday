@@ -1,3 +1,4 @@
+import { limitWords } from "@midday/documents";
 import { DocumentClassifier } from "@midday/documents/classifier";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
@@ -21,7 +22,7 @@ export const classifyDocument = schemaTask({
       .update({
         title: result.title,
         summary: result.summary,
-        content,
+        content: limitWords(content, 10000),
         date: result.date,
         language: result.language,
         // If the document has no tags, we consider it as processed

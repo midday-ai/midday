@@ -1,8 +1,11 @@
 "use client";
 
 import { LoadMore } from "@/components/load-more";
+import { VaultGetStarted } from "@/components/vault/vault-get-started";
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
+import { useRealtime } from "@/hooks/use-realtime";
+import { useUserQuery } from "@/hooks/use-user";
 import { useDocumentsStore } from "@/store/vault";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
@@ -18,10 +21,12 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { AnimatePresence } from "framer-motion";
 import * as React from "react";
 import { useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import { useCopyToClipboard } from "usehooks-ts";
+import { useDebounceCallback } from "usehooks-ts";
 import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
@@ -30,10 +35,10 @@ export function DataTable() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { ref, inView } = useInView();
-
+  const { data: user } = useUserQuery();
   const { filter } = useDocumentFilterParams();
   const { setRowSelection, rowSelection } = useDocumentsStore();
-  const { setParams } = useDocumentParams();
+  const { setParams, params } = useDocumentParams();
   const [, copy] = useCopyToClipboard();
 
   const infiniteQueryOptions = trpc.documents.get.infiniteQueryOptions(
@@ -46,8 +51,42 @@ export function DataTable() {
     },
   );
 
-  const { data, fetchNextPage, hasNextPage } =
+  const { data, fetchNextPage, hasNextPage, refetch, isFetching } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
+
+  const documents = useMemo(() => {
+    return data?.pages.flatMap((page) => page.data) ?? [];
+  }, [data]);
+
+  console.log(documents);
+
+  useEffect(() => {
+    if (inView) {
+      fetchNextPage();
+    }
+  }, [inView]);
+
+  const debouncedEventHandler = useDebounceCallback(() => {
+    refetch();
+
+    queryClient.invalidateQueries({
+      queryKey: trpc.documents.get.queryKey(),
+    });
+  }, 50);
+
+  useRealtime({
+    channelName: "realtime_documents",
+    table: "documents",
+    filter: `team_id=eq.${user?.team_id}`,
+    onEvent: (payload) => {
+      if (
+        payload.eventType === "INSERT" ||
+        (payload.eventType === "UPDATE" && params.view === "list")
+      ) {
+        debouncedEventHandler();
+      }
+    },
+  });
 
   const deleteDocumentMutation = useMutation(
     trpc.documents.delete.mutationOptions({
@@ -96,8 +135,8 @@ export function DataTable() {
     }),
   );
 
-  const shareDocumentMutation = useMutation(
-    trpc.documents.share.mutationOptions({
+  const signedUrlMutation = useMutation(
+    trpc.documents.signedUrl.mutationOptions({
       onSuccess: (data) => {
         if (data?.signedUrl) {
           copy(data.signedUrl);
@@ -113,21 +152,15 @@ export function DataTable() {
   };
 
   const handleShare = (filePath: string[]) => {
-    shareDocumentMutation.mutate({
+    signedUrlMutation.mutate({
       filePath: filePath?.join("/") ?? "",
       expireIn: 60 * 60 * 24 * 30, // 30 days
     });
   };
 
-  useEffect(() => {
-    if (inView) {
-      fetchNextPage();
-    }
-  }, [inView]);
-
-  const documents = useMemo(() => {
-    return data?.pages.flatMap((page) => page.data) ?? [];
-  }, [data]);
+  const files = useMemo(() => {
+    return documents.map((document) => document.path_tokens?.join("/") ?? "");
+  }, [documents]);
 
   const showBottomBar = Object.keys(rowSelection).length > 0;
 
@@ -144,6 +177,10 @@ export function DataTable() {
       rowSelection,
     },
   });
+
+  if (!documents?.length && !isFetching) {
+    return <VaultGetStarted />;
+  }
 
   return (
     <div className="w-full">
@@ -187,7 +224,9 @@ export function DataTable() {
         </TableBody>
       </Table>
 
-      {showBottomBar && <BottomBar />}
+      <AnimatePresence>
+        {showBottomBar && <BottomBar data={files} />}
+      </AnimatePresence>
 
       <LoadMore ref={ref} hasNextPage={hasNextPage} />
     </div>

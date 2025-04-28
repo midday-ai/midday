@@ -52,7 +52,7 @@ export async function download(
   return client.storage.from(bucket).download(path);
 }
 
-type ShareParams = {
+type SignedUrlParams = {
   path: string;
   bucket: string;
   expireIn: number;
@@ -61,9 +61,9 @@ type ShareParams = {
   };
 };
 
-export async function share(
+export async function signedUrl(
   client: SupabaseClient,
-  { bucket, path, expireIn, options }: ShareParams,
+  { bucket, path, expireIn, options }: SignedUrlParams,
 ) {
   return client.storage.from(bucket).createSignedUrl(path, expireIn, options);
 }

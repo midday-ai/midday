@@ -7,7 +7,7 @@ import {
   getDocumentsQuery,
   getRelatedFilesQuery,
 } from "@midday/supabase/queries";
-import { share } from "@midday/supabase/storage";
+import { signedUrl } from "@midday/supabase/storage";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 
@@ -60,19 +60,6 @@ export const documentsRouter = createTRPCRouter({
       });
     }),
 
-  share: protectedProcedure
-    .input(z.object({ filePath: z.string(), expireIn: z.number() }))
-    .mutation(async ({ input, ctx: { supabase } }) => {
-      console.log(input);
-      const { data } = await share(supabase, {
-        bucket: "vault",
-        path: input.filePath,
-        expireIn: input.expireIn,
-      });
-
-      return data;
-    }),
-
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx: { supabase } }) => {
@@ -94,7 +81,6 @@ export const documentsRouter = createTRPCRouter({
       ),
     )
     .mutation(async ({ ctx: { teamId, supabase }, input }) => {
-      console.log(input);
       const supportedDocuments = input.filter((item) =>
         isMimeTypeSupportedForProcessing(item.mimetype),
       );
@@ -129,5 +115,37 @@ export const documentsRouter = createTRPCRouter({
           },
         })),
       );
+    }),
+
+  signedUrl: protectedProcedure
+    .input(z.object({ filePath: z.string(), expireIn: z.number() }))
+    .mutation(async ({ input, ctx: { supabase } }) => {
+      const { data } = await signedUrl(supabase, {
+        bucket: "vault",
+        path: input.filePath,
+        expireIn: input.expireIn,
+      });
+
+      return data;
+    }),
+
+  signedUrls: protectedProcedure
+    .input(z.array(z.string()))
+    .mutation(async ({ input, ctx: { supabase } }) => {
+      const signedUrls = [];
+
+      for (const filePath of input) {
+        const { data } = await signedUrl(supabase, {
+          bucket: "vault",
+          path: filePath,
+          expireIn: 60, // 1 Minute
+        });
+
+        if (data?.signedUrl) {
+          signedUrls.push(data.signedUrl);
+        }
+      }
+
+      return signedUrls ?? [];
     }),
 });

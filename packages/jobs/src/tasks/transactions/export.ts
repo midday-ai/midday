@@ -112,14 +112,24 @@ export const exportTransactions = schemaTask({
 
     metadata.set("progress", 95);
 
+    const fullPath = `${path}/${fileName}`;
+
     await supabase.storage
       .from("vault")
-      .upload(`${path}/${fileName}`, await zip.arrayBuffer(), {
+      .upload(fullPath, await zip.arrayBuffer(), {
         upsert: true,
         contentType: "application/zip",
       });
 
     metadata.set("progress", 100);
+
+    // Update the documents to completed (it's a zip file)
+    await supabase
+      .from("documents")
+      .update({
+        processing_status: "completed",
+      })
+      .eq("name", fullPath);
 
     return {
       filePath,

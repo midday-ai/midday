@@ -1,10 +1,9 @@
 import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
-import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
 import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { parseOfficeAsync } from "officeparser";
 import { extractText, getDocumentProxy } from "unpdf";
-import { extractTextFromRtf } from "../utils";
+import { cleanText, extractTextFromRtf } from "../utils";
 
 export async function loadDocument({
   content,
@@ -87,5 +86,5 @@ export async function loadDocument({
     }
   }
 
-  return document;
+  return document ? cleanText(document) : null;
 }
