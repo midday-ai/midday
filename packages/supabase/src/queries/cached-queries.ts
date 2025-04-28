@@ -7,6 +7,7 @@ import {
   type GetCustomersQueryParams,
   type GetInvoiceSummaryParams,
   type GetInvoicesQueryParams,
+  type GetTeamBankAccountsParams,
   getBankConnectionsByTeamIdQuery,
   getCustomersQuery,
   getInvoiceSummaryQuery,
@@ -14,6 +15,7 @@ import {
   getInvoicesQuery,
   getLastInvoiceNumberQuery,
   getPaymentStatusQuery,
+  getTeamBankAccountsQuery,
   getTeamSettingsQuery,
   getUserQuery,
 } from "../queries";
@@ -220,4 +222,28 @@ export const getLastInvoiceNumber = async () => {
       revalidate: 3600,
     },
   )();
+};
+
+export const getTeamBankAccounts = async (
+  params?: Omit<GetTeamBankAccountsParams, "teamId">,
+) => {
+  const supabase = await createClient();
+
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getTeamBankAccountsQuery(supabase, { ...params, teamId });
+    },
+    ["bank_accounts", teamId],
+    {
+      tags: [`bank_accounts_${teamId}`],
+      revalidate: 180,
+    },
+  )(params);
 };
