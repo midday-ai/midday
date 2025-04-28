@@ -141,7 +141,7 @@ export function UploadZone({ children, onUpload }: Props) {
         });
       }
     },
-    maxSize: 10000000, // 10MB
+    maxSize: 5000000, // 5MB
     maxFiles: 25,
     accept: {
       "image/*": [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif", ".avif"],

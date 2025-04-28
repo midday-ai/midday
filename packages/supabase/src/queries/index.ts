@@ -1406,6 +1406,7 @@ type GetDocumentsParams = {
   teamId: string;
   pageSize?: number;
   cursor?: string | null;
+  language?: string | null;
   filter?: {
     q?: string | null;
     tags?: string[] | null;
@@ -1418,7 +1419,7 @@ export async function getDocumentsQuery(
   supabase: Client,
   params: GetDocumentsParams,
 ) {
-  const { teamId, pageSize = 20, cursor, filter } = params;
+  const { teamId, pageSize = 20, cursor, filter, language } = params;
 
   const { tags, q, start, end } = filter || {};
 
@@ -1440,7 +1441,11 @@ export async function getDocumentsQuery(
   }
 
   if (q) {
-    query.textSearch("fts_document", `${q.replaceAll(" ", "+")}:*`);
+    // Let's hardcode the language to English for now (When we have drizzle we can search multiple columns at once)
+    query.textSearch("fts_english", `${q.replaceAll(" ", "+")}:*`, {
+      type: "websearch",
+      config: "english",
+    });
   }
 
   if (start && end) {

@@ -465,6 +465,9 @@ export type Database = {
           date: string | null
           fts: unknown | null
           fts_document: unknown | null
+          fts_english: unknown | null
+          fts_language: unknown | null
+          fts_simple: unknown | null
           id: string
           language: string | null
           metadata: Json | null
@@ -488,6 +491,9 @@ export type Database = {
           date?: string | null
           fts?: unknown | null
           fts_document?: unknown | null
+          fts_english?: unknown | null
+          fts_language?: unknown | null
+          fts_simple?: unknown | null
           id?: string
           language?: string | null
           metadata?: Json | null
@@ -511,6 +517,9 @@ export type Database = {
           date?: string | null
           fts?: unknown | null
           fts_document?: unknown | null
+          fts_english?: unknown | null
+          fts_language?: unknown | null
+          fts_simple?: unknown | null
           id?: string
           language?: string | null
           metadata?: Json | null
