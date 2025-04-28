@@ -15,7 +15,7 @@ import { useState } from "react";
 import { CopyInput } from "../copy-input";
 import { ConnectGmail } from "../inbox/connect-gmail";
 // import { ConnectOutlook } from "../inbox/connect-outlook";
-import { InboxConnectedAccounts } from "../inbox/inbox-connected-accounts";
+// import { InboxConnectedAccounts } from "../inbox/inbox-connected-accounts";
 
 export function InboxSettingsModal() {
   const [open, setOpen] = useState(false);
@@ -36,11 +36,11 @@ export function InboxSettingsModal() {
         <div className="p-4">
           <DialogHeader className="mb-4">
             <DialogTitle>Settings</DialogTitle>
-            <DialogDescription>
+            {/* <DialogDescription>
               Connect your email provider or forward emails to your Midday
               address to. Midday will find attachments and suggest transactions
               to match them with.
-            </DialogDescription>
+            </DialogDescription> */}
           </DialogHeader>
 
           <div className="flex flex-col gap-2">
@@ -50,7 +50,7 @@ export function InboxSettingsModal() {
             )}
           </div>
 
-          <InboxConnectedAccounts />
+          {/* <InboxConnectedAccounts /> */}
 
           <div className="flex flex-col gap-2 mt-6">
             <ConnectGmail />

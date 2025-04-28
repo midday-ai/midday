@@ -1,10 +1,11 @@
 "use client";
 
-import type { ClientMessage } from "@/actions/ai/types";
 import { cn } from "@midday/ui/cn";
+import type { UIMessage } from "ai";
+import { BotMessage, UserMessage } from "./messages";
 
 type Props = {
-  messages: ClientMessage[];
+  messages: Array<UIMessage>;
   className?: string;
 };
 
@@ -15,14 +16,16 @@ export function ChatList({ messages, className }: Props) {
 
   return (
     <div className={cn("flex flex-col select-text", className)}>
-      {messages
-        .filter((tool) => tool.display !== undefined)
-        .map((message, index) => (
-          <div key={message.id}>
-            {message.display}
-            {index < messages.length - 1 && <div className="my-6" />}
-          </div>
-        ))}
+      {messages.map((message, index) => (
+        <div key={message.id}>
+          {message.role === "user" ? (
+            <UserMessage>{message.content}</UserMessage>
+          ) : (
+            <BotMessage content={message.content} />
+          )}
+          {index < messages.length - 1 && <div className="my-6" />}
+        </div>
+      ))}
     </div>
   );
 }

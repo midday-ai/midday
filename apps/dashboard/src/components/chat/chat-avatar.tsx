@@ -1,23 +1,22 @@
 "use client";
 
-import type { AI } from "@/actions/ai/chat";
+import { useUserQuery } from "@/hooks/use-user";
 import { Avatar, AvatarImageNext } from "@midday/ui/avatar";
-import { useAIState } from "ai/rsc";
 
 type Props = {
   role: "assistant" | "user";
 };
 
 export function ChatAvatar({ role }: Props) {
-  const [aiState] = useAIState<typeof AI>();
+  const { data: user } = useUserQuery();
 
   switch (role) {
     case "user": {
       return (
         <Avatar className="size-6">
           <AvatarImageNext
-            src={aiState?.user?.avatar_url || ""}
-            alt={aiState?.user?.full_name ?? ""}
+            src={user?.avatar_url || ""}
+            alt={user?.full_name ?? ""}
             width={24}
             height={24}
           />

@@ -13,7 +13,7 @@ export async function getTeamId() {
 export async function setTeamId(teamId: string) {
   const cookieStore = await cookies();
   cookieStore.set(selectedTeamIdCookieName, teamId, {
-    expires: addYears(new Date(), 1),
+    expires: addYears(new Date(), 100),
   });
 }
 

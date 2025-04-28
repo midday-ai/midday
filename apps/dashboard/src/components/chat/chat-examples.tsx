@@ -25,7 +25,7 @@ const itemVariant = {
 
 export function ChatExamples({ onSubmit }) {
   const items = useMemo(() => shuffle(chatExamples), []);
-  const ref = useRef();
+  const ref = useRef<HTMLDivElement>(null);
   const { events } = useDraggable(ref);
 
   const totalLength = chatExamples.reduce((accumulator, currentString) => {

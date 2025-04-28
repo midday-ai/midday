@@ -1,7 +1,6 @@
 import type { inferRouterOutputs } from "@trpc/server";
 import { createTRPCRouter } from "../init";
 import { appsRouter } from "./apps";
-import { assistantRouter } from "./assistant";
 import { bankAccountsRouter } from "./bank-accounts";
 import { customersRouter } from "./customers";
 import { documentTagAssignmentsRouter } from "./document-tag-assignments";
@@ -23,7 +22,6 @@ import { userRouter } from "./user";
 
 export const appRouter = createTRPCRouter({
   apps: appsRouter,
-  assistant: assistantRouter,
   bankAccounts: bankAccountsRouter,
   customers: customersRouter,
   inbox: inboxRouter,

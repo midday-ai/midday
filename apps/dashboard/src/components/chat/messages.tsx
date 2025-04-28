@@ -1,8 +1,6 @@
 "use client";
 
-import { useStreamableText } from "@/hooks/use-streamable-text";
 import { cn } from "@midday/ui/cn";
-import type { StreamableValue } from "ai/rsc";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { ErrorFallback } from "../error-fallback";
 import { MemoizedReactMarkdown } from "../markdown";
@@ -40,10 +38,8 @@ export function SpinnerMessage() {
 export function BotMessage({
   content,
 }: {
-  content: string | StreamableValue<string>;
+  content: string;
 }) {
-  const text = useStreamableText(content);
-
   return (
     <ErrorBoundary errorComponent={ErrorFallback}>
       <div className="group relative flex items-start">
@@ -66,7 +62,7 @@ export function BotMessage({
               },
             }}
           >
-            {text}
+            {content}
           </MemoizedReactMarkdown>
         </div>
       </div>
