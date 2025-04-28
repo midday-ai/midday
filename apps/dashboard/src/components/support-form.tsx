@@ -29,6 +29,7 @@ import type { z } from "zod";
 
 export function SupportForm() {
   const { toast } = useToast();
+
   const form = useForm<z.infer<typeof sendSupportSchema>>({
     resolver: zodResolver(sendSupportSchema),
     defaultValues: {
