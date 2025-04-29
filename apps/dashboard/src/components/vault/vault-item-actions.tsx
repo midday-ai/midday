@@ -91,7 +91,11 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
   return (
     <div className="flex flex-row gap-2">
       <a href={`${downloadUrl}&filename=${fileName}`} download>
-        <Button variant="outline" size="icon" className="rounded-full size-7">
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-full size-7 bg-background"
+        >
           <Icons.ArrowCoolDown className="size-3.5" />
         </Button>
       </a>
@@ -99,13 +103,14 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
       <Button
         variant="outline"
         size="icon"
+        type="button"
         onClick={() =>
           signedUrlMutation.mutate({
             filePath: filePath.join("/"),
             expireIn: 60 * 60 * 24 * 30, // 30 days
           })
         }
-        className="rounded-full size-7"
+        className="rounded-full size-7 bg-background"
       >
         {isCopied ? (
           <Icons.Check className="size-3.5 -mt-0.5" />
@@ -118,7 +123,7 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
         <Button
           variant="outline"
           size="icon"
-          className="rounded-full size-7"
+          className="rounded-full size-7 bg-background"
           onClick={() => deleteDocumentMutation.mutate({ id })}
         >
           <Icons.Delete className="size-3.5" />

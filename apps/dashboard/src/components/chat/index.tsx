@@ -1,49 +1,58 @@
 "use client";
 
 import { useUserQuery } from "@/hooks/use-user";
+import { useAssistantStore } from "@/store/assistant";
 import { useChat } from "@ai-sdk/react";
-import { ScrollArea } from "@midday/ui/scroll-area";
+import { useEffect } from "react";
 import { ChatEmpty } from "./chat-empty";
 import { ChatExamples } from "./chat-examples";
 import { ChatFooter } from "./chat-footer";
-import { ChatList } from "./chat-list";
+import { ChatInput } from "./chat-input";
+import { Messages } from "./messages";
 
 export function Chat() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat({});
+  const { message } = useAssistantStore();
+
+  const { messages, input, handleSubmit, status, setInput, append } = useChat({
+    experimental_throttle: 100,
+    sendExtraMessageFields: true,
+  });
 
   const { data: user } = useUserQuery();
 
   const showExamples = messages.length === 0 && !input;
 
+  const handleExampleSubmit = (example: string) => {
+    append({ role: "user", content: example });
+    handleSubmit();
+  };
+
+  useEffect(() => {
+    if (message) {
+      append({ role: "user", content: message });
+      handleSubmit();
+    }
+  }, [message]);
+
   return (
     <div className="relative">
-      <ScrollArea className="todesktop:h-[335px] md:h-[335px]">
-        <div>
-          {messages.length ? (
-            <ChatList messages={messages} className="p-4 pb-8" />
-          ) : (
-            <ChatEmpty firstName={user?.full_name?.split(" ").at(0) ?? ""} />
-          )}
-        </div>
-      </ScrollArea>
-
+      <div className="todesktop:h-[335px] md:h-[335px]">
+        {messages.length ? (
+          <Messages status={status} messages={messages} />
+        ) : (
+          <ChatEmpty firstName={user?.full_name?.split(" ").at(0) ?? ""} />
+        )}
+      </div>
       <div className="fixed bottom-[1px] left-[1px] right-[1px] todesktop:h-[88px] md:h-[88px] bg-background border-border border-t-[1px]">
-        {showExamples && <ChatExamples onSubmit={handleSubmit} />}
+        {showExamples && <ChatExamples handleSubmit={handleExampleSubmit} />}
 
-        <form onSubmit={handleSubmit}>
-          <input
-            name="prompt"
-            placeholder="Ask Midday a question..."
-            value={input}
-            onChange={handleInputChange}
-            className="h-12 min-h-12 px-2 border-none w-full text-[#878787] placeholder:text-[#878787] text-sm"
-            autoComplete="off"
-            autoCorrect="off"
-            autoFocus
-          />
-        </form>
+        <ChatInput
+          handleSubmit={handleSubmit}
+          input={input}
+          setInput={setInput}
+        />
 
-        <ChatFooter onSubmit={() => handleSubmit()} />
+        <ChatFooter handleSubmit={handleSubmit} />
       </div>
     </div>
   );

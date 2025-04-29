@@ -975,7 +975,7 @@ export async function getCategoriesQuery(
 type GetInboxSearchParams = {
   teamId: string;
   limit?: number;
-  q: string;
+  q: string | number;
 };
 
 export async function getInboxSearchQuery(
@@ -1419,7 +1419,7 @@ export async function getDocumentsQuery(
   supabase: Client,
   params: GetDocumentsParams,
 ) {
-  const { teamId, pageSize = 20, cursor, filter, language } = params;
+  const { teamId, pageSize = 20, cursor, filter } = params;
 
   const { tags, q, start, end } = filter || {};
 

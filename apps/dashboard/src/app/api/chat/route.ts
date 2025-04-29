@@ -1,40 +1,49 @@
+import { getBurnRate } from "@/lib/tools/get-burn-rate";
+import { getDocuments } from "@/lib/tools/get-documents";
+import { getForecast } from "@/lib/tools/get-forecast";
+import { getInbox } from "@/lib/tools/get-inbox";
+import { getProfit } from "@/lib/tools/get-profit";
+import { getRevenue } from "@/lib/tools/get-revenue";
+import { getRunway } from "@/lib/tools/get-runway";
 import { getSpending } from "@/lib/tools/get-spending";
-import { getTeamId } from "@/utils/team";
+import { getTransactions } from "@/lib/tools/get-transactions";
 import { openai } from "@ai-sdk/openai";
 import { createDataStreamResponse, smoothStream, streamText } from "ai";
 
 export async function POST(request: Request) {
   const { messages } = await request.json();
-  const teamId = await getTeamId();
-
-  if (!teamId) {
-    return new Response("Team not found", { status: 404 });
-  }
 
   return createDataStreamResponse({
     execute: (dataStream) => {
       const result = streamText({
-        model: openai("gpt-4o-mini"),
-        system: `\
-        You are a helpful assistant in Midday who can help users ask questions about their transactions, revenue, spending find invoices and more.
-    
-        If the user wants the burn rate, call \`getBurnRate\` function.
-        If the user wants the runway, call \`getRunway\` function.
-        If the user wants the profit, call \`getProfit\` function.
-        If the user wants to find transactions or expenses, call \`getTransactions\` function.
-        If the user wants to see spending based on a category, call \`getSpending\` function.
-        If the user wants to find invoices or receipts, call \`getInvoices\` function.
-        If the user wants to find documents, call \`getDocuments\` function.
-        Don't return markdown, just plain text.
-    
-        Always try to call the functions with default values, otherwise ask the user to respond with parameters.
-        Current date is: ${new Date().toISOString().split("T")[0]} \n
+        model: openai("gpt-4.1-mini"),
+        system: `
+        You are Midday AI, an expert financial assistant for the user's business.
+        Your goal is to help users understand their business finances by analyzing transactions, revenue, spending, and key financial metrics, as well as finding specific documents, receipts, and invoices.
+
+        When responding to user queries:
+        1. Identify the core question and the financial data or document needed.
+        2. Select the appropriate tool(s) to retrieve the necessary information.
+        3. If a question requires combining data from multiple tools (e.g., calculating profit margin using revenue and spending data), synthesize the information before responding.
+        4. Prefer using default parameters (e.g., current month, latest period) unless the user specifies a date range or other parameters.
+        5. If essential parameters are missing, ask the user for clarification.
+        6. Present the information clearly and concisely.
+
+        The current date is: ${new Date().toISOString().split("T")[0]}. Be accurate and helpful in your financial analysis.
         `,
         messages,
         maxSteps: 5,
         experimental_transform: smoothStream({ chunking: "word" }),
         tools: {
-          getSpending: getSpending({ teamId }),
+          getSpending,
+          getDocuments,
+          getBurnRate,
+          getTransactions,
+          getRevenue,
+          getForecast,
+          getProfit,
+          getRunway,
+          getInbox,
         },
       });
 

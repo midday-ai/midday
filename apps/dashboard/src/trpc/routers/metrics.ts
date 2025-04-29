@@ -15,6 +15,7 @@ export const metricsRouter = createTRPCRouter({
       z.object({
         from: z.string(),
         to: z.string(),
+        currency: z.string().optional(),
       }),
     )
     .query(async ({ ctx: { supabase, teamId }, input }) => {
@@ -22,6 +23,7 @@ export const metricsRouter = createTRPCRouter({
         teamId: teamId!,
         from: input.from,
         to: input.to,
+        currency: input.currency,
         type: "revenue",
       });
 
@@ -33,6 +35,7 @@ export const metricsRouter = createTRPCRouter({
       z.object({
         from: z.string(),
         to: z.string(),
+        currency: z.string().optional(),
       }),
     )
     .query(async ({ ctx: { supabase, teamId }, input }) => {
@@ -40,6 +43,7 @@ export const metricsRouter = createTRPCRouter({
         teamId: teamId!,
         from: input.from,
         to: input.to,
+        currency: input.currency,
         type: "profit",
       });
 
@@ -51,6 +55,7 @@ export const metricsRouter = createTRPCRouter({
       z.object({
         from: z.string(),
         to: z.string(),
+        currency: z.string().optional(),
       }),
     )
     .query(async ({ ctx: { supabase, teamId }, input }) => {
@@ -58,6 +63,7 @@ export const metricsRouter = createTRPCRouter({
         teamId: teamId!,
         from: input.from,
         to: input.to,
+        currency: input.currency,
       });
 
       return data;
@@ -68,6 +74,7 @@ export const metricsRouter = createTRPCRouter({
       z.object({
         from: z.string(),
         to: z.string(),
+        currency: z.string().optional(),
       }),
     )
     .query(async ({ ctx: { supabase, teamId }, input }) => {
@@ -75,6 +82,7 @@ export const metricsRouter = createTRPCRouter({
         teamId: teamId!,
         from: input.from,
         to: input.to,
+        currency: input.currency,
       });
 
       return data;
@@ -85,6 +93,7 @@ export const metricsRouter = createTRPCRouter({
       z.object({
         from: z.string(),
         to: z.string(),
+        currency: z.string().optional(),
       }),
     )
     .query(async ({ ctx: { supabase, teamId }, input }) => {
@@ -92,6 +101,7 @@ export const metricsRouter = createTRPCRouter({
         teamId: teamId!,
         from: input.from,
         to: input.to,
+        currency: input.currency,
       });
 
       return data;

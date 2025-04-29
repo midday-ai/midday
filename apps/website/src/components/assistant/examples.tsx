@@ -35,11 +35,6 @@ export const chatExamples = [
       "Based on the period from Jun 1, 2023 and Jun 5, 2024 your revenue is $18,933.33. In the previous period, your profit was $20,933.33.",
   },
   {
-    title: "Create a report",
-    content:
-      "Could you please specify the type of report you would like to create?",
-  },
-  {
     title: "Forecast profit",
     content:
       "Based on the last 12 months profit data, the forecasted profit for the next month is approximately $18,933.33. This is an indication of the forecast and should be verified.",
