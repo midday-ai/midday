@@ -1,6 +1,5 @@
 "use client";
 
-import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
 import { getAccounts } from "@/actions/institutions/get-accounts";
 import { connectBankAccountSchema } from "@/actions/schema";
 import { sendSupportAction } from "@/actions/send-support-action";
@@ -150,6 +149,7 @@ function SupportForm() {
 }
 
 export function SelectBankAccountsModal() {
+  return null;
   const { toast } = useToast();
   const t = useI18n();
 

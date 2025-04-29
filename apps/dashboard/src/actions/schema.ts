@@ -261,7 +261,3 @@ export const filterInvoiceSchema = z.object({
     .optional()
     .describe("The customers to filter by"),
 });
-
-export const deleteConnectionSchema = z.object({
-  connectionId: z.string(),
-});

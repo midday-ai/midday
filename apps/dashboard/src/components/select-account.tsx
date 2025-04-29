@@ -1,4 +1,3 @@
-import { createBankAccountAction } from "@/actions/create-bank-account-action";
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAccountName } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
@@ -22,6 +21,7 @@ type Props = {
 };
 
 export function SelectAccount({ placeholder, onChange, value }: Props) {
+  return null;
   const [data, setData] = useState([]);
   const supabase = createClient();
   const { data: user } = useUserQuery();
