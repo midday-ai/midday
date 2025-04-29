@@ -95,8 +95,8 @@ export const processAttachment = schemaTask({
 
       // TODO: Send event to match inbox
     } catch {
-      //     // If we end up here we could not parse the document
-      //     // But we want to update the status so we show the record with fallback name
+      // If we end up here we could not parse the document
+      // But we want to update the status so we show the record with fallback name
       await supabase
         .from("inbox")
         .update({ status: "pending" })

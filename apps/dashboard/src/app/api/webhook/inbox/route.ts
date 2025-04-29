@@ -66,7 +66,7 @@ export async function POST(req: Request) {
   try {
     const { data: teamData } = await supabase
       .from("teams")
-      .select("id, inbox_email, inbox_forwarding")
+      .select("id")
       .eq("inbox_id", inboxId)
       .single()
       .throwOnError();
@@ -108,10 +108,14 @@ export async function POST(req: Request) {
 
         const { data } = await supabase.storage
           .from("vault")
-          .upload(`${teamId}/inbox/${uniqueFileName}`, attachment.Content, {
-            contentType: attachment.ContentType,
-            upsert: true,
-          });
+          .upload(
+            `${teamId}/inbox/${uniqueFileName}`,
+            Buffer.from(attachment.Content, "base64"),
+            {
+              contentType: attachment.ContentType,
+              upsert: true,
+            },
+          );
 
         return {
           // NOTE: If we can't parse the name using OCR this will be the fallback name
@@ -135,20 +139,9 @@ export async function POST(req: Request) {
 
     const insertData = await Promise.all(uploadedAttachments ?? []);
 
-    // Insert records
-    const { data: inboxData } = await supabase
-      .from("inbox")
-      .insert(insertData)
-      .select("id, file_path, content_type, size")
-      .throwOnError();
-
-    if (!inboxData?.length) {
-      throw Error("No records");
-    }
-
     await tasks.batchTrigger<typeof processAttachment>(
       "process-attachment",
-      inboxData.map((item) => ({
+      insertData.map((item) => ({
         payload: {
           file_path: item.file_path!,
           mimetype: item.content_type!,

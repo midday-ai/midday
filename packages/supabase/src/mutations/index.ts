@@ -1383,6 +1383,16 @@ export async function deleteDocument(
     path: data.path_tokens,
   });
 
+  // Delete all transaction attachments that have the same path
+  // Use contains and containedBy for array equality check, as .eq might have issues
+  // serializing arrays correctly for comparison, leading to the "malformed array literal" error.
+  // path @> data.path_tokens AND path <@ data.path_tokens is equivalent to path = data.path_tokens
+  await supabase
+    .from("transaction_attachments")
+    .delete()
+    .contains("path", data.path_tokens)
+    .containedBy("path", data.path_tokens);
+
   return {
     data,
   };

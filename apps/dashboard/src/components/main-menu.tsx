@@ -2,6 +2,12 @@
 
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -66,23 +72,36 @@ const Item = ({ item, isActive, onSelect }: ItemProps) => {
   const Icon = icons[item.path as keyof typeof icons];
 
   return (
-    <Link prefetch href={item.path} onClick={() => onSelect?.()}>
-      <div
-        className={cn(
-          "relative border border-transparent md:w-[45px] h-[45px] flex items-center md:justify-center",
-          "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
-          isActive &&
-            "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
-        )}
-      >
-        <div className="relative">
-          <div className="flex space-x-3 p-0 items-center pl-2 md:pl-0">
-            <Icon />
-            <span className="flex md:hidden">{item.name}</span>
-          </div>
-        </div>
-      </div>
-    </Link>
+    <TooltipProvider delayDuration={70}>
+      <Link prefetch href={item.path} onClick={() => onSelect?.()}>
+        <Tooltip>
+          <TooltipTrigger className="w-full">
+            <div
+              className={cn(
+                "relative border border-transparent md:w-[45px] h-[45px] flex items-center md:justify-center",
+                "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
+                isActive &&
+                  "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
+              )}
+            >
+              <div className="relative">
+                <div className="flex space-x-3 p-0 items-center pl-2 md:pl-0">
+                  <Icon />
+                  <span className="flex md:hidden">{item.name}</span>
+                </div>
+              </div>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent
+            side="left"
+            className="px-3 py-1.5 text-xs hidden md:flex items-center gap-1"
+            sideOffset={10}
+          >
+            {item.name}
+          </TooltipContent>
+        </Tooltip>
+      </Link>
+    </TooltipProvider>
   );
 };
 
