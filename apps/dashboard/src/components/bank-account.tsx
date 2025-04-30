@@ -60,7 +60,6 @@ export function BankAccount({
   type,
   hasError,
 }: Props) {
-  return null;
   const [value, setValue] = useState("");
   const [_, setParams] = useQueryStates({
     step: parseAsString,
@@ -182,17 +181,17 @@ export function BankAccount({
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 disabled={value !== "DELETE"}
-                onClick={() =>
-                  deleteAccount.execute({
-                    id,
-                  })
-                }
+                // onClick={() =>
+                //   deleteAccount.execute({
+                //     id,
+                //   })
+                // }
               >
-                {deleteAccount.status === "executing" ? (
+                {/* {deleteAccount.status === "executing" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Confirm"
-                )}
+                )} */}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -201,10 +200,10 @@ export function BankAccount({
         {!manual && (
           <Switch
             checked={enabled}
-            disabled={updateAccount.status === "executing"}
-            onCheckedChange={(enabled: boolean) => {
-              updateAccount.execute({ id, enabled });
-            }}
+            // disabled={updateAccount.status === "executing"}
+            // onCheckedChange={(enabled: boolean) => {
+            //   updateAccount.execute({ id, enabled });
+            // }}
           />
         )}
       </div>

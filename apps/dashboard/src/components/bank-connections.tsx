@@ -3,6 +3,8 @@
 import { manualSyncTransactionsAction } from "@/actions/transactions/manual-sync-transactions-action";
 import { reconnectConnectionAction } from "@/actions/transactions/reconnect-connection-action";
 import { useSyncStatus } from "@/hooks/use-sync-status";
+import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { connectionStatus } from "@/utils/connection-status";
 import {
   Accordion,
@@ -18,6 +20,7 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
@@ -29,37 +32,14 @@ import { DeleteConnection } from "./delete-connection";
 import { ReconnectProvider } from "./reconnect-provider";
 import { SyncTransactions } from "./sync-transactions";
 
-interface BankConnectionProps {
-  connection: {
-    id: string;
-    name: string;
-    logo_url: string;
-    provider: string;
-    expires_at?: string;
-    enrollment_id: string | null;
-    institution_id: string;
-    reference_id?: string;
-    last_accessed?: string;
-    access_token: string | null;
-    error?: string;
-    status: "connected" | "disconnected" | "unknown";
-    accounts: Array<{
-      id: string;
-      name: string;
-      enabled: boolean;
-      manual: boolean;
-      currency: string;
-      balance?: number;
-      type: string;
-      error_retries?: number;
-    }>;
-  };
-}
+type BankConnection = NonNullable<
+  RouterOutputs["bankConnections"]["get"]
+>[number];
 
 function ConnectionState({
   connection,
   isSyncing,
-}: { connection: BankConnectionProps["connection"]; isSyncing: boolean }) {
+}: { connection: BankConnection; isSyncing: boolean }) {
   const { show, expired } = connectionStatus(connection);
 
   if (isSyncing) {
@@ -134,7 +114,7 @@ function ConnectionState({
   return <div className="text-xs font-normal">Never accessed</div>;
 }
 
-export function BankConnection({ connection }: BankConnectionProps) {
+export function BankConnection({ connection }: { connection: BankConnection }) {
   const [runId, setRunId] = useState<string | undefined>();
   const [accessToken, setAccessToken] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
@@ -331,15 +311,15 @@ export function BankConnection({ connection }: BankConnectionProps) {
   );
 }
 
-export function BankConnections({
-  data,
-}: { data: BankConnectionProps["connection"][] }) {
-  const defaultValue = data.length === 1 ? ["connection-0"] : undefined;
+export function BankConnections() {
+  const trpc = useTRPC();
+  const { data } = useSuspenseQuery(trpc.bankConnections.get.queryOptions());
+  const defaultValue = data?.length === 1 ? ["connection-0"] : undefined;
 
   return (
     <div className="px-6 divide-y">
       <Accordion type="multiple" className="w-full" defaultValue={defaultValue}>
-        {data.map((connection, index) => {
+        {data?.map((connection, index) => {
           return (
             <AccordionItem
               value={`connection-${index}`}

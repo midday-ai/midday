@@ -5,8 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
-import { Suspense } from "react";
-import { Loading } from "./base-currency.loading";
 import { SelectCurrency } from "./select-currency";
 
 export function BaseCurrency() {

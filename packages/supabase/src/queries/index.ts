@@ -49,7 +49,31 @@ export async function getBankConnectionsQuery(
 
   return supabase
     .from("bank_connections")
-    .select("id, expires_at, name, status, logo_url, provider, last_accessed")
+    .select(
+      `
+      id,
+      name,
+      logo_url,
+      provider,
+      expires_at,
+      enrollment_id,
+      institution_id,
+      reference_id,
+      last_accessed,
+      access_token,
+      status,
+      accounts:bank_accounts(
+        id,
+        name,
+        enabled,
+        manual,
+        currency,
+        balance,
+        type,
+        error_retries
+      )
+    `,
+    )
     .eq("team_id", teamId);
 }
 
@@ -118,7 +142,6 @@ export async function getTeamUserQuery(
     )
     .eq("team_id", params.teamId)
     .eq("user_id", params.userId)
-    .throwOnError()
     .single();
 
   return {

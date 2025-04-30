@@ -1,8 +1,5 @@
 import { AddAccountButton } from "@/components/add-account-button";
-import {
-  BankAccountList,
-  BankAccountListSkeleton,
-} from "@/components/bank-account-list";
+import { BankAccountList } from "@/components/bank-account-list";
 import {
   Card,
   CardDescription,
@@ -11,6 +8,7 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { Suspense } from "react";
+import { BankAccountListSkeleton } from "./bank-account-list-skeleton";
 
 export function ConnectedAccounts() {
   return (
