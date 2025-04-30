@@ -1,11 +1,12 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import type { SearchParams } from "nuqs";
 import appIcon from "public/appicon.png";
 import { EventEmitter } from "./event-emitter";
 import { searchParamsSchema } from "./schema";
 
 type Props = {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<SearchParams>;
 };
 
 const AllDonePage = async (props: Props) => {

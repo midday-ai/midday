@@ -1,4 +1,3 @@
-import { updateBankAccountAction } from "@/actions/update-bank-account-action";
 import { useI18n } from "@/locales/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
@@ -28,7 +27,6 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -59,11 +57,12 @@ export function EditBankAccountModal({
   defaultType,
   defaultBalance,
 }: Props) {
+  return null;
   const t = useI18n();
 
-  const updateAccount = useAction(updateBankAccountAction, {
-    onSuccess: () => onOpenChange(false),
-  });
+  // const updateAccount = useAction(updateBankAccountAction, {
+  //   onSuccess: () => onOpenChange(false),
+  // });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

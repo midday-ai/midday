@@ -11,13 +11,14 @@ import { Cookies } from "@/utils/constants";
 import { cn } from "@midday/ui/cn";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import type { SearchParams } from "nuqs";
 
 export const metadata: Metadata = {
   title: "Overview | Midday",
 };
 
 type Props = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<SearchParams>;
 };
 
 export default async function Overview(props: Props) {
@@ -30,14 +31,13 @@ export default async function Overview(props: Props) {
     cookieStore.get(Cookies.HideConnectFlow)?.value === "true";
 
   batchPrefetch([
-    trpc.assistant.history.queryOptions(),
     trpc.invoice.get.queryOptions({ pageSize: 10 }),
     trpc.invoice.paymentStatus.queryOptions(),
     trpc.metrics.expense.queryOptions({ from, to }),
     trpc.metrics.profit.queryOptions({ from, to }),
     trpc.metrics.burnRate.queryOptions({ from, to }),
     trpc.metrics.runway.queryOptions({ from, to }),
-    trpc.inbox.get.queryOptions({ filter: { done: false } }),
+    trpc.inbox.get.queryOptions({ filter: { status: "done" } }),
     trpc.bankAccounts.balances.queryOptions(),
     trpc.documents.get.queryOptions({ pageSize: 10 }),
     trpc.metrics.spending.queryOptions({

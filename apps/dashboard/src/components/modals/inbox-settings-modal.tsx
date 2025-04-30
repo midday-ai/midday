@@ -5,7 +5,7 @@ import { getInboxEmail } from "@midday/inbox";
 import { Button } from "@midday/ui/button";
 import {
   DialogContent,
-  DialogDescription,
+  // DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
@@ -13,7 +13,7 @@ import { Dialog } from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
 import { useState } from "react";
 import { CopyInput } from "../copy-input";
-import { ConnectGmail } from "../inbox/connect-gmail";
+// import { ConnectGmail } from "../inbox/connect-gmail";
 // import { ConnectOutlook } from "../inbox/connect-outlook";
 // import { InboxConnectedAccounts } from "../inbox/inbox-connected-accounts";
 
@@ -53,7 +53,7 @@ export function InboxSettingsModal() {
           {/* <InboxConnectedAccounts /> */}
 
           <div className="flex flex-col gap-2 mt-6">
-            <ConnectGmail />
+            {/* <ConnectGmail /> */}
             {/* <ConnectOutlook /> */}
           </div>
         </div>

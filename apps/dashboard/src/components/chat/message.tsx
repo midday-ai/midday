@@ -13,7 +13,11 @@ import { Profit } from "./tools/profit/profit";
 import { Revenue } from "./tools/revenue/revenue";
 import { Transactions } from "./tools/transactions/transactions";
 
-function ToolResult({ part }: { part: UIMessage["parts"][number] }) {
+type ToolResultProps = {
+  part: UIMessage["parts"][number];
+};
+
+function ToolResult({ part }: ToolResultProps) {
   if (part.type !== "tool-invocation") {
     return null;
   }

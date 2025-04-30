@@ -1488,3 +1488,19 @@ export async function createDocumentTagEmbedding(
     name: params.name,
   });
 }
+
+type DeleteBankConnectionParams = {
+  id: string;
+};
+
+export async function deleteBankConnection(
+  supabase: Client,
+  params: DeleteBankConnectionParams,
+) {
+  return supabase
+    .from("bank_connections")
+    .delete()
+    .eq("id", params.id)
+    .select("reference_id, provider, access_token")
+    .single();
+}

@@ -1,4 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { deleteBankAccount } from "@midday/supabase/mutations";
 import {
   getBankAccountsBalancesQuery,
   getBankAccountsCurrenciesQuery,
@@ -33,4 +34,12 @@ export const bankAccountsRouter = createTRPCRouter({
 
     return data;
   }),
+
+  delete: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input, ctx: { supabase } }) => {
+      const { data } = await deleteBankAccount(supabase, input.id);
+
+      return data;
+    }),
 });

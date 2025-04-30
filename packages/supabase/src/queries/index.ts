@@ -37,15 +37,20 @@ export async function getCurrentUserTeamQuery(supabase: Client) {
   return getUserQuery(supabase, session.user?.id);
 }
 
-export async function getBankConnectionsByTeamIdQuery(
+type GetBankConnectionsParams = {
+  teamId: string;
+};
+
+export async function getBankConnectionsQuery(
   supabase: Client,
-  teamId: string,
+  params: GetBankConnectionsParams,
 ) {
+  const { teamId } = params;
+
   return supabase
     .from("bank_connections")
-    .select("*")
-    .eq("team_id", teamId)
-    .throwOnError();
+    .select("id, expires_at, name, status, logo_url, provider, last_accessed")
+    .eq("team_id", teamId);
 }
 
 export type GetTeamBankAccountsParams = {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,26 +22,27 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
-import { deleteConnectionAction } from "../actions/institutions/delete-connection";
 
 type Props = {
   connectionId: string;
 };
 
 export function DeleteConnection({ connectionId }: Props) {
+  const trpc = useTRPC();
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
-  const { execute, isExecuting } = useAction(deleteConnectionAction);
 
-  const handleDelete = async () => {
-    setOpen(false);
-    setValue("");
-
-    execute({ connectionId });
-  };
+  const deleteConnectionMutation = useMutation(
+    trpc.bankConnections.delete.mutationOptions({
+      onSuccess: () => {
+        setOpen(false);
+        setValue("");
+      },
+    }),
+  );
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -52,7 +54,7 @@ export function DeleteConnection({ connectionId }: Props) {
                 variant="outline"
                 size="icon"
                 className="rounded-full w-7 h-7 flex items-center"
-                disabled={isExecuting}
+                disabled={deleteConnectionMutation.isPending}
               >
                 <Icons.Delete size={16} />
               </Button>
@@ -89,10 +91,12 @@ export function DeleteConnection({ connectionId }: Props) {
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            disabled={value !== "DELETE" || isExecuting}
-            onClick={handleDelete}
+            disabled={value !== "DELETE" || deleteConnectionMutation.isPending}
+            onClick={() =>
+              deleteConnectionMutation.mutate({ id: connectionId })
+            }
           >
-            {isExecuting ? (
+            {deleteConnectionMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               "Confirm"

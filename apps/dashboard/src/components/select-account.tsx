@@ -1,7 +1,5 @@
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAccountName } from "@/utils/format";
-import { createClient } from "@midday/supabase/client";
-import { getTeamBankAccountsQuery } from "@midday/supabase/queries";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";

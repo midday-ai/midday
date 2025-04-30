@@ -1,16 +1,6 @@
 import { isValid } from "date-fns";
 import { z } from "zod";
 
-export const deleteProjectTagSchema = z.object({
-  tagId: z.string(),
-  projectId: z.string(),
-});
-
-export const createProjectTagSchema = z.object({
-  tagId: z.string(),
-  projectId: z.string(),
-});
-
 export const trackingConsentSchema = z.boolean();
 
 export const sendSupportSchema = z.object({
@@ -34,25 +24,6 @@ export const updateTeamSchema = z.object({
 
 export type UpdateTeamFormValues = z.infer<typeof updateTeamSchema>;
 
-export const deleteBankAccountSchema = z.object({
-  id: z.string().uuid(),
-});
-
-export const updateBankAccountSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().optional(),
-  enabled: z.boolean().optional(),
-  balance: z.number().optional(),
-  type: z
-    .enum(["depository", "credit", "other_asset", "loan", "other_liability"])
-    .optional()
-    .nullable(),
-});
-
-export type DeleteBankAccountFormValues = z.infer<
-  typeof deleteBankAccountSchema
->;
-
 export const updateSubscriberPreferenceSchema = z.object({
   templateId: z.string(),
   teamId: z.string(),
@@ -63,15 +34,6 @@ export const updateSubscriberPreferenceSchema = z.object({
 });
 
 export const exportTransactionsSchema = z.array(z.string());
-
-export const deleteFileSchema = z.object({
-  id: z.string(),
-  path: z.array(z.string()),
-});
-
-export const deleteFolderSchema = z.object({
-  path: z.array(z.string()),
-});
 
 export const createFolderSchema = z.object({
   path: z.string(),
@@ -123,22 +85,6 @@ export const sendFeedbackSchema = z.object({
 export const changeTeamSchema = z.object({
   teamId: z.string(),
   redirectTo: z.string(),
-});
-
-export const deleteEntriesSchema = z.object({
-  id: z.string().uuid(),
-});
-
-export const updateEntriesSchema = z.object({
-  id: z.string().uuid().optional(),
-  action: z.enum(["update", "create", "delete"]),
-  date: z.string().optional(),
-  duration: z.number().optional(),
-  assigned_id: z.string().optional(),
-  project_id: z.string().optional(),
-  description: z.string().optional(),
-  start: z.string().datetime().optional(),
-  stop: z.string().datetime().optional(),
 });
 
 export const manualSyncTransactionsSchema = z.object({

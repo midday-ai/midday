@@ -1,7 +1,5 @@
 "use client";
 
-import { deleteBankAccountAction } from "@/actions/delete-bank-account-action";
-import { updateBankAccountAction } from "@/actions/update-bank-account-action";
 import { useI18n } from "@/locales/client";
 import { getInitials } from "@/utils/format";
 import {
@@ -36,7 +34,6 @@ import {
 } from "@midday/ui/tooltip";
 import { MoreHorizontal } from "lucide-react";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
 import { FormatAmount } from "./format-amount";
@@ -63,6 +60,7 @@ export function BankAccount({
   type,
   hasError,
 }: Props) {
+  return null;
   const [value, setValue] = useState("");
   const [_, setParams] = useQueryStates({
     step: parseAsString,
@@ -73,9 +71,6 @@ export function BankAccount({
 
   const [isOpen, setOpen] = useState(false);
   const t = useI18n();
-
-  const updateAccount = useAction(updateBankAccountAction);
-  const deleteAccount = useAction(deleteBankAccountAction);
 
   return (
     <div

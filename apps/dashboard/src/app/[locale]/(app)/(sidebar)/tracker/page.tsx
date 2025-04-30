@@ -7,6 +7,7 @@ import { loadSortParams } from "@/hooks/use-sort-params";
 import { loadTrackerFilterParams } from "@/hooks/use-tracker-filter-params";
 import { prefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
+import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<SearchParams>;
 };
 
 export default async function Page(props: Props) {

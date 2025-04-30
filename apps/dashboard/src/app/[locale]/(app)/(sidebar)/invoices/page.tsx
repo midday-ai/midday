@@ -13,6 +13,7 @@ import { InvoiceSkeleton } from "@/components/tables/invoices/skeleton";
 import { getDefaultSettings } from "@midday/invoice/default";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
 import { searchParamsCache } from "./search-params";
 
@@ -20,9 +21,11 @@ export const metadata: Metadata = {
   title: "Invoices | Midday",
 };
 
-export default async function Page(props: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+type Props = {
+  searchParams: Promise<SearchParams>;
+};
+
+export default async function Page(props: Props) {
   const searchParams = await props.searchParams;
   const {
     q: query,
