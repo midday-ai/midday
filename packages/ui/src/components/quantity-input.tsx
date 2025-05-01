@@ -79,7 +79,7 @@ export function QuantityInput({
           min={min}
           max={max}
           autoComplete="off"
-          step={0.1}
+          step={0.01}
           value={rawValue}
           onInput={handleInput}
           onBlur={onBlur}
