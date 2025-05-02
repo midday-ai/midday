@@ -13,7 +13,6 @@ import {
   getInvoicesQuery,
   getLastInvoiceNumberQuery,
   getPaymentStatusQuery,
-  getTeamSettingsQuery,
   getUserQuery,
 } from "../queries";
 
@@ -50,27 +49,6 @@ export const getUser = cache(async () => {
     },
   )();
 });
-
-export const getTeamSettings = async () => {
-  const supabase = await createClient();
-  const user = await getUser();
-  const teamId = user?.data?.team_id;
-
-  if (!teamId) {
-    return null;
-  }
-
-  return unstable_cache(
-    async () => {
-      return getTeamSettingsQuery(supabase, teamId);
-    },
-    ["team_settings", teamId],
-    {
-      tags: [`team_settings_${teamId}`],
-      revalidate: 3600,
-    },
-  )();
-};
 
 export const getInvoiceSummary = async (
   params?: Omit<GetInvoiceSummaryParams, "teamId">,

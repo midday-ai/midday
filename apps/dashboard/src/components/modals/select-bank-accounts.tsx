@@ -43,20 +43,15 @@ import { LoadingTransactionsEvent } from "../loading-transactions-event";
 function RowsSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <Skeleton className="h-9 w-9 rounded-full" />
-        <div className="space-y-2">
-          <Skeleton className="h-3.5 w-[210px] rounded-none" />
-          <Skeleton className="h-2.5 w-[180px] rounded-none" />
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index.toString()} className="flex items-center space-x-4">
+          <Skeleton className="h-9 w-9 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-3.5 w-[250px] rounded-none" />
+            <Skeleton className="h-2.5 w-[200px] rounded-none" />
+          </div>
         </div>
-      </div>
-      <div className="flex items-center space-x-4">
-        <Skeleton className="h-9 w-9 rounded-full" />
-        <div className="space-y-2">
-          <Skeleton className="h-3.5 w-[250px] rounded-none" />
-          <Skeleton className="h-2.5 w-[200px] rounded-none" />
-        </div>
-      </div>
+      ))}
     </div>
   );
 }
@@ -194,12 +189,21 @@ export function SelectBankAccountsModal() {
   const isOpen = step === "account";
 
   const { data, isLoading } = useQuery(
-    trpc.institutions.accounts.queryOptions({
-      id: ref ?? undefined,
-      accessToken: token ?? undefined,
-      institutionId: institution_id ?? undefined,
-      provider: provider as "gocardless" | "plaid" | "teller" | "enablebanking",
-    }),
+    trpc.institutions.accounts.queryOptions(
+      {
+        id: ref ?? undefined,
+        accessToken: token ?? undefined,
+        institutionId: institution_id ?? undefined,
+        provider: provider as
+          | "gocardless"
+          | "plaid"
+          | "teller"
+          | "enablebanking",
+      },
+      {
+        enabled: isOpen,
+      },
+    ),
   );
 
   const connectBankConnectionMutation = useMutation(
@@ -342,7 +346,7 @@ export function SelectBankAccountsModal() {
                                 <FormControl>
                                   <Switch
                                     checked={
-                                      field.value.find(
+                                      field.value?.find(
                                         (value) =>
                                           value.account_id === account.id,
                                       )?.enabled

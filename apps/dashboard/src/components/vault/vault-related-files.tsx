@@ -19,7 +19,7 @@ export function VaultRelatedFiles() {
   const { params } = useDocumentParams();
 
   const { data, isLoading } = useQuery(
-    trpc.documents.getRelatedFiles.queryOptions(
+    trpc.documents.getRelatedDocuments.queryOptions(
       {
         pageSize: 12,
         id: params?.id!,

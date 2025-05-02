@@ -5,7 +5,7 @@ import { deleteDocument } from "@midday/supabase/mutations";
 import {
   getDocumentQuery,
   getDocumentsQuery,
-  getRelatedFilesQuery,
+  getRelatedDocumentsQuery,
 } from "@midday/supabase/queries";
 import { signedUrl } from "@midday/supabase/storage";
 import { tasks } from "@trigger.dev/sdk/v3";
@@ -50,10 +50,10 @@ export const documentsRouter = createTRPCRouter({
       return data;
     }),
 
-  getRelatedFiles: protectedProcedure
+  getRelatedDocuments: protectedProcedure
     .input(z.object({ id: z.string(), pageSize: z.number() }))
     .query(async ({ input, ctx: { supabase, teamId } }) => {
-      return getRelatedFilesQuery(supabase, {
+      return getRelatedDocumentsQuery(supabase, {
         id: input.id,
         teamId: teamId!,
         pageSize: input.pageSize,

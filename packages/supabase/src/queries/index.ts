@@ -25,18 +25,6 @@ export async function getUserQuery(supabase: Client, userId: string) {
     .throwOnError();
 }
 
-export async function getCurrentUserTeamQuery(supabase: Client) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session?.user) {
-    return;
-  }
-
-  return getUserQuery(supabase, session.user?.id);
-}
-
 type GetBankConnectionsParams = {
   teamId: string;
   enabled?: boolean;
@@ -1044,10 +1032,6 @@ export async function getInboxSearchQuery(
   return data;
 }
 
-export async function getTeamSettingsQuery(supabase: Client, teamId: string) {
-  return supabase.from("teams").select("*").eq("id", teamId).single();
-}
-
 export type GetInvoicesQueryParams = {
   teamId: string;
   cursor?: string | null;
@@ -1515,15 +1499,15 @@ export async function getDocumentsQuery(
   };
 }
 
-export type GetRelatedFilesParams = {
+export type GetRelatedDocumentsParams = {
   teamId: string;
   id: string;
   pageSize: number;
 };
 
-export async function getRelatedFilesQuery(
+export async function getRelatedDocumentsQuery(
   supabase: Client,
-  params: GetRelatedFilesParams,
+  params: GetRelatedDocumentsParams,
 ) {
   const { teamId, id, pageSize } = params;
 
