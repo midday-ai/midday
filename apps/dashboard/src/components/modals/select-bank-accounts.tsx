@@ -238,7 +238,7 @@ export function SelectBankAccountsModal() {
   }, [error, setParams]);
 
   const onClose = () => {
-    setParams({ step: null });
+    setParams(null);
   };
 
   const form = useZodForm(formSchema, {

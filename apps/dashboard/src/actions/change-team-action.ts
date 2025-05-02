@@ -4,7 +4,6 @@ import { setTeamId } from "@/utils/team";
 import { LogEvents } from "@midday/events/events";
 import { updateUser } from "@midday/supabase/mutations";
 import { redirect } from "next/navigation";
-import { after } from "next/server";
 import { z } from "zod";
 import { authActionClient } from "./safe-action";
 
@@ -29,12 +28,9 @@ export const changeTeamAction = authActionClient
     }) => {
       await setTeamId(teamId);
 
-      // Update user team_id after redirect
-      after(async () => {
-        await updateUser(supabase, {
-          id: user.id,
-          team_id: teamId,
-        });
+      await updateUser(supabase, {
+        id: user.id,
+        team_id: teamId,
       });
 
       redirect(redirectTo);

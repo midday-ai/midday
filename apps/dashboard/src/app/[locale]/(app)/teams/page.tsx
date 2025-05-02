@@ -1,8 +1,6 @@
 import { SelectTeamTable } from "@/components/tables/select-team/table";
 import { UserMenu } from "@/components/user-menu";
-import { getUser } from "@midday/supabase/cached-queries";
-import { getTeamsByUserIdQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
+import { HydrateClient, getQueryClient, prefetch, trpc } from "@/trpc/server";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -13,17 +11,17 @@ export const metadata: Metadata = {
 };
 
 export default async function Teams() {
-  const supabase = await createClient();
-  const user = await getUser();
+  const queryClient = getQueryClient();
+  const teams = await queryClient.fetchQuery(trpc.team.list.queryOptions());
 
-  const teams = await getTeamsByUserIdQuery(supabase, user?.data?.id);
+  prefetch(trpc.user.me.queryOptions());
 
-  if (!teams?.data?.length) {
+  if (!teams?.length) {
     redirect("/teams/create");
   }
 
   return (
-    <>
+    <HydrateClient>
       <header className="w-full absolute left-0 right-0 flex justify-between items-center">
         <div className="ml-5 mt-4 md:ml-10 md:mt-10">
           <Link href="/">
@@ -45,7 +43,7 @@ export default async function Teams() {
             </p>
           </div>
 
-          <SelectTeamTable data={teams.data} />
+          <SelectTeamTable data={teams} />
 
           <div className="text-center mt-8 border-t-[1px] border-border pt-6">
             <Link href="/teams/create" className="text-sm">
@@ -54,6 +52,6 @@ export default async function Teams() {
           </div>
         </div>
       </div>
-    </>
+    </HydrateClient>
   );
 }
