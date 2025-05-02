@@ -44,32 +44,34 @@ export const EnrichSchema = z
   })
   .openapi("EnrichSchema");
 
-export const OutputSchema = z.object({
-  category: z
-    .enum([
-      "travel",
-      "office_supplies",
-      "meals",
-      "software",
-      "rent",
-      "equipment",
-      "internet_and_telephone",
-      "facilities_expenses",
-      "activity",
-      "taxes",
-      "fees",
-    ])
-    .describe("The category of the transaction")
-    .nullable(),
-  company: z.string().describe("The company name").nullable(),
-  website: z
-    .string()
-    .describe("The website of the company, only root domains without protocol")
-    .nullable(),
-  subscription: z
-    .boolean()
-    .describe("Whether the transaction is a recurring subscription payment")
-    .default(false),
-});
+export const OutputSchema = z
+  .object({
+    category: z
+      .enum([
+        "travel",
+        "office_supplies",
+        "meals",
+        "software",
+        "rent",
+        "equipment",
+        "internet_and_telephone",
+        "facilities_expenses",
+        "activity",
+        "taxes",
+        "fees",
+      ])
+      .openapi("The category of the transaction")
+      .nullable(),
+    company: z.string().openapi("The company name").nullable(),
+    website: z
+      .string()
+      .openapi("The website of the company, only root domains without protocol")
+      .nullable(),
+    subscription: z
+      .boolean()
+      .openapi("Whether the transaction is a recurring subscription payment")
+      .default(false),
+  })
+  .openapi("OutputSchema");
 
 export type EnrichBody = z.infer<typeof EnrichBodySchema>;

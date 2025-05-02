@@ -1,5 +1,4 @@
 import type { Bindings } from "@/common/bindings";
-import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { requestId } from "hono/request-id";
 import {
@@ -37,29 +36,18 @@ app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
   scheme: "bearer",
 });
 
-app.get(
-  "/",
-  swaggerUI({
-    url: "/openapi",
-  }),
-);
-
-app.doc("/openapi", {
-  openapi: "3.1.0",
-  info: {
-    version: "1.0.0",
-    title: "Midday Engine API",
-  },
+app.get("/", (c) => {
+  return c.redirect("https://midday.ai", 302);
 });
 
 const appRoutes = app
   .route("/transactions", transactionsRoutes)
   .route("/accounts", accountRoutes)
   .route("/institutions", institutionRoutes)
-  .route("/rates", ratesRoutes)
   .route("/auth", authRoutes)
   .route("/connections", connectionRoutes)
   .route("/health", healthRoutes)
+  .route("/rates", ratesRoutes)
   .route("/enrich", enrichRoutes);
 
 export type AppType = typeof appRoutes;
