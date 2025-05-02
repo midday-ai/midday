@@ -147,23 +147,13 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
       onclose();
 
       queryClient.invalidateQueries({
-        queryKey: trpc.transactions.get.queryKey(),
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankAccounts.get.queryKey(),
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankConnections.get.queryKey(),
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.metrics.revenue.queryKey(),
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.metrics.spending.queryKey(),
+        queryKey: [
+          trpc.transactions.get.queryKey(),
+          trpc.bankAccounts.get.queryKey(),
+          trpc.bankConnections.get.queryKey(),
+          trpc.metrics.revenue.queryKey(),
+          trpc.metrics.spending.queryKey(),
+        ],
       });
 
       toast({
@@ -241,7 +231,6 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                         bankAccountId: data.bank_account_id,
                         currentBalance: data.balance,
                         inverted: data.inverted,
-                        table: data.table,
                         mappings: {
                           amount: data.amount,
                           date: data.date,

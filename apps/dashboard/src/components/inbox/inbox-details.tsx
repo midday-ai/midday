@@ -126,11 +126,10 @@ export function InboxDetails() {
     trpc.inbox.update.mutationOptions({
       onSuccess: (data) => {
         queryClient.invalidateQueries({
-          queryKey: trpc.inbox.get.infiniteQueryKey(),
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: trpc.transactions.get.infiniteQueryKey(),
+          queryKey: [
+            trpc.inbox.get.infiniteQueryKey(),
+            trpc.transactions.get.infiniteQueryKey(),
+          ],
         });
       },
     }),

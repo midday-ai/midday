@@ -1,13 +1,18 @@
 "use server";
 
 import { authActionClient } from "@/actions/safe-action";
-import { reconnectConnectionSchema } from "@/actions/schema";
 import { LogEvents } from "@midday/events/events";
 import type { reconnectConnection } from "@midday/jobs/tasks/reconnect/connection";
 import { tasks } from "@trigger.dev/sdk/v3";
+import { z } from "zod";
 
 export const reconnectConnectionAction = authActionClient
-  .schema(reconnectConnectionSchema)
+  .schema(
+    z.object({
+      connectionId: z.string(),
+      provider: z.string(),
+    }),
+  )
   .metadata({
     name: "reconnect-connection",
     track: {

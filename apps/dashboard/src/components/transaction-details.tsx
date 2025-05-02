@@ -154,14 +154,11 @@ export function TransactionDetails() {
         );
       },
       onSettled: () => {
-        // invalidate the transaction details query
         queryClient.invalidateQueries({
-          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
-        });
-
-        // invalidate the transaction list query
-        queryClient.invalidateQueries({
-          queryKey: trpc.transactions.get.infiniteQueryKey(),
+          queryKey: [
+            trpc.transactions.getById.queryKey({ id: transactionId! }),
+            trpc.transactions.get.infiniteQueryKey(),
+          ],
         });
       },
     }),
@@ -170,14 +167,11 @@ export function TransactionDetails() {
   const createTransactionTagMutation = useMutation(
     trpc.transactionTags.create.mutationOptions({
       onSuccess: () => {
-        // invalidate the transaction details query
         queryClient.invalidateQueries({
-          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
-        });
-
-        // invalidate the transaction list query
-        queryClient.invalidateQueries({
-          queryKey: trpc.transactions.get.infiniteQueryKey(),
+          queryKey: [
+            trpc.transactions.getById.queryKey({ id: transactionId! }),
+            trpc.transactions.get.infiniteQueryKey(),
+          ],
         });
       },
     }),
@@ -186,14 +180,11 @@ export function TransactionDetails() {
   const deleteTransactionTagMutation = useMutation(
     trpc.transactionTags.delete.mutationOptions({
       onSuccess: () => {
-        // invalidate the transaction details query
         queryClient.invalidateQueries({
-          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
-        });
-
-        // invalidate the transaction list query
-        queryClient.invalidateQueries({
-          queryKey: trpc.transactions.get.infiniteQueryKey(),
+          queryKey: [
+            trpc.transactions.getById.queryKey({ id: transactionId! }),
+            trpc.transactions.get.infiniteQueryKey(),
+          ],
         });
       },
     }),
@@ -202,14 +193,11 @@ export function TransactionDetails() {
   const updateSimilarTransactionsCategoryMutation = useMutation(
     trpc.transactions.updateSimilarTransactionsCategory.mutationOptions({
       onSuccess: () => {
-        // invalidate the transaction list query
         queryClient.invalidateQueries({
-          queryKey: trpc.transactions.get.infiniteQueryKey(),
-        });
-
-        // invalidate the transaction details query
-        queryClient.invalidateQueries({
-          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+          queryKey: [
+            trpc.transactions.get.infiniteQueryKey(),
+            trpc.transactions.getById.queryKey({ id: transactionId! }),
+          ],
         });
       },
     }),

@@ -1,5 +1,5 @@
 import type { Bindings } from "@/common/bindings";
-import { ErrorSchema, Providers } from "@/common/schema";
+import { ErrorSchema } from "@/common/schema";
 import { Provider } from "@/providers";
 import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { createErrorResponse } from "@/utils/error";

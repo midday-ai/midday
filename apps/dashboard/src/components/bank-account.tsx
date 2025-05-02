@@ -85,11 +85,10 @@ export function BankAccount({ data }: Props) {
     trpc.bankAccounts.delete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.bankConnections.get.queryKey(),
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: trpc.bankAccounts.get.queryKey(),
+          queryKey: [
+            trpc.bankConnections.get.queryKey(),
+            trpc.bankAccounts.get.queryKey(),
+          ],
         });
 
         setOpen(false);
@@ -101,11 +100,10 @@ export function BankAccount({ data }: Props) {
     trpc.bankAccounts.update.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.bankConnections.get.queryKey(),
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: trpc.bankAccounts.get.queryKey(),
+          queryKey: [
+            trpc.bankConnections.get.queryKey(),
+            trpc.bankAccounts.get.queryKey(),
+          ],
         });
       },
     }),

@@ -8,19 +8,19 @@ type CreateBankConnectionPayload = {
   accounts: {
     account_id: string;
     institution_id: string;
-    logo_url: string;
+    logo_url?: string | null;
     name: string;
     bank_name: string;
     currency: string;
     enabled: boolean;
-    balance: number;
+    balance?: number;
     type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
-    account_reference: string | null;
-    expires_at: string | null;
+    account_reference?: string | null;
+    expires_at?: string | null;
   }[];
-  accessToken?: string;
-  enrollmentId?: string;
-  referenceId?: string;
+  accessToken?: string | null;
+  enrollmentId?: string | null;
+  referenceId?: string | null;
   teamId: string;
   userId: string;
   provider: "gocardless" | "teller" | "plaid" | "enablebanking";

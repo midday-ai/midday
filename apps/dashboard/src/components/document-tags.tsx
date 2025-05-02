@@ -21,15 +21,11 @@ export function DocumentTags({ id, tags }: Props) {
     trpc.documentTagAssignments.create.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.documentTags.get.queryKey(),
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: trpc.documents.getById.queryKey(),
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: trpc.documents.get.infiniteQueryKey(),
+          queryKey: [
+            trpc.documentTags.get.queryKey(),
+            trpc.documents.getById.queryKey(),
+            trpc.documents.get.infiniteQueryKey(),
+          ],
         });
       },
     }),
@@ -39,15 +35,11 @@ export function DocumentTags({ id, tags }: Props) {
     trpc.documentTagAssignments.delete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.documentTags.get.queryKey(),
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: trpc.documents.getById.queryKey(),
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: trpc.documents.get.infiniteQueryKey(),
+          queryKey: [
+            trpc.documentTags.get.queryKey(),
+            trpc.documents.getById.queryKey(),
+            trpc.documents.get.infiniteQueryKey(),
+          ],
         });
       },
     }),

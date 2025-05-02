@@ -22,11 +22,6 @@ export const updateSubscriberPreferenceSchema = z.object({
 
 export const exportTransactionsSchema = z.array(z.string());
 
-export const createFolderSchema = z.object({
-  path: z.string(),
-  name: z.string(),
-});
-
 export const unenrollMfaSchema = z.object({
   factorId: z.string(),
 });
@@ -35,52 +30,6 @@ export const mfaVerifySchema = z.object({
   factorId: z.string(),
   challengeId: z.string(),
   code: z.string(),
-});
-
-export const connectBankAccountSchema = z.object({
-  referenceId: z.string().nullable().optional(), // GoCardLess
-  accessToken: z.string().nullable().optional(), // Teller
-  enrollmentId: z.string().nullable().optional(), // Teller
-  provider: z.enum(["gocardless", "plaid", "teller", "enablebanking"]),
-  accounts: z.array(
-    z.object({
-      account_id: z.string(),
-      bank_name: z.string(),
-      balance: z.number().optional(),
-      currency: z.string(),
-      name: z.string(),
-      institution_id: z.string(),
-      account_reference: z.string().nullable().optional(), // EnableBanking & GoCardLess
-      enabled: z.boolean(),
-      logo_url: z.string().nullable().optional(),
-      expires_at: z.string().nullable().optional(), // EnableBanking & GoCardLess
-      type: z.enum([
-        "credit",
-        "depository",
-        "other_asset",
-        "loan",
-        "other_liability",
-      ]),
-    }),
-  ),
-});
-
-export const sendFeedbackSchema = z.object({
-  feedback: z.string(),
-});
-
-export const changeTeamSchema = z.object({
-  teamId: z.string(),
-  redirectTo: z.string(),
-});
-
-export const manualSyncTransactionsSchema = z.object({
-  connectionId: z.string(),
-});
-
-export const reconnectConnectionSchema = z.object({
-  connectionId: z.string(),
-  provider: z.string(),
 });
 
 export const createGoCardLessLinkSchema = z.object({
@@ -115,11 +64,6 @@ export const verifyOtpSchema = z.object({
 
 export const getVatRateSchema = z.object({
   name: z.string().min(2),
-});
-
-export const createBankAccountSchema = z.object({
-  name: z.string(),
-  currency: z.string().optional(),
 });
 
 export const parseDateSchema = z

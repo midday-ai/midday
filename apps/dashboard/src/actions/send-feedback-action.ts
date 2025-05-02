@@ -2,15 +2,19 @@
 
 import { LogEvents } from "@midday/events/events";
 import { PlainClient } from "@team-plain/typescript-sdk";
+import { z } from "zod";
 import { authActionClient } from "./safe-action";
-import { sendFeedbackSchema } from "./schema";
 
 const client = new PlainClient({
   apiKey: process.env.PLAIN_API_KEY!,
 });
 
 export const sendFeebackAction = authActionClient
-  .schema(sendFeedbackSchema)
+  .schema(
+    z.object({
+      feedback: z.string(),
+    }),
+  )
   .metadata({
     name: "send-feedback",
     track: {

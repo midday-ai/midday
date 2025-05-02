@@ -10,7 +10,7 @@ type Props = {
 };
 
 export function SelectAttachment({ placeholder, onSelect }: Props) {
-  const [debouncedValue, setValue] = useDebounceValue("", 100);
+  const [debouncedValue, setValue] = useDebounceValue("", 200);
 
   const trpc = useTRPC();
 

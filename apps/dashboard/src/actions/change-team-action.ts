@@ -5,11 +5,16 @@ import { LogEvents } from "@midday/events/events";
 import { updateUser } from "@midday/supabase/mutations";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
+import { z } from "zod";
 import { authActionClient } from "./safe-action";
-import { changeTeamSchema } from "./schema";
 
 export const changeTeamAction = authActionClient
-  .schema(changeTeamSchema)
+  .schema(
+    z.object({
+      teamId: z.string(),
+      redirectTo: z.string(),
+    }),
+  )
   .metadata({
     name: "change-team",
     track: {

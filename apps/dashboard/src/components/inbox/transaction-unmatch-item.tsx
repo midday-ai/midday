@@ -61,10 +61,10 @@ export function TransactionUnmatchItem() {
       },
       onSettled: (_, __, variables) => {
         queryClient.invalidateQueries({
-          queryKey: trpc.inbox.getById.queryKey({ id: variables.id }),
-        });
-        queryClient.invalidateQueries({
-          queryKey: trpc.inbox.get.infiniteQueryKey(),
+          queryKey: [
+            trpc.inbox.getById.queryKey({ id: variables.id }),
+            trpc.inbox.get.infiniteQueryKey(),
+          ],
         });
       },
     }),

@@ -1,6 +1,6 @@
-import { updateInstitutionUsageAction } from "@/actions/institutions/update-institution-usage";
 import { useConnectParams } from "@/hooks/use-connect-params";
-import { useAction } from "next-safe-action/hooks";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
 import { BankConnectButton } from "./bank-connect-button";
 import { EnableBankingConnect } from "./enablebanking-connect";
 import { GoCardLessConnect } from "./gocardless-connect";
@@ -26,10 +26,13 @@ export function ConnectBankProvider({
   type,
 }: Props) {
   const { setParams, countryCode } = useConnectParams();
-  const updateInstitutionUsage = useAction(updateInstitutionUsageAction);
+  const trpc = useTRPC();
+  const updateUsageMutation = useMutation(
+    trpc.institutions.updateUsage.mutationOptions(),
+  );
 
   const updateUsage = () => {
-    updateInstitutionUsage.execute({ institutionId: id });
+    updateUsageMutation.mutate({ id });
   };
 
   switch (provider) {

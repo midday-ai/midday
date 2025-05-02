@@ -73,11 +73,10 @@ export function EditBankAccountModal({
     trpc.bankAccounts.update.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.bankConnections.get.queryKey(),
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: trpc.bankAccounts.get.queryKey(),
+          queryKey: [
+            trpc.bankConnections.get.queryKey(),
+            trpc.bankAccounts.get.queryKey(),
+          ],
         });
 
         onOpenChange(false);

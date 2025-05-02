@@ -20,10 +20,9 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { BankAccount } from "./bank-account";
@@ -134,11 +133,12 @@ function ConnectionState({
 }
 
 export function BankConnection({ connection }: { connection: BankConnection }) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const [runId, setRunId] = useState<string | undefined>();
   const [accessToken, setAccessToken] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
-  const router = useRouter();
 
   const { show } = connectionStatus(connection);
   const { status, setStatus } = useSyncStatus({ runId, accessToken });
@@ -206,8 +206,14 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
       dismiss();
       setRunId(undefined);
       setSyncing(false);
-      router.replace("/settings/accounts");
-      router.refresh();
+
+      queryClient.invalidateQueries({
+        queryKey: [
+          trpc.bankConnections.get.queryKey(),
+          trpc.bankAccounts.get.queryKey(),
+          trpc.team.current.queryKey(),
+        ],
+      });
     }
   }, [status]);
 
@@ -215,6 +221,13 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
     if (status === "FAILED") {
       setSyncing(false);
       setRunId(undefined);
+
+      queryClient.invalidateQueries({
+        queryKey: [
+          trpc.bankConnections.get.queryKey(),
+          trpc.bankAccounts.get.queryKey(),
+        ],
+      });
 
       toast({
         duration: 3500,
@@ -229,7 +242,11 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
     if (params.step === "reconnect" && params.id) {
       reconnectConnection.execute({
         connectionId: params.id,
-        provider: connection.provider,
+        provider: connection.provider as
+          | "gocardless"
+          | "plaid"
+          | "teller"
+          | "enablebanking",
       });
     }
   }, [params]);

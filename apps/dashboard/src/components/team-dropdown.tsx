@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 
 export function TeamDropdown() {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
   const { data: user } = useUserQuery();
   const queryClient = useQueryClient();
 
@@ -49,7 +49,7 @@ export function TeamDropdown() {
       return a.team.id.localeCompare(b.team.id);
     }) ?? [];
 
-  useOnClickOutside(() => {
+  useOnClickOutside(ref, () => {
     if (!isChangingTeam) {
       setActive(false);
     }

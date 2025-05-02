@@ -16,7 +16,7 @@ export function MatchTransaction() {
   const { data: user } = useUserQuery();
   const queryClient = useQueryClient();
 
-  const [debouncedValue, setValue] = useDebounceValue("", 100);
+  const [debouncedValue, setValue] = useDebounceValue("", 200);
   const [isOpen, onOpenChange] = useState(false);
 
   const id = params.inboxId;
@@ -115,10 +115,10 @@ export function MatchTransaction() {
       },
       onSettled: (_, __, variables) => {
         queryClient.invalidateQueries({
-          queryKey: trpc.inbox.getById.queryKey({ id: variables.id }),
-        });
-        queryClient.invalidateQueries({
-          queryKey: trpc.inbox.get.infiniteQueryKey(),
+          queryKey: [
+            trpc.inbox.getById.queryKey({ id: variables.id }),
+            trpc.inbox.get.infiniteQueryKey(),
+          ],
         });
       },
     }),

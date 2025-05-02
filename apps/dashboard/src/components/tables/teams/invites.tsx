@@ -19,14 +19,8 @@ export function Invites() {
   const declineInviteMutation = useMutation(
     trpc.team.declineInvite.mutationOptions({
       onSuccess: () => {
-        // Invalidate the invites query
         queryClient.invalidateQueries({
-          queryKey: trpc.user.invites.queryKey(),
-        });
-
-        // Invalidate the teams query
-        queryClient.invalidateQueries({
-          queryKey: trpc.team.list.queryKey(),
+          queryKey: [trpc.user.invites.queryKey(), trpc.team.list.queryKey()],
         });
       },
     }),
@@ -35,14 +29,8 @@ export function Invites() {
   const acceptInviteMutation = useMutation(
     trpc.team.acceptInvite.mutationOptions({
       onSuccess: () => {
-        // Invalidate the invites query
         queryClient.invalidateQueries({
-          queryKey: trpc.user.invites.queryKey(),
-        });
-
-        // Invalidate the teams query
-        queryClient.invalidateQueries({
-          queryKey: trpc.team.list.queryKey(),
+          queryKey: [trpc.user.invites.queryKey(), trpc.team.list.queryKey()],
         });
       },
     }),

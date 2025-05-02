@@ -26,7 +26,7 @@ export function VatNumberInput({
   countryCode,
   ...props
 }: Props) {
-  const [vatNumber, setVatNumber] = useDebounceValue(value || "", 100);
+  const [vatNumber, setVatNumber] = useDebounceValue(value || "", 200);
   const [companyName, setCompanyName] = useState("");
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
 
