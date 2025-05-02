@@ -12,7 +12,6 @@ const BATCH_SIZE = 500;
 export const importTransactions = schemaTask({
   id: "import-transactions",
   schema: z.object({
-    importType: z.enum(["csv", "image"]),
     inverted: z.boolean(),
     filePath: z.array(z.string()).optional(),
     bankAccountId: z.string(),
@@ -32,7 +31,6 @@ export const importTransactions = schemaTask({
   run: async ({
     teamId,
     filePath,
-    importType,
     bankAccountId,
     currency,
     mappings,
@@ -41,112 +39,73 @@ export const importTransactions = schemaTask({
   }) => {
     const supabase = createClient();
 
-    switch (importType) {
-      case "csv": {
-        if (!filePath) {
-          throw new Error("File path is required");
-        }
-
-        const { data: fileData } = await supabase.storage
-          .from("vault")
-          .download(filePath.join("/"));
-
-        const content = await fileData?.text();
-
-        if (!content) {
-          throw new Error("File content is required");
-        }
-
-        await new Promise((resolve, reject) => {
-          Papa.parse(content, {
-            header: true,
-            skipEmptyLines: true,
-            worker: false,
-            complete: resolve,
-            error: reject,
-            chunk: async (
-              chunk: {
-                data: Record<string, string>[];
-                errors: Array<{ message: string }>;
-              },
-              parser: Papa.Parser,
-            ) => {
-              parser.pause();
-
-              const { data } = chunk;
-
-              if (!data?.length) {
-                throw new Error("No data in CSV import chunk");
-              }
-
-              const mappedTransactions = mapTransactions(
-                data,
-                mappings,
-                currency,
-                teamId,
-                bankAccountId,
-              );
-
-              const transactions = mappedTransactions.map((transaction) =>
-                transform({ transaction, inverted }),
-              );
-
-              const { validTransactions, invalidTransactions } =
-                validateTransactions(transactions);
-
-              if (invalidTransactions.length > 0) {
-                logger.error("Invalid transactions", {
-                  invalidTransactions,
-                });
-              }
-
-              await processBatch(
-                validTransactions,
-                BATCH_SIZE,
-                async (batch) => {
-                  return supabase.from("transactions").upsert(batch, {
-                    onConflict: "internal_id",
-                    ignoreDuplicates: true,
-                  });
-                },
-              );
-
-              parser.resume();
-            },
-          });
-        });
-
-        break;
-      }
-      case "image": {
-        if (!table) {
-          throw new Error("Table is required");
-        }
-
-        const mappedTransactions = mapTransactions(
-          table,
-          mappings,
-          currency,
-          teamId,
-          bankAccountId,
-        );
-
-        const transactions = mappedTransactions.map((transaction) =>
-          transform({ transaction, inverted }),
-        );
-
-        await processBatch(transactions, BATCH_SIZE, async (batch) => {
-          return supabase.from("transactions").upsert(batch, {
-            onConflict: "internal_id",
-            ignoreDuplicates: true,
-          });
-        });
-
-        break;
-      }
-      default: {
-        throw new Error("Invalid import type");
-      }
+    if (!filePath) {
+      throw new Error("File path is required");
     }
+
+    const { data: fileData } = await supabase.storage
+      .from("vault")
+      .download(filePath.join("/"));
+
+    const content = await fileData?.text();
+
+    if (!content) {
+      throw new Error("File content is required");
+    }
+
+    await new Promise((resolve, reject) => {
+      Papa.parse(content, {
+        header: true,
+        skipEmptyLines: true,
+        worker: false,
+        complete: resolve,
+        error: reject,
+        chunk: async (
+          chunk: {
+            data: Record<string, string>[];
+            errors: Array<{ message: string }>;
+          },
+          parser: Papa.Parser,
+        ) => {
+          parser.pause();
+
+          const { data } = chunk;
+
+          if (!data?.length) {
+            throw new Error("No data in CSV import chunk");
+          }
+
+          const mappedTransactions = mapTransactions(
+            data,
+            mappings,
+            currency,
+            teamId,
+            bankAccountId,
+          );
+
+          const transactions = mappedTransactions.map((transaction) =>
+            transform({ transaction, inverted }),
+          );
+
+          const { validTransactions, invalidTransactions } =
+            validateTransactions(transactions);
+
+          if (invalidTransactions.length > 0) {
+            logger.error("Invalid transactions", {
+              invalidTransactions,
+            });
+          }
+
+          await processBatch(validTransactions, BATCH_SIZE, async (batch) => {
+            return supabase.from("transactions").upsert(batch, {
+              onConflict: "internal_id",
+              ignoreDuplicates: true,
+            });
+          });
+
+          parser.resume();
+        },
+      });
+    });
   },
 });

@@ -1,6 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import type { deleteTeam as deleteTeamTask } from "@midday/jobs/tasks/team/delete";
 import type { inviteTeamMembers } from "@midday/jobs/tasks/team/invite";
+import type { updateBaseCurrency } from "@midday/jobs/tasks/transactions/update-base-currency";
 import {
   acceptTeamInvite,
   createTeam,
@@ -37,17 +38,17 @@ export const teamRouter = createTRPCRouter({
       z.object({
         name: z.string().min(2).max(32).optional(),
         email: z.string().email().optional(),
-        inbox_email: z.string().email().optional().nullable(),
-        inbox_forwarding: z.boolean().optional().nullable(),
         logo_url: z.string().url().optional(),
         base_currency: z.string().optional(),
-        document_classification: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx: { supabase, teamId }, input }) => {
       const { data } = await updateTeam(supabase, {
-        id: teamId,
+        id: teamId!,
         name: input.name,
+        email: input.email,
+        logo_url: input.logo_url,
+        base_currency: input.base_currency,
       });
 
       return data;
@@ -137,12 +138,14 @@ export const teamRouter = createTRPCRouter({
       const data = await deleteTeam(supabase, {
         teamId: input.teamId,
       });
+
       if (!data) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Team not found",
         });
       }
+
       if (data.bank_connections.length > 0) {
         await tasks.trigger<typeof deleteTeamTask>("delete-team", {
           teamId: input.teamId!,
@@ -234,4 +237,18 @@ export const teamRouter = createTRPCRouter({
       return data;
     },
   ),
+
+  updateBaseCurrency: protectedProcedure
+    .input(z.object({ baseCurrency: z.string() }))
+    .mutation(async ({ ctx: { teamId }, input }) => {
+      const event = await tasks.trigger<typeof updateBaseCurrency>(
+        "update-base-currency",
+        {
+          teamId: teamId!,
+          baseCurrency: input.baseCurrency,
+        },
+      );
+
+      return event;
+    }),
 });

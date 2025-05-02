@@ -4,9 +4,9 @@ import { importTransactionsAction } from "@/actions/transactions/import-transact
 import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useUpload } from "@/hooks/use-upload";
 import { useUserQuery } from "@/hooks/use-user";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
-import { Button } from "@midday/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -15,19 +15,14 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
-import { Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAction } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import {
-  ImportCsvContext,
-  type ImportCsvFormData,
-  importSchema,
-} from "./context";
+import { ImportCsvContext, importSchema } from "./context";
 import { FieldMapping } from "./field-mapping";
 import { SelectFile } from "./select-file";
 
@@ -39,6 +34,8 @@ type Props = {
 };
 
 export function ImportModal({ currencies, defaultCurrency }: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const [runId, setRunId] = useState<string | undefined>();
   const [accessToken, setAccessToken] = useState<string | undefined>();
   const [isImporting, setIsImporting] = useState(false);
@@ -55,7 +52,6 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
   const { uploadFile } = useUpload();
 
   const { toast } = useToast();
-  const router = useRouter();
 
   const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
@@ -95,8 +91,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
     handleSubmit,
     reset,
     formState: { isValid },
-  } = useForm<ImportCsvFormData>({
-    resolver: zodResolver(importSchema),
+  } = useZodForm(importSchema, {
     defaultValues: {
       currency: defaultCurrency,
       bank_account_id: params.accountId ?? undefined,
@@ -150,7 +145,26 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
       setRunId(undefined);
       setIsImporting(false);
       onclose();
-      router.refresh();
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.transactions.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.bankAccounts.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.bankConnections.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.metrics.revenue.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.metrics.spending.queryKey(),
+      });
 
       toast({
         duration: 3500,
@@ -189,7 +203,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
             </div>
             <DialogDescription>
               {page === "select-file" &&
-                "Upload a CSV file or a screenshot of your transactions."}
+                "Upload a CSV file of your transactions."}
               {page === "confirm-import" &&
                 "We’ve mapped each column to what we believe is correct, but please review the data below to confirm it’s accurate."}
             </DialogDescription>
@@ -212,29 +226,22 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                   <form
                     className="flex flex-col gap-y-4"
                     onSubmit={handleSubmit(async (data) => {
-                      let filePath = undefined;
-
                       setIsImporting(true);
 
-                      if (data.import_type === "csv") {
-                        const filename = stripSpecialCharacters(data.file.name);
-                        const { path } = await uploadFile({
-                          bucket: "vault",
-                          path: [user?.team_id, "imports", filename],
-                          file,
-                        });
-
-                        filePath = path;
-                      }
+                      const filename = stripSpecialCharacters(data.file.name);
+                      const { path } = await uploadFile({
+                        bucket: "vault",
+                        path: [user?.team_id, "imports", filename],
+                        file,
+                      });
 
                       importTransactions.execute({
-                        filePath,
+                        filePath: path,
                         currency: data.currency,
                         bankAccountId: data.bank_account_id,
                         currentBalance: data.balance,
                         inverted: data.inverted,
                         table: data.table,
-                        importType: data.import_type,
                         mappings: {
                           amount: data.amount,
                           date: data.date,
@@ -248,16 +255,13 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                       <>
                         <FieldMapping currencies={currencies} />
 
-                        <Button
-                          disabled={!isValid || isImporting}
+                        <SubmitButton
+                          isSubmitting={isImporting}
+                          disabled={!isValid}
                           className="mt-4"
                         >
-                          {isImporting ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            "Confirm import"
-                          )}
-                        </Button>
+                          Confirm import
+                        </SubmitButton>
 
                         <button
                           type="button"

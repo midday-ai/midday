@@ -18,7 +18,9 @@ export function ConnectionStatus() {
   const trpc = useTRPC();
 
   const { data, isLoading } = useQuery(
-    trpc.bankConnections.get.queryOptions({ enabled: true }),
+    trpc.bankConnections.get.queryOptions({
+      enabled: true,
+    }),
   );
 
   if (isLoading || !data) {

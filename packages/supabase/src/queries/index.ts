@@ -39,15 +39,16 @@ export async function getCurrentUserTeamQuery(supabase: Client) {
 
 type GetBankConnectionsParams = {
   teamId: string;
+  enabled?: boolean;
 };
 
 export async function getBankConnectionsQuery(
   supabase: Client,
   params: GetBankConnectionsParams,
 ) {
-  const { teamId } = params;
+  const { teamId, enabled } = params;
 
-  return supabase
+  const query = supabase
     .from("bank_connections")
     .select(
       `
@@ -75,28 +76,39 @@ export async function getBankConnectionsQuery(
     `,
     )
     .eq("team_id", teamId);
+
+  if (enabled) {
+    query.eq("enabled", enabled);
+  }
+
+  return query;
 }
 
-export type GetTeamBankAccountsParams = {
+export type GetBankAccountsParams = {
   teamId: string;
   enabled?: boolean;
+  manual?: boolean;
 };
 
-export async function getTeamBankAccountsQuery(
+export async function getBankAccountsQuery(
   supabase: Client,
-  params: GetTeamBankAccountsParams,
+  params: GetBankAccountsParams,
 ) {
-  const { teamId, enabled } = params;
+  const { teamId, enabled, manual } = params;
 
   const query = supabase
     .from("bank_accounts")
-    .select("*, bank:bank_connections(*)")
+    .select("*, connection:bank_connections(*)")
     .eq("team_id", teamId)
     .order("created_at", { ascending: true })
     .order("name", { ascending: false });
 
   if (enabled) {
     query.eq("enabled", enabled);
+  }
+
+  if (manual) {
+    query.eq("manual", manual);
   }
 
   return query;

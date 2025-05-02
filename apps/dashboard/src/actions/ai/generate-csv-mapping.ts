@@ -46,7 +46,6 @@ export async function generateCsvMapping(
         First few rows of data:
         ${firstRows.map((row) => JSON.stringify(row)).join("\n")}
       `,
-      temperature: 0.2,
     });
 
     for await (const partialObject of partialObjectStream) {

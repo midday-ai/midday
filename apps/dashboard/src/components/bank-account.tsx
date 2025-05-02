@@ -1,6 +1,8 @@
 "use client";
 
 import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getInitials } from "@/utils/format";
 import {
   AlertDialog,
@@ -32,6 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontal } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
@@ -40,27 +43,18 @@ import { FormatAmount } from "./format-amount";
 import { EditBankAccountModal } from "./modals/edit-bank-account-modal";
 
 type Props = {
-  id: string;
-  name: string;
-  balance?: number;
-  currency: string;
-  enabled: boolean;
-  manual: boolean;
-  type?: string;
-  hasError?: boolean;
+  data: NonNullable<
+    RouterOutputs["bankConnections"]["get"]
+  >[number]["accounts"][number];
 };
 
-export function BankAccount({
-  id,
-  name,
-  currency,
-  balance,
-  enabled,
-  manual,
-  type,
-  hasError,
-}: Props) {
+export function BankAccount({ data }: Props) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const [value, setValue] = useState("");
+  const [isOpen, setOpen] = useState(false);
+  const t = useI18n();
+
   const [_, setParams] = useQueryStates({
     step: parseAsString,
     accountId: parseAsString,
@@ -68,8 +62,54 @@ export function BankAccount({
     type: parseAsString,
   });
 
-  const [isOpen, setOpen] = useState(false);
-  const t = useI18n();
+  const {
+    id,
+    enabled,
+    manual,
+    connection,
+    type,
+    name,
+    balance,
+    currency,
+    error_retries,
+  } = data;
+
+  const hasError =
+    enabled &&
+    connection != null &&
+    connection.status !== "disconnected" &&
+    error_retries != null &&
+    error_retries > 0;
+
+  const deleteAccountMutation = useMutation(
+    trpc.bankAccounts.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.bankConnections.get.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.bankAccounts.get.queryKey(),
+        });
+
+        setOpen(false);
+      },
+    }),
+  );
+
+  const updateAccountMutation = useMutation(
+    trpc.bankAccounts.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.bankConnections.get.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.bankAccounts.get.queryKey(),
+        });
+      },
+    }),
+  );
 
   return (
     <div
@@ -81,7 +121,7 @@ export function BankAccount({
       <div className="flex items-center space-x-4 w-full mr-8">
         <Avatar className="size-[34px]">
           <AvatarFallback className="text-[11px]">
-            {getInitials(name)}
+            {getInitials(name ?? "")}
           </AvatarFallback>
         </Avatar>
 
@@ -181,17 +221,13 @@ export function BankAccount({
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 disabled={value !== "DELETE"}
-                // onClick={() =>
-                //   deleteAccount.execute({
-                //     id,
-                //   })
-                // }
+                onClick={() => deleteAccountMutation.mutate({ id })}
               >
-                {/* {deleteAccount.status === "executing" ? (
+                {deleteAccountMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Confirm"
-                )} */}
+                )}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -200,10 +236,10 @@ export function BankAccount({
         {!manual && (
           <Switch
             checked={enabled}
-            // disabled={updateAccount.status === "executing"}
-            // onCheckedChange={(enabled: boolean) => {
-            //   updateAccount.execute({ id, enabled });
-            // }}
+            disabled={updateAccountMutation.isPending}
+            onCheckedChange={(enabled: boolean) => {
+              updateAccountMutation.mutate({ id, enabled });
+            }}
           />
         )}
       </div>

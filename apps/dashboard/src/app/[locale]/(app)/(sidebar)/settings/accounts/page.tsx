@@ -9,11 +9,13 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   prefetch(trpc.bankConnections.get.queryOptions());
+  prefetch(trpc.bankAccounts.get.queryOptions({ manual: true }));
+  prefetch(trpc.team.current.queryOptions());
 
   return (
     <div className="space-y-12">
       <ConnectedAccounts />
-      {/* <BaseCurrency /> */}
+      <BaseCurrency />
     </div>
   );
 }

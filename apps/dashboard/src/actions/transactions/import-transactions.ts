@@ -16,7 +16,6 @@ export const importTransactionsAction = authActionClient
       currentBalance: z.string().optional(),
       inverted: z.boolean(),
       table: z.array(z.record(z.string(), z.string())).optional(),
-      importType: z.enum(["csv", "image"]),
       mappings: z.object({
         amount: z.string(),
         date: z.string(),
@@ -42,7 +41,6 @@ export const importTransactionsAction = authActionClient
         currentBalance,
         inverted,
         table,
-        importType,
       },
       ctx: { user, supabase },
     }) => {
@@ -65,7 +63,6 @@ export const importTransactionsAction = authActionClient
           mappings,
           teamId: user.team_id!,
           inverted,
-          importType,
         },
       );
 

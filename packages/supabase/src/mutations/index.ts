@@ -219,13 +219,21 @@ export async function deleteUser(supabase: Client, params: DeleteUserParams) {
   };
 }
 
-export async function updateTeam(supabase: Client, data: any) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
+type UpdateTeamParams = {
+  id: string;
+  base_currency?: string;
+  name?: string;
+  email?: string;
+  logo_url?: string;
+};
+
+export async function updateTeam(supabase: Client, params: UpdateTeamParams) {
+  const { id, ...data } = params;
 
   return supabase
     .from("teams")
     .update(data)
-    .eq("id", userData?.team_id)
+    .eq("id", id)
     .select("*")
     .maybeSingle();
 }
@@ -271,6 +279,33 @@ export async function deleteTeamMember(
     .single();
 }
 
+type CreateBankAccountParams = {
+  name: string;
+  currency?: string;
+  teamId: string;
+  userId: string;
+  accountId: string;
+  manual?: boolean;
+};
+
+export async function createBankAccount(
+  supabase: Client,
+  params: CreateBankAccountParams,
+) {
+  return await supabase
+    .from("bank_accounts")
+    .insert({
+      name: params.name,
+      currency: params.currency,
+      team_id: params.teamId,
+      created_by: params.userId,
+      account_id: params.accountId,
+      manual: params.manual,
+    })
+    .select()
+    .single();
+}
+
 export async function deleteBankAccount(supabase: Client, id: string) {
   return await supabase
     .from("bank_accounts")
@@ -283,9 +318,10 @@ export async function deleteBankAccount(supabase: Client, id: string) {
 type UpdateBankAccountParams = {
   id: string;
   teamId: string;
-  name: string;
-  type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
+  name?: string;
+  type?: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
   balance?: number;
+  enabled?: boolean;
 };
 
 export async function updateBankAccount(

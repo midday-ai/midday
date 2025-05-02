@@ -32,6 +32,21 @@ import { DeleteConnection } from "./delete-connection";
 import { ReconnectProvider } from "./reconnect-provider";
 import { SyncTransactions } from "./sync-transactions";
 
+function getProviderName(provider: string | null) {
+  switch (provider) {
+    case "gocardless":
+      return "GoCardLess";
+    case "enablebanking":
+      return "Enable Banking";
+    case "teller":
+      return "Teller";
+    case "plaid":
+      return "Plaid";
+    default:
+      return null;
+  }
+}
+
 type BankConnection = NonNullable<
   RouterOutputs["bankConnections"]["get"]
 >[number];
@@ -106,7 +121,11 @@ function ConnectionState({
       <div className="text-xs font-normal flex items-center space-x-1">
         <span className="text-xs font-normal">{`Updated ${formatDistanceToNow(
           new Date(connection.last_accessed),
-        )} ago`}</span>
+          {
+            addSuffix: true,
+          },
+        )}`}</span>
+        <span>via {getProviderName(connection.provider)}</span>
       </div>
     );
   }
@@ -252,16 +271,19 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
 
         <div className="ml-auto flex space-x-2">
           {connection.status === "disconnected" || show ? (
-            <ReconnectProvider
-              variant="button"
-              id={connection.id}
-              provider={connection.provider}
-              enrollmentId={connection.enrollment_id}
-              institutionId={connection.institution_id}
-              accessToken={connection.access_token}
-              onManualSync={handleManualSync}
-              referenceId={connection.reference_id}
-            />
+            <>
+              <ReconnectProvider
+                variant="button"
+                id={connection.id}
+                provider={connection.provider}
+                enrollmentId={connection.enrollment_id}
+                institutionId={connection.institution_id}
+                accessToken={connection.access_token}
+                onManualSync={handleManualSync}
+                referenceId={connection.reference_id}
+              />
+              <DeleteConnection connectionId={connection.id} />
+            </>
           ) : (
             <>
               <ReconnectProvider
@@ -286,24 +308,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
       <AccordionContent className="bg-background">
         <div className="ml-[30px] divide-y">
           {connection.accounts.map((account) => {
-            return (
-              <BankAccount
-                key={account.id}
-                id={account.id}
-                name={account.name}
-                enabled={account.enabled}
-                manual={account.manual}
-                currency={account.currency}
-                balance={account.balance ?? 0}
-                type={account.type}
-                hasError={
-                  account.enabled &&
-                  connection.status !== "disconnected" &&
-                  account.error_retries !== undefined &&
-                  account.error_retries > 0
-                }
-              />
-            );
+            return <BankAccount key={account.id} data={account} />;
           })}
         </div>
       </AccordionContent>

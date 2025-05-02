@@ -9,17 +9,17 @@ import type { InboxOption } from "./data";
 import { InboxList } from "./inbox-list";
 
 type Props = {
-  disabled: boolean;
   filter: InboxOption;
 };
 
-export function InboxWidget({ disabled, filter }: Props) {
+export function InboxWidget({ filter }: Props) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const { data } = useSuspenseQuery(
     trpc.inbox.get.queryOptions({
       filter: {
-        done: filter === "done",
+        status:
+          filter === "all" ? undefined : filter === "todo" ? "pending" : filter,
       },
     }),
   );

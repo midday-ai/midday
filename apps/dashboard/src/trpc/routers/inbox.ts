@@ -17,17 +17,19 @@ import { z } from "zod";
 export const inboxRouter = createTRPCRouter({
   get: protectedProcedure
     .input(
-      z.object({
-        cursor: z.string().nullable().optional(),
-        order: z.string().nullable().optional(),
-        pageSize: z.number().optional(),
-        filter: z
-          .object({
-            q: z.string().nullable().optional(),
-            status: z.enum(["done", "pending"]).nullable().optional(),
-          })
-          .optional(),
-      }),
+      z
+        .object({
+          cursor: z.string().nullable().optional(),
+          order: z.string().nullable().optional(),
+          pageSize: z.number().optional(),
+          filter: z
+            .object({
+              q: z.string().nullable().optional(),
+              status: z.enum(["done", "pending"]).nullable().optional(),
+            })
+            .optional(),
+        })
+        .optional(),
     )
     .query(async ({ ctx: { supabase, teamId }, input }) => {
       return getInboxQuery(supabase, {

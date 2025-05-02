@@ -22,7 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
@@ -32,12 +32,17 @@ type Props = {
 
 export function DeleteConnection({ connectionId }: Props) {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
 
   const deleteConnectionMutation = useMutation(
     trpc.bankConnections.delete.mutationOptions({
       onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.bankConnections.get.queryKey(),
+        });
+
         setOpen(false);
         setValue("");
       },

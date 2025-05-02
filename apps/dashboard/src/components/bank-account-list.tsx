@@ -5,7 +5,7 @@ export function BankAccountList() {
   return (
     <>
       <BankConnections />
-      {/* <ManualAccounts data={manualAccounts} /> */}
+      <ManualAccounts />
     </>
   );
 }

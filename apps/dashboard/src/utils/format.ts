@@ -109,7 +109,7 @@ export function getInitials(value: string) {
 export function formatAccountName({
   name = "",
   currency,
-}: { name?: string; currency?: string }) {
+}: { name?: string; currency?: string | null }) {
   if (currency) {
     return `${name} (${currency})`;
   }

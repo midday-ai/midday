@@ -166,7 +166,7 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
       id: tag.id,
       name: tag.name,
     })),
-    accounts: bankAccountsData?.data?.map((bankAccount) => ({
+    accounts: bankAccountsData?.map((bankAccount) => ({
       id: bankAccount.id,
       name: bankAccount.name ?? "",
       currency: bankAccount.currency ?? "",

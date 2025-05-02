@@ -11,19 +11,6 @@ export const sendSupportSchema = z.object({
   url: z.string().optional(),
 });
 
-export const updateTeamSchema = z.object({
-  name: z.string().min(2).max(32).optional(),
-  email: z.string().email().optional(),
-  inbox_email: z.string().email().optional().nullable(),
-  inbox_forwarding: z.boolean().optional().nullable(),
-  logo_url: z.string().url().optional(),
-  base_currency: z.string().optional(),
-  document_classification: z.boolean().optional(),
-  revalidatePath: z.string().optional(),
-});
-
-export type UpdateTeamFormValues = z.infer<typeof updateTeamSchema>;
-
 export const updateSubscriberPreferenceSchema = z.object({
   templateId: z.string(),
   teamId: z.string(),

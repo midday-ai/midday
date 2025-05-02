@@ -23,8 +23,6 @@ export function SelectFile() {
 
     setIsLoading(true);
 
-    setValue("import_type", "csv");
-
     readLines(file, 4)
       .then((lines) => {
         const { data, meta } = Papa.parse(lines, {
@@ -76,8 +74,6 @@ export function SelectFile() {
             maxFiles={1}
             accept={{
               "text/csv": [".csv"],
-              "image/jpeg": [".jpg"],
-              "image/png": [".png"],
             }}
             maxSize={5000000}
           >
@@ -101,10 +97,8 @@ export function SelectFile() {
                   ) : (
                     <div>
                       <p>Drop your file here, or click to browse.</p>
-                      <span>5MB file limit.</span>
-                      <span className="mt-2 text-[10px]">
-                        CSV, PDF, jpg or png
-                      </span>
+                      <span>5MB file limit. </span>
+                      <span className="mt-2 text-[10px]">CSV format</span>
                     </div>
                   )}
 

@@ -1,6 +1,6 @@
+import { useZodForm } from "@/hooks/use-zod-form";
 import { useI18n } from "@/locales/client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@midday/ui/button";
+import { useTRPC } from "@/trpc/client";
 import { CurrencyInput } from "@midday/ui/currency-input";
 import {
   Dialog,
@@ -26,8 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { SubmitButton } from "@midday/ui/submit-button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -44,9 +44,9 @@ type Props = {
   id: string;
   onOpenChange: (isOpen: boolean) => void;
   isOpen: boolean;
-  defaultName: string;
-  defaultType?: string;
-  defaultBalance: number;
+  defaultName: string | null;
+  defaultType?: string | null;
+  defaultBalance: number | null;
 };
 
 export function EditBankAccountModal({
@@ -57,24 +57,46 @@ export function EditBankAccountModal({
   defaultType,
   defaultBalance,
 }: Props) {
-  return null;
   const t = useI18n();
+  const queryClient = useQueryClient();
+  const trpc = useTRPC();
 
-  // const updateAccount = useAction(updateBankAccountAction, {
-  //   onSuccess: () => onOpenChange(false),
-  // });
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useZodForm(formSchema, {
     defaultValues: {
-      name: defaultName,
-      type: defaultType,
-      balance: defaultBalance,
+      name: defaultName ?? undefined,
+      type: defaultType ?? undefined,
+      balance: defaultBalance ?? undefined,
     },
   });
 
+  const updateAccountMutation = useMutation(
+    trpc.bankAccounts.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.bankConnections.get.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.bankAccounts.get.queryKey(),
+        });
+
+        onOpenChange(false);
+      },
+    }),
+  );
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateAccount.execute({ id, ...values });
+    updateAccountMutation.mutate({
+      id,
+      name: values.name,
+      balance: values.balance,
+      type: values.type as
+        | "depository"
+        | "credit"
+        | "other_asset"
+        | "loan"
+        | "other_liability",
+    });
   }
 
   const accountTypes = () => {
@@ -179,17 +201,13 @@ export function EditBankAccountModal({
 
               <DialogFooter className="mt-10 w-full">
                 <div className="space-y-4 w-full">
-                  <Button
-                    disabled={updateAccount.status === "executing"}
+                  <SubmitButton
+                    isSubmitting={updateAccountMutation.isPending}
                     className="w-full"
                     type="submit"
                   >
-                    {updateAccount.status === "executing" ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      "Save"
-                    )}
-                  </Button>
+                    Save
+                  </SubmitButton>
                 </div>
               </DialogFooter>
             </form>

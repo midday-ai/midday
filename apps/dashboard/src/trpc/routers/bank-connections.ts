@@ -6,13 +6,16 @@ import { tasks } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 
 export const bankConnectionsRouter = createTRPCRouter({
-  get: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
-    const { data } = await getBankConnectionsQuery(supabase, {
-      teamId: teamId!,
-    });
+  get: protectedProcedure
+    .input(z.object({ enabled: z.boolean().optional() }).optional())
+    .query(async ({ ctx: { supabase, teamId }, input }) => {
+      const { data } = await getBankConnectionsQuery(supabase, {
+        teamId: teamId!,
+        enabled: input?.enabled,
+      });
 
-    return data;
-  }),
+      return data;
+    }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))

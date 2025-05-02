@@ -23,7 +23,7 @@ export function FormatAmount({
   return formatAmount({
     locale: locale || user?.locale,
     amount: amount,
-    currency: currency,
+    currency,
     maximumFractionDigits,
     minimumFractionDigits,
   });
