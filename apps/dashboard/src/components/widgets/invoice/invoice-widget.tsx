@@ -34,7 +34,7 @@ export function InvoiceWidget() {
         />
       </div>
 
-      <Invoice invoices={invoices} />
+      <Invoice invoices={invoices?.data ?? []} />
     </div>
   );
 }

@@ -18,7 +18,6 @@
     "./editor": "./src/editor/index.tsx",
     "./calculate": "./src/utils/calculate.ts",
     "./format-to-html": "./src/templates/html/format.tsx",
-    "./default": "./src/utils/default.ts",
     "./content": "./src/utils/content.ts"
   },
   "dependencies": {

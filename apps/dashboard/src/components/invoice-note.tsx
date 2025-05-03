@@ -1,4 +1,3 @@
-import { updateInvoiceAction } from "@/actions/invoice/update-invoice-action";
 import { Textarea } from "@midday/ui/textarea";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
@@ -10,7 +9,7 @@ type Props = {
 
 export function InvoiceNote({ id, defaultValue }: Props) {
   const [value, setValue] = useState(defaultValue);
-  const updateInvoice = useAction(updateInvoiceAction);
+  // const updateInvoice = useAction(updateInvoiceAction);
 
   return (
     <Textarea
@@ -20,10 +19,10 @@ export function InvoiceNote({ id, defaultValue }: Props) {
       className="min-h-[100px] resize-none"
       onBlur={() => {
         if (value !== defaultValue) {
-          updateInvoice.execute({
-            id,
-            internal_note: value && value.length > 0 ? value : null,
-          });
+          // updateInvoice.execute({
+          //   id,
+          //   internal_note: value && value.length > 0 ? value : null,
+          // });
         }
       }}
       onChange={(evt) => setValue(evt.target.value)}

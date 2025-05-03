@@ -27,19 +27,13 @@ import { FilterList } from "./filter-list";
 
 const allowedStatuses = ["draft", "overdue", "paid", "unpaid", "canceled"];
 
-type Props = {
-  customers?: {
-    id: string | null;
-    name: string | null;
-  }[];
-};
-
-export function InvoiceSearchFilter({ customers: customersData }: Props) {
+export function InvoiceSearchFilter() {
   const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { setParams, statuses, start, end, q, customers } = useInvoiceParams();
+  const customersData = null;
 
   const t = useI18n();
 
@@ -167,13 +161,13 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
           </DropdownMenuTrigger>
         </form>
 
-        <FilterList
+        {/* <FilterList
           filters={filters}
           loading={streaming}
           onRemove={setParams}
           statusFilters={statusFilters}
-          customers={customersData}
-        />
+          // customers={customersData}
+        /> */}
       </div>
 
       <DropdownMenuContent

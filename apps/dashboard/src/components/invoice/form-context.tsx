@@ -8,9 +8,6 @@ import {
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { UTCDate } from "@date-fns/utc";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Settings } from "@midday/invoice/default";
-import { createClient } from "@midday/supabase/client";
-import { getDraftInvoiceQuery } from "@midday/supabase/queries";
 import { addMonths } from "date-fns";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -69,7 +66,6 @@ export function FormContext({
   isOpen,
   invoiceNumber,
 }: FormContextProps) {
-  const supabase = createClient();
   const { lineItems, currency } = useInvoiceParams();
   const [isLoading, setLoading] = useState(false);
 
@@ -116,30 +112,31 @@ export function FormContext({
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    async function fetchInvoice() {
-      const { data } = await getDraftInvoiceQuery(supabase, id);
+  // useEffect(() => {
+  //   async function fetchInvoice() {
+  //     const { data } = await getDraftInvoiceQuery(supabase, id);
 
-      if (data) {
-        form.reset({
-          ...data,
-          template: {
-            ...defaultValues.template,
-            ...data.template,
-          },
-        });
-      }
+  //     if (data) {
+  //       form.reset({
+  //         ...data,
+  //         template: {
+  //           ...defaultValues.template,
+  //           ...data.template,
+  //         },
+  //       });
+  //     }
 
-      setLoading(false);
-    }
+  //     setLoading(false);
+  //   }
 
-    if (id) {
-      setLoading(true);
-      fetchInvoice();
-    }
-  }, [id, isOpen]);
+  //   if (id) {
+  //     setLoading(true);
+  //     fetchInvoice();
+  //   }
+  // }, [id, isOpen]);
 
   // These values comes from the tracker table
+
   useEffect(() => {
     if (lineItems) {
       form.setValue("line_items", lineItems);

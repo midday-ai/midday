@@ -1,5 +1,3 @@
-import { draftInvoiceAction } from "@/actions/invoice/draft-invoice-action";
-import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { getUrl } from "@/utils/environment";
 import { formatRelativeTime } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
@@ -25,7 +23,7 @@ type Props = {
   teamId: string;
   customers: Customer[];
   updatedAt?: Date;
-  onSubmit: (values: InvoiceFormValues) => void;
+  // onSubmit: (values: InvoiceFormValues) => void;
   isSubmitting: boolean;
 };
 
@@ -37,12 +35,12 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
 
   const token = form.watch("token");
 
-  const draftInvoice = useAction(draftInvoiceAction, {
-    onSuccess: ({ data }) => {
-      setLastUpdated(new Date());
-      form.setValue("token", data?.token, { shouldValidate: true });
-    },
-  });
+  // const draftInvoice = useAction(draftInvoiceAction, {
+  //   onSuccess: ({ data }) => {
+  //     setLastUpdated(new Date());
+  //     form.setValue("token", data?.token, { shouldValidate: true });
+  //   },
+  // });
 
   // Only watch the fields that are used in the upsert action
   const formValues = useWatch({
@@ -73,7 +71,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
   const draftInvoiceDebounced = useDebounceCallback(
     (values: InvoiceFormValues) => {
       if (isDirty && form.watch("customer_id") && invoiceNumberValid) {
-        draftInvoice.execute(transformFormValuesToDraft(values));
+        // draftInvoice.execute(transformFormValuesToDraft(values));
       }
     },
     500,
@@ -104,7 +102,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
   const handleSubmit = (values: InvoiceFormValues) => {
     onSubmit(values);
 
-    draftInvoice.execute(transformFormValuesToDraft(values));
+    // draftInvoice.execute(transformFormValuesToDraft(values));
   };
 
   // Prevent form from submitting when pressing enter
@@ -160,12 +158,12 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
       <div className="absolute bottom-14 w-full h-9">
         <div className="flex justify-between items-center mt-auto">
           <div className="flex space-x-2 items-center text-xs text-[#808080]">
-            {(draftInvoice.isPending || lastEditedText) && (
+            {/* {(draftInvoice.isPending || lastEditedText) && (
               <span>{draftInvoice.isPending ? "Saving" : lastEditedText}</span>
-            )}
+            )} */}
             {token && (
               <>
-                {(draftInvoice.isPending || lastEditedText) && <span>-</span>}
+                {/* {(draftInvoice.isPending || lastEditedText) && <span>-</span>} */}
                 <OpenURL
                   href={`${getUrl()}/i/${token}`}
                   className="flex items-center gap-1"
@@ -179,7 +177,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
 
           <SubmitButton
             isSubmitting={isSubmitting}
-            disabled={draftInvoice.isPending}
+            // disabled={draftInvoice.isPending}
           />
         </div>
       </div>

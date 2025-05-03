@@ -1,11 +1,9 @@
 "use client";
 
-import { createInvoiceAction } from "@/actions/invoice/create-invoice-action";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { getUrl } from "@/utils/environment";
 import { Button } from "@midday/ui/button";
 import { SheetContent, SheetHeader } from "@midday/ui/sheet";
-import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { InvoiceSuccessful } from "../invoice-successful";
@@ -57,11 +55,11 @@ export function InvoiceSheetContent({
   const { setParams, type } = useInvoiceParams();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
 
-  const createInvoice = useAction(createInvoiceAction, {
-    onSuccess: ({ data }) => {
-      setInvoice(data);
-    },
-  });
+  // const createInvoice = useAction(createInvoiceAction, {
+  //   onSuccess: ({ data }) => {
+  //     setInvoice(data);
+  //   },
+  // });
 
   const { watch } = useFormContext();
   const templateSize = watch("template.size");
@@ -125,8 +123,8 @@ export function InvoiceSheetContent({
       <Form
         teamId={teamId}
         customers={customers}
-        isSubmitting={createInvoice.isPending}
-        onSubmit={({ id }) => createInvoice.execute({ id, deliveryType })}
+        // isSubmitting={createInvoice.isPending}
+        // onSubmit={({ id }) => createInvoice.execute({ id, deliveryType })}
         invoiceNumber={invoiceNumber}
       />
     </SheetContent>

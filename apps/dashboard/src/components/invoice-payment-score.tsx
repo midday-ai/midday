@@ -1,7 +1,10 @@
-import { getI18n } from "@/locales/server";
-import { getPaymentStatus } from "@midday/supabase/cached-queries";
+"use client";
+
+import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { Skeleton } from "@midday/ui/skeleton";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { PaymentScoreVisualizer } from "./payment-score-visualizer";
 
 export function InvoicePaymentScoreSkeleton() {
@@ -23,27 +26,29 @@ export function InvoicePaymentScoreSkeleton() {
   );
 }
 
-export async function InvoicePaymentScore() {
-  const t = await getI18n();
-  const {
-    data: { payment_status, score },
-  } = await getPaymentStatus();
+export function InvoicePaymentScore() {
+  const trpc = useTRPC();
+  const { data } = useSuspenseQuery(trpc.invoice.paymentStatus.queryOptions());
+  const t = useI18n();
 
   return (
     <Card>
       <CardHeader className="pb-2 flex flex-col xl:flex-row justify-between">
         <CardTitle className="font-mono font-medium text-2xl">
-          {t(`payment_status.${payment_status}`)}
+          {t(`payment_status.${data?.payment_status}`)}
         </CardTitle>
 
-        <PaymentScoreVisualizer score={score} paymentStatus={payment_status} />
+        <PaymentScoreVisualizer
+          score={data?.score}
+          paymentStatus={data?.payment_status}
+        />
       </CardHeader>
 
       <CardContent className="sm:hidden xl:flex">
         <div className="flex flex-col gap-2">
           <div>Payment score</div>
           <div className="text-sm text-muted-foreground">
-            {t(`payment_status_description.${payment_status}`)}
+            {t(`payment_status_description.${data?.payment_status}`)}
           </div>
         </div>
       </CardContent>

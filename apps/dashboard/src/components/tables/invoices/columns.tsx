@@ -1,11 +1,10 @@
 "use client";
 
-import type { InvoiceTemplate } from "@/actions/invoice/schema";
-import { updateInvoiceAction } from "@/actions/invoice/update-invoice-action";
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
 import { OpenURL } from "@/components/open-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getUrl } from "@/utils/environment";
 import { formatDate, getDueDateStatus } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
@@ -25,35 +24,11 @@ import { useToast } from "@midday/ui/use-toast";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
 import * as React from "react";
 
-export type Invoice = {
-  id: string;
-  due_date: string;
-  issue_date?: string;
-  paid_at?: string;
-  status: string;
-  currency: string;
-  invoice_number: string;
-  amount?: number;
-  vat?: number;
-  tax?: number;
-  updated_at?: string;
-  viewed_at?: string;
-  template: InvoiceTemplate;
-  token: string;
-  sent_to?: string | null;
-  customer_details?: JSON;
-  internal_note?: string | null;
-  customer?: {
-    id: string;
-    name: string;
-    website: string;
-  };
-  // Used when relation is deleted
-  customer_name?: string;
-};
+export type Invoice = NonNullable<
+  RouterOutputs["invoice"]["get"]["data"]
+>[number];
 
 export const columns: ColumnDef<Invoice>[] = [
   {
@@ -175,10 +150,10 @@ export const columns: ColumnDef<Invoice>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row, table }) => {
+    cell: ({ row }) => {
       const status = row.getValue("status");
       const { setParams } = useInvoiceParams();
-      const updateInvoice = useAction(updateInvoiceAction);
+      // const updateInvoice = useAction(updateInvoiceAction);
       const { toast } = useToast();
 
       const handleCopyLink = async () => {
@@ -200,13 +175,6 @@ export const columns: ColumnDef<Invoice>[] = [
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="relative">
               <Button variant="ghost" className="h-8 w-8 p-0">
-                {/* {hasNewMessages && (
-                  <div className="rounded-full size-1 absolute bg-[#FFD02B] -right-0 top-0.5 ring-2 ring-background">
-                    <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[ping_1s_ease-in-out_5]" />
-                    <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-75" />
-                    <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-50" />
-                  </div>
-                )} */}
                 <DotsHorizontalIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -260,12 +228,12 @@ export const columns: ColumnDef<Invoice>[] = [
 
               {(status === "overdue" || status === "unpaid") && (
                 <DropdownMenuItem
-                  onClick={() =>
-                    updateInvoice.execute({
-                      id: row.original.id,
-                      status: "canceled",
-                    })
-                  }
+                  // onClick={() =>
+                  //   updateInvoice.execute({
+                  //     id: row.original.id,
+                  //     status: "canceled",
+                  //   })
+                  // }
                   className="text-[#FF3638]"
                 >
                   Cancel
@@ -274,9 +242,9 @@ export const columns: ColumnDef<Invoice>[] = [
 
               {status === "canceled" && (
                 <DropdownMenuItem
-                  onClick={() =>
-                    table.options.meta?.deleteInvoice(row.original.id)
-                  }
+                  // onClick={() =>
+                  //   table.options.meta?.deleteInvoice(row.original.id)
+                  // }
                   className="text-[#FF3638]"
                 >
                   Delete
@@ -285,9 +253,9 @@ export const columns: ColumnDef<Invoice>[] = [
 
               {status === "draft" && (
                 <DropdownMenuItem
-                  onClick={() =>
-                    table.options.meta?.deleteInvoice(row.original.id)
-                  }
+                  // onClick={() =>
+                  //   table.options.meta?.deleteInvoice(row.original.id)
+                  // }
                   className="text-[#FF3638]"
                 >
                   Delete

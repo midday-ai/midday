@@ -10,6 +10,8 @@ import { TrialEndedModal } from "../modals/trial-ended-modal";
 import { CustomerCreateSheet } from "./customer-create-sheet";
 import { CustomerEditSheet } from "./customer-edit-sheet";
 import { DocumentSheet } from "./document-sheet";
+// import { InvoiceCreateSheet } from "./invoice-create-sheet";
+// import { InvoiceDetailsSheet } from "./invoice-details-sheet";
 import { TrackerCreateSheet } from "./tracker-create-sheet";
 import { TrackerScheduleSheet } from "./tracker-schedule-sheet";
 import { TrackerUpdateSheet } from "./tracker-update-sheet";
@@ -41,7 +43,8 @@ export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
       <TrialEndedModal />
       <DocumentSheet />
 
-      {/* <InvoiceCreateSheetServer teamId={userData?.team_id} />  */}
+      {/* <InvoiceCreateSheet />
+      <InvoiceDetailsSheet /> */}
     </>
   );
 }

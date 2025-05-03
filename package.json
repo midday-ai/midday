@@ -23,11 +23,11 @@
   },
   "dependencies": {
     "@biomejs/biome": "1.9.4",
-    "@manypkg/cli": "^0.23.0",
-    "turbo": "2.5.0",
+    "@manypkg/cli": "^0.24.0",
+    "turbo": "2.5.2",
     "typescript": "^5.8.3"
   },
-  "packageManager": "bun@1.2.10",
+  "packageManager": "bun@1.2.11",
   "resolutions": {
     "jackspeak": "2.1.1"
   }

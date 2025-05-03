@@ -1036,8 +1036,8 @@ export type GetInvoicesQueryParams = {
   teamId: string;
   cursor?: string | null;
   pageSize?: number;
-  searchQuery?: string | null;
   filter?: {
+    q?: string | null;
     statuses?: string[] | null;
     customers?: string[] | null;
     start?: string | null;
@@ -1050,8 +1050,8 @@ export async function getInvoicesQuery(
   supabase: Client,
   params: GetInvoicesQueryParams,
 ) {
-  const { teamId, filter, searchQuery, sort, cursor, pageSize = 25 } = params;
-  const { statuses, start, end, customers } = filter || {};
+  const { teamId, filter, sort, cursor, pageSize = 25 } = params;
+  const { q, statuses, start, end, customers } = filter || {};
 
   const query = supabase
     .from("invoices")
@@ -1090,11 +1090,11 @@ export async function getInvoicesQuery(
     query.in("customer_id", customers);
   }
 
-  if (searchQuery) {
-    if (!Number.isNaN(Number.parseInt(searchQuery))) {
-      query.eq("amount", Number(searchQuery));
+  if (q) {
+    if (!Number.isNaN(Number.parseInt(q))) {
+      query.eq("amount", Number(q));
     } else {
-      query.textSearch("fts", `${searchQuery.replaceAll(" ", "+")}:*`);
+      query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
     }
   }
 
@@ -1122,7 +1122,7 @@ export async function getInvoicesQuery(
 
 export type GetInvoiceSummaryParams = {
   teamId: string;
-  status: "paid" | "canceled" | "overdue" | "unpaid" | "draft";
+  status?: "paid" | "canceled" | "overdue" | "unpaid" | "draft";
 };
 
 export async function getInvoiceSummaryQuery(

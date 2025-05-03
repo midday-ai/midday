@@ -1,6 +1,6 @@
 "use client";
 
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useSortParams } from "@/hooks/use-sort-params";
 import { Button } from "@midday/ui/button";
 import {
   TableHeader as BaseTableHeader,
@@ -10,11 +10,12 @@ import {
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 export function TableHeader() {
-  const { setParams, sort } = useInvoiceParams();
-  const [column, value] = sort || [];
+  const { params, setParams } = useSortParams();
+
+  const [column, value] = params.sort || [];
 
   const createSortQuery = (name: string) => {
-    const [currentColumn, currentValue] = sort || [];
+    const [currentColumn, currentValue] = params.sort || [];
 
     if (name === currentColumn) {
       if (currentValue === "asc") {

@@ -3,7 +3,7 @@ import { EmptyState } from "./empty-state";
 import { InvoiceRow } from "./invoice-row";
 
 type Props = {
-  invoices: RouterOutputs["invoice"]["get"];
+  invoices: RouterOutputs["invoice"]["get"]["data"];
 };
 
 export function Invoice({ invoices }: Props) {

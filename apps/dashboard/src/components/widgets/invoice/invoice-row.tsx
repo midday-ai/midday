@@ -10,7 +10,7 @@ import { cn } from "@midday/ui/cn";
 import { useState } from "react";
 
 type Props = {
-  invoice: NonNullable<RouterOutputs["invoice"]["get"]>[number];
+  invoice: NonNullable<RouterOutputs["invoice"]["get"]["data"]>[number];
 };
 
 export function InvoiceRow({ invoice }: Props) {

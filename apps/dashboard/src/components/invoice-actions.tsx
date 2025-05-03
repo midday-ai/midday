@@ -1,8 +1,7 @@
-import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
-import { sendReminderAction } from "@/actions/invoice/send-reminder-action";
-import { updateInvoiceAction } from "@/actions/invoice/update-invoice-action";
+// import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
+// import { sendReminderAction } from "@/actions/invoice/send-reminder-action";
+// import { updateInvoiceAction } from "@/actions/invoice/update-invoice-action";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { UTCDate } from "@date-fns/utc";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +21,6 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { useAction } from "next-safe-action/hooks";
 
 type Props = {
   status: string;
@@ -31,12 +29,12 @@ type Props = {
 
 export function InvoiceActions({ status, id }: Props) {
   const { setParams } = useInvoiceParams();
-  const updateInvoice = useAction(updateInvoiceAction);
-  const deleteInvoice = useAction(deleteInvoiceAction);
-  const sendReminder = useAction(sendReminderAction);
+  // const updateInvoice = useAction(updateInvoiceAction);
+  // const deleteInvoice = useAction(deleteInvoiceAction);
+  // const sendReminder = useAction(sendReminderAction);
 
   const handleDeleteInvoice = () => {
-    deleteInvoice.execute({ id });
+    // deleteInvoice.execute({ id });
     setParams(null);
   };
 
@@ -57,13 +55,13 @@ export function InvoiceActions({ status, id }: Props) {
             </DropdownMenuTrigger>
             <DropdownMenuContent sideOffset={10} align="end">
               <DropdownMenuItem
-                onClick={() =>
-                  updateInvoice.execute({
-                    id,
-                    status: "unpaid",
-                    paid_at: null,
-                  })
-                }
+              // onClick={() =>
+              //   updateInvoice.execute({
+              //     id,
+              //     status: "unpaid",
+              //     paid_at: null,
+              //   })
+              // }
               >
                 Mark as unpaid
               </DropdownMenuItem>
@@ -103,8 +101,8 @@ export function InvoiceActions({ status, id }: Props) {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={() => sendReminder.execute({ id })}
-                  disabled={sendReminder.isPending}
+                // onClick={() => sendReminder.execute({ id })}
+                // disabled={sendReminder.isPending}
                 >
                   Send Reminder
                 </AlertDialogAction>
@@ -134,13 +132,13 @@ export function InvoiceActions({ status, id }: Props) {
             </DropdownMenuTrigger>
             <DropdownMenuContent sideOffset={10} align="end">
               <DropdownMenuItem
-                onClick={() =>
-                  updateInvoice.execute({
-                    id,
-                    status: "paid",
-                    paid_at: new UTCDate().toISOString(),
-                  })
-                }
+              // onClick={() =>
+              // updateInvoice.execute({
+              //   id,
+              //   status: "paid",
+              //   paid_at: new UTCDate().toISOString(),
+              // })
+              // }
               >
                 Mark as paid
               </DropdownMenuItem>
@@ -152,9 +150,9 @@ export function InvoiceActions({ status, id }: Props) {
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-destructive"
-                onClick={() =>
-                  updateInvoice.execute({ id, status: "canceled" })
-                }
+                // onClick={() =>
+                // updateInvoice.execute({ id, status: "canceled" })
+                // }
               >
                 Cancel
               </DropdownMenuItem>
