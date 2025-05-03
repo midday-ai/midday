@@ -1,6 +1,5 @@
 "use server";
 
-import { parseDateSchema } from "@/actions/schema";
 import { openai } from "@ai-sdk/openai";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
@@ -8,10 +7,12 @@ import { z } from "zod";
 
 const schema = z.object({
   name: z.string().optional().describe("The name or description to search for"),
-  start: parseDateSchema
+  start: z
+    .date()
     .optional()
     .describe("The start date when to retrieve from. Return ISO-8601 format."),
-  end: parseDateSchema
+  end: z
+    .date()
     .optional()
     .describe(
       "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
@@ -37,7 +38,6 @@ export async function generateVaultFilters(prompt: string, context?: string) {
         }, {}) as any),
       }),
       prompt,
-      temperature: 0.3,
     });
 
     for await (const partialObject of partialObjectStream) {

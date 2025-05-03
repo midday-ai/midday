@@ -3,11 +3,11 @@
 import { LogEvents } from "@midday/events/events";
 import type { exportTransactions } from "@midday/jobs/tasks/transactions/export";
 import { tasks } from "@trigger.dev/sdk/v3";
+import { z } from "zod";
 import { authActionClient } from "./safe-action";
-import { exportTransactionsSchema } from "./schema";
 
 export const exportTransactionsAction = authActionClient
-  .schema(exportTransactionsSchema)
+  .schema(z.array(z.string()))
   .metadata({
     name: "export-transactions",
     track: {

@@ -1,8 +1,9 @@
 "use client";
 
 import { generateInvoiceFilters } from "@/actions/ai/filters/generate-invoice-filters";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
 import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
@@ -19,6 +20,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
+import { useQuery } from "@tanstack/react-query";
 import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
 import { useRef, useState } from "react";
@@ -30,12 +32,14 @@ const allowedStatuses = ["draft", "overdue", "paid", "unpaid", "canceled"];
 export function InvoiceSearchFilter() {
   const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const t = useI18n();
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { setParams, statuses, start, end, q, customers } = useInvoiceParams();
-  const customersData = null;
+  const trpc = useTRPC();
 
-  const t = useI18n();
+  const { setFilter, filter } = useInvoiceFilterParams();
+
+  const { data: customersData } = useQuery(trpc.customers.get.queryOptions());
 
   const statusFilters = allowedStatuses.map((status) => ({
     id: status,
@@ -46,7 +50,7 @@ export function InvoiceSearchFilter() {
     "esc",
     () => {
       setPrompt("");
-      setParams(null);
+      setFilter(null);
       setIsOpen(false);
     },
     {
@@ -66,60 +70,66 @@ export function InvoiceSearchFilter() {
     if (value) {
       setPrompt(value);
     } else {
-      setParams(null);
+      setFilter(null);
       setPrompt("");
     }
   };
 
   const handleSubmit = async () => {
-    setStreaming(true);
+    // If the user is typing a query with multiple words, we want to stream the results
+    if (prompt.split(" ").length > 1) {
+      setStreaming(true);
 
-    const { object } = await generateInvoiceFilters(
-      prompt,
-      `Invoice payment statuses: ${statusFilters.map((filter) => filter.name).join(", ")}
-       Customers: ${customersData?.map((customer) => customer.name).join(", ")}
+      setStreaming(true);
+
+      const { object } = await generateInvoiceFilters(
+        prompt,
+        `Invoice payment statuses: ${statusFilters.map((filter) => filter.name).join(", ")}
+         Customers: ${customersData?.data?.map((customer) => customer.name).join(", ")}
       `,
-    );
+      );
 
-    let finalObject = {};
+      let finalObject = {};
 
-    for await (const partialObject of readStreamableValue(object)) {
-      if (partialObject) {
-        finalObject = {
-          ...finalObject,
-          statuses: Array.isArray(partialObject?.statuses)
-            ? partialObject?.statuses
-            : partialObject?.statuses
-              ? [partialObject.statuses]
-              : null,
-          customers:
-            partialObject?.customers?.map(
-              (name: string) =>
-                customersData?.find((customer) => customer.name === name)?.id,
-            ) ?? null,
-          q: partialObject?.name ?? null,
-          start: partialObject?.start ?? null,
-          end: partialObject?.end ?? null,
-        };
+      for await (const partialObject of readStreamableValue(object)) {
+        if (partialObject) {
+          finalObject = {
+            ...finalObject,
+            statuses: Array.isArray(partialObject?.statuses)
+              ? partialObject?.statuses
+              : partialObject?.statuses
+                ? [partialObject.statuses]
+                : null,
+            customers:
+              partialObject?.customers?.map(
+                (name: string) =>
+                  customersData?.data?.find(
+                    (customer) => customer.name === name,
+                  )?.id,
+              ) ?? null,
+            q: partialObject?.name ?? null,
+            start: partialObject?.start ?? null,
+            end: partialObject?.end ?? null,
+          };
+        }
       }
+
+      setFilter({
+        q: null,
+        ...finalObject,
+      });
+
+      setStreaming(false);
+    } else {
+      setFilter({ q: prompt.length > 0 ? prompt : null });
     }
-
-    setParams({
-      q: null,
-      ...finalObject,
-    });
-
-    setStreaming(false);
   };
 
-  const filters = {
-    end,
-    start,
-    statuses,
-    customers,
-  };
+  const validFilters = Object.fromEntries(
+    Object.entries(filter).filter(([key]) => key !== "q"),
+  );
 
-  const hasValidFilters = Object.values(filters).some(
+  const hasValidFilters = Object.values(validFilters).some(
     (value) => value !== null,
   );
 
@@ -161,13 +171,13 @@ export function InvoiceSearchFilter() {
           </DropdownMenuTrigger>
         </form>
 
-        {/* <FilterList
-          filters={filters}
+        <FilterList
+          filters={validFilters}
           loading={streaming}
-          onRemove={setParams}
+          onRemove={setFilter}
           statusFilters={statusFilters}
-          // customers={customersData}
-        /> */}
+          customers={customersData?.data}
+        />
       </div>
 
       <DropdownMenuContent
@@ -194,11 +204,11 @@ export function InvoiceSearchFilter() {
                   initialFocus
                   toDate={new Date()}
                   selected={{
-                    from: start ? new Date(start) : undefined,
-                    to: end ? new Date(end) : undefined,
+                    from: filter?.start ? new Date(filter.start) : undefined,
+                    to: filter?.end ? new Date(filter.end) : undefined,
                   }}
                   onSelect={({ from, to }) => {
-                    setParams({
+                    setFilter({
                       start: from
                         ? formatISO(from, { representation: "date" })
                         : null,
@@ -225,14 +235,14 @@ export function InvoiceSearchFilter() {
                 alignOffset={-4}
                 className="p-0"
               >
-                {customersData?.map((customer) => (
+                {customersData?.data?.map((customer) => (
                   <DropdownMenuCheckboxItem
                     key={customer.id}
                     onCheckedChange={() => {
-                      setParams({
-                        customers: filters?.customers?.includes(customer.id)
-                          ? filters.customers.filter((s) => s !== customer.id)
-                          : [...(filters?.customers ?? []), customer.id],
+                      setFilter({
+                        customers: filter?.customers?.includes(customer.id)
+                          ? filter.customers.filter((s) => s !== customer.id)
+                          : [...(filter?.customers ?? []), customer.id],
                       });
                     }}
                   >
@@ -240,7 +250,7 @@ export function InvoiceSearchFilter() {
                   </DropdownMenuCheckboxItem>
                 ))}
 
-                {!customersData?.length && (
+                {!customersData?.data?.length && (
                   <DropdownMenuItem disabled>
                     No customers found
                   </DropdownMenuItem>
@@ -266,10 +276,10 @@ export function InvoiceSearchFilter() {
                   <DropdownMenuCheckboxItem
                     key={status.id}
                     onCheckedChange={() => {
-                      setParams({
-                        statuses: filters?.statuses?.includes(status.id)
-                          ? filters.statuses.filter((s) => s !== status.id)
-                          : [...(filters?.statuses ?? []), status.id],
+                      setFilter({
+                        statuses: filter?.statuses?.includes(status.id)
+                          ? filter.statuses.filter((s) => s !== status.id)
+                          : [...(filter?.statuses ?? []), status.id],
                       });
                     }}
                   >

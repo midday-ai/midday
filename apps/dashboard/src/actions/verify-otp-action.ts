@@ -5,11 +5,16 @@ import { createClient } from "@midday/supabase/server";
 import { addYears } from "date-fns";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { actionClient } from "./safe-action";
-import { verifyOtpSchema } from "./schema";
 
 export const verifyOtpAction = actionClient
-  .schema(verifyOtpSchema)
+  .schema(
+    z.object({
+      token: z.string(),
+      email: z.string(),
+    }),
+  )
   .action(async ({ parsedInput: { email, token } }) => {
     const supabase = await createClient();
 

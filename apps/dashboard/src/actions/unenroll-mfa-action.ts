@@ -1,11 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { authActionClient } from "./safe-action";
-import { unenrollMfaSchema } from "./schema";
 
 export const unenrollMfaAction = authActionClient
-  .schema(unenrollMfaSchema)
+  .schema(
+    z.object({
+      factorId: z.string(),
+    }),
+  )
   .metadata({
     name: "unenroll-mfa",
   })

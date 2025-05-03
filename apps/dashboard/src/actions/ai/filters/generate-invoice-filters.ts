@@ -1,9 +1,9 @@
 "use server";
 
-import { filterInvoiceSchema } from "@/actions/schema";
 import { openai } from "@ai-sdk/openai";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
+import { z } from "zod";
 
 const VALID_FILTERS = [
   "name",
@@ -13,6 +13,28 @@ const VALID_FILTERS = [
   "customers",
   "statuses",
 ];
+
+const schema = z.object({
+  name: z.string().optional().describe("The name to search for"),
+  statuses: z
+    .array(z.enum(["draft", "overdue", "paid", "unpaid", "canceled"]))
+    .optional()
+    .describe("The statuses to filter by"),
+  start: z
+    .date()
+    .optional()
+    .describe("The start date when to retrieve from. Return ISO-8601 format."),
+  end: z
+    .date()
+    .optional()
+    .describe(
+      "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
+    ),
+  customers: z
+    .array(z.string())
+    .optional()
+    .describe("The customers to filter by"),
+});
 
 export async function generateInvoiceFilters(prompt: string, context?: string) {
   const stream = createStreamableValue();
@@ -24,14 +46,13 @@ export async function generateInvoiceFilters(prompt: string, context?: string) {
                Current date is: ${new Date().toISOString().split("T")[0]} \n
                ${context}
       `,
-      schema: filterInvoiceSchema.pick({
+      schema: schema.pick({
         ...(VALID_FILTERS.reduce((acc, filter) => {
           acc[filter] = true;
           return acc;
         }, {}) as any),
       }),
       prompt,
-      temperature: 0.7,
     });
 
     for await (const partialObject of partialObjectStream) {

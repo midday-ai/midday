@@ -15,14 +15,7 @@ type Props = {
 export function InboxWidget({ filter }: Props) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
-  const { data } = useSuspenseQuery(
-    trpc.inbox.get.queryOptions({
-      filter: {
-        status:
-          filter === "all" ? undefined : filter === "todo" ? "pending" : filter,
-      },
-    }),
-  );
+  const { data } = useSuspenseQuery(trpc.inbox.get.queryOptions());
 
   if (!data?.data?.length) {
     return (

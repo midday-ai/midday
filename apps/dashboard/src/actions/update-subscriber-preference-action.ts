@@ -2,11 +2,20 @@
 
 import { updateSubscriberPreference } from "@midday/notification";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
+import { z } from "zod";
 import { authActionClient } from "./safe-action";
-import { updateSubscriberPreferenceSchema } from "./schema";
 
 export const updateSubscriberPreferenceAction = authActionClient
-  .schema(updateSubscriberPreferenceSchema)
+  .schema(
+    z.object({
+      templateId: z.string(),
+      teamId: z.string(),
+      revalidatePath: z.string(),
+      subscriberId: z.string(),
+      type: z.string(),
+      enabled: z.boolean(),
+    }),
+  )
   .metadata({
     name: "update-subscriber-preference",
   })

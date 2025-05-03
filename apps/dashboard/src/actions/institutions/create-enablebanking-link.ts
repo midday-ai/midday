@@ -4,11 +4,19 @@ import { client } from "@midday/engine/client";
 import { LogEvents } from "@midday/events/events";
 import { getCountryCode } from "@midday/location";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { authActionClient } from "../safe-action";
-import { createEnableBankingLinkSchema } from "../schema";
 
 export const createEnableBankingLinkAction = authActionClient
-  .schema(createEnableBankingLinkSchema)
+  .schema(
+    z.object({
+      institutionId: z.string(),
+      maximumConsentValidity: z.number(),
+      country: z.string().optional().nullable(),
+      isDesktop: z.boolean(),
+      type: z.enum(["personal", "business"]),
+    }),
+  )
   .metadata({
     name: "create-enablebanking-link",
   })

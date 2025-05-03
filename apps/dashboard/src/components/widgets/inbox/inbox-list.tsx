@@ -15,12 +15,10 @@ export function InboxList({ data }: Props) {
   return (
     <div className="flex flex-col gap-4 overflow-auto scrollbar-hide aspect-square pb-14 mt-8">
       {data?.map((item) => {
-        const tab = item.transaction_id ? "done" : "todo";
-
         return (
           <Link
             key={item.id}
-            href={`/inbox?inboxId=${item.id}&tab=${tab}`}
+            href={`/inbox?inboxId=${item.id}`}
             className="flex flex-col items-start gap-2 border p-4 text-left text-sm transition-all"
           >
             <div className="flex w-full flex-col gap-1">

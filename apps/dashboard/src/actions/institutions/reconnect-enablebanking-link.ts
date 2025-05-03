@@ -3,11 +3,17 @@
 import { client } from "@midday/engine/client";
 import { LogEvents } from "@midday/events/events";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { authActionClient } from "../safe-action";
-import { reconnectEnableBankingLinkSchema } from "../schema";
 
 export const reconnectEnableBankingLinkAction = authActionClient
-  .schema(reconnectEnableBankingLinkSchema)
+  .schema(
+    z.object({
+      institutionId: z.string(),
+      isDesktop: z.boolean(),
+      sessionId: z.string(),
+    }),
+  )
   .metadata({
     name: "reconnect-enablebanking-link",
   })

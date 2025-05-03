@@ -2,11 +2,17 @@
 
 import { LogEvents } from "@midday/events/events";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { authActionClient } from "./safe-action";
-import { mfaVerifySchema } from "./schema";
 
 export const mfaVerifyAction = authActionClient
-  .schema(mfaVerifySchema)
+  .schema(
+    z.object({
+      factorId: z.string(),
+      challengeId: z.string(),
+      code: z.string(),
+    }),
+  )
   .metadata({
     name: "mfa-verify",
     track: {

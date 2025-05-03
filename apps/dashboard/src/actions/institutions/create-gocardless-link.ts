@@ -3,11 +3,18 @@
 import { client } from "@midday/engine/client";
 import { LogEvents } from "@midday/events/events";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { authActionClient } from "../safe-action";
-import { createGoCardLessLinkSchema } from "../schema";
 
 export const createGoCardLessLinkAction = authActionClient
-  .schema(createGoCardLessLinkSchema)
+  .schema(
+    z.object({
+      institutionId: z.string(),
+      step: z.string().optional(),
+      availableHistory: z.number(),
+      redirectBase: z.string(),
+    }),
+  )
   .metadata({
     name: "create-gocardless-link",
   })

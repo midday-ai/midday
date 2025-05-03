@@ -2,8 +2,8 @@
 
 import { LogEvents } from "@midday/events/events";
 import { PlainClient, ThreadFieldSchemaType } from "@team-plain/typescript-sdk";
+import { z } from "zod";
 import { authActionClient } from "./safe-action";
-import { sendSupportSchema } from "./schema";
 
 const client = new PlainClient({
   apiKey: process.env.PLAIN_API_KEY!,
@@ -25,7 +25,15 @@ const mapToPriorityNumber = (priority: string) => {
 };
 
 export const sendSupportAction = authActionClient
-  .schema(sendSupportSchema)
+  .schema(
+    z.object({
+      subject: z.string(),
+      priority: z.string(),
+      type: z.string(),
+      message: z.string(),
+      url: z.string().optional(),
+    }),
+  )
   .metadata({
     name: "send-support",
     track: {

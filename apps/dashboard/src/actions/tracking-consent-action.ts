@@ -3,11 +3,11 @@
 import { Cookies } from "@/utils/constants";
 import { addYears } from "date-fns";
 import { cookies } from "next/headers";
+import { z } from "zod";
 import { actionClient } from "./safe-action";
-import { trackingConsentSchema } from "./schema";
 
 export const trackingConsentAction = actionClient
-  .schema(trackingConsentSchema)
+  .schema(z.boolean())
   .action(async ({ parsedInput: value }) => {
     (await cookies()).set({
       name: Cookies.TrackingConsent,
