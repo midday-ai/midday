@@ -1,8 +1,7 @@
 "use client";
 
-import { sendSupportSchema } from "@/actions/schema";
 import { sendSupportAction } from "@/actions/send-support-action";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useZodForm } from "@/hooks/use-zod-form";
 import { Button } from "@midday/ui/button";
 import {
   Form,
@@ -24,14 +23,20 @@ import { Textarea } from "@midday/ui/textarea";
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
-import type { z } from "zod";
+import { z } from "zod";
+
+const formSchema = z.object({
+  subject: z.string(),
+  priority: z.string(),
+  type: z.string(),
+  message: z.string(),
+  url: z.string().optional(),
+});
 
 export function SupportForm() {
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof sendSupportSchema>>({
-    resolver: zodResolver(sendSupportSchema),
+  const form = useZodForm(formSchema, {
     defaultValues: {
       subject: undefined,
       type: undefined,
