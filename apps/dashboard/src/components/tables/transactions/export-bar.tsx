@@ -1,4 +1,5 @@
 import { exportTransactionsAction } from "@/actions/export-transactions-action";
+import { useUserQuery } from "@/hooks/use-user";
 import { useExportStore } from "@/store/export";
 import { useTransactionsStore } from "@/store/transactions";
 import { Button } from "@midday/ui/button";
@@ -15,6 +16,7 @@ export function ExportBar() {
   const { setExportData } = useExportStore();
   const { rowSelection, setRowSelection } = useTransactionsStore();
   const [isOpen, setOpen] = useState(false);
+  const { data: user } = useUserQuery();
 
   const ids = Object.keys(rowSelection);
   const totalSelected = ids.length;
@@ -67,7 +69,13 @@ export function ExportBar() {
             </Button>
             <SubmitButton
               isSubmitting={status === "executing"}
-              onClick={() => execute(ids)}
+              onClick={() =>
+                execute({
+                  transactionIds: ids,
+                  dateFormat: user?.date_format ?? undefined,
+                  locale: user?.locale ?? undefined,
+                })
+              }
             >
               <div className="flex items-center space-x-2">
                 <span>Export</span>

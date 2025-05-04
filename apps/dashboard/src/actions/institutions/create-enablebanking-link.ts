@@ -30,7 +30,7 @@ export const createEnableBankingLinkAction = authActionClient
         isDesktop,
         type,
       },
-      ctx: { analytics, user },
+      ctx: { analytics, teamId },
     }) => {
       analytics.track({
         event: LogEvents.EnableBankingLinkCreated.name,
@@ -47,7 +47,7 @@ export const createEnableBankingLinkAction = authActionClient
             institutionId,
             country,
             type,
-            teamId: user.team_id,
+            teamId: teamId!,
             validUntil: new Date(Date.now() + maximumConsentValidity * 1000)
               .toISOString()
               .replace(/\.\d+Z$/, ".000000+00:00"),

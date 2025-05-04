@@ -35,7 +35,8 @@
     "./tasks/reconnect/connection": "./src/tasks/reconnect/connection.ts",
     "./tasks/document/process-document": "./src/tasks/document/process-document.ts",
     "./tasks/invoice/email/send-reminder": "./src/tasks/invoice/email/send-reminder.tsx",
-    "./tasks/invoice/email/send-invoice": "./src/tasks/invoice/email/send-invoice.tsx"
+    "./tasks/invoice/email/send-email": "./src/tasks/invoice/email/send-email.tsx",
+    "./tasks/invoice/operations/generate-invoice": "./src/tasks/invoice/operations/generate-invoice.ts"
   },
   "dependencies": {
     "@fast-csv/format": "5.0.2",

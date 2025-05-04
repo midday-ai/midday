@@ -40,7 +40,7 @@ export const importTransactionsAction = authActionClient
         currentBalance,
         inverted,
       },
-      ctx: { user, supabase },
+      ctx: { teamId, supabase },
     }) => {
       // Update currency for account
       const balance = currentBalance
@@ -59,7 +59,7 @@ export const importTransactionsAction = authActionClient
           bankAccountId,
           currency,
           mappings,
-          teamId: user.team_id!,
+          teamId: teamId!,
           inverted,
         },
       );

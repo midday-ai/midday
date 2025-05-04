@@ -21,11 +21,11 @@ export const reconnectConnectionAction = authActionClient
     },
   })
   .action(
-    async ({ parsedInput: { connectionId, provider }, ctx: { user } }) => {
+    async ({ parsedInput: { connectionId, provider }, ctx: { teamId } }) => {
       const event = await tasks.trigger<typeof reconnectConnection>(
         "reconnect-connection",
         {
-          teamId: user.team_id!,
+          teamId: teamId!,
           connectionId,
           provider,
         },

@@ -26,7 +26,7 @@ export const createGoCardLessLinkAction = authActionClient
         redirectBase,
         step = "account",
       },
-      ctx: { analytics, user },
+      ctx: { analytics },
     }) => {
       const redirectTo = new URL(redirectBase);
 

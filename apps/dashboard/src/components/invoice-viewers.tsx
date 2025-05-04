@@ -2,7 +2,6 @@
 
 import { formatRelativeTime } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
-import { createClient } from "@midday/supabase/client";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import {
   Avatar,
@@ -18,7 +17,6 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
 import type { Customer } from "./invoice-toolbar";
 
 interface User {
@@ -33,25 +31,24 @@ type Props = {
 };
 
 export function InvoiceViewers({ customer, viewedAt }: Props) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const supabase = createClient();
+  return null;
 
-  useEffect(() => {
-    async function fetchCurrentUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        setCurrentUser({
-          id: user.id,
-          avatar_url: user.user_metadata.avatar_url,
-          full_name: user.user_metadata.full_name,
-        });
-      }
-    }
+  // useEffect(() => {
+  //   async function fetchCurrentUser() {
+  //     const {
+  //       data: { user },
+  //     } = await supabase.auth.getUser();
+  //     if (user) {
+  //       setCurrentUser({
+  //         id: user.id,
+  //         avatar_url: user.user_metadata.avatar_url,
+  //         full_name: user.user_metadata.full_name,
+  //       });
+  //     }
+  //   }
 
-    fetchCurrentUser();
-  }, []);
+  //   fetchCurrentUser();
+  // }, []);
 
   if (!currentUser) {
     return null;

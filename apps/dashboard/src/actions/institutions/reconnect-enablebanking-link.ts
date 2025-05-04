@@ -20,7 +20,7 @@ export const reconnectEnableBankingLinkAction = authActionClient
   .action(
     async ({
       parsedInput: { institutionId, isDesktop, sessionId },
-      ctx: { analytics, user },
+      ctx: { analytics, teamId },
     }) => {
       analytics.track({
         event: LogEvents.EnableBankingLinkReconnected.name,
@@ -42,7 +42,7 @@ export const reconnectEnableBankingLinkAction = authActionClient
           json: {
             institutionId: name,
             country,
-            teamId: user.team_id!,
+            teamId: teamId!,
             type,
             validUntil: new Date(Date.now() + maximum_consent_validity * 1000)
               .toISOString()

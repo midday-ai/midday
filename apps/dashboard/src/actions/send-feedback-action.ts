@@ -28,10 +28,10 @@ export const sendFeebackAction = authActionClient
         emailAddress: user.email,
       },
       onCreate: {
-        fullName: user.full_name,
+        fullName: user.user_metadata.full_name,
         externalId: user.id,
         email: {
-          email: user.email,
+          email: user.email!,
           isVerified: true,
         },
       },

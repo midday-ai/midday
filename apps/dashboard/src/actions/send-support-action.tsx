@@ -47,7 +47,7 @@ export const sendSupportAction = authActionClient
         emailAddress: user.email,
       },
       onCreate: {
-        fullName: user.full_name,
+        fullName: user.user_metadata.full_name,
         externalId: user.id,
         email: {
           email: user.email,

@@ -1,5 +1,6 @@
+import { getTeamId } from "@/utils/team";
 import { getSubscriberPreferences } from "@midday/notification";
-import { getUser } from "@midday/supabase/cached-queries";
+import { getSession } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
 import { NotificationSetting } from "./notification-setting";
 
@@ -10,10 +11,15 @@ export function NotificationSettingsSkeleton() {
 }
 
 export async function NotificationSettings() {
-  const { data: userData } = await getUser();
+  const {
+    data: { session },
+  } = await getSession();
+
+  const teamId = await getTeamId();
+
   const { data: subscriberPreferences } = await getSubscriberPreferences({
-    subscriberId: userData.id,
-    teamId: userData.team_id,
+    subscriberId: session?.user.id!,
+    teamId: teamId!,
   });
 
   const emailSettings = subscriberPreferences
@@ -27,8 +33,8 @@ export async function NotificationSettings() {
           id={setting.template._id}
           name={setting.template.name}
           enabled={setting.preference.channels?.email}
-          subscriberId={userData.id}
-          teamId={userData.team_id}
+          subscriberId={session?.user.id!}
+          teamId={teamId!}
           type="email"
         />
       );

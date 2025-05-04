@@ -1,6 +1,7 @@
 import { logger } from "@/utils/logger";
+import { getTeamId } from "@/utils/team";
 import { setupAnalytics } from "@midday/events/server";
-import { getUser } from "@midday/supabase/cached-queries";
+import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import {
   DEFAULT_SERVER_ERROR_MESSAGE,
@@ -54,16 +55,21 @@ export const authActionClient = actionClientWithMeta
     return result;
   })
   .use(async ({ next, metadata }) => {
-    const user = await getUser();
+    const {
+      data: { session },
+    } = await getSession();
+
+    const teamId = await getTeamId();
+
     const supabase = await createClient();
 
-    if (!user?.data) {
+    if (!session) {
       throw new Error("Unauthorized");
     }
 
     const analytics = await setupAnalytics({
-      userId: user.data.id,
-      fullName: user.data.full_name,
+      userId: session.user.id,
+      fullName: session.user.user_metadata.full_name,
     });
 
     if (metadata?.track) {
@@ -74,7 +80,8 @@ export const authActionClient = actionClientWithMeta
       ctx: {
         supabase,
         analytics,
-        user: user.data,
+        user: session.user,
+        teamId,
       },
     });
   });

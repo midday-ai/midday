@@ -1,7 +1,9 @@
 import { parseInputValue } from "@/components/invoice/utils";
 import { UTCDate } from "@date-fns/utc";
 import { generateToken } from "@midday/invoice/token";
+import type { sendInvoiceEmail } from "@midday/jobs/tasks/invoice/email/send-email";
 import type { sendInvoiceReminder } from "@midday/jobs/tasks/invoice/email/send-reminder";
+import type { generateInvoice } from "@midday/jobs/tasks/invoice/operations/generate-invoice";
 import { getCountryCode, getLocale, getTimezone } from "@midday/location";
 import { currencies } from "@midday/location/currencies";
 import {
@@ -265,7 +267,30 @@ export const invoiceRouter = createTRPCRouter({
         deliveryType: z.enum(["create", "create_and_send"]),
       }),
     )
-    .mutation(async ({ input, ctx: { supabase, teamId, session } }) => {}),
+    .mutation(async ({ input, ctx: { supabase } }) => {
+      // Update the invoice status to unpaid
+      const { data } = await updateInvoice(supabase, {
+        id: input.id,
+        status: "unpaid",
+      });
+
+      if (!data) {
+        throw new Error("Invoice not found");
+      }
+
+      // Only send the email if the delivery type is create_and_send
+      if (input.deliveryType === "create_and_send") {
+        await tasks.trigger<typeof sendInvoiceEmail>("send-invoice-email", {
+          invoiceId: data.id,
+        });
+      }
+
+      await tasks.trigger<typeof generateInvoice>("generate-invoice", {
+        invoiceId: data.id,
+      });
+
+      return data;
+    }),
 
   remind: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
