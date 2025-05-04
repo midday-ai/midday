@@ -1540,3 +1540,190 @@ export async function deleteBankConnection(
     .select("reference_id, provider, access_token")
     .single();
 }
+
+type UpdateInvoiceParams = {
+  id: string;
+  status?: "paid" | "canceled" | "unpaid";
+  paid_at?: string | null;
+  internal_note?: string | null;
+  reminder_sent_at?: string | null;
+};
+
+export async function updateInvoice(
+  supabase: Client,
+  params: UpdateInvoiceParams,
+) {
+  const { id, ...rest } = params;
+
+  return supabase
+    .from("invoices")
+    .update(rest)
+    .eq("id", id)
+    .select("*")
+    .single();
+}
+
+type DeleteInvoiceParams = {
+  id: string;
+};
+
+export async function deleteInvoice(
+  supabase: Client,
+  params: DeleteInvoiceParams,
+) {
+  return supabase
+    .from("invoices")
+    .delete()
+    .eq("id", params.id)
+    .select("*")
+    .single();
+}
+
+type DraftInvoiceTemplateParams = {
+  customer_label?: string;
+  title?: string;
+  from_label?: string;
+  invoice_no_label?: string;
+  issue_date_label?: string;
+  due_date_label?: string;
+  description_label?: string;
+  price_label?: string;
+  quantity_label?: string;
+  total_label?: string;
+  total_summary_label?: string;
+  vat_label?: string;
+  subtotal_label?: string;
+  tax_label?: string;
+  discount_label?: string;
+  timezone?: string;
+  payment_label?: string;
+  note_label?: string;
+  logo_url?: string | null;
+  currency?: string;
+  payment_details?: string | null; // Stringified JSON
+  from_details?: string | null; // Stringified JSON
+  date_format?: string;
+  include_vat?: boolean;
+  include_tax?: boolean;
+  include_discount?: boolean;
+  include_decimals?: boolean;
+  include_units?: boolean;
+  include_qr?: boolean;
+  tax_rate?: number;
+  vat_rate?: number;
+  size?: "a4" | "letter";
+  delivery_type?: "create" | "create_and_send";
+  locale?: string;
+};
+
+type DraftInvoiceLineItemParams = {
+  name?: string;
+  quantity?: number;
+  unit?: string | null;
+  price?: number;
+  vat?: number;
+  tax?: number;
+};
+
+type DraftInvoiceParams = {
+  id: string;
+  template: DraftInvoiceTemplateParams;
+  from_details?: string | null; // Stringified JSON
+  customer_details?: string | null; // Stringified JSON
+  customer_id?: string | null;
+  customer_name?: string | null;
+  payment_details?: string | null; // Stringified JSON
+  note_details?: string | null; // Stringified JSON
+  due_date: string;
+  issue_date: string;
+  invoice_number: string;
+  logo_url?: string | null;
+  vat?: number | null;
+  tax?: number | null;
+  discount?: number | null;
+  subtotal?: number | null;
+  top_block?: string | null; // Stringified JSON
+  bottom_block?: string | null; // Stringified JSON
+  amount?: number | null;
+  line_items?: DraftInvoiceLineItemParams[];
+  token: string;
+  teamId: string;
+  userId: string;
+};
+
+export async function draftInvoice(
+  supabase: Client,
+  params: DraftInvoiceParams,
+) {
+  const {
+    id,
+    teamId,
+    userId,
+    token,
+    template,
+    payment_details,
+    from_details,
+    customer_details,
+    note_details,
+    ...restInput
+  } = params;
+
+  const {
+    payment_details: _, // Renamed placeholder as requested
+    from_details: __, // Renamed placeholder as requested
+    ...restTemplate
+  } = template;
+
+  return supabase
+    .from("invoices")
+    .upsert(
+      {
+        // Core identifiers from params
+        id,
+        team_id: teamId,
+        user_id: userId, // Using userId from params as in original code
+        token,
+
+        // Fields from restInput (original input minus core IDs, template, and details)
+        ...restInput,
+        // Fields from template (currency and the rest of the template object)
+        currency: template.currency?.toUpperCase(),
+        template: restTemplate, // restTemplate contains template minus details fields
+
+        // Stringified JSON detail fields from params
+        payment_details: payment_details,
+        from_details: from_details,
+        customer_details: customer_details,
+        note_details: note_details,
+      },
+      {
+        onConflict: "id",
+      },
+    )
+    .select("*")
+    .single();
+}
+
+type UpdateInvoiceTemplateParams = {
+  id: string;
+  teamId: string;
+} & DraftInvoiceTemplateParams;
+
+export async function updateInvoiceTemplate(
+  supabase: Client,
+  params: UpdateInvoiceTemplateParams,
+) {
+  return supabase
+    .from("invoice_templates")
+    .upsert(
+      {
+        team_id: params.teamId,
+        ...params,
+      },
+      // Right now we only have one template per team, so we can use the team_id as the unique constraint
+      { onConflict: "team_id" },
+    )
+    .eq("id", params.id)
+    .select()
+    .single();
+}

@@ -38,8 +38,9 @@ export function DocumentDetails() {
       );
     },
   });
+
   if (isLoading) {
-    return <DocumentDetailsSkeleton fullView={fullView} />;
+    return <DocumentDetailsSkeleton />;
   }
 
   return (

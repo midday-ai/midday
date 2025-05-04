@@ -1,7 +1,7 @@
 import { getWebsiteLogo } from "@/utils/logos";
 import { OgTemplate, isValidLogoUrl } from "@midday/invoice";
 import { verify } from "@midday/invoice/token";
-import { getInvoiceQuery } from "@midday/supabase/queries";
+import { getInvoiceByIdQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { ImageResponse } from "next/og";
 
@@ -13,7 +13,7 @@ export default async function Image({ params }: { params: { token: string } }) {
   const supabase = await createClient({ admin: true });
 
   const { id } = await verify(params.token);
-  const { data: invoice } = await getInvoiceQuery(supabase, id);
+  const { data: invoice } = await getInvoiceByIdQuery(supabase, id);
 
   if (!invoice) {
     return new Response("Not found", { status: 404 });

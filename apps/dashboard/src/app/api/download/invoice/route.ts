@@ -1,5 +1,5 @@
 import { PdfTemplate, renderToStream } from "@midday/invoice";
-import { getInvoiceQuery } from "@midday/supabase/queries";
+import { getInvoiceByIdQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 
   const { id, size, preview } = result.data;
 
-  const { data } = await getInvoiceQuery(supabase, id);
+  const { data } = await getInvoiceByIdQuery(supabase, id);
 
   if (!data) {
     return new Response("Invoice not found", { status: 404 });

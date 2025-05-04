@@ -1,5 +1,6 @@
 "use client";
 
+import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { Button } from "@midday/ui/button";
 
@@ -33,7 +34,7 @@ export function EmptyState() {
 }
 
 export function NoResults() {
-  const { setParams } = useInvoiceParams();
+  const { setFilter } = useInvoiceFilterParams();
 
   return (
     <div className="flex items-center justify-center ">
@@ -45,7 +46,7 @@ export function NoResults() {
           </p>
         </div>
 
-        <Button variant="outline" onClick={() => setParams(null)}>
+        <Button variant="outline" onClick={() => setFilter(null)}>
           Clear filters
         </Button>
       </div>

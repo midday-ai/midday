@@ -1,6 +1,3 @@
-// import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
-// import { sendReminderAction } from "@/actions/invoice/send-reminder-action";
-// import { updateInvoiceAction } from "@/actions/invoice/update-invoice-action";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import {
   AlertDialog,
@@ -29,9 +26,6 @@ type Props = {
 
 export function InvoiceActions({ status, id }: Props) {
   const { setParams } = useInvoiceParams();
-  // const updateInvoice = useAction(updateInvoiceAction);
-  // const deleteInvoice = useAction(deleteInvoiceAction);
-  // const sendReminder = useAction(sendReminderAction);
 
   const handleDeleteInvoice = () => {
     // deleteInvoice.execute({ id });

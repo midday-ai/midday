@@ -7,15 +7,12 @@ import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getDueDateStatus } from "@/utils/format";
 import { formatDate } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
-import { useState } from "react";
 
 type Props = {
   invoice: NonNullable<RouterOutputs["invoice"]["get"]["data"]>[number];
 };
 
 export function InvoiceRow({ invoice }: Props) {
-  const [isOpen, setOpen] = useState(false);
-
   const showDate = invoice.status === "unpaid" || invoice.status === "overdue";
 
   return (
@@ -23,7 +20,7 @@ export function InvoiceRow({ invoice }: Props) {
       <li
         key={invoice.id}
         className="h-[57px] flex items-center w-full"
-        onClick={() => setOpen(true)}
+        // onClick={() => setOpen(true)}
       >
         <div className="flex items-center w-full">
           <div className="flex flex-col space-y-1 w-[90px]">
@@ -58,8 +55,6 @@ export function InvoiceRow({ invoice }: Props) {
           </div>
         </div>
       </li>
-
-      <InvoiceDetailsSheet data={invoice} setOpen={setOpen} isOpen={isOpen} />
     </>
   );
 }

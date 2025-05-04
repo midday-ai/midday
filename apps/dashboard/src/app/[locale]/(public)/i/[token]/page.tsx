@@ -3,7 +3,7 @@ import InvoiceToolbar from "@/components/invoice-toolbar";
 import { UTCDate } from "@date-fns/utc";
 import { HtmlTemplate } from "@midday/invoice/templates/html";
 import { verify } from "@midday/invoice/token";
-import { getInvoiceQuery } from "@midday/supabase/queries";
+import { getInvoiceByIdQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { waitUntil } from "@vercel/functions";
 import type { Metadata } from "next";
@@ -17,7 +17,7 @@ export async function generateMetadata(props: {
 
   try {
     const { id } = await verify(params.token);
-    const { data: invoice } = await getInvoiceQuery(supabase, id);
+    const { data: invoice } = await getInvoiceByIdQuery(supabase, id);
 
     if (!invoice) {
       return {
@@ -85,7 +85,7 @@ export default async function Page(props: Props) {
     } = await supabase.auth.getSession();
 
     const { id } = await verify(params.token);
-    const { data: invoice } = await getInvoiceQuery(supabase, id);
+    const { data: invoice } = await getInvoiceByIdQuery(supabase, id);
 
     // If the invoice is draft and the user is not logged in, return 404 or if the invoice is not found
     if (!invoice || (invoice.status === "draft" && !session)) {

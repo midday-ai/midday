@@ -1233,7 +1233,7 @@ export async function getInvoiceTemplatesQuery(
     .single();
 }
 
-export async function getInvoiceQuery(supabase: Client, id: string) {
+export async function getInvoiceByIdQuery(supabase: Client, id: string) {
   return supabase
     .from("invoices")
     .select("*, customer:customer_id(name, website), team:team_id(name)")

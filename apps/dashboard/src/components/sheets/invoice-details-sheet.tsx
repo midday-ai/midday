@@ -1,22 +1,20 @@
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { Sheet, SheetContent } from "@midday/ui/sheet";
 import React from "react";
 import { InvoiceDetails } from "../invoice-details";
 
-type Props = {
-  setOpen: (open: boolean) => void;
-  isOpen: boolean;
-  data?: NonNullable<RouterOutputs["invoice"]["get"]>[number];
-};
+export function InvoiceDetailsSheet() {
+  const {
+    params: { invoiceId },
+    setParams,
+  } = useInvoiceParams();
 
-export function InvoiceDetailsSheet({ setOpen, isOpen, data }: Props) {
-  const { invoiceId } = useInvoiceParams();
+  const isOpen = Boolean(invoiceId);
 
   return (
-    <Sheet open={isOpen} onOpenChange={setOpen}>
+    <Sheet open={isOpen} onOpenChange={() => setParams({ invoiceId: null })}>
       <SheetContent>
-        <InvoiceDetails id={invoiceId} data={data} />
+        <InvoiceDetails />
       </SheetContent>
     </Sheet>
   );

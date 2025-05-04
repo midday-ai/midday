@@ -33,7 +33,9 @@
     "./tasks/transactions/update-base-currency": "./src/tasks/transactions/update-base-currency.ts",
     "./tasks/user/setup": "./src/tasks/user/setup.ts",
     "./tasks/reconnect/connection": "./src/tasks/reconnect/connection.ts",
-    "./tasks/document/process-document": "./src/tasks/document/process-document.ts"
+    "./tasks/document/process-document": "./src/tasks/document/process-document.ts",
+    "./tasks/invoice/email/send-reminder": "./src/tasks/invoice/email/send-reminder.tsx",
+    "./tasks/invoice/email/send-invoice": "./src/tasks/invoice/email/send-invoice.tsx"
   },
   "dependencies": {
     "@fast-csv/format": "5.0.2",

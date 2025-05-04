@@ -14,13 +14,15 @@ import {
 import React, { useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import { columns } from "./columns";
+import { NoResults } from "./empty-states";
+import { EmptyState } from "./empty-states";
 import { InvoiceRow } from "./row";
 import { TableHeader } from "./table-header";
 
 export function DataTable() {
   const trpc = useTRPC();
   const { params } = useSortParams();
-  const { filter } = useInvoiceFilterParams();
+  const { filter, hasFilters } = useInvoiceFilterParams();
   const { ref, inView } = useInView();
 
   const infiniteQueryOptions = trpc.invoice.get.infiniteQueryOptions(
@@ -35,7 +37,7 @@ export function DataTable() {
     },
   );
 
-  const { data, fetchNextPage, hasNextPage, refetch } =
+  const { data, fetchNextPage, hasNextPage, isFetching } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
 
   const tableData = useMemo(() => {
@@ -59,6 +61,14 @@ export function DataTable() {
     // dateFormat: user?.date_format,
     // },
   });
+
+  if (hasFilters && !tableData?.length) {
+    return <NoResults />;
+  }
+
+  if (!tableData?.length && !isFetching) {
+    return <EmptyState />;
+  }
 
   return (
     <>

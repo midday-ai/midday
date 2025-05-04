@@ -1,5 +1,5 @@
 import { resend } from "@/utils/resend";
-import InvoiceEmail from "@midday/email/emails/invoice";
+import { InvoiceReminderEmail } from "@midday/email/emails/invoice-reminder";
 import { createClient } from "@midday/supabase/job";
 import { getAppUrl } from "@midday/utils/envs";
 import { render } from "@react-email/render";
@@ -7,8 +7,8 @@ import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
-export const sendInvoiceEmail = schemaTask({
-  id: "send-invoice-email",
+export const sendInvoiceReminder = schemaTask({
+  id: "send-invoice-reminder",
   schema: z.object({
     invoiceId: z.string().uuid(),
   }),
@@ -22,7 +22,7 @@ export const sendInvoiceEmail = schemaTask({
     const { data: invoice } = await supabase
       .from("invoices")
       .select(
-        "id, token, customer:customer_id(name, website, email), team:team_id(name, email)",
+        "id, token, invoice_number, customer:customer_id(name, website, email), team:team_id(name, email)",
       )
       .eq("id", invoiceId)
       .single();
@@ -43,15 +43,16 @@ export const sendInvoiceEmail = schemaTask({
       from: "Midday <middaybot@midday.ai>",
       to: customerEmail,
       replyTo: invoice?.team.email ?? undefined,
-      subject: `${invoice?.team.name} sent you an invoice`,
+      subject: `Reminder: Payment for ${invoice.invoice_number}`,
       headers: {
         "X-Entity-Ref-ID": nanoid(),
       },
       html: await render(
-        <InvoiceEmail
-          customerName={invoice?.customer?.name!}
-          teamName={invoice?.team.name!}
-          link={`${getAppUrl()}/i/${invoice?.token}`}
+        <InvoiceReminderEmail
+          companyName={invoice.customer?.name!}
+          teamName={invoice.team.name!}
+          invoiceNumber={invoice.invoice_number!}
+          link={`${getAppUrl()}/i/${invoice.token}`}
         />,
       ),
     });
@@ -66,13 +67,5 @@ export const sendInvoiceEmail = schemaTask({
     }
 
     logger.info("Invoice email sent");
-
-    await supabase
-      .from("invoices")
-      .update({
-        status: "unpaid",
-        sent_to: customerEmail,
-      })
-      .eq("id", invoiceId);
   },
 });

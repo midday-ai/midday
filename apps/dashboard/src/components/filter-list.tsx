@@ -225,10 +225,10 @@ export function FilterList({
       {loading && (
         <div className="flex space-x-2">
           <motion.li key="1" variants={itemVariant}>
-            <Skeleton className="rounded-full h-8 w-[100px]" />
+            <Skeleton className="h-8 w-[100px]" />
           </motion.li>
           <motion.li key="2" variants={itemVariant}>
-            <Skeleton className="rounded-full h-8 w-[100px]" />
+            <Skeleton className="h-8 w-[100px]" />
           </motion.li>
         </div>
       )}

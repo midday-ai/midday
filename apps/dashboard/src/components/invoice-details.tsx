@@ -1,7 +1,7 @@
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { getWebsiteLogo } from "@/utils/logos";
-import { createClient } from "@midday/supabase/client";
-import { getInvoiceQuery } from "@midday/supabase/queries";
 import {
   Accordion,
   AccordionContent,
@@ -12,98 +12,43 @@ import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { Skeleton } from "@midday/ui/skeleton";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useEffect, useState } from "react";
 import { CopyInput } from "./copy-input";
 import { FormatAmount } from "./format-amount";
 import { InvoiceActions } from "./invoice-actions";
+import { InvoiceDetailsSkeleton } from "./invoice-details-skeleton";
 import { InvoiceNote } from "./invoice-note";
 import { InvoiceStatus } from "./invoice-status";
 import { OpenURL } from "./open-url";
-import type { Invoice } from "./tables/invoices/columns";
 
-type Props = {
-  id: string;
-  data?: Invoice;
-};
+export function InvoiceDetails() {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const {
+    params: { invoiceId },
+  } = useInvoiceParams();
 
-export function InvoiceDetails({ id, data: initialData }: Props) {
-  const supabase = createClient();
-  const [data, setData] = useState<Invoice | null>(initialData ?? null);
-  const [loading, setLoading] = useState(false);
+  const isOpen = Boolean(invoiceId);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { data: invoice } = await getInvoiceQuery(supabase, id);
+  const { data, isLoading } = useQuery({
+    ...trpc.invoice.getById.queryOptions({
+      id: invoiceId!,
+    }),
+    enabled: isOpen,
+    staleTime: 60 * 1000,
+    initialData: () => {
+      const pages = queryClient
+        .getQueriesData({ queryKey: trpc.invoice.get.infiniteQueryKey() })
+        .flatMap(([, data]) => data?.pages ?? [])
+        .flatMap((page) => page.data ?? []);
 
-        setData(invoice);
-        setLoading(false);
-      } catch {
-        setLoading(false);
-      }
-    }
+      return pages.find((d) => d.id === invoiceId);
+    },
+  });
 
-    if (!data && id) {
-      fetchData();
-    }
-  }, [data, id]);
-
-  useEffect(() => {
-    setData(initialData);
-  }, [initialData]);
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-2 mt-1 items-center">
-            <Skeleton className="size-5 rounded-full" />
-            <Skeleton className="h-4 w-32" />
-          </div>
-          <Skeleton className="h-6 w-20" />
-        </div>
-
-        <div className="flex justify-between items-center mt-6 mb-3 relative">
-          <div className="flex flex-col w-full space-y-1">
-            <Skeleton className="h-10 w-40" />
-            <Skeleton className="h-3 w-24" />
-          </div>
-        </div>
-
-        <Skeleton className="h-10 w-full" />
-
-        <div className="mt-8 flex flex-col space-y-1">
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-4 w-36" />
-        </div>
-
-        <div className="mt-6 flex flex-col space-y-4 border-t border-border pt-6">
-          {[...Array(4)].map((_, index) => (
-            <div
-              key={index.toString()}
-              className="flex justify-between items-center"
-            >
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-32" />
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-6 flex flex-col space-y-2 border-t border-border pt-6">
-          <Skeleton className="h-4 w-24" />
-          <div className="flex w-full gap-2">
-            <Skeleton className="h-10 flex-1" />
-            <Skeleton className="h-10 w-10" />
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <Skeleton className="h-10 w-full" />
-        </div>
-      </div>
-    );
+  if (isLoading) {
+    return <InvoiceDetailsSkeleton />;
   }
 
   if (!data) {
@@ -111,6 +56,7 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
   }
 
   const {
+    id,
     customer,
     amount,
     currency,
@@ -125,6 +71,7 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
     token,
     internal_note,
     updated_at,
+    customer_name,
   } = data;
 
   return (
@@ -142,7 +89,7 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
               />
             )}
             <AvatarFallback className="text-[9px] font-medium">
-              {customer?.name?.[0]}
+              {customer?.name?.at(0) || customer_name?.at(0)}
             </AvatarFallback>
           </Avatar>
 
@@ -164,6 +111,7 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
           <div className="h-3 space-x-2">
             {vat !== 0 && (
               <span className="text-[#606060] text-xs select-text">
+                {/* @ts-expect-error - vat_label is not typed (JSONB) */}
                 {template?.vat_label}{" "}
                 <FormatAmount amount={vat} currency={currency} />
               </span>
@@ -171,6 +119,7 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
 
             {tax !== 0 && (
               <span className="text-[#606060] text-xs select-text">
+                {/* @ts-expect-error - tax_label is not typed (JSONB) */}
                 {template?.tax_label}{" "}
                 <FormatAmount amount={tax} currency={currency} />
               </span>
@@ -246,6 +195,7 @@ export function InvoiceDetails({ id, data: initialData }: Props) {
 
             {status !== "draft" && (
               <a
+                // @ts-expect-error - template?.size is not typed (JSONB)
                 href={`/api/download/invoice?id=${id}&size=${template?.size}`}
                 download
               >
