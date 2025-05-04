@@ -119,7 +119,7 @@ export const columns: ColumnDef<Invoice>[] = [
     accessorKey: "amount",
     cell: ({ row }) => (
       <span
-        className={cn({
+        className={cn("flex items-center gap-2", {
           "line-through": row.original.status === "canceled",
         })}
       >

@@ -147,13 +147,19 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
       onclose();
 
       queryClient.invalidateQueries({
-        queryKey: [
-          trpc.transactions.get.queryKey(),
-          trpc.bankAccounts.get.queryKey(),
-          trpc.bankConnections.get.queryKey(),
-          trpc.metrics.revenue.queryKey(),
-          trpc.metrics.spending.queryKey(),
-        ],
+        queryKey: trpc.transactions.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.bankAccounts.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.bankConnections.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.metrics.queryKey(),
       });
 
       toast({

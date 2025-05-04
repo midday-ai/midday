@@ -1,8 +1,9 @@
 import { resend } from "@/utils/resend";
-import { InvoiceReminderEmail } from "@midday/email/emails/invoice-reminder";
+import InvoiceReminderEmail from "@midday/email/emails/invoice-reminder";
+import { render } from "@midday/email/render";
+import { encrypt } from "@midday/encryption";
 import { createClient } from "@midday/supabase/job";
 import { getAppUrl } from "@midday/utils/envs";
-import { render } from "@react-email/render";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { nanoid } from "nanoid";
 import { z } from "zod";
@@ -32,7 +33,7 @@ export const sendInvoiceReminder = schemaTask({
       return;
     }
 
-    const customerEmail = invoice?.customer?.email;
+    const customerEmail = "pontus@midday.ai"; // invoice?.customer?.email;
 
     if (!customerEmail) {
       logger.error("Invoice customer email not found");
@@ -47,15 +48,19 @@ export const sendInvoiceReminder = schemaTask({
       headers: {
         "X-Entity-Ref-ID": nanoid(),
       },
-      html: await render(
+      html: render(
         <InvoiceReminderEmail
           companyName={invoice.customer?.name!}
           teamName={invoice.team.name!}
           invoiceNumber={invoice.invoice_number!}
-          link={`${getAppUrl()}/i/${invoice.token}`}
+          link={`${getAppUrl()}/i/${encodeURIComponent(
+            invoice?.token,
+          )}?viewer=${encodeURIComponent(encrypt(customerEmail))}`}
         />,
       ),
     });
+
+    console.log(response);
 
     if (response.error) {
       logger.error("Invoice email failed to send", {

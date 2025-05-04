@@ -46,6 +46,7 @@ export default async function Page(props: Props) {
       status: "overdue",
     }),
     trpc.invoice.paymentStatus.queryOptions(),
+    trpc.invoice.getNextInvoiceNumber.queryOptions(),
   ]);
 
   return (

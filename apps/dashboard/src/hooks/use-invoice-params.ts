@@ -4,7 +4,6 @@ import { createLoader, parseAsString, parseAsStringEnum } from "nuqs/server";
 const invoiceParamsSchema = {
   selectedCustomerId: parseAsString,
   type: parseAsStringEnum(["edit", "create", "details", "comments"]),
-  currency: parseAsString,
   invoiceId: parseAsString,
 };
 
@@ -12,7 +11,7 @@ export function useInvoiceParams() {
   const [params, setParams] = useQueryStates(invoiceParamsSchema);
 
   return {
-    params,
+    ...params,
     setParams,
   };
 }

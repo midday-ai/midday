@@ -7,24 +7,13 @@ import { FormContext } from "../invoice/form-context";
 import { InvoiceSheetContent } from "./invoice-sheet-content";
 
 export function InvoiceCreateSheet() {
-  return null;
-  const { setParams, type, invoiceId } = useInvoiceParams();
+  const { setParams, type } = useInvoiceParams();
   const isOpen = Boolean(type === "create" || type === "edit");
 
   return (
-    <FormContext
-      template={template}
-      invoiceNumber={invoiceNumber}
-      isOpen={isOpen}
-      id={invoiceId}
-      defaultSettings={defaultSettings}
-    >
+    <FormContext>
       <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
-        <InvoiceSheetContent
-          teamId={teamId}
-          customers={customers}
-          invoiceNumber={invoiceNumber}
-        />
+        <InvoiceSheetContent />
       </Sheet>
     </FormContext>
   );

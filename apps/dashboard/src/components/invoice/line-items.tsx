@@ -1,13 +1,10 @@
 "use client";
 
-import type { InvoiceFormValues } from "@/actions/invoice/schema";
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { formatAmount } from "@/utils/format";
 import { calculateLineItemTotal } from "@midday/invoice/calculate";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Reorder, useDragControls } from "framer-motion";
-import { useAction } from "next-safe-action/hooks";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { AmountInput } from "./amount-input";
 import { Description } from "./description";
@@ -16,7 +13,8 @@ import { LabelInput } from "./label-input";
 import { QuantityInput } from "./quantity-input";
 
 export function LineItems() {
-  const { control } = useFormContext<InvoiceFormValues>();
+  return null;
+  const { control } = useFormContext();
   const currency = useWatch({ control, name: "template.currency" });
 
   const includeDecimals = useWatch({
@@ -36,7 +34,7 @@ export function LineItems() {
     name: "line_items",
   });
 
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const reorderList = (newFields: typeof fields) => {
     const firstDiffIndex = fields.findIndex(
@@ -68,9 +66,9 @@ export function LineItems() {
         <LabelInput
           name="template.description_label"
           onSave={(value) => {
-            updateInvoiceTemplate.execute({
-              description_label: value,
-            });
+            // updateInvoiceTemplate.execute({
+            //   description_label: value,
+            // });
           }}
           className="truncate"
         />
@@ -78,9 +76,9 @@ export function LineItems() {
         <LabelInput
           name="template.quantity_label"
           onSave={(value) => {
-            updateInvoiceTemplate.execute({
-              quantity_label: value,
-            });
+            // updateInvoiceTemplate.execute({
+            //   quantity_label: value,
+            // });
           }}
           className="truncate"
         />
@@ -88,9 +86,9 @@ export function LineItems() {
         <LabelInput
           name="template.price_label"
           onSave={(value) => {
-            updateInvoiceTemplate.execute({
-              price_label: value,
-            });
+            // updateInvoiceTemplate.execute({
+            //   price_label: value,
+            // });
           }}
           className="truncate"
         />
@@ -98,9 +96,9 @@ export function LineItems() {
         <LabelInput
           name="template.total_label"
           onSave={(value) => {
-            updateInvoiceTemplate.execute({
-              total_label: value,
-            });
+            // updateInvoiceTemplate.execute({
+            //   total_label: value,
+            // });
           }}
           className="text-right truncate"
         />

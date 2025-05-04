@@ -20,7 +20,11 @@ export function Invites() {
     trpc.team.declineInvite.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: [trpc.user.invites.queryKey(), trpc.team.list.queryKey()],
+          queryKey: trpc.user.invites.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.team.list.queryKey(),
         });
       },
     }),
@@ -30,7 +34,11 @@ export function Invites() {
     trpc.team.acceptInvite.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: [trpc.user.invites.queryKey(), trpc.team.list.queryKey()],
+          queryKey: trpc.user.invites.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.team.list.queryKey(),
         });
       },
     }),

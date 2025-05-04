@@ -1,7 +1,5 @@
 "use client";
 
-import type { InvoiceFormValues } from "@/actions/invoice/schema";
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { useUpload } from "@/hooks/use-upload";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -10,12 +8,12 @@ import { useAction } from "next-safe-action/hooks";
 import { useFormContext } from "react-hook-form";
 
 export function Logo({ teamId }: { teamId: string }) {
-  const { watch, setValue } = useFormContext<InvoiceFormValues>();
+  const { watch, setValue } = useFormContext();
   const logoUrl = watch("template.logo_url");
   const { uploadFile, isLoading } = useUpload();
   const { toast } = useToast();
 
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -29,9 +27,9 @@ export function Logo({ teamId }: { teamId: string }) {
 
         setValue("template.logo_url", url, { shouldValidate: true });
 
-        updateInvoiceTemplate.execute({
-          logo_url: url,
-        });
+        // updateInvoiceTemplate.execute({
+        //   logo_url: url,
+        // });
       } catch (error) {
         toast({
           title: "Something went wrong, please try again.",
@@ -62,7 +60,7 @@ export function Logo({ teamId }: { teamId: string }) {
                 setValue("template.logo_url", undefined, {
                   shouldValidate: true,
                 });
-                updateInvoiceTemplate.execute({ logo_url: null });
+                // updateInvoiceTemplate.execute({ logo_url: null });
               }}
             >
               <Icons.Clear className="size-4" />

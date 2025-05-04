@@ -1,7 +1,4 @@
-import type { InvoiceFormValues } from "@/actions/invoice/schema";
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { calculateTotal } from "@midday/invoice/calculate";
-import { useAction } from "next-safe-action/hooks";
 import { useCallback, useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { AnimatedNumber } from "../animated-number";
@@ -12,9 +9,9 @@ import { TaxInput } from "./tax-input";
 import { VATInput } from "./vat-input";
 
 export function Summary() {
-  const { control, setValue } = useFormContext<InvoiceFormValues>();
+  const { control, setValue } = useFormContext();
 
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const includeDecimals = useWatch({
     control,
@@ -116,11 +113,11 @@ export function Summary() {
         <LabelInput
           className="flex-shrink-0 min-w-6"
           name="template.subtotal_label"
-          onSave={(value) => {
-            updateInvoiceTemplate.execute({
-              subtotal_label: value,
-            });
-          }}
+          // onSave={(value) => {
+          //   updateInvoiceTemplate.execute({
+          //     subtotal_label: value,
+          //   });
+          // }}
         />
         <span className="text-right font-mono text-[11px] text-[#878787]">
           <FormatAmount
@@ -136,11 +133,11 @@ export function Summary() {
         <div className="flex justify-between items-center py-1">
           <LabelInput
             name="template.discount_label"
-            onSave={(value) => {
-              updateInvoiceTemplate.execute({
-                discount_label: value,
-              });
-            }}
+            // onSave={(value) => {
+            //   updateInvoiceTemplate.execute({
+            //     discount_label: value,
+            //   });
+            // }}
           />
 
           <AmountInput
@@ -158,11 +155,11 @@ export function Summary() {
             <LabelInput
               className="flex-shrink-0 min-w-5"
               name="template.vat_label"
-              onSave={(value) => {
-                updateInvoiceTemplate.execute({
-                  vat_label: value,
-                });
-              }}
+              // onSave={(value) => {
+              //   updateInvoiceTemplate.execute({
+              //     vat_label: value,
+              //   });
+              // }}
             />
 
             <VATInput />
@@ -185,11 +182,11 @@ export function Summary() {
             <LabelInput
               className="flex-shrink-0 min-w-5"
               name="template.tax_label"
-              onSave={(value) => {
-                updateInvoiceTemplate.execute({
-                  tax_label: value,
-                });
-              }}
+              // onSave={(value) => {
+              //   updateInvoiceTemplate.execute({
+              //     tax_label: value,
+              //   });
+              // }}
             />
 
             <TaxInput />
@@ -208,11 +205,11 @@ export function Summary() {
       <div className="flex justify-between items-center py-4 mt-2 border-t border-border">
         <LabelInput
           name="template.total_summary_label"
-          onSave={(value) => {
-            updateInvoiceTemplate.execute({
-              total_summary_label: value,
-            });
-          }}
+          // onSave={(value) => {
+          //   updateInvoiceTemplate.execute({
+          //     total_summary_label: value,
+          //   });
+          // }}
         />
         <span className="text-right font-mono font-medium text-[21px]">
           <AnimatedNumber

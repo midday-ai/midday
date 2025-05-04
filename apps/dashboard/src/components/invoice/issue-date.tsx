@@ -1,16 +1,13 @@
-import type { InvoiceFormValues } from "@/actions/invoice/schema";
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { TZDate } from "@date-fns/tz";
 import { Calendar } from "@midday/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { format } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
 export function IssueDate() {
-  const { setValue, watch } = useFormContext<InvoiceFormValues>();
+  const { setValue, watch } = useFormContext();
   const issueDate = watch("issue_date");
   const dateFormat = watch("template.date_format");
   const [isOpen, setIsOpen] = useState(false);
@@ -22,18 +19,18 @@ export function IssueDate() {
     }
   };
 
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   return (
     <div className="flex space-x-1 items-center">
       <div className="flex items-center">
         <LabelInput
           name="template.issue_date_label"
-          onSave={(value) => {
-            updateInvoiceTemplate.execute({
-              issue_date_label: value,
-            });
-          }}
+          // onSave={(value) => {
+          //   updateInvoiceTemplate.execute({
+          //     issue_date_label: value,
+          //   });
+          // }}
         />
         <span className="text-[11px] text-[#878787] font-mono">:</span>
       </div>

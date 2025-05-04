@@ -1,7 +1,7 @@
 import { resend } from "@/utils/resend";
 import { InviteEmail } from "@midday/email/emails/invite";
 import { getI18n } from "@midday/email/locales";
-import { render } from "@react-email/render";
+import { render } from "@midday/email/render";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { nanoid } from "nanoid";
 import { z } from "zod";
@@ -40,7 +40,7 @@ export const inviteTeamMembers = schemaTask({
       headers: {
         "X-Entity-Ref-ID": nanoid(),
       },
-      html: await render(
+      html: render(
         InviteEmail({
           invitedByEmail: invite.invitedByEmail,
           invitedByName: invite.invitedByName,

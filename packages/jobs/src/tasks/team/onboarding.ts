@@ -4,8 +4,8 @@ import { GetStartedEmail } from "@midday/email/emails/get-started";
 import { TrialEndedEmail } from "@midday/email/emails/trial-ended";
 import { TrialExpiringEmail } from "@midday/email/emails/trial-expiring";
 import { WelcomeEmail } from "@midday/email/emails/welcome";
+import { render } from "@midday/email/render";
 import { createClient } from "@midday/supabase/job";
-import { render } from "@react-email/render";
 import { schemaTask, wait } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 
@@ -47,7 +47,7 @@ export const onboardTeam = schemaTask({
         to: user.email,
         subject: "Welcome to Midday",
         from: "Pontus from Midday <pontus@midday.ai>",
-        html: await render(
+        html: render(
           WelcomeEmail({
             fullName: user.full_name,
           }),

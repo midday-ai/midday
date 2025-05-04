@@ -2,7 +2,7 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
-import { InvoiceDetailsSheet } from "@/components/sheets/invoice-details-sheet";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getDueDateStatus } from "@/utils/format";
 import { formatDate } from "@/utils/format";
@@ -13,6 +13,7 @@ type Props = {
 };
 
 export function InvoiceRow({ invoice }: Props) {
+  const { setParams } = useInvoiceParams();
   const showDate = invoice.status === "unpaid" || invoice.status === "overdue";
 
   return (
@@ -20,7 +21,7 @@ export function InvoiceRow({ invoice }: Props) {
       <li
         key={invoice.id}
         className="h-[57px] flex items-center w-full"
-        // onClick={() => setOpen(true)}
+        onClick={() => setParams({ invoiceId: invoice.id })}
       >
         <div className="flex items-center w-full">
           <div className="flex flex-col space-y-1 w-[90px]">

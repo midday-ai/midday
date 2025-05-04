@@ -1,5 +1,4 @@
 import { parseInputValue } from "@/components/invoice/utils";
-import { UTCDate } from "@date-fns/utc";
 import { generateToken } from "@midday/invoice/token";
 import type { sendInvoiceEmail } from "@midday/jobs/tasks/invoice/email/send-email";
 import type { sendInvoiceReminder } from "@midday/jobs/tasks/invoice/email/send-reminder";
@@ -16,7 +15,7 @@ import {
   getInvoiceSummaryQuery,
   getInvoiceTemplatesQuery,
   getInvoicesQuery,
-  getLastInvoiceNumberQuery,
+  getNextInvoiceNumberQuery,
   getPaymentStatusQuery,
 } from "@midday/supabase/queries";
 import { tasks } from "@trigger.dev/sdk/v3";
@@ -67,9 +66,9 @@ export const invoiceRouter = createTRPCRouter({
     },
   ),
 
-  invoiceNumber: protectedProcedure.query(
+  getNextInvoiceNumber: protectedProcedure.query(
     async ({ ctx: { supabase, teamId } }) => {
-      const { data } = await getLastInvoiceNumberQuery(supabase, teamId!);
+      const { data } = await getNextInvoiceNumberQuery(supabase, teamId!);
 
       return data;
     },
@@ -293,7 +292,7 @@ export const invoiceRouter = createTRPCRouter({
     }),
 
   remind: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.string().uuid(), date: z.string() }))
     .mutation(async ({ input, ctx: { supabase } }) => {
       await tasks.trigger<typeof sendInvoiceReminder>("send-invoice-reminder", {
         invoiceId: input.id,
@@ -301,7 +300,7 @@ export const invoiceRouter = createTRPCRouter({
 
       const { data } = await updateInvoice(supabase, {
         id: input.id,
-        reminder_sent_at: new UTCDate().toISOString(),
+        reminder_sent_at: input.date,
       });
 
       return data;

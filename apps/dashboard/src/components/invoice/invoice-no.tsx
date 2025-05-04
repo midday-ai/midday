@@ -1,4 +1,3 @@
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { createClient } from "@midday/supabase/client";
 import { searchInvoiceNumberQuery } from "@midday/supabase/queries";
@@ -9,7 +8,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { Input } from "./input";
@@ -28,7 +26,7 @@ export function InvoiceNo({ teamId }: Props) {
 
   const { type } = useInvoiceParams();
 
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   useEffect(() => {
     async function searchInvoiceNumber() {
@@ -64,9 +62,9 @@ export function InvoiceNo({ teamId }: Props) {
         <LabelInput
           name="template.invoice_no_label"
           onSave={(value) => {
-            updateInvoiceTemplate.execute({
-              invoice_no_label: value,
-            });
+            // updateInvoiceTemplate.execute({
+            //   invoice_no_label: value,
+            // });
           }}
           className="truncate"
         />

@@ -1,8 +1,9 @@
 import { resend } from "@/utils/resend";
 import InvoiceEmail from "@midday/email/emails/invoice";
+import { render } from "@midday/email/render";
+import { encrypt } from "@midday/encryption";
 import { createClient } from "@midday/supabase/job";
 import { getAppUrl } from "@midday/utils/envs";
-import { render } from "@react-email/render";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { nanoid } from "nanoid";
 import { z } from "zod";
@@ -47,11 +48,13 @@ export const sendInvoiceEmail = schemaTask({
       headers: {
         "X-Entity-Ref-ID": nanoid(),
       },
-      html: await render(
+      html: render(
         <InvoiceEmail
           customerName={invoice?.customer?.name!}
           teamName={invoice?.team.name!}
-          link={`${getAppUrl()}/i/${invoice?.token}`}
+          link={`${getAppUrl()}/i/${encodeURIComponent(
+            invoice?.token,
+          )}?viewer=${encodeURIComponent(encrypt(customerEmail))}`}
         />,
       ),
     });

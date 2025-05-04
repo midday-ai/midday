@@ -1,6 +1,5 @@
 "use client";
 
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import {
   DropdownMenu,
@@ -12,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { useAction } from "next-safe-action/hooks";
 import { useFormContext } from "react-hook-form";
 import { SelectCurrency } from "../select-currency";
 
@@ -95,7 +93,7 @@ const menuItems = [
 
 export function SettingsMenu() {
   const { watch, setValue } = useFormContext();
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   return (
     <DropdownMenu>
@@ -125,9 +123,9 @@ export function SettingsMenu() {
                       setValue(watchKey, value, {
                         shouldValidate: true,
                       });
-                      updateInvoiceTemplate.execute({
-                        [item.key]: value,
-                      });
+                      // updateInvoiceTemplate.execute({
+                      //   [item.key]: value,
+                      // });
                     }}
                   />
                 </DropdownMenuSubContent>
@@ -153,9 +151,9 @@ export function SettingsMenu() {
                           shouldValidate: true,
                         });
 
-                        updateInvoiceTemplate.execute({
-                          [item.key]: option.value,
-                        });
+                        // updateInvoiceTemplate.execute({
+                        //   [item.key]: option.value,
+                        // });
                       }
                     }}
                     onSelect={(event) => event.preventDefault()}

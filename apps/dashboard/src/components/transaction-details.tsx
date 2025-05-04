@@ -155,10 +155,11 @@ export function TransactionDetails() {
       },
       onSettled: () => {
         queryClient.invalidateQueries({
-          queryKey: [
-            trpc.transactions.getById.queryKey({ id: transactionId! }),
-            trpc.transactions.get.infiniteQueryKey(),
-          ],
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
       },
     }),
@@ -167,11 +168,12 @@ export function TransactionDetails() {
   const createTransactionTagMutation = useMutation(
     trpc.transactionTags.create.mutationOptions({
       onSuccess: () => {
+        qqueryClient.invalidateQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
+
         queryClient.invalidateQueries({
-          queryKey: [
-            trpc.transactions.getById.queryKey({ id: transactionId! }),
-            trpc.transactions.get.infiniteQueryKey(),
-          ],
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
       },
     }),
@@ -181,10 +183,11 @@ export function TransactionDetails() {
     trpc.transactionTags.delete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: [
-            trpc.transactions.getById.queryKey({ id: transactionId! }),
-            trpc.transactions.get.infiniteQueryKey(),
-          ],
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
       },
     }),
@@ -194,10 +197,11 @@ export function TransactionDetails() {
     trpc.transactions.updateSimilarTransactionsCategory.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: [
-            trpc.transactions.get.infiniteQueryKey(),
-            trpc.transactions.getById.queryKey({ id: transactionId! }),
-          ],
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
       },
     }),

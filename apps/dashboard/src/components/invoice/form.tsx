@@ -2,7 +2,6 @@ import { getUrl } from "@/utils/environment";
 import { formatRelativeTime } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
-import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useDebounceCallback } from "usehooks-ts";
@@ -19,19 +18,14 @@ import { SubmitButton } from "./submit-button";
 import { Summary } from "./summary";
 import { transformFormValuesToDraft } from "./utils";
 
-type Props = {
-  teamId: string;
-  customers: Customer[];
-  updatedAt?: Date;
-  // onSubmit: (values: InvoiceFormValues) => void;
-  isSubmitting: boolean;
-};
-
-export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
+export function Form() {
   const [lastUpdated, setLastUpdated] = useState<Date | undefined>();
   const [lastEditedText, setLastEditedText] = useState("");
+  const teamId = "123";
+  const onSubmit = () => {};
+  const isSubmitting = false;
 
-  const form = useFormContext<InvoiceFormValues>();
+  const form = useFormContext();
 
   const token = form.watch("token");
 
@@ -130,7 +124,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
               <FromDetails />
             </div>
             <div>
-              <CustomerDetails customers={customers} />
+              <CustomerDetails />
             </div>
           </div>
 

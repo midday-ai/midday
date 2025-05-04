@@ -1,6 +1,7 @@
 import { sendSlackTransactionNotifications } from "@midday/app-store/slack-notifications";
 import TransactionsEmail from "@midday/email/emails/transactions";
 import { getI18n } from "@midday/email/locales";
+import { render } from "@midday/email/render";
 import { getInboxEmail } from "@midday/inbox";
 import {
   NotificationTypes,
@@ -8,7 +9,6 @@ import {
   triggerBulk,
 } from "@midday/notification";
 import { createClient } from "@midday/supabase/job";
-import { render } from "@react-email/render";
 import { logger } from "@trigger.dev/sdk/v3";
 
 interface User {
@@ -88,7 +88,7 @@ export async function handleTransactionEmails(
   const emailPromises = usersData.map(async ({ user, team_id, team }) => {
     const { t } = getI18n({ locale: user.locale ?? "en" });
 
-    const html = await render(
+    const html = render(
       <TransactionsEmail
         fullName={user.full_name}
         transactions={transactions}

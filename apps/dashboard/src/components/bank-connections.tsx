@@ -208,11 +208,15 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
       setSyncing(false);
 
       queryClient.invalidateQueries({
-        queryKey: [
-          trpc.bankConnections.get.queryKey(),
-          trpc.bankAccounts.get.queryKey(),
-          trpc.team.current.queryKey(),
-        ],
+        queryKey: trpc.bankConnections.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.bankAccounts.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.team.current.queryKey(),
       });
     }
   }, [status]);
@@ -223,10 +227,11 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
       setRunId(undefined);
 
       queryClient.invalidateQueries({
-        queryKey: [
-          trpc.bankConnections.get.queryKey(),
-          trpc.bankAccounts.get.queryKey(),
-        ],
+        queryKey: trpc.bankConnections.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.bankAccounts.get.queryKey(),
       });
 
       toast({

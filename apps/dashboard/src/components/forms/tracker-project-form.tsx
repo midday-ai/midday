@@ -74,10 +74,11 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
         setLatestProjectId(result?.id ?? null);
 
         queryClient.invalidateQueries({
-          queryKey: [
-            trpc.trackerProjects.get.infiniteQueryKey(),
-            trpc.trackerProjects.getById.queryKey(),
-          ],
+          queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.trackerProjects.getById.queryKey(),
         });
 
         // Close the tracker project form

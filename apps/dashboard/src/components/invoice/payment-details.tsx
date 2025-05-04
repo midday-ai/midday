@@ -1,8 +1,6 @@
 "use client";
 
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Editor } from "@/components/invoice/editor";
-import { useAction } from "next-safe-action/hooks";
 import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
@@ -10,17 +8,17 @@ export function PaymentDetails() {
   const { control, watch } = useFormContext();
   const id = watch("id");
 
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   return (
     <div>
       <LabelInput
         name="template.payment_label"
-        onSave={(value) => {
-          updateInvoiceTemplate.execute({
-            payment_label: value,
-          });
-        }}
+        // onSave={(value) => {
+        //   updateInvoiceTemplate.execute({
+        //     payment_label: value,
+        //   });
+        // }}
         className="mb-2 block"
       />
 
@@ -33,11 +31,11 @@ export function PaymentDetails() {
             key={id}
             initialContent={field.value}
             onChange={field.onChange}
-            onBlur={(content) => {
-              updateInvoiceTemplate.execute({
-                payment_details: content ? JSON.stringify(content) : null,
-              });
-            }}
+            // onBlur={(content) => {
+            //   updateInvoiceTemplate.execute({
+            //     payment_details: content ? JSON.stringify(content) : null,
+            //   });
+            // }}
             className="min-h-[78px]"
           />
         )}

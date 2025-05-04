@@ -10,7 +10,7 @@ import { TrialEndedModal } from "../modals/trial-ended-modal";
 import { CustomerCreateSheet } from "./customer-create-sheet";
 import { CustomerEditSheet } from "./customer-edit-sheet";
 import { DocumentSheet } from "./document-sheet";
-// import { InvoiceCreateSheet } from "./invoice-create-sheet";
+import { InvoiceCreateSheet } from "./invoice-create-sheet";
 import { InvoiceDetailsSheet } from "./invoice-details-sheet";
 import { TrackerCreateSheet } from "./tracker-create-sheet";
 import { TrackerScheduleSheet } from "./tracker-schedule-sheet";
@@ -37,15 +37,15 @@ export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
       <TransactionSheet />
 
       <AssistantModal />
-      <ConnectTransactionsModal countryCode={countryCode} />
       <SelectBankAccountsModal />
-      <ImportModal currencies={uniqueCurrencies} defaultCurrency={currency} />
       <TrialEndedModal />
       <DocumentSheet />
 
+      <ImportModal currencies={uniqueCurrencies} defaultCurrency={currency} />
+      <ConnectTransactionsModal countryCode={countryCode} />
+
       <InvoiceDetailsSheet />
-      {/* <InvoiceCreateSheet />
-       */}
+      <InvoiceCreateSheet />
     </>
   );
 }

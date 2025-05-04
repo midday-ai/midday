@@ -50,7 +50,7 @@ export const sendSupportAction = authActionClient
         fullName: user.user_metadata.full_name,
         externalId: user.id,
         email: {
-          email: user.email,
+          email: user.email!,
           isVerified: true,
         },
       },

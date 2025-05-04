@@ -7,7 +7,6 @@ import { SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { InvoiceSuccessful } from "../invoice-successful";
-import type { Customer } from "../invoice/customer-details";
 import { Form } from "../invoice/form";
 import { SettingsMenu } from "../invoice/settings-menu";
 import { OpenURL } from "../open-url";
@@ -41,73 +40,52 @@ function InvoiceSheetHeader({
   return null;
 }
 
-type Props = {
-  teamId: string;
-  customers: Customer[];
-  invoiceNumber: string | null;
-};
-
-export function InvoiceSheetContent({
-  teamId,
-  customers,
-  invoiceNumber,
-}: Props) {
+export function InvoiceSheetContent() {
   const { setParams, type } = useInvoiceParams();
-  const [invoice, setInvoice] = useState<Invoice | null>(null);
-
-  // const createInvoice = useAction(createInvoiceAction, {
-  //   onSuccess: ({ data }) => {
-  //     setInvoice(data);
-  //   },
-  // });
 
   const { watch } = useFormContext();
   const templateSize = watch("template.size");
-  const deliveryType = watch("template.delivery_type");
+  // const deliveryType = watch("template.delivery_type");
 
   const size = templateSize === "a4" ? 650 : 740;
   const isOpen = Boolean(type === "create" || type === "edit");
 
-  useEffect(() => {
-    setInvoice(null);
-  }, [isOpen]);
+  // if (invoice && invoice.status !== "draft") {
+  //   return (
+  //     <SheetContent className="bg-white dark:bg-[#0C0C0C] transition-[max-width] duration-300 ease-in-out">
+  //       <InvoiceSheetHeader
+  //         type={
+  //           invoice?.template.delivery_type === "create_and_send"
+  //             ? "created_and_sent"
+  //             : "created"
+  //         }
+  //       />
 
-  if (invoice && invoice.status !== "draft") {
-    return (
-      <SheetContent className="bg-white dark:bg-[#0C0C0C] transition-[max-width] duration-300 ease-in-out">
-        <InvoiceSheetHeader
-          type={
-            invoice?.template.delivery_type === "create_and_send"
-              ? "created_and_sent"
-              : "created"
-          }
-        />
+  //       <div className="flex flex-col justify-center h-[calc(100vh-260px)]">
+  //         <InvoiceSuccessful invoice={invoice} />
+  //       </div>
 
-        <div className="flex flex-col justify-center h-[calc(100vh-260px)]">
-          <InvoiceSuccessful invoice={invoice} />
-        </div>
+  //       <div className="flex mt-auto absolute bottom-6 justify-end gap-4 right-6 left-6">
+  //         <OpenURL href={`${getUrl()}/i/${invoice.token}`}>
+  //           <Button variant="secondary">View invoice</Button>
+  //         </OpenURL>
 
-        <div className="flex mt-auto absolute bottom-6 justify-end gap-4 right-6 left-6">
-          <OpenURL href={`${getUrl()}/i/${invoice.token}`}>
-            <Button variant="secondary">View invoice</Button>
-          </OpenURL>
+  //         <Button
+  //           onClick={() => {
+  //             setInvoice(null);
+  //             setParams(null);
 
-          <Button
-            onClick={() => {
-              setInvoice(null);
-              setParams(null);
-
-              setTimeout(() => {
-                setParams({ type: "create" });
-              }, 600);
-            }}
-          >
-            Create another
-          </Button>
-        </div>
-      </SheetContent>
-    );
-  }
+  //             setTimeout(() => {
+  //               setParams({ type: "create" });
+  //             }, 600);
+  //           }}
+  //         >
+  //           Create another
+  //         </Button>
+  //       </div>
+  //     </SheetContent>
+  //   );
+  // }
 
   return (
     <SheetContent
@@ -120,13 +98,7 @@ export function InvoiceSheetContent({
         </div>
       </SheetHeader>
 
-      <Form
-        teamId={teamId}
-        customers={customers}
-        // isSubmitting={createInvoice.isPending}
-        // onSubmit={({ id }) => createInvoice.execute({ id, deliveryType })}
-        invoiceNumber={invoiceNumber}
-      />
+      <Form />
     </SheetContent>
   );
 }

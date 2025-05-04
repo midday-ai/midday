@@ -41,10 +41,11 @@ export function TransactionAttachments({ id, data }: Props) {
       onSuccess: () => {
         // invalidate the transaction list query
         queryClient.invalidateQueries({
-          queryKey: [
-            trpc.transactions.get.infiniteQueryKey(),
-            trpc.transactions.getById.queryKey({ id }),
-          ],
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id }),
         });
       },
     }),
@@ -55,10 +56,11 @@ export function TransactionAttachments({ id, data }: Props) {
       onSuccess: () => {
         // invalidate the transaction details query
         queryClient.invalidateQueries({
-          queryKey: [
-            trpc.transactions.getById.queryKey({ id }),
-            trpc.transactions.get.infiniteQueryKey(),
-          ],
+          queryKey: trpc.transactions.getById.queryKey({ id }),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
       },
     }),

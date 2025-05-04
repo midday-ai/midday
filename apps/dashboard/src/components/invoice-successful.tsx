@@ -117,7 +117,7 @@ export function InvoiceSuccessful({ invoice }: Props) {
                 className="size-[40px] hover:bg-secondary shrink-0"
               >
                 <div>
-                  <Icons.Download className="size-4" />
+                  <Icons.ArrowCoolDown className="size-4" />
                 </div>
               </Button>
             </a>

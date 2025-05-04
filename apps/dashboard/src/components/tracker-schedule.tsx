@@ -116,10 +116,11 @@ export function TrackerSchedule() {
     trpc.trackerEntries.delete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: [
-            trpc.trackerEntries.byRange.queryKey(),
-            trpc.trackerProjects.get.infiniteQueryKey(),
-          ],
+          queryKey: trpc.trackerEntries.byRange.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
         });
 
         refetch();
@@ -138,10 +139,11 @@ export function TrackerSchedule() {
           );
 
           queryClient.invalidateQueries({
-            queryKey: [
-              trpc.trackerEntries.byRange.queryKey(),
-              trpc.trackerProjects.get.infiniteQueryKey(),
-            ],
+            queryKey: trpc.trackerEntries.byRange.queryKey(),
+          });
+
+          queryClient.invalidateQueries({
+            queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
           });
 
           refetch();

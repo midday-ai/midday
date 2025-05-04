@@ -16,6 +16,7 @@ import { useOnClickOutside } from "usehooks-ts";
 export function TeamDropdown() {
   const ref = useRef<HTMLDivElement>(null);
   const { data: user } = useUserQuery();
+  const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   const [selectedId, setSelectedId] = useState<string | undefined>(
@@ -32,7 +33,6 @@ export function TeamDropdown() {
     },
   });
 
-  const trpc = useTRPC();
   const { data: teams } = useQuery(trpc.team.list.queryOptions());
 
   useEffect(() => {

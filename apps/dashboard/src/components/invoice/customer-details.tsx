@@ -1,11 +1,8 @@
 "use client";
 
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Editor } from "@/components/invoice/editor";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import type { JSONContent } from "@tiptap/react";
-import { useAction } from "next-safe-action/hooks";
-import { useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { SelectCustomer } from "../select-customer";
 import { LabelInput } from "./label-input";
@@ -29,20 +26,16 @@ export interface Customer {
   tags?: { tag: { id: string; name: string } }[];
 }
 
-interface CustomerDetailsProps {
-  customers: Customer[];
-}
-
-export function CustomerDetails({ customers }: CustomerDetailsProps) {
+export function CustomerDetails() {
   const { control, setValue, watch } = useFormContext();
   const { setParams, selectedCustomerId } = useInvoiceParams();
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const content = watch("customer_details");
   const id = watch("id");
 
   const handleLabelSave = (value: string) => {
-    updateInvoiceTemplate.execute({ customer_label: value });
+    // updateInvoiceTemplate.execute({ customer_label: value });
   };
 
   const handleOnChange = (content?: JSONContent | null) => {
@@ -60,23 +53,25 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
     }
   };
 
-  useEffect(() => {
-    const customer = customers.find((c) => c.id === selectedCustomerId);
+  // Get customer by id
 
-    if (customer) {
-      const customerContent = transformCustomerToContent(customer);
+  // useEffect(() => {
+  //   const customer = customers.find((c) => c.id === selectedCustomerId);
 
-      // Remove the selected customer id from the url so we don't introduce a race condition
-      setParams({ selectedCustomerId: null });
+  //   if (customer) {
+  //     const customerContent = transformCustomerToContent(customer);
 
-      setValue("customer_name", customer.name, { shouldValidate: true });
-      setValue("customer_id", customer.id, { shouldValidate: true });
-      setValue("customer_details", customerContent, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    }
-  }, [selectedCustomerId, customers]);
+  //     // Remove the selected customer id from the url so we don't introduce a race condition
+  //     setParams({ selectedCustomerId: null });
+
+  //     setValue("customer_name", customer.name, { shouldValidate: true });
+  //     setValue("customer_id", customer.id, { shouldValidate: true });
+  //     setValue("customer_details", customerContent, {
+  //       shouldValidate: true,
+  //       shouldDirty: true,
+  //     });
+  //   }
+  // }, [selectedCustomerId,  ]);
 
   return (
     <div>
@@ -100,7 +95,7 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
           )}
         />
       ) : (
-        <SelectCustomer data={customers} />
+        <SelectCustomer />
       )}
     </div>
   );

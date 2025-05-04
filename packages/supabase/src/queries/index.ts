@@ -1236,7 +1236,7 @@ export async function getInvoiceTemplatesQuery(
 export async function getInvoiceByIdQuery(supabase: Client, id: string) {
   return supabase
     .from("invoices")
-    .select("*, customer:customer_id(name, website), team:team_id(name)")
+    .select("*, customer:customer_id(name, website, email), team:team_id(name)")
     .eq("id", id)
     .single();
 }
@@ -1267,17 +1267,13 @@ export async function searchInvoiceNumberQuery(
     .ilike("invoice_number", `%${params.query}`);
 }
 
-export async function getLastInvoiceNumberQuery(
+export async function getNextInvoiceNumberQuery(
   supabase: Client,
   teamId: string,
 ) {
-  const { data } = await supabase
-    .rpc("get_next_invoice_number", {
-      team_id: teamId,
-    })
-    .single();
-
-  return { data };
+  return supabase.rpc("get_next_invoice_number", {
+    team_id: teamId,
+  });
 }
 
 export async function getTagsQuery(supabase: Client, teamId: string) {

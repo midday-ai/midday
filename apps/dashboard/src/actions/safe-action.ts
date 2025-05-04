@@ -42,7 +42,7 @@ export const actionClientWithMeta = createSafeActionClient({
 
 export const authActionClient = actionClientWithMeta
   .use(async ({ next, clientInput, metadata }) => {
-    const result = await next({ ctx: null });
+    const result = await next({ ctx: {} });
 
     if (process.env.NODE_ENV === "development") {
       logger("Input ->", clientInput);

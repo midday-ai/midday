@@ -1,5 +1,3 @@
-import type { InvoiceFormValues } from "@/actions/invoice/schema";
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { TZDate } from "@date-fns/tz";
 import { Calendar } from "@midday/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
@@ -10,13 +8,13 @@ import { useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
 export function DueDate() {
-  const { setValue, watch } = useFormContext<InvoiceFormValues>();
+  const { setValue, watch } = useFormContext();
   const dueDate = watch("due_date");
   const dateFormat = watch("template.date_format");
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
@@ -31,9 +29,9 @@ export function DueDate() {
         <LabelInput
           name="template.due_date_label"
           onSave={(value) => {
-            updateInvoiceTemplate.execute({
-              due_date_label: value,
-            });
+            // updateInvoiceTemplate.execute({
+            //   due_date_label: value,
+            // });
           }}
         />
         <span className="text-[11px] text-[#878787] font-mono">:</span>

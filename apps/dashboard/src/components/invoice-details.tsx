@@ -25,9 +25,7 @@ import { OpenURL } from "./open-url";
 export function InvoiceDetails() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const {
-    params: { invoiceId },
-  } = useInvoiceParams();
+  const { invoiceId } = useInvoiceParams();
 
   const isOpen = Boolean(invoiceId);
 
@@ -109,7 +107,7 @@ export function InvoiceDetails() {
           </span>
 
           <div className="h-3 space-x-2">
-            {vat !== 0 && (
+            {vat !== 0 && vat != null && (
               <span className="text-[#606060] text-xs select-text">
                 {/* @ts-expect-error - vat_label is not typed (JSONB) */}
                 {template?.vat_label}{" "}
@@ -117,7 +115,7 @@ export function InvoiceDetails() {
               </span>
             )}
 
-            {tax !== 0 && (
+            {tax !== 0 && tax != null && (
               <span className="text-[#606060] text-xs select-text">
                 {/* @ts-expect-error - tax_label is not typed (JSONB) */}
                 {template?.tax_label}{" "}
@@ -184,9 +182,9 @@ export function InvoiceDetails() {
           <span className="text-sm text-[#606060]">Invoice link</span>
           <div className="flex w-full gap-2">
             <div className="flex-1 min-w-0 relative">
-              <CopyInput value={`${getUrl()}/i/${token}`} />
+              <CopyInput value={`${getUrl()}/i/${token}`} className="pr-14" />
 
-              <div className="absolute right-9 top-[11px]">
+              <div className="absolute right-10 top-[11px] border-r border-border pr-2">
                 <OpenURL href={`${getUrl()}/i/${token}`}>
                   <Icons.OpenInNew />
                 </OpenURL>
@@ -201,10 +199,10 @@ export function InvoiceDetails() {
               >
                 <Button
                   variant="secondary"
-                  className="size-[40px] hover:bg-secondary shrink-0"
+                  className="size-[38px] hover:bg-secondary shrink-0"
                 >
                   <div>
-                    <Icons.Download className="size-4" />
+                    <Icons.ArrowCoolDown className="size-4" />
                   </div>
                 </Button>
               </a>

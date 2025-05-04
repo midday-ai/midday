@@ -1,13 +1,13 @@
 import { InvoiceOverdueEmail } from "@midday/email/emails/invoice-overdue";
 import { InvoicePaidEmail } from "@midday/email/emails/invoice-paid";
 import { getI18n } from "@midday/email/locales";
+import { render } from "@midday/email/render";
 import {
   NotificationTypes,
   TriggerEvents,
   triggerBulk,
 } from "@midday/notification";
 import { getAppUrl } from "@midday/utils/envs";
-import { render } from "@react-email/render";
 import { logger } from "@trigger.dev/sdk/v3";
 
 export async function handlePaidInvoiceNotifications({
@@ -63,7 +63,7 @@ export async function handlePaidInvoiceNotifications({
         return null;
       }
 
-      const html = await render(
+      const html = render(
         <InvoicePaidEmail invoiceNumber={invoiceNumber} link={link} />,
       );
 

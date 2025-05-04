@@ -102,10 +102,11 @@ export function CustomerForm({ data }: Props) {
     trpc.customers.upsert.mutationOptions({
       onSuccess: (data) => {
         queryClient.invalidateQueries({
-          queryKey: [
-            trpc.customers.get.infiniteQueryKey(),
-            trpc.customers.getById.queryKey(),
-          ],
+          queryKey: trpc.customers.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.customers.getById.queryKey(),
         });
 
         // Close the customer form
