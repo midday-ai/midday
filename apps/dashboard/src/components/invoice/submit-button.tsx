@@ -1,5 +1,6 @@
 "use client";
 
+import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -9,7 +10,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton as BaseSubmitButton } from "@midday/ui/submit-button";
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
 
 type Props = {
@@ -25,14 +26,17 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
 
   const invoiceNumberValid = !formState.errors.invoice_number;
 
-  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  const trpc = useTRPC();
+  const updateTemplateMutation = useMutation(
+    trpc.invoiceTemplate.upsert.mutationOptions(),
+  );
 
   const handleOptionChange = (value: string) => {
     const deliveryType = value as "create" | "create_and_send";
 
-    // updateInvoiceTemplate.execute({
-    //   delivery_type: deliveryType,
-    // });
+    updateTemplateMutation.mutate({
+      delivery_type: deliveryType,
+    });
 
     setValue("template.delivery_type", deliveryType, {
       shouldValidate: true,

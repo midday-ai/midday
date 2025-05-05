@@ -32,8 +32,8 @@
     "@polar-sh/sdk": "^0.32.13",
     "@react-google-maps/api": "^2.20.6",
     "@react-pdf/renderer": "^4.3.0",
-    "@tanstack/react-query": "^5.75.1",
-    "@tanstack/react-query-devtools": "^5.75.1",
+    "@tanstack/react-query": "^5.75.2",
+    "@tanstack/react-query-devtools": "^5.75.2",
     "@tanstack/react-table": "^8.21.3",
     "@team-plain/typescript-sdk": "^5.9.0",
     "@todesktop/client-active-win": "^0.15.0",
@@ -64,7 +64,7 @@
     "react-colorful": "^5.6.1",
     "react-dom": "19.1.0",
     "react-dropzone": "^14.3.8",
-    "react-hook-form": "^7.56.1",
+    "react-hook-form": "^7.56.2",
     "react-hotkeys-hook": "^5.0.1",
     "react-intersection-observer": "^9.16.0",
     "react-markdown": "^10.1.0",
@@ -78,7 +78,7 @@
     "tus-js-client": "4.3.1",
     "use-places-autocomplete": "^4.0.1",
     "usehooks-ts": "^3.1.1",
-    "zod": "^3.24.3",
+    "zod": "^3.24.4",
     "zustand": "^5.0.4"
   },
   "devDependencies": {

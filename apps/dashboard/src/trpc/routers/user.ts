@@ -23,7 +23,7 @@ export const userRouter = createTRPCRouter({
         timezone: z.string().optional(),
         time_format: z.number().optional(),
         date_format: z
-          .enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "DD.MM.YYYY"])
+          .enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"])
           .optional(),
       }),
     )

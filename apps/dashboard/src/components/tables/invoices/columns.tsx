@@ -143,11 +143,6 @@ export const columns: ColumnDef<Invoice>[] = [
     },
   },
   {
-    header: "Recurring",
-    accessorKey: "recurring",
-    cell: ({ row }) => row.getValue("recurring") ?? "One time",
-  },
-  {
     id: "actions",
     header: "Actions",
     cell: ({ row }) => {

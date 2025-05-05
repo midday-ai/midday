@@ -464,7 +464,6 @@ export type Database = {
           created_at: string | null;
           date: string | null;
           fts: unknown | null;
-          fts_document: unknown | null;
           fts_english: unknown | null;
           fts_language: unknown | null;
           fts_simple: unknown | null;
@@ -490,7 +489,6 @@ export type Database = {
           created_at?: string | null;
           date?: string | null;
           fts?: unknown | null;
-          fts_document?: unknown | null;
           fts_english?: unknown | null;
           fts_language?: unknown | null;
           fts_simple?: unknown | null;
@@ -516,7 +514,6 @@ export type Database = {
           created_at?: string | null;
           date?: string | null;
           fts?: unknown | null;
-          fts_document?: unknown | null;
           fts_english?: unknown | null;
           fts_language?: unknown | null;
           fts_simple?: unknown | null;
@@ -801,6 +798,7 @@ export type Database = {
           price_label: string | null;
           quantity_label: string | null;
           size: Database["public"]["Enums"]["invoice_size"] | null;
+          subtotal_label: string | null;
           tax_label: string | null;
           tax_rate: number | null;
           team_id: string;
@@ -837,6 +835,7 @@ export type Database = {
           price_label?: string | null;
           quantity_label?: string | null;
           size?: Database["public"]["Enums"]["invoice_size"] | null;
+          subtotal_label?: string | null;
           tax_label?: string | null;
           tax_rate?: number | null;
           team_id: string;
@@ -873,6 +872,7 @@ export type Database = {
           price_label?: string | null;
           quantity_label?: string | null;
           size?: Database["public"]["Enums"]["invoice_size"] | null;
+          subtotal_label?: string | null;
           tax_label?: string | null;
           tax_rate?: number | null;
           team_id?: string;

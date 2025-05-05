@@ -1,6 +1,8 @@
 "use client";
 
 import { Editor } from "@/components/invoice/editor";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
 import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
@@ -8,7 +10,10 @@ export function FromDetails() {
   const { control, watch } = useFormContext();
   const id = watch("id");
 
-  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  const trpc = useTRPC();
+  const updateTemplateMutation = useMutation(
+    trpc.invoiceTemplate.upsert.mutationOptions(),
+  );
 
   return (
     <div>
@@ -16,9 +21,7 @@ export function FromDetails() {
         name="template.from_label"
         className="mb-2 block"
         onSave={(value) => {
-          // updateInvoiceTemplate.execute({
-          //   from_label: value,
-          // });
+          updateTemplateMutation.mutate({ from_label: value });
         }}
       />
 
@@ -32,9 +35,9 @@ export function FromDetails() {
             initialContent={field.value}
             onChange={field.onChange}
             onBlur={(content) => {
-              // updateInvoiceTemplate.execute({
-              //   from_details: content ? JSON.stringify(content) : null,
-              // });
+              updateTemplateMutation.mutate({
+                from_details: content ? JSON.stringify(content) : null,
+              });
             }}
             className="min-h-[90px] [&>div]:min-h-[90px]"
           />

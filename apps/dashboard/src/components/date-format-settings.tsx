@@ -38,7 +38,7 @@ export function DateFormatSettings() {
                 | "dd/MM/yyyy"
                 | "MM/dd/yyyy"
                 | "yyyy-MM-dd"
-                | "DD.MM.YYYY",
+                | "dd.MM.yyyy",
             });
           }}
         >
@@ -49,7 +49,7 @@ export function DateFormatSettings() {
             <SelectItem value="dd/MM/yyyy">dd/MM/yyyy</SelectItem>
             <SelectItem value="MM/dd/yyyy">MM/dd/yyyy</SelectItem>
             <SelectItem value="yyyy-MM-dd">yyyy-MM-dd</SelectItem>
-            <SelectItem value="DD.MM.YYYY">DD.MM.YYYY</SelectItem>
+            <SelectItem value="dd.MM.yyyy">dd.MM.yyyy</SelectItem>
           </SelectContent>
         </Select>
       </CardContent>

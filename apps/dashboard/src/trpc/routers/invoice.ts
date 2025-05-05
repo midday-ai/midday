@@ -1,4 +1,5 @@
 import { parseInputValue } from "@/components/invoice/utils";
+import { UTCDate } from "@date-fns/utc";
 import { generateToken } from "@midday/invoice/token";
 import type { sendInvoiceEmail } from "@midday/jobs/tasks/invoice/email/send-email";
 import type { sendInvoiceReminder } from "@midday/jobs/tasks/invoice/email/send-reminder";
@@ -13,15 +14,56 @@ import {
 import {
   getInvoiceByIdQuery,
   getInvoiceSummaryQuery,
-  getInvoiceTemplatesQuery,
+  getInvoiceTemplateQuery,
   getInvoicesQuery,
   getNextInvoiceNumberQuery,
   getPaymentStatusQuery,
+  getTeamByIdQuery,
+  searchInvoiceNumberQuery,
 } from "@midday/supabase/queries";
 import { tasks } from "@trigger.dev/sdk/v3";
+import { addMonths } from "date-fns";
+import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { protectedProcedure } from "../init";
 import { createTRPCRouter } from "../init";
+
+const defaultTemplate = {
+  title: "Invoice",
+  customer_label: "To",
+  from_label: "From",
+  invoice_no_label: "Invoice No",
+  issue_date_label: "Issue Date",
+  due_date_label: "Due Date",
+  description_label: "Description",
+  price_label: "Price",
+  quantity_label: "Quantity",
+  total_label: "Total",
+  total_summary_label: "Total",
+  subtotal_label: "Subtotal",
+  vat_label: "VAT",
+  tax_label: "Tax",
+  payment_label: "Payment Details",
+  payment_details: undefined,
+  note_label: "Note",
+  logo_url: undefined,
+  currency: "USD",
+  from_details: undefined,
+  size: "a4",
+  include_vat: true,
+  include_tax: true,
+  discount_label: "Discount",
+  include_discount: false,
+  include_units: false,
+  include_decimals: false,
+  include_qr: true,
+  date_format: "dd/MM/yyyy",
+  tax_rate: 0,
+  vat_rate: 0,
+  delivery_type: "create",
+  timezone: undefined,
+  locale: undefined,
+};
 
 export const invoiceRouter = createTRPCRouter({
   get: protectedProcedure
@@ -66,21 +108,16 @@ export const invoiceRouter = createTRPCRouter({
     },
   ),
 
-  getNextInvoiceNumber: protectedProcedure.query(
-    async ({ ctx: { supabase, teamId } }) => {
-      const { data } = await getNextInvoiceNumberQuery(supabase, teamId!);
+  searchInvoiceNumber: protectedProcedure
+    .input(z.object({ query: z.string() }))
+    .query(async ({ input, ctx: { supabase, teamId } }) => {
+      const { data } = await searchInvoiceNumberQuery(supabase, {
+        teamId: teamId!,
+        query: input.query,
+      });
 
       return data;
-    },
-  ),
-
-  invoiceTemplates: protectedProcedure.query(
-    async ({ ctx: { supabase, teamId } }) => {
-      const { data } = await getInvoiceTemplatesQuery(supabase, teamId!);
-
-      return data;
-    },
-  ),
+    }),
 
   invoiceSummary: protectedProcedure
     .input(
@@ -102,23 +139,33 @@ export const invoiceRouter = createTRPCRouter({
     }),
 
   defaultSettings: protectedProcedure
-    .input(
-      z.object({
-        baseCurrency: z.string(),
-        timezone: z.string(),
-        locale: z.string(),
-      }),
-    )
-    .query(async ({ input }) => {
+    // .input(
+    //   z.object({
+    //     timezone: z.string(),
+    //     locale: z.string(),
+    //   }),
+    // )
+    .query(async ({ input, ctx: { supabase, teamId } }) => {
       const countryCode = await getCountryCode();
 
+      // Fetch invoice number, template, and team details concurrently
+      const [{ data: nextInvoiceNumber }, { data: template }, { data: team }] =
+        await Promise.all([
+          getNextInvoiceNumberQuery(supabase, teamId!),
+          getInvoiceTemplateQuery(supabase, teamId!),
+          getTeamByIdQuery(supabase, teamId!),
+        ]);
+
       const currency =
-        input.baseCurrency ??
+        team?.base_currency ??
         currencies[countryCode as keyof typeof currencies] ??
         "USD";
 
-      const timezone = input.timezone ?? (await getTimezone());
-      const locale = input.locale ?? (await getLocale());
+      // const timezone = input.timezone ?? (await getTimezone());
+      // const locale = input.locale ?? (await getLocale());
+
+      const timezone = await getTimezone();
+      const locale = await getLocale();
 
       // Default to letter size for US/CA, A4 for rest of world
       const size = ["US", "CA"].includes(countryCode) ? "letter" : "a4";
@@ -128,7 +175,56 @@ export const invoiceRouter = createTRPCRouter({
         countryCode,
       );
 
+      const savedTemplate = {
+        title: template?.title ?? defaultTemplate.title,
+        logo_url: template?.logo_url ?? defaultTemplate.logo_url,
+        currency: template?.currency ?? defaultTemplate.currency,
+        size: template?.size ?? defaultTemplate.size,
+        include_tax: template?.include_tax ?? defaultTemplate.include_tax,
+        include_vat: template?.include_vat ?? defaultTemplate.include_vat,
+        include_discount:
+          template?.include_discount ?? defaultTemplate.include_discount,
+        include_decimals:
+          template?.include_decimals ?? defaultTemplate.include_decimals,
+        include_units: template?.include_units ?? defaultTemplate.include_units,
+        include_qr: template?.include_qr ?? defaultTemplate.include_qr,
+        customer_label:
+          template?.customer_label ?? defaultTemplate.customer_label,
+        from_label: template?.from_label ?? defaultTemplate.from_label,
+        invoice_no_label:
+          template?.invoice_no_label ?? defaultTemplate.invoice_no_label,
+        subtotal_label:
+          template?.subtotal_label ?? defaultTemplate.subtotal_label,
+        issue_date_label:
+          template?.issue_date_label ?? defaultTemplate.issue_date_label,
+        total_summary_label:
+          template?.total_summary_label ?? defaultTemplate.total_summary_label,
+        due_date_label:
+          template?.due_date_label ?? defaultTemplate.due_date_label,
+        discount_label:
+          template?.discount_label ?? defaultTemplate.discount_label,
+        description_label:
+          template?.description_label ?? defaultTemplate.description_label,
+        price_label: template?.price_label ?? defaultTemplate.price_label,
+        quantity_label:
+          template?.quantity_label ?? defaultTemplate.quantity_label,
+        total_label: template?.total_label ?? defaultTemplate.total_label,
+        vat_label: template?.vat_label ?? defaultTemplate.vat_label,
+        tax_label: template?.tax_label ?? defaultTemplate.tax_label,
+        payment_label: template?.payment_label ?? defaultTemplate.payment_label,
+        note_label: template?.note_label ?? defaultTemplate.note_label,
+        date_format: template?.date_format ?? defaultTemplate.date_format,
+        delivery_type: template?.delivery_type ?? defaultTemplate.delivery_type,
+        tax_rate: template?.tax_rate ?? defaultTemplate.tax_rate,
+        vat_rate: template?.vat_rate ?? defaultTemplate.vat_rate,
+        from_details: template?.from_details ?? defaultTemplate.from_details,
+        payment_details:
+          template?.payment_details ?? defaultTemplate.payment_details,
+      };
+
       return {
+        // Default values first
+        id: uuidv4(),
         currency: currency.toUpperCase(),
         size,
         include_tax,
@@ -137,8 +233,28 @@ export const invoiceRouter = createTRPCRouter({
         include_decimals: false,
         include_units: false,
         include_qr: true,
+        invoice_number: nextInvoiceNumber,
         timezone,
         locale,
+        from_details: savedTemplate.from_details,
+        payment_details: savedTemplate.payment_details,
+        customer_details: undefined,
+        note_details: undefined,
+        customer_id: undefined,
+        issue_date: new UTCDate().toISOString(),
+        due_date: addMonths(new UTCDate(), 1).toISOString(),
+        line_items: [],
+        tax: undefined,
+        token: undefined,
+        discount: undefined,
+        subtotal: undefined,
+        top_block: undefined,
+        bottom_block: undefined,
+        amount: undefined,
+        customer_name: undefined,
+        logo_url: undefined,
+        vat: undefined,
+        template: savedTemplate,
       };
     }),
 

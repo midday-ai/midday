@@ -169,12 +169,6 @@ export function InvoiceDetails() {
             <span>{invoice_number}</span>
           </span>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-[#606060]">Recurring</span>
-          <span className="text-sm">
-            <span>One time</span>
-          </span>
-        </div>
       </div>
 
       {customer && (

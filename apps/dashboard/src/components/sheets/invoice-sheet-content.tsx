@@ -1,16 +1,10 @@
 "use client";
 
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { getUrl } from "@/utils/environment";
-import { Button } from "@midday/ui/button";
 import { SheetContent, SheetHeader } from "@midday/ui/sheet";
-import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
-import { InvoiceSuccessful } from "../invoice-successful";
 import { Form } from "../invoice/form";
 import { SettingsMenu } from "../invoice/settings-menu";
-import { OpenURL } from "../open-url";
-import type { Invoice } from "../tables/invoices/columns";
 
 function InvoiceSheetHeader({
   type,

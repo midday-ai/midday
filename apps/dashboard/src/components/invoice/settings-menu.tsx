@@ -1,5 +1,6 @@
 "use client";
 
+import { useTRPC } from "@/trpc/client";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import {
   DropdownMenu,
@@ -11,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import { useMutation } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
 import { SelectCurrency } from "../select-currency";
 
@@ -18,7 +20,7 @@ const dateFormats = [
   { value: "dd/MM/yyyy", label: "DD/MM/YYYY" },
   { value: "MM/dd/yyyy", label: "MM/DD/YYYY" },
   { value: "yyyy-MM-dd", label: "YYYY-MM-DD" },
-  { value: "DD.MM.YYYY", label: "DD.MM.YYYY" },
+  { value: "dd.MM.yyyy", label: "dd.MM.yyyy" },
 ];
 
 const invoiceSizes = [
@@ -93,7 +95,10 @@ const menuItems = [
 
 export function SettingsMenu() {
   const { watch, setValue } = useFormContext();
-  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  const trpc = useTRPC();
+  const updateTemplateMutation = useMutation(
+    trpc.invoiceTemplate.upsert.mutationOptions(),
+  );
 
   return (
     <DropdownMenu>
@@ -123,9 +128,9 @@ export function SettingsMenu() {
                       setValue(watchKey, value, {
                         shouldValidate: true,
                       });
-                      // updateInvoiceTemplate.execute({
-                      //   [item.key]: value,
-                      // });
+                      updateTemplateMutation.mutate({
+                        [item.key]: value,
+                      });
                     }}
                   />
                 </DropdownMenuSubContent>
@@ -151,9 +156,9 @@ export function SettingsMenu() {
                           shouldValidate: true,
                         });
 
-                        // updateInvoiceTemplate.execute({
-                        //   [item.key]: option.value,
-                        // });
+                        updateTemplateMutation.mutate({
+                          [item.key]: option.value,
+                        });
                       }
                     }}
                     onSelect={(event) => event.preventDefault()}

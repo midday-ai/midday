@@ -1,13 +1,17 @@
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { formatRelativeTime } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useDebounceCallback } from "usehooks-ts";
 import { OpenURL } from "../open-url";
-import { type Customer, CustomerDetails } from "./customer-details";
+import { CustomerDetails } from "./customer-details";
 import { EditBlock } from "./edit-block";
+import type { InvoiceFormValues } from "./form-context";
 import { FromDetails } from "./from-details";
 import { LineItems } from "./line-items";
 import { Logo } from "./logo";
@@ -19,22 +23,41 @@ import { Summary } from "./summary";
 import { transformFormValuesToDraft } from "./utils";
 
 export function Form() {
+  const { invoiceId, setParams } = useInvoiceParams();
   const [lastUpdated, setLastUpdated] = useState<Date | undefined>();
   const [lastEditedText, setLastEditedText] = useState("");
-  const teamId = "123";
-  const onSubmit = () => {};
-  const isSubmitting = false;
 
   const form = useFormContext();
-
   const token = form.watch("token");
 
-  // const draftInvoice = useAction(draftInvoiceAction, {
-  //   onSuccess: ({ data }) => {
-  //     setLastUpdated(new Date());
-  //     form.setValue("token", data?.token, { shouldValidate: true });
-  //   },
-  // });
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const draftInvoiceMutation = useMutation(
+    trpc.invoice.draft.mutationOptions({
+      onSuccess: (data) => {
+        console.log("data", data);
+        if (!invoiceId && data?.id) {
+          setParams({ type: "edit", invoiceId: data.id });
+        }
+
+        setLastUpdated(new Date());
+        form.setValue("token", data?.token, { shouldValidate: true });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.getById.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.invoiceSummary.queryKey(),
+        });
+      },
+    }),
+  );
 
   // Only watch the fields that are used in the upsert action
   const formValues = useWatch({
@@ -65,7 +88,7 @@ export function Form() {
   const draftInvoiceDebounced = useDebounceCallback(
     (values: InvoiceFormValues) => {
       if (isDirty && form.watch("customer_id") && invoiceNumberValid) {
-        // draftInvoice.execute(transformFormValuesToDraft(values));
+        draftInvoiceMutation.mutate(transformFormValuesToDraft(values));
       }
     },
     500,
@@ -96,7 +119,7 @@ export function Form() {
   const handleSubmit = (values: InvoiceFormValues) => {
     onSubmit(values);
 
-    // draftInvoice.execute(transformFormValuesToDraft(values));
+    draftInvoiceMutation.mutate(transformFormValuesToDraft(values));
   };
 
   // Prevent form from submitting when pressing enter
@@ -115,8 +138,8 @@ export function Form() {
       <ScrollArea className="h-[calc(100vh-200px)] bg-background" hideScrollbar>
         <div className="p-8 pb-4 h-full flex flex-col">
           <div className="flex justify-between">
-            <Meta teamId={teamId} />
-            <Logo teamId={teamId} />
+            <Meta />
+            <Logo />
           </div>
 
           <div className="grid grid-cols-2 gap-6 mt-8 mb-4">
@@ -152,12 +175,16 @@ export function Form() {
       <div className="absolute bottom-14 w-full h-9">
         <div className="flex justify-between items-center mt-auto">
           <div className="flex space-x-2 items-center text-xs text-[#808080]">
-            {/* {(draftInvoice.isPending || lastEditedText) && (
-              <span>{draftInvoice.isPending ? "Saving" : lastEditedText}</span>
-            )} */}
+            {(draftInvoiceMutation.isPending || lastEditedText) && (
+              <span>
+                {draftInvoiceMutation.isPending ? "Saving" : lastEditedText}
+              </span>
+            )}
             {token && (
               <>
-                {/* {(draftInvoice.isPending || lastEditedText) && <span>-</span>} */}
+                {(draftInvoiceMutation.isPending || lastEditedText) && (
+                  <span>-</span>
+                )}
                 <OpenURL
                   href={`${getUrl()}/i/${token}`}
                   className="flex items-center gap-1"
@@ -170,8 +197,8 @@ export function Form() {
           </div>
 
           <SubmitButton
-            isSubmitting={isSubmitting}
-            // disabled={draftInvoice.isPending}
+            isSubmitting={draftInvoiceMutation.isPending}
+            disabled={draftInvoiceMutation.isPending}
           />
         </div>
       </div>

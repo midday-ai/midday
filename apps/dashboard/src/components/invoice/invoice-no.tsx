@@ -1,6 +1,7 @@
+"use client";
+
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { createClient } from "@midday/supabase/client";
-import { searchInvoiceNumberQuery } from "@midday/supabase/queries";
+import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import {
   Tooltip,
@@ -8,53 +9,51 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { Input } from "./input";
 import { LabelInput } from "./label-input";
 
-type Props = {
-  teamId: string;
-};
-
-export function InvoiceNo({ teamId }: Props) {
-  const { watch, setError, clearErrors } = useFormContext();
-  const supabase = createClient();
+export function InvoiceNo() {
+  const {
+    watch,
+    setError,
+    clearErrors,
+    formState: { errors },
+  } = useFormContext();
   const invoiceNumber = watch("invoice_number");
-
-  const [isInvoiceNumberExists, setIsInvoiceNumberExists] = useState(false);
+  const trpc = useTRPC();
+  const updateTemplateMutation = useMutation(
+    trpc.invoiceTemplate.upsert.mutationOptions(),
+  );
 
   const { type } = useInvoiceParams();
 
-  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  const { data } = useQuery(
+    trpc.invoice.searchInvoiceNumber.queryOptions(
+      {
+        query: invoiceNumber,
+      },
+      {
+        // Only search for invoice number if we are creating a new invoice
+        enabled: type === "create" && invoiceNumber !== "",
+        // Never cache the result
+        gcTime: 0,
+      },
+    ),
+  );
 
   useEffect(() => {
-    async function searchInvoiceNumber() {
-      if (invoiceNumber) {
-        const { data } = await searchInvoiceNumberQuery(supabase, {
-          teamId,
-          query: invoiceNumber,
-        });
-
-        const exists = data && data.length > 0;
-        setIsInvoiceNumberExists(exists ?? false);
-
-        if (exists) {
-          setError("invoice_number", {
-            type: "manual",
-            message: "Invoice number already exists",
-          });
-        } else {
-          clearErrors("invoice_number");
-        }
-      }
+    if (data) {
+      setError("invoice_number", {
+        type: "manual",
+        message: "Invoice number already exists",
+      });
+    } else {
+      clearErrors("invoice_number");
     }
-
-    // Only search for invoice number if we are creating a new invoice
-    if (type === "create") {
-      searchInvoiceNumber();
-    }
-  }, [invoiceNumber, teamId, type]);
+  }, [data]);
 
   return (
     <div className="flex space-x-1 items-center">
@@ -62,9 +61,7 @@ export function InvoiceNo({ teamId }: Props) {
         <LabelInput
           name="template.invoice_no_label"
           onSave={(value) => {
-            // updateInvoiceTemplate.execute({
-            //   invoice_no_label: value,
-            // });
+            updateTemplateMutation.mutate({ invoice_no_label: value });
           }}
           className="truncate"
         />
@@ -81,12 +78,12 @@ export function InvoiceNo({ teamId }: Props) {
                 name="invoice_number"
                 className={cn(
                   "w-28 flex-shrink p-0 border-none text-[11px] h-4.5 overflow-hidden",
-                  isInvoiceNumberExists ? "text-red-500" : "",
+                  errors.invoice_number ? "text-red-500" : "",
                 )}
               />
             </div>
           </TooltipTrigger>
-          {isInvoiceNumberExists && (
+          {errors.invoice_number && (
             <TooltipContent className="text-xs px-3 py-1.5">
               <p>Invoice number already exists</p>
             </TooltipContent>

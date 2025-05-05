@@ -1668,29 +1668,19 @@ export async function draftInvoice(
     ...restInput
   } = params;
 
-  const {
-    payment_details: _, // Renamed placeholder as requested
-    from_details: __, // Renamed placeholder as requested
-    ...restTemplate
-  } = template;
+  const { payment_details: _, from_details: __, ...restTemplate } = template;
 
   return supabase
     .from("invoices")
     .upsert(
       {
-        // Core identifiers from params
         id,
         team_id: teamId,
-        user_id: userId, // Using userId from params as in original code
+        user_id: userId,
         token,
-
-        // Fields from restInput (original input minus core IDs, template, and details)
         ...restInput,
-        // Fields from template (currency and the rest of the template object)
         currency: template.currency?.toUpperCase(),
-        template: restTemplate, // restTemplate contains template minus details fields
-
-        // Stringified JSON detail fields from params
+        template: restTemplate,
         payment_details: payment_details,
         from_details: from_details,
         customer_details: customer_details,
@@ -1705,7 +1695,6 @@ export async function draftInvoice(
 }
 
 type UpdateInvoiceTemplateParams = {
-  id: string;
   teamId: string;
 } & DraftInvoiceTemplateParams;
 
@@ -1713,17 +1702,17 @@ export async function updateInvoiceTemplate(
   supabase: Client,
   params: UpdateInvoiceTemplateParams,
 ) {
+  const { teamId, ...rest } = params;
   return supabase
     .from("invoice_templates")
     .upsert(
       {
-        team_id: params.teamId,
-        ...params,
+        team_id: teamId,
+        ...rest,
       },
       // Right now we only have one template per team, so we can use the team_id as the unique constraint
       { onConflict: "team_id" },
     )
-    .eq("id", params.id)
     .select()
     .single();
 }

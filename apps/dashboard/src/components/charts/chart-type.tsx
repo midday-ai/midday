@@ -20,12 +20,12 @@ export function ChartType({ disabled }: Props) {
 
   return (
     <Select
-      defaultValue={params.type}
+      defaultValue={params.chart}
       onValueChange={(value) => {
         if (value) {
           setParams({
             ...params,
-            type: value as NonNullable<typeof params.type>,
+            chart: value as NonNullable<typeof params.chart>,
           });
         }
       }}
@@ -34,7 +34,7 @@ export function ChartType({ disabled }: Props) {
         className="flex-1 space-x-1 font-medium"
         disabled={disabled}
       >
-        <span>{t(`chart_type.${params.type}`)}</span>
+        <span>{t(`chart_type.${params.chart}`)}</span>
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

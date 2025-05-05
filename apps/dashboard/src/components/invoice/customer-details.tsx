@@ -2,40 +2,38 @@
 
 import { Editor } from "@/components/invoice/editor";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type { JSONContent } from "@tiptap/react";
+import { useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { SelectCustomer } from "../select-customer";
 import { LabelInput } from "./label-input";
 import { transformCustomerToContent } from "./utils";
 
-export interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  address_line_1?: string;
-  address_line_2?: string;
-  token: string;
-  city?: string;
-  state?: string;
-  zip?: string;
-  country?: string;
-  vat?: string;
-  contact?: string;
-  website?: string;
-  tags?: { tag: { id: string; name: string } }[];
-}
-
 export function CustomerDetails() {
   const { control, setValue, watch } = useFormContext();
   const { setParams, selectedCustomerId } = useInvoiceParams();
-  // const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+
+  const trpc = useTRPC();
+  const updateTemplateMutation = useMutation(
+    trpc.invoiceTemplate.upsert.mutationOptions(),
+  );
 
   const content = watch("customer_details");
   const id = watch("id");
 
+  const { data: customer } = useQuery(
+    trpc.customers.getById.queryOptions(
+      { id: selectedCustomerId! },
+      {
+        enabled: !!selectedCustomerId,
+      },
+    ),
+  );
+
   const handleLabelSave = (value: string) => {
-    // updateInvoiceTemplate.execute({ customer_label: value });
+    updateTemplateMutation.mutate({ customer_label: value });
   };
 
   const handleOnChange = (content?: JSONContent | null) => {
@@ -53,25 +51,21 @@ export function CustomerDetails() {
     }
   };
 
-  // Get customer by id
+  useEffect(() => {
+    if (customer) {
+      const customerContent = transformCustomerToContent(customer);
 
-  // useEffect(() => {
-  //   const customer = customers.find((c) => c.id === selectedCustomerId);
+      // Remove the selected customer id from the url so we don't introduce a race condition
+      setParams({ selectedCustomerId: null });
 
-  //   if (customer) {
-  //     const customerContent = transformCustomerToContent(customer);
-
-  //     // Remove the selected customer id from the url so we don't introduce a race condition
-  //     setParams({ selectedCustomerId: null });
-
-  //     setValue("customer_name", customer.name, { shouldValidate: true });
-  //     setValue("customer_id", customer.id, { shouldValidate: true });
-  //     setValue("customer_details", customerContent, {
-  //       shouldValidate: true,
-  //       shouldDirty: true,
-  //     });
-  //   }
-  // }, [selectedCustomerId,  ]);
+      setValue("customer_name", customer.name, { shouldValidate: true });
+      setValue("customer_id", customer.id, { shouldValidate: true });
+      setValue("customer_details", customerContent, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [customer]);
 
   return (
     <div>

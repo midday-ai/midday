@@ -4,9 +4,9 @@ import React from "react";
 import { InvoiceDetails } from "../invoice-details";
 
 export function InvoiceDetailsSheet() {
-  const { invoiceId, setParams } = useInvoiceParams();
+  const { invoiceId, type, setParams } = useInvoiceParams();
 
-  const isOpen = Boolean(invoiceId);
+  const isOpen = Boolean(invoiceId && type === "details");
 
   return (
     <Sheet open={isOpen} onOpenChange={() => setParams({ invoiceId: null })}>

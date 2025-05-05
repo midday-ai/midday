@@ -8,6 +8,7 @@ import { Reorder, useDragControls } from "framer-motion";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { AmountInput } from "./amount-input";
 import { Description } from "./description";
+import type { InvoiceFormValues } from "./form-context";
 import { Input } from "./input";
 import { LabelInput } from "./label-input";
 import { QuantityInput } from "./quantity-input";
@@ -160,7 +161,7 @@ function LineItemRow({
   includeUnits?: boolean;
 }) {
   const controls = useDragControls();
-  const { control } = useFormContext<InvoiceFormValues>();
+  const { control } = useFormContext();
 
   const locale = useWatch({ control, name: "template.locale" });
 

@@ -1056,7 +1056,37 @@ export async function getInvoicesQuery(
   const query = supabase
     .from("invoices")
     .select(
-      "id, invoice_number, internal_note, token, due_date, issue_date, paid_at, updated_at, viewed_at, amount, template, currency, status, vat, tax, customer:customer_id(id, name, website), customer_name",
+      `
+      id,
+      due_date,
+      invoice_number,
+      amount,
+      currency,
+      line_items,
+      payment_details,
+      customer_details,
+      note,
+      internal_note,
+      paid_at,
+      vat,
+      tax,
+      file_path,
+      status,
+      viewed_at,
+      from_details,
+      issue_date,
+      template,
+      note_details,
+      customer_name,
+      token,
+      sent_to,
+      discount,
+      subtotal,
+      top_block,
+      bottom_block,
+      customer:customer_id(name, website, email),
+      team:team_id(name)
+    `,
       { count: "exact" },
     )
     .eq("team_id", teamId);
@@ -1222,13 +1252,47 @@ export async function getCustomerQuery(supabase: Client, customerId: string) {
     .single();
 }
 
-export async function getInvoiceTemplatesQuery(
+export async function getInvoiceTemplateQuery(
   supabase: Client,
   teamId: string,
 ) {
   return supabase
     .from("invoice_templates")
-    .select("*")
+    .select(`
+      id,
+      customer_label,
+      from_label,
+      invoice_no_label,
+      issue_date_label,
+      due_date_label,
+      description_label,
+      price_label,
+      quantity_label,
+      total_label,
+      vat_label,
+      tax_label,
+      payment_label,
+      note_label,
+      logo_url,
+      currency,
+      subtotal_label,
+      payment_details,
+      from_details,
+      size,
+      date_format,
+      include_vat,
+      include_tax,
+      tax_rate,
+      delivery_type,
+      discount_label,
+      include_discount,
+      include_decimals,
+      include_qr,
+      total_summary_label,
+      title,
+      vat_rate,
+      include_units
+    `)
     .eq("team_id", teamId)
     .single();
 }
@@ -1236,16 +1300,38 @@ export async function getInvoiceTemplatesQuery(
 export async function getInvoiceByIdQuery(supabase: Client, id: string) {
   return supabase
     .from("invoices")
-    .select("*, customer:customer_id(name, website, email), team:team_id(name)")
-    .eq("id", id)
-    .single();
-}
-
-export async function getDraftInvoiceQuery(supabase: Client, id: string) {
-  return supabase
-    .from("invoices")
     .select(
-      "id, due_date, invoice_number, template, status, discount, amount, currency, line_items, payment_details, note_details, customer_details, vat, tax, from_details, issue_date, customer_id, customer_name, token, top_block, bottom_block",
+      `
+      id,
+      due_date,
+      invoice_number,
+      amount,
+      currency,
+      line_items,
+      payment_details,
+      customer_details,
+      status,
+      note,
+      internal_note,
+      paid_at,
+      vat,
+      tax,
+      file_path,
+      viewed_at,
+      from_details,
+      issue_date,
+      template,
+      note_details,
+      customer_name,
+      token,
+      sent_to,
+      discount,
+      subtotal,
+      top_block,
+      bottom_block,
+      customer:customer_id(name, website, email),
+      team:team_id(name)
+    `,
     )
     .eq("id", id)
     .single();
@@ -1264,7 +1350,8 @@ export async function searchInvoiceNumberQuery(
     .from("invoices")
     .select("invoice_number")
     .eq("team_id", params.teamId)
-    .ilike("invoice_number", `%${params.query}`);
+    .ilike("invoice_number", `%${params.query}`)
+    .single();
 }
 
 export async function getNextInvoiceNumberQuery(

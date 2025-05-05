@@ -83,13 +83,16 @@ export const metricsParamsSchema = {
   period: parseAsStringLiteral(
     chartPeriodOptions.map((option) => option.value),
   ).withDefault("12m"),
-  type: parseAsStringLiteral(chartTypeOptions).withDefault("revenue"),
+  chart: parseAsStringLiteral(chartTypeOptions).withDefault("revenue"),
 };
 
 export function useMetricsParams() {
   const [params, setParams] = useQueryStates(metricsParamsSchema);
 
-  return { params, setParams };
+  return {
+    params,
+    setParams,
+  };
 }
 
 export const loadMetricsParams = createLoader(metricsParamsSchema);

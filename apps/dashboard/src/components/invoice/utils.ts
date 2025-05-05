@@ -1,5 +1,5 @@
-import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import type { Customer } from "./customer-details";
+import type { InvoiceFormValues } from "./form-context";
 
 export const transformCustomerToContent = (customer?: Customer) => {
   if (!customer) return null;

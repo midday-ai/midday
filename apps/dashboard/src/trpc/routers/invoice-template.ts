@@ -7,7 +7,6 @@ export const invoiceTemplateRouter = createTRPCRouter({
   upsert: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
         customer_label: z.string().optional(),
         title: z.string().optional(),
         from_label: z.string().optional(),
@@ -30,7 +29,9 @@ export const invoiceTemplateRouter = createTRPCRouter({
         currency: z.string().optional(),
         payment_details: z.string().optional().nullable(),
         from_details: z.string().optional().nullable(),
-        date_format: z.string().optional(),
+        date_format: z
+          .enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"])
+          .optional(),
         include_vat: z.boolean().optional().optional(),
         include_tax: z.boolean().optional().optional(),
         include_discount: z.boolean().optional(),

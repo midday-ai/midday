@@ -11,6 +11,7 @@ import { inboxRouter } from "./inbox";
 import { inboxAccountsRouter } from "./inbox-accounts";
 import { institutionsRouter } from "./institutions";
 import { invoiceRouter } from "./invoice";
+import { invoiceTemplateRouter } from "./invoice-template";
 import { metricsRouter } from "./metrics";
 import { tagsRouter } from "./tags";
 import { teamRouter } from "./team";
@@ -27,9 +28,14 @@ export const appRouter = createTRPCRouter({
   bankAccounts: bankAccountsRouter,
   bankConnections: bankConnectionsRouter,
   customers: customersRouter,
+  documents: documentsRouter,
+  documentTagAssignments: documentTagAssignmentsRouter,
+  documentTags: documentTagsRouter,
   inbox: inboxRouter,
   inboxAccounts: inboxAccountsRouter,
+  institutions: institutionsRouter,
   invoice: invoiceRouter,
+  invoiceTemplate: invoiceTemplateRouter,
   metrics: metricsRouter,
   tags: tagsRouter,
   team: teamRouter,
@@ -40,10 +46,6 @@ export const appRouter = createTRPCRouter({
   transactions: transactionsRouter,
   transactionTags: transactionTagsRouter,
   user: userRouter,
-  documents: documentsRouter,
-  documentTags: documentTagsRouter,
-  documentTagAssignments: documentTagAssignmentsRouter,
-  institutions: institutionsRouter,
 });
 
 // export type definition of API

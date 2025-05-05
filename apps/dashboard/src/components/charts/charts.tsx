@@ -13,7 +13,7 @@ type Props = {
 export function Charts({ disabled }: Props) {
   const { params } = useMetricsParams();
 
-  switch (params.type) {
+  switch (params.chart) {
     case "revenue":
       return <RevenueChart disabled={disabled} />;
     case "profit":
