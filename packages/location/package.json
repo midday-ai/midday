@@ -15,7 +15,8 @@
     "./countries": "./src/countries.ts",
     "./countries-intl": "./src/countries-intl.ts",
     "./currencies": "./src/currencies.ts",
-    "./country-flags": "./src/country-flags.ts"
+    "./country-flags": "./src/country-flags.ts",
+    "./timezones": "./src/timezones.ts"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

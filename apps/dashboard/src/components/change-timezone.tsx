@@ -2,6 +2,7 @@
 
 import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
+import { getTimezones } from "@midday/location/timezones";
 import {
   Card,
   CardContent,
@@ -11,15 +12,13 @@ import {
 } from "@midday/ui/card";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
 
-type Props = {
-  timezones: { tzCode: string; name: string }[];
-};
-
-export function ChangeTimezone({ timezones }: Props) {
+export function ChangeTimezone() {
   const t = useI18n();
 
   const { data: user } = useUserQuery();
   const updateUserMutation = useUserMutation();
+
+  const timezones = getTimezones();
 
   const timezoneItems = timezones.map((tz, id) => ({
     id: id.toString(),
