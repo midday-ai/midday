@@ -13,6 +13,7 @@ import { InvoiceSkeleton } from "@/components/tables/invoices/skeleton";
 import { loadInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
 import { loadSortParams } from "@/hooks/use-sort-params";
 import { batchPrefetch, trpc } from "@/trpc/server";
+import { getInitialInvoicesColumnVisibility } from "@/utils/columns";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import type { SearchParams } from "nuqs";
@@ -31,6 +32,8 @@ export default async function Page(props: Props) {
 
   const filter = loadInvoiceFilterParams(searchParams);
   const { sort } = loadSortParams(searchParams);
+
+  const columnVisibility = getInitialInvoicesColumnVisibility();
 
   batchPrefetch([
     trpc.invoice.get.infiniteQueryOptions({
@@ -68,7 +71,7 @@ export default async function Page(props: Props) {
 
       <ErrorBoundary errorComponent={ErrorFallback}>
         <Suspense fallback={<InvoiceSkeleton />}>
-          <DataTable />
+          <DataTable columnVisibility={columnVisibility} />
         </Suspense>
       </ErrorBoundary>
     </div>

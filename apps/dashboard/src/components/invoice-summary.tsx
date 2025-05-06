@@ -56,7 +56,7 @@ export function InvoiceSummary({ data, totalInvoiceCount, title }: Props) {
           <AnimatedNumber
             key={item.currency}
             value={item.total_amount}
-            currency={item.currency}
+            currency={item.currency ?? team?.base_currency ?? "USD"}
             maximumFractionDigits={0}
             minimumFractionDigits={0}
           />

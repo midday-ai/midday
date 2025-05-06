@@ -2,7 +2,7 @@
 
 import { AddTransactions } from "@/components/add-transactions";
 import { BulkActions } from "@/components/bulk-actions";
-import { ColumnVisibility } from "@/components/column-visibility";
+import { TransactionsColumnVisibility } from "@/components/transactions-column-visibility";
 import { useTransactionsStore } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
 import {
@@ -97,7 +97,7 @@ export function TransactionsActions() {
 
   return (
     <div className="space-x-2 hidden md:flex">
-      <ColumnVisibility />
+      <TransactionsColumnVisibility />
       <AddTransactions />
     </div>
   );

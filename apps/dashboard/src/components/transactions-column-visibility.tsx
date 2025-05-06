@@ -4,7 +4,7 @@ import { Checkbox } from "@midday/ui/checkbox";
 import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 
-export function ColumnVisibility() {
+export function TransactionsColumnVisibility() {
   const { columns } = useTransactionsStore();
 
   return (

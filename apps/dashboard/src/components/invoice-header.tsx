@@ -1,4 +1,5 @@
 import { InvoiceSearchFilter } from "@/components/invoice-search-filter";
+import { InvoiceColumnVisibility } from "./invoice-column-visibility";
 import { OpenInvoiceSheet } from "./open-invoice-sheet";
 
 export function InvoiceHeader() {
@@ -6,7 +7,8 @@ export function InvoiceHeader() {
     <div className="flex items-center justify-between">
       <InvoiceSearchFilter />
 
-      <div className="hidden sm:block">
+      <div className="hidden sm:flex space-x-2">
+        <InvoiceColumnVisibility />
         <OpenInvoiceSheet />
       </div>
     </div>

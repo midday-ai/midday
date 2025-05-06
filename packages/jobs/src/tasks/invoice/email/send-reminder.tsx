@@ -60,8 +60,6 @@ export const sendInvoiceReminder = schemaTask({
       ),
     });
 
-    console.log(response);
-
     if (response.error) {
       logger.error("Invoice email failed to send", {
         invoiceId,

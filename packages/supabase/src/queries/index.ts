@@ -1087,7 +1087,9 @@ export async function getInvoicesQuery(
       bottom_block,
       customer:customer_id(name, website, email),
       customer_id,
-      team:team_id(name)
+      team:team_id(name),
+      vat,
+      tax
     `,
       { count: "exact" },
     )
@@ -1334,7 +1336,9 @@ export async function getInvoiceByIdQuery(supabase: Client, id: string) {
       top_block,
       bottom_block,
       customer:customer_id(name, website, email),
-      team:team_id(name)
+      team:team_id(name),
+      vat,
+      tax
     `,
     )
     .eq("id", id)

@@ -29,9 +29,13 @@ import { NoResults, NoTransactions } from "./empty-states";
 import { ExportBar } from "./export-bar";
 import { Loading } from "./loading";
 
+type Props = {
+  columnVisibility: Promise<VisibilityState>;
+};
+
 export function DataTable({
   columnVisibility: columnVisibilityPromise,
-}: { columnVisibility: Promise<VisibilityState> }) {
+}: Props) {
   const trpc = useTRPC();
   const { filter } = useTransactionFilterParams();
   const { setRowSelection, rowSelection, setColumns, setCanDelete } =

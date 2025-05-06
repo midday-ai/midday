@@ -34,7 +34,7 @@ export const columns: ColumnDef<Invoice>[] = [
     header: "Due date",
     accessorKey: "due_date",
     cell: ({ row, table }) => {
-      const date = row.getValue("due_date");
+      const date = row.original.due_date;
 
       const showDate =
         row.original.status === "unpaid" || row.original.status === "overdue";
@@ -42,11 +42,13 @@ export const columns: ColumnDef<Invoice>[] = [
       return (
         <div className="flex flex-col space-y-1 w-[80px]">
           <span>
-            {date ? formatDate(date, table.options.meta?.dateFormat) : "-"}
+            {date
+              ? formatDate(date, (table.options.meta as any)?.dateFormat)
+              : "-"}
           </span>
           {showDate && (
             <span className="text-xs text-muted-foreground">
-              {date ? getDueDateStatus(date) : "-"}
+              {date ? getDueDateStatus(date as string) : "-"}
             </span>
           )}
         </div>
@@ -92,7 +94,9 @@ export const columns: ColumnDef<Invoice>[] = [
                   side="right"
                   sideOffset={5}
                 >
-                  {`Viewed ${formatDistanceToNow(viewAt)} ago`}
+                  {viewAt
+                    ? `Viewed ${formatDistanceToNow(new Date(viewAt))} ago`
+                    : ""}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -111,20 +115,80 @@ export const columns: ColumnDef<Invoice>[] = [
         })}
       >
         <FormatAmount
-          amount={row.getValue("amount")}
-          currency={row.original.currency}
+          amount={row.original.amount}
+          currency={row.original.currency ?? "USD"}
         />
       </span>
+    ),
+  },
+  {
+    header: "VAT Rate",
+    accessorKey: "vat_rate",
+    cell: ({ row }) => {
+      // @ts-expect-error template is a jsonb field
+      const vatRate = row.original.template.vat_rate as number | undefined;
+      return vatRate !== undefined && vatRate !== null ? `${vatRate}%` : "-";
+    },
+  },
+  {
+    header: "VAT Amount",
+    accessorKey: "vat_amount",
+    cell: ({ row }) => (
+      <FormatAmount
+        amount={(row.original?.vat as number) ?? null}
+        currency={row.original.currency ?? "USD"}
+      />
+    ),
+  },
+  {
+    header: "Tax Rate",
+    accessorKey: "tax_rate",
+    cell: ({ row }) => {
+      // @ts-expect-error template is a jsonb field
+      const taxRate = row.original.template.tax_rate as number | undefined;
+      return taxRate !== undefined && taxRate !== null ? `${taxRate}%` : "-";
+    },
+  },
+  {
+    header: "Tax Amount",
+    accessorKey: "tax_amount",
+    cell: ({ row }) => (
+      <FormatAmount
+        amount={(row.original.tax as number) ?? null}
+        currency={row.original.currency ?? "USD"}
+      />
+    ),
+  },
+  {
+    header: "Excl. VAT",
+    accessorKey: "excl_vat",
+    cell: ({ row }) => (
+      <FormatAmount
+        amount={(row.original.amount as number) - (row.original.vat as number)}
+        currency={row.original.currency ?? "USD"}
+      />
+    ),
+  },
+  {
+    header: "Excl. Tax",
+    accessorKey: "excl_tax",
+    cell: ({ row }) => (
+      <FormatAmount
+        amount={(row.original.amount as number) - (row.original.tax as number)}
+        currency={row.original.currency ?? "USD"}
+      />
     ),
   },
   {
     header: "Issue date",
     accessorKey: "issue_date",
     cell: ({ row, table }) => {
-      const date = row.getValue("issue_date");
+      const date = row.original.issue_date;
       return (
         <span>
-          {date ? formatDate(date, table.options.meta?.dateFormat) : "-"}
+          {date
+            ? formatDate(date, (table.options.meta as any)?.dateFormat)
+            : "-"}
         </span>
       );
     },

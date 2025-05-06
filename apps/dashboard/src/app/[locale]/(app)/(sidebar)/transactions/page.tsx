@@ -5,7 +5,7 @@ import { TransactionsSearchFilter } from "@/components/transactions-search-filte
 import { loadSortParams } from "@/hooks/use-sort-params";
 import { loadTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
 import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
-import { getInitialColumnVisibility } from "@/utils/columns";
+import { getInitialTransactionsColumnVisibility } from "@/utils/columns";
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
@@ -25,7 +25,7 @@ export default async function Transactions(props: Props) {
   const filter = loadTransactionFilterParams(searchParams);
   const { sort } = loadSortParams(searchParams);
 
-  const columnVisibility = getInitialColumnVisibility();
+  const columnVisibility = getInitialTransactionsColumnVisibility();
 
   // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
   await queryClient.fetchInfiniteQuery(
