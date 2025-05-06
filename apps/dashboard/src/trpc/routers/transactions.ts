@@ -183,6 +183,7 @@ export const transactionsRouter = createTRPCRouter({
         query: z.string().optional(),
         inboxId: z.string().uuid().optional(),
         maxResults: z.number().optional(),
+        minConfidenceScore: z.number().optional(),
       }),
     )
     .query(async ({ input, ctx: { supabase, teamId } }) => {
@@ -191,6 +192,7 @@ export const transactionsRouter = createTRPCRouter({
         teamId: teamId!,
         inboxId: input.inboxId,
         maxResults: input.maxResults,
+        minConfidenceScore: input.minConfidenceScore,
       });
 
       return data;

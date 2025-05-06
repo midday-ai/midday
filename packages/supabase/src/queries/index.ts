@@ -1456,13 +1456,20 @@ export type SearchTransactionMatchParams = {
   inboxId?: string;
   query?: string;
   maxResults?: number;
+  minConfidenceScore?: number;
 };
 
 export async function searchTransactionMatchQuery(
   supabase: Client,
   params: SearchTransactionMatchParams,
 ) {
-  const { teamId, query, inboxId, maxResults = 5 } = params;
+  const {
+    teamId,
+    query,
+    inboxId,
+    maxResults = 5,
+    minConfidenceScore = 0.5,
+  } = params;
 
   if (query) {
     return supabase.rpc("search_transactions_direct", {
@@ -1477,6 +1484,7 @@ export async function searchTransactionMatchQuery(
       p_team_id: teamId,
       p_inbox_id: inboxId,
       p_max_results: maxResults,
+      p_min_confidence_score: minConfidenceScore,
     });
   }
 
