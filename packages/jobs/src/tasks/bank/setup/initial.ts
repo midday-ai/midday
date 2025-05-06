@@ -12,7 +12,7 @@ export const initialBankSetup = schemaTask({
     teamId: z.string().uuid(),
     connectionId: z.string().uuid(),
   }),
-  maxDuration: 300,
+  maxDuration: 120,
   queue: {
     concurrencyLimit: 50,
   },

@@ -23,7 +23,7 @@ export const inboxSlackUpload = schemaTask({
       url: z.string(),
     }),
   }),
-  maxDuration: 300,
+  maxDuration: 60,
   queue: {
     concurrencyLimit: 10,
   },

@@ -24,7 +24,7 @@ export const importTransactions = schemaTask({
       description: z.string(),
     }),
   }),
-  maxDuration: 300,
+  maxDuration: 120,
   queue: {
     concurrencyLimit: 10,
   },

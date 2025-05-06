@@ -15,7 +15,7 @@ export const processAttachment = schemaTask({
     referenceId: z.string().optional(),
     website: z.string().optional(),
   }),
-  maxDuration: 300,
+  maxDuration: 60,
   queue: {
     concurrencyLimit: 100,
   },

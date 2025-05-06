@@ -13,7 +13,7 @@ export const syncInboxAccount = schemaTask({
   schema: z.object({
     id: z.string(),
   }),
-  maxDuration: 300,
+  maxDuration: 60,
   queue: {
     concurrencyLimit: 10,
   },

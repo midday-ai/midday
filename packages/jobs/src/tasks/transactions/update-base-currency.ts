@@ -10,7 +10,7 @@ export const updateBaseCurrency = schemaTask({
     teamId: z.string().uuid(),
     baseCurrency: z.string(),
   }),
-  maxDuration: 300,
+  maxDuration: 120,
   queue: {
     concurrencyLimit: 10,
   },

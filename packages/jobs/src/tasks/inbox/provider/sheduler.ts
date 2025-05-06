@@ -3,7 +3,7 @@ import { syncInboxAccount } from "./sync-account";
 
 export const inboxSyncScheduler = schedules.task({
   id: "inbox-sync-scheduler",
-  maxDuration: 600,
+  maxDuration: 60,
   run: async (payload) => {
     if (!payload.externalId) {
       throw new Error("ID is required");

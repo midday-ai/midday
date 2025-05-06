@@ -9,7 +9,7 @@ import { syncAccount } from "./account";
 // Fan-out pattern. We want to trigger a task for each bank account (Transactions, Balance)
 export const syncConnection = schemaTask({
   id: "sync-connection",
-  maxDuration: 1000,
+  maxDuration: 120,
   retry: {
     maxAttempts: 2,
   },

@@ -6,7 +6,7 @@ import { syncConnection } from "../sync/connection";
 // Then in sync connection we check if the connection is connected and if not we update the status (Connected, Disconnected)
 export const bankSyncScheduler = schedules.task({
   id: "bank-sync-scheduler",
-  maxDuration: 600,
+  maxDuration: 120,
   run: async (payload) => {
     // Only run in production (Set in Trigger.dev)
     if (process.env.TRIGGER_ENVIRONMENT !== "production") return;

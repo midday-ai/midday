@@ -6,7 +6,7 @@ import { z } from "zod";
 
 export const disconnectedNotifications = schemaTask({
   id: "disconnected-notifications",
-  maxDuration: 300,
+  maxDuration: 10,
   queue: {
     concurrencyLimit: 1,
   },

@@ -13,7 +13,7 @@ export const sendInvoiceReminder = schemaTask({
   schema: z.object({
     invoiceId: z.string().uuid(),
   }),
-  maxDuration: 300,
+  maxDuration: 60,
   queue: {
     concurrencyLimit: 10,
   },

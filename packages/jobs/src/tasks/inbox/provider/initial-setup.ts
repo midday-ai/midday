@@ -11,7 +11,7 @@ export const initialInboxSetup = schemaTask({
   schema: z.object({
     id: z.string().uuid(), // This is the inbox_account row id
   }),
-  maxDuration: 300,
+  maxDuration: 120,
   queue: {
     concurrencyLimit: 20,
   },

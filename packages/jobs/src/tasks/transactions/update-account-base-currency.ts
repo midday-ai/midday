@@ -14,7 +14,7 @@ export const updateAccountBaseCurrency = schemaTask({
     balance: z.number(),
     baseCurrency: z.string(),
   }),
-  maxDuration: 300,
+  maxDuration: 120,
   queue: {
     concurrencyLimit: 10,
   },

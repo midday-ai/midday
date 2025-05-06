@@ -15,7 +15,7 @@ export const processDocument = schemaTask({
     file_path: z.array(z.string()),
     teamId: z.string(),
   }),
-  maxDuration: 300,
+  maxDuration: 60,
   queue: {
     concurrencyLimit: 100,
   },

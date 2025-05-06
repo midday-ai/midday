@@ -23,7 +23,7 @@ export const inviteTeamMembers = schemaTask({
       }),
     ),
   }),
-  maxDuration: 300,
+  maxDuration: 30,
   queue: {
     concurrencyLimit: 10,
   },
