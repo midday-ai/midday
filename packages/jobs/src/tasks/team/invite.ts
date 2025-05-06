@@ -16,7 +16,7 @@ export const inviteTeamMembers = schemaTask({
     invites: z.array(
       z.object({
         email: z.string().email(),
-        invitedByName: z.string().uuid(),
+        invitedByName: z.string(),
         invitedByEmail: z.string().email(),
         teamName: z.string(),
         inviteCode: z.string(),
