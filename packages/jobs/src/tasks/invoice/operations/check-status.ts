@@ -73,6 +73,7 @@ export const checkInvoiceStatus = schemaTask({
       await updateInvoiceStatus({
         invoiceId,
         status: "paid",
+        paid_at: new Date().toISOString(),
       });
     } else {
       // Check if the invoice is overdue

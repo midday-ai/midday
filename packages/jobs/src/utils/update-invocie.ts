@@ -5,15 +5,17 @@ import { logger } from "@trigger.dev/sdk/v3";
 export async function updateInvoiceStatus({
   invoiceId,
   status,
+  paid_at,
 }: {
   invoiceId: string;
   status: "overdue" | "paid";
+  paid_at?: string;
 }): Promise<void> {
   const supabase = createClient();
 
   const { data: updatedInvoice } = await supabase
     .from("invoices")
-    .update({ status })
+    .update({ status, paid_at })
     .eq("id", invoiceId)
     .select("id, invoice_number, status, team_id, customer_name")
     .single();
