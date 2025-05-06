@@ -1,17 +1,17 @@
 "use client";
 
+import { InvoiceContent } from "@/components/invoice-content";
+import { FormContext } from "@/components/invoice/form-context";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTRPC } from "@/trpc/client";
 import { Sheet } from "@midday/ui/sheet";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import React from "react";
-import { FormContext } from "../invoice/form-context";
-import { InvoiceSheetContent } from "./invoice-sheet-content";
 
 export function InvoiceSheet() {
   const trpc = useTRPC();
   const { setParams, type, invoiceId } = useInvoiceParams();
-  const isOpen = type === "create" || type === "edit";
+  const isOpen = type === "create" || type === "edit" || type === "success";
 
   // Get default settings for new invoices
   const { data: defaultSettings, refetch } = useSuspenseQuery(
@@ -42,7 +42,7 @@ export function InvoiceSheet() {
   return (
     <Sheet open={isOpen} onOpenChange={handleOnOpenChange}>
       <FormContext defaultSettings={defaultSettings} data={data}>
-        <InvoiceSheetContent />
+        <InvoiceContent />
       </FormContext>
     </Sheet>
   );

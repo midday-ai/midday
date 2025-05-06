@@ -111,6 +111,7 @@ export function DataTable({
           window.navigator.clipboard.writeText(
             `${process.env.NEXT_PUBLIC_URL}/transactions/?transactionId=${id}`,
           );
+
           toast({
             title: "Transaction URL copied to clipboard",
             variant: "success",

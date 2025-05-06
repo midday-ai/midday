@@ -56,10 +56,6 @@ export function DataTable() {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    // meta: {
-    // deleteInvoice: handleDeleteInvoice,
-    // dateFormat: user?.date_format,
-    // },
   });
 
   if (hasFilters && !tableData?.length) {

@@ -58,8 +58,6 @@ export function DataTable() {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
-  console.log(documents);
-
   useEffect(() => {
     if (inView) {
       fetchNextPage();

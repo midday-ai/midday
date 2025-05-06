@@ -83,8 +83,6 @@ export default async function Page(props: Props) {
   const searchParams = await props.searchParams;
   const viewer = decodeURIComponent(searchParams?.viewer as string);
 
-  console.log(viewer);
-
   const {
     data: { session },
   } = await supabase.auth.getSession();

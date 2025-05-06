@@ -7,7 +7,7 @@ import { ScrollArea } from "@midday/ui/scroll-area";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
-import { useDebounceCallback } from "usehooks-ts";
+import { useDebounceValue } from "usehooks-ts";
 import { OpenURL } from "../open-url";
 import { CustomerDetails } from "./customer-details";
 import { EditBlock } from "./edit-block";
@@ -36,14 +36,26 @@ export function Form() {
   const draftInvoiceMutation = useMutation(
     trpc.invoice.draft.mutationOptions({
       onSuccess: (data) => {
-        console.log("data", data);
         if (!invoiceId && data?.id) {
           setParams({ type: "edit", invoiceId: data.id });
         }
 
         setLastUpdated(new Date());
-        form.setValue("token", data?.token, { shouldValidate: true });
 
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.invoiceSummary.queryKey(),
+        });
+      },
+    }),
+  );
+
+  const createInvoiceMutation = useMutation(
+    trpc.invoice.create.mutationOptions({
+      onSuccess: (data) => {
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.get.infiniteQueryKey(),
         });
@@ -55,6 +67,8 @@ export function Form() {
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.invoiceSummary.queryKey(),
         });
+
+        setParams({ type: "success", invoiceId: data.id });
       },
     }),
   );
@@ -84,20 +98,16 @@ export function Form() {
 
   const isDirty = form.formState.isDirty;
   const invoiceNumberValid = !form.getFieldState("invoice_number").error;
-
-  const draftInvoiceDebounced = useDebounceCallback(
-    (values: InvoiceFormValues) => {
-      if (isDirty && form.watch("customer_id") && invoiceNumberValid) {
-        draftInvoiceMutation.mutate(transformFormValuesToDraft(values));
-      }
-    },
-    500,
-  );
+  const [debouncedValue] = useDebounceValue(formValues, 500);
 
   useEffect(() => {
-    const currentFormValues = form.getValues();
-    draftInvoiceDebounced(currentFormValues);
-  }, [formValues, isDirty, invoiceNumberValid]);
+    if (isDirty && form.watch("customer_id") && invoiceNumberValid) {
+      const currentFormValues = form.getValues();
+      draftInvoiceMutation.mutate(
+        transformFormValuesToDraft(currentFormValues),
+      );
+    }
+  }, [debouncedValue, isDirty, invoiceNumberValid]);
 
   useEffect(() => {
     const updateLastEditedText = () => {
@@ -117,9 +127,10 @@ export function Form() {
 
   // Submit the form and the draft invoice
   const handleSubmit = (values: InvoiceFormValues) => {
-    onSubmit(values);
-
-    draftInvoiceMutation.mutate(transformFormValuesToDraft(values));
+    createInvoiceMutation.mutate({
+      id: values.id,
+      deliveryType: values.template.delivery_type ?? "create",
+    });
   };
 
   // Prevent form from submitting when pressing enter
@@ -175,16 +186,8 @@ export function Form() {
       <div className="absolute bottom-14 w-full h-9">
         <div className="flex justify-between items-center mt-auto">
           <div className="flex space-x-2 items-center text-xs text-[#808080]">
-            {(draftInvoiceMutation.isPending || lastEditedText) && (
-              <span>
-                {draftInvoiceMutation.isPending ? "Saving" : lastEditedText}
-              </span>
-            )}
             {token && (
               <>
-                {(draftInvoiceMutation.isPending || lastEditedText) && (
-                  <span>-</span>
-                )}
                 <OpenURL
                   href={`${getUrl()}/i/${token}`}
                   className="flex items-center gap-1"
@@ -192,13 +195,25 @@ export function Form() {
                   <Icons.ExternalLink className="size-3" />
                   <span>Preview invoice</span>
                 </OpenURL>
+
+                {(draftInvoiceMutation.isPending || lastEditedText) && (
+                  <span>-</span>
+                )}
               </>
+            )}
+
+            {(draftInvoiceMutation.isPending || lastEditedText) && (
+              <span>
+                {draftInvoiceMutation.isPending ? "Saving" : lastEditedText}
+              </span>
             )}
           </div>
 
           <SubmitButton
-            isSubmitting={draftInvoiceMutation.isPending}
-            disabled={draftInvoiceMutation.isPending}
+            isSubmitting={createInvoiceMutation.isPending}
+            disabled={
+              createInvoiceMutation.isPending || draftInvoiceMutation.isPending
+            }
           />
         </div>
       </div>

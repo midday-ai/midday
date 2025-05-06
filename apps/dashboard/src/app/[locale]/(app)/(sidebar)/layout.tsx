@@ -2,9 +2,13 @@ import { ExportStatus } from "@/components/export-status";
 import { Header } from "@/components/header";
 import { GlobalSheets } from "@/components/sheets/global-sheets";
 import { Sidebar } from "@/components/sidebar";
-import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
+import {
+  HydrateClient,
+  batchPrefetch,
+  getQueryClient,
+  trpc,
+} from "@/trpc/server";
 import { getCountryCode, getCurrency } from "@midday/location";
-import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -16,6 +20,12 @@ export default async function Layout({
   const queryClient = getQueryClient();
   const currencyPromise = getCurrency();
   const countryCodePromise = getCountryCode();
+
+  // NOTE: These are used in the global sheets
+  batchPrefetch([
+    trpc.team.current.queryOptions(),
+    trpc.invoice.defaultSettings.queryOptions(),
+  ]);
 
   // NOTE: Right now we want to fetch the user and hydrate the client
   // Next steps would be to prefetch and suspense

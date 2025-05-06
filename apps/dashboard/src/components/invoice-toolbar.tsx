@@ -1,6 +1,5 @@
 "use client";
 
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { Button } from "@midday/ui/button";
 import {
   Tooltip,
@@ -9,11 +8,8 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { motion } from "framer-motion";
-import {
-  MdChatBubbleOutline,
-  MdContentCopy,
-  MdOutlineFileDownload,
-} from "react-icons/md";
+import { MdContentCopy, MdOutlineFileDownload } from "react-icons/md";
+import { useCopyToClipboard } from "usehooks-ts";
 import { InvoiceViewers } from "./invoice-viewers";
 
 export type Customer = {
@@ -34,11 +30,11 @@ export default function InvoiceToolbar({
   customer,
   viewedAt,
 }: Props) {
-  const { setParams } = useInvoiceParams();
+  const [, copy] = useCopyToClipboard();
 
   const handleCopyLink = () => {
     const url = window.location.href;
-    navigator.clipboard.writeText(url);
+    copy(url);
   };
 
   return (
@@ -91,32 +87,6 @@ export default function InvoiceToolbar({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-
-        {/* <TooltipProvider delayDuration={0}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full size-8 relative"
-                onClick={() => setParams({ type: "comments", invoiceId: id })}
-              >
-                <div className="rounded-full size-1 absolute bg-[#FFD02B] right-[3px] top-[3px] ring-2 ring-background">
-                  <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[ping_1s_ease-in-out_5]" />
-                  <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-75" />
-                  <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-50" />
-                </div>
-                <MdChatBubbleOutline />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent
-              sideOffset={15}
-              className="text-[10px] px-2 py-1 rounded-sm font-medium"
-            >
-              <p>Comment</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider> */}
 
         <InvoiceViewers customer={customer} viewedAt={viewedAt} />
       </div>

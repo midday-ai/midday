@@ -22,6 +22,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import { useCopyToClipboard } from "usehooks-ts";
 import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
 import { MatchTransaction } from "./match-transaction";
 
@@ -33,6 +34,7 @@ export function InboxDetails() {
   const { toast } = useToast();
   const [showFallback, setShowFallback] = useState(false);
   const { data: user } = useUserQuery();
+  const [, copy] = useCopyToClipboard();
 
   const id = params.inboxId;
 
@@ -153,18 +155,16 @@ export function InboxDetails() {
     setShowFallback(false);
   }, [data]);
 
-  const handleCopyLink = async () => {
+  const handleCopyLink = () => {
     if (!data) return;
 
-    try {
-      await navigator.clipboard.writeText(`${getUrl()}/inbox?id=${data.id}`);
+    copy(`${getUrl()}/inbox?id=${data.id}`);
 
-      toast({
-        duration: 4000,
-        title: "Copied link to clipboard.",
-        variant: "success",
-      });
-    } catch {}
+    toast({
+      duration: 4000,
+      title: "Copied link to clipboard.",
+      variant: "success",
+    });
   };
 
   const fallback = showFallback || (!data?.website && data?.display_name);

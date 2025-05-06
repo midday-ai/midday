@@ -67,6 +67,10 @@ export function InvoiceActions({ status, id }: Props) {
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.invoiceSummary.queryKey(),
         });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.defaultSettings.queryKey(),
+        });
       },
     }),
   );

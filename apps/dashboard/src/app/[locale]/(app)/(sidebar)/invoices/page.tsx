@@ -33,7 +33,6 @@ export default async function Page(props: Props) {
   const { sort } = loadSortParams(searchParams);
 
   batchPrefetch([
-    trpc.team.current.queryOptions(),
     trpc.invoice.get.infiniteQueryOptions({
       filter,
       sort,
@@ -46,7 +45,6 @@ export default async function Page(props: Props) {
       status: "overdue",
     }),
     trpc.invoice.paymentStatus.queryOptions(),
-    trpc.invoice.defaultSettings.queryOptions(),
   ]);
 
   return (

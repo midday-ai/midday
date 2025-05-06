@@ -51,8 +51,6 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
     if (value && data) {
       const found = data.find((d) => d.id === value);
 
-      console.log(found);
-
       if (found) {
         setSelectedItem({
           id: found.id,
@@ -83,7 +81,6 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
       }
       selectedItem={selectedItem ?? undefined}
       onSelect={(item) => {
-        console.log(item);
         onChange(item);
       }}
       onCreate={(name) => {

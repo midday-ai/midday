@@ -1,4 +1,5 @@
 import { parseInputValue } from "@/components/invoice/utils";
+import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { UTCDate } from "@date-fns/utc";
 import { generateToken } from "@midday/invoice/token";
 import type { sendInvoiceEmail } from "@midday/jobs/tasks/invoice/email/send-email";
@@ -19,14 +20,14 @@ import {
   getNextInvoiceNumberQuery,
   getPaymentStatusQuery,
   getTeamByIdQuery,
+  getUserQuery,
   searchInvoiceNumberQuery,
 } from "@midday/supabase/queries";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { addMonths } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
-import { protectedProcedure } from "../init";
-import { createTRPCRouter } from "../init";
+import { draftInvoiceSchema } from "./schema";
 
 const defaultTemplate = {
   title: "Invoice",
@@ -138,34 +139,30 @@ export const invoiceRouter = createTRPCRouter({
       return data;
     }),
 
-  defaultSettings: protectedProcedure
-    // .input(
-    //   z.object({
-    //     timezone: z.string(),
-    //     locale: z.string(),
-    //   }),
-    // )
-    .query(async ({ input, ctx: { supabase, teamId } }) => {
+  defaultSettings: protectedProcedure.query(
+    async ({ ctx: { supabase, teamId, session } }) => {
       const countryCode = await getCountryCode();
 
       // Fetch invoice number, template, and team details concurrently
-      const [{ data: nextInvoiceNumber }, { data: template }, { data: team }] =
-        await Promise.all([
-          getNextInvoiceNumberQuery(supabase, teamId!),
-          getInvoiceTemplateQuery(supabase, teamId!),
-          getTeamByIdQuery(supabase, teamId!),
-        ]);
+      const [
+        { data: nextInvoiceNumber },
+        { data: template },
+        { data: team },
+        { data: user },
+      ] = await Promise.all([
+        getNextInvoiceNumberQuery(supabase, teamId!),
+        getInvoiceTemplateQuery(supabase, teamId!),
+        getTeamByIdQuery(supabase, teamId!),
+        getUserQuery(supabase, session.user.id),
+      ]);
 
       const currency =
         team?.base_currency ??
         currencies[countryCode as keyof typeof currencies] ??
         "USD";
 
-      // const timezone = input.timezone ?? (await getTimezone());
-      // const locale = input.locale ?? (await getLocale());
-
-      const timezone = await getTimezone();
-      const locale = await getLocale();
+      const timezone = user?.timezone ?? (await getTimezone());
+      const locale = user?.locale ?? (await getLocale());
 
       // Default to letter size for US/CA, A4 for rest of world
       const size = ["US", "CA"].includes(countryCode) ? "letter" : "a4";
@@ -226,6 +223,7 @@ export const invoiceRouter = createTRPCRouter({
         // Default values first
         id: uuidv4(),
         currency: currency.toUpperCase(),
+        status: "draft",
         size,
         include_tax,
         include_vat: !include_tax,
@@ -243,7 +241,7 @@ export const invoiceRouter = createTRPCRouter({
         customer_id: undefined,
         issue_date: new UTCDate().toISOString(),
         due_date: addMonths(new UTCDate(), 1).toISOString(),
-        line_items: [],
+        line_items: [{ name: "", quantity: 0, price: 0, vat: 0 }],
         tax: undefined,
         token: undefined,
         discount: undefined,
@@ -256,7 +254,8 @@ export const invoiceRouter = createTRPCRouter({
         vat: undefined,
         template: savedTemplate,
       };
-    }),
+    },
+  ),
 
   update: protectedProcedure
     .input(
@@ -284,80 +283,7 @@ export const invoiceRouter = createTRPCRouter({
     }),
 
   draft: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().uuid(),
-        template: z.object({
-          customer_label: z.string().optional(),
-          title: z.string().optional(),
-          from_label: z.string().optional(),
-          invoice_no_label: z.string().optional(),
-          issue_date_label: z.string().optional(),
-          due_date_label: z.string().optional(),
-          description_label: z.string().optional(),
-          price_label: z.string().optional(),
-          quantity_label: z.string().optional(),
-          total_label: z.string().optional(),
-          total_summary_label: z.string().optional(),
-          vat_label: z.string().optional(),
-          subtotal_label: z.string().optional(),
-          tax_label: z.string().optional(),
-          discount_label: z.string().optional(),
-          timezone: z.string().optional(),
-          payment_label: z.string().optional(),
-          note_label: z.string().optional(),
-          logo_url: z.string().optional().nullable(),
-          currency: z.string().optional(),
-          payment_details: z.string().optional().nullable(),
-          from_details: z.string().optional().nullable(),
-          date_format: z.string().optional(),
-          include_vat: z.boolean().optional().optional(),
-          include_tax: z.boolean().optional().optional(),
-          include_discount: z.boolean().optional(),
-          include_decimals: z.boolean().optional(),
-          include_units: z.boolean().optional(),
-          include_qr: z.boolean().optional(),
-          tax_rate: z.number().min(0).max(100).optional(),
-          vat_rate: z.number().min(0).max(100).optional(),
-          size: z.enum(["a4", "letter"]).optional(),
-          delivery_type: z.enum(["create", "create_and_send"]).optional(),
-          locale: z.string().optional(),
-        }),
-        from_details: z.string().nullable().optional(),
-        customer_details: z.string().nullable().optional(),
-        customer_id: z.string().uuid().nullable().optional(),
-        customer_name: z.string().nullable().optional(),
-        payment_details: z.string().nullable().optional(),
-        note_details: z.string().nullable().optional(),
-        due_date: z.string(),
-        issue_date: z.string(),
-        invoice_number: z.string(),
-        logo_url: z.string().optional().nullable(),
-        vat: z.number().nullable().optional(),
-        tax: z.number().nullable().optional(),
-        discount: z.number().nullable().optional(),
-        subtotal: z.number().nullable().optional(),
-        top_block: z.any().nullable().optional(),
-        bottom_block: z.any().nullable().optional(),
-        amount: z.number().nullable().optional(),
-        line_items: z
-          .array(
-            z.object({
-              name: z.string().optional(),
-              quantity: z
-                .number()
-                .min(0, "Quantity must be at least 0")
-                .optional(),
-              unit: z.string().optional().nullable(),
-              price: z.number().safe().optional(),
-              vat: z.number().min(0, "VAT must be at least 0").optional(),
-              tax: z.number().min(0, "Tax must be at least 0").optional(),
-            }),
-          )
-          .optional(),
-        token: z.string().optional(),
-      }),
-    )
+    .input(draftInvoiceSchema)
     .mutation(async ({ input, ctx: { supabase, teamId, session } }) => {
       const token = input.token ?? (await generateToken(input.id));
 
@@ -393,12 +319,12 @@ export const invoiceRouter = createTRPCRouter({
         throw new Error("Invoice not found");
       }
 
-      // Only send the email if the delivery type is create_and_send
-      if (input.deliveryType === "create_and_send") {
-        await tasks.trigger<typeof sendInvoiceEmail>("send-invoice-email", {
-          invoiceId: data.id,
-        });
-      }
+      // // Only send the email if the delivery type is create_and_send
+      // if (input.deliveryType === "create_and_send") {
+      //   await tasks.trigger<typeof sendInvoiceEmail>("send-invoice-email", {
+      //     invoiceId: data.id,
+      //   });
+      // }
 
       await tasks.trigger<typeof generateInvoice>("generate-invoice", {
         invoiceId: data.id,

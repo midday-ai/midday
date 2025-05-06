@@ -15,6 +15,7 @@ import { useToast } from "@midday/ui/use-toast";
 import { addDays, addYears } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
+import { useCopyToClipboard } from "usehooks-ts";
 
 const options = [
   {
@@ -36,6 +37,7 @@ export function ExportStatus() {
   const [toastId, setToastId] = useState(null);
   const { exportData, setExportData } = useExportStore();
   const { status, progress, result } = useExportStatus(exportData);
+  const [, copy] = useCopyToClipboard();
 
   const shareFile = useAction(shareFileAction, {
     onError: () => {
@@ -45,8 +47,8 @@ export function ExportStatus() {
         title: "Something went wrong please try again.",
       });
     },
-    onSuccess: async ({ data }) => {
-      await navigator.clipboard.writeText(data ?? "");
+    onSuccess: ({ data }) => {
+      copy(data ?? "");
 
       toast({
         duration: 2500,

@@ -96,13 +96,18 @@ export function CustomerForm({ data }: Props) {
   const isEdit = !!data;
 
   const { setParams: setCustomerParams, name } = useCustomerParams();
-  const { setParams: setInvoiceParams, invoiceId } = useInvoiceParams();
+  const { setParams: setInvoiceParams, type } = useInvoiceParams();
+  const fromInvoice = type === "create" || type === "edit";
 
   const upsertCustomerMutation = useMutation(
     trpc.customers.upsert.mutationOptions({
       onSuccess: (data) => {
         queryClient.invalidateQueries({
           queryKey: trpc.customers.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.customers.get.queryKey(),
         });
 
         queryClient.invalidateQueries({
@@ -113,7 +118,7 @@ export function CustomerForm({ data }: Props) {
         setCustomerParams(null);
 
         // If the customer is created from an invoice, set the customer as the selected customer
-        if (data && Boolean(invoiceId)) {
+        if (data && fromInvoice) {
           setInvoiceParams({ selectedCustomerId: data.id });
         }
       },
