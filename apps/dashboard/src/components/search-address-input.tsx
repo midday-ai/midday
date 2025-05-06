@@ -10,10 +10,10 @@ import {
   Command as CommandPrimitive,
 } from "@midday/ui/command";
 import { useJsApiLoader } from "@react-google-maps/api";
-import { useClickAway } from "@uidotdev/usehooks";
 import { Check } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import usePlacesAutoComplete, { getDetails } from "use-places-autocomplete";
+import { useOnClickOutside } from "usehooks-ts";
 
 type Libraries = Parameters<typeof useJsApiLoader>[0]["libraries"];
 const libraries: Libraries = ["places"];
@@ -88,7 +88,7 @@ export function SearchAddressInput({
   emptyMessage = "No results found.",
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
-
+  const ref = useRef<HTMLDivElement>(null);
   const [isOpen, setOpen] = useState(false);
   const [selected, setSelected] = useState<Option | null>(null);
   const [inputValue, setInputValue] = useState<string>(defaultValue || "");
@@ -176,7 +176,7 @@ export function SearchAddressInput({
     onSelect(addressDetails);
   };
 
-  const ref = useClickAway(() => {
+  useOnClickOutside(ref, () => {
     setOpen(false);
   });
 

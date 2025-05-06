@@ -5,15 +5,18 @@ import { getCountry } from "@midday/location";
 import { generateObject } from "ai";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
-import { getVatRateSchema } from "../schema";
 
 export const getVatRateAction = authActionClient
-  .schema(getVatRateSchema)
+  .schema(
+    z.object({
+      name: z.string().min(2),
+    }),
+  )
   .metadata({
     name: "get-vat-rate",
   })
   .action(async ({ parsedInput: { name } }) => {
-    const country = getCountry();
+    const country = await getCountry();
 
     const { object } = await generateObject({
       model: openai("gpt-4o-mini"),
@@ -24,7 +27,6 @@ export const getVatRateAction = authActionClient
         You are an expert in VAT rates for the specific country and category \n
         What's the VAT rate for category ${name} in ${country.name}?
       `,
-      temperature: 0.8,
     });
 
     return {

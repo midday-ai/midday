@@ -4,6 +4,7 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useCopyToClipboard } from "usehooks-ts";
 
 type Props = {
   value: string;
@@ -12,17 +13,16 @@ type Props = {
 
 export function CopyInput({ value, className }: Props) {
   const [isCopied, setCopied] = useState(false);
+  const [, copy] = useCopyToClipboard();
 
-  const handleClipboard = async () => {
-    try {
-      setCopied(true);
+  const handleClipboard = () => {
+    setCopied(true);
 
-      await navigator.clipboard.writeText(value);
+    copy(value);
 
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    } catch {}
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
   };
 
   return (

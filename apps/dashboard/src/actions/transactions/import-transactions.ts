@@ -2,7 +2,8 @@
 
 import { LogEvents } from "@midday/events/events";
 import { formatAmountValue } from "@midday/import";
-import { importTransactions } from "jobs/tasks/transactions/import";
+import type { importTransactions } from "@midday/jobs/tasks/transactions/import";
+import { tasks } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
 
@@ -14,8 +15,6 @@ export const importTransactionsAction = authActionClient
       currency: z.string(),
       currentBalance: z.string().optional(),
       inverted: z.boolean(),
-      table: z.array(z.record(z.string(), z.string())).optional(),
-      importType: z.enum(["csv", "image"]),
       mappings: z.object({
         amount: z.string(),
         date: z.string(),
@@ -40,10 +39,8 @@ export const importTransactionsAction = authActionClient
         mappings,
         currentBalance,
         inverted,
-        table,
-        importType,
       },
-      ctx: { user, supabase },
+      ctx: { teamId, supabase },
     }) => {
       // Update currency for account
       const balance = currentBalance
@@ -55,15 +52,17 @@ export const importTransactionsAction = authActionClient
         .update({ currency, balance })
         .eq("id", bankAccountId);
 
-      const event = await importTransactions.trigger({
-        filePath,
-        bankAccountId,
-        currency,
-        mappings,
-        teamId: user.team_id!,
-        inverted,
-        importType,
-      });
+      const event = await tasks.trigger<typeof importTransactions>(
+        "import-transactions",
+        {
+          filePath,
+          bankAccountId,
+          currency,
+          mappings,
+          teamId: teamId!,
+          inverted,
+        },
+      );
 
       return event;
     },

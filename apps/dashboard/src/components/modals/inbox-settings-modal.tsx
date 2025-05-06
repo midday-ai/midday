@@ -1,29 +1,25 @@
 "use client";
 
+import { useUserQuery } from "@/hooks/use-user";
+import { getInboxEmail } from "@midday/inbox";
 import { Button } from "@midday/ui/button";
 import {
   DialogContent,
-  DialogDescription,
+  // DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
 import { Dialog } from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
 import { useState } from "react";
-import { InboxSettings } from "../inbox-settings";
+import { CopyInput } from "../copy-input";
+// import { ConnectGmail } from "../inbox/connect-gmail";
+// import { ConnectOutlook } from "../inbox/connect-outlook";
+// import { InboxConnectedAccounts } from "../inbox/inbox-connected-accounts";
 
-type Props = {
-  forwardEmail: string;
-  inboxForwarding: boolean;
-  inboxId: string;
-};
-
-export function InboxSettingsModal({
-  forwardEmail,
-  inboxForwarding,
-  inboxId,
-}: Props) {
+export function InboxSettingsModal() {
   const [open, setOpen] = useState(false);
+  const { data: user } = useUserQuery();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -38,19 +34,28 @@ export function InboxSettingsModal({
         onOpenAutoFocus={(evt) => evt.preventDefault()}
       >
         <div className="p-4">
-          <DialogHeader className="mb-8">
+          <DialogHeader className="mb-4">
             <DialogTitle>Settings</DialogTitle>
-            <DialogDescription>
-              Make changes to your inbox here. Click save when you're done.
-            </DialogDescription>
+            {/* <DialogDescription>
+              Connect your email provider or forward emails to your Midday
+              address to. Midday will find attachments and suggest transactions
+              to match them with.
+            </DialogDescription> */}
           </DialogHeader>
 
-          <InboxSettings
-            forwardEmail={forwardEmail}
-            inboxForwarding={inboxForwarding}
-            inboxId={inboxId}
-            onSuccess={() => setOpen(false)}
-          />
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium">Inbox email</span>
+            {user?.team?.inbox_id && (
+              <CopyInput value={getInboxEmail(user.team.inbox_id)} />
+            )}
+          </div>
+
+          {/* <InboxConnectedAccounts /> */}
+
+          <div className="flex flex-col gap-2 mt-6">
+            {/* <ConnectGmail /> */}
+            {/* <ConnectOutlook /> */}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

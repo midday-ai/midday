@@ -1,14 +1,13 @@
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { differenceInDays } from "date-fns";
 
 const DISPLAY_DAYS = 30;
 const WARNING_DAYS = 14;
 const ERROR_DAYS = 7;
 
-type Connection = {
-  expires_at?: string | null;
-};
+type Connection = NonNullable<RouterOutputs["bankConnections"]["get"]>[number];
 
-export function getConnectionsStatus(connections: Connection[] | null) {
+export function getConnectionsStatus(connections: Connection[]) {
   const warning = connections?.some(
     (connection) =>
       connection.expires_at &&

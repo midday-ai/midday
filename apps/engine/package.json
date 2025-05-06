@@ -9,21 +9,21 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
-    "@hono/swagger-ui": "^0.5.0",
-    "@hono/zod-openapi": "^0.18.4",
-    "@hono/zod-validator": "^0.4.3",
-    "hono": "^4.7.2",
-    "jose": "^6.0.6",
-    "plaid": "^31.1.0",
-    "typesense": "^2.0.2",
-    "workers-ai-provider": "^0.0.13",
-    "xior": "^0.6.3",
-    "zod": "^3.24.2"
+    "@hono/swagger-ui": "^0.5.1",
+    "@hono/zod-openapi": "^0.19.6",
+    "@hono/zod-validator": "^0.5.0",
+    "hono": "^4.7.8",
+    "jose": "^6.0.10",
+    "plaid": "^33.0.0",
+    "typesense": "^2.0.3",
+    "workers-ai-provider": "^0.3.0",
+    "xior": "^0.7.8",
+    "zod": "^3.24.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250224.0",
-    "@types/bun": "^1.2.3",
-    "wrangler": "^3.109.3"
+    "@cloudflare/workers-types": "^4.20250430.0",
+    "@types/bun": "^1.2.11",
+    "wrangler": "^4.14.1"
   },
   "exports": {
     "./client": "./src/client/index.ts",

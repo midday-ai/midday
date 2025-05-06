@@ -1,12 +1,12 @@
 import { Input } from "@midday/ui/input";
-import { type ChangeEventHandler, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { VatAssistant } from "./vat-assistant";
 
 type Props = {
   name: string;
-  onChange: (value: ChangeEventHandler<HTMLInputElement>) => void;
+  onChange: (value: string) => void;
   onSelect: (vat: number) => void;
-  value?: string | null;
+  value?: number | null;
 };
 
 export function VatInput({
@@ -19,7 +19,7 @@ export function VatInput({
   const [value, setValue] = useState(defaultValue);
 
   const handleOnSelect = (vat: number) => {
-    setValue(vat.toString());
+    setValue(vat);
     onSelect(vat);
   };
 
@@ -27,7 +27,9 @@ export function VatInput({
     <div className="relative">
       <Input
         key={value}
-        onChange={onChange}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          onChange(e.target.value)
+        }
         autoFocus={false}
         placeholder="VAT"
         className="remove-arrow"
@@ -42,7 +44,7 @@ export function VatInput({
 
       <VatAssistant
         name={name}
-        value={value}
+        value={value?.toString() ?? ""}
         onSelect={handleOnSelect}
         isFocused={isFocused}
       />

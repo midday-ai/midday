@@ -1,6 +1,6 @@
 "use client";
 
-import { updateUserAction } from "@/actions/update-user-action";
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 import {
   Card,
   CardContent,
@@ -15,14 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { useAction } from "next-safe-action/hooks";
 
-type Props = {
-  dateFormat: string;
-};
-
-export function DateFormatSettings({ dateFormat }: Props) {
-  const action = useAction(updateUserAction);
+export function DateFormatSettings() {
+  const { data: user } = useUserQuery();
+  const updateUserMutation = useUserMutation();
 
   return (
     <Card className="flex justify-between items-center">
@@ -35,10 +31,14 @@ export function DateFormatSettings({ dateFormat }: Props) {
 
       <CardContent>
         <Select
-          defaultValue={dateFormat}
+          defaultValue={user.date_format ?? undefined}
           onValueChange={(value) => {
-            action.execute({
-              date_format: value as "dd/MM/yyyy" | "MM/dd/yyyy" | "yyyy-MM-dd",
+            updateUserMutation.mutate({
+              date_format: value as
+                | "dd/MM/yyyy"
+                | "MM/dd/yyyy"
+                | "yyyy-MM-dd"
+                | "dd.MM.yyyy",
             });
           }}
         >
@@ -49,6 +49,7 @@ export function DateFormatSettings({ dateFormat }: Props) {
             <SelectItem value="dd/MM/yyyy">dd/MM/yyyy</SelectItem>
             <SelectItem value="MM/dd/yyyy">MM/dd/yyyy</SelectItem>
             <SelectItem value="yyyy-MM-dd">yyyy-MM-dd</SelectItem>
+            <SelectItem value="dd.MM.yyyy">dd.MM.yyyy</SelectItem>
           </SelectContent>
         </Select>
       </CardContent>

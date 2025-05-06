@@ -1,9 +1,12 @@
+"use client";
+
+import { useConnectParams } from "@/hooks/use-connect-params";
 import { useInitialConnectionStatus } from "@/hooks/use-initial-connection-status";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const Lottie = dynamic(() => import("lottie-react"), {
@@ -25,9 +28,10 @@ export function LoadingTransactionsEvent({
   onClose,
   setActiveTab,
 }: Props) {
+  const queryClient = useQueryClient();
   const [step, setStep] = useState(1);
   const { resolvedTheme } = useTheme();
-  const router = useRouter();
+  const { setParams } = useConnectParams();
 
   const { status } = useInitialConnectionStatus({
     runId,
@@ -42,9 +46,12 @@ export function LoadingTransactionsEvent({
     if (status === "COMPLETED") {
       setStep(3);
 
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries();
+
       setTimeout(() => {
         setRunId(undefined);
-        router.push("/");
+        setParams(null);
       }, 1000);
     }
   }, [status]);

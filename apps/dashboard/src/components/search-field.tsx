@@ -10,10 +10,8 @@ type Props = {
   shallow?: boolean;
 };
 
-export function SearchField({ placeholder, shallow = false }: Props) {
-  const [search, setSearch] = useQueryState("q", {
-    shallow,
-  });
+export function SearchField({ placeholder }: Props) {
+  const [search, setSearch] = useQueryState("q");
 
   useHotkeys("esc", () => setSearch(null), {
     enableOnFormTags: true,

@@ -1,9 +1,13 @@
 import { getDiscount, getPlans } from "@/utils/plans";
 import { api } from "@/utils/polar";
-import { getSession, getUser } from "@midday/supabase/cached-queries";
+import { getSession } from "@midday/supabase/cached-queries";
+import { getTeamByIdQuery } from "@midday/supabase/queries";
+import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 
 export const GET = async (req: NextRequest) => {
+  const supabase = await createClient();
+
   const {
     data: { session },
   } = await getSession();
@@ -26,13 +30,13 @@ export const GET = async (req: NextRequest) => {
     throw new Error("Invalid plan");
   }
 
-  const userData = await getUser();
+  const { data: team } = await getTeamByIdQuery(supabase, teamId!);
 
-  if (!userData?.data?.team) {
+  if (!team) {
     throw new Error("Team not found");
   }
 
-  const discountId = getDiscount(userData.data.team.created_at, planType);
+  const discountId = getDiscount(planType);
 
   const successUrl = new URL("/api/checkout/success", req.nextUrl.origin);
   successUrl.searchParams.set("redirectPath", redirectPath);
@@ -42,15 +46,15 @@ export const GET = async (req: NextRequest) => {
   }
 
   const checkout = await api.checkouts.create({
-    productId: selectedPlan.id,
+    products: [selectedPlan.id],
     successUrl: successUrl.toString(),
-    customerExternalId: teamId,
-    customerEmail: userData.data.email ?? undefined,
-    customerName: userData.data.full_name ?? undefined,
+    customerExternalId: team.id,
+    customerEmail: session.user.email ?? undefined,
+    customerName: team.name ?? undefined,
     discountId: discountId?.id,
     metadata: {
-      teamId: teamId ?? "",
-      companyName: userData.data.team?.name ?? "",
+      teamId: team.id,
+      companyName: team.name ?? "",
     },
   });
 

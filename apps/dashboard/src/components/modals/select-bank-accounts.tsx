@@ -1,11 +1,10 @@
 "use client";
 
-import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
-import { getAccounts } from "@/actions/institutions/get-accounts";
-import { connectBankAccountSchema } from "@/actions/schema";
 import { sendSupportAction } from "@/actions/send-support-action";
 import { useConnectParams } from "@/hooks/use-connect-params";
+import { useZodForm } from "@/hooks/use-zod-form";
 import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
 import { getInitials } from "@/utils/format";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
@@ -26,10 +25,13 @@ import {
 } from "@midday/ui/form";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { Switch } from "@midday/ui/switch";
 import { Tabs, TabsContent } from "@midday/ui/tabs";
 import { Textarea } from "@midday/ui/textarea";
 import { useToast } from "@midday/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
@@ -38,37 +40,18 @@ import z from "zod";
 import { FormatAmount } from "../format-amount";
 import { LoadingTransactionsEvent } from "../loading-transactions-event";
 
-type Account = {
-  id: string;
-  name: string;
-  balance: number;
-  currency: string;
-  type: string;
-  subtype: string;
-  mask: string;
-  institution: {
-    id: string;
-    name: string;
-  };
-};
-
 function RowsSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <Skeleton className="h-9 w-9 rounded-full" />
-        <div className="space-y-2">
-          <Skeleton className="h-3.5 w-[210px] rounded-none" />
-          <Skeleton className="h-2.5 w-[180px] rounded-none" />
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index.toString()} className="flex items-center space-x-4">
+          <Skeleton className="h-9 w-9 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-3.5 w-[250px] rounded-none" />
+            <Skeleton className="h-2.5 w-[200px] rounded-none" />
+          </div>
         </div>
-      </div>
-      <div className="flex items-center space-x-4">
-        <Skeleton className="h-9 w-9 rounded-full" />
-        <div className="space-y-2">
-          <Skeleton className="h-3.5 w-[250px] rounded-none" />
-          <Skeleton className="h-2.5 w-[200px] rounded-none" />
-        </div>
-      </div>
+      ))}
     </div>
   );
 }
@@ -149,12 +132,43 @@ function SupportForm() {
   );
 }
 
+const formSchema = z.object({
+  referenceId: z.string().nullable().optional(), // GoCardLess
+  accessToken: z.string().nullable().optional(), // Teller
+  enrollmentId: z.string().nullable().optional(), // Teller
+  provider: z.enum(["gocardless", "plaid", "teller", "enablebanking"]),
+  accounts: z
+    .array(
+      z.object({
+        account_id: z.string(),
+        bank_name: z.string(),
+        balance: z.number().optional(),
+        currency: z.string(),
+        name: z.string(),
+        institution_id: z.string(),
+        account_reference: z.string().nullable().optional(), // EnableBanking & GoCardLess
+        enabled: z.boolean(),
+        logo_url: z.string().nullable().optional(),
+        expires_at: z.string().nullable().optional(), // EnableBanking & GoCardLess
+        type: z.enum([
+          "credit",
+          "depository",
+          "other_asset",
+          "loan",
+          "other_liability",
+        ]),
+      }),
+    )
+    .refine((accounts) => accounts.some((account) => account.enabled), {
+      message: "At least one account must be selected.", // You might want a more specific message depending on UI context
+    }),
+});
+
 export function SelectBankAccountsModal() {
   const { toast } = useToast();
+  const trpc = useTRPC();
   const t = useI18n();
 
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(true);
   const [runId, setRunId] = useState<string>();
   const [accessToken, setAccessToken] = useState<string>();
   const [activeTab, setActiveTab] = useState<
@@ -174,6 +188,43 @@ export function SelectBankAccountsModal() {
 
   const isOpen = step === "account";
 
+  const { data, isLoading } = useQuery(
+    trpc.institutions.accounts.queryOptions(
+      {
+        id: ref ?? undefined,
+        accessToken: token ?? undefined,
+        institutionId: institution_id ?? undefined,
+        provider: provider as
+          | "gocardless"
+          | "plaid"
+          | "teller"
+          | "enablebanking",
+      },
+      {
+        enabled: isOpen,
+      },
+    ),
+  );
+
+  const connectBankConnectionMutation = useMutation(
+    trpc.bankConnections.create.mutationOptions({
+      onError: () => {
+        toast({
+          duration: 3500,
+          variant: "error",
+          title: "Something went wrong please try again.",
+        });
+      },
+      onSuccess: (data) => {
+        if (data?.id) {
+          setRunId(data.id);
+          setAccessToken(data.publicAccessToken);
+          setActiveTab("loading");
+        }
+      },
+    }),
+  );
+
   useEffect(() => {
     if (error) {
       // NOTE: On GoCardLess cancel flow
@@ -187,101 +238,46 @@ export function SelectBankAccountsModal() {
   }, [error, setParams]);
 
   const onClose = () => {
-    setParams(
-      { step: null },
-      {
-        // NOTE: Rerender so the overview modal is visible
-        shallow: false,
-      },
-    );
+    setParams(null);
   };
 
-  const connectBankAction = useAction(connectBankAccountAction, {
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-    onSuccess: ({ data }) => {
-      if (data?.id) {
-        setRunId(data.id);
-        setAccessToken(data.publicAccessToken);
-        setActiveTab("loading");
-      }
-    },
-  });
-
-  const form = useForm<z.infer<typeof connectBankAccountSchema>>({
-    resolver: zodResolver(connectBankAccountSchema),
+  const form = useZodForm(formSchema, {
     defaultValues: {
+      accessToken: token ?? undefined,
+      enrollmentId: enrollment_id ?? undefined,
+      referenceId: ref ?? undefined,
+      provider: provider as "gocardless" | "plaid" | "teller" | "enablebanking",
       accounts: [],
     },
   });
 
-  async function onSubmit(values: z.infer<typeof connectBankAccountSchema>) {
-    connectBankAction.execute(values);
-  }
-
   useEffect(() => {
-    async function fetchData() {
-      const { data } = await getAccounts({
-        provider: provider as
-          | "teller"
-          | "plaid"
-          | "gocardless"
-          | "enablebanking",
-        id: ref ?? undefined,
-        accessToken: token ?? undefined,
-        institutionId: institution_id ?? undefined,
-      });
+    form.reset({
+      provider: provider as "gocardless" | "plaid" | "teller" | "enablebanking",
+      accessToken: token ?? undefined,
+      enrollmentId: enrollment_id ?? undefined,
+      // GoCardLess Requestion ID or Plaid Item ID
+      referenceId: ref ?? undefined,
+      accounts: data?.map((account) => ({
+        name: account.name,
+        institution_id: account.institution.id,
+        logo_url: account.institution?.logo,
+        account_id: account.id,
+        account_reference: account.resource_id,
+        bank_name: account.institution.name,
+        // TODO: Remove once we have a fix and return currency from engine
+        currency: account.currency ?? account.balance.currency,
+        balance: account.balance.amount,
+        enabled: true,
+        type: account.type,
+        expires_at: account.expires_at,
+      })),
+    });
+  }, [data, ref]);
 
-      setAccounts(data);
-      setLoading(false);
-
-      if (!form.formState.isValid) {
-        form.reset({
-          provider: provider as
-            | "gocardless"
-            | "plaid"
-            | "teller"
-            | "enablebanking",
-          accessToken: token ?? undefined,
-          enrollmentId: enrollment_id ?? undefined,
-          // GoCardLess Requestion ID or Plaid Item ID
-          referenceId: ref ?? undefined,
-          accounts: data.map((account) => ({
-            name: account.name,
-            institution_id: account.institution.id,
-            logo_url: account.institution?.logo,
-            account_id: account.id,
-            account_reference: account.resource_id,
-            bank_name: account.institution.name,
-            // TODO: Remove once we have a fix and return currency from engine
-            currency: account.currency ?? account.balance.currency,
-            balance: account.balance.amount,
-            enabled: true,
-            type: account.type,
-            expires_at: account.expires_at,
-          })),
-        });
-      }
-    }
-
-    if (isOpen && !accounts.length) {
-      fetchData();
-    }
-  }, [
-    isOpen,
-    provider,
-    form,
-    accounts,
-    ref,
-    token,
-    institution_id,
-    enrollment_id,
-  ]);
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    connectBankConnectionMutation.mutate(values);
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -307,9 +303,9 @@ export function SelectBankAccountsModal() {
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="space-y-6 h-[300px] overflow-auto pb-[100px] relative scrollbar-hide"
                   >
-                    {loading && <RowsSkeleton />}
+                    {isLoading && <RowsSkeleton />}
 
-                    {accounts.map((account) => (
+                    {data?.map((account) => (
                       <FormField
                         key={account.id}
                         control={form.control}
@@ -350,7 +346,7 @@ export function SelectBankAccountsModal() {
                                 <FormControl>
                                   <Switch
                                     checked={
-                                      field.value.find(
+                                      field.value?.find(
                                         (value) =>
                                           value.account_id === account.id,
                                       )?.enabled
@@ -379,22 +375,17 @@ export function SelectBankAccountsModal() {
                     ))}
 
                     <div className="fixed bottom-0 left-0 right-0 z-10 bg-background pt-4 px-6 pb-6">
-                      <Button
+                      <SubmitButton
                         className="w-full"
                         type="submit"
+                        isSubmitting={connectBankConnectionMutation.isPending}
                         disabled={
-                          connectBankAction.status === "executing" ||
-                          !form
-                            .getValues("accounts")
-                            .find((account) => account.enabled)
+                          connectBankConnectionMutation.isPending ||
+                          !form.formState.isValid
                         }
                       >
-                        {connectBankAction.status === "executing" ? (
-                          <Loader2 className="w-4 h-4 animate-spin pointer-events-none" />
-                        ) : (
-                          "Save"
-                        )}
-                      </Button>
+                        Save
+                      </SubmitButton>
 
                       <div className="flex justify-center mt-4">
                         <button

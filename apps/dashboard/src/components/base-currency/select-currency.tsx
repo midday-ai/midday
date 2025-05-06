@@ -1,63 +1,77 @@
 "use client";
 
-import { updateCurrencyAction } from "@/actions/transactions/update-currency-action";
 import { SelectCurrency as SelectCurrencyBase } from "@/components/select-currency";
 import { useSyncStatus } from "@/hooks/use-sync-status";
+import { useTeamMutation } from "@/hooks/use-team";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useTRPC } from "@/trpc/client";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { Button } from "@midday/ui/button";
 import { useToast } from "@midday/ui/use-toast";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
+export function SelectCurrency() {
+  const trpc = useTRPC();
   const { toast } = useToast();
   const [isSyncing, setSyncing] = useState(false);
   const [runId, setRunId] = useState<string | undefined>();
   const [accessToken, setAccessToken] = useState<string | undefined>();
+  const updateTeamMutation = useTeamMutation();
+  const { data: team } = useTeamQuery();
+
+  const updateBaseCurrencyMutation = useMutation(
+    trpc.team.updateBaseCurrency.mutationOptions({
+      onMutate: () => {
+        setSyncing(true);
+      },
+      onSuccess: (data) => {
+        if (data) {
+          setRunId(data.id);
+          setAccessToken(data.publicAccessToken);
+        }
+      },
+      onError: () => {
+        setRunId(undefined);
+
+        toast({
+          duration: 3500,
+          variant: "error",
+          title: "Something went wrong pleaase try again.",
+        });
+      },
+    }),
+  );
 
   const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
-  const updateCurrency = useAction(updateCurrencyAction, {
-    onExecute: () => setSyncing(true),
-    onSuccess: ({ data }) => {
-      if (data) {
-        setRunId(data.id);
-        setAccessToken(data.publicAccessToken);
-      }
-    },
-    onError: () => {
-      setRunId(undefined);
-
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong pleaase try again.",
-      });
-    },
-  });
-
   const handleChange = async (baseCurrency: string) => {
-    if (baseCurrency !== defaultValue) {
-      toast({
-        title: "Update base currency",
-        description:
-          "This will update the base currency for all transactions and account balances.",
-        duration: 7000,
-        footer: (
-          <Button
-            onClick={() =>
-              updateCurrency.execute({
-                baseCurrency: baseCurrency.toUpperCase(),
-              })
-            }
-          >
-            Update
-          </Button>
-        ),
-      });
-
-      return;
-    }
+    updateTeamMutation.mutate(
+      {
+        base_currency: baseCurrency.toUpperCase(),
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Update base currency",
+            description:
+              "This will update the base currency for all transactions and account balances.",
+            duration: 7000,
+            footer: (
+              <Button
+                onClick={() =>
+                  updateBaseCurrencyMutation.mutate({
+                    baseCurrency: baseCurrency.toUpperCase(),
+                  })
+                }
+              >
+                Update
+              </Button>
+            ),
+          });
+        },
+      },
+    );
   };
 
   useEffect(() => {
@@ -102,7 +116,7 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
       <SelectCurrencyBase
         onChange={handleChange}
         currencies={uniqueCurrencies}
-        value={defaultValue}
+        value={team?.base_currency ?? undefined}
       />
     </div>
   );

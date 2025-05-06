@@ -1,9 +1,5 @@
-import { createCategoriesAction } from "@/actions/create-categories-action";
-import {
-  type CreateCategoriesFormValues,
-  createCategoriesSchema,
-} from "@/actions/schema";
 import { InputColor } from "@/components/input-color";
+import { useTRPC } from "@/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
@@ -16,11 +12,11 @@ import {
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
-import { useToast } from "@midday/ui/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
 import { VatInput } from "../vat-input";
 
 type Props = {
@@ -29,33 +25,49 @@ type Props = {
 };
 
 const newItem = {
-  name: undefined,
-  description: undefined,
+  name: "",
+  description: "",
   vat: undefined,
   color: undefined,
 };
 
+interface CategoryFormValues {
+  name: string;
+  description?: string;
+  color?: string;
+  vat?: number;
+}
+
+interface CreateCategoriesFormValues {
+  categories: CategoryFormValues[];
+}
+
+const createCategoriesSchema = z.object({
+  categories: z.array(
+    z.object({
+      name: z.string().min(1, "Name is required"),
+      description: z.string().optional(),
+      color: z.string().optional(),
+      vat: z.number().optional(),
+    }),
+  ),
+});
+
 export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
-  const { toast } = useToast();
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
-  const createCategories = useAction(createCategoriesAction, {
-    onSuccess: () => {
-      onOpenChange(false);
+  const categoriesMutation = useMutation(
+    trpc.transactionCategories.createMany.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactionCategories.get.queryKey(),
+        });
 
-      toast({
-        title: "Successfully created categories.",
-        variant: "success",
-        duration: 3500,
-      });
-    },
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
+        onOpenChange(false);
+      },
+    }),
+  );
 
   const form = useForm<CreateCategoriesFormValues>({
     resolver: zodResolver(createCategoriesSchema),
@@ -68,15 +80,11 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
     form.reset({
       categories: [newItem],
     });
-  }, [isOpen]);
+  }, [isOpen, form]);
 
-  const onSubmit = form.handleSubmit((data) => {
-    createCategories.execute({
-      categories: data.categories.filter(
-        (category) => category.name !== undefined,
-      ),
-    });
-  });
+  const onSubmit = (data: CreateCategoriesFormValues) => {
+    categoriesMutation.mutate(data.categories);
+  };
 
   const { fields, append } = useFieldArray({
     name: "categories",
@@ -133,17 +141,18 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                           <FormItem className="flex-1">
                             <FormControl>
                               <VatInput
-                                value={field.value}
-                                name={form.watch(`categories.${index}.name`)}
-                                onChange={(evt) => {
-                                  field.onChange(evt.target.value);
+                                value={field.value?.toString() ?? ""}
+                                name={
+                                  form.watch(`categories.${index}.name`) ?? ""
+                                }
+                                onChange={(value: string) => {
+                                  field.onChange(
+                                    value ? Number(value) : undefined,
+                                  );
                                 }}
                                 onSelect={(vat) => {
                                   if (vat) {
-                                    form.setValue(
-                                      `categories.${index}.vat`,
-                                      vat.toString(),
-                                    );
+                                    field.onChange(vat);
                                   }
                                 }}
                               />
@@ -178,7 +187,7 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
               type="button"
               className="mt-4 space-x-1"
               onClick={() => {
-                append(newItem, { shouldFocus: false });
+                append(newItem);
               }}
             >
               <Icons.Add />
@@ -193,11 +202,8 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                   </span>
                 )}
               </div>
-              <Button
-                type="submit"
-                disabled={createCategories.status === "executing"}
-              >
-                {createCategories.status === "executing" ? (
+              <Button type="submit" disabled={categoriesMutation.isPending}>
+                {categoriesMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Create"

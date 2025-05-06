@@ -12,11 +12,12 @@ import {
 } from "./command";
 import { Icons } from "./icons";
 
-export type Option = Record<"id" | "name", string> & Record<string, string>;
+export type Option = Record<"id" | "name", string> & {
+  component?: () => React.ReactNode;
+} & Record<string, string>;
 
 type ComboboxProps = {
   options: Option[];
-  emptyMessage: string;
   value?: Option;
   onSelect?: (value?: Option) => void;
   onCreate?: (value?: string) => void;
@@ -29,7 +30,10 @@ type ComboboxProps = {
   classNameList?: string;
   autoFocus?: boolean;
   showIcon?: boolean;
-  CreateComponent?: React.ReactElement<{ value: string }>;
+  CreateComponent?: React.ComponentType<{ value: string }>;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
 };
 
 export const Combobox = ({
@@ -47,20 +51,34 @@ export const Combobox = ({
   autoFocus,
   onValueChange,
   CreateComponent,
+  open: controlledOpen,
+  onOpenChange,
+  onFocus,
 }: ComboboxProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [isOpen, setOpen] = useState(false);
+  const [internalIsOpen, setInternalOpen] = useState(false);
   const [selected, setSelected] = useState<Option | undefined>(value as Option);
   const [inputValue, setInputValue] = useState<string>(value?.name || "");
+
+  const isControlled = controlledOpen !== undefined;
+  const isOpen = isControlled ? controlledOpen : internalIsOpen;
+
+  const handleOpenChange = (open: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(open);
+    } else {
+      setInternalOpen(open);
+    }
+  };
 
   const handleOnValueChange = (value: string) => {
     setInputValue(value);
     onValueChange?.(value);
 
     if (value) {
-      setOpen(true);
+      handleOpenChange(true);
     } else {
-      setOpen(false);
+      handleOpenChange(false);
     }
   };
 
@@ -71,14 +89,16 @@ export const Combobox = ({
   };
 
   const handleBlur = useCallback(() => {
-    setOpen(false);
-    setInputValue(selected?.name);
-  }, [selected]);
+    setTimeout(() => {
+      if (!inputRef.current?.contains(document.activeElement)) {
+        handleOpenChange(false);
+        setInputValue(selected?.name ?? "");
+      }
+    }, 150);
+  }, [selected, handleOpenChange]);
 
-  const handleOnFocus = () => {
-    if (inputValue !== value?.name) {
-      setOpen(true);
-    }
+  const handleOnFocus = (event: React.FocusEvent<HTMLInputElement>) => {
+    onFocus?.(event);
   };
 
   const handleSelectOption = useCallback(
@@ -88,8 +108,6 @@ export const Combobox = ({
       setSelected(selectedOption);
       onSelect?.(selectedOption);
 
-      // This is a hack to prevent the input from being focused after the user selects an option
-      // We can call this hack: "The next tick"
       setTimeout(() => {
         inputRef?.current?.blur();
       }, 0);
@@ -133,7 +151,7 @@ export const Combobox = ({
           className="w-full outline-none animate-in fade-in-0 zoom-in-95"
           hidden={!isOpen}
         >
-          {inputValue?.length > 0 && (
+          {isOpen && (
             <CommandGroup
               className={cn(
                 "bg-background absolute z-10 w-full max-h-[250px] overflow-auto py-2 border px-2",

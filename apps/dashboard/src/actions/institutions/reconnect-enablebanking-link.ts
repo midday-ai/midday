@@ -3,18 +3,24 @@
 import { client } from "@midday/engine/client";
 import { LogEvents } from "@midday/events/events";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { authActionClient } from "../safe-action";
-import { reconnectEnableBankingLinkSchema } from "../schema";
 
 export const reconnectEnableBankingLinkAction = authActionClient
-  .schema(reconnectEnableBankingLinkSchema)
+  .schema(
+    z.object({
+      institutionId: z.string(),
+      isDesktop: z.boolean(),
+      sessionId: z.string(),
+    }),
+  )
   .metadata({
     name: "reconnect-enablebanking-link",
   })
   .action(
     async ({
       parsedInput: { institutionId, isDesktop, sessionId },
-      ctx: { analytics, user },
+      ctx: { analytics, teamId },
     }) => {
       analytics.track({
         event: LogEvents.EnableBankingLinkReconnected.name,
@@ -36,7 +42,7 @@ export const reconnectEnableBankingLinkAction = authActionClient
           json: {
             institutionId: name,
             country,
-            teamId: user.team_id!,
+            teamId: teamId!,
             type,
             validUntil: new Date(Date.now() + maximum_consent_validity * 1000)
               .toISOString()

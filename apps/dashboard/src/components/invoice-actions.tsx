@@ -1,8 +1,7 @@
-import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
-import { sendReminderAction } from "@/actions/invoice/send-reminder-action";
-import { updateInvoiceAction } from "@/actions/invoice/update-invoice-action";
+"use client";
+
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { UTCDate } from "@date-fns/utc";
+import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +21,8 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { useAction } from "next-safe-action/hooks";
+import { useToast } from "@midday/ui/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   status: string;
@@ -30,13 +30,65 @@ type Props = {
 };
 
 export function InvoiceActions({ status, id }: Props) {
+  const trpc = useTRPC();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { setParams } = useInvoiceParams();
-  const updateInvoice = useAction(updateInvoiceAction);
-  const deleteInvoice = useAction(deleteInvoiceAction);
-  const sendReminder = useAction(sendReminderAction);
+
+  const updateInvoiceMutation = useMutation(
+    trpc.invoice.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.getById.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.invoiceSummary.queryKey(),
+        });
+      },
+    }),
+  );
+
+  const deleteInvoiceMutation = useMutation(
+    trpc.invoice.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.getById.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.invoiceSummary.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.defaultSettings.queryKey(),
+        });
+      },
+    }),
+  );
+
+  const sendReminderMutation = useMutation(
+    trpc.invoice.remind.mutationOptions({
+      onSuccess: () => {
+        toast({
+          duration: 2500,
+          title: "Reminder sent",
+          variant: "success",
+        });
+      },
+    }),
+  );
 
   const handleDeleteInvoice = () => {
-    deleteInvoice.execute({ id });
+    deleteInvoiceMutation.mutate({ id });
     setParams(null);
   };
 
@@ -48,7 +100,7 @@ export function InvoiceActions({ status, id }: Props) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                size="sm"
+                size="icon"
                 variant="secondary"
                 className="hover:bg-secondary"
               >
@@ -58,7 +110,7 @@ export function InvoiceActions({ status, id }: Props) {
             <DropdownMenuContent sideOffset={10} align="end">
               <DropdownMenuItem
                 onClick={() =>
-                  updateInvoice.execute({
+                  updateInvoiceMutation.mutate({
                     id,
                     status: "unpaid",
                     paid_at: null,
@@ -103,8 +155,13 @@ export function InvoiceActions({ status, id }: Props) {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={() => sendReminder.execute({ id })}
-                  disabled={sendReminder.isPending}
+                  onClick={() =>
+                    sendReminderMutation.mutate({
+                      id,
+                      date: new Date().toISOString(),
+                    })
+                  }
+                  disabled={sendReminderMutation.isPending}
                 >
                   Send Reminder
                 </AlertDialogAction>
@@ -135,10 +192,10 @@ export function InvoiceActions({ status, id }: Props) {
             <DropdownMenuContent sideOffset={10} align="end">
               <DropdownMenuItem
                 onClick={() =>
-                  updateInvoice.execute({
+                  updateInvoiceMutation.mutate({
                     id,
                     status: "paid",
-                    paid_at: new UTCDate().toISOString(),
+                    paid_at: new Date().toISOString(),
                   })
                 }
               >
@@ -153,7 +210,10 @@ export function InvoiceActions({ status, id }: Props) {
               <DropdownMenuItem
                 className="text-destructive"
                 onClick={() =>
-                  updateInvoice.execute({ id, status: "canceled" })
+                  updateInvoiceMutation.mutate({
+                    id,
+                    status: "canceled",
+                  })
                 }
               >
                 Cancel

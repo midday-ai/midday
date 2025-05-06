@@ -1,7 +1,8 @@
 import { validateTellerSignature } from "@/utils/teller";
+import type { syncConnection } from "@midday/jobs/tasks/bank/sync/connection";
 import { createClient } from "@midday/supabase/server";
+import { tasks } from "@trigger.dev/sdk/v3";
 import { isAfter, subDays } from "date-fns";
-import { syncConnection } from "jobs/tasks/bank/sync/connection";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const supabase = createClient({ admin: true });
+  const supabase = await createClient({ admin: true });
 
   const { data: connectionData, error: connectionError } = await supabase
     .from("bank_connections")
@@ -87,7 +88,7 @@ export async function POST(req: NextRequest) {
           subDays(new Date(), 1),
         );
 
-        await syncConnection.trigger({
+        await tasks.trigger<typeof syncConnection>("sync-connection", {
           connectionId: connectionData.id,
           manualSync,
         });

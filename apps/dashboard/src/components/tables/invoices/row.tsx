@@ -1,5 +1,6 @@
 "use client";
 
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { cn } from "@midday/ui/cn";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { type Row, flexRender } from "@tanstack/react-table";
@@ -7,30 +8,29 @@ import type { Invoice } from "./columns";
 
 type Props = {
   row: Row<Invoice>;
-  setOpen: (id?: string) => void;
 };
 
-export function InvoiceRow({ row, setOpen }: Props) {
+export function InvoiceRow({ row }: Props) {
+  const { setParams } = useInvoiceParams();
+
   return (
     <>
       <TableRow
-        className="hover:bg-transparent cursor-default h-[57px] cursor-pointer"
+        className="hover:bg-transparent h-[57px] cursor-pointer"
         key={row.id}
       >
         {row.getVisibleCells().map((cell, index) => (
           <TableCell
             key={cell.id}
-            className={cn(
-              index === 2 && "w-[50px]",
-              (cell.column.id === "actions" ||
-                cell.column.id === "recurring" ||
-                cell.column.id === "invoice_number" ||
-                cell.column.id === "issue_date") &&
-                "hidden md:table-cell",
-            )}
-            onClick={() =>
-              index !== row.getVisibleCells().length - 1 && setOpen(row.id)
-            }
+            className={cn(index === 2 && "w-[50px]")}
+            onClick={() => {
+              if (index !== row.getVisibleCells().length - 1) {
+                setParams({
+                  invoiceId: row.id,
+                  type: "details",
+                });
+              }
+            }}
           >
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </TableCell>

@@ -5,9 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
-import { Suspense } from "react";
-import { Loading } from "./base-currency.loading";
-import { BaseCurrencyServer } from "./base-currency.server";
+import { SelectCurrency } from "./select-currency";
 
 export function BaseCurrency() {
   return (
@@ -22,9 +20,7 @@ export function BaseCurrency() {
       </CardHeader>
 
       <CardContent>
-        <Suspense fallback={<Loading />}>
-          <BaseCurrencyServer />
-        </Suspense>
+        <SelectCurrency />
       </CardContent>
     </Card>
   );

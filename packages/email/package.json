@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "main": "index.ts",
+  "exports": {
+    "./emails/*": "./emails/*.tsx",
+    "./locales": "./locales/index.ts",
+    "./render": "./render.ts"
+  },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
@@ -15,14 +20,14 @@
   "dependencies": {
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
-    "@react-email/components": "0.0.31",
-    "@react-email/render": "0.0.10",
-    "@react-email/tailwind": "1.0.4",
+    "@react-email/components": "0.0.38",
+    "@react-email/render": "1.1.0",
+    "@react-email/tailwind": "1.0.5",
     "date-fns": "^4.1.0",
-    "react-email": "3.0.4",
+    "react-email": "4.0.11",
     "responsive-react-email": "^0.0.5"
   },
   "devDependencies": {
-    "typescript": "^5.7.2"
+    "typescript": "^5.8.3"
   }
 }

@@ -1,23 +1,11 @@
-import { UTCDate } from "@date-fns/utc";
 import {
-  addDays,
   endOfMonth,
   formatISO,
-  isWithinInterval,
+  parseISO,
   startOfMonth,
   subYears,
 } from "date-fns";
 import type { Client } from "../types";
-
-function transactionCategory(transaction) {
-  return (
-    transaction?.category ?? {
-      id: "uncategorized",
-      name: "Uncategorized",
-      color: "#606060",
-    }
-  );
-}
 
 export function getPercentageIncrease(a: number, b: number) {
   return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
@@ -37,50 +25,78 @@ export async function getUserQuery(supabase: Client, userId: string) {
     .throwOnError();
 }
 
-export async function getCurrentUserTeamQuery(supabase: Client) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session?.user) {
-    return;
-  }
-
-  return getUserQuery(supabase, session.user?.id);
-}
-
-export async function getBankConnectionsByTeamIdQuery(
-  supabase: Client,
-  teamId: string,
-) {
-  return supabase
-    .from("bank_connections")
-    .select("*")
-    .eq("team_id", teamId)
-    .throwOnError();
-}
-
-export type GetTeamBankAccountsParams = {
+type GetBankConnectionsParams = {
   teamId: string;
   enabled?: boolean;
 };
 
-export async function getTeamBankAccountsQuery(
+export async function getBankConnectionsQuery(
   supabase: Client,
-  params: GetTeamBankAccountsParams,
+  params: GetBankConnectionsParams,
 ) {
   const { teamId, enabled } = params;
 
   const query = supabase
-    .from("bank_accounts")
-    .select("*, bank:bank_connections(*)")
-    .eq("team_id", teamId)
-    .order("created_at", { ascending: true })
-    .order("name", { ascending: false })
-    .throwOnError();
+    .from("bank_connections")
+    .select(
+      `
+      id,
+      name,
+      logo_url,
+      provider,
+      expires_at,
+      enrollment_id,
+      institution_id,
+      reference_id,
+      last_accessed,
+      access_token,
+      status,
+      accounts:bank_accounts(
+        id,
+        name,
+        enabled,
+        manual,
+        currency,
+        balance,
+        type,
+        error_retries
+      )
+    `,
+    )
+    .eq("team_id", teamId);
 
   if (enabled) {
     query.eq("enabled", enabled);
+  }
+
+  return query;
+}
+
+export type GetBankAccountsParams = {
+  teamId: string;
+  enabled?: boolean;
+  manual?: boolean;
+};
+
+export async function getBankAccountsQuery(
+  supabase: Client,
+  params: GetBankAccountsParams,
+) {
+  const { teamId, enabled, manual } = params;
+
+  const query = supabase
+    .from("bank_accounts")
+    .select("*, connection:bank_connections(*)")
+    .eq("team_id", teamId)
+    .order("created_at", { ascending: true })
+    .order("name", { ascending: false });
+
+  if (enabled) {
+    query.eq("enabled", enabled);
+  }
+
+  if (manual) {
+    query.eq("manual", manual);
   }
 
   return query;
@@ -98,8 +114,7 @@ export async function getTeamMembersQuery(supabase: Client, teamId: string) {
     `,
     )
     .eq("team_id", teamId)
-    .order("created_at")
-    .throwOnError();
+    .order("created_at");
 
   return {
     data,
@@ -127,7 +142,6 @@ export async function getTeamUserQuery(
     )
     .eq("team_id", params.teamId)
     .eq("user_id", params.userId)
-    .throwOnError()
     .single();
 
   return {
@@ -156,23 +170,23 @@ export async function getSpendingQuery(
 
 export type GetTransactionsParams = {
   teamId: string;
-  to: number;
-  from: number;
-  sort?: [string, "asc" | "desc"];
-  searchQuery?: string;
+  cursor?: string | null;
+  sort?: string[] | null;
+  pageSize?: number;
   filter?: {
-    statuses?: string[];
-    attachments?: "include" | "exclude";
-    categories?: string[];
-    tags?: string[];
-    accounts?: string[];
-    assignees?: string[];
-    type?: "income" | "expense";
-    start?: string;
-    end?: string;
-    recurring?: string[];
-    amount_range?: [number, number];
-    amount?: [string, string];
+    q?: string | null;
+    statuses?: string[] | null;
+    attachments?: "include" | "exclude" | null;
+    categories?: string[] | null;
+    tags?: string[] | null;
+    accounts?: string[] | null;
+    assignees?: string[] | null;
+    type?: "income" | "expense" | null;
+    start?: string | null;
+    end?: string | null;
+    recurring?: string[] | null;
+    amount_range?: number[] | null;
+    amount?: string[] | null;
   };
 };
 
@@ -180,9 +194,10 @@ export async function getTransactionsQuery(
   supabase: Client,
   params: GetTransactionsParams,
 ) {
-  const { from = 0, to, filter, sort, teamId, searchQuery } = params;
+  const { filter, sort, teamId, cursor, pageSize = 40 } = params;
 
   const {
+    q,
     statuses,
     attachments,
     categories,
@@ -193,75 +208,76 @@ export async function getTransactionsQuery(
     end,
     assignees,
     recurring,
-    amount_range,
     amount,
+    amount_range,
   } = filter || {};
 
-  const columns = [
-    "id",
-    "date",
-    "amount",
-    "currency",
-    "method",
-    "status",
-    "note",
-    "manual",
-    "internal",
-    "recurring",
-    "frequency",
-    "name",
-    "description",
-    "assigned:assigned_id(*)",
-    "category:transaction_categories(id, name, color, slug)",
-    "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
-    "attachments:transaction_attachments(id, name, size, path, type)",
-    "tags:transaction_tags(id, tag_id, tag:tags(id, name))",
-    "vat:calculated_vat",
-  ];
+  const columns = `
+      id,
+      date,
+      amount,
+      currency,
+      method,
+      status,
+      note,
+      manual,
+      internal,
+      recurring,
+      frequency,
+      name,
+      description,
+      assigned:assigned_id(*),
+      category:transaction_categories(id, name, color, slug),
+      bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url)),
+      attachments:transaction_attachments(id, name, size, path, type),
+      tags:transaction_tags(id, tag_id, tag:tags(id, name)),
+      vat:calculated_vat
+    `;
 
   const query = supabase
     .from("transactions")
-    .select(columns.join(","), { count: "exact" })
+    .select(columns)
     .eq("team_id", teamId);
 
+  // Apply sorting
   if (sort) {
     const [column, value] = sort;
     const ascending = value === "asc";
 
     if (column === "attachment") {
       query.order("is_fulfilled", { ascending });
+      query.order("id", { ascending }); // Secondary sort for stability
     } else if (column === "assigned") {
       query.order("assigned(full_name)", { ascending });
+      query.order("id", { ascending });
     } else if (column === "bank_account") {
       query.order("bank_account(name)", { ascending });
+      query.order("id", { ascending });
     } else if (column === "category") {
       query.order("category(name)", { ascending });
+      query.order("id", { ascending });
     } else if (column === "tags") {
       query.order("is_transaction_tagged", { ascending });
-    } else {
+      query.order("id", { ascending });
+    } else if (column) {
       query.order(column, { ascending });
+      query.order("id", { ascending }); // Always include ID as secondary sort
     }
   } else {
-    // NOTE: date can be on the same day (2020-01-01), so we need to order by id and amount to keep the order
-    query
-      .order("date", { ascending: false })
-      .order("name", { ascending: false })
-      .order("id", { ascending: false });
+    // Default sorting
+    query.order("date", { ascending: false }).order("id", { ascending: false }); // Always include ID as secondary sort
   }
 
   if (start && end) {
-    const fromDate = new UTCDate(start);
-    const toDate = new UTCDate(end);
-
-    query.gte("date", fromDate.toISOString());
-    query.lte("date", toDate.toISOString());
+    query.gte("date", start);
+    query.lte("date", end);
   }
 
-  if (searchQuery) {
-    if (!Number.isNaN(Number.parseInt(searchQuery))) {
-      query.eq("amount", Number(searchQuery));
+  if (q) {
+    if (!Number.isNaN(Number.parseInt(q))) {
+      query.eq("amount", Number(q));
     } else {
-      query.textSearch("fts_vector", `${searchQuery.replaceAll(" ", "+")}:*`);
+      query.textSearch("fts_vector", `${q.replaceAll(" ", "+")}:*`);
     }
   }
 
@@ -294,11 +310,9 @@ export async function getTransactionsQuery(
 
   if (tags) {
     query
-      .select(
-        [...columns, "temp_filter_tags:transaction_tags!inner()"].join(","),
-      )
+      .in("temp_filter_tags.tag_id", tags)
       .eq("team_id", teamId)
-      .in("temp_filter_tags.tag_id", tags);
+      .select(`${columns}, temp_filter_tags:transaction_tags!inner()`);
   }
 
   if (recurring) {
@@ -341,54 +355,45 @@ export async function getTransactionsQuery(
     }
   }
 
-  const { data, count } = await query.range(from, to);
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
 
-  const totalAmount = data
-    ?.reduce((acc, { amount, currency }) => {
-      const existingCurrency = acc.find((item) => item.currency === currency);
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
 
-      if (existingCurrency) {
-        existingCurrency.amount += amount;
-      } else {
-        acc.push({ amount, currency });
-      }
-      return acc;
-    }, [])
-    .sort((a, b) => a?.amount - b?.amount);
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
 
   return {
     meta: {
-      totalAmount,
-      count,
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
     },
-    data: data?.map((transaction) => ({
-      ...transaction,
-      category: transactionCategory(transaction),
-    })),
+    data: data ?? [],
   };
 }
 
 export async function getTransactionQuery(supabase: Client, id: string) {
-  const columns = [
-    "*",
-    "assigned:assigned_id(*)",
-    "category:category_slug(id, name, vat)",
-    "attachments:transaction_attachments(*)",
-    "tags:transaction_tags(id, tag:tags(id, name))",
-    "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
-    "vat:calculated_vat",
-  ];
-
   const { data } = await supabase
     .from("transactions")
-    .select(columns.join(","))
+    .select(`
+      *,
+      assigned:assigned_id(*),
+      attachments:transaction_attachments(*),
+      category:transaction_categories(id, name, color, slug),
+      tags:transaction_tags(id, tag:tags(id, name)),
+      bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url)),
+      vat:calculated_vat
+    `)
     .eq("id", id)
-    .single()
-    .throwOnError();
+    .single();
 
   return {
-    ...data,
-    category: transactionCategory(data),
+    data,
   };
 }
 
@@ -396,21 +401,30 @@ type GetSimilarTransactionsParams = {
   name: string;
   teamId: string;
   categorySlug?: string;
+  frequency?: "weekly" | "monthly" | "annually" | "irregular";
 };
 
 export async function getSimilarTransactions(
   supabase: Client,
   params: GetSimilarTransactionsParams,
 ) {
-  const { name, teamId, categorySlug } = params;
+  const { name, teamId, categorySlug, frequency } = params;
 
-  return supabase
+  const query = supabase
     .from("transactions")
-    .select("id, amount, team_id", { count: "exact" })
+    .select("id, amount, team_id")
     .eq("team_id", teamId)
-    .textSearch("fts_vector", `${name.replaceAll(" ", "+")}:*`)
-    .neq("category_slug", categorySlug)
-    .throwOnError();
+    .textSearch("fts_vector", `${name.replaceAll(" ", "+")}:*`);
+
+  if (categorySlug) {
+    query.neq("category_slug", categorySlug);
+  }
+
+  if (frequency) {
+    query.eq("frequency", frequency);
+  }
+
+  return query;
 }
 
 type GetBankAccountsCurrenciesParams = {
@@ -439,13 +453,10 @@ export async function getBurnRateQuery(
 ) {
   const { teamId, from, to, currency } = params;
 
-  const fromDate = new UTCDate(from);
-  const toDate = new UTCDate(to);
-
   const { data } = await supabase.rpc("get_burn_rate_v4", {
     team_id: teamId,
-    date_from: startOfMonth(fromDate).toDateString(),
-    date_to: endOfMonth(toDate).toDateString(),
+    date_from: startOfMonth(parseISO(from)).toDateString(),
+    date_to: endOfMonth(parseISO(to)).toDateString(),
     base_currency: currency,
   });
 
@@ -468,13 +479,10 @@ export async function getRunwayQuery(
 ) {
   const { teamId, from, to, currency } = params;
 
-  const fromDate = new UTCDate(from);
-  const toDate = new UTCDate(to);
-
   return supabase.rpc("get_runway_v4", {
     team_id: teamId,
-    date_from: startOfMonth(fromDate).toDateString(),
-    date_to: endOfMonth(toDate).toDateString(),
+    date_from: startOfMonth(parseISO(from)).toDateString(),
+    date_to: endOfMonth(parseISO(to)).toDateString(),
     base_currency: currency,
   });
 }
@@ -495,20 +503,17 @@ export async function getMetricsQuery(
 
   const rpc = type === "profit" ? "get_profit_v3" : "get_revenue_v3";
 
-  const fromDate = new UTCDate(from);
-  const toDate = new UTCDate(to);
-
   const [{ data: prevData }, { data: currentData }] = await Promise.all([
     supabase.rpc(rpc, {
       team_id: teamId,
-      date_from: subYears(startOfMonth(fromDate), 1).toDateString(),
-      date_to: subYears(endOfMonth(toDate), 1).toDateString(),
+      date_from: subYears(startOfMonth(parseISO(from)), 1).toDateString(),
+      date_to: subYears(endOfMonth(parseISO(to)), 1).toDateString(),
       base_currency: currency,
     }),
     supabase.rpc(rpc, {
       team_id: teamId,
-      date_from: startOfMonth(fromDate).toDateString(),
-      date_to: endOfMonth(toDate).toDateString(),
+      date_from: startOfMonth(parseISO(from)).toDateString(),
+      date_to: endOfMonth(parseISO(to)).toDateString(),
       base_currency: currency,
     }),
   ]);
@@ -571,13 +576,10 @@ export async function getExpensesQuery(
 ) {
   const { teamId, from, to, currency } = params;
 
-  const fromDate = new UTCDate(from);
-  const toDate = new UTCDate(to);
-
   const { data } = await supabase.rpc("get_expenses", {
     team_id: teamId,
-    date_from: startOfMonth(fromDate).toDateString(),
-    date_to: endOfMonth(toDate).toDateString(),
+    date_from: startOfMonth(parseISO(from)).toDateString(),
+    date_to: endOfMonth(parseISO(to)).toDateString(),
     base_currency: currency,
   });
 
@@ -595,169 +597,13 @@ export async function getExpensesQuery(
       type: "expense",
       currency: data?.at(0)?.currency,
     },
-    result: data.map((item) => ({
+    result: data?.map((item) => ({
       ...item,
       value: item.value,
       recurring: item.recurring_value,
       total: item.value + item.recurring_value,
     })),
   };
-}
-
-export type GetVaultParams = {
-  teamId: string;
-  parentId?: string;
-  limit?: number;
-  searchQuery?: string;
-  filter?: {
-    start?: string;
-    end?: string;
-    owners?: string[];
-    tags?: string[];
-  };
-};
-
-export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
-  const { teamId, parentId, limit = 10000, searchQuery, filter } = params;
-
-  const { start, end, owners, tags } = filter || {};
-
-  const isSearch =
-    (filter !== undefined &&
-      Object.values(filter).some(
-        (value) => value !== undefined && value !== null,
-      )) ||
-    Boolean(searchQuery);
-
-  const query = supabase
-    .from("documents")
-    .select(
-      "id, name, path_tokens, created_at, team_id, metadata, tag, owner:owner_id(*)",
-    )
-    .eq("team_id", teamId)
-    .limit(limit)
-    .order("created_at", { ascending: true });
-
-  if (owners?.length) {
-    query.in("owner_id", owners);
-  }
-
-  if (tags?.length) {
-    query.in("tag", tags);
-  }
-
-  if (start && end) {
-    query.gte("created_at", start);
-    query.lte("created_at", end);
-  }
-
-  if (!isSearch) {
-    // if no search query, we want to get the default folders
-    if (parentId === "inbox") {
-      query
-        .or(`parent_id.eq.${parentId || teamId},parent_id.eq.uploaded`)
-        .not("path_tokens", "cs", '{"uploaded",".folderPlaceholder"}');
-    } else {
-      query.or(`parent_id.eq.${parentId || teamId}`);
-    }
-  }
-
-  if (searchQuery) {
-    query.textSearch("fts", `${searchQuery.replaceAll(" ", "+")}:*`);
-  }
-
-  const { data } = await query;
-
-  const defaultFolders =
-    parentId || isSearch
-      ? []
-      : [
-          { name: "exports", isFolder: true },
-          { name: "inbox", isFolder: true },
-          { name: "imports", isFolder: true },
-          { name: "transactions", isFolder: true },
-          { name: "invoices", isFolder: true },
-        ];
-
-  const filteredData = (data ?? []).map((item) => ({
-    ...item,
-    name:
-      item.path_tokens?.at(-1) === ".folderPlaceholder"
-        ? item.path_tokens?.at(-2)
-        : item.path_tokens?.at(-1),
-    isFolder: item.path_tokens?.at(-1) === ".folderPlaceholder",
-  }));
-
-  const mergedMap = new Map(
-    [...defaultFolders, ...filteredData].map((obj) => [obj.name, obj]),
-  );
-
-  const mergedArray = Array.from(mergedMap.values());
-
-  return {
-    data: mergedArray,
-  };
-}
-
-export async function getVaultActivityQuery(supabase: Client, teamId: string) {
-  return supabase
-    .from("documents")
-    .select("id, name, metadata, path_tokens, tag, team_id")
-    .eq("team_id", teamId)
-    .limit(20)
-    .not("name", "ilike", "%.folderPlaceholder")
-    .order("created_at", { ascending: false });
-}
-
-type GetVaultRecursiveParams = {
-  teamId: string;
-  folder: string;
-  limit?: number;
-  offset?: number;
-};
-
-export async function getVaultRecursiveQuery(
-  supabase: Client,
-  params: GetVaultRecursiveParams,
-) {
-  const { teamId, folder, limit = 10000 } = params;
-
-  async function fetchFolderContents(parentId: string) {
-    const query = supabase
-      .from("documents")
-      .select(
-        "id, name, path_tokens, created_at, team_id, metadata, tag, owner:owner_id(*)",
-      )
-      .eq("team_id", teamId)
-      .eq("parent_id", parentId)
-      .limit(limit)
-      .order("created_at", { ascending: true });
-
-    const { data } = await query;
-    if (!data) return [];
-
-    const results = [];
-    for (const item of data) {
-      // Cast the item to Document type
-      const documentItem = item;
-      results.push(documentItem);
-
-      // If this is a folder (ends with .folderPlaceholder), recursively get its contents
-      if (documentItem.path_tokens?.at(-1) === ".folderPlaceholder") {
-        // Use the path token before .folderPlaceholder as the parent ID
-        const folderParentId = documentItem.path_tokens.at(-2);
-        if (folderParentId) {
-          const folderContents = await fetchFolderContents(folderParentId);
-          results.push(...folderContents);
-        }
-      }
-    }
-
-    return results;
-  }
-
-  const data = await fetchFolderContents(folder);
-  return data;
 }
 
 export async function getTeamsByUserIdQuery(supabase: Client, userId: string) {
@@ -785,8 +631,7 @@ export async function getUserInvitesQuery(supabase: Client, email: string) {
   return supabase
     .from("user_invites")
     .select("id, email, code, role, user:invited_by(*), team:team_id(*)")
-    .eq("email", email)
-    .throwOnError();
+    .eq("email", email);
 }
 
 type GetUserInviteQueryParams = {
@@ -808,12 +653,13 @@ export async function getUserInviteQuery(
 
 type GetInboxQueryParams = {
   teamId: string;
-  from?: number;
-  to?: number;
-  done?: boolean;
-  todo?: boolean;
-  ascending?: boolean;
-  searchQuery?: string;
+  cursor?: string | null;
+  order?: string | null;
+  pageSize?: number;
+  filter?: {
+    q?: string | null;
+    status?: "new" | "archived" | "processing" | "done" | "pending" | null;
+  };
 };
 
 export async function getInboxQuery(
@@ -821,132 +667,138 @@ export async function getInboxQuery(
   params: GetInboxQueryParams,
 ) {
   const {
-    from = 0,
-    to = 10,
     teamId,
-    done,
-    todo,
-    searchQuery,
-    ascending = false,
+    filter: { q, status } = {},
+    cursor,
+    order,
+    pageSize = 20,
   } = params;
-
-  const columns = [
-    "id",
-    "file_name",
-    "file_path",
-    "display_name",
-    "transaction_id",
-    "amount",
-    "currency",
-    "content_type",
-    "date",
-    "status",
-    "forwarded_to",
-    "created_at",
-    "website",
-    "description",
-    "transaction:transactions(id, amount, currency, name, date)",
-  ];
 
   const query = supabase
     .from("inbox")
-    .select(columns.join(","))
+    .select(`
+      id,
+      file_name,
+      file_path, 
+      display_name,
+      transaction_id,
+      amount,
+      currency,
+      content_type,
+      date,
+      status,
+      created_at,
+      website,
+      description,
+      transaction:transactions(id, amount, currency, name, date)
+    `)
     .eq("team_id", teamId)
-    .order("created_at", { ascending })
+    .order("created_at", { ascending: order === "desc" })
     .neq("status", "deleted");
 
-  if (done) {
-    query.not("transaction_id", "is", null);
+  // If status is not done, filter by status
+  if (status) {
+    query.eq("status", status);
   }
 
-  if (todo) {
-    query.is("transaction_id", null);
-  }
-
-  if (searchQuery) {
-    if (!Number.isNaN(Number.parseInt(searchQuery))) {
-      query.like("inbox_amount_text", `%${searchQuery}%`);
+  if (q) {
+    if (!Number.isNaN(Number.parseInt(q))) {
+      query.like("inbox_amount_text", `%${q}%`);
     } else {
-      query.textSearch("fts", `${searchQuery.replaceAll(" ", "+")}:*`);
+      query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
     }
   }
 
-  const { data } = await query.range(from, to);
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
+
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
 
   return {
-    data: data?.map((item) => {
-      const pending = isWithinInterval(new Date(), {
-        start: new Date(item.created_at),
-        end: addDays(new Date(item.created_at), 45),
-      });
-
-      return {
-        ...item,
-        pending,
-        review: !pending && !item.transaction_id,
-      };
-    }),
+    meta: {
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
+    },
+    data: data || [],
   };
 }
 
-type GetTrackerProjectQueryParams = {
+export async function getInboxByIdQuery(supabase: Client, id: string) {
+  return supabase
+    .from("inbox")
+    .select(`
+      id,
+      file_name,
+      file_path, 
+      display_name,
+      transaction_id,
+      amount,
+      currency,
+      content_type,
+      date,
+      status,
+      created_at,
+      website,
+      description,
+      transaction:transactions(id, amount, currency, name, date)
+    `)
+    .eq("id", id)
+    .single();
+}
+
+type GetTrackerProjectByIdQueryParams = {
   teamId: string;
-  projectId: string;
+  id: string;
 };
 
-export async function getTrackerProjectQuery(
+export async function getTrackerProjectByIdQuery(
   supabase: Client,
-  params: GetTrackerProjectQueryParams,
+  params: GetTrackerProjectByIdQueryParams,
 ) {
   return supabase
     .from("tracker_projects")
     .select("*, tags:tracker_project_tags(id, tag:tags(id, name))")
-    .eq("id", params.projectId)
+    .eq("id", params.id)
     .eq("team_id", params.teamId)
     .single();
 }
 
 export type GetTrackerProjectsQueryParams = {
   teamId: string;
-  to?: number;
-  from?: number;
-  start?: string;
-  end?: string;
-  sort?: [string, "asc" | "desc"];
-  search?: {
-    query?: string;
-    fuzzy?: boolean;
-  };
+  cursor?: string | null;
+  pageSize?: number;
   filter?: {
-    status?: "in_progress" | "completed";
-    customers?: string[];
+    q?: string | null;
+    start?: string | null;
+    end?: string | null;
+    status?: "in_progress" | "completed" | null;
+    customers?: string[] | null;
+    tags?: string[] | null;
   };
+  sort?: string[] | null;
 };
 
 export async function getTrackerProjectsQuery(
   supabase: Client,
   params: GetTrackerProjectsQueryParams,
 ) {
-  const {
-    from = 0,
-    to = 10,
-    filter,
-    sort,
-    teamId,
-    search,
-    start,
-    end,
-  } = params;
-  const { status, customers } = filter || {};
+  const { filter, sort, teamId, cursor, pageSize = 25 } = params;
+  const { status, customers, q, start, end, tags } = filter || {};
+
+  const columns =
+    "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount, customer:customer_id(id, name, website), tags:tracker_project_tags(id, tag:tags(id, name))";
 
   const query = supabase
     .from("tracker_projects")
-    .select(
-      "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount, customer:customer_id(id, name, website), tags:tracker_project_tags(id, tag:tags(id, name))",
-      {
-        count: "exact",
-      },
-    )
+    .select(columns)
     .eq("team_id", teamId);
 
   if (status) {
@@ -958,40 +810,65 @@ export async function getTrackerProjectsQuery(
     query.lte("created_at", end);
   }
 
-  if (search?.query && search?.fuzzy) {
-    query.ilike("name", `%${search.query}%`);
+  if (q) {
+    query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
   }
 
   if (customers?.length) {
     query.in("customer_id", customers);
   }
 
-  if (sort) {
-    const [column, value] = sort;
+  if (tags) {
+    query
+      .in("temp_filter_tags.tag_id", tags)
+      .eq("team_id", teamId)
+      .select(`${columns}, temp_filter_tags:tracker_project_tags!inner()`);
+  }
+
+  if (sort?.length === 2) {
+    const [column, direction] = sort;
+    const ascending = direction === "asc";
+
     if (column === "time") {
-      query.order("total_duration", { ascending: value === "asc" });
+      query.order("total_duration", { ascending });
     } else if (column === "amount") {
-      // query.order("total_amount", { ascending: value === "asc" });
+      query.order("get_project_total_amount", { ascending });
     } else if (column === "assigned") {
-      // query.order("assigned_id", { ascending: value === "asc" });
+      query.order("get_project_assigned_users_count", { ascending });
     } else if (column === "customer") {
-      query.order("customer(name)", { ascending: value === "asc" });
+      query.order("customer(name)", { ascending });
     } else if (column === "tags") {
-      query.order("is_project_tagged", { ascending: value === "asc" });
-    } else {
-      query.order(column, { ascending: value === "asc" });
+      query.order("is_project_tagged", { ascending });
+    } else if (column) {
+      query.order(column, { ascending });
     }
   } else {
     query.order("created_at", { ascending: false });
   }
 
-  const { data, count } = await query.range(from, to);
+  if (cursor) {
+    query.lt("created_at", cursor);
+  }
+
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
+
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
 
   return {
     meta: {
-      count,
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
     },
-    data,
+    data: data || [],
   };
 }
 
@@ -1014,7 +891,7 @@ export async function getTrackerRecordsByDateQuery(
       "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency, customer:customer_id(id, name))",
     )
     .eq("team_id", teamId)
-    .eq("date", formatISO(new UTCDate(date), { representation: "date" }));
+    .eq("date", formatISO(parseISO(date), { representation: "date" }));
 
   if (projectId) {
     query.eq("project_id", projectId);
@@ -1051,18 +928,14 @@ export async function getTrackerRecordsByRangeQuery(
   supabase: Client,
   params: GetTrackerRecordsByRangeParams,
 ) {
-  if (!params.teamId) {
-    return null;
-  }
-
   const query = supabase
     .from("tracker_entries")
     .select(
       "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
     )
     .eq("team_id", params.teamId)
-    .gte("date", new UTCDate(params.from).toISOString())
-    .lte("date", new UTCDate(params.to).toISOString())
+    .gte("date", params.from)
+    .lte("date", params.to)
     .order("created_at");
 
   if (params.userId) {
@@ -1074,6 +947,7 @@ export async function getTrackerRecordsByRangeQuery(
   }
 
   const { data } = await query;
+
   const result = data?.reduce((acc, item) => {
     const key = item.date;
 
@@ -1091,7 +965,7 @@ export async function getTrackerRecordsByRangeQuery(
 
   const totalAmount = data?.reduce(
     (amount, { project, duration = 0 }) =>
-      amount + (project?.rate ?? 0) * (duration / 3600),
+      amount + (project?.rate ?? 0) * (duration ?? 0 / 3600),
     0,
   );
 
@@ -1102,7 +976,7 @@ export async function getTrackerRecordsByRangeQuery(
       from: params.from,
       to: params.to,
     },
-    data: result,
+    result,
   };
 }
 
@@ -1122,13 +996,14 @@ export async function getCategoriesQuery(
     .select("id, name, color, slug, description, system, vat")
     .eq("team_id", teamId)
     .order("created_at", { ascending: false })
+    .order("name", { ascending: true })
     .range(0, limit);
 }
 
 type GetInboxSearchParams = {
   teamId: string;
   limit?: number;
-  q: string;
+  q: string | number;
 };
 
 export async function getInboxSearchQuery(
@@ -1157,16 +1032,12 @@ export async function getInboxSearchQuery(
   return data;
 }
 
-export async function getTeamSettingsQuery(supabase: Client, teamId: string) {
-  return supabase.from("teams").select("*").eq("id", teamId).single();
-}
-
 export type GetInvoicesQueryParams = {
   teamId: string;
-  from?: number;
-  to?: number;
-  searchQuery?: string | null;
+  cursor?: string | null;
+  pageSize?: number;
   filter?: {
+    q?: string | null;
     statuses?: string[] | null;
     customers?: string[] | null;
     start?: string | null;
@@ -1179,13 +1050,45 @@ export async function getInvoicesQuery(
   supabase: Client,
   params: GetInvoicesQueryParams,
 ) {
-  const { teamId, filter, searchQuery, sort, from = 0, to = 25 } = params;
-  const { statuses, start, end, customers } = filter || {};
+  const { teamId, filter, sort, cursor, pageSize = 25 } = params;
+  const { q, statuses, start, end, customers } = filter || {};
 
   const query = supabase
     .from("invoices")
     .select(
-      "id, invoice_number, internal_note, token, due_date, issue_date, paid_at, updated_at, viewed_at, amount, template, currency, status, vat, tax, customer:customer_id(id, name, website), customer_name",
+      `
+      id,
+      due_date,
+      invoice_number,
+      amount,
+      currency,
+      line_items,
+      payment_details,
+      customer_details,
+      updated_at,
+      note,
+      internal_note,
+      paid_at,
+      vat,
+      tax,
+      file_path,
+      status,
+      viewed_at,
+      from_details,
+      issue_date,
+      template,
+      note_details,
+      customer_name,
+      token,
+      sent_to,
+      discount,
+      subtotal,
+      top_block,
+      bottom_block,
+      customer:customer_id(name, website, email),
+      customer_id,
+      team:team_id(name)
+    `,
       { count: "exact" },
     )
     .eq("team_id", teamId);
@@ -1211,30 +1114,39 @@ export async function getInvoicesQuery(
   }
 
   if (start && end) {
-    const fromDate = new UTCDate(start);
-    const toDate = new UTCDate(end);
-
-    query.gte("due_date", fromDate.toISOString());
-    query.lte("due_date", toDate.toISOString());
+    query.gte("due_date", start);
+    query.lte("due_date", end);
   }
 
   if (customers?.length) {
     query.in("customer_id", customers);
   }
 
-  if (searchQuery) {
-    if (!Number.isNaN(Number.parseInt(searchQuery))) {
-      query.eq("amount", Number(searchQuery));
+  if (q) {
+    if (!Number.isNaN(Number.parseInt(q))) {
+      query.eq("amount", Number(q));
     } else {
-      query.textSearch("fts", `${searchQuery.replaceAll(" ", "+")}:*`);
+      query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
     }
   }
 
-  const { data, count } = await query.range(from, to);
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
+
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
 
   return {
     meta: {
-      count,
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
     },
     data,
   };
@@ -1242,7 +1154,7 @@ export async function getInvoicesQuery(
 
 export type GetInvoiceSummaryParams = {
   teamId: string;
-  status?: "paid" | "cancelled";
+  status?: "paid" | "canceled" | "overdue" | "unpaid" | "draft";
 };
 
 export async function getInvoiceSummaryQuery(
@@ -1267,17 +1179,21 @@ export async function getPaymentStatusQuery(supabase: Client, teamId: string) {
 
 export type GetCustomersQueryParams = {
   teamId: string;
-  from?: number;
-  to?: number;
-  searchQuery?: string | null;
+  filter?: {
+    q?: string | null;
+  };
   sort?: string[] | null;
+  cursor?: string | null;
+  pageSize?: number;
 };
 
 export async function getCustomersQuery(
   supabase: Client,
   params: GetCustomersQueryParams,
 ) {
-  const { teamId, from = 0, to = 100, searchQuery, sort } = params;
+  const { teamId, filter, sort, cursor, pageSize = 25 } = params;
+
+  const { q } = filter || {};
 
   const query = supabase
     .from("customers")
@@ -1285,35 +1201,48 @@ export async function getCustomersQuery(
       "*, invoices:invoices(id), projects:tracker_projects(id), tags:customer_tags(id, tag:tags(id, name))",
       { count: "exact" },
     )
-    .eq("team_id", teamId)
-    .range(from, to);
+    .eq("team_id", teamId);
 
-  if (searchQuery) {
-    query.ilike("name", `%${searchQuery}%`);
+  if (q) {
+    query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
   }
 
-  if (sort) {
+  if (sort?.length === 2) {
     const [column, value] = sort;
     const ascending = value === "asc";
 
     if (column === "invoices") {
-      query.order("invoices(id)", { ascending });
+      query.order("get_invoice_count", { ascending });
     } else if (column === "projects") {
-      query.order("projects(id)", { ascending });
-    } else {
+      query.order("get_project_count", { ascending });
+    } else if (column === "tags") {
+      query.order("is_customer_tagged", { ascending });
+    } else if (column) {
       query.order(column, { ascending });
     }
   } else {
     query.order("created_at", { ascending: false });
   }
 
-  const { data, count } = await query;
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
+
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
 
   return {
     meta: {
-      count,
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
     },
-    data,
+    data: data ?? [],
   };
 }
 
@@ -1325,30 +1254,88 @@ export async function getCustomerQuery(supabase: Client, customerId: string) {
     .single();
 }
 
-export async function getInvoiceTemplatesQuery(
+export async function getInvoiceTemplateQuery(
   supabase: Client,
   teamId: string,
 ) {
   return supabase
     .from("invoice_templates")
-    .select("*")
+    .select(`
+      id,
+      customer_label,
+      from_label,
+      invoice_no_label,
+      issue_date_label,
+      due_date_label,
+      description_label,
+      price_label,
+      quantity_label,
+      total_label,
+      vat_label,
+      tax_label,
+      payment_label,
+      note_label,
+      logo_url,
+      currency,
+      subtotal_label,
+      payment_details,
+      from_details,
+      size,
+      date_format,
+      include_vat,
+      include_tax,
+      tax_rate,
+      delivery_type,
+      discount_label,
+      include_discount,
+      include_decimals,
+      include_qr,
+      total_summary_label,
+      title,
+      vat_rate,
+      include_units
+    `)
     .eq("team_id", teamId)
     .single();
 }
 
-export async function getInvoiceQuery(supabase: Client, id: string) {
-  return supabase
-    .from("invoices")
-    .select("*, customer:customer_id(name, website), team:team_id(name)")
-    .eq("id", id)
-    .single();
-}
-
-export async function getDraftInvoiceQuery(supabase: Client, id: string) {
+export async function getInvoiceByIdQuery(supabase: Client, id: string) {
   return supabase
     .from("invoices")
     .select(
-      "id, due_date, invoice_number, template, status, discount, amount, currency, line_items, payment_details, note_details, customer_details, vat, tax, from_details, issue_date, customer_id, customer_name, token, top_block, bottom_block",
+      `
+      id,
+      due_date,
+      invoice_number,
+      amount,
+      currency,
+      line_items,
+      payment_details,
+      customer_details,
+      updated_at,
+      status,
+      note,
+      internal_note,
+      paid_at,
+      vat,
+      tax,
+      file_path,
+      viewed_at,
+      from_details,
+      issue_date,
+      template,
+      note_details,
+      customer_name,
+      customer_id,
+      token,
+      sent_to,
+      discount,
+      subtotal,
+      top_block,
+      bottom_block,
+      customer:customer_id(name, website, email),
+      team:team_id(name)
+    `,
     )
     .eq("id", id)
     .single();
@@ -1367,20 +1354,17 @@ export async function searchInvoiceNumberQuery(
     .from("invoices")
     .select("invoice_number")
     .eq("team_id", params.teamId)
-    .ilike("invoice_number", `%${params.query}`);
+    .ilike("invoice_number", `%${params.query}`)
+    .single();
 }
 
-export async function getLastInvoiceNumberQuery(
+export async function getNextInvoiceNumberQuery(
   supabase: Client,
   teamId: string,
 ) {
-  const { data } = await supabase
-    .rpc("get_next_invoice_number", {
-      team_id: teamId,
-    })
-    .single();
-
-  return { data };
+  return supabase.rpc("get_next_invoice_number", {
+    team_id: teamId,
+  });
 }
 
 export async function getTagsQuery(supabase: Client, teamId: string) {
@@ -1409,4 +1393,233 @@ export async function getTeamLimitsMetricsQuery(
       input_team_id: teamId,
     })
     .single();
+}
+
+export async function getInstalledAppsQuery(supabase: Client, teamId: string) {
+  return supabase.from("apps").select("app_id, settings").eq("team_id", teamId);
+}
+
+export async function getTeamByIdQuery(supabase: Client, teamId: string) {
+  return supabase.from("teams").select("*").eq("id", teamId).single();
+}
+
+export async function getInboxAccountsQuery(supabase: Client, teamId: string) {
+  return supabase
+    .from("inbox_accounts")
+    .select("id, email, provider, last_accessed")
+    .eq("team_id", teamId);
+}
+
+export async function getInboxAccountByIdQuery(supabase: Client, id: string) {
+  return supabase
+    .from("inbox_accounts")
+    .select(
+      "id, email, provider, access_token, refresh_token, expiry_date, last_accessed",
+    )
+    .eq("id", id)
+    .single();
+}
+
+export async function getExistingInboxAttachmentsQuery(
+  supabase: Client,
+  inputArray: string[],
+) {
+  return supabase
+    .from("inbox")
+    .select("reference_id")
+    .in("reference_id", inputArray);
+}
+
+export async function getAvailablePlansQuery(supabase: Client, teamId: string) {
+  const [teamMembersResponse, bankConnectionsResponse] = await Promise.all([
+    supabase.from("users_on_team").select("id").eq("team_id", teamId),
+    supabase.from("bank_connections").select("id").eq("team_id", teamId),
+  ]);
+
+  const teamMembersCount = teamMembersResponse.data?.length ?? 0;
+  const bankConnectionsCount = bankConnectionsResponse.data?.length ?? 0;
+
+  // Can choose starter if team has 2 or fewer members and 2 or fewer bank connections
+  const starter = teamMembersCount <= 2 && bankConnectionsCount <= 2;
+
+  // Can always choose pro plan
+  return {
+    data: {
+      starter,
+      pro: true,
+    },
+  };
+}
+
+export type SearchTransactionMatchParams = {
+  teamId: string;
+  inboxId?: string;
+  query?: string;
+  maxResults?: number;
+  minConfidenceScore?: number;
+};
+
+export async function searchTransactionMatchQuery(
+  supabase: Client,
+  params: SearchTransactionMatchParams,
+) {
+  const {
+    teamId,
+    query,
+    inboxId,
+    maxResults = 5,
+    minConfidenceScore = 0.5,
+  } = params;
+
+  if (query) {
+    return supabase.rpc("search_transactions_direct", {
+      p_team_id: teamId,
+      p_query: query,
+      p_max_results: maxResults,
+    });
+  }
+
+  if (inboxId) {
+    return supabase.rpc("match_transactions_to_inbox", {
+      p_team_id: teamId,
+      p_inbox_id: inboxId,
+      p_max_results: maxResults,
+      p_min_confidence_score: minConfidenceScore,
+    });
+  }
+
+  return {
+    data: [],
+  };
+}
+
+export type GetDocumentQueryParams = {
+  teamId: string;
+  id?: string | null;
+  filePath?: string | null;
+};
+
+export async function getDocumentQuery(
+  supabase: Client,
+  params: GetDocumentQueryParams,
+) {
+  const query = supabase
+    .from("documents")
+    .select(
+      "id, name, path_tokens, title, metadata, created_at, summary, tags:document_tag_assignments(tag:document_tags(id, name, slug))",
+    )
+    .eq("team_id", params.teamId);
+
+  if (params.id) {
+    query.eq("id", params.id);
+  }
+
+  if (params.filePath) {
+    query.eq("name", params.filePath);
+  }
+
+  return query.single();
+}
+
+type GetDocumentsParams = {
+  teamId: string;
+  pageSize?: number;
+  cursor?: string | null;
+  language?: string | null;
+  filter?: {
+    q?: string | null;
+    tags?: string[] | null;
+    start?: string | null;
+    end?: string | null;
+  };
+};
+
+export async function getDocumentsQuery(
+  supabase: Client,
+  params: GetDocumentsParams,
+) {
+  const { teamId, pageSize = 20, cursor, filter } = params;
+
+  const { tags, q, start, end } = filter || {};
+
+  const columns =
+    "id, name, metadata, path_tokens, processing_status, title, summary, team_id, created_at, tags:document_tag_assignments(tag:document_tags(id, name, slug))";
+
+  const query = supabase
+    .from("documents")
+    .select(columns)
+    .eq("team_id", teamId)
+    .not("name", "ilike", "%.folderPlaceholder")
+    .order("created_at", { ascending: false });
+
+  if (tags) {
+    query
+      .in("temp_filter_tags.tag_id", tags)
+      .eq("team_id", teamId)
+      .select(`${columns}, temp_filter_tags:document_tag_assignments!inner()`);
+  }
+
+  if (q) {
+    // Let's hardcode the language to English for now (When we have drizzle we can search multiple columns at once)
+    query.textSearch("fts_english", `${q.replaceAll(" ", "+")}:*`, {
+      type: "websearch",
+      config: "english",
+    });
+  }
+
+  if (start && end) {
+    query.gte("date", start);
+    query.lte("date", end);
+  }
+
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
+
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
+
+  return {
+    meta: {
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
+    },
+    data: data ?? [],
+  };
+}
+
+export type GetRelatedDocumentsParams = {
+  teamId: string;
+  id: string;
+  pageSize: number;
+};
+
+export async function getRelatedDocumentsQuery(
+  supabase: Client,
+  params: GetRelatedDocumentsParams,
+) {
+  const { teamId, id, pageSize } = params;
+
+  const { data } = await supabase.rpc("match_similar_documents_by_title", {
+    source_document_id: id,
+    p_team_id: teamId,
+    match_threshold: 0.3,
+    match_count: pageSize,
+  });
+
+  return data;
+}
+
+export async function getDocumentTagsQuery(supabase: Client, teamId: string) {
+  return supabase
+    .from("document_tags")
+    .select("id, name")
+    .eq("team_id", teamId)
+    .order("created_at", { ascending: false });
 }

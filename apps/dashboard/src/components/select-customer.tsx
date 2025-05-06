@@ -2,6 +2,7 @@
 
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
   Command,
@@ -12,22 +13,23 @@ import {
   CommandList,
 } from "@midday/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import { useQuery } from "@tanstack/react-query";
 import React from "react";
 
-type Props = {
-  data: {
-    id: string;
-    name: string;
-  }[];
-};
-
-export function SelectCustomer({ data }: Props) {
+export function SelectCustomer() {
+  const trpc = useTRPC();
   const { setParams: setCustomerParams } = useCustomerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
-  const formatData = data.map((item) => ({
+  const { data: customers } = useQuery(
+    trpc.customers.get.queryOptions({
+      pageSize: 100,
+    }),
+  );
+
+  const formatData = customers?.data?.map((item) => ({
     value: item.name,
     label: item.name,
     id: item.id,
@@ -43,7 +45,7 @@ export function SelectCustomer({ data }: Props) {
     setOpen(false);
   };
 
-  if (!data.length) {
+  if (!customers?.data?.length) {
     return (
       <Button
         type="button"

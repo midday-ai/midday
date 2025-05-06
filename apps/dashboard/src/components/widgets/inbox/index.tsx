@@ -1,25 +1,29 @@
+"use client";
+
 import { ErrorFallback } from "@/components/error-fallback";
-import { InboxListSkeleton } from "@/components/inbox-list-skeleton";
-import { Cookies } from "@/utils/constants";
+import { InboxListSkeleton } from "@/components/inbox/inbox-list-skeleton";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
-import { cookies } from "next/headers";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
+import type { InboxOption } from "./data";
 import { InboxHeader } from "./inbox-header";
 import { InboxWidget } from "./inbox-widget";
 
-export async function Inbox({ disabled }) {
-  const filter = cookies().get(Cookies.InboxFilter)?.value ?? "all";
+type Props = {
+  disabled: boolean;
+};
+
+export function Inbox({ disabled }: Props) {
+  const [filter, setFilter] = useState<InboxOption>("all");
 
   return (
     <div className="border relative aspect-square overflow-hidden p-4 md:p-8">
-      <InboxHeader filter={filter} disabled={disabled} />
+      <InboxHeader filter={filter} disabled={disabled} setFilter={setFilter} />
 
       <ErrorBoundary errorComponent={ErrorFallback}>
         <Suspense
-          key={filter}
-          fallback={<InboxListSkeleton numberOfItems={3} className="pt-8" />}
+          fallback={<InboxListSkeleton numberOfItems={5} className="pt-8" />}
         >
-          <InboxWidget disabled={disabled} filter={filter} />
+          <InboxWidget filter={filter} />
         </Suspense>
       </ErrorBoundary>
     </div>

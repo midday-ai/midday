@@ -1,12 +1,13 @@
 "use client";
 
-import { deleteProjectAction } from "@/actions/project/delete-project-action";
 import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { useUserContext } from "@/store/user/hook";
+import { useUserQuery } from "@/hooks/use-user";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
+import { getWebsiteLogo } from "@/utils/logos";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,10 +31,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea, ScrollBar } from "@midday/ui/scroll-area";
 import { TableCell, TableRow } from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
-import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
-import type { TrackerProject } from "./data-table";
 
 type DataTableCellProps = {
   children: React.ReactNode;
@@ -62,25 +60,14 @@ export function Row({ children }: RowProps) {
 }
 
 type DataTableRowProps = {
-  row: TrackerProject;
-  userId: string;
+  row: RouterOutputs["trackerProjects"]["get"]["data"][number];
+  onDelete: ({ id }: { id: string }) => void;
 };
 
-export function DataTableRow({ row, userId }: DataTableRowProps) {
-  const { toast } = useToast();
+export function DataTableRow({ row, onDelete }: DataTableRowProps) {
   const { setParams } = useTrackerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
-  const { locale } = useUserContext((state) => state.data);
-
-  const deleteAction = useAction(deleteProjectAction, {
-    onError: () => {
-      toast({
-        duration: 2500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
+  const { data: user } = useUserQuery();
 
   const onClick = () => {
     setParams({
@@ -102,7 +89,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
                 <Avatar className="size-5">
                   {row.customer?.website && (
                     <AvatarImageNext
-                      src={`https://img.logo.dev/${row.customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                      src={getWebsiteLogo(row.customer?.website)}
                       alt={`${row.customer?.name} logo`}
                       width={20}
                       height={20}
@@ -123,20 +110,24 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
           <DataTableCell onClick={onClick} className="cursor-pointer">
             <span className="text-sm">
               {row.estimate
-                ? `${secondsToHoursAndMinutes(row.total_duration)} / ${secondsToHoursAndMinutes(row.estimate * 3600)}`
-                : secondsToHoursAndMinutes(row?.total_duration)}
+                ? `${secondsToHoursAndMinutes(row.total_duration ?? 0)} / ${secondsToHoursAndMinutes(row.estimate * 3600)}`
+                : secondsToHoursAndMinutes(row?.total_duration ?? 0)}
             </span>
           </DataTableCell>
           <DataTableCell onClick={onClick} className="cursor-pointer">
-            <span className="text-sm">
-              {formatAmount({
-                currency: row.currency,
-                amount: row.total_amount,
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-                locale,
-              })}
-            </span>
+            {row.currency ? (
+              <span className="text-sm">
+                {formatAmount({
+                  currency: row.currency,
+                  amount: row.total_amount ?? 0,
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                  locale: user?.locale,
+                })}
+              </span>
+            ) : (
+              "-"
+            )}
           </DataTableCell>
           <DataTableCell onClick={onClick} className="cursor-pointer">
             {row.description}
@@ -150,7 +141,10 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
                       href={`/transactions?tags=${tag.tag.id}`}
                       key={tag.id}
                     >
-                      <Badge variant="tag" className="whitespace-nowrap">
+                      <Badge
+                        variant="tag-rounded"
+                        className="whitespace-nowrap"
+                      >
                         {tag.tag.name}
                       </Badge>
                     </Link>
@@ -165,6 +159,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
           </DataTableCell>
           <DataTableCell onClick={onClick} className="cursor-pointer">
             <div className="flex items-center space-x-2">
+              {/* @ts-expect-error */}
               {row.users?.map((user) => (
                 <Avatar key={user.user_id} className="size-4">
                   <AvatarImageNext
@@ -201,9 +196,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteAction.execute({ id: row.id })}
-            >
+            <AlertDialogAction onClick={() => onDelete({ id: row.id })}>
               Continue
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -216,31 +209,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
             Edit
           </DropdownMenuItem>
 
-          <DropdownMenuItem
-            onClick={() =>
-              setInvoiceParams({
-                selectedCustomerId: row.customer?.id,
-                type: "create",
-                currency: row.currency,
-                lineItems: [
-                  {
-                    name: row.name,
-                    price: row.rate ?? 0,
-                    quantity: 1,
-                  },
-                ],
-              })
-            }
-          >
-            Create invoice
-          </DropdownMenuItem>
-
-          <TrackerExportCSV
-            name={row.name}
-            projectId={row.id}
-            teamId={row.team_id}
-            userId={userId}
-          />
+          <TrackerExportCSV name={row.name} projectId={row.id} />
 
           <DropdownMenuSeparator />
 

@@ -1,19 +1,19 @@
+import { getWebsiteLogo } from "@/utils/logos";
 import { OgTemplate, isValidLogoUrl } from "@midday/invoice";
 import { verify } from "@midday/invoice/token";
-import { getInvoiceQuery } from "@midday/supabase/queries";
+import { getInvoiceByIdQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { ImageResponse } from "next/og";
 
 export const contentType = "image/png";
-export const runtime = "edge";
 
 const CDN_URL = "https://cdn.midday.ai";
 
 export default async function Image({ params }: { params: { token: string } }) {
-  const supabase = createClient({ admin: true });
+  const supabase = await createClient({ admin: true });
 
   const { id } = await verify(params.token);
-  const { data: invoice } = await getInvoiceQuery(supabase, id);
+  const { data: invoice } = await getInvoiceByIdQuery(supabase, id);
 
   if (!invoice) {
     return new Response("Not found", { status: 404 });
@@ -27,7 +27,7 @@ export default async function Image({ params }: { params: { token: string } }) {
     `${CDN_URL}/fonts/Geist/og/Geist-Regular.otf`,
   ).then((res) => res.arrayBuffer());
 
-  const logoUrl = `https://img.logo.dev/${invoice.customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`;
+  const logoUrl = getWebsiteLogo(invoice.customer?.website);
 
   const isValidLogo = await isValidLogoUrl(logoUrl);
 

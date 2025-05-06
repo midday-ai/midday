@@ -1,8 +1,8 @@
 "use client";
 
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Editor } from "@/components/invoice/editor";
-import { useAction } from "next-safe-action/hooks";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
 import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
@@ -10,16 +10,17 @@ export function PaymentDetails() {
   const { control, watch } = useFormContext();
   const id = watch("id");
 
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  const trpc = useTRPC();
+  const updateTemplateMutation = useMutation(
+    trpc.invoiceTemplate.upsert.mutationOptions(),
+  );
 
   return (
     <div>
       <LabelInput
         name="template.payment_label"
         onSave={(value) => {
-          updateInvoiceTemplate.execute({
-            payment_label: value,
-          });
+          updateTemplateMutation.mutate({ payment_label: value });
         }}
         className="mb-2 block"
       />
@@ -34,7 +35,7 @@ export function PaymentDetails() {
             initialContent={field.value}
             onChange={field.onChange}
             onBlur={(content) => {
-              updateInvoiceTemplate.execute({
+              updateTemplateMutation.mutate({
                 payment_details: content ? JSON.stringify(content) : null,
               });
             }}

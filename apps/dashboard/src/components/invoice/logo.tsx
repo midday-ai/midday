@@ -1,21 +1,26 @@
 "use client";
 
-import type { InvoiceFormValues } from "@/actions/invoice/schema";
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { useUpload } from "@/hooks/use-upload";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { useToast } from "@midday/ui/use-toast";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
 
-export function Logo({ teamId }: { teamId: string }) {
-  const { watch, setValue } = useFormContext<InvoiceFormValues>();
+export function Logo() {
+  const { watch, setValue } = useFormContext();
   const logoUrl = watch("template.logo_url");
   const { uploadFile, isLoading } = useUpload();
   const { toast } = useToast();
 
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  const { data: user } = useUserQuery();
+
+  const trpc = useTRPC();
+  const updateTemplateMutation = useMutation(
+    trpc.invoiceTemplate.upsert.mutationOptions(),
+  );
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -23,15 +28,13 @@ export function Logo({ teamId }: { teamId: string }) {
       try {
         const { url } = await uploadFile({
           file,
-          path: [teamId, "invoice", file.name],
+          path: [user?.team_id, "invoice", file.name],
           bucket: "avatars",
         });
 
         setValue("template.logo_url", url, { shouldValidate: true });
 
-        updateInvoiceTemplate.execute({
-          logo_url: url,
-        });
+        updateTemplateMutation.mutate({ logo_url: url });
       } catch (error) {
         toast({
           title: "Something went wrong, please try again.",
@@ -62,7 +65,7 @@ export function Logo({ teamId }: { teamId: string }) {
                 setValue("template.logo_url", undefined, {
                   shouldValidate: true,
                 });
-                updateInvoiceTemplate.execute({ logo_url: null });
+                updateTemplateMutation.mutate({ logo_url: null });
               }}
             >
               <Icons.Clear className="size-4" />

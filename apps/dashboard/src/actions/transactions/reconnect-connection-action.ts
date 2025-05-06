@@ -1,12 +1,18 @@
 "use server";
 
 import { authActionClient } from "@/actions/safe-action";
-import { reconnectConnectionSchema } from "@/actions/schema";
 import { LogEvents } from "@midday/events/events";
-import { reconnectConnection } from "jobs/tasks/reconnect/connection";
+import type { reconnectConnection } from "@midday/jobs/tasks/reconnect/connection";
+import { tasks } from "@trigger.dev/sdk/v3";
+import { z } from "zod";
 
 export const reconnectConnectionAction = authActionClient
-  .schema(reconnectConnectionSchema)
+  .schema(
+    z.object({
+      connectionId: z.string(),
+      provider: z.string(),
+    }),
+  )
   .metadata({
     name: "reconnect-connection",
     track: {
@@ -15,12 +21,15 @@ export const reconnectConnectionAction = authActionClient
     },
   })
   .action(
-    async ({ parsedInput: { connectionId, provider }, ctx: { user } }) => {
-      const event = await reconnectConnection.trigger({
-        teamId: user.team_id!,
-        connectionId,
-        provider,
-      });
+    async ({ parsedInput: { connectionId, provider }, ctx: { teamId } }) => {
+      const event = await tasks.trigger<typeof reconnectConnection>(
+        "reconnect-connection",
+        {
+          teamId: teamId!,
+          connectionId,
+          provider,
+        },
+      );
 
       return event;
     },

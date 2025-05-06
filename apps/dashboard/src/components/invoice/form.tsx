@@ -1,15 +1,17 @@
-import { draftInvoiceAction } from "@/actions/invoice/draft-invoice-action";
-import type { InvoiceFormValues } from "@/actions/invoice/schema";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTRPC } from "@/trpc/client";
+import { getUrl } from "@/utils/environment";
 import { formatRelativeTime } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
-import { useDebounce } from "@uidotdev/usehooks";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
+import { useDebounceValue } from "usehooks-ts";
 import { OpenURL } from "../open-url";
-import { type Customer, CustomerDetails } from "./customer-details";
+import { CustomerDetails } from "./customer-details";
 import { EditBlock } from "./edit-block";
+import type { InvoiceFormValues } from "./form-context";
 import { FromDetails } from "./from-details";
 import { LineItems } from "./line-items";
 import { Logo } from "./logo";
@@ -20,28 +22,56 @@ import { SubmitButton } from "./submit-button";
 import { Summary } from "./summary";
 import { transformFormValuesToDraft } from "./utils";
 
-type Props = {
-  teamId: string;
-  customers: Customer[];
-  updatedAt?: Date;
-  onSubmit: (values: InvoiceFormValues) => void;
-  isSubmitting: boolean;
-};
-
-export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
+export function Form() {
+  const { invoiceId, setParams } = useInvoiceParams();
   const [lastUpdated, setLastUpdated] = useState<Date | undefined>();
   const [lastEditedText, setLastEditedText] = useState("");
 
-  const form = useFormContext<InvoiceFormValues>();
-
+  const form = useFormContext();
   const token = form.watch("token");
 
-  const draftInvoice = useAction(draftInvoiceAction, {
-    onSuccess: ({ data }) => {
-      setLastUpdated(new Date());
-      form.setValue("token", data?.token, { shouldValidate: true });
-    },
-  });
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const draftInvoiceMutation = useMutation(
+    trpc.invoice.draft.mutationOptions({
+      onSuccess: (data) => {
+        if (!invoiceId && data?.id) {
+          setParams({ type: "edit", invoiceId: data.id });
+        }
+
+        setLastUpdated(new Date());
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.invoiceSummary.queryKey(),
+        });
+      },
+    }),
+  );
+
+  const createInvoiceMutation = useMutation(
+    trpc.invoice.create.mutationOptions({
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.getById.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.invoiceSummary.queryKey(),
+        });
+
+        setParams({ type: "success", invoiceId: data.id });
+      },
+    }),
+  );
 
   // Only watch the fields that are used in the upsert action
   const formValues = useWatch({
@@ -68,16 +98,16 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
 
   const isDirty = form.formState.isDirty;
   const invoiceNumberValid = !form.getFieldState("invoice_number").error;
-  const debouncedValues = useDebounce(formValues, 500);
+  const [debouncedValue] = useDebounceValue(formValues, 500);
 
   useEffect(() => {
-    const currentFormValues = form.getValues();
-
-    // Only draft the invoice if the customer is selected and the invoice number is valid
     if (isDirty && form.watch("customer_id") && invoiceNumberValid) {
-      draftInvoice.execute(transformFormValuesToDraft(currentFormValues));
+      const currentFormValues = form.getValues();
+      draftInvoiceMutation.mutate(
+        transformFormValuesToDraft(currentFormValues),
+      );
     }
-  }, [debouncedValues, isDirty, invoiceNumberValid]);
+  }, [debouncedValue, isDirty, invoiceNumberValid]);
 
   useEffect(() => {
     const updateLastEditedText = () => {
@@ -97,9 +127,10 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
 
   // Submit the form and the draft invoice
   const handleSubmit = (values: InvoiceFormValues) => {
-    onSubmit(values);
-
-    draftInvoice.execute(transformFormValuesToDraft(values));
+    createInvoiceMutation.mutate({
+      id: values.id,
+      deliveryType: values.template.delivery_type ?? "create",
+    });
   };
 
   // Prevent form from submitting when pressing enter
@@ -118,8 +149,8 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
       <ScrollArea className="h-[calc(100vh-200px)] bg-background" hideScrollbar>
         <div className="p-8 pb-4 h-full flex flex-col">
           <div className="flex justify-between">
-            <Meta teamId={teamId} />
-            <Logo teamId={teamId} />
+            <Meta />
+            <Logo />
           </div>
 
           <div className="grid grid-cols-2 gap-6 mt-8 mb-4">
@@ -127,7 +158,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
               <FromDetails />
             </div>
             <div>
-              <CustomerDetails customers={customers} />
+              <CustomerDetails />
             </div>
           </div>
 
@@ -155,26 +186,34 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
       <div className="absolute bottom-14 w-full h-9">
         <div className="flex justify-between items-center mt-auto">
           <div className="flex space-x-2 items-center text-xs text-[#808080]">
-            {(draftInvoice.isPending || lastEditedText) && (
-              <span>{draftInvoice.isPending ? "Saving" : lastEditedText}</span>
-            )}
             {token && (
               <>
-                {(draftInvoice.isPending || lastEditedText) && <span>-</span>}
                 <OpenURL
-                  href={`${window.location.origin}/i/${token}`}
+                  href={`${getUrl()}/i/${token}`}
                   className="flex items-center gap-1"
                 >
                   <Icons.ExternalLink className="size-3" />
                   <span>Preview invoice</span>
                 </OpenURL>
+
+                {(draftInvoiceMutation.isPending || lastEditedText) && (
+                  <span>-</span>
+                )}
               </>
+            )}
+
+            {(draftInvoiceMutation.isPending || lastEditedText) && (
+              <span>
+                {draftInvoiceMutation.isPending ? "Saving" : lastEditedText}
+              </span>
             )}
           </div>
 
           <SubmitButton
-            isSubmitting={isSubmitting}
-            disabled={draftInvoice.isPending}
+            isSubmitting={createInvoiceMutation.isPending}
+            disabled={
+              createInvoiceMutation.isPending || draftInvoiceMutation.isPending
+            }
           />
         </div>
       </div>

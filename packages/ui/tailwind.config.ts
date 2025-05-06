@@ -51,6 +51,10 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
+        shimmer: {
+          "0%": { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -119,20 +123,8 @@ export default {
             transform: "scale(1)",
           },
         },
-        "open-scale-up-fade": {
-          "0%": {
-            opacity: "0",
-            transform: "scale(.98) translateY(5px)",
-          },
-          "100%": {
-            opacity: "1",
-            transform: "scale(1) translateY(0)",
-          },
-        },
       },
       animation: {
-        "animate-webgl-scale-in-fade": "webgl-scale-in-fade 1s ease-in-out",
-        "open-scale-up-fade": "open-scale-up-fade",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "caret-blink": "caret-blink 1.25s ease-out infinite",
@@ -141,6 +133,7 @@ export default {
         third: "moveInCircle 40s linear infinite",
         fourth: "moveHorizontal 40s ease infinite",
         fifth: "moveInCircle 20s ease infinite",
+        shimmer: "shimmer 2.5s linear infinite",
         scroll:
           "scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
       },

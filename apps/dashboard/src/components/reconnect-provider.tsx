@@ -1,6 +1,7 @@
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
 import { reconnectEnableBankingLinkAction } from "@/actions/institutions/reconnect-enablebanking-link";
 import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-gocardless-link";
+import { getUrl } from "@/utils/environment";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -11,12 +12,12 @@ import {
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
-import { useScript } from "@uidotdev/usehooks";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
+import { useScript } from "usehooks-ts";
 
 type Props = {
   id: string;
@@ -143,7 +144,7 @@ export function ReconnectProvider({
           id,
           institutionId,
           availableHistory: 60,
-          redirectTo: `${window.location.origin}/api/gocardless/reconnect`,
+          redirectTo: `${getUrl()}/api/gocardless/reconnect`,
           isDesktop: isDesktopApp(),
         });
       }

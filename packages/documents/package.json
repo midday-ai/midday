@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./loader": "./src/loaders/loader.ts",
+    "./classifier": "./src/classifier/classifier.ts",
+    "./embed": "./src/embed/embed.ts",
+    "./utils": "./src/utils.ts"
+  },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
@@ -11,18 +18,17 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^0.0.66",
-    "@azure-rest/ai-document-intelligence": "^1.0.0-beta.3",
+    "@ai-sdk/mistral": "^1.2.7",
+    "@langchain/community": "^0.3.42",
+    "@langchain/core": "^0.3.50",
     "@midday/utils": "workspace:*",
-    "ai": "3.4.9",
-    "base64-arraybuffer": "^1.0.2",
-    "change-case": "^5.4.4",
-    "heic-convert": "1.2.4",
-    "zod": "^3.23.8"
+    "ai": "4.3.11",
+    "mammoth": "^1.9.0",
+    "officeparser": "^5.1.1",
+    "unpdf": "^0.12.2",
+    "zod": "^3.24.3"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.10",
-    "@types/heic-convert": "1.2.3",
-    "request": "^2.88.2"
+    "@types/bun": "^1.2.11"
   }
 }

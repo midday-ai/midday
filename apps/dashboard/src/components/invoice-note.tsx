@@ -1,6 +1,8 @@
-import { updateInvoiceAction } from "@/actions/invoice/update-invoice-action";
+"use client";
+
+import { useTRPC } from "@/trpc/client";
 import { Textarea } from "@midday/ui/textarea";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 type Props = {
@@ -9,9 +11,19 @@ type Props = {
 };
 
 export function InvoiceNote({ id, defaultValue }: Props) {
+  const queryClient = useQueryClient();
+  const trpc = useTRPC();
   const [value, setValue] = useState(defaultValue);
-  const updateInvoice = useAction(updateInvoiceAction);
 
+  const updateInvoiceMutation = useMutation(
+    trpc.invoice.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.getById.queryKey({ id }),
+        });
+      },
+    }),
+  );
   return (
     <Textarea
       defaultValue={defaultValue ?? ""}
@@ -20,7 +32,7 @@ export function InvoiceNote({ id, defaultValue }: Props) {
       className="min-h-[100px] resize-none"
       onBlur={() => {
         if (value !== defaultValue) {
-          updateInvoice.execute({
+          updateInvoiceMutation.mutate({
             id,
             internal_note: value && value.length > 0 ? value : null,
           });

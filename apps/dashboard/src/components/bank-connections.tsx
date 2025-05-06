@@ -3,6 +3,8 @@
 import { manualSyncTransactionsAction } from "@/actions/transactions/manual-sync-transactions-action";
 import { reconnectConnectionAction } from "@/actions/transactions/reconnect-connection-action";
 import { useSyncStatus } from "@/hooks/use-sync-status";
+import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { connectionStatus } from "@/utils/connection-status";
 import {
   Accordion,
@@ -18,9 +20,9 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { BankAccount } from "./bank-account";
@@ -29,37 +31,29 @@ import { DeleteConnection } from "./delete-connection";
 import { ReconnectProvider } from "./reconnect-provider";
 import { SyncTransactions } from "./sync-transactions";
 
-interface BankConnectionProps {
-  connection: {
-    id: string;
-    name: string;
-    logo_url: string;
-    provider: string;
-    expires_at?: string;
-    enrollment_id: string | null;
-    institution_id: string;
-    reference_id?: string;
-    last_accessed?: string;
-    access_token: string | null;
-    error?: string;
-    status: "connected" | "disconnected" | "unknown";
-    accounts: Array<{
-      id: string;
-      name: string;
-      enabled: boolean;
-      manual: boolean;
-      currency: string;
-      balance?: number;
-      type: string;
-      error_retries?: number;
-    }>;
-  };
+function getProviderName(provider: string | null) {
+  switch (provider) {
+    case "gocardless":
+      return "GoCardLess";
+    case "enablebanking":
+      return "Enable Banking";
+    case "teller":
+      return "Teller";
+    case "plaid":
+      return "Plaid";
+    default:
+      return null;
+  }
 }
+
+type BankConnection = NonNullable<
+  RouterOutputs["bankConnections"]["get"]
+>[number];
 
 function ConnectionState({
   connection,
   isSyncing,
-}: { connection: BankConnectionProps["connection"]; isSyncing: boolean }) {
+}: { connection: BankConnection; isSyncing: boolean }) {
   const { show, expired } = connectionStatus(connection);
 
   if (isSyncing) {
@@ -126,7 +120,11 @@ function ConnectionState({
       <div className="text-xs font-normal flex items-center space-x-1">
         <span className="text-xs font-normal">{`Updated ${formatDistanceToNow(
           new Date(connection.last_accessed),
-        )} ago`}</span>
+          {
+            addSuffix: true,
+          },
+        )}`}</span>
+        <span>via {getProviderName(connection.provider)}</span>
       </div>
     );
   }
@@ -134,12 +132,13 @@ function ConnectionState({
   return <div className="text-xs font-normal">Never accessed</div>;
 }
 
-export function BankConnection({ connection }: BankConnectionProps) {
+export function BankConnection({ connection }: { connection: BankConnection }) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const [runId, setRunId] = useState<string | undefined>();
   const [accessToken, setAccessToken] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
-  const router = useRouter();
 
   const { show } = connectionStatus(connection);
   const { status, setStatus } = useSyncStatus({ runId, accessToken });
@@ -207,8 +206,18 @@ export function BankConnection({ connection }: BankConnectionProps) {
       dismiss();
       setRunId(undefined);
       setSyncing(false);
-      router.replace("/settings/accounts");
-      router.refresh();
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.bankConnections.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.bankAccounts.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.team.current.queryKey(),
+      });
     }
   }, [status]);
 
@@ -216,6 +225,14 @@ export function BankConnection({ connection }: BankConnectionProps) {
     if (status === "FAILED") {
       setSyncing(false);
       setRunId(undefined);
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.bankConnections.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.bankAccounts.get.queryKey(),
+      });
 
       toast({
         duration: 3500,
@@ -230,7 +247,11 @@ export function BankConnection({ connection }: BankConnectionProps) {
     if (params.step === "reconnect" && params.id) {
       reconnectConnection.execute({
         connectionId: params.id,
-        provider: connection.provider,
+        provider: connection.provider as
+          | "gocardless"
+          | "plaid"
+          | "teller"
+          | "enablebanking",
       });
     }
   }, [params]);
@@ -272,16 +293,19 @@ export function BankConnection({ connection }: BankConnectionProps) {
 
         <div className="ml-auto flex space-x-2">
           {connection.status === "disconnected" || show ? (
-            <ReconnectProvider
-              variant="button"
-              id={connection.id}
-              provider={connection.provider}
-              enrollmentId={connection.enrollment_id}
-              institutionId={connection.institution_id}
-              accessToken={connection.access_token}
-              onManualSync={handleManualSync}
-              referenceId={connection.reference_id}
-            />
+            <>
+              <ReconnectProvider
+                variant="button"
+                id={connection.id}
+                provider={connection.provider}
+                enrollmentId={connection.enrollment_id}
+                institutionId={connection.institution_id}
+                accessToken={connection.access_token}
+                onManualSync={handleManualSync}
+                referenceId={connection.reference_id}
+              />
+              <DeleteConnection connectionId={connection.id} />
+            </>
           ) : (
             <>
               <ReconnectProvider
@@ -306,24 +330,7 @@ export function BankConnection({ connection }: BankConnectionProps) {
       <AccordionContent className="bg-background">
         <div className="ml-[30px] divide-y">
           {connection.accounts.map((account) => {
-            return (
-              <BankAccount
-                key={account.id}
-                id={account.id}
-                name={account.name}
-                enabled={account.enabled}
-                manual={account.manual}
-                currency={account.currency}
-                balance={account.balance ?? 0}
-                type={account.type}
-                hasError={
-                  account.enabled &&
-                  connection.status !== "disconnected" &&
-                  account.error_retries !== undefined &&
-                  account.error_retries > 0
-                }
-              />
-            );
+            return <BankAccount key={account.id} data={account} />;
           })}
         </div>
       </AccordionContent>
@@ -331,15 +338,15 @@ export function BankConnection({ connection }: BankConnectionProps) {
   );
 }
 
-export function BankConnections({
-  data,
-}: { data: BankConnectionProps["connection"][] }) {
-  const defaultValue = data.length === 1 ? ["connection-0"] : undefined;
+export function BankConnections() {
+  const trpc = useTRPC();
+  const { data } = useSuspenseQuery(trpc.bankConnections.get.queryOptions());
+  const defaultValue = data?.length === 1 ? ["connection-0"] : undefined;
 
   return (
     <div className="px-6 divide-y">
       <Accordion type="multiple" className="w-full" defaultValue={defaultValue}>
-        {data.map((connection, index) => {
+        {data?.map((connection, index) => {
           return (
             <AccordionItem
               value={`connection-${index}`}

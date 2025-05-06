@@ -4,11 +4,19 @@ import { client } from "@midday/engine/client";
 import { LogEvents } from "@midday/events/events";
 import { getCountryCode } from "@midday/location";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { authActionClient } from "../safe-action";
-import { createEnableBankingLinkSchema } from "../schema";
 
 export const createEnableBankingLinkAction = authActionClient
-  .schema(createEnableBankingLinkSchema)
+  .schema(
+    z.object({
+      institutionId: z.string(),
+      maximumConsentValidity: z.number(),
+      country: z.string().optional().nullable(),
+      isDesktop: z.boolean(),
+      type: z.enum(["personal", "business"]),
+    }),
+  )
   .metadata({
     name: "create-enablebanking-link",
   })
@@ -22,7 +30,7 @@ export const createEnableBankingLinkAction = authActionClient
         isDesktop,
         type,
       },
-      ctx: { analytics, user },
+      ctx: { analytics, teamId },
     }) => {
       analytics.track({
         event: LogEvents.EnableBankingLinkCreated.name,
@@ -31,7 +39,7 @@ export const createEnableBankingLinkAction = authActionClient
         isDesktop,
       });
 
-      const country = countryCode ?? getCountryCode();
+      const country = countryCode ?? (await getCountryCode());
 
       try {
         const linkResponse = await client.auth.enablebanking.link.$post({
@@ -39,7 +47,7 @@ export const createEnableBankingLinkAction = authActionClient
             institutionId,
             country,
             type,
-            teamId: user.team_id,
+            teamId: teamId!,
             validUntil: new Date(Date.now() + maximumConsentValidity * 1000)
               .toISOString()
               .replace(/\.\d+Z$/, ".000000+00:00"),

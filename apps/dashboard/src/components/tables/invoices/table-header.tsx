@@ -1,6 +1,6 @@
 "use client";
 
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useSortParams } from "@/hooks/use-sort-params";
 import { Button } from "@midday/ui/button";
 import {
   TableHeader as BaseTableHeader,
@@ -10,11 +10,12 @@ import {
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 export function TableHeader() {
-  const { setParams, sort } = useInvoiceParams({ shallow: false });
-  const [column, value] = sort || [];
+  const { params, setParams } = useSortParams();
+
+  const [column, value] = params.sort || [];
 
   const createSortQuery = (name: string) => {
-    const [currentColumn, currentValue] = sort || [];
+    const [currentColumn, currentValue] = params.sort || [];
 
     if (name === currentColumn) {
       if (currentValue === "asc") {
@@ -32,7 +33,7 @@ export function TableHeader() {
   return (
     <BaseTableHeader>
       <TableRow>
-        <TableHead className="hidden md:table-cell">
+        <TableHead className="w-[200px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -47,7 +48,7 @@ export function TableHeader() {
             )}
           </Button>
         </TableHead>
-        <TableHead>
+        <TableHead className="w-[150px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -58,7 +59,7 @@ export function TableHeader() {
             {"status" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead>
+        <TableHead className="w-[180px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -71,7 +72,7 @@ export function TableHeader() {
             {"due_date" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead className="w-[200px]">
+        <TableHead className="min-w-[250px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -84,7 +85,7 @@ export function TableHeader() {
             {"customer" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead>
+        <TableHead className="w-[200px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -96,7 +97,7 @@ export function TableHeader() {
           </Button>
         </TableHead>
 
-        <TableHead className="hidden md:table-cell">
+        <TableHead>
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -111,22 +112,8 @@ export function TableHeader() {
             )}
           </Button>
         </TableHead>
-        <TableHead className="hidden md:table-cell">
-          <Button
-            className="p-0 hover:bg-transparent space-x-2"
-            variant="ghost"
-            onClick={() => createSortQuery("recurring")}
-          >
-            <span>Recurring</span>
-            {"recurring" === column && value === "asc" && (
-              <ArrowDown size={16} />
-            )}
-            {"recurring" === column && value === "desc" && (
-              <ArrowUp size={16} />
-            )}
-          </Button>
-        </TableHead>
-        <TableHead className="hidden md:table-cell">Actions</TableHead>
+
+        <TableHead className="w-[100px]">Actions</TableHead>
       </TableRow>
     </BaseTableHeader>
   );

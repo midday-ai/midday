@@ -11,11 +11,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@openpanel/nextjs": "^1.0.6",
-    "@vercel/functions": "^1.5.0"
+    "@openpanel/nextjs": "^1.0.7",
+    "@vercel/functions": "^2.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.6.3"
+    "typescript": "^5.8.3"
   },
   "exports": {
     "./server": "./src/server.ts",

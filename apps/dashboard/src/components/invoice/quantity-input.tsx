@@ -25,6 +25,7 @@ export function QuantityInput({
         {...props}
         value={value}
         min={0}
+        step={0.01}
         onChange={onChange}
         onFocus={() => setIsFocused(true)}
         className={cn(

@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./connector": "./src/connector.ts"
+  },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
@@ -11,6 +15,12 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "zod": "^3.23.8"
+    "@midday/encryption": "workspace:*",
+    "@midday/supabase": "workspace:*",
+    "googleapis": "^148.0.0",
+    "zod": "^3.24.3",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@azure/identity": "^4.9.0",
+    "@azure/msal-node": "^3.5.1"
   }
 }

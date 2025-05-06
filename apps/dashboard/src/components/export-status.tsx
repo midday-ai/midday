@@ -12,22 +12,23 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
-import ms from "ms";
+import { addDays, addYears } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
+import { useCopyToClipboard } from "usehooks-ts";
 
 const options = [
   {
     label: "Expire in 1 week",
-    expireIn: ms("7d"),
+    expireIn: Math.floor(addDays(new Date(), 7).getTime() / 1000),
   },
   {
     label: "Expire in 1 month",
-    expireIn: ms("30d"),
+    expireIn: Math.floor(addDays(new Date(), 30).getTime() / 1000),
   },
   {
     label: "Expire in 1 year",
-    expireIn: ms("1y"),
+    expireIn: Math.floor(addYears(new Date(), 1).getTime() / 1000),
   },
 ];
 
@@ -36,6 +37,7 @@ export function ExportStatus() {
   const [toastId, setToastId] = useState(null);
   const { exportData, setExportData } = useExportStore();
   const { status, progress, result } = useExportStatus(exportData);
+  const [, copy] = useCopyToClipboard();
 
   const shareFile = useAction(shareFileAction, {
     onError: () => {
@@ -45,8 +47,8 @@ export function ExportStatus() {
         title: "Something went wrong please try again.",
       });
     },
-    onSuccess: async ({ data }) => {
-      await navigator.clipboard.writeText(data ?? "");
+    onSuccess: ({ data }) => {
+      copy(data ?? "");
 
       toast({
         duration: 2500,
@@ -60,8 +62,8 @@ export function ExportStatus() {
     dismiss(toastId);
   };
 
-  const handleOnShare = ({ expireIn, filename }) => {
-    shareFile.execute({ expireIn, filepath: `exports/${filename}` });
+  const handleOnShare = ({ expireIn, fullPath }) => {
+    shareFile.execute({ expireIn, fullPath });
     dismiss(toastId);
   };
 
@@ -120,7 +122,7 @@ export function ExportStatus() {
                     onClick={() =>
                       handleOnShare({
                         expireIn: option.expireIn,
-                        filename: result.fileName,
+                        fullPath: result.fullPath,
                       })
                     }
                   >
@@ -131,7 +133,7 @@ export function ExportStatus() {
             </DropdownMenu>
 
             <a
-              href={`/api/download/file?path=exports/${result.fileName}&filename=${result.fileName}`}
+              href={`/api/download/file?path=${result.fullPath}&filename=${result.fileName}`}
               download
             >
               <Button size="sm" onClick={handleOnDownload}>

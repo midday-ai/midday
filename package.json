@@ -1,11 +1,7 @@
 {
   "name": "midday",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*",
-    "packages/email/*"
-  ],
+  "workspaces": ["packages/*", "apps/*", "packages/email/*"],
   "scripts": {
     "build": "turbo build",
     "clean": "git clean -xdf node_modules",
@@ -20,18 +16,18 @@
     "dev:engine": "turbo dev --filter=@midday/engine",
     "dev:website": "turbo dev --filter=@midday/website ",
     "dev:desktop": "turbo dev --filter=@midday/desktop",
-    "jobs:dashboard": "turbo jobs --filter=@midday/dashboard",
+    "jobs:dashboard": "turbo jobs --filter=@midday/jobs",
     "format": "biome format --write .",
     "lint": "turbo lint && manypkg check",
     "typecheck": "turbo typecheck"
   },
   "dependencies": {
     "@biomejs/biome": "1.9.4",
-    "@manypkg/cli": "^0.23.0",
-    "turbo": "2.3.3",
-    "typescript": "^5.7.2"
+    "@manypkg/cli": "^0.24.0",
+    "turbo": "2.5.2",
+    "typescript": "^5.8.3"
   },
-  "packageManager": "bun@1.1.38",
+  "packageManager": "bun@1.2.11",
   "resolutions": {
     "jackspeak": "2.1.1"
   }

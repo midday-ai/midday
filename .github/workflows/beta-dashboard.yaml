@@ -1,0 +1,43 @@
+name: Beta Deployment - Dashboard
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DASHBOARD }}
+  TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
+on:
+  push:
+    branches:
+      - beta
+    paths:
+      - apps/dashboard/**
+      - packages/**
+jobs:
+  deploy-beta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install
+      # - name: 🔦 Run linter
+      #   run: bun run lint --filter=@midday/dashboard
+      # - name: 🪐 Check TypeScript
+      #   run: bun run typecheck --filter=@midday/dashboard
+      - name: 🧪 Run unit tests
+        run: bun run test
+      - name: 📤 Pull Vercel Environment Information
+        run: bunx vercel pull --yes --environment=beta --token=${{ secrets.VERCEL_TOKEN }}
+      - name: 🏗 Build Project Artifacts
+        run: bunx vercel build --target=beta --token=${{ secrets.VERCEL_TOKEN }}
+      - name: 🔄 Deploy Background Jobs
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: |
+          TRIGGER_PROJECT_ID=${{ secrets.TRIGGER_PROJECT_ID }} bunx trigger.dev@3.3.17 deploy --env staging
+        working-directory: packages/jobs
+      - name: 🚀 Deploy to Vercel
+        run: |
+          bunx vercel deploy --prebuilt --target=beta --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` beta.midday.ai

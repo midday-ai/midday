@@ -1,16 +1,27 @@
+"use client";
+
+import { useMetricsParams } from "@/hooks/use-metrics-params";
 import { BurnRateChart } from "./burn-rate-chart";
 import { ExpenseChart } from "./expense-chart";
-import { ProfitRevenueChart } from "./profit-revenue-chart";
+import { ProfitChart } from "./profit-chart";
+import { RevenueChart } from "./revenue-chart";
 
-export function Charts(props) {
-  switch (props.type) {
+type Props = {
+  disabled: boolean;
+};
+
+export function Charts({ disabled }: Props) {
+  const { params } = useMetricsParams();
+
+  switch (params.chart) {
     case "revenue":
+      return <RevenueChart disabled={disabled} />;
     case "profit":
-      return <ProfitRevenueChart {...props} />;
+      return <ProfitChart disabled={disabled} />;
     case "burn_rate":
-      return <BurnRateChart {...props} />;
+      return <BurnRateChart disabled={disabled} />;
     case "expense":
-      return <ExpenseChart {...props} />;
+      return <ExpenseChart disabled={disabled} />;
     default:
       return null;
   }

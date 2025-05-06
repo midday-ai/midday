@@ -1,5 +1,6 @@
 "use client";
 
+import { useTrackerFilterParams } from "@/hooks/use-tracker-filter-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { Button } from "@midday/ui/button";
 
@@ -7,8 +8,8 @@ export function EmptyState() {
   const { setParams } = useTrackerParams();
 
   return (
-    <div className="flex items-center justify-center ">
-      <div className="flex flex-col items-center mt-14">
+    <div className="flex items-center justify-center h-[350px]">
+      <div className="flex flex-col items-center -mt-20">
         <div className="text-center mb-6 space-y-2">
           <h2 className="font-medium text-lg">No projects</h2>
           <p className="text-[#606060] text-sm">
@@ -33,11 +34,11 @@ export function EmptyState() {
 }
 
 export function NoResults() {
-  const { setParams } = useTrackerParams();
+  const { setFilter } = useTrackerFilterParams();
 
   return (
-    <div className="flex items-center justify-center ">
-      <div className="flex flex-col items-center mt-14">
+    <div className="flex items-center justify-center h-[350px]">
+      <div className="flex flex-col items-center -mt-20">
         <div className="text-center mb-6 space-y-2">
           <h2 className="font-medium text-lg">No results</h2>
           <p className="text-[#606060] text-sm">
@@ -45,10 +46,7 @@ export function NoResults() {
           </p>
         </div>
 
-        <Button
-          variant="outline"
-          onClick={() => setParams(null, { shallow: false })}
-        >
+        <Button variant="outline" onClick={() => setFilter(null)}>
           Clear filters
         </Button>
       </div>

@@ -2,7 +2,6 @@
 
 import { EditCategoryModal } from "@/components/modals/edit-category-modal";
 import { Button } from "@midday/ui/button";
-import { Checkbox } from "@midday/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -89,10 +88,7 @@ export const columns: ColumnDef<Category>[] = [
               {!row.original.system && (
                 <DropdownMenuItem
                   onClick={() =>
-                    table.options.meta?.deleteCategories.execute({
-                      ids: [row.original.id],
-                      revalidatePath: "/settings/categories",
-                    })
+                    table.options.meta.deleteCategory(row.original.id)
                   }
                 >
                   Remove

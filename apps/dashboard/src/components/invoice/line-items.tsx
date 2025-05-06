@@ -1,23 +1,28 @@
 "use client";
 
-import type { InvoiceFormValues } from "@/actions/invoice/schema";
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
+import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
 import { calculateLineItemTotal } from "@midday/invoice/calculate";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { useMutation } from "@tanstack/react-query";
 import { Reorder, useDragControls } from "framer-motion";
-import { useAction } from "next-safe-action/hooks";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { AmountInput } from "./amount-input";
 import { Description } from "./description";
+import type { InvoiceFormValues } from "./form-context";
 import { Input } from "./input";
 import { LabelInput } from "./label-input";
 import { QuantityInput } from "./quantity-input";
 
 export function LineItems() {
-  const { control } = useFormContext<InvoiceFormValues>();
+  const { control } = useFormContext();
   const currency = useWatch({ control, name: "template.currency" });
+
+  const trpc = useTRPC();
+  const updateTemplateMutation = useMutation(
+    trpc.invoiceTemplate.upsert.mutationOptions(),
+  );
 
   const includeDecimals = useWatch({
     control,
@@ -35,8 +40,6 @@ export function LineItems() {
     control,
     name: "line_items",
   });
-
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const reorderList = (newFields: typeof fields) => {
     const firstDiffIndex = fields.findIndex(
@@ -68,7 +71,7 @@ export function LineItems() {
         <LabelInput
           name="template.description_label"
           onSave={(value) => {
-            updateInvoiceTemplate.execute({
+            updateTemplateMutation.mutate({
               description_label: value,
             });
           }}
@@ -78,7 +81,7 @@ export function LineItems() {
         <LabelInput
           name="template.quantity_label"
           onSave={(value) => {
-            updateInvoiceTemplate.execute({
+            updateTemplateMutation.mutate({
               quantity_label: value,
             });
           }}
@@ -88,7 +91,7 @@ export function LineItems() {
         <LabelInput
           name="template.price_label"
           onSave={(value) => {
-            updateInvoiceTemplate.execute({
+            updateTemplateMutation.mutate({
               price_label: value,
             });
           }}
@@ -98,7 +101,7 @@ export function LineItems() {
         <LabelInput
           name="template.total_label"
           onSave={(value) => {
-            updateInvoiceTemplate.execute({
+            updateTemplateMutation.mutate({
               total_label: value,
             });
           }}
@@ -162,7 +165,7 @@ function LineItemRow({
   includeUnits?: boolean;
 }) {
   const controls = useDragControls();
-  const { control } = useFormContext<InvoiceFormValues>();
+  const { control } = useFormContext();
 
   const locale = useWatch({ control, name: "template.locale" });
 

@@ -1,57 +1,23 @@
 "use client";
 
-import type { InvoiceTemplate } from "@/actions/invoice/schema";
-import { updateInvoiceAction } from "@/actions/invoice/update-invoice-action";
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
-import { OpenURL } from "@/components/open-url";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { formatDate, getDueDateStatus } from "@/utils/format";
+import { getWebsiteLogo } from "@/utils/logos";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
-import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { TooltipProvider } from "@midday/ui/tooltip";
-import { useToast } from "@midday/ui/use-toast";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
 import * as React from "react";
+import { ActionsMenu } from "./actions-menu";
 
-export type Invoice = {
-  id: string;
-  due_date: string;
-  issue_date?: string;
-  paid_at?: string;
-  status: string;
-  currency: string;
-  invoice_number: string;
-  amount?: number;
-  vat?: number;
-  tax?: number;
-  updated_at?: string;
-  viewed_at?: string;
-  template: InvoiceTemplate;
-  token: string;
-  sent_to?: string | null;
-  customer_details?: JSON;
-  internal_note?: string | null;
-  customer?: {
-    id: string;
-    name: string;
-    website: string;
-  };
-  // Used when relation is deleted
-  customer_name?: string;
-};
+export type Invoice = NonNullable<
+  RouterOutputs["invoice"]["get"]["data"]
+>[number];
 
 export const columns: ColumnDef<Invoice>[] = [
   {
@@ -71,9 +37,7 @@ export const columns: ColumnDef<Invoice>[] = [
       const date = row.getValue("due_date");
 
       const showDate =
-        row.original.status === "unpaid" ||
-        row.original.status === "overdue" ||
-        row.original.status === "pending";
+        row.original.status === "unpaid" || row.original.status === "overdue";
 
       return (
         <div className="flex flex-col space-y-1 w-[80px]">
@@ -104,7 +68,7 @@ export const columns: ColumnDef<Invoice>[] = [
           <Avatar className="size-5">
             {customer?.website && (
               <AvatarImageNext
-                src={`https://img.logo.dev/${customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                src={getWebsiteLogo(customer?.website)}
                 alt={`${name} logo`}
                 width={20}
                 height={20}
@@ -142,7 +106,7 @@ export const columns: ColumnDef<Invoice>[] = [
     accessorKey: "amount",
     cell: ({ row }) => (
       <span
-        className={cn({
+        className={cn("flex items-center gap-2", {
           "line-through": row.original.status === "canceled",
         })}
       >
@@ -166,137 +130,10 @@ export const columns: ColumnDef<Invoice>[] = [
     },
   },
   {
-    header: "Recurring",
-    accessorKey: "recurring",
-    cell: ({ row }) => row.getValue("recurring") ?? "One time",
-  },
-  {
     id: "actions",
     header: "Actions",
-    cell: ({ row, table }) => {
-      const status = row.getValue("status");
-      const { setParams } = useInvoiceParams();
-      const updateInvoice = useAction(updateInvoiceAction);
-      const { toast } = useToast();
-
-      const handleCopyLink = async () => {
-        try {
-          await navigator.clipboard.writeText(
-            `${window.location.origin}/i/${row.original.token}`,
-          );
-
-          toast({
-            duration: 4000,
-            title: "Copied link to clipboard.",
-            variant: "success",
-          });
-        } catch {}
-      };
-
-      return (
-        <div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="relative">
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                {/* {hasNewMessages && (
-                  <div className="rounded-full size-1 absolute bg-[#FFD02B] -right-0 top-0.5 ring-2 ring-background">
-                    <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[ping_1s_ease-in-out_5]" />
-                    <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-75" />
-                    <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-50" />
-                  </div>
-                )} */}
-                <DotsHorizontalIcon className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end">
-              {status !== "paid" && status !== "canceled" && (
-                <DropdownMenuItem
-                  onClick={() =>
-                    setParams({
-                      invoiceId: row.original.id,
-                      type: "edit",
-                    })
-                  }
-                >
-                  Edit invoice
-                </DropdownMenuItem>
-              )}
-
-              <DropdownMenuItem>
-                <OpenURL
-                  href={`${window.location.origin}/i/${row.original.token}`}
-                >
-                  Open invoice
-                </OpenURL>
-              </DropdownMenuItem>
-
-              <DropdownMenuItem onClick={handleCopyLink}>
-                Copy link
-              </DropdownMenuItem>
-
-              {status !== "draft" && (
-                <>
-                  {/* <DropdownMenuItem
-                    onClick={() =>
-                      setParams({
-                        type: "comments",
-                        invoiceId: row.original.id,
-                      })
-                    }
-                  >
-                    Comments
-                  </DropdownMenuItem> */}
-                  <DropdownMenuItem>
-                    <a
-                      href={`/api/download/invoice?id=${row.original.id}&size=${row.original.template?.size === "a4" ? "a4" : "letter"}`}
-                      download
-                    >
-                      Download
-                    </a>
-                  </DropdownMenuItem>
-                </>
-              )}
-
-              {(status === "overdue" || status === "unpaid") && (
-                <DropdownMenuItem
-                  onClick={() =>
-                    updateInvoice.execute({
-                      id: row.original.id,
-                      status: "canceled",
-                    })
-                  }
-                  className="text-[#FF3638]"
-                >
-                  Cancel
-                </DropdownMenuItem>
-              )}
-
-              {status === "canceled" && (
-                <DropdownMenuItem
-                  onClick={() =>
-                    table.options.meta?.deleteInvoice(row.original.id)
-                  }
-                  className="text-[#FF3638]"
-                >
-                  Delete
-                </DropdownMenuItem>
-              )}
-
-              {status === "draft" && (
-                <DropdownMenuItem
-                  onClick={() =>
-                    table.options.meta?.deleteInvoice(row.original.id)
-                  }
-                  className="text-[#FF3638]"
-                >
-                  Delete
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      );
+    cell: ({ row }) => {
+      return <ActionsMenu row={row.original} />;
     },
   },
 ];

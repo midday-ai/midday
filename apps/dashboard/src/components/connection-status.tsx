@@ -1,5 +1,7 @@
+"use client";
+
+import { useTRPC } from "@/trpc/client";
 import { getConnectionsStatus } from "@/utils/connection-status";
-import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -9,18 +11,23 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
-export async function ConnectionStatus() {
-  const bankConnections = await getBankConnectionsByTeamId();
+export function ConnectionStatus() {
+  const trpc = useTRPC();
 
-  if (!bankConnections?.data?.length) {
+  const { data, isLoading } = useQuery(
+    trpc.bankConnections.get.queryOptions({
+      enabled: true,
+    }),
+  );
+
+  if (isLoading || !data) {
     return null;
   }
 
-  const connectionIssue = bankConnections?.data?.some(
-    (bank) => bank.status === "disconnected",
-  );
+  const connectionIssue = data?.some((bank) => bank.status === "disconnected");
 
   if (connectionIssue) {
     return (
@@ -49,12 +56,12 @@ export async function ConnectionStatus() {
     );
   }
 
-  // NOTE: No connections with expire_at (Only GoCardLess)
-  if (bankConnections?.data?.find((bank) => bank.expires_at === null)) {
+  // NOTE: No connections with expire_at (Only GoCardLess and Enable Banking)
+  if (data?.find((bank) => bank.expires_at === null)) {
     return null;
   }
 
-  const { warning, error, show } = getConnectionsStatus(bankConnections.data);
+  const { warning, error, show } = getConnectionsStatus(data);
 
   if (!show) {
     return null;

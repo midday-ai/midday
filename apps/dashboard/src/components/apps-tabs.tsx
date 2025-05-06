@@ -16,7 +16,6 @@ const tabs = [
 
 export function AppsTabs() {
   const [currentTab, setTab] = useQueryState("tab", {
-    shallow: false,
     defaultValue: "all",
   });
 

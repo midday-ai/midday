@@ -1,34 +1,22 @@
 import { ManageSubscription } from "@/components/manage-subscription";
 import { Plans } from "@/components/plans";
-// import { UsageSkeleton } from "@/components/usage";
-// import { UsageServer } from "@/components/usage.server";
-// import { UsageSkeleton } from "@/components/usage";
-// import { UsageServer } from "@/components/usage.server";
-import { canChooseStarterPlanQuery, getProPlanPrice } from "@/utils/plans";
-import { getUser } from "@midday/supabase/cached-queries";
+import { trpc } from "@/trpc/server";
+import { getQueryClient } from "@/trpc/server";
 import type { Metadata } from "next";
-// import { Suspense } from "react";
-// import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Billing | Midday",
 };
 
 export default async function Billing() {
-  const user = await getUser();
+  const queryClient = getQueryClient();
+  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
 
-  const team = user?.data?.team;
-  const canChooseStarterPlan = await canChooseStarterPlanQuery(team?.id);
-
-  const proPlanPrice = getProPlanPrice(team?.created_at);
-
-  // Determine if discount applies
-  const hasDiscount = proPlanPrice < 99;
-  const discountPrice = hasDiscount ? proPlanPrice : undefined;
+  const team = user?.team;
 
   return (
     <div className="space-y-12">
-      {team?.plan !== "trial" && <ManageSubscription teamId={team?.id} />}
+      {team?.plan !== "trial" && <ManageSubscription />}
 
       {team?.plan === "trial" && (
         <div>
@@ -36,17 +24,9 @@ export default async function Billing() {
             Plans
           </h2>
 
-          <Plans
-            discountPrice={discountPrice}
-            teamId={team?.id}
-            canChooseStarterPlan={canChooseStarterPlan}
-          />
+          <Plans />
         </div>
       )}
-
-      {/* <Suspense fallback={<UsageSkeleton />}>
-        <UsageServer teamId={team?.id} plan={team?.plan} />
-      </Suspense> */}
     </div>
   );
 }

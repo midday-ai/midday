@@ -1,7 +1,9 @@
-import type { InvoiceFormValues } from "@/actions/invoice/schema";
-import type { Customer } from "./customer-details";
+import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { InvoiceFormValues } from "./form-context";
 
-export const transformCustomerToContent = (customer?: Customer) => {
+export const transformCustomerToContent = (
+  customer?: RouterOutputs["customers"]["getById"],
+) => {
   if (!customer) return null;
 
   const content = [];
@@ -55,13 +57,6 @@ export const transformCustomerToContent = (customer?: Customer) => {
     content.push({
       type: "paragraph",
       content: [{ text: customer.phone, type: "text" }],
-    });
-  }
-
-  if (customer.vat) {
-    content.push({
-      type: "paragraph",
-      content: [{ text: `VAT: ${customer.vat}`, type: "text" }],
     });
   }
 

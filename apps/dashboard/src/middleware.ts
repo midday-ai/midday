@@ -2,6 +2,7 @@ import { updateSession } from "@midday/supabase/middleware";
 import { createClient } from "@midday/supabase/server";
 import { createI18nMiddleware } from "next-international/middleware";
 import { type NextRequest, NextResponse } from "next/server";
+import { selectedTeamIdCookieName } from "./utils/team";
 
 const I18nMiddleware = createI18nMiddleware({
   locales: ["en"],
@@ -11,7 +12,7 @@ const I18nMiddleware = createI18nMiddleware({
 
 export async function middleware(request: NextRequest) {
   const response = await updateSession(request, I18nMiddleware(request));
-  const supabase = createClient();
+  const supabase = await createClient();
   const url = new URL("/", request.url);
   const nextUrl = request.nextUrl;
 
@@ -29,7 +30,7 @@ export async function middleware(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Not authenticated
+  // 1. Not authenticated
   if (
     !session &&
     newUrl.pathname !== "/login" &&
@@ -49,36 +50,53 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // If authenticated but no full_name redirect to user setup page
-  if (
-    newUrl.pathname !== "/setup" &&
-    newUrl.pathname !== "/teams/create" &&
-    session &&
-    !session?.user?.user_metadata?.full_name
-  ) {
-    // Check if the URL contains an invite code
-    const inviteCodeMatch = newUrl.pathname.startsWith("/teams/invite/");
+  // If authenticated, proceed with other checks
+  if (session) {
+    // 2. Check user setup (full_name)
+    if (
+      newUrl.pathname !== "/setup" &&
+      newUrl.pathname !== "/teams/create" &&
+      !session?.user?.user_metadata?.full_name
+    ) {
+      // Check if the URL contains an invite code
+      const inviteCodeMatch = newUrl.pathname.startsWith("/teams/invite/");
 
-    if (inviteCodeMatch) {
-      return NextResponse.redirect(`${url.origin}${newUrl.pathname}`);
+      if (inviteCodeMatch) {
+        // Allow proceeding to invite page even without setup
+        // Redirecting with the original path including locale if present
+        return NextResponse.redirect(
+          `${url.origin}${request.nextUrl.pathname}`,
+        );
+      }
+      // Redirect to setup if not on setup, create team, or invite page and full_name is missing
+      return NextResponse.redirect(`${url.origin}/setup`);
     }
 
-    return NextResponse.redirect(`${url.origin}/setup`);
+    // 3. Check MFA Verification
+    const { data: mfaData } =
+      await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (
+      mfaData &&
+      mfaData.nextLevel === "aal2" &&
+      mfaData.nextLevel !== mfaData.currentLevel &&
+      newUrl.pathname !== "/mfa/verify"
+    ) {
+      // Redirect to MFA verification if needed and not already there
+      return NextResponse.redirect(`${url.origin}/mfa/verify`);
+    }
+
+    // 4. Check for team selection (Only if authenticated, setup complete, and MFA verified if necessary)
+    if (
+      newUrl.pathname !== "/mfa/verify" && // Ensure we don't redirect away from MFA verify
+      !newUrl.pathname.startsWith("/teams") && // Allow access to team pages
+      !request.cookies.has(selectedTeamIdCookieName) // Check if team cookie is missing
+    ) {
+      // Redirect to team selection page if no team is selected and not on a team-related page or MFA page
+      return NextResponse.redirect(`${url.origin}/teams`);
+    }
   }
 
-  const { data: mfaData } =
-    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-
-  // Enrolled for mfa but not verified
-  if (
-    mfaData &&
-    mfaData.nextLevel === "aal2" &&
-    mfaData.nextLevel !== mfaData.currentLevel &&
-    newUrl.pathname !== "/mfa/verify"
-  ) {
-    return NextResponse.redirect(`${url.origin}/mfa/verify`);
-  }
-
+  // If all checks pass, return the original or updated response
   return response;
 }
 

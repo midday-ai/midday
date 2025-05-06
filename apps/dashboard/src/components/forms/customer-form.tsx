@@ -1,11 +1,10 @@
 "use client";
 
-import { createCustomerAction } from "@/actions/create-customer-action";
-import { createCustomerTagAction } from "@/actions/customer/create-customer-tag-action";
-import { deleteCustomerTagAction } from "@/actions/customer/delete-customer-tag-action";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import {
   Accordion,
   AccordionContent,
@@ -26,12 +25,9 @@ import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Textarea } from "@midday/ui/textarea";
-import { useAction } from "next-safe-action/hooks";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { CountrySelector } from "../country-selector";
-import type { Customer } from "../invoice/customer-details";
 import {
   type AddressDetails,
   SearchAddressInput,
@@ -41,28 +37,28 @@ import { VatNumberInput } from "../vat-number-input";
 
 const formSchema = z.object({
   id: z.string().uuid().optional(),
-  name: z.string().min(1, {
+  name: z.string().min(2, {
     message: "Name must be at least 1 characters.",
   }),
   email: z.string().email({
     message: "Email is not valid.",
   }),
-  phone: z.string().nullable().optional(),
+  phone: z.string().optional(),
   website: z
     .string()
-    .nullable()
+
     .optional()
     .transform((url) => url?.replace(/^https?:\/\//, "")),
-  contact: z.string().nullable().optional(),
-  address_line_1: z.string().nullable().optional(),
-  address_line_2: z.string().nullable().optional(),
-  city: z.string().nullable().optional(),
-  state: z.string().nullable().optional(),
-  country: z.string().nullable().optional(),
-  country_code: z.string().nullable().optional(),
-  zip: z.string().nullable().optional(),
-  vat_number: z.string().nullable().optional(),
-  note: z.string().nullable().optional(),
+  contact: z.string().optional(),
+  address_line_1: z.string().optional(),
+  address_line_2: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  country: z.string().optional(),
+  country_code: z.string().optional(),
+  zip: z.string().optional(),
+  vat_number: z.string().optional(),
+  note: z.string().optional(),
   tags: z
     .array(
       z.object({
@@ -70,8 +66,7 @@ const formSchema = z.object({
         value: z.string(),
       }),
     )
-    .optional()
-    .nullable(),
+    .optional(),
 });
 
 const excludedDomains = [
@@ -92,63 +87,67 @@ const excludedDomains = [
 ];
 
 type Props = {
-  data?: Customer;
+  data?: RouterOutputs["customers"]["getById"];
 };
 
 export function CustomerForm({ data }: Props) {
-  const [sections, setSections] = useState<string[]>(["general"]);
-  const { setParams: setCustomerParams, name } = useCustomerParams();
-  const { setParams: setInvoiceParams } = useInvoiceParams();
-
-  const deleteCustomerTag = useAction(deleteCustomerTagAction);
-  const createCustomerTag = useAction(createCustomerTagAction);
-
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const isEdit = !!data;
 
-  const createCustomer = useAction(createCustomerAction, {
-    onSuccess: ({ data }) => {
-      if (data) {
-        setInvoiceParams({ selectedCustomerId: data.id });
+  const { setParams: setCustomerParams, name } = useCustomerParams();
+  const { setParams: setInvoiceParams, type } = useInvoiceParams();
+  const fromInvoice = type === "create" || type === "edit";
+
+  const upsertCustomerMutation = useMutation(
+    trpc.customers.upsert.mutationOptions({
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.customers.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.customers.get.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.customers.getById.queryKey(),
+        });
+
+        // Close the customer form
         setCustomerParams(null);
-      }
-    },
-  });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+        // If the customer is created from an invoice, set the customer as the selected customer
+        if (data && fromInvoice) {
+          setInvoiceParams({ selectedCustomerId: data.id });
+        }
+      },
+    }),
+  );
+
+  const form = useZodForm(formSchema, {
     defaultValues: {
-      id: undefined,
-      name: name ?? undefined,
-      email: undefined,
-      website: undefined,
-      address_line_1: undefined,
-      address_line_2: undefined,
-      city: undefined,
-      state: undefined,
-      country: undefined,
-      zip: undefined,
-      vat_number: undefined,
-      note: undefined,
-      phone: undefined,
-      contact: undefined,
-      tags: undefined,
+      id: data?.id,
+      name: name ?? data?.name ?? undefined,
+      email: data?.email ?? undefined,
+      website: data?.website ?? undefined,
+      address_line_1: data?.address_line_1 ?? undefined,
+      address_line_2: data?.address_line_2 ?? undefined,
+      city: data?.city ?? undefined,
+      state: data?.state ?? undefined,
+      country: data?.country ?? undefined,
+      country_code: data?.country_code ?? undefined,
+      zip: data?.zip ?? undefined,
+      phone: data?.phone ?? undefined,
+      contact: data?.contact ?? undefined,
+      note: data?.note ?? undefined,
+      tags:
+        data?.tags?.map((tag) => ({
+          id: tag.tag?.id ?? "",
+          value: tag.tag?.name ?? "",
+        })) ?? undefined,
     },
   });
-
-  useEffect(() => {
-    if (data) {
-      setSections(["general", "details"]);
-      form.reset({
-        ...data,
-        tags:
-          data.tags?.map((tag) => ({
-            id: tag.tag?.id ?? "",
-            value: tag.tag?.name ?? "",
-            label: tag.tag?.name ?? "",
-          })) ?? undefined,
-      });
-    }
-  }, [data]);
 
   const onSelectAddress = (address: AddressDetails) => {
     form.setValue("address_line_1", address.address_line_1);
@@ -170,15 +169,35 @@ export function CustomerForm({ data }: Props) {
     }
   };
 
+  const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    const formattedData = {
+      ...data,
+      id: data.id || undefined,
+      address_line_1: data.address_line_1 || null,
+      address_line_2: data.address_line_2 || null,
+      city: data.city || null,
+      state: data.state || null,
+      country: data.country || null,
+      contact: data.contact || null,
+      note: data.note || null,
+      website: data.website || null,
+      phone: data.phone || null,
+      zip: data.zip || null,
+      vat_number: data.vat_number || null,
+      tags: data.tags?.length ? data.tags : null,
+    };
+
+    upsertCustomerMutation.mutate(formattedData);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(createCustomer.execute)}>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
         <div className="h-[calc(100vh-180px)] scrollbar-hide overflow-auto">
           <div>
             <Accordion
-              key={sections.join("-")}
               type="multiple"
-              defaultValue={sections}
+              defaultValue={["general"]}
               className="space-y-6"
             >
               <AccordionItem value="general">
@@ -196,11 +215,13 @@ export function CustomerForm({ data }: Props) {
                           <FormControl>
                             <Input
                               {...field}
+                              value={field.value ?? ""}
                               autoFocus
                               placeholder="Acme Inc"
                               autoComplete="off"
                             />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -217,6 +238,7 @@ export function CustomerForm({ data }: Props) {
                             <FormControl>
                               <Input
                                 {...field}
+                                value={field.value ?? ""}
                                 placeholder="acme@example.com"
                                 type="email"
                                 autoComplete="off"
@@ -238,6 +260,7 @@ export function CustomerForm({ data }: Props) {
                             <FormControl>
                               <Input
                                 {...field}
+                                value={field.value ?? ""}
                                 placeholder="+1 (555) 123-4567"
                                 type="tel"
                                 autoComplete="off"
@@ -260,10 +283,12 @@ export function CustomerForm({ data }: Props) {
                           <FormControl>
                             <Input
                               {...field}
+                              value={field.value ?? ""}
                               placeholder="acme.com"
                               autoComplete="off"
                             />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -279,10 +304,12 @@ export function CustomerForm({ data }: Props) {
                           <FormControl>
                             <Input
                               {...field}
+                              value={field.value ?? ""}
                               placeholder="John Doe"
                               autoComplete="off"
                             />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -311,10 +338,12 @@ export function CustomerForm({ data }: Props) {
                           <FormControl>
                             <Input
                               {...field}
+                              value={field.value ?? ""}
                               placeholder="123 Main St"
                               autoComplete="off"
                             />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -330,10 +359,12 @@ export function CustomerForm({ data }: Props) {
                           <FormControl>
                             <Input
                               {...field}
+                              value={field.value ?? ""}
                               placeholder="Suite 100"
                               autoComplete="off"
                             />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -349,13 +380,14 @@ export function CustomerForm({ data }: Props) {
                             </FormLabel>
                             <FormControl>
                               <CountrySelector
-                                defaultValue={field.value}
+                                defaultValue={field.value ?? ""}
                                 onSelect={(code, name) => {
                                   field.onChange(name);
                                   form.setValue("country_code", code);
                                 }}
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -371,10 +403,12 @@ export function CustomerForm({ data }: Props) {
                             <FormControl>
                               <Input
                                 {...field}
+                                value={field.value ?? ""}
                                 placeholder="New York"
                                 autoComplete="off"
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -392,10 +426,12 @@ export function CustomerForm({ data }: Props) {
                             <FormControl>
                               <Input
                                 {...field}
+                                value={field.value ?? ""}
                                 placeholder="NY"
                                 autoComplete="off"
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -411,10 +447,12 @@ export function CustomerForm({ data }: Props) {
                             <FormControl>
                               <Input
                                 {...field}
+                                value={field.value ?? ""}
                                 placeholder="10001"
                                 autoComplete="off"
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -429,55 +467,38 @@ export function CustomerForm({ data }: Props) {
                       </Label>
 
                       <SelectTags
-                        tags={form.getValues("tags")}
+                        tags={(form.getValues("tags") ?? []).map((tag) => ({
+                          id: tag.id,
+                          value: tag.value,
+                          label: tag.value,
+                        }))}
                         onRemove={(tag) => {
-                          deleteCustomerTag.execute({
-                            tagId: tag.id,
-                            customerId: form.getValues("id")!,
-                          });
+                          form.setValue(
+                            "tags",
+                            form
+                              .getValues("tags")
+                              ?.filter((t) => t.id !== tag.id),
+                            {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            },
+                          );
                         }}
-                        // Only for create customers
-                        onCreate={(tag) => {
-                          if (!isEdit) {
-                            form.setValue(
-                              "tags",
-                              [
-                                ...(form.getValues("tags") ?? []),
-                                {
-                                  value: tag.value ?? "",
-                                  id: tag.id ?? "",
-                                },
-                              ],
-                              {
-                                shouldDirty: true,
-                                shouldValidate: true,
-                              },
-                            );
-                          }
-                        }}
-                        // Only for edit customers
                         onSelect={(tag) => {
-                          if (isEdit) {
-                            createCustomerTag.execute({
-                              tagId: tag.id,
-                              customerId: form.getValues("id")!,
-                            });
-                          } else {
-                            form.setValue(
-                              "tags",
-                              [
-                                ...(form.getValues("tags") ?? []),
-                                {
-                                  value: tag.value ?? "",
-                                  id: tag.id ?? "",
-                                },
-                              ],
+                          form.setValue(
+                            "tags",
+                            [
+                              ...(form.getValues("tags") ?? []),
                               {
-                                shouldDirty: true,
-                                shouldValidate: true,
+                                value: tag.value ?? "",
+                                id: tag.id ?? "",
                               },
-                            );
-                          }
+                            ],
+                            {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            },
+                          );
                         }}
                       />
 
@@ -498,9 +519,11 @@ export function CustomerForm({ data }: Props) {
                             <FormControl>
                               <VatNumberInput
                                 {...field}
-                                countryCode={form.watch("country_code")}
+                                value={field.value ?? ""}
+                                countryCode={form.watch("country_code") ?? ""}
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -517,11 +540,13 @@ export function CustomerForm({ data }: Props) {
                           <FormControl>
                             <Textarea
                               {...field}
+                              value={field.value ?? ""}
                               className="flex min-h-[80px] resize-none"
                               placeholder="Additional information..."
                               autoComplete="off"
                             />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -543,8 +568,10 @@ export function CustomerForm({ data }: Props) {
             </Button>
 
             <SubmitButton
-              isSubmitting={createCustomer.isExecuting}
-              disabled={createCustomer.isExecuting || !form.formState.isValid}
+              isSubmitting={upsertCustomerMutation.isPending}
+              disabled={
+                upsertCustomerMutation.isPending || !form.formState.isDirty
+              }
             >
               {isEdit ? "Update" : "Create"}
             </SubmitButton>

@@ -1,9 +1,9 @@
 "use client";
 
-import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { cn } from "@midday/ui/cn";
 import { Controller, useFormContext } from "react-hook-form";
 import { Editor } from "./editor";
+import type { InvoiceFormValues } from "./form-context";
 
 type Props = {
   name: keyof InvoiceFormValues;

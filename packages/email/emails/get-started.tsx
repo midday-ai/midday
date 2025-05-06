@@ -61,57 +61,66 @@ export const GetStartedEmail = ({ fullName = "Viktor Hofte" }: Props) => {
             <br />
 
             <span className="font-medium">Hi {firstName},</span>
+
             <Text className="text-[#121212]">
               Just checking in to help you get started. Here are a few things
               you can try today:
-              <br />
-              <ul className="list-none pl-0 text-[#121212] text-[14px]">
-                <li className="mb-2">
+            </Text>
+            <br />
+            <ul className="list-none pl-0 text-[#121212] text-[14px]">
+              <li className="mb-2">
+                <Text>
                   <strong>Connect your bank account</strong> – Get a clear
                   financial overview.
-                </li>
-
-                <li className="mb-2">
+                </Text>
+              </li>
+              <li className="mb-2">
+                <Text>
                   <strong>Track your time</strong> – Stay on top of your hours
                   and never lose billable time.
-                </li>
-
-                <li className="mb-2">
+                </Text>
+              </li>
+              <li className="mb-2">
+                <Text>
                   <strong>Send your first invoice</strong> – Get paid faster and
                   track overdue payments effortlessly.
-                </li>
-
-                <li className="mb-2">
+                </Text>
+              </li>
+              <li className="mb-2">
+                <Text>
                   <strong>Reconcile transactions</strong> – Use Inbox to gather
                   receipts and match them with transactions.
-                </li>
-
-                <li className="mb-2">
+                </Text>
+              </li>
+              <li className="mb-2">
+                <Text>
                   <strong>Store important files</strong> – Keep contracts and
                   agreements secure in Vault.
-                </li>
-
-                <li className="mb-2">
+                </Text>
+              </li>
+              <li className="mb-2">
+                <Text>
                   <strong>Use the assistant</strong> – Gain insights and get a
                   deeper understanding of your finances.
-                </li>
-
-                <li className="mb-2">
+                </Text>
+              </li>
+              <li className="mb-2">
+                <Text>
                   <strong>Try the native desktop app</strong> – Faster access to
                   stay in control of your business.
-                </li>
-              </ul>
+                </Text>
+              </li>
+            </ul>
+            <br />
+            <Text className="text-[#121212] text-[14px]">
+              Let us know if you have any thoughts or feedback—we'd love to hear
+              from you. Just hit reply.
+            </Text>
+            <br />
+            <Text className="text-[#121212] text-[14px]">
+              Best,
               <br />
-              <p className="text-[#121212] text-[14px]">
-                Let us know if you have any thoughts or feedback—we’d love to
-                hear from you. Just hit reply.
-              </p>
-              <br />
-              <p className="text-[#121212] text-[14px]">
-                Best,
-                <br />
-                Pontus & Viktor
-              </p>
+              Pontus & Viktor
             </Text>
 
             <br />

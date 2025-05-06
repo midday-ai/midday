@@ -1,24 +1,36 @@
-import { getInvoiceSummary } from "@midday/supabase/cached-queries";
-import Link from "next/link";
+"use client";
+
+import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
+import { useTRPC } from "@/trpc/client";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { InvoiceSummary } from "./invoice-summary";
 
-type Props = {
-  defaultCurrency: string;
-};
-
-export async function InvoicesPaid({ defaultCurrency }: Props) {
-  const { data } = await getInvoiceSummary({ status: "paid" });
+export function InvoicesPaid() {
+  const { setFilter } = useInvoiceFilterParams();
+  const trpc = useTRPC();
+  const { data } = useSuspenseQuery(
+    trpc.invoice.invoiceSummary.queryOptions({
+      status: "paid",
+    }),
+  );
 
   const totalInvoiceCount = data?.at(0)?.invoice_count;
 
   return (
-    <Link href="/invoices?statuses=paid" className="hidden sm:block">
+    <button
+      type="button"
+      onClick={() =>
+        setFilter({
+          statuses: ["paid"],
+        })
+      }
+      className="hidden sm:block text-left"
+    >
       <InvoiceSummary
         data={data}
-        totalInvoiceCount={totalInvoiceCount}
-        defaultCurrency={defaultCurrency}
+        totalInvoiceCount={totalInvoiceCount ?? 0}
         title="Paid"
       />
-    </Link>
+    </button>
   );
 }

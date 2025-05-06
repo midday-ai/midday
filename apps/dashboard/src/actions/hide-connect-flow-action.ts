@@ -10,7 +10,7 @@ export const hideConnectFlowAction = authActionClient
     name: "hide-connect-flow",
   })
   .action(async () => {
-    cookies().set({
+    (await cookies()).set({
       name: Cookies.HideConnectFlow,
       value: "true",
       expires: addYears(new Date(), 1),

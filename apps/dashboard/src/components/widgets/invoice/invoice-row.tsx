@@ -2,60 +2,29 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
-import { InvoiceDetailsSheet } from "@/components/sheets/invoice-details-sheet";
-import type { Invoice } from "@/components/tables/invoices/columns";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getDueDateStatus } from "@/utils/format";
 import { formatDate } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
-import { Skeleton } from "@midday/ui/skeleton";
-import { useState } from "react";
 
 type Props = {
-  invoice: Invoice;
+  invoice: NonNullable<RouterOutputs["invoice"]["get"]["data"]>[number];
 };
 
-export function InvoiceRowSkeleton() {
-  return (
-    <li className="h-[57px] flex items-center w-full">
-      <div className="flex items-center w-full">
-        <div className="flex flex-col space-y-1 w-1/4">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-3 w-16" />
-        </div>
-
-        <div className="w-1/4">
-          <Skeleton className="h-5 w-16" />
-        </div>
-
-        <div className="w-1/4">
-          <Skeleton className="h-4 w-24" />
-        </div>
-
-        <div className="w-1/4 flex justify-end">
-          <Skeleton className="h-4 w-16" />
-        </div>
-      </div>
-    </li>
-  );
-}
-
 export function InvoiceRow({ invoice }: Props) {
-  const [isOpen, setOpen] = useState(false);
-
-  const showDate =
-    invoice.status === "unpaid" ||
-    invoice.status === "overdue" ||
-    invoice.status === "pending";
+  const { setParams } = useInvoiceParams();
+  const showDate = invoice.status === "unpaid" || invoice.status === "overdue";
 
   return (
     <>
       <li
         key={invoice.id}
         className="h-[57px] flex items-center w-full"
-        onClick={() => setOpen(true)}
+        onClick={() => setParams({ invoiceId: invoice.id, type: "details" })}
       >
         <div className="flex items-center w-full">
-          <div className="flex flex-col space-y-1 w-1/4">
+          <div className="flex flex-col space-y-1 w-[90px]">
             <span className="text-sm">
               {invoice.due_date ? formatDate(invoice.due_date) : "-"}
             </span>
@@ -66,11 +35,13 @@ export function InvoiceRow({ invoice }: Props) {
             )}
           </div>
 
-          <div className="w-1/4">
+          <div className="w-[85px]">
             <InvoiceStatus status={invoice.status} />
           </div>
 
-          <div className="w-1/4 text-sm">{invoice.customer?.name}</div>
+          <div className="flex-1 text-sm line-clamp-1 pr-4">
+            {invoice.customer?.name}
+          </div>
 
           <div
             className={cn(
@@ -78,12 +49,13 @@ export function InvoiceRow({ invoice }: Props) {
               invoice.status === "canceled" && "line-through",
             )}
           >
-            <FormatAmount amount={invoice.amount} currency={invoice.currency} />
+            <FormatAmount
+              amount={invoice.amount ?? 0}
+              currency={invoice.currency ?? "USD"}
+            />
           </div>
         </div>
       </li>
-
-      <InvoiceDetailsSheet data={invoice} setOpen={setOpen} isOpen={isOpen} />
     </>
   );
 }

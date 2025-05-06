@@ -3,77 +3,89 @@ import { Charts } from "@/components/charts/charts";
 import { EmptyState } from "@/components/charts/empty-state";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
+import { defaultPeriod } from "@/components/widgets/spending/data";
+import { loadMetricsParams } from "@/hooks/use-metrics-params";
+import { HydrateClient, batchPrefetch, trpc } from "@/trpc/server";
+import { getQueryClient } from "@/trpc/server";
 import { Cookies } from "@/utils/constants";
-import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
-import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-
-// NOTE: GoCardLess serverAction needs this currently
-// (Fetch accounts takes up to 20s and default limit is 15s)
-export const maxDuration = 30;
+import type { SearchParams } from "nuqs";
 
 export const metadata: Metadata = {
   title: "Overview | Midday",
 };
 
-const defaultValue = {
-  from: subMonths(startOfMonth(new Date()), 12).toISOString(),
-  to: new Date().toISOString(),
-  period: "monthly",
+type Props = {
+  searchParams: Promise<SearchParams>;
 };
 
-export default async function Overview({ searchParams }) {
-  const accounts = await getTeamBankAccounts();
-  const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
+export default async function Overview(props: Props) {
+  const queryClient = getQueryClient();
+  const searchParams = await props.searchParams;
+  const { from, to } = loadMetricsParams(searchParams);
 
-  const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
+  const cookieStore = await cookies();
+  const hideConnectFlow =
+    cookieStore.get(Cookies.HideConnectFlow)?.value === "true";
 
-  const initialPeriod = cookies().has(Cookies.SpendingPeriod)
-    ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value)
-    : {
-        id: "this_year",
-        from: startOfYear(new Date()).toISOString(),
-        to: new Date().toISOString(),
-      };
+  batchPrefetch([
+    trpc.invoice.get.queryOptions({ pageSize: 10 }),
+    trpc.invoice.paymentStatus.queryOptions(),
+    trpc.metrics.expense.queryOptions({ from, to }),
+    trpc.metrics.profit.queryOptions({ from, to }),
+    trpc.metrics.burnRate.queryOptions({ from, to }),
+    trpc.metrics.runway.queryOptions({ from, to }),
+    trpc.inbox.get.queryOptions(),
+    trpc.bankAccounts.balances.queryOptions(),
+    trpc.documents.get.queryOptions({ pageSize: 10 }),
+    trpc.metrics.spending.queryOptions({
+      from: defaultPeriod.from,
+      to: defaultPeriod.to,
+    }),
+    trpc.transactions.get.queryOptions({
+      pageSize: 15,
+      filter: { type: undefined },
+    }),
+  ]);
 
-  const value = {
-    ...(searchParams.from && { from: searchParams.from }),
-    ...(searchParams.to && { to: searchParams.to }),
-  };
+  // Preload the data for the first visible chart
+  const [accounts] = await Promise.all([
+    queryClient.fetchQuery(
+      trpc.bankAccounts.get.queryOptions({
+        enabled: true,
+      }),
+    ),
+    queryClient.fetchQuery(
+      trpc.metrics.revenue.queryOptions({
+        from,
+        to,
+      }),
+    ),
+  ]);
 
-  const isEmpty = !accounts?.data?.length;
+  const isEmpty = !accounts?.length;
 
   return (
-    <>
+    <HydrateClient>
       <div>
         <div className="h-[530px] mb-4">
-          <ChartSelectors defaultValue={defaultValue} />
+          <ChartSelectors />
 
           <div className="mt-8 relative">
             {isEmpty && <EmptyState />}
 
             <div className={cn(isEmpty && "blur-[8px] opacity-20")}>
-              <Charts
-                value={value}
-                defaultValue={defaultValue}
-                disabled={isEmpty}
-                type={chartType}
-                currency={searchParams.currency}
-              />
+              <Charts disabled={isEmpty} />
             </div>
           </div>
         </div>
 
-        <Widgets
-          initialPeriod={initialPeriod}
-          disabled={isEmpty}
-          searchParams={searchParams}
-        />
+        <Widgets disabled={false} />
       </div>
 
       <OverviewModal defaultOpen={isEmpty && !hideConnectFlow} />
-    </>
+    </HydrateClient>
   );
 }

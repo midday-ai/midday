@@ -1,7 +1,7 @@
 "use client";
 
 import { formatRelativeTime } from "@/utils/format";
-import { createClient } from "@midday/supabase/client";
+import { getWebsiteLogo } from "@/utils/logos";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import {
   Avatar,
@@ -17,7 +17,6 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
 import type { Customer } from "./invoice-toolbar";
 
 interface User {
@@ -32,25 +31,24 @@ type Props = {
 };
 
 export function InvoiceViewers({ customer, viewedAt }: Props) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const supabase = createClient();
+  return null;
 
-  useEffect(() => {
-    async function fetchCurrentUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        setCurrentUser({
-          id: user.id,
-          avatar_url: user.user_metadata.avatar_url,
-          full_name: user.user_metadata.full_name,
-        });
-      }
-    }
+  // useEffect(() => {
+  //   async function fetchCurrentUser() {
+  //     const {
+  //       data: { user },
+  //     } = await supabase.auth.getUser();
+  //     if (user) {
+  //       setCurrentUser({
+  //         id: user.id,
+  //         avatar_url: user.user_metadata.avatar_url,
+  //         full_name: user.user_metadata.full_name,
+  //       });
+  //     }
+  //   }
 
-    fetchCurrentUser();
-  }, []);
+  //   fetchCurrentUser();
+  // }, []);
 
   if (!currentUser) {
     return null;
@@ -101,7 +99,7 @@ export function InvoiceViewers({ customer, viewedAt }: Props) {
                 <Avatar className="size-5 object-contain border border-border">
                   {customer?.website && (
                     <AvatarImageNext
-                      src={`https://img.logo.dev/${customer.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                      src={getWebsiteLogo(customer.website)}
                       alt={`${customer.name} logo`}
                       width={20}
                       height={20}

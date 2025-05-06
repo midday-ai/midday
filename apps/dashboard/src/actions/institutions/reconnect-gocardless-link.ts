@@ -28,9 +28,9 @@ export const reconnectGoCardLessLinkAction = authActionClient
         redirectTo,
         isDesktop,
       },
-      ctx: { user },
+      ctx: { teamId },
     }) => {
-      const reference = `${user.team_id}:${nanoid()}`;
+      const reference = `${teamId}:${nanoid()}`;
 
       const link = new URL(redirectTo);
 

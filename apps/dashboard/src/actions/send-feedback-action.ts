@@ -2,15 +2,19 @@
 
 import { LogEvents } from "@midday/events/events";
 import { PlainClient } from "@team-plain/typescript-sdk";
+import { z } from "zod";
 import { authActionClient } from "./safe-action";
-import { sendFeedbackSchema } from "./schema";
 
 const client = new PlainClient({
   apiKey: process.env.PLAIN_API_KEY!,
 });
 
 export const sendFeebackAction = authActionClient
-  .schema(sendFeedbackSchema)
+  .schema(
+    z.object({
+      feedback: z.string(),
+    }),
+  )
   .metadata({
     name: "send-feedback",
     track: {
@@ -24,10 +28,10 @@ export const sendFeebackAction = authActionClient
         emailAddress: user.email,
       },
       onCreate: {
-        fullName: user.full_name,
+        fullName: user.user_metadata.full_name,
         externalId: user.id,
         email: {
-          email: user.email,
+          email: user.email!,
           isVerified: true,
         },
       },

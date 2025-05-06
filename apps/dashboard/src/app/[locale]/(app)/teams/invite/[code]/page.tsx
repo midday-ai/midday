@@ -8,16 +8,16 @@ import type { Metadata } from "next";
 import { revalidateTag } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Join team | Midday",
 };
 
-export default async function InviteCode({
-  params,
-}: { params: { code: string } }) {
-  const supabase = createClient();
+export default async function InviteCode(props: {
+  params: Promise<{ code: string }>;
+}) {
+  const params = await props.params;
+  const supabase = await createClient();
   const { code } = params;
 
   if (code) {
@@ -45,9 +45,7 @@ export default async function InviteCode({
         </div>
 
         <div className="mr-5 mt-4 md:mr-10 md:mt-10">
-          <Suspense>
-            <UserMenu onlySignOut />
-          </Suspense>
+          <UserMenu onlySignOut />
         </div>
       </header>
 

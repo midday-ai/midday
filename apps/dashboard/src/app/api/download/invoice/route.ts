@@ -1,11 +1,8 @@
 import { PdfTemplate, renderToStream } from "@midday/invoice";
-import { getInvoiceQuery } from "@midday/supabase/queries";
+import { getInvoiceByIdQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-
-export const preferredRegion = ["fra1", "sfo1", "iad1"];
-export const dynamic = "force-dynamic";
 
 const paramsSchema = z.object({
   id: z.string().uuid(),
@@ -14,7 +11,7 @@ const paramsSchema = z.object({
 });
 
 export async function GET(req: NextRequest) {
-  const supabase = createClient({ admin: true });
+  const supabase = await createClient({ admin: true });
   const requestUrl = new URL(req.url);
 
   const result = paramsSchema.safeParse(
@@ -27,7 +24,7 @@ export async function GET(req: NextRequest) {
 
   const { id, size, preview } = result.data;
 
-  const { data } = await getInvoiceQuery(supabase, id);
+  const { data } = await getInvoiceByIdQuery(supabase, id);
 
   if (!data) {
     return new Response("Invoice not found", { status: 404 });

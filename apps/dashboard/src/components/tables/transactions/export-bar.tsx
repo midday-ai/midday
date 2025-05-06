@@ -1,22 +1,25 @@
 import { exportTransactionsAction } from "@/actions/export-transactions-action";
+import { useUserQuery } from "@/hooks/use-user";
 import { useExportStore } from "@/store/export";
 import { useTransactionsStore } from "@/store/transactions";
 import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { useToast } from "@midday/ui/use-toast";
+import NumberFlow from "@number-flow/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
-type Props = {
-  selected: boolean;
-};
-
-export function ExportBar({ selected }: Props) {
+export function ExportBar() {
   const { toast } = useToast();
   const { setExportData } = useExportStore();
   const { rowSelection, setRowSelection } = useTransactionsStore();
   const [isOpen, setOpen] = useState(false);
+  const { data: user } = useUserQuery();
+
+  const ids = Object.keys(rowSelection);
+  const totalSelected = ids.length;
 
   const { execute, status } = useAction(exportTransactionsAction, {
     onSuccess: ({ data }) => {
@@ -41,12 +44,12 @@ export function ExportBar({ selected }: Props) {
   });
 
   useEffect(() => {
-    if (selected) {
+    if (totalSelected) {
       setOpen(true);
     } else {
       setOpen(false);
     }
-  }, [selected]);
+  }, [totalSelected]);
 
   return (
     <AnimatePresence>
@@ -55,28 +58,30 @@ export function ExportBar({ selected }: Props) {
         animate={{ y: isOpen ? 0 : 100 }}
         initial={{ y: 100 }}
       >
-        <div className="mx-2 md:mx-0 backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-full">
-          <span className="text-sm">{selected} selected</span>
+        <div className="mx-2 md:mx-0 backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C]">
+          <span className="text-sm text-[#878787]">
+            <NumberFlow value={Object.keys(rowSelection).length} /> selected
+          </span>
 
-          <div className="flex items-center space-x-4">
-            <button
-              type="button"
-              onClick={() => setRowSelection(() => ({}))}
-              className="text-sm"
-            >
-              Deselect all
-            </button>
-            <Button
-              className="h-8 text-sm"
-              onClick={() => execute(Object.keys(rowSelection))}
-              disabled={status === "executing"}
-            >
-              {status === "executing" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                `Export (${selected})`
-              )}
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" onClick={() => setRowSelection({})}>
+              <span>Deselect all</span>
             </Button>
+            <SubmitButton
+              isSubmitting={status === "executing"}
+              onClick={() =>
+                execute({
+                  transactionIds: ids,
+                  dateFormat: user?.date_format ?? undefined,
+                  locale: user?.locale ?? undefined,
+                })
+              }
+            >
+              <div className="flex items-center space-x-2">
+                <span>Export</span>
+                <Icons.ArrowCoolDown className="size-4" />
+              </div>
+            </SubmitButton>
           </div>
         </div>
       </motion.div>

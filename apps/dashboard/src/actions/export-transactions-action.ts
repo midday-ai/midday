@@ -1,12 +1,19 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { exportTransactions } from "jobs/tasks/transactions/export";
+import type { exportTransactions } from "@midday/jobs/tasks/transactions/export";
+import { tasks } from "@trigger.dev/sdk/v3";
+import { z } from "zod";
 import { authActionClient } from "./safe-action";
-import { exportTransactionsSchema } from "./schema";
 
 export const exportTransactionsAction = authActionClient
-  .schema(exportTransactionsSchema)
+  .schema(
+    z.object({
+      transactionIds: z.array(z.string()),
+      dateFormat: z.string().optional().default("MM/DD/YYYY"),
+      locale: z.string().optional().default("en"),
+    }),
+  )
   .metadata({
     name: "export-transactions",
     track: {
@@ -14,17 +21,25 @@ export const exportTransactionsAction = authActionClient
       channel: LogEvents.ExportTransactions.channel,
     },
   })
-  .action(async ({ parsedInput: transactionIds, ctx: { user } }) => {
-    if (!user.team_id || !user.locale) {
-      throw new Error("User not found");
-    }
+  .action(
+    async ({
+      parsedInput: { transactionIds, dateFormat, locale },
+      ctx: { teamId },
+    }) => {
+      if (!teamId) {
+        throw new Error("Team not found");
+      }
 
-    const event = await exportTransactions.trigger({
-      teamId: user.team_id,
-      locale: user.locale,
-      transactionIds,
-      dateFormat: user.date_format,
-    });
+      const event = await tasks.trigger<typeof exportTransactions>(
+        "export-transactions",
+        {
+          teamId,
+          locale,
+          transactionIds,
+          dateFormat,
+        },
+      );
 
-    return event;
-  });
+      return event;
+    },
+  );

@@ -1,6 +1,8 @@
 "use client";
 
 import { generateTrackerFilters } from "@/actions/ai/filters/generate-tracker-filters";
+import { useTrackerFilterParams } from "@/hooks/use-tracker-filter-params";
+import { useTRPC } from "@/trpc/client";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
@@ -17,71 +19,49 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
+import { useQuery } from "@tanstack/react-query";
 import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
-import {
-  parseAsArrayOf,
-  parseAsString,
-  parseAsStringLiteral,
-  useQueryStates,
-} from "nuqs";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
-
-type Props = {
-  members?: {
-    id: string;
-    name: string;
-  }[];
-  customers?: {
-    id: string | null;
-    name: string | null;
-  }[];
-};
-
-const defaultSearch = {
-  q: null,
-  start: null,
-  end: null,
-  assignees: null,
-  statuses: null,
-};
 
 const statusFilters = [
   { id: "in_progress", name: "In Progress" },
   { id: "completed", name: "Completed" },
 ];
 
-export function TrackerSearchFilter({
-  members,
-  customers: customersData,
-}: Props) {
+export function TrackerSearchFilter() {
   const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const trpc = useTRPC();
 
-  const [filters, setFilters] = useQueryStates(
-    {
-      q: parseAsString,
-      start: parseAsString,
-      end: parseAsString,
-      statuses: parseAsArrayOf(
-        parseAsStringLiteral(["in_progress", "completed"]),
-      ),
-      customers: parseAsArrayOf(parseAsString),
-    },
-    {
-      shallow: false,
-    },
-  );
+  const { filter, setFilter } = useTrackerFilterParams();
+
+  const shouldFetch = isOpen;
+
+  const { data: customersData } = useQuery({
+    ...trpc.customers.get.queryOptions(),
+    enabled: shouldFetch || Boolean(filter.customers?.length),
+  });
+
+  const { data: membersData } = useQuery({
+    ...trpc.team.members.queryOptions(),
+    enabled: shouldFetch || Boolean(filter.customers?.length),
+  });
+
+  const { data: tagsData } = useQuery({
+    ...trpc.tags.get.queryOptions(),
+    enabled: shouldFetch || Boolean(filter.tags?.length),
+  });
 
   useHotkeys(
     "esc",
     () => {
       setPrompt("");
-      setFilters(defaultSearch);
+      setFilter(null);
       setIsOpen(false);
     },
     {
@@ -100,7 +80,7 @@ export function TrackerSearchFilter({
     if (value) {
       setPrompt(value);
     } else {
-      setFilters(defaultSearch);
+      setFilter(null);
       setPrompt("");
     }
   };
@@ -112,7 +92,10 @@ export function TrackerSearchFilter({
 
       const { object } = await generateTrackerFilters(
         prompt,
-        `Customers: ${customersData?.map((customer) => customer.name).join(", ")}`,
+        `
+        Customers: ${customersData?.data?.map((customer) => customer.name).join(", ")}
+        Tags: ${tagsData?.map((tag) => tag.name).join(", ")}
+        `,
       );
 
       let finalObject = {};
@@ -122,45 +105,52 @@ export function TrackerSearchFilter({
           finalObject = {
             ...finalObject,
             ...partialObject,
-            statuses: partialObject?.status ? [partialObject.status] : null,
+            status: partialObject?.status ?? null,
             start: partialObject?.start ?? null,
             end: partialObject?.end ?? null,
             q: partialObject?.name ?? null,
+            tags: partialObject?.tags ?? null,
             customers:
               partialObject?.customers?.map(
                 (name: string) =>
-                  customersData?.find((customer) => customer.name === name)?.id,
+                  customersData?.data?.find(
+                    (customer) => customer.name === name,
+                  )?.id,
               ) ?? null,
           };
         }
       }
 
-      setFilters({
+      setFilter({
         q: null,
         ...finalObject,
       });
 
       setStreaming(false);
     } else {
-      setFilters({ q: prompt.length > 0 ? prompt : null });
+      setFilter({ q: prompt.length > 0 ? prompt : null });
     }
   };
 
-  const hasValidFilters =
-    Object.entries(filters).filter(
-      ([key, value]) => value !== null && key !== "q",
-    ).length > 0;
+  const validFilters = Object.fromEntries(
+    Object.entries(filter).filter(([key]) => key !== "q"),
+  );
+
+  const hasValidFilters = Object.values(validFilters).some(
+    (value) => value !== null,
+  );
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex space-x-4 items-center">
         <FilterList
-          filters={filters}
+          filters={validFilters}
           loading={streaming}
-          onRemove={setFilters}
-          members={members}
-          customers={customersData}
+          onRemove={setFilter}
+          members={membersData}
+          customers={customersData?.data}
           statusFilters={statusFilters}
+          tags={tagsData}
         />
 
         <form
@@ -223,8 +213,8 @@ export function TrackerSearchFilter({
                   initialFocus
                   toDate={new Date()}
                   selected={{
-                    from: filters.start && new Date(filters.start),
-                    to: filters.end && new Date(filters.end),
+                    from: filter.start && new Date(filter.start),
+                    to: filter.end && new Date(filter.end),
                   }}
                   onSelect={(range) => {
                     if (!range) return;
@@ -232,13 +222,13 @@ export function TrackerSearchFilter({
                     const newRange = {
                       start: range.from
                         ? formatISO(range.from, { representation: "date" })
-                        : filters.start,
+                        : filter.start,
                       end: range.to
                         ? formatISO(range.to, { representation: "date" })
-                        : filters.end,
+                        : filter.end,
                     };
 
-                    setFilters(newRange);
+                    setFilter(newRange);
                   }}
                 />
               </DropdownMenuSubContent>
@@ -261,10 +251,10 @@ export function TrackerSearchFilter({
                 {statusFilters.map(({ id, name }) => (
                   <DropdownMenuCheckboxItem
                     key={id}
-                    checked={filters?.statuses?.includes(id)}
+                    checked={filter?.statuses?.includes(id)}
                     onCheckedChange={() => {
-                      setFilters({
-                        statuses: id ? [id] : null,
+                      setFilter({
+                        status: id ?? null,
                       });
                     }}
                   >
@@ -288,14 +278,14 @@ export function TrackerSearchFilter({
                 alignOffset={-4}
                 className="p-0"
               >
-                {customersData?.map((customer) => (
+                {customersData?.data?.map((customer) => (
                   <DropdownMenuCheckboxItem
                     key={customer.id}
                     onCheckedChange={() => {
-                      setFilters({
-                        customers: filters?.customers?.includes(customer.id)
-                          ? filters.customers.filter((s) => s !== customer.id)
-                          : [...(filters?.customers ?? []), customer.id],
+                      setFilter({
+                        customers: filter?.customers?.includes(customer.id)
+                          ? filter.customers.filter((s) => s !== customer.id)
+                          : [...(filter?.customers ?? []), customer.id],
                       });
                     }}
                   >
@@ -303,10 +293,45 @@ export function TrackerSearchFilter({
                   </DropdownMenuCheckboxItem>
                 ))}
 
-                {!customersData?.length && (
+                {!customersData?.data?.length && (
                   <DropdownMenuItem disabled>
                     No customers found
                   </DropdownMenuItem>
+                )}
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.Status className="mr-2 h-4 w-4" />
+              <span>Tags</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent
+                sideOffset={14}
+                alignOffset={-4}
+                className="p-0"
+              >
+                {tagsData?.map((tag) => (
+                  <DropdownMenuCheckboxItem
+                    key={tag.id}
+                    onCheckedChange={() => {
+                      setFilter({
+                        tags: filter?.tags?.includes(tag.id)
+                          ? filter.tags.filter((s) => s !== tag.id)
+                          : [...(filter?.tags ?? []), tag.id],
+                      });
+                    }}
+                  >
+                    {tag.name}
+                  </DropdownMenuCheckboxItem>
+                ))}
+
+                {!tagsData?.length && (
+                  <DropdownMenuItem disabled>No tags found</DropdownMenuItem>
                 )}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>

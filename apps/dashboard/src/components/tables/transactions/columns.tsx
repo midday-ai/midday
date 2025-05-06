@@ -6,18 +6,8 @@ import { FormatAmount } from "@/components/format-amount";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { formatDate } from "@/utils/format";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -30,63 +20,222 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { ScrollArea, ScrollBar } from "@midday/ui/scroll-area";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
-import type { ColumnDef } from "@tanstack/react-table";
-import { Loader2 } from "lucide-react";
+import { TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
+import type {
+  ColumnDef,
+  TableMeta as ReactTableMeta,
+} from "@tanstack/react-table";
+import { memo, useCallback } from "react";
 
-export type Transaction = {
-  id: string;
-  amount: number;
-  status: "posted" | "excluded" | "included" | "pending" | "completed";
-  frequency?: string;
-  recurring?: boolean;
-  manual?: boolean;
-  date: string;
-  category?: {
-    slug: string;
+type Transaction = RouterOutputs["transactions"]["get"]["data"][number];
+
+interface TableMeta<TData> extends ReactTableMeta<TData> {
+  dateFormat?: string;
+  hasSorting?: boolean;
+  setOpen?: (id: string) => void;
+  copyUrl?: (id: string) => void;
+  updateTransaction?: (data: { id: string; status: string }) => void;
+}
+
+const SelectCell = memo(
+  ({
+    checked,
+    onChange,
+  }: { checked: boolean; onChange: (value: boolean) => void }) => (
+    <Checkbox checked={checked} onCheckedChange={onChange} />
+  ),
+);
+
+SelectCell.displayName = "SelectCell";
+
+const DateCell = memo(
+  ({
+    date,
+    format,
+    noSort,
+  }: { date: string; format?: string; noSort?: boolean }) =>
+    formatDate(date, format, noSort),
+);
+
+DateCell.displayName = "DateCell";
+
+const DescriptionCell = memo(
+  ({
+    name,
+    description,
+    status,
+    categorySlug,
+  }: {
     name: string;
-    color: string;
-  };
-  name: string;
-  description?: string;
-  currency: string;
-  method: string;
-  attachments?: {
-    id: string;
-    path: string;
-    name: string;
-    type: string;
-    size: number;
-  }[];
-  assigned?: {
-    avatar_url: string;
-    full_name: string;
-  };
-  bank_account?: {
-    name: string;
-    bank_connection: {
-      logo_url: string;
-    };
-  };
-  tags?: {
-    id: string;
-    name: string;
-  }[];
-};
+    description?: string;
+    status?: string;
+    categorySlug?: string;
+  }) => (
+    <div className="flex items-center space-x-2">
+      <TooltipTrigger asChild>
+        <span className={cn(categorySlug === "income" && "text-[#00C969]")}>
+          <div className="flex space-x-2 items-center">
+            <span className="line-clamp-1 text-ellipsis max-w-[100px] md:max-w-none">
+              {name}
+            </span>
+
+            {status === "pending" && (
+              <div className="flex space-x-1 items-center border rounded-md text-[10px] py-1 px-2 h-[22px] text-[#878787]">
+                <span>Pending</span>
+              </div>
+            )}
+          </div>
+        </span>
+      </TooltipTrigger>
+
+      {description && (
+        <TooltipContent
+          className="px-3 py-1.5 text-xs max-w-[380px]"
+          side="left"
+          sideOffset={10}
+        >
+          {description}
+        </TooltipContent>
+      )}
+    </div>
+  ),
+);
+
+DescriptionCell.displayName = "DescriptionCell";
+
+const AmountCell = memo(
+  ({
+    amount,
+    currency,
+    categorySlug,
+  }: {
+    amount: number;
+    currency: string;
+    categorySlug?: string;
+  }) => (
+    <span
+      className={cn("text-sm", categorySlug === "income" && "text-[#00C969]")}
+    >
+      <FormatAmount amount={amount} currency={currency} />
+    </span>
+  ),
+);
+
+AmountCell.displayName = "AmountCell";
+
+const TagsCell = memo(
+  ({ tags }: { tags?: { tag: { id: string; name: string } }[] }) => (
+    <div className="relative">
+      <div className="flex items-center space-x-2">
+        {tags?.map(({ tag }) => (
+          <Badge
+            key={tag.id}
+            variant="tag-rounded"
+            className="whitespace-nowrap"
+          >
+            {tag.name}
+          </Badge>
+        ))}
+      </div>
+      <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+    </div>
+  ),
+);
+
+TagsCell.displayName = "TagsCell";
+
+const ActionsCell = memo(
+  ({
+    transaction,
+    onViewDetails,
+    onCopyUrl,
+    onUpdateTransaction,
+  }: {
+    transaction: Transaction;
+    onViewDetails: (id: string) => void;
+    onCopyUrl: (id: string) => void;
+    onUpdateTransaction: (data: { id: string; status: string }) => void;
+  }) => {
+    const handleViewDetails = useCallback(() => {
+      onViewDetails(transaction.id);
+    }, [transaction.id, onViewDetails]);
+
+    const handleCopyUrl = useCallback(() => {
+      onCopyUrl(transaction.id);
+    }, [transaction.id, onCopyUrl]);
+
+    const handleUpdateToPosted = useCallback(() => {
+      onUpdateTransaction({ id: transaction.id, status: "posted" });
+    }, [transaction.id, onUpdateTransaction]);
+
+    const handleUpdateToCompleted = useCallback(() => {
+      onUpdateTransaction({ id: transaction.id, status: "completed" });
+    }, [transaction.id, onUpdateTransaction]);
+
+    const handleUpdateToExcluded = useCallback(() => {
+      onUpdateTransaction({ id: transaction.id, status: "excluded" });
+    }, [transaction.id, onUpdateTransaction]);
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <Icons.MoreHoriz />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={handleViewDetails}>
+            View details
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleCopyUrl}>Share URL</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {!transaction.manual && transaction.status === "excluded" && (
+            <DropdownMenuItem onClick={handleUpdateToPosted}>
+              Include
+            </DropdownMenuItem>
+          )}
+
+          {transaction.attachments?.length === 0 &&
+            transaction.status !== "completed" && (
+              <DropdownMenuItem onClick={handleUpdateToCompleted}>
+                Mark as completed
+              </DropdownMenuItem>
+            )}
+
+          {transaction.attachments?.length === 0 &&
+            transaction.status === "completed" && (
+              <DropdownMenuItem onClick={handleUpdateToPosted}>
+                Mark as uncompleted
+              </DropdownMenuItem>
+            )}
+
+          {!transaction.manual && transaction.status !== "excluded" && (
+            <DropdownMenuItem onClick={handleUpdateToExcluded}>
+              Exclude
+            </DropdownMenuItem>
+          )}
+
+          {transaction.manual && (
+            <DropdownMenuItem className="text-destructive">
+              Delete
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  },
+);
+
+ActionsCell.displayName = "ActionsCell";
 
 export const columns: ColumnDef<Transaction>[] = [
   {
     id: "select",
     cell: ({ row }) => (
-      <Checkbox
+      <SelectCell
         checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        onChange={(value) => row.toggleSelected(!!value)}
       />
     ),
     enableSorting: false,
@@ -95,130 +244,73 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "date",
     header: "Date",
-    cell: ({ row, table }) => {
-      return formatDate(
-        row.original.date,
-        table.options.meta?.dateFormat,
-        !table.options.meta?.hasSorting,
-      );
-    },
+    cell: ({ row, table }) => (
+      <DateCell
+        date={row.original.date}
+        format={
+          (table.options.meta as TableMeta<Transaction> | undefined)?.dateFormat
+        }
+        noSort={
+          !(table.options.meta as TableMeta<Transaction> | undefined)
+            ?.hasSorting
+        }
+      />
+    ),
   },
   {
     accessorKey: "description",
     header: "Description",
-    cell: ({ row }) => {
-      return (
-        <div className="flex items-center space-x-2">
-          <TooltipProvider delayDuration={20}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span
-                  className={cn(
-                    row.original?.category?.slug === "income" &&
-                      "text-[#00C969]",
-                  )}
-                >
-                  <div className="flex space-x-2 items-center">
-                    <span className="line-clamp-1 text-ellipsis max-w-[100px] md:max-w-none">
-                      {row.original.name}
-                    </span>
-
-                    {row.original.status === "pending" && (
-                      <div className="flex space-x-1 items-center border rounded-md text-[10px] py-1 px-2 h-[22px] text-[#878787]">
-                        <span>Pending</span>
-                      </div>
-                    )}
-                  </div>
-                </span>
-              </TooltipTrigger>
-
-              {row.original?.description && (
-                <TooltipContent
-                  className="px-3 py-1.5 text-xs max-w-[380px]"
-                  side="left"
-                  sideOffset={10}
-                >
-                  {row.original.description}
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <DescriptionCell
+        name={row.original.name}
+        description={row.original.description ?? undefined}
+        status={row.original.status ?? undefined}
+        categorySlug={row.original?.category?.slug}
+      />
+    ),
   },
   {
     accessorKey: "amount",
     header: "Amount",
-    cell: ({ row }) => {
-      return (
-        <span
-          className={cn(
-            "text-sm",
-            row.original?.category?.slug === "income" && "text-[#00C969]",
-          )}
-        >
-          <FormatAmount
-            amount={row.original.amount}
-            currency={row.original.currency}
-          />
-        </span>
-      );
-    },
+    cell: ({ row }) => (
+      <AmountCell
+        amount={row.original.amount}
+        currency={row.original.currency}
+        categorySlug={row.original?.category?.slug}
+      />
+    ),
   },
   {
     accessorKey: "category",
     header: "Category",
-    cell: ({ row }) => {
-      return (
-        <Category
-          name={row.original?.category?.name}
-          color={row.original?.category?.color}
-        />
-      );
-    },
+    cell: ({ row }) => (
+      <Category
+        name={row.original?.category?.name ?? ""}
+        color={row.original?.category?.color ?? ""}
+      />
+    ),
   },
   {
     accessorKey: "tags",
     header: "Tags",
-    cell: ({ row }) => {
-      return (
-        <div className="relative">
-          <ScrollArea className="max-w-[170px] whitespace-nowrap">
-            <div className="flex items-center space-x-2">
-              {row.original.tags?.map((tag) => (
-                <Badge key={tag.id} variant="tag" className="whitespace-nowrap">
-                  {tag.tag.name}
-                </Badge>
-              ))}
-            </div>
-
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
-        </div>
-      );
-    },
+    cell: ({ row }) => <TagsCell tags={row.original.tags} />,
   },
   {
     accessorKey: "bank_account",
     header: "Account",
-    cell: ({ row }) => {
-      return (
-        <TransactionBankAccount
-          name={row.original?.bank_account?.name}
-          logoUrl={row.original?.bank_account?.bank_connection?.logo_url}
-        />
-      );
-    },
+    cell: ({ row }) => (
+      <TransactionBankAccount
+        name={row.original?.bank_account?.name ?? undefined}
+        logoUrl={
+          row.original?.bank_account?.bank_connection?.logo_url ?? undefined
+        }
+      />
+    ),
   },
   {
     accessorKey: "method",
     header: "Method",
-    cell: ({ row }) => {
-      return <TransactionMethod method={row.original.method} />;
-    },
+    cell: ({ row }) => <TransactionMethod method={row.original.method} />,
   },
   {
     accessorKey: "assigned",
@@ -240,8 +332,8 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "status",
     cell: ({ row }) => {
       const fullfilled =
-        row.original?.status === "completed" ||
-        row?.original?.attachments?.length > 0;
+        row.original.status === "completed" ||
+        (row.original.attachments?.length ?? 0) > 0;
 
       return <TransactionStatus fullfilled={fullfilled} />;
     },
@@ -251,118 +343,15 @@ export const columns: ColumnDef<Transaction>[] = [
     enableSorting: false,
     enableHiding: false,
     cell: ({ row, table }) => {
+      const meta = table.options.meta as TableMeta<Transaction> | undefined;
+
       return (
-        <AlertDialog>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <Icons.MoreHoriz />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => table.options.meta?.setOpen(row.original.id)}
-              >
-                View details
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => table.options.meta?.copyUrl(row.original.id)}
-              >
-                Share URL
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {!row.original?.manual && row.original.status === "excluded" && (
-                <DropdownMenuItem
-                  onClick={() => {
-                    table.options.meta?.updateTransaction({
-                      id: row.original.id,
-                      status: "posted",
-                    });
-                  }}
-                >
-                  Include
-                </DropdownMenuItem>
-              )}
-
-              {row?.original?.attachments?.length === 0 &&
-                row.original.status !== "completed" && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      table.options.meta?.updateTransaction({
-                        id: row.original.id,
-                        status: "completed",
-                      });
-                    }}
-                  >
-                    Mark as completed
-                  </DropdownMenuItem>
-                )}
-
-              {row?.original?.attachments?.length === 0 &&
-                row.original.status === "completed" && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      table.options.meta?.updateTransaction({
-                        id: row.original.id,
-                        status: "posted",
-                      });
-                    }}
-                  >
-                    Mark as uncompleted
-                  </DropdownMenuItem>
-                )}
-
-              {!row.original?.manual && row.original.status !== "excluded" && (
-                <DropdownMenuItem
-                  onClick={() => {
-                    table.options.meta?.updateTransaction({
-                      id: row.original.id,
-                      status: "excluded",
-                    });
-                  }}
-                >
-                  Exclude
-                </DropdownMenuItem>
-              )}
-
-              {row.original?.manual && (
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem className="text-destructive">
-                    Delete
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your
-                transaction.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  table.options.meta?.deleteTransactions({
-                    ids: [row.original.id],
-                  });
-                }}
-              >
-                {table.options.meta?.deleteTransactions?.status ===
-                "executing" ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Confirm"
-                )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <ActionsCell
+          transaction={row.original}
+          onViewDetails={meta.setOpen}
+          onCopyUrl={meta.copyUrl}
+          onUpdateTransaction={meta.updateTransaction}
+        />
       );
     },
   },

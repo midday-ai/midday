@@ -7,7 +7,7 @@ type Props = {
   placeholder: string;
   defaultValue?: string;
   defaultColor?: string;
-  autoFocus?: booleam;
+  autoFocus?: boolean;
   onChange: (values: { name: string; color: string }) => void;
 };
 

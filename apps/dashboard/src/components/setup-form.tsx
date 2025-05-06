@@ -1,8 +1,7 @@
 "use client";
 
-import { updateUserSchema } from "@/actions/schema";
-import { updateUserAction } from "@/actions/update-user-action";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
   Form,
@@ -14,60 +13,48 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-import { useToast } from "@midday/ui/use-toast";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
+import { SubmitButton } from "@midday/ui/submit-button";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
-import { useForm } from "react-hook-form";
-import type { z } from "zod";
+import { z } from "zod";
 import { AvatarUpload } from "./avatar-upload";
 
-type Props = {
-  userId: string;
-  avatarUrl?: string;
-  fullName?: string;
-};
+const formSchema = z.object({
+  full_name: z.string().min(2).max(32),
+});
 
-export function SetupForm({ userId, avatarUrl, fullName }: Props) {
-  const { toast } = useToast();
+export function SetupForm() {
   const router = useRouter();
   const uploadRef = useRef<HTMLInputElement>(null);
 
-  const updateUser = useAction(updateUserAction, {
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-    onSuccess: () => {
-      router.replace("/");
-    },
-  });
+  const trpc = useTRPC();
+  const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
 
-  const form = useForm<z.infer<typeof updateUserSchema>>({
-    resolver: zodResolver(updateUserSchema),
+  const form = useZodForm(formSchema, {
     defaultValues: {
-      full_name: fullName ?? "",
+      full_name: user.full_name ?? "",
     },
   });
 
-  const isSubmitting =
-    updateUser.status !== "idle" && updateUser.status !== "hasErrored";
+  const updateUserMutation = useMutation(
+    trpc.user.update.mutationOptions({
+      onSuccess: () => {
+        router.replace("/");
+      },
+    }),
+  );
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(updateUser.execute)}
+        onSubmit={form.handleSubmit(updateUserMutation.mutate)}
         className="space-y-8"
       >
         <div className="flex justify-between items-end gap-4">
           <AvatarUpload
-            userId={userId}
-            avatarUrl={avatarUrl}
-            fullName={fullName}
+            userId={user.id}
+            avatarUrl={user.avatar_url}
             size={80}
             ref={uploadRef}
           />
@@ -97,13 +84,13 @@ export function SetupForm({ userId, avatarUrl, fullName }: Props) {
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <span>Save</span>
-          )}
-        </Button>
+        <SubmitButton
+          type="submit"
+          className="w-full"
+          isSubmitting={updateUserMutation.isPending}
+        >
+          Save
+        </SubmitButton>
       </form>
     </Form>
   );

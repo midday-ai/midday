@@ -1,5 +1,6 @@
 "use client";
 
+import type { UseChatHelpers } from "@ai-sdk/react";
 import { shuffle } from "@midday/utils";
 import { motion } from "framer-motion";
 import { useMemo, useRef } from "react";
@@ -23,9 +24,13 @@ const itemVariant = {
   show: { y: 0, opacity: 1 },
 };
 
-export function ChatExamples({ onSubmit }) {
+type Props = {
+  handleSubmit: (example: string) => void;
+};
+
+export function ChatExamples({ handleSubmit }: Props) {
   const items = useMemo(() => shuffle(chatExamples), []);
-  const ref = useRef();
+  const ref = useRef<HTMLDivElement>(null);
   const { events } = useDraggable(ref);
 
   const totalLength = chatExamples.reduce((accumulator, currentString) => {
@@ -46,7 +51,11 @@ export function ChatExamples({ onSubmit }) {
         style={{ width: `${totalLength}px` }}
       >
         {items.map((example) => (
-          <button key={example} type="button" onClick={() => onSubmit(example)}>
+          <button
+            key={example}
+            type="button"
+            onClick={() => handleSubmit(example)}
+          >
             <motion.li
               variants={itemVariant}
               className="font-mono text-[#878787] bg-[#F2F1EF] text-xs dark:bg-[#1D1D1D] px-3 py-2 rounded-full cursor-default"

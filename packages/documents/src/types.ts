@@ -1,29 +1,10 @@
-export type Document = {
-  Content: string;
-  ContentType: string;
-  ContentLength: number;
-  Name: string;
-};
-
-export type MimeType = "application/pdf" | "image/jpeg";
-
-export type DocumentResponse = {
-  content: Buffer | ArrayBuffer;
-  mimeType: MimeType;
-  size: number;
-  fileName: string;
-  name: string;
-};
-
-export type DocumentClientParams = {
-  contentType: string;
-};
-
 export type GetDocumentRequest = {
-  content: string;
+  content?: string;
+  documentUrl?: string;
+  mimetype: string;
 };
 
-export type GetDocumentResponse = {
+export type GetInvoiceOrReceiptResponse = {
   name?: string | null;
   date?: string | null;
   amount?: number | null;
@@ -31,6 +12,10 @@ export type GetDocumentResponse = {
   website?: string | null;
   type?: string | null;
   description?: string | null;
+  tax_amount?: number | null;
+  tax_rate?: number | null;
+  tax_type?: string | null;
+  metadata?: Record<string, string | number | boolean | null>;
 };
 
 export interface Attachment {
@@ -42,3 +27,11 @@ export interface Attachment {
 }
 
 export type Attachments = Attachment[];
+
+export type DocumentClassifierRequest = {
+  content: string;
+};
+
+export type DocumentClassifierImageRequest = {
+  content: ArrayBuffer;
+};

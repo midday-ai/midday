@@ -1,5 +1,8 @@
+"use client";
+
+import { useMetricsParams } from "@/hooks/use-metrics-params";
+import { useTRPC } from "@/trpc/client";
 import { calculateAvgBurnRate } from "@/utils/format";
-import { getBurnRate, getRunway } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -8,54 +11,49 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { AnimatedNumber } from "../animated-number";
 import { AreaChart } from "./area-chart";
 import { burnRateExamleData } from "./data";
 
 type Props = {
-  value: unknown;
-  defaultValue: unknown;
   disabled?: boolean;
-  currency?: string;
 };
 
-export async function BurnRateChart({
-  value,
-  defaultValue,
-  disabled,
-  currency,
-}: Props) {
-  const [{ data: burnRateData, currency: baseCurrency }, { data: runway }] =
-    disabled
-      ? burnRateExamleData
-      : await Promise.all([
-          getBurnRate({
-            ...defaultValue,
-            ...value,
-            currency,
-          }),
-          getRunway({
-            ...defaultValue,
-            ...value,
-            currency,
-          }),
-        ]);
+export function BurnRateChart({ disabled }: Props) {
+  const trpc = useTRPC();
+  const { params } = useMetricsParams();
+
+  const { data } = useQuery({
+    ...trpc.metrics.burnRate.queryOptions({
+      from: params.from,
+      to: params.to,
+    }),
+    placeholderData: (previousData) => previousData ?? burnRateExamleData,
+  });
+
+  const { data: runway } = useQuery({
+    ...trpc.metrics.runway.queryOptions({
+      from: params.from,
+      to: params.to,
+    }),
+  });
 
   return (
     <div className={cn(disabled && "pointer-events-none select-none")}>
       <div className="space-y-2 mb-14 select-text">
         <h1 className="text-4xl font-mono">
           <AnimatedNumber
-            value={calculateAvgBurnRate(burnRateData)}
-            currency={baseCurrency}
+            value={calculateAvgBurnRate(data ?? [])}
+            currency={data?.at(0)?.currency ?? "USD"}
           />
         </h1>
 
         <div className="text-sm text-[#606060] flex items-center space-x-2">
           <span>
-            {typeof runway === "number" && runway > 0
-              ? `${runway} months runway`
+            {runway && runway > 0
+              ? `${runway} ${runway === 1 ? "month" : "months"} runway`
               : "Average burn rate"}
           </span>
           <TooltipProvider delayDuration={100}>
@@ -95,7 +93,7 @@ export async function BurnRateChart({
         </div>
       </div>
 
-      <AreaChart data={burnRateData} />
+      <AreaChart data={data} />
     </div>
   );
 }

@@ -1,5 +1,8 @@
-import type { GetDocumentRequest, GetDocumentResponse } from "./types";
+import type { GetDocumentRequest, GetInvoiceOrReceiptResponse } from "./types";
 
 export interface Processor {
-  getDocument: (params: GetDocumentRequest) => Promise<GetDocumentResponse>;
+  // getDocument: (params: GetDocumentRequest) => Promise<GetDocumentResponse>;
+  getInvoiceOrReceipt?: (
+    params: GetDocumentRequest,
+  ) => Promise<GetInvoiceOrReceiptResponse>;
 }

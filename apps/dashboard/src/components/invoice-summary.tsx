@@ -1,6 +1,8 @@
 "use client";
 
+import { useTeamQuery } from "@/hooks/use-team";
 import { useI18n } from "@/locales/client";
+import type { RouterOutputs } from "@/trpc/routers/_app";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -8,11 +10,9 @@ import { useState } from "react";
 import { AnimatedNumber } from "./animated-number";
 
 type Props = {
-  data: any[];
+  data: RouterOutputs["invoice"]["invoiceSummary"];
   totalInvoiceCount: number;
-  defaultCurrency: string;
   title: string;
-  locale: string;
 };
 
 export function InvoiceSummarySkeleton() {
@@ -34,20 +34,20 @@ export function InvoiceSummarySkeleton() {
   );
 }
 
-export function InvoiceSummary({
-  data,
-  totalInvoiceCount,
-  defaultCurrency,
-  title,
-}: Props) {
+export function InvoiceSummary({ data, totalInvoiceCount, title }: Props) {
   const t = useI18n();
   const [activeIndex, setActiveIndex] = useState(0);
+  const { data: team } = useTeamQuery();
 
-  const dataWithDefaultCurrency = data.length
+  const dataWithDefaultCurrency = data?.length
     ? data
-    : [{ currency: defaultCurrency, total_amount: 0 }];
+    : [{ currency: team?.base_currency, total_amount: 0 }];
 
   const item = dataWithDefaultCurrency[activeIndex];
+
+  if (!item) {
+    return null;
+  }
 
   return (
     <Card>
@@ -64,8 +64,7 @@ export function InvoiceSummary({
           {dataWithDefaultCurrency.length > 1 && (
             <div className="flex space-x-2 top-[63px] absolute">
               {dataWithDefaultCurrency.map((item, idx) => (
-                <button
-                  type="button"
+                <div
                   key={item.currency}
                   onMouseEnter={() => setActiveIndex(idx)}
                   onClick={() => setActiveIndex(idx)}

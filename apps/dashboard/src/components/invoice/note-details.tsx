@@ -1,8 +1,8 @@
 "use client";
 
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Editor } from "@/components/invoice/editor";
-import { useAction } from "next-safe-action/hooks";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
 import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
@@ -10,16 +10,17 @@ export function NoteDetails() {
   const { control, watch } = useFormContext();
   const id = watch("id");
 
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+  const trpc = useTRPC();
+  const updateTemplateMutation = useMutation(
+    trpc.invoiceTemplate.upsert.mutationOptions(),
+  );
 
   return (
     <div>
       <LabelInput
         name="template.note_label"
         onSave={(value) => {
-          updateInvoiceTemplate.execute({
-            note_label: value,
-          });
+          updateTemplateMutation.mutate({ note_label: value });
         }}
         className="mb-2 block"
       />

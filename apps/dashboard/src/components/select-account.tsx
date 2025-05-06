@@ -1,84 +1,99 @@
-import { createBankAccountAction } from "@/actions/create-bank-account-action";
-import { useUserContext } from "@/store/user/hook";
+import { useTRPC } from "@/trpc/client";
 import { formatAccountName } from "@/utils/format";
-import { createClient } from "@midday/supabase/client";
-import { getTeamBankAccountsQuery } from "@midday/supabase/queries";
-import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
-import { useAction } from "next-safe-action/hooks";
+import {
+  ComboboxDropdown,
+  type ComboboxItem,
+} from "@midday/ui/combobox-dropdown";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { TransactionBankAccount } from "./transaction-bank-account";
+
+type SelectedItem = ComboboxItem & {
+  id: string;
+  label: string;
+  logo?: string | null;
+  currency?: string | null;
+  type?: string | null;
+};
 
 type Props = {
   placeholder: string;
   className?: string;
   value?: string;
-  onChange: (value: {
-    id: string;
-    label: string;
-    logo?: string;
-    currency?: string;
-    type?: string;
-  }) => void;
+  onChange: (value: SelectedItem) => void;
 };
 
 export function SelectAccount({ placeholder, onChange, value }: Props) {
-  const [data, setData] = useState([]);
-  const supabase = createClient();
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
 
-  const { team_id: teamId } = useUserContext((state) => state.data);
+  const { data, isLoading } = useQuery(trpc.bankAccounts.get.queryOptions());
 
-  const createBankAccount = useAction(createBankAccountAction, {
-    onSuccess: async ({ data: result }) => {
-      if (result) {
-        onChange(result);
-        setData((prev) => [{ id: result.id, label: result.name }, ...prev]);
-      }
-    },
-  });
+  const createBankAccountMutation = useMutation(
+    trpc.bankAccounts.create.mutationOptions({
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.bankAccounts.get.queryKey(),
+        });
+
+        if (data) {
+          setSelectedItem({
+            id: data.id,
+            label: data.name ?? "",
+          });
+        }
+      },
+    }),
+  );
 
   useEffect(() => {
-    async function fetchData() {
-      const repsonse = await getTeamBankAccountsQuery(supabase, {
-        teamId,
-      });
+    if (value && data) {
+      const found = data.find((d) => d.id === value);
 
-      setData(
-        repsonse.data?.map((account) => ({
-          id: account.id,
-          label: account.name,
-          logo: account?.logo_url,
-          currency: account.currency,
-          type: account.type,
-        })),
-      );
+      if (found) {
+        setSelectedItem({
+          id: found.id,
+          label: found.name ?? "",
+          logo: found.connection?.logo_url,
+          currency: found.currency,
+        });
+      }
     }
+  }, [value, data]);
 
-    if (!data.length) {
-      fetchData();
-    }
-  }, []);
-
-  const selectedValue = data.find((d) => d?.id === value);
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <ComboboxDropdown
-      disabled={createBankAccount.status === "executing"}
+      disabled={createBankAccountMutation.isPending}
       placeholder={placeholder}
       searchPlaceholder="Select or create account"
-      items={data}
-      selectedItem={selectedValue}
+      items={
+        data?.map((d) => ({
+          id: d.id,
+          label: d.name ?? "",
+          logo: d.connection?.logo_url,
+          currency: d.currency,
+        })) ?? []
+      }
+      selectedItem={selectedItem ?? undefined}
       onSelect={(item) => {
         onChange(item);
       }}
-      onCreate={(name) => createBankAccount.execute({ name })}
+      onCreate={(name) => {
+        createBankAccountMutation.mutate({ name, manual: true });
+      }}
       renderSelectedItem={(selectedItem) => {
         return (
           <TransactionBankAccount
             name={formatAccountName({
               name: selectedItem.label,
-              currency: selectedItem.currency,
+              currency: selectedItem?.currency,
             })}
-            logoUrl={selectedItem.logo}
+            logoUrl={selectedItem?.logo ?? undefined}
           />
         );
       }}
@@ -94,9 +109,9 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
           <TransactionBankAccount
             name={formatAccountName({
               name: item.label,
-              currency: item.currency,
+              currency: item?.currency,
             })}
-            logoUrl={item.logo}
+            logoUrl={item.logo ?? undefined}
           />
         );
       }}

@@ -1,22 +1,12 @@
 import { ErrorFallback } from "@/components/error-fallback";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
-import { Suspense } from "react";
-import {
-  TrackerWidgetServer,
-  TrackerWidgetSkeleton,
-} from "./tracker-widget.server";
+import { TrackerWidget } from "./tracker-widget";
 
-type Props = {
-  date: string;
-};
-
-export function Tracker({ date }: Props) {
+export function Tracker() {
   return (
     <div className="border aspect-square overflow-hidden relative p-4 md:p-8">
       <ErrorBoundary errorComponent={ErrorFallback}>
-        <Suspense fallback={<TrackerWidgetSkeleton key={date} />}>
-          <TrackerWidgetServer date={date} />
-        </Suspense>
+        <TrackerWidget />
       </ErrorBoundary>
     </div>
   );

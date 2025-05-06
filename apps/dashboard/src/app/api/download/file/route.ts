@@ -1,19 +1,20 @@
-import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { download } from "@midday/supabase/storage";
+import type { NextRequest, NextResponse } from "next/server";
 
-export const preferredRegion = ["fra1", "sfo1", "iad1"];
-
-export async function GET(req, res) {
-  const supabase = createClient();
-  const user = await getUser();
+export async function GET(req: NextRequest, res: NextResponse) {
+  const supabase = await createClient();
   const requestUrl = new URL(req.url);
   const path = requestUrl.searchParams.get("path");
   const filename = requestUrl.searchParams.get("filename");
 
+  if (!path) {
+    return new Response("Path is required", { status: 400 });
+  }
+
   const { data } = await download(supabase, {
     bucket: "vault",
-    path: `${user.data.team_id}/${path}`,
+    path,
   });
 
   const responseHeaders = new Headers(res.headers);

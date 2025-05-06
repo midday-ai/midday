@@ -1,5 +1,7 @@
 "use client";
 
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { SubmitButton } from "@midday/ui/submit-button";
 import {
@@ -8,22 +10,19 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { useQuery } from "@tanstack/react-query";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Check } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-export function Plans({
-  discountPrice,
-  teamId,
-  canChooseStarterPlan,
-}: {
-  discountPrice?: number;
-  teamId: string;
-  canChooseStarterPlan: boolean;
-}) {
+export function Plans() {
   const isDesktop = isDesktopApp();
-  const [isLoading, setIsLoading] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(0);
+  const trpc = useTRPC();
+
+  const { data: user } = useUserQuery();
+  const { data, isLoading } = useQuery(trpc.team.availablePlans.queryOptions());
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -95,32 +94,30 @@ export function Plans({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href={`/api/checkout?plan=starter&teamId=${teamId}&isDesktop=${isDesktop}&planType=starter`}
-                  className={cn(
-                    !canChooseStarterPlan && "opacity-50 cursor-default",
-                  )}
+                  href={`/api/checkout?plan=starter&teamId=${user?.team?.id}&isDesktop=${isDesktop}&planType=starter`}
+                  className={cn(!data?.starter && "opacity-50 cursor-default")}
                   onClick={(evt) => {
-                    if (!canChooseStarterPlan) {
+                    if (!data?.starter) {
                       evt.preventDefault();
                       return;
                     }
 
-                    setIsLoading(1);
+                    setIsSubmitting(1);
                   }}
                 >
                   <SubmitButton
                     variant="secondary"
                     className={cn(
                       "h-9 hover:bg-primary hover:text-secondary",
-                      !canChooseStarterPlan && "pointer-events-none",
+                      !isLoading && !data?.starter && "pointer-events-none",
                     )}
-                    isSubmitting={isLoading === 1}
+                    isSubmitting={isSubmitting === 1}
                   >
                     Choose starter plan
                   </SubmitButton>
                 </Link>
               </TooltipTrigger>
-              {!canChooseStarterPlan && (
+              {!isLoading && !data?.starter && (
                 <TooltipContent className="text-xs max-w-[300px]">
                   <p>
                     This plan is not applicable since you have exceeded the
@@ -142,16 +139,15 @@ export function Plans({
             <span
               className={cn(
                 "text-2xl font-medium tracking-tight",
-                discountPrice && "line-through text-[#878787]",
+                "line-through text-[#878787]",
               )}
             >
               $99
             </span>
-            {discountPrice && (
-              <span className="ml-1 text-2xl font-medium tracking-tight">
-                ${discountPrice}
-              </span>
-            )}
+            <span className="ml-1 text-2xl font-medium tracking-tight">
+              $49
+            </span>
+
             <span className="ml-1 text-xl font-medium">/mo</span>
             <span className="ml-2 text-xs text-muted-foreground">
               Excl. VAT
@@ -212,12 +208,12 @@ export function Plans({
 
           <div className="mt-8 border-t border-border pt-4">
             <Link
-              href={`/api/checkout?plan=pro&teamId=${teamId}&isDesktop=${isDesktop}&planType=pro`}
+              href={`/api/checkout?plan=pro&teamId=${user?.team?.id}&isDesktop=${isDesktop}&planType=pro`}
             >
               <SubmitButton
                 className="h-9"
-                onClick={() => setIsLoading(2)}
-                isSubmitting={isLoading === 2}
+                onClick={() => setIsSubmitting(2)}
+                isSubmitting={isSubmitting === 2}
               >
                 Choose pro plan
               </SubmitButton>

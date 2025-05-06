@@ -1,10 +1,10 @@
 "use client";
 
+import { getUrl } from "@/utils/environment";
 import { createClient } from "@midday/supabase/client";
-import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
-import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -18,7 +18,7 @@ export function GoogleSignIn() {
     setLoading(true);
 
     if (isDesktopApp()) {
-      const redirectTo = new URL("/api/auth/callback", window.location.origin);
+      const redirectTo = new URL("/api/auth/callback", getUrl());
 
       redirectTo.searchParams.append("provider", "google");
       redirectTo.searchParams.append("client", "desktop");
@@ -33,7 +33,7 @@ export function GoogleSignIn() {
         },
       });
     } else {
-      const redirectTo = new URL("/api/auth/callback", window.location.origin);
+      const redirectTo = new URL("/api/auth/callback", getUrl());
 
       if (returnTo) {
         redirectTo.searchParams.append("return_to", returnTo);
@@ -51,18 +51,15 @@ export function GoogleSignIn() {
   };
 
   return (
-    <Button
+    <SubmitButton
       onClick={handleSignIn}
-      className="active:scale-[0.98] bg-primary px-6 py-4 text-secondary font-medium flex space-x-2 h-[40px] w-full"
+      className="bg-primary px-6 py-4 text-secondary font-medium h-[40px] w-full"
+      isSubmitting={isLoading}
     >
-      {isLoading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <>
-          <Icons.Google />
-          <span>Continue with Google</span>
-        </>
-      )}
-    </Button>
+      <div className="flex items-center space-x-2">
+        <Icons.Google />
+        <span>Continue with Google</span>
+      </div>
+    </SubmitButton>
   );
 }

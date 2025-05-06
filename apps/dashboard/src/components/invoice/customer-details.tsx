@@ -1,48 +1,39 @@
 "use client";
 
-import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Editor } from "@/components/invoice/editor";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type { JSONContent } from "@tiptap/react";
-import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { SelectCustomer } from "../select-customer";
 import { LabelInput } from "./label-input";
 import { transformCustomerToContent } from "./utils";
 
-export interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  address_line_1?: string;
-  address_line_2?: string;
-  token: string;
-  city?: string;
-  state?: string;
-  zip?: string;
-  country?: string;
-  vat?: string;
-  contact?: string;
-  website?: string;
-  tags?: { tag: { id: string; name: string } }[];
-}
-
-interface CustomerDetailsProps {
-  customers: Customer[];
-}
-
-export function CustomerDetails({ customers }: CustomerDetailsProps) {
+export function CustomerDetails() {
   const { control, setValue, watch } = useFormContext();
   const { setParams, selectedCustomerId } = useInvoiceParams();
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
+
+  const trpc = useTRPC();
+  const updateTemplateMutation = useMutation(
+    trpc.invoiceTemplate.upsert.mutationOptions(),
+  );
 
   const content = watch("customer_details");
   const id = watch("id");
 
+  const { data: customer } = useQuery(
+    trpc.customers.getById.queryOptions(
+      { id: selectedCustomerId! },
+      {
+        enabled: !!selectedCustomerId,
+      },
+    ),
+  );
+
   const handleLabelSave = (value: string) => {
-    updateInvoiceTemplate.execute({ customer_label: value });
+    updateTemplateMutation.mutate({ customer_label: value });
   };
 
   const handleOnChange = (content?: JSONContent | null) => {
@@ -61,8 +52,6 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
   };
 
   useEffect(() => {
-    const customer = customers.find((c) => c.id === selectedCustomerId);
-
     if (customer) {
       const customerContent = transformCustomerToContent(customer);
 
@@ -76,7 +65,7 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
         shouldDirty: true,
       });
     }
-  }, [selectedCustomerId, customers]);
+  }, [customer]);
 
   return (
     <div>
@@ -100,7 +89,7 @@ export function CustomerDetails({ customers }: CustomerDetailsProps) {
           )}
         />
       ) : (
-        <SelectCustomer data={customers} />
+        <SelectCustomer />
       )}
     </div>
   );

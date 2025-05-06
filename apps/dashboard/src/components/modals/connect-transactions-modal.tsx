@@ -2,8 +2,8 @@
 
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
 import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
-import { getInstitutions } from "@/actions/institutions/get-institutions";
 import { useConnectParams } from "@/hooks/use-connect-params";
+import { useTRPC } from "@/trpc/client";
 import { track } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Button } from "@midday/ui/button";
@@ -16,10 +16,11 @@ import {
 } from "@midday/ui/dialog";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
-import { useDebounce, useScript } from "@uidotdev/usehooks";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
+import { useDebounceValue, useScript } from "usehooks-ts";
 import { BankLogo } from "../bank-logo";
 import { ConnectBankProvider } from "../connect-bank-provider";
 import { CountrySelector } from "../country-selector";
@@ -108,24 +109,12 @@ type ConnectTransactionsModalProps = {
   countryCode: string;
 };
 
-type Institution = {
-  id: string;
-  name: string;
-  logo: string | null;
-  provider: string;
-  available_history?: number;
-  maximum_consent_validity?: number;
-  type?: "personal" | "business";
-};
-
 export function ConnectTransactionsModal({
   countryCode: initialCountryCode,
 }: ConnectTransactionsModalProps) {
+  const trpc = useTRPC();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [results, setResults] = useState<Institution[]>([]);
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
-
   const {
     countryCode,
     q: query,
@@ -134,7 +123,6 @@ export function ConnectTransactionsModal({
   } = useConnectParams(initialCountryCode);
 
   const isOpen = step === "connect";
-  const debouncedSearchTerm = useDebounce(query, 200);
 
   // NOTE: Load SDKs here so it's not unmonted
   useScript("https://cdn.teller.io/connect/connect.js", {
@@ -175,49 +163,27 @@ export function ConnectTransactionsModal({
   });
 
   const handleOnClose = () => {
-    setParams(
-      {
-        step: null,
-        countryCode: null,
-        q: null,
-        ref: null,
-      },
-      {
-        // NOTE: Rerender so the overview modal is visible
-        shallow: false,
-      },
-    );
+    setParams({
+      step: null,
+      countryCode: null,
+      q: null,
+      ref: null,
+    });
   };
 
-  async function fetchData(query?: string) {
-    try {
-      setLoading(true);
-      // Fix the destructuring to handle the response structure correctly
-      const response = await getInstitutions({ countryCode, query });
-      setLoading(false);
+  const [debouncedQuery] = useDebounceValue(query ?? "", 200);
 
-      setResults(response.data || []);
-    } catch {
-      setLoading(false);
-      setResults([]);
-    }
-  }
-
-  useEffect(() => {
-    // Fix the condition by properly grouping the expressions
-    if (
-      (isOpen && (!results || results.length === 0)) ||
-      countryCode !== initialCountryCode
-    ) {
-      fetchData();
-    }
-  }, [isOpen, countryCode]);
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchData(debouncedSearchTerm ?? undefined);
-    }
-  }, [debouncedSearchTerm, isOpen]);
+  const { data, isLoading } = useQuery(
+    trpc.institutions.get.queryOptions(
+      {
+        q: debouncedQuery,
+        countryCode,
+      },
+      {
+        enabled: isOpen,
+      },
+    ),
+  );
 
   useEffect(() => {
     async function createLinkToken() {
@@ -273,16 +239,15 @@ export function ConnectTransactionsModal({
                     defaultValue={countryCode}
                     onSelect={(countryCode) => {
                       setParams({ countryCode });
-                      setResults([]);
                     }}
                   />
                 </div>
               </div>
 
               <div className="h-[430px] space-y-4 overflow-auto scrollbar-hide pt-2 mt-2">
-                {loading && <SearchSkeleton />}
+                {isLoading && <SearchSkeleton />}
 
-                {results?.map((institution: Institution) => {
+                {data?.map((institution) => {
                   if (!institution) {
                     return null;
                   }
@@ -315,7 +280,7 @@ export function ConnectTransactionsModal({
                   );
                 })}
 
-                {!loading && results?.length === 0 && (
+                {!isLoading && data?.length === 0 && (
                   <div className="flex flex-col items-center justify-center min-h-[350px]">
                     <p className="font-medium mb-2">No banks found</p>
                     <p className="text-sm text-center text-[#878787]">

@@ -1,8 +1,4 @@
-import {
-  type UpdateCategoriesFormValues,
-  updateCategorySchema,
-} from "@/actions/schema";
-import { updateCategoryAction } from "@/actions/update-category-action";
+import { useTRPC } from "@/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
@@ -20,9 +16,10 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { InputColor } from "../input-color";
 import { VatInput } from "../vat-input";
 
@@ -38,15 +35,35 @@ type Props = {
   };
 };
 
+const updateCategorySchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional().nullable(),
+  color: z.string().optional().nullable(),
+  vat: z.number().optional().nullable(),
+});
+
+type UpdateCategoriesFormValues = z.infer<typeof updateCategorySchema>;
+
 export function EditCategoryModal({
   id,
   onOpenChange,
   isOpen,
   defaultValue,
 }: Props) {
-  const updateCategory = useAction(updateCategoryAction, {
-    onSuccess: () => onOpenChange(false),
-  });
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const updateCategoryMutation = useMutation(
+    trpc.transactionCategories.update.mutationOptions({
+      onSuccess: () => {
+        onOpenChange(false);
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactionCategories.get.queryKey(),
+        });
+      },
+    }),
+  );
 
   const form = useForm<UpdateCategoriesFormValues>({
     resolver: zodResolver(updateCategorySchema),
@@ -55,15 +72,16 @@ export function EditCategoryModal({
       name: defaultValue.name,
       color: defaultValue.color,
       description: defaultValue.description ?? undefined,
-      vat: defaultValue?.vat?.toString() ?? undefined,
+      vat: defaultValue?.vat ? Number(defaultValue.vat) : undefined,
     },
   });
 
   function onSubmit(values: UpdateCategoriesFormValues) {
-    updateCategory.execute({
+    updateCategoryMutation.mutate({
       ...values,
-      description: values.description?.length ? values.description : null,
-      vat: values.vat?.length ? values.vat.toString() : null,
+      description: values.description ?? null,
+      vat: values.vat ? (values.vat > 0 ? values.vat : null) : null,
+      color: values.color ?? null,
     });
   }
 
@@ -89,7 +107,8 @@ export function EditCategoryModal({
                             <div
                               className="size-3 transition-colors rounded-[2px] absolute top-3 left-2"
                               style={{
-                                backgroundColor: form.watch("color"),
+                                backgroundColor:
+                                  form.watch("color") ?? undefined,
                               }}
                             />
 
@@ -100,7 +119,7 @@ export function EditCategoryModal({
                                 field.onChange(name);
                               }}
                               defaultValue={field.value}
-                              defaultColor={form.watch("color")}
+                              defaultColor={form.watch("color") ?? undefined}
                             />
 
                             <FormMessage />
@@ -120,12 +139,12 @@ export function EditCategoryModal({
                             <VatInput
                               value={field.value}
                               name={form.watch("name")}
-                              onChange={(evt) => {
-                                field.onChange(evt.target.value);
+                              onChange={(vat) => {
+                                field.onChange(+vat);
                               }}
                               onSelect={(vat) => {
                                 if (vat) {
-                                  form.setValue("vat", vat.toString());
+                                  form.setValue("vat", +vat);
                                 }
                               }}
                             />
@@ -146,6 +165,7 @@ export function EditCategoryModal({
                           {...field}
                           autoFocus={false}
                           placeholder="Description"
+                          value={field.value ?? ""}
                         />
                       </FormControl>
                     </FormItem>
@@ -156,11 +176,11 @@ export function EditCategoryModal({
               <DialogFooter className="mt-8 w-full">
                 <div className="space-y-4 w-full">
                   <Button
-                    disabled={updateCategory.status === "executing"}
+                    disabled={updateCategoryMutation.isPending}
                     className="w-full"
                     type="submit"
                   >
-                    {updateCategory.status === "executing" ? (
+                    {updateCategoryMutation.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       "Save"

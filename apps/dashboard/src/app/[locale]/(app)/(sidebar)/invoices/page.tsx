@@ -8,56 +8,56 @@ import { InvoiceSummarySkeleton } from "@/components/invoice-summary";
 import { InvoicesOpen } from "@/components/invoices-open";
 import { InvoicesOverdue } from "@/components/invoices-overdue";
 import { InvoicesPaid } from "@/components/invoices-paid";
-import { InvoicesTable } from "@/components/tables/invoices";
+import { DataTable } from "@/components/tables/invoices/data-table";
 import { InvoiceSkeleton } from "@/components/tables/invoices/skeleton";
-import { getDefaultSettings } from "@midday/invoice/default";
+import { loadInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
+import { loadSortParams } from "@/hooks/use-sort-params";
+import { batchPrefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
-import { searchParamsCache } from "./search-params";
 
 export const metadata: Metadata = {
   title: "Invoices | Midday",
 };
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
-}) {
-  const {
-    q: query,
-    sort,
-    start,
-    end,
-    statuses,
-    customers,
-    page,
-  } = searchParamsCache.parse(searchParams);
+type Props = {
+  searchParams: Promise<SearchParams>;
+};
 
-  const defaultSettings = await getDefaultSettings();
+export default async function Page(props: Props) {
+  const searchParams = await props.searchParams;
 
-  const loadingKey = JSON.stringify({
-    q: query,
-    sort,
-    start,
-    end,
-    statuses,
-    customers,
-    page,
-  });
+  const filter = loadInvoiceFilterParams(searchParams);
+  const { sort } = loadSortParams(searchParams);
+
+  batchPrefetch([
+    trpc.invoice.get.infiniteQueryOptions({
+      filter,
+      sort,
+    }),
+    trpc.invoice.invoiceSummary.queryOptions(),
+    trpc.invoice.invoiceSummary.queryOptions({
+      status: "paid",
+    }),
+    trpc.invoice.invoiceSummary.queryOptions({
+      status: "overdue",
+    }),
+    trpc.invoice.paymentStatus.queryOptions(),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6">
         <Suspense fallback={<InvoiceSummarySkeleton />}>
-          <InvoicesOpen defaultCurrency={defaultSettings.currency} />
+          <InvoicesOpen />
         </Suspense>
         <Suspense fallback={<InvoiceSummarySkeleton />}>
-          <InvoicesOverdue defaultCurrency={defaultSettings.currency} />
+          <InvoicesOverdue />
         </Suspense>
         <Suspense fallback={<InvoiceSummarySkeleton />}>
-          <InvoicesPaid defaultCurrency={defaultSettings.currency} />
+          <InvoicesPaid />
         </Suspense>
         <Suspense fallback={<InvoicePaymentScoreSkeleton />}>
           <InvoicePaymentScore />
@@ -67,16 +67,8 @@ export default async function Page({
       <InvoiceHeader />
 
       <ErrorBoundary errorComponent={ErrorFallback}>
-        <Suspense fallback={<InvoiceSkeleton />} key={loadingKey}>
-          <InvoicesTable
-            query={query}
-            sort={sort}
-            start={start}
-            end={end}
-            statuses={statuses}
-            customers={customers}
-            page={page}
-          />
+        <Suspense fallback={<InvoiceSkeleton />}>
+          <DataTable />
         </Suspense>
       </ErrorBoundary>
     </div>
