@@ -60,6 +60,11 @@ export function InvoiceActions({ status, id }: Props) {
           queryKey: trpc.invoice.get.infiniteQueryKey(),
         });
 
+        // Widget uses regular query
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.queryKey(),
+        });
+
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.getById.queryKey(),
         });

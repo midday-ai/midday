@@ -126,7 +126,7 @@ export function InboxDetails() {
 
   const updateInboxMutation = useMutation(
     trpc.inbox.update.mutationOptions({
-      onSuccess: (data) => {
+      onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.inbox.get.infiniteQueryKey(),
         });

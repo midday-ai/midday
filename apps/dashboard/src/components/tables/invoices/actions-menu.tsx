@@ -35,6 +35,11 @@ export function ActionsMenu({ row }: Props) {
           queryKey: trpc.invoice.get.infiniteQueryKey(),
         });
 
+        // Widget uses regular query
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.queryKey(),
+        });
+
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.getById.queryKey(),
         });
@@ -55,6 +60,11 @@ export function ActionsMenu({ row }: Props) {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        // Widget uses regular query
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.queryKey(),
         });
       },
     }),
