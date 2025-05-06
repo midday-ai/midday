@@ -22,7 +22,10 @@ export function DueDate() {
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
-      setValue("due_date", date, { shouldValidate: true, shouldDirty: true });
+      setValue("due_date", date.toISOString(), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
       setIsOpen(false);
     }
   };
