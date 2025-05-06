@@ -21,7 +21,7 @@ export function InvoiceRow({ invoice }: Props) {
       <li
         key={invoice.id}
         className="h-[57px] flex items-center w-full"
-        onClick={() => setParams({ invoiceId: invoice.id })}
+        onClick={() => setParams({ invoiceId: invoice.id, type: "details" })}
       >
         <div className="flex items-center w-full">
           <div className="flex flex-col space-y-1 w-[90px]">

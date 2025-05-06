@@ -1,3 +1,5 @@
+"use client";
+
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
@@ -12,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CopyInput } from "./copy-input";
 import { FormatAmount } from "./format-amount";
@@ -24,25 +26,13 @@ import { OpenURL } from "./open-url";
 
 export function InvoiceDetails() {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const { invoiceId } = useInvoiceParams();
 
-  const isOpen = Boolean(invoiceId);
+  const isOpen = invoiceId !== null;
 
   const { data, isLoading } = useQuery({
-    ...trpc.invoice.getById.queryOptions({
-      id: invoiceId!,
-    }),
+    ...trpc.invoice.getById.queryOptions({ id: invoiceId! }),
     enabled: isOpen,
-    staleTime: 60 * 1000,
-    initialData: () => {
-      const pages = queryClient
-        .getQueriesData({ queryKey: trpc.invoice.get.infiniteQueryKey() })
-        .flatMap(([, data]) => data?.pages ?? [])
-        .flatMap((page) => page.data ?? []);
-
-      return pages.find((d) => d.id === invoiceId);
-    },
   });
 
   if (isLoading) {

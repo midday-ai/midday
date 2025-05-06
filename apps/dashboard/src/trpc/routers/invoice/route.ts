@@ -320,11 +320,11 @@ export const invoiceRouter = createTRPCRouter({
       }
 
       // // Only send the email if the delivery type is create_and_send
-      // if (input.deliveryType === "create_and_send") {
-      //   await tasks.trigger<typeof sendInvoiceEmail>("send-invoice-email", {
-      //     invoiceId: data.id,
-      //   });
-      // }
+      if (input.deliveryType === "create_and_send") {
+        await tasks.trigger<typeof sendInvoiceEmail>("send-invoice-email", {
+          invoiceId: data.id,
+        });
+      }
 
       await tasks.trigger<typeof generateInvoice>("generate-invoice", {
         invoiceId: data.id,

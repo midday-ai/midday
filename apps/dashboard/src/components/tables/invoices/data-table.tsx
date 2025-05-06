@@ -3,6 +3,7 @@
 import { LoadMore } from "@/components/load-more";
 import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
 import { useSortParams } from "@/hooks/use-sort-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { Table, TableBody } from "@midday/ui/table";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
@@ -24,6 +25,7 @@ export function DataTable() {
   const { params } = useSortParams();
   const { filter, hasFilters } = useInvoiceFilterParams();
   const { ref, inView } = useInView();
+  const { data: user } = useUserQuery();
 
   const infiniteQueryOptions = trpc.invoice.get.infiniteQueryOptions(
     {
@@ -56,6 +58,9 @@ export function DataTable() {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    meta: {
+      dateFormat: user?.date_format,
+    },
   });
 
   if (hasFilters && !tableData?.length) {

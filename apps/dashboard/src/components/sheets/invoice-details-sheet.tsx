@@ -9,7 +9,10 @@ export function InvoiceDetailsSheet() {
   const isOpen = Boolean(invoiceId && type === "details");
 
   return (
-    <Sheet open={isOpen} onOpenChange={() => setParams({ invoiceId: null })}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={() => setParams({ invoiceId: null, type: null })}
+    >
       <SheetContent>
         <InvoiceDetails />
       </SheetContent>

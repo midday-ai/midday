@@ -149,8 +149,8 @@ export function MatchTransaction() {
       <Combobox
         key={data?.transaction?.id}
         placeholder="Select a transaction"
-        className="w-full bg-transparent px-12 h-12"
-        classNameList="bottom-[50px] border-none"
+        className="w-full bg-transparent px-12 h-12 border border-border dark:border-none"
+        classNameList="bottom-[50px] border border-border dark:border-none"
         onValueChange={handleChange}
         value={selectedValue}
         options={options ?? []}

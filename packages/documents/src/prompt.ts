@@ -16,7 +16,7 @@ export const documentClassifierPrompt = `You are an expert multilingual document
 *   The core **subject** or 1-2 defining keywords from the summary or document content.
 *   If the document represents a purchase (like an invoice or receipt), include a tag for the **single most significant item or service** purchased (e.g., "Software License", "Consulting Services", "Office Desk").
 
-Make the tags concise and informative. Aim for tags that uniquely identify the document's key characteristics for searching. Avoid overly generic terms (like "document", "file", "text") or date-related tags (as the date is extracted separately). Base tags strictly on the content provided.
+Make the tags concise and informative. Aim for tags that uniquely identify the document's key characteristics for searching. Avoid overly generic terms (like "document", "file", "text") or date-related tags (as the date is extracted separately). Base tags strictly on the content provided. Ensure all tags are in singular form (e.g., "item" instead of "items").
 `;
 
 export const imageClassifierPrompt = `
@@ -34,6 +34,7 @@ Analyze the provided image and generate a list of 1-5 concise, relevant tags des
 **Rules:**
 
 *   Each tag must be 1–2 words long.
+*   Ensure all tags are in singular form (e.g., "item" instead of "items").
 *   Avoid generic words like "paper", "text", "photo", "image", "document" unless absolutely essential for context.
 *   Prioritize concrete, specific tags. For purchases, combine merchant and item where possible (e.g., "Starbucks Coffee").
 *   If uncertain about a tag's relevance, it's better to omit it. Focus on accuracy.

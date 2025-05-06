@@ -48,7 +48,7 @@ export function FilePreview({ mimeType, filePath }: Props) {
         src={src}
         alt="File Preview"
         className={cn(
-          "w-full h-full object-contain",
+          "w-full h-full object-contain border border-border dark:border-none",
           isLoading ? "opacity-0" : "opacity-100",
           "transition-opacity duration-100",
         )}

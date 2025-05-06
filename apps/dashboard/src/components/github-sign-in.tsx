@@ -2,10 +2,9 @@
 
 import { getUrl } from "@/utils/environment";
 import { createClient } from "@midday/supabase/client";
-import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
-import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -52,18 +51,15 @@ export function GithubSignIn() {
   };
 
   return (
-    <Button
+    <SubmitButton
       onClick={handleSignIn}
-      className="bg-primary px-6 py-4 text-secondary font-medium flex space-x-2 h-[40px] w-full"
+      className="bg-primary px-6 py-4 text-secondary font-medium h-[40px] w-full"
+      isSubmitting={isLoading}
     >
-      {isLoading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <>
-          <Icons.Github />
-          <span>Continue with Github</span>
-        </>
-      )}
-    </Button>
+      <div className="flex items-center space-x-2">
+        <Icons.Github />
+        <span>Continue with Github</span>
+      </div>
+    </SubmitButton>
   );
 }
