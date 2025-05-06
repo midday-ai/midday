@@ -217,6 +217,8 @@ export const invoiceRouter = createTRPCRouter({
         from_details: template?.from_details ?? defaultTemplate.from_details,
         payment_details:
           template?.payment_details ?? defaultTemplate.payment_details,
+        timezone,
+        locale,
       };
 
       return {
