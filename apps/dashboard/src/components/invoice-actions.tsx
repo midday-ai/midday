@@ -14,10 +14,15 @@ import {
   AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
 import { Button } from "@midday/ui/button";
+import { Calendar } from "@midday/ui/calendar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
@@ -194,18 +199,29 @@ export function InvoiceActions({ status, id }: Props) {
                 <Icons.MoreHoriz className="size-4" />
               </Button>
             </DropdownMenuTrigger>
+
             <DropdownMenuContent sideOffset={10} align="end">
-              <DropdownMenuItem
-                onClick={() =>
-                  updateInvoiceMutation.mutate({
-                    id,
-                    status: "paid",
-                    paid_at: new Date().toISOString(),
-                  })
-                }
-              >
-                Mark as paid
-              </DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Mark as paid</DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <Calendar
+                      mode="single"
+                      selected={new Date()}
+                      onSelect={(date) => {
+                        if (date) {
+                          updateInvoiceMutation.mutate({
+                            id,
+                            status: "paid",
+                            paid_at: date.toISOString(),
+                          });
+                        }
+                      }}
+                      initialFocus
+                    />
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
               <DropdownMenuItem
                 className="text-destructive"
                 onClick={handleDeleteInvoice}
