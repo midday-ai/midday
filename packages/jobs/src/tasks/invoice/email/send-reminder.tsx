@@ -33,7 +33,7 @@ export const sendInvoiceReminder = schemaTask({
       return;
     }
 
-    const customerEmail = "pontus@midday.ai"; // invoice?.customer?.email;
+    const customerEmail = invoice?.customer?.email;
 
     if (!customerEmail) {
       logger.error("Invoice customer email not found");
