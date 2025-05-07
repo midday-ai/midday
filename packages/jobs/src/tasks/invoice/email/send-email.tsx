@@ -12,18 +12,20 @@ export const sendInvoiceEmail = schemaTask({
   id: "send-invoice-email",
   schema: z.object({
     invoiceId: z.string().uuid(),
+    filename: z.string(),
+    fullPath: z.string(),
   }),
   maxDuration: 30,
   queue: {
     concurrencyLimit: 10,
   },
-  run: async ({ invoiceId }) => {
+  run: async ({ invoiceId, filename, fullPath }) => {
     const supabase = createClient();
 
     const { data: invoice } = await supabase
       .from("invoices")
       .select(
-        "id, token, customer:customer_id(name, website, email), team:team_id(name, email)",
+        "id, token, template, customer:customer_id(name, website, email), team:team_id(name, email)",
       )
       .eq("id", invoiceId)
       .single();
@@ -31,6 +33,26 @@ export const sendInvoiceEmail = schemaTask({
     if (!invoice) {
       logger.error("Invoice not found");
       return;
+    }
+
+    let attachments: { content: string; filename: string }[] | undefined;
+
+    // @ts-expect-error template is a jsonb field
+    if (invoice.template.include_pdf) {
+      const { data: attachmentData } = await supabase.storage
+        .from("vault")
+        .download(fullPath);
+
+      attachments = attachmentData
+        ? [
+            {
+              content: Buffer.from(await attachmentData.arrayBuffer()).toString(
+                "base64",
+              ),
+              filename,
+            },
+          ]
+        : undefined;
     }
 
     const customerEmail = invoice?.customer?.email;
@@ -48,6 +70,7 @@ export const sendInvoiceEmail = schemaTask({
       headers: {
         "X-Entity-Ref-ID": nanoid(),
       },
+      attachments,
       html: render(
         <InvoiceEmail
           customerName={invoice?.customer?.name!}

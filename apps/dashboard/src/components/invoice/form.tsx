@@ -85,6 +85,7 @@ export function Form() {
       "amount",
       "vat",
       "tax",
+      "discount",
       "due_date",
       "issue_date",
       "note_details",

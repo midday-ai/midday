@@ -88,7 +88,8 @@ export function Summary() {
     setValue("vat", totalVAT, { shouldValidate: true });
     setValue("tax", totalTax, { shouldValidate: true });
     setValue("subtotal", subTotal, { shouldValidate: true });
-  }, [total, totalVAT, totalTax, subTotal]);
+    setValue("discount", discount ?? 0, { shouldValidate: true });
+  }, [total, totalVAT, totalTax, subTotal, discount]);
 
   useEffect(() => {
     updateFormValues();

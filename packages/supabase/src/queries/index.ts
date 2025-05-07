@@ -1296,7 +1296,8 @@ export async function getInvoiceTemplateQuery(
       total_summary_label,
       title,
       vat_rate,
-      include_units
+      include_units,
+      include_pdf
     `)
     .eq("team_id", teamId)
     .single();

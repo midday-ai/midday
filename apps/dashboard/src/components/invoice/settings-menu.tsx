@@ -48,13 +48,13 @@ const menuItems = [
   },
   {
     icon: Icons.Tax,
-    label: "Sales Tax",
+    label: "Add sales tax",
     options: booleanOptions,
     key: "include_tax",
   },
   {
     icon: Icons.Vat,
-    label: "VAT",
+    label: "Add VAT",
     options: booleanOptions,
     key: "include_vat",
   },
@@ -69,13 +69,19 @@ const menuItems = [
   },
   {
     icon: Icons.ConfirmationNumber,
-    label: "Discount",
+    label: "Add discount",
     options: booleanOptions,
     key: "include_discount",
   },
   {
+    icon: Icons.PdfOutline,
+    label: "Attach PDF in email",
+    options: booleanOptions,
+    key: "include_pdf",
+  },
+  {
     icon: Icons.Straighten,
-    label: "Units",
+    label: "Add units",
     options: booleanOptions,
     key: "include_units",
   },
@@ -87,7 +93,7 @@ const menuItems = [
   },
   {
     icon: Icons.QrCode,
-    label: "QR Code",
+    label: "Add QR code",
     options: booleanOptions,
     key: "include_qr",
   },

@@ -57,6 +57,7 @@ const defaultTemplate = {
   include_discount: false,
   include_units: false,
   include_decimals: false,
+  include_pdf: false,
   include_qr: true,
   date_format: "dd/MM/yyyy",
   tax_rate: 0,
@@ -185,6 +186,7 @@ export const invoiceRouter = createTRPCRouter({
           template?.include_decimals ?? defaultTemplate.include_decimals,
         include_units: template?.include_units ?? defaultTemplate.include_units,
         include_qr: template?.include_qr ?? defaultTemplate.include_qr,
+        include_pdf: template?.include_pdf ?? defaultTemplate.include_pdf,
         customer_label:
           template?.customer_label ?? defaultTemplate.customer_label,
         from_label: template?.from_label ?? defaultTemplate.from_label,
@@ -231,6 +233,7 @@ export const invoiceRouter = createTRPCRouter({
         include_vat: !include_tax,
         include_discount: false,
         include_decimals: false,
+        include_pdf: false,
         include_units: false,
         include_qr: true,
         invoice_number: nextInvoiceNumber,
@@ -321,15 +324,9 @@ export const invoiceRouter = createTRPCRouter({
         throw new Error("Invoice not found");
       }
 
-      // // Only send the email if the delivery type is create_and_send
-      if (input.deliveryType === "create_and_send") {
-        await tasks.trigger<typeof sendInvoiceEmail>("send-invoice-email", {
-          invoiceId: data.id,
-        });
-      }
-
       await tasks.trigger<typeof generateInvoice>("generate-invoice", {
         invoiceId: data.id,
+        deliveryType: input.deliveryType,
       });
 
       return data;
