@@ -36,7 +36,6 @@
     "@tanstack/react-query-devtools": "^5.75.5",
     "@tanstack/react-table": "^8.21.3",
     "@team-plain/typescript-sdk": "^5.9.0",
-    "@todesktop/client-active-win": "^0.20.0",
     "@todesktop/client-core": "^1.18.1",
     "@todesktop/runtime": "^2.1.2",
     "@trigger.dev/react-hooks": "3.3.17",
