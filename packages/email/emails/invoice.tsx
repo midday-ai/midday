@@ -10,7 +10,6 @@ import {
   Tailwind,
   Text,
 } from "@react-email/components";
-import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 
 interface Props {
@@ -82,8 +81,6 @@ export const InvoiceEmail = ({
             </Section>
 
             <br />
-
-            <Footer />
           </Container>
         </Body>
       </Tailwind>
