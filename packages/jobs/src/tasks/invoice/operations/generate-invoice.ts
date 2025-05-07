@@ -3,11 +3,13 @@ import { PdfTemplate, renderToBuffer } from "@midday/invoice";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
+import { sendInvoiceEmail } from "../email/send-email";
 
 export const generateInvoice = schemaTask({
   id: "generate-invoice",
   schema: z.object({
     invoiceId: z.string().uuid(),
+    deliveryType: z.enum(["create", "create_and_send"]),
   }),
   maxDuration: 60,
   queue: {
@@ -32,13 +34,12 @@ export const generateInvoice = schemaTask({
     const buffer = await renderToBuffer(await PdfTemplate(invoice));
 
     const filename = `${invoiceData?.invoice_number}.pdf`;
+    const fullPath = `${invoiceData?.team_id}/invoices/${filename}`;
 
-    await supabase.storage
-      .from("vault")
-      .upload(`${invoiceData?.team_id}/invoices/${filename}`, buffer, {
-        contentType: "application/pdf",
-        upsert: true,
-      });
+    await supabase.storage.from("vault").upload(fullPath, buffer, {
+      contentType: "application/pdf",
+      upsert: true,
+    });
 
     logger.debug("PDF uploaded to storage");
 
@@ -49,6 +50,14 @@ export const generateInvoice = schemaTask({
         file_size: buffer.length,
       })
       .eq("id", invoiceId);
+
+    if (payload.deliveryType === "create_and_send") {
+      await sendInvoiceEmail.trigger({
+        invoiceId,
+        filename,
+        fullPath,
+      });
+    }
 
     await processDocument.trigger({
       file_path: [invoiceData?.team_id, "invoices", filename],

@@ -785,6 +785,7 @@ export type Database = {
           id: string
           include_decimals: boolean | null
           include_discount: boolean | null
+          include_pdf: boolean | null
           include_qr: boolean | null
           include_tax: boolean | null
           include_units: boolean | null
@@ -822,6 +823,7 @@ export type Database = {
           id?: string
           include_decimals?: boolean | null
           include_discount?: boolean | null
+          include_pdf?: boolean | null
           include_qr?: boolean | null
           include_tax?: boolean | null
           include_units?: boolean | null
@@ -859,6 +861,7 @@ export type Database = {
           id?: string
           include_decimals?: boolean | null
           include_discount?: boolean | null
+          include_pdf?: boolean | null
           include_qr?: boolean | null
           include_tax?: boolean | null
           include_units?: boolean | null
