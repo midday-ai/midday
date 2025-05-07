@@ -55,7 +55,7 @@ We are working on the documentation to get started with Midday for local develop
 - Nextjs
 - Supabase
 - Shadcn
-- ToDesktop
+- Tauri
 - Expo
 - TailwindCSS
 

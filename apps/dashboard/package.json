@@ -36,8 +36,6 @@
     "@tanstack/react-query-devtools": "^5.75.5",
     "@tanstack/react-table": "^8.21.3",
     "@team-plain/typescript-sdk": "^5.9.0",
-    "@todesktop/client-core": "^1.18.1",
-    "@todesktop/runtime": "^2.1.2",
     "@trigger.dev/react-hooks": "3.3.17",
     "@trigger.dev/sdk": "3.3.17",
     "@trpc/client": "^11.1.2",
@@ -82,7 +80,6 @@
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@todesktop/tailwind-variants": "^1.0.1",
     "@types/file-saver": "^2.0.7",
     "@types/node": "^22.15.14",
     "@types/papaparse": "^5.3.16",
