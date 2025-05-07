@@ -59,6 +59,8 @@ export function InvoiceDetails() {
     token,
     internal_note,
     updated_at,
+    sent_at,
+    sent_to,
     customer_name,
   } = data;
 
@@ -153,6 +155,23 @@ export function InvoiceDetails() {
             <span>{issue_date && format(new Date(issue_date), "MMM dd")}</span>
           </span>
         </div>
+
+        {sent_at && (
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-[#606060]">Sent at</span>
+            <span className="text-sm">
+              <span>{sent_at && format(new Date(sent_at), "MMM dd")}</span>
+            </span>
+          </div>
+        )}
+
+        {sent_to && (
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-[#606060]">Sent to</span>
+            <span className="text-sm">{sent_to}</span>
+          </div>
+        )}
+
         <div className="flex justify-between items-center">
           <span className="text-sm text-[#606060]">Invoice no.</span>
           <span className="text-sm">

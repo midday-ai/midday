@@ -194,6 +194,39 @@ export const columns: ColumnDef<Invoice>[] = [
     },
   },
   {
+    header: "Sent at",
+    accessorKey: "sent_at",
+    cell: ({ row, table }) => {
+      const sentAt = row.original.sent_at;
+      const sentTo = row.original.sent_to;
+
+      if (!sentAt) {
+        return "-";
+      }
+
+      if (!sentTo) {
+        return formatDate(sentAt, (table.options.meta as any)?.dateFormat);
+      }
+
+      return (
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger className="flex items-center space-x-2">
+              {formatDate(sentAt, (table.options.meta as any)?.dateFormat)}
+            </TooltipTrigger>
+            <TooltipContent
+              className="text-xs py-1 px-2"
+              side="right"
+              sideOffset={5}
+            >
+              {sentTo}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
+  },
+  {
     id: "actions",
     header: "Actions",
     cell: ({ row }) => {

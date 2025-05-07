@@ -925,6 +925,7 @@ export type Database = {
           paid_at: string | null
           payment_details: Json | null
           reminder_sent_at: string | null
+          sent_at: string | null
           sent_to: string | null
           status: Database["public"]["Enums"]["invoice_status"]
           subtotal: number | null
@@ -964,6 +965,7 @@ export type Database = {
           paid_at?: string | null
           payment_details?: Json | null
           reminder_sent_at?: string | null
+          sent_at?: string | null
           sent_to?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           subtotal?: number | null
@@ -1003,6 +1005,7 @@ export type Database = {
           paid_at?: string | null
           payment_details?: Json | null
           reminder_sent_at?: string | null
+          sent_at?: string | null
           sent_to?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           subtotal?: number | null

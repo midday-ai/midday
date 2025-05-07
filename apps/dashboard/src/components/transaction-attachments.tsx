@@ -160,7 +160,7 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
         });
       }
     },
-    maxSize: 5000000, // 5MB
+    maxSize: 3000000, // 3MB
     accept: {
       "image/*": [
         ".jpg",
@@ -204,7 +204,7 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
                 click to browse.
               </span>
             </p>
-            <p className="text-xs text-dark-gray">5MB file limit.</p>
+            <p className="text-xs text-dark-gray">3MB file limit.</p>
           </div>
         )}
       </div>

@@ -37,9 +37,9 @@ import { Switch } from "@midday/ui/switch";
 import { Textarea } from "@midday/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-
 const formSchema = z.object({
   name: z.string().min(1),
   amount: z.number(),
@@ -101,8 +101,6 @@ export function TransactionCreateForm() {
       note: undefined,
       currency: team?.base_currency ?? undefined,
       attachments: undefined,
-      frequency: undefined,
-      recurring: undefined,
       internal: undefined,
     },
   });
@@ -334,7 +332,8 @@ export function TransactionCreateForm() {
             <AccordionTrigger>Attachment</AccordionTrigger>
             <AccordionContent>
               <TransactionAttachments
-                id={""}
+                // NOTE: For manual attachments, we need to generate a unique id
+                id={nanoid()}
                 data={attachments}
                 onUpload={(files) => {
                   form.setValue("attachments", files);

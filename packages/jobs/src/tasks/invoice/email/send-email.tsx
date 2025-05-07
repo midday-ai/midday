@@ -75,6 +75,7 @@ export const sendInvoiceEmail = schemaTask({
       .update({
         status: "unpaid",
         sent_to: customerEmail,
+        sent_at: new Date().toISOString(),
       })
       .eq("id", invoiceId);
   },

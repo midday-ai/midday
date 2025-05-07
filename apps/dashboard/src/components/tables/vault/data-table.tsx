@@ -1,6 +1,7 @@
 "use client";
 
 import { LoadMore } from "@/components/load-more";
+import { NoResults } from "@/components/vault/empty-states";
 import { VaultGetStarted } from "@/components/vault/vault-get-started";
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
@@ -36,7 +37,7 @@ export function DataTable() {
   const queryClient = useQueryClient();
   const { ref, inView } = useInView();
   const { data: user } = useUserQuery();
-  const { filter } = useDocumentFilterParams();
+  const { filter, hasFilters } = useDocumentFilterParams();
   const { setRowSelection, rowSelection } = useDocumentsStore();
   const { setParams, params } = useDocumentParams();
   const [, copy] = useCopyToClipboard();
@@ -175,6 +176,10 @@ export function DataTable() {
       rowSelection,
     },
   });
+
+  if (hasFilters && !documents?.length) {
+    return <NoResults />;
+  }
 
   if (!documents?.length && !isFetching) {
     return <VaultGetStarted />;

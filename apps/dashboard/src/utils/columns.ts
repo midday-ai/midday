@@ -21,6 +21,7 @@ export async function getInitialInvoicesColumnVisibility() {
   const cookieStore = await cookies();
 
   const columnsToHide = [
+    "sent_at",
     "excl_vat",
     "excl_tax",
     "vat_amount",

@@ -87,6 +87,7 @@ export function TableHeader({ table }: Props) {
             </Button>
           </TableHead>
         )}
+
         {isVisible("due_date") && (
           <TableHead className="w-[180px]">
             <Button
@@ -104,6 +105,7 @@ export function TableHeader({ table }: Props) {
             </Button>
           </TableHead>
         )}
+
         {isVisible("customer") && (
           <TableHead className="min-w-[250px]">
             <Button
@@ -188,6 +190,12 @@ export function TableHeader({ table }: Props) {
                 <ArrowUp size={16} />
               )}
             </Button>
+          </TableHead>
+        )}
+
+        {isVisible("sent_at") && (
+          <TableHead className="w-[150px] min-w-[150px]">
+            <span>Sent at</span>
           </TableHead>
         )}
 

@@ -18,7 +18,7 @@ export function InvoiceColumnVisibility() {
       </PopoverTrigger>
 
       <PopoverContent className="w-[200px] p-0" align="end" sideOffset={8}>
-        <div className="flex flex-col p-4 space-y-2 max-h-[352px] overflow-auto">
+        <div className="flex flex-col p-4 space-y-2 h-[380px]">
           {columns
             .filter(
               (column) =>
