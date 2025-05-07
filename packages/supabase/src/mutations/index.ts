@@ -1,5 +1,6 @@
 import { getAccessValidForDays } from "@midday/engine/gocardless/utils";
 import { addDays } from "date-fns";
+import { nanoid } from "nanoid";
 import { getUserInviteQuery } from "../queries";
 import type { Client } from "../types";
 import { remove } from "../utils/storage";
@@ -406,7 +407,7 @@ export type Attachment = {
   name: string;
   size: number;
   path: string[];
-  transaction_id: string;
+  transaction_id?: string;
 };
 
 export async function createAttachments(
@@ -1715,4 +1716,72 @@ export async function updateInvoiceTemplate(
     )
     .select()
     .single();
+}
+
+type CreateTransactionParams = {
+  name: string;
+  amount: number;
+  currency: string;
+  teamId: string;
+  date: string;
+  bank_account_id: string;
+  assigned_id?: string | null;
+  category_slug?: string | null;
+  note?: string | null;
+  internal?: boolean;
+  attachments?: Attachment[];
+};
+
+export async function createTransaction(
+  supabase: Client,
+  params: CreateTransactionParams,
+) {
+  const { teamId, attachments, ...rest } = params;
+
+  const { data: accountData } = await supabase
+    .from("bank_accounts")
+    .select("id, currency")
+    .eq("id", rest.bank_account_id)
+    .is("currency", null)
+    .single();
+
+  // If the account currency is not set, set it to the transaction currency
+  // Usually this is the case for new accounts
+  if (!accountData?.currency) {
+    await supabase
+      .from("bank_accounts")
+      .update({
+        currency: rest.currency,
+        base_currency: rest.currency,
+      })
+      .eq("id", rest.bank_account_id);
+  }
+
+  const { data } = await supabase
+    .from("transactions")
+    .insert({
+      ...rest,
+      team_id: teamId,
+      method: "other",
+      manual: true,
+      notified: true,
+      status: "posted",
+      internal_id: `${teamId}_${nanoid()}`,
+    })
+    .select("*")
+    .single();
+
+  if (attachments && data) {
+    await createAttachments(supabase, {
+      attachments: attachments.map((attachment) => ({
+        ...attachment,
+        transaction_id: data.id,
+      })),
+      teamId,
+    });
+  }
+
+  return {
+    data,
+  };
 }

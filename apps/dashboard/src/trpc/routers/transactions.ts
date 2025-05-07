@@ -1,5 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import {
+  createTransaction,
   deleteTransactions,
   updateSimilarTransactionsCategory,
   updateSimilarTransactionsRecurring,
@@ -193,6 +194,39 @@ export const transactionsRouter = createTRPCRouter({
         inboxId: input.inboxId,
         maxResults: input.maxResults,
         minConfidenceScore: input.minConfidenceScore,
+      });
+
+      return data;
+    }),
+
+  create: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        amount: z.number(),
+        currency: z.string(),
+        date: z.string(),
+        bank_account_id: z.string(),
+        assigned_id: z.string().optional(),
+        category_slug: z.string().optional(),
+        note: z.string().optional(),
+        internal: z.boolean().optional(),
+        attachments: z
+          .array(
+            z.object({
+              path: z.array(z.string()),
+              name: z.string(),
+              size: z.number(),
+              type: z.string(),
+            }),
+          )
+          .optional(),
+      }),
+    )
+    .mutation(async ({ input, ctx: { supabase, teamId } }) => {
+      const { data } = await createTransaction(supabase, {
+        ...input,
+        teamId: teamId!,
       });
 
       return data;

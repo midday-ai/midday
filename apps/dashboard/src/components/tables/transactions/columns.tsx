@@ -150,11 +150,13 @@ const ActionsCell = memo(
     onViewDetails,
     onCopyUrl,
     onUpdateTransaction,
+    onDeleteTransaction,
   }: {
     transaction: Transaction;
     onViewDetails: (id: string) => void;
     onCopyUrl: (id: string) => void;
     onUpdateTransaction: (data: { id: string; status: string }) => void;
+    onDeleteTransaction: (id: string) => void;
   }) => {
     const handleViewDetails = useCallback(() => {
       onViewDetails(transaction.id);
@@ -175,6 +177,10 @@ const ActionsCell = memo(
     const handleUpdateToExcluded = useCallback(() => {
       onUpdateTransaction({ id: transaction.id, status: "excluded" });
     }, [transaction.id, onUpdateTransaction]);
+
+    const handleDeleteTransaction = useCallback(() => {
+      onDeleteTransaction(transaction.id);
+    }, [transaction.id, onDeleteTransaction]);
 
     return (
       <DropdownMenu>
@@ -217,7 +223,10 @@ const ActionsCell = memo(
           )}
 
           {transaction.manual && (
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={handleDeleteTransaction}
+            >
               Delete
             </DropdownMenuItem>
           )}
@@ -348,9 +357,10 @@ export const columns: ColumnDef<Transaction>[] = [
       return (
         <ActionsCell
           transaction={row.original}
-          onViewDetails={meta.setOpen}
-          onCopyUrl={meta.copyUrl}
-          onUpdateTransaction={meta.updateTransaction}
+          onViewDetails={meta?.setOpen}
+          onCopyUrl={meta?.copyUrl}
+          onUpdateTransaction={meta?.updateTransaction}
+          onDeleteTransaction={meta?.onDeleteTransaction}
         />
       );
     },

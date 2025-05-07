@@ -38,6 +38,11 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
         });
 
         if (data) {
+          onChange({
+            id: data.id,
+            label: data.name ?? "",
+          });
+
           setSelectedItem({
             id: data.id,
             label: data.name ?? "",

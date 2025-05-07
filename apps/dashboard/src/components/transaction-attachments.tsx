@@ -22,9 +22,10 @@ type Attachment = {
 type Props = {
   id: string;
   data?: Attachment[];
+  onUpload?: (files: Attachment[]) => void;
 };
 
-export function TransactionAttachments({ id, data }: Props) {
+export function TransactionAttachments({ id, data, onUpload }: Props) {
   const { toast } = useToast();
   const [files, setFiles] = useState<Attachment[]>([]);
   const { uploadFile } = useUpload();
@@ -100,6 +101,8 @@ export function TransactionAttachments({ id, data }: Props) {
         };
       }),
     );
+
+    onUpload?.(uploadedFiles);
 
     createAttachmentsMutation.mutate(
       uploadedFiles.map((file) => ({

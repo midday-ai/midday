@@ -1,10 +1,14 @@
-import { useQueryState } from "nuqs";
+import { useQueryStates } from "nuqs";
+import { parseAsBoolean, parseAsString } from "nuqs/server";
 
 export function useTransactionParams() {
-  const [transactionId, setTransactionId] = useQueryState("transactionId");
+  const [params, setParams] = useQueryStates({
+    transactionId: parseAsString,
+    createTransaction: parseAsBoolean,
+  });
 
   return {
-    transactionId,
-    setTransactionId,
+    ...params,
+    setParams,
   };
 }

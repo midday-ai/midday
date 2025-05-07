@@ -15,6 +15,7 @@ import { InvoiceSheet } from "./invoice-sheet";
 import { TrackerCreateSheet } from "./tracker-create-sheet";
 import { TrackerScheduleSheet } from "./tracker-schedule-sheet";
 import { TrackerUpdateSheet } from "./tracker-update-sheet";
+import { TransactionCreateSheet } from "./transaction-create-sheet";
 import { TransactionSheet } from "./transaction-sheet";
 
 type Props = {
@@ -34,7 +35,9 @@ export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
 
       <CustomerCreateSheet />
       <CustomerEditSheet />
+
       <TransactionSheet />
+      <TransactionCreateSheet />
 
       <AssistantModal />
       <SelectBankAccountsModal />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -15,6 +16,8 @@ export function AddTransactions() {
     step: parseAsString,
     hide: parseAsBoolean,
   });
+
+  const { setParams: setTransactionParams } = useTransactionParams();
 
   return (
     <DropdownMenu>
@@ -37,6 +40,13 @@ export function AddTransactions() {
         >
           <Icons.Import size={18} />
           <span>Import/backfill</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setTransactionParams({ createTransaction: true })}
+          className="space-x-2"
+        >
+          <Icons.CreateTransaction size={18} />
+          <span>Create transaction</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

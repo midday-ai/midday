@@ -6,12 +6,12 @@ import React from "react";
 import { TransactionDetails } from "../transaction-details";
 
 export function TransactionSheet() {
-  const { transactionId, setTransactionId } = useTransactionParams();
+  const { transactionId, setParams } = useTransactionParams();
   const isOpen = Boolean(transactionId);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      setTransactionId(null);
+      setParams(null);
     }
   };
 

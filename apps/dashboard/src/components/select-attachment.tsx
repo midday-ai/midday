@@ -1,8 +1,12 @@
+import { useDocumentParams } from "@/hooks/use-document-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { formatDate } from "@/utils/format";
 import { Combobox } from "@midday/ui/combobox";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounceValue } from "usehooks-ts";
-import { FileViewer } from "./file-viewer";
+import { FilePreview } from "./file-preview";
+import { FormatAmount } from "./format-amount";
 
 type Props = {
   placeholder: string;
@@ -10,7 +14,9 @@ type Props = {
 };
 
 export function SelectAttachment({ placeholder, onSelect }: Props) {
-  const [debouncedValue, setValue] = useDebounceValue("", 200);
+  const [debouncedValue, setDebouncedValue] = useDebounceValue("", 200);
+  const { data: user } = useUserQuery();
+  const { setParams } = useDocumentParams();
 
   const trpc = useTRPC();
 
@@ -22,16 +28,48 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
     enabled: Boolean(debouncedValue),
   });
 
+  const handleOnSelect = (item: any) => {
+    onSelect(item);
+  };
+
   const options = items?.map((item) => ({
     id: item.id,
     name: item.display_name,
     data: item,
     component: () => {
+      const filePath = `${item?.file_path?.join("/")}`;
       return (
-        <FileViewer
-          mimeType={item.content_type}
-          url={`/api/proxy?filePath=vault/${item?.file_path?.join("/")}`}
-        />
+        <div className="flex w-full items-center justify-between gap-2 text-sm">
+          <div className="flex gap-2 items-center">
+            <div className="w-7 h-7 overflow-hidden">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setParams({ filePath });
+                }}
+              >
+                <FilePreview mimeType={item.content_type} filePath={filePath} />
+              </button>
+            </div>
+            <div className="flex flex-col">
+              <span className="truncate">
+                {item.display_name || item.file_name}
+              </span>
+              {item?.date && (
+                <span className="text-muted-foreground text-xs">
+                  {formatDate(item.date, user?.date_format, true)}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-shrink-0 items-center gap-4">
+            {item?.amount && item?.currency && (
+              <FormatAmount amount={item.amount} currency={item.currency} />
+            )}
+          </div>
+        </div>
       );
     },
   }));
@@ -41,12 +79,12 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
       className="border border-border p-2 pl-10"
       placeholder={placeholder}
       onValueChange={(query) => {
-        setValue(query);
+        setDebouncedValue(query);
       }}
-      onSelect={onSelect}
+      onSelect={handleOnSelect}
       options={isLoading ? [] : options}
       isLoading={isLoading}
-      classNameList="mt-2"
+      classNameList="mt-2 max-h-[161px]"
     />
   );
 }

@@ -43,7 +43,7 @@ export function DataTable({
   const deferredSearch = useDeferredValue(filter.q);
   const { params } = useSortParams();
   const { ref, inView } = useInView();
-  const { transactionId, setTransactionId } = useTransactionParams();
+  const { transactionId, setParams } = useTransactionParams();
   const { hasFilters } = useTransactionFilterParams();
 
   const showBottomBar = hasFilters && !Object.keys(rowSelection).length;
@@ -81,6 +81,14 @@ export function DataTable({
     }),
   );
 
+  const deleteTransactionMutation = useMutation(
+    trpc.transactions.deleteMany.mutationOptions({
+      onSuccess: () => {
+        refetch();
+      },
+    }),
+  );
+
   useEffect(() => {
     if (inView) {
       fetchNextPage();
@@ -108,7 +116,7 @@ export function DataTable({
     },
     meta: {
       setOpen: (id: string) => {
-        setTransactionId(id);
+        setParams({ transactionId: id });
       },
       copyUrl: (id: string) => {
         try {
@@ -137,6 +145,9 @@ export function DataTable({
             | "posted"
             | "excluded",
         });
+      },
+      onDeleteTransaction: (id: string) => {
+        deleteTransactionMutation.mutate({ ids: [id] });
       },
     },
   });
@@ -180,7 +191,7 @@ export function DataTable({
         const prevId = ids[currentIndex - 1];
 
         if (prevId) {
-          setTransactionId(prevId);
+          setParams({ transactionId: prevId });
         }
       }
 
@@ -189,7 +200,7 @@ export function DataTable({
         const nextId = ids[currentIndex + 1];
 
         if (nextId) {
-          setTransactionId(nextId);
+          setParams({ transactionId: nextId });
         }
       }
     },
@@ -236,7 +247,7 @@ export function DataTable({
                             cell.column.id !== "select" &&
                             cell.column.id !== "actions"
                           ) {
-                            setTransactionId(row.original.id);
+                            setParams({ transactionId: row.original.id });
                           }
                         }}
                       >
