@@ -2,10 +2,36 @@ import { serializableToBlob } from "@/utils/blob";
 import { writeToString } from "@fast-csv/format";
 import { createClient } from "@midday/supabase/job";
 import { metadata, schemaTask } from "@trigger.dev/sdk/v3";
-import { BlobReader, BlobWriter, TextReader, ZipWriter } from "@zip.js/zip.js";
+import {
+  BlobReader,
+  BlobWriter,
+  TextReader,
+  Uint8ArrayReader,
+  ZipWriter,
+} from "@zip.js/zip.js";
 import { format } from "date-fns";
+import xlsx from "node-xlsx";
 import { z } from "zod";
 import { processExport } from "./process-export";
+
+const columns = [
+  { label: "ID", key: "id" },
+  { label: "Date", key: "date" },
+  { label: "Description", key: "description" },
+  { label: "Additional info", key: "additionalInfo" },
+  { label: "Amount", key: "amount" },
+  { label: "Currency", key: "currency" },
+  { label: "Formatted amount", key: "formattedAmount" },
+  { label: "VAT", key: "vat" },
+  { label: "Category", key: "category" },
+  { label: "Category description", key: "categoryDescription" },
+  { label: "Status", key: "status" },
+  { label: "Attachments", key: "attachments" },
+  { label: "Balance", key: "balance" },
+  { label: "Account", key: "account" },
+  { label: "Note", key: "note" },
+  { label: "Tags", key: "tags" },
+];
 
 // Process transactions in batches of 100
 const BATCH_SIZE = 100;
@@ -71,30 +97,27 @@ export const exportTransactions = schemaTask({
     );
 
     const csv = await writeToString(rows, {
-      headers: [
-        "ID",
-        "Date",
-        "Description",
-        "Additional info",
-        "Amount",
-        "Currency",
-        "Formatted amount",
-        "VAT",
-        "Category",
-        "Category description",
-        "Status",
-        "Attachments",
-        "Balance",
-        "Account",
-        "Note",
-        "Tags",
-      ],
+      headers: columns.map((c) => c.label),
     });
+
+    const data = [
+      columns.map((c) => c.label), // Header row
+      ...rows.map((row) => row.map((cell) => cell ?? "")),
+    ];
+
+    const buffer = xlsx.build([
+      {
+        name: "Transactions",
+        data,
+        options: {},
+      },
+    ]);
 
     const zipFileWriter = new BlobWriter("application/zip");
     const zipWriter = new ZipWriter(zipFileWriter);
 
     zipWriter.add("transactions.csv", new TextReader(csv));
+    zipWriter.add("transactions.xlsx", new Uint8ArrayReader(buffer));
 
     metadata.set("progress", 90);
 
