@@ -207,6 +207,7 @@ export function InvoiceActions({ status, id }: Props) {
                   <DropdownMenuSubContent>
                     <Calendar
                       mode="single"
+                      toDate={new Date()}
                       selected={new Date()}
                       onSelect={(date) => {
                         if (date) {
@@ -214,6 +215,13 @@ export function InvoiceActions({ status, id }: Props) {
                             id,
                             status: "paid",
                             paid_at: date.toISOString(),
+                          });
+                        } else {
+                          // NOTE: Today is undefined
+                          updateInvoiceMutation.mutate({
+                            id,
+                            status: "paid",
+                            paid_at: new Date().toISOString(),
                           });
                         }
                       }}
