@@ -1,6 +1,5 @@
 import { AppleSignIn } from "@/components/apple-sign-in";
 import { ConsentBanner } from "@/components/consent-banner";
-import { DesktopCommandMenuSignIn } from "@/components/desktop-command-menu-sign-in";
 import { GithubSignIn } from "@/components/github-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { OTPSignIn } from "@/components/otp-sign-in";
@@ -22,11 +21,7 @@ export const metadata: Metadata = {
   title: "Login | Midday",
 };
 
-export default async function Page(params) {
-  if ((await params?.searchParams)?.return_to === "desktop/command") {
-    return <DesktopCommandMenuSignIn />;
-  }
-
+export default async function Page() {
   const cookieStore = await cookies();
   const preferred = cookieStore.get(Cookies.PreferredSignInProvider);
   const showTrackingConsent =

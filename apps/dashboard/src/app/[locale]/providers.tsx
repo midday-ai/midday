@@ -3,14 +3,7 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProviderClient } from "@/locales/client";
 import { TRPCReactProvider } from "@/trpc/client";
-import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import type { ReactNode } from "react";
-
-// We need to import it here because this is the first
-// client component
-if (isDesktopApp()) {
-  require("@/desktop/main");
-}
 
 type ProviderProps = {
   locale: string;
