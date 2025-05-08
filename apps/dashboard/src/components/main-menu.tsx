@@ -78,10 +78,10 @@ const Item = ({ item, isActive, onSelect }: ItemProps) => {
           <TooltipTrigger className="w-full">
             <div
               className={cn(
-                "relative border border-transparent md:w-[45px] h-[45px] flex items-center md:justify-center",
+                "relative border border-transparent size-[40px] flex items-center md:justify-center",
                 "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
                 isActive &&
-                  "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
+                  "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C] text-primary",
               )}
             >
               <div className="relative">
@@ -95,7 +95,7 @@ const Item = ({ item, isActive, onSelect }: ItemProps) => {
           <TooltipContent
             side="left"
             className="px-3 py-1.5 text-xs hidden md:flex items-center gap-1"
-            sideOffset={10}
+            sideOffset={6}
           >
             {item.name}
           </TooltipContent>
@@ -116,7 +116,7 @@ export function MainMenu({ onSelect }: Props) {
   return (
     <div className="mt-6">
       <nav>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           {items.map((item) => {
             const isActive =
               (pathname === "/" && item.path === "/") ||

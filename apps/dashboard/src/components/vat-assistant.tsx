@@ -1,5 +1,4 @@
 import { getVatRateAction } from "@/actions/ai/get-vat-rate";
-import { Experimental } from "@/components/experimental";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -72,7 +71,6 @@ export function VatAssistant({ name, onSelect, isFocused, value }: Props) {
           >
             <div className="flex space-x-2 items-center">
               <span>VAT Assistant</span>
-              <Experimental className="px-2 py-0 border-border" />
             </div>
             <span className="text-xs text-[#878787]">
               {`The VAT rate for ${name} in ${result.country} is generally ${result.vat}%. Please remember to confirm this with your local Tax office.`}

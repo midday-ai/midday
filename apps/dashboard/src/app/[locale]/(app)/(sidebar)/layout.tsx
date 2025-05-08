@@ -43,9 +43,9 @@ export default async function Layout({
 
         <Sidebar />
 
-        <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
+        <div className="md:ml-[70px] pb-8">
           <Header />
-          {children}
+          <div className="px-6">{children}</div>
         </div>
 
         <ExportStatus />
