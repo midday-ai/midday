@@ -42,7 +42,7 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
   const deleteDocumentMutation = useMutation(
     trpc.documents.delete.mutationOptions({
       onMutate: async ({ id }) => {
-        setParams({ id: null });
+        setParams({ documentId: null });
 
         // Cancel outgoing refetches
         await queryClient.cancelQueries({

@@ -22,10 +22,10 @@ export function VaultRelatedFiles() {
     trpc.documents.getRelatedDocuments.queryOptions(
       {
         pageSize: 12,
-        id: params?.id!,
+        id: params?.documentId!,
       },
       {
-        enabled: !!params?.id,
+        enabled: !!params?.documentId,
       },
     ),
   );

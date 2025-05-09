@@ -12,15 +12,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const icons = {
-  "/": () => <Icons.Overview size={22} />,
-  "/transactions": () => <Icons.Transactions size={22} />,
-  "/invoices": () => <Icons.Invoice size={22} />,
-  "/tracker": () => <Icons.Tracker size={22} />,
-  "/customers": () => <Icons.Customers size={22} />,
-  "/vault": () => <Icons.Vault size={22} />,
-  "/settings": () => <Icons.Settings size={22} />,
-  "/apps": () => <Icons.Apps size={22} />,
-  "/inbox": () => <Icons.Inbox2 size={22} />,
+  "/": () => <Icons.Overview size={20} />,
+  "/transactions": () => <Icons.Transactions size={20} />,
+  "/invoices": () => <Icons.Invoice size={20} />,
+  "/tracker": () => <Icons.Tracker size={20} />,
+  "/customers": () => <Icons.Customers size={20} />,
+  "/vault": () => <Icons.Vault size={20} />,
+  "/settings": () => <Icons.Settings size={20} />,
+  "/apps": () => <Icons.Apps size={20} />,
+  "/inbox": () => <Icons.Inbox2 size={20} />,
 } as const;
 
 const items = [
@@ -78,10 +78,10 @@ const Item = ({ item, isActive, onSelect }: ItemProps) => {
           <TooltipTrigger className="w-full">
             <div
               className={cn(
-                "relative border border-transparent md:w-[45px] h-[45px] flex items-center md:justify-center",
-                "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
+                "relative border border-transparent size-[40px] flex items-center md:justify-center",
+                "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C] dark:text-[#666666] text-black",
                 isActive &&
-                  "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
+                  "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C] dark:!text-white",
               )}
             >
               <div className="relative">
@@ -95,7 +95,7 @@ const Item = ({ item, isActive, onSelect }: ItemProps) => {
           <TooltipContent
             side="left"
             className="px-3 py-1.5 text-xs hidden md:flex items-center gap-1"
-            sideOffset={10}
+            sideOffset={6}
           >
             {item.name}
           </TooltipContent>
@@ -116,7 +116,7 @@ export function MainMenu({ onSelect }: Props) {
   return (
     <div className="mt-6">
       <nav>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           {items.map((item) => {
             const isActive =
               (pathname === "/" && item.path === "/") ||

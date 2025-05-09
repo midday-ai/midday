@@ -13,6 +13,7 @@ import { institutionsRouter } from "./institutions";
 import { invoiceTemplateRouter } from "./invoice-template";
 import { invoiceRouter } from "./invoice/route";
 import { metricsRouter } from "./metrics";
+import { searchRouter } from "./search";
 import { tagsRouter } from "./tags";
 import { teamRouter } from "./team";
 import { trackerEntriesRouter } from "./tracker-entries";
@@ -46,6 +47,7 @@ export const appRouter = createTRPCRouter({
   transactions: transactionsRouter,
   transactionTags: transactionTagsRouter,
   user: userRouter,
+  search: searchRouter,
 });
 
 // export type definition of API

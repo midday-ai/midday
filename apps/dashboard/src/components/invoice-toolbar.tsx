@@ -10,7 +10,6 @@ import {
 import { motion } from "framer-motion";
 import { MdContentCopy, MdOutlineFileDownload } from "react-icons/md";
 import { useCopyToClipboard } from "usehooks-ts";
-import { InvoiceViewers } from "./invoice-viewers";
 
 export type Customer = {
   name: string;
@@ -87,8 +86,6 @@ export default function InvoiceToolbar({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-
-        <InvoiceViewers customer={customer} viewedAt={viewedAt} />
       </div>
     </motion.div>
   );

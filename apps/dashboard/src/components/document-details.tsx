@@ -16,13 +16,13 @@ export function DocumentDetails() {
   const queryClient = useQueryClient();
   const { params } = useDocumentParams();
 
-  const isOpen = Boolean(params.filePath || params.id);
-  const fullView = Boolean(params.id);
+  const isOpen = Boolean(params.filePath || params.documentId);
+  const fullView = Boolean(params.documentId);
 
   const { data, isLoading } = useQuery({
     ...trpc.documents.getById.queryOptions({
       filePath: params.filePath!,
-      id: params.id!,
+      id: params.documentId!,
     }),
     enabled: isOpen,
     staleTime: 60 * 1000,
@@ -34,7 +34,8 @@ export function DocumentDetails() {
 
       return pages.find(
         (d) =>
-          d.id === params.id || d.path_tokens?.join("/") === params.filePath,
+          d.id === params.documentId ||
+          d.path_tokens?.join("/") === params.filePath,
       );
     },
   });

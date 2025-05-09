@@ -1,7 +1,6 @@
 import { useAssistantStore } from "@/store/assistant";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { Experimental } from "../experimental";
 
 export function Header() {
   const { setOpen } = useAssistantStore();
@@ -20,10 +19,6 @@ export function Header() {
       >
         <Icons.Close />
       </Button>
-
-      <div className="space-x-2 items-center hidden md:flex todesktop:flex">
-        <Experimental className="border-border text-[#878787]" />
-      </div>
     </div>
   );
 }

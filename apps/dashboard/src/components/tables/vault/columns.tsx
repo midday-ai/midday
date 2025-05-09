@@ -124,7 +124,7 @@ export const columns: ColumnDef<Document>[] = [
           <DropdownMenuContent>
             <DropdownMenuItem
               onClick={() => {
-                setParams({ id: row.original.id });
+                setParams({ documentId: row.original.id });
               }}
             >
               View details

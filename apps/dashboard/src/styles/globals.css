@@ -268,3 +268,10 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     transparent 0
   );
 }
+
+.global-search-list {
+  height: min(450px, var(--search-list-height));
+  overscroll-behavior: contain;
+  transition: 100ms ease;
+  transition-property: height;
+}

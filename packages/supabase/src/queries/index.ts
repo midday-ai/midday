@@ -1630,3 +1630,26 @@ export async function getDocumentTagsQuery(supabase: Client, teamId: string) {
     .eq("team_id", teamId)
     .order("created_at", { ascending: false });
 }
+
+type GlobalSearchParams = {
+  teamId: string;
+  searchTerm?: string;
+  limit?: number;
+  itemsPerTableLimit?: number;
+  language?: string;
+  relevanceThreshold?: number;
+};
+
+export async function globalSearchQuery(
+  supabase: Client,
+  params: GlobalSearchParams,
+) {
+  return supabase.rpc("global_search", {
+    p_search_term: params.searchTerm,
+    p_team_id: params.teamId,
+    p_search_lang: params.language,
+    p_limit: params.limit,
+    p_items_per_table_limit: params.itemsPerTableLimit,
+    p_relevance_threshold: params.relevanceThreshold,
+  });
+}

@@ -1,6 +1,5 @@
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-// import { Experimental } from "../experimental";
 
 type Props = {
   isExpanded: boolean;
@@ -25,10 +24,6 @@ export function Header({ toggleSidebar, isExpanded }: Props) {
         </Button>
 
         <h2>Assistant</h2>
-      </div>
-
-      <div className="flex space-x-2 items-center">
-        {/* <Experimental className="border-border text-[#878787]" /> */}
       </div>
     </div>
   );

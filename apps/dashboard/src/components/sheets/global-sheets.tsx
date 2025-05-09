@@ -4,19 +4,20 @@ import { AssistantModal } from "@/components/assistant/assistant-modal";
 import { ConnectTransactionsModal } from "@/components/modals/connect-transactions-modal";
 import { ImportModal } from "@/components/modals/import-modal";
 import { SelectBankAccountsModal } from "@/components/modals/select-bank-accounts";
+import { TrialEndedModal } from "@/components/modals/trial-ended-modal";
+import { SearchModal } from "@/components/search/search-modal";
+import { CustomerCreateSheet } from "@/components/sheets/customer-create-sheet";
+import { CustomerEditSheet } from "@/components/sheets/customer-edit-sheet";
+import { DocumentSheet } from "@/components/sheets/document-sheet";
+import { InvoiceDetailsSheet } from "@/components/sheets/invoice-details-sheet";
+import { InvoiceSheet } from "@/components/sheets/invoice-sheet";
+import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
+import { TrackerScheduleSheet } from "@/components/sheets/tracker-schedule-sheet";
+import { TrackerUpdateSheet } from "@/components/sheets/tracker-update-sheet";
+import { TransactionCreateSheet } from "@/components/sheets/transaction-create-sheet";
+import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { use } from "react";
-import { TrialEndedModal } from "../modals/trial-ended-modal";
-import { CustomerCreateSheet } from "./customer-create-sheet";
-import { CustomerEditSheet } from "./customer-edit-sheet";
-import { DocumentSheet } from "./document-sheet";
-import { InvoiceDetailsSheet } from "./invoice-details-sheet";
-import { InvoiceSheet } from "./invoice-sheet";
-import { TrackerCreateSheet } from "./tracker-create-sheet";
-import { TrackerScheduleSheet } from "./tracker-schedule-sheet";
-import { TrackerUpdateSheet } from "./tracker-update-sheet";
-import { TransactionCreateSheet } from "./transaction-create-sheet";
-import { TransactionSheet } from "./transaction-sheet";
 
 type Props = {
   currencyPromise: Promise<string>;
@@ -42,6 +43,8 @@ export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
       <AssistantModal />
       <SelectBankAccountsModal />
       <TrialEndedModal />
+      <SearchModal />
+
       <DocumentSheet />
 
       <ImportModal currencies={uniqueCurrencies} defaultCurrency={currency} />

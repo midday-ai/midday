@@ -90,7 +90,7 @@ export function DataTable() {
   const deleteDocumentMutation = useMutation(
     trpc.documents.delete.mutationOptions({
       onMutate: async ({ id }) => {
-        setParams({ id: null });
+        setParams({ documentId: null });
 
         // Cancel outgoing refetches
         await queryClient.cancelQueries({
@@ -208,7 +208,7 @@ export function DataTable() {
                         cell.column.id !== "tags" &&
                         cell.column.id !== "actions"
                       ) {
-                        setParams({ id: row.original.id });
+                        setParams({ documentId: row.original.id });
                       }
                     }}
                   >

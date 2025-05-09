@@ -2518,6 +2518,31 @@ export type Database = {
           amount: number
         }[]
       }
+      global_search: {
+        Args:
+          | {
+              p_search_term: string
+              p_team_id: string
+              p_search_lang?: string
+              p_limit?: number
+              p_items_per_table_limit?: number
+            }
+          | {
+              p_search_term: string
+              p_team_id: string
+              p_search_lang?: string
+              p_limit?: number
+              p_items_per_table_limit?: number
+              p_relevance_threshold?: number
+            }
+        Returns: {
+          id: string
+          type: string
+          relevance: number
+          created_at: string
+          data: Json
+        }[]
+      }
       group_transactions_v2: {
         Args: { p_team_id: string }
         Returns: {
