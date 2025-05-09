@@ -3,7 +3,9 @@ import { FaXTwitter } from "react-icons/fa6";
 import { FiGithub } from "react-icons/fi";
 import {
   MdArrowBack,
+  MdArrowDownward,
   MdArrowRightAlt,
+  MdArrowUpward,
   MdAttachMoney,
   MdAutoAwesome,
   MdChangeHistory,
@@ -55,6 +57,7 @@ import {
   MdOutlineRepeat,
   MdOutlineSquareFoot,
   MdOutlineStyle,
+  MdOutlineSubdirectoryArrowLeft,
   MdOutlineTask,
   MdOutlineTune,
   MdOutlineVisibility,
@@ -598,4 +601,7 @@ export const Icons = {
   Files: MdOutlineInventory2,
   GridView: MdOutlineGridView,
   ListView: MdOutlineReorder,
+  ArrowDownward: MdArrowDownward,
+  ArrowUpward: MdArrowUpward,
+  SubdirectoryArrowLeft: MdOutlineSubdirectoryArrowLeft,
 };

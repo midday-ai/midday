@@ -79,7 +79,7 @@ const Item = ({ item, isActive, onSelect }: ItemProps) => {
             <div
               className={cn(
                 "relative border border-transparent size-[40px] flex items-center md:justify-center",
-                "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C] dark:text-[#666666] text-black",
+                "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C] dark:text-[#666666] text-black hover:!text-primary",
                 isActive &&
                   "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C] dark:!text-white",
               )}

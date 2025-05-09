@@ -141,13 +141,13 @@ const SearchResultItemDisplay = ({
           />
         );
         resultDisplay = (
-          <div className="flex items-center justify-between w-full group">
+          <div className="flex items-center justify-between w-full">
             <span className="flex-grow truncate">
               {/* @ts-expect-error - Unstructured data */}
               {item.data.title ||
                 (item.data?.name as string)?.split("/").at(-1)}
             </span>
-            <div className="flex items-center gap-2 invisible group-hover:visible group-focus:visible">
+            <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`?documentId=${item.id}`} />
               <DownloadButton
                 href={`/api/download/file?path=${item.data.path_tokens?.join("/")}&filename=${
@@ -173,14 +173,14 @@ const SearchResultItemDisplay = ({
           <Icons.Customers className="size-4 dark:text-[#666] text-primary" />
         );
         resultDisplay = (
-          <div className="flex items-center w-full group">
+          <div className="flex items-center w-full">
             <div className="flex-grow truncate flex gap-2 items-center">
               <span>{item.data.name as string}</span>
               <span className="text-xs text-muted-foreground">
                 {item.data.email as string}
               </span>
             </div>
-            <div className="flex items-center gap-2 invisible group-hover:visible group-focus:visible">
+            <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`?customerId=${item.id}`} />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
             </div>
@@ -202,11 +202,11 @@ const SearchResultItemDisplay = ({
           <Icons.Invoice className="size-4 dark:text-[#666] text-primary" />
         );
         resultDisplay = (
-          <div className="flex items-center w-full group">
+          <div className="flex items-center w-full">
             <div className="flex-grow truncate flex gap-2 items-center">
               <span>{item.data.invoice_number as string}</span>
             </div>
-            <div className="flex items-center gap-2 invisible group-hover:visible group-focus:visible">
+            <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`?invoiceId=${item.id}&type=details`} />
               <DownloadButton
                 href={`/api/download/invoice?id=${item.id}&size=${item?.data?.template?.size}`}
@@ -227,7 +227,7 @@ const SearchResultItemDisplay = ({
           <Icons.Inbox2 size={14} className="dark:text-[#666] text-primary" />
         );
         resultDisplay = (
-          <div className="flex items-center justify-between w-full group">
+          <div className="flex items-center justify-between w-full">
             <div className="flex-grow truncate flex gap-2 items-center">
               <span>
                 {
@@ -251,7 +251,7 @@ const SearchResultItemDisplay = ({
                   formatDate(item.data.date as string, dateFormat)}
               </span>
             </div>
-            <div className="flex items-center gap-2 invisible group-hover:visible group-focus:visible">
+            <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`/inbox?inboxId=${item.id}`} />
               <DownloadButton
                 href={`/api/download/file?path=${item.data?.file_path?.join(
@@ -276,11 +276,11 @@ const SearchResultItemDisplay = ({
           <Icons.Tracker className="size-4 dark:text-[#666] text-primary" />
         );
         resultDisplay = (
-          <div className="flex items-center w-full group">
+          <div className="flex items-center w-full">
             <div className="flex-grow truncate flex gap-2 items-center">
               <span>{item.data.name as string}</span>
             </div>
-            <div className="flex items-center gap-2 invisible group-hover:visible group-focus:visible">
+            <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`?projectId=${item.id}&update=true`} />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
             </div>
@@ -300,7 +300,7 @@ const SearchResultItemDisplay = ({
           <Icons.Transactions className="size-4 dark:text-[#666] text-primary" />
         );
         resultDisplay = (
-          <div className="flex items-center justify-between w-full group">
+          <div className="flex items-center justify-between w-full">
             <div className="flex-grow truncate flex gap-2 items-center">
               <span>{item.data.name as string}</span>
               <span className="text-xs text-muted-foreground">
@@ -314,7 +314,7 @@ const SearchResultItemDisplay = ({
                   formatDate(item.data.date as string, dateFormat)}
               </span>
             </div>
-            <div className="flex items-center gap-2 invisible group-hover:visible group-focus:visible">
+            <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton url={item.data?.url as string} />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
             </div>
@@ -340,7 +340,7 @@ const SearchResultItemDisplay = ({
       key={item.id}
       value={item.id}
       onSelect={handleSelect}
-      className="text-sm flex flex-col items-start gap-1 py-2"
+      className="text-sm flex flex-col items-start gap-1 py-2 group/item"
     >
       <div className="flex items-center gap-2 w-full">
         {icon}

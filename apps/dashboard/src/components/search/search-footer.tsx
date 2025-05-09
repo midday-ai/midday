@@ -7,11 +7,17 @@ export function SearchFooter() {
         <Icons.LogoSmall />
       </div>
 
-      <div className="ml-auto flex space-x-4">
-        <div className="flex space-x-2 items-center text-xs">
-          <kbd className="pointer-events-none h-5 select-none items-center gap-1 border bg-accent px-1.5 font-mono text-[10px] font-medium">
-            <span>↵</span>
-          </kbd>
+      <div className="ml-auto flex space-x-2">
+        <div className="size-6 select-none items-center border bg-accent flex justify-center">
+          <Icons.ArrowUpward className="size-3 dark:text-[#666666] text-black" />
+        </div>
+
+        <div className="size-6 select-none items-center border bg-accent flex justify-center">
+          <Icons.ArrowDownward className="size-3 dark:text-[#666666] text-black" />
+        </div>
+
+        <div className="size-6 select-none items-center border bg-accent flex justify-center">
+          <Icons.SubdirectoryArrowLeft className="size-3 dark:text-[#666666] text-black" />
         </div>
       </div>
     </div>
