@@ -1637,6 +1637,7 @@ type GlobalSearchParams = {
   limit?: number;
   itemsPerTableLimit?: number;
   language?: string;
+  relevanceThreshold?: number;
 };
 
 export async function globalSearchQuery(
@@ -1649,5 +1650,6 @@ export async function globalSearchQuery(
     p_search_lang: params.language,
     p_limit: params.limit,
     p_items_per_table_limit: params.itemsPerTableLimit,
+    p_relevance_threshold: params.relevanceThreshold,
   });
 }

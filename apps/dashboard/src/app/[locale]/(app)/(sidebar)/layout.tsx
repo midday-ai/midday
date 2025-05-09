@@ -25,6 +25,7 @@ export default async function Layout({
   batchPrefetch([
     trpc.team.current.queryOptions(),
     trpc.invoice.defaultSettings.queryOptions(),
+    trpc.search.global.queryOptions({ searchTerm: "" }),
   ]);
 
   // NOTE: Right now we want to fetch the user and hydrate the client

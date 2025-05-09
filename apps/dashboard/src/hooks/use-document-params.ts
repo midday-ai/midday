@@ -3,7 +3,7 @@ import { parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 export function useDocumentParams() {
   const [params, setParams] = useQueryStates({
-    id: parseAsString,
+    documentId: parseAsString,
     filePath: parseAsString,
     view: parseAsStringLiteral(["grid", "list"]).withDefault("grid"),
   });

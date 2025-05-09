@@ -8,12 +8,12 @@ import React from "react";
 export function DocumentSheet() {
   const { params, setParams } = useDocumentParams();
 
-  const isOpen = Boolean(params.filePath || params.id);
+  const isOpen = Boolean(params.filePath || params.documentId);
 
   return (
     <Sheet
       open={isOpen}
-      onOpenChange={() => setParams({ id: null, filePath: null })}
+      onOpenChange={() => setParams({ documentId: null, filePath: null })}
     >
       <SheetContent style={{ maxWidth: 647 }}>
         <DocumentDetails />

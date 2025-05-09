@@ -2519,13 +2519,22 @@ export type Database = {
         }[]
       }
       global_search: {
-        Args: {
-          p_search_term: string
-          p_team_id: string
-          p_search_lang?: string
-          p_limit?: number
-          p_items_per_table_limit?: number
-        }
+        Args:
+          | {
+              p_search_term: string
+              p_team_id: string
+              p_search_lang?: string
+              p_limit?: number
+              p_items_per_table_limit?: number
+            }
+          | {
+              p_search_term: string
+              p_team_id: string
+              p_search_lang?: string
+              p_limit?: number
+              p_items_per_table_limit?: number
+              p_relevance_threshold?: number
+            }
         Returns: {
           id: string
           type: string

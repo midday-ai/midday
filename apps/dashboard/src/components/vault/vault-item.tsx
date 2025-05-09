@@ -43,7 +43,7 @@ export function VaultItem({ data, small }: Props) {
           ) && "bg-border",
         )}
         onClick={() => {
-          setParams({ id: data.id });
+          setParams({ documentId: data.id });
         }}
       >
         {/* @ts-expect-error - mimetype is not typed (JSONB) */}
@@ -63,7 +63,7 @@ export function VaultItem({ data, small }: Props) {
         type="button"
         className="flex flex-col text-left"
         onClick={() => {
-          setParams({ id: data.id });
+          setParams({ documentId: data.id });
         }}
       >
         {
