@@ -24,13 +24,9 @@ function ActivityItem({
   return (
     <li className="relative pb-6 last:pb-0">
       {!isLast && (
-        <div
-          className={cn(
-            "absolute left-[3.5px] top-3.5 bottom-0 w-[1px] border-[0.5px] border-solid border-border",
-            completed && "border-dashed",
-          )}
-        />
+        <div className="absolute left-[3px] top-[20px] bottom-0 border-[0.5px] border-border" />
       )}
+
       <div className="flex items-center gap-3">
         <div
           className={cn(
@@ -48,6 +44,7 @@ function ActivityItem({
           >
             {label}
           </span>
+
           <span className="text-sm text-[#666666]">
             {date &&
               format(
@@ -84,7 +81,7 @@ export function InvoiceActivity({ data }: Props) {
           label="Sent"
           date={data?.sent_at}
           completed
-          timeFormat={user?.time}
+          timeFormat={user?.time_format}
         />
       )}
       {data?.viewed_at && (
@@ -92,7 +89,7 @@ export function InvoiceActivity({ data }: Props) {
           label="Viewed"
           date={data?.viewed_at}
           completed
-          timeFormat={user?.time}
+          timeFormat={user?.time_format}
         />
       )}
       {data?.reminder_sent_at && (
@@ -100,7 +97,7 @@ export function InvoiceActivity({ data }: Props) {
           label="Reminder sent"
           date={data?.reminder_sent_at}
           completed
-          timeFormat={user?.time}
+          timeFormat={user?.time_format}
         />
       )}
 
@@ -110,7 +107,7 @@ export function InvoiceActivity({ data }: Props) {
           date={data?.paid_at}
           completed={completed}
           isLast
-          timeFormat={user?.time}
+          timeFormat={user?.time_format}
         />
       )}
 
@@ -120,7 +117,7 @@ export function InvoiceActivity({ data }: Props) {
           completed
           date={data?.updated_at}
           isLast
-          timeFormat={user?.time}
+          timeFormat={user?.time_format}
         />
       )}
     </ul>
