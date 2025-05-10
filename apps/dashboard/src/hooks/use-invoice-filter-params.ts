@@ -2,7 +2,6 @@ import { useQueryStates } from "nuqs";
 import { createLoader, parseAsArrayOf, parseAsString } from "nuqs/server";
 
 const invoiceFilterParamsSchema = {
-  sort: parseAsArrayOf(parseAsString),
   q: parseAsString,
   statuses: parseAsArrayOf(parseAsString),
   customers: parseAsArrayOf(parseAsString),

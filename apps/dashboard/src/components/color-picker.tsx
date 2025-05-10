@@ -12,7 +12,7 @@ export function ColorPicker({ value, onSelect }: Props) {
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="size-3 transition-colors rounded-[2px] absolute top-3 left-2"
+          className="size-3 transition-colors absolute top-3 left-2"
           style={{
             backgroundColor: value,
           }}
