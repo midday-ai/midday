@@ -114,6 +114,11 @@ export function CustomerForm({ data }: Props) {
           queryKey: trpc.customers.getById.queryKey(),
         });
 
+        // Invalidate global search
+        queryClient.invalidateQueries({
+          queryKey: trpc.search.global.queryKey(),
+        });
+
         // Close the customer form
         setCustomerParams(null);
 

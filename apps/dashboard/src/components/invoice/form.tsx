@@ -68,6 +68,11 @@ export function Form() {
           queryKey: trpc.invoice.invoiceSummary.queryKey(),
         });
 
+        // Invalidate global search
+        queryClient.invalidateQueries({
+          queryKey: trpc.search.global.queryKey(),
+        });
+
         setParams({ type: "success", invoiceId: data.id });
       },
     }),

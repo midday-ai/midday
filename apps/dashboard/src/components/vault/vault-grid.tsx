@@ -55,6 +55,11 @@ export function VaultGrid() {
     queryClient.invalidateQueries({
       queryKey: trpc.documents.get.queryKey(),
     });
+
+    // Invalidate global search
+    queryClient.invalidateQueries({
+      queryKey: trpc.search.global.queryKey(),
+    });
   }, 50);
 
   useRealtime({

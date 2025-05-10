@@ -47,6 +47,11 @@ export function TrackerSelectProject({
           queryClient.invalidateQueries({
             queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
           });
+
+          // Invalidate global search
+          queryClient.invalidateQueries({
+            queryKey: trpc.search.global.queryKey(),
+          });
         }
       },
       onError: () => {

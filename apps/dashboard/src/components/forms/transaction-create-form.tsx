@@ -86,6 +86,11 @@ export function TransactionCreateForm() {
           queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
 
+        // Invalidate global search
+        queryClient.invalidateQueries({
+          queryKey: trpc.search.global.queryKey(),
+        });
+
         setParams(null);
       },
     }),
