@@ -28,6 +28,7 @@ export function GoogleSignIn() {
         options: {
           redirectTo: redirectTo.toString(),
           queryParams: {
+            prompt: "select_account",
             client: "desktop",
           },
         },
@@ -45,6 +46,9 @@ export function GoogleSignIn() {
         provider: "google",
         options: {
           redirectTo: redirectTo.toString(),
+          queryParams: {
+            prompt: "select_account",
+          },
         },
       });
     }
