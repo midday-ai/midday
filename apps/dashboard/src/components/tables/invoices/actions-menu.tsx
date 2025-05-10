@@ -5,10 +5,15 @@ import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { Button } from "@midday/ui/button";
+import { Calendar } from "@midday/ui/calendar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { useToast } from "@midday/ui/use-toast";
@@ -69,6 +74,28 @@ export function ActionsMenu({ row }: Props) {
       },
     }),
   );
+
+  const duplicateInvoiceMutation = useMutation(
+    trpc.invoice.duplicate.mutationOptions({
+      onSuccess: (data) => {
+        if (data) {
+          setParams({
+            invoiceId: data.id,
+            type: "edit",
+          });
+        }
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.queryKey(),
+        });
+      },
+    }),
+  );
+
   const handleCopyLink = async () => {
     copy(`${getUrl()}/i/${row.token}`);
 
@@ -122,18 +149,70 @@ export function ActionsMenu({ row }: Props) {
             </DropdownMenuItem>
           )}
 
-          {(row.status === "overdue" || row.status === "unpaid") && (
+          <DropdownMenuItem
+            onClick={() => duplicateInvoiceMutation.mutate({ id: row.id })}
+          >
+            Duplicate invoice
+          </DropdownMenuItem>
+
+          {row.status === "paid" && (
             <DropdownMenuItem
               onClick={() =>
                 updateInvoiceMutation.mutate({
                   id: row.id,
-                  status: "canceled",
+                  status: "unpaid",
+                  paid_at: null,
                 })
               }
-              className="text-[#FF3638]"
             >
-              Cancel
+              Mark as unpaid
             </DropdownMenuItem>
+          )}
+
+          {(row.status === "overdue" || row.status === "unpaid") && (
+            <>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Mark as paid</DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <Calendar
+                      mode="single"
+                      toDate={new Date()}
+                      selected={new Date()}
+                      onSelect={(date) => {
+                        if (date) {
+                          updateInvoiceMutation.mutate({
+                            id: row.id,
+                            status: "paid",
+                            paid_at: date.toISOString(),
+                          });
+                        } else {
+                          // NOTE: Today is undefined
+                          updateInvoiceMutation.mutate({
+                            id: row.id,
+                            status: "paid",
+                            paid_at: new Date().toISOString(),
+                          });
+                        }
+                      }}
+                      initialFocus
+                    />
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
+              <DropdownMenuItem
+                onClick={() =>
+                  updateInvoiceMutation.mutate({
+                    id: row.id,
+                    status: "canceled",
+                  })
+                }
+                className="text-[#FF3638]"
+              >
+                Cancel
+              </DropdownMenuItem>
+            </>
           )}
 
           {row.status === "canceled" && (

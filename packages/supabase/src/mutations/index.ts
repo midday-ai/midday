@@ -1,7 +1,7 @@
 import { getAccessValidForDays } from "@midday/engine/gocardless/utils";
-import { addDays } from "date-fns";
+import { addDays, addMonths } from "date-fns";
 import { nanoid } from "nanoid";
-import { getUserInviteQuery } from "../queries";
+import { getInvoiceByIdQuery, getUserInviteQuery } from "../queries";
 import type { Client } from "../types";
 import { remove } from "../utils/storage";
 
@@ -1784,4 +1784,59 @@ export async function createTransaction(
   return {
     data,
   };
+}
+
+type DuplicateInvoiceParams = {
+  id: string;
+  token: string;
+  userId: string;
+  invoiceNumber: string;
+};
+
+export async function duplicateInvoice(
+  supabase: Client,
+  params: DuplicateInvoiceParams,
+) {
+  const { id, token, userId, invoiceNumber } = params;
+
+  // 1. Fetch the invoice that needs to be duplicated
+  const { data: invoice } = await supabase
+    .from("invoices")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (!invoice) {
+    throw new Error("Invoice not found");
+  }
+
+  return draftInvoice(supabase, {
+    token,
+    userId,
+    teamId: invoice.team_id,
+
+    // Core invoice fields
+    template: invoice.template as DraftInvoiceTemplateParams,
+    due_date: addMonths(new Date(), 1).toISOString(),
+    issue_date: new Date().toISOString(),
+    invoice_number: invoiceNumber,
+
+    // Optional metadata – copied as-is
+    customer_id: invoice.customer_id,
+    customer_name: invoice.customer_name,
+    logo_url: invoice.logo_url,
+    vat: invoice.vat,
+    tax: invoice.tax,
+    discount: invoice.discount,
+    subtotal: invoice.subtotal,
+    amount: invoice.amount,
+
+    payment_details: invoice.payment_details,
+    note_details: invoice.note_details,
+    top_block: invoice.top_block,
+    bottom_block: invoice.bottom_block,
+    from_details: invoice.from_details,
+    customer_details: invoice.customer_details,
+    line_items: invoice.line_items,
+  });
 }

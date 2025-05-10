@@ -2,7 +2,6 @@ import { parseInputValue } from "@/components/invoice/utils";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { UTCDate } from "@date-fns/utc";
 import { generateToken } from "@midday/invoice/token";
-import type { sendInvoiceEmail } from "@midday/jobs/tasks/invoice/email/send-email";
 import type { sendInvoiceReminder } from "@midday/jobs/tasks/invoice/email/send-reminder";
 import type { generateInvoice } from "@midday/jobs/tasks/invoice/operations/generate-invoice";
 import { getCountryCode, getLocale, getTimezone } from "@midday/location";
@@ -10,6 +9,7 @@ import { currencies } from "@midday/location/currencies";
 import {
   deleteInvoice,
   draftInvoice,
+  duplicateInvoice,
   updateInvoice,
 } from "@midday/supabase/mutations";
 import {
@@ -342,6 +342,25 @@ export const invoiceRouter = createTRPCRouter({
       const { data } = await updateInvoice(supabase, {
         id: input.id,
         reminder_sent_at: input.date,
+      });
+
+      return data;
+    }),
+
+  duplicate: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ input, ctx: { supabase, session, teamId } }) => {
+      const { data: nextInvoiceNumber } = await getNextInvoiceNumberQuery(
+        supabase,
+        teamId!,
+      );
+
+      const token = await generateToken(input.id);
+      const { data } = await duplicateInvoice(supabase, {
+        id: input.id,
+        token,
+        userId: session.user.id,
+        invoiceNumber: nextInvoiceNumber!,
       });
 
       return data;
