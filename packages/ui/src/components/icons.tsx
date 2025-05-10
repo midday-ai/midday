@@ -52,6 +52,7 @@ import {
   MdOutlineNotificationsNone,
   MdOutlineOpenInNew,
   MdOutlinePalette,
+  MdOutlinePictureAsPdf,
   MdOutlineQrCode2,
   MdOutlineReorder,
   MdOutlineRepeat,
@@ -281,6 +282,23 @@ export const Icons = {
     <SVGIcon {...props}>
       <path d="M2.91602 17.0833V2.91663H17.0827V17.0833H2.91602ZM4.16602 15.8333H15.8327V13.1731H13.0923C12.7291 13.7009 12.278 14.1106 11.7389 14.4023C11.1999 14.6939 10.62 14.8398 9.99935 14.8398C9.37865 14.8398 8.79879 14.6939 8.25977 14.4023C7.72074 14.1106 7.26963 13.7009 6.90643 13.1731H4.16602V15.8333ZM9.99935 13.5898C10.5271 13.5898 11.0063 13.437 11.4368 13.1314C11.8674 12.8259 12.166 12.4231 12.3327 11.9231H15.8327V4.16663H4.16602V11.9231H7.66602C7.83268 12.4231 8.13129 12.8259 8.56185 13.1314C8.9924 13.437 9.47157 13.5898 9.99935 13.5898Z" />
     </SVGIcon>
+  ),
+  Decimals: ({
+    className,
+    size = 24,
+    ...props
+  }: React.SVGProps<SVGSVGElement> & { size?: number | string }) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      height={size}
+      viewBox="0 -960 960 960"
+      width={size}
+      fill="currentColor"
+      className={className}
+      {...props}
+    >
+      <path d="m720-80-56-56 63-64H480v-80h247l-63-64 56-56 160 160L720-80ZM80-440v-120h120v120H80Zm300 0q-58 0-99-41t-41-99v-160q0-58 41-99t99-41q58 0 99 41t41 99v160q0 58-41 99t-99 41Zm360 0q-58 0-99-41t-41-99v-160q0-58 41-99t99-41q58 0 99 41t41 99v160q0 58-41 99t-99 41Zm-360-80q25 0 42.5-17.5T440-580v-160q0-25-17.5-42.5T380-800q-25 0-42.5 17.5T320-740v160q0 25 17.5 42.5T380-520Zm360 0q25 0 42.5-17.5T800-580v-160q0-25-17.5-42.5T740-800q-25 0-42.5 17.5T680-740v160q0 25 17.5 42.5T740-520Z" />
+    </svg>
   ),
   Check: (props: any) => (
     <svg
@@ -547,6 +565,8 @@ export const Icons = {
   Close: MdClose,
   X: FaXTwitter,
   Discord: PiDiscordLogo,
+  PdfOutline: MdOutlinePictureAsPdf,
+
   GithubOutline: FiGithub,
   Refresh: MdRefresh,
   Currency: MdAttachMoney,
