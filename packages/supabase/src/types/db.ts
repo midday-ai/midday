@@ -2519,21 +2519,55 @@ export type Database = {
         }[]
       }
       global_search: {
+        Args: {
+          p_search_term: string
+          p_team_id: string
+          p_search_lang?: string
+          p_limit?: number
+          p_items_per_table_limit?: number
+          p_relevance_threshold?: number
+        }
+        Returns: {
+          id: string
+          type: string
+          relevance: number
+          created_at: string
+          data: Json
+        }[]
+      }
+      global_semantic_search: {
         Args:
           | {
-              p_search_term: string
-              p_team_id: string
-              p_search_lang?: string
-              p_limit?: number
-              p_items_per_table_limit?: number
+              search_term: string
+              team_id: string
+              start_date?: string
+              end_date?: string
+              types?: string[]
+              amount?: number
+              amount_min?: number
+              amount_max?: number
+              status?: string
+              currency?: string
+              language?: string
+              due_date_start?: string
+              due_date_end?: string
             }
           | {
-              p_search_term: string
-              p_team_id: string
-              p_search_lang?: string
-              p_limit?: number
-              p_items_per_table_limit?: number
-              p_relevance_threshold?: number
+              search_term: string
+              team_id: string
+              start_date?: string
+              end_date?: string
+              types?: string[]
+              amount?: number
+              amount_min?: number
+              amount_max?: number
+              status?: string
+              currency?: string
+              language?: string
+              due_date_start?: string
+              due_date_end?: string
+              max_results?: number
+              items_per_table_limit?: number
             }
         Returns: {
           id: string

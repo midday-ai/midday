@@ -1653,3 +1653,42 @@ export async function globalSearchQuery(
     p_relevance_threshold: params.relevanceThreshold,
   });
 }
+
+type GlobalSemanticSearchParams = {
+  teamId: string;
+  searchTerm: string;
+  itemsPerTableLimit?: number;
+  language?: string;
+  types?: string[];
+  amount?: number;
+  amount_min?: number;
+  amount_max?: number;
+  status?: string;
+  currency?: string;
+  start_date?: string;
+  end_date?: string;
+  due_date_start?: string;
+  due_date_end?: string;
+};
+
+export async function globalSemanticSearchQuery(
+  supabase: Client,
+  params: GlobalSemanticSearchParams,
+) {
+  return supabase.rpc("global_semantic_search", {
+    search_term: params.searchTerm,
+    team_id: params.teamId,
+    language: params.language,
+    types: params.types,
+    items_per_table_limit: params.itemsPerTableLimit,
+    amount: params.amount,
+    amount_min: params.amount_min,
+    amount_max: params.amount_max,
+    status: params.status,
+    currency: params.currency,
+    start_date: params.start_date,
+    end_date: params.end_date,
+    due_date_start: params.due_date_start,
+    due_date_end: params.due_date_end,
+  });
+}

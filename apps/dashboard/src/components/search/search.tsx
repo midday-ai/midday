@@ -366,7 +366,7 @@ export function Search() {
     router.push(path);
   };
 
-  const [debouncedSearch, setDebouncedSearch] = useDebounceValue("", 200);
+  const [debouncedSearch, setDebouncedSearch] = useDebounceValue("", 400);
   const trpc = useTRPC();
 
   const sectionActions: SearchItem[] = [

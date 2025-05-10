@@ -13,7 +13,7 @@ import { institutionsRouter } from "./institutions";
 import { invoiceTemplateRouter } from "./invoice-template";
 import { invoiceRouter } from "./invoice/route";
 import { metricsRouter } from "./metrics";
-import { searchRouter } from "./search";
+import { searchRouter } from "./search/route";
 import { tagsRouter } from "./tags";
 import { teamRouter } from "./team";
 import { trackerEntriesRouter } from "./tracker-entries";
