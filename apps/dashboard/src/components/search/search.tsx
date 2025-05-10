@@ -205,6 +205,9 @@ const SearchResultItemDisplay = ({
           <div className="flex items-center w-full">
             <div className="flex-grow truncate flex gap-2 items-center">
               <span>{item.data.invoice_number as string}</span>
+              <span className="text-xs text-muted-foreground">
+                {item.data?.status}
+              </span>
             </div>
             <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`?invoiceId=${item.id}&type=details`} />
@@ -352,6 +355,7 @@ const SearchResultItemDisplay = ({
 
 export function Search() {
   const { data: user } = useUserQuery();
+  const [debounceDelay, setDebounceDelay] = useState(200);
   const ref = useRef<HTMLDivElement>(null);
   const height = useRef<HTMLDivElement>(null);
   const { setOpen } = useSearchStore();
@@ -366,7 +370,10 @@ export function Search() {
     router.push(path);
   };
 
-  const [debouncedSearch, setDebouncedSearch] = useDebounceValue("", 400);
+  const [debouncedSearch, setDebouncedSearch] = useDebounceValue(
+    "",
+    debounceDelay,
+  );
   const trpc = useTRPC();
 
   const sectionActions: SearchItem[] = [
@@ -464,7 +471,11 @@ export function Search() {
   ];
 
   // Fetch data using useQuery
-  const { data: queryResult, isLoading } = useQuery({
+  const {
+    data: queryResult,
+    isLoading,
+    isFetching,
+  } = useQuery({
     ...trpc.search.global.queryOptions({
       searchTerm: debouncedSearch,
     }),
@@ -572,12 +583,26 @@ export function Search() {
       shouldFilter={false}
       className="overflow-hidden p-0 relative w-full bg-background backdrop-filter dark:border-[#2C2C2C] backdrop-blur-lg dark:bg-[#151515]/[99] h-auto border border-border"
     >
-      <div className="border-b border-border">
+      <div className="border-b border-border relative">
         <CommandInput
           placeholder="Type a command or search..."
-          onValueChange={(value: string) => setDebouncedSearch(value)}
+          onValueChange={(value: string) => {
+            setDebouncedSearch(value);
+
+            // If the search term is longer than 1 word, increase the debounce delay
+            if (value.trim().split(/\s+/).length > 1) {
+              setDebounceDelay(700);
+            } else {
+              setDebounceDelay(200);
+            }
+          }}
           className="px-4 h-[55px] py-0"
         />
+        {isFetching && (
+          <div className="absolute bottom-0 h-[2px] w-full overflow-hidden">
+            <div className="absolute top-[1px] h-full w-40 animate-slide-effect bg-gradient-to-r dark:from-gray-800 dark:via-white dark:via-80% dark:to-gray-800 from-gray-200 via-black via-80% to-gray-200" />
+          </div>
+        )}
       </div>
 
       <div className="px-2 global-search-list" ref={ref}>

@@ -123,6 +123,11 @@ export default {
             transform: "scale(1)",
           },
         },
+        "slide-effect": {
+          "0%": { left: "0%" },
+          "50%": { left: "calc(100% - 80px)" },
+          "100%": { left: "0%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -134,6 +139,7 @@ export default {
         fourth: "moveHorizontal 40s ease infinite",
         fifth: "moveInCircle 20s ease infinite",
         shimmer: "shimmer 2.5s linear infinite",
+        "slide-effect": "slide-effect 1.3s ease-in-out infinite",
         scroll:
           "scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
       },
