@@ -22,8 +22,8 @@ import { InvoiceActions } from "./invoice-actions";
 import { InvoiceDetailsSkeleton } from "./invoice-details-skeleton";
 import { InvoiceNote } from "./invoice-note";
 import { InvoiceStatus } from "./invoice-status";
+import { InvoiceActivity } from "./invoice/activity";
 import { OpenURL } from "./open-url";
-
 export function InvoiceDetails() {
   const trpc = useTRPC();
   const { invoiceId } = useInvoiceParams();
@@ -215,11 +215,16 @@ export function InvoiceDetails() {
       )}
 
       <Accordion
-        type="single"
-        collapsible
+        type="multiple"
         className="mt-6"
-        defaultValue={internal_note ? "note" : undefined}
+        defaultValue={internal_note ? ["note", "activity"] : ["activity"]}
       >
+        <AccordionItem value="activity">
+          <AccordionTrigger>Activity</AccordionTrigger>
+          <AccordionContent>
+            <InvoiceActivity data={data} />
+          </AccordionContent>
+        </AccordionItem>
         <AccordionItem value="note">
           <AccordionTrigger>Internal note</AccordionTrigger>
           <AccordionContent>

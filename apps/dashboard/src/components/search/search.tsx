@@ -1,6 +1,7 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
+import { InvoiceStatus } from "@/components/invoice-status";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
@@ -205,9 +206,7 @@ const SearchResultItemDisplay = ({
           <div className="flex items-center w-full">
             <div className="flex-grow truncate flex gap-2 items-center">
               <span>{item.data.invoice_number as string}</span>
-              <span className="text-xs text-muted-foreground">
-                {item.data?.status}
-              </span>
+              <InvoiceStatus status={item.data?.status as string} />
             </div>
             <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`?invoiceId=${item.id}&type=details`} />
