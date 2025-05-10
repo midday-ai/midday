@@ -1824,19 +1824,25 @@ export async function duplicateInvoice(
     // Optional metadata – copied as-is
     customer_id: invoice.customer_id,
     customer_name: invoice.customer_name,
-    logo_url: invoice.logo_url,
     vat: invoice.vat,
     tax: invoice.tax,
     discount: invoice.discount,
     subtotal: invoice.subtotal,
     amount: invoice.amount,
 
+    // @ts-expect-error - JSONB
     payment_details: invoice.payment_details,
+    // @ts-expect-error - JSONB
     note_details: invoice.note_details,
+    // @ts-expect-error - JSONB
     top_block: invoice.top_block,
+    // @ts-expect-error - JSONB
     bottom_block: invoice.bottom_block,
+    // @ts-expect-error - JSONB
     from_details: invoice.from_details,
+    // @ts-expect-error - JSONB
     customer_details: invoice.customer_details,
+    // @ts-expect-error - JSONB
     line_items: invoice.line_items,
   });
 }
