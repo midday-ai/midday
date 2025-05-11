@@ -9,7 +9,7 @@ export const generateInvoice = schemaTask({
   id: "generate-invoice",
   schema: z.object({
     invoiceId: z.string().uuid(),
-    deliveryType: z.enum(["create", "create_and_send"]),
+    deliveryType: z.enum(["create", "create_and_send", "scheduled"]),
   }),
   maxDuration: 60,
   queue: {

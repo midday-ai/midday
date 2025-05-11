@@ -33,6 +33,22 @@ export const invoiceFormSchema = z.object({
   amount: z.number(),
   line_items: z.array(lineItemSchema).min(1),
   token: z.string().optional(),
+  scheduled_at: z
+    .string()
+    .datetime()
+    .optional()
+    .superRefine((val, ctx) => {
+      // If delivery_type is "scheduled", scheduled_at is required
+      const deliveryType = ctx.parent?.template?.delivery_type;
+      if (deliveryType === "scheduled" && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Scheduled date and time is required when scheduling an invoice.",
+          path: ["scheduled_at"],
+        });
+      }
+    }),
 });
 
 export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;

@@ -1,5 +1,6 @@
 "use client";
 
+import { ScheduleDateTime } from "@/components/invoice/schedule-datetime";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
@@ -32,14 +33,18 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   );
 
   const handleOptionChange = (value: string) => {
-    const deliveryType = value as "create" | "create_and_send";
+    const deliveryType = value as "create" | "create_and_send" | "scheduled";
 
-    updateTemplateMutation.mutate({
-      delivery_type: deliveryType,
-    });
+    // Let's not update the delivery type on the template if it's scheduled
+    if (deliveryType !== "scheduled") {
+      updateTemplateMutation.mutate({
+        delivery_type: deliveryType,
+      });
+    }
 
     setValue("template.delivery_type", deliveryType, {
       shouldValidate: true,
+      shouldDirty: true,
     });
   };
 
@@ -54,10 +59,20 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
       label: canUpdate ? "Update & Send" : "Create & Send",
       value: "create_and_send",
     },
+    {
+      label: canUpdate ? "Scheduled" : "Schedule",
+      value: "scheduled",
+    },
   ];
 
   return (
     <div className="flex divide-x">
+      {selectedOption === "scheduled" && (
+        <div className="mr-2">
+          <ScheduleDateTime />
+        </div>
+      )}
+
       <BaseSubmitButton
         isSubmitting={isSubmitting}
         disabled={!isValid || disabled}

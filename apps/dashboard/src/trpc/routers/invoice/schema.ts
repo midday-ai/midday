@@ -34,7 +34,7 @@ export const upsertInvoiceTemplateSchema = z.object({
   tax_rate: z.number().min(0).max(100).optional(),
   vat_rate: z.number().min(0).max(100).optional(),
   size: z.enum(["a4", "letter"]).optional(),
-  delivery_type: z.enum(["create", "create_and_send"]).optional(),
+  delivery_type: z.enum(["create", "create_and_send", "scheduled"]).optional(),
   locale: z.string().optional(),
 });
 
@@ -113,7 +113,7 @@ export const invoiceTemplateSchema = z.object({
   tax_rate: z.number().min(0).max(100).optional(),
   vat_rate: z.number().min(0).max(100).optional(),
   date_format: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"]),
-  delivery_type: z.enum(["create", "create_and_send"]),
+  delivery_type: z.enum(["create", "create_and_send", "scheduled"]),
   locale: z.string().optional(),
   timezone: z.string().optional(),
 });

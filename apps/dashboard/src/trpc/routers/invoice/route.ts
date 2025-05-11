@@ -310,7 +310,7 @@ export const invoiceRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        deliveryType: z.enum(["create", "create_and_send"]),
+        deliveryType: z.enum(["create", "create_and_send", "scheduled"]),
       }),
     )
     .mutation(async ({ input, ctx: { supabase } }) => {
@@ -364,5 +364,11 @@ export const invoiceRouter = createTRPCRouter({
       });
 
       return data;
+    }),
+
+  unschedule: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ input, ctx: { supabase } }) => {
+      return;
     }),
 });
