@@ -21,14 +21,17 @@
     "@trpc/server": "^11.1.2",
     "ai": "^4.3.15",
     "date-fns": "^4.1.0",
+    "drizzle-orm": "^0.43.1",
     "hono": "^4.7.9",
     "jose": "^6.0.11",
     "nanoid": "^5.1.5",
+    "postgres": "^3.4.5",
     "superjson": "^2.2.2",
     "uuid": "^11.1.0",
     "zod": "^3.24.4"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.31.1"
   }
 }

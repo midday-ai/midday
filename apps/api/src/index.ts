@@ -1,10 +1,16 @@
 import { trpcServer } from "@hono/trpc-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { logger } from "hono/logger";
+import { poweredBy } from "hono/powered-by";
+import { secureHeaders } from "hono/secure-headers";
 import { createTRPCContext } from "./trpc/init";
 import { appRouter } from "./trpc/routers/_app";
 
 const app = new Hono();
+
+app.use(poweredBy());
+app.use(secureHeaders());
 
 app.use(
   "/trpc/*",
@@ -22,6 +28,8 @@ app.use(
     credentials: true,
   }),
 );
+
+app.use(logger());
 
 app.use(
   "/trpc/*",

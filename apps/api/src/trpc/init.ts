@@ -1,3 +1,4 @@
+import { connectDb } from "@api/db";
 import { createClient } from "@api/services/supabase";
 import { verifyAccessToken } from "@api/utils/auth";
 import { TRPCError, initTRPC } from "@trpc/server";
@@ -14,6 +15,7 @@ export const createTRPCContext = async (_: unknown, c: Context) => {
     session,
     teamId,
     supabase,
+    db: await connectDb(),
   };
 };
 

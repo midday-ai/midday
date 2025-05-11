@@ -1,14 +1,15 @@
+import { getUserById } from "@api/db/queries/users";
 import { resend } from "@api/services/resend";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { deleteUser, updateUser } from "@midday/supabase/mutations";
-import { getUserInvitesQuery, getUserQuery } from "@midday/supabase/queries";
+import { getUserInvitesQuery } from "@midday/supabase/queries";
 import { z } from "zod";
 
 export const userRouter = createTRPCRouter({
-  me: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
-    const { data } = await getUserQuery(supabase, session.user.id);
+  me: protectedProcedure.query(async ({ ctx: { db, session } }) => {
+    const user = await getUserById(db, { id: session.user.id });
 
-    return data;
+    return user;
   }),
 
   update: protectedProcedure

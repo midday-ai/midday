@@ -33,7 +33,7 @@ export function TeamAvatar() {
     });
 
     if (url) {
-      updateTeam({ logo_url: url });
+      updateTeam({ logoUrl: url });
     }
   };
 
@@ -57,7 +57,7 @@ export function TeamAvatar() {
           ) : (
             <>
               <AvatarImage
-                src={data?.logo_url ?? undefined}
+                src={data?.logoUrl ?? undefined}
                 alt={data?.name ?? undefined}
                 width={64}
                 height={64}
