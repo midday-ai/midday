@@ -1,3 +1,4 @@
+import { getTeamById, updateTeamById } from "@api/db/queries/teams";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import type { deleteTeam as deleteTeamTask } from "@midday/jobs/tasks/team/delete";
 import type { inviteTeamMembers } from "@midday/jobs/tasks/team/invite";
@@ -11,12 +12,10 @@ import {
   deleteTeamInvite,
   deleteTeamMember,
   leaveTeam,
-  updateTeam,
   updateTeamMember,
 } from "@midday/supabase/mutations";
 import {
   getAvailablePlansQuery,
-  getTeamByIdQuery,
   getTeamInvitesQuery,
   getTeamMembersQuery,
   getTeamsByUserIdQuery,
@@ -26,10 +25,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const teamRouter = createTRPCRouter({
-  current: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
-    const { data } = await getTeamByIdQuery(supabase, teamId!);
+  current: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
+    const team = await getTeamById(db, { id: teamId! });
 
-    return data;
+    return team;
   }),
 
   update: protectedProcedure
@@ -37,20 +36,15 @@ export const teamRouter = createTRPCRouter({
       z.object({
         name: z.string().min(2).max(32).optional(),
         email: z.string().email().optional(),
-        logo_url: z.string().url().optional(),
-        base_currency: z.string().optional(),
+        logoUrl: z.string().url().optional(),
+        baseCurrency: z.string().optional(),
       }),
     )
-    .mutation(async ({ ctx: { supabase, teamId }, input }) => {
-      const { data } = await updateTeam(supabase, {
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return updateTeamById(db, {
         id: teamId!,
-        name: input.name,
-        email: input.email,
-        logo_url: input.logo_url,
-        base_currency: input.base_currency,
+        data: input,
       });
-
-      return data;
     }),
 
   members: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
@@ -193,6 +187,9 @@ export const teamRouter = createTRPCRouter({
       // const location = (await headers()).get("x-vercel-ip-city") ?? "Unknown";
       // const ip = (await headers()).get("x-forwarded-for") ?? "127.0.0.1";
 
+      const location = "Unknown";
+      const ip = "127.0.0.1";
+
       const { data } = await createTeamInvites(supabase, {
         teamId: teamId!,
         invites: input.map((invite) => ({
@@ -205,19 +202,19 @@ export const teamRouter = createTRPCRouter({
         data?.map((invite) => ({
           email: invite.email!,
           invitedBy: session.user.id!,
-          invitedByName: session.user.full_name,
+          invitedByName: session.user.full_name!,
           invitedByEmail: session.user.email!,
           teamName: invite.team?.name!,
           inviteCode: invite.code!,
         })) ?? [];
 
-      // await tasks.trigger<typeof inviteTeamMembers>("invite-team-members", {
-      //   teamId: teamId!,
-      //   invites,
-      //   location,
-      //   ip,
-      //   locale: "en",
-      // });
+      await tasks.trigger<typeof inviteTeamMembers>("invite-team-members", {
+        teamId: teamId!,
+        invites,
+        location,
+        ip,
+        locale: "en",
+      });
     }),
 
   deleteInvite: protectedProcedure

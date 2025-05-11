@@ -48,7 +48,7 @@ export function SelectCurrency() {
   const handleChange = async (baseCurrency: string) => {
     updateTeamMutation.mutate(
       {
-        base_currency: baseCurrency.toUpperCase(),
+        baseCurrency: baseCurrency.toUpperCase(),
       },
       {
         onSuccess: () => {
@@ -116,7 +116,7 @@ export function SelectCurrency() {
       <SelectCurrencyBase
         onChange={handleChange}
         currencies={uniqueCurrencies}
-        value={team?.base_currency ?? undefined}
+        value={team?.baseCurrency ?? undefined}
       />
     </div>
   );
