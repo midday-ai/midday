@@ -2,7 +2,7 @@
 
 import { useTeamQuery } from "@/hooks/use-team";
 import { useI18n } from "@/locales/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";

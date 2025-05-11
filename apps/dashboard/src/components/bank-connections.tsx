@@ -4,8 +4,8 @@ import { manualSyncTransactionsAction } from "@/actions/transactions/manual-sync
 import { reconnectConnectionAction } from "@/actions/transactions/reconnect-connection-action";
 import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useTRPC } from "@/trpc/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { connectionStatus } from "@/utils/connection-status";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   Accordion,
   AccordionContent,

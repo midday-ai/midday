@@ -2,7 +2,7 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { InboxStatus } from "@/components/inbox/inbox-status";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Icons } from "@midday/ui/icons";
 import { format } from "date-fns";
 import Link from "next/link";

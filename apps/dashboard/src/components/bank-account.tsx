@@ -2,8 +2,8 @@
 
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getInitials } from "@/utils/format";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   AlertDialog,
   AlertDialogAction,

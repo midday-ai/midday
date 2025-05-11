@@ -2,8 +2,8 @@ import { FormatAmount } from "@/components/format-amount";
 import { InboxStatus } from "@/components/inbox/inbox-status";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { formatDate } from "@/utils/format";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 

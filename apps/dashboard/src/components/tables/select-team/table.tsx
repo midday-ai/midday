@@ -1,6 +1,6 @@
 "use client";
 
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Table, TableBody } from "@midday/ui/table";
 import { TableRow } from "./table-row";
 

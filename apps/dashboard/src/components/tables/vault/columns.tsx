@@ -1,7 +1,7 @@
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { formatSize } from "@/utils/format";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";

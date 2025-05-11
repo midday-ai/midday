@@ -1,8 +1,8 @@
 "use client";
 
 import { useCustomerParams } from "@/hooks/use-customer-params";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getWebsiteLogo } from "@/utils/logos";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";

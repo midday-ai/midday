@@ -1,7 +1,7 @@
 "use client";
 
 import { useDocumentParams } from "@/hooks/use-document-params";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
 import { useRouter } from "next/navigation";
 

@@ -1,6 +1,6 @@
 "use client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { secondsToHoursAndMinutes } from "@/utils/format";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 
 type Props = {

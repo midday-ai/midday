@@ -3,7 +3,6 @@
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import {
   NEW_EVENT_ID,
@@ -15,6 +14,7 @@ import {
   transformTrackerData,
   updateEventTime,
 } from "@/utils/tracker";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import {
   ContextMenu,

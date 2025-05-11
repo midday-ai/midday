@@ -5,9 +5,9 @@ import { TrackerStatus } from "@/components/tracker-status";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   AlertDialog,
   AlertDialogAction,

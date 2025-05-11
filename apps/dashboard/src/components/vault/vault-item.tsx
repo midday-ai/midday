@@ -3,7 +3,7 @@
 import { FilePreview } from "@/components/file-preview";
 import { VaultItemTags } from "@/components/vault/vault-item-tags";
 import { useDocumentParams } from "@/hooks/use-document-params";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 import { VaultItemActions } from "./vault-item-actions";
