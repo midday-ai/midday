@@ -69,7 +69,8 @@
     "./cn": "./src/utils/cn.ts",
     "./truncate": "./src/utils/truncate.ts",
     "./hooks": "./src/hooks/index.ts",
-    "./quantity-input": "./src/components/quantity-input.tsx"
+    "./quantity-input": "./src/components/quantity-input.tsx",
+    "./date-time-picker": "./src/components/date-time-picker.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.7",

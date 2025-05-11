@@ -69,6 +69,7 @@ export const draftInvoiceSchema = z.object({
   amount: z.number().nullable().optional(),
   line_items: z.array(draftLineItemSchema).optional(),
   token: z.string().optional(),
+  scheduled_at: z.string().nullable().optional(),
 });
 
 export const lineItemSchema = z.object({

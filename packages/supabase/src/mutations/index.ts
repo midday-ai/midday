@@ -1647,6 +1647,7 @@ type DraftInvoiceParams = {
   bottom_block?: string | null; // Stringified JSON
   amount?: number | null;
   line_items?: DraftInvoiceLineItemParams[];
+  scheduled_at?: string | null;
   token: string;
   teamId: string;
   userId: string;

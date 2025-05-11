@@ -35,8 +35,8 @@ export const invoiceFormSchema = z.object({
   token: z.string().optional(),
   scheduled_at: z
     .string()
-    .datetime()
     .optional()
+    .nullable()
     .superRefine((val, ctx) => {
       // If delivery_type is "scheduled", scheduled_at is required
       const deliveryType = ctx.parent?.template?.delivery_type;

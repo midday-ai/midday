@@ -65,6 +65,7 @@ const defaultTemplate = {
   delivery_type: "create",
   timezone: undefined,
   locale: undefined,
+  scheduled_at: undefined,
 };
 
 export const invoiceRouter = createTRPCRouter({
@@ -256,6 +257,7 @@ export const invoiceRouter = createTRPCRouter({
         amount: undefined,
         customer_name: undefined,
         logo_url: undefined,
+        scheduled_at: undefined,
         vat: undefined,
         template: savedTemplate,
       };
@@ -301,6 +303,7 @@ export const invoiceRouter = createTRPCRouter({
         from_details: parseInputValue(input.from_details),
         customer_details: parseInputValue(input.customer_details),
         note_details: parseInputValue(input.note_details),
+        scheduled_at: input.scheduled_at,
       });
 
       return data;

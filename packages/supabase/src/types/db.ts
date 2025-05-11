@@ -928,6 +928,8 @@ export type Database = {
           paid_at: string | null
           payment_details: Json | null
           reminder_sent_at: string | null
+          scheduled_at: string | null
+          scheduled_job_id: string | null
           sent_at: string | null
           sent_to: string | null
           status: Database["public"]["Enums"]["invoice_status"]
@@ -968,6 +970,8 @@ export type Database = {
           paid_at?: string | null
           payment_details?: Json | null
           reminder_sent_at?: string | null
+          scheduled_at?: string | null
+          scheduled_job_id?: string | null
           sent_at?: string | null
           sent_to?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
@@ -1008,6 +1012,8 @@ export type Database = {
           paid_at?: string | null
           payment_details?: Json | null
           reminder_sent_at?: string | null
+          scheduled_at?: string | null
+          scheduled_job_id?: string | null
           sent_at?: string | null
           sent_to?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
@@ -2536,39 +2542,23 @@ export type Database = {
         }[]
       }
       global_semantic_search: {
-        Args:
-          | {
-              search_term: string
-              team_id: string
-              start_date?: string
-              end_date?: string
-              types?: string[]
-              amount?: number
-              amount_min?: number
-              amount_max?: number
-              status?: string
-              currency?: string
-              language?: string
-              due_date_start?: string
-              due_date_end?: string
-            }
-          | {
-              search_term: string
-              team_id: string
-              start_date?: string
-              end_date?: string
-              types?: string[]
-              amount?: number
-              amount_min?: number
-              amount_max?: number
-              status?: string
-              currency?: string
-              language?: string
-              due_date_start?: string
-              due_date_end?: string
-              max_results?: number
-              items_per_table_limit?: number
-            }
+        Args: {
+          team_id: string
+          search_term?: string
+          start_date?: string
+          end_date?: string
+          types?: string[]
+          amount?: number
+          amount_min?: number
+          amount_max?: number
+          status?: string
+          currency?: string
+          language?: string
+          due_date_start?: string
+          due_date_end?: string
+          max_results?: number
+          items_per_table_limit?: number
+        }
         Returns: {
           id: string
           type: string
@@ -2798,7 +2788,7 @@ export type Database = {
         | "deleted"
         | "done"
       inbox_type: "invoice" | "expense"
-      invoice_delivery_type: "create" | "create_and_send"
+      invoice_delivery_type: "create" | "create_and_send" | "scheduled"
       invoice_size: "a4" | "letter"
       invoice_status: "draft" | "overdue" | "paid" | "unpaid" | "canceled"
       plans: "trial" | "starter" | "pro"
@@ -2998,7 +2988,7 @@ export const Constants = {
         "done",
       ],
       inbox_type: ["invoice", "expense"],
-      invoice_delivery_type: ["create", "create_and_send"],
+      invoice_delivery_type: ["create", "create_and_send", "scheduled"],
       invoice_size: ["a4", "letter"],
       invoice_status: ["draft", "overdue", "paid", "unpaid", "canceled"],
       plans: ["trial", "starter", "pro"],

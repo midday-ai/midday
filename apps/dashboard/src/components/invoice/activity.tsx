@@ -76,6 +76,15 @@ export function InvoiceActivity({ data }: Props) {
           timeFormat={user?.time_format}
         />
       )}
+
+      {data?.scheduled_at && (
+        <ActivityItem
+          label="Scheduled"
+          date={data?.scheduled_at}
+          completed
+          timeFormat={user?.time_format}
+        />
+      )}
       {data?.sent_at && (
         <ActivityItem
           label="Sent"
