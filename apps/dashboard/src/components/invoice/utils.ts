@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import type { InvoiceFormValues } from "./form-context";
 
 export const transformCustomerToContent = (
@@ -92,8 +92,3 @@ export const transformFormValuesToDraft = (values: InvoiceFormValues) => {
     }),
   };
 };
-
-export function parseInputValue(value?: string | null) {
-  if (value === null) return null;
-  return value ? JSON.parse(value) : undefined;
-}

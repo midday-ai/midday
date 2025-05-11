@@ -3,9 +3,9 @@
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getDueDateStatus } from "@/utils/format";
 import { formatDate } from "@/utils/format";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 
 type Props = {

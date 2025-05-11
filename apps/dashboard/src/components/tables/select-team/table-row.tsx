@@ -1,7 +1,7 @@
 "use client";
 
 import { changeTeamAction } from "@/actions/change-team-action";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { TableRow as BaseTableRow, TableCell } from "@midday/ui/table";

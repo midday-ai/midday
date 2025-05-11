@@ -1,5 +1,7 @@
 import "server-only";
 
+import { createTRPCContext } from "@midday/api/trpc/init";
+import { appRouter } from "@midday/api/trpc/routers/_app";
 import { HydrationBoundary } from "@tanstack/react-query";
 import { dehydrate } from "@tanstack/react-query";
 import {
@@ -7,9 +9,7 @@ import {
   createTRPCOptionsProxy,
 } from "@trpc/tanstack-react-query";
 import { cache } from "react";
-import { createTRPCContext } from "./init";
 import { makeQueryClient } from "./query-client";
-import { appRouter } from "./routers/_app";
 
 // IMPORTANT: Create a stable getter for the query client that
 //            will return the same client during the same request.

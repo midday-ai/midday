@@ -2,9 +2,9 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { formatDate, getDueDateStatus } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
