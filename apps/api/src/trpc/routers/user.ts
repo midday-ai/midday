@@ -1,9 +1,8 @@
 import { resend } from "@api/services/resend";
+import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { deleteUser, updateUser } from "@midday/supabase/mutations";
 import { getUserInvitesQuery, getUserQuery } from "@midday/supabase/queries";
 import { z } from "zod";
-import { protectedProcedure } from "../init";
-import { createTRPCRouter } from "../init";
 
 export const userRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {

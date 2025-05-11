@@ -1,24 +1,51 @@
 import "server-only";
 
-import { createTRPCContext } from "@midday/api/trpc/init";
-import { appRouter } from "@midday/api/trpc/routers/_app";
+import { getTeamId } from "@/utils/team";
+import type { AppRouter } from "@midday/api/trpc/routers/_app";
+import { createClient } from "@midday/supabase/server";
 import { HydrationBoundary } from "@tanstack/react-query";
 import { dehydrate } from "@tanstack/react-query";
+import { createTRPCClient, loggerLink } from "@trpc/client";
+import { httpBatchLink } from "@trpc/client/links/httpBatchLink";
 import {
   type TRPCQueryOptions,
   createTRPCOptionsProxy,
 } from "@trpc/tanstack-react-query";
 import { cache } from "react";
+import superjson from "superjson";
 import { makeQueryClient } from "./query-client";
 
 // IMPORTANT: Create a stable getter for the query client that
 //            will return the same client during the same request.
 export const getQueryClient = cache(makeQueryClient);
 
-export const trpc = createTRPCOptionsProxy({
-  ctx: createTRPCContext,
-  router: appRouter,
+export const trpc = createTRPCOptionsProxy<AppRouter>({
   queryClient: getQueryClient,
+  client: createTRPCClient({
+    links: [
+      httpBatchLink({
+        url: `${process.env.NEXT_PUBLIC_API_URL}/trpc`,
+        transformer: superjson,
+        async headers() {
+          const supabase = await createClient();
+
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+
+          return {
+            Authorization: `Bearer ${session?.access_token}`,
+            "X-Team-Id": await getTeamId(),
+          };
+        },
+      }),
+      loggerLink({
+        enabled: (opts) =>
+          process.env.NODE_ENV === "development" ||
+          (opts.direction === "down" && opts.result instanceof Error),
+      }),
+    ],
+  }),
 });
 
 export function HydrateClient(props: { children: React.ReactNode }) {

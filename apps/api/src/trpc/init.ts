@@ -1,20 +1,18 @@
-import { createClient } from "@midday/supabase/server";
+import { createClient } from "@api/services/supabase";
+import { verifyAccessToken } from "@api/utils/auth";
 import { TRPCError, initTRPC } from "@trpc/server";
+import type { Context } from "hono";
 import superjson from "superjson";
 
-export const createTRPCContext = async () => {
-  // TODO: Get headers (jwt token + teamId)
-  const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  console.log("here", "123");
-  // const teamId = await getTeamId();
+export const createTRPCContext = async (_: unknown, c: Context) => {
+  const accessToken = c.req.header("Authorization")?.split(" ")[1];
+  const teamId = c.req.header("X-Team-Id");
+  const session = await verifyAccessToken(accessToken);
+  const supabase = await createClient(accessToken);
 
   return {
     session,
-    teamId: "123",
+    teamId,
     supabase,
   };
 };

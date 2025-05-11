@@ -1,6 +1,7 @@
 "use client";
 
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
+import { createClient } from "@midday/supabase/client";
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider, isServer } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -41,6 +42,26 @@ export function TRPCReactProvider(
         httpBatchLink({
           url: `${process.env.NEXT_PUBLIC_API_URL}/trpc`,
           transformer: superjson,
+          async headers() {
+            const supabase = createClient();
+
+            const {
+              data: { session },
+            } = await supabase.auth.getSession();
+
+            return {
+              Authorization: `Bearer ${session?.access_token}`,
+              "X-Team-Id": (() => {
+                if (typeof document !== "undefined") {
+                  const match = document.cookie.match(
+                    /(?:^|; )selected-team-id=([^;]*)/,
+                  );
+                  return match ? decodeURIComponent(match[1]) : undefined;
+                }
+                return undefined;
+              })(),
+            };
+          },
         }),
         loggerLink({
           enabled: (opts) =>
