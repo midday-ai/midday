@@ -4,7 +4,7 @@ import { UTCDate } from "@date-fns/utc";
 import { generateToken } from "@midday/invoice/token";
 import type { sendInvoiceReminder } from "@midday/jobs/tasks/invoice/email/send-reminder";
 import type { generateInvoice } from "@midday/jobs/tasks/invoice/operations/generate-invoice";
-import { getCountryCode, getLocale, getTimezone } from "@midday/location";
+// import { getCountryCode, getLocale, getTimezone } from "@midday/location";
 import { currencies } from "@midday/location/currencies";
 import {
   deleteInvoice,
@@ -142,7 +142,10 @@ export const invoiceRouter = createTRPCRouter({
 
   defaultSettings: protectedProcedure.query(
     async ({ ctx: { supabase, teamId, session } }) => {
-      const countryCode = await getCountryCode();
+      // const countryCode = await getCountryCode();
+      const countryCode = "US";
+      const timezone = "America/New_York";
+      const locale = "en";
 
       // Fetch invoice number, template, and team details concurrently
       const [
@@ -162,8 +165,8 @@ export const invoiceRouter = createTRPCRouter({
         currencies[countryCode as keyof typeof currencies] ??
         "USD";
 
-      const timezone = user?.timezone ?? (await getTimezone());
-      const locale = user?.locale ?? (await getLocale());
+      // const timezone = user?.timezone ?? (await getTimezone());
+      // const locale = user?.locale ?? (await getLocale());
 
       // Default to letter size for US/CA, A4 for rest of world
       const size = ["US", "CA"].includes(countryCode) ? "letter" : "a4";
