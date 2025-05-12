@@ -45,7 +45,7 @@ import { EditBankAccountModal } from "./modals/edit-bank-account-modal";
 type Props = {
   data: NonNullable<
     RouterOutputs["bankConnections"]["get"]
-  >[number]["accounts"][number];
+  >[number]["bankAccounts"][number];
 };
 
 export function BankAccount({ data }: Props) {
@@ -71,15 +71,15 @@ export function BankAccount({ data }: Props) {
     name,
     balance,
     currency,
-    error_retries,
+    errorRetries,
   } = data;
 
   const hasError =
     enabled &&
     connection != null &&
     connection.status !== "disconnected" &&
-    error_retries != null &&
-    error_retries > 0;
+    errorRetries != null &&
+    errorRetries > 0;
 
   const deleteAccountMutation = useMutation(
     trpc.bankAccounts.delete.mutationOptions({
@@ -157,7 +157,7 @@ export function BankAccount({ data }: Props) {
             )}
           </div>
 
-          {balance && balance > 0 ? (
+          {balance && Number.parseFloat(balance) > 0 ? (
             <span className="text-[#878787] text-sm">
               <FormatAmount amount={balance} currency={currency} />
             </span>

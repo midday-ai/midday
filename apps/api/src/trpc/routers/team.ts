@@ -26,9 +26,7 @@ import { z } from "zod";
 
 export const teamRouter = createTRPCRouter({
   current: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
-    const team = await getTeamById(db, { id: teamId! });
-
-    return team;
+    return getTeamById(db, teamId!);
   }),
 
   update: protectedProcedure

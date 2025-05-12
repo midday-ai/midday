@@ -1,7 +1,8 @@
 {
   "name": "@midday/api",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "db:pull": "drizzle-kit pull"
   },
   "exports": {
     "./trpc/routers/_app": "./src/trpc/routers/_app.ts"

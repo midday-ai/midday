@@ -1,12 +1,12 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { createTRPCRouter } from "../init";
-import { appsRouter } from "./apps";
-import { bankAccountsRouter } from "./bank-accounts";
-import { bankConnectionsRouter } from "./bank-connections";
+import { appsRouter } from "./apps/route";
+import { bankAccountsRouter } from "./bank-accounts/route";
+import { bankConnectionsRouter } from "./bank-connections/route";
 import { customersRouter } from "./customers/route";
-import { documentTagAssignmentsRouter } from "./document-tag-assignments";
-import { documentTagsRouter } from "./document-tags";
-import { documentsRouter } from "./documents";
+import { documentTagAssignmentsRouter } from "./document-tag-assignments/route";
+import { documentTagsRouter } from "./document-tags/route";
+import { documentsRouter } from "./documents/route";
 import { inboxRouter } from "./inbox";
 import { inboxAccountsRouter } from "./inbox-accounts";
 import { institutionsRouter } from "./institutions";
@@ -14,7 +14,7 @@ import { invoiceTemplateRouter } from "./invoice-template";
 import { invoiceRouter } from "./invoice/route";
 import { metricsRouter } from "./metrics";
 import { searchRouter } from "./search/route";
-import { tagsRouter } from "./tags";
+import { tagsRouter } from "./tags/route";
 import { teamRouter } from "./team";
 import { trackerEntriesRouter } from "./tracker-entries";
 import { trackerProjectsRouter } from "./tracker-projects";
@@ -22,7 +22,7 @@ import { transactionAttachmentsRouter } from "./transaction-attachments";
 import { transactionCategoriesRouter } from "./transaction-categories";
 import { transactionTagsRouter } from "./transaction-tags";
 import { transactionsRouter } from "./transactions";
-import { userRouter } from "./user";
+import { userRouter } from "./user/route";
 
 export const appRouter = createTRPCRouter({
   apps: appsRouter,
