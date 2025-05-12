@@ -288,7 +288,7 @@ export function InboxDetails() {
                 {isProcessing && !data.date && (
                   <Skeleton className="h-3 w-[50px]" />
                 )}
-                {data.date && formatDate(data.date, user?.date_format)}
+                {data.date && formatDate(data.date, user?.dateFormat)}
               </div>
             </div>
           </div>
@@ -299,10 +299,10 @@ export function InboxDetails() {
             <MatchTransaction />
           </div>
 
-          {data?.file_path && (
+          {data?.filePath && (
             <FileViewer
-              mimeType={data.content_type}
-              url={`/api/proxy?filePath=vault/${data?.file_path.join("/")}`}
+              mimeType={data.contentType}
+              url={`/api/proxy?filePath=vault/${data?.filePath.join("/")}`}
               // If the order changes, the file viewer will remount otherwise the PDF worker will crash
               key={`${params.order}-${JSON.stringify(filterParams)}`}
             />
