@@ -346,160 +346,6 @@ export async function joinTeamByInviteCode(supabase: Client, code: string) {
   return null;
 }
 
-type UpdateInboxParams = {
-  id: string;
-  teamId: string;
-  status?: "deleted" | "new" | "archived" | "processing" | "done" | "pending";
-};
-
-export async function updateInbox(supabase: Client, params: UpdateInboxParams) {
-  const { id, teamId, ...data } = params;
-
-  return supabase
-    .from("inbox")
-    .update(data)
-    .eq("id", id)
-    .select(`
-      id,
-      file_name,
-      file_path, 
-      display_name,
-      transaction_id,
-      amount,
-      currency,
-      content_type,
-      date,
-      status,
-      created_at,
-      website,
-      description,
-      transaction:transactions(id, amount, currency, name, date)
-    `)
-    .single();
-}
-
-type MatchTransactionParams = {
-  id: string;
-  transactionId: string;
-  teamId: string;
-};
-
-export async function matchTransaction(
-  supabase: Client,
-  params: MatchTransactionParams,
-) {
-  const { id, transactionId, teamId } = params;
-
-  const { data: inboxData } = await supabase
-    .from("inbox")
-    .select(`
-      id,
-      content_type,
-      file_path,
-      size,
-      file_name
-    `)
-    .eq("id", id)
-    .single();
-
-  if (inboxData) {
-    const { data: attachmentData } = await supabase
-      .from("transaction_attachments")
-      .insert({
-        type: inboxData.content_type,
-        path: inboxData.file_path,
-        transaction_id: transactionId,
-        size: inboxData.size,
-        name: inboxData.file_name,
-        team_id: teamId,
-      })
-      .select("id")
-      .single();
-
-    if (attachmentData) {
-      await supabase
-        .from("inbox")
-        .update({
-          attachment_id: attachmentData.id,
-          transaction_id: transactionId,
-          status: "done",
-        })
-        .eq("id", params.id)
-        .select()
-        .single();
-    }
-
-    return supabase
-      .from("inbox")
-      .select(`
-        id,
-        file_name,
-        file_path, 
-        display_name,
-        transaction_id,
-        amount,
-        currency,
-        content_type,
-        date,
-        status,
-        created_at,
-        website,
-        description,
-        transaction:transactions(id, amount, currency, name, date)
-      `)
-      .eq("id", id)
-      .single();
-  }
-}
-
-export async function unmatchTransaction(supabase: Client, id: string) {
-  const { data: inboxData } = await supabase
-    .from("inbox")
-    .select(`
-      id,
-      transaction_id,
-      attachment_id
-    `)
-    .eq("id", id)
-    .single();
-
-  await supabase
-    .from("inbox")
-    .update({ transaction_id: null, attachment_id: null, status: "pending" })
-    .eq("id", id)
-    .select("transaction_id")
-    .single();
-
-  // Delete transaction attachment
-  if (inboxData?.transaction_id) {
-    await supabase
-      .from("transaction_attachments")
-      .delete()
-      .eq("transaction_id", inboxData?.transaction_id);
-  }
-
-  return supabase
-    .from("inbox")
-    .select(`
-      id,
-      file_name,
-      file_path, 
-      display_name,
-      transaction_id,
-      amount,
-      currency,
-      content_type,
-      date,
-      status,
-      created_at,
-      website,
-      description,
-      transaction:transactions(id, amount, currency, name, date)
-    `)
-    .eq("id", id)
-    .single();
-}
-
 type CreateTransactionCategoriesParams = {
   teamId: string;
   categories: {
@@ -1001,14 +847,6 @@ export async function deleteTrackerEntry(
   return supabase.from("tracker_entries").delete().eq("id", params.id);
 }
 
-type DeleteInboxParams = {
-  id: string;
-};
-
-export async function deleteInbox(supabase: Client, params: DeleteInboxParams) {
-  return supabase.from("inbox").delete().eq("id", params.id);
-}
-
 type UpsertInboxAccountParams = {
   teamId: string;
   accessToken: string;
@@ -1044,6 +882,45 @@ export async function upsertInboxAccount(
     )
     .select("id, provider, external_id")
     .single();
+}
+
+type DeleteInboxAccountParams = {
+  id: string;
+};
+
+export async function deleteInboxAccount(
+  supabase: Client,
+  params: DeleteInboxAccountParams,
+) {
+  return supabase
+    .from("inbox_accounts")
+    .delete()
+    .eq("id", params.id)
+    .select("id, schedule_id")
+    .single();
+}
+
+type UpdateInboxAccountParams = {
+  id: string;
+  refreshToken?: string;
+  accessToken?: string;
+  expiryDate?: string;
+  scheduleId?: string;
+};
+
+export async function updateInboxAccount(
+  supabase: Client,
+  params: UpdateInboxAccountParams,
+) {
+  return supabase
+    .from("inbox_accounts")
+    .update({
+      refresh_token: params.refreshToken,
+      access_token: params.accessToken,
+      expiry_date: params.expiryDate,
+      schedule_id: params.scheduleId,
+    })
+    .eq("id", params.id);
 }
 
 type UpdateTeamPlanData = {

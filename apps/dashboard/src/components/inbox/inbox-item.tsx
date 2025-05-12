@@ -40,7 +40,7 @@ export function InboxItem({ item, index }: Props) {
                 {isProcessing ? (
                   <Skeleton className="h-3 w-[120px] mb-1" />
                 ) : (
-                  item.display_name
+                  item.displayName
                 )}
               </div>
             </div>
@@ -54,7 +54,7 @@ export function InboxItem({ item, index }: Props) {
             {isProcessing && <Skeleton className="h-3 w-[50px]" />}
             {!isProcessing &&
               item?.date &&
-              formatDate(item.date, user?.date_format)}
+              formatDate(item.date, user?.dateFormat)}
           </div>
         </div>
 

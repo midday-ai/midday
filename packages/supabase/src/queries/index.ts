@@ -554,109 +554,6 @@ export async function getUserInviteQuery(
     .single();
 }
 
-type GetInboxQueryParams = {
-  teamId: string;
-  cursor?: string | null;
-  order?: string | null;
-  pageSize?: number;
-  filter?: {
-    q?: string | null;
-    status?: "new" | "archived" | "processing" | "done" | "pending" | null;
-  };
-};
-
-export async function getInboxQuery(
-  supabase: Client,
-  params: GetInboxQueryParams,
-) {
-  const {
-    teamId,
-    filter: { q, status } = {},
-    cursor,
-    order,
-    pageSize = 20,
-  } = params;
-
-  const query = supabase
-    .from("inbox")
-    .select(`
-      id,
-      file_name,
-      file_path, 
-      display_name,
-      transaction_id,
-      amount,
-      currency,
-      content_type,
-      date,
-      status,
-      created_at,
-      website,
-      description,
-      transaction:transactions(id, amount, currency, name, date)
-    `)
-    .eq("team_id", teamId)
-    .order("created_at", { ascending: order === "desc" })
-    .neq("status", "deleted");
-
-  // If status is not done, filter by status
-  if (status) {
-    query.eq("status", status);
-  }
-
-  if (q) {
-    if (!Number.isNaN(Number.parseInt(q))) {
-      query.like("inbox_amount_text", `%${q}%`);
-    } else {
-      query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
-    }
-  }
-
-  // Convert cursor to offset
-  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
-
-  // TODO: Use cursor instead of range
-  const { data } = await query.range(offset, offset + pageSize - 1);
-
-  // Generate next cursor (offset)
-  const nextCursor =
-    data && data.length === pageSize
-      ? (offset + pageSize).toString()
-      : undefined;
-
-  return {
-    meta: {
-      cursor: nextCursor,
-      hasPreviousPage: offset > 0,
-      hasNextPage: data && data.length === pageSize,
-    },
-    data: data || [],
-  };
-}
-
-export async function getInboxByIdQuery(supabase: Client, id: string) {
-  return supabase
-    .from("inbox")
-    .select(`
-      id,
-      file_name,
-      file_path, 
-      display_name,
-      transaction_id,
-      amount,
-      currency,
-      content_type,
-      date,
-      status,
-      created_at,
-      website,
-      description,
-      transaction:transactions(id, amount, currency, name, date)
-    `)
-    .eq("id", id)
-    .single();
-}
-
 type GetTrackerProjectByIdQueryParams = {
   teamId: string;
   id: string;
@@ -901,38 +798,6 @@ export async function getCategoriesQuery(
     .order("created_at", { ascending: false })
     .order("name", { ascending: true })
     .range(0, limit);
-}
-
-type GetInboxSearchParams = {
-  teamId: string;
-  limit?: number;
-  q: string | number;
-};
-
-export async function getInboxSearchQuery(
-  supabase: Client,
-  params: GetInboxSearchParams,
-) {
-  const { teamId, q, limit = 10 } = params;
-
-  const query = supabase
-    .from("inbox")
-    .select(
-      "id, created_at, file_name, amount, currency, file_path, content_type, date, display_name, size, description",
-    )
-    .eq("team_id", teamId)
-    .neq("status", "deleted")
-    .order("created_at", { ascending: true });
-
-  if (!Number.isNaN(Number.parseInt(q))) {
-    query.like("inbox_amount_text", `%${q}%`);
-  } else {
-    query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
-  }
-
-  const { data } = await query.range(0, limit);
-
-  return data;
 }
 
 export type GetInvoicesQueryParams = {
@@ -1302,6 +1167,23 @@ export async function getTeamLimitsMetricsQuery(
 
 export async function getTeamByIdQuery(supabase: Client, teamId: string) {
   return supabase.from("teams").select("*").eq("id", teamId).single();
+}
+
+export async function getInboxAccountsQuery(supabase: Client, teamId: string) {
+  return supabase
+    .from("inbox_accounts")
+    .select("id, email, provider, last_accessed")
+    .eq("team_id", teamId);
+}
+
+export async function getInboxAccountByIdQuery(supabase: Client, id: string) {
+  return supabase
+    .from("inbox_accounts")
+    .select(
+      "id, email, provider, access_token, refresh_token, expiry_date, last_accessed",
+    )
+    .eq("id", id)
+    .single();
 }
 
 export async function getExistingInboxAttachmentsQuery(
