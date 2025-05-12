@@ -2,7 +2,7 @@ import type { Database } from "@api/db";
 import { teams } from "@api/db/schema";
 import { eq } from "drizzle-orm";
 
-export const getTeamById = async (db: Database, { id }: { id: string }) => {
+export const getTeamById = async (db: Database, id: string) => {
   const [result] = await db
     .select({
       id: teams.id,

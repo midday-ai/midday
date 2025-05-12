@@ -7,9 +7,7 @@ import { z } from "zod";
 
 export const userRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx: { db, session } }) => {
-    const user = await getUserById(db, { id: session.user.id });
-
-    return user;
+    return getUserById(db, session.user.id);
   }),
 
   update: protectedProcedure

@@ -10,12 +10,13 @@ export const createTRPCContext = async (_: unknown, c: Context) => {
   const teamId = c.req.header("X-Team-Id");
   const session = await verifyAccessToken(accessToken);
   const supabase = await createClient(accessToken);
+  const db = await connectDb();
 
   return {
     session,
     teamId,
     supabase,
-    db: await connectDb(),
+    db,
   };
 };
 

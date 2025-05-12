@@ -70,10 +70,10 @@ export const columns: ColumnDef<Customer>[] = [
     header: "Invoices",
     accessorKey: "invoices",
     cell: ({ row }) => {
-      if (row.original.invoices.length > 0) {
+      if (row.original.invoiceCount > 0) {
         return (
           <Link href={`/invoices?customers=${row.original.id}`}>
-            {row.original.invoices.length}
+            {row.original.invoiceCount}
           </Link>
         );
       }
@@ -85,10 +85,10 @@ export const columns: ColumnDef<Customer>[] = [
     header: "Projects",
     accessorKey: "projects",
     cell: ({ row }) => {
-      if (row.original.projects.length > 0) {
+      if (row.original.projectCount > 0) {
         return (
           <Link href={`/tracker?customers=${row.original.id}`}>
-            {row.original.projects.length}
+            {row.original.projectCount}
           </Link>
         );
       }
@@ -104,7 +104,7 @@ export const columns: ColumnDef<Customer>[] = [
         <div className="relative">
           <ScrollArea className="max-w-[170px] whitespace-nowrap">
             <div className="flex items-center space-x-2">
-              {row.original.tags?.map(({ tag }) => (
+              {row.original.tags?.map((tag) => (
                 <Link href={`/transactions?tags=${tag.id}`} key={tag.id}>
                   <Badge variant="tag-rounded" className="whitespace-nowrap">
                     {tag.name}

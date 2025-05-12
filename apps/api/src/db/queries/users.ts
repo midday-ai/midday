@@ -2,11 +2,7 @@ import type { Database } from "@api/db";
 import { teams, users } from "@api/db/schema";
 import { eq } from "drizzle-orm";
 
-type GetUserByIdParams = {
-  id: string;
-};
-
-export const getUserById = async (db: Database, { id }: GetUserByIdParams) => {
+export const getUserById = async (db: Database, id: string) => {
   const [result] = await db
     .select({
       id: users.id,
@@ -24,8 +20,6 @@ export const getUserById = async (db: Database, { id }: GetUserByIdParams) => {
         name: teams.name,
         logoUrl: teams.logoUrl,
         email: teams.email,
-        inboxEmail: teams.inboxEmail,
-        plan: teams.plan,
       },
     })
     .from(users)

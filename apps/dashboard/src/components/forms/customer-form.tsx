@@ -50,14 +50,14 @@ const formSchema = z.object({
     .optional()
     .transform((url) => url?.replace(/^https?:\/\//, "")),
   contact: z.string().optional(),
-  address_line_1: z.string().optional(),
-  address_line_2: z.string().optional(),
+  addressLine1: z.string().optional(),
+  addressLine2: z.string().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
   country: z.string().optional(),
-  country_code: z.string().optional(),
+  countryCode: z.string().optional(),
   zip: z.string().optional(),
-  vat_number: z.string().optional(),
+  vatNumber: z.string().optional(),
   note: z.string().optional(),
   tags: z
     .array(
@@ -136,12 +136,12 @@ export function CustomerForm({ data }: Props) {
       name: name ?? data?.name ?? undefined,
       email: data?.email ?? undefined,
       website: data?.website ?? undefined,
-      address_line_1: data?.address_line_1 ?? undefined,
-      address_line_2: data?.address_line_2 ?? undefined,
+      addressLine1: data?.addressLine1 ?? undefined,
+      addressLine2: data?.addressLine2 ?? undefined,
       city: data?.city ?? undefined,
       state: data?.state ?? undefined,
       country: data?.country ?? undefined,
-      country_code: data?.country_code ?? undefined,
+      countryCode: data?.countryCode ?? undefined,
       zip: data?.zip ?? undefined,
       phone: data?.phone ?? undefined,
       contact: data?.contact ?? undefined,
@@ -149,18 +149,18 @@ export function CustomerForm({ data }: Props) {
       vat_number: data?.vat_number ?? undefined,
       tags:
         data?.tags?.map((tag) => ({
-          id: tag.tag?.id ?? "",
-          value: tag.tag?.name ?? "",
+          id: tag?.id ?? "",
+          value: tag?.name ?? "",
         })) ?? undefined,
     },
   });
 
   const onSelectAddress = (address: AddressDetails) => {
-    form.setValue("address_line_1", address.address_line_1);
+    form.setValue("addressLine1", address.address_line_1);
     form.setValue("city", address.city);
     form.setValue("state", address.state);
     form.setValue("country", address.country);
-    form.setValue("country_code", address.country_code);
+    form.setValue("countryCode", address.country_code);
     form.setValue("zip", address.zip);
   };
 
@@ -179,8 +179,8 @@ export function CustomerForm({ data }: Props) {
     const formattedData = {
       ...data,
       id: data.id || undefined,
-      address_line_1: data.address_line_1 || null,
-      address_line_2: data.address_line_2 || null,
+      addressLine1: data.addressLine1 || null,
+      addressLine2: data.addressLine2 || null,
       city: data.city || null,
       state: data.state || null,
       country: data.country || null,
@@ -189,7 +189,7 @@ export function CustomerForm({ data }: Props) {
       website: data.website || null,
       phone: data.phone || null,
       zip: data.zip || null,
-      vat_number: data.vat_number || null,
+      vatNumber: data.vatNumber || null,
       tags: data.tags?.length ? data.tags : null,
       country_code: data.country_code || null,
     };
@@ -336,7 +336,7 @@ export function CustomerForm({ data }: Props) {
 
                     <FormField
                       control={form.control}
-                      name="address_line_1"
+                      name="addressLine1"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs text-[#878787] font-normal">
@@ -357,7 +357,7 @@ export function CustomerForm({ data }: Props) {
 
                     <FormField
                       control={form.control}
-                      name="address_line_2"
+                      name="addressLine2"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs text-[#878787] font-normal">
@@ -390,7 +390,7 @@ export function CustomerForm({ data }: Props) {
                                 defaultValue={field.value ?? ""}
                                 onSelect={(code, name) => {
                                   field.onChange(name);
-                                  form.setValue("country_code", code);
+                                  form.setValue("countryCode", code);
                                 }}
                               />
                             </FormControl>
@@ -517,7 +517,7 @@ export function CustomerForm({ data }: Props) {
                     <div>
                       <FormField
                         control={form.control}
-                        name="vat_number"
+                        name="vatNumber"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-xs text-[#878787] font-normal">

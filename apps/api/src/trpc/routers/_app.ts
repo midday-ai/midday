@@ -3,7 +3,7 @@ import { createTRPCRouter } from "../init";
 import { appsRouter } from "./apps";
 import { bankAccountsRouter } from "./bank-accounts";
 import { bankConnectionsRouter } from "./bank-connections";
-import { customersRouter } from "./customers";
+import { customersRouter } from "./customers/route";
 import { documentTagAssignmentsRouter } from "./document-tag-assignments";
 import { documentTagsRouter } from "./document-tags";
 import { documentsRouter } from "./documents";
