@@ -1304,23 +1304,6 @@ export async function getTeamByIdQuery(supabase: Client, teamId: string) {
   return supabase.from("teams").select("*").eq("id", teamId).single();
 }
 
-export async function getInboxAccountsQuery(supabase: Client, teamId: string) {
-  return supabase
-    .from("inbox_accounts")
-    .select("id, email, provider, last_accessed")
-    .eq("team_id", teamId);
-}
-
-export async function getInboxAccountByIdQuery(supabase: Client, id: string) {
-  return supabase
-    .from("inbox_accounts")
-    .select(
-      "id, email, provider, access_token, refresh_token, expiry_date, last_accessed",
-    )
-    .eq("id", id)
-    .single();
-}
-
 export async function getExistingInboxAttachmentsQuery(
   supabase: Client,
   inputArray: string[],
@@ -1392,101 +1375,6 @@ export async function searchTransactionMatchQuery(
   return {
     data: [],
   };
-}
-
-type GetDocumentsParams = {
-  teamId: string;
-  pageSize?: number;
-  cursor?: string | null;
-  language?: string | null;
-  filter?: {
-    q?: string | null;
-    tags?: string[] | null;
-    start?: string | null;
-    end?: string | null;
-  };
-};
-
-export async function getDocumentsQuery(
-  supabase: Client,
-  params: GetDocumentsParams,
-) {
-  const { teamId, pageSize = 20, cursor, filter } = params;
-
-  const { tags, q, start, end } = filter || {};
-
-  const columns =
-    "id, name, metadata, path_tokens, processing_status, title, summary, team_id, created_at, tags:document_tag_assignments(tag:document_tags(id, name, slug))";
-
-  const query = supabase
-    .from("documents")
-    .select(columns)
-    .eq("team_id", teamId)
-    .not("name", "ilike", "%.folderPlaceholder")
-    .order("created_at", { ascending: false });
-
-  if (tags) {
-    query
-      .in("temp_filter_tags.tag_id", tags)
-      .eq("team_id", teamId)
-      .select(`${columns}, temp_filter_tags:document_tag_assignments!inner()`);
-  }
-
-  if (q) {
-    // Let's hardcode the language to English for now (When we have drizzle we can search multiple columns at once)
-    query.textSearch("fts_english", `${q.replaceAll(" ", "+")}:*`, {
-      type: "websearch",
-      config: "english",
-    });
-  }
-
-  if (start && end) {
-    query.gte("date", start);
-    query.lte("date", end);
-  }
-
-  // Convert cursor to offset
-  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
-
-  // TODO: Use cursor instead of range
-  const { data } = await query.range(offset, offset + pageSize - 1);
-
-  // Generate next cursor (offset)
-  const nextCursor =
-    data && data.length === pageSize
-      ? (offset + pageSize).toString()
-      : undefined;
-
-  return {
-    meta: {
-      cursor: nextCursor,
-      hasPreviousPage: offset > 0,
-      hasNextPage: data && data.length === pageSize,
-    },
-    data: data ?? [],
-  };
-}
-
-export type GetRelatedDocumentsParams = {
-  teamId: string;
-  id: string;
-  pageSize: number;
-};
-
-export async function getRelatedDocumentsQuery(
-  supabase: Client,
-  params: GetRelatedDocumentsParams,
-) {
-  const { teamId, id, pageSize } = params;
-
-  const { data } = await supabase.rpc("match_similar_documents_by_title", {
-    source_document_id: id,
-    p_team_id: teamId,
-    match_threshold: 0.3,
-    match_count: pageSize,
-  });
-
-  return data;
 }
 
 type GlobalSearchParams = {

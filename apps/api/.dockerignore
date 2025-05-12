@@ -1,0 +1,26 @@
+# Dependencies
+node_modules
+.turbo
+
+# Build artifacts
+dist
+build
+.next
+out
+
+# Development files
+.git
+.github
+.vscode
+*.log
+.DS_Store
+
+# Environment files
+.env
+.env.*
+!.env-template
+
+# Other apps in monorepo
+apps/dashboard
+apps/website
+apps/desktop
