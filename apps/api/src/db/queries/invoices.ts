@@ -1,6 +1,5 @@
 import type { Database } from "@api/db";
-import { customers, invoices, teams } from "@api/db/schema";
-import { invoiceStatusEnum } from "@api/db/schema";
+import { customers, invoiceStatusEnum, invoices, teams } from "@api/db/schema";
 import { buildSearchQuery } from "@api/utils/search";
 import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
@@ -41,8 +40,8 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
 
   // Apply date range filter
   if (start && end) {
-    whereConditions.push(gte(invoices.dueDate, new Date(start)));
-    whereConditions.push(lte(invoices.dueDate, new Date(end)));
+    whereConditions.push(gte(invoices.dueDate, start));
+    whereConditions.push(lte(invoices.dueDate, end));
   }
 
   // Apply customer filter

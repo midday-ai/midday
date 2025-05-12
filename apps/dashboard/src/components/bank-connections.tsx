@@ -270,7 +270,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
           chevronBefore
         >
           <div className="flex space-x-4 items-center ml-4 w-full">
-            <BankLogo src={connection.logo_url} alt={connection.name} />
+            <BankLogo src={connection.logoUrl} alt={connection.name} />
 
             <div className="flex flex-col">
               <span className="text-sm">{connection.name}</span>
@@ -298,11 +298,11 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
                 variant="button"
                 id={connection.id}
                 provider={connection.provider}
-                enrollmentId={connection.enrollment_id}
-                institutionId={connection.institution_id}
-                accessToken={connection.access_token}
+                enrollmentId={connection.enrollmentId}
+                institutionId={connection.institutionId}
+                accessToken={connection.accessToken}
                 onManualSync={handleManualSync}
-                referenceId={connection.reference_id}
+                referenceId={connection.referenceId}
               />
               <DeleteConnection connectionId={connection.id} />
             </>
@@ -311,11 +311,11 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
               <ReconnectProvider
                 id={connection.id}
                 provider={connection.provider}
-                enrollmentId={connection.enrollment_id}
-                institutionId={connection.institution_id}
-                accessToken={connection.access_token}
+                enrollmentId={connection.enrollmentId}
+                institutionId={connection.institutionId}
+                accessToken={connection.accessToken}
                 onManualSync={handleManualSync}
-                referenceId={connection.reference_id}
+                referenceId={connection.referenceId}
               />
               <SyncTransactions
                 disabled={isSyncing}
@@ -329,7 +329,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
 
       <AccordionContent className="bg-background">
         <div className="ml-[30px] divide-y">
-          {connection.accounts.map((account) => {
+          {connection.bankAccounts.map((account) => {
             return <BankAccount key={account.id} data={account} />;
           })}
         </div>

@@ -1,31 +1,27 @@
+import { getDocumentById } from "@api/db/queries/documents";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
 import type { processDocument } from "@midday/jobs/tasks/document/process-document";
 import { deleteDocument } from "@midday/supabase/mutations";
 import {
-  getDocumentQuery,
   getDocumentsQuery,
   getRelatedDocumentsQuery,
 } from "@midday/supabase/queries";
 import { signedUrl } from "@midday/supabase/storage";
 import { tasks } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
+import {
+  deleteDocumentSchema,
+  getDocumentSchema,
+  getDocumentsSchema,
+  getRelatedDocumentsSchema,
+  processDocumentSchema,
+  signedUrlSchema,
+  signedUrlsSchema,
+} from "./schema";
 
 export const documentsRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(
-      z.object({
-        cursor: z.string().nullable().optional(),
-        sort: z.array(z.string(), z.string()).nullable().optional(),
-        pageSize: z.number().optional(),
-        filter: z
-          .object({
-            q: z.string().nullable().optional(),
-            tags: z.array(z.string()).nullable().optional(),
-          })
-          .optional(),
-      }),
-    )
+    .input(getDocumentsSchema)
     .query(async ({ input, ctx: { supabase, teamId } }) => {
       return getDocumentsQuery(supabase, {
         teamId: teamId!,
@@ -34,24 +30,17 @@ export const documentsRouter = createTRPCRouter({
     }),
 
   getById: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().nullable().optional(),
-        filePath: z.string().nullable().optional(),
-      }),
-    )
-    .query(async ({ input, ctx: { supabase, teamId } }) => {
-      const { data } = await getDocumentQuery(supabase, {
+    .input(getDocumentSchema)
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      return getDocumentById(db, {
         id: input.id,
         filePath: input.filePath,
         teamId: teamId!,
       });
-
-      return data;
     }),
 
   getRelatedDocuments: protectedProcedure
-    .input(z.object({ id: z.string(), pageSize: z.number() }))
+    .input(getRelatedDocumentsSchema)
     .query(async ({ input, ctx: { supabase, teamId } }) => {
       return getRelatedDocumentsQuery(supabase, {
         id: input.id,
@@ -61,7 +50,7 @@ export const documentsRouter = createTRPCRouter({
     }),
 
   delete: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(deleteDocumentSchema)
     .mutation(async ({ input, ctx: { supabase } }) => {
       const { data } = await deleteDocument(supabase, {
         id: input.id,
@@ -71,15 +60,7 @@ export const documentsRouter = createTRPCRouter({
     }),
 
   processDocument: protectedProcedure
-    .input(
-      z.array(
-        z.object({
-          mimetype: z.string(),
-          size: z.number(),
-          file_path: z.array(z.string()),
-        }),
-      ),
-    )
+    .input(processDocumentSchema)
     .mutation(async ({ ctx: { teamId, supabase }, input }) => {
       const supportedDocuments = input.filter((item) =>
         isMimeTypeSupportedForProcessing(item.mimetype),
@@ -118,7 +99,7 @@ export const documentsRouter = createTRPCRouter({
     }),
 
   signedUrl: protectedProcedure
-    .input(z.object({ filePath: z.string(), expireIn: z.number() }))
+    .input(signedUrlSchema)
     .mutation(async ({ input, ctx: { supabase } }) => {
       const { data } = await signedUrl(supabase, {
         bucket: "vault",
@@ -130,7 +111,7 @@ export const documentsRouter = createTRPCRouter({
     }),
 
   signedUrls: protectedProcedure
-    .input(z.array(z.string()))
+    .input(signedUrlsSchema)
     .mutation(async ({ input, ctx: { supabase } }) => {
       const signedUrls = [];
 

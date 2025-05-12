@@ -11,7 +11,7 @@ import { App } from "./app";
 export function Apps() {
   const trpc = useTRPC();
   const { data: installedApps } = useSuspenseQuery(
-    trpc.apps.installed.queryOptions(),
+    trpc.apps.get.queryOptions(),
   );
 
   const { data: user } = useUserQuery();

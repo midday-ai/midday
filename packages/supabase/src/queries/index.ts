@@ -25,83 +25,6 @@ export async function getUserQuery(supabase: Client, userId: string) {
     .throwOnError();
 }
 
-type GetBankConnectionsParams = {
-  teamId: string;
-  enabled?: boolean;
-};
-
-export async function getBankConnectionsQuery(
-  supabase: Client,
-  params: GetBankConnectionsParams,
-) {
-  const { teamId, enabled } = params;
-
-  const query = supabase
-    .from("bank_connections")
-    .select(
-      `
-      id,
-      name,
-      logo_url,
-      provider,
-      expires_at,
-      enrollment_id,
-      institution_id,
-      reference_id,
-      last_accessed,
-      access_token,
-      status,
-      accounts:bank_accounts(
-        id,
-        name,
-        enabled,
-        manual,
-        currency,
-        balance,
-        type,
-        error_retries
-      )
-    `,
-    )
-    .eq("team_id", teamId);
-
-  if (enabled) {
-    query.eq("enabled", enabled);
-  }
-
-  return query;
-}
-
-export type GetBankAccountsParams = {
-  teamId: string;
-  enabled?: boolean;
-  manual?: boolean;
-};
-
-export async function getBankAccountsQuery(
-  supabase: Client,
-  params: GetBankAccountsParams,
-) {
-  const { teamId, enabled, manual } = params;
-
-  const query = supabase
-    .from("bank_accounts")
-    .select("*, connection:bank_connections(*)")
-    .eq("team_id", teamId)
-    .order("created_at", { ascending: true })
-    .order("name", { ascending: false });
-
-  if (enabled) {
-    query.eq("enabled", enabled);
-  }
-
-  if (manual) {
-    query.eq("manual", manual);
-  }
-
-  return query;
-}
-
 export async function getTeamMembersQuery(supabase: Client, teamId: string) {
   const { data } = await supabase
     .from("users_on_team")
@@ -427,19 +350,6 @@ export async function getSimilarTransactions(
   return query;
 }
 
-type GetBankAccountsCurrenciesParams = {
-  teamId: string;
-};
-
-export async function getBankAccountsCurrenciesQuery(
-  supabase: Client,
-  params: GetBankAccountsCurrenciesParams,
-) {
-  return supabase.rpc("get_bank_account_currencies", {
-    team_id: params.teamId,
-  });
-}
-
 export type GetBurnRateQueryParams = {
   teamId: string;
   from: string;
@@ -625,13 +535,6 @@ export async function getTeamInvitesQuery(supabase: Client, teamId: string) {
     .select("id, email, code, role, user:invited_by(*), team:team_id(*)")
     .eq("team_id", teamId)
     .throwOnError();
-}
-
-export async function getUserInvitesQuery(supabase: Client, email: string) {
-  return supabase
-    .from("user_invites")
-    .select("id, email, code, role, user:invited_by(*), team:team_id(*)")
-    .eq("email", email);
 }
 
 type GetUserInviteQueryParams = {
@@ -1386,15 +1289,6 @@ export async function getTagsQuery(supabase: Client, teamId: string) {
     .order("created_at", { ascending: false });
 }
 
-export async function getBankAccountsBalancesQuery(
-  supabase: Client,
-  teamId: string,
-) {
-  return supabase.rpc("get_team_bank_accounts_balances", {
-    team_id: teamId,
-  });
-}
-
 export async function getTeamLimitsMetricsQuery(
   supabase: Client,
   teamId: string,
@@ -1404,10 +1298,6 @@ export async function getTeamLimitsMetricsQuery(
       input_team_id: teamId,
     })
     .single();
-}
-
-export async function getInstalledAppsQuery(supabase: Client, teamId: string) {
-  return supabase.from("apps").select("app_id, settings").eq("team_id", teamId);
 }
 
 export async function getTeamByIdQuery(supabase: Client, teamId: string) {
@@ -1504,34 +1394,6 @@ export async function searchTransactionMatchQuery(
   };
 }
 
-export type GetDocumentQueryParams = {
-  teamId: string;
-  id?: string | null;
-  filePath?: string | null;
-};
-
-export async function getDocumentQuery(
-  supabase: Client,
-  params: GetDocumentQueryParams,
-) {
-  const query = supabase
-    .from("documents")
-    .select(
-      "id, name, path_tokens, title, metadata, created_at, summary, tags:document_tag_assignments(tag:document_tags(id, name, slug))",
-    )
-    .eq("team_id", params.teamId);
-
-  if (params.id) {
-    query.eq("id", params.id);
-  }
-
-  if (params.filePath) {
-    query.eq("name", params.filePath);
-  }
-
-  return query.single();
-}
-
 type GetDocumentsParams = {
   teamId: string;
   pageSize?: number;
@@ -1625,14 +1487,6 @@ export async function getRelatedDocumentsQuery(
   });
 
   return data;
-}
-
-export async function getDocumentTagsQuery(supabase: Client, teamId: string) {
-  return supabase
-    .from("document_tags")
-    .select("id, name")
-    .eq("team_id", teamId)
-    .order("created_at", { ascending: false });
 }
 
 type GlobalSearchParams = {
