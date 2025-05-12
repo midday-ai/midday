@@ -50,6 +50,6 @@ app.get("/health", async (c) => {
 });
 
 export default {
-  port: 3003,
+  port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3000,
   fetch: app.fetch,
 };

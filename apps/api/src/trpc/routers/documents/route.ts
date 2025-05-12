@@ -1,14 +1,15 @@
-import { getDocumentById } from "@api/db/queries/documents";
+import {
+  deleteDocument,
+  getDocumentById,
+  getDocumentsQuery,
+  getRelatedDocumentsQuery,
+} from "@api/db/queries/documents";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
 import type { processDocument } from "@midday/jobs/tasks/document/process-document";
-import { deleteDocument } from "@midday/supabase/mutations";
-import {
-  getDocumentsQuery,
-  getRelatedDocumentsQuery,
-} from "@midday/supabase/queries";
-import { signedUrl } from "@midday/supabase/storage";
+import { remove, signedUrl } from "@midday/supabase/storage";
 import { tasks } from "@trigger.dev/sdk/v3";
+import { TRPCError } from "@trpc/server";
 import {
   deleteDocumentSchema,
   getDocumentSchema,
@@ -22,8 +23,8 @@ import {
 export const documentsRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getDocumentsSchema)
-    .query(async ({ input, ctx: { supabase, teamId } }) => {
-      return getDocumentsQuery(supabase, {
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      return getDocumentsQuery(db, {
         teamId: teamId!,
         ...input,
       });
@@ -41,22 +42,36 @@ export const documentsRouter = createTRPCRouter({
 
   getRelatedDocuments: protectedProcedure
     .input(getRelatedDocumentsSchema)
-    .query(async ({ input, ctx: { supabase, teamId } }) => {
-      return getRelatedDocumentsQuery(supabase, {
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      return getRelatedDocumentsQuery(db, {
         id: input.id,
-        teamId: teamId!,
         pageSize: input.pageSize,
+        teamId: teamId!,
       });
     }),
 
   delete: protectedProcedure
     .input(deleteDocumentSchema)
-    .mutation(async ({ input, ctx: { supabase } }) => {
-      const { data } = await deleteDocument(supabase, {
+    .mutation(async ({ input, ctx: { db, supabase, teamId } }) => {
+      const document = await deleteDocument(db, {
         id: input.id,
+        teamId: teamId!,
       });
 
-      return data;
+      if (!document || !document.pathTokens) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Document not found",
+        });
+      }
+
+      // Delete from storage
+      await remove(supabase, {
+        bucket: "vault",
+        path: document.pathTokens,
+      });
+
+      return document;
     }),
 
   processDocument: protectedProcedure

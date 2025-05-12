@@ -76,7 +76,7 @@ export function DataTable() {
   useRealtime({
     channelName: "realtime_documents",
     table: "documents",
-    filter: `team_id=eq.${user?.team_id}`,
+    filter: `team_id=eq.${user?.teamId}`,
     onEvent: (payload) => {
       if (
         payload.eventType === "INSERT" ||
@@ -158,7 +158,7 @@ export function DataTable() {
   };
 
   const files = useMemo(() => {
-    return documents.map((document) => document.path_tokens?.join("/") ?? "");
+    return documents.map((document) => document.pathTokens?.join("/") ?? "");
   }, [documents]);
 
   const showBottomBar = Object.keys(rowSelection).length > 0;

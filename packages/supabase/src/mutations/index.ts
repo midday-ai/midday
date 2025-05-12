@@ -1046,45 +1046,6 @@ export async function upsertInboxAccount(
     .single();
 }
 
-type DeleteInboxAccountParams = {
-  id: string;
-};
-
-export async function deleteInboxAccount(
-  supabase: Client,
-  params: DeleteInboxAccountParams,
-) {
-  return supabase
-    .from("inbox_accounts")
-    .delete()
-    .eq("id", params.id)
-    .select("id, schedule_id")
-    .single();
-}
-
-type UpdateInboxAccountParams = {
-  id: string;
-  refreshToken?: string;
-  accessToken?: string;
-  expiryDate?: string;
-  scheduleId?: string;
-};
-
-export async function updateInboxAccount(
-  supabase: Client,
-  params: UpdateInboxAccountParams,
-) {
-  return supabase
-    .from("inbox_accounts")
-    .update({
-      refresh_token: params.refreshToken,
-      access_token: params.accessToken,
-      expiry_date: params.expiryDate,
-      schedule_id: params.scheduleId,
-    })
-    .eq("id", params.id);
-}
-
 type UpdateTeamPlanData = {
   id: string;
   plan?: "trial" | "starter" | "pro";
@@ -1104,47 +1065,6 @@ export async function updateTeamPlan(
     .eq("id", id)
     .select("users_on_team(user_id)")
     .single();
-}
-
-type DeleteDocumentParams = {
-  id: string;
-};
-
-export async function deleteDocument(
-  supabase: Client,
-  params: DeleteDocumentParams,
-) {
-  const { data } = await supabase
-    .from("documents")
-    .delete()
-    .eq("id", params.id)
-    .select("id, path_tokens")
-    .single();
-
-  if (!data || !data.path_tokens) {
-    return {
-      data: null,
-    };
-  }
-
-  await remove(supabase, {
-    bucket: "vault",
-    path: data.path_tokens,
-  });
-
-  // Delete all transaction attachments that have the same path
-  // Use contains and containedBy for array equality check, as .eq might have issues
-  // serializing arrays correctly for comparison, leading to the "malformed array literal" error.
-  // path @> data.path_tokens AND path <@ data.path_tokens is equivalent to path = data.path_tokens
-  await supabase
-    .from("transaction_attachments")
-    .delete()
-    .contains("path", data.path_tokens)
-    .containedBy("path", data.path_tokens);
-
-  return {
-    data,
-  };
 }
 
 type UpdateInvoiceParams = {

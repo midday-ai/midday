@@ -8,7 +8,7 @@ import { documentTagAssignmentsRouter } from "./document-tag-assignments/route";
 import { documentTagsRouter } from "./document-tags/route";
 import { documentsRouter } from "./documents/route";
 import { inboxRouter } from "./inbox";
-import { inboxAccountsRouter } from "./inbox-accounts";
+import { inboxAccountsRouter } from "./inbox-accounts/route";
 import { institutionsRouter } from "./institutions";
 import { invoiceTemplateRouter } from "./invoice-template";
 import { invoiceRouter } from "./invoice/route";
