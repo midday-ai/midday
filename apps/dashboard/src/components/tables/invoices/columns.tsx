@@ -22,8 +22,8 @@ export type Invoice = NonNullable<
 export const columns: ColumnDef<Invoice>[] = [
   {
     header: "Invoice no.",
-    accessorKey: "invoice_number",
-    cell: ({ row }) => row.getValue("invoice_number"),
+    accessorKey: "invoiceNumber",
+    cell: ({ row }) => row.getValue("invoiceNumber"),
   },
   {
     header: "Status",
@@ -32,9 +32,9 @@ export const columns: ColumnDef<Invoice>[] = [
   },
   {
     header: "Due date",
-    accessorKey: "due_date",
+    accessorKey: "dueDate",
     cell: ({ row, table }) => {
-      const date = row.original.due_date;
+      const date = row.original.dueDate;
 
       const showDate =
         row.original.status === "unpaid" || row.original.status === "overdue";
@@ -60,8 +60,8 @@ export const columns: ColumnDef<Invoice>[] = [
     accessorKey: "customer",
     cell: ({ row }) => {
       const customer = row.original.customer;
-      const name = customer?.name || row.original.customer_name;
-      const viewAt = row.original.viewed_at;
+      const name = customer?.name || row.original.customerName;
+      const viewAt = row.original.viewedAt;
 
       if (!name) return "-";
 
@@ -123,16 +123,16 @@ export const columns: ColumnDef<Invoice>[] = [
   },
   {
     header: "VAT Rate",
-    accessorKey: "vat_rate",
+    accessorKey: "vatRate",
     cell: ({ row }) => {
       // @ts-expect-error template is a jsonb field
-      const vatRate = row.original.template.vat_rate as number | undefined;
+      const vatRate = row.original.template.vatRate as number | undefined;
       return vatRate !== undefined && vatRate !== null ? `${vatRate}%` : "-";
     },
   },
   {
     header: "VAT Amount",
-    accessorKey: "vat_amount",
+    accessorKey: "vatAmount",
     cell: ({ row }) => (
       <FormatAmount
         amount={(row.original?.vat as number) ?? null}
@@ -142,16 +142,16 @@ export const columns: ColumnDef<Invoice>[] = [
   },
   {
     header: "Tax Rate",
-    accessorKey: "tax_rate",
+    accessorKey: "taxRate",
     cell: ({ row }) => {
       // @ts-expect-error template is a jsonb field
-      const taxRate = row.original.template.tax_rate as number | undefined;
+      const taxRate = row.original.template.taxRate as number | undefined;
       return taxRate !== undefined && taxRate !== null ? `${taxRate}%` : "-";
     },
   },
   {
     header: "Tax Amount",
-    accessorKey: "tax_amount",
+    accessorKey: "taxAmount",
     cell: ({ row }) => (
       <FormatAmount
         amount={(row.original.tax as number) ?? null}
@@ -161,7 +161,7 @@ export const columns: ColumnDef<Invoice>[] = [
   },
   {
     header: "Excl. VAT",
-    accessorKey: "excl_vat",
+    accessorKey: "exclVat",
     cell: ({ row }) => (
       <FormatAmount
         amount={(row.original.amount as number) - (row.original.vat as number)}
@@ -171,7 +171,7 @@ export const columns: ColumnDef<Invoice>[] = [
   },
   {
     header: "Excl. Tax",
-    accessorKey: "excl_tax",
+    accessorKey: "exclTax",
     cell: ({ row }) => (
       <FormatAmount
         amount={(row.original.amount as number) - (row.original.tax as number)}
@@ -181,9 +181,9 @@ export const columns: ColumnDef<Invoice>[] = [
   },
   {
     header: "Issue date",
-    accessorKey: "issue_date",
+    accessorKey: "issueDate",
     cell: ({ row, table }) => {
-      const date = row.original.issue_date;
+      const date = row.original.issueDate;
       return (
         <span>
           {date
@@ -195,10 +195,10 @@ export const columns: ColumnDef<Invoice>[] = [
   },
   {
     header: "Sent at",
-    accessorKey: "sent_at",
+    accessorKey: "sentAt",
     cell: ({ row, table }) => {
-      const sentAt = row.original.sent_at;
-      const sentTo = row.original.sent_to;
+      const sentAt = row.original.sentAt;
+      const sentTo = row.original.sentTo;
 
       if (!sentAt) {
         return "-";

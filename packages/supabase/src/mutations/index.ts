@@ -1,7 +1,7 @@
 import { getAccessValidForDays } from "@midday/engine/gocardless/utils";
 import { addDays, addMonths } from "date-fns";
 import { nanoid } from "nanoid";
-import { getInvoiceByIdQuery, getUserInviteQuery } from "../queries";
+import { getUserInviteQuery } from "../queries";
 import type { Client } from "../types";
 import { remove } from "../utils/storage";
 

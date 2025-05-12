@@ -1,3 +1,4 @@
+import { getInvoices } from "@api/db/queries/invoices";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { parseInputValue } from "@api/utils/parse";
 import { UTCDate } from "@date-fns/utc";
@@ -16,7 +17,6 @@ import {
   getInvoiceByIdQuery,
   getInvoiceSummaryQuery,
   getInvoiceTemplateQuery,
-  getInvoicesQuery,
   getNextInvoiceNumberQuery,
   getPaymentStatusQuery,
   getTeamByIdQuery,
@@ -87,8 +87,8 @@ export const invoiceRouter = createTRPCRouter({
         })
         .optional(),
     )
-    .query(async ({ input, ctx: { supabase, teamId } }) => {
-      return getInvoicesQuery(supabase, {
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      return getInvoices(db, {
         teamId: teamId!,
         ...input,
       });
