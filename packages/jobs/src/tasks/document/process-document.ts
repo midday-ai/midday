@@ -31,8 +31,7 @@ export const processDocument = schemaTask({
       }
 
       // If the file is an image, we have a special classifier for it
-      // NOTE: We don't want to classify images in the inbox (we have a special classifier for that)
-      if (mimetype.startsWith("image/") && !file_path.includes("inbox")) {
+      if (mimetype.startsWith("image/")) {
         await classifyImage.trigger({
           fileName: file_path.join("/"),
           teamId,
