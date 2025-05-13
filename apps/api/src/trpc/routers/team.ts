@@ -181,12 +181,8 @@ export const teamRouter = createTRPCRouter({
         }),
       ),
     )
-    .mutation(async ({ ctx: { supabase, session, teamId }, input }) => {
-      // const location = (await headers()).get("x-vercel-ip-city") ?? "Unknown";
-      // const ip = (await headers()).get("x-forwarded-for") ?? "127.0.0.1";
-
-      const location = "Unknown";
-      const ip = "127.0.0.1";
+    .mutation(async ({ ctx: { supabase, session, teamId, geo }, input }) => {
+      const ip = geo.ip ?? "127.0.0.1";
 
       const { data } = await createTeamInvites(supabase, {
         teamId: teamId!,
@@ -209,7 +205,6 @@ export const teamRouter = createTRPCRouter({
       await tasks.trigger<typeof inviteTeamMembers>("invite-team-members", {
         teamId: teamId!,
         invites,
-        location,
         ip,
         locale: "en",
       });

@@ -10,7 +10,6 @@ export const inviteTeamMembers = schemaTask({
   id: "invite-team-members",
   schema: z.object({
     teamId: z.string().uuid(),
-    location: z.string(),
     ip: z.string(),
     locale: z.string(),
     invites: z.array(
@@ -27,7 +26,7 @@ export const inviteTeamMembers = schemaTask({
   queue: {
     concurrencyLimit: 10,
   },
-  run: async ({ location, ip, invites, locale }) => {
+  run: async ({ ip, invites, locale }) => {
     const { t } = getI18n({ locale });
 
     const emails = invites?.map(async (invite) => ({
@@ -48,7 +47,6 @@ export const inviteTeamMembers = schemaTask({
           teamName: invite.teamName,
           inviteCode: invite.inviteCode,
           ip,
-          location,
           locale,
         }),
       ),

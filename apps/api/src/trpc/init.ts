@@ -1,6 +1,7 @@
 import { connectDb } from "@api/db";
 import { createClient } from "@api/services/supabase";
 import { verifyAccessToken } from "@api/utils/auth";
+import { getGeoContext } from "@api/utils/geo";
 import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";
 import superjson from "superjson";
@@ -11,12 +12,14 @@ export const createTRPCContext = async (_: unknown, c: Context) => {
   const session = await verifyAccessToken(accessToken);
   const supabase = await createClient(accessToken);
   const db = await connectDb();
+  const geo = getGeoContext(c.req);
 
   return {
     session,
     teamId,
     supabase,
     db,
+    geo,
   };
 };
 
