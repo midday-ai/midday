@@ -1,6 +1,6 @@
 import type { Database } from "@api/db";
 import { trackerEntries } from "@api/db/schema";
-import { SQL, and, eq, gte, inArray, lte, or } from "drizzle-orm";
+import { and, eq, gte, inArray, lte } from "drizzle-orm";
 
 type GetTrackerRecordsByDateParams = {
   teamId: string;
@@ -36,7 +36,12 @@ export async function getTrackerRecordsByDate(
       user: true,
       trackerProject: {
         with: {
-          customer: true,
+          customer: {
+            columns: {
+              id: true,
+              name: true,
+            },
+          },
         },
       },
     },
@@ -90,10 +95,21 @@ export async function getTrackerRecordsByRange(
   const data = await db.query.trackerEntries.findMany({
     where: and(...whereConditions),
     with: {
-      user: true,
+      user: {
+        columns: {
+          id: true,
+          fullName: true,
+          avatarUrl: true,
+        },
+      },
       trackerProject: {
         with: {
-          customer: true,
+          customer: {
+            columns: {
+              id: true,
+              name: true,
+            },
+          },
         },
       },
     },
@@ -200,10 +216,22 @@ export async function upsertTrackerEntries(
   const result = await db.query.trackerEntries.findMany({
     where: and(...whereConditions),
     with: {
-      user: true,
+      user: {
+        columns: {
+          id: true,
+          fullName: true,
+          avatarUrl: true,
+        },
+      },
       trackerProject: {
         with: {
-          customer: true,
+          customer: {
+            columns: {
+              id: true,
+              name: true,
+              website: true,
+            },
+          },
         },
       },
     },

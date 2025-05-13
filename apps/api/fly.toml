@@ -1,0 +1,24 @@
+app = 'midday-api'
+primary_region = 'fra'
+
+[build]
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 3
+  processes = ['app']
+
+  [http_service.healthcheck]
+    path = "/healthcheck"
+    interval = "15s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "get"
+
+[[vm]]
+  memory = '2gb'
+  cpu_kind = 'shared'
+  cpus = 1

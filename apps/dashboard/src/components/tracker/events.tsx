@@ -19,9 +19,10 @@ export function TrackerEvents({ data, isToday }: Props) {
             "text-xs bg-[#F0F0F0] dark:bg-[#1D1D1D] text-[#606060] dark:text-[#878787] p-1 w-full text-left line-clamp-1 min-h-[23px]",
             isToday && "!bg-background",
           )}
-          key={data[0].id}
+          key={data?.at(0)?.id}
         >
-          {data[0].project.name} ({secondsToHoursAndMinutes(data[0].duration)})
+          {data?.at(0)?.trackerProject?.name} (
+          {secondsToHoursAndMinutes(data?.at(0)?.duration ?? 0)})
         </div>
       )}
       {data && data.length > 1 && (

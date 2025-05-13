@@ -7,11 +7,14 @@ const primaryPool = postgres(process.env.DATABASE_PRIMARY_URL!, {
   prepare: false,
 });
 
-const euPool = postgres(process.env.DATABASE_PRIMARY_URL!, { prepare: false });
-const usPool = postgres(process.env.DATABASE_US_URL!, { prepare: false });
-const saPool = postgres(process.env.DATABASE_SA_URL!, { prepare: false });
+const fraPool = postgres(process.env.DATABASE_FRA_URL!, { prepare: false });
+const sjcPool = postgres(process.env.DATABASE_SJC_URL!, { prepare: false });
+const iadPool = postgres(process.env.DATABASE_IAD_URL!, { prepare: false });
 
-export const primaryDb = drizzle(primaryPool, { schema, casing: "snake_case" });
+export const primaryDb = drizzle(primaryPool, {
+  schema,
+  casing: "snake_case",
+});
 
 const getReplicaIndexForRegion = () => {
   switch (process.env.FLY_REGION) {
@@ -19,7 +22,7 @@ const getReplicaIndexForRegion = () => {
       return 0;
     case "iad":
       return 1;
-    case "gru":
+    case "sjc":
       return 2;
     default:
       return 0;
@@ -33,9 +36,9 @@ export const connectDb = async () => {
     primaryDb,
     [
       // Order of replicas is important
-      drizzle(euPool, { schema, casing: "snake_case" }),
-      drizzle(usPool, { schema, casing: "snake_case" }),
-      drizzle(saPool, { schema, casing: "snake_case" }),
+      drizzle(fraPool, { schema, casing: "snake_case" }),
+      drizzle(iadPool, { schema, casing: "snake_case" }),
+      drizzle(sjcPool, { schema, casing: "snake_case" }),
     ],
     (replicas) => replicas[replicaIndex]!,
   );

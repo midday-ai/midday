@@ -364,8 +364,8 @@ export function TrackerSchedule() {
     id?: string;
     start: string;
     end: string;
-    assigned_id: string;
-    project_id: string;
+    assignedId: string;
+    projectId: string;
     description?: string;
   }) => {
     const dates = getDates(selectedDate, sortedRange ?? null);
@@ -388,8 +388,8 @@ export function TrackerSchedule() {
       start: startDate.toISOString(),
       stop: endDate.toISOString(),
       dates,
-      assigned_id: values.assigned_id,
-      project_id: values.project_id,
+      assignedId: values.assignedId,
+      projectId: values.projectId,
       description: values.description ?? null,
       duration: Math.max(0, differenceInSeconds(endDate, startDate)),
     };
@@ -540,7 +540,7 @@ export function TrackerSchedule() {
                 className="pr-4 flex font-mono flex-col"
                 style={{ height: `${ROW_HEIGHT}px` }}
               >
-                {formatHour(hour, user?.time_format)}
+                {formatHour(hour, user?.timeFormat)}
               </div>
             ))}
           </div>
@@ -602,14 +602,14 @@ export function TrackerSchedule() {
                     >
                       <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
                         <span>
-                          {event.project.name} (
+                          {event.trackerProject.name} (
                           {secondsToHoursAndMinutes(
                             differenceInSeconds(event.end, event.start),
                           )}
                           )
                         </span>
-                        {event.project.customer && (
-                          <span>{event.project.customer.name}</span>
+                        {event?.trackerProject?.customer && (
+                          <span>{event.trackerProject.customer.name}</span>
                         )}
                         <span>{event.description}</span>
                       </div>
@@ -655,7 +655,7 @@ export function TrackerSchedule() {
         onCreate={handleCreateEvent}
         isSaving={upsertTrackerEntry.isPending}
         userId={user?.id}
-        projectId={formEvent?.project?.id ?? selectedProjectId}
+        projectId={formEvent?.trackerProject?.id ?? selectedProjectId}
         description={formEvent?.description ?? undefined}
         start={
           formEvent && isValid(formEvent.start)
@@ -676,7 +676,7 @@ export function TrackerSchedule() {
             const updatedEvent = {
               ...eventToUpdate,
               project: {
-                ...(eventToUpdate.project ?? {}),
+                ...(eventToUpdate.trackerProject ?? {}),
                 id: project.id,
                 name: project.name,
               },
@@ -695,8 +695,8 @@ export function TrackerSchedule() {
                 id: eventToUpdate.id,
                 start: getTimeFromDate(eventToUpdate.start),
                 end: getTimeFromDate(eventToUpdate.end),
-                project_id: project.id,
-                assigned_id: eventToUpdate.assigned_id,
+                projectId: project.id,
+                assignedId: eventToUpdate.assignedId,
                 description: eventToUpdate.description ?? undefined,
               });
             }

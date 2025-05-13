@@ -1,26 +1,30 @@
-# Dependencies
+# Node modules
 node_modules
-.turbo
 
-# Build artifacts
+# Build outputs
+.next
 dist
 build
-.next
-out
 
-# Development files
-.git
-.github
-.vscode
-*.log
-.DS_Store
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Other app directories not needed for API
+apps/dashboard
+apps/docs
+apps/website
 
 # Environment files
-.env
-.env.*
-!.env-template
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Other apps in monorepo
-apps/dashboard
-apps/website
-apps/desktop
+# System files
+.DS_Store
+*.pem
+
+# Cache
+.turbo

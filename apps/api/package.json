@@ -13,6 +13,7 @@
     "@hono/trpc-server": "^0.3.4",
     "@midday/documents": "workspace:*",
     "@midday/engine": "workspace:*",
+    "@midday/inbox": "workspace:*",
     "@midday/invoice": "workspace:*",
     "@midday/jobs": "workspace:*",
     "@midday/location": "workspace:*",
@@ -27,6 +28,7 @@
     "jose": "^6.0.11",
     "nanoid": "^5.1.5",
     "postgres": "^3.4.5",
+    "resend": "^4.5.1",
     "superjson": "^2.2.2",
     "uuid": "^11.1.0",
     "zod": "^3.24.4"
