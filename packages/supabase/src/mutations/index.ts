@@ -3,6 +3,92 @@ import { addDays, addMonths } from "date-fns";
 import { nanoid } from "nanoid";
 import { getUserInviteQuery } from "../queries";
 import type { Client } from "../types";
+import { remove } from "../utils/storage";
+
+type CreateBankConnectionPayload = {
+  accounts: {
+    account_id: string;
+    institution_id: string;
+    logo_url?: string | null;
+    name: string;
+    bank_name: string;
+    currency: string;
+    enabled: boolean;
+    balance?: number;
+    type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
+    account_reference?: string | null;
+    expires_at?: string | null;
+  }[];
+  accessToken?: string | null;
+  enrollmentId?: string | null;
+  referenceId?: string | null;
+  teamId: string;
+  userId: string;
+  provider: "gocardless" | "teller" | "plaid" | "enablebanking";
+};
+
+export async function createBankConnection(
+  supabase: Client,
+  {
+    accounts,
+    accessToken,
+    enrollmentId,
+    referenceId,
+    teamId,
+    userId,
+    provider,
+  }: CreateBankConnectionPayload,
+) {
+  // Get first account to create a bank connection
+  const account = accounts?.at(0);
+
+  if (!account) {
+    return;
+  }
+
+  const bankConnection = await supabase
+    .from("bank_connections")
+    .upsert(
+      {
+        institution_id: account.institution_id,
+        name: account.bank_name,
+        logo_url: account.logo_url,
+        team_id: teamId,
+        provider,
+        access_token: accessToken,
+        enrollment_id: enrollmentId,
+        reference_id: referenceId,
+        expires_at: account.expires_at,
+      },
+      {
+        onConflict: "institution_id, team_id",
+      },
+    )
+    .select()
+    .single();
+
+  await supabase.from("bank_accounts").upsert(
+    accounts.map(
+      (account) => ({
+        account_id: account.account_id,
+        bank_connection_id: bankConnection?.data?.id,
+        team_id: teamId,
+        created_by: userId,
+        name: account.name,
+        currency: account.currency,
+        enabled: account.enabled,
+        type: account.type,
+        account_reference: account.account_reference,
+        balance: account.balance ?? 0,
+      }),
+      {
+        onConflict: "account_id",
+      },
+    ),
+  );
+
+  return bankConnection;
+}
 
 type UpdateBankConnectionData = {
   id: string;
@@ -91,6 +177,49 @@ export async function updateTransactions(
     .select("id, category, category_slug, team_id, name, status, internal");
 }
 
+type UpdateUserParams = {
+  id: string;
+  full_name?: string | null;
+  team_id?: string | null;
+};
+
+export async function updateUser(supabase: Client, data: UpdateUserParams) {
+  const { id, ...input } = data;
+
+  return supabase.from("users").update(input).eq("id", id).select().single();
+}
+
+type DeleteUserParams = {
+  id: string;
+};
+
+export async function deleteUser(supabase: Client, params: DeleteUserParams) {
+  const { id } = params;
+
+  const { data: membersData } = await supabase
+    .from("users_on_team")
+    .select("team_id, team:team_id(id, name, members:users_on_team(id))")
+    .eq("user_id", id);
+
+  // Delete teams with only one member
+  const teamIds = membersData
+    ?.filter(({ team }) => team?.members.length === 1)
+    .map(({ team_id }) => team_id);
+
+  await Promise.all([
+    supabase.auth.admin.deleteUser(id),
+    supabase.from("users").delete().eq("id", id),
+    supabase
+      .from("teams")
+      .delete()
+      .in("id", teamIds ?? []),
+  ]);
+
+  return {
+    id,
+  };
+}
+
 type UpdateTeamParams = {
   id: string;
   base_currency?: string;
@@ -151,6 +280,66 @@ export async function deleteTeamMember(
     .single();
 }
 
+type CreateBankAccountParams = {
+  name: string;
+  currency?: string;
+  teamId: string;
+  userId: string;
+  accountId: string;
+  manual?: boolean;
+};
+
+export async function createBankAccount(
+  supabase: Client,
+  params: CreateBankAccountParams,
+) {
+  return await supabase
+    .from("bank_accounts")
+    .insert({
+      name: params.name,
+      currency: params.currency,
+      team_id: params.teamId,
+      created_by: params.userId,
+      account_id: params.accountId,
+      manual: params.manual,
+    })
+    .select()
+    .single();
+}
+
+export async function deleteBankAccount(supabase: Client, id: string) {
+  return await supabase
+    .from("bank_accounts")
+    .delete()
+    .eq("id", id)
+    .select()
+    .single();
+}
+
+type UpdateBankAccountParams = {
+  id: string;
+  teamId: string;
+  name?: string;
+  type?: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
+  balance?: number;
+  enabled?: boolean;
+};
+
+export async function updateBankAccount(
+  supabase: Client,
+  params: UpdateBankAccountParams,
+) {
+  const { id, teamId, ...data } = params;
+
+  return await supabase
+    .from("bank_accounts")
+    .update(data)
+    .eq("id", id)
+    .eq("team_id", teamId)
+    .select()
+    .single();
+}
+
 type UpdateSimilarTransactionsCategoryParams = {
   team_id: string;
   name: string;
@@ -206,6 +395,57 @@ export async function updateSimilarTransactionsRecurring(
     )
     .eq("team_id", team_id)
     .select("id, team_id");
+}
+
+type CreateAttachmentsParams = {
+  attachments: Attachment[];
+  teamId: string;
+};
+
+export type Attachment = {
+  type: string;
+  name: string;
+  size: number;
+  path: string[];
+  transaction_id?: string;
+};
+
+export async function createAttachments(
+  supabase: Client,
+  params: CreateAttachmentsParams,
+) {
+  const { attachments, teamId } = params;
+
+  return supabase
+    .from("transaction_attachments")
+    .insert(
+      attachments.map((attachment) => ({
+        ...attachment,
+        team_id: teamId,
+      })),
+    )
+    .select();
+}
+
+export async function deleteAttachment(supabase: Client, id: string) {
+  const response = await supabase
+    .from("transaction_attachments")
+    .delete()
+    .eq("id", id)
+    .select("id, transaction_id, name, team_id")
+    .single();
+
+  // Find inbox by transaction_id and set transaction_id to null
+  if (response?.data?.transaction_id) {
+    await supabase
+      .from("inbox")
+      .update({
+        transaction_id: null,
+      })
+      .eq("transaction_id", response.data.transaction_id);
+  }
+
+  return response;
 }
 
 type CreateTeamParams = {
@@ -292,6 +532,160 @@ export async function joinTeamByInviteCode(supabase: Client, code: string) {
   }
 
   return null;
+}
+
+type UpdateInboxParams = {
+  id: string;
+  teamId: string;
+  status?: "deleted" | "new" | "archived" | "processing" | "done" | "pending";
+};
+
+export async function updateInbox(supabase: Client, params: UpdateInboxParams) {
+  const { id, teamId, ...data } = params;
+
+  return supabase
+    .from("inbox")
+    .update(data)
+    .eq("id", id)
+    .select(`
+      id,
+      file_name,
+      file_path, 
+      display_name,
+      transaction_id,
+      amount,
+      currency,
+      content_type,
+      date,
+      status,
+      created_at,
+      website,
+      description,
+      transaction:transactions(id, amount, currency, name, date)
+    `)
+    .single();
+}
+
+type MatchTransactionParams = {
+  id: string;
+  transactionId: string;
+  teamId: string;
+};
+
+export async function matchTransaction(
+  supabase: Client,
+  params: MatchTransactionParams,
+) {
+  const { id, transactionId, teamId } = params;
+
+  const { data: inboxData } = await supabase
+    .from("inbox")
+    .select(`
+      id,
+      content_type,
+      file_path,
+      size,
+      file_name
+    `)
+    .eq("id", id)
+    .single();
+
+  if (inboxData) {
+    const { data: attachmentData } = await supabase
+      .from("transaction_attachments")
+      .insert({
+        type: inboxData.content_type,
+        path: inboxData.file_path,
+        transaction_id: transactionId,
+        size: inboxData.size,
+        name: inboxData.file_name,
+        team_id: teamId,
+      })
+      .select("id")
+      .single();
+
+    if (attachmentData) {
+      await supabase
+        .from("inbox")
+        .update({
+          attachment_id: attachmentData.id,
+          transaction_id: transactionId,
+          status: "done",
+        })
+        .eq("id", params.id)
+        .select()
+        .single();
+    }
+
+    return supabase
+      .from("inbox")
+      .select(`
+        id,
+        file_name,
+        file_path, 
+        display_name,
+        transaction_id,
+        amount,
+        currency,
+        content_type,
+        date,
+        status,
+        created_at,
+        website,
+        description,
+        transaction:transactions(id, amount, currency, name, date)
+      `)
+      .eq("id", id)
+      .single();
+  }
+}
+
+export async function unmatchTransaction(supabase: Client, id: string) {
+  const { data: inboxData } = await supabase
+    .from("inbox")
+    .select(`
+      id,
+      transaction_id,
+      attachment_id
+    `)
+    .eq("id", id)
+    .single();
+
+  await supabase
+    .from("inbox")
+    .update({ transaction_id: null, attachment_id: null, status: "pending" })
+    .eq("id", id)
+    .select("transaction_id")
+    .single();
+
+  // Delete transaction attachment
+  if (inboxData?.transaction_id) {
+    await supabase
+      .from("transaction_attachments")
+      .delete()
+      .eq("transaction_id", inboxData?.transaction_id);
+  }
+
+  return supabase
+    .from("inbox")
+    .select(`
+      id,
+      file_name,
+      file_path, 
+      display_name,
+      transaction_id,
+      amount,
+      currency,
+      content_type,
+      date,
+      status,
+      created_at,
+      website,
+      description,
+      transaction:transactions(id, amount, currency, name, date)
+    `)
+    .eq("id", id)
+    .single();
 }
 
 type CreateTransactionCategoriesParams = {
@@ -388,6 +782,76 @@ export async function deleteTransactions(
     .eq("manual", true);
 }
 
+type CreateTagParams = {
+  teamId: string;
+  name: string;
+};
+
+export async function createTag(supabase: Client, params: CreateTagParams) {
+  return supabase
+    .from("tags")
+    .insert({
+      name: params.name,
+      team_id: params.teamId,
+    })
+    .select("id, name")
+    .single();
+}
+
+type DeleteTagParams = {
+  id: string;
+};
+
+export async function deleteTag(supabase: Client, params: DeleteTagParams) {
+  return supabase.from("tags").delete().eq("id", params.id);
+}
+
+type UpdateTagParams = {
+  id: string;
+  name: string;
+};
+
+export async function updateTag(supabase: Client, params: UpdateTagParams) {
+  const { id, name } = params;
+
+  return supabase.from("tags").update({ name }).eq("id", id);
+}
+
+type CreateTransactionTagParams = {
+  teamId: string;
+  transactionId: string;
+  tagId: string;
+};
+
+export async function createTransactionTag(
+  supabase: Client,
+  params: CreateTransactionTagParams,
+) {
+  return supabase.from("transaction_tags").insert({
+    team_id: params.teamId,
+    transaction_id: params.transactionId,
+    tag_id: params.tagId,
+  });
+}
+
+type DeleteTransactionTagParams = {
+  transactionId: string;
+  tagId: string;
+};
+
+export async function deleteTransactionTag(
+  supabase: Client,
+  params: DeleteTransactionTagParams,
+) {
+  const { transactionId, tagId } = params;
+
+  return supabase
+    .from("transaction_tags")
+    .delete()
+    .eq("transaction_id", transactionId)
+    .eq("tag_id", tagId);
+}
+
 type AcceptTeamInviteParams = {
   userId: string;
   teamId: string;
@@ -436,6 +900,71 @@ export async function declineTeamInvite(
     .delete()
     .eq("email", email)
     .eq("team_id", teamId);
+}
+
+type DisconnectAppParams = {
+  appId: string;
+  teamId: string;
+};
+
+export async function disconnectApp(
+  supabase: Client,
+  params: DisconnectAppParams,
+) {
+  const { appId, teamId } = params;
+
+  return supabase
+    .from("apps")
+    .delete()
+    .eq("app_id", appId)
+    .eq("team_id", teamId)
+    .select()
+    .single();
+}
+
+type UpdateAppSettingsParams = {
+  appId: string;
+  teamId: string;
+  option: {
+    id: string;
+    value: string | number | boolean;
+  };
+};
+
+export async function updateAppSettings(
+  supabase: Client,
+  params: UpdateAppSettingsParams,
+) {
+  const { appId, teamId, option } = params;
+
+  const { data: existingApp } = await supabase
+    .from("apps")
+    .select("settings")
+    .eq("app_id", appId)
+    .eq("team_id", teamId)
+    .single();
+
+  const updatedSettings = existingApp?.settings?.map((setting) => {
+    if (setting.id === option.id) {
+      return { ...setting, value: option.value };
+    }
+
+    return setting;
+  });
+
+  const { data } = await supabase
+    .from("apps")
+    .update({ settings: updatedSettings })
+    .eq("app_id", appId)
+    .eq("team_id", teamId)
+    .select()
+    .single();
+
+  if (!data) {
+    throw new Error("Failed to update app settings");
+  }
+
+  return data;
 }
 
 type DeleteTeamParams = {
@@ -715,6 +1244,59 @@ export async function deleteTrackerProject(
     .single();
 }
 
+type UpsertTrackerEntriesParams = {
+  id?: string;
+  teamId: string;
+  start: string;
+  stop: string;
+  dates: string[];
+  assigned_id: string;
+  project_id: string;
+  description?: string | null;
+  duration: number;
+};
+
+export async function upsertTrackerEntries(
+  supabase: Client,
+  params: UpsertTrackerEntriesParams,
+) {
+  const { dates, id, teamId, ...rest } = params;
+  const entries = dates.map((date) => ({
+    team_id: teamId,
+    ...(id ? { id } : {}),
+    ...rest,
+    date,
+  }));
+
+  return supabase
+    .from("tracker_entries")
+    .upsert(entries, {
+      ignoreDuplicates: false,
+    })
+    .select(
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
+    );
+}
+
+type DeleteTrackerEntryParams = {
+  id: string;
+};
+
+export async function deleteTrackerEntry(
+  supabase: Client,
+  params: DeleteTrackerEntryParams,
+) {
+  return supabase.from("tracker_entries").delete().eq("id", params.id);
+}
+
+type DeleteInboxParams = {
+  id: string;
+};
+
+export async function deleteInbox(supabase: Client, params: DeleteInboxParams) {
+  return supabase.from("inbox").delete().eq("id", params.id);
+}
+
 type UpsertInboxAccountParams = {
   teamId: string;
   accessToken: string;
@@ -809,6 +1391,154 @@ export async function updateTeamPlan(
     .update(rest)
     .eq("id", id)
     .select("users_on_team(user_id)")
+    .single();
+}
+
+type DeleteDocumentParams = {
+  id: string;
+};
+
+export async function deleteDocument(
+  supabase: Client,
+  params: DeleteDocumentParams,
+) {
+  const { data } = await supabase
+    .from("documents")
+    .delete()
+    .eq("id", params.id)
+    .select("id, path_tokens")
+    .single();
+
+  if (!data || !data.path_tokens) {
+    return {
+      data: null,
+    };
+  }
+
+  await remove(supabase, {
+    bucket: "vault",
+    path: data.path_tokens,
+  });
+
+  // Delete all transaction attachments that have the same path
+  // Use contains and containedBy for array equality check, as .eq might have issues
+  // serializing arrays correctly for comparison, leading to the "malformed array literal" error.
+  // path @> data.path_tokens AND path <@ data.path_tokens is equivalent to path = data.path_tokens
+  await supabase
+    .from("transaction_attachments")
+    .delete()
+    .contains("path", data.path_tokens)
+    .containedBy("path", data.path_tokens);
+
+  return {
+    data,
+  };
+}
+
+type CreateDocumentTagParams = {
+  name: string;
+  teamId: string;
+  slug: string;
+};
+
+export async function createDocumentTag(
+  supabase: Client,
+  params: CreateDocumentTagParams,
+) {
+  return supabase
+    .from("document_tags")
+    .insert({
+      name: params.name,
+      slug: params.slug,
+      team_id: params.teamId,
+    })
+    .select("id, name, slug")
+    .single();
+}
+
+type DeleteDocumentTagParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function deleteDocumentTag(
+  supabase: Client,
+  params: DeleteDocumentTagParams,
+) {
+  return supabase
+    .from("document_tags")
+    .delete()
+    .eq("id", params.id)
+    .eq("team_id", params.teamId)
+    .select("id")
+    .single();
+}
+
+type CreateDocumentTagAssignmentParams = {
+  documentId: string;
+  tagId: string;
+  teamId: string;
+};
+
+export async function createDocumentTagAssignment(
+  supabase: Client,
+  params: CreateDocumentTagAssignmentParams,
+) {
+  return supabase.from("document_tag_assignments").insert({
+    document_id: params.documentId,
+    tag_id: params.tagId,
+    team_id: params.teamId,
+  });
+}
+
+type DeleteDocumentTagAssignmentParams = {
+  documentId: string;
+  tagId: string;
+  teamId: string;
+};
+
+export async function deleteDocumentTagAssignment(
+  supabase: Client,
+  params: DeleteDocumentTagAssignmentParams,
+) {
+  return supabase
+    .from("document_tag_assignments")
+    .delete()
+    .eq("document_id", params.documentId)
+    .eq("tag_id", params.tagId)
+    .eq("team_id", params.teamId);
+}
+
+type CreateDocumentTagEmbeddingParams = {
+  slug: string;
+  name: string;
+  embedding: string;
+};
+
+export async function createDocumentTagEmbedding(
+  supabase: Client,
+  params: CreateDocumentTagEmbeddingParams,
+) {
+  return supabase.from("document_tag_embeddings").insert({
+    embedding: params.embedding,
+    slug: params.slug,
+    name: params.name,
+  });
+}
+
+type DeleteBankConnectionParams = {
+  id: string;
+};
+
+export async function deleteBankConnection(
+  supabase: Client,
+  params: DeleteBankConnectionParams,
+) {
+  return supabase
+    .from("bank_connections")
+    .delete()
+    .eq("id", params.id)
+    .select("reference_id, provider, access_token")
     .single();
 }
 

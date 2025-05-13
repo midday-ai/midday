@@ -1,10 +1,10 @@
-import { getTrackerProjects } from "@api/db/queries/tracker-projects";
-import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   deleteTrackerProject,
+  getTrackerProjectById,
+  getTrackerProjects,
   upsertTrackerProject,
-} from "@midday/supabase/mutations";
-import { getTrackerProjectByIdQuery } from "@midday/supabase/queries";
+} from "@api/db/queries/tracker-projects";
+import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   deleteTrackerProjectSchema,
   getTrackerProjectByIdSchema,
@@ -24,33 +24,25 @@ export const trackerProjectsRouter = createTRPCRouter({
 
   upsert: protectedProcedure
     .input(upsertTrackerProjectSchema)
-    .mutation(async ({ input, ctx: { supabase, teamId } }) => {
-      const { data } = await upsertTrackerProject(supabase, {
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      return upsertTrackerProject(db, {
         ...input,
         teamId: teamId!,
       });
-
-      return data;
     }),
 
   delete: protectedProcedure
     .input(deleteTrackerProjectSchema)
-    .mutation(async ({ input, ctx: { supabase } }) => {
-      const { data } = await deleteTrackerProject(supabase, {
-        id: input.id,
-      });
-
-      return data;
+    .mutation(async ({ input, ctx: { db } }) => {
+      return deleteTrackerProject(db, input.id);
     }),
 
   getById: protectedProcedure
     .input(getTrackerProjectByIdSchema)
-    .query(async ({ input, ctx: { supabase, teamId } }) => {
-      const { data } = await getTrackerProjectByIdQuery(supabase, {
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      return getTrackerProjectById(db, {
         ...input,
         teamId: teamId!,
       });
-
-      return data;
     }),
 });
