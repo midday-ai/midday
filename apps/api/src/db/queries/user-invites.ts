@@ -2,7 +2,7 @@ import type { Database } from "@api/db";
 import { userInvites } from "@api/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function getUserInvitesQuery(db: Database, email: string) {
+export async function getUserInvites(db: Database, email: string) {
   return db.query.userInvites.findMany({
     where: eq(userInvites.email, email),
     with: {

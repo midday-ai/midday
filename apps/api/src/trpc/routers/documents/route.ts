@@ -1,8 +1,8 @@
 import {
   deleteDocument,
   getDocumentById,
-  getDocumentsQuery,
-  getRelatedDocumentsQuery,
+  getDocuments,
+  getRelatedDocuments,
 } from "@api/db/queries/documents";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
@@ -24,7 +24,7 @@ export const documentsRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getDocumentsSchema)
     .query(async ({ input, ctx: { db, teamId } }) => {
-      return getDocumentsQuery(db, {
+      return getDocuments(db, {
         teamId: teamId!,
         ...input,
       });
@@ -43,7 +43,7 @@ export const documentsRouter = createTRPCRouter({
   getRelatedDocuments: protectedProcedure
     .input(getRelatedDocumentsSchema)
     .query(async ({ input, ctx: { db, teamId } }) => {
-      return getRelatedDocumentsQuery(db, {
+      return getRelatedDocuments(db, {
         id: input.id,
         pageSize: input.pageSize,
         teamId: teamId!,
