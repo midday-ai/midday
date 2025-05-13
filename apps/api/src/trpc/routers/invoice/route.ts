@@ -141,12 +141,7 @@ export const invoiceRouter = createTRPCRouter({
     }),
 
   defaultSettings: protectedProcedure.query(
-    async ({ ctx: { supabase, teamId, session } }) => {
-      // const countryCode = await getCountryCode();
-      const countryCode = "US";
-      const timezone = "America/New_York";
-      const locale = "en";
-
+    async ({ ctx: { supabase, teamId, session, geo } }) => {
       // Fetch invoice number, template, and team details concurrently
       const [
         { data: nextInvoiceNumber },
@@ -160,13 +155,14 @@ export const invoiceRouter = createTRPCRouter({
         getUserQuery(supabase, session.user.id),
       ]);
 
+      const locale = user?.locale ?? "en";
+      const timezone = geo.timezone ?? "America/New_York";
+      const countryCode = geo.country ?? "US";
+
       const currency =
         team?.base_currency ??
         currencies[countryCode as keyof typeof currencies] ??
         "USD";
-
-      // const timezone = user?.timezone ?? (await getTimezone());
-      // const locale = user?.locale ?? (await getLocale());
 
       // Default to letter size for US/CA, A4 for rest of world
       const size = ["US", "CA"].includes(countryCode) ? "letter" : "a4";
