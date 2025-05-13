@@ -25,6 +25,83 @@ export async function getUserQuery(supabase: Client, userId: string) {
     .throwOnError();
 }
 
+type GetBankConnectionsParams = {
+  teamId: string;
+  enabled?: boolean;
+};
+
+export async function getBankConnectionsQuery(
+  supabase: Client,
+  params: GetBankConnectionsParams,
+) {
+  const { teamId, enabled } = params;
+
+  const query = supabase
+    .from("bank_connections")
+    .select(
+      `
+      id,
+      name,
+      logo_url,
+      provider,
+      expires_at,
+      enrollment_id,
+      institution_id,
+      reference_id,
+      last_accessed,
+      access_token,
+      status,
+      accounts:bank_accounts(
+        id,
+        name,
+        enabled,
+        manual,
+        currency,
+        balance,
+        type,
+        error_retries
+      )
+    `,
+    )
+    .eq("team_id", teamId);
+
+  if (enabled) {
+    query.eq("enabled", enabled);
+  }
+
+  return query;
+}
+
+export type GetBankAccountsParams = {
+  teamId: string;
+  enabled?: boolean;
+  manual?: boolean;
+};
+
+export async function getBankAccountsQuery(
+  supabase: Client,
+  params: GetBankAccountsParams,
+) {
+  const { teamId, enabled, manual } = params;
+
+  const query = supabase
+    .from("bank_accounts")
+    .select("*, connection:bank_connections(*)")
+    .eq("team_id", teamId)
+    .order("created_at", { ascending: true })
+    .order("name", { ascending: false });
+
+  if (enabled) {
+    query.eq("enabled", enabled);
+  }
+
+  if (manual) {
+    query.eq("manual", manual);
+  }
+
+  return query;
+}
+
 export async function getTeamMembersQuery(supabase: Client, teamId: string) {
   const { data } = await supabase
     .from("users_on_team")
@@ -350,6 +427,19 @@ export async function getSimilarTransactions(
   return query;
 }
 
+type GetBankAccountsCurrenciesParams = {
+  teamId: string;
+};
+
+export async function getBankAccountsCurrenciesQuery(
+  supabase: Client,
+  params: GetBankAccountsCurrenciesParams,
+) {
+  return supabase.rpc("get_bank_account_currencies", {
+    team_id: params.teamId,
+  });
+}
+
 export type GetBurnRateQueryParams = {
   teamId: string;
   from: string;
@@ -537,6 +627,13 @@ export async function getTeamInvitesQuery(supabase: Client, teamId: string) {
     .throwOnError();
 }
 
+export async function getUserInvitesQuery(supabase: Client, email: string) {
+  return supabase
+    .from("user_invites")
+    .select("id, email, code, role, user:invited_by(*), team:team_id(*)")
+    .eq("email", email);
+}
+
 type GetUserInviteQueryParams = {
   code: string;
   email: string;
@@ -551,6 +648,109 @@ export async function getUserInviteQuery(
     .select("*")
     .eq("code", params.code)
     .eq("email", params.email)
+    .single();
+}
+
+type GetInboxQueryParams = {
+  teamId: string;
+  cursor?: string | null;
+  order?: string | null;
+  pageSize?: number;
+  filter?: {
+    q?: string | null;
+    status?: "new" | "archived" | "processing" | "done" | "pending" | null;
+  };
+};
+
+export async function getInboxQuery(
+  supabase: Client,
+  params: GetInboxQueryParams,
+) {
+  const {
+    teamId,
+    filter: { q, status } = {},
+    cursor,
+    order,
+    pageSize = 20,
+  } = params;
+
+  const query = supabase
+    .from("inbox")
+    .select(`
+      id,
+      file_name,
+      file_path, 
+      display_name,
+      transaction_id,
+      amount,
+      currency,
+      content_type,
+      date,
+      status,
+      created_at,
+      website,
+      description,
+      transaction:transactions(id, amount, currency, name, date)
+    `)
+    .eq("team_id", teamId)
+    .order("created_at", { ascending: order === "desc" })
+    .neq("status", "deleted");
+
+  // If status is not done, filter by status
+  if (status) {
+    query.eq("status", status);
+  }
+
+  if (q) {
+    if (!Number.isNaN(Number.parseInt(q))) {
+      query.like("inbox_amount_text", `%${q}%`);
+    } else {
+      query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
+    }
+  }
+
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
+
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
+
+  return {
+    meta: {
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
+    },
+    data: data || [],
+  };
+}
+
+export async function getInboxByIdQuery(supabase: Client, id: string) {
+  return supabase
+    .from("inbox")
+    .select(`
+      id,
+      file_name,
+      file_path, 
+      display_name,
+      transaction_id,
+      amount,
+      currency,
+      content_type,
+      date,
+      status,
+      created_at,
+      website,
+      description,
+      transaction:transactions(id, amount, currency, name, date)
+    `)
+    .eq("id", id)
     .single();
 }
 
@@ -571,6 +771,215 @@ export async function getTrackerProjectByIdQuery(
     .single();
 }
 
+export type GetTrackerProjectsQueryParams = {
+  teamId: string;
+  cursor?: string | null;
+  pageSize?: number;
+  filter?: {
+    q?: string | null;
+    start?: string | null;
+    end?: string | null;
+    status?: "in_progress" | "completed" | null;
+    customers?: string[] | null;
+    tags?: string[] | null;
+  };
+  sort?: string[] | null;
+};
+
+export async function getTrackerProjectsQuery(
+  supabase: Client,
+  params: GetTrackerProjectsQueryParams,
+) {
+  const { filter, sort, teamId, cursor, pageSize = 25 } = params;
+  const { status, customers, q, start, end, tags } = filter || {};
+
+  const columns =
+    "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount, customer:customer_id(id, name, website), tags:tracker_project_tags(id, tag:tags(id, name))";
+
+  const query = supabase
+    .from("tracker_projects")
+    .select(columns)
+    .eq("team_id", teamId);
+
+  if (status) {
+    query.eq("status", status);
+  }
+
+  if (start && end) {
+    query.gte("created_at", start);
+    query.lte("created_at", end);
+  }
+
+  if (q) {
+    query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
+  }
+
+  if (customers?.length) {
+    query.in("customer_id", customers);
+  }
+
+  if (tags) {
+    query
+      .in("temp_filter_tags.tag_id", tags)
+      .eq("team_id", teamId)
+      .select(`${columns}, temp_filter_tags:tracker_project_tags!inner()`);
+  }
+
+  if (sort?.length === 2) {
+    const [column, direction] = sort;
+    const ascending = direction === "asc";
+
+    if (column === "time") {
+      query.order("total_duration", { ascending });
+    } else if (column === "amount") {
+      query.order("get_project_total_amount", { ascending });
+    } else if (column === "assigned") {
+      query.order("get_project_assigned_users_count", { ascending });
+    } else if (column === "customer") {
+      query.order("customer(name)", { ascending });
+    } else if (column === "tags") {
+      query.order("is_project_tagged", { ascending });
+    } else if (column) {
+      query.order(column, { ascending });
+    }
+  } else {
+    query.order("created_at", { ascending: false });
+  }
+
+  if (cursor) {
+    query.lt("created_at", cursor);
+  }
+
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
+
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
+
+  return {
+    meta: {
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
+    },
+    data: data || [],
+  };
+}
+
+type GetTrackerRecordsByDateParams = {
+  teamId: string;
+  date: string;
+  projectId?: string;
+  userId?: string;
+};
+
+export async function getTrackerRecordsByDateQuery(
+  supabase: Client,
+  params: GetTrackerRecordsByDateParams,
+) {
+  const { teamId, projectId, date, userId } = params;
+
+  const query = supabase
+    .from("tracker_entries")
+    .select(
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency, customer:customer_id(id, name))",
+    )
+    .eq("team_id", teamId)
+    .eq("date", formatISO(parseISO(date), { representation: "date" }));
+
+  if (projectId) {
+    query.eq("project_id", projectId);
+  }
+
+  if (userId) {
+    query.eq("assigned_id", userId);
+  }
+
+  const { data } = await query;
+
+  const totalDuration = data?.reduce(
+    (duration, item) => (item?.duration ?? 0) + duration,
+    0,
+  );
+
+  return {
+    meta: {
+      totalDuration,
+    },
+    data,
+  };
+}
+
+export type GetTrackerRecordsByRangeParams = {
+  teamId: string;
+  from: string;
+  to: string;
+  projectId?: string;
+  userId?: string;
+};
+
+export async function getTrackerRecordsByRangeQuery(
+  supabase: Client,
+  params: GetTrackerRecordsByRangeParams,
+) {
+  const query = supabase
+    .from("tracker_entries")
+    .select(
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
+    )
+    .eq("team_id", params.teamId)
+    .gte("date", params.from)
+    .lte("date", params.to)
+    .order("created_at");
+
+  if (params.userId) {
+    query.eq("assigned_id", params.userId);
+  }
+
+  if (params.projectId) {
+    query.eq("project_id", params.projectId);
+  }
+
+  const { data } = await query;
+
+  const result = data?.reduce((acc, item) => {
+    const key = item.date;
+
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(item);
+    return acc;
+  }, {});
+
+  const totalDuration = data?.reduce(
+    (duration, item) => (item?.duration ?? 0) + duration,
+    0,
+  );
+
+  const totalAmount = data?.reduce(
+    (amount, { project, duration = 0 }) =>
+      amount + (project?.rate ?? 0) * (duration ?? 0 / 3600),
+    0,
+  );
+
+  return {
+    meta: {
+      totalDuration,
+      totalAmount,
+      from: params.from,
+      to: params.to,
+    },
+    result,
+  };
+}
+
 export type GetCategoriesParams = {
   teamId: string;
   limit?: number;
@@ -589,6 +998,38 @@ export async function getCategoriesQuery(
     .order("created_at", { ascending: false })
     .order("name", { ascending: true })
     .range(0, limit);
+}
+
+type GetInboxSearchParams = {
+  teamId: string;
+  limit?: number;
+  q: string | number;
+};
+
+export async function getInboxSearchQuery(
+  supabase: Client,
+  params: GetInboxSearchParams,
+) {
+  const { teamId, q, limit = 10 } = params;
+
+  const query = supabase
+    .from("inbox")
+    .select(
+      "id, created_at, file_name, amount, currency, file_path, content_type, date, display_name, size, description",
+    )
+    .eq("team_id", teamId)
+    .neq("status", "deleted")
+    .order("created_at", { ascending: true });
+
+  if (!Number.isNaN(Number.parseInt(q))) {
+    query.like("inbox_amount_text", `%${q}%`);
+  } else {
+    query.textSearch("fts", `${q.replaceAll(" ", "+")}:*`);
+  }
+
+  const { data } = await query.range(0, limit);
+
+  return data;
 }
 
 export type GetInvoicesQueryParams = {
@@ -945,6 +1386,15 @@ export async function getTagsQuery(supabase: Client, teamId: string) {
     .order("created_at", { ascending: false });
 }
 
+export async function getBankAccountsBalancesQuery(
+  supabase: Client,
+  teamId: string,
+) {
+  return supabase.rpc("get_team_bank_accounts_balances", {
+    team_id: teamId,
+  });
+}
+
 export async function getTeamLimitsMetricsQuery(
   supabase: Client,
   teamId: string,
@@ -954,6 +1404,10 @@ export async function getTeamLimitsMetricsQuery(
       input_team_id: teamId,
     })
     .single();
+}
+
+export async function getInstalledAppsQuery(supabase: Client, teamId: string) {
+  return supabase.from("apps").select("app_id, settings").eq("team_id", teamId);
 }
 
 export async function getTeamByIdQuery(supabase: Client, teamId: string) {
@@ -1048,6 +1502,137 @@ export async function searchTransactionMatchQuery(
   return {
     data: [],
   };
+}
+
+export type GetDocumentQueryParams = {
+  teamId: string;
+  id?: string | null;
+  filePath?: string | null;
+};
+
+export async function getDocumentQuery(
+  supabase: Client,
+  params: GetDocumentQueryParams,
+) {
+  const query = supabase
+    .from("documents")
+    .select(
+      "id, name, path_tokens, title, metadata, created_at, summary, tags:document_tag_assignments(tag:document_tags(id, name, slug))",
+    )
+    .eq("team_id", params.teamId);
+
+  if (params.id) {
+    query.eq("id", params.id);
+  }
+
+  if (params.filePath) {
+    query.eq("name", params.filePath);
+  }
+
+  return query.single();
+}
+
+type GetDocumentsParams = {
+  teamId: string;
+  pageSize?: number;
+  cursor?: string | null;
+  language?: string | null;
+  filter?: {
+    q?: string | null;
+    tags?: string[] | null;
+    start?: string | null;
+    end?: string | null;
+  };
+};
+
+export async function getDocumentsQuery(
+  supabase: Client,
+  params: GetDocumentsParams,
+) {
+  const { teamId, pageSize = 20, cursor, filter } = params;
+
+  const { tags, q, start, end } = filter || {};
+
+  const columns =
+    "id, name, metadata, path_tokens, processing_status, title, summary, team_id, created_at, tags:document_tag_assignments(tag:document_tags(id, name, slug))";
+
+  const query = supabase
+    .from("documents")
+    .select(columns)
+    .eq("team_id", teamId)
+    .not("name", "ilike", "%.folderPlaceholder")
+    .order("created_at", { ascending: false });
+
+  if (tags) {
+    query
+      .in("temp_filter_tags.tag_id", tags)
+      .eq("team_id", teamId)
+      .select(`${columns}, temp_filter_tags:document_tag_assignments!inner()`);
+  }
+
+  if (q) {
+    // Let's hardcode the language to English for now (When we have drizzle we can search multiple columns at once)
+    query.textSearch("fts_english", `${q.replaceAll(" ", "+")}:*`, {
+      type: "websearch",
+      config: "english",
+    });
+  }
+
+  if (start && end) {
+    query.gte("date", start);
+    query.lte("date", end);
+  }
+
+  // Convert cursor to offset
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // TODO: Use cursor instead of range
+  const { data } = await query.range(offset, offset + pageSize - 1);
+
+  // Generate next cursor (offset)
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
+
+  return {
+    meta: {
+      cursor: nextCursor,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
+    },
+    data: data ?? [],
+  };
+}
+
+export type GetRelatedDocumentsParams = {
+  teamId: string;
+  id: string;
+  pageSize: number;
+};
+
+export async function getRelatedDocumentsQuery(
+  supabase: Client,
+  params: GetRelatedDocumentsParams,
+) {
+  const { teamId, id, pageSize } = params;
+
+  const { data } = await supabase.rpc("match_similar_documents_by_title", {
+    source_document_id: id,
+    p_team_id: teamId,
+    match_threshold: 0.3,
+    match_count: pageSize,
+  });
+
+  return data;
+}
+
+export async function getDocumentTagsQuery(supabase: Client, teamId: string) {
+  return supabase
+    .from("document_tags")
+    .select("id, name")
+    .eq("team_id", teamId)
+    .order("created_at", { ascending: false });
 }
 
 type GlobalSearchParams = {
