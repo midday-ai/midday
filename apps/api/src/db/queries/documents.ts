@@ -59,10 +59,7 @@ export type GetDocumentsParams = {
   };
 };
 
-export async function getDocumentsQuery(
-  db: Database,
-  params: GetDocumentsParams,
-) {
+export async function getDocuments(db: Database, params: GetDocumentsParams) {
   const { teamId, pageSize = 20, cursor, filter } = params;
   const { tags, q, start, end } = filter || {};
 
@@ -169,7 +166,7 @@ export type GetRelatedDocumentsResponse = {
   title_similarity: number;
 };
 
-export async function getRelatedDocumentsQuery(
+export async function getRelatedDocuments(
   db: Database,
   params: GetRelatedDocumentsParams,
 ) {
