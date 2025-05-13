@@ -22,7 +22,7 @@ export const processAttachmentsSchema = z.array(
   z.object({
     mimetype: z.string(),
     size: z.number(),
-    file_path: z.array(z.string()),
+    filePath: z.array(z.string()),
   }),
 );
 

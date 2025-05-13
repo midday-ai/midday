@@ -14,12 +14,12 @@ const saPool = postgres(process.env.DATABASE_SA_URL!, { prepare: false });
 export const primaryDb = drizzle(primaryPool, { schema, casing: "snake_case" });
 
 const getReplicaIndexForRegion = () => {
-  switch (process.env.AWS_REGION) {
-    case "eu-central-1":
+  switch (process.env.FLY_REGION) {
+    case "fra":
       return 0;
-    case "us-east-1":
+    case "iad":
       return 1;
-    case "sa-east-1":
+    case "gru":
       return 2;
     default:
       return 0;
