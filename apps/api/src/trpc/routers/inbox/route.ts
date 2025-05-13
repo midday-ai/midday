@@ -50,7 +50,7 @@ export const inboxRouter = createTRPCRouter({
         "process-attachment",
         input.map((item) => ({
           payload: {
-            file_path: item.file_path,
+            file_path: item.filePath,
             mimetype: item.mimetype,
             size: item.size,
             teamId: teamId!,

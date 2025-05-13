@@ -1,15 +1,14 @@
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { client } from "@midday/engine/client";
-import { z } from "zod";
+import {
+  getAccountsSchema,
+  getInstitutionsSchema,
+  updateUsageSchema,
+} from "./schema";
 
 export const institutionsRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(
-      z.object({
-        q: z.string().optional(),
-        countryCode: z.string(),
-      }),
-    )
+    .input(getInstitutionsSchema)
     .query(async ({ input }) => {
       const institutionsResponse = await client.institutions.$get({
         query: input,
@@ -25,14 +24,7 @@ export const institutionsRouter = createTRPCRouter({
     }),
 
   accounts: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().optional(), // EnableBanking & GoCardLess
-        accessToken: z.string().optional(),
-        institutionId: z.string().optional(), // Plaid
-        provider: z.enum(["gocardless", "teller", "plaid", "enablebanking"]),
-      }),
-    )
+    .input(getAccountsSchema)
     .query(async ({ input }) => {
       const accountsResponse = await client.accounts.$get({
         query: input,
@@ -48,7 +40,7 @@ export const institutionsRouter = createTRPCRouter({
     }),
 
   updateUsage: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(updateUsageSchema)
     .mutation(async ({ input }) => {
       const usageResponse = await client.institutions[":id"].usage.$put({
         param: input,

@@ -3,7 +3,6 @@ import { addDays, addMonths } from "date-fns";
 import { nanoid } from "nanoid";
 import { getUserInviteQuery } from "../queries";
 import type { Client } from "../types";
-import { remove } from "../utils/storage";
 
 type UpdateBankConnectionData = {
   id: string;
@@ -209,57 +208,6 @@ export async function updateSimilarTransactionsRecurring(
     .select("id, team_id");
 }
 
-type CreateAttachmentsParams = {
-  attachments: Attachment[];
-  teamId: string;
-};
-
-export type Attachment = {
-  type: string;
-  name: string;
-  size: number;
-  path: string[];
-  transaction_id?: string;
-};
-
-export async function createAttachments(
-  supabase: Client,
-  params: CreateAttachmentsParams,
-) {
-  const { attachments, teamId } = params;
-
-  return supabase
-    .from("transaction_attachments")
-    .insert(
-      attachments.map((attachment) => ({
-        ...attachment,
-        team_id: teamId,
-      })),
-    )
-    .select();
-}
-
-export async function deleteAttachment(supabase: Client, id: string) {
-  const response = await supabase
-    .from("transaction_attachments")
-    .delete()
-    .eq("id", id)
-    .select("id, transaction_id, name, team_id")
-    .single();
-
-  // Find inbox by transaction_id and set transaction_id to null
-  if (response?.data?.transaction_id) {
-    await supabase
-      .from("inbox")
-      .update({
-        transaction_id: null,
-      })
-      .eq("transaction_id", response.data.transaction_id);
-  }
-
-  return response;
-}
-
 type CreateTeamParams = {
   name: string;
   baseCurrency: string;
@@ -438,41 +386,6 @@ export async function deleteTransactions(
     .delete()
     .in("id", params.ids)
     .eq("manual", true);
-}
-
-type CreateTransactionTagParams = {
-  teamId: string;
-  transactionId: string;
-  tagId: string;
-};
-
-export async function createTransactionTag(
-  supabase: Client,
-  params: CreateTransactionTagParams,
-) {
-  return supabase.from("transaction_tags").insert({
-    team_id: params.teamId,
-    transaction_id: params.transactionId,
-    tag_id: params.tagId,
-  });
-}
-
-type DeleteTransactionTagParams = {
-  transactionId: string;
-  tagId: string;
-};
-
-export async function deleteTransactionTag(
-  supabase: Client,
-  params: DeleteTransactionTagParams,
-) {
-  const { transactionId, tagId } = params;
-
-  return supabase
-    .from("transaction_tags")
-    .delete()
-    .eq("transaction_id", transactionId)
-    .eq("tag_id", tagId);
 }
 
 type AcceptTeamInviteParams = {
@@ -800,51 +713,6 @@ export async function deleteTrackerProject(
     .eq("id", params.id)
     .select("id")
     .single();
-}
-
-type UpsertTrackerEntriesParams = {
-  id?: string;
-  teamId: string;
-  start: string;
-  stop: string;
-  dates: string[];
-  assigned_id: string;
-  project_id: string;
-  description?: string | null;
-  duration: number;
-};
-
-export async function upsertTrackerEntries(
-  supabase: Client,
-  params: UpsertTrackerEntriesParams,
-) {
-  const { dates, id, teamId, ...rest } = params;
-  const entries = dates.map((date) => ({
-    team_id: teamId,
-    ...(id ? { id } : {}),
-    ...rest,
-    date,
-  }));
-
-  return supabase
-    .from("tracker_entries")
-    .upsert(entries, {
-      ignoreDuplicates: false,
-    })
-    .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
-    );
-}
-
-type DeleteTrackerEntryParams = {
-  id: string;
-};
-
-export async function deleteTrackerEntry(
-  supabase: Client,
-  params: DeleteTrackerEntryParams,
-) {
-  return supabase.from("tracker_entries").delete().eq("id", params.id);
 }
 
 type UpsertInboxAccountParams = {

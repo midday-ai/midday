@@ -2,7 +2,6 @@
 
 import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
@@ -66,7 +65,6 @@ type DataTableRowProps = {
 
 export function DataTableRow({ row, onDelete }: DataTableRowProps) {
   const { setParams } = useTrackerParams();
-  const { setParams: setInvoiceParams } = useInvoiceParams();
   const { data: user } = useUserQuery();
 
   const onClick = () => {
@@ -110,8 +108,8 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
           <DataTableCell onClick={onClick} className="cursor-pointer">
             <span className="text-sm">
               {row.estimate
-                ? `${secondsToHoursAndMinutes(row.total_duration ?? 0)} / ${secondsToHoursAndMinutes(row.estimate * 3600)}`
-                : secondsToHoursAndMinutes(row?.total_duration ?? 0)}
+                ? `${secondsToHoursAndMinutes(row.totalDuration ?? 0)} / ${secondsToHoursAndMinutes(row.estimate * 3600)}`
+                : secondsToHoursAndMinutes(row.totalDuration ?? 0)}
             </span>
           </DataTableCell>
           <DataTableCell onClick={onClick} className="cursor-pointer">
@@ -119,7 +117,7 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
               <span className="text-sm">
                 {formatAmount({
                   currency: row.currency,
-                  amount: row.total_amount ?? 0,
+                  amount: row.totalAmount ?? 0,
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                   locale: user?.locale,
@@ -159,17 +157,16 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
           </DataTableCell>
           <DataTableCell onClick={onClick} className="cursor-pointer">
             <div className="flex items-center space-x-2">
-              {/* @ts-expect-error */}
               {row.users?.map((user) => (
-                <Avatar key={user.user_id} className="size-4">
+                <Avatar key={user.id} className="size-4">
                   <AvatarImageNext
-                    src={user.avatar_url}
-                    alt={user.full_name ?? ""}
+                    src={user.avatarUrl}
+                    alt={user.fullName ?? ""}
                     width={20}
                     height={20}
                   />
                   <AvatarFallback className="text-[10px]">
-                    {user.full_name?.slice(0, 1)?.toUpperCase()}
+                    {user.fullName?.slice(0, 1)?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               ))}
