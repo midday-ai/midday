@@ -43,7 +43,6 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
         {
           error: "Internal server error",
           message: "Internal server error",
-          requestId: c.get("requestId"),
           code: "400",
         },
         400,
