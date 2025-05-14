@@ -1,3 +1,4 @@
+import { DocumentClient } from "@midday/documents";
 import { loadDocument } from "@midday/documents/loader";
 import { getContentSample } from "@midday/documents/utils";
 import { createClient } from "@midday/supabase/job";

@@ -1,9 +1,14 @@
 import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
 import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx";
+import { Mistral } from "@mistralai/mistralai";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { parseOfficeAsync } from "officeparser";
 import { extractText, getDocumentProxy } from "unpdf";
 import { cleanText, extractTextFromRtf } from "../utils";
+
+// Currently, the Vercel AI SDK doesn't support base64-encoded PDF files
+// And here we only have the Blob object
+const mistralClient = new Mistral({ apiKey: process.env.MISTRAL_API_KEY });
 
 export async function loadDocument({
   content,
@@ -26,6 +31,23 @@ export async function loadDocument({
 
       // Unsupported Unicode escape sequence
       document = text.replaceAll("\u0000", "");
+
+      // If we still don't have any text, let's use Mistral
+      if (document.length === 0) {
+        const base64Content = Buffer.from(await content.arrayBuffer()).toString(
+          "base64",
+        );
+        const ocrResponse = await mistralClient.ocr.process({
+          model: "mistral-ocr-latest",
+          document: {
+            type: "document_url",
+            documentUrl: `data:application/pdf;base64,${base64Content}`,
+          },
+          includeImageBase64: true,
+        });
+
+        document = ocrResponse.pages[0]?.markdown ?? null;
+      }
 
       break;
     }
