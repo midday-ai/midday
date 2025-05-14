@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "trigger dev",
-    "deploy": "trigger deploy"
+    "deploy": "trigger deploy",
+    "typecheck": "tsc --noEmit"
   },
   "exports": {
     "./tasks/bank/setup/initial": "./src/tasks/bank/setup/initial.ts",

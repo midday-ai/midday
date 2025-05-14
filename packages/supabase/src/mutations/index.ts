@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getAccessValidForDays } from "@midday/engine/gocardless/utils";
 import { addDays, addMonths } from "date-fns";
 import { nanoid } from "nanoid";

@@ -1,4 +1,4 @@
-import { processDocument } from "@/tasks/document/process-document";
+import { processDocument } from "@jobs/tasks/document/process-document";
 import { PdfTemplate, renderToBuffer } from "@midday/invoice";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";

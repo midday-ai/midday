@@ -1,5 +1,5 @@
 import { createSlackWebClient } from "@midday/app-store/slack";
-import type { SlackEvent } from "@slack/bolt";
+import type { SlackEvent } from "@slack/web-api";
 import { waitUntil } from "@vercel/functions";
 import { fileShare } from "./file";
 import { assistantThreadMessage, assistantThreadStarted } from "./thread";
@@ -17,20 +17,23 @@ export async function handleSlackEvent(
     return;
   }
 
-  // In Assisant Threads
-  if (event.subtype === "file_share") {
-    waitUntil(fileShare(event, options));
-    return;
-  }
+  // Check for message events first to enable type-safe access to message-specific properties
+  if (event.type === "message") {
+    if (event.subtype === "file_share") {
+      waitUntil(fileShare(event, options));
+      return;
+    }
 
-  if (
-    event.text &&
-    event.type === "message" &&
-    event.channel_type === "im" &&
-    !event.bot_id && // Ignore bot messages
-    event.subtype !== "assistant_app_thread"
-  ) {
-    waitUntil(assistantThreadMessage(event, client, options));
-    return;
+    // Handle general IM messages from users (inspired by reference code)
+    // This block targets plain direct messages from users.
+    if (
+      !event.subtype &&
+      event.channel_type === "im" &&
+      !event.bot_id && // Ignore messages from bots that have a bot_id
+      event.text // Ensure there is text content in the message
+    ) {
+      waitUntil(assistantThreadMessage(event as any, client, options));
+      return;
+    }
   }
 }

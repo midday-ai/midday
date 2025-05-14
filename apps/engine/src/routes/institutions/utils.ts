@@ -1,7 +1,7 @@
-import { GoCardLessProvider } from "@/providers/gocardless/gocardless-provider";
-import { PlaidProvider } from "@/providers/plaid/plaid-provider";
-import { TellerProvider } from "@/providers/teller/teller-provider";
-import type { ProviderParams } from "@/providers/types";
+import { GoCardLessProvider } from "@engine/providers/gocardless/gocardless-provider";
+import { PlaidProvider } from "@engine/providers/plaid/plaid-provider";
+import { TellerProvider } from "@engine/providers/teller/teller-provider";
+import type { ProviderParams } from "@engine/providers/types";
 
 export const excludedInstitutions = [
   "ins_56", // Chase - Plaid

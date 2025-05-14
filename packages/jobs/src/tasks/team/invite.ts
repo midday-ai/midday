@@ -1,4 +1,4 @@
-import { resend } from "@/utils/resend";
+import { resend } from "@jobs/utils/resend";
 import { InviteEmail } from "@midday/email/emails/invite";
 import { getI18n } from "@midday/email/locales";
 import { render } from "@midday/email/render";

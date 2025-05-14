@@ -1,4 +1,4 @@
-import { resend } from "@/utils/resend";
+import { resend } from "@jobs/utils/resend";
 import InvoiceReminderEmail from "@midday/email/emails/invoice-reminder";
 import { render } from "@midday/email/render";
 import { encrypt } from "@midday/encryption";

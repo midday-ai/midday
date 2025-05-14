@@ -3,7 +3,7 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@engine/*": ["src/*"]
     },
     "strict": true,
     "types": ["@cloudflare/workers-types", "bun-types"],

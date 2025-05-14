@@ -1,4 +1,4 @@
-import { triggerSequenceAndWait } from "@/utils/trigger-sequence";
+import { triggerSequenceAndWait } from "@jobs/utils/trigger-sequence";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";

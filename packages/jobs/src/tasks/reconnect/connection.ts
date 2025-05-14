@@ -1,5 +1,5 @@
-import { syncConnection } from "@/tasks/bank/sync/connection";
-import { client } from "@midday/engine/client";
+import { syncConnection } from "@jobs/tasks/bank/sync/connection";
+import { engineClient } from "@jobs/utils/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
@@ -20,7 +20,7 @@ export const reconnectConnection = schemaTask({
 
     if (provider === "gocardless") {
       // We need to update the reference of the connection
-      const connection = await client.connections[":reference"].$get({
+      const connection = await engineClient.connections[":reference"].$get({
         param: { reference: teamId },
       });
 
@@ -41,7 +41,7 @@ export const reconnectConnection = schemaTask({
 
       // The account_ids can be different between the old and new connection
       // So we need to check for account_reference and update
-      const accounts = await client.accounts.$get({
+      const accounts = await engineClient.accounts.$get({
         query: {
           id: referenceId,
           provider: "gocardless",

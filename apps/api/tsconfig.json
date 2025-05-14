@@ -17,10 +17,12 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
     "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
+    "jsxImportSource": "react",
     "baseUrl": ".",
     "paths": {
-      "@api/*": ["src/*"]
+      "@api/*": ["src/*"],
+      "@engine/*": ["../engine/src/*"],
+      "@jobs/*": ["../../packages/jobs/src/*"]
     },
     "types": ["bun-types"]
   },
