@@ -63,7 +63,6 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
 
     return c.json(
       {
-        requestId: c.get("requestId"),
         message: "Service unhelthy",
         code: "bad_request",
       },

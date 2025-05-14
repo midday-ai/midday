@@ -2,8 +2,7 @@ import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
 import { Provider } from "@/providers";
 import { createErrorResponse } from "@/utils/error";
-import { createRoute } from "@hono/zod-openapi";
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
   AccountBalanceParamsSchema,
@@ -68,7 +67,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           200,
         );
       } catch (error) {
-        const errorResponse = createErrorResponse(error, c.get("requestId"));
+        const errorResponse = createErrorResponse(error);
 
         return c.json(errorResponse, 400);
       }
@@ -125,7 +124,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           200,
         );
       } catch (error) {
-        const errorResponse = createErrorResponse(error, c.get("requestId"));
+        const errorResponse = createErrorResponse(error);
 
         return c.json(errorResponse, 400);
       }
@@ -182,7 +181,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           200,
         );
       } catch (error) {
-        const errorResponse = createErrorResponse(error, c.get("requestId"));
+        const errorResponse = createErrorResponse(error);
 
         return c.json(errorResponse, 400);
       }

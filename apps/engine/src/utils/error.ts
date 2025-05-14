@@ -56,19 +56,17 @@ export class ProviderError extends Error {
   }
 }
 
-export function createErrorResponse(error: unknown, requestId: string) {
+export function createErrorResponse(error: unknown) {
   console.error(error);
 
   if (error instanceof ProviderError) {
     return {
-      requestId,
       message: error.message,
       code: error.code,
     };
   }
 
   return {
-    requestId,
     message: String(error),
     code: "unknown",
   };

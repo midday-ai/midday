@@ -82,7 +82,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           200,
         );
       } catch (error) {
-        const errorResponse = createErrorResponse(error, c.get("requestId"));
+        const errorResponse = createErrorResponse(error);
 
         return c.json(errorResponse, 400);
       }
@@ -138,7 +138,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
 
         return c.json(data, 200);
       } catch (error) {
-        const errorResponse = createErrorResponse(error, c.get("requestId"));
+        const errorResponse = createErrorResponse(error);
 
         return c.json(errorResponse, 400);
       }
@@ -203,7 +203,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           200,
         );
       } catch (error) {
-        const errorResponse = createErrorResponse(error, c.get("requestId"));
+        const errorResponse = createErrorResponse(error);
 
         return c.json(errorResponse, 400);
       }
@@ -266,7 +266,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           200,
         );
       } catch (error) {
-        const errorResponse = createErrorResponse(error, c.get("requestId"));
+        const errorResponse = createErrorResponse(error);
 
         return c.json(errorResponse, 400);
       }
@@ -328,7 +328,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           200,
         );
       } catch (error) {
-        const errorResponse = createErrorResponse(error, c.get("requestId"));
+        const errorResponse = createErrorResponse(error);
 
         return c.json(errorResponse, 400);
       }
@@ -397,7 +397,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           200,
         );
       } catch (error) {
-        const errorResponse = createErrorResponse(error, c.get("requestId"));
+        const errorResponse = createErrorResponse(error);
 
         return c.json(errorResponse, 400);
       }
@@ -454,7 +454,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
           200,
         );
       } catch (error) {
-        const errorResponse = createErrorResponse(error, c.get("requestId"));
+        const errorResponse = createErrorResponse(error);
         console.log("errorResponse", errorResponse);
 
         return c.json(errorResponse, 400);

@@ -3,8 +3,8 @@ permissions:
   contents: read
 on:
   push:
-    # branches:
-    #   - main
+    branches:
+      - main
     paths:
       - apps/api/**
       - packages/**
