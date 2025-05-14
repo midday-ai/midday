@@ -73,7 +73,7 @@ export function InvoiceActivity({ data }: Props) {
           label="Created"
           date={data?.created_at}
           completed
-          timeFormat={user?.time_format}
+          timeFormat={user?.timeFormat ?? null}
         />
       )}
       {data?.sent_at && (
@@ -81,7 +81,7 @@ export function InvoiceActivity({ data }: Props) {
           label="Sent"
           date={data?.sent_at}
           completed
-          timeFormat={user?.time_format}
+          timeFormat={user?.timeFormat}
         />
       )}
       {data?.viewed_at && (
@@ -89,7 +89,7 @@ export function InvoiceActivity({ data }: Props) {
           label="Viewed"
           date={data?.viewed_at}
           completed
-          timeFormat={user?.time_format}
+          timeFormat={user?.timeFormat}
         />
       )}
       {data?.reminder_sent_at && (
@@ -97,7 +97,7 @@ export function InvoiceActivity({ data }: Props) {
           label="Reminder sent"
           date={data?.reminder_sent_at}
           completed
-          timeFormat={user?.time_format}
+          timeFormat={user?.timeFormat}
         />
       )}
 
@@ -107,7 +107,7 @@ export function InvoiceActivity({ data }: Props) {
           date={data?.paid_at}
           completed={completed}
           isLast
-          timeFormat={user?.time_format}
+          timeFormat={user?.timeFormat}
         />
       )}
 
@@ -117,7 +117,7 @@ export function InvoiceActivity({ data }: Props) {
           completed
           date={data?.updated_at}
           isLast
-          timeFormat={user?.time_format}
+          timeFormat={user?.timeFormat}
         />
       )}
     </ul>

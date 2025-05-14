@@ -41,7 +41,7 @@ export function InvoiceSummary({ data, totalInvoiceCount, title }: Props) {
 
   const dataWithDefaultCurrency = data?.length
     ? data
-    : [{ currency: team?.base_currency, total_amount: 0 }];
+    : [{ currency: team?.baseCurrency, total_amount: 0 }];
 
   const item = dataWithDefaultCurrency[activeIndex];
 
@@ -56,7 +56,7 @@ export function InvoiceSummary({ data, totalInvoiceCount, title }: Props) {
           <AnimatedNumber
             key={item.currency}
             value={item.total_amount}
-            currency={item.currency ?? team?.base_currency ?? "USD"}
+            currency={item.currency ?? team?.baseCurrency ?? "USD"}
             maximumFractionDigits={0}
             minimumFractionDigits={0}
           />

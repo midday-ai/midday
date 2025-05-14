@@ -38,7 +38,7 @@ export function ChangeTimezone() {
           <ComboboxDropdown
             placeholder={t("timezone.placeholder")}
             selectedItem={timezoneItems.find(
-              (item) => item.value === user.timezone,
+              (item) => item.value === user?.timezone,
             )}
             searchPlaceholder={t("timezone.searchPlaceholder")}
             items={timezoneItems}

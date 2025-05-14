@@ -31,7 +31,7 @@ export function DisplayName() {
 
   const form = useZodForm(formSchema, {
     defaultValues: {
-      full_name: user?.full_name ?? undefined,
+      full_name: user?.fullName ?? undefined,
     },
   });
 

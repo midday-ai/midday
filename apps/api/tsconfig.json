@@ -23,5 +23,7 @@
       "@api/*": ["src/*"]
     },
     "types": ["bun-types"]
-  }
+  },
+  "exclude": ["node_modules", "packages/*"],
+  "include": ["src/**/*.ts"]
 }
