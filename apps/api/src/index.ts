@@ -1,12 +1,11 @@
 import { trpcServer } from "@hono/trpc-server";
-import { sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { poweredBy } from "hono/powered-by";
 import { secureHeaders } from "hono/secure-headers";
-import { connectDb } from "./db";
 import { createTRPCContext } from "./trpc/init";
 import { appRouter } from "./trpc/routers/_app";
+import { checkHealth } from "./utils/health";
 
 const app = new Hono();
 
@@ -43,8 +42,7 @@ app.use(
 
 app.get("/health", async (c) => {
   try {
-    const db = await connectDb();
-    await db.execute(sql`SELECT 1`);
+    await checkHealth();
 
     return c.json({ status: "ok" }, 200);
   } catch (error) {
