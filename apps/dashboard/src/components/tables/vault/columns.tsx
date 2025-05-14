@@ -46,7 +46,7 @@ export const columns: ColumnDef<Document>[] = [
     id: "title",
     accessorKey: "title",
     cell: ({ row }) => {
-      const isLoading = row.original.processing_status === "pending";
+      const isLoading = row.original.processingStatus === "pending";
 
       if (isLoading) {
         return <Skeleton className="w-52 h-4" />;
@@ -61,7 +61,7 @@ export const columns: ColumnDef<Document>[] = [
     cell: ({ row }) => {
       const { setFilter } = useDocumentFilterParams();
 
-      const isLoading = row.original.processing_status === "pending";
+      const isLoading = row.original.processingStatus === "pending";
 
       if (isLoading) {
         return (
@@ -131,7 +131,7 @@ export const columns: ColumnDef<Document>[] = [
             </DropdownMenuItem>
             <DropdownMenuItem>
               <a
-                href={`/api/download/file?path=${row.original.path_tokens?.join(
+                href={`/api/download/file?path=${row.original.pathTokens?.join(
                   "/",
                 )}&filename=${row.original.name?.split("/").at(-1)}`}
                 download
@@ -141,11 +141,11 @@ export const columns: ColumnDef<Document>[] = [
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
-                if (row.original.path_tokens) {
-                  handleShare(row.original.path_tokens);
+                if (row.original.pathTokens) {
+                  handleShare(row.original.pathTokens);
                 }
               }}
-              disabled={!row.original.path_tokens}
+              disabled={!row.original.pathTokens}
             >
               Copy link
             </DropdownMenuItem>

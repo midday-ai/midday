@@ -5,6 +5,7 @@ import { getGeoContext } from "@api/utils/geo";
 import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";
 import superjson from "superjson";
+import { withPrimaryReadAfterWrite } from "./middleware/primary-read-after-write";
 
 export const createTRPCContext = async (_: unknown, c: Context) => {
   const accessToken = c.req.header("Authorization")?.split(" ")[1];
@@ -30,17 +31,29 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 
-export const protectedProcedure = t.procedure.use(async (opts) => {
-  const { teamId, session } = opts.ctx;
-
-  if (!session) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
-
-  return opts.next({
-    ctx: {
-      teamId,
-      session,
-    },
+const withPrimaryDbMiddleware = t.middleware(async (opts) => {
+  const result = await withPrimaryReadAfterWrite({
+    ctx: opts.ctx,
+    type: opts.type,
+    next: opts.next,
   });
+
+  return result;
 });
+
+export const protectedProcedure = t.procedure
+  .use(withPrimaryDbMiddleware)
+  .use(async (opts) => {
+    const { teamId, session } = opts.ctx;
+
+    if (!session) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return opts.next({
+      ctx: {
+        teamId,
+        session,
+      },
+    });
+  });
