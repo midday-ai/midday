@@ -1,9 +1,9 @@
-import type { Bindings } from "@/common/bindings";
-import { ErrorSchema } from "@/common/schema";
-import { EnableBankingApi } from "@/providers/enablebanking/enablebanking-api";
-import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
-import { PlaidApi } from "@/providers/plaid/plaid-api";
-import { createErrorResponse } from "@/utils/error";
+import type { Bindings } from "@engine/common/bindings";
+import { ErrorSchema } from "@engine/common/schema";
+import { EnableBankingApi } from "@engine/providers/enablebanking/enablebanking-api";
+import { GoCardLessApi } from "@engine/providers/gocardless/gocardless-api";
+import { PlaidApi } from "@engine/providers/plaid/plaid-api";
+import { createErrorResponse } from "@engine/utils/error";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";

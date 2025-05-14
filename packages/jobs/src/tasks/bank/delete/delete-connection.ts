@@ -1,4 +1,4 @@
-import { client } from "@midday/engine/client";
+import { engineClient } from "@jobs/utils/engine-client";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 
@@ -16,7 +16,7 @@ export const deleteConnection = schemaTask({
   run: async (payload) => {
     const { referenceId, provider, accessToken } = payload;
 
-    await client.connections.delete.$delete({
+    await engineClient.connections.delete.$delete({
       json: {
         id: referenceId,
         provider,

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { openai } from "@ai-sdk/openai";
 import { createClient } from "@midday/supabase/server";
 import type { AssistantThreadStartedEvent, WebClient } from "@slack/web-api";

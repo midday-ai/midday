@@ -3,7 +3,7 @@
   "scripts": {
     "dev": "PORT=3003 bun run --hot src/index.ts",
     "db:pull": "drizzle-kit pull",
-    "check:types": "tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "exports": {
     "./trpc/routers/_app": "./src/trpc/routers/_app.ts"

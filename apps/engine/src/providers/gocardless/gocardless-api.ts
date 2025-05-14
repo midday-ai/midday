@@ -1,5 +1,5 @@
-import { ProviderError } from "@/utils/error";
-import { logger } from "@/utils/logger";
+import { ProviderError } from "@engine/utils/error";
+import { logger } from "@engine/utils/logger";
 import { formatISO, subDays } from "date-fns";
 import xior from "xior";
 import type { XiorInstance, XiorRequestConfig } from "xior";

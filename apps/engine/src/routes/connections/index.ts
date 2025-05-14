@@ -1,8 +1,8 @@
-import type { Bindings } from "@/common/bindings";
-import { ErrorSchema } from "@/common/schema";
-import { Provider } from "@/providers";
-import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
-import { createErrorResponse } from "@/utils/error";
+import type { Bindings } from "@engine/common/bindings";
+import { ErrorSchema } from "@engine/common/schema";
+import { Provider } from "@engine/providers";
+import { GoCardLessApi } from "@engine/providers/gocardless/gocardless-api";
+import { createErrorResponse } from "@engine/utils/error";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {

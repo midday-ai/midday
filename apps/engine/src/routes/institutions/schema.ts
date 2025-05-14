@@ -1,5 +1,5 @@
-import { Providers } from "@/common/schema";
-import { ALL_COUNTRIES } from "@/utils/countries";
+import { Providers } from "@engine/common/schema";
+import { ALL_COUNTRIES } from "@engine/utils/countries";
 import { z } from "@hono/zod-openapi";
 
 export const InstitutionSchema = z

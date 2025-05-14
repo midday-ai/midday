@@ -1,4 +1,4 @@
-import { generateCronTag } from "@/utils/generate-cron-tag";
+import { generateCronTag } from "@jobs/utils/generate-cron-tag";
 import { schedules, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 import { bankSyncScheduler } from "../scheduler/bank-scheduler";

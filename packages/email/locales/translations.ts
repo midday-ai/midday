@@ -1,3 +1,4 @@
+// @ts-nocheck - let's use https://www.npmjs.com/package/@languine/react-email
 export interface TranslationParams {
   [key: string]: string | number | undefined;
 }

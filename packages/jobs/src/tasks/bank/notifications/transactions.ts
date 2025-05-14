@@ -1,8 +1,8 @@
 import {
   handleTransactionEmails,
   handleTransactionSlackNotifications,
-} from "@/utils/transaction-notifications";
-import { handleTransactionNotifications } from "@/utils/transaction-notifications";
+} from "@jobs/utils/transaction-notifications";
+import { handleTransactionNotifications } from "@jobs/utils/transaction-notifications";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";

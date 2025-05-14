@@ -1,5 +1,5 @@
-import { serializableToBlob } from "@/utils/blob";
 import { writeToString } from "@fast-csv/format";
+import { serializableToBlob } from "@jobs/utils/blob";
 import { createClient } from "@midday/supabase/job";
 import { metadata, schemaTask } from "@trigger.dev/sdk/v3";
 import {

@@ -51,7 +51,7 @@ export function getRevenueTool({
           style: "currency",
           currency: data.summary.currency,
         },
-      ).format(data.summary.currentTotal)}`;
+      ).format(data.summary.currentTotal ?? 0)}`;
     },
   };
 }
