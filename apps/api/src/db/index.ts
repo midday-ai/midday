@@ -17,6 +17,8 @@ export const primaryDb = drizzle(primaryPool, {
 });
 
 const getReplicaIndexForRegion = () => {
+  console.log("FLY_REGION", process.env.FLY_REGION);
+
   switch (process.env.FLY_REGION) {
     case "fra":
       return 0;
@@ -29,8 +31,12 @@ const getReplicaIndexForRegion = () => {
   }
 };
 
+const replicaNames = ["fra", "iad", "sjc"];
+
 export const connectDb = async () => {
   const replicaIndex = getReplicaIndexForRegion();
+
+  console.log("📡 Connected to replica in:", replicaNames[replicaIndex]);
 
   return withReplicas(
     primaryDb,

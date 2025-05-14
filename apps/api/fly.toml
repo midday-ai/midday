@@ -12,7 +12,7 @@ primary_region = 'fra'
   processes = ['app']
 
   [http_service.healthcheck]
-    path = "/healthcheck"
+    path = "/health"
     interval = "15s"
     timeout = "5s"
     grace_period = "10s"
