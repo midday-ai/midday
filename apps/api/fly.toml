@@ -19,6 +19,6 @@ primary_region = 'fra'
     method = "get"
 
 [[vm]]
-  memory = '2gb'
+  memory = '4gb'
   cpu_kind = 'shared'
-  cpus = 1
+  cpus = 8
