@@ -33,8 +33,8 @@
     "@polar-sh/sdk": "^0.32.13",
     "@react-google-maps/api": "^2.20.6",
     "@react-pdf/renderer": "^4.3.0",
-    "@tanstack/react-query": "^5.75.7",
-    "@tanstack/react-query-devtools": "^5.75.7",
+    "@tanstack/react-query": "^5.76.1",
+    "@tanstack/react-query-devtools": "^5.76.1",
     "@tanstack/react-table": "^8.21.3",
     "@team-plain/typescript-sdk": "^5.9.0",
     "@todesktop/client-core": "^1.18.1",
@@ -65,7 +65,7 @@
     "react-dom": "19.1.0",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.56.3",
-    "react-hotkeys-hook": "^5.0.1",
+    "react-hotkeys-hook": "^5.1.0",
     "react-intersection-observer": "^9.16.0",
     "react-markdown": "^10.1.0",
     "react-pdf": "^9.2.1",
@@ -85,10 +85,10 @@
     "@midday/tsconfig": "workspace:*",
     "@todesktop/tailwind-variants": "^1.0.1",
     "@types/file-saver": "^2.0.7",
-    "@types/node": "^22.15.17",
+    "@types/node": "^22.15.18",
     "@types/papaparse": "^5.3.16",
-    "@types/react": "19.1.3",
-    "@types/react-dom": "19.1.3",
+    "@types/react": "19.1.4",
+    "@types/react-dom": "19.1.5",
     "typescript": "^5.8.3"
   }
 }
