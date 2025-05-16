@@ -8,6 +8,9 @@ const MAX_SIZE = 1500;
 
 export const convertHeic = schemaTask({
   id: "convert-heic",
+  machine: {
+    preset: "large-1x",
+  },
   schema: z.object({
     file_path: z.array(z.string()),
   }),
