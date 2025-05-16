@@ -1,4 +1,5 @@
 import { trpcServer } from "@hono/trpc-server";
+import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { poweredBy } from "hono/powered-by";
@@ -49,6 +50,8 @@ app.get("/health", async (c) => {
     return c.json({ status: "error" }, 500);
   }
 });
+
+app.get("/", Scalar({ url: "/doc", pageTitle: "Midday API", theme: "saturn" }));
 
 export default {
   port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3000,

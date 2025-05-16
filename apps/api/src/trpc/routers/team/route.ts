@@ -1,28 +1,31 @@
-import { getTeamById, updateTeamById } from "@api/db/queries/teams";
+import { createTeam, getTeamById, updateTeamById } from "@api/db/queries/teams";
+import {
+  acceptTeamInvite,
+  declineTeamInvite,
+} from "@api/db/queries/user-invites";
+import {
+  getTeamMembers,
+  getTeamsByUserId,
+} from "@api/db/queries/users-on-team";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import type { deleteTeam as deleteTeamTask } from "@midday/jobs/tasks/team/delete";
 import type { inviteTeamMembers } from "@midday/jobs/tasks/team/invite";
 import type { updateBaseCurrency } from "@midday/jobs/tasks/transactions/update-base-currency";
-import {
-  acceptTeamInvite,
-  createTeam,
-  createTeamInvites,
-  declineTeamInvite,
-  deleteTeam,
-  deleteTeamInvite,
-  deleteTeamMember,
-  leaveTeam,
-  updateTeamMember,
-} from "@midday/supabase/mutations";
-import {
-  getAvailablePlansQuery,
-  getTeamInvitesQuery,
-  getTeamMembersQuery,
-  getTeamsByUserIdQuery,
-} from "@midday/supabase/queries";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import {
+  acceptTeamInviteSchema,
+  createTeamSchema,
+  declineTeamInviteSchema,
+  deleteTeamInviteSchema,
+  deleteTeamMemberSchema,
+  deleteTeamSchema,
+  inviteTeamMembersSchema,
+  leaveTeamSchema,
+  updateBaseCurrencySchema,
+  updateTeamByIdSchema,
+  updateTeamMemberSchema,
+} from "./schema";
 
 export const teamRouter = createTRPCRouter({
   current: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -30,14 +33,7 @@ export const teamRouter = createTRPCRouter({
   }),
 
   update: protectedProcedure
-    .input(
-      z.object({
-        name: z.string().min(2).max(32).optional(),
-        email: z.string().email().optional(),
-        logoUrl: z.string().url().optional(),
-        baseCurrency: z.string().optional(),
-      }),
-    )
+    .input(updateTeamByIdSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
       return updateTeamById(db, {
         id: teamId!,
@@ -45,35 +41,22 @@ export const teamRouter = createTRPCRouter({
       });
     }),
 
-  members: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
-    const { data } = await getTeamMembersQuery(supabase, teamId!);
-
-    return data;
+  members: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
+    return getTeamMembers(db, teamId!);
   }),
 
-  list: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
-    const { data } = await getTeamsByUserIdQuery(supabase, session.user.id);
-
-    return data;
+  list: protectedProcedure.query(async ({ ctx: { db, session } }) => {
+    return getTeamsByUserId(db, session.user.id);
   }),
 
   create: protectedProcedure
-    .input(
-      z.object({
-        name: z.string(),
-        baseCurrency: z.string(),
-      }),
-    )
-    .mutation(async ({ ctx: { supabase }, input }) => {
-      const { data } = await createTeam(supabase, input);
-
-      return {
-        data,
-      };
+    .input(createTeamSchema)
+    .mutation(async ({ ctx: { db, session }, input }) => {
+      return createTeam(db, { ...input, userId: session.user.id });
     }),
 
   leave: protectedProcedure
-    .input(z.object({ teamId: z.string() }))
+    .input(leaveTeamSchema)
     .mutation(async ({ ctx: { supabase, session }, input }) => {
       const { data: teamMembersData } = await getTeamMembersQuery(
         supabase,
@@ -99,32 +82,26 @@ export const teamRouter = createTRPCRouter({
     }),
 
   acceptInvite: protectedProcedure
-    .input(z.object({ teamId: z.string() }))
-    .mutation(async ({ ctx: { supabase, session }, input }) => {
-      return acceptTeamInvite(supabase, {
+    .input(acceptTeamInviteSchema)
+    .mutation(async ({ ctx: { db, session }, input }) => {
+      return acceptTeamInvite(db, {
         userId: session.user.id,
+        email: session.user.email!,
         teamId: input.teamId,
       });
     }),
 
   declineInvite: protectedProcedure
-    .input(z.object({ teamId: z.string() }))
-    .mutation(async ({ ctx: { supabase, session }, input }) => {
-      if (!session.user.email) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "User email not found",
-        });
-      }
-
-      return declineTeamInvite(supabase, {
-        email: session.user.email,
+    .input(declineTeamInviteSchema)
+    .mutation(async ({ ctx: { db, session }, input }) => {
+      return declineTeamInvite(db, {
+        email: session.user.email!,
         teamId: input.teamId,
       });
     }),
 
   delete: protectedProcedure
-    .input(z.object({ teamId: z.string() }))
+    .input(deleteTeamSchema)
     .mutation(async ({ ctx: { supabase }, input }) => {
       const data = await deleteTeam(supabase, {
         teamId: input.teamId,
@@ -146,7 +123,7 @@ export const teamRouter = createTRPCRouter({
     }),
 
   deleteMember: protectedProcedure
-    .input(z.object({ teamId: z.string(), userId: z.string() }))
+    .input(deleteTeamMemberSchema)
     .mutation(async ({ ctx: { supabase }, input }) => {
       return deleteTeamMember(supabase, {
         teamId: input.teamId,
@@ -155,13 +132,7 @@ export const teamRouter = createTRPCRouter({
     }),
 
   updateMember: protectedProcedure
-    .input(
-      z.object({
-        teamId: z.string(),
-        userId: z.string(),
-        role: z.enum(["owner", "member"]),
-      }),
-    )
+    .input(updateTeamMemberSchema)
     .mutation(async ({ ctx: { supabase }, input }) => {
       return updateTeamMember(supabase, input);
     }),
@@ -173,14 +144,7 @@ export const teamRouter = createTRPCRouter({
   }),
 
   invite: protectedProcedure
-    .input(
-      z.array(
-        z.object({
-          email: z.string(),
-          role: z.enum(["owner", "member"]),
-        }),
-      ),
-    )
+    .input(inviteTeamMembersSchema)
     .mutation(async ({ ctx: { supabase, session, teamId, geo }, input }) => {
       const ip = geo.ip ?? "127.0.0.1";
 
@@ -211,7 +175,7 @@ export const teamRouter = createTRPCRouter({
     }),
 
   deleteInvite: protectedProcedure
-    .input(z.object({ inviteId: z.string() }))
+    .input(deleteTeamInviteSchema)
     .mutation(async ({ ctx: { supabase, teamId }, input }) => {
       return deleteTeamInvite(supabase, {
         teamId: teamId!,
@@ -228,7 +192,7 @@ export const teamRouter = createTRPCRouter({
   ),
 
   updateBaseCurrency: protectedProcedure
-    .input(z.object({ baseCurrency: z.string() }))
+    .input(updateBaseCurrencySchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
       const event = await tasks.trigger<typeof updateBaseCurrency>(
         "update-base-currency",
