@@ -16,7 +16,7 @@ export function Vault({ files }: Props) {
   return (
     <ul className="bullet-none divide-y cursor-pointer overflow-auto scrollbar-hide aspect-square pb-24">
       {files?.map((file) => {
-        const firstTag = file.tags.at(0);
+        const firstTag = file.documentTagAssignments.at(0)?.tag;
 
         return (
           <li key={file.id}>
@@ -32,7 +32,7 @@ export function Vault({ files }: Props) {
                 {file.name?.split("/").at(-1)}
               </span>
 
-              {file.tags.length > 0 && (
+              {file.documentTagAssignments.length > 0 && (
                 <button
                   type="button"
                   onClick={() => {

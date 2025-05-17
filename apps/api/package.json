@@ -1,7 +1,7 @@
 {
   "name": "@midday/api",
   "scripts": {
-    "dev": "PORT=3003 bun run --hot src/index.ts",
+    "dev": "TZ=UTC PORT=3003 bun run --hot src/index.ts",
     "db:pull": "drizzle-kit pull",
     "typecheck": "tsc --noEmit"
   },
