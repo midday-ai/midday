@@ -202,14 +202,14 @@ const ActionsCell = memo(
             </DropdownMenuItem>
           )}
 
-          {transaction.attachments?.length === 0 &&
+          {transaction.transactionAttachments?.length === 0 &&
             transaction.status !== "completed" && (
               <DropdownMenuItem onClick={handleUpdateToCompleted}>
                 Mark as completed
               </DropdownMenuItem>
             )}
 
-          {transaction.attachments?.length === 0 &&
+          {transaction.transactionAttachments?.length === 0 &&
             transaction.status === "completed" && (
               <DropdownMenuItem onClick={handleUpdateToPosted}>
                 Mark as uncompleted
@@ -309,9 +309,9 @@ export const columns: ColumnDef<Transaction>[] = [
     header: "Account",
     cell: ({ row }) => (
       <TransactionBankAccount
-        name={row.original?.bank_account?.name ?? undefined}
+        name={row.original?.bankAccount?.name ?? undefined}
         logoUrl={
-          row.original?.bank_account?.bank_connection?.logo_url ?? undefined
+          row.original?.bankAccount?.bankConnection?.logoUrl ?? undefined
         }
       />
     ),
@@ -331,8 +331,8 @@ export const columns: ColumnDef<Transaction>[] = [
 
       return (
         <AssignedUser
-          fullName={row.original.assigned?.full_name}
-          avatarUrl={row.original.assigned?.avatar_url}
+          fullName={row.original.assigned?.fullName}
+          avatarUrl={row.original.assigned?.avatarUrl}
         />
       );
     },
@@ -341,8 +341,7 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "status",
     cell: ({ row }) => {
       const fullfilled =
-        row.original.status === "completed" ||
-        (row.original.attachments?.length ?? 0) > 0;
+        row.original.status === "completed" || row.original.isFulfilled;
 
       return <TransactionStatus fullfilled={fullfilled} />;
     },

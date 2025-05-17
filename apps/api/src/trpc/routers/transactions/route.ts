@@ -1,18 +1,5 @@
+import { getTransactions } from "@api/db/queries/transactions";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import {
-  createTransaction,
-  deleteTransactions,
-  updateSimilarTransactionsCategory,
-  updateSimilarTransactionsRecurring,
-  updateTransaction,
-  updateTransactions,
-} from "@midday/supabase/mutations";
-import {
-  getSimilarTransactions,
-  getTransactionQuery,
-  getTransactionsQuery,
-  searchTransactionMatchQuery,
-} from "@midday/supabase/queries";
 import {
   createTransactionSchema,
   deleteTransactionsSchema,
@@ -29,8 +16,8 @@ import {
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getTransactionsSchema)
-    .query(async ({ input, ctx: { supabase, teamId } }) => {
-      return getTransactionsQuery(supabase, {
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      return getTransactions(db, {
         ...input,
         teamId: teamId!,
       });
@@ -39,15 +26,19 @@ export const transactionsRouter = createTRPCRouter({
   deleteMany: protectedProcedure
     .input(deleteTransactionsSchema)
     .mutation(async ({ input, ctx: { supabase } }) => {
-      return deleteTransactions(supabase, { ids: input.ids });
+      // return deleteTransactions(supabase, { ids: input.ids });
+
+      return null;
     }),
 
   getById: protectedProcedure
     .input(getTransactionByIdSchema)
     .query(async ({ input, ctx: { supabase } }) => {
-      const { data } = await getTransactionQuery(supabase, input.id);
+      // const { data } = await getTransactionQuery(supabase, input.id);
 
-      return data;
+      // return data;
+
+      return null;
     }),
 
   getAmountRange: protectedProcedure.query(
@@ -66,79 +57,93 @@ export const transactionsRouter = createTRPCRouter({
   update: protectedProcedure
     .input(updateTransactionSchema)
     .mutation(async ({ input, ctx: { supabase } }) => {
-      const { data } = await updateTransaction(supabase, input);
+      // const { data } = await updateTransaction(supabase, input);
 
-      return data;
+      // return data;
+
+      return null;
     }),
 
   updateMany: protectedProcedure
     .input(updateTransactionsSchema)
     .mutation(async ({ input, ctx: { supabase, teamId } }) => {
-      const { data } = await updateTransactions(supabase, {
-        ...input,
-        team_id: teamId!,
-      });
+      // const { data } = await updateTransactions(supabase, {
+      //   ...input,
+      //   team_id: teamId!,
+      // });
 
-      return data;
+      // return data;
+
+      return null;
     }),
 
   getSimilarTransactions: protectedProcedure
     .input(getSimilarTransactionsSchema)
     .query(async ({ input, ctx: { supabase, teamId } }) => {
-      const { data } = await getSimilarTransactions(supabase, {
-        name: input.name,
-        categorySlug: input.categorySlug,
-        frequency: input.frequency,
-        teamId: teamId!,
-      });
+      // const { data } = await getSimilarTransactions(supabase, {
+      //   name: input.name,
+      //   categorySlug: input.categorySlug,
+      //   frequency: input.frequency,
+      //   teamId: teamId!,
+      // });
 
-      return data;
+      // return data;
+
+      return null;
     }),
 
   updateSimilarTransactionsCategory: protectedProcedure
     .input(updateSimilarTransactionsCategorySchema)
     .mutation(async ({ input, ctx: { supabase, teamId } }) => {
-      const { data } = await updateSimilarTransactionsCategory(supabase, {
-        ...input,
-        team_id: teamId!,
-      });
+      // const { data } = await updateSimilarTransactionsCategory(supabase, {
+      //   ...input,
+      //   team_id: teamId!,
+      // });
 
-      return data;
+      // return data;
+
+      return null;
     }),
 
   updateSimilarTransactionsRecurring: protectedProcedure
     .input(updateSimilarTransactionsRecurringSchema)
     .mutation(async ({ input, ctx: { supabase, teamId } }) => {
-      const { data } = await updateSimilarTransactionsRecurring(supabase, {
-        ...input,
-        team_id: teamId!,
-      });
+      // const { data } = await updateSimilarTransactionsRecurring(supabase, {
+      //   ...input,
+      //   team_id: teamId!,
+      // });
 
-      return data;
+      // return data;
+
+      return null;
     }),
 
   searchTransactionMatch: protectedProcedure
     .input(searchTransactionMatchSchema)
     .query(async ({ input, ctx: { supabase, teamId } }) => {
-      const { data } = await searchTransactionMatchQuery(supabase, {
-        query: input.query,
-        teamId: teamId!,
-        inboxId: input.inboxId,
-        maxResults: input.maxResults,
-        minConfidenceScore: input.minConfidenceScore,
-      });
+      // const { data } = await searchTransactionMatchQuery(supabase, {
+      //   query: input.query,
+      //   teamId: teamId!,
+      //   inboxId: input.inboxId,
+      //   maxResults: input.maxResults,
+      //   minConfidenceScore: input.minConfidenceScore,
+      // });
 
-      return data;
+      // return data;
+
+      return null;
     }),
 
   create: protectedProcedure
     .input(createTransactionSchema)
     .mutation(async ({ input, ctx: { supabase, teamId } }) => {
-      const { data } = await createTransaction(supabase, {
-        ...input,
-        teamId: teamId!,
-      });
+      // const { data } = await createTransaction(supabase, {
+      //   ...input,
+      //   teamId: teamId!,
+      // });
 
-      return data;
+      // return data;
+
+      return null;
     }),
 });
