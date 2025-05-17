@@ -482,7 +482,7 @@ export function Search() {
   });
 
   // Extract search results array from queryResult
-  const searchResults: SearchItem[] = queryResult?.data || [];
+  const searchResults: SearchItem[] = queryResult || [];
 
   const combinedData = useMemo(() => {
     // Type assertion for searchResults from DB to ensure they have actions if needed,
@@ -621,7 +621,7 @@ export function Search() {
                   <SearchResultItemDisplay
                     key={item.id}
                     item={item}
-                    dateFormat={user?.date_format ?? undefined}
+                    dateFormat={user?.dateFormat ?? undefined}
                   />
                 ))}
               </CommandGroup>
