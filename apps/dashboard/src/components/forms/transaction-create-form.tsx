@@ -257,7 +257,7 @@ export function TransactionCreateForm() {
                         {field.value ? (
                           format(
                             new Date(field.value),
-                            user?.date_format ?? "PPP",
+                            user?.dateFormat ?? "PPP",
                           )
                         ) : (
                           <span>Select date</span>

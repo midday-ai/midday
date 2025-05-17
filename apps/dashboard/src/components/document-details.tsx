@@ -57,13 +57,13 @@ export function DocumentDetails() {
           </span>
         </div>
 
-        <DocumentActions showDelete={fullView} filePath={data?.path_tokens} />
+        <DocumentActions showDelete={fullView} filePath={data?.pathTokens} />
       </SheetHeader>
 
       <div className="h-full max-h-[763px] p-0 pb-4 overflow-x-auto scrollbar-hide">
         <div className="flex flex-col flex-grow min-h-0 relative h-full w-full items-center justify-center">
           <FileViewer
-            url={`/api/proxy?filePath=vault/${data?.path_tokens?.join("/")}`}
+            url={`/api/proxy?filePath=vault/${data?.pathTokens?.join("/")}`}
             // @ts-expect-error - mimetype is not typed (JSONB)
             mimeType={data?.metadata?.mimetype}
             maxWidth={565}
@@ -78,7 +78,7 @@ export function DocumentDetails() {
           </p>
         )}
 
-        <DocumentTags tags={data?.tags} id={data?.id} />
+        <DocumentTags tags={data?.documentTagAssignments} id={data?.id} />
 
         {fullView && <VaultRelatedFiles />}
       </div>

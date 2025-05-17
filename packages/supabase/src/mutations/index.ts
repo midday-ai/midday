@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { getAccessValidForDays } from "@midday/engine/gocardless/utils";
 import { addDays, addMonths } from "date-fns";
 import { nanoid } from "nanoid";
-import { getInvoiceByIdQuery, getUserInviteQuery } from "../queries";
+import { getUserInviteQuery } from "../queries";
 import type { Client } from "../types";
 import { remove } from "../utils/storage";
 
@@ -446,24 +447,6 @@ export async function deleteAttachment(supabase: Client, id: string) {
   }
 
   return response;
-}
-
-type CreateTeamParams = {
-  name: string;
-  baseCurrency: string;
-};
-
-export async function createTeam(supabase: Client, params: CreateTeamParams) {
-  const { data: teamId } = await supabase.rpc("create_team_v2", {
-    name: params.name,
-    currency: params.baseCurrency,
-  });
-
-  return {
-    data: {
-      id: teamId,
-    },
-  };
 }
 
 type LeaveTeamParams = {

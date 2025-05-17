@@ -1,7 +1,7 @@
 import {
   handleOverdueInvoiceNotifications,
   handlePaidInvoiceNotifications,
-} from "@/utils/invoice-notifications";
+} from "@jobs/utils/invoice-notifications";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";

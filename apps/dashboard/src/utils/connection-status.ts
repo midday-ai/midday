@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { differenceInDays } from "date-fns";
 
 const DISPLAY_DAYS = 30;

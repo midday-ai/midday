@@ -1,7 +1,6 @@
 import type { Context, Next } from "hono";
 import { env } from "hono/adapter";
 import { bearerAuth } from "hono/bearer-auth";
-import { cache } from "hono/cache";
 import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
 import { logger as customLogger } from "./utils/logger";
@@ -20,23 +19,7 @@ const authMiddleware = (c: Context, next: Next) => {
   return bearer(c, next);
 };
 
-const cacheMiddleware = (c: Context, next: Next) => {
-  if (process.env.NODE_ENV === "development") {
-    return next();
-  }
-
-  return cache({
-    cacheName: "engine",
-    cacheControl: "max-age=3600",
-  })(c, next);
-};
-
 const securityMiddleware = secureHeaders();
 const loggingMiddleware = logger(customLogger);
 
-export {
-  authMiddleware,
-  cacheMiddleware,
-  securityMiddleware,
-  loggingMiddleware,
-};
+export { authMiddleware, securityMiddleware, loggingMiddleware };

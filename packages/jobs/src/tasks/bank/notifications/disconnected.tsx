@@ -1,4 +1,4 @@
-import { resend } from "@/utils/resend";
+import { resend } from "@jobs/utils/resend";
 import ConnectionIssueEmail from "@midday/email/emails/connection-issue";
 import { render } from "@react-email/components";
 import { schemaTask } from "@trigger.dev/sdk/v3";

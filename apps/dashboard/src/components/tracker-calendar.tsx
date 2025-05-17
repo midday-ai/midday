@@ -24,7 +24,7 @@ export function TrackerCalendar() {
   const { data: user } = useUserQuery();
   const trpc = useTRPC();
 
-  const weekStartsOnMonday = user?.week_starts_on_monday ?? false;
+  const weekStartsOnMonday = user?.weekStartsOnMonday ?? false;
 
   const {
     date: currentDate,

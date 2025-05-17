@@ -35,7 +35,7 @@ export function LocaleSettings() {
           <ComboboxDropdown
             placeholder={t("locale.placeholder")}
             selectedItem={localeItems.find(
-              (item) => item.value === user.locale,
+              (item) => item.value === user?.locale,
             )}
             searchPlaceholder={t("locale.searchPlaceholder")}
             items={localeItems}

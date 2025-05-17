@@ -1,4 +1,4 @@
-import { logger } from "@/utils/logger";
+import { logger } from "@engine/utils/logger";
 import { EnableBankingProvider } from "./enablebanking/enablebanking-provider";
 import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 import { PlaidProvider } from "./plaid/plaid-provider";

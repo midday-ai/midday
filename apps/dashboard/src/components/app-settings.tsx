@@ -26,7 +26,7 @@ function AppSettingsItem({
     trpc.apps.update.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.apps.installed.queryKey(),
+          queryKey: trpc.apps.get.queryKey(),
         });
       },
     }),

@@ -1,6 +1,6 @@
-import { parseAPIError } from "@/utils/parse-error";
-import { getClassification } from "@/utils/transform";
-import { client } from "@midday/engine/client";
+import { engineClient } from "@jobs/utils/engine-client";
+import { parseAPIError } from "@jobs/utils/parse-error";
+import { getClassification } from "@jobs/utils/transform";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
@@ -45,7 +45,7 @@ export const syncAccount = schemaTask({
 
     // Get the balance
     try {
-      const balanceResponse = await client.accounts.balance.$get({
+      const balanceResponse = await engineClient.accounts.balance.$get({
         query: {
           provider,
           id: accountId,
@@ -105,7 +105,7 @@ export const syncAccount = schemaTask({
 
     // Get the transactions
     try {
-      const transactionsResponse = await client.transactions.$get({
+      const transactionsResponse = await engineClient.transactions.$get({
         query: {
           provider,
           accountId,

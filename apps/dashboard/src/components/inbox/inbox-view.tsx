@@ -61,7 +61,7 @@ export function InboxView() {
   useRealtime({
     channelName: "realtime_inbox",
     table: "inbox",
-    filter: `team_id=eq.${user?.team_id}`,
+    filter: `team_id=eq.${user?.teamId}`,
     onEvent: (payload) => {
       if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
         debouncedEventHandler();

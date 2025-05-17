@@ -54,7 +54,7 @@ export function App({
     trpc.apps.disconnect.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.apps.installed.queryKey(),
+          queryKey: trpc.apps.get.queryKey(),
         });
       },
     }),

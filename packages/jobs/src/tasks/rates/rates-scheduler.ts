@@ -1,5 +1,5 @@
-import { processBatch } from "@/utils/process-batch";
-import { client } from "@midday/engine/client";
+import { engineClient } from "@jobs/utils/engine-client";
+import { processBatch } from "@jobs/utils/process-batch";
 import { createClient } from "@midday/supabase/job";
 import { logger, schedules } from "@trigger.dev/sdk/v3";
 
@@ -12,7 +12,7 @@ export const ratesScheduler = schedules.task({
 
     const supabase = createClient();
 
-    const ratesResponse = await client.rates.$get();
+    const ratesResponse = await engineClient.rates.$get();
 
     if (!ratesResponse.ok) {
       logger.error("Failed to get rates");

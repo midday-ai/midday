@@ -3,7 +3,7 @@
 import { FilePreview } from "@/components/file-preview";
 import { VaultItemTags } from "@/components/vault/vault-item-tags";
 import { useDocumentParams } from "@/hooks/use-document-params";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 import { VaultItemActions } from "./vault-item-actions";
@@ -16,7 +16,7 @@ type Props = {
 export function VaultItem({ data, small }: Props) {
   const { setParams } = useDocumentParams();
 
-  const isLoading = data.processing_status === "pending";
+  const isLoading = data.processingStatus === "pending";
 
   return (
     <div
@@ -28,7 +28,7 @@ export function VaultItem({ data, small }: Props) {
       <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <VaultItemActions
           id={data.id}
-          filePath={data.path_tokens ?? []}
+          filePath={data.pathTokens ?? []}
           hideDelete={small}
         />
       </div>
@@ -53,7 +53,7 @@ export function VaultItem({ data, small }: Props) {
           <Skeleton className="absolute inset-0 w-full h-full" />
         ) : (
           <FilePreview
-            filePath={data?.path_tokens?.join("/") ?? ""}
+            filePath={data?.pathTokens?.join("/") ?? ""}
             mimeType={(data?.metadata as { mimetype?: string })?.mimetype ?? ""}
           />
         )}
@@ -85,7 +85,12 @@ export function VaultItem({ data, small }: Props) {
         )}
       </button>
 
-      {!small && <VaultItemTags tags={data?.tags} isLoading={isLoading} />}
+      {!small && (
+        <VaultItemTags
+          tags={data?.documentTagAssignments}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 }

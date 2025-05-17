@@ -1,4 +1,4 @@
-import { processBatch } from "@/utils/process-batch";
+import { processBatch } from "@jobs/utils/process-batch";
 import { mapTransactions } from "@midday/import/mappings";
 import { transform } from "@midday/import/transform";
 import { validateTransactions } from "@midday/import/validate";

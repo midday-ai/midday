@@ -2,8 +2,8 @@ import { FormatAmount } from "@/components/format-amount";
 import { InboxStatus } from "@/components/inbox/inbox-status";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { formatDate } from "@/utils/format";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 
@@ -40,7 +40,7 @@ export function InboxItem({ item, index }: Props) {
                 {isProcessing ? (
                   <Skeleton className="h-3 w-[120px] mb-1" />
                 ) : (
-                  item.display_name
+                  item.displayName
                 )}
               </div>
             </div>
@@ -54,7 +54,7 @@ export function InboxItem({ item, index }: Props) {
             {isProcessing && <Skeleton className="h-3 w-[50px]" />}
             {!isProcessing &&
               item?.date &&
-              formatDate(item.date, user?.date_format)}
+              formatDate(item.date, user?.dateFormat)}
           </div>
         </div>
 

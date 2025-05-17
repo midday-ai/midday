@@ -1,11 +1,11 @@
 "use client";
 
 import { useZodForm } from "@/hooks/use-zod-form";
-import type { RouterOutputs } from "@/trpc/routers/_app";
-import {
-  invoiceTemplateSchema,
-  lineItemSchema,
-} from "@/trpc/routers/invoice/schema";
+// import {
+//   invoiceTemplateSchema,
+//   lineItemSchema,
+// } from "@/trpc/routers/invoice/schema";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { useEffect } from "react";
 import { FormProvider } from "react-hook-form";
 import { z } from "zod";
@@ -13,7 +13,7 @@ import { z } from "zod";
 export const invoiceFormSchema = z.object({
   id: z.string().uuid(),
   status: z.string(),
-  template: invoiceTemplateSchema,
+  // template: invoiceTemplateSchema,
   from_details: z.any(),
   customer_details: z.any(),
   customer_id: z.string().uuid(),
@@ -31,7 +31,7 @@ export const invoiceFormSchema = z.object({
   top_block: z.any().nullable().optional(),
   bottom_block: z.any().nullable().optional(),
   amount: z.number(),
-  line_items: z.array(lineItemSchema).min(1),
+  // line_items: z.array(lineItemSchema).min(1),
   token: z.string().optional(),
 });
 
