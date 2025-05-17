@@ -10,7 +10,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuPortal,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -173,32 +172,30 @@ export function ActionsMenu({ row }: Props) {
             <>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>Mark as paid</DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    <Calendar
-                      mode="single"
-                      toDate={new Date()}
-                      selected={new Date()}
-                      onSelect={(date) => {
-                        if (date) {
-                          updateInvoiceMutation.mutate({
-                            id: row.id,
-                            status: "paid",
-                            paid_at: date.toISOString(),
-                          });
-                        } else {
-                          // NOTE: Today is undefined
-                          updateInvoiceMutation.mutate({
-                            id: row.id,
-                            status: "paid",
-                            paid_at: new Date().toISOString(),
-                          });
-                        }
-                      }}
-                      initialFocus
-                    />
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <Calendar
+                    mode="single"
+                    toDate={new Date()}
+                    selected={new Date()}
+                    onSelect={(date) => {
+                      if (date) {
+                        updateInvoiceMutation.mutate({
+                          id: row.id,
+                          status: "paid",
+                          paid_at: date.toISOString(),
+                        });
+                      } else {
+                        // NOTE: Today is undefined
+                        updateInvoiceMutation.mutate({
+                          id: row.id,
+                          status: "paid",
+                          paid_at: new Date().toISOString(),
+                        });
+                      }
+                    }}
+                    initialFocus
+                  />
+                </DropdownMenuSubContent>
               </DropdownMenuSub>
 
               <DropdownMenuItem
