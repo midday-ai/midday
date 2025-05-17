@@ -1,23 +1,15 @@
-import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   globalSearchQuery,
   globalSemanticSearchQuery,
-} from "@midday/supabase/queries";
-import { z } from "zod";
+} from "@api/db/queries/search";
+import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { generateLLMFilters } from "./llm";
+import { globalSearchSchema } from "./schema";
 
 export const searchRouter = createTRPCRouter({
   global: protectedProcedure
-    .input(
-      z.object({
-        searchTerm: z.string().optional(),
-        language: z.string().optional(),
-        limit: z.number().default(30),
-        itemsPerTableLimit: z.number().default(5),
-        relevanceThreshold: z.number().default(0.01),
-      }),
-    )
-    .query(async ({ input, ctx: { supabase, teamId } }) => {
+    .input(globalSearchSchema)
+    .query(async ({ input, ctx: { db, teamId } }) => {
       const { searchTerm } = input;
 
       // Determine if we should fall back to LLM-generated filters:
@@ -25,7 +17,7 @@ export const searchRouter = createTRPCRouter({
       const shouldUseLLMFilters =
         !!searchTerm && searchTerm.trim().split(/\s+/).length > 1;
 
-      const results = await globalSearchQuery(supabase, {
+      const results = await globalSearchQuery(db, {
         teamId: teamId!,
         ...input,
         searchTerm: searchTerm ?? undefined,
@@ -45,16 +37,14 @@ export const searchRouter = createTRPCRouter({
           : input.relevanceThreshold,
       });
 
-      if (shouldUseLLMFilters && !results?.data?.length) {
+      if (shouldUseLLMFilters && !results.length) {
         const filters = await generateLLMFilters(searchTerm);
 
-        const semanticResults = await globalSemanticSearchQuery(supabase, {
+        const semanticResults = await globalSemanticSearchQuery(db, {
           teamId: teamId!,
           itemsPerTableLimit: input.itemsPerTableLimit,
           ...filters,
         });
-
-        console.log(semanticResults);
 
         return semanticResults;
       }

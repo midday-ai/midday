@@ -117,5 +117,6 @@ export async function getBankAccountsCurrencies(db: Database, teamId: string) {
   const result: GetBankAccountsCurrenciesResponse[] = await db.execute(
     sql`SELECT * FROM get_bank_account_currencies(${teamId})`,
   );
+
   return result;
 }

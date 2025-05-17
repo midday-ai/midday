@@ -30,7 +30,7 @@
     "@novu/headless": "^2.6.6",
     "@number-flow/react": "^0.5.9",
     "@polar-sh/nextjs": "^0.4.0",
-    "@polar-sh/sdk": "^0.32.13",
+    "@polar-sh/sdk": "^0.32.14",
     "@react-google-maps/api": "^2.20.6",
     "@react-pdf/renderer": "^4.3.0",
     "@tanstack/react-query": "^5.76.1",

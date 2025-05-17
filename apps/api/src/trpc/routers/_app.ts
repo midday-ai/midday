@@ -10,9 +10,9 @@ import { documentsRouter } from "./documents/route";
 import { inboxAccountsRouter } from "./inbox-accounts/route";
 import { inboxRouter } from "./inbox/route";
 import { institutionsRouter } from "./institutions/route";
-import { invoiceTemplateRouter } from "./invoice-template";
+import { invoiceTemplateRouter } from "./invoice-template/route";
 import { invoiceRouter } from "./invoice/route";
-import { metricsRouter } from "./metrics";
+import { metricsRouter } from "./metrics/route";
 import { searchRouter } from "./search/route";
 import { tagsRouter } from "./tags/route";
 import { teamRouter } from "./team/route";
@@ -21,7 +21,7 @@ import { trackerProjectsRouter } from "./tracker-projects/route";
 import { transactionAttachmentsRouter } from "./transaction-attachments/route";
 import { transactionCategoriesRouter } from "./transaction-categories/route";
 import { transactionTagsRouter } from "./transaction-tags/route";
-import { transactionsRouter } from "./transactions";
+import { transactionsRouter } from "./transactions/route";
 import { userRouter } from "./user/route";
 
 export const appRouter = createTRPCRouter({

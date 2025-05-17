@@ -117,3 +117,61 @@ export const invoiceTemplateSchema = z.object({
   locale: z.string().optional(),
   timezone: z.string().optional(),
 });
+
+export const getInvoicesSchema = z
+  .object({
+    cursor: z.string().nullable().optional(),
+    sort: z.array(z.string(), z.string()).nullable().optional(),
+    pageSize: z.number().optional(),
+    filter: z
+      .object({
+        q: z.string().nullable().optional(),
+        start: z.string().nullable().optional(),
+        end: z.string().nullable().optional(),
+        statuses: z.array(z.string()).nullable().optional(),
+        customers: z.array(z.string()).nullable().optional(),
+      })
+      .optional(),
+  })
+  .optional();
+
+export const getInvoiceByIdSchema = z.object({
+  id: z.string(),
+});
+
+export const searchInvoiceNumberSchema = z.object({
+  query: z.string(),
+});
+
+export const invoiceSummarySchema = z
+  .object({
+    status: z
+      .enum(["draft", "overdue", "paid", "unpaid", "canceled"])
+      .optional(),
+  })
+  .optional();
+
+export const updateInvoiceSchema = z.object({
+  id: z.string(),
+  status: z.enum(["paid", "canceled", "unpaid"]).optional(),
+  paid_at: z.string().nullable().optional(),
+  internal_note: z.string().nullable().optional(),
+});
+
+export const deleteInvoiceSchema = z.object({
+  id: z.string(),
+});
+
+export const createInvoiceSchema = z.object({
+  id: z.string().uuid(),
+  deliveryType: z.enum(["create", "create_and_send"]),
+});
+
+export const remindInvoiceSchema = z.object({
+  id: z.string().uuid(),
+  date: z.string(),
+});
+
+export const duplicateInvoiceSchema = z.object({
+  id: z.string().uuid(),
+});

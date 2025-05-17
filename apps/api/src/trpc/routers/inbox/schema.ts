@@ -40,3 +40,7 @@ export const matchTransactionSchema = z.object({
   id: z.string(),
   transactionId: z.string().uuid(),
 });
+
+export const unmatchTransactionSchema = z.object({
+  id: z.string().uuid(),
+});

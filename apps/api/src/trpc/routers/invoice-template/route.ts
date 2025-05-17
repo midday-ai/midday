@@ -1,7 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { upsertInvoiceTemplateSchema } from "@api/trpc/routers/invoice/schema";
 import { parseInputValue } from "@api/utils/parse";
 import { updateInvoiceTemplate } from "@midday/supabase/mutations";
-import { upsertInvoiceTemplateSchema } from "./invoice/schema";
 
 export const invoiceTemplateRouter = createTRPCRouter({
   upsert: protectedProcedure
