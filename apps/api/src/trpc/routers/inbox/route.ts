@@ -10,7 +10,6 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import type { processAttachment } from "@midday/jobs/tasks/inbox/process-attachment";
 import { tasks } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 import {
   deleteInboxSchema,
   getInboxByIdSchema,
@@ -18,6 +17,7 @@ import {
   matchTransactionSchema,
   processAttachmentsSchema,
   searchInboxSchema,
+  unmatchTransactionSchema,
   updateInboxSchema,
 } from "./schema";
 
@@ -84,7 +84,7 @@ export const inboxRouter = createTRPCRouter({
     }),
 
   unmatchTransaction: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(unmatchTransactionSchema)
     .mutation(async ({ ctx: { db }, input }) => {
       return unmatchTransaction(db, input.id);
     }),

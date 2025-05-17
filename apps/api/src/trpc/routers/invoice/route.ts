@@ -26,8 +26,18 @@ import {
 import { tasks } from "@trigger.dev/sdk/v3";
 import { addMonths } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
-import { z } from "zod";
-import { draftInvoiceSchema } from "./schema";
+import {
+  createInvoiceSchema,
+  deleteInvoiceSchema,
+  draftInvoiceSchema,
+  duplicateInvoiceSchema,
+  getInvoiceByIdSchema,
+  getInvoicesSchema,
+  invoiceSummarySchema,
+  remindInvoiceSchema,
+  searchInvoiceNumberSchema,
+  updateInvoiceSchema,
+} from "./schema";
 
 const defaultTemplate = {
   title: "Invoice",
@@ -69,24 +79,7 @@ const defaultTemplate = {
 
 export const invoiceRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(
-      z
-        .object({
-          cursor: z.string().nullable().optional(),
-          sort: z.array(z.string(), z.string()).nullable().optional(),
-          pageSize: z.number().optional(),
-          filter: z
-            .object({
-              q: z.string().nullable().optional(),
-              start: z.string().nullable().optional(),
-              end: z.string().nullable().optional(),
-              statuses: z.array(z.string()).nullable().optional(),
-              customers: z.array(z.string()).nullable().optional(),
-            })
-            .optional(),
-        })
-        .optional(),
-    )
+    .input(getInvoicesSchema)
     .query(async ({ input, ctx: { db, teamId } }) => {
       return getInvoices(db, {
         teamId: teamId!,
@@ -95,7 +88,7 @@ export const invoiceRouter = createTRPCRouter({
     }),
 
   getById: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(getInvoiceByIdSchema)
     .query(async ({ input, ctx: { supabase } }) => {
       const { data } = await getInvoiceByIdQuery(supabase, input.id);
 
@@ -111,7 +104,7 @@ export const invoiceRouter = createTRPCRouter({
   ),
 
   searchInvoiceNumber: protectedProcedure
-    .input(z.object({ query: z.string() }))
+    .input(searchInvoiceNumberSchema)
     .query(async ({ input, ctx: { supabase, teamId } }) => {
       const { data } = await searchInvoiceNumberQuery(supabase, {
         teamId: teamId!,
@@ -122,15 +115,7 @@ export const invoiceRouter = createTRPCRouter({
     }),
 
   invoiceSummary: protectedProcedure
-    .input(
-      z
-        .object({
-          status: z
-            .enum(["draft", "overdue", "paid", "unpaid", "canceled"])
-            .optional(),
-        })
-        .optional(),
-    )
+    .input(invoiceSummarySchema)
     .query(async ({ ctx: { supabase, teamId }, input }) => {
       const { data } = await getInvoiceSummaryQuery(supabase, {
         teamId: teamId!,
@@ -262,14 +247,7 @@ export const invoiceRouter = createTRPCRouter({
   ),
 
   update: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        status: z.enum(["paid", "canceled", "unpaid"]).optional(),
-        paid_at: z.string().nullable().optional(),
-        internal_note: z.string().nullable().optional(),
-      }),
-    )
+    .input(updateInvoiceSchema)
     .mutation(async ({ input, ctx: { supabase } }) => {
       const { data } = await updateInvoice(supabase, input);
 
@@ -277,7 +255,7 @@ export const invoiceRouter = createTRPCRouter({
     }),
 
   delete: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(deleteInvoiceSchema)
     .mutation(async ({ input, ctx: { supabase } }) => {
       const { data } = await deleteInvoice(supabase, {
         id: input.id,
@@ -306,12 +284,7 @@ export const invoiceRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().uuid(),
-        deliveryType: z.enum(["create", "create_and_send"]),
-      }),
-    )
+    .input(createInvoiceSchema)
     .mutation(async ({ input, ctx: { supabase } }) => {
       // Update the invoice status to unpaid
       const { data } = await updateInvoice(supabase, {
@@ -332,7 +305,7 @@ export const invoiceRouter = createTRPCRouter({
     }),
 
   remind: protectedProcedure
-    .input(z.object({ id: z.string().uuid(), date: z.string() }))
+    .input(remindInvoiceSchema)
     .mutation(async ({ input, ctx: { supabase } }) => {
       await tasks.trigger<typeof sendInvoiceReminder>("send-invoice-reminder", {
         invoiceId: input.id,
@@ -347,7 +320,7 @@ export const invoiceRouter = createTRPCRouter({
     }),
 
   duplicate: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(duplicateInvoiceSchema)
     .mutation(async ({ input, ctx: { supabase, session, teamId } }) => {
       const { data: nextInvoiceNumber } = await getNextInvoiceNumberQuery(
         supabase,
