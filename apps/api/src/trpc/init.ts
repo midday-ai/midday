@@ -41,6 +41,8 @@ const withPrimaryDbMiddleware = t.middleware(async (opts) => {
   return result;
 });
 
+export const publicProcedure = t.procedure.use(withPrimaryDbMiddleware);
+
 export const protectedProcedure = t.procedure
   .use(withPrimaryDbMiddleware)
   .use(async (opts) => {

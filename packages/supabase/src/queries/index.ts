@@ -441,32 +441,6 @@ export async function getBankAccountsCurrenciesQuery(
   });
 }
 
-export type GetBurnRateQueryParams = {
-  teamId: string;
-  from: string;
-  to: string;
-  currency?: string;
-};
-
-export async function getBurnRateQuery(
-  supabase: Client,
-  params: GetBurnRateQueryParams,
-) {
-  const { teamId, from, to, currency } = params;
-
-  const { data } = await supabase.rpc("get_burn_rate_v4", {
-    team_id: teamId,
-    date_from: startOfMonth(parseISO(from)).toDateString(),
-    date_to: endOfMonth(parseISO(to)).toDateString(),
-    base_currency: currency,
-  });
-
-  return {
-    data,
-    currency: data?.at(0)?.currency,
-  };
-}
-
 export type GetRunwayQueryParams = {
   teamId: string;
   from: string;
@@ -486,82 +460,6 @@ export async function getRunwayQuery(
     date_to: endOfMonth(parseISO(to)).toDateString(),
     base_currency: currency,
   });
-}
-
-export type GetMetricsParams = {
-  teamId: string;
-  from: string;
-  to: string;
-  currency?: string;
-  type?: "revenue" | "profit";
-};
-
-export async function getMetricsQuery(
-  supabase: Client,
-  params: GetMetricsParams,
-) {
-  const { teamId, from, to, type = "profit", currency } = params;
-
-  const rpc = type === "profit" ? "get_profit_v3" : "get_revenue_v3";
-
-  const [{ data: prevData }, { data: currentData }] = await Promise.all([
-    supabase.rpc(rpc, {
-      team_id: teamId,
-      date_from: subYears(startOfMonth(parseISO(from)), 1).toDateString(),
-      date_to: subYears(endOfMonth(parseISO(to)), 1).toDateString(),
-      base_currency: currency,
-    }),
-    supabase.rpc(rpc, {
-      team_id: teamId,
-      date_from: startOfMonth(parseISO(from)).toDateString(),
-      date_to: endOfMonth(parseISO(to)).toDateString(),
-      base_currency: currency,
-    }),
-  ]);
-
-  const prevTotal = prevData?.reduce((value, item) => item.value + value, 0);
-  const currentTotal = currentData?.reduce(
-    (value, item) => item.value + value,
-    0,
-  );
-
-  const baseCurrency = currentData?.at(0)?.currency;
-
-  return {
-    summary: {
-      currentTotal,
-      prevTotal,
-      currency: baseCurrency,
-    },
-    meta: {
-      type,
-      currency: baseCurrency,
-    },
-    result: currentData?.map((record, index) => {
-      const prev = prevData?.at(index);
-
-      return {
-        date: record.date,
-        precentage: {
-          value: getPercentageIncrease(
-            Math.abs(prev?.value),
-            Math.abs(record.value),
-          ),
-          status: record.value > prev?.value ? "positive" : "negative",
-        },
-        current: {
-          date: record.date,
-          value: record.value,
-          currency,
-        },
-        previous: {
-          date: prev?.date,
-          value: prev?.value,
-          currency,
-        },
-      };
-    }),
-  };
 }
 
 export type GetExpensesQueryParams = {

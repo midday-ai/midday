@@ -1,7 +1,20 @@
-import { createTeam, getTeamById, updateTeamById } from "@api/db/queries/teams";
+import { getBankConnections } from "@api/db/queries/bank-connections";
+import {
+  createTeam,
+  deleteTeam,
+  deleteTeamMember,
+  getAvailablePlans,
+  getTeamById,
+  leaveTeam,
+  updateTeamById,
+  updateTeamMember,
+} from "@api/db/queries/teams";
 import {
   acceptTeamInvite,
+  createTeamInvites,
   declineTeamInvite,
+  deleteTeamInvite,
+  getTeamInvites,
 } from "@api/db/queries/user-invites";
 import {
   getTeamMembers,
@@ -57,17 +70,14 @@ export const teamRouter = createTRPCRouter({
 
   leave: protectedProcedure
     .input(leaveTeamSchema)
-    .mutation(async ({ ctx: { supabase, session }, input }) => {
-      const { data: teamMembersData } = await getTeamMembersQuery(
-        supabase,
-        input.teamId,
+    .mutation(async ({ ctx: { db, session }, input }) => {
+      const teamMembersData = await getTeamMembers(db, input.teamId);
+
+      const currentUser = teamMembersData?.data?.find(
+        (member) => member.user?.id === session.user.id,
       );
 
-      const currentUser = teamMembersData?.find(
-        (member) => member.user.id === session.user.id,
-      );
-
-      const totalOwners = teamMembersData?.filter(
+      const totalOwners = teamMembersData?.data?.filter(
         (member) => member.role === "owner",
       ).length;
 
@@ -75,7 +85,7 @@ export const teamRouter = createTRPCRouter({
         throw Error("Action not allowed");
       }
 
-      return leaveTeam(supabase, {
+      return leaveTeam(db, {
         userId: session.user.id,
         teamId: input.teamId,
       });
@@ -102,10 +112,8 @@ export const teamRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteTeamSchema)
-    .mutation(async ({ ctx: { supabase }, input }) => {
-      const data = await deleteTeam(supabase, {
-        teamId: input.teamId,
-      });
+    .mutation(async ({ ctx: { db }, input }) => {
+      const data = await deleteTeam(db, input.teamId);
 
       if (!data) {
         throw new TRPCError({
@@ -114,18 +122,26 @@ export const teamRouter = createTRPCRouter({
         });
       }
 
-      if (data.bank_connections.length > 0) {
+      const bankConnections = await getBankConnections(db, {
+        teamId: data.id,
+      });
+
+      if (bankConnections.length > 0) {
         await tasks.trigger<typeof deleteTeamTask>("delete-team", {
           teamId: input.teamId!,
-          connections: data.bank_connections,
+          connections: bankConnections.map((connection) => ({
+            access_token: connection.accessToken,
+            provider: connection.provider,
+            reference_id: connection.referenceId,
+          })),
         });
       }
     }),
 
   deleteMember: protectedProcedure
     .input(deleteTeamMemberSchema)
-    .mutation(async ({ ctx: { supabase }, input }) => {
-      return deleteTeamMember(supabase, {
+    .mutation(async ({ ctx: { db }, input }) => {
+      return deleteTeamMember(db, {
         teamId: input.teamId,
         userId: input.userId,
       });
@@ -133,22 +149,20 @@ export const teamRouter = createTRPCRouter({
 
   updateMember: protectedProcedure
     .input(updateTeamMemberSchema)
-    .mutation(async ({ ctx: { supabase }, input }) => {
-      return updateTeamMember(supabase, input);
+    .mutation(async ({ ctx: { db }, input }) => {
+      return updateTeamMember(db, input);
     }),
 
-  invites: protectedProcedure.query(async ({ ctx: { supabase, teamId } }) => {
-    const { data } = await getTeamInvitesQuery(supabase, teamId!);
-
-    return data;
+  invites: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
+    return getTeamInvites(db, teamId!);
   }),
 
   invite: protectedProcedure
     .input(inviteTeamMembersSchema)
-    .mutation(async ({ ctx: { supabase, session, teamId, geo }, input }) => {
+    .mutation(async ({ ctx: { db, session, teamId, geo }, input }) => {
       const ip = geo.ip ?? "127.0.0.1";
 
-      const { data } = await createTeamInvites(supabase, {
+      const data = await createTeamInvites(db, {
         teamId: teamId!,
         invites: input.map((invite) => ({
           ...invite,
@@ -158,12 +172,12 @@ export const teamRouter = createTRPCRouter({
 
       const invites =
         data?.map((invite) => ({
-          email: invite.email!,
+          email: invite?.email!,
           invitedBy: session.user.id!,
           invitedByName: session.user.full_name!,
           invitedByEmail: session.user.email!,
-          teamName: invite.team?.name!,
-          inviteCode: invite.code!,
+          teamName: invite?.team?.name!,
+          inviteCode: invite?.code!,
         })) ?? [];
 
       await tasks.trigger<typeof inviteTeamMembers>("invite-team-members", {
@@ -176,20 +190,16 @@ export const teamRouter = createTRPCRouter({
 
   deleteInvite: protectedProcedure
     .input(deleteTeamInviteSchema)
-    .mutation(async ({ ctx: { supabase, teamId }, input }) => {
-      return deleteTeamInvite(supabase, {
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return deleteTeamInvite(db, {
         teamId: teamId!,
         inviteId: input.inviteId,
       });
     }),
 
-  availablePlans: protectedProcedure.query(
-    async ({ ctx: { supabase, teamId } }) => {
-      const { data } = await getAvailablePlansQuery(supabase, teamId!);
-
-      return data;
-    },
-  ),
+  availablePlans: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
+    return getAvailablePlans(db, teamId!);
+  }),
 
   updateBaseCurrency: protectedProcedure
     .input(updateBaseCurrencySchema)
