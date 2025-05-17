@@ -1,6 +1,6 @@
-import { withReplicas } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
 const primaryPool = postgres(process.env.DATABASE_PRIMARY_URL!, {

@@ -20,7 +20,7 @@ export const searchRouter = createTRPCRouter({
       const results = await globalSearchQuery(db, {
         teamId: teamId!,
         ...input,
-        searchTerm: searchTerm ?? undefined,
+        searchTerm: searchTerm,
         /**
          * Tighten the relevance threshold whenever the user enters a multi-word query.
          *
