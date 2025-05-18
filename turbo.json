@@ -42,8 +42,7 @@
         "OUTLOOK_REDIRECT_URI",
         "MIDDAY_ENCRYPTION_KEY",
         "NEXT_PUBLIC_URL",
-        "NEXT_PUBLIC_VERCEL_TARGET_ENV",
-        "NEXT_PUBLIC_VERCEL_URL"
+        "VERCEL_TARGET_ENV"
       ],
       "inputs": ["$TURBO_DEFAULT$", ".env"],
       "dependsOn": ["^build"],
