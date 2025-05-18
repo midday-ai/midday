@@ -17,6 +17,8 @@ export function GoogleSignIn() {
   const handleSignIn = async () => {
     setLoading(true);
 
+    alert(getUrl());
+
     if (isDesktopApp()) {
       const redirectTo = new URL("/api/auth/callback", getUrl());
 
