@@ -45,12 +45,13 @@ export function SetupForm() {
     }),
   );
 
+  function handleSubmit(data: z.infer<typeof formSchema>) {
+    updateUserMutation.mutate(data);
+  }
+
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(updateUserMutation.mutate)}
-        className="space-y-8"
-      >
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <div className="flex justify-between items-end gap-4">
           <AvatarUpload
             userId={user.id}

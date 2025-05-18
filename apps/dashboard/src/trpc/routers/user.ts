@@ -28,6 +28,14 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx: { supabase, session }, input }) => {
+      if (input.full_name) {
+        await supabase.auth.updateUser({
+          data: {
+            full_name: input.full_name,
+          },
+        });
+      }
+
       const { data } = await updateUser(supabase, {
         id: session.user.id,
         ...input,

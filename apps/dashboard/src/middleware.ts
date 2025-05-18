@@ -56,6 +56,7 @@ export async function middleware(request: NextRequest) {
     if (
       newUrl.pathname !== "/setup" &&
       newUrl.pathname !== "/teams/create" &&
+      newUrl.pathname !== "/teams" &&
       !session?.user?.user_metadata?.full_name
     ) {
       // Check if the URL contains an invite code
