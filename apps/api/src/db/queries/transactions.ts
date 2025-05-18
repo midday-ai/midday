@@ -88,6 +88,17 @@ export async function getTransactions(
       .where(eq(transactionAttachments.teamId, teamId)),
   );
 
+  // CTE to determine if a transaction has any tags for the given teamId
+  const transactionTagStatus = db.$with("tts").as(
+    db
+      .selectDistinct({
+        transactionId: transactionTags.transactionId,
+        has_tag_val: sql<number>`1`.as("has_tag_val"),
+      })
+      .from(transactionTags)
+      .where(eq(transactionTags.teamId, teamId)),
+  );
+
   // Always start with teamId filter
   const whereConditions: (SQL | undefined)[] = [
     eq(transactions.teamId, teamId),
@@ -122,21 +133,11 @@ export async function getTransactions(
     }
   }
 
-  // Statuses and attachments filter logic
+  // Attachments filter using the 'tas' CTE
   if (attachments === "exclude") {
-    const subquery = db
-      .select({ id: transactionAttachments.transactionId })
-      .from(transactionAttachments)
-      .where(eq(transactionAttachments.transactionId, transactions.id));
-    whereConditions.push(sql`NOT EXISTS (${subquery})`);
+    whereConditions.push(sql`tas.has_attachment_val IS NULL`);
   } else if (attachments === "include") {
-    const subquery = db
-      .select({ id: transactionAttachments.transactionId })
-      .from(transactionAttachments)
-      .where(eq(transactionAttachments.transactionId, transactions.id));
-    whereConditions.push(sql`EXISTS (${subquery})`);
-  } else if (statuses?.includes("excluded")) {
-    whereConditions.push(eq(transactions.internal, true));
+    whereConditions.push(sql`COALESCE(tas.has_attachment_val, 0) = 1`);
   }
 
   // Status filtering logic revised
@@ -189,17 +190,20 @@ export async function getTransactions(
     }
   }
 
-  // Tags filter
+  // Tags filter using EXISTS
   if (filterTags && filterTags.length > 0) {
-    // Only include tags for this team
-    const taggedTransactionIds = db
-      .selectDistinct({ transactionId: transactionTags.transactionId })
+    const tagsExistSubquery = db
+      .select({ val: sql`1` })
       .from(transactionTags)
       .innerJoin(tags, eq(transactionTags.tagId, tags.id))
       .where(
-        and(inArray(tags.id, filterTags), eq(transactionTags.teamId, teamId)),
+        and(
+          eq(transactionTags.transactionId, transactions.id), // Correlate with the outer transaction
+          eq(transactionTags.teamId, teamId), // Ensure transactionTags are for the correct team
+          inArray(tags.id, filterTags), // Filter by the provided tag IDs
+        ),
       );
-    whereConditions.push(inArray(transactions.id, taggedTransactionIds));
+    whereConditions.push(sql`EXISTS (${tagsExistSubquery})`);
   }
 
   // Recurring filter
@@ -260,7 +264,7 @@ export async function getTransactions(
 
   // All joins must also be limited by teamId where relevant
   const queryBuilder = db
-    .with(transactionAttachmentStatus) // Add the CTE to the query
+    .with(transactionAttachmentStatus, transactionTagStatus) // Add both CTEs
     .select({
       id: transactions.id,
       date: transactions.date,
@@ -301,6 +305,11 @@ export async function getTransactions(
         id: bankConnections.id,
         logoUrl: bankConnections.logoUrl,
       },
+      transactionTags: sql<
+        Array<{ id: string; name: string | null }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tags.id}, 'name', ${tags.name})) FILTER (WHERE ${tags.id} IS NOT NULL), '[]'::json)`.as(
+        "transactionTags",
+      ),
     })
     .from(transactions)
     .leftJoin(
@@ -326,10 +335,56 @@ export async function getTransactions(
       eq(bankAccounts.bankConnectionId, bankConnections.id),
     )
     .leftJoin(
-      transactionAttachmentStatus, // Alias 'tas' is automatically used by Drizzle if not specified here with .as('tas_alias_in_join')
+      transactionAttachmentStatus,
       eq(transactions.id, transactionAttachmentStatus.transactionId),
     )
-    .where(and(...finalWhereConditions));
+    .leftJoin(
+      transactionTagStatus,
+      eq(transactions.id, transactionTagStatus.transactionId),
+    )
+    .leftJoin(
+      transactionTags,
+      and(
+        eq(transactionTags.transactionId, transactions.id),
+        eq(transactionTags.teamId, teamId),
+      ),
+    )
+    .leftJoin(
+      tags,
+      and(eq(tags.id, transactionTags.tagId), eq(tags.teamId, teamId)),
+    )
+    .where(and(...finalWhereConditions))
+    .groupBy(
+      transactions.id,
+      transactions.date,
+      transactions.amount,
+      transactions.currency,
+      transactions.method,
+      transactions.status,
+      transactions.note,
+      transactions.manual,
+      transactions.internal,
+      transactions.recurring,
+      transactions.frequency,
+      transactions.name,
+      transactions.description,
+      transactions.createdAt,
+      users.id,
+      users.fullName,
+      users.email,
+      users.avatarUrl,
+      transactionCategories.id,
+      transactionCategories.name,
+      transactionCategories.color,
+      transactionCategories.slug,
+      bankAccounts.id,
+      bankAccounts.name,
+      bankAccounts.currency,
+      bankConnections.id,
+      bankConnections.logoUrl,
+      transactionAttachmentStatus.has_attachment_val,
+      transactionTagStatus.has_tag_val,
+    );
 
   let query = queryBuilder.$dynamic();
 
@@ -357,18 +412,9 @@ export async function getTransactions(
         order(transactions.id),
       );
     } else if (column === "tags") {
-      const hasTagsSubquery = db
-        .select({ val: sql<number>`1` })
-        .from(transactionTags)
-        .where(
-          and(
-            eq(transactionTags.transactionId, transactions.id),
-            eq(transactionTags.teamId, teamId),
-          ),
-        )
-        .limit(1);
+      // Use the tts CTE for sorting by tags
       query = query.orderBy(
-        order(sql`EXISTS (${hasTagsSubquery})`),
+        order(sql`COALESCE(tts.has_tag_val, 0)`),
         order(transactions.id),
       );
     } else if (column === "date") {

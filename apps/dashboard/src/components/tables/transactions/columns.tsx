@@ -124,16 +124,12 @@ const AmountCell = memo(
 AmountCell.displayName = "AmountCell";
 
 const TagsCell = memo(
-  ({ tags }: { tags?: { tag: { id: string; name: string } }[] }) => (
+  ({ tags }: { tags?: { id: string; name: string | null }[] }) => (
     <div className="relative">
       <div className="flex items-center space-x-2">
-        {tags?.map(({ tag }) => (
-          <Badge
-            key={tag.id}
-            variant="tag-rounded"
-            className="whitespace-nowrap"
-          >
-            {tag.name}
+        {tags?.map(({ id, name }) => (
+          <Badge key={id} variant="tag-rounded" className="whitespace-nowrap">
+            {name}
           </Badge>
         ))}
       </div>
@@ -202,19 +198,17 @@ const ActionsCell = memo(
             </DropdownMenuItem>
           )}
 
-          {transaction.transactionAttachments?.length === 0 &&
-            transaction.status !== "completed" && (
-              <DropdownMenuItem onClick={handleUpdateToCompleted}>
-                Mark as completed
-              </DropdownMenuItem>
-            )}
+          {transaction.isFulfilled && transaction.status !== "completed" && (
+            <DropdownMenuItem onClick={handleUpdateToCompleted}>
+              Mark as completed
+            </DropdownMenuItem>
+          )}
 
-          {transaction.transactionAttachments?.length === 0 &&
-            transaction.status === "completed" && (
-              <DropdownMenuItem onClick={handleUpdateToPosted}>
-                Mark as uncompleted
-              </DropdownMenuItem>
-            )}
+          {transaction.isFulfilled && transaction.status === "completed" && (
+            <DropdownMenuItem onClick={handleUpdateToPosted}>
+              Mark as uncompleted
+            </DropdownMenuItem>
+          )}
 
           {!transaction.manual && transaction.status !== "excluded" && (
             <DropdownMenuItem onClick={handleUpdateToExcluded}>
@@ -302,7 +296,7 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "tags",
     header: "Tags",
-    cell: ({ row }) => <TagsCell tags={row.original.tags} />,
+    cell: ({ row }) => <TagsCell tags={row.original.transactionTags} />,
   },
   {
     accessorKey: "bank_account",

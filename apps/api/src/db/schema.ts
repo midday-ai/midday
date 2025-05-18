@@ -31,6 +31,26 @@ export const tsvector = customType<{
   },
 });
 
+type NumericConfig = {
+  precision?: number;
+  scale?: number;
+};
+
+export const numericCasted = customType<{
+  data: number;
+  driverData: string;
+  config: NumericConfig;
+}>({
+  dataType: (config) => {
+    if (config?.precision && config?.scale) {
+      return `numeric(${config.precision}, ${config.scale})`;
+    }
+    return "numeric";
+  },
+  fromDriver: (value: string) => Number.parseFloat(value),
+  toDriver: (value: number) => value.toString(),
+});
+
 export const accountTypeEnum = pgEnum("account_type", [
   "depository",
   "credit",
@@ -170,7 +190,7 @@ export const transactions = pgTable(
     date: date().notNull(),
     name: text().notNull(),
     method: transactionMethodsEnum().notNull(),
-    amount: numeric().notNull(),
+    amount: numericCasted({ precision: 10, scale: 2 }).notNull(),
     currency: text().notNull(),
     teamId: uuid("team_id").notNull(),
     assignedId: uuid("assigned_id"),
@@ -180,11 +200,11 @@ export const transactions = pgTable(
     internalId: text("internal_id").notNull(),
     status: transactionStatusEnum().default("posted"),
     category: transactionCategoriesEnum(),
-    balance: numeric(),
+    balance: numericCasted({ precision: 10, scale: 2 }),
     manual: boolean().default(false),
     description: text(),
     categorySlug: text("category_slug"),
-    baseAmount: numeric("base_amount"),
+    baseAmount: numericCasted({ precision: 10, scale: 2 }),
     baseCurrency: text("base_currency"),
     recurring: boolean(),
     frequency: transactionFrequencyEnum(),
