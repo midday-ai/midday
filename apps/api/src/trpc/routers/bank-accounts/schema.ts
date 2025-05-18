@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const getBankAccountsQuerySchema = z
+export const getBankAccountsSchema = z
   .object({
     enabled: z.boolean().optional(),
     manual: z.boolean().optional(),

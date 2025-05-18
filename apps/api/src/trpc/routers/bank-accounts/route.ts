@@ -11,13 +11,13 @@ import { nanoid } from "nanoid";
 import {
   createBankAccountSchema,
   deleteBankAccountSchema,
-  getBankAccountsQuerySchema,
+  getBankAccountsSchema,
   updateBankAccountSchema,
 } from "./schema";
 
 export const bankAccountsRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(getBankAccountsQuerySchema)
+    .input(getBankAccountsSchema)
     .query(async ({ input, ctx: { db, teamId } }) => {
       return getBankAccounts(db, {
         teamId: teamId!,

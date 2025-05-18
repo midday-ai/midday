@@ -341,63 +341,6 @@ export async function updateBankAccount(
     .single();
 }
 
-type UpdateSimilarTransactionsCategoryParams = {
-  team_id: string;
-  name: string;
-  category_slug?: string | null;
-  frequency?: "weekly" | "monthly" | "annually" | "irregular";
-  recurring?: boolean;
-};
-
-export async function updateSimilarTransactionsCategory(
-  supabase: Client,
-  params: UpdateSimilarTransactionsCategoryParams,
-) {
-  const { name, team_id, category_slug, frequency, recurring } = params;
-
-  return supabase
-    .from("transactions")
-    .update({
-      category_slug,
-      recurring,
-      frequency,
-    })
-    .textSearch("fts_vector", `${name.replaceAll(" ", "+")}:*`)
-    .eq("team_id", team_id)
-    .select("id, team_id");
-}
-
-type UpdateSimilarTransactionsRecurringParams = {
-  id: string;
-  team_id: string;
-};
-
-export async function updateSimilarTransactionsRecurring(
-  supabase: Client,
-  params: UpdateSimilarTransactionsRecurringParams,
-) {
-  const { id, team_id } = params;
-
-  const transaction = await supabase
-    .from("transactions")
-    .select("name, recurring, frequency")
-    .eq("id", id)
-    .single();
-
-  return supabase
-    .from("transactions")
-    .update({
-      recurring: transaction.data?.recurring,
-      frequency: transaction.data?.frequency,
-    })
-    .textSearch(
-      "fts_vector",
-      `${transaction.data?.name?.replaceAll(" ", "+")}:*`,
-    )
-    .eq("team_id", team_id)
-    .select("id, team_id");
-}
-
 type CreateAttachmentsParams = {
   attachments: Attachment[];
   teamId: string;

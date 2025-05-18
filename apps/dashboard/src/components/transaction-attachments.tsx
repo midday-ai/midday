@@ -213,7 +213,6 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
         {files.map((file, idx) => (
           <AttachmentItem
             key={`${file.name}-${idx}`}
-            id={file.name}
             file={file}
             onDelete={() => handleOnDelete(file?.id)}
           />

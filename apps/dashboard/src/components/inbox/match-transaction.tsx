@@ -47,7 +47,7 @@ export function MatchTransaction() {
       <TransactionMatchItem
         date={transaction.transaction_date}
         name={transaction.name}
-        dateFormat={user?.date_format}
+        dateFormat={user?.dateFormat}
         amount={transaction.transaction_amount}
         currency={transaction.transaction_currency}
         showBestMatch={

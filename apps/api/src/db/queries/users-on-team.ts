@@ -3,7 +3,7 @@ import type { Database } from "../index";
 import { teams, users, usersOnTeam } from "../schema";
 
 export async function getTeamMembers(db: Database, teamId: string) {
-  const result = await db
+  return db
     .select({
       id: usersOnTeam.id,
       role: usersOnTeam.role,
@@ -19,10 +19,6 @@ export async function getTeamMembers(db: Database, teamId: string) {
     .leftJoin(users, eq(usersOnTeam.userId, users.id))
     .where(eq(usersOnTeam.teamId, teamId))
     .orderBy(usersOnTeam.createdAt);
-
-  return {
-    data: result,
-  };
 }
 
 export async function getTeamsByUserId(db: Database, userId: string) {

@@ -73,11 +73,11 @@ export const teamRouter = createTRPCRouter({
     .mutation(async ({ ctx: { db, session }, input }) => {
       const teamMembersData = await getTeamMembers(db, input.teamId);
 
-      const currentUser = teamMembersData?.data?.find(
+      const currentUser = teamMembersData?.find(
         (member) => member.user?.id === session.user.id,
       );
 
-      const totalOwners = teamMembersData?.data?.filter(
+      const totalOwners = teamMembersData?.filter(
         (member) => member.role === "owner",
       ).length;
 
