@@ -146,6 +146,7 @@ export function CustomerForm({ data }: Props) {
       phone: data?.phone ?? undefined,
       contact: data?.contact ?? undefined,
       note: data?.note ?? undefined,
+      vat_number: data?.vat_number ?? undefined,
       tags:
         data?.tags?.map((tag) => ({
           id: tag.tag?.id ?? "",
@@ -190,6 +191,7 @@ export function CustomerForm({ data }: Props) {
       zip: data.zip || null,
       vat_number: data.vat_number || null,
       tags: data.tags?.length ? data.tags : null,
+      country_code: data.country_code || null,
     };
 
     upsertCustomerMutation.mutate(formattedData);
@@ -525,7 +527,6 @@ export function CustomerForm({ data }: Props) {
                               <VatNumberInput
                                 {...field}
                                 value={field.value ?? ""}
-                                countryCode={form.watch("country_code") ?? ""}
                               />
                             </FormControl>
                             <FormMessage />

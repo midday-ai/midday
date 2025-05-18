@@ -60,6 +60,7 @@ export const customersRouter = createTRPCRouter({
         website: z.string().nullable().optional(),
         phone: z.string().nullable().optional(),
         contact: z.string().nullable().optional(),
+        vat_number: z.string().nullable().optional(),
         tags: z
           .array(
             z.object({
