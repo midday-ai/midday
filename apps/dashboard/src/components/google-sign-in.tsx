@@ -17,6 +17,8 @@ export function GoogleSignIn() {
   const handleSignIn = async () => {
     setLoading(true);
 
+    console.log(JSON.stringify(process.env, null, 2));
+
     alert(getUrl());
 
     if (isDesktopApp()) {
