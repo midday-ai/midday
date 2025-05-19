@@ -8,7 +8,7 @@ import {
   updateInbox,
 } from "@api/db/queries/inbox";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import type { processAttachment } from "@midday/jobs/tasks/inbox/process-attachment";
+import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk/v3";
 import {
   deleteInboxSchema,
@@ -46,7 +46,7 @@ export const inboxRouter = createTRPCRouter({
   processAttachments: protectedProcedure
     .input(processAttachmentsSchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
-      return tasks.batchTrigger<typeof processAttachment>(
+      return tasks.batchTrigger(
         "process-attachment",
         input.map((item) => ({
           payload: {
@@ -55,7 +55,7 @@ export const inboxRouter = createTRPCRouter({
             size: item.size,
             teamId: teamId!,
           },
-        })),
+        })) as { payload: ProcessAttachmentPayload }[],
       );
     }),
 

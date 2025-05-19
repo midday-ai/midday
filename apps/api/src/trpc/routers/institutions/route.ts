@@ -1,5 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { engineClient } from "@midday/engine-client";
+import { client } from "@midday/engine-client";
 import {
   getAccountsSchema,
   getInstitutionsSchema,
@@ -10,7 +10,7 @@ export const institutionsRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getInstitutionsSchema)
     .query(async ({ input }) => {
-      const institutionsResponse = await engineClient.institutions.$get({
+      const institutionsResponse = await client.institutions.$get({
         query: input,
       });
 
@@ -26,7 +26,7 @@ export const institutionsRouter = createTRPCRouter({
   accounts: protectedProcedure
     .input(getAccountsSchema)
     .query(async ({ input }) => {
-      const accountsResponse = await engineClient.accounts.$get({
+      const accountsResponse = await client.accounts.$get({
         query: input,
       });
 
@@ -42,7 +42,7 @@ export const institutionsRouter = createTRPCRouter({
   updateUsage: protectedProcedure
     .input(updateUsageSchema)
     .mutation(async ({ input }) => {
-      const usageResponse = await engineClient.institutions[":id"].usage.$put({
+      const usageResponse = await client.institutions[":id"].usage.$put({
         param: input,
       });
 

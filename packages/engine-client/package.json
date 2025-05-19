@@ -2,5 +2,11 @@
   "name": "@midday/engine-client",
   "version": "0.0.1",
   "private": true,
-  "main": "./src/index.ts"
+  "main": "./src/index.ts",
+  "dependencies": {
+    "hono": "^4.7.10"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
 }

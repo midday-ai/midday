@@ -1,15 +1,12 @@
 import { triggerSequenceAndWait } from "@jobs/utils/trigger-sequence";
+import { updateBaseCurrencySchema } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 import { updateAccountBaseCurrency } from "./update-account-base-currency";
 
 export const updateBaseCurrency = schemaTask({
   id: "update-base-currency",
-  schema: z.object({
-    teamId: z.string().uuid(),
-    baseCurrency: z.string(),
-  }),
+  schema: updateBaseCurrencySchema,
   maxDuration: 120,
   queue: {
     concurrencyLimit: 10,

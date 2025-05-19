@@ -7,7 +7,7 @@ import {
 } from "@api/db/queries/documents";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
-import type { processDocument } from "@midday/jobs/tasks/document/process-document";
+import type { ProcessDocumentPayload } from "@midday/jobs/schema";
 import { remove, signedUrl } from "@midday/supabase/storage";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
@@ -103,15 +103,18 @@ export const documentsRouter = createTRPCRouter({
       }
 
       // Trigger processing task only for supported documents
-      return tasks.batchTrigger<typeof processDocument>(
+      return tasks.batchTrigger(
         "process-document",
-        supportedDocuments.map((item) => ({
-          payload: {
-            filePath: item.filePath,
-            mimetype: item.mimetype,
-            teamId: teamId!,
-          },
-        })),
+        supportedDocuments.map(
+          (item) =>
+            ({
+              payload: {
+                filePath: item.filePath,
+                mimetype: item.mimetype,
+                teamId: teamId!,
+              },
+            }) as { payload: ProcessDocumentPayload },
+        ),
       );
     }),
 

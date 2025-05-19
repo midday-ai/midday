@@ -1,16 +1,13 @@
+import { generateInvoiceSchema } from "@jobs/schema";
 import { processDocument } from "@jobs/tasks/document/process-document";
 import { PdfTemplate, renderToBuffer } from "@midday/invoice";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 import { sendInvoiceEmail } from "../email/send-email";
 
 export const generateInvoice = schemaTask({
   id: "generate-invoice",
-  schema: z.object({
-    invoiceId: z.string().uuid(),
-    deliveryType: z.enum(["create", "create_and_send"]),
-  }),
+  schema: generateInvoiceSchema,
   maxDuration: 60,
   queue: {
     concurrencyLimit: 50,

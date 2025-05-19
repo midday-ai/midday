@@ -21,9 +21,11 @@ import {
   getTeamsByUserId,
 } from "@api/db/queries/users-on-team";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import type { deleteTeam as deleteTeamTask } from "@midday/jobs/tasks/team/delete";
-import type { inviteTeamMembers } from "@midday/jobs/tasks/team/invite";
-import type { updateBaseCurrency } from "@midday/jobs/tasks/transactions/update-base-currency";
+import type {
+  DeleteTeamPayload,
+  InviteTeamMembersPayload,
+  UpdateBaseCurrencyPayload,
+} from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 import {
@@ -127,14 +129,14 @@ export const teamRouter = createTRPCRouter({
       });
 
       if (bankConnections.length > 0) {
-        await tasks.trigger<typeof deleteTeamTask>("delete-team", {
+        await tasks.trigger("delete-team", {
           teamId: input.teamId!,
           connections: bankConnections.map((connection) => ({
             accessToken: connection.accessToken,
             provider: connection.provider,
             referenceId: connection.referenceId,
           })),
-        });
+        } satisfies DeleteTeamPayload);
       }
     }),
 
@@ -180,12 +182,12 @@ export const teamRouter = createTRPCRouter({
           inviteCode: invite?.code!,
         })) ?? [];
 
-      await tasks.trigger<typeof inviteTeamMembers>("invite-team-members", {
+      await tasks.trigger("invite-team-members", {
         teamId: teamId!,
         invites,
         ip,
         locale: "en",
-      });
+      } satisfies InviteTeamMembersPayload);
     }),
 
   deleteInvite: protectedProcedure
@@ -204,13 +206,10 @@ export const teamRouter = createTRPCRouter({
   updateBaseCurrency: protectedProcedure
     .input(updateBaseCurrencySchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
-      const event = await tasks.trigger<typeof updateBaseCurrency>(
-        "update-base-currency",
-        {
-          teamId: teamId!,
-          baseCurrency: input.baseCurrency,
-        },
-      );
+      const event = await tasks.trigger("update-base-currency", {
+        teamId: teamId!,
+        baseCurrency: input.baseCurrency,
+      } satisfies UpdateBaseCurrencyPayload);
 
       return event;
     }),

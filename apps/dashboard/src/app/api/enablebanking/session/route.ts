@@ -1,4 +1,4 @@
-import { engineClient } from "@midday/engine-client";
+import { client } from "@midday/engine-client";
 import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/?error=missing_code", redirectBase));
   }
 
-  const sessionResponse = await engineClient.auth.enablebanking.exchange.$get({
+  const sessionResponse = await client.auth.enablebanking.exchange.$get({
     query: {
       code,
     },

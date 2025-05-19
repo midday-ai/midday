@@ -15,19 +15,27 @@ type DatabaseWithPrimary = Database & {
   $primary?: Database;
 };
 
+type Session = {
+  user: {
+    id: string;
+    email?: string;
+    full_name?: string;
+  };
+} | null;
+
 // Database middleware that handles replication lag based on mutation operations
 // For mutations: always use primary DB
 // For queries: use primary DB if the team recently performed a mutation
 export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
   ctx: {
-    session?: { user?: { id?: string } };
+    session?: Session;
     teamId?: string;
     db: Database;
   };
   type: "query" | "mutation" | "subscription";
   next: (opts: {
     ctx: {
-      session?: { user?: { id?: string } };
+      session?: Session;
       teamId?: string;
       db: Database;
     };

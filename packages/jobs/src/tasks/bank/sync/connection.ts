@@ -1,5 +1,5 @@
 import { triggerSequenceAndWait } from "@jobs/utils/trigger-sequence";
-import { engineClient } from "@midday/engine-client";
+import { client } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
@@ -33,7 +33,7 @@ export const syncConnection = schemaTask({
         throw new Error("Connection not found");
       }
 
-      const connectionResponse = await engineClient.connections.status.$get({
+      const connectionResponse = await client.connections.status.$get({
         query: {
           id: data.reference_id,
           provider: data.provider,

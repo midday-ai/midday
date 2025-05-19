@@ -1,6 +1,6 @@
 "use server";
 
-import { engineClient } from "@midday/engine-client";
+import { client } from "@midday/engine-client";
 import { LogEvents } from "@midday/events/events";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -28,7 +28,7 @@ export const reconnectEnableBankingLinkAction = authActionClient
         isDesktop,
       });
 
-      const institutionResponse = await engineClient.institutions[":id"].$get({
+      const institutionResponse = await client.institutions[":id"].$get({
         param: {
           id: institutionId,
         },
@@ -42,7 +42,7 @@ export const reconnectEnableBankingLinkAction = authActionClient
         await institutionResponse.json();
 
       try {
-        const linkResponse = await engineClient.auth.enablebanking.link.$post({
+        const linkResponse = await client.auth.enablebanking.link.$post({
           json: {
             institutionId: name,
             country,
