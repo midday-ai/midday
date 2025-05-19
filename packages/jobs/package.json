@@ -42,7 +42,7 @@
   "dependencies": {
     "@fast-csv/format": "5.0.2",
     "@midday/email": "workspace:*",
-    "@midday/engine": "workspace:*",
+    "@midday/engine-client": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@sindresorhus/slugify": "^2.2.1",
     "@zip.js/zip.js": "^2.7.61",

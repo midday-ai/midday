@@ -241,11 +241,13 @@ export async function getTrackerProjects(
 }
 
 export async function deleteTrackerProject(db: Database, id: string) {
-  return db
+  const [result] = await db
     .delete(trackerProjects)
     .where(eq(trackerProjects.id, id))
     .returning({ id: trackerProjects.id })
     .execute();
+
+  return result;
 }
 
 export type UpsertTrackerProjectParams = {
@@ -275,9 +277,7 @@ export async function upsertTrackerProject(
       .values({
         ...projectData,
         teamId,
-        // Convert numeric types if needed
         rate: projectData.rate !== undefined ? projectData.rate : undefined,
-        // Convert estimate to bigint number mode
         estimate:
           projectData.estimate !== undefined ? projectData.estimate : undefined,
       })
@@ -286,9 +286,7 @@ export async function upsertTrackerProject(
         set: {
           ...projectData,
           teamId,
-          // Convert numeric types if needed
           rate: projectData.rate !== undefined ? projectData.rate : undefined,
-          // Convert estimate to bigint number mode
           estimate:
             projectData.estimate !== undefined
               ? projectData.estimate
@@ -298,7 +296,10 @@ export async function upsertTrackerProject(
           ? eq(trackerProjects.id, projectData.id)
           : undefined,
       })
-      .returning();
+      .returning({
+        id: trackerProjects.id,
+        name: trackerProjects.name,
+      });
 
     if (!result) {
       throw new Error("Failed to upsert tracker project");
@@ -351,40 +352,7 @@ export async function upsertTrackerProject(
       }
     }
 
-    // Get the project with its tags
-    const projectWithTags = await tx
-      .select({
-        project: trackerProjects,
-        tagId: trackerProjectTags.tagId,
-        tagName: tags.name,
-      })
-      .from(trackerProjects)
-      .leftJoin(
-        trackerProjectTags,
-        eq(trackerProjects.id, trackerProjectTags.trackerProjectId),
-      )
-      .leftJoin(tags, eq(trackerProjectTags.tagId, tags.id))
-      .where(eq(trackerProjects.id, projectId))
-      .execute();
-
-    // Format the response
-    const project = projectWithTags[0]?.project;
-    const formattedTags = projectWithTags
-      .filter((p) => p.tagId)
-      .map((p) => ({
-        id: p.tagId,
-        tag: {
-          id: p.tagId,
-          name: p.tagName,
-        },
-      }));
-
-    return {
-      data: {
-        ...project,
-        tags: formattedTags,
-      },
-    };
+    return result;
   });
 }
 
@@ -435,7 +403,7 @@ export async function getTrackerProjectById(
     .limit(1);
 
   if (!projectData.length) {
-    return { data: null };
+    return null;
   }
 
   const project = projectData[0];
@@ -463,17 +431,15 @@ export async function getTrackerProjectById(
 
   // Format the response
   return {
-    data: {
-      ...project,
-      tags: projectTags.map((pt) => ({
-        id: pt.id,
-        tag: { id: pt.tagId, name: pt.tagName },
-      })),
-      users: assignedUsers.map((user) => ({
-        id: user.user_id,
-        fullName: user.full_name,
-        avatarUrl: user.avatar_url,
-      })),
-    },
+    ...project,
+    tags: projectTags.map((pt) => ({
+      id: pt.id,
+      tag: { id: pt.tagId, name: pt.tagName },
+    })),
+    users: assignedUsers.map((user) => ({
+      id: user.user_id,
+      fullName: user.full_name,
+      avatarUrl: user.avatar_url,
+    })),
   };
 }

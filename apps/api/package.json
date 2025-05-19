@@ -13,7 +13,7 @@
     "@date-fns/utc": "^2.1.0",
     "@hono/trpc-server": "^0.3.4",
     "@midday/documents": "workspace:*",
-    "@midday/engine": "workspace:*",
+    "@midday/engine-client": "workspace:*",
     "@midday/inbox": "workspace:*",
     "@midday/invoice": "workspace:*",
     "@midday/jobs": "workspace:*",

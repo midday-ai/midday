@@ -1,6 +1,6 @@
-import { engineClient } from "@jobs/utils/engine-client";
 import { parseAPIError } from "@jobs/utils/parse-error";
 import { getClassification } from "@jobs/utils/transform";
+import { engineClient } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";

@@ -1,6 +1,6 @@
 "use server";
 
-import { engineClient } from "@/utils/engine-client";
+import { engineClient } from "@midday/engine-client";
 
 export const exchangePublicToken = async (token: string) => {
   const plaidResponse = await engineClient.auth.plaid.exchange.$post({

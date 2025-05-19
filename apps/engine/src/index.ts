@@ -32,7 +32,7 @@ app.get("/", (c) => {
   return c.redirect("https://midday.ai", 302);
 });
 
-const appRoutes = app
+export const appRoutes = app
   .route("/transactions", transactionsRoutes)
   .route("/accounts", accountRoutes)
   .route("/institutions", institutionRoutes)
@@ -41,7 +41,5 @@ const appRoutes = app
   .route("/health", healthRoutes)
   .route("/rates", ratesRoutes)
   .route("/enrich", enrichRoutes);
-
-export type AppType = typeof appRoutes;
 
 export default app;

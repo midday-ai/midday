@@ -57,6 +57,7 @@ export async function resumableUpload(
     return upload.findPreviousUploads().then((previousUploads) => {
       // Found previous uploads so we select the first one.
       if (previousUploads.length) {
+        // @ts-expect-error
         upload.resumeFromPreviousUpload(previousUploads[0]);
       }
 

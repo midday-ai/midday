@@ -17,6 +17,7 @@ export async function getUserInvites(db: Database, email: string) {
         columns: {
           id: true,
           name: true,
+          logoUrl: true,
         },
       },
     },

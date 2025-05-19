@@ -278,16 +278,7 @@ export function DataTable({
 
       <ExportBar />
 
-      <AnimatePresence>
-        {showBottomBar && (
-          <BottomBar
-            transactions={tableData.map((row) => ({
-              amount: row?.amount ?? 0,
-              currency: row?.currency ?? "",
-            }))}
-          />
-        )}
-      </AnimatePresence>
+      <AnimatePresence>{showBottomBar && <BottomBar />}</AnimatePresence>
     </div>
   );
 }

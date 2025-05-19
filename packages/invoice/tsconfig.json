@@ -2,6 +2,11 @@
   "extends": "@midday/tsconfig/base.json",
   "include": ["src"],
   "exclude": ["node_modules"],
+  "baseUrl": ".",
+  "paths": {
+    "@/*": ["./src/*"],
+    "@api/*": ["../../apps/api/src/*"]
+  },
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",

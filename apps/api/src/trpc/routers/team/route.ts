@@ -130,9 +130,9 @@ export const teamRouter = createTRPCRouter({
         await tasks.trigger<typeof deleteTeamTask>("delete-team", {
           teamId: input.teamId!,
           connections: bankConnections.map((connection) => ({
-            access_token: connection.accessToken,
+            accessToken: connection.accessToken,
             provider: connection.provider,
-            reference_id: connection.referenceId,
+            referenceId: connection.referenceId,
           })),
         });
       }

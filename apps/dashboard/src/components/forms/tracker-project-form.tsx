@@ -44,7 +44,7 @@ const formSchema = z.object({
   rate: z.number().min(1).optional(),
   currency: z.string().optional(),
   status: z.enum(["in_progress", "completed"]).optional(),
-  customer_id: z.string().uuid().nullable().optional(),
+  customerId: z.string().uuid().nullable().optional(),
   tags: z
     .array(
       z.object({
@@ -116,7 +116,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
       billable: data.billable || false,
       estimate: data.estimate || null,
       status: data.status || "in_progress",
-      customer_id: data.customer_id || null,
+      customerId: data.customerId || null,
       tags: data.tags?.length ? data.tags : null,
     };
 
@@ -154,7 +154,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
 
         <FormField
           control={form.control}
-          name="customer_id"
+          name="customerId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Customer</FormLabel>

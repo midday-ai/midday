@@ -104,6 +104,7 @@ export function ReconnectProvider({
   });
 
   const openTeller = () => {
+    // @ts-expect-error
     const teller = window.TellerConnect.setup({
       applicationId: process.env.NEXT_PUBLIC_TELLER_APPLICATION_ID!,
       environment: process.env.NEXT_PUBLIC_TELLER_ENVIRONMENT,
@@ -152,7 +153,7 @@ export function ReconnectProvider({
         return reconnectEnableBankingLink.execute({
           institutionId,
           isDesktop: isDesktopApp(),
-          sessionId: referenceId,
+          sessionId: referenceId!,
         });
       }
       case "teller":
