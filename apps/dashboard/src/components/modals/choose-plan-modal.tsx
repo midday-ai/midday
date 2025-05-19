@@ -16,16 +16,12 @@ export function ChoosePlanModal({
   daysLeft,
   hasDiscount,
   discountPrice,
-  teamId,
-  canChooseStarterPlan,
 }: {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   daysLeft?: number;
   hasDiscount?: boolean;
   discountPrice?: number;
-  teamId: string;
-  canChooseStarterPlan: boolean;
 }) {
   const handleClose = (value: boolean) => {
     onOpenChange(value);
@@ -69,11 +65,7 @@ export function ChoosePlanModal({
             {getDescription()}
           </DialogDescription>
 
-          <Plans
-            discountPrice={discountPrice}
-            teamId={teamId}
-            canChooseStarterPlan={canChooseStarterPlan}
-          />
+          <Plans />
 
           <p className="text-xs text-muted-foreground mt-4">
             After the trial period ends, you'll have read-only access,{" "}

@@ -1,4 +1,4 @@
-import type { AccountType } from "@/utils/account";
+import type { AccountType } from "@engine/utils/account";
 
 export type Providers = "teller" | "plaid" | "gocardless" | "enablebanking";
 

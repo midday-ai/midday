@@ -1,5 +1,8 @@
-import { getAccountBalance, getTransactionAmount } from "@/utils/base-currency";
-import { processBatch } from "@/utils/process-batch";
+import {
+  getAccountBalance,
+  getTransactionAmount,
+} from "@jobs/utils/base-currency";
+import { processBatch } from "@jobs/utils/process-batch";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";

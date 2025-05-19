@@ -168,7 +168,7 @@ export function Form() {
             </div>
           </div>
 
-          <EditBlock name="top_block" />
+          <EditBlock name="topBlock" />
 
           <div className="mt-4">
             <LineItems />
@@ -184,7 +184,7 @@ export function Form() {
               <NoteDetails />
             </div>
 
-            <EditBlock name="bottom_block" />
+            <EditBlock name="bottomBlock" />
           </div>
         </div>
       </ScrollArea>

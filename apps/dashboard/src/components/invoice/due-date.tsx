@@ -36,7 +36,7 @@ export function DueDate() {
         <LabelInput
           name="template.due_date_label"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ due_date_label: value });
+            updateTemplateMutation.mutate({ dueDateLabel: value });
           }}
         />
         <span className="text-[11px] text-[#878787] font-mono">:</span>

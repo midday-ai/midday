@@ -1,7 +1,6 @@
 import { getSession } from "@midday/supabase/cached-queries";
 import { updateBankConnection } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
-import { revalidateTag } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -20,8 +19,7 @@ export async function GET(req: NextRequest) {
   const isDesktop = requestUrl.searchParams.get("desktop");
 
   if (id) {
-    const { data } = await updateBankConnection(supabase, { id, referenceId });
-    revalidateTag(`bank_connections_${data?.team_id}`);
+    await updateBankConnection(supabase, { id, referenceId });
   }
 
   if (isDesktop === "true") {

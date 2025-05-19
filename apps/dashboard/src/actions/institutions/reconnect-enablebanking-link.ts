@@ -1,6 +1,6 @@
 "use server";
 
-import { client } from "@midday/engine/client";
+import { engineClient } from "@/utils/engine-client";
 import { LogEvents } from "@midday/events/events";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -28,17 +28,21 @@ export const reconnectEnableBankingLinkAction = authActionClient
         isDesktop,
       });
 
-      const institutionResponse = await client.institutions[":id"].$get({
+      const institutionResponse = await engineClient.institutions[":id"].$get({
         param: {
           id: institutionId,
         },
       });
 
+      if (!institutionResponse.ok) {
+        throw new Error("Failed to get institution");
+      }
+
       const { maximum_consent_validity, country, name, type } =
         await institutionResponse.json();
 
       try {
-        const linkResponse = await client.auth.enablebanking.link.$post({
+        const linkResponse = await engineClient.auth.enablebanking.link.$post({
           json: {
             institutionId: name,
             country,
@@ -52,6 +56,10 @@ export const reconnectEnableBankingLinkAction = authActionClient
               : `web:reconnect:${sessionId}`,
           },
         });
+
+        if (!linkResponse.ok) {
+          throw new Error("Failed to create link");
+        }
 
         const { data: linkData } = await linkResponse.json();
 

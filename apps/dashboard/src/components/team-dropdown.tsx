@@ -43,12 +43,13 @@ export function TeamDropdown() {
 
   const sortedTeams =
     teams?.sort((a, b) => {
-      if (a.team.id === selectedId) return -1;
-      if (b.team.id === selectedId) return 1;
+      if (a.team?.id === selectedId) return -1;
+      if (b.team?.id === selectedId) return 1;
 
-      return a.team.id.localeCompare(b.team.id);
+      return (a.team?.id ?? "").localeCompare(b.team?.id ?? "");
     }) ?? [];
 
+  // @ts-expect-error
   useOnClickOutside(ref, () => {
     if (!isChangingTeam) {
       setActive(false);
@@ -99,7 +100,7 @@ export function TeamDropdown() {
         )}
         {sortedTeams.map(({ team }, index) => (
           <motion.div
-            key={team.id}
+            key={team?.id}
             className="w-[32px] h-[32px] left-0 overflow-hidden absolute"
             style={{ zIndex: -index }}
             initial={{
@@ -130,13 +131,13 @@ export function TeamDropdown() {
                 if (index === 0) {
                   toggleActive();
                 } else {
-                  handleTeamChange(team.id);
+                  handleTeamChange(team?.id ?? "");
                 }
               }}
             >
               <AvatarImageNext
-                src={team.logo_url ?? ""}
-                alt={team.name ?? ""}
+                src={team?.logoUrl ?? ""}
+                alt={team?.name ?? ""}
                 width={20}
                 height={20}
                 quality={100}

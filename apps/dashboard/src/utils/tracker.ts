@@ -1,3 +1,4 @@
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   addMinutes,
   addSeconds,
@@ -9,6 +10,8 @@ import {
 } from "date-fns";
 
 export const NEW_EVENT_ID = "new-event";
+
+type TrackerRecord = RouterOutputs["trackerEntries"]["byDate"]["data"][number];
 
 export function sortDates(dates: string[]) {
   return dates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
@@ -54,9 +57,19 @@ export const createNewEvent = (
   const endDate = addMinutes(startDate, 15);
   return {
     id: NEW_EVENT_ID,
-    start: startDate,
-    end: endDate,
-    project: { id: selectedProjectId ?? "", name: "" },
+    date: format(startDate, "yyyy-MM-dd"),
+    description: null,
+    duration: 15 * 60, // 15 minutes in seconds
+    start: startDate.toISOString(),
+    stop: endDate.toISOString(),
+    user: null,
+    trackerProject: {
+      id: selectedProjectId ?? "",
+      name: "",
+      currency: null,
+      rate: null,
+      customer: null,
+    },
   };
 };
 
@@ -65,7 +78,7 @@ export const updateEventTime = (
   start: Date,
   end: Date,
 ): TrackerRecord => {
-  return { ...event, start, end };
+  return { ...event, start: start.toISOString(), stop: end.toISOString() };
 };
 
 export const getDates = (
@@ -86,25 +99,27 @@ export const getDates = (
 };
 
 export const transformTrackerData = (
-  event: any,
+  event: TrackerRecord,
   selectedDate: string | null,
 ): TrackerRecord => {
   const start = event.start
     ? parseISO(event.start)
     : parseISO(`${event.date || selectedDate}T09:00:00`);
-  const end = event.end
-    ? parseISO(event.end)
+  const stop = event.stop
+    ? parseISO(event.stop)
     : addSeconds(start, event.duration || 0);
 
   return {
     ...event,
     id: event.id,
-    start,
-    end,
-    project: {
-      id: event.project_id,
-      name: event.project?.name || "",
-      customer: event.project?.customer,
+    start: start.toISOString(),
+    stop: stop.toISOString(),
+    trackerProject: {
+      id: event.trackerProject?.id || "",
+      name: event.trackerProject?.name || "",
+      currency: event.trackerProject?.currency ?? null,
+      rate: event.trackerProject?.rate ?? null,
+      customer: event.trackerProject?.customer ?? null,
     },
     description: event.description,
   };

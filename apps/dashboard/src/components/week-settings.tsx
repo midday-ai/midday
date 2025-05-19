@@ -25,10 +25,10 @@ export function WeekSettings() {
 
       <CardContent>
         <Switch
-          checked={user.week_starts_on_monday ?? false}
+          checked={user?.weekStartsOnMonday ?? false}
           disabled={updateUserMutation.isPending}
-          onCheckedChange={(week_starts_on_monday: boolean) => {
-            updateUserMutation.mutate({ week_starts_on_monday });
+          onCheckedChange={(weekStartsOnMonday: boolean) => {
+            updateUserMutation.mutate({ weekStartsOnMonday });
           }}
         />
       </CardContent>

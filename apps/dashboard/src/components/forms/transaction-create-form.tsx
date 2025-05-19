@@ -40,14 +40,15 @@ import { format } from "date-fns";
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import { z } from "zod";
+
 const formSchema = z.object({
   name: z.string().min(1),
   amount: z.number(),
   currency: z.string(),
   date: z.string(),
-  bank_account_id: z.string(),
-  assigned_id: z.string().optional(),
-  category_slug: z.string().optional(),
+  bankAccountId: z.string(),
+  assignedId: z.string().optional(),
+  categorySlug: z.string().optional(),
   note: z.string().optional(),
   internal: z.boolean().optional(),
   attachments: z
@@ -99,24 +100,24 @@ export function TransactionCreateForm() {
   const form = useZodForm(formSchema, {
     defaultValues: {
       name: undefined,
-      category_slug: undefined,
+      categorySlug: undefined,
       date: new Date().toISOString(),
-      bank_account_id: accounts?.at(0)?.id,
-      assigned_id: user?.id,
+      bankAccountId: accounts?.at(0)?.id,
+      assignedId: user?.id,
       note: undefined,
-      currency: team?.base_currency ?? undefined,
+      currency: team?.baseCurrency ?? undefined,
       attachments: undefined,
       internal: undefined,
     },
   });
 
-  const category = form.watch("category_slug");
+  const category = form.watch("categorySlug");
   const attachments = form.watch("attachments");
-  const bankAccountId = form.watch("bank_account_id");
+  const bankAccountId = form.watch("bankAccountId");
 
   useEffect(() => {
     if (user) {
-      form.setValue("assigned_id", user.id);
+      form.setValue("assignedId", user.id);
     }
   }, [user]);
 
@@ -124,7 +125,7 @@ export function TransactionCreateForm() {
     if (!bankAccountId && accounts?.length) {
       const firstAccountId = accounts.at(0)?.id;
       if (firstAccountId) {
-        form.setValue("bank_account_id", firstAccountId);
+        form.setValue("bankAccountId", firstAccountId);
       }
     }
   }, [accounts, bankAccountId]);
@@ -172,7 +173,7 @@ export function TransactionCreateForm() {
                       field.onChange(values.floatValue);
 
                       if (values.floatValue && values.floatValue > 0) {
-                        form.setValue("category_slug", "income");
+                        form.setValue("categorySlug", "income");
                       }
 
                       if (
@@ -180,7 +181,7 @@ export function TransactionCreateForm() {
                         values.floatValue !== undefined &&
                         values.floatValue < 0
                       ) {
-                        form.setValue("category_slug", undefined);
+                        form.setValue("categorySlug", undefined);
                       }
                     }}
                   />
@@ -216,7 +217,7 @@ export function TransactionCreateForm() {
         <div className="flex space-x-4 mt-4">
           <FormField
             control={form.control}
-            name="bank_account_id"
+            name="bankAccountId"
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Account</FormLabel>
@@ -257,7 +258,7 @@ export function TransactionCreateForm() {
                         {field.value ? (
                           format(
                             new Date(field.value),
-                            user?.date_format ?? "PPP",
+                            user?.dateFormat ?? "PPP",
                           )
                         ) : (
                           <span>Select date</span>
@@ -287,7 +288,7 @@ export function TransactionCreateForm() {
         <div className="flex space-x-4 mt-4">
           <FormField
             control={form.control}
-            name="category_slug"
+            name="categorySlug"
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Category</FormLabel>
@@ -310,7 +311,7 @@ export function TransactionCreateForm() {
 
           <FormField
             control={form.control}
-            name="assigned_id"
+            name="assignedId"
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Assign</FormLabel>

@@ -1,14 +1,14 @@
 "use client";
 
 import { useUserQuery } from "@/hooks/use-user";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { format } from "date-fns";
 import React from "react";
 
 type ActivityItemProps = {
   label: string;
-  date: string;
+  date?: string | null;
   completed: boolean;
   isLast?: boolean;
   timeFormat?: number | null;
@@ -64,50 +64,50 @@ type Props = {
 
 export function InvoiceActivity({ data }: Props) {
   const { data: user } = useUserQuery();
-  const completed = data?.paid_at !== null;
+  const completed = data?.paidAt !== null;
 
   return (
     <ul>
-      {data?.created_at && (
+      {data?.createdAt && (
         <ActivityItem
           label="Created"
-          date={data?.created_at}
+          date={data?.createdAt}
           completed
-          timeFormat={user?.time_format}
+          timeFormat={user?.timeFormat ?? null}
         />
       )}
-      {data?.sent_at && (
+      {data?.sentAt && (
         <ActivityItem
           label="Sent"
-          date={data?.sent_at}
+          date={data?.sentAt}
           completed
-          timeFormat={user?.time_format}
+          timeFormat={user?.timeFormat}
         />
       )}
-      {data?.viewed_at && (
+      {data?.viewedAt && (
         <ActivityItem
           label="Viewed"
-          date={data?.viewed_at}
+          date={data?.viewedAt}
           completed
-          timeFormat={user?.time_format}
+          timeFormat={user?.timeFormat}
         />
       )}
-      {data?.reminder_sent_at && (
+      {data?.reminderSentAt && (
         <ActivityItem
           label="Reminder sent"
-          date={data?.reminder_sent_at}
+          date={data?.reminderSentAt}
           completed
-          timeFormat={user?.time_format}
+          timeFormat={user?.timeFormat}
         />
       )}
 
       {data?.status !== "canceled" && (
         <ActivityItem
           label="Paid"
-          date={data?.paid_at}
+          date={data?.paidAt}
           completed={completed}
           isLast
-          timeFormat={user?.time_format}
+          timeFormat={user?.timeFormat}
         />
       )}
 
@@ -115,9 +115,9 @@ export function InvoiceActivity({ data }: Props) {
         <ActivityItem
           label="Canceled"
           completed
-          date={data?.updated_at}
+          date={data?.updatedAt}
           isLast
-          timeFormat={user?.time_format}
+          timeFormat={user?.timeFormat}
         />
       )}
     </ul>

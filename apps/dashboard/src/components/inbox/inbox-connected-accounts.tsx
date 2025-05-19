@@ -19,7 +19,7 @@ export function InboxConnectedAccounts() {
     }),
   );
 
-  if (!data?.data?.length) return null;
+  if (!data?.length) return null;
 
   return (
     <div>
@@ -28,7 +28,7 @@ export function InboxConnectedAccounts() {
       </div>
 
       <div className="flex flex-col gap-2 mb-6 divide-y divide-border border-b-[1px]">
-        {data?.data?.map((account) => (
+        {data?.map((account) => (
           <div
             key={account.id}
             className="flex items-center justify-between py-0.5"
@@ -37,7 +37,7 @@ export function InboxConnectedAccounts() {
               <div className="text-sm flex justify-between">
                 <span className="flex-2 text-sm">{account.email}</span>
                 <span className="text-muted-foreground text-xs">
-                  {formatDistanceToNow(new Date(account.last_accessed))} ago
+                  {formatDistanceToNow(new Date(account.lastAccessed))} ago
                 </span>
               </div>
             </div>

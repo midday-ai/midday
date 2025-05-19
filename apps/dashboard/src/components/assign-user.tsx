@@ -34,9 +34,19 @@ export function AssignUser({ selectedId, onSelect }: Props) {
   return (
     <Select
       value={value}
-      onValueChange={(id) =>
-        onSelect(users?.find(({ user }) => user?.id === id)?.user)
-      }
+      onValueChange={(id) => {
+        const found = users?.find(({ user }) => user?.id === id)?.user;
+
+        if (found) {
+          onSelect({
+            id: found.id,
+            full_name: found.fullName ?? null,
+            avatar_url: found.avatarUrl ?? null,
+          });
+        } else {
+          onSelect(undefined);
+        }
+      }}
     >
       <SelectTrigger
         id="assign"
@@ -49,10 +59,10 @@ export function AssignUser({ selectedId, onSelect }: Props) {
       <SelectContent className="overflow-y-auto max-h-[200px]">
         {users?.map(({ user }) => {
           return (
-            <SelectItem key={user?.id} value={user?.id}>
+            <SelectItem key={user?.id} value={user?.id ?? ""}>
               <AssignedUser
-                fullName={user?.full_name}
-                avatarUrl={user?.avatar_url}
+                fullName={user?.fullName}
+                avatarUrl={user?.avatarUrl}
               />
             </SelectItem>
           );

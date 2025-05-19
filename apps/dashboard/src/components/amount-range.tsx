@@ -26,10 +26,10 @@ export function AmountRange() {
   );
 
   const minValue = items?.length
-    ? Math.min(...items.map((item) => item.amount))
+    ? Math.min(...items.map((item) => Number(item.amount) || 0))
     : 0;
   const maxValue = items?.length
-    ? Math.max(...items.map((item) => item.amount))
+    ? Math.max(...items.map((item) => Number(item.amount) || 0))
     : 0;
 
   const {
@@ -58,10 +58,12 @@ export function AmountRange() {
   };
 
   const countItemsInRange = (min: number, max: number) => {
-    return (
-      items?.filter((item) => item.amount >= min && item.amount <= max)
-        .length ?? 0
-    );
+    if (!items) return 0;
+    return items.filter((item) => {
+      const amount =
+        typeof item.amount === "number" ? item.amount : Number(item.amount);
+      return !Number.isNaN(amount) && amount >= min && amount <= max;
+    }).length;
   };
 
   const totalCount = countItemsInRange(

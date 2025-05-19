@@ -1,5 +1,5 @@
-import { blobToSerializable } from "@/utils/blob";
-import { processBatch } from "@/utils/process-batch";
+import { blobToSerializable } from "@jobs/utils/blob";
+import { processBatch } from "@jobs/utils/process-batch";
 import { createClient } from "@midday/supabase/job";
 import { download } from "@midday/supabase/storage";
 import { schemaTask } from "@trigger.dev/sdk/v3";

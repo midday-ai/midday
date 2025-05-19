@@ -22,7 +22,7 @@ export function InvoiceNo() {
     clearErrors,
     formState: { errors },
   } = useFormContext();
-  const invoiceNumber = watch("invoice_number");
+  const invoiceNumber = watch("invoiceNumber");
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
     trpc.invoiceTemplate.upsert.mutationOptions(),
@@ -46,12 +46,12 @@ export function InvoiceNo() {
 
   useEffect(() => {
     if (data) {
-      setError("invoice_number", {
+      setError("invoiceNumber", {
         type: "manual",
         message: "Invoice number already exists",
       });
     } else {
-      clearErrors("invoice_number");
+      clearErrors("invoiceNumber");
     }
   }, [data]);
 
@@ -59,9 +59,9 @@ export function InvoiceNo() {
     <div className="flex space-x-1 items-center">
       <div className="flex items-center flex-shrink-0">
         <LabelInput
-          name="template.invoice_no_label"
+          name="template.invoiceNoLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ invoice_no_label: value });
+            updateTemplateMutation.mutate({ invoiceNoLabel: value });
           }}
           className="truncate"
         />
@@ -75,15 +75,15 @@ export function InvoiceNo() {
           <TooltipTrigger asChild>
             <div>
               <Input
-                name="invoice_number"
+                name="invoiceNumber"
                 className={cn(
                   "w-28 flex-shrink p-0 border-none text-[11px] h-4.5 overflow-hidden",
-                  errors.invoice_number ? "text-red-500" : "",
+                  errors.invoiceNumber ? "text-red-500" : "",
                 )}
               />
             </div>
           </TooltipTrigger>
-          {errors.invoice_number && (
+          {errors.invoiceNumber && (
             <TooltipContent className="text-xs px-3 py-1.5">
               <p>Invoice number already exists</p>
             </TooltipContent>

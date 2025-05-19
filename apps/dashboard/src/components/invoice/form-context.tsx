@@ -1,11 +1,11 @@
 "use client";
 
 import { useZodForm } from "@/hooks/use-zod-form";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   invoiceTemplateSchema,
   lineItemSchema,
-} from "@/trpc/routers/invoice/schema";
+} from "@api/trpc/routers/invoice/schema";
 import { useEffect } from "react";
 import { FormProvider } from "react-hook-form";
 import { z } from "zod";
@@ -14,24 +14,24 @@ export const invoiceFormSchema = z.object({
   id: z.string().uuid(),
   status: z.string(),
   template: invoiceTemplateSchema,
-  from_details: z.any(),
-  customer_details: z.any(),
-  customer_id: z.string().uuid(),
-  customer_name: z.string().optional(),
-  payment_details: z.any(),
-  note_details: z.any().optional(),
-  due_date: z.string(),
-  issue_date: z.string(),
-  invoice_number: z.string(),
-  logo_url: z.string().nullable().optional(),
+  fromDetails: z.any(),
+  customerDetails: z.any(),
+  customerId: z.string().uuid(),
+  customerName: z.string().optional(),
+  paymentDetails: z.any(),
+  noteDetails: z.any().optional(),
+  dueDate: z.string(),
+  issueDate: z.string(),
+  invoiceNumber: z.string(),
+  logoUrl: z.string().nullable().optional(),
   vat: z.number().nullable().optional(),
   tax: z.number().nullable().optional(),
   discount: z.number().nullable().optional(),
   subtotal: z.number().nullable().optional(),
-  top_block: z.any().nullable().optional(),
-  bottom_block: z.any().nullable().optional(),
+  topBlock: z.any().nullable().optional(),
+  bottomBlock: z.any().nullable().optional(),
   amount: z.number(),
-  line_items: z.array(lineItemSchema).min(1),
+  lineItems: z.array(lineItemSchema).min(1),
   token: z.string().optional(),
 });
 

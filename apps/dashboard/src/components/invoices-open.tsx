@@ -11,7 +11,7 @@ export function InvoicesOpen() {
   const { setFilter } = useInvoiceFilterParams();
 
   const totalInvoiceCount = data?.reduce(
-    (acc, curr) => acc + (curr.invoice_count ?? 0),
+    (acc, curr) => acc + (curr.invoiceCount ?? 0),
     0,
   );
 

@@ -47,7 +47,7 @@ export function MatchTransaction() {
       <TransactionMatchItem
         date={transaction.transaction_date}
         name={transaction.name}
-        dateFormat={user?.date_format}
+        dateFormat={user?.dateFormat}
         amount={transaction.transaction_amount}
         currency={transaction.transaction_currency}
         showBestMatch={
@@ -92,7 +92,7 @@ export function MatchTransaction() {
         if (previousInboxItem && selectedTransaction) {
           queryClient.setQueryData(queryKey, {
             ...previousInboxItem,
-            transaction_id: transactionId,
+            transactionId,
             transaction: {
               id: selectedTransaction.transaction_id,
               name: selectedTransaction.name,
@@ -140,7 +140,7 @@ export function MatchTransaction() {
     }
   }, [id]);
 
-  if (data?.transaction_id) {
+  if (data?.transactionId) {
     return <TransactionUnmatchItem />;
   }
 

@@ -20,7 +20,7 @@ export function Summary() {
 
   const includeDecimals = useWatch({
     control,
-    name: "template.include_decimals",
+    name: "template.includeDecimals",
   });
 
   const maximumFractionDigits = includeDecimals ? 2 : 0;
@@ -37,32 +37,32 @@ export function Summary() {
 
   const includeTax = useWatch({
     control,
-    name: "template.include_tax",
+    name: "template.includeTax",
   });
 
   const taxRate = useWatch({
     control,
-    name: "template.tax_rate",
+    name: "template.taxRate",
   });
 
   const vatRate = useWatch({
     control,
-    name: "template.vat_rate",
+    name: "template.vatRate",
   });
 
   const includeVAT = useWatch({
     control,
-    name: "template.include_vat",
+    name: "template.includeVAT",
   });
 
   const includeDiscount = useWatch({
     control,
-    name: "template.include_discount",
+    name: "template.includeDiscount",
   });
 
   const lineItems = useWatch({
     control,
-    name: "line_items",
+    name: "lineItems",
   });
 
   const discount = useWatch({
@@ -97,13 +97,13 @@ export function Summary() {
 
   useEffect(() => {
     if (!includeTax) {
-      setValue("template.tax_rate", 0, { shouldValidate: true });
+      setValue("template.taxRate", 0, { shouldValidate: true });
     }
   }, [includeTax]);
 
   useEffect(() => {
     if (!includeVAT) {
-      setValue("template.vat_rate", 0, { shouldValidate: true });
+      setValue("template.vatRate", 0, { shouldValidate: true });
     }
   }, [includeVAT]);
 
@@ -118,9 +118,9 @@ export function Summary() {
       <div className="flex justify-between items-center py-1">
         <LabelInput
           className="flex-shrink-0 min-w-6"
-          name="template.subtotal_label"
+          name="template.subtotalLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ subtotal_label: value });
+            updateTemplateMutation.mutate({ subtotalLabel: value });
           }}
         />
         <span className="text-right font-mono text-[11px] text-[#878787]">
@@ -136,9 +136,9 @@ export function Summary() {
       {includeDiscount && (
         <div className="flex justify-between items-center py-1">
           <LabelInput
-            name="template.discount_label"
+            name="template.discountLabel"
             onSave={(value) => {
-              updateTemplateMutation.mutate({ discount_label: value });
+              updateTemplateMutation.mutate({ discountLabel: value });
             }}
           />
 
@@ -156,9 +156,9 @@ export function Summary() {
           <div className="flex items-center gap-1">
             <LabelInput
               className="flex-shrink-0 min-w-5"
-              name="template.vat_label"
+              name="template.vatLabel"
               onSave={(value) => {
-                updateTemplateMutation.mutate({ vat_label: value });
+                updateTemplateMutation.mutate({ vatLabel: value });
               }}
             />
 
@@ -181,9 +181,9 @@ export function Summary() {
           <div className="flex items-center gap-1">
             <LabelInput
               className="flex-shrink-0 min-w-5"
-              name="template.tax_label"
+              name="template.taxLabel"
               onSave={(value) => {
-                updateTemplateMutation.mutate({ tax_label: value });
+                updateTemplateMutation.mutate({ taxLabel: value });
               }}
             />
 
@@ -202,9 +202,9 @@ export function Summary() {
 
       <div className="flex justify-between items-center py-4 mt-2 border-t border-border">
         <LabelInput
-          name="template.total_summary_label"
+          name="template.totalSummaryLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ total_summary_label: value });
+            updateTemplateMutation.mutate({ totalSummaryLabel: value });
           }}
         />
         <span className="text-right font-mono font-medium text-[21px]">

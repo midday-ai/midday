@@ -18,16 +18,16 @@ export function NoteDetails() {
   return (
     <div>
       <LabelInput
-        name="template.note_label"
+        name="template.noteLabel"
         onSave={(value) => {
-          updateTemplateMutation.mutate({ note_label: value });
+          updateTemplateMutation.mutate({ noteLabel: value });
         }}
         className="mb-2 block"
       />
 
       <Controller
         control={control}
-        name="note_details"
+        name="noteDetails"
         render={({ field }) => {
           return (
             <Editor

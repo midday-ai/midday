@@ -5,15 +5,6 @@ import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 import { z } from "zod";
 
-const VALID_FILTERS = [
-  "name",
-  "due_date",
-  "start",
-  "end",
-  "customers",
-  "statuses",
-];
-
 const schema = z.object({
   name: z.string().optional().describe("The name to search for"),
   statuses: z
@@ -43,15 +34,10 @@ export async function generateInvoiceFilters(prompt: string, context?: string) {
     const { partialObjectStream } = await streamObject({
       model: openai("gpt-4o-mini"),
       system: `You are a helpful assistant that generates filters for a given prompt. \n
-               Current date is: ${new Date().toISOString().split("T")[0]} \n
-               ${context}
-      `,
-      schema: schema.pick({
-        ...(VALID_FILTERS.reduce((acc, filter) => {
-          acc[filter] = true;
-          return acc;
-        }, {}) as any),
-      }),
+                Current date is: ${new Date().toISOString().split("T")[0]} \n
+                ${context}
+        `,
+      schema,
       prompt,
     });
 

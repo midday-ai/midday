@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 "use client";
 
 import { useUserQuery } from "@/hooks/use-user";

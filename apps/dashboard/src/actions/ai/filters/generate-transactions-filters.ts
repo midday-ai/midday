@@ -5,19 +5,6 @@ import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 import { z } from "zod";
 
-const VALID_FILTERS = [
-  "name",
-  "attachments",
-  "categories",
-  "tags",
-  "start",
-  "end",
-  "accounts",
-  "assignees",
-  "recurring",
-  "amount_range",
-];
-
 const schema = z.object({
   name: z.string().optional().describe("The name to search for"),
   start: z
@@ -64,12 +51,7 @@ export async function generateTransactionsFilters(
                Current date is: ${new Date().toISOString().split("T")[0]} \n
                ${context}
       `,
-      schema: schema.pick({
-        ...(VALID_FILTERS.reduce((acc, filter) => {
-          acc[filter] = true;
-          return acc;
-        }, {}) as any),
-      }),
+      schema,
       prompt,
     });
 

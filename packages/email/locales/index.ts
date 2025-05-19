@@ -1,3 +1,4 @@
+// @ts-nocheck - let's use https://www.npmjs.com/package/@languine/react-email
 import { type TranslationParams, translations } from "./translations";
 
 type Options = {

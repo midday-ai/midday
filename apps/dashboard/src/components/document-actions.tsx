@@ -4,7 +4,11 @@ import { useDocumentParams } from "@/hooks/use-document-params";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  type InfiniteData,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
 
@@ -120,7 +124,7 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
           size="icon"
           onClick={() =>
             deleteDocumentMutation.mutate({
-              id: params.id!,
+              id: params.documentId!,
             })
           }
         >

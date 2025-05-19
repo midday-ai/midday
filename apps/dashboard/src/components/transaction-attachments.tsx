@@ -89,7 +89,7 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
 
         const { path } = await uploadFile({
           bucket: "vault",
-          path: [user?.team_id, "transactions", id, filename],
+          path: [user?.teamId ?? "", "transactions", id, filename],
           file: acceptedFile as File,
         });
 
@@ -107,13 +107,13 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
     createAttachmentsMutation.mutate(
       uploadedFiles.map((file) => ({
         ...file,
-        transaction_id: id,
+        transactionId: id,
       })),
     );
 
     processDocumentMutation.mutate(
       uploadedFiles.map((file) => ({
-        file_path: file.path,
+        filePath: file.path,
         mimetype: file.type,
         size: file.size,
       })),
@@ -128,7 +128,7 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
       size: file.data.size,
       type: file.data.content_type,
       path: file.data.file_path,
-      transaction_id: id,
+      transactionId: id,
     };
 
     setFiles((prev) => [item, ...prev]);
@@ -213,7 +213,6 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
         {files.map((file, idx) => (
           <AttachmentItem
             key={`${file.name}-${idx}`}
-            id={file.name}
             file={file}
             onDelete={() => handleOnDelete(file?.id)}
           />

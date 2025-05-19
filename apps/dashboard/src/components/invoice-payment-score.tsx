@@ -35,12 +35,13 @@ export function InvoicePaymentScore() {
     <Card>
       <CardHeader className="pb-2 flex flex-col xl:flex-row justify-between">
         <CardTitle className="font-mono font-medium text-2xl">
-          {t(`payment_status.${data?.payment_status}`)}
+          {/* @ts-expect-error */}
+          {t(`payment_status.${data?.paymentStatus}`)}
         </CardTitle>
 
         <PaymentScoreVisualizer
           score={data?.score}
-          paymentStatus={data?.payment_status}
+          paymentStatus={data?.paymentStatus}
         />
       </CardHeader>
 
@@ -48,7 +49,8 @@ export function InvoicePaymentScore() {
         <div className="flex flex-col gap-2">
           <div>Payment score</div>
           <div className="text-sm text-muted-foreground">
-            {t(`payment_status_description.${data?.payment_status}`)}
+            {/* @ts-expect-error */}
+            {t(`payment_status_description.${data?.paymentStatus}`)}
           </div>
         </div>
       </CardContent>

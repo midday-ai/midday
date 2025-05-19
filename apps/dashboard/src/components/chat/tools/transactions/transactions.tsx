@@ -58,9 +58,7 @@ export function Transactions({ result }: Props) {
         </TableHeader>
         <TableBody>
           {data?.data?.map((transaction) => {
-            const fullfilled =
-              transaction.status === "completed" ||
-              transaction?.attachments?.length > 0;
+            const fullfilled = transaction.isFulfilled;
 
             return (
               <TableRow key={transaction.id} className="h-[34px]">
@@ -73,7 +71,7 @@ export function Transactions({ result }: Props) {
                   <span className="line-clamp-1">{transaction.name}</span>
                 </TableCell>
                 <TableCell className="font-normal">
-                  {formatDate(transaction.date, user?.date_format)}
+                  {formatDate(transaction.date, user?.dateFormat)}
                 </TableCell>
                 <TableCell
                   className={cn(

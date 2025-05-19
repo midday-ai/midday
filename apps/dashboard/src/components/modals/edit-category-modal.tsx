@@ -29,9 +29,9 @@ type Props = {
   isOpen: boolean;
   defaultValue: {
     name: string;
-    color: string;
-    description?: string;
-    vat?: string;
+    color: string | null;
+    description?: string | null;
+    vat?: number | null;
   };
 };
 

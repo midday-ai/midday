@@ -45,8 +45,8 @@ export function InboxSettingsModal() {
 
           <div className="flex flex-col gap-2">
             <span className="text-sm font-medium">Inbox email</span>
-            {user?.team?.inbox_id && (
-              <CopyInput value={getInboxEmail(user.team.inbox_id)} />
+            {user?.team?.inboxId && (
+              <CopyInput value={getInboxEmail(user.team.inboxId)} />
             )}
           </div>
 

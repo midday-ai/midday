@@ -27,10 +27,12 @@ export function BrowserNavigation() {
 
   const handleOnNavigate = (dir: "back" | "forward") => {
     if (dir === "back") {
+      // @ts-expect-error
       window.todesktop.contents.goBack();
     }
 
     if (dir === "forward") {
+      // @ts-expect-error
       window.todesktop.contents.goForward();
     }
   };

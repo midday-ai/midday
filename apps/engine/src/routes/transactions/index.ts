@@ -1,9 +1,8 @@
-import type { Bindings } from "@/common/bindings";
-import { ErrorSchema } from "@/common/schema";
-import { Provider } from "@/providers";
-import { createErrorResponse } from "@/utils/error";
-import { createRoute } from "@hono/zod-openapi";
-import { OpenAPIHono } from "@hono/zod-openapi";
+import type { Bindings } from "@engine/common/bindings";
+import { ErrorSchema } from "@engine/common/schema";
+import { Provider } from "@engine/providers";
+import { createErrorResponse } from "@engine/utils/error";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { TransactionsParamsSchema, TransactionsSchema } from "./schema";
 
@@ -61,7 +60,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
         200,
       );
     } catch (error) {
-      const errorResponse = createErrorResponse(error, c.get("requestId"));
+      const errorResponse = createErrorResponse(error);
 
       return c.json(errorResponse, 400);
     }

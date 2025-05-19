@@ -23,14 +23,15 @@ export function InvoiceWidget() {
       <div className="flex justify-between items-center p-3 py-2 border border-border">
         <div>
           <div className="flex flex-col gap-2">
-            <div>{t(`payment_status.${paymentStatus?.payment_status}`)}</div>
+            {/* @ts-expect-error */}
+            <div>{t(`payment_status.${paymentStatus?.paymentStatus}`)}</div>
             <div className="text-sm text-muted-foreground">Payment score</div>
           </div>
         </div>
 
         <PaymentScoreVisualizer
           score={paymentStatus?.score ?? 0}
-          paymentStatus={paymentStatus?.payment_status ?? "none"}
+          paymentStatus={paymentStatus?.paymentStatus ?? "none"}
         />
       </div>
 

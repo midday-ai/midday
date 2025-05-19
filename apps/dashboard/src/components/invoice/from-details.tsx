@@ -18,15 +18,15 @@ export function FromDetails() {
   return (
     <div>
       <LabelInput
-        name="template.from_label"
+        name="template.fromLabel"
         className="mb-2 block"
         onSave={(value) => {
-          updateTemplateMutation.mutate({ from_label: value });
+          updateTemplateMutation.mutate({ fromLabel: value });
         }}
       />
 
       <Controller
-        name="from_details"
+        name="template.fromDetails"
         control={control}
         render={({ field }) => (
           <Editor
@@ -36,7 +36,7 @@ export function FromDetails() {
             onChange={field.onChange}
             onBlur={(content) => {
               updateTemplateMutation.mutate({
-                from_details: content ? JSON.stringify(content) : null,
+                fromDetails: content ? JSON.stringify(content) : null,
               });
             }}
             className="min-h-[90px] [&>div]:min-h-[90px]"

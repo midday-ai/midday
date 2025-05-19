@@ -87,7 +87,7 @@ export function BulkActions({ ids }: Props) {
                   onChange={(selected) => {
                     updateTransactionsMutation.mutate({
                       ids,
-                      category_slug: selected.slug,
+                      categorySlug: selected.slug,
                     });
                   }}
                   headless
@@ -117,7 +117,7 @@ export function BulkActions({ ids }: Props) {
                       onCheckedChange={() => {
                         updateTransactionsMutation.mutate({
                           ids,
-                          tag_id: tag.id,
+                          tagId: tag.id,
                         });
                       }}
                     >
@@ -213,7 +213,7 @@ export function BulkActions({ ids }: Props) {
                   onSelect={(selected) => {
                     updateTransactionsMutation.mutate({
                       ids,
-                      assigned_id: selected?.id,
+                      assignedId: selected?.id,
                     });
                   }}
                 />

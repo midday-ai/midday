@@ -1,4 +1,4 @@
-import { generateQuarterDailyCronTag } from "@/utils/generate-cron-tag";
+import { generateQuarterDailyCronTag } from "@jobs/utils/generate-cron-tag";
 import { createClient } from "@midday/supabase/job";
 import { updateInboxAccount } from "@midday/supabase/mutations";
 import { schedules, schemaTask } from "@trigger.dev/sdk/v3";

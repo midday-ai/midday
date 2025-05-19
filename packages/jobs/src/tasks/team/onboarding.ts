@@ -1,5 +1,5 @@
-import { shouldSendEmail } from "@/utils/check-team-plan";
-import { resend } from "@/utils/resend";
+import { shouldSendEmail } from "@jobs/utils/check-team-plan";
+import { resend } from "@jobs/utils/resend";
 import { GetStartedEmail } from "@midday/email/emails/get-started";
 import { TrialEndedEmail } from "@midday/email/emails/trial-ended";
 import { TrialExpiringEmail } from "@midday/email/emails/trial-expiring";

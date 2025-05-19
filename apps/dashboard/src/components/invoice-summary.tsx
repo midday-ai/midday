@@ -2,7 +2,7 @@
 
 import { useTeamQuery } from "@/hooks/use-team";
 import { useI18n } from "@/locales/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -41,7 +41,7 @@ export function InvoiceSummary({ data, totalInvoiceCount, title }: Props) {
 
   const dataWithDefaultCurrency = data?.length
     ? data
-    : [{ currency: team?.base_currency, total_amount: 0 }];
+    : [{ currency: team?.baseCurrency, totalAmount: 0 }];
 
   const item = dataWithDefaultCurrency[activeIndex];
 
@@ -55,8 +55,8 @@ export function InvoiceSummary({ data, totalInvoiceCount, title }: Props) {
         <CardTitle className="font-mono font-medium text-2xl">
           <AnimatedNumber
             key={item.currency}
-            value={item.total_amount}
-            currency={item.currency ?? team?.base_currency ?? "USD"}
+            value={item.totalAmount}
+            currency={item.currency ?? team?.baseCurrency ?? "USD"}
             maximumFractionDigits={0}
             minimumFractionDigits={0}
           />

@@ -14,7 +14,7 @@ export function InvoicesOverdue() {
     }),
   );
 
-  const totalInvoiceCount = data?.at(0)?.invoice_count;
+  const totalInvoiceCount = data?.at(0)?.invoiceCount;
 
   return (
     <button

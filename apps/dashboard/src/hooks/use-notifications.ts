@@ -1,26 +1,25 @@
-import { createClient } from "@midday/supabase/client";
-import { getUserQuery } from "@midday/supabase/queries";
+// @ts-nocheck - will be removed soon
+import { useUserQuery } from "@/hooks/use-user";
 import { HeadlessService } from "@novu/headless";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useNotifications() {
-  const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
-  const [subscriberId, setSubscriberId] = useState();
   const headlessServiceRef = useRef<HeadlessService>();
+  const { data: user } = useUserQuery();
 
   const markAllMessagesAsRead = () => {
     const headlessService = headlessServiceRef.current;
 
     if (headlessService) {
-      setNotifications((prevNotifications) =>
-        prevNotifications.map((notification) => {
-          return {
+      setNotifications((prevNotifications: typeof notifications) =>
+        prevNotifications.map(
+          (notification: (typeof notifications)[number]) => ({
             ...notification,
             read: true,
-          };
-        }),
+          }),
+        ),
       );
 
       headlessService.markAllMessagesAsRead({
@@ -87,25 +86,6 @@ export function useNotifications() {
   };
 
   useEffect(() => {
-    async function fetchUser() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      const { data: userData } = await getUserQuery(
-        supabase,
-        session?.user?.id,
-      );
-
-      if (userData) {
-        setSubscriberId(`${userData.team_id}_${userData.id}`);
-      }
-    }
-
-    fetchUser();
-  }, [supabase]);
-
-  useEffect(() => {
     const headlessService = headlessServiceRef.current;
 
     if (headlessService) {
@@ -118,6 +98,8 @@ export function useNotifications() {
   }, [headlessServiceRef.current]);
 
   useEffect(() => {
+    const subscriberId = `${user?.teamId}_${user?.id}`;
+
     if (subscriberId && !headlessServiceRef.current) {
       const headlessService = new HeadlessService({
         applicationIdentifier:
@@ -134,7 +116,7 @@ export function useNotifications() {
         onError: () => {},
       });
     }
-  }, [fetchNotifications, subscriberId]);
+  }, [fetchNotifications, user]);
 
   return {
     isLoading,

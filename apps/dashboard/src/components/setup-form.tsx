@@ -21,7 +21,7 @@ import { z } from "zod";
 import { AvatarUpload } from "./avatar-upload";
 
 const formSchema = z.object({
-  full_name: z.string().min(2).max(32),
+  fullName: z.string().min(2).max(32),
 });
 
 export function SetupForm() {
@@ -33,7 +33,7 @@ export function SetupForm() {
 
   const form = useZodForm(formSchema, {
     defaultValues: {
-      full_name: user.full_name ?? "",
+      fullName: user?.fullName ?? "",
     },
   });
 
@@ -54,8 +54,8 @@ export function SetupForm() {
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <div className="flex justify-between items-end gap-4">
           <AvatarUpload
-            userId={user.id}
-            avatarUrl={user.avatar_url}
+            userId={user?.id ?? ""}
+            avatarUrl={user?.avatarUrl}
             size={80}
             ref={uploadRef}
           />
@@ -70,7 +70,7 @@ export function SetupForm() {
 
         <FormField
           control={form.control}
-          name="full_name"
+          name="fullName"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Full name</FormLabel>

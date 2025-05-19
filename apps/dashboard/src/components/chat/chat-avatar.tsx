@@ -17,8 +17,8 @@ export function ChatAvatar({ role }: Props) {
         <div className="flex size-[25px] shrink-0 select-none items-center justify-center">
           <Avatar className="size-6">
             <AvatarImageNext
-              src={user?.avatar_url || ""}
-              alt={user?.full_name ?? ""}
+              src={user?.avatarUrl || ""}
+              alt={user?.fullName ?? ""}
               width={24}
               height={24}
             />

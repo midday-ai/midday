@@ -143,7 +143,7 @@ export async function POST(req: Request) {
       "process-attachment",
       insertData.map((item) => ({
         payload: {
-          file_path: item.file_path!,
+          filePath: item.file_path!,
           mimetype: item.content_type!,
           size: item.size!,
           teamId: teamId!,

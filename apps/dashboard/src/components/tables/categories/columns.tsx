@@ -1,6 +1,7 @@
 "use client";
 
 import { EditCategoryModal } from "@/components/modals/edit-category-modal";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -18,13 +19,7 @@ import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import * as React from "react";
 
-export type Category = {
-  id: string;
-  name: string;
-  system: boolean;
-  vat?: string;
-  color: string;
-};
+export type Category = RouterOutputs["transactionCategories"]["get"][number];
 
 export const columns: ColumnDef<Category>[] = [
   {
@@ -34,7 +29,7 @@ export const columns: ColumnDef<Category>[] = [
       <div className="flex space-x-2 items-center">
         <div
           className="size-3"
-          style={{ backgroundColor: row.original.color }}
+          style={{ backgroundColor: row.original.color ?? undefined }}
         />
         <TooltipProvider delayDuration={0}>
           <Tooltip>
@@ -88,7 +83,7 @@ export const columns: ColumnDef<Category>[] = [
               {!row.original.system && (
                 <DropdownMenuItem
                   onClick={() =>
-                    table.options.meta.deleteCategory(row.original.id)
+                    table.options.meta?.deleteCategory?.(row.original.id)
                   }
                 >
                   Remove
@@ -98,7 +93,7 @@ export const columns: ColumnDef<Category>[] = [
           </DropdownMenu>
 
           <EditCategoryModal
-            id={row.id}
+            id={row.original.id}
             defaultValue={row.original}
             isOpen={isOpen}
             onOpenChange={setOpen}

@@ -1,6 +1,6 @@
 // Thank you: https://github.com/maybe-finance/maybe-archive/blob/04bf3d135bdbb1fdaa2dd669dca4738c797cc382/libs/teller-api/src/types/accounts.ts
 
-import type { AccountType } from "@/utils/account";
+import type { AccountType } from "@engine/utils/account";
 
 export type DetailCategory =
   | "accommodation"

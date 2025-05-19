@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import type { TZDate } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
 import { format, formatISO, isToday } from "date-fns";

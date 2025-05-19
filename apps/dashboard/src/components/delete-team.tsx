@@ -89,7 +89,7 @@ export function DeleteTeam() {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={() =>
-                  deleteTeamMutation.mutate({ teamId: user?.team_id! })
+                  deleteTeamMutation.mutate({ teamId: user?.teamId! })
                 }
                 disabled={value !== "DELETE"}
               >

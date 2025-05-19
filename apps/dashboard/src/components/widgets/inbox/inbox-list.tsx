@@ -2,7 +2,7 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { InboxStatus } from "@/components/inbox/inbox-status";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Icons } from "@midday/ui/icons";
 import { format } from "date-fns";
 import Link from "next/link";
@@ -25,8 +25,8 @@ export function InboxList({ data }: Props) {
               <div className="flex items-center mb-1">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center space-x-2">
-                    <div className="font-semibold">{item?.display_name}</div>
-                    {item.transaction_id && <Icons.Check />}
+                    <div className="font-semibold">{item?.displayName}</div>
+                    {item.transactionId && <Icons.Check />}
                   </div>
                 </div>
                 <div className="ml-auto text-xs text-muted-foreground">

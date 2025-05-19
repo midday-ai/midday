@@ -1,7 +1,7 @@
 import { changeTeamAction } from "@/actions/change-team-action";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,22 +51,23 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
         <div className="flex items-center space-x-4">
           <Avatar className="rounded-full w-8 h-8">
             <AvatarImageNext
-              src={row.original.team?.logo_url ?? ""}
+              src={row.original.team?.logoUrl ?? ""}
               alt={row.original.team?.name ?? ""}
               width={32}
               height={32}
             />
             <AvatarFallback>
               <span className="text-xs">
-                {row.original.team.name?.charAt(0)?.toUpperCase()}
+                {row.original.team?.name?.charAt(0)?.toUpperCase()}
               </span>
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <span className="font-medium text-sm">
-              {row.original.team.name}
+              {row.original.team?.name}
             </span>
             <span className="text-sm text-[#606060]">
+              {/* @ts-expect-error */}
               {t(`roles.${row.original.role}`)}
             </span>
           </div>
@@ -103,7 +104,7 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
               isSubmitting={viewTeam.status === "executing"}
               onClick={() =>
                 viewTeam.execute({
-                  teamId: row.original.team.id,
+                  teamId: row.original.team?.id!,
                   redirectTo: "/",
                 })
               }
@@ -116,7 +117,7 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
                 isSubmitting={manageTeam.status === "executing"}
                 onClick={() =>
                   manageTeam.execute({
-                    teamId: row.original.team.id,
+                    teamId: row.original.team?.id!,
                     redirectTo: "/settings",
                   })
                 }
@@ -157,7 +158,7 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
                         disabled={leaveTeamMutation.isPending}
                         onClick={() =>
                           leaveTeamMutation.mutate({
-                            teamId: row.original.team.id,
+                            teamId: row.original.team?.id!,
                           })
                         }
                       >

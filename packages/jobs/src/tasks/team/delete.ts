@@ -9,8 +9,8 @@ export const deleteTeam = schemaTask({
     connections: z.array(
       z.object({
         provider: z.string().nullable(),
-        reference_id: z.string().nullable(),
-        access_token: z.string().nullable(),
+        referenceId: z.string().nullable(),
+        accessToken: z.string().nullable(),
       }),
     ),
   }),
@@ -26,9 +26,9 @@ export const deleteTeam = schemaTask({
     const connectionPromises = connections.map(async (connection) => {
       return client.connections.delete.$post({
         json: {
-          id: connection.reference_id,
+          id: connection.referenceId,
           provider: connection.provider,
-          accessToken: connection.access_token,
+          accessToken: connection.accessToken,
         },
       });
     });
