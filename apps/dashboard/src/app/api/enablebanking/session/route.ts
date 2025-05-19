@@ -1,4 +1,4 @@
-import { engineClient } from "@/utils/engine-client";
+import { engineClient } from "@midday/engine-client";
 import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";

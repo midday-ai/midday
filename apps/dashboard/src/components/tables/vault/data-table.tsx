@@ -9,6 +9,7 @@ import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
 import { useDocumentsStore } from "@/store/vault";
 import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import {
@@ -105,10 +106,13 @@ export function DataTable() {
         // Optimistically update infinite query data
         queryClient.setQueriesData(
           { queryKey: trpc.documents.get.infiniteQueryKey() },
-          (old: InfiniteData<any>) => ({
+          (old: InfiniteData<RouterOutputs["documents"]["get"]>) => ({
             pages: old.pages.map((page) => ({
               ...page,
-              data: page.data.filter((item: any) => item.id !== id),
+              data: page.data.filter(
+                (item: RouterOutputs["documents"]["get"]["data"][number]) =>
+                  item.id !== id,
+              ),
             })),
             pageParams: old.pageParams,
           }),
@@ -168,7 +172,6 @@ export function DataTable() {
     columns,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
-    // @ts-expect-error
     meta: {
       handleDelete,
       handleShare,

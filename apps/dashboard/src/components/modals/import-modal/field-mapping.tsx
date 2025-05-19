@@ -56,6 +56,7 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
                 Object.keys(mappableFields).includes(field) &&
                 fileColumns.includes(value as string)
               ) {
+                // @ts-expect-error
                 setValue(field as keyof typeof mappableFields, value, {
                   shouldValidate: true,
                 });
@@ -203,7 +204,7 @@ function FieldRow({
     if (!description) return;
 
     if (field === "date") {
-      return formatDate(description, user?.timezone);
+      return formatDate(description);
     }
 
     if (field === "amount") {

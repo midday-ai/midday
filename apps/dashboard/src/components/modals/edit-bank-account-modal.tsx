@@ -108,6 +108,7 @@ export function EditBankAccountModal({
       "other_liability",
     ].map((type) => (
       <SelectItem key={type} value={type}>
+        {/* @ts-expect-error */}
         {t(`account_type.${type}`)}
       </SelectItem>
     ));

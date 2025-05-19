@@ -27,7 +27,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./client": "./src/client/index.ts",
+    "./hc": "./src/hc.ts",
     "./gocardless/utils": "./src/providers/gocardless/utils.ts"
   }
 }

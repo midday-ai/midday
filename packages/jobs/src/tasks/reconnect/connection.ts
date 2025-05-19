@@ -1,5 +1,5 @@
 import { syncConnection } from "@jobs/tasks/bank/sync/connection";
-import { engineClient } from "@jobs/utils/engine-client";
+import { engineClient } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";

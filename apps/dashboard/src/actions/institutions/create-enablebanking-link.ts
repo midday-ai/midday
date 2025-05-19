@@ -1,6 +1,6 @@
 "use server";
 
-import { engineClient } from "@/utils/engine-client";
+import { engineClient } from "@midday/engine-client";
 import { LogEvents } from "@midday/events/events";
 import { getCountryCode } from "@midday/location";
 import { redirect } from "next/navigation";

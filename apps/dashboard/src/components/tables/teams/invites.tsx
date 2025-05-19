@@ -57,7 +57,7 @@ export function Invites() {
               <div className="flex items-center space-x-4">
                 <Avatar className="rounded-full w-8 h-8">
                   <AvatarImageNext
-                    src={invite.team?.logo_url ?? ""}
+                    src={invite.team?.logoUrl ?? ""}
                     alt={invite.team?.name ?? ""}
                     width={32}
                     height={32}
@@ -73,6 +73,7 @@ export function Invites() {
                     {invite.team?.name}
                   </span>
                   <span className="text-sm text-[#606060]">
+                    {/* @ts-expect-error */}
                     {t(`roles.${invite.role}`)}
                   </span>
                 </div>
@@ -84,7 +85,7 @@ export function Invites() {
                   variant="outline"
                   onClick={() => {
                     declineInviteMutation.mutate({
-                      teamId: invite.team?.id ?? "",
+                      teamId: invite.team?.id!,
                     });
                   }}
                 >
@@ -94,7 +95,7 @@ export function Invites() {
                   variant="outline"
                   onClick={() => {
                     acceptInviteMutation.mutate({
-                      teamId: invite.team?.id ?? "",
+                      teamId: invite.team?.id!,
                     });
                   }}
                 >

@@ -63,7 +63,7 @@ interface Props {
   filters: Partial<FilterValue>;
   loading: boolean;
   onRemove: (filters: { [key: string]: null }) => void;
-  categories?: { id: string; name: string; slug: string }[];
+  categories?: { id: string; name: string; slug: string | null }[];
   accounts?: { id: string; name: string; currency: string }[];
   members?: { id: string; name: string }[];
   customers?: { id: string; name: string }[];

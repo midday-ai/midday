@@ -93,7 +93,7 @@ export function TrackerSchedule() {
             };
           }
 
-          const [, rangeData] = data.at(0);
+          const [, rangeData] = data.at(0) ?? [];
           if (!rangeData?.result?.[selectedDate]) {
             return {
               data: [],
@@ -193,7 +193,7 @@ export function TrackerSchedule() {
       // Update total duration
       setTotalDuration((prevDuration) => {
         const deletedEventDuration = differenceInSeconds(
-          new Date(data.find((event) => event.id === eventId)?.end || 0),
+          new Date(data.find((event) => event.id === eventId)?.stop || 0),
           new Date(data.find((event) => event.id === eventId)?.start || 0),
         );
         return Math.max(0, prevDuration - deletedEventDuration);
@@ -258,7 +258,7 @@ export function TrackerSchedule() {
       const deltaY = e.clientY - resizeStartY;
       const deltaSlots = Math.round(deltaY / SLOT_HEIGHT);
       if (resizeType === "bottom") {
-        const newEnd = addMinutes(resizingEvent.end, deltaSlots * 15);
+        const newEnd = addMinutes(resizingEvent.stop, deltaSlots * 15);
         setData((prevData) =>
           prevData.map((event) =>
             event.id === resizingEvent.id
@@ -276,13 +276,13 @@ export function TrackerSchedule() {
         setData((prevData) =>
           prevData.map((event) =>
             event.id === resizingEvent.id
-              ? updateEventTime(event, newStart, event.end)
+              ? updateEventTime(event, newStart, event.stop)
               : event,
           ),
         );
         setSelectedEvent((prev) =>
           prev && prev.id === resizingEvent.id
-            ? updateEventTime(prev, newStart, prev.end)
+            ? updateEventTime(prev, newStart, prev.stop)
             : prev,
         );
       }
@@ -290,7 +290,7 @@ export function TrackerSchedule() {
       const deltaY = e.clientY - moveStartY;
       const deltaSlots = Math.round(deltaY / SLOT_HEIGHT);
       const newStart = addMinutes(movingEvent.start, deltaSlots * 15);
-      const newEnd = addMinutes(movingEvent.end, deltaSlots * 15);
+      const newEnd = addMinutes(movingEvent.stop, deltaSlots * 15);
 
       // Ensure the event doesn't move before start of day or after end of day
       const dayStart = startOfDay(movingEvent.start);
@@ -471,7 +471,7 @@ export function TrackerSchedule() {
           }
         }
 
-        let newEnd = currentEvent.end;
+        let newEnd = currentEvent.stop;
         let endChanged = false;
         // Update end time if 'end' prop is provided
         if (end !== undefined) {
@@ -487,7 +487,7 @@ export function TrackerSchedule() {
             // Check if valid and different from current end
             if (
               isValid(parsedEnd) &&
-              parsedEnd.getTime() !== currentEvent.end.getTime()
+              parsedEnd.getTime() !== currentEvent.stop.getTime()
             ) {
               newEnd = parsedEnd;
               endChanged = true;
@@ -568,7 +568,7 @@ export function TrackerSchedule() {
             ))}
             {data?.map((event) => {
               const startSlot = getSlotFromDate(event.start);
-              const endSlot = getSlotFromDate(event.end);
+              const endSlot = getSlotFromDate(event.stop);
               const height = (endSlot - startSlot) * SLOT_HEIGHT;
 
               return (
@@ -604,7 +604,7 @@ export function TrackerSchedule() {
                         <span>
                           {event.trackerProject.name} (
                           {secondsToHoursAndMinutes(
-                            differenceInSeconds(event.end, event.start),
+                            differenceInSeconds(event.stop, event.start),
                           )}
                           )
                         </span>
@@ -662,9 +662,9 @@ export function TrackerSchedule() {
             ? getTimeFromDate(formEvent.start)
             : undefined
         }
-        end={
-          formEvent && isValid(formEvent.end)
-            ? getTimeFromDate(formEvent.end)
+        stop={
+          formEvent && isValid(formEvent.stop)
+            ? getTimeFromDate(formEvent.stop)
             : undefined
         }
         onSelectProject={(project) => {
@@ -694,7 +694,7 @@ export function TrackerSchedule() {
               handleCreateEvent({
                 id: eventToUpdate.id,
                 start: getTimeFromDate(eventToUpdate.start),
-                end: getTimeFromDate(eventToUpdate.end),
+                stop: getTimeFromDate(eventToUpdate.stop),
                 projectId: project.id,
                 assignedId: eventToUpdate.assignedId,
                 description: eventToUpdate.description ?? undefined,

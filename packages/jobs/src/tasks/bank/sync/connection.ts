@@ -1,5 +1,5 @@
-import { engineClient } from "@jobs/utils/engine-client";
 import { triggerSequenceAndWait } from "@jobs/utils/trigger-sequence";
+import { engineClient } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";

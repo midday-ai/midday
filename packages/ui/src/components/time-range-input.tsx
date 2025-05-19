@@ -8,30 +8,30 @@ export function TimeRangeInput({
   value,
   onChange,
 }: {
-  value: { start: string; end: string };
-  onChange: (value: { start: string; end: string }) => void;
+  value: { start: string; stop: string };
+  onChange: (value: { start: string; stop: string }) => void;
 }) {
   const [startTime, setStartTime] = useState(value.start);
-  const [endTime, setEndTime] = useState(value.end);
+  const [stopTime, setStopTime] = useState(value.stop);
   const [duration, setDuration] = useState("");
 
   useEffect(() => {
     setStartTime(value.start);
-    setEndTime(value.end);
+    setStopTime(value.stop);
   }, [value]);
 
   useEffect(() => {
-    if (!startTime || !endTime) {
+    if (!startTime || !stopTime) {
       return;
     }
 
     const start = parse(startTime, "HH:mm", new Date());
-    const end = parse(endTime, "HH:mm", new Date());
-    const diff = differenceInMinutes(end, start);
+    const stop = parse(stopTime, "HH:mm", new Date());
+    const diff = differenceInMinutes(stop, start);
     const hours = Math.floor(diff / 60);
     const minutes = diff % 60;
     setDuration(`${hours}h ${minutes}min`);
-  }, [startTime, endTime]);
+  }, [startTime, stopTime]);
 
   return (
     <div className="flex items-center w-full border border-border px-4 py-2">
@@ -53,10 +53,10 @@ export function TimeRangeInput({
       <div className="flex items-center space-x-2 flex-1 justify-end">
         <input
           type="time"
-          value={endTime}
+          value={stopTime}
           onChange={(e) => {
-            setEndTime(e.target.value);
-            onChange({ ...value, end: e.target.value });
+            setStopTime(e.target.value);
+            onChange({ ...value, stop: e.target.value });
           }}
           className="bg-transparent focus:outline-none text-sm"
         />

@@ -1,5 +1,5 @@
-import { engineClient } from "@jobs/utils/engine-client";
 import { processBatch } from "@jobs/utils/process-batch";
+import { engineClient } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schedules } from "@trigger.dev/sdk/v3";
 

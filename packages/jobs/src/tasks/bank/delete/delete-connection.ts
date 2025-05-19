@@ -1,4 +1,4 @@
-import { engineClient } from "@jobs/utils/engine-client";
+import { engineClient } from "@midday/engine-client";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 

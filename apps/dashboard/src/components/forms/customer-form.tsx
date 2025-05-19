@@ -190,7 +190,12 @@ export function CustomerForm({ data }: Props) {
       phone: data.phone || null,
       zip: data.zip || null,
       vatNumber: data.vatNumber || null,
-      tags: data.tags?.length ? data.tags : null,
+      tags: data.tags?.length
+        ? data.tags.map((tag) => ({
+            id: tag.id,
+            name: tag.value,
+          }))
+        : null,
       countryCode: data.countryCode || null,
     };
 

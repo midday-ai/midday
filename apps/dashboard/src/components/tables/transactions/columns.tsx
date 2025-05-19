@@ -42,7 +42,7 @@ const DateCell = memo(
     date,
     format,
     noSort,
-  }: { date: string; format?: string; noSort?: boolean }) =>
+  }: { date: string; format?: string | null; noSort?: boolean }) =>
     formatDate(date, format, noSort),
 );
 

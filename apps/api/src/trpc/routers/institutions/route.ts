@@ -1,5 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { engineClient } from "@api/utils/engine-client";
+import { engineClient } from "@midday/engine-client";
 import {
   getAccountsSchema,
   getInstitutionsSchema,
