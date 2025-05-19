@@ -12,7 +12,7 @@ type PDFTextStyle = Style & {
     | "underline line-through";
 };
 
-export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
+export function formatEditorContent(doc?: EditorDoc) {
   if (!doc || !doc.content) {
     return null;
   }

@@ -3,7 +3,7 @@
 import { FormatAmount } from "@/components/format-amount";
 import { TransactionStatus } from "@/components/transaction-status";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 
 type Props = {
@@ -15,8 +15,7 @@ type Props = {
 
 export function TransactionListItem({ transaction, disabled }: Props) {
   const { setParams } = useTransactionParams();
-  const fullfilled =
-    transaction?.status === "completed" || transaction?.attachments?.length > 0;
+  const fullfilled = transaction.isFulfilled;
 
   return (
     <>

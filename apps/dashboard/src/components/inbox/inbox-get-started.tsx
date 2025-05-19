@@ -3,12 +3,6 @@
 // import { ConnectGmail } from "@/components/inbox/connect-gmail";
 import { useUserQuery } from "@/hooks/use-user";
 import { getInboxEmail } from "@midday/inbox";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@midday/ui/accordion";
 import { useRouter } from "next/navigation";
 import { CopyInput } from "../copy-input";
 import { UploadZone } from "./inbox-upload-zone";
@@ -45,9 +39,9 @@ export function InboxGetStarted() {
               {/* <ConnectGmail /> */}
               {/* <ConnectOutlook /> */}
 
-              {user?.team?.inbox_id && (
+              {user?.team?.inboxId && (
                 <div className="flex flex-col space-y-4">
-                  <CopyInput value={getInboxEmail(user.team.inbox_id)} />
+                  <CopyInput value={getInboxEmail(user.team.inboxId)} />
                 </div>
                 // <Accordion
                 //   type="single"

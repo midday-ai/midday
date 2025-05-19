@@ -6,26 +6,27 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "check:types": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
-    "@hono/swagger-ui": "^0.5.1",
     "@hono/zod-openapi": "^0.19.6",
     "@hono/zod-validator": "^0.5.0",
-    "hono": "^4.7.8",
-    "jose": "^6.0.10",
+    "hono": "^4.7.10",
+    "jose": "^6.0.11",
     "plaid": "^33.0.0",
     "typesense": "^2.0.3",
-    "workers-ai-provider": "^0.3.0",
+    "workers-ai-provider": "^0.4.1",
     "xior": "^0.7.8",
-    "zod": "^3.24.3"
+    "zod": "^3.24.4"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250430.0",
-    "@types/bun": "^1.2.11",
-    "wrangler": "^4.14.1"
+    "@cloudflare/workers-types": "^4.20250517.0",
+    "@types/bun": "^1.2.13",
+    "wrangler": "^4.15.2"
   },
   "exports": {
+    ".": "./src/index.ts",
     "./client": "./src/client/index.ts",
     "./gocardless/utils": "./src/providers/gocardless/utils.ts"
   }

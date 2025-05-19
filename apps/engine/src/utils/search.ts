@@ -1,4 +1,4 @@
-import type { Bindings } from "@/common/bindings";
+import type { Bindings } from "@engine/common/bindings";
 import Typesense from "typesense";
 
 export function SearchClient(envs: Bindings) {

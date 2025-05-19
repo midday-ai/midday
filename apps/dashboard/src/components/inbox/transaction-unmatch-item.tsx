@@ -44,7 +44,7 @@ export function TransactionUnmatchItem() {
         if (previousInboxItem) {
           queryClient.setQueryData(queryKey, {
             ...previousInboxItem,
-            transaction_id: null,
+            transactionId: null,
             transaction: null,
           });
         }
@@ -82,7 +82,7 @@ export function TransactionUnmatchItem() {
       <TransactionMatchItem
         date={data?.transaction?.date}
         name={data?.transaction?.name}
-        dateFormat={user?.date_format}
+        dateFormat={user?.dateFormat}
         amount={data?.transaction?.amount}
         currency={data?.transaction?.currency}
       />

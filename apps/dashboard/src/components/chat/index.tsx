@@ -40,7 +40,7 @@ export function Chat() {
         {messages.length ? (
           <Messages status={status} messages={messages} />
         ) : (
-          <ChatEmpty firstName={user?.full_name?.split(" ").at(0) ?? ""} />
+          <ChatEmpty firstName={user?.fullName?.split(" ").at(0) ?? ""} />
         )}
       </div>
       <div className="fixed bottom-[1px] left-[1px] right-[1px] todesktop:h-[88px] md:h-[88px] bg-background border-border border-t-[1px]">

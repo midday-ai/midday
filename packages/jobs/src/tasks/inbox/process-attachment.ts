@@ -11,7 +11,7 @@ export const processAttachment = schemaTask({
     teamId: z.string().uuid(),
     mimetype: z.string(),
     size: z.number(),
-    file_path: z.array(z.string()),
+    filePath: z.array(z.string()),
     referenceId: z.string().optional(),
     website: z.string().optional(),
   }),
@@ -19,17 +19,17 @@ export const processAttachment = schemaTask({
   queue: {
     concurrencyLimit: 100,
   },
-  run: async ({ teamId, mimetype, size, file_path, referenceId, website }) => {
+  run: async ({ teamId, mimetype, size, filePath, referenceId, website }) => {
     const supabase = createClient();
 
     // If the file is a HEIC we need to convert it to a JPG
     if (mimetype === "image/heic") {
       await convertHeic.triggerAndWait({
-        file_path,
+        filePath,
       });
     }
 
-    const filename = file_path.at(-1);
+    const filename = filePath.at(-1);
 
     const { data: inboxData } = await supabase
       .from("inbox")
@@ -37,7 +37,7 @@ export const processAttachment = schemaTask({
         // NOTE: If we can't parse the name using OCR this will be the fallback name
         display_name: filename,
         team_id: teamId,
-        file_path: file_path,
+        file_path: filePath,
         file_name: filename,
         content_type: mimetype,
         size,
@@ -54,7 +54,7 @@ export const processAttachment = schemaTask({
 
     const { data } = await supabase.storage
       .from("vault")
-      .createSignedUrl(file_path.join("/"), 60);
+      .createSignedUrl(filePath.join("/"), 60);
 
     if (!data) {
       throw Error("File not found");
@@ -89,7 +89,7 @@ export const processAttachment = schemaTask({
       // NOTE: Process documents and images for classification
       await processDocument.trigger({
         mimetype,
-        file_path,
+        filePath,
         teamId,
       });
 

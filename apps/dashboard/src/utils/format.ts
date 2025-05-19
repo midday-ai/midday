@@ -40,7 +40,11 @@ export function formatAmount({
     return;
   }
 
-  return Intl.NumberFormat(locale, {
+  // Fix: locale can be null, but Intl.NumberFormat expects string | string[] | undefined
+  // So, if locale is null, pass undefined instead
+  const safeLocale = locale ?? undefined;
+
+  return Intl.NumberFormat(safeLocale, {
     style: "currency",
     currency,
     minimumFractionDigits,

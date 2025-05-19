@@ -1,4 +1,4 @@
-import { Providers } from "@/common/schema";
+import { Providers } from "@engine/common/schema";
 import { z } from "@hono/zod-openapi";
 
 export const TransactionsParamsSchema = z

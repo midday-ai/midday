@@ -6,8 +6,8 @@ import { FormatAmount } from "@/components/format-amount";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { formatDate } from "@/utils/format";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -21,21 +21,10 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
-import type {
-  ColumnDef,
-  TableMeta as ReactTableMeta,
-} from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { memo, useCallback } from "react";
 
 type Transaction = RouterOutputs["transactions"]["get"]["data"][number];
-
-interface TableMeta<TData> extends ReactTableMeta<TData> {
-  dateFormat?: string;
-  hasSorting?: boolean;
-  setOpen?: (id: string) => void;
-  copyUrl?: (id: string) => void;
-  updateTransaction?: (data: { id: string; status: string }) => void;
-}
 
 const SelectCell = memo(
   ({
@@ -69,7 +58,7 @@ const DescriptionCell = memo(
     name: string;
     description?: string;
     status?: string;
-    categorySlug?: string;
+    categorySlug?: string | null;
   }) => (
     <div className="flex items-center space-x-2">
       <TooltipTrigger asChild>
@@ -111,7 +100,7 @@ const AmountCell = memo(
   }: {
     amount: number;
     currency: string;
-    categorySlug?: string;
+    categorySlug?: string | null;
   }) => (
     <span
       className={cn("text-sm", categorySlug === "income" && "text-[#00C969]")}
@@ -124,16 +113,12 @@ const AmountCell = memo(
 AmountCell.displayName = "AmountCell";
 
 const TagsCell = memo(
-  ({ tags }: { tags?: { tag: { id: string; name: string } }[] }) => (
+  ({ tags }: { tags?: { id: string; name: string | null }[] }) => (
     <div className="relative">
       <div className="flex items-center space-x-2">
-        {tags?.map(({ tag }) => (
-          <Badge
-            key={tag.id}
-            variant="tag-rounded"
-            className="whitespace-nowrap"
-          >
-            {tag.name}
+        {tags?.map(({ id, name }) => (
+          <Badge key={id} variant="tag-rounded" className="whitespace-nowrap">
+            {name}
           </Badge>
         ))}
       </div>
@@ -153,33 +138,33 @@ const ActionsCell = memo(
     onDeleteTransaction,
   }: {
     transaction: Transaction;
-    onViewDetails: (id: string) => void;
-    onCopyUrl: (id: string) => void;
-    onUpdateTransaction: (data: { id: string; status: string }) => void;
-    onDeleteTransaction: (id: string) => void;
+    onViewDetails?: (id: string) => void;
+    onCopyUrl?: (id: string) => void;
+    onUpdateTransaction?: (data: { id: string; status: string }) => void;
+    onDeleteTransaction?: (id: string) => void;
   }) => {
     const handleViewDetails = useCallback(() => {
-      onViewDetails(transaction.id);
+      onViewDetails?.(transaction.id);
     }, [transaction.id, onViewDetails]);
 
     const handleCopyUrl = useCallback(() => {
-      onCopyUrl(transaction.id);
+      onCopyUrl?.(transaction.id);
     }, [transaction.id, onCopyUrl]);
 
     const handleUpdateToPosted = useCallback(() => {
-      onUpdateTransaction({ id: transaction.id, status: "posted" });
+      onUpdateTransaction?.({ id: transaction.id, status: "posted" });
     }, [transaction.id, onUpdateTransaction]);
 
     const handleUpdateToCompleted = useCallback(() => {
-      onUpdateTransaction({ id: transaction.id, status: "completed" });
+      onUpdateTransaction?.({ id: transaction.id, status: "completed" });
     }, [transaction.id, onUpdateTransaction]);
 
     const handleUpdateToExcluded = useCallback(() => {
-      onUpdateTransaction({ id: transaction.id, status: "excluded" });
+      onUpdateTransaction?.({ id: transaction.id, status: "excluded" });
     }, [transaction.id, onUpdateTransaction]);
 
     const handleDeleteTransaction = useCallback(() => {
-      onDeleteTransaction(transaction.id);
+      onDeleteTransaction?.(transaction.id);
     }, [transaction.id, onDeleteTransaction]);
 
     return (
@@ -202,19 +187,17 @@ const ActionsCell = memo(
             </DropdownMenuItem>
           )}
 
-          {transaction.attachments?.length === 0 &&
-            transaction.status !== "completed" && (
-              <DropdownMenuItem onClick={handleUpdateToCompleted}>
-                Mark as completed
-              </DropdownMenuItem>
-            )}
+          {transaction.isFulfilled && transaction.status !== "completed" && (
+            <DropdownMenuItem onClick={handleUpdateToCompleted}>
+              Mark as completed
+            </DropdownMenuItem>
+          )}
 
-          {transaction.attachments?.length === 0 &&
-            transaction.status === "completed" && (
-              <DropdownMenuItem onClick={handleUpdateToPosted}>
-                Mark as uncompleted
-              </DropdownMenuItem>
-            )}
+          {transaction.isFulfilled && transaction.status === "completed" && (
+            <DropdownMenuItem onClick={handleUpdateToPosted}>
+              Mark as uncompleted
+            </DropdownMenuItem>
+          )}
 
           {!transaction.manual && transaction.status !== "excluded" && (
             <DropdownMenuItem onClick={handleUpdateToExcluded}>
@@ -256,13 +239,8 @@ export const columns: ColumnDef<Transaction>[] = [
     cell: ({ row, table }) => (
       <DateCell
         date={row.original.date}
-        format={
-          (table.options.meta as TableMeta<Transaction> | undefined)?.dateFormat
-        }
-        noSort={
-          !(table.options.meta as TableMeta<Transaction> | undefined)
-            ?.hasSorting
-        }
+        format={table.options.meta?.dateFormat}
+        noSort={!table.options.meta?.hasSorting}
       />
     ),
   },
@@ -302,16 +280,16 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "tags",
     header: "Tags",
-    cell: ({ row }) => <TagsCell tags={row.original.tags} />,
+    cell: ({ row }) => <TagsCell tags={row.original.transactionTags} />,
   },
   {
     accessorKey: "bank_account",
     header: "Account",
     cell: ({ row }) => (
       <TransactionBankAccount
-        name={row.original?.bank_account?.name ?? undefined}
+        name={row.original?.bankAccount?.name ?? undefined}
         logoUrl={
-          row.original?.bank_account?.bank_connection?.logo_url ?? undefined
+          row.original?.bankAccount?.bankConnection?.logoUrl ?? undefined
         }
       />
     ),
@@ -331,8 +309,8 @@ export const columns: ColumnDef<Transaction>[] = [
 
       return (
         <AssignedUser
-          fullName={row.original.assigned?.full_name}
-          avatarUrl={row.original.assigned?.avatar_url}
+          fullName={row.original.assigned?.fullName}
+          avatarUrl={row.original.assigned?.avatarUrl}
         />
       );
     },
@@ -341,8 +319,7 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "status",
     cell: ({ row }) => {
       const fullfilled =
-        row.original.status === "completed" ||
-        (row.original.attachments?.length ?? 0) > 0;
+        row.original.status === "completed" || row.original.isFulfilled;
 
       return <TransactionStatus fullfilled={fullfilled} />;
     },
@@ -352,7 +329,7 @@ export const columns: ColumnDef<Transaction>[] = [
     enableSorting: false,
     enableHiding: false,
     cell: ({ row, table }) => {
-      const meta = table.options.meta as TableMeta<Transaction> | undefined;
+      const meta = table.options.meta;
 
       return (
         <ActionsCell

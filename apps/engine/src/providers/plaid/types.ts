@@ -1,4 +1,4 @@
-import type { AccountType } from "@/utils/account";
+import type { AccountType } from "@engine/utils/account";
 import type {
   AccountsGetResponse,
   Institution as BaseInstitution,

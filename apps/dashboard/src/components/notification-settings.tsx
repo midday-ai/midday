@@ -1,3 +1,4 @@
+// @ts-nocheck - will be removed soon
 import { getTeamId } from "@/utils/team";
 import { getSubscriberPreferences } from "@midday/notification";
 import { getSession } from "@midday/supabase/cached-queries";

@@ -65,7 +65,7 @@ export function VaultGrid() {
   useRealtime({
     channelName: "realtime_documents",
     table: "documents",
-    filter: `team_id=eq.${user?.team_id}`,
+    filter: `team_id=eq.${user?.teamId}`,
     onEvent: (payload) => {
       if (
         payload.eventType === "INSERT" ||

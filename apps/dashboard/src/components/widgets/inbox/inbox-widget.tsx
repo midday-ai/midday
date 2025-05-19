@@ -21,7 +21,7 @@ export function InboxWidget({ filter }: Props) {
     return (
       <div className="flex flex-col space-y-4 items-center justify-center h-full text-center">
         <div>
-          <CopyInput value={getInboxEmail(user?.team?.inbox_id ?? "")} />
+          <CopyInput value={getInboxEmail(user?.team?.inboxId ?? "")} />
         </div>
 
         <p className="text-sm text-[#606060]">

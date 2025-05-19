@@ -160,7 +160,7 @@ export function ActionsMenu({ row }: Props) {
                 updateInvoiceMutation.mutate({
                   id: row.id,
                   status: "unpaid",
-                  paid_at: null,
+                  paidAt: null,
                 })
               }
             >
@@ -182,14 +182,14 @@ export function ActionsMenu({ row }: Props) {
                         updateInvoiceMutation.mutate({
                           id: row.id,
                           status: "paid",
-                          paid_at: date.toISOString(),
+                          paidAt: date.toISOString(),
                         });
                       } else {
                         // NOTE: Today is undefined
                         updateInvoiceMutation.mutate({
                           id: row.id,
                           status: "paid",
-                          paid_at: new Date().toISOString(),
+                          paidAt: new Date().toISOString(),
                         });
                       }
                     }}

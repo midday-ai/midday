@@ -1,5 +1,5 @@
 import { useI18n } from "@/locales/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,30 +27,13 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import { useToast } from "@midday/ui/use-toast";
-import type { ColumnDef, FilterFn, Row, RowData } from "@tanstack/react-table";
+import type { ColumnDef, FilterFn, Row } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import * as React from "react";
 import "@tanstack/react-table";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
-declare module "@tanstack/react-table" {
-  // Define both ColumnMeta and TableMeta interfaces
-  interface TableMeta<TData extends RowData> {
-    currentUser?: {
-      role: "owner" | "member" | null;
-      user: {
-        id: string;
-      };
-    };
-    totalOwners?: number;
-  }
-
-  interface ColumnMeta<TData extends RowData, TValue> {
-    className?: string;
-  }
-}
 
 type TeamMember = RouterOutputs["team"]["members"][number];
 
@@ -59,7 +42,7 @@ const userFilterFn: FilterFn<TeamMember> = (
   _: string,
   filterValue: string,
 ) => {
-  const memberName = row.original.user?.full_name?.toLowerCase();
+  const memberName = row.original.user?.fullName?.toLowerCase();
 
   return memberName?.includes(filterValue.toLowerCase()) ?? false;
 };
@@ -75,20 +58,20 @@ export const columns: ColumnDef<TeamMember>[] = [
           <div className="flex items-center space-x-4">
             <Avatar className="rounded-full w-8 h-8">
               <AvatarImageNext
-                src={row.original.user?.avatar_url ?? ""}
-                alt={row.original.user?.full_name ?? ""}
+                src={row.original.user?.avatarUrl ?? ""}
+                alt={row.original.user?.fullName ?? ""}
                 width={32}
                 height={32}
               />
               <AvatarFallback>
                 <span className="text-xs">
-                  {row.original.user?.full_name?.charAt(0)?.toUpperCase()}
+                  {row.original.user?.fullName?.charAt(0)?.toUpperCase()}
                 </span>
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
               <span className="font-medium text-sm">
-                {row.original.user?.full_name}
+                {row.original.user?.fullName}
               </span>
               <span className="text-sm text-[#606060]">
                 {row.original.user?.email}
@@ -154,8 +137,8 @@ export const columns: ColumnDef<TeamMember>[] = [
                 value={row.original.role ?? undefined}
                 onValueChange={(role) => {
                   updateMemberMutation.mutate({
-                    userId: row.original.user?.id,
-                    teamId: row.original.team_id,
+                    userId: row.original.user?.id!,
+                    teamId: row.original.teamId!,
                     role: role as "owner" | "member",
                   });
                 }}
@@ -208,8 +191,8 @@ export const columns: ColumnDef<TeamMember>[] = [
                             disabled={deleteMemberMutation.isPending}
                             onClick={() => {
                               deleteMemberMutation.mutate({
-                                userId: row.original.user?.id,
-                                teamId: row.original.team_id,
+                                userId: row.original.user?.id!,
+                                teamId: row.original.teamId!,
                               });
                             }}
                           >
@@ -251,7 +234,7 @@ export const columns: ColumnDef<TeamMember>[] = [
                             disabled={leaveTeamMutation.isPending}
                             onClick={() =>
                               leaveTeamMutation.mutate({
-                                teamId: row.original.team_id,
+                                teamId: row.original.teamId!,
                               })
                             }
                           >

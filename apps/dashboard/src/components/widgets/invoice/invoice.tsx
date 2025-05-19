@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { EmptyState } from "./empty-state";
 import { InvoiceRow } from "./invoice-row";
 

@@ -106,15 +106,15 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    if (createdSlackIntegration) {
+    if (createdSlackIntegration?.config) {
       const slackApp = createSlackApp({
-        token: createdSlackIntegration.config.access_token,
-        botId: createdSlackIntegration.config.bot_user_id,
+        token: createdSlackIntegration?.config?.access_token,
+        botId: createdSlackIntegration?.config?.bot_user_id,
       });
 
       try {
         await slackApp.client.chat.postMessage({
-          channel: createdSlackIntegration.config.channel_id,
+          channel: createdSlackIntegration?.config?.channel_id,
           unfurl_links: false,
           unfurl_media: false,
           blocks: [
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
               type: "section",
               text: {
                 type: "mrkdwn",
-                text: "Hello there! 👋 I'm your new Midday bot, I'll send notifications in this channel regarding new transactions and other important updates.\n\n Head over to the <slack://app?id=A07PN48FW3A&tab=home|Midday Assistant> to ask questions.",
+                text: "Hello there! 👋 I'm your new Midday bot, I'll send notifications in this channel regarding new transactions and other important updates.",
               },
             },
             {

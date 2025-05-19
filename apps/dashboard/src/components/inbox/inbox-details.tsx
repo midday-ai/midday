@@ -6,6 +6,7 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { formatDate } from "@/utils/format";
+import { getInitials } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
@@ -46,6 +47,7 @@ export function InboxDetails() {
         initialData: () => {
           const pages = queryClient
             .getQueriesData({ queryKey: trpc.inbox.get.infiniteQueryKey() })
+            // @ts-expect-error
             .flatMap(([, data]) => data?.pages ?? [])
             .flatMap((page) => page.data ?? []);
 
@@ -70,6 +72,7 @@ export function InboxDetails() {
 
         // Flatten the data from all pages to find the current index and the next item
         const allInboxes = previousData
+          // @ts-expect-error
           .flatMap(([, data]) => data?.pages ?? [])
           .flatMap((page) => page.data ?? []);
 
@@ -252,11 +255,7 @@ export function InboxDetails() {
 
                   {fallback && (
                     <AvatarFallback>
-                      {data?.display_name
-                        ?.split(" ")
-                        .slice(0, 2)
-                        .map((chunk) => chunk[0])
-                        .join("")}
+                      {getInitials(data?.display_name)}
                     </AvatarFallback>
                   )}
                 </Avatar>
@@ -288,7 +287,7 @@ export function InboxDetails() {
                 {isProcessing && !data.date && (
                   <Skeleton className="h-3 w-[50px]" />
                 )}
-                {data.date && formatDate(data.date, user?.date_format)}
+                {data.date && formatDate(data.date, user?.dateFormat)}
               </div>
             </div>
           </div>
@@ -299,10 +298,10 @@ export function InboxDetails() {
             <MatchTransaction />
           </div>
 
-          {data?.file_path && (
+          {data?.filePath && (
             <FileViewer
-              mimeType={data.content_type}
-              url={`/api/proxy?filePath=vault/${data?.file_path.join("/")}`}
+              mimeType={data.contentType}
+              url={`/api/proxy?filePath=vault/${data?.filePath.join("/")}`}
               // If the order changes, the file viewer will remount otherwise the PDF worker will crash
               key={`${params.order}-${JSON.stringify(filterParams)}`}
             />

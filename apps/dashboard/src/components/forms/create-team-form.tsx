@@ -39,11 +39,11 @@ export function CreateTeamForm({ defaultCurrencyPromise }: Props) {
 
   const createTeamMutation = useMutation(
     trpc.team.create.mutationOptions({
-      onSuccess: ({ data }) => {
-        if (!data) return;
+      onSuccess: (teamId) => {
+        if (!teamId) return;
 
         changeTeam.execute({
-          teamId: data.id,
+          teamId,
           redirectTo: "/teams/invite",
         });
       },

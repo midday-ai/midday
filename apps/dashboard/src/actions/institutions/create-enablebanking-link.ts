@@ -1,6 +1,6 @@
 "use server";
 
-import { client } from "@midday/engine/client";
+import { engineClient } from "@/utils/engine-client";
 import { LogEvents } from "@midday/events/events";
 import { getCountryCode } from "@midday/location";
 import { redirect } from "next/navigation";
@@ -24,7 +24,6 @@ export const createEnableBankingLinkAction = authActionClient
     async ({
       parsedInput: {
         institutionId,
-        step = "account",
         maximumConsentValidity,
         country: countryCode,
         isDesktop,
@@ -35,14 +34,13 @@ export const createEnableBankingLinkAction = authActionClient
       analytics.track({
         event: LogEvents.EnableBankingLinkCreated.name,
         institutionId,
-        step,
         isDesktop,
       });
 
       const country = countryCode ?? (await getCountryCode());
 
       try {
-        const linkResponse = await client.auth.enablebanking.link.$post({
+        const linkResponse = await engineClient.auth.enablebanking.link.$post({
           json: {
             institutionId,
             country,
@@ -55,6 +53,10 @@ export const createEnableBankingLinkAction = authActionClient
           },
         });
 
+        if (!linkResponse.ok) {
+          throw new Error("Failed to create link");
+        }
+
         const { data: linkData } = await linkResponse.json();
 
         return redirect(linkData.url);
@@ -64,7 +66,6 @@ export const createEnableBankingLinkAction = authActionClient
           analytics.track({
             event: LogEvents.EnableBankingLinkFailed.name,
             institutionId,
-            step,
           });
 
           throw error;

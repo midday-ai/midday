@@ -34,7 +34,7 @@ export function InvoiceNote({ id, defaultValue }: Props) {
         if (value !== defaultValue) {
           updateInvoiceMutation.mutate({
             id,
-            internal_note: value && value.length > 0 ? value : null,
+            internalNote: value && value.length > 0 ? value : null,
           });
         }
       }}

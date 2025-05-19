@@ -33,7 +33,7 @@ export function CustomerDetails() {
   );
 
   const handleLabelSave = (value: string) => {
-    updateTemplateMutation.mutate({ customer_label: value });
+    updateTemplateMutation.mutate({ customerLabel: value });
   };
 
   const handleOnChange = (content?: JSONContent | null) => {
@@ -70,13 +70,13 @@ export function CustomerDetails() {
   return (
     <div>
       <LabelInput
-        name="template.customer_label"
+        name="template.customerLabel"
         className="mb-2 block"
         onSave={handleLabelSave}
       />
       {content ? (
         <Controller
-          name="customer_details"
+          name="customerDetails"
           control={control}
           render={({ field }) => (
             <Editor

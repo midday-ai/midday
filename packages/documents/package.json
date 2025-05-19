@@ -18,18 +18,18 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "@ai-sdk/mistral": "^1.2.7",
-    "@langchain/community": "^0.3.42",
-    "@langchain/core": "^0.3.50",
+    "@ai-sdk/mistral": "^1.2.8",
+    "@langchain/community": "^0.3.43",
+    "@langchain/core": "^0.3.56",
     "@midday/utils": "workspace:*",
     "@mistralai/mistralai": "^1.6.0",
-    "ai": "4.3.11",
+    "ai": "4.3.16",
     "mammoth": "^1.9.0",
     "officeparser": "^5.1.1",
-    "unpdf": "^0.12.2",
-    "zod": "^3.24.3"
+    "unpdf": "^1.0.4",
+    "zod": "^3.24.4"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.11"
+    "@types/bun": "^1.2.13"
   }
 }

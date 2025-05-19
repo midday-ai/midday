@@ -67,9 +67,9 @@ interface Props {
   accounts?: { id: string; name: string; currency: string }[];
   members?: { id: string; name: string }[];
   customers?: { id: string; name: string }[];
-  statusFilters: { id: string; name: string }[];
-  attachmentsFilters: { id: string; name: string }[];
-  recurringFilters: { id: string; name: string }[];
+  statusFilters?: { id: string; name: string }[];
+  attachmentsFilters?: { id: string; name: string }[];
+  recurringFilters?: { id: string; name: string }[];
   tags?: { id: string; name: string; slug?: string }[];
   amountRange?: [number, number];
 }
@@ -134,7 +134,7 @@ export function FilterList({
         return statusesValue
           .map(
             (status) =>
-              statusFilters.find((filter) => filter.id === status)?.name,
+              statusFilters?.find((filter) => filter.id === status)?.name,
           )
           .join(", ");
       }
@@ -142,7 +142,7 @@ export function FilterList({
       case "status": {
         const statusValue = value as FilterValue["status"];
         if (!statusValue) return null;
-        return statusFilters.find((filter) => filter.id === statusValue)?.name;
+        return statusFilters?.find((filter) => filter.id === statusValue)?.name;
       }
 
       case "categories": {

@@ -1,12 +1,11 @@
 import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
 import MultipleSelector from "@midday/ui/multiple-selector";
+import type { Option as MultipleSelectorOption } from "@midday/ui/multiple-selector";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 
-type Option = {
-  value: string;
-  label: string;
+type Option = MultipleSelectorOption & {
   id: string;
 };
 
@@ -68,7 +67,7 @@ export function VaultSelectTags({ tags, onSelect, onRemove, onChange }: Props) {
                 onClick={(event) => {
                   event.stopPropagation();
                   deleteTagMutation.mutate({
-                    id: option.id!,
+                    id: option.id as string,
                   });
                 }}
                 className="text-gray-500"
@@ -99,10 +98,14 @@ export function VaultSelectTags({ tags, onSelect, onRemove, onChange }: Props) {
           );
         }}
         onChange={(options) => {
-          setSelected(options);
-          onChange?.(options);
+          const typedOptions = options.map((opt) => ({
+            ...opt,
+            id: opt.value,
+          }));
+          setSelected(typedOptions);
+          onChange?.(typedOptions);
 
-          const newTag = options.find(
+          const newTag = typedOptions.find(
             (tag) => !selected.find((opt) => opt.value === tag.value),
           );
 
@@ -111,14 +114,14 @@ export function VaultSelectTags({ tags, onSelect, onRemove, onChange }: Props) {
             return;
           }
 
-          if (options.length < selected.length) {
+          if (typedOptions.length < selected.length) {
             const removedTag = selected.find(
-              (tag) => !options.find((opt) => opt.value === tag.value),
-            ) as Option & { id: string };
+              (tag) => !typedOptions.find((opt) => opt.value === tag.value),
+            );
 
             if (removedTag) {
               onRemove?.(removedTag);
-              setSelected(options);
+              setSelected(typedOptions);
             }
           }
         }}

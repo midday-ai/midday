@@ -7,7 +7,7 @@ import { useLatestProjectId } from "@/hooks/use-latest-project-id";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
 import { CurrencyInput } from "@midday/ui/currency-input";
@@ -97,7 +97,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
       billable: data?.billable ?? false,
       estimate: data?.estimate ?? 0,
       currency: data?.currency ?? defaultCurrency,
-      customer_id: data?.customer_id ?? undefined,
+      customerId: data?.customerId ?? undefined,
       tags:
         data?.tags?.map((tag) => ({
           id: tag.tag?.id ?? "",

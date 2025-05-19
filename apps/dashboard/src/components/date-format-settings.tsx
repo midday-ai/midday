@@ -31,10 +31,10 @@ export function DateFormatSettings() {
 
       <CardContent>
         <Select
-          defaultValue={user.date_format ?? undefined}
+          defaultValue={user?.dateFormat ?? undefined}
           onValueChange={(value) => {
             updateUserMutation.mutate({
-              date_format: value as
+              dateFormat: value as
                 | "dd/MM/yyyy"
                 | "MM/dd/yyyy"
                 | "yyyy-MM-dd"

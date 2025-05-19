@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { getLogoURL } from "@/utils/logo";
+import { getLogoURL } from "@engine/utils/logo";
 import { capitalCase } from "change-case";
 import type { Account, Balance, ConnectionStatus, Transaction } from "../types";
 import type {

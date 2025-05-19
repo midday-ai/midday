@@ -136,6 +136,8 @@ export function DataTableHeader({ table, loading }: Props) {
               onClick={() => createSortQuery("tags")}
             >
               <span>Tags</span>
+              {"tags" === column && value === "asc" && <ArrowDown size={16} />}
+              {"tags" === column && value === "desc" && <ArrowUp size={16} />}
             </Button>
           </TableHead>
         )}

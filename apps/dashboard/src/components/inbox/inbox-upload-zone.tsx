@@ -14,7 +14,7 @@ type Props = {
   children: ReactNode;
   onUpload?: (
     results: {
-      file_path: string[];
+      filePath: string[];
       mimetype: string;
       size: number;
     }[],
@@ -27,7 +27,7 @@ export function UploadZone({ children, onUpload }: Props) {
   const supabase = createClient();
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
-  const [toastId, setToastId] = useState(null);
+  const [toastId, setToastId] = useState<string | undefined>(undefined);
   const uploadProgress = useRef([]);
   const { toast, dismiss, update } = useToast();
   const processAttachmentsMutation = useMutation(
@@ -44,9 +44,12 @@ export function UploadZone({ children, onUpload }: Props) {
         duration: Number.POSITIVE_INFINITY,
       });
 
-      setToastId(id);
-    } else {
+      if (id) {
+        setToastId(id);
+      }
+    } else if (toastId) {
       update(toastId, {
+        id: toastId,
         progress,
         title: `Uploading ${uploadProgress.current.length} files`,
       });
@@ -65,7 +68,7 @@ export function UploadZone({ children, onUpload }: Props) {
     setShowProgress(true);
 
     // Add uploaded folder so we can filter background job on this
-    const path = [user?.team_id, "inbox"];
+    const path = [user?.teamId, "inbox"];
 
     try {
       const results = await Promise.all(
@@ -93,7 +96,7 @@ export function UploadZone({ children, onUpload }: Props) {
       // Trigger the upload jobs
       processAttachmentsMutation.mutate(
         results.map((result) => ({
-          file_path: [...path, result.filename],
+          filePath: [...path, result.filename],
           mimetype: result.file.type,
           size: result.file.size,
         })),
@@ -110,7 +113,7 @@ export function UploadZone({ children, onUpload }: Props) {
       });
 
       setShowProgress(false);
-      setToastId(null);
+      setToastId(undefined);
       dismiss(toastId);
       onUpload?.(results);
     } catch {

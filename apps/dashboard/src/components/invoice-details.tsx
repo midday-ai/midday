@@ -24,6 +24,7 @@ import { InvoiceNote } from "./invoice-note";
 import { InvoiceStatus } from "./invoice-status";
 import { InvoiceActivity } from "./invoice/activity";
 import { OpenURL } from "./open-url";
+
 export function InvoiceDetails() {
   const trpc = useTRPC();
   const { invoiceId } = useInvoiceParams();
@@ -51,17 +52,17 @@ export function InvoiceDetails() {
     status,
     vat,
     tax,
-    paid_at,
-    due_date,
-    issue_date,
-    invoice_number,
+    paidAt,
+    dueDate,
+    issueDate,
+    invoiceNumber,
     template,
     token,
-    internal_note,
-    updated_at,
-    sent_at,
-    sent_to,
-    customer_name,
+    internalNote,
+    updatedAt,
+    sentAt,
+    sentTo,
+    customerName,
   } = data;
 
   return (
@@ -79,7 +80,7 @@ export function InvoiceDetails() {
               />
             )}
             <AvatarFallback className="text-[9px] font-medium">
-              {customer?.name?.at(0) || customer_name?.at(0)}
+              {customer?.name?.at(0) || customerName?.at(0)}
             </AvatarFallback>
           </Avatar>
 
@@ -95,11 +96,13 @@ export function InvoiceDetails() {
               "line-through": status === "canceled",
             })}
           >
-            <FormatAmount amount={amount} currency={currency} />
+            {amount && currency && (
+              <FormatAmount amount={amount} currency={currency} />
+            )}
           </span>
 
           <div className="h-3 space-x-2">
-            {vat !== 0 && vat != null && (
+            {vat !== 0 && vat != null && currency && (
               <span className="text-[#606060] text-xs select-text">
                 {/* @ts-expect-error - vat_label is not typed (JSONB) */}
                 {template?.vat_label}{" "}
@@ -107,7 +110,7 @@ export function InvoiceDetails() {
               </span>
             )}
 
-            {tax !== 0 && tax != null && (
+            {tax !== 0 && tax != null && currency && (
               <span className="text-[#606060] text-xs select-text">
                 {/* @ts-expect-error - tax_label is not typed (JSONB) */}
                 {template?.tax_label}{" "}
@@ -123,7 +126,7 @@ export function InvoiceDetails() {
       {status === "paid" && (
         <div className="mt-8 flex flex-col space-y-1">
           <span className="text-base font-medium">
-            Paid on {paid_at && format(new Date(paid_at), "MMM dd")}
+            Paid on {paidAt && format(new Date(paidAt), "MMM dd")}
           </span>
           <span className="text-xs">
             <span className="text-[#606060]">Marked as paid</span>
@@ -134,7 +137,7 @@ export function InvoiceDetails() {
       {status === "canceled" && (
         <div className="mt-8 flex flex-col space-y-1">
           <span className="text-base font-medium">
-            Canceled on {updated_at && format(new Date(updated_at), "MMM dd")}
+            Canceled on {updatedAt && format(new Date(updatedAt), "MMM dd")}
           </span>
           <span className="text-xs">
             <span className="text-[#606060]">Marked as canceled</span>
@@ -146,36 +149,36 @@ export function InvoiceDetails() {
         <div className="flex justify-between items-center">
           <span className="text-sm text-[#606060]">Due date</span>
           <span className="text-sm">
-            <span>{due_date && format(new Date(due_date), "MMM dd")}</span>
+            <span>{dueDate && format(new Date(dueDate), "MMM dd")}</span>
           </span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-sm text-[#606060]">Issue date</span>
           <span className="text-sm">
-            <span>{issue_date && format(new Date(issue_date), "MMM dd")}</span>
+            <span>{issueDate && format(new Date(issueDate), "MMM dd")}</span>
           </span>
         </div>
 
-        {sent_at && (
+        {sentAt && (
           <div className="flex justify-between items-center">
             <span className="text-sm text-[#606060]">Sent at</span>
             <span className="text-sm">
-              <span>{sent_at && format(new Date(sent_at), "MMM dd")}</span>
+              <span>{sentAt && format(new Date(sentAt), "MMM dd")}</span>
             </span>
           </div>
         )}
 
-        {sent_to && (
+        {sentTo && (
           <div className="flex justify-between items-center">
             <span className="text-sm text-[#606060]">Sent to</span>
-            <span className="text-sm">{sent_to}</span>
+            <span className="text-sm">{sentTo}</span>
           </div>
         )}
 
         <div className="flex justify-between items-center">
           <span className="text-sm text-[#606060]">Invoice no.</span>
           <span className="text-sm">
-            <span>{invoice_number}</span>
+            <span>{invoiceNumber}</span>
           </span>
         </div>
       </div>
@@ -217,7 +220,7 @@ export function InvoiceDetails() {
       <Accordion
         type="multiple"
         className="mt-6"
-        defaultValue={internal_note ? ["note", "activity"] : ["activity"]}
+        defaultValue={internalNote ? ["note", "activity"] : ["activity"]}
       >
         <AccordionItem value="activity">
           <AccordionTrigger>Activity</AccordionTrigger>
@@ -228,7 +231,7 @@ export function InvoiceDetails() {
         <AccordionItem value="note">
           <AccordionTrigger>Internal note</AccordionTrigger>
           <AccordionContent>
-            <InvoiceNote id={id} defaultValue={internal_note} />
+            <InvoiceNote id={id} defaultValue={internalNote} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
