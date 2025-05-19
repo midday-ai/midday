@@ -2,26 +2,13 @@ import { resend } from "@jobs/utils/resend";
 import { InviteEmail } from "@midday/email/emails/invite";
 import { getI18n } from "@midday/email/locales";
 import { render } from "@midday/email/render";
+import { inviteTeamMembersSchema } from "@midday/jobs/schema";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { nanoid } from "nanoid";
-import { z } from "zod";
 
 export const inviteTeamMembers = schemaTask({
   id: "invite-team-members",
-  schema: z.object({
-    teamId: z.string().uuid(),
-    ip: z.string(),
-    locale: z.string(),
-    invites: z.array(
-      z.object({
-        email: z.string().email(),
-        invitedByName: z.string(),
-        invitedByEmail: z.string().email(),
-        teamName: z.string(),
-        inviteCode: z.string(),
-      }),
-    ),
-  }),
+  schema: inviteTeamMembersSchema,
   maxDuration: 30,
   queue: {
     concurrencyLimit: 10,

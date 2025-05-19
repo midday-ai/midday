@@ -26,7 +26,7 @@
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
-    "@midday/engine-client": "workspace:*",
+    "@midday/engine": "workspace:*",
     "@novu/headless": "^2.6.6",
     "@number-flow/react": "^0.5.9",
     "@polar-sh/nextjs": "^0.4.0",

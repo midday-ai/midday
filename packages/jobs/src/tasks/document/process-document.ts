@@ -1,8 +1,8 @@
+import { processDocumentSchema } from "@jobs/schema";
 import { loadDocument } from "@midday/documents/loader";
 import { getContentSample } from "@midday/documents/utils";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 import { classifyDocument } from "./classify-document";
 import { classifyImage } from "./classify-image";
 import { convertHeic } from "./convert-heic";
@@ -10,11 +10,7 @@ import { convertHeic } from "./convert-heic";
 // NOTE: Process documents and images for classification
 export const processDocument = schemaTask({
   id: "process-document",
-  schema: z.object({
-    mimetype: z.string(),
-    filePath: z.array(z.string()),
-    teamId: z.string(),
-  }),
+  schema: processDocumentSchema,
   maxDuration: 60,
   queue: {
     concurrencyLimit: 100,

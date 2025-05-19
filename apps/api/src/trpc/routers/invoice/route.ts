@@ -17,8 +17,10 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { parseInputValue } from "@api/utils/parse";
 import { UTCDate } from "@date-fns/utc";
 import { generateToken } from "@midday/invoice/token";
-import type { sendInvoiceReminder } from "@midday/jobs/tasks/invoice/email/send-reminder";
-import type { generateInvoice } from "@midday/jobs/tasks/invoice/operations/generate-invoice";
+import type {
+  GenerateInvoicePayload,
+  SendInvoiceReminderPayload,
+} from "@midday/jobs/schema";
 import { currencies } from "@midday/location/currencies";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { addMonths } from "date-fns";
@@ -266,10 +268,10 @@ export const invoiceRouter = createTRPCRouter({
         throw new Error("Invoice not found");
       }
 
-      await tasks.trigger<typeof generateInvoice>("generate-invoice", {
+      await tasks.trigger("generate-invoice", {
         invoiceId: data.id,
         deliveryType: input.deliveryType,
-      });
+      } satisfies GenerateInvoicePayload);
 
       return data;
     }),
@@ -277,9 +279,9 @@ export const invoiceRouter = createTRPCRouter({
   remind: protectedProcedure
     .input(remindInvoiceSchema)
     .mutation(async ({ input, ctx: { db } }) => {
-      await tasks.trigger<typeof sendInvoiceReminder>("send-invoice-reminder", {
+      await tasks.trigger("send-invoice-reminder", {
         invoiceId: input.id,
-      });
+      } satisfies SendInvoiceReminderPayload);
 
       return updateInvoice(db, {
         id: input.id,

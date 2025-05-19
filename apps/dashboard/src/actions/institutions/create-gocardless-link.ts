@@ -1,6 +1,6 @@
 "use server";
 
-import { engineClient } from "@midday/engine-client";
+import { client } from "@midday/engine-client";
 import { LogEvents } from "@midday/events/events";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -42,13 +42,12 @@ export const createGoCardLessLinkAction = authActionClient
       });
 
       try {
-        const agreementResponse =
-          await engineClient.auth.gocardless.agreement.$post({
-            json: {
-              institutionId,
-              transactionTotalDays: availableHistory,
-            },
-          });
+        const agreementResponse = await client.auth.gocardless.agreement.$post({
+          json: {
+            institutionId,
+            transactionTotalDays: availableHistory,
+          },
+        });
 
         if (!agreementResponse.ok) {
           throw new Error("Failed to create agreement");
@@ -56,7 +55,7 @@ export const createGoCardLessLinkAction = authActionClient
 
         const { data: agreementData } = await agreementResponse.json();
 
-        const linkResponse = await engineClient.auth.gocardless.link.$post({
+        const linkResponse = await client.auth.gocardless.link.$post({
           json: {
             agreement: agreementData.id,
             institutionId,

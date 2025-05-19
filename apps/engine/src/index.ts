@@ -1,4 +1,3 @@
-import type { Bindings } from "@engine/common/bindings";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import {
   authMiddleware,
@@ -14,9 +13,7 @@ import institutionRoutes from "./routes/institutions";
 import ratesRoutes from "./routes/rates";
 import transactionsRoutes from "./routes/transactions";
 
-const app = new OpenAPIHono<{
-  Bindings: Bindings;
-}>({
+const app = new OpenAPIHono({
   defaultHook: (result, c) => {
     if (!result.success) {
       return c.json({ success: false, errors: result.error.errors }, 422);
@@ -41,5 +38,7 @@ export const appRoutes = app
   .route("/health", healthRoutes)
   .route("/rates", ratesRoutes)
   .route("/enrich", enrichRoutes);
+
+export type AppType = typeof appRoutes;
 
 export default app;

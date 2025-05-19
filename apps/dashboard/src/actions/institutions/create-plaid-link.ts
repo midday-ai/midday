@@ -1,6 +1,6 @@
 "use server";
 
-import { engineClient } from "@midday/engine-client";
+import { client } from "@midday/engine-client";
 import { getSession } from "@midday/supabase/cached-queries";
 
 export const createPlaidLinkTokenAction = async (accessToken?: string) => {
@@ -8,7 +8,7 @@ export const createPlaidLinkTokenAction = async (accessToken?: string) => {
     data: { session },
   } = await getSession();
 
-  const plaidResponse = await engineClient.auth.plaid.link.$post({
+  const plaidResponse = await client.auth.plaid.link.$post({
     json: {
       userId: session?.user?.id,
       accessToken,

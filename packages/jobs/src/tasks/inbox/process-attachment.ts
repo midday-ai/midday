@@ -1,20 +1,13 @@
+import { processAttachmentSchema } from "@jobs/schema";
 import { DocumentClient } from "@midday/documents";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 import { convertHeic } from "../document/convert-heic";
 import { processDocument } from "../document/process-document";
 
 export const processAttachment = schemaTask({
   id: "process-attachment",
-  schema: z.object({
-    teamId: z.string().uuid(),
-    mimetype: z.string(),
-    size: z.number(),
-    filePath: z.array(z.string()),
-    referenceId: z.string().optional(),
-    website: z.string().optional(),
-  }),
+  schema: processAttachmentSchema,
   maxDuration: 60,
   queue: {
     concurrencyLimit: 100,

@@ -1,6 +1,6 @@
 "use server";
 
-import { engineClient } from "@midday/engine-client";
+import { client } from "@midday/engine-client";
 import { LogEvents } from "@midday/events/events";
 import { getCountryCode } from "@midday/location";
 import { redirect } from "next/navigation";
@@ -40,7 +40,7 @@ export const createEnableBankingLinkAction = authActionClient
       const country = countryCode ?? (await getCountryCode());
 
       try {
-        const linkResponse = await engineClient.auth.enablebanking.link.$post({
+        const linkResponse = await client.auth.enablebanking.link.$post({
           json: {
             institutionId,
             country,
