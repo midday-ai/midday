@@ -1,23 +1,26 @@
-# name: Fly Deploy
-# permissions:
-#   contents: read
-# on:
-#   push:
-#     branches:
-#       - main
-#     paths:
-#       - apps/api/**
-#       - packages/**
-#       - "!packages/email/**"
-#       - "!packages/ui/**"
-# jobs:
-#   deploy:
-#     name: 🚀 Deploy to Fly
-#     runs-on: ubuntu-latest
-#     concurrency: deploy-group
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: superfly/flyctl-actions/setup-flyctl@master
-#       - run: flyctl deploy --remote-only --dockerfile apps/api/Dockerfile --config apps/api/fly.toml
-#         env:
-#           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+name: Fly Deploy
+permissions:
+  contents: read
+on:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - apps/api/**
+      - packages/**
+      - packages/email/**
+      - packages/jobs/**
+      - packages/location/**
+      - packages/supabase/**
+      - packages/engine-client/**
+jobs:
+  deploy:
+    name: 🚀 Deploy to Fly
+    runs-on: ubuntu-latest
+    concurrency: deploy-group
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only --dockerfile apps/api/Dockerfile --config apps/api/fly-preview.yml
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

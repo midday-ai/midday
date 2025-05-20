@@ -1,15 +1,20 @@
 # Base image with Bun
 FROM oven/bun:1.2.13 AS base
 
+# Install turbo CLI globally using Bun
+FROM base AS turbo-cli
+RUN bun add -g turbo
+
 # Builder stage
-FROM base AS builder
+FROM turbo-cli AS builder
 WORKDIR /app
-# Install turbo globally
-RUN bun install -g turbo
 # Copy all files
 COPY . .
-# Prune the workspaces to only the api and its dependencies, make sure to include all dependencies
+# Use turbo CLI from Bun global install to prune workspaces
 RUN turbo prune @midday/api --docker
+
+# Build @midday/engine for the client types
+RUN turbo run build --filter=@midday/engine...
 
 # Installer stage
 FROM base AS installer
@@ -22,6 +27,9 @@ RUN bun install
 
 # Copy the full source code
 COPY --from=builder /app/out/full/ .
+
+# Copy the built engine dist if it exists
+COPY --from=builder /app/apps/engine/dist /app/apps/engine/dist
 
 # Runner stage (same as installer to avoid another copy)
 FROM installer AS runner

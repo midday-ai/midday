@@ -1,8 +1,6 @@
 app = 'midday-api'
 primary_region = 'fra'
 
-[build]
-
 [http_service]
   internal_port = 3000
   force_https = true
