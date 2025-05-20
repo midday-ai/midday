@@ -54,3 +54,7 @@ export const connectDb = async () => {
 };
 
 export type Database = Awaited<ReturnType<typeof connectDb>>;
+
+export type DatabaseWithPrimary = Database & {
+  $primary?: Database;
+};

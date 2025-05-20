@@ -5,6 +5,7 @@ import { getGeoContext } from "@api/utils/geo";
 import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";
 import superjson from "superjson";
+import { withTeamAccess } from "./middleware/check-team-access";
 import { withPrimaryReadAfterWrite } from "./middleware/primary-read-after-write";
 
 export const createTRPCContext = async (_: unknown, c: Context) => {
@@ -32,19 +33,25 @@ export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 
 const withPrimaryDbMiddleware = t.middleware(async (opts) => {
-  const result = await withPrimaryReadAfterWrite({
+  return withPrimaryReadAfterWrite({
     ctx: opts.ctx,
     type: opts.type,
     next: opts.next,
   });
+});
 
-  return result;
+const withTeamCheckMiddleware = t.middleware(async (opts) => {
+  return withTeamAccess({
+    ctx: opts.ctx,
+    next: opts.next,
+  });
 });
 
 export const publicProcedure = t.procedure.use(withPrimaryDbMiddleware);
 
 export const protectedProcedure = t.procedure
   .use(withPrimaryDbMiddleware)
+  .use(withTeamCheckMiddleware)
   .use(async (opts) => {
     const { teamId, session } = opts.ctx;
 

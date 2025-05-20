@@ -1,6 +1,6 @@
 import { type JWTPayload, jwtVerify } from "jose";
 
-type Payload = {
+export type Session = {
   user: {
     id: string;
     email?: string;
@@ -18,7 +18,7 @@ type SupabaseJWTPayload = JWTPayload & {
 
 export async function verifyAccessToken(
   accessToken?: string,
-): Promise<Payload | null> {
+): Promise<Session | null> {
   if (!accessToken) return null;
 
   try {
