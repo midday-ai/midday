@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: bun install
       - name: 🏗 Build @midday/engine
-        run: turbo run build --filter=@midday/engine...
+        run: bunx turbo run build --filter=@midday/engine...
       # - name: 🔦 Run linter
       #   run: bun run lint --filter=@midday/dashboard
       # - name: 🪐 Check TypeScript
