@@ -24,9 +24,29 @@ export const InstitutionSchema = z
         example: 365,
       })
       .nullable(),
+    maximum_consent_validity: z
+      .string()
+      .openapi({
+        example: "personal",
+      })
+      .optional()
+      .nullable(),
+    type: z
+      .enum(["personal", "business"])
+      .openapi({
+        example: "personal",
+      })
+      .nullable()
+      .optional(),
+    popularity: z
+      .number()
+      .openapi({
+        example: 1,
+      })
+      .optional(),
     provider: Providers.openapi({
       example: Providers.Enum.teller,
-    }),
+    }).optional(),
   })
   .openapi("InstitutionSchema");
 

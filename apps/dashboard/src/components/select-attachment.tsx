@@ -38,6 +38,7 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
     data: item,
     component: () => {
       const filePath = `${item?.filePath?.join("/")}`;
+
       return (
         <div className="flex w-full items-center justify-between gap-2 text-sm">
           <div className="flex gap-2 items-center">
@@ -49,7 +50,7 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
                   setParams({ filePath });
                 }}
               >
-                <FilePreview mimeType={item.contentType} filePath={filePath} />
+                <FilePreview mimeType={item.contentType!} filePath={filePath} />
               </button>
             </div>
             <div className="flex flex-col">

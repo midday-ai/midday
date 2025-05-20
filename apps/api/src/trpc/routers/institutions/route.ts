@@ -20,7 +20,13 @@ export const institutionsRouter = createTRPCRouter({
 
       const { data } = await institutionsResponse.json();
 
-      return data;
+      return data.map((institution) => ({
+        ...institution,
+        availableHistory: institution.available_history,
+        maximumConsentValidity: institution.maximum_consent_validity,
+        type: institution.type,
+        provider: institution.provider!,
+      }));
     }),
 
   accounts: protectedProcedure

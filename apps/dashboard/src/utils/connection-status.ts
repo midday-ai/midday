@@ -10,28 +10,28 @@ type Connection = NonNullable<RouterOutputs["bankConnections"]["get"]>[number];
 export function getConnectionsStatus(connections: Connection[]) {
   const warning = connections?.some(
     (connection) =>
-      connection.expires_at &&
-      differenceInDays(new Date(connection.expires_at), new Date()) <=
+      connection.expiresAt &&
+      differenceInDays(new Date(connection.expiresAt), new Date()) <=
         WARNING_DAYS,
   );
 
   const error = connections?.some(
     (connection) =>
-      connection.expires_at &&
-      differenceInDays(new Date(connection.expires_at), new Date()) <=
+      connection.expiresAt &&
+      differenceInDays(new Date(connection.expiresAt), new Date()) <=
         ERROR_DAYS,
   );
 
   const expired = connections?.some(
     (connection) =>
-      connection.expires_at &&
-      differenceInDays(new Date(connection.expires_at), new Date()) <= 0,
+      connection.expiresAt &&
+      differenceInDays(new Date(connection.expiresAt), new Date()) <= 0,
   );
 
   const show = connections?.some(
     (connection) =>
-      connection.expires_at &&
-      differenceInDays(new Date(connection.expires_at), new Date()) <=
+      connection.expiresAt &&
+      differenceInDays(new Date(connection.expiresAt), new Date()) <=
         DISPLAY_DAYS,
   );
 
@@ -45,21 +45,21 @@ export function getConnectionsStatus(connections: Connection[]) {
 
 export function connectionStatus(connection: Connection) {
   const warning =
-    connection.expires_at &&
-    differenceInDays(new Date(connection.expires_at), new Date()) <=
+    connection.expiresAt &&
+    differenceInDays(new Date(connection.expiresAt), new Date()) <=
       WARNING_DAYS;
 
   const error =
-    connection.expires_at &&
-    differenceInDays(new Date(connection.expires_at), new Date()) <= ERROR_DAYS;
+    connection.expiresAt &&
+    differenceInDays(new Date(connection.expiresAt), new Date()) <= ERROR_DAYS;
 
   const expired =
-    connection.expires_at &&
-    differenceInDays(new Date(connection.expires_at), new Date()) <= 0;
+    connection.expiresAt &&
+    differenceInDays(new Date(connection.expiresAt), new Date()) <= 0;
 
   const show =
-    connection.expires_at &&
-    differenceInDays(new Date(connection.expires_at), new Date()) <=
+    connection.expiresAt &&
+    differenceInDays(new Date(connection.expiresAt), new Date()) <=
       DISPLAY_DAYS;
 
   return {
