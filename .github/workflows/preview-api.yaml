@@ -15,9 +15,9 @@ on:
       - packages/engine-client/**
 jobs:
   deploy:
-    name: 🚀 Deploy to Fly
+    name: 🚀 Deploy to Fly Preview
     runs-on: ubuntu-latest
-    concurrency: deploy-group
+    concurrency: fly-preview
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1

@@ -12,9 +12,9 @@ on:
       - "!packages/ui/**"
 jobs:
   deploy:
-    name: 🚀 Deploy to Fly
+    name: 🚀 Deploy to Fly Production
     runs-on: ubuntu-latest
-    concurrency: deploy-group
+    concurrency: fly-production
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
