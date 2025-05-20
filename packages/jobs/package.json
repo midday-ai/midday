@@ -15,6 +15,7 @@
     "@midday/email": "workspace:*",
     "@midday/engine": "workspace:*",
     "@midday/supabase": "workspace:*",
+    "@midday/engine-client": "workspace:*",
     "@sindresorhus/slugify": "^2.2.1",
     "@zip.js/zip.js": "^2.7.61",
     "heic-convert": "1.2.4",
