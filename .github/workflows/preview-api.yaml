@@ -29,8 +29,10 @@ jobs:
         run: bunx turbo run build --filter=@midday/engine...
       - name: 🔦 Run linter
         run: bun run lint --filter=@midday/api
+        working-directory: ./apps/api
       - name: 🪐 Check TypeScript
         run: bun run typecheck --filter=@midday/api
+        working-directory: ./apps/api
       - name: 🧪 Run unit tests
         run: bun run test
       - uses: superfly/flyctl-actions/setup-flyctl@master

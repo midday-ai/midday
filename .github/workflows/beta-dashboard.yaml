@@ -25,10 +25,12 @@ jobs:
         run: bunx turbo run build --filter=@midday/engine...
       # - name: 🔦 Run linter
       #   run: bun run lint --filter=@midday/dashboard
+      #   working-directory: ./apps/dashboard
       # - name: 🪐 Check TypeScript
       #   run: bun run typecheck --filter=@midday/dashboard
+      #   working-directory: ./apps/dashboard
       - name: 🧪 Run unit tests
-        run: bun run test
+        run: bunx run test
       - name: 📤 Pull Vercel Environment Information
         run: bunx vercel pull --yes --environment=beta --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts

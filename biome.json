@@ -3,6 +3,17 @@
   "organizeImports": {
     "enabled": true
   },
+  "files": {
+    "ignore": [
+      "dist",
+      "dist/**",
+      "node_modules",
+      "node_modules/**",
+      ".turbo",
+      ".next",
+      ".next/**"
+    ]
+  },
   "linter": {
     "ignore": [".wrangler", "node_modules"],
     "enabled": true,
