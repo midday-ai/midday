@@ -7,14 +7,13 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
-    "format": "biome --write .",
+    "format": "biome format --write .",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
     "./animated-size-container": "./src/components/animated-size-container.tsx",
     "./accordion": "./src/components/accordion.tsx",
     "./alert-dialog": "./src/components/alert-dialog.tsx",
-    "./breadcrumb": "./src/components/breadcrumb.tsx",
     "./alert": "./src/components/alert.tsx",
     "./chart": "./src/components/chart.tsx",
     "./currency-input": "./src/components/currency-input.tsx",
