@@ -56,9 +56,7 @@
           "name": "Enable insert for authenticated users only",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "withCheck": "true"
         }
       },
@@ -514,12 +512,8 @@
           "tableFrom": "transactions",
           "tableTo": "users",
           "schemaTo": "public",
-          "columnsFrom": [
-            "assigned_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assigned_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -528,12 +522,8 @@
           "tableFrom": "transactions",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -542,12 +532,8 @@
           "tableFrom": "transactions",
           "tableTo": "bank_accounts",
           "schemaTo": "public",
-          "columnsFrom": [
-            "bank_account_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["bank_account_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -556,14 +542,8 @@
           "tableFrom": "transactions",
           "tableTo": "transaction_categories",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id",
-            "category_slug"
-          ],
-          "columnsTo": [
-            "team_id",
-            "slug"
-          ],
+          "columnsFrom": ["team_id", "category_slug"],
+          "columnsTo": ["team_id", "slug"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -571,9 +551,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "transactions_internal_id_key": {
-          "columns": [
-            "internal_id"
-          ],
+          "columns": ["internal_id"],
           "nullsNotDistinct": false,
           "name": "transactions_internal_id_key"
         }
@@ -584,34 +562,26 @@
           "name": "Transactions can be created by a member of the team",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "withCheck": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         },
         "Transactions can be deleted by a member of the team": {
           "name": "Transactions can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Transactions can be selected by a member of the team": {
           "name": "Transactions can be selected by a member of the team",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Transactions can be updated by a member of the team": {
           "name": "Transactions can be updated by a member of the team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         }
       },
       "isRLSEnabled": true
@@ -727,12 +697,8 @@
           "tableFrom": "tracker_entries",
           "tableTo": "users",
           "schemaTo": "public",
-          "columnsFrom": [
-            "assigned_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assigned_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -741,12 +707,8 @@
           "tableFrom": "tracker_entries",
           "tableTo": "tracker_projects",
           "schemaTo": "public",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -755,12 +717,8 @@
           "tableFrom": "tracker_entries",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -773,34 +731,26 @@
           "name": "Entries can be created by a member of the team",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "withCheck": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         },
         "Entries can be deleted by a member of the team": {
           "name": "Entries can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "authenticated"
-          ]
+          "to": ["authenticated"]
         },
         "Entries can be selected by a member of the team": {
           "name": "Entries can be selected by a member of the team",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "authenticated"
-          ]
+          "to": ["authenticated"]
         },
         "Entries can be updated by a member of the team": {
           "name": "Entries can be updated by a member of the team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "authenticated"
-          ]
+          "to": ["authenticated"]
         }
       },
       "isRLSEnabled": true
@@ -849,12 +799,8 @@
           "tableFrom": "customer_tags",
           "tableTo": "customers",
           "schemaTo": "public",
-          "columnsFrom": [
-            "customer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["customer_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -863,12 +809,8 @@
           "tableFrom": "customer_tags",
           "tableTo": "tags",
           "schemaTo": "public",
-          "columnsFrom": [
-            "tag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tag_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -877,12 +819,8 @@
           "tableFrom": "customer_tags",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -890,10 +828,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "unique_customer_tag": {
-          "columns": [
-            "customer_id",
-            "tag_id"
-          ],
+          "columns": ["customer_id", "tag_id"],
           "nullsNotDistinct": false,
           "name": "unique_customer_tag"
         }
@@ -904,9 +839,7 @@
           "name": "Tags can be handled by a member of the team",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         }
       },
@@ -993,12 +926,8 @@
           "tableFrom": "inbox_accounts",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1006,16 +935,12 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "inbox_accounts_email_key": {
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "nullsNotDistinct": false,
           "name": "inbox_accounts_email_key"
         },
         "inbox_accounts_external_id_key": {
-          "columns": [
-            "external_id"
-          ],
+          "columns": ["external_id"],
           "nullsNotDistinct": false,
           "name": "inbox_accounts_external_id_key"
         }
@@ -1026,26 +951,20 @@
           "name": "Inbox accounts can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         },
         "Inbox accounts can be selected by a member of the team": {
           "name": "Inbox accounts can be selected by a member of the team",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Inbox accounts can be updated by a member of the team": {
           "name": "Inbox accounts can be updated by a member of the team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         }
       },
       "isRLSEnabled": true
@@ -1219,12 +1138,8 @@
           "tableFrom": "bank_accounts",
           "tableTo": "bank_connections",
           "schemaTo": "public",
-          "columnsFrom": [
-            "bank_connection_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["bank_connection_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1233,12 +1148,8 @@
           "tableFrom": "bank_accounts",
           "tableTo": "users",
           "schemaTo": "public",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1247,12 +1158,8 @@
           "tableFrom": "bank_accounts",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1265,34 +1172,26 @@
           "name": "Bank Accounts can be created by a member of the team",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "withCheck": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         },
         "Bank Accounts can be deleted by a member of the team": {
           "name": "Bank Accounts can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Bank Accounts can be selected by a member of the team": {
           "name": "Bank Accounts can be selected by a member of the team",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Bank Accounts can be updated by a member of the team": {
           "name": "Bank Accounts can be updated by a member of the team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         }
       },
       "isRLSEnabled": true
@@ -1608,12 +1507,8 @@
           "tableFrom": "invoices",
           "tableTo": "users",
           "schemaTo": "public",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1622,12 +1517,8 @@
           "tableFrom": "invoices",
           "tableTo": "customers",
           "schemaTo": "public",
-          "columnsFrom": [
-            "customer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["customer_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -1636,12 +1527,8 @@
           "tableFrom": "invoices",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1649,9 +1536,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "invoices_scheduled_job_id_key": {
-          "columns": [
-            "scheduled_job_id"
-          ],
+          "columns": ["scheduled_job_id"],
           "nullsNotDistinct": false,
           "name": "invoices_scheduled_job_id_key"
         }
@@ -1662,9 +1547,7 @@
           "name": "Invoices can be handled by a member of the team",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         }
       },
@@ -1821,12 +1704,8 @@
           "tableFrom": "customers",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1839,9 +1718,7 @@
           "name": "Customers can be handled by members of the team",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         }
       },
@@ -1912,10 +1789,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "unique_rate": {
-          "columns": [
-            "base",
-            "target"
-          ],
+          "columns": ["base", "target"],
           "nullsNotDistinct": false,
           "name": "unique_rate"
         }
@@ -1926,9 +1800,7 @@
           "name": "Enable read access for authenticated users",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "true"
         }
       },
@@ -1989,12 +1861,8 @@
           "tableFrom": "tags",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2002,10 +1870,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "unique_tag_name": {
-          "columns": [
-            "team_id",
-            "name"
-          ],
+          "columns": ["team_id", "name"],
           "nullsNotDistinct": false,
           "name": "unique_tag_name"
         }
@@ -2016,9 +1881,7 @@
           "name": "Tags can be handled by a member of the team",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         }
       },
@@ -2099,12 +1962,8 @@
           "tableFrom": "tracker_reports",
           "tableTo": "users",
           "schemaTo": "public",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2113,12 +1972,8 @@
           "tableFrom": "tracker_reports",
           "tableTo": "tracker_projects",
           "schemaTo": "public",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -2127,12 +1982,8 @@
           "tableFrom": "tracker_reports",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -2145,9 +1996,7 @@
           "name": "Reports can be handled by a member of the team",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         }
       },
@@ -2271,12 +2120,8 @@
           "tableFrom": "tracker_project_tags",
           "tableTo": "tags",
           "schemaTo": "public",
-          "columnsFrom": [
-            "tag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tag_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2285,12 +2130,8 @@
           "tableFrom": "tracker_project_tags",
           "tableTo": "tracker_projects",
           "schemaTo": "public",
-          "columnsFrom": [
-            "tracker_project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tracker_project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2299,12 +2140,8 @@
           "tableFrom": "tracker_project_tags",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2312,10 +2149,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "unique_project_tag": {
-          "columns": [
-            "tracker_project_id",
-            "tag_id"
-          ],
+          "columns": ["tracker_project_id", "tag_id"],
           "nullsNotDistinct": false,
           "name": "unique_project_tag"
         }
@@ -2326,9 +2160,7 @@
           "name": "Tags can be handled by a member of the team",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         }
       },
@@ -2432,12 +2264,8 @@
           "tableFrom": "reports",
           "tableTo": "users",
           "schemaTo": "public",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2446,12 +2274,8 @@
           "tableFrom": "reports",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2464,34 +2288,26 @@
           "name": "Reports can be created by a member of the team",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "withCheck": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         },
         "Reports can be deleted by a member of the team": {
           "name": "Reports can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Reports can be selected by a member of the team": {
           "name": "Reports can be selected by a member of the team",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Reports can be updated by member of team": {
           "name": "Reports can be updated by member of team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         }
       },
       "isRLSEnabled": true
@@ -2621,12 +2437,8 @@
           "tableFrom": "bank_connections",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2634,10 +2446,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "unique_bank_connections": {
-          "columns": [
-            "institution_id",
-            "team_id"
-          ],
+          "columns": ["institution_id", "team_id"],
           "nullsNotDistinct": false,
           "name": "unique_bank_connections"
         }
@@ -2648,34 +2457,26 @@
           "name": "Bank Connections can be created by a member of the team",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "withCheck": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         },
         "Bank Connections can be deleted by a member of the team": {
           "name": "Bank Connections can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Bank Connections can be selected by a member of the team": {
           "name": "Bank Connections can be selected by a member of the team",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Bank Connections can be updated by a member of the team": {
           "name": "Bank Connections can be updated by a member of the team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         }
       },
       "isRLSEnabled": true
@@ -2755,12 +2556,8 @@
           "tableFrom": "user_invites",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2769,12 +2566,8 @@
           "tableFrom": "user_invites",
           "tableTo": "users",
           "schemaTo": "public",
-          "columnsFrom": [
-            "invited_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["invited_by"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2782,17 +2575,12 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "unique_team_invite": {
-          "columns": [
-            "team_id",
-            "email"
-          ],
+          "columns": ["team_id", "email"],
           "nullsNotDistinct": false,
           "name": "unique_team_invite"
         },
         "user_invites_code_key": {
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "nullsNotDistinct": false,
           "name": "user_invites_code_key"
         }
@@ -2803,50 +2591,38 @@
           "name": "Enable select for users based on email",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "((auth.jwt() ->> 'email'::text) = email)"
         },
         "User Invites can be created by a member of the team": {
           "name": "User Invites can be created by a member of the team",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "User Invites can be deleted by a member of the team": {
           "name": "User Invites can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "User Invites can be deleted by invited email": {
           "name": "User Invites can be deleted by invited email",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "User Invites can be selected by a member of the team": {
           "name": "User Invites can be selected by a member of the team",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "User Invites can be updated by a member of the team": {
           "name": "User Invites can be updated by a member of the team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         }
       },
       "isRLSEnabled": true
@@ -2895,12 +2671,8 @@
           "tableFrom": "document_tags",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2908,10 +2680,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "unique_slug_per_team": {
-          "columns": [
-            "slug",
-            "team_id"
-          ],
+          "columns": ["slug", "team_id"],
           "nullsNotDistinct": false,
           "name": "unique_slug_per_team"
         }
@@ -2922,9 +2691,7 @@
           "name": "Tags can be handled by a member of the team",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         }
       },
@@ -3037,12 +2804,8 @@
           "tableFrom": "transaction_tags",
           "tableTo": "tags",
           "schemaTo": "public",
-          "columnsFrom": [
-            "tag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tag_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3051,12 +2814,8 @@
           "tableFrom": "transaction_tags",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3065,12 +2824,8 @@
           "tableFrom": "transaction_tags",
           "tableTo": "transactions",
           "schemaTo": "public",
-          "columnsFrom": [
-            "transaction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["transaction_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3078,10 +2833,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "unique_tag": {
-          "columns": [
-            "tag_id",
-            "transaction_id"
-          ],
+          "columns": ["tag_id", "transaction_id"],
           "nullsNotDistinct": false,
           "name": "unique_tag"
         }
@@ -3092,9 +2844,7 @@
           "name": "Transaction Tags can be handled by a member of the team",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         }
       },
@@ -3195,12 +2945,8 @@
           "tableFrom": "transaction_attachments",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3209,12 +2955,8 @@
           "tableFrom": "transaction_attachments",
           "tableTo": "transactions",
           "schemaTo": "public",
-          "columnsFrom": [
-            "transaction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["transaction_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -3227,34 +2969,26 @@
           "name": "Transaction Attachments can be created by a member of the team",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "withCheck": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         },
         "Transaction Attachments can be deleted by a member of the team": {
           "name": "Transaction Attachments can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Transaction Attachments can be selected by a member of the team": {
           "name": "Transaction Attachments can be selected by a member of the team",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Transaction Attachments can be updated by a member of the team": {
           "name": "Transaction Attachments can be updated by a member of the team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         }
       },
       "isRLSEnabled": true
@@ -3354,9 +3088,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "teams_inbox_id_key": {
-          "columns": [
-            "inbox_id"
-          ],
+          "columns": ["inbox_id"],
           "nullsNotDistinct": false,
           "name": "teams_inbox_id_key"
         }
@@ -3367,42 +3099,32 @@
           "name": "Enable insert for authenticated users only",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "withCheck": "true"
         },
         "Invited users can select team if they are invited.": {
           "name": "Invited users can select team if they are invited.",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Teams can be deleted by a member of the team": {
           "name": "Teams can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Teams can be selected by a member of the team": {
           "name": "Teams can be selected by a member of the team",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Teams can be updated by a member of the team": {
           "name": "Teams can be updated by a member of the team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         }
       },
       "isRLSEnabled": true
@@ -3673,12 +3395,8 @@
           "tableFrom": "documents",
           "tableTo": "users",
           "schemaTo": "public",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -3687,12 +3405,8 @@
           "tableFrom": "documents",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3705,34 +3419,26 @@
           "name": "Documents can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         },
         "Documents can be selected by a member of the team": {
           "name": "Documents can be selected by a member of the team",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Documents can be updated by a member of the team": {
           "name": "Documents can be updated by a member of the team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Enable insert for authenticated users only": {
           "name": "Enable insert for authenticated users only",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "authenticated"
-          ]
+          "to": ["authenticated"]
         }
       },
       "isRLSEnabled": true
@@ -3795,12 +3501,8 @@
           "tableFrom": "apps",
           "tableTo": "users",
           "schemaTo": "public",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3809,12 +3511,8 @@
           "tableFrom": "apps",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3822,10 +3520,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "unique_app_id_team_id": {
-          "columns": [
-            "team_id",
-            "app_id"
-          ],
+          "columns": ["team_id", "app_id"],
           "nullsNotDistinct": false,
           "name": "unique_app_id_team_id"
         }
@@ -3836,34 +3531,26 @@
           "name": "Apps can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         },
         "Apps can be inserted by a member of the team": {
           "name": "Apps can be inserted by a member of the team",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Apps can be selected by a member of the team": {
           "name": "Apps can be selected by a member of the team",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Apps can be updated by a member of the team": {
           "name": "Apps can be updated by a member of the team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         }
       },
       "isRLSEnabled": true
@@ -4102,12 +3789,8 @@
           "tableFrom": "invoice_templates",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4115,9 +3798,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "invoice_templates_team_id_key": {
-          "columns": [
-            "team_id"
-          ],
+          "columns": ["team_id"],
           "nullsNotDistinct": false,
           "name": "invoice_templates_team_id_key"
         }
@@ -4128,9 +3809,7 @@
           "name": "Invoice templates can be handled by a member of the team",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         }
       },
@@ -4211,14 +3890,8 @@
           "tableFrom": "transaction_enrichments",
           "tableTo": "transaction_categories",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id",
-            "category_slug"
-          ],
-          "columnsTo": [
-            "team_id",
-            "slug"
-          ],
+          "columnsFrom": ["team_id", "category_slug"],
+          "columnsTo": ["team_id", "slug"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4227,12 +3900,8 @@
           "tableFrom": "transaction_enrichments",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4240,10 +3909,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "unique_team_name": {
-          "columns": [
-            "name",
-            "team_id"
-          ],
+          "columns": ["name", "team_id"],
           "nullsNotDistinct": false,
           "name": "unique_team_name"
         }
@@ -4254,18 +3920,14 @@
           "name": "Enable insert for authenticated users only",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "withCheck": "true"
         },
         "Enable update for authenticated users only": {
           "name": "Enable update for authenticated users only",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "authenticated"
-          ]
+          "to": ["authenticated"]
         }
       },
       "isRLSEnabled": true
@@ -4369,12 +4031,8 @@
           "tableFrom": "users",
           "tableTo": "users",
           "schemaTo": "auth",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4383,12 +4041,8 @@
           "tableFrom": "users",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -4401,34 +4055,26 @@
           "name": "Users can insert their own profile.",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "withCheck": "(auth.uid() = id)"
         },
         "Users can select their own profile.": {
           "name": "Users can select their own profile.",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Users can select users if they are in the same team": {
           "name": "Users can select users if they are in the same team",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "authenticated"
-          ]
+          "to": ["authenticated"]
         },
         "Users can update own profile.": {
           "name": "Users can update own profile.",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         }
       },
       "isRLSEnabled": true
@@ -4559,12 +4205,8 @@
           "tableFrom": "tracker_projects",
           "tableTo": "customers",
           "schemaTo": "public",
-          "columnsFrom": [
-            "customer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["customer_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4573,12 +4215,8 @@
           "tableFrom": "tracker_projects",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4591,34 +4229,26 @@
           "name": "Projects can be created by a member of the team",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "withCheck": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         },
         "Projects can be deleted by a member of the team": {
           "name": "Projects can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "authenticated"
-          ]
+          "to": ["authenticated"]
         },
         "Projects can be selected by a member of the team": {
           "name": "Projects can be selected by a member of the team",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "authenticated"
-          ]
+          "to": ["authenticated"]
         },
         "Projects can be updated by a member of the team": {
           "name": "Projects can be updated by a member of the team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "authenticated"
-          ]
+          "to": ["authenticated"]
         }
       },
       "isRLSEnabled": true
@@ -4865,12 +4495,8 @@
           "tableFrom": "inbox",
           "tableTo": "transaction_attachments",
           "schemaTo": "public",
-          "columnsFrom": [
-            "attachment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["attachment_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -4879,12 +4505,8 @@
           "tableFrom": "inbox",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4893,12 +4515,8 @@
           "tableFrom": "inbox",
           "tableTo": "transactions",
           "schemaTo": "public",
-          "columnsFrom": [
-            "transaction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["transaction_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -4906,9 +4524,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "inbox_reference_id_key": {
-          "columns": [
-            "reference_id"
-          ],
+          "columns": ["reference_id"],
           "nullsNotDistinct": false,
           "name": "inbox_reference_id_key"
         }
@@ -4919,26 +4535,20 @@
           "name": "Inbox can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         },
         "Inbox can be selected by a member of the team": {
           "name": "Inbox can be selected by a member of the team",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         },
         "Inbox can be updated by a member of the team": {
           "name": "Inbox can be updated by a member of the team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         }
       },
       "isRLSEnabled": true
@@ -5006,12 +4616,8 @@
           "tableFrom": "document_tag_assignments",
           "tableTo": "documents",
           "schemaTo": "public",
-          "columnsFrom": [
-            "document_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["document_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5020,12 +4626,8 @@
           "tableFrom": "document_tag_assignments",
           "tableTo": "document_tags",
           "schemaTo": "public",
-          "columnsFrom": [
-            "tag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tag_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5034,12 +4636,8 @@
           "tableFrom": "document_tag_assignments",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5047,18 +4645,12 @@
       "compositePrimaryKeys": {
         "document_tag_assignments_pkey": {
           "name": "document_tag_assignments_pkey",
-          "columns": [
-            "document_id",
-            "tag_id"
-          ]
+          "columns": ["document_id", "tag_id"]
         }
       },
       "uniqueConstraints": {
         "document_tag_assignments_unique": {
-          "columns": [
-            "document_id",
-            "tag_id"
-          ],
+          "columns": ["document_id", "tag_id"],
           "nullsNotDistinct": false,
           "name": "document_tag_assignments_unique"
         }
@@ -5069,9 +4661,7 @@
           "name": "Tags can be handled by a member of the team",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         }
       },
@@ -5155,12 +4745,8 @@
           "tableFrom": "users_on_team",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -5169,12 +4755,8 @@
           "tableFrom": "users_on_team",
           "tableTo": "users",
           "schemaTo": "public",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5182,11 +4764,7 @@
       "compositePrimaryKeys": {
         "members_pkey": {
           "name": "members_pkey",
-          "columns": [
-            "user_id",
-            "team_id",
-            "id"
-          ]
+          "columns": ["user_id", "team_id", "id"]
         }
       },
       "uniqueConstraints": {},
@@ -5196,34 +4774,26 @@
           "name": "Enable insert for authenticated users only",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "withCheck": "true"
         },
         "Enable updates for users on team": {
           "name": "Enable updates for users on team",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "authenticated"
-          ]
+          "to": ["authenticated"]
         },
         "Select for current user teams": {
           "name": "Select for current user teams",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "authenticated"
-          ]
+          "to": ["authenticated"]
         },
         "Users on team can be deleted by a member of the team": {
           "name": "Users on team can be deleted by a member of the team",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "public"
-          ]
+          "to": ["public"]
         }
       },
       "isRLSEnabled": true
@@ -5321,12 +4891,8 @@
           "tableFrom": "transaction_categories",
           "tableTo": "teams",
           "schemaTo": "public",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5334,18 +4900,12 @@
       "compositePrimaryKeys": {
         "transaction_categories_pkey": {
           "name": "transaction_categories_pkey",
-          "columns": [
-            "team_id",
-            "slug"
-          ]
+          "columns": ["team_id", "slug"]
         }
       },
       "uniqueConstraints": {
         "unique_team_slug": {
-          "columns": [
-            "team_id",
-            "slug"
-          ],
+          "columns": ["team_id", "slug"],
           "nullsNotDistinct": false,
           "name": "unique_team_slug"
         }
@@ -5356,9 +4916,7 @@
           "name": "Users on team can manage categories",
           "as": "PERMISSIVE",
           "for": "ALL",
-          "to": [
-            "public"
-          ],
+          "to": ["public"],
           "using": "(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))"
         }
       },
@@ -5379,132 +4937,72 @@
     },
     "public.bankProviders": {
       "name": "bankProviders",
-      "values": [
-        "gocardless",
-        "plaid",
-        "teller"
-      ],
+      "values": ["gocardless", "plaid", "teller"],
       "schema": "public"
     },
     "public.bank_providers": {
       "name": "bank_providers",
-      "values": [
-        "gocardless",
-        "plaid",
-        "teller",
-        "enablebanking",
-        "pluggy"
-      ],
+      "values": ["gocardless", "plaid", "teller", "enablebanking", "pluggy"],
       "schema": "public"
     },
     "public.connection_status": {
       "name": "connection_status",
-      "values": [
-        "disconnected",
-        "connected",
-        "unknown"
-      ],
+      "values": ["disconnected", "connected", "unknown"],
       "schema": "public"
     },
     "public.document_processing_status": {
       "name": "document_processing_status",
-      "values": [
-        "pending",
-        "processing",
-        "completed",
-        "failed"
-      ],
+      "values": ["pending", "processing", "completed", "failed"],
       "schema": "public"
     },
     "public.inbox_account_providers": {
       "name": "inbox_account_providers",
-      "values": [
-        "gmail",
-        "outlook"
-      ],
+      "values": ["gmail", "outlook"],
       "schema": "public"
     },
     "public.inbox_status": {
       "name": "inbox_status",
-      "values": [
-        "processing",
-        "pending",
-        "archived",
-        "new",
-        "deleted",
-        "done"
-      ],
+      "values": ["processing", "pending", "archived", "new", "deleted", "done"],
       "schema": "public"
     },
     "public.inbox_type": {
       "name": "inbox_type",
-      "values": [
-        "invoice",
-        "expense"
-      ],
+      "values": ["invoice", "expense"],
       "schema": "public"
     },
     "public.invoice_delivery_type": {
       "name": "invoice_delivery_type",
-      "values": [
-        "create",
-        "create_and_send",
-        "scheduled"
-      ],
+      "values": ["create", "create_and_send", "scheduled"],
       "schema": "public"
     },
     "public.invoice_size": {
       "name": "invoice_size",
-      "values": [
-        "a4",
-        "letter"
-      ],
+      "values": ["a4", "letter"],
       "schema": "public"
     },
     "public.invoice_status": {
       "name": "invoice_status",
-      "values": [
-        "draft",
-        "overdue",
-        "paid",
-        "unpaid",
-        "canceled"
-      ],
+      "values": ["draft", "overdue", "paid", "unpaid", "canceled"],
       "schema": "public"
     },
     "public.plans": {
       "name": "plans",
-      "values": [
-        "trial",
-        "starter",
-        "pro"
-      ],
+      "values": ["trial", "starter", "pro"],
       "schema": "public"
     },
     "public.reportTypes": {
       "name": "reportTypes",
-      "values": [
-        "profit",
-        "revenue",
-        "burn_rate",
-        "expense"
-      ],
+      "values": ["profit", "revenue", "burn_rate", "expense"],
       "schema": "public"
     },
     "public.teamRoles": {
       "name": "teamRoles",
-      "values": [
-        "owner",
-        "member"
-      ],
+      "values": ["owner", "member"],
       "schema": "public"
     },
     "public.trackerStatus": {
       "name": "trackerStatus",
-      "values": [
-        "in_progress",
-        "completed"
-      ],
+      "values": ["in_progress", "completed"],
       "schema": "public"
     },
     "public.transactionCategories": {
@@ -5548,13 +5046,7 @@
     },
     "public.transactionStatus": {
       "name": "transactionStatus",
-      "values": [
-        "posted",
-        "pending",
-        "excluded",
-        "completed",
-        "archived"
-      ],
+      "values": ["posted", "pending", "excluded", "completed", "archived"],
       "schema": "public"
     },
     "public.transaction_frequency": {
