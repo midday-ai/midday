@@ -3,7 +3,7 @@ import { getAllowedAttachments } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
-import type { processAttachment } from "@midday/jobs/tasks/inbox/process-attachment";
+import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/server";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { nanoid } from "nanoid";
@@ -139,7 +139,7 @@ export async function POST(req: Request) {
 
     const insertData = await Promise.all(uploadedAttachments ?? []);
 
-    await tasks.batchTrigger<typeof processAttachment>(
+    await tasks.batchTrigger(
       "process-attachment",
       insertData.map((item) => ({
         payload: {
@@ -147,7 +147,7 @@ export async function POST(req: Request) {
           mimetype: item.content_type!,
           size: item.size!,
           teamId: teamId!,
-        },
+        } satisfies ProcessAttachmentPayload,
       })),
     );
   } catch (error) {

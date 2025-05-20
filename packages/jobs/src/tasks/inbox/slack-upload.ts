@@ -3,26 +3,14 @@ import {
   downloadFile,
 } from "@midday/app-store/slack-client";
 import { DocumentClient } from "@midday/documents";
+import { inboxSlackUploadSchema } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { format } from "date-fns";
-import { z } from "zod";
 
 export const inboxSlackUpload = schemaTask({
   id: "inbox-slack-upload",
-  schema: z.object({
-    teamId: z.string(),
-    token: z.string(),
-    channelId: z.string(),
-    threadId: z.string().optional(),
-    file: z.object({
-      id: z.string(),
-      name: z.string(),
-      mimetype: z.string(),
-      size: z.number(),
-      url: z.string(),
-    }),
-  }),
+  schema: inboxSlackUploadSchema,
   maxDuration: 60,
   queue: {
     concurrencyLimit: 10,

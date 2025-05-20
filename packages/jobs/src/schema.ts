@@ -87,3 +87,77 @@ export const updateBaseCurrencySchema = z.object({
 export type UpdateBaseCurrencyPayload = z.infer<
   typeof updateBaseCurrencySchema
 >;
+
+export const exportTransactionsSchema = z.object({
+  teamId: z.string().uuid(),
+  locale: z.string(),
+  dateFormat: z.string().nullable().optional(),
+  transactionIds: z.array(z.string().uuid()),
+});
+
+export type ExportTransactionsPayload = z.infer<
+  typeof exportTransactionsSchema
+>;
+
+export const importTransactionsSchema = z.object({
+  inverted: z.boolean(),
+  filePath: z.array(z.string()).optional(),
+  bankAccountId: z.string(),
+  currency: z.string(),
+  teamId: z.string(),
+  table: z.array(z.record(z.string(), z.string())).optional(),
+  mappings: z.object({
+    amount: z.string(),
+    date: z.string(),
+    description: z.string(),
+  }),
+});
+
+export type ImportTransactionsPayload = z.infer<
+  typeof importTransactionsSchema
+>;
+
+export const syncConnectionSchema = z.object({
+  connectionId: z.string().uuid(),
+  manualSync: z.boolean().optional(),
+});
+
+export type SyncConnectionPayload = z.infer<typeof syncConnectionSchema>;
+
+export const reconnectConnectionSchema = z.object({
+  teamId: z.string().uuid(),
+  connectionId: z.string().uuid(),
+  provider: z.string(),
+});
+
+export type ReconnectConnectionPayload = z.infer<
+  typeof reconnectConnectionSchema
+>;
+
+export const initialInboxSetupSchema = z.object({
+  id: z.string().uuid(), // This is the inbox_account row id
+});
+
+export type InitialInboxSetupPayload = z.infer<typeof initialInboxSetupSchema>;
+
+export const onboardTeamSchema = z.object({
+  userId: z.string().uuid(),
+});
+
+export type OnboardTeamPayload = z.infer<typeof onboardTeamSchema>;
+
+export const inboxSlackUploadSchema = z.object({
+  teamId: z.string(),
+  token: z.string(),
+  channelId: z.string(),
+  threadId: z.string().optional(),
+  file: z.object({
+    id: z.string(),
+    name: z.string(),
+    mimetype: z.string(),
+    size: z.number(),
+    url: z.string(),
+  }),
+});
+
+export type InboxSlackUploadPayload = z.infer<typeof inboxSlackUploadSchema>;

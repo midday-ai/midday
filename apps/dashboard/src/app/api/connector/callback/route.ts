@@ -1,6 +1,6 @@
 import { getTeamId } from "@/utils/team";
 import { InboxConnector } from "@midday/inbox/connector";
-import type { initialInboxSetup } from "@midday/jobs/tasks/inbox/provider/initial-setup";
+import type { InitialInboxSetupPayload } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { NextResponse } from "next/server";
 
@@ -28,9 +28,9 @@ export async function GET(request: Request) {
       );
     }
 
-    await tasks.trigger<typeof initialInboxSetup>("initial-inbox-setup", {
+    await tasks.trigger("initial-inbox-setup", {
       id: account.id,
-    });
+    } satisfies InitialInboxSetupPayload);
 
     return NextResponse.redirect(
       new URL(`/inbox?connected=true&provider=${state}`, request.url),

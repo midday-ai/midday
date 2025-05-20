@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import type { exportTransactions } from "@midday/jobs/tasks/transactions/export";
+import type { ExportTransactionsPayload } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 import { authActionClient } from "./safe-action";
@@ -30,15 +30,12 @@ export const exportTransactionsAction = authActionClient
         throw new Error("Team not found");
       }
 
-      const event = await tasks.trigger<typeof exportTransactions>(
-        "export-transactions",
-        {
-          teamId,
-          locale,
-          transactionIds,
-          dateFormat,
-        },
-      );
+      const event = await tasks.trigger("export-transactions", {
+        teamId,
+        locale,
+        transactionIds,
+        dateFormat,
+      } satisfies ExportTransactionsPayload);
 
       return event;
     },

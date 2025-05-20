@@ -1,3 +1,4 @@
+import { onboardTeamSchema } from "@jobs/schema";
 import { shouldSendEmail } from "@jobs/utils/check-team-plan";
 import { resend } from "@jobs/utils/resend";
 import { GetStartedEmail } from "@midday/email/emails/get-started";
@@ -7,13 +8,10 @@ import { WelcomeEmail } from "@midday/email/emails/welcome";
 import { render } from "@midday/email/render";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask, wait } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 
 export const onboardTeam = schemaTask({
   id: "onboard-team",
-  schema: z.object({
-    userId: z.string().uuid(),
-  }),
+  schema: onboardTeamSchema,
   maxDuration: 300,
   run: async ({ userId }) => {
     const supabase = createClient();

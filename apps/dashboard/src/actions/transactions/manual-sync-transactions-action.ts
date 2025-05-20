@@ -2,7 +2,7 @@
 
 import { authActionClient } from "@/actions/safe-action";
 import { LogEvents } from "@midday/events/events";
-import type { syncConnection } from "@midday/jobs/tasks/bank/sync/connection";
+import type { SyncConnectionPayload } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 
@@ -20,13 +20,10 @@ export const manualSyncTransactionsAction = authActionClient
     },
   })
   .action(async ({ parsedInput: { connectionId } }) => {
-    const event = await tasks.trigger<typeof syncConnection>(
-      "sync-connection",
-      {
-        connectionId,
-        manualSync: true,
-      },
-    );
+    const event = await tasks.trigger("sync-connection", {
+      connectionId,
+      manualSync: true,
+    } satisfies SyncConnectionPayload);
 
     return event;
   });

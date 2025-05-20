@@ -2,7 +2,7 @@
 
 import { authActionClient } from "@/actions/safe-action";
 import { LogEvents } from "@midday/events/events";
-import type { reconnectConnection } from "@midday/jobs/tasks/reconnect/connection";
+import type { ReconnectConnectionPayload } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 
@@ -22,14 +22,11 @@ export const reconnectConnectionAction = authActionClient
   })
   .action(
     async ({ parsedInput: { connectionId, provider }, ctx: { teamId } }) => {
-      const event = await tasks.trigger<typeof reconnectConnection>(
-        "reconnect-connection",
-        {
-          teamId: teamId!,
-          connectionId,
-          provider,
-        },
-      );
+      const event = await tasks.trigger("reconnect-connection", {
+        teamId: teamId!,
+        connectionId,
+        provider,
+      } satisfies ReconnectConnectionPayload);
 
       return event;
     },
