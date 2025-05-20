@@ -8,9 +8,15 @@ import { useDebounceValue } from "usehooks-ts";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 
+type Attachment = {
+  id: string;
+  name: string;
+  data: unknown;
+};
+
 type Props = {
   placeholder: string;
-  onSelect: (file: any) => void;
+  onSelect: (file: Attachment) => void;
 };
 
 export function SelectAttachment({ placeholder, onSelect }: Props) {
@@ -28,7 +34,7 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
     enabled: Boolean(debouncedValue),
   });
 
-  const handleOnSelect = (item: any) => {
+  const handleOnSelect = (item: Attachment) => {
     onSelect(item);
   };
 
