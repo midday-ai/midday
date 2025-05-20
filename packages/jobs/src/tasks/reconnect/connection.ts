@@ -1,8 +1,8 @@
+import { reconnectConnectionSchema } from "@jobs/schema";
 import { syncConnection } from "@jobs/tasks/bank/sync/connection";
 import { client } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 
 export const reconnectConnection = schemaTask({
   id: "reconnect-connection",
@@ -10,11 +10,7 @@ export const reconnectConnection = schemaTask({
   retry: {
     maxAttempts: 2,
   },
-  schema: z.object({
-    teamId: z.string().uuid(),
-    connectionId: z.string().uuid(),
-    provider: z.string(),
-  }),
+  schema: reconnectConnectionSchema,
   run: async ({ teamId, connectionId, provider }) => {
     const supabase = createClient();
 

@@ -1,8 +1,8 @@
+import { syncConnectionSchema } from "@jobs/schema";
 import { triggerSequenceAndWait } from "@jobs/utils/trigger-sequence";
 import { client } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 import { transactionNotifications } from "../notifications/transactions";
 import { syncAccount } from "./account";
 
@@ -13,10 +13,7 @@ export const syncConnection = schemaTask({
   retry: {
     maxAttempts: 2,
   },
-  schema: z.object({
-    connectionId: z.string().uuid(),
-    manualSync: z.boolean().optional(),
-  }),
+  schema: syncConnectionSchema,
   run: async ({ connectionId, manualSync }, { ctx }) => {
     const supabase = createClient();
 

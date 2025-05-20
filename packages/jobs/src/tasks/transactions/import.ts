@@ -1,3 +1,4 @@
+import { importTransactionsSchema } from "@jobs/schema";
 import { processBatch } from "@jobs/utils/process-batch";
 import { mapTransactions } from "@midday/import/mappings";
 import { transform } from "@midday/import/transform";
@@ -5,25 +6,12 @@ import { validateTransactions } from "@midday/import/validate";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import Papa from "papaparse";
-import { z } from "zod";
 
 const BATCH_SIZE = 500;
 
 export const importTransactions = schemaTask({
   id: "import-transactions",
-  schema: z.object({
-    inverted: z.boolean(),
-    filePath: z.array(z.string()).optional(),
-    bankAccountId: z.string(),
-    currency: z.string(),
-    teamId: z.string(),
-    table: z.array(z.record(z.string(), z.string())).optional(),
-    mappings: z.object({
-      amount: z.string(),
-      date: z.string(),
-      description: z.string(),
-    }),
-  }),
+  schema: importTransactionsSchema,
   maxDuration: 120,
   queue: {
     concurrencyLimit: 10,

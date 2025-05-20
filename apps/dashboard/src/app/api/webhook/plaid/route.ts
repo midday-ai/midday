@@ -1,5 +1,5 @@
 import { logger } from "@/utils/logger";
-import type { syncConnection } from "@midday/jobs/tasks/bank/sync/connection";
+import type { SyncConnectionPayload } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/server";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { isAfter, subDays } from "date-fns";
@@ -96,10 +96,10 @@ export async function POST(req: NextRequest) {
           manualSync,
         });
 
-        await tasks.trigger<typeof syncConnection>("sync-connection", {
+        await tasks.trigger("sync-connection", {
           connectionId: connectionData.id,
           manualSync,
-        });
+        } satisfies SyncConnectionPayload);
 
         break;
       }

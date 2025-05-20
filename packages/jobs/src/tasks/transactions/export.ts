@@ -1,4 +1,5 @@
 import { writeToString } from "@fast-csv/format";
+import { exportTransactionsSchema } from "@jobs/schema";
 import { serializableToBlob } from "@jobs/utils/blob";
 import { createClient } from "@midday/supabase/job";
 import { metadata, schemaTask } from "@trigger.dev/sdk/v3";
@@ -11,7 +12,6 @@ import {
 } from "@zip.js/zip.js";
 import { format } from "date-fns";
 import xlsx from "node-xlsx";
-import { z } from "zod";
 import { processExport } from "./process-export";
 
 const columns = [
@@ -38,12 +38,7 @@ const BATCH_SIZE = 100;
 
 export const exportTransactions = schemaTask({
   id: "export-transactions",
-  schema: z.object({
-    teamId: z.string().uuid(),
-    locale: z.string(),
-    dateFormat: z.string().nullable().optional(),
-    transactionIds: z.array(z.string().uuid()),
-  }),
+  schema: exportTransactionsSchema,
   maxDuration: 300,
   queue: {
     concurrencyLimit: 10,
