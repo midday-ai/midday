@@ -97,14 +97,16 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
               name: document.name,
               logo: document.logo ?? null,
               popularity: document.popularity,
-              available_history: document.available_history
-                ? +document.available_history
-                : null,
-              maximum_consent_validity: document.maximum_consent_validity
-                ? +document.maximum_consent_validity
-                : null,
+              available_history:
+                typeof document.available_history === "number"
+                  ? document.available_history
+                  : null,
+              maximum_consent_validity:
+                typeof document.maximum_consent_validity === "string"
+                  ? document.maximum_consent_validity
+                  : null,
               provider: document.provider,
-              type: document.type,
+              type: document.type ?? null,
             })),
           },
           200,
@@ -168,8 +170,20 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
         return c.json(
           {
             data: {
-              ...data,
-              country: data.countries.at(0),
+              id: data.id,
+              name: data.name,
+              logo: data.logo ?? null,
+              available_history:
+                typeof data.available_history === "number"
+                  ? data.available_history
+                  : null,
+              maximum_consent_validity:
+                typeof data.maximum_consent_validity === "string"
+                  ? data.maximum_consent_validity
+                  : null,
+              popularity: data.popularity,
+              provider: data.provider,
+              type: data.type ?? null,
             },
           },
           200,
@@ -233,11 +247,18 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
             name: result.name,
             provider: result.provider,
             id: result.id,
-            logo: result.logo,
-            available_history: result.available_history,
-            maximum_consent_validity: result.maximum_consent_validity,
-            country: result.countries.at(0),
-            type: result.type,
+            logo: result.logo ?? null,
+            available_history: result.available_history ?? null,
+            maximum_consent_validity:
+              typeof result.maximum_consent_validity === "string" ||
+              result.maximum_consent_validity == null
+                ? result.maximum_consent_validity
+                : (result.maximum_consent_validity?.toString() ?? null),
+            country: Array.isArray(result.countries)
+              ? result.countries.at(0)
+              : undefined,
+            type: result.type ?? null,
+            popularity: result.popularity,
           },
           200,
         );

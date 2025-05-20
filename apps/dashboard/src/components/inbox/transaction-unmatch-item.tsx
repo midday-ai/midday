@@ -76,7 +76,7 @@ export function TransactionUnmatchItem() {
   }
 
   return (
-    <div className="bg-background h-12 flex py-3 text-sm w-full px-4 gap-4 items-center overflow-hidden">
+    <div className="bg-background h-12 flex py-3 text-sm w-full px-4 gap-4 items-center overflow-hidden border border-border dark:border-none">
       <Icons.Check className="w-4 h-4" />
 
       <TransactionMatchItem

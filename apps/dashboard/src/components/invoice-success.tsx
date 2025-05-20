@@ -14,14 +14,6 @@ import { FormatAmount } from "./format-amount";
 import { InvoiceSheetHeader } from "./invoice-sheet-header";
 import { OpenURL } from "./open-url";
 
-function CustomerDetails({ content }: { content: JSON }) {
-  return (
-    <div className="font-mono text-[#878787]">
-      {formatEditorContent(content)}
-    </div>
-  );
-}
-
 export function InvoiceSuccess() {
   const trpc = useTRPC();
   const { invoiceId, setParams } = useInvoiceParams();
@@ -94,7 +86,9 @@ export function InvoiceSuccess() {
             <span className="text-[11px] font-mono">
               {invoice.template.customerLabel}
             </span>
-            <CustomerDetails content={invoice.customerDetails} />
+            <div className="font-mono text-[#878787]">
+              {formatEditorContent(invoice.customerDetails)}
+            </div>
           </motion.div>
 
           <motion.div

@@ -207,6 +207,7 @@ export function App({
                   <AccordionContent className="text-[#878787] text-sm">
                     <AppSettings
                       appId={id}
+                      // @ts-expect-error
                       settings={[
                         ...Object.values({
                           ...Object.fromEntries(

@@ -140,6 +140,11 @@ export function TrackerSearchFilter() {
     (value) => value !== null,
   );
 
+  const members = membersData.map((member) => ({
+    id: member.user!.id as string,
+    name: member.user!.fullName as string,
+  }));
+
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex space-x-4 items-center">
@@ -147,7 +152,7 @@ export function TrackerSearchFilter() {
           filters={validFilters}
           loading={streaming}
           onRemove={setFilter}
-          members={membersData}
+          members={members}
           customers={customersData?.data}
           statusFilters={statusFilters}
           tags={tagsData}
