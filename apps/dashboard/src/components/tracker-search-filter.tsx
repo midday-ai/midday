@@ -140,7 +140,7 @@ export function TrackerSearchFilter() {
     (value) => value !== null,
   );
 
-  const members = membersData.map((member) => ({
+  const members = membersData?.map((member) => ({
     id: member.user!.id as string,
     name: member.user!.fullName as string,
   }));
@@ -217,10 +217,16 @@ export function TrackerSearchFilter() {
                   mode="range"
                   initialFocus
                   toDate={new Date()}
-                  selected={{
-                    from: filter.start && new Date(filter.start),
-                    to: filter.end && new Date(filter.end),
-                  }}
+                  selected={
+                    filter.start || filter.end
+                      ? {
+                          from: filter.start
+                            ? new Date(filter.start)
+                            : undefined,
+                          to: filter.end ? new Date(filter.end) : undefined,
+                        }
+                      : undefined
+                  }
                   onSelect={(range) => {
                     if (!range) return;
 
