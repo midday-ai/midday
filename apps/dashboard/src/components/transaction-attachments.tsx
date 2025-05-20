@@ -214,7 +214,7 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
           <AttachmentItem
             key={`${file.name}-${idx}`}
             file={file}
-            onDelete={() => handleOnDelete(file?.id)}
+            onDelete={() => handleOnDelete(file?.id!)}
           />
         ))}
       </ul>
