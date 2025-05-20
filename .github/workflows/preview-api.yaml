@@ -27,6 +27,12 @@ jobs:
         run: bun install
       - name: 🏗 Build @midday/engine
         run: bunx turbo run build --filter=@midday/engine...
+      - name: 🔦 Run linter
+        run: bun run lint --filter=@midday/api
+      - name: 🪐 Check TypeScript
+        run: bun run typecheck --filter=@midday/api
+      - name: 🧪 Run unit tests
+        run: bun run test
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --remote-only --dockerfile apps/api/Dockerfile --config apps/api/fly-preview.yml
         env:
