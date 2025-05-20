@@ -1,22 +1,15 @@
-app = 'midday-api'
-primary_region = 'fra'
+app = "midday-api"
+primary_region = "fra"
 
 [http_service]
-  internal_port = 3000
-  force_https = true
-  auto_stop_machines = false
-  auto_start_machines = true
-  min_machines_running = 3
-  processes = ['app']
-
-  [http_service.healthcheck]
-    path = "/health"
-    interval = "15s"
-    timeout = "5s"
-    grace_period = "10s"
-    method = "get"
+auto_start_machines = true
+auto_stop_machines = false
+force_https = true
+internal_port = 3_000
+min_machines_running = 3
+processes = [ "app" ]
 
 [[vm]]
-  memory = '4gb'
-  cpu_kind = 'shared'
-  cpus = 8
+cpu_kind = "shared"
+cpus = 8
+memory = "4gb"
