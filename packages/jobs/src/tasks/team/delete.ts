@@ -1,5 +1,5 @@
 import { deleteTeamSchema } from "@jobs/schema";
-import { client } from "@midday/engine/client";
+import { client } from "@midday/engine-client";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 
 export const deleteTeam = schemaTask({
