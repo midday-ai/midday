@@ -13,9 +13,6 @@ COPY . .
 # Use turbo CLI from Bun global install to prune workspaces
 RUN turbo prune @midday/api --docker
 
-# Build @midday/engine for the client types
-RUN turbo run build --filter=@midday/engine...
-
 # Installer stage
 FROM base AS installer
 WORKDIR /app
@@ -28,8 +25,8 @@ RUN bun install
 # Copy the full source code
 COPY --from=builder /app/out/full/ .
 
-# Copy the built engine dist if it exists
-COPY --from=builder /app/apps/engine/dist /app/apps/engine/dist
+# Copy the prebuilt engine dist from the build context (assumes CI built it)
+COPY apps/engine/dist /app/apps/engine/dist
 
 # Runner stage (same as installer to avoid another copy)
 FROM installer AS runner

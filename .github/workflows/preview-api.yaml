@@ -20,6 +20,13 @@ jobs:
     concurrency: deploy-group
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install
+      - name: 🏗 Build @midday/engine
+        run: turbo run build --filter=@midday/engine...
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --remote-only --dockerfile apps/api/Dockerfile --config apps/api/fly-preview.yml
         env:

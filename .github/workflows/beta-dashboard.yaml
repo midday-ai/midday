@@ -21,6 +21,8 @@ jobs:
           bun-version: latest
       - name: Install dependencies
         run: bun install
+      - name: 🏗 Build @midday/engine
+        run: turbo run build --filter=@midday/engine...
       # - name: 🔦 Run linter
       #   run: bun run lint --filter=@midday/dashboard
       # - name: 🪐 Check TypeScript
