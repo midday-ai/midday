@@ -1,42 +1,34 @@
-import type { Database } from "@api/db";
+import type { Database, DatabaseWithPrimary } from "@api/db";
+import type { Session } from "@api/utils/auth";
 import { logger } from "@api/utils/logger";
+import { LRUCache } from "lru-cache";
 
 // In-memory map to track teams who recently performed mutations.
 // Note: This map is per server instance, and we typically run 1 instance per region.
 // Otherwise, we would need to share this state with Redis or a similar external store.
 // Key: teamId, Value: timestamp when they should be able to use replicas again
-const teamMutationMap = new Map<string, number>();
+const cache = new LRUCache<string, number>({
+  max: 5_000, // up to 5k entries
+  ttl: 10000, // 10 seconds in milliseconds
+});
 
 // The window time in milliseconds to handle replication lag (10 seconds)
 const REPLICATION_LAG_WINDOW = 10000;
-
-// Define a type that includes the optional $primary property
-type DatabaseWithPrimary = Database & {
-  $primary?: Database;
-};
-
-type Session = {
-  user: {
-    id: string;
-    email?: string;
-    full_name?: string;
-  };
-} | null;
 
 // Database middleware that handles replication lag based on mutation operations
 // For mutations: always use primary DB
 // For queries: use primary DB if the team recently performed a mutation
 export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
   ctx: {
-    session?: Session;
-    teamId?: string;
+    session?: Session | null;
+    teamId?: string | null;
     db: Database;
   };
   type: "query" | "mutation" | "subscription";
   next: (opts: {
     ctx: {
-      session?: Session;
-      teamId?: string;
+      session?: Session | null;
+      teamId?: string | null;
       db: Database;
     };
   }) => Promise<TReturn>;
@@ -49,7 +41,7 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
     if (type === "mutation") {
       // Set the timestamp when the team can use replicas again
       const expiryTime = Date.now() + REPLICATION_LAG_WINDOW;
-      teamMutationMap.set(teamId, expiryTime);
+      cache.set(teamId, expiryTime);
 
       logger.info({
         msg: "Using primary DB for mutation",
@@ -67,7 +59,7 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
     }
     // For queries, check if the team recently performed a mutation
     else {
-      const timestamp = teamMutationMap.get(teamId);
+      const timestamp = cache.get(teamId);
       const now = Date.now();
 
       // If the timestamp exists and hasn't expired, use primary DB
@@ -93,28 +85,6 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
           teamId,
           operationType: type,
           recentMutation: !!timestamp,
-        });
-      }
-    }
-
-    // Clean up expired entries occasionally
-    if (Math.random() < 0.1) {
-      // ~10% chance to run cleanup on each request
-      const now = Date.now();
-      let cleanedCount = 0;
-
-      for (const [key, value] of teamMutationMap.entries()) {
-        if (now > value) {
-          teamMutationMap.delete(key);
-          cleanedCount++;
-        }
-      }
-
-      if (cleanedCount > 0) {
-        logger.debug({
-          msg: "Cleaned up expired mutation entries",
-          cleanedCount,
-          remainingEntries: teamMutationMap.size,
         });
       }
     }
