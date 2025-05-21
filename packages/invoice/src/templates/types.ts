@@ -43,14 +43,13 @@ export type LineItem = {
 };
 
 export type TemplateProps = {
-  title: string;
   invoice_number: string;
   discount?: number;
   issue_date: string;
   due_date: string;
   template: Template;
   line_items: LineItem[];
-  customer_details?: EditorDoc;
+  customer_details?: EditorDoc | null;
   payment_details?: EditorDoc;
   from_details?: EditorDoc;
   note_details?: EditorDoc;
@@ -62,7 +61,6 @@ export type TemplateProps = {
   width: number;
   height: number;
   token: string;
-  size: "letter" | "a4";
   top_block?: EditorDoc;
   bottom_block?: EditorDoc;
   subtotal?: number;

@@ -1,14 +1,20 @@
-import type { TemplateProps } from "../types";
+import type { EditorDoc, Template } from "../types";
 import { EditorContent } from "./components/editor-content";
 import { Header } from "./components/header";
 import { Logo } from "./components/logo";
 import { Meta } from "./components/meta";
 
-type Props = TemplateProps & {
+type Props = {
   isValidLogo: boolean;
   name: string;
   logoUrl: string;
   status: "draft" | "overdue" | "paid" | "unpaid" | "canceled";
+  invoice_number: string;
+  issue_date: string;
+  due_date: string;
+  template: Template;
+  customer_details: EditorDoc;
+  from_details: EditorDoc;
 };
 
 export function OgTemplate({

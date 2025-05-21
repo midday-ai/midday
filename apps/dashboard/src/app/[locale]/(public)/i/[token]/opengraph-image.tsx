@@ -9,11 +9,15 @@ export const contentType = "image/png";
 
 const CDN_URL = "https://cdn.midday.ai";
 
-export default async function Image({ params }: { params: { token: string } }) {
+type Props = {
+  params: { token: string };
+};
+
+export default async function Image({ params }: Props) {
   const supabase = await createClient({ admin: true });
 
   const { id } = await verify(params.token);
-  const { data: invoice } = await getInvoiceByIdQuery(supabase, id);
+  const { data: invoice } = await getInvoiceByIdQuery(supabase, id as string);
 
   if (!invoice) {
     return new Response("Not found", { status: 404 });
@@ -33,10 +37,19 @@ export default async function Image({ params }: { params: { token: string } }) {
 
   return new ImageResponse(
     <OgTemplate
-      {...invoice}
-      name={invoice.customer_name || invoice.customer?.name}
+      name={invoice.customer_name || (invoice.customer?.name as string)}
+      invoice_number={invoice.invoice_number!}
+      issue_date={invoice.issue_date!}
+      due_date={invoice.due_date!}
+      status={invoice.status}
       isValidLogo={isValidLogo}
       logoUrl={logoUrl}
+      // @ts-expect-error - JSONB
+      customer_details={invoice.customer_details}
+      // @ts-expect-error - JSONB
+      from_details={invoice.from_details}
+      // @ts-expect-error - JSONB
+      template={invoice.template}
     />,
     {
       width: 1200,

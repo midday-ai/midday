@@ -298,9 +298,13 @@ export function TransactionCreateForm() {
                       field.onChange(value?.slug);
                     }}
                     hideLoading
-                    selected={categories?.find(
-                      (category) => category.slug === field.value,
-                    )}
+                    selected={categories
+                      ?.map((category) =>
+                        category && category.slug !== null
+                          ? { ...category, slug: category.slug }
+                          : undefined,
+                      )
+                      .find((category) => category?.slug === field.value)}
                   />
                 </FormControl>
 
@@ -342,6 +346,7 @@ export function TransactionCreateForm() {
                 id={nanoid()}
                 data={attachments}
                 onUpload={(files) => {
+                  // @ts-expect-error
                   form.setValue("attachments", files);
                 }}
               />

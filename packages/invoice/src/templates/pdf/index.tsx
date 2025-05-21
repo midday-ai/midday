@@ -27,7 +27,6 @@ export async function PdfTemplate({
   subtotal,
   top_block,
   bottom_block,
-  size = "a4",
   token,
 }: TemplateProps) {
   let qrCode = null;
@@ -43,7 +42,8 @@ export async function PdfTemplate({
     <Document>
       <Page
         wrap
-        size={size.toUpperCase() as "LETTER" | "A4"}
+        // @ts-expect-error - template.size is not typed (JSONB)
+        size={template.size.toUpperCase() as "LETTER" | "A4"}
         style={{
           padding: 20,
           backgroundColor: "#fff",

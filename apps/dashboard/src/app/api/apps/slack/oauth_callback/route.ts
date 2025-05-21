@@ -108,12 +108,15 @@ export async function GET(request: NextRequest) {
 
     if (createdSlackIntegration?.config) {
       const slackApp = createSlackApp({
+        // @ts-expect-error - config is JSONB
         token: createdSlackIntegration?.config?.access_token,
+        // @ts-expect-error - config is JSONB
         botId: createdSlackIntegration?.config?.bot_user_id,
       });
 
       try {
         await slackApp.client.chat.postMessage({
+          // @ts-expect-error - config is JSONB
           channel: createdSlackIntegration?.config?.channel_id,
           unfurl_links: false,
           unfurl_media: false,

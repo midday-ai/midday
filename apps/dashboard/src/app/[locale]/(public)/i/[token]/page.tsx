@@ -17,7 +17,7 @@ export async function generateMetadata(props: {
   const supabase = await createClient({ admin: true });
 
   try {
-    const { id } = await verify(params.token);
+    const { id } = (await verify(params.token)) as { id: string };
     const { data: invoice } = await getInvoiceByIdQuery(supabase, id);
 
     if (!invoice) {
@@ -123,23 +123,20 @@ export default async function Page(props: Props) {
         style={{ maxWidth: width }}
       >
         <CustomerHeader
-          name={invoice.customer_name || invoice.customer?.name}
+          name={invoice.customer_name || (invoice.customer?.name as string)}
           website={invoice.customer?.website}
           status={invoice.status}
         />
         <div className="pb-24 md:pb-0">
           <div className="shadow-[0_24px_48px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
+            {/* @ts-expect-error - template.size is not typed (JSONB) */}
             <HtmlTemplate {...invoice} width={width} height={height} />
           </div>
         </div>
       </div>
 
-      <InvoiceToolbar
-        id={invoice.id}
-        size={invoice.template.size}
-        customer={invoice.customer}
-        viewedAt={invoice.viewed_at}
-      />
+      {/* @ts-expect-error - template.size is not typed (JSONB) */}
+      <InvoiceToolbar id={invoice.id} size={invoice.template.size} />
 
       <div className="fixed bottom-4 right-4 hidden md:block">
         <a

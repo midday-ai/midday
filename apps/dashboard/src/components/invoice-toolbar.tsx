@@ -11,24 +11,12 @@ import { motion } from "framer-motion";
 import { MdContentCopy, MdOutlineFileDownload } from "react-icons/md";
 import { useCopyToClipboard } from "usehooks-ts";
 
-export type Customer = {
-  name: string;
-  website?: string;
-};
-
 type Props = {
   id: string;
-  size: "letter" | "a4";
-  customer: Customer;
-  viewedAt?: string;
+  size?: "letter" | "a4" | null;
 };
 
-export default function InvoiceToolbar({
-  id,
-  size,
-  customer,
-  viewedAt,
-}: Props) {
+export default function InvoiceToolbar({ id, size }: Props) {
   const [, copy] = useCopyToClipboard();
 
   const handleCopyLink = () => {

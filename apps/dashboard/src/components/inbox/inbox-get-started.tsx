@@ -16,7 +16,7 @@ export function InboxGetStarted() {
   };
 
   return (
-    <UploadZone onUpload={handleUpload}>
+    <UploadZone onUploadComplete={handleUpload}>
       <div className="h-[calc(100vh-150px)] flex items-center justify-center">
         <div className="relative z-20 m-auto flex w-full max-w-[380px] flex-col">
           <div className="flex w-full flex-col relative">
