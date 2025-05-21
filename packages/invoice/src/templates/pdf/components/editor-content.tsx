@@ -3,7 +3,7 @@ import type { EditorDoc } from "../../types";
 import { formatEditorContent } from "../format";
 
 type Props = {
-  content?: EditorDoc;
+  content?: EditorDoc | null;
 };
 
 export function EditorContent({ content }: Props) {

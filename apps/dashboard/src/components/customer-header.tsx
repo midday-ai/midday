@@ -4,7 +4,7 @@ import { InvoiceStatus } from "./invoice-status";
 
 type Props = {
   name: string;
-  website: string;
+  website?: string | null;
   status: "overdue" | "paid" | "unpaid" | "draft" | "canceled";
 };
 

@@ -30,8 +30,10 @@ export async function GET(req: NextRequest) {
     return new Response("Invoice not found", { status: 404 });
   }
 
+  // @ts-expect-error - template.size is not typed (JSONB)
   const stream = await renderToStream(await PdfTemplate({ ...data, size }));
 
+  // @ts-expect-error - stream is not assignable to BodyInit
   const blob = await new Response(stream).blob();
 
   const headers: Record<string, string> = {

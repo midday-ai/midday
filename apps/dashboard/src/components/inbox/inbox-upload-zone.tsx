@@ -10,25 +10,30 @@ import { useMutation } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
-type Props = {
-  children: ReactNode;
-  onUpload?: (
-    results: {
-      filePath: string[];
-      mimetype: string;
-      size: number;
-    }[],
-  ) => void;
+type UploadResult = {
+  filename: string;
+  file: File;
 };
 
-export function UploadZone({ children, onUpload }: Props) {
+type ProcessAttachmentInput = {
+  filePath: string[];
+  mimetype: string;
+  size: number;
+};
+
+type Props = {
+  children: ReactNode;
+  onUploadComplete?: () => void;
+};
+
+export function UploadZone({ children, onUploadComplete }: Props) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const supabase = createClient();
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
   const [toastId, setToastId] = useState<string | undefined>(undefined);
-  const uploadProgress = useRef([]);
+  const uploadProgress = useRef<number[]>([]);
   const { toast, dismiss, update } = useToast();
   const processAttachmentsMutation = useMutation(
     trpc.inbox.processAttachments.mutationOptions(),
@@ -56,7 +61,7 @@ export function UploadZone({ children, onUpload }: Props) {
     }
   }, [showProgress, progress, toastId]);
 
-  const onDrop = async (files) => {
+  const onDrop = async (files: File[]) => {
     // NOTE: If onDropRejected
     if (!files.length) {
       return;
@@ -67,12 +72,11 @@ export function UploadZone({ children, onUpload }: Props) {
 
     setShowProgress(true);
 
-    // Add uploaded folder so we can filter background job on this
-    const path = [user?.teamId, "inbox"];
+    const path = [user?.teamId, "inbox"] as string[];
 
     try {
-      const results = await Promise.all(
-        files.map(async (file, idx) =>
+      const results = (await Promise.all(
+        files.map(async (file: File, idx: number) =>
           resumableUpload(supabase, {
             bucket: "vault",
             path,
@@ -91,15 +95,17 @@ export function UploadZone({ children, onUpload }: Props) {
             },
           }),
         ),
-      );
+      )) as UploadResult[];
 
       // Trigger the upload jobs
       processAttachmentsMutation.mutate(
-        results.map((result) => ({
-          filePath: [...path, result.filename],
-          mimetype: result.file.type,
-          size: result.file.size,
-        })),
+        results.map(
+          (result): ProcessAttachmentInput => ({
+            filePath: [...path, result.filename],
+            mimetype: result.file.type,
+            size: result.file.size,
+          }),
+        ),
       );
 
       // Reset once done
@@ -115,7 +121,7 @@ export function UploadZone({ children, onUpload }: Props) {
       setShowProgress(false);
       setToastId(undefined);
       dismiss(toastId);
-      onUpload?.(results);
+      onUploadComplete?.();
     } catch {
       toast({
         duration: 2500,
