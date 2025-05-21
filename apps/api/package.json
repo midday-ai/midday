@@ -37,7 +37,7 @@
     "resend": "^4.5.1",
     "superjson": "^2.2.2",
     "uuid": "^11.1.0",
-    "zod": "^3.25.13"
+    "zod": "^3.25.17"
   },
   "devDependencies": {
     "@types/bun": "^1.2.13",
