@@ -262,10 +262,10 @@ export function TrackerSearchFilter() {
                 {statusFilters.map(({ id, name }) => (
                   <DropdownMenuCheckboxItem
                     key={id}
-                    checked={filter?.statuses?.includes(id)}
+                    checked={filter?.status === id}
                     onCheckedChange={() => {
                       setFilter({
-                        status: id ?? null,
+                        status: id as "completed" | "in_progress" | null,
                       });
                     }}
                   >

@@ -19,7 +19,7 @@
     "@team-plain/typescript-sdk": "5.9.0",
     "@uidotdev/usehooks": "^2.4.1",
     "date-fns": "^4.1.0",
-    "framer-motion": "^12.11.3",
+    "framer-motion": "^12.12.1",
     "geist": "^1.4.2",
     "next": "15.3.2",
     "next-mdx-remote": "^5.0.0",
@@ -30,12 +30,12 @@
     "react-use-draggable-scroll": "^0.4.7",
     "resend": "^4.5.1",
     "server-only": "^0.0.1",
-    "sharp": "^0.34.1",
+    "sharp": "^0.34.2",
     "sugar-high": "^0.9.3"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^22.15.18",
+    "@types/node": "^22.15.21",
     "@types/react": "19.1.4"
   }
 }
