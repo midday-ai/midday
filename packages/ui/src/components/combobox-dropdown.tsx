@@ -95,7 +95,6 @@ export function ComboboxDropdown<T extends ComboboxItem>({
                   const foundItem = items.find((item) => item.id === id);
 
                   if (!foundItem) {
-                    console.log("No item found", id);
                     return;
                   }
 

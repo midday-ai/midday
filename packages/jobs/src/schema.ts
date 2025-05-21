@@ -17,7 +17,7 @@ export type GenerateInvoicePayload = z.infer<typeof generateInvoiceSchema>;
 
 export const deleteConnectionSchema = z.object({
   referenceId: z.string().optional().nullable(),
-  provider: z.string(),
+  provider: z.enum(["gocardless", "teller", "plaid", "enablebanking"]),
   accessToken: z.string().optional().nullable(),
 });
 
@@ -53,7 +53,7 @@ export const deleteTeamSchema = z.object({
   teamId: z.string().uuid(),
   connections: z.array(
     z.object({
-      provider: z.string().nullable(),
+      provider: z.string(),
       referenceId: z.string().nullable(),
       accessToken: z.string().nullable(),
     }),

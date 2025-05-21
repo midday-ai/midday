@@ -184,6 +184,9 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
               popularity: data.popularity,
               provider: data.provider,
               type: data.type ?? null,
+              country: Array.isArray(data.countries)
+                ? data.countries.at(0)
+                : undefined,
             },
           },
           200,

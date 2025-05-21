@@ -2,7 +2,6 @@ import { transformTransaction } from "@jobs/utils/transform";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
-// import { enrichTransactions } from "../../transactions/enrich";
 
 const transactionSchema = z.object({
   id: z.string(),
@@ -36,6 +35,7 @@ export const upsertTransactions = schemaTask({
       // Transform transactions to match our DB schema
       const formattedTransactions = transactions.map((transaction) => {
         return transformTransaction({
+          // @ts-expect-error - TODO: Fix types with drizzle
           transaction,
           teamId,
           bankAccountId,
@@ -44,38 +44,15 @@ export const upsertTransactions = schemaTask({
       });
 
       // Upsert transactions into the transactions table, skipping duplicates based on internal_id
-      const { data: upsertedTransactions } = await supabase
+      await supabase
         .from("transactions")
+        // @ts-expect-error - TODO: Fix types with drizzle
         .upsert(formattedTransactions, {
           onConflict: "internal_id",
           ignoreDuplicates: true,
         })
         .select()
         .throwOnError();
-
-      // Filter out transactions that are not uncategorized expenses
-      // const uncategorizedExpenses = upsertedTransactions?.filter(
-      //   (transaction) => !transaction.category && transaction.amount < 0,
-      // );
-
-      // if (uncategorizedExpenses?.length) {
-      //   // We only want to wait for enrichment if this is a manual sync
-      //   if (manualSync) {
-      //     await enrichTransactions.triggerAndWait({
-      //       transactions: uncategorizedExpenses.map((transaction) => ({
-      //         id: transaction.id,
-      //         name: transaction.name,
-      //       })),
-      //     });
-      //   } else {
-      //     await enrichTransactions.trigger({
-      //       transactions: uncategorizedExpenses.map((transaction) => ({
-      //         id: transaction.id,
-      //         name: transaction.name,
-      //       })),
-      //     });
-      //   }
-      // }
     } catch (error) {
       logger.error("Failed to upsert transactions", { error });
 

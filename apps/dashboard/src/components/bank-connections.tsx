@@ -91,15 +91,15 @@ function ConnectionState({
           <span>Connection expires soon</span>
         </div>
 
-        {connection.expires_at && (
+        {connection.expiresAt && (
           <TooltipContent
             className="px-3 py-1.5 text-xs max-w-[430px]"
             sideOffset={20}
             side="left"
           >
             We only have access to your bank for another{" "}
-            {differenceInDays(new Date(connection.expires_at), new Date())}{" "}
-            days. Please update the connection to keep everything in sync.
+            {differenceInDays(new Date(connection.expiresAt), new Date())} days.
+            Please update the connection to keep everything in sync.
           </TooltipContent>
         )}
       </>
@@ -115,11 +115,11 @@ function ConnectionState({
     );
   }
 
-  if (connection.last_accessed) {
+  if (connection.lastAccessed) {
     return (
       <div className="text-xs font-normal flex items-center space-x-1">
         <span className="text-xs font-normal">{`Updated ${formatDistanceToNow(
-          new Date(connection.last_accessed),
+          new Date(connection.lastAccessed),
           {
             addSuffix: true,
           },
@@ -291,7 +291,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
           </div>
         </AccordionTrigger>
 
-        <div className="ml-auto flex space-x-2">
+        <div className="ml-auto flex space-x-2 items-center">
           {connection.status === "disconnected" || show ? (
             <>
               <ReconnectProvider

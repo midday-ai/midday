@@ -14,9 +14,9 @@ export const deleteConnection = schemaTask({
 
     await client.connections.delete.$delete({
       json: {
-        id: referenceId,
+        id: referenceId!,
         provider,
-        accessToken,
+        accessToken: accessToken ?? undefined,
       },
     });
   },

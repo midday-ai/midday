@@ -88,7 +88,7 @@ export function Summary({
           <Text style={{ fontSize: 9, textAlign: "right" }}>
             {formatAmount({
               currency,
-              amount: vat,
+              amount: vat || 0,
               locale,
               maximumFractionDigits,
             })}
@@ -104,7 +104,7 @@ export function Summary({
           <Text style={{ fontSize: 9, textAlign: "right" }}>
             {formatAmount({
               currency,
-              amount: tax,
+              amount: tax || 0,
               locale,
               maximumFractionDigits,
             })}

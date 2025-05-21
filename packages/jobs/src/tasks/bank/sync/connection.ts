@@ -32,9 +32,13 @@ export const syncConnection = schemaTask({
 
       const connectionResponse = await client.connections.status.$get({
         query: {
-          id: data.reference_id,
-          provider: data.provider,
-          accessToken: data.access_token,
+          id: data.reference_id!,
+          provider: data.provider as
+            | "gocardless"
+            | "plaid"
+            | "teller"
+            | "enablebanking", // Pluggy not supported yet
+          accessToken: data.access_token ?? undefined,
         },
       });
 
@@ -93,6 +97,7 @@ export const syncConnection = schemaTask({
         // We don't want to delay the sync if it's a manual sync
         // but we do want to delay it if it's an background sync to avoid rate limiting
         if (bankAccounts.length > 0) {
+          // @ts-expect-error - TODO: Fix types
           await triggerSequenceAndWait(bankAccounts, syncAccount, {
             tags: ctx.run.tags,
             delayMinutes: manualSync ? 0 : 1,

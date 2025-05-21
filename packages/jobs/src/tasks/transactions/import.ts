@@ -76,6 +76,7 @@ export const importTransactions = schemaTask({
           );
 
           const { validTransactions, invalidTransactions } =
+            // @ts-expect-error
             validateTransactions(transactions);
 
           if (invalidTransactions.length > 0) {
@@ -84,7 +85,9 @@ export const importTransactions = schemaTask({
             });
           }
 
+          // @ts-expect-error
           await processBatch(validTransactions, BATCH_SIZE, async (batch) => {
+            // @ts-expect-error
             return supabase.from("transactions").upsert(batch, {
               onConflict: "internal_id",
               ignoreDuplicates: true,

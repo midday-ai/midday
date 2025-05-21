@@ -24,6 +24,12 @@ export type Template = {
   title: string;
   subtotal_label: string;
   subtotal: number;
+  include_tax: boolean;
+  tax_rate: number;
+  include_discount: boolean;
+  discount_label: string;
+  discount: number;
+  vat_rate: number;
 };
 
 export type LineItem = {
@@ -44,10 +50,10 @@ export type TemplateProps = {
   due_date: string;
   template: Template;
   line_items: LineItem[];
-  customer_details?: JSON;
-  payment_details?: JSON;
-  from_details?: JSON;
-  note_details?: JSON;
+  customer_details?: EditorDoc;
+  payment_details?: EditorDoc;
+  from_details?: EditorDoc;
+  note_details?: EditorDoc;
   currency: string;
   amount: number;
   customer_name?: string;
@@ -57,8 +63,8 @@ export type TemplateProps = {
   height: number;
   token: string;
   size: "letter" | "a4";
-  top_block?: JSON;
-  bottom_block?: JSON;
+  top_block?: EditorDoc;
+  bottom_block?: EditorDoc;
   subtotal?: number;
 };
 

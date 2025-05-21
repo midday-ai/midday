@@ -34,9 +34,8 @@ export async function PdfTemplate({
 
   if (template.include_qr) {
     qrCode = await QRCodeUtil.toDataURL(`https://app.midday.ai/i/${token}`, {
-      width: 40 * 3,
-      height: 40 * 3,
       margin: 0,
+      width: 40 * 3,
     });
   }
 
@@ -141,7 +140,7 @@ export async function PdfTemplate({
             includeTax={template.include_tax}
             includeDecimals={template.include_decimals}
             subtotalLabel={template.subtotal_label}
-            subtotal={subtotal}
+            subtotal={subtotal || 0}
           />
 
           <View style={{ flexDirection: "row", marginTop: 20 }}>

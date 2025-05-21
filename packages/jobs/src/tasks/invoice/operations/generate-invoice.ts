@@ -28,6 +28,7 @@ export const generateInvoice = schemaTask({
 
     const { user, ...invoice } = invoiceData;
 
+    // @ts-expect-error - Template JSONB while EditorDoc in components
     const buffer = await renderToBuffer(await PdfTemplate(invoice));
 
     const filename = `${invoiceData?.invoice_number}.pdf`;
@@ -57,7 +58,7 @@ export const generateInvoice = schemaTask({
     }
 
     await processDocument.trigger({
-      file_path: [invoiceData?.team_id, "invoices", filename],
+      filePath: [invoiceData?.team_id, "invoices", filename],
       mimetype: "application/pdf",
       teamId: invoiceData?.team_id,
     });

@@ -29,6 +29,7 @@ export const sendInvoiceNotifications = schemaTask({
     switch (status) {
       case "paid":
         await handlePaidInvoiceNotifications({
+          // @ts-expect-error - TODO: Fix types with drizzle
           user,
           invoiceId,
           invoiceNumber,
@@ -36,6 +37,7 @@ export const sendInvoiceNotifications = schemaTask({
         break;
       case "overdue":
         await handleOverdueInvoiceNotifications({
+          // @ts-expect-error - TODO: Fix types with drizzle
           user,
           invoiceId,
           invoiceNumber,
