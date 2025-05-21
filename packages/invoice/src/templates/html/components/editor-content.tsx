@@ -1,6 +1,11 @@
+import type { EditorDoc } from "../../types";
 import { formatEditorContent } from "../format";
 
-export function EditorContent({ content }: { content?: JSON }) {
+type Props = {
+  content?: EditorDoc;
+};
+
+export function EditorContent({ content }: Props) {
   if (!content) {
     return null;
   }

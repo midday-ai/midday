@@ -51,6 +51,7 @@ export async function handleInboxNotifications({
   );
 
   if (notificationEvents.length) {
+    // @ts-expect-error - TODO: Fix types with drizzle
     triggerBulk(notificationEvents?.flat());
   }
 }

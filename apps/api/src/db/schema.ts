@@ -954,7 +954,7 @@ export const bankConnections = pgTable(
     logoUrl: text("logo_url"),
     accessToken: text("access_token"),
     enrollmentId: text("enrollment_id"),
-    provider: bankProvidersEnum(),
+    provider: bankProvidersEnum().notNull(),
     lastAccessed: timestamp("last_accessed", {
       withTimezone: true,
       mode: "string",

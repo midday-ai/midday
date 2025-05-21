@@ -44,6 +44,12 @@ export const InstitutionSchema = z
         example: 1,
       })
       .optional(),
+    country: z
+      .string()
+      .openapi({
+        example: "GB",
+      })
+      .optional(),
     provider: Providers.openapi({
       example: Providers.Enum.teller,
     }).optional(),

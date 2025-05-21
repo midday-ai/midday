@@ -15,11 +15,15 @@ export const deleteTeam = schemaTask({
 
     // Delete connections in providers
     const connectionPromises = connections.map(async (connection) => {
-      return client.connections.delete.$post({
+      return client.connections.delete.$delete({
         json: {
-          id: connection.referenceId,
-          provider: connection.provider,
-          accessToken: connection.accessToken,
+          id: connection.referenceId!,
+          provider: connection.provider as
+            | "gocardless"
+            | "teller"
+            | "plaid"
+            | "enablebanking",
+          accessToken: connection.accessToken ?? undefined,
         },
       });
     });

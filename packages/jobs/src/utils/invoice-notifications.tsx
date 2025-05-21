@@ -50,6 +50,7 @@ export async function handlePaidInvoiceNotifications({
     .filter(Boolean);
 
   try {
+    // @ts-expect-error - TODO: Fix types with drizzle
     await triggerBulk(paidNotificationEvents);
   } catch (error) {
     await logger.error("Paid invoice notification", { error });
@@ -87,6 +88,7 @@ export async function handlePaidInvoiceNotifications({
   const validPaidEmailPromises = await Promise.all(paidEmailPromises);
 
   try {
+    // @ts-expect-error - TODO: Fix types with drizzle
     await triggerBulk(validPaidEmailPromises);
   } catch (error) {
     await logger.error("Paid invoice email", { error });
@@ -135,6 +137,7 @@ export async function handleOverdueInvoiceNotifications({
     .filter(Boolean);
 
   try {
+    // @ts-expect-error - TODO: Fix types with drizzle
     await triggerBulk(overdueNotificationEvents);
   } catch (error) {
     await logger.error("Overdue invoice notification", { error });
@@ -176,6 +179,7 @@ export async function handleOverdueInvoiceNotifications({
   const validOverdueEmailPromises = await Promise.all(overdueEmailPromises);
 
   try {
+    // @ts-expect-error - TODO: Fix types with drizzle
     await triggerBulk(validOverdueEmailPromises);
   } catch (error) {
     await logger.error("Overdue invoice email", { error });

@@ -12,9 +12,13 @@ import {
 import { Icons } from "./icons";
 import { Spinner } from "./spinner";
 
-export type Option = Record<"id" | "name", string> & {
+export type Option = {
+  id: string;
+  name: string;
   component?: () => React.ReactNode;
-} & Record<string, string>;
+} & {
+  [key: string]: string | (() => React.ReactNode) | undefined;
+};
 
 type ComboboxProps = {
   options: Option[];

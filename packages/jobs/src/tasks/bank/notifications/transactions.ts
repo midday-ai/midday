@@ -41,8 +41,11 @@ export const transactionNotifications = schemaTask({
       });
 
       if (sortedTransactions && sortedTransactions.length > 0) {
+        // @ts-expect-error - TODO: Fix types
         await handleTransactionNotifications(usersData, sortedTransactions);
+        // @ts-expect-error - TODO: Fix types
         await handleTransactionEmails(usersData, sortedTransactions);
+        // @ts-expect-error - TODO: Fix types
         await handleTransactionSlackNotifications(teamId, sortedTransactions);
       }
     } catch (error) {

@@ -20,6 +20,10 @@ export const reconnectConnection = schemaTask({
         param: { reference: teamId },
       });
 
+      if (!connection.ok) {
+        throw new Error("Connection not found");
+      }
+
       const connectionResponse = await connection.json();
 
       const referenceId = connectionResponse?.data.id;
@@ -45,6 +49,10 @@ export const reconnectConnection = schemaTask({
         },
       });
 
+      if (!accounts.ok) {
+        throw new Error("Accounts not found");
+      }
+
       const accountsResponse = await accounts.json();
 
       await Promise.all(
@@ -54,7 +62,7 @@ export const reconnectConnection = schemaTask({
             .update({
               account_id: account.id,
             })
-            .eq("account_reference", account.resource_id);
+            .eq("account_reference", account.resource_id!);
         }),
       );
     }

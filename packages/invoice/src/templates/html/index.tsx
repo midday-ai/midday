@@ -1,4 +1,3 @@
-import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import type { TemplateProps } from "../types";
 import { EditorContent } from "./components/editor-content";
@@ -6,12 +5,6 @@ import { LineItems } from "./components/line-items";
 import { Logo } from "./components/logo";
 import { Meta } from "./components/meta";
 import { Summary } from "./components/summary";
-
-type Invoice = RouterOutputs["invoices"]["getById"];
-
-type Props = {
-  invoice: Invoice;
-};
 
 export function HtmlTemplate({
   invoice_number,

@@ -24,7 +24,7 @@ type Props = {
   provider: string;
   enrollmentId: string | null;
   institutionId: string;
-  referenceId?: string;
+  referenceId?: string | null;
   accessToken: string | null;
   onManualSync: () => void;
   variant?: "button" | "icon";

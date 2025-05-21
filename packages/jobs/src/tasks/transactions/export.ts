@@ -6,8 +6,8 @@ import { metadata, schemaTask } from "@trigger.dev/sdk/v3";
 import {
   BlobReader,
   BlobWriter,
+  CompatibleUint8ArrayReader,
   TextReader,
-  Uint8ArrayReader,
   ZipWriter,
 } from "@zip.js/zip.js";
 import { format } from "date-fns";
@@ -112,7 +112,7 @@ export const exportTransactions = schemaTask({
     const zipWriter = new ZipWriter(zipFileWriter);
 
     zipWriter.add("transactions.csv", new TextReader(csv));
-    zipWriter.add("transactions.xlsx", new Uint8ArrayReader(buffer));
+    zipWriter.add("transactions.xlsx", new CompatibleUint8ArrayReader(buffer));
 
     metadata.set("progress", 90);
 
