@@ -1,14 +1,13 @@
 "use client";
 
-import { changeTeamAction } from "@/actions/change-team-action";
+import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { TableRow as BaseTableRow, TableCell } from "@midday/ui/table";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-
 type Props = {
   row: RouterOutputs["team"]["list"][number];
 };
@@ -16,18 +15,23 @@ type Props = {
 export function TableRow({ row }: Props) {
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
+  const trpc = useTRPC();
+  const router = useRouter();
 
-  const changeTeam = useAction(changeTeamAction, {
-    onExecute: () => {
-      setIsLoading(true);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries();
-    },
-    onError: () => {
-      setIsLoading(false);
-    },
-  });
+  const changeTeamMutation = useMutation(
+    trpc.user.update.mutationOptions({
+      onMutate: () => {
+        setIsLoading(true);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries();
+        router.push("/");
+      },
+      onError: () => {
+        setIsLoading(false);
+      },
+    }),
+  );
 
   return (
     <BaseTableRow key={row.id} className="hover:bg-transparent">
@@ -60,9 +64,8 @@ export function TableRow({ row }: Props) {
               isSubmitting={isLoading}
               variant="outline"
               onClick={() => {
-                changeTeam.execute({
+                changeTeamMutation.mutate({
                   teamId: row.team?.id!,
-                  redirectTo: "/",
                 });
               }}
             >

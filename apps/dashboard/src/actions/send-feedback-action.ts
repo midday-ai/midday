@@ -28,7 +28,7 @@ export const sendFeebackAction = authActionClient
         emailAddress: user.email,
       },
       onCreate: {
-        fullName: user.user_metadata.full_name,
+        fullName: user.fullName ?? "",
         externalId: user.id,
         email: {
           email: user.email!,

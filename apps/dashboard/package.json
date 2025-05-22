@@ -45,7 +45,6 @@
     "@trpc/tanstack-react-query": "^11.1.2",
     "ai": "^4.3.16",
     "change-case": "^5.4.4",
-    "cookies-next": "^5.1.0",
     "date-fns": "^4.1.0",
     "dub": "^0.61.14",
     "file-saver": "^2.0.5",

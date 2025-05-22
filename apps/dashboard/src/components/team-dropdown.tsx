@@ -1,14 +1,12 @@
 "use client";
 
-import { changeTeamAction } from "@/actions/change-team-action";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
@@ -25,13 +23,14 @@ export function TeamDropdown() {
   const [isActive, setActive] = useState(false);
   const [isChangingTeam, setIsChangingTeam] = useState(false);
 
-  const changeTeam = useAction(changeTeamAction, {
-    onSuccess: () => {
-      // Invalidate all queries to refresh the data
-      queryClient.invalidateQueries();
-      setIsChangingTeam(false);
-    },
-  });
+  const changeTeamMutation = useMutation(
+    trpc.user.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries();
+        setIsChangingTeam(false);
+      },
+    }),
+  );
 
   const { data: teams } = useQuery(trpc.team.list.queryOptions());
 
@@ -68,7 +67,7 @@ export function TeamDropdown() {
     setSelectedId(teamId);
     setActive(false);
 
-    changeTeam.execute({ teamId, redirectTo: "/" });
+    changeTeamMutation.mutate({ teamId });
   };
 
   return (

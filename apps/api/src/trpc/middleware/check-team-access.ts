@@ -14,42 +14,62 @@ const cache = new LRUCache<string, boolean>({
 export const withTeamAccess = async <TReturn>(opts: {
   ctx: {
     session?: Session | null;
-    teamId?: string | null;
     db: Database;
   };
   next: (opts: {
     ctx: {
       session?: Session | null;
-      teamId?: string | null;
       db: Database;
+      teamId: string;
     };
   }) => Promise<TReturn>;
 }) => {
   const { ctx, next } = opts;
 
   const userId = ctx.session?.user?.id;
-  const teamId = ctx.teamId;
 
-  if (!userId || !teamId) {
+  if (!userId) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: "No permission to access this team",
     });
   }
 
-  const cacheKey = `${userId}:${teamId}`;
+  const result = await ctx.db.query.users.findFirst({
+    with: {
+      usersOnTeams: {
+        columns: {
+          id: true,
+          teamId: true,
+        },
+      },
+    },
+    where: (users, { eq }) => eq(users.id, userId),
+  });
+
+  if (!result) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "User not found",
+    });
+  }
+
+  if (!result.teamId) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "User has no team assigned",
+    });
+  }
+
+  const teamId = result.teamId;
+  const cacheKey = `user:${userId}:team:${teamId}`;
   let hasAccess = cache.get(cacheKey);
 
   if (hasAccess === undefined) {
-    const membership = await ctx.db.query.usersOnTeam.findFirst({
-      columns: {
-        id: true,
-      },
-      where: (usersOnTeam, { eq, and }) =>
-        and(eq(usersOnTeam.userId, userId), eq(usersOnTeam.teamId, teamId)),
-    });
+    hasAccess = result.usersOnTeams.some(
+      (membership) => membership.teamId === teamId,
+    );
 
-    hasAccess = !!membership;
     cache.set(cacheKey, hasAccess);
   }
 
@@ -63,7 +83,7 @@ export const withTeamAccess = async <TReturn>(opts: {
   return next({
     ctx: {
       session: ctx.session,
-      teamId: ctx.teamId,
+      teamId,
       db: ctx.db,
     },
   });
