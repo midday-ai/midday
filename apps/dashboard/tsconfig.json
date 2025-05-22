@@ -11,6 +11,7 @@
     "strict": true
   },
   "include": [
+    "../../types",
     "next-env.d.ts",
     "next.config.js",
     "**/*.ts",

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import appIcon from "../../../public/appicon.png";
+import appIcon from "public/appicon.png";
 
 export default function NotFound() {
   return (
