@@ -81,7 +81,15 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
       const queryClient = useQueryClient();
       const router = useRouter();
 
-      const changeTeamMutation = useMutation(
+      const viewTeamMutation = useMutation(
+        trpc.user.update.mutationOptions({
+          onSuccess: () => {
+            queryClient.invalidateQueries();
+          },
+        }),
+      );
+
+      const manageTeamMutation = useMutation(
         trpc.user.update.mutationOptions({
           onSuccess: () => {
             queryClient.invalidateQueries();
@@ -107,9 +115,9 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
           <div className="flex space-x-3 items-center">
             <SubmitButton
               variant="outline"
-              isSubmitting={changeTeamMutation.isPending}
+              isSubmitting={viewTeamMutation.isPending}
               onClick={() =>
-                changeTeamMutation.mutate(
+                viewTeamMutation.mutate(
                   {
                     teamId: row.original.team?.id!,
                   },
@@ -126,9 +134,9 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
             {row.original.role === "owner" && (
               <SubmitButton
                 variant="outline"
-                isSubmitting={changeTeamMutation.isPending}
+                isSubmitting={manageTeamMutation.isPending}
                 onClick={() =>
-                  changeTeamMutation.mutate(
+                  manageTeamMutation.mutate(
                     {
                       teamId: row.original.team?.id!,
                     },

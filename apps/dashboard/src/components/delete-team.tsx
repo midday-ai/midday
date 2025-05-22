@@ -1,6 +1,5 @@
 "use client";
 
-import { deleteTeamAction } from "@/actions/delete-team-action";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import {
@@ -26,22 +25,14 @@ import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 
 export function DeleteTeam() {
   const [value, setValue] = useState("");
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
-  const deleteTeam = useAction(deleteTeamAction);
 
-  const deleteTeamMutation = useMutation(
-    trpc.team.delete.mutationOptions({
-      onSuccess: () => {
-        deleteTeam.execute();
-      },
-    }),
-  );
+  const deleteTeamMutation = useMutation(trpc.team.delete.mutationOptions());
 
   return (
     <Card className="border-destructive">

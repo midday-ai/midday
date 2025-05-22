@@ -62,8 +62,8 @@ const withTeamCheckMiddleware = t.middleware(async (opts) => {
 export const publicProcedure = t.procedure.use(withPrimaryDbMiddleware);
 
 export const protectedProcedure = t.procedure
+  .use(withTeamCheckMiddleware) // NOTE: This is needed to ensure that the teamId is set in the context
   .use(withPrimaryDbMiddleware)
-  .use(withTeamCheckMiddleware)
   .use(async (opts) => {
     const { teamId, session } = opts.ctx;
 
