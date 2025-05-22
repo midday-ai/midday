@@ -88,6 +88,7 @@ export function VaultGrid() {
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 3xl:grid-cols-6 gap-8">
         {documents.map((document) => (
+          // @ts-expect-error
           <VaultItem key={document.id} data={document} />
         ))}
       </div>

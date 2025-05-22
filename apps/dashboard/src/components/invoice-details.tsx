@@ -96,8 +96,8 @@ export function InvoiceDetails() {
               "line-through": status === "canceled",
             })}
           >
-            {amount && currency && (
-              <FormatAmount amount={amount} currency={currency} />
+            {currency && (
+              <FormatAmount amount={amount ?? 0} currency={currency} />
             )}
           </span>
 

@@ -11,10 +11,9 @@ import { VaultItemActions } from "./vault-item-actions";
 type Props = {
   data: Partial<RouterOutputs["documents"]["get"]["data"][number]> & {
     id: string;
-    name: string;
+    name?: string | null;
     metadata: Record<string, unknown>;
     pathTokens: string[];
-    tag: string;
     title: string;
     summary: string;
   };

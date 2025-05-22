@@ -291,6 +291,22 @@ export async function getTransactions(
         sql<boolean>`COALESCE(tas.has_attachment_val, 0) = 1 OR ${transactions.status} = 'completed'`.as(
           "isFulfilled",
         ),
+      vat: sql<number>`
+        CASE
+          WHEN ${transactions.categorySlug} IS NULL THEN 0
+          ELSE ABS(ROUND(
+            ${transactions.amount} * (
+              COALESCE((
+                SELECT tc.vat
+                FROM ${transactionCategories} as tc
+                WHERE tc.slug = ${transactions.categorySlug}
+                  AND tc.team_id = ${transactions.teamId}
+                LIMIT 1
+              ), 0) / 100.0
+            ), 2
+          ))
+        END
+      `.as("vat"),
       assigned: {
         id: users.id,
         fullName: users.fullName,
@@ -494,6 +510,22 @@ export async function getTransactionById(db: Database, transactionId: string) {
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)})) OR ${transactions.status} = 'completed'`.as(
           "isFulfilled",
         ),
+      vat: sql<number>`
+        CASE
+          WHEN ${transactions.categorySlug} IS NULL THEN 0
+          ELSE ABS(ROUND(
+            ${transactions.amount} * (
+              COALESCE((
+                SELECT tc.vat
+                FROM ${transactionCategories} as tc
+                WHERE tc.slug = ${transactions.categorySlug}
+                  AND tc.team_id = ${transactions.teamId}
+                LIMIT 1
+              ), 0) / 100.0
+            ), 2
+          ))
+        END
+      `.as("vat"),
       assigned: {
         id: users.id,
         fullName: users.fullName,
@@ -521,8 +553,14 @@ export async function getTransactionById(db: Database, transactionId: string) {
         "transactionTags",
       ),
       attachments: sql<
-        Array<{ id: string; filename: string | null; url: string | null }>
-      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transactionAttachments.id}, 'filename', ${transactionAttachments.name}, 'url', ${transactionAttachments.path})) FILTER (WHERE ${transactionAttachments.id} IS NOT NULL), '[]'::json)`.as(
+        Array<{
+          id: string;
+          filename: string | null;
+          path: string | null;
+          type: string;
+          size: number;
+        }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transactionAttachments.id}, 'filename', ${transactionAttachments.name}, 'path', ${transactionAttachments.path}, 'type', ${transactionAttachments.type}, 'size', ${transactionAttachments.size})) FILTER (WHERE ${transactionAttachments.id} IS NOT NULL), '[]'::json)`.as(
         "attachments",
       ),
     })

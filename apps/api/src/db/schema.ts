@@ -58,25 +58,30 @@ export const accountTypeEnum = pgEnum("account_type", [
   "loan",
   "other_liability",
 ]);
+
 export const bankProvidersEnum = pgEnum("bank_providers", [
   "gocardless",
   "plaid",
   "teller",
   "enablebanking",
 ]);
+
 export const connectionStatusEnum = pgEnum("connection_status", [
   "disconnected",
   "connected",
   "unknown",
 ]);
+
 export const documentProcessingStatusEnum = pgEnum(
   "document_processing_status",
   ["pending", "processing", "completed", "failed"],
 );
+
 export const inboxAccountProvidersEnum = pgEnum("inbox_account_providers", [
   "gmail",
   "outlook",
 ]);
+
 export const inboxStatusEnum = pgEnum("inbox_status", [
   "processing",
   "pending",
@@ -85,12 +90,14 @@ export const inboxStatusEnum = pgEnum("inbox_status", [
   "deleted",
   "done",
 ]);
+
 export const inboxTypeEnum = pgEnum("inbox_type", ["invoice", "expense"]);
 export const invoiceDeliveryTypeEnum = pgEnum("invoice_delivery_type", [
   "create",
   "create_and_send",
   "scheduled",
 ]);
+
 export const invoiceSizeEnum = pgEnum("invoice_size", ["a4", "letter"]);
 export const invoiceStatusEnum = pgEnum("invoice_status", [
   "draft",
@@ -99,6 +106,7 @@ export const invoiceStatusEnum = pgEnum("invoice_status", [
   "unpaid",
   "canceled",
 ]);
+
 export const plansEnum = pgEnum("plans", ["trial", "starter", "pro"]);
 export const reportTypesEnum = pgEnum("reportTypes", [
   "profit",
@@ -106,6 +114,7 @@ export const reportTypesEnum = pgEnum("reportTypes", [
   "burn_rate",
   "expense",
 ]);
+
 export const teamRolesEnum = pgEnum("teamRoles", ["owner", "member"]);
 export const trackerStatusEnum = pgEnum("trackerStatus", [
   "in_progress",
@@ -130,6 +139,7 @@ export const transactionCategoriesEnum = pgEnum("transactionCategories", [
   "salary",
   "fees",
 ]);
+
 export const transactionMethodsEnum = pgEnum("transactionMethods", [
   "payment",
   "card_purchase",
@@ -143,6 +153,7 @@ export const transactionMethodsEnum = pgEnum("transactionMethods", [
   "wire",
   "fee",
 ]);
+
 export const transactionStatusEnum = pgEnum("transactionStatus", [
   "posted",
   "pending",
@@ -150,6 +161,7 @@ export const transactionStatusEnum = pgEnum("transactionStatus", [
   "completed",
   "archived",
 ]);
+
 export const transactionFrequencyEnum = pgEnum("transaction_frequency", [
   "weekly",
   "biweekly",

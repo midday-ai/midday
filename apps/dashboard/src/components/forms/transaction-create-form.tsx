@@ -344,7 +344,12 @@ export function TransactionCreateForm() {
               <TransactionAttachments
                 // NOTE: For manual attachments, we need to generate a unique id
                 id={nanoid()}
-                data={attachments}
+                data={attachments?.map((attachment) => ({
+                  ...attachment,
+                  id: nanoid(),
+                  filename: attachment.name,
+                  path: attachment.path.join("/"),
+                }))}
                 onUpload={(files) => {
                   // @ts-expect-error
                   form.setValue("attachments", files);

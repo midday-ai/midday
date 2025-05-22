@@ -13,7 +13,7 @@ export function Status({ value, variant }: Props) {
     <div
       className={cn(
         "flex space-x-1 text-[#FF3638] items-center",
-        variant === "positive" && "text-[#00C969]"
+        variant === "positive" && "text-[#00C969]",
       )}
     >
       {variant === "positive" ? (

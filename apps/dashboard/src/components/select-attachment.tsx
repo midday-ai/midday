@@ -11,7 +11,7 @@ import { FormatAmount } from "./format-amount";
 type Attachment = {
   id: string;
   name: string;
-  data: unknown;
+  data?: unknown;
 };
 
 type Props = {
@@ -88,8 +88,15 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
       onValueChange={(query) => {
         setDebouncedValue(query);
       }}
-      onSelect={handleOnSelect}
-      options={isLoading ? [] : options}
+      onSelect={(value) => {
+        if (value) {
+          handleOnSelect(value);
+        }
+      }}
+      options={(options ?? []).map((opt) => ({
+        ...opt,
+        name: opt.name!,
+      }))}
       isLoading={isLoading}
       classNameList="mt-2 max-h-[161px]"
     />

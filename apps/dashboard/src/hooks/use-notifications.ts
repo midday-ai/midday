@@ -59,7 +59,7 @@ export function useNotifications() {
 
     if (headlessService) {
       headlessService.fetchNotifications({
-        listener: ({}) => {},
+        listener: () => {},
         onSuccess: (response) => {
           setLoading(false);
           setNotifications(response.data);

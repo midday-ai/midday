@@ -3,6 +3,7 @@
 import { useUpload } from "@/hooks/use-upload";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
@@ -21,7 +22,7 @@ type Attachment = {
 
 type Props = {
   id: string;
-  data?: Attachment[];
+  data?: NonNullable<RouterOutputs["transactions"]["getById"]>["attachments"];
   onUpload?: (files: Attachment[]) => void;
 };
 
@@ -120,6 +121,7 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
     );
   };
 
+  // @ts-expect-error
   const handleOnSelectFile = (file) => {
     const filename = stripSpecialCharacters(file.name);
 
@@ -137,7 +139,15 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
 
   useEffect(() => {
     if (data) {
-      setFiles(data);
+      setFiles(
+        data.map((item) => ({
+          id: item.id,
+          name: item.filename!,
+          path: item.path,
+          size: item.size,
+          type: item.type,
+        })),
+      );
     }
   }, [data]);
 

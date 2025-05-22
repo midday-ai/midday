@@ -16,8 +16,7 @@ export type Option = {
   id: string;
   name: string;
   component?: () => React.ReactNode;
-} & {
-  [key: string]: string | (() => React.ReactNode) | undefined;
+  data?: unknown;
 };
 
 type ComboboxProps = {

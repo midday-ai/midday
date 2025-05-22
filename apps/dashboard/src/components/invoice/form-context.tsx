@@ -49,18 +49,21 @@ export function FormContext({
   defaultSettings,
 }: FormContextProps) {
   const form = useZodForm(invoiceFormSchema, {
+    // @ts-expect-error
     defaultValues: defaultSettings,
     mode: "onChange",
   });
 
   useEffect(() => {
     form.reset({
-      ...defaultSettings,
-      ...data,
+      ...(defaultSettings ?? {}),
+      ...(data ?? {}),
+      // @ts-expect-error
       template: {
-        ...defaultSettings?.template,
-        ...data?.template,
+        ...(defaultSettings?.template ?? {}),
+        ...(data?.template ?? {}),
       },
+      customerId: data?.customerId ?? defaultSettings?.customerId ?? undefined,
     });
   }, [data, defaultSettings]);
 

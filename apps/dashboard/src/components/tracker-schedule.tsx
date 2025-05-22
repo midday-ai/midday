@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
@@ -81,33 +82,6 @@ export function TrackerSchedule() {
       {
         enabled: !!selectedDate,
         staleTime: 60 * 1000,
-        initialData: () => {
-          const data = queryClient.getQueriesData({
-            queryKey: trpc.trackerEntries.byRange.queryKey(),
-          });
-
-          if (!data.length || !selectedDate) {
-            return {
-              data: [],
-              meta: { totalDuration: 0 },
-            };
-          }
-
-          const [, rangeData] = data.at(0) ?? [];
-          if (!rangeData?.result?.[selectedDate]) {
-            return {
-              data: [],
-              meta: { totalDuration: 0 },
-            };
-          }
-
-          return {
-            data: rangeData.result[selectedDate],
-            meta: {
-              totalDuration: rangeData.meta.totalDuration || 0,
-            },
-          };
-        },
       },
     ),
   });

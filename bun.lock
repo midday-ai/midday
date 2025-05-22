@@ -36,7 +36,7 @@
         "lru-cache": "^11.1.0",
         "nanoid": "^5.1.5",
         "pino": "^9.7.0",
-        "postgres": "^3.4.6",
+        "postgres": "^3.4.7",
         "resend": "^4.5.1",
         "superjson": "^2.2.2",
         "uuid": "^11.1.0",
@@ -2979,7 +2979,7 @@
 
     "postcss-value-parser": ["postcss-value-parser@4.2.0", "", {}, "sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ=="],
 
-    "postgres": ["postgres@3.4.6", "", {}, "sha512-MXrZVqgUfiirfZ0MqQqXqZQa6oM5OWFjfuaHVKl7v2zW25LnOJeLpQk+UUW0ZuP94fcS+fZVqyDYm9v5SIJ11Q=="],
+    "postgres": ["postgres@3.4.7", "", {}, "sha512-Jtc2612XINuBjIl/QTWsV5UvE8UHuNblcO3vVADSrKsrc6RqGX6lOW1cEo3CM2v0XG4Nat8nI+YM7/f26VxXLw=="],
 
     "prebuild-install": ["prebuild-install@7.1.3", "", { "dependencies": { "detect-libc": "^2.0.0", "expand-template": "^2.0.3", "github-from-package": "0.0.0", "minimist": "^1.2.3", "mkdirp-classic": "^0.5.3", "napi-build-utils": "^2.0.0", "node-abi": "^3.3.0", "pump": "^3.0.0", "rc": "^1.2.7", "simple-get": "^4.0.0", "tar-fs": "^2.0.0", "tunnel-agent": "^0.6.0" }, "bin": { "prebuild-install": "bin.js" } }, "sha512-8Mf2cbV7x1cXPUILADGI3wuhfqWvtiLA1iclTDbFRZkgRQS0NqsPZphna9V+HyTEadheuPmjaJMsbzKQFOzLug=="],
 

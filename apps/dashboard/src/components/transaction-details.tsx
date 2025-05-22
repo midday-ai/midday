@@ -270,7 +270,7 @@ export function TransactionDetails() {
                 </span>
               )}
               <div className="h-3">
-                {data?.vat ? (
+                {data?.vat && data.vat > 0 ? (
                   <span className="text-[#606060] text-xs select-text">
                     VAT{" "}
                     <FormatAmount amount={data.vat} currency={data.currency} />
@@ -296,6 +296,7 @@ export function TransactionDetails() {
 
           <SelectCategory
             id={transactionId}
+            // @ts-expect-error
             selected={data?.category ?? undefined}
             onChange={async (category) => {
               if (category) {
@@ -378,21 +379,25 @@ export function TransactionDetails() {
 
         <SelectTags
           tags={data?.transactionTags?.map((tag) => ({
-            label: tag.name,
-            value: tag.name,
             id: tag.id,
+            label: tag.name!,
+            value: tag.name!,
           }))}
           onSelect={(tag) => {
-            createTransactionTagMutation.mutate({
-              tagId: tag.id,
-              transactionId: transactionId!,
-            });
+            if (tag.id) {
+              createTransactionTagMutation.mutate({
+                tagId: tag.id,
+                transactionId: transactionId!,
+              });
+            }
           }}
           onRemove={(tag) => {
-            deleteTransactionTagMutation.mutate({
-              tagId: tag.id,
-              transactionId: transactionId!,
-            });
+            if (tag.id) {
+              deleteTransactionTagMutation.mutate({
+                tagId: tag.id,
+                transactionId: transactionId!,
+              });
+            }
           }}
         />
       </div>

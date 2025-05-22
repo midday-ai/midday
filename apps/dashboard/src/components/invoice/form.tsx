@@ -110,6 +110,7 @@ export function Form() {
     if (isDirty && form.watch("customerId") && invoiceNumberValid) {
       const currentFormValues = form.getValues();
       draftInvoiceMutation.mutate(
+        // @ts-expect-error
         transformFormValuesToDraft(currentFormValues),
       );
     }
@@ -148,6 +149,7 @@ export function Form() {
 
   return (
     <form
+      // @ts-expect-error
       onSubmit={form.handleSubmit(handleSubmit)}
       className="relative h-full"
       onKeyDown={handleKeyDown}

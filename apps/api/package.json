@@ -34,11 +34,11 @@
     "lru-cache": "^11.1.0",
     "nanoid": "^5.1.5",
     "pino": "^9.7.0",
-    "postgres": "^3.4.6",
+    "postgres": "^3.4.7",
     "resend": "^4.5.1",
     "superjson": "^2.2.2",
     "uuid": "^11.1.0",
-    "zod": "^3.25.17"
+    "zod": "^3.25.20"
   },
   "devDependencies": {
     "@types/bun": "^1.2.13",
