@@ -40,7 +40,7 @@
         "resend": "^4.5.1",
         "superjson": "^2.2.2",
         "uuid": "^11.1.0",
-        "zod": "^3.25.17",
+        "zod": "^3.25.20",
       },
       "devDependencies": {
         "@types/bun": "^1.2.13",
@@ -117,7 +117,7 @@
         "tus-js-client": "4.3.1",
         "use-places-autocomplete": "^4.0.1",
         "usehooks-ts": "^3.1.1",
-        "zod": "^3.25.17",
+        "zod": "^3.25.20",
         "zustand": "^5.0.5",
       },
       "devDependencies": {
@@ -148,7 +148,7 @@
         "typesense": "^2.0.3",
         "workers-ai-provider": "^0.5.1",
         "xior": "^0.7.8",
-        "zod": "^3.25.17",
+        "zod": "^3.25.20",
       },
       "devDependencies": {
         "@cloudflare/workers-types": "^4.20250521.0",
@@ -196,7 +196,7 @@
         "@slack/bolt": "^4.4.0",
         "@slack/web-api": "^7.9.2",
         "ai": "^4.3.16",
-        "zod": "^3.25.17",
+        "zod": "^3.25.20",
       },
       "devDependencies": {
         "@types/node": "^22.15.21",
@@ -216,7 +216,7 @@
         "mammoth": "^1.9.0",
         "officeparser": "^5.1.1",
         "unpdf": "^1.0.4",
-        "zod": "^3.25.17",
+        "zod": "^3.25.20",
       },
       "devDependencies": {
         "@types/bun": "^1.2.13",
@@ -282,7 +282,7 @@
         "@midday/encryption": "workspace:*",
         "@midday/supabase": "workspace:*",
         "googleapis": "^149.0.0",
-        "zod": "^3.25.17",
+        "zod": "^3.25.20",
       },
     },
     "packages/invoice": {
@@ -3727,7 +3727,7 @@
 
     "youch": ["youch@3.3.4", "", { "dependencies": { "cookie": "^0.7.1", "mustache": "^4.2.0", "stacktracey": "^2.1.8" } }, "sha512-UeVBXie8cA35DS6+nBkls68xaBBXCye0CNznrhszZjTbRVnJKQuNsyLKBTTL4ln1o1rh2PKtv35twV7irj5SEg=="],
 
-    "zod": ["zod@3.25.17", "", {}, "sha512-8hQzQ/kMOIFbwOgPrm9Sf9rtFHpFUMy4HvN0yEB0spw14aYi0uT5xG5CE2DB9cd51GWNsz+DNO7se1kztHMKnw=="],
+    "zod": ["zod@3.25.20", "", {}, "sha512-z03fqpTMDF1G02VLKUMt6vyACE7rNWkh3gpXVHgPTw28NPtDFRGvcpTtPwn2kMKtQ0idtYJUTxchytmnqYswcw=="],
 
     "zod-error": ["zod-error@1.5.0", "", { "dependencies": { "zod": "^3.20.2" } }, "sha512-zzopKZ/skI9iXpqCEPj+iLCKl9b88E43ehcU+sbRoHuwGd9F1IDVGQ70TyO6kmfiRL1g4IXkjsXK+g1gLYl4WQ=="],
 
