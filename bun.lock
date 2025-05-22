@@ -309,7 +309,7 @@
         "@midday/engine-client": "workspace:*",
         "@midday/supabase": "workspace:*",
         "@sindresorhus/slugify": "^2.2.1",
-        "@zip.js/zip.js": "^2.7.61",
+        "@zip.js/zip.js": "^2.7.62",
         "heic-convert": "1.2.4",
         "node-xlsx": "^0.24.0",
         "sharp": "0.34.1",
@@ -1445,7 +1445,7 @@
 
     "@xmldom/xmldom": ["@xmldom/xmldom@0.8.10", "", {}, "sha512-2WALfTl4xo2SkGCYRt6rDTFfk9R1czmBvUQy12gK2KuRKIpWEhcbbzy8EZXtz/jkRqHX8bFEc6FC1HjX4TUWYw=="],
 
-    "@zip.js/zip.js": ["@zip.js/zip.js@2.7.61", "", {}, "sha512-+tZvY10nkW0pJoU88XFWLBd2O9PJPvEnDhSY/jQHfIroN5W5qGfPgFHKC4lkx0+9Vw/0IAkNHf1XBVInBkM9Vw=="],
+    "@zip.js/zip.js": ["@zip.js/zip.js@2.7.62", "", {}, "sha512-OaLvZ8j4gCkLn048ypkZu29KX30r8/OfFF2w4Jo5WXFr+J04J+lzJ5TKZBVgFXhlvSkqNFQdfnY1Q8TMTCyBVA=="],
 
     "abort-controller": ["abort-controller@3.0.0", "", { "dependencies": { "event-target-shim": "^5.0.0" } }, "sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg=="],
 
