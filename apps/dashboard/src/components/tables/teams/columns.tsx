@@ -1,4 +1,3 @@
-import { changeTeamAction } from "@/actions/change-team-action";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -23,11 +22,11 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { toast } from "@midday/ui/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef, FilterFn, Row } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 
 const teamNameFilterFn: FilterFn<RouterOutputs["team"]["list"][number]> = (
   row: Row<RouterOutputs["team"]["list"][number]>,
@@ -79,6 +78,16 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
     id: "actions",
     cell: ({ row }) => {
       const trpc = useTRPC();
+      const queryClient = useQueryClient();
+      const router = useRouter();
+
+      const changeTeamMutation = useMutation(
+        trpc.user.update.mutationOptions({
+          onSuccess: () => {
+            queryClient.invalidateQueries();
+          },
+        }),
+      );
 
       const leaveTeamMutation = useMutation(
         trpc.team.leave.mutationOptions({
@@ -93,20 +102,23 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
         }),
       );
 
-      const viewTeam = useAction(changeTeamAction);
-      const manageTeam = useAction(changeTeamAction);
-
       return (
         <div className="flex justify-end">
           <div className="flex space-x-3 items-center">
             <SubmitButton
               variant="outline"
-              isSubmitting={viewTeam.status === "executing"}
+              isSubmitting={changeTeamMutation.isPending}
               onClick={() =>
-                viewTeam.execute({
-                  teamId: row.original.team?.id!,
-                  redirectTo: "/",
-                })
+                changeTeamMutation.mutate(
+                  {
+                    teamId: row.original.team?.id!,
+                  },
+                  {
+                    onSuccess: () => {
+                      router.push("/");
+                    },
+                  },
+                )
               }
             >
               View
@@ -114,12 +126,18 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
             {row.original.role === "owner" && (
               <SubmitButton
                 variant="outline"
-                isSubmitting={manageTeam.status === "executing"}
+                isSubmitting={changeTeamMutation.isPending}
                 onClick={() =>
-                  manageTeam.execute({
-                    teamId: row.original.team?.id!,
-                    redirectTo: "/settings",
-                  })
+                  changeTeamMutation.mutate(
+                    {
+                      teamId: row.original.team?.id!,
+                    },
+                    {
+                      onSuccess: () => {
+                        router.push("/settings");
+                      },
+                    },
+                  )
                 }
               >
                 Manage

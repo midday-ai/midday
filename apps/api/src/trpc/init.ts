@@ -1,16 +1,29 @@
 import { connectDb } from "@api/db";
+import type { Database } from "@api/db";
 import { createClient } from "@api/services/supabase";
 import { verifyAccessToken } from "@api/utils/auth";
+import type { Session } from "@api/utils/auth";
 import { getGeoContext } from "@api/utils/geo";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";
 import superjson from "superjson";
 import { withTeamAccess } from "./middleware/check-team-access";
 import { withPrimaryReadAfterWrite } from "./middleware/primary-read-after-write";
 
-export const createTRPCContext = async (_: unknown, c: Context) => {
+type TRPCContext = {
+  session: Session | null;
+  supabase: SupabaseClient;
+  db: Database;
+  geo: ReturnType<typeof getGeoContext>;
+  teamId?: string;
+};
+
+export const createTRPCContext = async (
+  _: unknown,
+  c: Context,
+): Promise<TRPCContext> => {
   const accessToken = c.req.header("Authorization")?.split(" ")[1];
-  const teamId = c.req.header("X-Team-Id");
   const session = await verifyAccessToken(accessToken);
   const supabase = await createClient(accessToken);
   const db = await connectDb();
@@ -18,14 +31,13 @@ export const createTRPCContext = async (_: unknown, c: Context) => {
 
   return {
     session,
-    teamId,
     supabase,
     db,
     geo,
   };
 };
 
-const t = initTRPC.context<typeof createTRPCContext>().create({
+const t = initTRPC.context<TRPCContext>().create({
   transformer: superjson,
 });
 

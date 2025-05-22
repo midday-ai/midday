@@ -2,7 +2,6 @@ import { updateSession } from "@midday/supabase/middleware";
 import { createClient } from "@midday/supabase/server";
 import { createI18nMiddleware } from "next-international/middleware";
 import { type NextRequest, NextResponse } from "next/server";
-import { selectedTeamIdCookieName } from "./utils/team";
 
 const I18nMiddleware = createI18nMiddleware({
   locales: ["en"],
@@ -83,16 +82,6 @@ export async function middleware(request: NextRequest) {
     ) {
       // Redirect to MFA verification if needed and not already there
       return NextResponse.redirect(`${url.origin}/mfa/verify`);
-    }
-
-    // 4. Check for team selection (Only if authenticated, setup complete, and MFA verified if necessary)
-    if (
-      newUrl.pathname !== "/mfa/verify" && // Ensure we don't redirect away from MFA verify
-      !newUrl.pathname.startsWith("/teams") && // Allow access to team pages
-      !request.cookies.has(selectedTeamIdCookieName) // Check if team cookie is missing
-    ) {
-      // Redirect to team selection page if no team is selected and not on a team-related page or MFA page
-      return NextResponse.redirect(`${url.origin}/teams`);
     }
   }
 

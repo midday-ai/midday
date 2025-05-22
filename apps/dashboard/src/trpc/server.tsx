@@ -1,6 +1,5 @@
 import "server-only";
 
-import { getTeamId } from "@/utils/team";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { createClient } from "@midday/supabase/server";
 import { HydrationBoundary } from "@tanstack/react-query";
@@ -35,7 +34,6 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
 
           return {
             Authorization: `Bearer ${session?.access_token}`,
-            "X-Team-Id": await getTeamId(),
           };
         },
       }),

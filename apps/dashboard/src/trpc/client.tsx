@@ -7,7 +7,6 @@ import { QueryClientProvider, isServer } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
-import { getCookie } from "cookies-next/client";
 import { useState } from "react";
 import superjson from "superjson";
 import { makeQueryClient } from "./query-client";
@@ -52,7 +51,6 @@ export function TRPCReactProvider(
 
             return {
               Authorization: `Bearer ${session?.access_token}`,
-              "X-Team-Id": getCookie("selected-team-id"),
             };
           },
         }),
