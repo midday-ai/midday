@@ -7,8 +7,8 @@ import { AssignedUser } from "./assigned-user";
 
 type User = {
   id: string;
-  avatar_url?: string | null;
-  full_name: string | null;
+  avatarUrl?: string | null;
+  fullName: string | null;
 };
 
 type Props = {
@@ -31,11 +31,15 @@ export function SelectUser({ onSelect }: Props) {
     return (
       <button
         type="button"
-        key={user.id}
+        key={user?.id}
         className="flex items-center text-sm cursor-default"
-        onClick={() => onSelect(user)}
+        onClick={() => {
+          if (user) {
+            onSelect(user);
+          }
+        }}
       >
-        <AssignedUser avatarUrl={user.avatar_url} fullName={user.full_name} />
+        <AssignedUser avatarUrl={user?.avatarUrl} fullName={user?.fullName} />
       </button>
     );
   });

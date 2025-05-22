@@ -8,7 +8,7 @@ import { CategoryColor } from "./category";
 type Selected = {
   id: string;
   name: string;
-  color: string | null;
+  color?: string | null;
   slug: string;
 };
 
@@ -48,6 +48,7 @@ export function SelectCategory({
     trpc.transactionCategories.get.queryOptions(),
   );
 
+  // @ts-expect-error - slug is not nullable
   const categories = data?.map(transformCategory) ?? [];
 
   const createCategoryMutation = useMutation(
@@ -62,13 +63,14 @@ export function SelectCategory({
             id: data.id,
             name: data.name,
             color: data.color,
-            slug: data.slug,
+            slug: data.slug!,
           });
         }
       },
     }),
   );
 
+  // @ts-expect-error - slug is not nullable
   const selectedValue = selected ? transformCategory(selected) : undefined;
 
   if (!selected && isLoading && !hideLoading) {

@@ -118,6 +118,7 @@ export function LineItems() {
         {fields.map((field, index) => (
           <LineItemRow
             key={field.id}
+            // @ts-expect-error
             item={field}
             index={index}
             handleRemove={handleRemove}

@@ -437,7 +437,7 @@ export async function getInvoiceSummary(
     .select({
       currency: invoices.currency,
       totalAmount: sql<number>`COALESCE(SUM(${invoices.amount}), 0)`,
-      invoiceCount: sql<number>`COUNT(*)`,
+      invoiceCount: sql<number>`COUNT(*)::int`,
     })
     .from(invoices)
     .where(and(...whereConditions))

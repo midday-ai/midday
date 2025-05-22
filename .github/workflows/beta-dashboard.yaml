@@ -23,12 +23,12 @@ jobs:
         run: bun install
       - name: 🏗 Build @midday/engine
         run: bunx turbo run build --filter=@midday/engine...
-      # - name: 🔦 Run linter
-      #   run: bun run lint
-      #   working-directory: ./apps/dashboard
-      # - name: 🪐 Check TypeScript
-      #   run: bun run typecheck
-      #   working-directory: ./apps/dashboard
+      - name: 🔦 Run linter
+        run: bun run lint
+        working-directory: ./apps/dashboard
+      - name: 🪐 Check TypeScript
+        run: bun run typecheck
+        working-directory: ./apps/dashboard
       - name: 🧪 Run unit tests
         run: bunx run test
       - name: 📤 Pull Vercel Environment Information

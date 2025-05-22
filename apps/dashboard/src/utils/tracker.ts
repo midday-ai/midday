@@ -115,7 +115,7 @@ export const transformTrackerData = (
     start: start.toISOString(),
     stop: stop.toISOString(),
     trackerProject: {
-      id: event.trackerProject?.id || "",
+      id: event.trackerProject?.id!,
       name: event.trackerProject?.name || "",
       currency: event.trackerProject?.currency ?? null,
       rate: event.trackerProject?.rate ?? null,
