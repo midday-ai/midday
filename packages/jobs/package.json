@@ -20,7 +20,7 @@
     "@zip.js/zip.js": "^2.7.61",
     "heic-convert": "1.2.4",
     "node-xlsx": "^0.24.0",
-    "sharp": "^0.34.2"
+    "sharp": "0.34.1"
   },
   "devDependencies": {
     "trigger.dev": "3.3.17",
