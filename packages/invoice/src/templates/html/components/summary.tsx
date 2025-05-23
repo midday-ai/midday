@@ -1,5 +1,5 @@
+import type { LineItem } from "../../../types";
 import { calculateTotal } from "../../../utils/calculate";
-import type { LineItem } from "../../types";
 
 type Props = {
   includeVat: boolean;

@@ -1,4 +1,4 @@
-import type { EditorDoc } from "../types";
+import type { EditorDoc } from "../../types";
 
 export function formatEditorContent(doc?: EditorDoc) {
   if (!doc || !doc.content) {

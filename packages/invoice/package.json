@@ -18,7 +18,8 @@
     "./editor": "./src/editor/index.tsx",
     "./calculate": "./src/utils/calculate.ts",
     "./format-to-html": "./src/templates/html/format.tsx",
-    "./content": "./src/utils/content.ts"
+    "./content": "./src/utils/content.ts",
+    "./types": "./src/types.ts"
   },
   "dependencies": {
     "@midday/ui": "workspace:*",

@@ -1,7 +1,7 @@
 import type { Database } from "@api/db";
 import { customers, invoiceStatusEnum, invoices, teams } from "@api/db/schema";
 import { buildSearchQuery } from "@api/utils/search";
-import type { EditorDoc, LineItem } from "@midday/invoice";
+import type { EditorDoc, LineItem } from "@midday/invoice/types";
 import camelcaseKeys from "camelcase-keys";
 import { addMonths } from "date-fns";
 import { and, asc, desc, eq, gte, ilike, inArray, lte, sql } from "drizzle-orm";

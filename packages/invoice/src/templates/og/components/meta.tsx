@@ -1,6 +1,6 @@
 import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns";
-import type { Template } from "../../types";
+import type { Template } from "../../../types";
 
 type Props = {
   template: Template;
