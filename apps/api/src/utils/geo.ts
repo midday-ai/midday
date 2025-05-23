@@ -8,14 +8,6 @@ export function getGeoContext(req: HonoRequest) {
   const timezone = headers["x-user-timezone"] ?? null;
   const ip = headers["x-forwarded-for"] ?? null;
 
-  console.log({
-    msg: "Geo context",
-    country,
-    locale,
-    timezone,
-    ip,
-  });
-
   return {
     country,
     locale,

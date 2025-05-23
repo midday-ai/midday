@@ -175,3 +175,7 @@ export const remindInvoiceSchema = z.object({
 export const duplicateInvoiceSchema = z.object({
   id: z.string().uuid(),
 });
+
+export const getInvoiceByTokenSchema = z.object({
+  token: z.string(),
+});

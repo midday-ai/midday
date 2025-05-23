@@ -39,53 +39,6 @@ export async function getUserInviteQuery(
     .single();
 }
 
-export async function getInvoiceByIdQuery(supabase: Client, id: string) {
-  return supabase
-    .from("invoices")
-    .select(
-      `
-      id,
-      due_date,
-      invoice_number,
-      amount,
-      created_at,
-      currency,
-      line_items,
-      payment_details,
-      customer_details,
-      reminder_sent_at,
-      updated_at,
-      status,
-      note,
-      internal_note,
-      paid_at,
-      vat,
-      tax,
-      file_path,
-      viewed_at,
-      from_details,
-      issue_date,
-      template,
-      sent_at,
-      note_details,
-      customer_name,
-      customer_id,
-      token,
-      sent_to,
-      discount,
-      subtotal,
-      top_block,
-      bottom_block,
-      customer:customer_id(name, website, email),
-      team:team_id(name),
-      vat,
-      tax
-    `,
-    )
-    .eq("id", id)
-    .single();
-}
-
 export async function getTeamByIdQuery(supabase: Client, teamId: string) {
   return supabase.from("teams").select("*").eq("id", teamId).single();
 }

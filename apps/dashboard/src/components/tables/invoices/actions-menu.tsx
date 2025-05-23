@@ -138,11 +138,7 @@ export function ActionsMenu({ row }: Props) {
 
           {row.status !== "draft" && (
             <DropdownMenuItem>
-              <a
-                // @ts-expect-error
-                href={`/api/download/invoice?id=${row.id}&size=${row.template?.size === "a4" ? "a4" : "letter"}`}
-                download
-              >
+              <a href={`/api/download/invoice?id=${row.id}`} download>
                 Download
               </a>
             </DropdownMenuItem>

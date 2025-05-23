@@ -5,7 +5,7 @@ import { InvoiceStatus } from "./invoice-status";
 type Props = {
   name: string;
   website?: string | null;
-  status: "overdue" | "paid" | "unpaid" | "draft" | "canceled";
+  status?: "overdue" | "paid" | "unpaid" | "draft" | "canceled";
 };
 
 export default function CustomerHeader({ name, website, status }: Props) {

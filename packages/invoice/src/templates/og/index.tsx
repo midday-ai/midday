@@ -1,69 +1,61 @@
-import type { EditorDoc, Template } from "../types";
+import type { Invoice } from "../types";
 import { EditorContent } from "./components/editor-content";
 import { Header } from "./components/header";
 import { Logo } from "./components/logo";
 import { Meta } from "./components/meta";
 
 type Props = {
+  data: Invoice;
   isValidLogo: boolean;
-  name: string;
-  logoUrl: string;
-  status: "draft" | "overdue" | "paid" | "unpaid" | "canceled";
-  invoice_number: string;
-  issue_date: string;
-  due_date: string;
-  template: Template;
-  customer_details: EditorDoc;
-  from_details: EditorDoc;
 };
 
-export function OgTemplate({
-  invoice_number,
-  issue_date,
-  due_date,
-  template,
-  customer_details,
-  from_details,
-  status,
-  name,
-  logoUrl,
-  isValidLogo,
-}: Props) {
+export function OgTemplate({ data, isValidLogo }: Props) {
+  const {
+    customerName,
+    status,
+    template,
+    invoiceNumber,
+    issueDate,
+    dueDate,
+    fromDetails,
+    customerDetails,
+  } = data;
+
   return (
     <div tw="h-full w-full flex flex-col bg-[#0C0C0C] font-[GeistMono] p-16 py-8">
       <Header
-        customerName={name}
+        customerName={customerName || ""}
         status={status}
-        logoUrl={logoUrl}
+        logoUrl={template.logoUrl}
         isValidLogo={isValidLogo}
       />
 
       <div tw="flex flex-col">
-        <Logo src={template.logo_url} customerName={name} />
+        <Logo src={template.logoUrl} customerName={customerName || ""} />
       </div>
 
       <Meta
         template={template}
-        invoiceNumber={invoice_number}
-        issueDate={issue_date}
-        dueDate={due_date}
+        invoiceNumber={invoiceNumber}
+        issueDate={issueDate}
+        dueDate={dueDate}
       />
 
       <div tw="flex justify-between mt-10">
         <div tw="flex flex-col flex-1 max-w-[50%]">
           <span tw="text-[#858585] text-[22px] font-[GeistMono] mb-1">
-            {template.from_label}
+            {template.fromLabel}
           </span>
-          <EditorContent content={from_details} />
+          <EditorContent content={fromDetails} />
         </div>
 
         <div tw="w-12" />
 
         <div tw="flex flex-col flex-1 max-w-[50%]">
           <span tw="text-[#858585] text-[22px] font-[GeistMono] mb-1">
-            {template.customer_label}
+            {template.customerLabel}
           </span>
-          <EditorContent content={customer_details} />
+          <EditorContent content={customerDetails} />
         </div>
       </div>
     </div>

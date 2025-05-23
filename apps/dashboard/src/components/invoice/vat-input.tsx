@@ -6,7 +6,7 @@ export function VATInput() {
   const {
     field: { value, onChange },
   } = useController({
-    name: "template.vat_rate",
+    name: "template.vatRate",
     control,
   });
 

@@ -1,9 +1,48 @@
 import type { Database } from "@api/db";
 import { customers, invoiceStatusEnum, invoices, teams } from "@api/db/schema";
 import { buildSearchQuery } from "@api/utils/search";
+import type { EditorDoc, LineItem } from "@midday/invoice";
+import camelcaseKeys from "camelcase-keys";
 import { addMonths } from "date-fns";
 import { and, asc, desc, eq, gte, ilike, inArray, lte, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
+
+export type Template = {
+  customerLabel: string;
+  title: string;
+  fromLabel: string;
+  invoiceNoLabel: string;
+  issueDateLabel: string;
+  dueDateLabel: string;
+  descriptionLabel: string;
+  priceLabel: string;
+  quantityLabel: string;
+  totalLabel: string;
+  totalSummaryLabel: string;
+  vatLabel: string;
+  subtotalLabel: string;
+  taxLabel: string;
+  discountLabel: string;
+  timezone: string;
+  paymentLabel: string;
+  noteLabel: string;
+  logoUrl: string | null;
+  currency: string;
+  paymentDetails: EditorDoc | null;
+  fromDetails: EditorDoc | null;
+  dateFormat: string;
+  includeVat: boolean;
+  includeTax: boolean;
+  includeDiscount: boolean;
+  includeDecimals: boolean;
+  includeUnits: boolean;
+  includeQr: boolean;
+  taxRate: number;
+  vatRate: number;
+  size: "a4" | "letter";
+  deliveryType: "create" | "create_and_send";
+  locale: string;
+};
 
 export type GetInvoicesParams = {
   teamId: string;
@@ -219,7 +258,23 @@ export async function getInvoiceById(db: Database, id: string) {
     .leftJoin(teams, eq(invoices.teamId, teams.id))
     .where(eq(invoices.id, id));
 
-  return result;
+  if (!result) {
+    return null;
+  }
+
+  return {
+    ...result,
+    template: camelcaseKeys(result?.template as Record<string, unknown>, {
+      deep: true,
+    }) as Template,
+    lineItems: result.lineItems as LineItem[],
+    paymentDetails: result.paymentDetails as EditorDoc | null,
+    customerDetails: result.customerDetails as EditorDoc | null,
+    fromDetails: result.fromDetails as EditorDoc | null,
+    noteDetails: result.noteDetails as EditorDoc | null,
+    topBlock: result.topBlock as EditorDoc | null,
+    bottomBlock: result.bottomBlock as EditorDoc | null,
+  };
 }
 
 type PaymentStatusResult = {
@@ -293,6 +348,15 @@ export async function getNextInvoiceNumber(
   return row.next_invoice_number as string;
 }
 
+type DraftInvoiceLineItemParams = {
+  name?: string;
+  quantity?: number;
+  unit?: string | null;
+  price?: number;
+  vat?: number;
+  tax?: number;
+};
+
 type DraftInvoiceTemplateParams = {
   customerLabel?: string;
   title?: string;
@@ -328,15 +392,6 @@ type DraftInvoiceTemplateParams = {
   size?: "a4" | "letter";
   deliveryType?: "create" | "create_and_send";
   locale?: string;
-};
-
-type DraftInvoiceLineItemParams = {
-  name?: string;
-  quantity?: number;
-  unit?: string | null;
-  price?: number;
-  vat?: number;
-  tax?: number;
 };
 
 type DraftInvoiceParams = {
@@ -404,7 +459,7 @@ export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
         token,
         ...restInput,
         currency: template.currency?.toUpperCase(),
-        template: restTemplate,
+        template: camelcaseKeys(restTemplate, { deep: true }),
         paymentDetails: paymentDetails,
         fromDetails: fromDetails,
         customerDetails: customerDetails,

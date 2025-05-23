@@ -12,11 +12,10 @@ import { MdContentCopy, MdOutlineFileDownload } from "react-icons/md";
 import { useCopyToClipboard } from "usehooks-ts";
 
 type Props = {
-  id: string;
-  size?: "letter" | "a4" | null;
+  token: string;
 };
 
-export default function InvoiceToolbar({ id, size }: Props) {
+export default function InvoiceToolbar({ token }: Props) {
   const [, copy] = useCopyToClipboard();
 
   const handleCopyLink = () => {
@@ -35,7 +34,7 @@ export default function InvoiceToolbar({ id, size }: Props) {
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <a href={`/api/download/invoice?id=${id}&size=${size}`} download>
+              <a href={`/api/download/invoice?token=${token}`} download>
                 <Button
                   variant="ghost"
                   size="icon"

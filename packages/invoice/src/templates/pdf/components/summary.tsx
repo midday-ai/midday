@@ -2,17 +2,17 @@ import { formatAmount } from "@midday/utils/format";
 import { Text, View } from "@react-pdf/renderer";
 
 interface SummaryProps {
-  amount: number;
-  tax?: number;
+  amount?: number | null;
+  tax?: number | null;
   taxRate?: number;
-  vat?: number;
+  vat?: number | null;
   vatRate?: number;
-  currency: string;
+  currency?: string | null;
   totalLabel: string;
   taxLabel: string;
   vatLabel: string;
   locale: string;
-  discount?: number;
+  discount?: number | null;
   discountLabel: string;
   includeDiscount: boolean;
   includeVAT: boolean;
@@ -57,12 +57,13 @@ export function Summary({
       <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
         <Text style={{ fontSize: 9, flex: 1 }}>{subtotalLabel}</Text>
         <Text style={{ fontSize: 9, textAlign: "right" }}>
-          {formatAmount({
-            currency,
-            amount: subtotal,
-            locale,
-            maximumFractionDigits,
-          })}
+          {currency &&
+            formatAmount({
+              currency,
+              amount: subtotal,
+              locale,
+              maximumFractionDigits,
+            })}
         </Text>
       </View>
 
@@ -70,12 +71,13 @@ export function Summary({
         <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
           <Text style={{ fontSize: 9, flex: 1 }}>{discountLabel}</Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
-            {formatAmount({
-              currency,
-              amount: discount,
-              locale,
-              maximumFractionDigits,
-            })}
+            {currency &&
+              formatAmount({
+                currency,
+                amount: discount,
+                locale,
+                maximumFractionDigits,
+              })}
           </Text>
         </View>
       )}
@@ -86,12 +88,13 @@ export function Summary({
             {vatLabel} ({vatRate}%)
           </Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
-            {formatAmount({
-              currency,
-              amount: vat || 0,
-              locale,
-              maximumFractionDigits,
-            })}
+            {currency &&
+              formatAmount({
+                currency,
+                amount: vat || 0,
+                locale,
+                maximumFractionDigits,
+              })}
           </Text>
         </View>
       )}
@@ -102,12 +105,13 @@ export function Summary({
             {taxLabel} ({taxRate}%)
           </Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
-            {formatAmount({
-              currency,
-              amount: tax || 0,
-              locale,
-              maximumFractionDigits,
-            })}
+            {currency &&
+              formatAmount({
+                currency,
+                amount: tax || 0,
+                locale,
+                maximumFractionDigits,
+              })}
           </Text>
         </View>
       )}
@@ -126,7 +130,9 @@ export function Summary({
       >
         <Text style={{ fontSize: 9, marginRight: 10 }}>{totalLabel}</Text>
         <Text style={{ fontSize: 21 }}>
-          {formatAmount({ currency, amount, locale, maximumFractionDigits })}
+          {currency &&
+            amount &&
+            formatAmount({ currency, amount, locale, maximumFractionDigits })}
         </Text>
       </View>
     </View>

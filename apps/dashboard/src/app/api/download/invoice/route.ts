@@ -1,17 +1,17 @@
+import { trpc } from "@/trpc/server";
+import { getQueryClient } from "@/trpc/server";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { PdfTemplate, renderToStream } from "@midday/invoice";
-import { getInvoiceByIdQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 
 const paramsSchema = z.object({
-  id: z.string().uuid(),
-  size: z.enum(["letter", "a4"]).default("a4"),
+  id: z.string().uuid().optional(),
+  token: z.string().optional(),
   preview: z.preprocess((val) => val === "true", z.boolean().default(false)),
 });
 
 export async function GET(req: NextRequest) {
-  const supabase = await createClient({ admin: true });
   const requestUrl = new URL(req.url);
 
   const result = paramsSchema.safeParse(
@@ -22,16 +22,27 @@ export async function GET(req: NextRequest) {
     return new Response("Invalid parameters", { status: 400 });
   }
 
-  const { id, size, preview } = result.data;
+  const queryClient = getQueryClient();
 
-  const { data } = await getInvoiceByIdQuery(supabase, id);
+  const { id, token, preview } = result.data;
+
+  let data: RouterOutputs["invoice"]["getInvoiceByToken"] | null = null;
+
+  if (id) {
+    data = await queryClient.fetchQuery(
+      trpc.invoice.getById.queryOptions({ id }),
+    );
+  } else if (token) {
+    data = await queryClient.fetchQuery(
+      trpc.invoice.getInvoiceByToken.queryOptions({ token }),
+    );
+  }
 
   if (!data) {
     return new Response("Invoice not found", { status: 404 });
   }
 
-  // @ts-expect-error - template.size is not typed (JSONB)
-  const stream = await renderToStream(await PdfTemplate({ ...data, size }));
+  const stream = await renderToStream(await PdfTemplate(data));
 
   // @ts-expect-error - stream is not assignable to BodyInit
   const blob = await new Response(stream).blob();
@@ -43,7 +54,7 @@ export async function GET(req: NextRequest) {
 
   if (!preview) {
     headers["Content-Disposition"] =
-      `attachment; filename="${data.invoice_number}.pdf"`;
+      `attachment; filename="${data.invoiceNumber}.pdf"`;
   }
 
   return new Response(blob, { headers });
