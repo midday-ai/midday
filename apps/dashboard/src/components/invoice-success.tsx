@@ -76,8 +76,11 @@ export function InvoiceSuccess() {
               </div>
 
               <span className="font-mono text-[11px]">
-                {/* @ts-expect-error - template is JSONB */}
-                {format(new Date(invoice.dueDate), invoice.template.dateFormat)}
+                {format(
+                  new Date(invoice.dueDate!),
+                  // @ts-expect-error - template is JSONB
+                  invoice.template.date_format,
+                )}
               </span>
             </div>
           </motion.div>
