@@ -7,7 +7,7 @@ export type Attachment = {
   name: string;
   size: number;
   path: string[];
-  transaction_id?: string;
+  transactionId?: string;
 };
 
 type CreateAttachmentsParams = {

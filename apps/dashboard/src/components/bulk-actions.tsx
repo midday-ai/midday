@@ -144,7 +144,7 @@ export function BulkActions({ ids }: Props) {
                   onCheckedChange={() => {
                     updateTransactionsMutation.mutate({
                       ids,
-                      internal: true,
+                      status: "excluded",
                     });
                   }}
                 >
@@ -154,7 +154,7 @@ export function BulkActions({ ids }: Props) {
                   onCheckedChange={() => {
                     updateTransactionsMutation.mutate({
                       ids,
-                      internal: false,
+                      status: "posted",
                     });
                   }}
                 >

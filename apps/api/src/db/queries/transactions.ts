@@ -142,20 +142,49 @@ export async function getTransactions(
     whereConditions.push(sql`COALESCE(tas.has_attachment_val, 0) = 1`);
   }
 
-  // Status filtering logic revised
+  // Status filtering - converted from your original query logic
   const activeStatusesToFilter: TransactionStatus[] = [];
   let isArchivedFiltered = false;
   let isExcludedFiltered = false;
+  let isUncompletedFiltered = false;
+  let isCompletedFiltered = false;
 
   if (statuses && statuses.length > 0) {
+    // Handle "excluded" status
     if (statuses.includes("excluded")) {
-      whereConditions.push(eq(transactions.internal, true));
+      whereConditions.push(eq(transactions.status, "excluded"));
       isExcludedFiltered = true;
     }
+
+    // Handle "archived" status
     if (statuses.includes("archived")) {
       whereConditions.push(eq(transactions.status, "archived"));
       isArchivedFiltered = true;
     }
+
+    // Handle "uncompleted" status (isFulfilled = false)
+    if (statuses.includes("uncompleted")) {
+      whereConditions.push(
+        and(
+          sql`tas.has_attachment_val IS NULL`,
+          ne(transactions.status, "completed"),
+        ),
+      );
+      isUncompletedFiltered = true;
+    }
+
+    // Handle "completed" status (isFulfilled = true)
+    if (statuses.includes("completed")) {
+      whereConditions.push(
+        or(
+          sql`COALESCE(tas.has_attachment_val, 0) = 1`,
+          eq(transactions.status, "completed"),
+        ),
+      );
+      isCompletedFiltered = true;
+    }
+
+    // Handle standard transaction statuses
     for (const s of statuses) {
       if (s === "pending" || s === "posted" || s === "completed") {
         if (transactionStatusEnum.enumValues.includes(s as TransactionStatus)) {
@@ -165,12 +194,22 @@ export async function getTransactions(
     }
   }
 
+  // Apply active status filters if any, otherwise use defaults
   if (activeStatusesToFilter.length > 0) {
     whereConditions.push(inArray(transactions.status, activeStatusesToFilter));
-  } else if (!isArchivedFiltered && !isExcludedFiltered) {
+  } else if (
+    !isArchivedFiltered &&
+    !isExcludedFiltered &&
+    !isUncompletedFiltered &&
+    !isCompletedFiltered
+  ) {
     // Default to pending, posted, completed if no other status filter is applied
+    // Exclude transactions with status "excluded" by default
     whereConditions.push(
-      inArray(transactions.status, ["pending", "posted", "completed"]),
+      and(
+        inArray(transactions.status, ["posted", "completed"]),
+        ne(transactions.status, "excluded"),
+      ),
     );
   }
 
@@ -307,6 +346,17 @@ export async function getTransactions(
           ))
         END
       `.as("vat"),
+      attachments: sql<
+        Array<{
+          id: string;
+          filename: string | null;
+          path: string | null;
+          type: string;
+          size: number;
+        }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transactionAttachments.id}, 'filename', ${transactionAttachments.name}, 'path', ${transactionAttachments.path}, 'type', ${transactionAttachments.type}, 'size', ${transactionAttachments.size})) FILTER (WHERE ${transactionAttachments.id} IS NOT NULL), '[]'::json)`.as(
+        "attachments",
+      ),
       assigned: {
         id: users.id,
         fullName: users.fullName,
@@ -375,6 +425,10 @@ export async function getTransactions(
     .leftJoin(
       tags,
       and(eq(tags.id, transactionTags.tagId), eq(tags.teamId, teamId)),
+    )
+    .leftJoin(
+      transactionAttachments,
+      eq(transactionAttachments.transactionId, transactions.id),
     )
     .where(and(...finalWhereConditions))
     .groupBy(
@@ -595,10 +649,11 @@ export async function getTransactionById(db: Database, transactionId: string) {
       transactions.id,
       users.id,
       transactionCategories.id,
+      transactionCategories.name,
+      transactionCategories.color,
+      transactionCategories.slug,
       bankAccounts.id,
       bankConnections.id,
-      // transactionAttachmentStatus.has_attachment_val, // from removed CTE
-      // Add all other non-aggregated selected columns from transactions table to GROUP BY
       transactions.date,
       transactions.amount,
       transactions.currency,
@@ -987,7 +1042,7 @@ export async function createTransaction(
     await createAttachments(db, {
       attachments: attachments.map((attachment) => ({
         ...attachment,
-        transaction_id: result.id,
+        transactionId: result.id,
       })),
       teamId,
     });
