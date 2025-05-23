@@ -1,4 +1,4 @@
-import type { Invoice } from "../types";
+import type { Invoice } from "../../types";
 import { EditorContent } from "./components/editor-content";
 import { Header } from "./components/header";
 import { Logo } from "./components/logo";
