@@ -19,10 +19,17 @@ export const getTeamById = async (db: Database, id: string) => {
   return result;
 };
 
+type UpdateTeamParams = {
+  id: string;
+  data: Partial<typeof teams.$inferInsert>;
+};
+
 export const updateTeamById = async (
   db: Database,
-  { id, data }: { id: string; data: Partial<typeof teams.$inferInsert> },
+  params: UpdateTeamParams,
 ) => {
+  const { id, data } = params;
+
   const [result] = await db
     .update(teams)
     .set(data)
@@ -42,7 +49,10 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
   return db.transaction(async (tx) => {
     const [newTeam] = await tx
       .insert(teams)
-      .values({ name: params.name, baseCurrency: params.baseCurrency })
+      .values({
+        name: params.name,
+        baseCurrency: params.baseCurrency,
+      })
       .returning({ id: teams.id });
 
     if (!newTeam?.id) {

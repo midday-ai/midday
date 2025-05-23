@@ -11,7 +11,7 @@ const cache = new LRUCache<string, boolean>({
   ttl: 1000 * 60 * 30, // 30 minutes in milliseconds
 });
 
-export const withTeamAccess = async <TReturn>(opts: {
+export const withTeamPermission = async <TReturn>(opts: {
   ctx: {
     session?: Session | null;
     db: Database;

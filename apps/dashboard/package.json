@@ -30,11 +30,11 @@
     "@novu/headless": "^2.6.6",
     "@number-flow/react": "^0.5.9",
     "@polar-sh/nextjs": "^0.4.0",
-    "@polar-sh/sdk": "^0.32.15",
+    "@polar-sh/sdk": "^0.32.16",
     "@react-google-maps/api": "^2.20.6",
     "@react-pdf/renderer": "^4.3.0",
-    "@tanstack/react-query": "^5.76.1",
-    "@tanstack/react-query-devtools": "^5.76.1",
+    "@tanstack/react-query": "^5.76.2",
+    "@tanstack/react-query-devtools": "^5.76.2",
     "@tanstack/react-table": "^8.21.3",
     "@team-plain/typescript-sdk": "^5.9.0",
     "@todesktop/client-core": "^1.18.1",
@@ -77,7 +77,7 @@
     "tus-js-client": "4.3.1",
     "use-places-autocomplete": "^4.0.1",
     "usehooks-ts": "^3.1.1",
-    "zod": "^3.25.20",
+    "zod": "^3.25.23",
     "zustand": "^5.0.5"
   },
   "devDependencies": {

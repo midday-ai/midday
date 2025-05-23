@@ -8,8 +8,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";
 import superjson from "superjson";
-import { withTeamAccess } from "./middleware/check-team-access";
 import { withPrimaryReadAfterWrite } from "./middleware/primary-read-after-write";
+import { withTeamPermission } from "./middleware/team-permission";
 
 type TRPCContext = {
   session: Session | null;
@@ -52,8 +52,8 @@ const withPrimaryDbMiddleware = t.middleware(async (opts) => {
   });
 });
 
-const withTeamCheckMiddleware = t.middleware(async (opts) => {
-  return withTeamAccess({
+const withTeamPermissionMiddleware = t.middleware(async (opts) => {
+  return withTeamPermission({
     ctx: opts.ctx,
     next: opts.next,
   });
@@ -62,7 +62,7 @@ const withTeamCheckMiddleware = t.middleware(async (opts) => {
 export const publicProcedure = t.procedure.use(withPrimaryDbMiddleware);
 
 export const protectedProcedure = t.procedure
-  .use(withTeamCheckMiddleware) // NOTE: This is needed to ensure that the teamId is set in the context
+  .use(withTeamPermissionMiddleware) // NOTE: This is needed to ensure that the teamId is set in the context
   .use(withPrimaryDbMiddleware)
   .use(async (opts) => {
     const { teamId, session } = opts.ctx;
