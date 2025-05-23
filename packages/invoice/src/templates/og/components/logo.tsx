@@ -1,5 +1,5 @@
 type Props = {
-  src?: string;
+  src?: string | null;
   customerName: string;
 };
 

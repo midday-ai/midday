@@ -2,9 +2,9 @@ import { Avatar } from "./avatar";
 import { Status } from "./status";
 
 type Props = {
-  customerName: string;
+  customerName: string | null;
   status: "draft" | "overdue" | "paid" | "unpaid" | "canceled";
-  logoUrl?: string;
+  logoUrl?: string | null;
   isValidLogo: boolean;
 };
 
@@ -14,7 +14,7 @@ export function Header({ customerName, status, logoUrl, isValidLogo }: Props) {
       <Avatar
         logoUrl={logoUrl}
         isValidLogo={isValidLogo}
-        customerName={customerName}
+        customerName={customerName || ""}
       />
       <Status status={status} />
     </div>

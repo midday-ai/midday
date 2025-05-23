@@ -13,15 +13,21 @@ import {
 } from "@api/db/queries/invoices";
 import { getTeamById } from "@api/db/queries/teams";
 import { getUserById } from "@api/db/queries/users";
-import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@api/trpc/init";
 import { parseInputValue } from "@api/utils/parse";
 import { UTCDate } from "@date-fns/utc";
 import { generateToken } from "@midday/invoice/token";
+import { verify } from "@midday/invoice/token";
 import type {
   GenerateInvoicePayload,
   SendInvoiceReminderPayload,
 } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk/v3";
+import { TRPCError } from "@trpc/server";
 import { addMonths } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -30,6 +36,7 @@ import {
   draftInvoiceSchema,
   duplicateInvoiceSchema,
   getInvoiceByIdSchema,
+  getInvoiceByTokenSchema,
   getInvoicesSchema,
   invoiceSummarySchema,
   remindInvoiceSchema,
@@ -89,6 +96,20 @@ export const invoiceRouter = createTRPCRouter({
     .input(getInvoiceByIdSchema)
     .query(async ({ input, ctx: { db } }) => {
       return getInvoiceById(db, input.id);
+    }),
+
+  getInvoiceByToken: publicProcedure
+    .input(getInvoiceByTokenSchema)
+    .query(async ({ input, ctx: { db } }) => {
+      const { id } = (await verify(decodeURIComponent(input.token))) as {
+        id: string;
+      };
+
+      if (!id) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      return getInvoiceById(db, id);
     }),
 
   paymentStatus: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {

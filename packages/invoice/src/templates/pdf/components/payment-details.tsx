@@ -3,7 +3,7 @@ import type { EditorDoc } from "../../types";
 import { EditorContent } from "./editor-content";
 
 type Props = {
-  content?: EditorDoc;
+  content?: EditorDoc | null;
   paymentLabel?: string;
 };
 

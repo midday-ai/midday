@@ -104,16 +104,14 @@ export function InvoiceDetails() {
           <div className="h-3 space-x-2">
             {vat !== 0 && vat != null && currency && (
               <span className="text-[#606060] text-xs select-text">
-                {/* @ts-expect-error - vat_label is not typed (JSONB) */}
-                {template?.vat_label}{" "}
+                {template?.vatLabel}{" "}
                 <FormatAmount amount={vat} currency={currency} />
               </span>
             )}
 
             {tax !== 0 && tax != null && currency && (
               <span className="text-[#606060] text-xs select-text">
-                {/* @ts-expect-error - tax_label is not typed (JSONB) */}
-                {template?.tax_label}{" "}
+                {template?.taxLabel}{" "}
                 <FormatAmount amount={tax} currency={currency} />
               </span>
             )}
@@ -198,11 +196,7 @@ export function InvoiceDetails() {
             </div>
 
             {status !== "draft" && (
-              <a
-                // @ts-expect-error - template?.size is not typed (JSONB)
-                href={`/api/download/invoice?id=${id}&size=${template?.size}`}
-                download
-              >
+              <a href={`/api/download/invoice?id=${id}`} download>
                 <Button
                   variant="secondary"
                   className="size-[38px] hover:bg-secondary shrink-0"

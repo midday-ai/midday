@@ -15,7 +15,7 @@ describe("calculateTotal", () => {
   it("should calculate VAT correctly when included", () => {
     const result = calculateTotal({
       lineItems: sampleLineItems,
-      includeVAT: true,
+      includeVat: true,
       vatRate: 10,
     });
     expect(result.vat).toBe(25); // 250 * 0.1
@@ -24,7 +24,7 @@ describe("calculateTotal", () => {
   it("should not include VAT when disabled", () => {
     const result = calculateTotal({
       lineItems: sampleLineItems,
-      includeVAT: false,
+      includeVat: false,
       vatRate: 10,
     });
     expect(result.vat).toBe(0);
@@ -34,7 +34,7 @@ describe("calculateTotal", () => {
     const result = calculateTotal({
       lineItems: sampleLineItems,
       discount: 20,
-      includeVAT: true,
+      includeVat: true,
       vatRate: 10,
     });
     expect(result.total).toBe(255); // (250 + 25 - 20)
@@ -45,7 +45,7 @@ describe("calculateTotal", () => {
       lineItems: sampleLineItems,
       taxRate: 15,
       includeTax: true,
-      includeVAT: true,
+      includeVat: true,
       vatRate: 10,
     });
     expect(result.tax).toBe(41.25); // (250 + 25) * 0.15

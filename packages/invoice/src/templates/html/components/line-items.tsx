@@ -5,7 +5,7 @@ import { Description } from "./description";
 
 type Props = {
   lineItems: LineItem[];
-  currency: string;
+  currency: string | null;
   descriptionLabel: string;
   quantityLabel: string;
   priceLabel: string;
@@ -49,14 +49,15 @@ export function LineItems({
           </div>
           <div className="text-[11px] self-start">{item.quantity}</div>
           <div className="text-[11px] self-start">
-            {includeUnits && item.unit
+            {currency && includeUnits && item.unit
               ? `${formatAmount({
                   currency,
                   amount: item.price,
                   maximumFractionDigits,
                   locale,
                 })}/${item.unit}`
-              : formatAmount({
+              : currency &&
+                formatAmount({
                   currency,
                   amount: item.price,
                   maximumFractionDigits,
@@ -64,15 +65,16 @@ export function LineItems({
                 })}
           </div>
           <div className="text-[11px] text-right self-start">
-            {formatAmount({
-              maximumFractionDigits,
-              currency,
-              amount: calculateLineItemTotal({
-                price: item.price,
-                quantity: item.quantity,
-              }),
-              locale,
-            })}
+            {currency &&
+              formatAmount({
+                maximumFractionDigits,
+                currency,
+                amount: calculateLineItemTotal({
+                  price: item.price,
+                  quantity: item.quantity,
+                }),
+                locale,
+              })}
           </div>
         </div>
       ))}

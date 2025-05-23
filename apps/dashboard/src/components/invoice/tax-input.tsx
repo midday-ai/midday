@@ -6,7 +6,7 @@ export function TaxInput() {
   const {
     field: { value, onChange },
   } = useController({
-    name: "template.tax_rate",
+    name: "template.taxRate",
     control,
   });
 

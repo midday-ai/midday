@@ -4,19 +4,16 @@ import type { Template } from "../../types";
 
 type Props = {
   template: Template;
-  invoiceNumber: string;
-  issueDate: string;
-  dueDate: string;
-  timezone: string;
+  invoiceNumber: string | null;
+  issueDate?: string | null;
+  dueDate?: string | null;
 };
 
-export function Meta({
-  template,
-  invoiceNumber,
-  issueDate,
-  dueDate,
-  timezone,
-}: Props) {
+export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
+  if (!template) {
+    return null;
+  }
+
   return (
     <div className="mb-2">
       <h2 className="text-[21px] font-medium font-mono mb-1 w-fit min-w-[100px]">
@@ -26,7 +23,7 @@ export function Meta({
         <div className="flex space-x-1 items-center">
           <div className="flex items-center flex-shrink-0 space-x-1">
             <span className="truncate font-mono text-[11px] text-[#878787]">
-              {template.invoice_no_label}:
+              {template.invoiceNoLabel}:
             </span>
             <span className="text-[11px] font-mono flex-shrink-0">
               {invoiceNumber}
@@ -39,13 +36,15 @@ export function Meta({
             <div className="flex space-x-1 items-center">
               <div className="flex items-center flex-shrink-0 space-x-1">
                 <span className="truncate font-mono text-[11px] text-[#878787]">
-                  {template.issue_date_label}:
+                  {template.issueDateLabel}:
                 </span>
                 <span className="text-[11px] font-mono flex-shrink-0">
-                  {format(
-                    new TZDate(issueDate, timezone),
-                    template.date_format,
-                  )}
+                  {issueDate
+                    ? format(
+                        new TZDate(issueDate, template.timezone),
+                        template.dateFormat,
+                      )
+                    : ""}
                 </span>
               </div>
             </div>
@@ -56,10 +55,15 @@ export function Meta({
             <div className="flex space-x-1 items-center">
               <div className="flex items-center flex-shrink-0 space-x-1">
                 <span className="truncate font-mono text-[11px] text-[#878787]">
-                  {template.due_date_label}:
+                  {template.dueDateLabel}:
                 </span>
                 <span className="text-[11px] font-mono flex-shrink-0">
-                  {format(new TZDate(dueDate, timezone), template.date_format)}
+                  {dueDate
+                    ? format(
+                        new TZDate(dueDate, template.timezone),
+                        template.dateFormat,
+                      )
+                    : ""}
                 </span>
               </div>
             </div>

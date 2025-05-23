@@ -37,7 +37,6 @@ export function InvoiceSuccess() {
     <>
       <InvoiceSheetHeader
         type={
-          // @ts-expect-error - template is JSONB
           invoice?.template?.deliveryType === "create_and_send"
             ? "created_and_sent"
             : "created"
@@ -55,7 +54,6 @@ export function InvoiceSuccess() {
             <div className="flex space-x-1 items-center">
               <div className="flex items-center">
                 <span className="text-[11px] text-[#878787] font-mono">
-                  {/* @ts-expect-error - template is JSONB */}
                   {invoice.template.invoiceNoLabel}
                 </span>
                 <span className="text-[11px] text-[#878787] font-mono">:</span>
@@ -69,7 +67,6 @@ export function InvoiceSuccess() {
             <div className="flex space-x-1 items-center">
               <div className="flex items-center">
                 <span className="text-[11px] text-[#878787] font-mono">
-                  {/* @ts-expect-error - template is JSONB */}
                   {invoice.template.dueDateLabel}
                 </span>
                 <span className="text-[11px] text-[#878787] font-mono">:</span>
@@ -78,8 +75,7 @@ export function InvoiceSuccess() {
               <span className="font-mono text-[11px]">
                 {format(
                   new Date(invoice.dueDate!),
-                  // @ts-expect-error - template is JSONB
-                  invoice.template.date_format,
+                  invoice.template.dateFormat,
                 )}
               </span>
             </div>
@@ -91,7 +87,6 @@ export function InvoiceSuccess() {
             transition={{ delay: 0.2, duration: 0.3 }}
           >
             <span className="text-[11px] font-mono">
-              {/* @ts-expect-error - template is JSONB */}
               {invoice.template.customerLabel}
             </span>
             <div className="font-mono text-[#878787]">
@@ -107,7 +102,6 @@ export function InvoiceSuccess() {
             className="flex items-center justify-between mt-10 border-b border-border border-dashed pb-4"
           >
             <span className="text-[11px] text-[#878787] font-mono">
-              {/* @ts-expect-error - template is JSONB */}
               {invoice.template.totalSummaryLabel}
             </span>
 
@@ -147,11 +141,7 @@ export function InvoiceSuccess() {
                   <CopyInput value={`${getUrl()}/i/${invoice.token}`} />
                 </div>
 
-                <a
-                  // @ts-expect-error - template is JSONB
-                  href={`/api/download/invoice?id=${invoice.id}&size=${invoice.template.size}`}
-                  download
-                >
+                <a href={`/api/download/invoice?id=${invoice.id}`} download>
                   <Button
                     variant="secondary"
                     className="size-[40px] hover:bg-secondary shrink-0"
