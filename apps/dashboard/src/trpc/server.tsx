@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
+import { getCountryCode, getLocale, getTimezone } from "@midday/location";
 import { createClient } from "@midday/supabase/server";
 import { HydrationBoundary } from "@tanstack/react-query";
 import { dehydrate } from "@tanstack/react-query";
@@ -34,6 +35,9 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
 
           return {
             Authorization: `Bearer ${session?.access_token}`,
+            "x-user-timezone": await getTimezone(),
+            "x-user-locale": await getLocale(),
+            "x-user-country": await getCountryCode(),
           };
         },
       }),

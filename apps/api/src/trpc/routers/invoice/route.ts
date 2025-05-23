@@ -21,7 +21,6 @@ import type {
   GenerateInvoicePayload,
   SendInvoiceReminderPayload,
 } from "@midday/jobs/schema";
-import { currencies } from "@midday/location/currencies";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { addMonths } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
@@ -37,7 +36,6 @@ import {
   searchInvoiceNumberSchema,
   updateInvoiceSchema,
 } from "./schema";
-// import { getCountryCode, getLocale, getTimezone } from "@midday/location";
 
 const defaultTemplate = {
   title: "Invoice",
@@ -122,17 +120,17 @@ export const invoiceRouter = createTRPCRouter({
         getNextInvoiceNumber(db, teamId!),
         getInvoiceTemplate(db, teamId!),
         getTeamById(db, teamId!),
-        getUserById(db, session.user.id),
+        getUserById(db, session?.user.id!),
       ]);
 
-      const locale = user?.locale ?? "en";
-      const timezone = geo.timezone ?? "America/New_York";
-      const countryCode = geo.country ?? "US";
-
+      const locale = user?.locale ?? geo?.locale ?? "en";
+      const timezone = user?.timezone ?? geo?.timezone ?? "America/New_York";
       const currency =
-        team?.baseCurrency ??
-        currencies[countryCode as keyof typeof currencies] ??
-        "USD";
+        template?.currency ?? team?.baseCurrency ?? defaultTemplate.currency;
+      const dateFormat =
+        template?.dateFormat ?? user?.dateFormat ?? defaultTemplate.dateFormat;
+      const logoUrl = template?.logoUrl ?? defaultTemplate.logoUrl;
+      const countryCode = geo.country ?? "US";
 
       // Default to letter size for US/CA, A4 for rest of world
       const size = ["US", "CA"].includes(countryCode) ? "letter" : "a4";
@@ -144,8 +142,8 @@ export const invoiceRouter = createTRPCRouter({
 
       const savedTemplate = {
         title: template?.title ?? defaultTemplate.title,
-        logoUrl: template?.logoUrl ?? defaultTemplate.logoUrl,
-        currency: template?.currency ?? defaultTemplate.currency,
+        logoUrl,
+        currency,
         size: template?.size ?? defaultTemplate.size,
         includeTax: template?.includeTax ?? defaultTemplate.includeTax,
         includeVat: template?.includeVat ?? defaultTemplate.includeVat,
@@ -176,7 +174,7 @@ export const invoiceRouter = createTRPCRouter({
         taxLabel: template?.taxLabel ?? defaultTemplate.taxLabel,
         paymentLabel: template?.paymentLabel ?? defaultTemplate.paymentLabel,
         noteLabel: template?.noteLabel ?? defaultTemplate.noteLabel,
-        dateFormat: template?.dateFormat ?? defaultTemplate.dateFormat,
+        dateFormat,
         deliveryType: template?.deliveryType ?? defaultTemplate.deliveryType,
         taxRate: template?.taxRate ?? defaultTemplate.taxRate,
         vatRate: template?.vatRate ?? defaultTemplate.vatRate,
@@ -190,7 +188,7 @@ export const invoiceRouter = createTRPCRouter({
       return {
         // Default values first
         id: uuidv4(),
-        currency: currency.toUpperCase(),
+        currency,
         status: "draft",
         size,
         includeTax,
@@ -246,7 +244,7 @@ export const invoiceRouter = createTRPCRouter({
       return draftInvoice(db, {
         ...input,
         teamId: teamId!,
-        userId: session.user.id,
+        userId: session?.user.id!,
         token,
         paymentDetails: parseInputValue(input.paymentDetails),
         fromDetails: parseInputValue(input.fromDetails),
@@ -298,7 +296,7 @@ export const invoiceRouter = createTRPCRouter({
       return duplicateInvoice(db, {
         id: input.id,
         token,
-        userId: session.user.id,
+        userId: session?.user.id!,
         invoiceNumber: nextInvoiceNumber!,
       });
     }),

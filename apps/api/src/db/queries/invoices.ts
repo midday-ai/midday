@@ -275,7 +275,7 @@ export async function searchInvoiceNumber(
     )
     .limit(1);
 
-  return result;
+  return result ?? null;
 }
 
 export async function getNextInvoiceNumber(
@@ -290,7 +290,7 @@ export async function getNextInvoiceNumber(
     throw new Error("Failed to fetch next invoice number");
   }
 
-  return String(row);
+  return row.next_invoice_number as string;
 }
 
 type DraftInvoiceTemplateParams = {

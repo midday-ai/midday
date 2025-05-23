@@ -1,5 +1,4 @@
 import { CreateTeamForm } from "@/components/forms/create-team-form";
-import { UserMenu } from "@/components/user-menu";
 import { getCurrency } from "@midday/location";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
@@ -19,10 +18,6 @@ export default function CreateTeam() {
           <Link href="/">
             <Icons.Logo />
           </Link>
-        </div>
-
-        <div className="mr-5 mt-4 md:mr-10 md:mt-10">
-          <UserMenu onlySignOut />
         </div>
       </header>
 

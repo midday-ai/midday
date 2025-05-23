@@ -10,8 +10,8 @@ import { LabelInput } from "./label-input";
 
 export function DueDate() {
   const { setValue, watch } = useFormContext();
-  const dueDate = watch("due_date");
-  const dateFormat = watch("template.date_format");
+  const dueDate = watch("dueDate");
+  const dateFormat = watch("template.dateFormat");
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -22,7 +22,7 @@ export function DueDate() {
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
-      setValue("due_date", date.toISOString(), {
+      setValue("dueDate", date.toISOString(), {
         shouldValidate: true,
         shouldDirty: true,
       });
@@ -34,7 +34,7 @@ export function DueDate() {
     <div className="flex space-x-1 items-center">
       <div className="flex items-center">
         <LabelInput
-          name="template.due_date_label"
+          name="template.dueDateLabel"
           onSave={(value) => {
             updateTemplateMutation.mutate({ dueDateLabel: value });
           }}

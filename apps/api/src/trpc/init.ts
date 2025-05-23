@@ -5,7 +5,7 @@ import { verifyAccessToken } from "@api/utils/auth";
 import type { Session } from "@api/utils/auth";
 import { getGeoContext } from "@api/utils/geo";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { initTRPC } from "@trpc/server";
+import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";
 import superjson from "superjson";
 import { withPrimaryReadAfterWrite } from "./middleware/primary-read-after-write";
@@ -66,6 +66,10 @@ export const protectedProcedure = t.procedure
   .use(withPrimaryDbMiddleware)
   .use(async (opts) => {
     const { teamId, session } = opts.ctx;
+
+    if (!session) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
 
     return opts.next({
       ctx: {
