@@ -50,12 +50,12 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
         replicaBlockUntil: new Date(expiryTime).toISOString(),
       });
 
-      // Check if $primary exists on the Database instance
+      // Use primary-only mode to maintain interface consistency
       const dbWithPrimary = ctx.db as DatabaseWithPrimary;
-      if (dbWithPrimary.$primary) {
-        ctx.db = dbWithPrimary.$primary;
+      if (dbWithPrimary.usePrimaryOnly) {
+        ctx.db = dbWithPrimary.usePrimaryOnly();
       }
-      // If not, we're already using the primary DB
+      // If usePrimaryOnly doesn't exist, we're already using the primary DB
     }
     // For queries, check if the team recently performed a mutation
     else {
@@ -73,12 +73,12 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
           replicaBlockUntil: new Date(timestamp).toISOString(),
         });
 
-        // Check if $primary exists on the Database instance
+        // Use primary-only mode to maintain interface consistency
         const dbWithPrimary = ctx.db as DatabaseWithPrimary;
-        if (dbWithPrimary.$primary) {
-          ctx.db = dbWithPrimary.$primary;
+        if (dbWithPrimary.usePrimaryOnly) {
+          ctx.db = dbWithPrimary.usePrimaryOnly();
         }
-        // If not, we're already using the primary DB
+        // If usePrimaryOnly doesn't exist, we're already using the primary DB
       } else {
         logger.debug({
           msg: "Using replica DB for query",
