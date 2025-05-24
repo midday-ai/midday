@@ -53,13 +53,13 @@ export function TrackerDaySelect({ className }: Props) {
         {formatDateRange(
           range
             ? [
-                new TZDate(currentDate[0].getTime(), "UTC"),
+                new TZDate(currentDate[0]?.getTime() ?? 0, "UTC"),
                 new TZDate(
-                  currentDate[1]?.getTime() ?? currentDate[0].getTime(),
+                  currentDate[1]?.getTime() ?? currentDate[0]?.getTime() ?? 0,
                   "UTC",
                 ),
               ]
-            : [new TZDate(currentDate[0].getTime(), "UTC")],
+            : [new TZDate(currentDate[0]?.getTime() ?? 0, "UTC")],
         )}
       </span>
       <Button

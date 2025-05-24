@@ -140,6 +140,11 @@ export function TrackerSearchFilter() {
     (value) => value !== null,
   );
 
+  const members = membersData?.map((member) => ({
+    id: member.user!.id as string,
+    name: member.user!.fullName as string,
+  }));
+
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex space-x-4 items-center">
@@ -147,7 +152,7 @@ export function TrackerSearchFilter() {
           filters={validFilters}
           loading={streaming}
           onRemove={setFilter}
-          members={membersData}
+          members={members}
           customers={customersData?.data}
           statusFilters={statusFilters}
           tags={tagsData}
@@ -212,10 +217,16 @@ export function TrackerSearchFilter() {
                   mode="range"
                   initialFocus
                   toDate={new Date()}
-                  selected={{
-                    from: filter.start && new Date(filter.start),
-                    to: filter.end && new Date(filter.end),
-                  }}
+                  selected={
+                    filter.start || filter.end
+                      ? {
+                          from: filter.start
+                            ? new Date(filter.start)
+                            : undefined,
+                          to: filter.end ? new Date(filter.end) : undefined,
+                        }
+                      : undefined
+                  }
                   onSelect={(range) => {
                     if (!range) return;
 
@@ -251,10 +262,10 @@ export function TrackerSearchFilter() {
                 {statusFilters.map(({ id, name }) => (
                   <DropdownMenuCheckboxItem
                     key={id}
-                    checked={filter?.statuses?.includes(id)}
+                    checked={filter?.status === id}
                     onCheckedChange={() => {
                       setFilter({
-                        status: id ?? null,
+                        status: id as "completed" | "in_progress" | null,
                       });
                     }}
                   >

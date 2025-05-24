@@ -3,9 +3,9 @@
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getDueDateStatus } from "@/utils/format";
 import { formatDate } from "@/utils/format";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 
 type Props = {
@@ -26,11 +26,11 @@ export function InvoiceRow({ invoice }: Props) {
         <div className="flex items-center w-full">
           <div className="flex flex-col space-y-1 w-[90px]">
             <span className="text-sm">
-              {invoice.due_date ? formatDate(invoice.due_date) : "-"}
+              {invoice.dueDate ? formatDate(invoice.dueDate) : "-"}
             </span>
             {showDate && (
               <span className="text-xs text-muted-foreground">
-                {invoice.due_date ? getDueDateStatus(invoice.due_date) : "-"}
+                {invoice.dueDate ? getDueDateStatus(invoice.dueDate) : "-"}
               </span>
             )}
           </div>

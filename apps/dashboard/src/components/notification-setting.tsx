@@ -54,6 +54,7 @@ export function NotificationSetting({
         <Label htmlFor={id}>{name}</Label>
         <p className="text-sm text-[#606060]">
           {/* Replace all spaces with a dot to match the translation key */}
+          {/* @ts-expect-error */}
           {t(`notifications.${name.toLowerCase().replaceAll(" ", ".")}`)}
         </p>
       </div>

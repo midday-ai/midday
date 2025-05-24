@@ -9,6 +9,7 @@ import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
 import { useDocumentsStore } from "@/store/vault";
 import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import {
@@ -76,7 +77,7 @@ export function DataTable() {
   useRealtime({
     channelName: "realtime_documents",
     table: "documents",
-    filter: `team_id=eq.${user?.team_id}`,
+    filter: `team_id=eq.${user?.teamId}`,
     onEvent: (payload) => {
       if (
         payload.eventType === "INSERT" ||
@@ -105,10 +106,13 @@ export function DataTable() {
         // Optimistically update infinite query data
         queryClient.setQueriesData(
           { queryKey: trpc.documents.get.infiniteQueryKey() },
-          (old: InfiniteData<any>) => ({
+          (old: InfiniteData<RouterOutputs["documents"]["get"]>) => ({
             pages: old.pages.map((page) => ({
               ...page,
-              data: page.data.filter((item: any) => item.id !== id),
+              data: page.data.filter(
+                (item: RouterOutputs["documents"]["get"]["data"][number]) =>
+                  item.id !== id,
+              ),
             })),
             pageParams: old.pageParams,
           }),
@@ -158,7 +162,7 @@ export function DataTable() {
   };
 
   const files = useMemo(() => {
-    return documents.map((document) => document.path_tokens?.join("/") ?? "");
+    return documents.map((document) => document.pathTokens?.join("/") ?? "");
   }, [documents]);
 
   const showBottomBar = Object.keys(rowSelection).length > 0;

@@ -90,7 +90,7 @@ export function DataTable({
       columnVisibility,
     },
     meta: {
-      dateFormat: user?.date_format,
+      dateFormat: user?.dateFormat,
     },
   });
 

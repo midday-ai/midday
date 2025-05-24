@@ -3,7 +3,7 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@engine/*": ["src/*"]
     },
     "strict": true,
     "types": ["@cloudflare/workers-types", "bun-types"],
@@ -16,5 +16,7 @@
     "allowJs": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true
-  }
+  },
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
 }

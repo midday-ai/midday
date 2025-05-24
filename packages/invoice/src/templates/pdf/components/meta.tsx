@@ -3,9 +3,9 @@ import { Text, View } from "@react-pdf/renderer";
 import { format } from "date-fns";
 
 interface MetaProps {
-  invoiceNo: string;
-  issueDate: string;
-  dueDate: string;
+  invoiceNo?: string | null;
+  issueDate?: string | null;
+  dueDate?: string | null;
   invoiceNoLabel: string;
   issueDateLabel: string;
   dueDateLabel: string;
@@ -42,7 +42,9 @@ export function Meta({
             {issueDateLabel}:
           </Text>
           <Text style={{ fontSize: 9 }}>
-            {format(new TZDate(issueDate, timezone), dateFormat)}
+            {issueDate
+              ? format(new TZDate(issueDate, timezone), dateFormat)
+              : ""}
           </Text>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -50,7 +52,7 @@ export function Meta({
             {dueDateLabel}:
           </Text>
           <Text style={{ fontSize: 9 }}>
-            {format(new TZDate(dueDate, timezone), dateFormat)}
+            {dueDate ? format(new TZDate(dueDate, timezone), dateFormat) : ""}
           </Text>
         </View>
       </View>

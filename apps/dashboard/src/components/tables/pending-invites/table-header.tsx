@@ -1,7 +1,7 @@
 "use client";
 
 import { InviteTeamMembersModal } from "@/components/modals/invite-team-members-modal";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Button } from "@midday/ui/button";
 import { Dialog } from "@midday/ui/dialog";
 import { Input } from "@midday/ui/input";

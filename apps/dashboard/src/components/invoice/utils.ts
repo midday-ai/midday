@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import type { InvoiceFormValues } from "./form-context";
 
 export const transformCustomerToContent = (
@@ -20,10 +20,10 @@ export const transformCustomerToContent = (
     });
   }
 
-  if (customer.address_line_1) {
+  if (customer.addressLine1) {
     content.push({
       type: "paragraph",
-      content: [{ text: customer.address_line_1, type: "text" }],
+      content: [{ text: customer.addressLine1, type: "text" }],
     });
   }
 
@@ -71,29 +71,24 @@ export const transformFormValuesToDraft = (values: InvoiceFormValues) => {
     ...values,
     template: {
       ...values.template,
-      ...(values.payment_details && {
-        payment_details: JSON.stringify(values.payment_details),
+      ...(values.paymentDetails && {
+        paymentDetails: JSON.stringify(values.paymentDetails),
       }),
-      ...(values.from_details && {
-        from_details: JSON.stringify(values.from_details),
+      ...(values.fromDetails && {
+        fromDetails: JSON.stringify(values.fromDetails),
       }),
     },
-    ...(values.payment_details && {
-      payment_details: JSON.stringify(values.payment_details),
+    ...(values.paymentDetails && {
+      paymentDetails: JSON.stringify(values.paymentDetails),
     }),
-    ...(values.from_details && {
-      from_details: JSON.stringify(values.from_details),
+    ...(values.fromDetails && {
+      fromDetails: JSON.stringify(values.fromDetails),
     }),
-    ...(values.customer_details && {
-      customer_details: JSON.stringify(values.customer_details),
+    ...(values.customerDetails && {
+      customerDetails: JSON.stringify(values.customerDetails),
     }),
-    ...(values.note_details && {
-      note_details: JSON.stringify(values.note_details),
+    ...(values.noteDetails && {
+      noteDetails: JSON.stringify(values.noteDetails),
     }),
   };
 };
-
-export function parseInputValue(value?: string | null) {
-  if (value === null) return null;
-  return value ? JSON.parse(value) : undefined;
-}

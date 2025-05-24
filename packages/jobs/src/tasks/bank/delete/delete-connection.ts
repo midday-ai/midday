@@ -1,14 +1,10 @@
-import { client } from "@midday/engine/client";
+import { client } from "@midday/engine-client";
+import { deleteConnectionSchema } from "@midday/jobs/schema";
 import { schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 
 export const deleteConnection = schemaTask({
   id: "delete-connection",
-  schema: z.object({
-    referenceId: z.string().optional().nullable(),
-    provider: z.string(),
-    accessToken: z.string().optional().nullable(),
-  }),
+  schema: deleteConnectionSchema,
   maxDuration: 60,
   queue: {
     concurrencyLimit: 5,
@@ -18,9 +14,9 @@ export const deleteConnection = schemaTask({
 
     await client.connections.delete.$delete({
       json: {
-        id: referenceId,
+        id: referenceId!,
         provider,
-        accessToken,
+        accessToken: accessToken ?? undefined,
       },
     });
   },

@@ -6,7 +6,7 @@ import type { Table } from "@tanstack/react-table";
 import type { Category } from "./columns";
 
 type Props = {
-  table?: Table<Category[]>;
+  table?: Table<Category>;
   onOpenChange?: (isOpen: boolean) => void;
 };
 

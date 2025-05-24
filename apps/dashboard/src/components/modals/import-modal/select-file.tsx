@@ -8,8 +8,7 @@ import { useCsvContext } from "./context";
 import { readLines } from "./utils";
 
 export function SelectFile() {
-  const { watch, control, setFileColumns, setFirstRows, setValue } =
-    useCsvContext();
+  const { watch, control, setFileColumns, setFirstRows } = useCsvContext();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -48,6 +47,7 @@ export function SelectFile() {
         }
 
         setFileColumns(meta.fields);
+        // @ts-expect-error
         setFirstRows(data);
         setIsLoading(false);
       })

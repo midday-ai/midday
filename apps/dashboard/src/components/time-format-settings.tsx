@@ -31,9 +31,9 @@ export function TimeFormatSettings() {
 
       <CardContent>
         <Select
-          defaultValue={user?.time_format?.toString() ?? undefined}
+          defaultValue={user?.timeFormat?.toString() ?? undefined}
           onValueChange={(value) => {
-            updateUserMutation.mutate({ time_format: +value });
+            updateUserMutation.mutate({ timeFormat: +value });
           }}
         >
           <SelectTrigger className="w-[180px]">

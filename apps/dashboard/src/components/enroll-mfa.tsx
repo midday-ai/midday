@@ -16,19 +16,25 @@ export function EnrollMFA() {
   const supabase = createClient();
   const router = useRouter();
   const [isValidating, setValidating] = useState(false);
-  const [factorId, setFactorId] = useState("");
-  const [qr, setQR] = useState("");
-  const [secret, setSecret] = useState();
+  const [factorId, setFactorId] = useState<string | undefined>(undefined);
+  const [qr, setQR] = useState<string | undefined>(undefined);
+  const [secret, setSecret] = useState<string | undefined>(undefined);
   const [error, setError] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   const onComplete = async (code: string) => {
     setError(false);
 
-    if (!isValidating) {
+    if (!isValidating && factorId) {
       setValidating(true);
 
       const challenge = await supabase.auth.mfa.challenge({ factorId });
+
+      if (!challenge.data) {
+        setError(true);
+        setValidating(false);
+        return;
+      }
 
       const verify = await supabase.auth.mfa.verify({
         factorId,
@@ -38,6 +44,9 @@ export function EnrollMFA() {
 
       if (verify.data) {
         router.replace("/");
+      } else {
+        setError(true);
+        setValidating(false);
       }
     }
   };
@@ -49,8 +58,9 @@ export function EnrollMFA() {
         issuer: "app.midday.ai",
       });
 
-      if (error) {
-        throw error;
+      if (error || !data) {
+        setError(true);
+        return;
       }
 
       setFactorId(data.id);
@@ -63,10 +73,11 @@ export function EnrollMFA() {
   }, []);
 
   const handleOnCancel = () => {
-    supabase.auth.mfa.unenroll({
-      factorId,
-    });
-
+    if (factorId) {
+      supabase.auth.mfa.unenroll({
+        factorId,
+      });
+    }
     router.push("/");
   };
 

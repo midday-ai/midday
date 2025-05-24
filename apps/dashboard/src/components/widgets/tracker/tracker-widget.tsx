@@ -22,7 +22,7 @@ import { TrackerHeader } from "./tracker-header";
 import { TrackerIndicator } from "./tracker-indicator";
 
 export function TrackerWidget() {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
   const {
     date: currentDate,
     range,
@@ -51,11 +51,11 @@ export function TrackerWidget() {
   const monthStart = startOfMonth(new Date(currentDate));
   const monthEnd = endOfMonth(new Date(currentDate));
   const calendarStart = startOfWeek(monthStart, {
-    weekStartsOn: user?.week_starts_on_monday ? 1 : 0,
+    weekStartsOn: user?.weekStartsOnMonday ? 1 : 0,
   });
 
   const calendarEnd = endOfWeek(monthEnd, {
-    weekStartsOn: user?.week_starts_on_monday ? 1 : 0,
+    weekStartsOn: user?.weekStartsOnMonday ? 1 : 0,
   });
 
   const calendarDays = eachDayOfInterval({
@@ -68,10 +68,11 @@ export function TrackerWidget() {
   const firstWeek = eachDayOfInterval({
     start: calendarStart,
     end: endOfWeek(calendarStart, {
-      weekStartsOn: user?.week_starts_on_monday ? 1 : 0,
+      weekStartsOn: user?.weekStartsOnMonday ? 1 : 0,
     }),
   });
 
+  // @ts-expect-error
   useOnClickOutside(ref, () => {
     if (range?.length === 1) {
       setParams({ range: null });

@@ -24,15 +24,19 @@ export function InputColor({
   return (
     <div className="relative">
       <ColorPicker
-        value={color}
+        value={color ?? ""}
         onSelect={(newColor) => {
           setColor(newColor);
-          onChange({
-            color: newColor,
-            name: value,
-          });
+
+          if (value) {
+            onChange({
+              color: newColor,
+              name: value,
+            });
+          }
         }}
       />
+
       <Input
         placeholder={placeholder}
         autoComplete="off"
@@ -49,10 +53,12 @@ export function InputColor({
           setColor(newColor);
           setValue(newName);
 
-          onChange({
-            color: newColor,
-            name: newName,
-          });
+          if (newColor) {
+            onChange({
+              color: newColor,
+              name: newName,
+            });
+          }
         }}
       />
     </div>

@@ -33,7 +33,9 @@ const AnimatedSizeContainer = forwardRef<
     forwardedRef,
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const resizeObserverEntry = useResizeObserver(containerRef);
+    const resizeObserverEntry = useResizeObserver(
+      containerRef as React.RefObject<Element>,
+    );
 
     return (
       <motion.div

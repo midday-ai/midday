@@ -17,12 +17,16 @@ export function TellerConnect({ id, onSelect }: Props) {
 
   useEffect(() => {
     if (institution) {
+      // @ts-expect-error
       const teller = window.TellerConnect.setup({
         applicationId: process.env.NEXT_PUBLIC_TELLER_APPLICATION_ID!,
         environment: process.env.NEXT_PUBLIC_TELLER_ENVIRONMENT,
         institution,
         appearance: theme,
-        onSuccess: (authorization) => {
+        onSuccess: (authorization: {
+          accessToken: string;
+          enrollment: { id: string };
+        }) => {
           setParams({
             step: "account",
             provider: "teller",

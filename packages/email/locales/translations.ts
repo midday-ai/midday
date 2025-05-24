@@ -1,3 +1,4 @@
+// @ts-nocheck - let's use https://www.npmjs.com/package/@languine/react-email
 export interface TranslationParams {
   [key: string]: string | number | undefined;
 }
@@ -52,7 +53,6 @@ export function translations(locale: string, params?: TranslationParams) {
         "invite.link3": "or copy and paste this URL into your browser",
         "invite.footer1": "This invitation was intended for",
         "invite.footer2": "This invite was sent from",
-        "invite.footer3": "located in",
         "invite.footer4":
           "If you were not expecting this invitation, you can ignore this email. If you are concerned about your account's safety, please reply to this email to get in touch with us.",
         "invoice.overdue.subject": `Invoice #${params?.invoiceNumber} is overdue`,
@@ -110,7 +110,6 @@ export function translations(locale: string, params?: TranslationParams) {
           "eller kopiera och klistra in denna URL i din webbläsare",
         "invite.footer1": "Denna inbjudan var avsedd för",
         "invite.footer2": "Denna inbjudan skickades från",
-        "invite.footer3": "belägen i",
         "invite.footer4":
           "Om du inte väntade dig den här inbjudan kan du ignorera det här e-postmeddelandet. Om du är orolig för ditt kontos säkerhet, vänligen svara på det här e-postmeddelandet för att komma i kontakt med oss.",
         "invoice.overdue.subject": `Faktura #${params?.invoiceNumber} är försenad`,

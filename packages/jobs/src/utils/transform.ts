@@ -19,7 +19,7 @@ type Transaction = {
   amount: number;
   team_id: string;
   date: string;
-  status: "posted" | "pending";
+  status: "posted";
   notified?: boolean;
 };
 
@@ -41,7 +41,8 @@ export function transformTransaction({
     bank_account_id: bankAccountId,
     balance: transaction.balance,
     team_id: teamId,
-    status: transaction.status ?? "posted",
+    // We only support posted transactions for now
+    status: "posted",
     // If the transactions are being synced manually, we don't want to notify
     // And using upsert, we don't want to override the notified value
     ...(notified ? { notified } : {}),

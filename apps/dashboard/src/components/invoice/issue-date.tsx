@@ -10,8 +10,8 @@ import { LabelInput } from "./label-input";
 
 export function IssueDate() {
   const { setValue, watch } = useFormContext();
-  const issueDate = watch("issue_date");
-  const dateFormat = watch("template.date_format");
+  const issueDate = watch("issueDate");
+  const dateFormat = watch("template.dateFormat");
   const [isOpen, setIsOpen] = useState(false);
 
   const trpc = useTRPC();
@@ -21,7 +21,7 @@ export function IssueDate() {
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
-      setValue("issue_date", date.toISOString(), {
+      setValue("issueDate", date.toISOString(), {
         shouldValidate: true,
         shouldDirty: true,
       });
@@ -33,9 +33,9 @@ export function IssueDate() {
     <div className="flex space-x-1 items-center">
       <div className="flex items-center">
         <LabelInput
-          name="template.issue_date_label"
+          name="template.issueDateLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ issue_date_label: value });
+            updateTemplateMutation.mutate({ issueDateLabel: value });
           }}
         />
         <span className="text-[11px] text-[#878787] font-mono">:</span>

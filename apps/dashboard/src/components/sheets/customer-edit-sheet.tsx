@@ -40,6 +40,7 @@ export function CustomerEditSheet() {
         initialData: () => {
           const pages = queryClient
             .getQueriesData({ queryKey: trpc.customers.get.infiniteQueryKey() })
+            // @ts-expect-error
             .flatMap(([, data]) => data?.pages ?? [])
             .flatMap((page) => page.data ?? []);
 

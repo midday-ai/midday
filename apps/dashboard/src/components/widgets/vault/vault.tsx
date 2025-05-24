@@ -1,7 +1,7 @@
 "use client";
 
 import { useDocumentParams } from "@/hooks/use-document-params";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
 import { useRouter } from "next/navigation";
 
@@ -16,7 +16,7 @@ export function Vault({ files }: Props) {
   return (
     <ul className="bullet-none divide-y cursor-pointer overflow-auto scrollbar-hide aspect-square pb-24">
       {files?.map((file) => {
-        const firstTag = file.tags.at(0);
+        const firstTag = file.documentTagAssignments.at(0)?.documentTag;
 
         return (
           <li key={file.id}>
@@ -32,15 +32,15 @@ export function Vault({ files }: Props) {
                 {file.name?.split("/").at(-1)}
               </span>
 
-              {file.tags.length > 0 && (
+              {file.documentTagAssignments.length > 0 && (
                 <button
                   type="button"
                   onClick={() => {
-                    router.push(`/vault?tags=${firstTag?.tag.id}`);
+                    router.push(`/vault?tags=${firstTag?.id}`);
                   }}
                 >
                   <Badge variant="tag-rounded" className="text-xs">
-                    {firstTag?.tag.name}
+                    {firstTag?.name}
                   </Badge>
                 </button>
               )}

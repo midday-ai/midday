@@ -1,6 +1,6 @@
-import { Providers } from "@/common/schema";
-import { getType } from "@/utils/account";
-import { getLogoURL } from "@/utils/logo";
+import { Providers } from "@engine/common/schema";
+import { getType } from "@engine/utils/account";
+import { getLogoURL } from "@engine/utils/logo";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,

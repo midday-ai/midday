@@ -1,7 +1,5 @@
 "use client";
 
-import type { UseChatHelpers } from "@ai-sdk/react";
-import { shuffle } from "@midday/utils";
 import { motion } from "framer-motion";
 import { useMemo, useRef } from "react";
 import { useDraggable } from "react-use-draggable-scroll";
@@ -29,8 +27,8 @@ type Props = {
 };
 
 export function ChatExamples({ handleSubmit }: Props) {
-  const items = useMemo(() => shuffle(chatExamples), []);
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
+  // @ts-expect-error: react-use-draggable-scroll expects a MutableRefObject<HTMLElement>
   const { events } = useDraggable(ref);
 
   const totalLength = chatExamples.reduce((accumulator, currentString) => {
@@ -50,7 +48,7 @@ export function ChatExamples({ handleSubmit }: Props) {
         className="flex space-x-4 ml-4 items-center"
         style={{ width: `${totalLength}px` }}
       >
-        {items.map((example) => (
+        {chatExamples.map((example) => (
           <button
             key={example}
             type="button"

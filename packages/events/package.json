@@ -7,12 +7,12 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
-    "format": "biome --write .",
+    "format": "biome format --write .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@openpanel/nextjs": "^1.0.7",
-    "@vercel/functions": "^2.0.0"
+    "@openpanel/nextjs": "^1.0.8",
+    "@vercel/functions": "^2.1.0"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

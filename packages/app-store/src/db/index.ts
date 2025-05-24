@@ -1,7 +1,7 @@
 import { createClient } from "@midday/supabase/server";
 
 export async function createApp(params: any) {
-  const client = createClient({ admin: true });
+  const client = await createClient({ admin: true });
 
   const { data, error } = await client
     .from("apps")

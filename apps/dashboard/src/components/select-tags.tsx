@@ -15,9 +15,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 
 type Option = {
+  id?: string;
   value: string;
   label: string;
-  id: string;
 };
 
 type Props = {
@@ -74,7 +74,7 @@ export function SelectTags({ tags, onSelect, onRemove, onChange }: Props) {
     .filter((tag) => !selected.some((s) => s.id === tag.id));
 
   const handleDelete = () => {
-    if (editingTag) {
+    if (editingTag?.id) {
       deleteTagMutation.mutate({ id: editingTag.id });
 
       setSelected(selected.filter((tag) => tag.id !== editingTag.id));
@@ -83,7 +83,7 @@ export function SelectTags({ tags, onSelect, onRemove, onChange }: Props) {
   };
 
   const handleUpdate = () => {
-    if (editingTag) {
+    if (editingTag?.id) {
       updateTagMutation.mutate({
         id: editingTag.id,
         name: editingTag.label,

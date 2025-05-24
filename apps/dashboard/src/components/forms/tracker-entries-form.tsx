@@ -18,11 +18,11 @@ import { TrackerSelectProject } from "../tracker-select-project";
 const formSchema = z.object({
   id: z.string().optional(),
   duration: z.number().min(1),
-  project_id: z.string().uuid(),
-  assigned_id: z.string().uuid().optional(),
+  projectId: z.string().uuid(),
+  assignedId: z.string().uuid().optional(),
   description: z.string().optional(),
   start: z.string(),
-  end: z.string(),
+  stop: z.string(),
 });
 
 type Props = {
@@ -32,7 +32,7 @@ type Props = {
   onCreate: (values: z.infer<typeof formSchema>) => void;
   projectId?: string | null;
   start?: string;
-  end?: string;
+  stop?: string;
   onSelectProject: (selected: { id: string; name: string }) => void;
   description?: string;
   isSaving: boolean;
@@ -45,7 +45,7 @@ export function TrackerEntriesForm({
   onCreate,
   projectId,
   start,
-  end,
+  stop,
   onSelectProject,
   description,
   isSaving,
@@ -60,10 +60,10 @@ export function TrackerEntriesForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: eventId,
-      assigned_id: userId,
-      project_id: selectedProjectId || latestProjectId || undefined,
+      assignedId: userId,
+      projectId: selectedProjectId || latestProjectId || undefined,
       start,
-      end,
+      stop,
       description: description ?? undefined,
     },
   });
@@ -80,21 +80,21 @@ export function TrackerEntriesForm({
     if (start) {
       form.setValue("start", start);
     }
-    if (end) {
-      form.setValue("end", end);
+    if (stop) {
+      form.setValue("stop", stop);
     }
 
     if (projectId) {
-      form.setValue("project_id", projectId, { shouldValidate: true });
+      form.setValue("projectId", projectId, { shouldValidate: true });
     }
 
     if (description) {
       form.setValue("description", description);
     }
 
-    if (start && end) {
+    if (start && stop) {
       const startDate = parse(start, "HH:mm", new Date());
-      const endDate = parse(end, "HH:mm", new Date());
+      const endDate = parse(stop, "HH:mm", new Date());
 
       const durationInSeconds = differenceInSeconds(endDate, startDate);
 
@@ -102,7 +102,7 @@ export function TrackerEntriesForm({
         form.setValue("duration", durationInSeconds, { shouldValidate: true });
       }
     }
-  }, [start, end, projectId, description, eventId]);
+  }, [start, stop, projectId, description, eventId]);
 
   return (
     <Form {...form}>
@@ -111,17 +111,21 @@ export function TrackerEntriesForm({
         className="mb-12 mt-6 space-y-4"
       >
         <TimeRangeInput
-          value={{ start: form.watch("start"), end: form.watch("end") }}
+          value={{ start: form.watch("start"), stop: form.watch("stop") }}
           onChange={(value) => {
             form.setValue("start", value.start);
-            form.setValue("end", value.end);
-            onTimeChange(value);
+            form.setValue("stop", value.stop);
+
+            onTimeChange({
+              start: value.start,
+              end: value.stop,
+            });
           }}
         />
 
         <FormField
           control={form.control}
-          name="project_id"
+          name="projectId"
           render={({ field }) => (
             <FormItem className="w-full">
               <FormControl>
@@ -147,12 +151,12 @@ export function TrackerEntriesForm({
 
         <FormField
           control={form.control}
-          name="assigned_id"
+          name="assignedId"
           render={({ field }) => (
             <FormItem className="w-full">
               <FormControl>
                 <AssignUser
-                  selectedId={form.watch("assigned_id")}
+                  selectedId={form.watch("assignedId")}
                   onSelect={(user) => {
                     if (user?.id) {
                       field.onChange(user.id);

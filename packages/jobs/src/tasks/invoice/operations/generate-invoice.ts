@@ -1,16 +1,13 @@
-import { processDocument } from "@/tasks/document/process-document";
+import { generateInvoiceSchema } from "@jobs/schema";
+import { processDocument } from "@jobs/tasks/document/process-document";
 import { PdfTemplate, renderToBuffer } from "@midday/invoice";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 import { sendInvoiceEmail } from "../email/send-email";
 
 export const generateInvoice = schemaTask({
   id: "generate-invoice",
-  schema: z.object({
-    invoiceId: z.string().uuid(),
-    deliveryType: z.enum(["create", "create_and_send"]),
-  }),
+  schema: generateInvoiceSchema,
   maxDuration: 60,
   queue: {
     concurrencyLimit: 50,
@@ -31,6 +28,7 @@ export const generateInvoice = schemaTask({
 
     const { user, ...invoice } = invoiceData;
 
+    // @ts-expect-error - Template JSONB while EditorDoc in components
     const buffer = await renderToBuffer(await PdfTemplate(invoice));
 
     const filename = `${invoiceData?.invoice_number}.pdf`;
@@ -60,7 +58,7 @@ export const generateInvoice = schemaTask({
     }
 
     await processDocument.trigger({
-      file_path: [invoiceData?.team_id, "invoices", filename],
+      filePath: [invoiceData?.team_id, "invoices", filename],
       mimetype: "application/pdf",
       teamId: invoiceData?.team_id,
     });

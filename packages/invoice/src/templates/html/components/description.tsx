@@ -1,7 +1,11 @@
 import { isValidJSON } from "../../../utils/content";
 import { EditorContent } from "./editor-content";
 
-export function Description({ content }: { content: string }) {
+type Props = {
+  content: string;
+};
+
+export function Description({ content }: Props) {
   const value = isValidJSON(content) ? JSON.parse(content) : null;
 
   // If the content is not valid JSON, return the content as a string

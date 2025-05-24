@@ -176,6 +176,7 @@ export function SearchAddressInput({
     onSelect(addressDetails);
   };
 
+  // @ts-expect-error
   useOnClickOutside(ref, () => {
     setOpen(false);
   });

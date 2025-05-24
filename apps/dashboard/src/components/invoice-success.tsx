@@ -14,14 +14,6 @@ import { FormatAmount } from "./format-amount";
 import { InvoiceSheetHeader } from "./invoice-sheet-header";
 import { OpenURL } from "./open-url";
 
-function CustomerDetails({ content }: { content: JSON }) {
-  return (
-    <div className="font-mono text-[#878787]">
-      {formatEditorContent(content)}
-    </div>
-  );
-}
-
 export function InvoiceSuccess() {
   const trpc = useTRPC();
   const { invoiceId, setParams } = useInvoiceParams();
@@ -45,7 +37,7 @@ export function InvoiceSuccess() {
     <>
       <InvoiceSheetHeader
         type={
-          invoice?.template.delivery_type === "create_and_send"
+          invoice?.template?.deliveryType === "create_and_send"
             ? "created_and_sent"
             : "created"
         }
@@ -62,28 +54,28 @@ export function InvoiceSuccess() {
             <div className="flex space-x-1 items-center">
               <div className="flex items-center">
                 <span className="text-[11px] text-[#878787] font-mono">
-                  {invoice.template.invoice_no_label}
+                  {invoice.template.invoiceNoLabel}
                 </span>
                 <span className="text-[11px] text-[#878787] font-mono">:</span>
               </div>
 
               <span className="font-mono text-[11px]">
-                {invoice.invoice_number}
+                {invoice.invoiceNumber}
               </span>
             </div>
 
             <div className="flex space-x-1 items-center">
               <div className="flex items-center">
                 <span className="text-[11px] text-[#878787] font-mono">
-                  {invoice.template.due_date_label}
+                  {invoice.template.dueDateLabel}
                 </span>
                 <span className="text-[11px] text-[#878787] font-mono">:</span>
               </div>
 
               <span className="font-mono text-[11px]">
                 {format(
-                  new Date(invoice.due_date),
-                  invoice.template.date_format,
+                  new Date(invoice.dueDate!),
+                  invoice.template.dateFormat,
                 )}
               </span>
             </div>
@@ -95,9 +87,12 @@ export function InvoiceSuccess() {
             transition={{ delay: 0.2, duration: 0.3 }}
           >
             <span className="text-[11px] font-mono">
-              {invoice.template.customer_label}
+              {invoice.template.customerLabel}
             </span>
-            <CustomerDetails content={invoice.customer_details} />
+            <div className="font-mono text-[#878787]">
+              {/* @ts-expect-error - customerDetails is JSONB */}
+              {formatEditorContent(invoice.customerDetails)}
+            </div>
           </motion.div>
 
           <motion.div
@@ -107,14 +102,16 @@ export function InvoiceSuccess() {
             className="flex items-center justify-between mt-10 border-b border-border border-dashed pb-4"
           >
             <span className="text-[11px] text-[#878787] font-mono">
-              {invoice.template.total_summary_label}
+              {invoice.template.totalSummaryLabel}
             </span>
 
             <span className="font-mono text-xl">
-              <FormatAmount
-                amount={invoice.amount}
-                currency={invoice.currency}
-              />
+              {invoice.amount && invoice.currency && (
+                <FormatAmount
+                  amount={invoice.amount}
+                  currency={invoice.currency}
+                />
+              )}
             </span>
           </motion.div>
 
@@ -126,12 +123,12 @@ export function InvoiceSuccess() {
           >
             <h2>Details</h2>
 
-            {invoice.sent_to && (
+            {invoice.sentTo && (
               <div className="flex flex-col space-y-1">
                 <span className="text-[11px] text-[#878787] font-mono">
                   Invoice sent to
                 </span>
-                <span className="text-sm">{invoice.sent_to}</span>
+                <span className="text-sm">{invoice.sentTo}</span>
               </div>
             )}
 
@@ -144,10 +141,7 @@ export function InvoiceSuccess() {
                   <CopyInput value={`${getUrl()}/i/${invoice.token}`} />
                 </div>
 
-                <a
-                  href={`/api/download/invoice?id=${invoice.id}&size=${invoice.template.size}`}
-                  download
-                >
+                <a href={`/api/download/invoice?id=${invoice.id}`} download>
                   <Button
                     variant="secondary"
                     className="size-[40px] hover:bg-secondary shrink-0"

@@ -22,7 +22,7 @@ import { SubmitButton } from "@midday/ui/submit-button";
 import { z } from "zod";
 
 const formSchema = z.object({
-  full_name: z.string().min(1).max(32).optional(),
+  fullName: z.string().min(1).max(32).optional(),
 });
 
 export function DisplayName() {
@@ -31,13 +31,13 @@ export function DisplayName() {
 
   const form = useZodForm(formSchema, {
     defaultValues: {
-      full_name: user?.full_name ?? undefined,
+      fullName: user?.fullName ?? undefined,
     },
   });
 
   const onSubmit = form.handleSubmit((data) => {
     updateUserMutation.mutate({
-      full_name: data?.full_name,
+      fullName: data?.fullName,
     });
   });
 
@@ -56,7 +56,7 @@ export function DisplayName() {
           <CardContent>
             <FormField
               control={form.control}
-              name="full_name"
+              name="fullName"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>

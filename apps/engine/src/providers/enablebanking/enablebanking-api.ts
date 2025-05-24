@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import { ProviderError } from "@/utils/error";
+import { ProviderError } from "@engine/utils/error";
 import { formatISO, subDays } from "date-fns";
 import * as jose from "jose";
 import xior, { type XiorInstance, type XiorRequestConfig } from "xior";

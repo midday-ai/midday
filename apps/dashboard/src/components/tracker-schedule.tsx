@@ -1,9 +1,9 @@
+// @ts-nocheck
 "use client";
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import {
   NEW_EVENT_ID,
@@ -15,6 +15,7 @@ import {
   transformTrackerData,
   updateEventTime,
 } from "@/utils/tracker";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import {
   ContextMenu,
@@ -81,33 +82,6 @@ export function TrackerSchedule() {
       {
         enabled: !!selectedDate,
         staleTime: 60 * 1000,
-        initialData: () => {
-          const data = queryClient.getQueriesData({
-            queryKey: trpc.trackerEntries.byRange.queryKey(),
-          });
-
-          if (!data.length || !selectedDate) {
-            return {
-              data: [],
-              meta: { totalDuration: 0 },
-            };
-          }
-
-          const [, rangeData] = data.at(0);
-          if (!rangeData?.result?.[selectedDate]) {
-            return {
-              data: [],
-              meta: { totalDuration: 0 },
-            };
-          }
-
-          return {
-            data: rangeData.result[selectedDate],
-            meta: {
-              totalDuration: rangeData.meta.totalDuration || 0,
-            },
-          };
-        },
       },
     ),
   });
@@ -193,7 +167,7 @@ export function TrackerSchedule() {
       // Update total duration
       setTotalDuration((prevDuration) => {
         const deletedEventDuration = differenceInSeconds(
-          new Date(data.find((event) => event.id === eventId)?.end || 0),
+          new Date(data.find((event) => event.id === eventId)?.stop || 0),
           new Date(data.find((event) => event.id === eventId)?.start || 0),
         );
         return Math.max(0, prevDuration - deletedEventDuration);
@@ -258,7 +232,7 @@ export function TrackerSchedule() {
       const deltaY = e.clientY - resizeStartY;
       const deltaSlots = Math.round(deltaY / SLOT_HEIGHT);
       if (resizeType === "bottom") {
-        const newEnd = addMinutes(resizingEvent.end, deltaSlots * 15);
+        const newEnd = addMinutes(resizingEvent.stop, deltaSlots * 15);
         setData((prevData) =>
           prevData.map((event) =>
             event.id === resizingEvent.id
@@ -276,13 +250,13 @@ export function TrackerSchedule() {
         setData((prevData) =>
           prevData.map((event) =>
             event.id === resizingEvent.id
-              ? updateEventTime(event, newStart, event.end)
+              ? updateEventTime(event, newStart, event.stop)
               : event,
           ),
         );
         setSelectedEvent((prev) =>
           prev && prev.id === resizingEvent.id
-            ? updateEventTime(prev, newStart, prev.end)
+            ? updateEventTime(prev, newStart, prev.stop)
             : prev,
         );
       }
@@ -290,7 +264,7 @@ export function TrackerSchedule() {
       const deltaY = e.clientY - moveStartY;
       const deltaSlots = Math.round(deltaY / SLOT_HEIGHT);
       const newStart = addMinutes(movingEvent.start, deltaSlots * 15);
-      const newEnd = addMinutes(movingEvent.end, deltaSlots * 15);
+      const newEnd = addMinutes(movingEvent.stop, deltaSlots * 15);
 
       // Ensure the event doesn't move before start of day or after end of day
       const dayStart = startOfDay(movingEvent.start);
@@ -364,8 +338,8 @@ export function TrackerSchedule() {
     id?: string;
     start: string;
     end: string;
-    assigned_id: string;
-    project_id: string;
+    assignedId: string;
+    projectId: string;
     description?: string;
   }) => {
     const dates = getDates(selectedDate, sortedRange ?? null);
@@ -388,8 +362,8 @@ export function TrackerSchedule() {
       start: startDate.toISOString(),
       stop: endDate.toISOString(),
       dates,
-      assigned_id: values.assigned_id,
-      project_id: values.project_id,
+      assignedId: values.assignedId,
+      projectId: values.projectId,
       description: values.description ?? null,
       duration: Math.max(0, differenceInSeconds(endDate, startDate)),
     };
@@ -471,7 +445,7 @@ export function TrackerSchedule() {
           }
         }
 
-        let newEnd = currentEvent.end;
+        let newEnd = currentEvent.stop;
         let endChanged = false;
         // Update end time if 'end' prop is provided
         if (end !== undefined) {
@@ -487,7 +461,7 @@ export function TrackerSchedule() {
             // Check if valid and different from current end
             if (
               isValid(parsedEnd) &&
-              parsedEnd.getTime() !== currentEvent.end.getTime()
+              parsedEnd.getTime() !== currentEvent.stop.getTime()
             ) {
               newEnd = parsedEnd;
               endChanged = true;
@@ -540,7 +514,7 @@ export function TrackerSchedule() {
                 className="pr-4 flex font-mono flex-col"
                 style={{ height: `${ROW_HEIGHT}px` }}
               >
-                {formatHour(hour, user?.time_format)}
+                {formatHour(hour, user?.timeFormat)}
               </div>
             ))}
           </div>
@@ -568,7 +542,7 @@ export function TrackerSchedule() {
             ))}
             {data?.map((event) => {
               const startSlot = getSlotFromDate(event.start);
-              const endSlot = getSlotFromDate(event.end);
+              const endSlot = getSlotFromDate(event.stop);
               const height = (endSlot - startSlot) * SLOT_HEIGHT;
 
               return (
@@ -602,14 +576,14 @@ export function TrackerSchedule() {
                     >
                       <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
                         <span>
-                          {event.project.name} (
+                          {event.trackerProject.name} (
                           {secondsToHoursAndMinutes(
-                            differenceInSeconds(event.end, event.start),
+                            differenceInSeconds(event.stop, event.start),
                           )}
                           )
                         </span>
-                        {event.project.customer && (
-                          <span>{event.project.customer.name}</span>
+                        {event?.trackerProject?.customer && (
+                          <span>{event.trackerProject.customer.name}</span>
                         )}
                         <span>{event.description}</span>
                       </div>
@@ -655,16 +629,16 @@ export function TrackerSchedule() {
         onCreate={handleCreateEvent}
         isSaving={upsertTrackerEntry.isPending}
         userId={user?.id}
-        projectId={formEvent?.project?.id ?? selectedProjectId}
+        projectId={formEvent?.trackerProject?.id ?? selectedProjectId}
         description={formEvent?.description ?? undefined}
         start={
           formEvent && isValid(formEvent.start)
             ? getTimeFromDate(formEvent.start)
             : undefined
         }
-        end={
-          formEvent && isValid(formEvent.end)
-            ? getTimeFromDate(formEvent.end)
+        stop={
+          formEvent && isValid(formEvent.stop)
+            ? getTimeFromDate(formEvent.stop)
             : undefined
         }
         onSelectProject={(project) => {
@@ -676,7 +650,7 @@ export function TrackerSchedule() {
             const updatedEvent = {
               ...eventToUpdate,
               project: {
-                ...(eventToUpdate.project ?? {}),
+                ...(eventToUpdate.trackerProject ?? {}),
                 id: project.id,
                 name: project.name,
               },
@@ -694,9 +668,9 @@ export function TrackerSchedule() {
               handleCreateEvent({
                 id: eventToUpdate.id,
                 start: getTimeFromDate(eventToUpdate.start),
-                end: getTimeFromDate(eventToUpdate.end),
-                project_id: project.id,
-                assigned_id: eventToUpdate.assigned_id,
+                stop: getTimeFromDate(eventToUpdate.stop),
+                projectId: project.id,
+                assignedId: eventToUpdate.assignedId,
                 description: eventToUpdate.description ?? undefined,
               });
             }

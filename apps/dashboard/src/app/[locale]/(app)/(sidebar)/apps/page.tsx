@@ -13,7 +13,7 @@ export default async function Page() {
   const queryClient = getQueryClient();
 
   // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
-  await queryClient.fetchQuery(trpc.apps.installed.queryOptions());
+  await queryClient.fetchQuery(trpc.apps.get.queryOptions());
 
   return (
     <HydrateClient>

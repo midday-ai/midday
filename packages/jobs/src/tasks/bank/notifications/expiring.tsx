@@ -1,4 +1,4 @@
-import { resend } from "@/utils/resend";
+import { resend } from "@jobs/utils/resend";
 import ConnectionExpireEmail from "@midday/email/emails/connection-expire";
 import { render } from "@react-email/components";
 import { schemaTask } from "@trigger.dev/sdk/v3";
@@ -19,7 +19,7 @@ export const expiringNotifications = schemaTask({
         user: z.object({
           id: z.string(),
           email: z.string(),
-          full_name: z.string(),
+          fullName: z.string(),
           locale: z.string(),
         }),
       }),
@@ -30,7 +30,7 @@ export const expiringNotifications = schemaTask({
       async ({ user, bankName, teamName, expiresAt }) => {
         const html = await render(
           <ConnectionExpireEmail
-            fullName={user.full_name}
+            fullName={user.fullName}
             bankName={bankName}
             teamName={teamName}
             expiresAt={expiresAt}

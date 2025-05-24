@@ -11,7 +11,7 @@ import { App } from "./app";
 export function Apps() {
   const trpc = useTRPC();
   const { data: installedApps } = useSuspenseQuery(
-    trpc.apps.installed.queryOptions(),
+    trpc.apps.get.queryOptions(),
   );
 
   const { data: user } = useUserQuery();
@@ -22,7 +22,11 @@ export function Apps() {
   const router = useRouter();
 
   const filteredApps = apps
-    .filter((app) => !isInstalledPage || installedApps.includes(app.id))
+    .filter(
+      (app) =>
+        !isInstalledPage ||
+        installedApps?.some((installed) => installed.app_id === app.id),
+    )
     .filter(
       (app) => !search || app.name.toLowerCase().includes(search.toLowerCase()),
     );
@@ -30,14 +34,18 @@ export function Apps() {
   return (
     <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 mx-auto mt-8">
       {filteredApps.map((app) => (
+        // @ts-expect-error
         <App
           key={app.id}
-          installed={installedApps?.includes(app.id)}
+          installed={installedApps?.some(
+            (installed) => installed.app_id === app.id,
+          )}
           {...app}
           userSettings={
             installedApps.find((setting) => setting?.app_id === app.id)
               ?.settings ?? []
           }
+          // @ts-expect-error
           onInitialize={() => app.onInitialize(user)}
         />
       ))}

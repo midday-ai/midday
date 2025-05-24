@@ -1,5 +1,5 @@
-import { updateInvoiceStatus } from "@/utils/update-invocie";
 import { TZDate } from "@date-fns/tz";
+import { updateInvoiceStatus } from "@jobs/utils/update-invocie";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { subDays } from "date-fns";

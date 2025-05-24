@@ -1,4 +1,4 @@
-import { ProviderError } from "@/utils/error";
+import { ProviderError } from "@engine/utils/error";
 import type {
   GetConnectionStatusRequest,
   GetConnectionStatusResponse,

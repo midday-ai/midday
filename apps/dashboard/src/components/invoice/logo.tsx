@@ -11,7 +11,7 @@ import { useFormContext } from "react-hook-form";
 
 export function Logo() {
   const { watch, setValue } = useFormContext();
-  const logoUrl = watch("template.logo_url");
+  const logoUrl = watch("template.logoUrl");
   const { uploadFile, isLoading } = useUpload();
   const { toast } = useToast();
 
@@ -28,13 +28,13 @@ export function Logo() {
       try {
         const { url } = await uploadFile({
           file,
-          path: [user?.team_id, "invoice", file.name],
+          path: [user?.teamId ?? "", "invoice", file.name],
           bucket: "avatars",
         });
 
-        setValue("template.logo_url", url, { shouldValidate: true });
+        setValue("template.logoUrl", url, { shouldValidate: true });
 
-        updateTemplateMutation.mutate({ logo_url: url });
+        updateTemplateMutation.mutate({ logoUrl: url });
       } catch (error) {
         toast({
           title: "Something went wrong, please try again.",
@@ -62,10 +62,10 @@ export function Logo() {
               style={{ width: "auto" }}
               onClick={(e) => {
                 e.preventDefault();
-                setValue("template.logo_url", undefined, {
+                setValue("template.logoUrl", undefined, {
                   shouldValidate: true,
                 });
-                updateTemplateMutation.mutate({ logo_url: null });
+                updateTemplateMutation.mutate({ logoUrl: null });
               }}
             >
               <Icons.Clear className="size-4" />

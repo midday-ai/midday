@@ -3,11 +3,15 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@api/*": ["../api/src/*"],
+      "@engine/*": ["../engine/src/*"],
+      "@jobs/*": ["../../packages/jobs/src/*"]
     },
     "strict": true
   },
   "include": [
+    "../../types",
     "next-env.d.ts",
     "next.config.js",
     "**/*.ts",

@@ -1,29 +1,39 @@
 import { ScrollArea } from "@midday/ui/scroll-area";
-import type { TemplateProps } from "../types";
+import type { Invoice } from "../../types";
 import { EditorContent } from "./components/editor-content";
 import { LineItems } from "./components/line-items";
 import { Logo } from "./components/logo";
 import { Meta } from "./components/meta";
 import { Summary } from "./components/summary";
 
-export function HtmlTemplate({
-  invoice_number,
-  issue_date,
-  due_date,
-  template,
-  line_items,
-  customer_details,
-  from_details,
-  payment_details,
-  note_details,
-  currency,
-  discount,
-  customer_name,
-  width,
-  height,
-  top_block,
-  bottom_block,
-}: TemplateProps) {
+type Props = {
+  data: Invoice;
+  width: number;
+  height: number;
+};
+
+export function HtmlTemplate({ data, width, height }: Props) {
+  if (!data) {
+    return null;
+  }
+
+  const {
+    invoiceNumber,
+    issueDate,
+    dueDate,
+    template,
+    lineItems,
+    customerDetails,
+    fromDetails,
+    paymentDetails,
+    noteDetails,
+    currency,
+    discount,
+    customerName,
+    topBlock,
+    bottomBlock,
+  } = data;
+
   return (
     <ScrollArea
       className="bg-background border border-border w-full md:w-auto h-full [&>div]:h-full"
@@ -41,63 +51,62 @@ export function HtmlTemplate({
         <div className="flex justify-between">
           <Meta
             template={template}
-            invoiceNumber={invoice_number}
-            issueDate={issue_date}
-            dueDate={due_date}
-            timezone={template.timezone}
+            invoiceNumber={invoiceNumber}
+            issueDate={issueDate}
+            dueDate={dueDate}
           />
 
-          {template.logo_url && (
-            <Logo logo={template.logo_url} customerName={customer_name || ""} />
+          {template.logoUrl && (
+            <Logo logo={template.logoUrl} customerName={customerName || ""} />
           )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-6 mb-4">
           <div>
             <p className="text-[11px] text-[#878787] font-mono mb-2 block">
-              {template.from_label}
+              {template.fromLabel}
             </p>
-            <EditorContent content={from_details} />
+            <EditorContent content={fromDetails} />
           </div>
           <div className="mt-4 md:mt-0">
             <p className="text-[11px] text-[#878787] font-mono mb-2 block">
-              {template.customer_label}
+              {template.customerLabel}
             </p>
-            <EditorContent content={customer_details} />
+            <EditorContent content={customerDetails} />
           </div>
         </div>
 
-        <EditorContent content={top_block} />
+        <EditorContent content={topBlock} />
 
         <LineItems
-          lineItems={line_items}
+          lineItems={lineItems}
           currency={currency}
-          descriptionLabel={template.description_label}
-          quantityLabel={template.quantity_label}
-          priceLabel={template.price_label}
-          totalLabel={template.total_label}
-          includeDecimals={template.include_decimals}
+          descriptionLabel={template.descriptionLabel}
+          quantityLabel={template.quantityLabel}
+          priceLabel={template.priceLabel}
+          totalLabel={template.totalLabel}
+          includeDecimals={template.includeDecimals}
           locale={template.locale}
-          includeUnits={template.include_units}
+          includeUnits={template.includeUnits}
         />
 
         <div className="mt-10 md:mt-12 flex justify-end mb-6 md:mb-8">
           <Summary
-            includeVAT={template.include_vat}
-            includeTax={template.include_tax}
-            taxRate={template.tax_rate}
-            vatRate={template.vat_rate}
+            includeVat={template.includeVat}
+            includeTax={template.includeTax}
+            taxRate={template.taxRate}
+            vatRate={template.vatRate}
             currency={currency}
-            vatLabel={template.vat_label}
-            taxLabel={template.tax_label}
-            totalLabel={template.total_summary_label}
-            lineItems={line_items}
-            includeDiscount={template.include_discount}
-            discountLabel={template.discount_label}
+            vatLabel={template.vatLabel}
+            taxLabel={template.taxLabel}
+            totalLabel={template.totalSummaryLabel}
+            lineItems={lineItems}
+            includeDiscount={template.includeDiscount}
+            discountLabel={template.discountLabel}
             discount={discount}
             locale={template.locale}
-            includeDecimals={template.include_decimals}
-            subtotalLabel={template.subtotal_label}
+            includeDecimals={template.includeDecimals}
+            subtotalLabel={template.subtotalLabel}
           />
         </div>
 
@@ -105,21 +114,21 @@ export function HtmlTemplate({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div>
               <p className="text-[11px] text-[#878787] font-mono mb-2 block">
-                {template.payment_label}
+                {template.paymentLabel}
               </p>
-              <EditorContent content={payment_details} />
+              <EditorContent content={paymentDetails} />
             </div>
-            {note_details && (
+            {noteDetails && (
               <div className="mt-4 md:mt-0">
                 <p className="text-[11px] text-[#878787] font-mono mb-2 block">
-                  {template.note_label}
+                  {template.noteLabel}
                 </p>
-                <EditorContent content={note_details} />
+                <EditorContent content={noteDetails} />
               </div>
             )}
           </div>
 
-          <EditorContent content={bottom_block} />
+          <EditorContent content={bottomBlock} />
         </div>
       </div>
     </ScrollArea>
