@@ -1985,6 +1985,46 @@ export const usersInAuth = pgTable(
   ],
 );
 
+export const apiKeys = pgTable(
+  "api_keys",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    key: text().notNull(),
+    name: text(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    userId: uuid("user_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+  },
+  (table) => [
+    index("api_keys_key_idx").using(
+      "btree",
+      table.key.asc().nullsLast().op("text_ops"),
+    ),
+    index("api_keys_user_id_idx").using(
+      "btree",
+      table.userId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("api_keys_team_id_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+    ),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "api_keys_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "api_keys_team_id_fkey",
+    }).onDelete("cascade"),
+    unique("api_keys_key_unique").on(table.key),
+  ],
+);
+
 // Relations
 export const transactionsRelations = relations(
   transactions,
@@ -2021,6 +2061,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   userInvites: many(userInvites),
   documents: many(documents),
   apps: many(apps),
+  apiKeys: many(apiKeys),
   usersInAuth: one(usersInAuth, {
     fields: [users.id],
     references: [usersInAuth.id],
@@ -2030,6 +2071,17 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     references: [teams.id],
   }),
   usersOnTeams: many(usersOnTeam),
+}));
+
+export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+  user: one(users, {
+    fields: [apiKeys.userId],
+    references: [users.id],
+  }),
+  team: one(teams, {
+    fields: [apiKeys.teamId],
+    references: [teams.id],
+  }),
 }));
 
 export const teamsRelations = relations(teams, ({ many }) => ({
@@ -2051,6 +2103,7 @@ export const teamsRelations = relations(teams, ({ many }) => ({
   transactionAttachments: many(transactionAttachments),
   documents: many(documents),
   apps: many(apps),
+  apiKeys: many(apiKeys),
   invoiceTemplates: many(invoiceTemplates),
   transactionEnrichments: many(transactionEnrichments),
   users: many(users),

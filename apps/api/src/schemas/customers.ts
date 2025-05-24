@@ -9,7 +9,7 @@ export const getCustomersSchema = z
       .optional(),
     sort: z.array(z.string(), z.string()).nullable().optional(),
     cursor: z.string().optional(),
-    pageSize: z.number().optional(),
+    pageSize: z.number().min(1).max(100).optional(),
   })
   .optional();
 

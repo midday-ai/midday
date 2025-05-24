@@ -5,11 +5,12 @@ import { openAPISpecs } from "hono-openapi";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { routers } from "./rest/routers";
+import type { Context } from "./rest/types";
 import { createTRPCContext } from "./trpc/init";
 import { appRouter } from "./trpc/routers/_app";
 import { checkHealth } from "./utils/health";
 
-const app = new Hono();
+export const app = new Hono<Context>();
 
 app.use(secureHeaders());
 
@@ -51,7 +52,8 @@ app.get("/health", async (c) => {
   }
 });
 
-app.route("/", routers);
+app.route("/v1", routers);
+
 app.get(
   "/openapi",
   openAPISpecs(app, {

@@ -1,33 +1,47 @@
+import { getTransactions } from "@api/db/queries/transactions";
+import type { Context } from "@api/rest/types";
+import {
+  getTransactionsSchema,
+  transactionsSchema,
+} from "@api/schemas/transactions";
+import { withTransform } from "@api/utils/with-transform";
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { resolver, validator as zValidator } from "hono-openapi/zod";
-import { transactionsQuerySchema, transactionsResponseSchema } from "./schema";
 
-const app = new Hono();
+const app = new Hono<Context>();
 
 app.get(
   "/",
   describeRoute({
-    description: "Say hello to the user",
+    description: "Get transactions",
     tags: ["Transactions"],
     responses: {
       200: {
-        description: "Successful greeting response",
+        description: "Transactions",
         content: {
-          "text/plain": {
-            schema: resolver(transactionsResponseSchema),
+          "application/json": {
+            schema: resolver(transactionsSchema.snake),
           },
         },
       },
     },
   }),
-  zValidator("query", transactionsQuerySchema),
-  (c) => {
-    const query = c.req.valid("query");
-    return c.json({
-      message: "Hello World",
-    });
-  },
+  zValidator("query", getTransactionsSchema.snake),
+  withTransform(
+    {
+      input: getTransactionsSchema,
+      output: transactionsSchema,
+    },
+    async (c, transformedQuery) => {
+      const db = c.get("db");
+
+      return getTransactions(db, {
+        teamId: c.get("teamId"),
+        ...transformedQuery,
+      });
+    },
+  ),
 );
 
 app.get(

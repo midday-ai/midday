@@ -122,7 +122,7 @@ export const getInvoicesSchema = z
   .object({
     cursor: z.string().nullable().optional(),
     sort: z.array(z.string(), z.string()).nullable().optional(),
-    pageSize: z.number().optional(),
+    pageSize: z.number().min(1).max(100).optional(),
     filter: z
       .object({
         q: z.string().nullable().optional(),
