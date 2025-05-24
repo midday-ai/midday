@@ -2,7 +2,7 @@ import { getTransactions } from "@api/db/queries/transactions";
 import type { Context } from "@api/rest/types";
 import {
   getTransactionsSchema,
-  transactionsSchema,
+  transactionsResponseSchema,
 } from "@api/schemas/transactions";
 import { withTransform } from "@api/utils/with-transform";
 import { Hono } from "hono";
@@ -21,7 +21,7 @@ app.get(
         description: "Transactions",
         content: {
           "application/json": {
-            schema: resolver(transactionsSchema.snake),
+            schema: resolver(transactionsResponseSchema.snake),
           },
         },
       },
@@ -31,14 +31,15 @@ app.get(
   withTransform(
     {
       input: getTransactionsSchema,
-      output: transactionsSchema,
+      output: transactionsResponseSchema,
     },
-    async (c, transformedQuery) => {
+    async (c, params) => {
       const db = c.get("db");
+      const teamId = c.get("teamId");
 
       return getTransactions(db, {
-        teamId: c.get("teamId"),
-        ...transformedQuery,
+        teamId,
+        ...params,
       });
     },
   ),

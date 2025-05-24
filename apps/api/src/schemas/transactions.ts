@@ -186,35 +186,31 @@ export const getTransactionsSchema = createSchema({
     }),
 });
 
-export const transactionsSchema = createSchema({
+export const transactionResponseSchema = createSchema({
+  id: z.string().uuid(),
+  name: z.string(),
+  amount: z.number(),
+  currency: z.string(),
+  date: z.string(),
+  categorySlug: z.string(),
+  status: z.string(),
+  internal: z.boolean(),
+  recurring: z.boolean(),
+  frequency: z.string(),
+  note: z.string(),
+  assignedId: z.string(),
+  attachments: z.array(z.string()),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const transactionsResponseSchema = createSchema({
   meta: z.object({
-    total: z.number(),
-    page: z.number(),
-    pageSize: z.number(),
+    cursor: z.string().optional(),
+    hasPreviousPage: z.boolean(),
+    hasNextPage: z.boolean(),
   }),
-  data: z
-    .array(
-      z.object({
-        id: z.string().uuid(),
-        name: z.string(),
-        amount: z.number(),
-        currency: z.string(),
-        date: z.string(),
-        categorySlug: z.string(),
-        status: z.string(),
-        internal: z.boolean(),
-        recurring: z.boolean(),
-        frequency: z.string(),
-        note: z.string(),
-        assignedId: z.string(),
-        attachments: z.array(z.string()),
-        createdAt: z.string(),
-        updatedAt: z.string(),
-      }),
-    )
-    .openapi({
-      description: "Array of transactions.",
-    }),
+  data: z.array(transactionResponseSchema.camel),
 });
 
 export const deleteTransactionsSchema = createSchema({
