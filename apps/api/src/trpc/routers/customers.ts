@@ -15,7 +15,7 @@ import { generateToken } from "@midday/invoice/token";
 
 export const customersRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(getCustomersSchema)
+    .input(getCustomersSchema.snake)
     .query(async ({ ctx: { teamId, db }, input }) => {
       return getCustomers(db, {
         teamId: teamId!,
