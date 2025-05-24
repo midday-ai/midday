@@ -54,7 +54,7 @@ export async function generateMetadata(props: {
     };
   } catch (error) {
     return {
-      title: "Invalid Invoice",
+      title: "Invoice Not Found",
       robots: {
         index: false,
         follow: false,

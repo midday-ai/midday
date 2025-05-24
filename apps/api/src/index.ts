@@ -1,16 +1,16 @@
 import { trpcServer } from "@hono/trpc-server";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
+import { openAPISpecs } from "hono-openapi";
 import { cors } from "hono/cors";
-import { poweredBy } from "hono/powered-by";
 import { secureHeaders } from "hono/secure-headers";
+import { routers } from "./rest/routers";
 import { createTRPCContext } from "./trpc/init";
 import { appRouter } from "./trpc/routers/_app";
 import { checkHealth } from "./utils/health";
 
 const app = new Hono();
 
-app.use(poweredBy());
 app.use(secureHeaders());
 
 app.use(
@@ -51,7 +51,44 @@ app.get("/health", async (c) => {
   }
 });
 
-app.get("/", Scalar({ url: "/doc", pageTitle: "Midday API", theme: "saturn" }));
+app.route("/", routers);
+app.get(
+  "/openapi",
+  openAPISpecs(app, {
+    documentation: {
+      info: {
+        title: "Midday API",
+        version: "1.0.0",
+        description: "API for Midday",
+      },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "Bearer",
+          },
+        },
+      },
+      security: [
+        {
+          bearerAuth: [],
+        },
+      ],
+      servers: [
+        {
+          url: "https://api.midday.ai",
+          description: "Production server",
+        },
+      ],
+    },
+  }),
+);
+
+app.get(
+  "/",
+  Scalar({ url: "/openapi", pageTitle: "Midday API", theme: "saturn" }),
+);
 
 export default {
   port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3000,
