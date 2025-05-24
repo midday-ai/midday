@@ -1,7 +1,5 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
-import { resolver, validator as zValidator } from "hono-openapi/zod";
-import { querySchema, responseSchema } from "./schema";
 
 const app = new Hono();
 
@@ -10,22 +8,7 @@ app.get(
   describeRoute({
     description: "Say hello to the user",
     tags: ["Invoices"],
-    responses: {
-      200: {
-        description: "Successful greeting response",
-        content: {
-          "text/plain": {
-            schema: resolver(responseSchema),
-          },
-        },
-      },
-    },
   }),
-  zValidator("query", querySchema),
-  (c) => {
-    const query = c.req.valid("query");
-    return c.text(`Hello ${query?.name ?? "Hono"}!`);
-  },
 );
 
 app.post(

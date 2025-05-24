@@ -39,6 +39,7 @@
     "pino": "^9.7.0",
     "postgres": "^3.4.7",
     "resend": "^4.5.1",
+    "snakecase-keys": "^8.0.1",
     "superjson": "^2.2.2",
     "uuid": "^11.1.0",
     "zod": "^3.25.27",

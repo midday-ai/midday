@@ -1,11 +1,8 @@
 "use client";
 
 import { useZodForm } from "@/hooks/use-zod-form";
+import { invoiceTemplateSchema, lineItemSchema } from "@api/schemas/invoice";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
-import {
-  invoiceTemplateSchema,
-  lineItemSchema,
-} from "@api/trpc/routers/invoice/schema";
 import { useEffect } from "react";
 import { FormProvider } from "react-hook-form";
 import { z } from "zod";

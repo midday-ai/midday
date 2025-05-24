@@ -3,7 +3,7 @@ import { z } from "zod";
 export const getDocumentsSchema = z.object({
   cursor: z.string().nullable().optional(),
   sort: z.array(z.string(), z.string()).nullable().optional(),
-  pageSize: z.number().optional(),
+  pageSize: z.number().min(1).max(100).optional(),
   filter: z
     .object({
       q: z.string().nullable().optional(),
@@ -19,7 +19,7 @@ export const getDocumentSchema = z.object({
 
 export const getRelatedDocumentsSchema = z.object({
   id: z.string(),
-  pageSize: z.number(),
+  pageSize: z.number().min(1).max(100),
 });
 
 export const deleteDocumentSchema = z.object({ id: z.string() });

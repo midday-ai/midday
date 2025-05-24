@@ -10,7 +10,7 @@ export const userRouter = createTRPCRouter({
   }),
 
   update: protectedProcedure
-    .input(updateUserSchema)
+    .input(updateUserSchema.snake)
     .mutation(async ({ ctx: { db, session }, input }) => {
       return updateUser(db, {
         id: session.user.id,

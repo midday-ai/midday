@@ -1,18 +1,21 @@
 import { Hono } from "hono";
-import { accountsRouter } from "./accounts/route";
-import { customersRouter } from "./customers/route";
-import { documentsRouter } from "./documents/route";
-import { inboxRouter } from "./inbox/route";
-import { invoicesRouter } from "./invoices/route";
-import { metricsRouter } from "./metrics/route";
-import { searchRouter } from "./search/route";
-import { tagsRouter } from "./tags/route";
-import { teamRouter } from "./team/route";
-import { trackerRouter } from "./tracker/route";
-import { transactionsRouter } from "./transactions/route";
-import { usersRouter } from "./users/route";
+import { protectedMiddleware } from "../middleware";
+import { accountsRouter } from "./accounts";
+import { customersRouter } from "./customers";
+import { documentsRouter } from "./documents";
+import { inboxRouter } from "./inbox";
+import { invoicesRouter } from "./invoices";
+import { metricsRouter } from "./metrics";
+import { searchRouter } from "./search";
+import { tagsRouter } from "./tags";
+import { teamRouter } from "./team";
+import { trackerRouter } from "./tracker";
+import { transactionsRouter } from "./transactions";
+import { usersRouter } from "./users";
 
 const routers = new Hono();
+
+routers.use(...protectedMiddleware);
 
 routers.route("/transactions", transactionsRouter);
 routers.route("/teams", teamRouter);
