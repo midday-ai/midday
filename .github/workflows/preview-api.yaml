@@ -35,6 +35,7 @@ jobs:
         working-directory: ./apps/api
       - name: 🧪 Run unit tests
         run: bun run test
+        working-directory: ./apps/api
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --remote-only --dockerfile apps/api/Dockerfile --config apps/api/fly-preview.yml
         env:

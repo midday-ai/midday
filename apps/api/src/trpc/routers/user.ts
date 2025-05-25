@@ -10,7 +10,7 @@ export const userRouter = createTRPCRouter({
   }),
 
   update: protectedProcedure
-    .input(updateUserSchema.camel)
+    .input(updateUserSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
       return updateUser(db, {
         id: session.user.id,

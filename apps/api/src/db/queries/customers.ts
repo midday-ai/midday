@@ -7,10 +7,19 @@ import {
   trackerProjects,
 } from "@api/db/schema";
 import { buildSearchQuery } from "@api/utils/search";
+import { generateToken } from "@midday/invoice/token";
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 
-export const getCustomerById = async (db: Database, id: string) => {
+type GetCustomerByIdParams = {
+  id: string;
+  teamId: string;
+};
+
+export const getCustomerById = async (
+  db: Database,
+  params: GetCustomerByIdParams,
+) => {
   const [result] = await db
     .select({
       id: customers.id,
@@ -48,7 +57,9 @@ export const getCustomerById = async (db: Database, id: string) => {
       `.as("tags"),
     })
     .from(customers)
-    .where(eq(customers.id, id))
+    .where(
+      and(eq(customers.id, params.id), eq(customers.teamId, params.teamId)),
+    )
     .leftJoin(invoices, eq(invoices.customerId, customers.id))
     .leftJoin(trackerProjects, eq(trackerProjects.customerId, customers.id))
     .leftJoin(customerTags, eq(customerTags.customerId, customers.id))
@@ -213,7 +224,6 @@ export type UpsertCustomerParams = {
   teamId: string;
   name: string;
   email: string;
-  token?: string;
   country?: string | null;
   addressLine1?: string | null;
   addressLine2?: string | null;
@@ -235,6 +245,8 @@ export const upsertCustomer = async (
 ) => {
   const { id, tags: inputTags, teamId, ...rest } = params;
 
+  const token = id ? await generateToken(id) : undefined;
+
   // Start a transaction
   return db.transaction(async (tx) => {
     // Upsert customer
@@ -250,7 +262,7 @@ export const upsertCustomer = async (
         set: {
           name: rest.name,
           email: rest.email,
-          token: rest.token,
+          token,
           country: rest.country,
           addressLine1: rest.addressLine1,
           addressLine2: rest.addressLine2,

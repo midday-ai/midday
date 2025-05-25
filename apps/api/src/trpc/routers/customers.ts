@@ -11,11 +11,10 @@ import {
   upsertCustomerSchema,
 } from "@api/schemas/customers";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { generateToken } from "@midday/invoice/token";
 
 export const customersRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(getCustomersSchema.camel)
+    .input(getCustomersSchema)
     .query(async ({ ctx: { teamId, db }, input }) => {
       return getCustomers(db, {
         teamId: teamId!,
@@ -25,8 +24,11 @@ export const customersRouter = createTRPCRouter({
 
   getById: protectedProcedure
     .input(getCustomerByIdSchema)
-    .query(async ({ ctx: { db }, input }) => {
-      return getCustomerById(db, input.id);
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getCustomerById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
     }),
 
   delete: protectedProcedure
@@ -38,11 +40,8 @@ export const customersRouter = createTRPCRouter({
   upsert: protectedProcedure
     .input(upsertCustomerSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
-      const token = input.id ? await generateToken(input.id) : undefined;
-
       return upsertCustomer(db, {
         ...input,
-        token,
         teamId: teamId!,
       });
     }),

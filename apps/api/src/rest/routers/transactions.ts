@@ -4,7 +4,7 @@ import {
   getTransactionsSchema,
   transactionsResponseSchema,
 } from "@api/schemas/transactions";
-import { withTransform } from "@api/utils/with-transform";
+import { withSanitized } from "@api/utils/with-sanitized";
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { resolver, validator as zValidator } from "hono-openapi/zod";
@@ -21,28 +21,25 @@ app.get(
         description: "Transactions",
         content: {
           "application/json": {
-            schema: resolver(transactionsResponseSchema.snake),
+            schema: resolver(transactionsResponseSchema),
           },
         },
       },
     },
   }),
-  zValidator("query", getTransactionsSchema.snake),
-  withTransform(
-    {
-      input: getTransactionsSchema,
-      output: transactionsResponseSchema,
-    },
-    async (c, params) => {
-      const db = c.get("db");
-      const teamId = c.get("teamId");
+  zValidator("query", getTransactionsSchema),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const query = c.req.valid("query");
 
-      return getTransactions(db, {
-        teamId,
-        ...params,
-      });
-    },
-  ),
+    const data = await getTransactions(db, {
+      teamId,
+      ...query,
+    });
+
+    return c.json(withSanitized(transactionsResponseSchema, { data }));
+  },
 );
 
 app.get(

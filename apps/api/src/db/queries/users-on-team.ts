@@ -31,7 +31,9 @@ export async function getTeamsByUserId(db: Database, userId: string) {
         id: teams.id,
         name: teams.name,
         plan: teams.plan,
+        role: usersOnTeam.role,
         createdAt: teams.createdAt,
+        logoUrl: teams.logoUrl,
       },
     })
     .from(usersOnTeam)
@@ -47,7 +49,9 @@ export async function getTeamsByUserId(db: Database, userId: string) {
     id: row?.team?.id,
     name: row?.team?.name,
     plan: row?.team?.plan,
+    role: row?.role,
     createdAt: row?.team?.createdAt,
     updatedAt: row?.team?.createdAt,
+    logoUrl: row?.team?.logoUrl,
   }));
 }

@@ -2009,8 +2009,12 @@ export const apiKeys = pgTable(
       .defaultNow(),
     userId: uuid("user_id").notNull(),
     teamId: uuid("team_id").notNull(),
-    isActive: boolean("is_active").notNull().default(true),
     keyHash: text("key_hash"),
+    permissions: text("permissions").array(),
+    lastUsedAt: timestamp("last_used_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
   },
   (table) => [
     index("api_keys_key_idx").using(

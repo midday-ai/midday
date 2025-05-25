@@ -1,78 +1,74 @@
 import type { Database } from "@api/db";
-import { apiKeys } from "@api/db/schema";
+import { apiKeys, users } from "@api/db/schema";
+import { generateApiKey } from "@api/utils/api-keys";
+import { encrypt, hash } from "@midday/encryption";
 import { and, eq } from "drizzle-orm";
 
-export async function getApiKeyByHash(db: Database, keyHash: string) {
+export async function getApiKeyByToken(db: Database, token: string) {
+  const keyHash = hash(token);
+
   const [result] = await db
     .select({
       id: apiKeys.id,
       name: apiKeys.name,
       userId: apiKeys.userId,
       teamId: apiKeys.teamId,
-      isActive: apiKeys.isActive,
       createdAt: apiKeys.createdAt,
     })
     .from(apiKeys)
-    .where(and(eq(apiKeys.keyHash, keyHash), eq(apiKeys.isActive, true)))
+    .where(eq(apiKeys.keyHash, keyHash))
     .limit(1);
 
   return result;
 }
 
 type CreateApiKeyData = {
-  keyEncrypted: string;
-  keyHash: string;
   name?: string;
   userId: string;
   teamId: string;
 };
 
 export async function createApiKey(db: Database, data: CreateApiKeyData) {
-  return await db
+  const keyEncrypted = encrypt(generateApiKey());
+  const keyHash = hash(keyEncrypted);
+
+  return db
     .insert(apiKeys)
     .values({
-      keyEncrypted: data.keyEncrypted,
-      keyHash: data.keyHash,
+      keyEncrypted,
+      keyHash,
       name: data.name,
       userId: data.userId,
       teamId: data.teamId,
-      isActive: true,
     })
     .returning();
 }
 
 export async function getApiKeysByTeam(db: Database, teamId: string) {
-  return await db
+  return db
     .select({
       id: apiKeys.id,
       name: apiKeys.name,
       createdAt: apiKeys.createdAt,
-      isActive: apiKeys.isActive,
+      user: {
+        id: users.id,
+        fullName: users.fullName,
+        avatarUrl: users.avatarUrl,
+      },
     })
     .from(apiKeys)
+    .leftJoin(users, eq(apiKeys.userId, users.id))
     .where(eq(apiKeys.teamId, teamId))
     .orderBy(apiKeys.createdAt);
 }
 
-export async function deleteApiKey(
-  db: Database,
-  keyId: string,
-  teamId: string,
-) {
-  return await db
-    .delete(apiKeys)
-    .where(and(eq(apiKeys.id, keyId), eq(apiKeys.teamId, teamId)));
-}
+type DeleteApiKeyParams = {
+  id: string;
+  teamId: string;
+};
 
-export async function deactivateApiKey(
-  db: Database,
-  keyId: string,
-  teamId: string,
-) {
-  return await db
-    .update(apiKeys)
-    .set({
-      isActive: false,
-    })
-    .where(and(eq(apiKeys.id, keyId), eq(apiKeys.teamId, teamId)));
+export async function deleteApiKey(db: Database, params: DeleteApiKeyParams) {
+  return db
+    .delete(apiKeys)
+    .where(and(eq(apiKeys.id, params.id), eq(apiKeys.teamId, params.teamId)));
 }
