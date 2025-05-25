@@ -1,11 +1,12 @@
 import { getTeamsByUserId } from "@api/db/queries/users-on-team";
+import type { Context } from "@api/rest/types";
 import { teamsResponseSchema } from "@api/schemas/team";
-import { withTransform } from "@api/utils/with-transform";
+import { withSanitized } from "@api/utils/with-sanitized";
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { resolver } from "hono-openapi/zod";
 
-const app = new Hono();
+const app = new Hono<Context>();
 
 app.get(
   "/",
@@ -17,24 +18,20 @@ app.get(
         description: "Teams",
         content: {
           "application/json": {
-            schema: resolver(teamsResponseSchema.snake),
+            schema: resolver(teamsResponseSchema),
           },
         },
       },
     },
   }),
-  withTransform(
-    {
-      output: teamsResponseSchema,
-    },
-    async (c) => {
-      const db = c.get("db");
-      const session = c.get("session");
+  async (c) => {
+    const db = c.get("db");
+    const session = c.get("session");
 
-      const result = await getTeamsByUserId(db, session.user.id);
-      return { data: result };
-    },
-  ),
+    const result = await getTeamsByUserId(db, session.user.id);
+
+    return c.json(withSanitized(teamsResponseSchema, { data: result }));
+  },
 );
 
 app.post(

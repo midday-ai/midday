@@ -1,22 +1,17 @@
-import { createSchema } from "@api/utils/schema";
 import { z } from "zod";
 import "zod-openapi/extend";
 
-export const teamResponseSchema = createSchema(
-  z.object({
-    id: z.string().uuid(),
-    name: z.string(),
-    plan: z.enum(["trial", "starter", "pro"]),
-    createdAt: z.string(),
-    updatedAt: z.string(),
-  }),
-);
+export const teamResponseSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  plan: z.enum(["trial", "starter", "pro"]),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
 
-export const teamsResponseSchema = createSchema(
-  z.object({
-    data: z.array(teamResponseSchema.camel),
-  }),
-);
+export const teamsResponseSchema = z.object({
+  data: z.array(teamResponseSchema),
+});
 
 export const updateTeamByIdSchema = z.object({
   name: z.string().min(2).max(32).optional(),

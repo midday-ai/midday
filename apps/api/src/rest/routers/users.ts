@@ -1,7 +1,7 @@
 import { getUserById, updateUser } from "@api/db/queries/users";
 import type { Context } from "@api/rest/types";
 import { updateUserSchema, userSchema } from "@api/schemas/users";
-import { withTransform } from "@api/utils/with-transform";
+import { withSanitized } from "@api/utils/with-sanitized";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
@@ -19,18 +19,20 @@ app.get(
         description: "The current user",
         content: {
           "application/json": {
-            schema: resolver(userSchema.snake),
+            schema: resolver(userSchema),
           },
         },
       },
     },
   }),
-  withTransform({ output: userSchema }, async (c) => {
+  async (c) => {
     const db = c.get("db");
     const session = c.get("session");
 
-    return getUserById(db, session.user.id);
-  }),
+    const result = await getUserById(db, session.user.id);
+
+    return c.json(withSanitized(userSchema, result));
+  },
 );
 
 app.put(
@@ -43,29 +45,25 @@ app.put(
         description: "The updated user",
         content: {
           "application/json": {
-            schema: resolver(userSchema.snake),
+            schema: resolver(userSchema),
           },
         },
       },
     },
   }),
-  zValidator("json", updateUserSchema.snake),
-  withTransform(
-    {
-      input: updateUserSchema,
-      output: userSchema,
-      inputSource: "json",
-    },
-    async (c, transformedInput) => {
-      const db = c.get("db");
-      const session = c.get("session");
+  zValidator("json", updateUserSchema),
+  async (c) => {
+    const db = c.get("db");
+    const session = c.get("session");
+    const body = c.req.valid("json");
 
-      return updateUser(db, {
-        id: session.user.id,
-        ...transformedInput,
-      });
-    },
-  ),
+    const result = await updateUser(db, {
+      id: session.user.id,
+      ...body,
+    });
+
+    return c.json(withSanitized(userSchema, result));
+  },
 );
 
 export const usersRouter = app;

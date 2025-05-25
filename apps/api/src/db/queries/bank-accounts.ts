@@ -2,13 +2,13 @@ import type { Database } from "@api/db";
 import { bankAccounts } from "@api/db/schema";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { sql } from "drizzle-orm";
+import { nanoid } from "nanoid";
 
 export type CreateBankAccountParams = {
   name: string;
   currency?: string;
   teamId: string;
   userId: string;
-  accountId: string;
   manual?: boolean;
 };
 
@@ -23,18 +23,28 @@ export async function createBankAccount(
       currency: params.currency,
       teamId: params.teamId,
       createdBy: params.userId,
-      accountId: params.accountId,
       manual: params.manual,
+      accountId: nanoid(),
     })
     .returning();
 
   return result;
 }
 
-export async function deleteBankAccount(db: Database, id: string) {
+type DeleteBankAccountParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function deleteBankAccount(
+  db: Database,
+  params: DeleteBankAccountParams,
+) {
+  const { id, teamId } = params;
+
   const [result] = await db
     .delete(bankAccounts)
-    .where(eq(bankAccounts.id, id))
+    .where(and(eq(bankAccounts.id, id), eq(bankAccounts.teamId, teamId)))
     .returning();
 
   return result;
@@ -47,6 +57,7 @@ export type UpdateBankAccountParams = {
   type?: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
   balance?: number;
   enabled?: boolean;
+  currency?: string;
 };
 
 export async function updateBankAccount(
@@ -86,6 +97,26 @@ export async function getBankAccounts(
       manual !== undefined ? eq(bankAccounts.manual, manual) : undefined,
     ),
     orderBy: [asc(bankAccounts.createdAt), desc(bankAccounts.name)],
+  });
+}
+
+type GetBankAccountByIdParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function getBankAccountById(
+  db: Database,
+  params: GetBankAccountByIdParams,
+) {
+  return db.query.bankAccounts.findFirst({
+    with: {
+      bankConnection: true,
+    },
+    where: and(
+      eq(bankAccounts.id, params.id),
+      eq(bankAccounts.teamId, params.teamId),
+    ),
   });
 }
 

@@ -8,6 +8,7 @@ import { TableRow as BaseTableRow, TableCell } from "@midday/ui/table";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+
 type Props = {
   row: RouterOutputs["team"]["list"][number];
 };

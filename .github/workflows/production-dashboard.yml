@@ -31,6 +31,7 @@ jobs:
         working-directory: ./apps/dashboard
       - name: 🧪 Run unit tests
         run: bun run test
+        working-directory: ./apps/dashboard
       - name: 📤 Pull Vercel Environment Information
         run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts

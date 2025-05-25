@@ -13,7 +13,6 @@ import {
   updateBankAccountSchema,
 } from "@api/schemas/bank-accounts";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { nanoid } from "nanoid";
 
 export const bankAccountsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -36,8 +35,11 @@ export const bankAccountsRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteBankAccountSchema)
-    .mutation(async ({ input, ctx: { db } }) => {
-      return deleteBankAccount(db, input.id);
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      return deleteBankAccount(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
     }),
 
   update: protectedProcedure
@@ -45,6 +47,7 @@ export const bankAccountsRouter = createTRPCRouter({
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       return updateBankAccount(db, {
         ...input,
+        id: input.id!,
         teamId: teamId!,
       });
     }),
@@ -56,7 +59,6 @@ export const bankAccountsRouter = createTRPCRouter({
         ...input,
         teamId: teamId!,
         userId: session.user.id,
-        accountId: nanoid(),
         manual: input.manual,
       });
     }),

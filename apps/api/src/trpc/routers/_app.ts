@@ -1,5 +1,6 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { createTRPCRouter } from "../init";
+import { apiKeysRouter } from "./api-keys";
 import { appsRouter } from "./apps";
 import { bankAccountsRouter } from "./bank-accounts";
 import { bankConnectionsRouter } from "./bank-connections";
@@ -48,6 +49,7 @@ export const appRouter = createTRPCRouter({
   transactionTags: transactionTagsRouter,
   user: userRouter,
   search: searchRouter,
+  apiKeys: apiKeysRouter,
 });
 
 // export type definition of API

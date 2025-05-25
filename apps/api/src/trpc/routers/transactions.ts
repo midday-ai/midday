@@ -27,7 +27,7 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(getTransactionsSchema.camel)
+    .input(getTransactionsSchema)
     .query(async ({ input, ctx: { db, teamId } }) => {
       return getTransactions(db, {
         ...input,
@@ -36,13 +36,13 @@ export const transactionsRouter = createTRPCRouter({
     }),
 
   getById: protectedProcedure
-    .input(getTransactionByIdSchema.camel)
+    .input(getTransactionByIdSchema)
     .query(async ({ input, ctx: { db } }) => {
       return getTransactionById(db, input.id);
     }),
 
   deleteMany: protectedProcedure
-    .input(deleteTransactionsSchema.camel)
+    .input(deleteTransactionsSchema)
     .mutation(async ({ input, ctx: { db } }) => {
       return deleteTransactions(db, { ids: input.ids });
     }),
@@ -52,13 +52,13 @@ export const transactionsRouter = createTRPCRouter({
   }),
 
   update: protectedProcedure
-    .input(updateTransactionSchema.camel)
+    .input(updateTransactionSchema)
     .mutation(async ({ input, ctx: { db } }) => {
       return updateTransaction(db, input);
     }),
 
   updateMany: protectedProcedure
-    .input(updateTransactionsSchema.camel)
+    .input(updateTransactionsSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       return updateTransactions(db, {
         ...input,
@@ -67,7 +67,7 @@ export const transactionsRouter = createTRPCRouter({
     }),
 
   getSimilarTransactions: protectedProcedure
-    .input(getSimilarTransactionsSchema.camel)
+    .input(getSimilarTransactionsSchema)
     .query(async ({ input, ctx: { db, teamId } }) => {
       return getSimilarTransactions(db, {
         name: input.name,
@@ -78,7 +78,7 @@ export const transactionsRouter = createTRPCRouter({
     }),
 
   updateSimilarTransactionsCategory: protectedProcedure
-    .input(updateSimilarTransactionsCategorySchema.camel)
+    .input(updateSimilarTransactionsCategorySchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       return updateSimilarTransactionsCategory(db, {
         ...input,
@@ -87,7 +87,7 @@ export const transactionsRouter = createTRPCRouter({
     }),
 
   updateSimilarTransactionsRecurring: protectedProcedure
-    .input(updateSimilarTransactionsRecurringSchema.camel)
+    .input(updateSimilarTransactionsRecurringSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       return updateSimilarTransactionsRecurring(db, {
         ...input,
@@ -96,7 +96,7 @@ export const transactionsRouter = createTRPCRouter({
     }),
 
   searchTransactionMatch: protectedProcedure
-    .input(searchTransactionMatchSchema.camel)
+    .input(searchTransactionMatchSchema)
     .query(async ({ input, ctx: { db, teamId } }) => {
       return searchTransactionMatch(db, {
         query: input.query,
@@ -108,7 +108,7 @@ export const transactionsRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(createTransactionSchema.camel)
+    .input(createTransactionSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       return createTransaction(db, {
         ...input,

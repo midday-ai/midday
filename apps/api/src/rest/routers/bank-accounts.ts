@@ -1,7 +1,28 @@
+import {
+  createBankAccount,
+  deleteBankAccount,
+  getBankAccountById,
+  getBankAccounts,
+  updateBankAccount,
+} from "@api/db/queries/bank-accounts";
+import type { Context } from "@api/rest/types";
+import {
+  bankAccountResponseSchema,
+  bankAccountsResponseSchema,
+  createBankAccountSchema,
+  deleteBankAccountSchema,
+  getBankAccountByIdSchema,
+  getBankAccountsSchema,
+  updateBankAccountSchema,
+} from "@api/schemas/bank-accounts";
+import { requestBodyResolver } from "@api/utils/request-body-resolver";
+import { withSanitized } from "@api/utils/with-sanitized";
+import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
+import { resolver } from "hono-openapi/zod";
 
-const app = new Hono();
+const app = new Hono<Context>();
 
 app.get(
   "/",
@@ -13,26 +34,25 @@ app.get(
         description: "List of bank accounts",
         content: {
           "application/json": {
-            schema: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  id: { type: "string" },
-                  name: { type: "string" },
-                  currency: { type: "string" },
-                  type: { type: "string" },
-                  enabled: { type: "boolean" },
-                  balance: { type: "number" },
-                  manual: { type: "boolean" },
-                },
-              },
-            },
+            schema: resolver(bankAccountsResponseSchema),
           },
         },
       },
     },
   }),
+  zValidator("query", getBankAccountsSchema),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const params = c.req.valid("query");
+
+    const data = await getBankAccounts(db, {
+      teamId,
+      ...params,
+    });
+
+    return c.json({ data });
+  },
 );
 
 app.post(
@@ -43,17 +63,7 @@ app.post(
     requestBody: {
       content: {
         "application/json": {
-          schema: {
-            type: "object",
-            required: ["name", "currency"],
-            properties: {
-              name: { type: "string" },
-              currency: { type: "string" },
-              type: { type: "string" },
-              balance: { type: "number" },
-              manual: { type: "boolean" },
-            },
-          },
+          schema: requestBodyResolver(createBankAccountSchema),
         },
       },
     },
@@ -62,74 +72,27 @@ app.post(
         description: "Bank account created",
         content: {
           "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                id: { type: "string" },
-                name: { type: "string" },
-                currency: { type: "string" },
-                type: { type: "string" },
-                enabled: { type: "boolean" },
-                balance: { type: "number" },
-                manual: { type: "boolean" },
-              },
-            },
+            schema: resolver(bankAccountResponseSchema),
           },
         },
       },
     },
   }),
-);
+  zValidator("json", createBankAccountSchema),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const session = c.get("session");
+    const body = c.req.valid("json");
 
-app.get(
-  "/balances",
-  describeRoute({
-    description: "Get bank account balances",
-    tags: ["Bank Accounts"],
-    responses: {
-      200: {
-        description: "Account balances",
-        content: {
-          "application/json": {
-            schema: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  accountId: { type: "string" },
-                  currency: { type: "string" },
-                  balance: { type: "number" },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  }),
-);
+    const result = await createBankAccount(db, {
+      ...body,
+      teamId,
+      userId: session.user.id,
+    });
 
-app.get(
-  "/currencies",
-  describeRoute({
-    description: "Get supported currencies",
-    tags: ["Bank Accounts"],
-    responses: {
-      200: {
-        description: "List of supported currencies",
-        content: {
-          "application/json": {
-            schema: {
-              type: "array",
-              items: {
-                type: "string",
-              },
-            },
-          },
-        },
-      },
-    },
-  }),
+    return c.json(result);
+  },
 );
 
 app.get(
@@ -137,28 +100,38 @@ app.get(
   describeRoute({
     description: "Get bank account by ID",
     tags: ["Bank Accounts"],
+    parameters: [
+      {
+        name: "id",
+        in: "path",
+        required: true,
+        schema: resolver(getBankAccountByIdSchema),
+      },
+    ],
     responses: {
       200: {
         description: "Bank account details",
         content: {
           "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                id: { type: "string" },
-                name: { type: "string" },
-                currency: { type: "string" },
-                type: { type: "string" },
-                enabled: { type: "boolean" },
-                balance: { type: "number" },
-                manual: { type: "boolean" },
-              },
-            },
+            schema: resolver(bankAccountResponseSchema),
           },
         },
       },
     },
   }),
+  zValidator("param", getBankAccountByIdSchema),
+  async (c) => {
+    const db = c.get("db");
+    const id = c.req.valid("param").id;
+    const teamId = c.get("teamId");
+
+    const result = await getBankAccountById(db, {
+      id,
+      teamId,
+    });
+
+    return c.json(withSanitized(bankAccountResponseSchema, result));
+  },
 );
 
 app.put(
@@ -166,17 +139,18 @@ app.put(
   describeRoute({
     description: "Update bank account by ID",
     tags: ["Bank Accounts"],
+    parameters: [
+      {
+        name: "id",
+        in: "path",
+        required: true,
+        schema: resolver(deleteBankAccountSchema),
+      },
+    ],
     requestBody: {
       content: {
         "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              name: { type: "string" },
-              enabled: { type: "boolean" },
-              type: { type: "string" },
-            },
-          },
+          schema: requestBodyResolver(updateBankAccountSchema),
         },
       },
     },
@@ -185,23 +159,28 @@ app.put(
         description: "Bank account updated",
         content: {
           "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                id: { type: "string" },
-                name: { type: "string" },
-                currency: { type: "string" },
-                type: { type: "string" },
-                enabled: { type: "boolean" },
-                balance: { type: "number" },
-                manual: { type: "boolean" },
-              },
-            },
+            schema: resolver(bankAccountResponseSchema),
           },
         },
       },
     },
   }),
+  zValidator("param", deleteBankAccountSchema),
+  zValidator("json", updateBankAccountSchema),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const body = c.req.valid("json");
+    const id = c.req.valid("param").id;
+
+    const result = await updateBankAccount(db, {
+      ...body,
+      id,
+      teamId,
+    });
+
+    return c.json(withSanitized(bankAccountResponseSchema, result));
+  },
 );
 
 app.delete(
@@ -214,17 +193,25 @@ app.delete(
         description: "Bank account deleted",
         content: {
           "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                success: { type: "boolean" },
-              },
-            },
+            schema: resolver(bankAccountResponseSchema),
           },
         },
       },
     },
   }),
+  zValidator("param", deleteBankAccountSchema),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const id = c.req.valid("param").id;
+
+    const result = await deleteBankAccount(db, {
+      id,
+      teamId,
+    });
+
+    return c.json(withSanitized(bankAccountResponseSchema, result));
+  },
 );
 
 export const bankAccountsRouter = app;
