@@ -38,22 +38,22 @@ export function TableRow({ row }: Props) {
       <TableCell className="border-r-[0px] py-4">
         <div className="flex items-center space-x-4">
           <Avatar className="rounded-full w-8 h-8">
-            {row.team?.logoUrl && (
+            {row.logoUrl && (
               <AvatarImageNext
-                src={row.team.logoUrl}
-                alt={row.team?.name ?? ""}
+                src={row.logoUrl}
+                alt={row.name ?? ""}
                 width={32}
                 height={32}
               />
             )}
             <AvatarFallback>
               <span className="text-xs">
-                {row?.team?.name?.charAt(0)?.toUpperCase()}
+                {row?.name?.charAt(0)?.toUpperCase()}
               </span>
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="font-medium text-sm">{row?.team?.name}</span>
+            <span className="font-medium text-sm">{row?.name}</span>
           </div>
         </div>
       </TableCell>
@@ -65,7 +65,7 @@ export function TableRow({ row }: Props) {
               variant="outline"
               onClick={() => {
                 changeTeamMutation.mutate({
-                  teamId: row.team?.id!,
+                  teamId: row.id!,
                 });
               }}
             >

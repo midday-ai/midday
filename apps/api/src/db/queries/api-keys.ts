@@ -2,11 +2,10 @@ import type { Database } from "@api/db";
 import { apiKeys } from "@api/db/schema";
 import { and, eq } from "drizzle-orm";
 
-export async function getApiKeyByKey(db: Database, key: string) {
+export async function getApiKeyByHash(db: Database, keyHash: string) {
   const [result] = await db
     .select({
       id: apiKeys.id,
-      key: apiKeys.key,
       name: apiKeys.name,
       userId: apiKeys.userId,
       teamId: apiKeys.teamId,
@@ -14,25 +13,26 @@ export async function getApiKeyByKey(db: Database, key: string) {
       createdAt: apiKeys.createdAt,
     })
     .from(apiKeys)
-    .where(and(eq(apiKeys.key, key), eq(apiKeys.isActive, true)))
+    .where(and(eq(apiKeys.keyHash, keyHash), eq(apiKeys.isActive, true)))
     .limit(1);
 
   return result;
 }
 
-export async function createApiKey(
-  db: Database,
-  data: {
-    key: string;
-    name?: string;
-    userId: string;
-    teamId: string;
-  },
-) {
+type CreateApiKeyData = {
+  keyEncrypted: string;
+  keyHash: string;
+  name?: string;
+  userId: string;
+  teamId: string;
+};
+
+export async function createApiKey(db: Database, data: CreateApiKeyData) {
   return await db
     .insert(apiKeys)
     .values({
-      key: data.key,
+      keyEncrypted: data.keyEncrypted,
+      keyHash: data.keyHash,
       name: data.name,
       userId: data.userId,
       teamId: data.teamId,

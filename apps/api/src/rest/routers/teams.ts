@@ -1,5 +1,9 @@
+import { getTeamsByUserId } from "@api/db/queries/users-on-team";
+import { teamsResponseSchema } from "@api/schemas/team";
+import { withTransform } from "@api/utils/with-transform";
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
+import { resolver } from "hono-openapi/zod";
 
 const app = new Hono();
 
@@ -8,7 +12,29 @@ app.get(
   describeRoute({
     description: "Get all teams",
     tags: ["Teams"],
+    responses: {
+      200: {
+        description: "Teams",
+        content: {
+          "application/json": {
+            schema: resolver(teamsResponseSchema.snake),
+          },
+        },
+      },
+    },
   }),
+  withTransform(
+    {
+      output: teamsResponseSchema,
+    },
+    async (c) => {
+      const db = c.get("db");
+      const session = c.get("session");
+
+      const result = await getTeamsByUserId(db, session.user.id);
+      return { data: result };
+    },
+  ),
 );
 
 app.post(
@@ -83,4 +109,4 @@ app.put(
   }),
 );
 
-export const teamRouter = app;
+export const teamsRouter = app;

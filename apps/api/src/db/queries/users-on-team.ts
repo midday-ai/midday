@@ -22,7 +22,7 @@ export async function getTeamMembers(db: Database, teamId: string) {
 }
 
 export async function getTeamsByUserId(db: Database, userId: string) {
-  return db
+  const result = await db
     .select({
       id: usersOnTeam.id,
       role: usersOnTeam.role,
@@ -30,11 +30,24 @@ export async function getTeamsByUserId(db: Database, userId: string) {
       team: {
         id: teams.id,
         name: teams.name,
-        logoUrl: teams.logoUrl,
+        plan: teams.plan,
+        createdAt: teams.createdAt,
       },
     })
     .from(usersOnTeam)
     .leftJoin(teams, eq(usersOnTeam.teamId, teams.id))
     .where(eq(usersOnTeam.userId, userId))
     .orderBy(usersOnTeam.createdAt);
+
+  if (!result) {
+    return [];
+  }
+
+  return result.map((row) => ({
+    id: row?.team?.id,
+    name: row?.team?.name,
+    plan: row?.team?.plan,
+    createdAt: row?.team?.createdAt,
+    updatedAt: row?.team?.createdAt,
+  }));
 }

@@ -42,10 +42,10 @@ export function TeamDropdown() {
 
   const sortedTeams =
     teams?.sort((a, b) => {
-      if (a.team?.id === selectedId) return -1;
-      if (b.team?.id === selectedId) return 1;
+      if (a.id === selectedId) return -1;
+      if (b.id === selectedId) return 1;
 
-      return (a.team?.id ?? "").localeCompare(b.team?.id ?? "");
+      return (a.id ?? "").localeCompare(b.id ?? "");
     }) ?? [];
 
   // @ts-expect-error
@@ -97,9 +97,9 @@ export function TeamDropdown() {
             </Link>
           </motion.div>
         )}
-        {sortedTeams.map(({ team }, index) => (
+        {sortedTeams.map((team, index) => (
           <motion.div
-            key={team?.id}
+            key={team.id}
             className="w-[32px] h-[32px] left-0 overflow-hidden absolute"
             style={{ zIndex: -index }}
             initial={{
