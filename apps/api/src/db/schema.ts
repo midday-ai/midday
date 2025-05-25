@@ -1,3 +1,4 @@
+import { decrypt, encrypt } from "@midday/encryption";
 import { type SQL, relations, sql } from "drizzle-orm";
 import {
   bigint,
@@ -49,6 +50,18 @@ export const numericCasted = customType<{
   },
   fromDriver: (value: string) => Number.parseFloat(value),
   toDriver: (value: number) => value.toString(),
+});
+
+const encryptedText = customType<{ data: string }>({
+  dataType() {
+    return "text";
+  },
+  fromDriver(value: unknown) {
+    return decrypt(value as string);
+  },
+  toDriver(value: string) {
+    return encrypt(value);
+  },
 });
 
 export const accountTypeEnum = pgEnum("account_type", [
@@ -1988,20 +2001,21 @@ export const usersInAuth = pgTable(
 export const apiKeys = pgTable(
   "api_keys",
   {
-    id: uuid().defaultRandom().primaryKey().notNull(),
-    key: text().notNull(),
-    name: text(),
+    id: uuid("id").notNull().defaultRandom().primaryKey(),
+    keyEncrypted: text("key_encrypted").notNull(),
+    name: text("name"),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
-      .defaultNow()
-      .notNull(),
+      .notNull()
+      .defaultNow(),
     userId: uuid("user_id").notNull(),
     teamId: uuid("team_id").notNull(),
-    isActive: boolean("is_active").default(true).notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    keyHash: text("key_hash"),
   },
   (table) => [
     index("api_keys_key_idx").using(
       "btree",
-      table.key.asc().nullsLast().op("text_ops"),
+      table.keyHash.asc().nullsLast().op("text_ops"),
     ),
     index("api_keys_user_id_idx").using(
       "btree",
@@ -2021,7 +2035,7 @@ export const apiKeys = pgTable(
       foreignColumns: [teams.id],
       name: "api_keys_team_id_fkey",
     }).onDelete("cascade"),
-    unique("api_keys_key_unique").on(table.key),
+    unique("api_keys_key_unique").on(table.keyHash),
   ],
 );
 

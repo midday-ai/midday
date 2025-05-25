@@ -5,7 +5,9 @@
     "db:pull": "drizzle-kit pull",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "test:watch": "bun test --watch"
   },
   "exports": {
     "./trpc/routers/_app": "./src/trpc/routers/_app.ts"
@@ -22,8 +24,9 @@
     "@midday/invoice": "workspace:*",
     "@midday/jobs": "workspace:*",
     "@midday/location": "workspace:*",
+    "@midday/encryption": "workspace:*",
     "@midday/supabase": "workspace:*",
-    "@scalar/hono-api-reference": "^0.8.10",
+    "@scalar/hono-api-reference": "^0.9.1",
     "@sindresorhus/slugify": "^2.2.1",
     "@trigger.dev/sdk": "3.3.17",
     "@trpc/server": "^11.1.2",
@@ -42,11 +45,11 @@
     "snakecase-keys": "^8.0.1",
     "superjson": "^2.2.2",
     "uuid": "^11.1.0",
-    "zod": "^3.25.27",
+    "zod": "^3.25.28",
     "zod-openapi": "^4.2.4"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.13",
+    "@types/bun": "^1.2.14",
     "drizzle-kit": "^0.31.1"
   }
 }

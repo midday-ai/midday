@@ -1,65 +1,81 @@
 import camelcaseKeys from "camelcase-keys";
 import snakecaseKeys from "snakecase-keys";
-import { type ZodRawShape, type ZodTypeAny, z } from "zod";
+import { type ZodTypeAny, z } from "zod";
 
+// Type helper to convert camelCase to snake_case
+type ToSnakeCase<S extends string> = S extends `${infer T}${infer U}`
+  ? `${T extends Capitalize<T> ? "_" : ""}${Lowercase<T>}${ToSnakeCase<U>}`
+  : S;
+
+// Type helper to transform ZodObject to snake_case version
+type TransformSchemaToSnakeCase<T extends ZodTypeAny> = T extends z.ZodObject<
+  infer Shape
+>
+  ? z.ZodObject<{
+      [K in keyof Shape as K extends string
+        ? ToSnakeCase<K>
+        : K]: Shape[K] extends ZodTypeAny
+        ? TransformSchemaToSnakeCase<Shape[K]>
+        : Shape[K];
+    }>
+  : T extends z.ZodArray<infer Element>
+    ? z.ZodArray<TransformSchemaToSnakeCase<Element>>
+    : T extends z.ZodOptional<infer Inner>
+      ? z.ZodOptional<TransformSchemaToSnakeCase<Inner>>
+      : T extends z.ZodNullable<infer Inner>
+        ? z.ZodNullable<TransformSchemaToSnakeCase<Inner>>
+        : T;
+
+// Utility function to convert camelCase to snake_case
 function toSnakeCase(str: string): string {
   return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 }
 
-function transformSchemaToSnakeCase(schema: ZodTypeAny): ZodTypeAny {
-  // Handle ZodObject - recursively transform nested objects
-  if (schema instanceof z.ZodObject) {
-    const shape = schema.shape;
-    const snakeShape: Record<string, ZodTypeAny> = {};
+// Utility function to actually transform a Zod schema to have snake_case field names
+function transformZodSchemaToSnakeCase(schema: ZodTypeAny): ZodTypeAny {
+  if (schema._def.typeName === "ZodObject") {
+    const shape: Record<string, ZodTypeAny> = {};
 
-    for (const [key, value] of Object.entries(shape)) {
+    for (const [key, value] of Object.entries(schema._def.shape())) {
       const snakeKey = toSnakeCase(key);
-      snakeShape[snakeKey] = transformSchemaToSnakeCase(value as ZodTypeAny);
+      shape[snakeKey] = transformZodSchemaToSnakeCase(value as ZodTypeAny);
     }
 
-    return z.object(snakeShape);
+    return z.object(shape);
   }
 
-  // Handle ZodArray - transform the element type if it's an object
-  if (schema instanceof z.ZodArray) {
-    return z.array(transformSchemaToSnakeCase(schema.element));
+  if (schema._def.typeName === "ZodArray") {
+    return z.array(transformZodSchemaToSnakeCase(schema._def.type));
   }
 
-  // Handle ZodOptional - unwrap, transform, and make optional again
-  if (schema instanceof z.ZodOptional) {
-    return transformSchemaToSnakeCase(schema.unwrap()).optional();
+  if (schema._def.typeName === "ZodOptional") {
+    return transformZodSchemaToSnakeCase(schema._def.innerType).optional();
   }
 
-  // Handle ZodNullable - unwrap, transform, and make nullable again
-  if (schema instanceof z.ZodNullable) {
-    return transformSchemaToSnakeCase(schema.unwrap()).nullable();
+  if (schema._def.typeName === "ZodNullable") {
+    return transformZodSchemaToSnakeCase(schema._def.innerType).nullable();
   }
 
-  // For primitive types and other schemas, return as is
+  // For other types (string, number, enum, etc.), return as-is
   return schema;
 }
 
-export function createSchema<T extends ZodRawShape>(shape: T) {
-  const camel = z.object(shape);
-
-  // Transform keys to snake_case recursively
-  const snakeShape: Record<string, ZodTypeAny> = {};
-  for (const key of Object.keys(shape)) {
-    const value = shape[key];
-    if (value !== undefined) {
-      snakeShape[toSnakeCase(key)] = transformSchemaToSnakeCase(value);
-    }
-  }
-
-  const snake = z.object(snakeShape);
-
+export function createSchema<T extends ZodTypeAny>(schema: T) {
   return {
-    camel,
-    snake,
-    transformInput: (input: unknown) =>
-      camel.parse(
+    camel: schema,
+    snake: transformZodSchemaToSnakeCase(
+      schema,
+    ) as TransformSchemaToSnakeCase<T>, // Actual snake_case schema
+    transformInput: (input: unknown) => {
+      // Handle the case where input is undefined for optional schemas
+      if (input === undefined) {
+        return undefined;
+      }
+      // Convert snake_case input to camelCase and parse with the original schema
+      return schema.parse(
         camelcaseKeys(input as Record<string, unknown>, { deep: true }),
-      ),
+      );
+    },
     transformOutput: <U>(data: U) => snakecaseKeys(data as any, { deep: true }),
   };
 }

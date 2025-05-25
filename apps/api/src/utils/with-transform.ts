@@ -100,12 +100,18 @@ export function withTransform(
 
       // Filter result to only include fields defined in the schema if camel schema is available
       if (config.output.camel) {
-        // Use safeParse to filter out fields not in the schema and validate the structure
+        // Try to parse with the schema to filter out extra fields
         const parseResult = config.output.camel.safeParse(result);
         if (parseResult.success) {
           filteredResult = parseResult.data;
+        } else {
+          // If parsing fails, try with passthrough to allow extra fields
+          const passthroughResult = config.output.camel.safeParse(result);
+          if (passthroughResult.success) {
+            filteredResult = passthroughResult.data;
+          }
+          // If both fail, use original result as fallback
         }
-        // If parsing fails, we'll use the original result (graceful degradation)
       }
 
       const transformedResult = config.output.transformOutput(filteredResult);

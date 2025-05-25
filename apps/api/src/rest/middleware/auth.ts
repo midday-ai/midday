@@ -1,6 +1,7 @@
-import { getApiKeyByKey } from "@api/db/queries/api-keys";
+import { getApiKeyByHash } from "@api/db/queries/api-keys";
 import { getUserById } from "@api/db/queries/users";
 import { isValidApiKeyFormat } from "@api/utils/api-keys";
+import { hash } from "@midday/encryption";
 import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { LRUCache } from "lru-cache";
@@ -36,7 +37,9 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
   let apiKey = apiKeyCache.get(token);
   if (!apiKey) {
     // If not in cache, query database
-    apiKey = await getApiKeyByKey(db, token);
+    const keyHash = hash(token);
+
+    apiKey = await getApiKeyByHash(db, keyHash);
     if (apiKey) {
       // Store in cache for future requests
       apiKeyCache.set(token, apiKey);

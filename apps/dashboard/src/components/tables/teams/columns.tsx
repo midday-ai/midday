@@ -33,7 +33,7 @@ const teamNameFilterFn: FilterFn<RouterOutputs["team"]["list"][number]> = (
   _: string,
   filterValue: string,
 ) => {
-  const teamName = row.original.team?.name?.toLowerCase();
+  const teamName = row.original.name?.toLowerCase();
 
   return teamName?.includes(filterValue.toLowerCase()) ?? false;
 };
@@ -50,21 +50,19 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
         <div className="flex items-center space-x-4">
           <Avatar className="rounded-full w-8 h-8">
             <AvatarImageNext
-              src={row.original.team?.logoUrl ?? ""}
-              alt={row.original.team?.name ?? ""}
+              src={row.original.logoUrl ?? ""}
+              alt={row.original.name ?? ""}
               width={32}
               height={32}
             />
             <AvatarFallback>
               <span className="text-xs">
-                {row.original.team?.name?.charAt(0)?.toUpperCase()}
+                {row.original.name?.charAt(0)?.toUpperCase()}
               </span>
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="font-medium text-sm">
-              {row.original.team?.name}
-            </span>
+            <span className="font-medium text-sm">{row.original.name}</span>
             <span className="text-sm text-[#606060]">
               {/* @ts-expect-error */}
               {t(`roles.${row.original.role}`)}
@@ -119,7 +117,7 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
               onClick={() =>
                 viewTeamMutation.mutate(
                   {
-                    teamId: row.original.team?.id!,
+                    teamId: row.original.id!,
                   },
                   {
                     onSuccess: () => {
@@ -138,7 +136,7 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
                 onClick={() =>
                   manageTeamMutation.mutate(
                     {
-                      teamId: row.original.team?.id!,
+                      teamId: row.original.id!,
                     },
                     {
                       onSuccess: () => {
@@ -184,7 +182,7 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
                         disabled={leaveTeamMutation.isPending}
                         onClick={() =>
                           leaveTeamMutation.mutate({
-                            teamId: row.original.team?.id!,
+                            teamId: row.original.id!,
                           })
                         }
                       >
