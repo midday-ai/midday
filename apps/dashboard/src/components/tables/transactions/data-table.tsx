@@ -147,7 +147,7 @@ export function DataTable({
         });
       },
       onDeleteTransaction: (id: string) => {
-        deleteTransactionMutation.mutate({ ids: [id] });
+        deleteTransactionMutation.mutate([id]);
       },
     },
   });

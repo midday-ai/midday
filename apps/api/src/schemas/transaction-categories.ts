@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 export const createTransactionCategorySchema = z.object({
   name: z.string(),

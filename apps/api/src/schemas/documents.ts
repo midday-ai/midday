@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 export const getDocumentsSchema = z.object({
   cursor: z.string().nullable().optional(),

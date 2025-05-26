@@ -1,5 +1,4 @@
-import { z } from "zod";
-import "zod-openapi/extend";
+import { z } from "@hono/zod-openapi";
 
 export const updateUserSchema = z.object({
   fullName: z.string().min(2).max(32).optional().openapi({
@@ -11,9 +10,17 @@ export const updateUserSchema = z.object({
   email: z.string().email().optional().openapi({
     description: "The user's email address.",
   }),
-  avatarUrl: z.string().url().optional().openapi({
-    description: "URL to the user's avatar image.",
-  }),
+  avatarUrl: z
+    .string()
+    .url()
+    .refine((url) => url.includes("midday.ai"), {
+      message: "avatarUrl must be a midday.ai domain URL",
+    })
+    .optional()
+    .openapi({
+      description:
+        "URL to the user's avatar image. Must be a midday.ai domain URL.",
+    }),
   locale: z.string().optional().openapi({
     description: "The user's locale (e.g., en-US, fr-FR).",
   }),

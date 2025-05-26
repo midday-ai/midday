@@ -34,7 +34,15 @@ export const updateTeamById = async (
     .update(teams)
     .set(data)
     .where(eq(teams.id, id))
-    .returning();
+    .returning({
+      id: teams.id,
+      name: teams.name,
+      logoUrl: teams.logoUrl,
+      email: teams.email,
+      inboxId: teams.inboxId,
+      plan: teams.plan,
+      baseCurrency: teams.baseCurrency,
+    });
 
   return result;
 };
@@ -71,15 +79,15 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
 };
 
 export async function getTeamMembers(db: Database, teamId: string) {
-  return db
+  const result = await db
     .select({
       id: usersOnTeam.id,
       role: usersOnTeam.role,
       team_id: usersOnTeam.teamId,
       user: {
         id: users.id,
-        full_name: users.fullName,
-        avatar_url: users.avatarUrl,
+        fullName: users.fullName,
+        avatarUrl: users.avatarUrl,
         email: users.email,
       },
     })
@@ -87,6 +95,14 @@ export async function getTeamMembers(db: Database, teamId: string) {
     .innerJoin(users, eq(usersOnTeam.userId, users.id))
     .where(eq(usersOnTeam.teamId, teamId))
     .orderBy(usersOnTeam.createdAt);
+
+  return result.map((item) => ({
+    id: item.user.id,
+    role: item.role,
+    fullName: item.user.fullName,
+    avatarUrl: item.user.avatarUrl,
+    email: item.user.email,
+  }));
 }
 
 type LeaveTeamParams = {

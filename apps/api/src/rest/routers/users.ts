@@ -1,25 +1,24 @@
 import { getUserById, updateUser } from "@api/db/queries/users";
 import type { Context } from "@api/rest/types";
 import { updateUserSchema, userSchema } from "@api/schemas/users";
-import { withSanitized } from "@api/utils/with-sanitized";
-import { zValidator } from "@hono/zod-validator";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { resolver } from "hono-openapi/zod";
+import { validateResponse } from "@api/utils/validate-response";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 
-const app = new Hono<Context>();
+const app = new OpenAPIHono<Context>();
 
-app.get(
-  "/me",
-  describeRoute({
-    description: "Get the current user",
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/me",
+    summary: "Retrieve the current user",
+    description: "Retrieve the current user for the authenticated team.",
     tags: ["Users"],
     responses: {
       200: {
-        description: "The current user",
+        description: "Retrieve the current user for the authenticated team.",
         content: {
           "application/json": {
-            schema: resolver(userSchema),
+            schema: userSchema,
           },
         },
       },
@@ -31,27 +30,37 @@ app.get(
 
     const result = await getUserById(db, session.user.id);
 
-    return c.json(withSanitized(userSchema, result));
+    return c.json(validateResponse(result, userSchema));
   },
 );
 
-app.put(
-  "/me",
-  describeRoute({
-    description: "Update the current user",
+app.openapi(
+  createRoute({
+    method: "patch",
+    path: "/me",
+    summary: "Update the current user",
+    description: "Update the current user for the authenticated team.",
     tags: ["Users"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: updateUserSchema,
+          },
+        },
+      },
+    },
     responses: {
       200: {
         description: "The updated user",
         content: {
           "application/json": {
-            schema: resolver(userSchema),
+            schema: userSchema,
           },
         },
       },
     },
   }),
-  zValidator("json", updateUserSchema),
   async (c) => {
     const db = c.get("db");
     const session = c.get("session");
@@ -62,7 +71,7 @@ app.put(
       ...body,
     });
 
-    return c.json(withSanitized(userSchema, result));
+    return c.json(validateResponse(result, userSchema));
   },
 );
 

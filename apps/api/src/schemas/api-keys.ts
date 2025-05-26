@@ -1,5 +1,4 @@
-import { z } from "zod";
-import "zod-openapi/extend";
+import { z } from "@hono/zod-openapi";
 
 export const createApiKeySchema = z.object({
   name: z.string().openapi({

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 export const getBankConnectionsSchema = z
   .object({ enabled: z.boolean().optional() })

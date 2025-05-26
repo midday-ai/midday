@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 export const getInstitutionsSchema = z.object({
   q: z.string().optional(),

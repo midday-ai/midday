@@ -1,6 +1,6 @@
 import { trpcServer } from "@hono/trpc-server";
+import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
-import { Hono } from "hono";
 import { openAPISpecs } from "hono-openapi";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
@@ -10,7 +10,7 @@ import { createTRPCContext } from "./trpc/init";
 import { appRouter } from "./trpc/routers/_app";
 import { checkHealth } from "./utils/health";
 
-export const app = new Hono<Context>();
+const app = new OpenAPIHono<Context>();
 
 app.use(secureHeaders());
 
@@ -54,38 +54,24 @@ app.get("/health", async (c) => {
 
 app.route("/v1", routers);
 
-app.get(
-  "/openapi",
-  openAPISpecs(app, {
-    documentation: {
-      info: {
-        title: "Midday API",
-        version: "1.0.0",
-        description: "API for Midday",
-      },
-      components: {
-        securitySchemes: {
-          bearerAuth: {
-            type: "http",
-            scheme: "bearer",
-            bearerFormat: "Bearer",
-          },
-        },
-      },
-      security: [
-        {
-          bearerAuth: [],
-        },
-      ],
-      servers: [
-        {
-          url: "https://api.midday.ai",
-          description: "Production server",
-        },
-      ],
+app.doc("/openapi", {
+  openapi: "3.1.0",
+  info: {
+    version: "0.0.1",
+    title: "Midday API",
+  },
+  servers: [
+    {
+      url: "https://api.midday.ai",
+      description: "Production server",
     },
-  }),
-);
+  ],
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
+});
 
 app.get(
   "/",

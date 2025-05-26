@@ -31,15 +31,16 @@ export const createTag = async (db: Database, params: CreateTagParams) => {
 type UpdateTagParams = {
   id: string;
   name: string;
+  teamId: string;
 };
 
 export const updateTag = async (db: Database, params: UpdateTagParams) => {
-  const { id, name } = params;
+  const { id, name, teamId } = params;
 
   const [result] = await db
     .update(tags)
     .set({ name })
-    .where(eq(tags.id, id))
+    .where(and(eq(tags.id, id), eq(tags.teamId, teamId)))
     .returning({
       id: tags.id,
       name: tags.name,
@@ -52,8 +53,23 @@ export const updateTag = async (db: Database, params: UpdateTagParams) => {
   return result;
 };
 
-export const deleteTag = async (db: Database, id: string) => {
-  await db.delete(tags).where(eq(tags.id, id)).returning();
+type DeleteTagParams = {
+  id: string;
+  teamId: string;
+};
+
+export const deleteTag = async (db: Database, params: DeleteTagParams) => {
+  const { id, teamId } = params;
+
+  const [result] = await db
+    .delete(tags)
+    .where(and(eq(tags.id, id), eq(tags.teamId, teamId)))
+    .returning({
+      id: tags.id,
+      name: tags.name,
+    });
+
+  return result;
 };
 
 export type GetTagsParams = {
@@ -77,7 +93,14 @@ export const getTags = async (db: Database, params: GetTagsParams) => {
   return results;
 };
 
-export const getTaById = async (db: Database, id: string) => {
+type GetTagByIdParams = {
+  id: string;
+  teamId: string;
+};
+
+export const getTagById = async (db: Database, params: GetTagByIdParams) => {
+  const { id, teamId } = params;
+
   const [result] = await db
     .select({
       id: tags.id,
@@ -86,7 +109,7 @@ export const getTaById = async (db: Database, id: string) => {
       createdAt: tags.createdAt,
     })
     .from(tags)
-    .where(eq(tags.id, id));
+    .where(and(eq(tags.id, id), eq(tags.teamId, teamId)));
 
   return result;
 };
