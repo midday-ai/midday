@@ -54,10 +54,8 @@ export function DataTable({
 
   const infiniteQueryOptions = trpc.transactions.get.infiniteQueryOptions(
     {
-      filter: {
-        ...filter,
-        q: deferredSearch,
-      },
+      ...filter,
+      q: deferredSearch,
       sort: params.sort,
     },
     {

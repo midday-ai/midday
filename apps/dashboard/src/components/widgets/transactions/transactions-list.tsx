@@ -16,9 +16,7 @@ export function TransactionsList({ type, disabled }: Props) {
   const { data: transactions } = useSuspenseQuery(
     trpc.transactions.get.queryOptions({
       pageSize: 15,
-      filter: {
-        type: type === "all" ? undefined : type,
-      },
+      type: type === "all" ? undefined : type,
     }),
   );
 

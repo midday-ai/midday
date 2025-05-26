@@ -118,22 +118,16 @@ export const invoiceTemplateSchema = z.object({
   timezone: z.string().optional(),
 });
 
-export const getInvoicesSchema = z
-  .object({
-    cursor: z.string().nullable().optional(),
-    sort: z.array(z.string(), z.string()).nullable().optional(),
-    pageSize: z.number().min(1).max(100).optional(),
-    filter: z
-      .object({
-        q: z.string().nullable().optional(),
-        start: z.string().nullable().optional(),
-        end: z.string().nullable().optional(),
-        statuses: z.array(z.string()).nullable().optional(),
-        customers: z.array(z.string()).nullable().optional(),
-      })
-      .optional(),
-  })
-  .optional();
+export const getInvoicesSchema = z.object({
+  cursor: z.string().nullable().optional(),
+  sort: z.array(z.string(), z.string()).nullable().optional(),
+  pageSize: z.coerce.number().min(1).max(100).optional(),
+  q: z.string().nullable().optional(),
+  start: z.string().nullable().optional(),
+  end: z.string().nullable().optional(),
+  statuses: z.array(z.string()).nullable().optional(),
+  customers: z.array(z.string()).nullable().optional(),
+});
 
 export const getInvoiceByIdSchema = z.object({
   id: z.string(),
@@ -178,4 +172,40 @@ export const duplicateInvoiceSchema = z.object({
 
 export const getInvoiceByTokenSchema = z.object({
   token: z.string(),
+});
+
+export const invoiceResponseSchema = z.object({
+  id: z.string().uuid(),
+  status: z.enum(["draft", "overdue", "paid", "unpaid", "canceled"]),
+  dueDate: z.string(),
+  issueDate: z.string(),
+  invoiceNumber: z.string(),
+  amount: z.number(),
+  currency: z.string(),
+  // customer: z.object({
+  //   id: z.string().uuid(),
+  //   name: z.string(),
+  // }),
+  paidAt: z.string().nullable(),
+  reminderSentAt: z.string().nullable(),
+  note: z.string().nullable(),
+  vat: z.number().nullable(),
+  tax: z.number().nullable(),
+  discount: z.number().nullable(),
+  subtotal: z.number().nullable(),
+  viewedAt: z.string().nullable(),
+  customerName: z.string().nullable(),
+  sentTo: z.string().email().nullable(),
+  sentAt: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const invoicesResponseSchema = z.object({
+  meta: z.object({
+    cursor: z.string().nullable(),
+    hasPreviousPage: z.boolean(),
+    hasNextPage: z.boolean(),
+  }),
+  data: z.array(invoiceResponseSchema),
 });

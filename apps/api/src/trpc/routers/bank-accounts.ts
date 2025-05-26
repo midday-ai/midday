@@ -16,7 +16,7 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 
 export const bankAccountsRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(getBankAccountsSchema)
+    .input(getBankAccountsSchema.optional())
     .query(async ({ input, ctx: { db, teamId } }) => {
       return getBankAccounts(db, {
         teamId: teamId!,

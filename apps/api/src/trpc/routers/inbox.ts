@@ -33,14 +33,20 @@ export const inboxRouter = createTRPCRouter({
 
   getById: protectedProcedure
     .input(getInboxByIdSchema)
-    .query(async ({ ctx: { db }, input }) => {
-      return getInboxById(db, input.id);
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getInboxById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
     }),
 
   delete: protectedProcedure
     .input(deleteInboxSchema)
-    .mutation(async ({ ctx: { db }, input }) => {
-      return deleteInbox(db, input.id);
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return deleteInbox(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
     }),
 
   processAttachments: protectedProcedure

@@ -33,7 +33,7 @@ export function Transactions({ result }: Props) {
     trpc.transactions.get.queryOptions({
       sort,
       pageSize,
-      filter,
+      ...filter,
     }),
   );
 

@@ -201,7 +201,7 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
 
   return {
     meta: {
-      cursor: nextCursor,
+      cursor: nextCursor ?? null,
       hasPreviousPage: offset > 0,
       hasNextPage: data && data.length === pageSize,
     },

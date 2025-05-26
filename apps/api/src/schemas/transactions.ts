@@ -34,150 +34,140 @@ export const getTransactionsSchema = z.object({
         in: "query",
       },
     }),
-  filter: z
-    .object({
-      q: z
-        .string()
-        .nullable()
-        .optional()
-        .openapi({
-          description: "Search query string to filter transactions by text.",
-          param: {
-            in: "query",
-          },
-        }),
-      categories: z
-        .array(z.string())
-        .nullable()
-        .optional()
-        .openapi({
-          description: "List of category slugs to filter transactions.",
-          param: {
-            in: "query",
-          },
-        }),
-      tags: z
-        .array(z.string())
-        .nullable()
-        .optional()
-        .openapi({
-          description: "List of tag IDs to filter transactions.",
-          param: {
-            in: "query",
-          },
-        }),
-      start: z
-        .string()
-        .nullable()
-        .optional()
-        .openapi({
-          description:
-            "Start date (inclusive) for filtering transactions, in ISO 8601 format.",
-          param: {
-            in: "query",
-          },
-        }),
-      end: z
-        .string()
-        .nullable()
-        .optional()
-        .openapi({
-          description:
-            "End date (inclusive) for filtering transactions, in ISO 8601 format.",
-          param: {
-            in: "query",
-          },
-        }),
-      accounts: z
-        .array(z.string())
-        .nullable()
-        .optional()
-        .openapi({
-          description: "List of account IDs to filter transactions.",
-          param: {
-            in: "query",
-          },
-        }),
-      assignees: z
-        .array(z.string())
-        .nullable()
-        .optional()
-        .openapi({
-          description: "List of user IDs assigned to transactions.",
-          param: {
-            in: "query",
-          },
-        }),
-      statuses: z
-        .array(z.string())
-        .nullable()
-        .optional()
-        .openapi({
-          description:
-            "List of transaction statuses to filter by (e.g., 'pending', 'completed').",
-          param: {
-            in: "query",
-          },
-        }),
-      recurring: z
-        .array(z.string())
-        .nullable()
-        .optional()
-        .openapi({
-          description:
-            "List of recurring frequency values to filter by (e.g., 'monthly').",
-          param: {
-            in: "query",
-          },
-        }),
-      attachments: z
-        .enum(["include", "exclude"])
-        .nullable()
-        .optional()
-        .openapi({
-          description:
-            "Whether to include or exclude transactions with attachments.",
-          param: {
-            in: "query",
-          },
-        }),
-      amountRange: z
-        .array(z.coerce.number())
-        .nullable()
-        .optional()
-        .openapi({
-          description:
-            "Amount range as [min, max] to filter transactions by value.",
-          param: {
-            in: "query",
-          },
-        }),
-      amount: z
-        .array(z.string())
-        .nullable()
-        .optional()
-        .openapi({
-          description:
-            "List of specific amounts (as strings) to filter transactions.",
-          param: {
-            in: "query",
-          },
-        }),
-      type: z
-        .enum(["income", "expense"])
-        .nullable()
-        .optional()
-        .openapi({
-          description: "Transaction type: 'income' or 'expense'.",
-          param: {
-            in: "query",
-          },
-        }),
-    })
+
+  q: z
+    .string()
+    .nullable()
+    .optional()
+    .openapi({
+      description: "Search query string to filter transactions by text.",
+      param: {
+        in: "query",
+      },
+    }),
+  categories: z
+    .array(z.string())
+    .nullable()
+    .optional()
+    .openapi({
+      description: "List of category slugs to filter transactions.",
+      param: {
+        in: "query",
+      },
+    }),
+  tags: z
+    .array(z.string())
+    .nullable()
+    .optional()
+    .openapi({
+      description: "List of tag IDs to filter transactions.",
+      param: {
+        in: "query",
+      },
+    }),
+  start: z
+    .string()
+    .nullable()
     .optional()
     .openapi({
       description:
-        "Object containing various filters for querying transactions.",
+        "Start date (inclusive) for filtering transactions, in ISO 8601 format.",
+      param: {
+        in: "query",
+      },
+    }),
+  end: z
+    .string()
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "End date (inclusive) for filtering transactions, in ISO 8601 format.",
+      param: {
+        in: "query",
+      },
+    }),
+  accounts: z
+    .array(z.string())
+    .nullable()
+    .optional()
+    .openapi({
+      description: "List of account IDs to filter transactions.",
+      param: {
+        in: "query",
+      },
+    }),
+  assignees: z
+    .array(z.string())
+    .nullable()
+    .optional()
+    .openapi({
+      description: "List of user IDs assigned to transactions.",
+      param: {
+        in: "query",
+      },
+    }),
+  statuses: z
+    .array(z.string())
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "List of transaction statuses to filter by (e.g., 'pending', 'completed').",
+      param: {
+        in: "query",
+      },
+    }),
+  recurring: z
+    .array(z.string())
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "List of recurring frequency values to filter by (e.g., 'monthly').",
+      param: {
+        in: "query",
+      },
+    }),
+  attachments: z
+    .enum(["include", "exclude"])
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "Whether to include or exclude transactions with attachments.",
+      param: {
+        in: "query",
+      },
+    }),
+  amountRange: z
+    .array(z.coerce.number())
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "Amount range as [min, max] to filter transactions by value.",
+      param: {
+        in: "query",
+      },
+    }),
+  amount: z
+    .array(z.string())
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "List of specific amounts (as strings) to filter transactions.",
+      param: {
+        in: "query",
+      },
+    }),
+  type: z
+    .enum(["income", "expense"])
+    .nullable()
+    .optional()
+    .openapi({
+      description: "Transaction type: 'income' or 'expense'.",
       param: {
         in: "query",
       },

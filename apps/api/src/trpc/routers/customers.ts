@@ -14,7 +14,7 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 
 export const customersRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(getCustomersSchema)
+    .input(getCustomersSchema.optional())
     .query(async ({ ctx: { teamId, db }, input }) => {
       return getCustomers(db, {
         teamId: teamId!,

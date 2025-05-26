@@ -102,7 +102,14 @@ export async function getInbox(db: Database, params: GetInboxParams) {
   };
 }
 
-export async function getInboxById(db: Database, id: string) {
+export type GetInboxByIdParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function getInboxById(db: Database, params: GetInboxByIdParams) {
+  const { id, teamId } = params;
+
   const [result] = await db
     .select({
       id: inbox.id,
@@ -128,14 +135,23 @@ export async function getInboxById(db: Database, id: string) {
     })
     .from(inbox)
     .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
-    .where(eq(inbox.id, id))
+    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
 
   return result;
 }
 
-export async function deleteInbox(db: Database, id: string) {
-  return db.delete(inbox).where(eq(inbox.id, id)).returning();
+export type DeleteInboxParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function deleteInbox(db: Database, params: DeleteInboxParams) {
+  const { id, teamId } = params;
+  return db
+    .delete(inbox)
+    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
+    .returning();
 }
 
 export type GetInboxSearchParams = {

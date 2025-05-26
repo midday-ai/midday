@@ -2,22 +2,12 @@ import { z } from "@hono/zod-openapi";
 
 export const getCustomersSchema = z
   .object({
-    filter: z
-      .object({
-        q: z
-          .string()
-          .nullable()
-          .optional()
-          .openapi({
-            description: "Search query string to filter customers by text.",
-            param: {
-              in: "query",
-            },
-          }),
-      })
+    q: z
+      .string()
+      .nullable()
       .optional()
       .openapi({
-        description: "Filter object for searching customers.",
+        description: "Search query string to filter customers by text.",
         param: {
           in: "query",
         },
@@ -55,7 +45,6 @@ export const getCustomersSchema = z
         },
       }),
   })
-  .optional()
   .openapi({
     description: "Filter object for searching customers.",
     param: {
