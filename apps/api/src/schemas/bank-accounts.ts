@@ -21,7 +21,6 @@ export const getBankAccountsSchema = z
         },
       }),
   })
-  .optional()
   .openapi({
     description: "Query parameters for filtering bank accounts.",
     param: {

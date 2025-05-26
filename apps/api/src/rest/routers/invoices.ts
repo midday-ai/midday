@@ -1,46 +1,52 @@
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
+import { getInvoices } from "@api/db/queries/invoices";
+import type { Context } from "@api/rest/types";
+import {
+  getInvoicesSchema,
+  invoicesResponseSchema,
+} from "@api/schemas/invoice";
+import { validateResponse } from "@api/utils/validate-response";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 
-const app = new Hono();
+const app = new OpenAPIHono<Context>();
 
-app.get(
-  "/",
-  describeRoute({
-    description: "Say hello to the user",
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/",
+    summary: "List all invoices",
+    description: "Retrieve a list of invoices for the authenticated team.",
     tags: ["Invoices"],
+    request: {
+      query: getInvoicesSchema,
+    },
+    responses: {
+      200: {
+        description: "A list of invoices for the authenticated team.",
+        content: {
+          "application/json": {
+            schema: invoicesResponseSchema,
+          },
+        },
+      },
+    },
   }),
-);
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const { pageSize, cursor, sort, ...filter } = c.req.valid("query");
 
-app.post(
-  "/",
-  describeRoute({
-    description: "Create a new invoice",
-    tags: ["Invoices"],
-  }),
-);
+    const result = await getInvoices(db, {
+      teamId,
+      pageSize,
+      cursor,
+      sort,
+      filter,
+    });
 
-app.get(
-  "/:id",
-  describeRoute({
-    description: "Get an invoice by ID",
-    tags: ["Invoices"],
-  }),
-);
+    console.log(result);
 
-app.put(
-  "/:id",
-  describeRoute({
-    description: "Update an invoice by ID",
-    tags: ["Invoices"],
-  }),
-);
-
-app.delete(
-  "/:id",
-  describeRoute({
-    description: "Delete an invoice by ID",
-    tags: ["Invoices"],
-  }),
+    return c.json(validateResponse(result, invoicesResponseSchema));
+  },
 );
 
 export const invoicesRouter = app;

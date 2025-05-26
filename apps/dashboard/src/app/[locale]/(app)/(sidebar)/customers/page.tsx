@@ -28,7 +28,7 @@ export default async function Page(props: Props) {
   // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
   await queryClient.fetchInfiniteQuery(
     trpc.customers.get.infiniteQueryOptions({
-      filter,
+      ...filter,
       sort,
     }),
   );

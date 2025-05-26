@@ -16,9 +16,7 @@ export function Documents({ result }: Props) {
   const trpc = useTRPC();
   const { data, isLoading } = useQuery(
     trpc.documents.get.queryOptions({
-      filter: {
-        q: result.params.name,
-      },
+      q: result.params.name,
     }),
   );
 

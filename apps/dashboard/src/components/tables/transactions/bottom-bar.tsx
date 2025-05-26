@@ -28,7 +28,7 @@ export function BottomBar() {
   const { filter } = useTransactionFilterParams();
   const { data: transactions, isLoading } = useQuery({
     ...trpc.transactions.get.queryOptions({
-      filter,
+      ...filter,
       pageSize: 10000,
     }),
   });

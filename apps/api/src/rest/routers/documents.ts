@@ -1,46 +1,126 @@
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
+import {
+  deleteDocument,
+  getDocumentById,
+  getDocuments,
+} from "@api/db/queries/documents";
+import type { Context } from "@api/rest/types";
+import {
+  deleteDocumentResponseSchema,
+  deleteDocumentSchema,
+  documentResponseSchema,
+  documentsResponseSchema,
+  getDocumentSchema,
+  getDocumentsSchema,
+} from "@api/schemas/documents";
+import { validateResponse } from "@api/utils/validate-response";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 
-const app = new Hono();
+const app = new OpenAPIHono<Context>();
 
-app.get(
-  "/",
-  describeRoute({
-    description: "Say hello to the user",
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/",
+    summary: "List all documents",
+    description: "Retrieve a list of documents for the authenticated team.",
     tags: ["Documents"],
+    request: {
+      query: getDocumentsSchema,
+    },
+    responses: {
+      200: {
+        description: "Retrieve a list of documents for the authenticated team.",
+        content: {
+          "application/json": {
+            schema: documentsResponseSchema,
+          },
+        },
+      },
+    },
   }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const { pageSize, cursor, sort, ...filter } = c.req.valid("query");
+
+    const result = await getDocuments(db, {
+      teamId,
+      pageSize,
+      cursor,
+      filter,
+    });
+
+    return c.json(validateResponse(result, documentsResponseSchema));
+  },
 );
 
-// app.post(
-//   "/",
-//   describeRoute({
-//     description: "Upload new document",
-//     tags: ["Documents"],
-//   }),
-// );
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/:id",
+    summary: "Retrieve a document",
+    description:
+      "Retrieve a document by its unique identifier for the authenticated team.",
+    tags: ["Documents"],
+    request: {
+      params: getDocumentSchema.pick({ id: true }),
+    },
+    responses: {
+      200: {
+        description: "Retrieve a document by its unique identifier",
+        content: {
+          "application/json": {
+            schema: documentResponseSchema,
+          },
+        },
+      },
+    },
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const id = c.req.valid("param").id;
 
-// app.get(
-//   "/:id",
-//   describeRoute({
-//     description: "Get a document by ID",
-//     tags: ["Documents"],
-//   }),
-// );
+    const result = await getDocumentById(db, {
+      teamId,
+      id,
+    });
 
-// app.put(
-//   "/:id",
-//   describeRoute({
-//     description: "Update a document by ID",
-//     tags: ["Documents"],
-//   }),
-// );
+    return c.json(validateResponse(result, documentResponseSchema));
+  },
+);
 
-// app.delete(
-//   "/:id",
-//   describeRoute({
-//     description: "Delete a document by ID",
-//     tags: ["Documents"],
-//   }),
-// );
+app.openapi(
+  createRoute({
+    method: "delete",
+    path: "/:id",
+    summary: "Delete a document",
+    description:
+      "Delete a document by its unique identifier for the authenticated team.",
+    tags: ["Documents"],
+    request: {
+      params: deleteDocumentSchema,
+    },
+    responses: {
+      200: {
+        description: "Document deleted successfully",
+        content: {
+          "application/json": {
+            schema: deleteDocumentResponseSchema,
+          },
+        },
+      },
+    },
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const id = c.req.valid("param").id;
+
+    const result = await deleteDocument(db, { teamId, id });
+
+    return c.json(validateResponse(result, documentResponseSchema));
+  },
+);
 
 export const documentsRouter = app;

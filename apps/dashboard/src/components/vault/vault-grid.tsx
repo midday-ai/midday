@@ -29,7 +29,7 @@ export function VaultGrid() {
   const infiniteQueryOptions = trpc.documents.get.infiniteQueryOptions(
     {
       pageSize: 20,
-      filter,
+      ...filter,
     },
     {
       getNextPageParam: ({ meta }) => meta?.cursor,

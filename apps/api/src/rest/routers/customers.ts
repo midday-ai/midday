@@ -41,9 +41,13 @@ app.openapi(
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
-    const params = c.req.valid("query");
+    const { q, ...query } = c.req.valid("query");
 
-    const result = await getCustomers(db, { teamId, ...params });
+    const result = await getCustomers(db, {
+      ...query,
+      teamId,
+      filter: { q },
+    });
 
     return c.json(validateResponse(result, customersResponseSchema));
   },
@@ -111,6 +115,7 @@ app.openapi(
       },
     },
   }),
+  // withRequiredScope("customers.read"),
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");

@@ -84,7 +84,7 @@ const defaultTemplate = {
 
 export const invoiceRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(getInvoicesSchema)
+    .input(getInvoicesSchema.optional())
     .query(async ({ input, ctx: { db, teamId } }) => {
       return getInvoices(db, {
         teamId: teamId!,

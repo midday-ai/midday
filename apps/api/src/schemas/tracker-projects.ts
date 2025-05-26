@@ -3,7 +3,7 @@ import { z } from "@hono/zod-openapi";
 export const getTrackerProjectsSchema = z
   .object({
     cursor: z.string().nullable().optional(),
-    pageSize: z.number().min(1).max(100).optional(),
+    pageSize: z.coerce.number().min(1).max(100).optional(),
     filter: z
       .object({
         q: z.string().nullable().optional(),
