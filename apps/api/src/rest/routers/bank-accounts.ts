@@ -15,32 +15,32 @@ import {
   getBankAccountsSchema,
   updateBankAccountSchema,
 } from "@api/schemas/bank-accounts";
-import { requestBodyResolver } from "@api/utils/request-body-resolver";
-import { withSanitized } from "@api/utils/with-sanitized";
-import { zValidator } from "@hono/zod-validator";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { resolver } from "hono-openapi/zod";
+import { validateResponse } from "@api/utils/validate-response";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 
-const app = new Hono<Context>();
+const app = new OpenAPIHono<Context>();
 
-app.get(
-  "/",
-  describeRoute({
-    description: "Get bank accounts",
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/",
+    summary: "List all bank accounts",
+    description: "Retrieve a list of bank accounts for the authenticated team.",
     tags: ["Bank Accounts"],
+    request: {
+      query: getBankAccountsSchema,
+    },
     responses: {
       200: {
-        description: "List of bank accounts",
         content: {
           "application/json": {
-            schema: resolver(bankAccountsResponseSchema),
+            schema: bankAccountsResponseSchema,
           },
         },
+        description: "Retrieve a list of bank accounts",
       },
     },
   }),
-  zValidator("query", getBankAccountsSchema),
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
@@ -51,19 +51,65 @@ app.get(
       ...params,
     });
 
-    return c.json({ data });
+    return c.json(
+      validateResponse(
+        {
+          data,
+        },
+        bankAccountsResponseSchema,
+      ),
+    );
   },
 );
 
-app.post(
-  "/",
-  describeRoute({
-    description: "Create bank account",
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/:id",
+    summary: "Retrieve a bank account",
+    description: "Retrieve a bank account by ID for the authenticated team.",
     tags: ["Bank Accounts"],
-    requestBody: {
-      content: {
-        "application/json": {
-          schema: requestBodyResolver(createBankAccountSchema),
+    request: {
+      params: getBankAccountByIdSchema,
+    },
+    responses: {
+      200: {
+        description: "Bank account details",
+        content: {
+          "application/json": {
+            schema: bankAccountResponseSchema,
+          },
+        },
+      },
+    },
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const id = c.req.valid("param").id;
+    const teamId = c.get("teamId");
+
+    const result = await getBankAccountById(db, {
+      id,
+      teamId,
+    });
+
+    return c.json(validateResponse(result, bankAccountResponseSchema));
+  },
+);
+
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/",
+    summary: "Create a bank account",
+    description: "Create a new bank account for the authenticated team.",
+    tags: ["Bank Accounts"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: createBankAccountSchema,
+          },
         },
       },
     },
@@ -72,13 +118,12 @@ app.post(
         description: "Bank account created",
         content: {
           "application/json": {
-            schema: resolver(bankAccountResponseSchema),
+            schema: bankAccountResponseSchema,
           },
         },
       },
     },
   }),
-  zValidator("json", createBankAccountSchema),
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
@@ -91,66 +136,24 @@ app.post(
       userId: session.user.id,
     });
 
-    return c.json(result);
+    return c.json(validateResponse(result, bankAccountResponseSchema));
   },
 );
 
-app.get(
-  "/:id",
-  describeRoute({
-    description: "Get bank account by ID",
+app.openapi(
+  createRoute({
+    method: "patch",
+    path: "/{id}",
+    summary: "Update a bank account",
+    description: "Update a bank account by ID for the authenticated team.",
     tags: ["Bank Accounts"],
-    parameters: [
-      {
-        name: "id",
-        in: "path",
-        required: true,
-        schema: resolver(getBankAccountByIdSchema),
-      },
-    ],
-    responses: {
-      200: {
-        description: "Bank account details",
+    request: {
+      params: deleteBankAccountSchema,
+      body: {
         content: {
           "application/json": {
-            schema: resolver(bankAccountResponseSchema),
+            schema: updateBankAccountSchema,
           },
-        },
-      },
-    },
-  }),
-  zValidator("param", getBankAccountByIdSchema),
-  async (c) => {
-    const db = c.get("db");
-    const id = c.req.valid("param").id;
-    const teamId = c.get("teamId");
-
-    const result = await getBankAccountById(db, {
-      id,
-      teamId,
-    });
-
-    return c.json(withSanitized(bankAccountResponseSchema, result));
-  },
-);
-
-app.put(
-  "/:id",
-  describeRoute({
-    description: "Update bank account by ID",
-    tags: ["Bank Accounts"],
-    parameters: [
-      {
-        name: "id",
-        in: "path",
-        required: true,
-        schema: resolver(deleteBankAccountSchema),
-      },
-    ],
-    requestBody: {
-      content: {
-        "application/json": {
-          schema: requestBodyResolver(updateBankAccountSchema),
         },
       },
     },
@@ -159,14 +162,12 @@ app.put(
         description: "Bank account updated",
         content: {
           "application/json": {
-            schema: resolver(bankAccountResponseSchema),
+            schema: bankAccountResponseSchema,
           },
         },
       },
     },
   }),
-  zValidator("param", deleteBankAccountSchema),
-  zValidator("json", updateBankAccountSchema),
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
@@ -179,27 +180,31 @@ app.put(
       teamId,
     });
 
-    return c.json(withSanitized(bankAccountResponseSchema, result));
+    return c.json(validateResponse(result, bankAccountResponseSchema));
   },
 );
 
-app.delete(
-  "/:id",
-  describeRoute({
-    description: "Delete bank account by ID",
+app.openapi(
+  createRoute({
+    method: "delete",
+    path: "/{id}",
+    summary: "Delete a bank account",
+    description: "Delete a bank account by ID for the authenticated team.",
     tags: ["Bank Accounts"],
+    request: {
+      params: deleteBankAccountSchema,
+    },
     responses: {
       200: {
         description: "Bank account deleted",
         content: {
           "application/json": {
-            schema: resolver(bankAccountResponseSchema),
+            schema: bankAccountResponseSchema,
           },
         },
       },
     },
   }),
-  zValidator("param", deleteBankAccountSchema),
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
@@ -210,7 +215,7 @@ app.delete(
       teamId,
     });
 
-    return c.json(withSanitized(bankAccountResponseSchema, result));
+    return c.json(validateResponse(result, bankAccountResponseSchema));
   },
 );
 

@@ -37,14 +37,17 @@ export const transactionsRouter = createTRPCRouter({
 
   getById: protectedProcedure
     .input(getTransactionByIdSchema)
-    .query(async ({ input, ctx: { db } }) => {
-      return getTransactionById(db, input.id);
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      return getTransactionById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
     }),
 
   deleteMany: protectedProcedure
     .input(deleteTransactionsSchema)
-    .mutation(async ({ input, ctx: { db } }) => {
-      return deleteTransactions(db, { ids: input.ids });
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      return deleteTransactions(db, { ids: input, teamId: teamId! });
     }),
 
   getAmountRange: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -53,8 +56,11 @@ export const transactionsRouter = createTRPCRouter({
 
   update: protectedProcedure
     .input(updateTransactionSchema)
-    .mutation(async ({ input, ctx: { db } }) => {
-      return updateTransaction(db, input);
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      return updateTransaction(db, {
+        ...input,
+        teamId: teamId!,
+      });
     }),
 
   updateMany: protectedProcedure

@@ -1,4 +1,5 @@
 import {
+  deleteCustomer,
   getCustomerById,
   getCustomers,
   upsertCustomer,
@@ -11,67 +12,70 @@ import {
   getCustomersSchema,
   upsertCustomerSchema,
 } from "@api/schemas/customers";
-import { requestBodyResolver } from "@api/utils/request-body-resolver";
-import { withSanitized } from "@api/utils/with-sanitized";
-import { zValidator } from "@hono/zod-validator";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { resolver } from "hono-openapi/zod";
+import { validateResponse } from "@api/utils/validate-response";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 
-const app = new Hono<Context>();
+const app = new OpenAPIHono<Context>();
 
-app.get(
-  "/",
-  describeRoute({
-    description: "Get customers",
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/",
+    summary: "List all customers",
+    description: "Retrieve a list of customers for the authenticated team.",
     tags: ["Customers"],
+    request: {
+      query: getCustomersSchema,
+    },
     responses: {
       200: {
-        description: "Customers",
+        description: "Retrieve a list of customers for the authenticated team.",
         content: {
           "application/json": {
-            schema: resolver(customersResponseSchema),
+            schema: customersResponseSchema,
           },
         },
       },
     },
   }),
-  zValidator("query", getCustomersSchema),
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
-    const query = c.req.valid("query");
+    const params = c.req.valid("query");
 
-    const data = await getCustomers(db, { teamId, ...query });
+    const result = await getCustomers(db, { teamId, ...params });
 
-    return c.json(withSanitized(customersResponseSchema, { data }));
+    return c.json(validateResponse(result, customersResponseSchema));
   },
 );
 
-app.post(
-  "/",
-  describeRoute({
-    description: "Create customer",
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/",
+    summary: "Create customer",
+    description: "Create a new customer for the authenticated team.",
     tags: ["Customers"],
-    requestBody: {
-      content: {
-        "application/json": {
-          schema: requestBodyResolver(upsertCustomerSchema),
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: upsertCustomerSchema,
+          },
         },
       },
     },
     responses: {
       201: {
-        description: "Customer",
+        description: "Customer created",
         content: {
           "application/json": {
-            schema: resolver(customerResponseSchema),
+            schema: customerResponseSchema,
           },
         },
       },
     },
   }),
-  zValidator("json", upsertCustomerSchema),
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
@@ -82,28 +86,31 @@ app.post(
       teamId,
     });
 
-    return c.json(withSanitized(customerResponseSchema, result));
+    return c.json(validateResponse(result, customerResponseSchema));
   },
 );
 
-app.get(
-  "/:id",
-  describeRoute({
-    description: "Get customer by ID",
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/:id",
+    summary: "Retrieve a customer",
+    description: "Retrieve a customer by ID for the authenticated team.",
     tags: ["Customers"],
+    request: {
+      params: getCustomerByIdSchema,
+    },
     responses: {
       200: {
-        description: "Customer",
+        description: "Retrieve a customer by ID for the authenticated team.",
         content: {
           "application/json": {
-            schema: resolver(customerResponseSchema),
+            schema: customerResponseSchema,
           },
         },
       },
     },
   }),
-  // withRequiredScopes(["customers:read"]),
-  zValidator("param", getCustomerByIdSchema),
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
@@ -111,35 +118,38 @@ app.get(
 
     const result = await getCustomerById(db, { id, teamId });
 
-    return c.json(withSanitized(customerResponseSchema, result));
+    return c.json(validateResponse(result, customerResponseSchema));
   },
 );
 
-app.put(
-  "/:id",
-  describeRoute({
-    description: "Update customer by ID",
+app.openapi(
+  createRoute({
+    method: "patch",
+    path: "/:id",
+    summary: "Update a customer",
+    description: "Update a customer by ID for the authenticated team.",
     tags: ["Customers"],
-    responses: {
-      200: {
-        description: "Customer",
+    request: {
+      params: getCustomerByIdSchema,
+      body: {
         content: {
           "application/json": {
-            schema: resolver(customerResponseSchema),
+            schema: upsertCustomerSchema,
           },
         },
       },
     },
-    requestBody: {
-      content: {
-        "application/json": {
-          schema: requestBodyResolver(upsertCustomerSchema),
+    responses: {
+      200: {
+        description: "Customer updated",
+        content: {
+          "application/json": {
+            schema: customerResponseSchema,
+          },
         },
       },
     },
   }),
-  zValidator("param", getCustomerByIdSchema),
-  zValidator("json", upsertCustomerSchema),
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
@@ -152,16 +162,40 @@ app.put(
       teamId,
     });
 
-    return c.json(withSanitized(customerResponseSchema, result));
+    return c.json(validateResponse(result, customerResponseSchema));
   },
 );
 
-app.delete(
-  "/:id",
-  describeRoute({
-    description: "Delete customer by ID",
+app.openapi(
+  createRoute({
+    method: "delete",
+    path: "/:id",
+    summary: "Delete a customer",
+    description: "Delete a customer by ID for the authenticated team.",
     tags: ["Customers"],
+    request: {
+      params: getCustomerByIdSchema,
+    },
+    responses: {
+      200: {
+        description: "Customer deleted",
+        content: {
+          "application/json": {
+            schema: customerResponseSchema,
+          },
+        },
+      },
+    },
   }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const id = c.req.valid("param").id;
+
+    const result = await deleteCustomer(db, { id, teamId });
+
+    return c.json(validateResponse(result, customerResponseSchema));
+  },
 );
 
 export const customersRouter = app;

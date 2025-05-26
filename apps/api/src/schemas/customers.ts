@@ -1,5 +1,4 @@
-import { z } from "zod";
-import "zod-openapi/extend";
+import { z } from "@hono/zod-openapi";
 
 export const getCustomersSchema = z
   .object({
@@ -77,73 +76,61 @@ export const customerResponseSchema = z.object({
     description: "Customer email address",
     example: "info@acme.com",
   }),
-  phone: z.string().nullable().optional().openapi({
+  phone: z.string().nullable().openapi({
     description: "Customer phone number",
     example: "+1-555-123-4567",
-    nullable: true,
   }),
-  website: z.string().nullable().optional().openapi({
+  website: z.string().nullable().openapi({
     description: "Customer website URL",
     example: "https://acme.com",
-    nullable: true,
   }),
   createdAt: z.string().openapi({
     description: "Date and time when the customer was created (ISO 8601)",
     example: "2024-05-01T12:34:56.789Z",
   }),
-  country: z.string().nullable().optional().openapi({
+  country: z.string().nullable().openapi({
     description: "Country name",
     example: "United States",
-    nullable: true,
   }),
-  addressLine1: z.string().nullable().optional().openapi({
+  addressLine1: z.string().nullable().openapi({
     description: "Address line 1",
     example: "123 Main St",
-    nullable: true,
   }),
-  addressLine2: z.string().nullable().optional().openapi({
+  addressLine2: z.string().nullable().openapi({
     description: "Address line 2",
     example: "Suite 400",
-    nullable: true,
   }),
-  city: z.string().nullable().optional().openapi({
+  city: z.string().nullable().openapi({
     description: "City",
     example: "San Francisco",
-    nullable: true,
   }),
-  state: z.string().nullable().optional().openapi({
+  state: z.string().nullable().openapi({
     description: "State or province",
     example: "CA",
-    nullable: true,
   }),
-  zip: z.string().nullable().optional().openapi({
+  zip: z.string().nullable().openapi({
     description: "ZIP or postal code",
     example: "94105",
-    nullable: true,
   }),
-  note: z.string().nullable().optional().openapi({
+  note: z.string().nullable().openapi({
     description: "Internal note about the customer",
     example: "Preferred contact by email.",
-    nullable: true,
   }),
-  vatNumber: z.string().nullable().optional().openapi({
+  vatNumber: z.string().nullable().openapi({
     description: "VAT number",
     example: "US123456789",
-    nullable: true,
   }),
-  countryCode: z.string().nullable().optional().openapi({
+  countryCode: z.string().nullable().openapi({
     description: "Country code (ISO 3166-1 alpha-2)",
     example: "US",
-    nullable: true,
   }),
   token: z.string().openapi({
     description: "Customer token (internal use)",
     example: "cus_abc123xyz",
   }),
-  contact: z.string().nullable().optional().openapi({
+  contact: z.string().nullable().openapi({
     description: "Contact person for the customer",
     example: "John Doe",
-    nullable: true,
   }),
   invoiceCount: z.number().openapi({
     description: "Number of invoices associated with the customer",
@@ -177,7 +164,7 @@ export const customerResponseSchema = z.object({
 
 export const customersResponseSchema = z.object({
   meta: z.object({
-    cursor: z.string().optional(),
+    cursor: z.string().nullable(),
     hasPreviousPage: z.boolean(),
     hasNextPage: z.boolean(),
   }),
@@ -208,52 +195,42 @@ export const upsertCustomerSchema = z.object({
   country: z.string().nullable().optional().openapi({
     description: "Country name",
     example: "United States",
-    nullable: true,
   }),
   addressLine1: z.string().nullable().optional().openapi({
     description: "Address line 1",
     example: "123 Main St",
-    nullable: true,
   }),
   addressLine2: z.string().nullable().optional().openapi({
     description: "Address line 2",
     example: "Suite 400",
-    nullable: true,
   }),
   city: z.string().nullable().optional().openapi({
     description: "City",
     example: "San Francisco",
-    nullable: true,
   }),
   state: z.string().nullable().optional().openapi({
     description: "State or province",
     example: "CA",
-    nullable: true,
   }),
   zip: z.string().nullable().optional().openapi({
     description: "ZIP or postal code",
     example: "94105",
-    nullable: true,
   }),
   note: z.string().nullable().optional().openapi({
     description: "Internal note about the customer",
     example: "VIP client, handle with care.",
-    nullable: true,
   }),
   website: z.string().nullable().optional().openapi({
     description: "Customer website URL",
     example: "https://acme.com",
-    nullable: true,
   }),
   phone: z.string().nullable().optional().openapi({
     description: "Customer phone number",
     example: "+1-555-123-4567",
-    nullable: true,
   }),
   contact: z.string().nullable().optional().openapi({
     description: "Contact person at the customer",
     example: "Jane Doe",
-    nullable: true,
   }),
   tags: z
     .array(
@@ -276,6 +253,5 @@ export const upsertCustomerSchema = z.object({
         { id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890", name: "Enterprise" },
         { id: "b2c3d4e5-f678-90ab-cdef-234567890abc", name: "VIP" },
       ],
-      nullable: true,
     }),
 });

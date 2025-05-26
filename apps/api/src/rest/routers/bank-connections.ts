@@ -39,53 +39,6 @@ app.get(
   }),
 );
 
-app.post(
-  "/",
-  describeRoute({
-    description: "Create bank connection",
-    tags: ["Bank Connections"],
-    requestBody: {
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            required: ["provider", "institutionId"],
-            properties: {
-              provider: {
-                type: "string",
-                enum: ["plaid", "teller", "gocardless"],
-              },
-              institutionId: { type: "string" },
-              accessToken: { type: "string" },
-              enrollmentId: { type: "string" },
-            },
-          },
-        },
-      },
-    },
-    responses: {
-      201: {
-        description: "Bank connection created",
-        content: {
-          "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                id: { type: "string" },
-                provider: { type: "string" },
-                institutionId: { type: "string" },
-                institutionName: { type: "string" },
-                status: { type: "string" },
-                createdAt: { type: "string", format: "date-time" },
-              },
-            },
-          },
-        },
-      },
-    },
-  }),
-);
-
 app.get(
   "/:id",
   describeRoute({
@@ -128,49 +81,6 @@ app.get(
   }),
 );
 
-app.put(
-  "/:id",
-  describeRoute({
-    description: "Update bank connection",
-    tags: ["Bank Connections"],
-    requestBody: {
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              status: {
-                type: "string",
-                enum: ["connected", "disconnected"],
-              },
-              accessToken: { type: "string" },
-            },
-          },
-        },
-      },
-    },
-    responses: {
-      200: {
-        description: "Bank connection updated",
-        content: {
-          "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                id: { type: "string" },
-                provider: { type: "string" },
-                institutionId: { type: "string" },
-                status: { type: "string" },
-                updatedAt: { type: "string", format: "date-time" },
-              },
-            },
-          },
-        },
-      },
-    },
-  }),
-);
-
 app.delete(
   "/:id",
   describeRoute({
@@ -185,30 +95,6 @@ app.delete(
               type: "object",
               properties: {
                 success: { type: "boolean" },
-              },
-            },
-          },
-        },
-      },
-    },
-  }),
-);
-
-app.post(
-  "/:id/sync",
-  describeRoute({
-    description: "Trigger manual sync for bank connection",
-    tags: ["Bank Connections"],
-    responses: {
-      200: {
-        description: "Sync triggered",
-        content: {
-          "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                success: { type: "boolean" },
-                syncId: { type: "string" },
               },
             },
           },

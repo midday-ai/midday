@@ -211,7 +211,7 @@ export const getCustomers = async (
 
   return {
     meta: {
-      cursor: nextCursor,
+      cursor: nextCursor ?? null,
       hasPreviousPage: offset > 0,
       hasNextPage: data && data.length === pageSize,
     },
@@ -377,6 +377,18 @@ export const upsertCustomer = async (
   });
 };
 
-export const deleteCustomer = async (db: Database, customerId: string) => {
-  await db.delete(customers).where(eq(customers.id, customerId)).returning();
+export type DeleteCustomerParams = {
+  id: string;
+  teamId: string;
+};
+
+export const deleteCustomer = async (
+  db: Database,
+  params: DeleteCustomerParams,
+) => {
+  const { id, teamId } = params;
+  await db
+    .delete(customers)
+    .where(and(eq(customers.id, id), eq(customers.teamId, teamId)))
+    .returning();
 };

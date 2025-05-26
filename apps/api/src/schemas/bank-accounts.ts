@@ -1,5 +1,4 @@
-import { z } from "zod";
-import "zod-openapi/extend";
+import { z } from "@hono/zod-openapi";
 
 export const getBankAccountsSchema = z
   .object({
@@ -36,15 +35,15 @@ export const bankAccountResponseSchema = z
       description: "Unique identifier for the bank account.",
       example: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
     }),
-    name: z.string().openapi({
+    name: z.string().nullable().openapi({
       description: "Name of the bank account.",
       example: "Checking Account",
     }),
-    currency: z.string().openapi({
+    currency: z.string().nullable().openapi({
       description: "Currency code of the bank account (e.g., USD, EUR).",
       example: "USD",
     }),
-    type: z.string().openapi({
+    type: z.string().nullable().openapi({
       description: "Type of the bank account (e.g., depository, credit).",
       example: "depository",
     }),
@@ -52,11 +51,11 @@ export const bankAccountResponseSchema = z
       description: "Whether the bank account is enabled.",
       example: true,
     }),
-    balance: z.number().openapi({
+    balance: z.number().nullable().openapi({
       description: "Current balance of the bank account.",
       example: 1500.75,
     }),
-    manual: z.boolean().openapi({
+    manual: z.boolean().nullable().openapi({
       description: "Whether the bank account is a manual account.",
       example: false,
     }),

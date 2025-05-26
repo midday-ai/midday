@@ -360,7 +360,6 @@ export async function getTransactions(
       assigned: {
         id: users.id,
         fullName: users.fullName,
-        email: users.email,
         avatarUrl: users.avatarUrl,
       },
       category: {
@@ -369,19 +368,20 @@ export async function getTransactions(
         color: transactionCategories.color,
         slug: transactionCategories.slug,
       },
-      bankAccount: {
+      account: {
         id: bankAccounts.id,
         name: bankAccounts.name,
         currency: bankAccounts.currency,
       },
-      bankConnection: {
+      connection: {
         id: bankConnections.id,
+        name: bankConnections.name,
         logoUrl: bankConnections.logoUrl,
       },
-      transactionTags: sql<
+      tags: sql<
         Array<{ id: string; name: string | null }>
       >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tags.id}, 'name', ${tags.name})) FILTER (WHERE ${tags.id} IS NOT NULL), '[]'::json)`.as(
-        "transactionTags",
+        "tags",
       ),
     })
     .from(transactions)
@@ -518,18 +518,22 @@ export async function getTransactions(
   const nextCursor = hasNextPage ? (offset + pageSize).toString() : undefined;
 
   const processedData = fetchedData.map((row) => {
-    const { bankAccount, bankConnection, ...rest } = row;
+    const { account, connection, ...rest } = row;
 
-    const newBankAccount = {
-      ...bankAccount,
-      bankConnection: bankConnection?.id
-        ? { id: bankConnection.id, logoUrl: bankConnection.logoUrl }
+    const newAccount = {
+      ...account,
+      connection: connection?.id
+        ? {
+            id: connection.id,
+            name: connection.name,
+            logoUrl: connection.logoUrl,
+          }
         : null,
     };
 
     return {
       ...rest,
-      bankAccount: newBankAccount,
+      account: newAccount,
     };
   });
 
@@ -543,7 +547,15 @@ export async function getTransactions(
   };
 }
 
-export async function getTransactionById(db: Database, transactionId: string) {
+type GetTransactionByIdParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function getTransactionById(
+  db: Database,
+  params: GetTransactionByIdParams,
+) {
   const [result] = await db
     .select({
       id: transactions.id,
@@ -583,7 +595,6 @@ export async function getTransactionById(db: Database, transactionId: string) {
       assigned: {
         id: users.id,
         fullName: users.fullName,
-        email: users.email,
         avatarUrl: users.avatarUrl,
       },
       category: {
@@ -592,19 +603,20 @@ export async function getTransactionById(db: Database, transactionId: string) {
         color: transactionCategories.color,
         slug: transactionCategories.slug,
       },
-      bankAccount: {
+      account: {
         id: bankAccounts.id,
         name: bankAccounts.name,
         currency: bankAccounts.currency,
       },
-      bankConnection: {
+      connection: {
         id: bankConnections.id,
+        name: bankConnections.name,
         logoUrl: bankConnections.logoUrl,
       },
-      transactionTags: sql<
+      tags: sql<
         Array<{ id: string; name: string | null }>
       >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${tags.id}, 'name', ${tags.name})) FILTER (WHERE ${tags.id} IS NOT NULL), '[]'::json)`.as(
-        "transactionTags",
+        "tags",
       ),
       attachments: sql<
         Array<{
@@ -644,7 +656,12 @@ export async function getTransactionById(db: Database, transactionId: string) {
       transactionAttachments,
       eq(transactionAttachments.transactionId, transactions.id),
     )
-    .where(eq(transactions.id, transactionId))
+    .where(
+      and(
+        eq(transactions.id, params.id),
+        eq(transactions.teamId, params.teamId),
+      ),
+    )
     .groupBy(
       transactions.id,
       users.id,
@@ -674,24 +691,38 @@ export async function getTransactionById(db: Database, transactionId: string) {
     return null;
   }
 
-  const { bankAccount, bankConnection, ...rest } = result;
+  const { account, connection, ...rest } = result;
 
-  const newBankAccount = bankAccount?.id
+  const newAccount = account?.id
     ? {
-        ...bankAccount,
-        bankConnection: bankConnection?.id
-          ? { id: bankConnection.id, logoUrl: bankConnection.logoUrl }
+        ...account,
+        connection: connection?.id
+          ? {
+              id: connection.id,
+              name: connection.name,
+              logoUrl: connection.logoUrl,
+            }
           : null,
       }
     : null;
 
   return {
     ...rest,
-    bankAccount: newBankAccount,
+    account: newAccount,
   };
 }
 
+// Helper function to get full transaction data by ID with the same structure as getTransactionById
+async function getFullTransactionData(
+  db: Database,
+  transactionId: string,
+  teamId: string,
+) {
+  return getTransactionById(db, { id: transactionId, teamId });
+}
+
 type DeleteTransactionsParams = {
+  teamId: string;
   ids: string[];
 };
 
@@ -702,9 +733,15 @@ export async function deleteTransactions(
   return db
     .delete(transactions)
     .where(
-      and(inArray(transactions.id, params.ids), eq(transactions.manual, true)),
+      and(
+        inArray(transactions.id, params.ids),
+        eq(transactions.manual, true),
+        eq(transactions.teamId, params.teamId),
+      ),
     )
-    .returning();
+    .returning({
+      id: transactions.id,
+    });
 }
 
 export async function getTransactionsAmountFullRangeData(
@@ -853,7 +890,7 @@ export async function updateSimilarTransactionsCategory(
 
   const searchQuery = buildSearchQuery(name);
 
-  return db
+  const results = await db
     .update(transactions)
     .set(updateData)
     .where(
@@ -864,8 +901,15 @@ export async function updateSimilarTransactionsCategory(
     )
     .returning({
       id: transactions.id,
-      teamId: transactions.teamId,
     });
+
+  // Get full transaction data for each updated transaction
+  const fullTransactions = await Promise.all(
+    results.map((result) => getFullTransactionData(db, result.id, teamId)),
+  );
+
+  // Filter out any null results
+  return fullTransactions.filter((transaction) => transaction !== null);
 }
 
 type UpdateSimilarTransactionsRecurringParams = {
@@ -897,7 +941,7 @@ export async function updateSimilarTransactionsRecurring(
 
   const searchQuery = buildSearchQuery(name);
 
-  return db
+  const results = await db
     .update(transactions)
     .set({
       recurring: recurring,
@@ -912,12 +956,20 @@ export async function updateSimilarTransactionsRecurring(
     )
     .returning({
       id: transactions.id,
-      teamId: transactions.teamId,
     });
+
+  // Get full transaction data for each updated transaction
+  const fullTransactions = await Promise.all(
+    results.map((result) => getFullTransactionData(db, result.id, team_id)),
+  );
+
+  // Filter out any null results
+  return fullTransactions.filter((transaction) => transaction !== null);
 }
 
 type UpdateTransactionData = {
   id: string;
+  teamId: string;
   categorySlug?: string | null;
   status?: "pending" | "archived" | "completed" | "posted" | "excluded" | null;
   internal?: boolean;
@@ -931,21 +983,21 @@ export async function updateTransaction(
   db: Database,
   params: UpdateTransactionData,
 ) {
-  const { id, ...dataToUpdate } = params;
+  const { id, teamId, ...dataToUpdate } = params;
 
   const [result] = await db
     .update(transactions)
     .set(dataToUpdate)
-    .where(eq(transactions.id, id))
+    .where(and(eq(transactions.id, id), eq(transactions.teamId, teamId)))
     .returning({
       id: transactions.id,
-      categorySlug: transactions.categorySlug,
-      name: transactions.name,
-      status: transactions.status,
-      internal: transactions.internal,
     });
 
-  return result;
+  if (!result) {
+    return null;
+  }
+
+  return getFullTransactionData(db, result.id, teamId);
 }
 
 type UpdateTransactionsData = {
@@ -983,13 +1035,15 @@ export async function updateTransactions(
     .where(and(eq(transactions.teamId, teamId), inArray(transactions.id, ids)))
     .returning({
       id: transactions.id,
-      categorySlug: transactions.categorySlug,
-      name: transactions.name,
-      status: transactions.status,
-      internal: transactions.internal,
     });
 
-  return results;
+  // Get full transaction data for each updated transaction
+  const fullTransactions = await Promise.all(
+    results.map((result) => getFullTransactionData(db, result.id, teamId)),
+  );
+
+  // Filter out any null results
+  return fullTransactions.filter((transaction) => transaction !== null);
 }
 
 export type CreateTransactionParams = {
@@ -1019,13 +1073,10 @@ export async function createTransaction(
     ...rest
   } = params;
 
-  const id = nanoid();
-
   const [result] = await db
     .insert(transactions)
     .values({
       ...rest,
-      id,
       teamId,
       bankAccountId,
       categorySlug,
@@ -1034,11 +1085,17 @@ export async function createTransaction(
       manual: true,
       notified: true,
       status: "posted",
-      internalId: `${teamId}_${id}`,
+      internalId: `${teamId}_${nanoid()}`,
     })
-    .returning();
+    .returning({
+      id: transactions.id,
+    });
 
-  if (attachments && result) {
+  if (!result) {
+    return null;
+  }
+
+  if (attachments) {
     await createAttachments(db, {
       attachments: attachments.map((attachment) => ({
         ...attachment,
@@ -1048,5 +1105,42 @@ export async function createTransaction(
     });
   }
 
-  return result;
+  return getFullTransactionData(db, result.id, teamId);
+}
+
+export async function createTransactions(
+  db: Database,
+  params: CreateTransactionParams[],
+) {
+  const transactionsToInsert = params.map(
+    ({ attachments, teamId, ...rest }) => {
+      return {
+        ...rest,
+        teamId,
+        method: "other" as const,
+        manual: true,
+        notified: true,
+        status: "posted" as const,
+        internalId: `${teamId}_${nanoid()}`,
+      };
+    },
+  );
+
+  const results = await db
+    .insert(transactions)
+    .values(transactionsToInsert)
+    .returning({
+      id: transactions.id,
+      teamId: transactions.teamId,
+    });
+
+  // Get full transaction data for each created transaction
+  const fullTransactions = await Promise.all(
+    results.map((result) =>
+      getFullTransactionData(db, result.id, result.teamId),
+    ),
+  );
+
+  // Filter out any null results
+  return fullTransactions.filter((transaction) => transaction !== null);
 }

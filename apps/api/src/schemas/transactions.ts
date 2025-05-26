@@ -1,5 +1,4 @@
-import { z } from "zod";
-import "zod-openapi/extend";
+import { z } from "@hono/zod-openapi";
 
 export const getTransactionsSchema = z.object({
   cursor: z
@@ -185,23 +184,208 @@ export const getTransactionsSchema = z.object({
     }),
 });
 
-export const transactionResponseSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string(),
-  amount: z.number(),
-  currency: z.string(),
-  date: z.string(),
-  categorySlug: z.string(),
-  status: z.string(),
-  internal: z.boolean(),
-  recurring: z.boolean(),
-  frequency: z.string(),
-  note: z.string(),
-  assignedId: z.string(),
-  attachments: z.array(z.string()),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-});
+export const transactionResponseSchema = z
+  .object({
+    id: z.string().uuid().openapi({
+      description: "The unique identifier of the transaction.",
+      example: "b3b7c8e2-1f2a-4c3d-9e4f-5a6b7c8d9e0f",
+    }),
+    name: z.string().openapi({
+      description: "The name or description of the transaction.",
+      example: "Office Supplies Purchase",
+    }),
+    amount: z.number().openapi({
+      description: "The amount of the transaction.",
+      example: 150.75,
+    }),
+    currency: z.string().openapi({
+      description: "The currency code of the transaction.",
+      example: "USD",
+    }),
+    date: z.string().openapi({
+      description: "The date of the transaction in ISO 8601 format.",
+      example: "2024-05-01T12:00:00Z",
+    }),
+    category: z
+      .object({
+        id: z.string().openapi({
+          description: "The unique identifier of the category.",
+          example: "office-supplies",
+        }),
+        name: z.string().openapi({
+          description: "The display name of the category.",
+          example: "Office Supplies",
+        }),
+        color: z.string().openapi({
+          description: "The color associated with the category.",
+          example: "#FF5733",
+        }),
+        slug: z.string().openapi({
+          description: "The slug of the category.",
+          example: "office-supplies",
+        }),
+      })
+      .nullable()
+      .openapi({
+        description: "The category assigned to the transaction.",
+        example: {
+          id: "office-supplies",
+          name: "Office Supplies",
+          color: "#FF5733",
+          slug: "office-supplies",
+        },
+      }),
+    status: z.string().openapi({
+      description: "The status of the transaction.",
+      example: "completed",
+    }),
+    internal: z.boolean().nullable().openapi({
+      description: "Whether the transaction is internal.",
+      example: false,
+    }),
+    recurring: z.boolean().nullable().openapi({
+      description: "Whether the transaction is recurring.",
+      example: false,
+    }),
+    manual: z.boolean().nullable().openapi({
+      description:
+        "Whether the transaction was created manually (API/Form) rather than via bank connections.",
+      example: false,
+    }),
+    frequency: z.string().nullable().openapi({
+      description: "The frequency of the recurring transaction, if applicable.",
+      example: "monthly",
+    }),
+    isFulfilled: z.boolean().openapi({
+      description: "Whether the transaction is fulfilled.",
+      example: true,
+    }),
+    note: z.string().nullable().openapi({
+      description: "An optional note attached to the transaction.",
+      example: "Paid by company card.",
+    }),
+    account: z
+      .object({
+        id: z.string().openapi({
+          description: "Bank account ID (UUID).",
+          example: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
+        }),
+        name: z.string().openapi({
+          description: "Name of the bank account.",
+          example: "Company Card",
+        }),
+        currency: z.string().openapi({
+          description: "Currency of the bank account.",
+          example: "USD",
+        }),
+        connection: z
+          .object({
+            id: z.string().openapi({
+              description: "Bank connection ID (UUID).",
+              example: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
+            }),
+            name: z.string().openapi({
+              description: "Name of the bank institution.",
+              example: "Company Card",
+            }),
+            logoUrl: z.string().nullable().openapi({
+              description: "Logo URL of the bank institution.",
+              example: "https://example.com/logo.png",
+            }),
+          })
+          .openapi({
+            description: "The bank connection associated with the account.",
+            example: {
+              id: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
+              name: "Company Card",
+              logoUrl: "https://example.com/logo.png",
+            },
+          }),
+      })
+      .openapi({
+        description: "The bank account associated with the transaction.",
+        example: {
+          id: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
+          name: "Company Card",
+          currency: "USD",
+          connection: {
+            id: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
+            name: "Company Card",
+            logoUrl: "https://example.com/logo.png",
+          },
+        },
+      }),
+    tags: z
+      .array(
+        z.object({
+          id: z.string().openapi({
+            description: "Tag ID (UUID).",
+            example: "b7e2f8c1-3d4a-4e2b-9f1a-2c3d4e5f6a7b",
+          }),
+          name: z.string().nullable().openapi({
+            description: "Name of the tag.",
+            example: "invoice",
+          }),
+        }),
+      )
+      .nullable()
+      .openapi({
+        description: "List of tags associated with the transaction.",
+        example: [
+          { id: "b7e2f8c1-3d4a-4e2b-9f1a-2c3d4e5f6a7b", name: "invoice" },
+          { id: "c8e2f8c1-3d4a-4e2b-9f1a-2c3d4e5f6a7c", name: "travel" },
+        ],
+      }),
+    attachments: z
+      .array(
+        z.object({
+          id: z.string().openapi({
+            description: "Attachment ID (UUID).",
+            example: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
+          }),
+          path: z.array(z.string()).openapi({
+            description: "Path segments for the attachment file.",
+            example: [
+              "dd6a039e-d071-423a-9a4d-9ba71325d890",
+              "transactions",
+              "1d2c3753-79d7-45b0-9c40-60f482bac8e8",
+              "img_2808-2.heic",
+            ],
+          }),
+          size: z.number().openapi({
+            description: "Size of the attachment in bytes.",
+            example: 1928716,
+          }),
+          type: z.string().openapi({
+            description: "MIME type of the attachment.",
+            example: "image/heic",
+          }),
+          filename: z.string().nullable().openapi({
+            description: "Original filename of the attachment.",
+            example: "img_2808-2.heic",
+          }),
+        }),
+      )
+      .nullable()
+      .openapi({
+        description: "List of attachments associated with the transaction.",
+        example: [
+          {
+            id: "b7e2f8c1-3d4a-4e2b-9f1a-2c3d4e5f6a7b",
+            path: [
+              "e1f2d3c4-b5a6-7d8e-9f0a-1b2c3d4e5f6a",
+              "transactions",
+              "9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
+              "invoice.pdf",
+            ],
+            size: 1928716,
+            type: "application/pdf",
+            filename: "invoice.pdf",
+          },
+        ],
+      }),
+  })
+  .openapi("TransactionResponse");
 
 export const transactionsResponseSchema = z.object({
   meta: z.object({
@@ -212,10 +396,34 @@ export const transactionsResponseSchema = z.object({
   data: z.array(transactionResponseSchema),
 });
 
-export const deleteTransactionsSchema = z.object({
-  ids: z.array(z.string()).openapi({
-    description: "Array of transaction IDs to delete.",
+export const deleteTransactionsSchema = z
+  .array(z.string().uuid())
+  .max(100)
+  .min(1)
+  .openapi({
+    description: "List of transaction IDs to delete.",
+  });
+
+export const deleteTransactionResponseSchema = z.object({
+  id: z.string().uuid().openapi({
+    description: "Transaction ID (UUID).",
   }),
+});
+
+export const deleteTransactionsResponseSchema = z.array(
+  deleteTransactionResponseSchema,
+);
+
+export const deleteTransactionSchema = z.object({
+  id: z
+    .string()
+    .uuid()
+    .openapi({
+      description: "Transaction ID (UUID).",
+      param: {
+        in: "path",
+      },
+    }),
 });
 
 export const getTransactionByIdSchema = z.object({
@@ -456,3 +664,15 @@ export const createTransactionSchema = z.object({
       description: "Array of attachments for the transaction.",
     }),
 });
+
+export const createTransactionsSchema = z
+  .array(createTransactionSchema)
+  .max(100)
+  .min(1)
+  .openapi({
+    description: "List of transactions to create.",
+  });
+
+export const createTransactionsResponseSchema = z.array(
+  transactionResponseSchema,
+);

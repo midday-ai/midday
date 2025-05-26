@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 export const getTrackerRecordsByDateSchema = z.object({ date: z.string() });
 

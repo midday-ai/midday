@@ -232,10 +232,10 @@ export function TransactionDetails() {
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              {data?.bankAccount?.bankConnection?.logoUrl && (
+              {data?.account?.connection?.logoUrl && (
                 <TransactionBankAccount
-                  name={data?.bankAccount?.name ?? undefined}
-                  logoUrl={data.bankAccount.bankConnection.logoUrl}
+                  name={data?.account?.name ?? undefined}
+                  logoUrl={data.account.connection.logoUrl}
                   className="text-[#606060] text-xs"
                 />
               )}
@@ -378,7 +378,7 @@ export function TransactionDetails() {
         </Label>
 
         <SelectTags
-          tags={data?.transactionTags?.map((tag) => ({
+          tags={data?.tags?.map((tag) => ({
             id: tag.id,
             label: tag.name!,
             value: tag.name!,

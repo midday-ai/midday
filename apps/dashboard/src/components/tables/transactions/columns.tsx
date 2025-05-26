@@ -280,17 +280,15 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "tags",
     header: "Tags",
-    cell: ({ row }) => <TagsCell tags={row.original.transactionTags} />,
+    cell: ({ row }) => <TagsCell tags={row.original.tags} />,
   },
   {
     accessorKey: "bank_account",
     header: "Account",
     cell: ({ row }) => (
       <TransactionBankAccount
-        name={row.original?.bankAccount?.name ?? undefined}
-        logoUrl={
-          row.original?.bankAccount?.bankConnection?.logoUrl ?? undefined
-        }
+        name={row.original?.account?.name ?? undefined}
+        logoUrl={row.original?.account?.connection?.logoUrl ?? undefined}
       />
     ),
   },

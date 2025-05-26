@@ -33,8 +33,11 @@ export const customersRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteCustomerSchema)
-    .mutation(async ({ ctx: { db }, input }) => {
-      return deleteCustomer(db, input.id);
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return deleteCustomer(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
     }),
 
   upsert: protectedProcedure
