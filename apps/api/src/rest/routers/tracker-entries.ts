@@ -1,0 +1,175 @@
+import {
+  deleteTrackerEntry,
+  //   getTrackerRecordsByDate,
+  //   upsertTrackerEntries,
+  getTrackerRecordsByRange,
+  // upsertTrackerEntries,
+} from "@api/db/queries/tracker-entries";
+import type { Context } from "@api/rest/types";
+import {
+  deleteTrackerEntrySchema,
+  //   getTrackerRecordsByDateSchema,
+  //   trackerEntryResponseSchema,
+  //   upsertTrackerEntriesSchema,
+  getTrackerRecordsByRangeSchema,
+  trackerEntriesResponseSchema,
+  // upsertTrackerEntriesSchema,
+} from "@api/schemas/tracker-entries";
+import { validateResponse } from "@api/utils/validate-response";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+
+const app = new OpenAPIHono<Context>();
+
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/",
+    summary: "List all tracker entries",
+    description: "List all tracker entries for the authenticated team.",
+    tags: ["Tracker"],
+    request: {
+      query: getTrackerRecordsByRangeSchema,
+    },
+    responses: {
+      200: {
+        description: "List all tracker entries for the authenticated team.",
+        content: {
+          "application/json": {
+            schema: trackerEntriesResponseSchema,
+          },
+        },
+      },
+    },
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+
+    const result = await getTrackerRecordsByRange(db, {
+      teamId,
+      ...c.req.valid("query"),
+    });
+
+    return c.json(validateResponse(result, trackerEntriesResponseSchema));
+  },
+);
+
+// app.openapi(
+//   createRoute({
+//     method: "post",
+//     path: "/",
+//     summary: "Create a tracker entry",
+//     description: "Create a tracker entry for the authenticated team.",
+//     tags: ["Tracker"],
+//     request: {
+//       body: {
+//         content: {
+//           "application/json": {
+//             schema: upsertTrackerEntriesSchema.omit({ id: true }),
+//           },
+//         },
+//       },
+//     },
+//     responses: {
+//       200: {
+//         description: "Tracker entry created successfully.",
+//         content: {
+//           "application/json": {
+//             schema: trackerEntryResponseSchema,
+//           },
+//         },
+//       },
+//     },
+//   }),
+//   async (c) => {
+//     const db = c.get("db");
+//     const teamId = c.get("teamId");
+//     const session = c.get("session");
+//     const { assignedId, ...rest } = c.req.valid("json");
+
+//     const result = await upsertTrackerEntries(db, {
+//       teamId,
+//       assignedId: assignedId ?? session.user.id,
+//       ...rest,
+//     });
+
+//     return c.json(validateResponse(result, trackerEntryResponseSchema));
+//   },
+// );
+
+app.openapi(
+  createRoute({
+    method: "delete",
+    path: "/{id}",
+    summary: "Delete a tracker entry",
+    description: "Delete a tracker entry for the authenticated team.",
+    tags: ["Tracker"],
+    request: {
+      params: deleteTrackerEntrySchema.pick({ id: true }),
+    },
+    responses: {
+      200: {
+        description: "Tracker entry deleted successfully.",
+        content: {
+          "application/json": {
+            schema: deleteTrackerEntrySchema,
+          },
+        },
+      },
+    },
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const { id } = c.req.valid("param");
+
+    const result = await deleteTrackerEntry(db, { teamId, id });
+
+    return c.json(validateResponse(result, deleteTrackerEntrySchema));
+  },
+);
+
+// app.openapi(
+//   createRoute({
+//     method: "patch",
+//     path: "/{id}",
+//     summary: "Update a tracker entry",
+//     description: "Update a tracker entry for the authenticated team.",
+//     tags: ["Tracker"],
+//     request: {
+//       params: deleteTrackerEntrySchema.pick({ id: true }),
+//       body: {
+//         content: {
+//           "application/json": {
+//             schema: upsertTrackerEntriesSchema.omit({ id: true }),
+//           },
+//         },
+//       },
+//     },
+//     responses: {
+//       200: {
+//         description: "Tracker entry updated successfully.",
+//         content: {
+//           "application/json": {
+//             schema: upsertTrackerEntriesSchema,
+//           },
+//         },
+//       },
+//     },
+//   }),
+//   async (c) => {
+//     const db = c.get("db");
+//     const teamId = c.get("teamId");
+//     const { id } = c.req.valid("param");
+
+//     const result = await upsertTrackerEntries(db, {
+//       id,
+//       teamId,
+//       ...c.req.valid("json"),
+//     });
+
+//     return c.json(validateResponse(result, upsertTrackerEntriesSchema));
+//   },
+// );
+
+export const trackerEntriesRouter = app;

@@ -14,7 +14,7 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 
 export const trackerProjectsRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(getTrackerProjectsSchema)
+    .input(getTrackerProjectsSchema.optional())
     .query(async ({ input, ctx: { db, teamId } }) => {
       return getTrackerProjects(db, {
         ...input,
@@ -33,8 +33,11 @@ export const trackerProjectsRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteTrackerProjectSchema)
-    .mutation(async ({ input, ctx: { db } }) => {
-      return deleteTrackerProject(db, input.id);
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      return deleteTrackerProject(db, {
+        ...input,
+        teamId: teamId!,
+      });
     }),
 
   getById: protectedProcedure

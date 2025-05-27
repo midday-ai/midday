@@ -48,10 +48,14 @@ export async function getMetrics(db: Database, params: GetMetricsParams) {
     return [prev, curr];
   });
 
-  const prevTotal =
-    prevData?.reduce((value, item) => item.value + value, 0) ?? 0;
-  const currentTotal =
-    currentData?.reduce((value, item) => item.value + value, 0) ?? 0;
+  const prevTotal = Number(
+    (prevData?.reduce((value, item) => item.value + value, 0) ?? 0).toFixed(2),
+  );
+  const currentTotal = Number(
+    (currentData?.reduce((value, item) => item.value + value, 0) ?? 0).toFixed(
+      2,
+    ),
+  );
 
   const baseCurrency = currentData?.at(0)?.currency ?? inputCurrency;
 
@@ -73,9 +77,9 @@ export async function getMetrics(db: Database, params: GetMetricsParams) {
       return {
         date: record.date,
         precentage: {
-          value: getPercentageIncrease(
-            Math.abs(prevValue),
-            Math.abs(recordValue),
+          value: Number(
+            getPercentageIncrease(Math.abs(prevValue), Math.abs(recordValue)) ||
+              0,
           ),
           status: recordValue > prevValue ? "positive" : "negative",
         },
@@ -143,10 +147,14 @@ export async function getExpenses(db: Database, params: GetExpensesParams) {
 
   const averageExpense =
     rawData && rawData.length > 0
-      ? rawData.reduce(
-          (sum, item) => sum + Number.parseFloat(item.value || "0"),
-          0,
-        ) / rawData.length
+      ? Number(
+          (
+            rawData.reduce(
+              (sum, item) => sum + Number.parseFloat(item.value || "0"),
+              0,
+            ) / rawData.length
+          ).toFixed(2),
+        )
       : 0;
 
   return {
@@ -159,16 +167,22 @@ export async function getExpenses(db: Database, params: GetExpensesParams) {
       currency: rawData?.at(0)?.currency ?? inputCurrency,
     },
     result: rawData?.map((item) => {
-      const value = Number.parseFloat(item.value || "0");
+      const value = Number.parseFloat(
+        Number.parseFloat(item.value || "0").toFixed(2),
+      );
       const recurring = Number.parseFloat(
-        item.recurring_value !== undefined ? String(item.recurring_value) : "0",
+        Number.parseFloat(
+          item.recurring_value !== undefined
+            ? String(item.recurring_value)
+            : "0",
+        ).toFixed(2),
       );
       return {
         date: item.date,
         value,
         currency: item.currency,
         recurring,
-        total: value + recurring,
+        total: Number((value + recurring).toFixed(2)),
       };
     }),
   };
@@ -200,7 +214,13 @@ export async function getSpending(
     sql`SELECT * FROM ${sql.raw("get_spending_v3")}(${teamId}, ${startOfMonth(parseISO(from)).toISOString()}, ${endOfMonth(parseISO(to)).toISOString()}, ${inputCurrency ?? null})`,
   )) as unknown as SpendingResultItem[];
 
-  return rawData ?? [];
+  return Array.isArray(rawData)
+    ? rawData.map((item) => ({
+        ...item,
+        amount: Number.parseFloat(Number(item.amount).toFixed(2)),
+        percentage: Number.parseFloat(Number(item.percentage).toFixed(2)),
+      }))
+    : [];
 }
 
 export type GetRunwayParams = {

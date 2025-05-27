@@ -1,10 +1,22 @@
 import type { Database } from "@api/db";
 import { customers, invoiceStatusEnum, invoices, teams } from "@api/db/schema";
 import { buildSearchQuery } from "@api/utils/search";
+import { generateToken } from "@midday/invoice/token";
 import type { EditorDoc, LineItem } from "@midday/invoice/types";
 import camelcaseKeys from "camelcase-keys";
 import { addMonths } from "date-fns";
-import { and, asc, desc, eq, gte, ilike, inArray, lte, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  lte,
+  or,
+  sql,
+} from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 
 export type Template = {
@@ -141,6 +153,7 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       topBlock: invoices.topBlock,
       bottomBlock: invoices.bottomBlock,
       customer: {
+        id: customers.id,
         name: customers.name,
         website: customers.website,
         email: customers.email,
@@ -209,7 +222,17 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
   };
 }
 
-export async function getInvoiceById(db: Database, id: string) {
+export type GetInvoiceByIdParams = {
+  id: string;
+  teamId?: string;
+};
+
+export async function getInvoiceById(
+  db: Database,
+  params: GetInvoiceByIdParams,
+) {
+  const { id, teamId } = params;
+
   const [result] = await db
     .select({
       id: invoices.id,
@@ -244,6 +267,7 @@ export async function getInvoiceById(db: Database, id: string) {
       topBlock: invoices.topBlock,
       bottomBlock: invoices.bottomBlock,
       customer: {
+        id: customers.id,
         name: customers.name,
         website: customers.website,
         email: customers.email,
@@ -256,7 +280,13 @@ export async function getInvoiceById(db: Database, id: string) {
     .from(invoices)
     .leftJoin(customers, eq(invoices.customerId, customers.id))
     .leftJoin(teams, eq(invoices.teamId, teams.id))
-    .where(eq(invoices.id, id));
+    .where(
+      and(
+        eq(invoices.id, id),
+        // This is when we use the token to get the invoice
+        teamId !== undefined ? eq(invoices.teamId, teamId) : undefined,
+      ),
+    );
 
   if (!result) {
     return null;
@@ -303,7 +333,7 @@ export async function getPaymentStatus(
   }
 
   return {
-    score: result.score,
+    score: Number(result.score),
     paymentStatus: result.payment_status,
   };
 }
@@ -415,7 +445,7 @@ type DraftInvoiceParams = {
   bottomBlock?: string | null;
   amount?: number | null;
   lineItems?: DraftInvoiceLineItemParams[];
-  token: string;
+  token?: string;
   teamId: string;
   userId: string;
 };
@@ -434,6 +464,8 @@ export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
     ...restInput
   } = params;
 
+  const useToken = token ?? (await generateToken(id!));
+
   const { paymentDetails: _, fromDetails: __, ...restTemplate } = template;
 
   const [result] = await db
@@ -442,7 +474,7 @@ export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
       id,
       teamId,
       userId,
-      token,
+      token: useToken,
       ...restInput,
       currency: template.currency?.toUpperCase(),
       template: restTemplate,
@@ -456,7 +488,7 @@ export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
       set: {
         teamId,
         userId,
-        token,
+        token: useToken,
         ...restInput,
         currency: template.currency?.toUpperCase(),
         template: camelcaseKeys(restTemplate, { deep: true }),
@@ -491,7 +523,7 @@ export async function getInvoiceSummary(
   const result = await db
     .select({
       currency: invoices.currency,
-      totalAmount: sql<number>`COALESCE(SUM(${invoices.amount}), 0)`,
+      totalAmount: sql<number>`COALESCE(SUM(${invoices.amount}), 0)::float`,
       invoiceCount: sql<number>`COUNT(*)::int`,
     })
     .from(invoices)
@@ -501,11 +533,26 @@ export async function getInvoiceSummary(
   return result;
 }
 
-export async function deleteInvoice(db: Database, id: string) {
+export type DeleteInvoiceParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function deleteInvoice(db: Database, params: DeleteInvoiceParams) {
+  const { id, teamId } = params;
+
   const [result] = await db
     .delete(invoices)
-    .where(eq(invoices.id, id))
-    .returning();
+    .where(
+      and(
+        eq(invoices.id, id),
+        eq(invoices.teamId, teamId),
+        and(or(eq(invoices.status, "draft"), eq(invoices.status, "canceled"))),
+      ),
+    )
+    .returning({
+      id: invoices.id,
+    });
 
   return result;
 }
@@ -589,15 +636,16 @@ export type UpdateInvoiceParams = {
   paidAt?: string | null;
   internalNote?: string | null;
   reminderSentAt?: string | null;
+  teamId: string;
 };
 
 export async function updateInvoice(db: Database, params: UpdateInvoiceParams) {
-  const { id, ...rest } = params;
+  const { id, teamId, ...rest } = params;
 
   const [result] = await db
     .update(invoices)
     .set(rest)
-    .where(eq(invoices.id, id))
+    .where(and(eq(invoices.id, id), eq(invoices.teamId, teamId)))
     .returning();
 
   return result;
