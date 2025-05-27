@@ -43,7 +43,10 @@ export const trackerEntriesRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteTrackerEntrySchema)
-    .mutation(async ({ ctx: { db }, input }) => {
-      return deleteTrackerEntry(db, input.id);
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return deleteTrackerEntry(db, {
+        teamId: teamId!,
+        id: input.id,
+      });
     }),
 });

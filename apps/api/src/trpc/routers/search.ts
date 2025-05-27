@@ -33,7 +33,7 @@ export const searchRouter = createTRPCRouter({
          *    intelligent result instead.
          */
         relevanceThreshold: shouldUseLLMFilters
-          ? 0.9
+          ? 0.01
           : input.relevanceThreshold,
       });
 

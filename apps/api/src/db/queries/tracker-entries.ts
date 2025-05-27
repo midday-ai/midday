@@ -130,18 +130,26 @@ export async function getTrackerRecordsByRange(
     orderBy: trackerEntries.createdAt,
   });
 
+  const dataWithProject = data.map((item) => ({
+    ...item,
+    project: item.trackerProject,
+  }));
+
   // Group entries by date
-  type EntryType = (typeof data)[number];
-  const result = data.reduce<Record<string, EntryType[]>>((acc, item) => {
-    if (item.date) {
-      const dateKey = item.date;
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
+  type EntryType = (typeof dataWithProject)[number];
+  const result = dataWithProject.reduce<Record<string, EntryType[]>>(
+    (acc, item) => {
+      if (item.date) {
+        const dateKey = item.date;
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+        acc[dateKey].push(item);
       }
-      acc[dateKey].push(item);
-    }
-    return acc;
-  }, {});
+      return acc;
+    },
+    {},
+  );
 
   // Calculate total duration
   const totalDuration = data.reduce(
@@ -173,7 +181,7 @@ export type UpsertTrackerEntriesParams = {
   start: string;
   stop: string;
   dates: string[];
-  assignedId: string;
+  assignedId?: string | null;
   projectId: string;
   description?: string | null;
   duration: number;
@@ -254,6 +262,23 @@ export async function upsertTrackerEntries(
   return result;
 }
 
-export async function deleteTrackerEntry(db: Database, id: string) {
-  return db.delete(trackerEntries).where(eq(trackerEntries.id, id)).returning();
+export type DeleteTrackerEntryParams = {
+  teamId: string;
+  id: string;
+};
+
+export async function deleteTrackerEntry(
+  db: Database,
+  params: DeleteTrackerEntryParams,
+) {
+  const { teamId, id } = params;
+
+  const [result] = await db
+    .delete(trackerEntries)
+    .where(and(eq(trackerEntries.id, id), eq(trackerEntries.teamId, teamId)))
+    .returning({
+      id: trackerEntries.id,
+    });
+
+  return result;
 }

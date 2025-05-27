@@ -97,9 +97,10 @@ export async function getTrackerProjects(
       totalDuration: sql<number>`total_duration(${trackerProjects})`.as(
         "total_duration",
       ),
-      totalAmount: sql<number>`get_project_total_amount(${trackerProjects})`.as(
-        "total_amount",
-      ),
+      totalAmount:
+        sql<number>`CAST(get_project_total_amount(${trackerProjects}) AS float)`.as(
+          "total_amount",
+        ),
       customer: {
         id: customers.id,
         name: customers.name,
@@ -209,7 +210,7 @@ export async function getTrackerProjects(
       .filter((pt) => pt.projectId === project.id)
       .map((pt) => ({
         id: pt.tagId,
-        tag: { id: pt.tagId, name: pt.tagName },
+        name: pt.tagName,
       }));
 
     const projectUsersList =
@@ -240,10 +241,20 @@ export async function getTrackerProjects(
   };
 }
 
-export async function deleteTrackerProject(db: Database, id: string) {
+export type DeleteTrackerProjectParams = {
+  teamId: string;
+  id: string;
+};
+
+export async function deleteTrackerProject(
+  db: Database,
+  params: DeleteTrackerProjectParams,
+) {
+  const { teamId, id } = params;
+
   const [result] = await db
     .delete(trackerProjects)
-    .where(eq(trackerProjects.id, id))
+    .where(and(eq(trackerProjects.id, id), eq(trackerProjects.teamId, teamId)))
     .returning({ id: trackerProjects.id })
     .execute();
 
@@ -298,7 +309,6 @@ export async function upsertTrackerProject(
       })
       .returning({
         id: trackerProjects.id,
-        name: trackerProjects.name,
       });
 
     if (!result) {
@@ -352,7 +362,10 @@ export async function upsertTrackerProject(
       }
     }
 
-    return result;
+    return getTrackerProjectById(db, {
+      teamId,
+      id: projectId,
+    });
   });
 }
 
@@ -384,9 +397,10 @@ export async function getTrackerProjectById(
       totalDuration: sql<number>`total_duration(${trackerProjects})`.as(
         "total_duration",
       ),
-      totalAmount: sql<number>`get_project_total_amount(${trackerProjects})`.as(
-        "total_amount",
-      ),
+      totalAmount:
+        sql<number>`CAST(get_project_total_amount(${trackerProjects}) AS float)`.as(
+          "total_amount",
+        ),
       customer: {
         id: customers.id,
         name: customers.name,

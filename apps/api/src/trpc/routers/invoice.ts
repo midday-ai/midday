@@ -94,8 +94,11 @@ export const invoiceRouter = createTRPCRouter({
 
   getById: protectedProcedure
     .input(getInvoiceByIdSchema)
-    .query(async ({ input, ctx: { db } }) => {
-      return getInvoiceById(db, input.id);
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      return getInvoiceById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
     }),
 
   getInvoiceByToken: publicProcedure
@@ -109,7 +112,9 @@ export const invoiceRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      return getInvoiceById(db, id);
+      return getInvoiceById(db, {
+        id,
+      });
     }),
 
   paymentStatus: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -126,7 +131,7 @@ export const invoiceRouter = createTRPCRouter({
     }),
 
   invoiceSummary: protectedProcedure
-    .input(invoiceSummarySchema)
+    .input(invoiceSummarySchema.optional())
     .query(async ({ ctx: { db, teamId }, input }) => {
       return getInvoiceSummary(db, {
         teamId: teamId!,
@@ -247,26 +252,29 @@ export const invoiceRouter = createTRPCRouter({
 
   update: protectedProcedure
     .input(updateInvoiceSchema)
-    .mutation(async ({ input, ctx: { db } }) => {
-      return updateInvoice(db, input);
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      return updateInvoice(db, {
+        ...input,
+        teamId: teamId!,
+      });
     }),
 
   delete: protectedProcedure
     .input(deleteInvoiceSchema)
-    .mutation(async ({ input, ctx: { db } }) => {
-      return deleteInvoice(db, input.id);
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      return deleteInvoice(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
     }),
 
   draft: protectedProcedure
     .input(draftInvoiceSchema)
     .mutation(async ({ input, ctx: { db, teamId, session } }) => {
-      const token = input.token ?? (await generateToken(input.id));
-
       return draftInvoice(db, {
         ...input,
         teamId: teamId!,
         userId: session?.user.id!,
-        token,
         paymentDetails: parseInputValue(input.paymentDetails),
         fromDetails: parseInputValue(input.fromDetails),
         customerDetails: parseInputValue(input.customerDetails),
@@ -276,11 +284,12 @@ export const invoiceRouter = createTRPCRouter({
 
   create: protectedProcedure
     .input(createInvoiceSchema)
-    .mutation(async ({ input, ctx: { db } }) => {
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
       // Update the invoice status to unpaid
       const data = await updateInvoice(db, {
         id: input.id,
         status: "unpaid",
+        teamId: teamId!,
       });
 
       if (!data) {
@@ -297,13 +306,14 @@ export const invoiceRouter = createTRPCRouter({
 
   remind: protectedProcedure
     .input(remindInvoiceSchema)
-    .mutation(async ({ input, ctx: { db } }) => {
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
       await tasks.trigger("send-invoice-reminder", {
         invoiceId: input.id,
       } satisfies SendInvoiceReminderPayload);
 
       return updateInvoice(db, {
         id: input.id,
+        teamId: teamId!,
         reminderSentAt: input.date,
       });
     }),
@@ -314,6 +324,7 @@ export const invoiceRouter = createTRPCRouter({
       const nextInvoiceNumber = await getNextInvoiceNumber(db, teamId!);
 
       const token = await generateToken(input.id);
+
       return duplicateInvoice(db, {
         id: input.id,
         token,

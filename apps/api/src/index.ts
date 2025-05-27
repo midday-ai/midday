@@ -1,7 +1,6 @@
 import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
-import { openAPISpecs } from "hono-openapi";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { routers } from "./rest/routers";
