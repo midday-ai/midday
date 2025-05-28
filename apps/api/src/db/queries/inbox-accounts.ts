@@ -1,6 +1,6 @@
 import type { Database } from "@api/db";
 import { inboxAccounts } from "@api/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export async function getInboxAccounts(db: Database, teamId: string) {
   return db
@@ -14,7 +14,15 @@ export async function getInboxAccounts(db: Database, teamId: string) {
     .where(eq(inboxAccounts.teamId, teamId));
 }
 
-export async function getInboxAccountById(db: Database, id: string) {
+type GetInboxAccountByIdParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function getInboxAccountById(
+  db: Database,
+  params: GetInboxAccountByIdParams,
+) {
   const [result] = await db
     .select({
       id: inboxAccounts.id,
@@ -26,15 +34,33 @@ export async function getInboxAccountById(db: Database, id: string) {
       lastAccessed: inboxAccounts.lastAccessed,
     })
     .from(inboxAccounts)
-    .where(eq(inboxAccounts.id, id));
+    .where(
+      and(
+        eq(inboxAccounts.id, params.id),
+        eq(inboxAccounts.teamId, params.teamId),
+      ),
+    );
 
   return result;
 }
 
-export async function deleteInboxAccount(db: Database, id: string) {
+type DeleteInboxAccountParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function deleteInboxAccount(
+  db: Database,
+  params: DeleteInboxAccountParams,
+) {
   const [deleted] = await db
     .delete(inboxAccounts)
-    .where(eq(inboxAccounts.id, id))
+    .where(
+      and(
+        eq(inboxAccounts.id, params.id),
+        eq(inboxAccounts.teamId, params.teamId),
+      ),
+    )
     .returning({
       id: inboxAccounts.id,
       scheduleId: inboxAccounts.scheduleId,

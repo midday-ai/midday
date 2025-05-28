@@ -97,7 +97,7 @@ export const transactionsRouter = createTRPCRouter({
     .mutation(async ({ input, ctx: { db, teamId } }) => {
       return updateSimilarTransactionsRecurring(db, {
         ...input,
-        team_id: teamId!,
+        teamId: teamId!,
       });
     }),
 

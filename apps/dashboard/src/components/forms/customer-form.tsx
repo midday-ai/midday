@@ -195,7 +195,7 @@ export function CustomerForm({ data }: Props) {
             id: tag.id,
             name: tag.value,
           }))
-        : null,
+        : undefined,
       countryCode: data.countryCode || null,
     };
 

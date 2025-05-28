@@ -27,6 +27,7 @@ export const createDocumentTagAssignment = async (
 export type DeleteDocumentTagAssignmentParams = {
   documentId: string;
   tagId: string;
+  teamId: string;
 };
 
 export const deleteDocumentTagAssignment = async (
@@ -39,6 +40,7 @@ export const deleteDocumentTagAssignment = async (
       and(
         eq(documentTagAssignments.documentId, params.documentId),
         eq(documentTagAssignments.tagId, params.tagId),
+        eq(documentTagAssignments.teamId, params.teamId),
       ),
     )
     .returning();

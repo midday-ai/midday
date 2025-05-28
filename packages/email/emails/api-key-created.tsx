@@ -29,7 +29,7 @@ export const ApiKeyCreatedEmail = ({
   ip = "204.13.186.218",
 }: Props) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName},\n\nYou've created a new API key with the name "${keyName}" on ${format(createdAt, "MMM d, yyyy")}. If this was not you, please contact support immediately.\n\nBest,\nThe Midday Team`;
+  const text = `Hi ${firstName},\n\nYou've created a new API key with the name "${keyName}" on ${format(new Date(createdAt), "MMM d, yyyy")}. If this was not you, please contact support immediately.\n\nBest,\nThe Midday Team`;
 
   return (
     <Html>
@@ -75,7 +75,7 @@ export const ApiKeyCreatedEmail = ({
             <Text className="text-[#121212]">
               You've created a new API key with the name{" "}
               <strong>{keyName}</strong> on{" "}
-              <strong>{format(createdAt, "MMM d, yyyy")}</strong>.
+              <strong>{format(new Date(createdAt), "MMM d, yyyy")}</strong>.
               <br />
             </Text>
 

@@ -1,6 +1,6 @@
 import type { Database } from "@api/db";
 import { bankAccounts, bankConnections } from "@api/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export type GetBankConnectionsParams = {
   teamId: string;
@@ -47,10 +47,20 @@ export const getBankConnections = async (
   });
 };
 
-export const deleteBankConnection = async (db: Database, id: string) => {
+type DeleteBankConnectionParams = {
+  id: string;
+  teamId: string;
+};
+
+export const deleteBankConnection = async (
+  db: Database,
+  params: DeleteBankConnectionParams,
+) => {
+  const { id, teamId } = params;
+
   const [result] = await db
     .delete(bankConnections)
-    .where(eq(bankConnections.id, id))
+    .where(and(eq(bankConnections.id, id), eq(bankConnections.teamId, teamId)))
     .returning({
       referenceId: bankConnections.referenceId,
       provider: bankConnections.provider,

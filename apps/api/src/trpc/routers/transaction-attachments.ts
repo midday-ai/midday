@@ -20,7 +20,10 @@ export const transactionAttachmentsRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteAttachmentSchema)
-    .mutation(async ({ input, ctx: { db } }) => {
-      return deleteAttachment(db, input.id);
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      return deleteAttachment(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
     }),
 });

@@ -52,8 +52,11 @@ export const bankConnectionsRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteBankConnectionSchema)
-    .mutation(async ({ input, ctx: { db } }) => {
-      const data = await deleteBankConnection(db, input.id);
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      const data = await deleteBankConnection(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
 
       if (!data) {
         throw new Error("Bank connection not found");

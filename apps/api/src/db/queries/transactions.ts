@@ -914,14 +914,14 @@ export async function updateSimilarTransactionsCategory(
 
 type UpdateSimilarTransactionsRecurringParams = {
   id: string;
-  team_id: string;
+  teamId: string;
 };
 
 export async function updateSimilarTransactionsRecurring(
   db: Database,
   params: UpdateSimilarTransactionsRecurringParams,
 ) {
-  const { id, team_id } = params;
+  const { id, teamId } = params;
 
   const [result] = await db
     .select({
@@ -930,7 +930,7 @@ export async function updateSimilarTransactionsRecurring(
       frequency: transactions.frequency,
     })
     .from(transactions)
-    .where(and(eq(transactions.id, id), eq(transactions.teamId, team_id)))
+    .where(and(eq(transactions.id, id), eq(transactions.teamId, teamId)))
     .limit(1);
 
   if (!result) {
@@ -949,7 +949,7 @@ export async function updateSimilarTransactionsRecurring(
     })
     .where(
       and(
-        eq(transactions.teamId, team_id),
+        eq(transactions.teamId, teamId),
         sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
         ne(transactions.id, id),
       ),
@@ -960,7 +960,7 @@ export async function updateSimilarTransactionsRecurring(
 
   // Get full transaction data for each updated transaction
   const fullTransactions = await Promise.all(
-    results.map((result) => getFullTransactionData(db, result.id, team_id)),
+    results.map((result) => getFullTransactionData(db, result.id, teamId)),
   );
 
   // Filter out any null results

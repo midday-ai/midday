@@ -93,6 +93,7 @@ export const createTransactionCategories = async (
 
 export type UpdateTransactionCategoryParams = {
   id: string;
+  teamId: string;
   name?: string;
   color?: string | null;
   description?: string | null;
@@ -103,23 +104,37 @@ export const updateTransactionCategory = async (
   db: Database,
   params: UpdateTransactionCategoryParams,
 ) => {
-  const { id, ...updates } = params;
+  const { id, teamId, ...updates } = params;
 
   const [result] = await db
     .update(transactionCategories)
     .set(updates)
-    .where(eq(transactionCategories.id, id))
+    .where(
+      and(
+        eq(transactionCategories.id, id),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
     .returning();
 
   return result;
 };
 
-export const deleteTransactionCategory = async (db: Database, id: string) => {
+export type DeleteTransactionCategoryParams = {
+  id: string;
+  teamId: string;
+};
+
+export const deleteTransactionCategory = async (
+  db: Database,
+  params: DeleteTransactionCategoryParams,
+) => {
   const [result] = await db
     .delete(transactionCategories)
     .where(
       and(
-        eq(transactionCategories.id, id),
+        eq(transactionCategories.id, params.id),
+        eq(transactionCategories.teamId, params.teamId),
         eq(transactionCategories.system, false),
       ),
     )

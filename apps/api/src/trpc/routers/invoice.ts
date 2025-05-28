@@ -330,6 +330,7 @@ export const invoiceRouter = createTRPCRouter({
         token,
         userId: session?.user.id!,
         invoiceNumber: nextInvoiceNumber!,
+        teamId: teamId!,
       });
     }),
 });

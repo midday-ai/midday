@@ -368,7 +368,7 @@ export const upsertCustomer = async (
         `.as("tags"),
       })
       .from(customers)
-      .where(eq(customers.id, customerId))
+      .where(and(eq(customers.id, customerId), eq(customers.teamId, teamId)))
       .leftJoin(customerTags, eq(customerTags.customerId, customers.id))
       .leftJoin(tags, eq(tags.id, customerTags.tagId))
       .groupBy(customers.id);

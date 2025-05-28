@@ -25,8 +25,11 @@ export const inboxAccountsRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteInboxAccountSchema)
-    .mutation(async ({ ctx: { db }, input }) => {
-      const data = await deleteInboxAccount(db, input.id);
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      const data = await deleteInboxAccount(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
 
       if (data?.scheduleId) {
         await schedules.deactivate(data.scheduleId);
