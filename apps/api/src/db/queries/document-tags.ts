@@ -1,6 +1,6 @@
 import type { Database } from "@api/db";
 import { documentTags } from "@api/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export const getDocumentTags = async (db: Database, teamId: string) => {
   return db.query.documentTags.findMany({
@@ -41,12 +41,18 @@ export const createDocumentTag = async (
 
 export type DeleteDocumentTagParams = {
   id: string;
+  teamId: string;
 };
 
-export const deleteDocumentTag = async (db: Database, id: string) => {
+export const deleteDocumentTag = async (
+  db: Database,
+  params: DeleteDocumentTagParams,
+) => {
+  const { id, teamId } = params;
+
   const [result] = await db
     .delete(documentTags)
-    .where(eq(documentTags.id, id))
+    .where(and(eq(documentTags.id, id), eq(documentTags.teamId, teamId)))
     .returning({
       id: documentTags.id,
     });

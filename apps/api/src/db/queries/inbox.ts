@@ -247,7 +247,7 @@ export async function updateInbox(db: Database, params: UpdateInboxParams) {
     })
     .from(inbox)
     .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
-    .where(eq(inbox.id, id))
+    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
 
   return result;
@@ -275,7 +275,7 @@ export async function matchTransaction(
       fileName: inbox.fileName,
     })
     .from(inbox)
-    .where(eq(inbox.id, id))
+    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
 
   if (!result) return null;
@@ -302,7 +302,7 @@ export async function matchTransaction(
         transactionId: transactionId,
         status: "done",
       })
-      .where(eq(inbox.id, id));
+      .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)));
   }
 
   // Return updated inbox with transaction data
@@ -331,11 +331,21 @@ export async function matchTransaction(
     })
     .from(inbox)
     .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
-    .where(eq(inbox.id, id))
+    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
 }
 
-export async function unmatchTransaction(db: Database, id: string) {
+export type UnmatchTransactionParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function unmatchTransaction(
+  db: Database,
+  params: UnmatchTransactionParams,
+) {
+  const { id, teamId } = params;
+
   // Get inbox data
   const [result] = await db
     .select({
@@ -344,7 +354,7 @@ export async function unmatchTransaction(db: Database, id: string) {
       attachmentId: inbox.attachmentId,
     })
     .from(inbox)
-    .where(eq(inbox.id, id))
+    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
 
   // Update inbox record
@@ -355,13 +365,18 @@ export async function unmatchTransaction(db: Database, id: string) {
       attachmentId: null,
       status: "pending",
     })
-    .where(eq(inbox.id, id));
+    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)));
 
   // Delete transaction attachment if exists
   if (result?.transactionId) {
     await db
       .delete(transactionAttachments)
-      .where(eq(transactionAttachments.transactionId, result.transactionId));
+      .where(
+        and(
+          eq(transactionAttachments.transactionId, result.transactionId),
+          eq(transactionAttachments.teamId, teamId),
+        ),
+      );
   }
 
   // Return updated inbox with transaction data
@@ -390,6 +405,6 @@ export async function unmatchTransaction(db: Database, id: string) {
     })
     .from(inbox)
     .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
-    .where(eq(inbox.id, id))
+    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
 }

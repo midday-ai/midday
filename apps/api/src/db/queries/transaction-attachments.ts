@@ -1,6 +1,6 @@
 import type { Database } from "@api/db";
 import { inbox, transactionAttachments } from "@api/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export type Attachment = {
   type: string;
@@ -32,7 +32,15 @@ export async function createAttachments(
     .returning();
 }
 
-export async function deleteAttachment(db: Database, id: string) {
+type DeleteAttachmentParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function deleteAttachment(
+  db: Database,
+  params: DeleteAttachmentParams,
+) {
   // First get the attachment to delete
   const [result] = await db
     .select({
@@ -42,7 +50,12 @@ export async function deleteAttachment(db: Database, id: string) {
       teamId: transactionAttachments.teamId,
     })
     .from(transactionAttachments)
-    .where(eq(transactionAttachments.id, id));
+    .where(
+      and(
+        eq(transactionAttachments.id, params.id),
+        eq(transactionAttachments.teamId, params.teamId),
+      ),
+    );
 
   if (!result) {
     throw new Error("Attachment not found");
@@ -59,5 +72,10 @@ export async function deleteAttachment(db: Database, id: string) {
   // Delete the attachment
   return db
     .delete(transactionAttachments)
-    .where(eq(transactionAttachments.id, id));
+    .where(
+      and(
+        eq(transactionAttachments.id, params.id),
+        eq(transactionAttachments.teamId, params.teamId),
+      ),
+    );
 }

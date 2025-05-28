@@ -91,7 +91,10 @@ export const inboxRouter = createTRPCRouter({
 
   unmatchTransaction: protectedProcedure
     .input(unmatchTransactionSchema)
-    .mutation(async ({ ctx: { db }, input }) => {
-      return unmatchTransaction(db, input.id);
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return unmatchTransaction(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
     }),
 });

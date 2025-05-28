@@ -57,13 +57,19 @@ export const transactionCategoriesRouter = createTRPCRouter({
 
   update: protectedProcedure
     .input(updateTransactionCategorySchema)
-    .mutation(async ({ input, ctx: { db } }) => {
-      return updateTransactionCategory(db, input);
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      return updateTransactionCategory(db, {
+        ...input,
+        teamId: teamId!,
+      });
     }),
 
   delete: protectedProcedure
     .input(deleteTransactionCategorySchema)
-    .mutation(async ({ input, ctx: { db } }) => {
-      return deleteTransactionCategory(db, input.id);
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      return deleteTransactionCategory(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
     }),
 });

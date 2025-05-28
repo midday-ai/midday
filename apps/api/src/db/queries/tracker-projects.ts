@@ -304,7 +304,10 @@ export async function upsertTrackerProject(
               : undefined,
         },
         where: projectData.id
-          ? eq(trackerProjects.id, projectData.id)
+          ? and(
+              eq(trackerProjects.id, projectData.id),
+              eq(trackerProjects.teamId, teamId),
+            )
           : undefined,
       })
       .returning({

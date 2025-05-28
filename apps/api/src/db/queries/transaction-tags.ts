@@ -25,13 +25,14 @@ export async function createTransactionTag(
 type DeleteTransactionTagParams = {
   transactionId: string;
   tagId: string;
+  teamId: string;
 };
 
 export async function deleteTransactionTag(
   db: Database,
   params: DeleteTransactionTagParams,
 ) {
-  const { transactionId, tagId } = params;
+  const { transactionId, tagId, teamId } = params;
 
   return db
     .delete(transactionTags)
@@ -39,6 +40,7 @@ export async function deleteTransactionTag(
       and(
         eq(transactionTags.transactionId, transactionId),
         eq(transactionTags.tagId, tagId),
+        eq(transactionTags.teamId, teamId),
       ),
     );
 }

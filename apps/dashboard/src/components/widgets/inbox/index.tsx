@@ -23,7 +23,7 @@ export function Inbox({ disabled }: Props) {
         <Suspense
           fallback={<InboxListSkeleton numberOfItems={5} className="pt-8" />}
         >
-          <InboxWidget filter={filter} />
+          <InboxWidget />
         </Suspense>
       </ErrorBoundary>
     </div>

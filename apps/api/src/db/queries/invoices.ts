@@ -562,13 +562,14 @@ export type DuplicateInvoiceParams = {
   token: string;
   userId: string;
   invoiceNumber: string;
+  teamId: string;
 };
 
 export async function duplicateInvoice(
   db: Database,
   params: DuplicateInvoiceParams,
 ) {
-  const { id, token, userId, invoiceNumber } = params;
+  const { id, token, userId, invoiceNumber, teamId } = params;
 
   // 1. Fetch the invoice that needs to be duplicated
   const [invoice] = await db
@@ -591,7 +592,7 @@ export async function duplicateInvoice(
       lineItems: invoices.lineItems,
     })
     .from(invoices)
-    .where(eq(invoices.id, id));
+    .where(and(eq(invoices.id, id), eq(invoices.teamId, teamId)));
 
   if (!invoice) {
     throw new Error("Invoice not found");

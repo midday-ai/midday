@@ -43,7 +43,10 @@ export const documentTagsRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteDocumentTagSchema)
-    .mutation(async ({ ctx: { db }, input }) => {
-      return deleteDocumentTag(db, input.id);
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return deleteDocumentTag(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
     }),
 });
