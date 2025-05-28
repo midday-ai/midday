@@ -9,7 +9,9 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "test:watch": "bun test --watch"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.22",
