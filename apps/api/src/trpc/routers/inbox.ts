@@ -23,7 +23,7 @@ import { tasks } from "@trigger.dev/sdk/v3";
 
 export const inboxRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(getInboxSchema)
+    .input(getInboxSchema.optional())
     .query(async ({ ctx: { db, teamId }, input }) => {
       return getInbox(db, {
         teamId: teamId!,

@@ -17,6 +17,7 @@ import {
 } from "@api/schemas/tracker-entries";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
 
@@ -40,6 +41,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("tracker-entries.read")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -117,6 +119,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("tracker-entries.write")],
   }),
   async (c) => {
     const db = c.get("db");

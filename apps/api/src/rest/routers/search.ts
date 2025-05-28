@@ -3,6 +3,7 @@ import type { Context } from "@api/rest/types";
 import { globalSearchSchema, searchResponseSchema } from "@api/schemas/search";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
 
@@ -27,6 +28,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("search.read")],
   }),
   async (c) => {
     const db = c.get("db");

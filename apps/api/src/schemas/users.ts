@@ -2,13 +2,16 @@ import { z } from "@hono/zod-openapi";
 
 export const updateUserSchema = z.object({
   fullName: z.string().min(2).max(32).optional().openapi({
-    description: "The user's full name. Minimum 2, maximum 32 characters.",
+    description: "Full name of the user. Must be between 2 and 32 characters",
+    example: "Jane Doe",
   }),
   teamId: z.string().optional().openapi({
-    description: "The ID of the team the user belongs to.",
+    description: "Unique identifier of the team the user belongs to",
+    example: "team-abc123",
   }),
   email: z.string().email().optional().openapi({
-    description: "The user's email address.",
+    description: "Email address of the user",
+    example: "jane.doe@acme.com",
   }),
   avatarUrl: z
     .string()
@@ -19,60 +22,72 @@ export const updateUserSchema = z.object({
     .optional()
     .openapi({
       description:
-        "URL to the user's avatar image. Must be a midday.ai domain URL.",
+        "URL to the user's avatar image. Must be hosted on midday.ai domain",
+      example: "https://cdn.midday.ai/avatars/jane-doe.jpg",
     }),
   locale: z.string().optional().openapi({
-    description: "The user's locale (e.g., en-US, fr-FR).",
+    description:
+      "User's preferred locale for internationalization (language and region)",
+    example: "en-US",
   }),
   weekStartsOnMonday: z.boolean().optional().openapi({
-    description: "Whether the user's week starts on Monday.",
+    description:
+      "Whether the user's calendar week starts on Monday (true) or Sunday (false)",
+    example: true,
   }),
   timezone: z.string().optional().openapi({
-    description: "The user's timezone (e.g., 'America/New_York').",
+    description: "User's timezone identifier in IANA Time Zone Database format",
+    example: "America/New_York",
   }),
   timeFormat: z.number().optional().openapi({
-    description: "The user's preferred time format (e.g., 12 or 24).",
+    description:
+      "User's preferred time format: 12 for 12-hour format, 24 for 24-hour format",
+    example: 24,
   }),
   dateFormat: z
     .enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"])
     .optional()
     .openapi({
       description:
-        "The user's preferred date format. One of: 'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd', 'dd.MM.yyyy'.",
+        "User's preferred date format. Available options: 'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd', 'dd.MM.yyyy'",
+      example: "yyyy-MM-dd",
     }),
 });
 
 export const userSchema = z.object({
   id: z.string().uuid().openapi({
-    description: "The user's ID.",
+    description: "Unique identifier of the user",
     example: "123e4567-e89b-12d3-a456-426614174000",
   }),
   fullName: z.string().openapi({
-    description: "The user's full name.",
+    description: "Full name of the user",
     example: "Jane Doe",
   }),
   email: z.string().email().openapi({
-    description: "The user's email address.",
-    example: "jane.doe@example.com",
+    description: "Email address of the user",
+    example: "jane.doe@acme.com",
   }),
   avatarUrl: z.string().url().nullable().openapi({
-    description: "URL to the user's avatar image.",
-    example: "https://cdn.midday.ai/avatar.jpg",
+    description: "URL to the user's avatar image",
+    example: "https://cdn.midday.ai/avatars/jane-doe.jpg",
   }),
   locale: z.string().nullable().openapi({
-    description: "The user's locale (e.g., en-US, fr-FR).",
+    description:
+      "User's preferred locale for internationalization (language and region)",
     example: "en-US",
   }),
   weekStartsOnMonday: z.boolean().nullable().openapi({
-    description: "Whether the user's week starts on Monday.",
+    description:
+      "Whether the user's calendar week starts on Monday (true) or Sunday (false)",
     example: true,
   }),
   timezone: z.string().nullable().openapi({
-    description: "The user's timezone (e.g., 'America/New_York').",
+    description: "User's timezone identifier in IANA Time Zone Database format",
     example: "America/New_York",
   }),
   timeFormat: z.number().nullable().openapi({
-    description: "The user's preferred time format (e.g., 12 or 24).",
+    description:
+      "User's preferred time format: 12 for 12-hour format, 24 for 24-hour format",
     example: 24,
   }),
   dateFormat: z
@@ -80,27 +95,30 @@ export const userSchema = z.object({
     .nullable()
     .openapi({
       description:
-        "The user's preferred date format. One of: 'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd', 'dd.MM.yyyy'.",
+        "User's preferred date format. Available options: 'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd', 'dd.MM.yyyy'",
       example: "yyyy-MM-dd",
     }),
   team: z
     .object({
       id: z.string().uuid().openapi({
-        description: "The team's ID.",
+        description: "Unique identifier of the team",
         example: "123e4567-e89b-12d3-a456-426614174000",
       }),
       name: z.string().openapi({
-        description: "The team's name.",
-        example: "Acme Corp",
+        description: "Name of the team or organization",
+        example: "Acme Corporation",
       }),
       logoUrl: z.string().url().openapi({
-        description: "The team's logo URL.",
-        example: "https://cdn.midday.ai/logo.png",
+        description: "URL to the team's logo image",
+        example: "https://cdn.midday.ai/logos/acme-corp.png",
       }),
       plan: z.string().openapi({
-        description: "The team's subscription plan.",
+        description: "Current subscription plan of the team",
         example: "pro",
       }),
     })
-    .nullable(),
+    .nullable()
+    .openapi({
+      description: "Team information that the user belongs to",
+    }),
 });

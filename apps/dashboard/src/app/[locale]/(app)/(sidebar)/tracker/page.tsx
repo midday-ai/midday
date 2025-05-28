@@ -25,7 +25,7 @@ export default async function Page(props: Props) {
 
   prefetch(
     trpc.trackerProjects.get.infiniteQueryOptions({
-      filter,
+      ...filter,
       sort,
     }),
   );

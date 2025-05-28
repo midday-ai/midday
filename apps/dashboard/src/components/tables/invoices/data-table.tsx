@@ -46,9 +46,7 @@ export function DataTable({
   const infiniteQueryOptions = trpc.invoice.get.infiniteQueryOptions(
     {
       sort: params.sort,
-      filter: {
-        ...filter,
-      },
+      ...filter,
     },
     {
       getNextPageParam: ({ meta }) => meta?.cursor,

@@ -1,4 +1,7 @@
-import { ApiKeys } from "@/components/api-keys";
+import { DeleteApiKeyModal } from "@/components/modals/delete-api-key-modal";
+import { EditApiKeyModal } from "@/components/modals/edit-api-key-modal";
+import { DataTable } from "@/components/tables/api-keys";
+import { prefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -6,5 +9,13 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  return <ApiKeys />;
+  prefetch(trpc.apiKeys.get.queryOptions());
+
+  return (
+    <>
+      <DataTable />
+      <EditApiKeyModal />
+      <DeleteApiKeyModal />
+    </>
+  );
 }

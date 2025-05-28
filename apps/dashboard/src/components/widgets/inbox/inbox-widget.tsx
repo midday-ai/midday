@@ -5,14 +5,9 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { getInboxEmail } from "@midday/inbox";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import type { InboxOption } from "./data";
 import { InboxList } from "./inbox-list";
 
-type Props = {
-  filter: InboxOption;
-};
-
-export function InboxWidget({ filter }: Props) {
+export function InboxWidget() {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const { data } = useSuspenseQuery(trpc.inbox.get.queryOptions());

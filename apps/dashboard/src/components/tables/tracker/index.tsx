@@ -23,10 +23,8 @@ export function DataTable() {
 
   const infiniteQueryOptions = trpc.trackerProjects.get.infiniteQueryOptions(
     {
-      filter: {
-        ...filter,
-        q: deferredSearch ?? null,
-      },
+      ...filter,
+      q: deferredSearch ?? null,
       sort: params.sort,
     },
     {

@@ -15,6 +15,7 @@ import {
 } from "@api/schemas/tags";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
 
@@ -35,6 +36,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("tags.read")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -73,6 +75,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("tags.read")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -111,6 +114,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("tags.write")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -150,6 +154,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("tags.write")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -182,6 +187,7 @@ app.openapi(
         description: "Tag deleted",
       },
     },
+    middleware: [withRequiredScope("tags.write")],
   }),
   async (c) => {
     const db = c.get("db");

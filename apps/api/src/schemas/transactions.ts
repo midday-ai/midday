@@ -7,7 +7,8 @@ export const getTransactionsSchema = z.object({
     .optional()
     .openapi({
       description:
-        "A cursor for pagination, representing the last item from the previous page.",
+        "Cursor for pagination, representing the last item from the previous page",
+      example: "eyJpZCI6IjEyMyJ9",
       param: {
         in: "query",
       },
@@ -18,7 +19,8 @@ export const getTransactionsSchema = z.object({
     .optional()
     .openapi({
       description:
-        "Sorting order as a tuple: [field, direction]. Example: ['date', 'desc'].",
+        "Sorting order as a tuple: [field, direction]. Example: ['date', 'desc'] or ['amount', 'asc']",
+      example: ["date", "desc"],
       param: {
         in: "query",
       },
@@ -29,7 +31,8 @@ export const getTransactionsSchema = z.object({
     .max(10000)
     .optional()
     .openapi({
-      description: "Number of transactions to return per page (1-100).",
+      description: "Number of transactions to return per page (1-10000)",
+      example: 50,
       param: {
         in: "query",
       },
@@ -40,7 +43,9 @@ export const getTransactionsSchema = z.object({
     .nullable()
     .optional()
     .openapi({
-      description: "Search query string to filter transactions by text.",
+      description:
+        "Search query string to filter transactions by name, description, or other text fields",
+      example: "office supplies",
       param: {
         in: "query",
       },
@@ -50,7 +55,9 @@ export const getTransactionsSchema = z.object({
     .nullable()
     .optional()
     .openapi({
-      description: "List of category slugs to filter transactions.",
+      description:
+        "Array of category slugs to filter transactions by specific categories",
+      example: ["office-supplies", "travel"],
       param: {
         in: "query",
       },
@@ -60,7 +67,8 @@ export const getTransactionsSchema = z.object({
     .nullable()
     .optional()
     .openapi({
-      description: "List of tag IDs to filter transactions.",
+      description: "Array of tag IDs to filter transactions by specific tags",
+      example: ["tag-1", "tag-2"],
       param: {
         in: "query",
       },
@@ -71,7 +79,8 @@ export const getTransactionsSchema = z.object({
     .optional()
     .openapi({
       description:
-        "Start date (inclusive) for filtering transactions, in ISO 8601 format.",
+        "Start date (inclusive) for filtering transactions in ISO 8601 format",
+      example: "2024-04-01T00:00:00.000Z",
       param: {
         in: "query",
       },
@@ -82,7 +91,8 @@ export const getTransactionsSchema = z.object({
     .optional()
     .openapi({
       description:
-        "End date (inclusive) for filtering transactions, in ISO 8601 format.",
+        "End date (inclusive) for filtering transactions in ISO 8601 format",
+      example: "2024-04-30T23:59:59.999Z",
       param: {
         in: "query",
       },
@@ -92,7 +102,9 @@ export const getTransactionsSchema = z.object({
     .nullable()
     .optional()
     .openapi({
-      description: "List of account IDs to filter transactions.",
+      description:
+        "Array of bank account IDs to filter transactions by specific accounts",
+      example: ["account-1", "account-2"],
       param: {
         in: "query",
       },
@@ -102,7 +114,8 @@ export const getTransactionsSchema = z.object({
     .nullable()
     .optional()
     .openapi({
-      description: "List of user IDs assigned to transactions.",
+      description: "Array of user IDs to filter transactions by assigned users",
+      example: ["user-1", "user-2"],
       param: {
         in: "query",
       },
@@ -113,7 +126,8 @@ export const getTransactionsSchema = z.object({
     .optional()
     .openapi({
       description:
-        "List of transaction statuses to filter by (e.g., 'pending', 'completed').",
+        "Array of transaction statuses to filter by. Available statuses: 'pending', 'completed', 'archived', 'posted', 'excluded'",
+      example: ["pending", "completed"],
       param: {
         in: "query",
       },
@@ -124,7 +138,8 @@ export const getTransactionsSchema = z.object({
     .optional()
     .openapi({
       description:
-        "List of recurring frequency values to filter by (e.g., 'monthly').",
+        "Array of recurring frequency values to filter by. Available frequencies: 'weekly', 'monthly', 'annually', 'irregular'",
+      example: ["monthly", "annually"],
       param: {
         in: "query",
       },
@@ -135,7 +150,8 @@ export const getTransactionsSchema = z.object({
     .optional()
     .openapi({
       description:
-        "Whether to include or exclude transactions with attachments.",
+        "Filter transactions based on attachment presence. 'include' returns only transactions with attachments, 'exclude' returns only transactions without attachments",
+      example: "include",
       param: {
         in: "query",
       },
@@ -146,7 +162,8 @@ export const getTransactionsSchema = z.object({
     .optional()
     .openapi({
       description:
-        "Amount range as [min, max] to filter transactions by value.",
+        "Amount range as [min, max] to filter transactions by monetary value",
+      example: [100, 1000],
       param: {
         in: "query",
       },
@@ -157,7 +174,8 @@ export const getTransactionsSchema = z.object({
     .optional()
     .openapi({
       description:
-        "List of specific amounts (as strings) to filter transactions.",
+        "Array of specific amounts (as strings) to filter transactions by exact values",
+      example: ["150.75", "299.99"],
       param: {
         in: "query",
       },
@@ -167,7 +185,9 @@ export const getTransactionsSchema = z.object({
     .nullable()
     .optional()
     .openapi({
-      description: "Transaction type: 'income' or 'expense'.",
+      description:
+        "Transaction type to filter by. 'income' for money received, 'expense' for money spent",
+      example: "expense",
       param: {
         in: "query",
       },
@@ -177,47 +197,49 @@ export const getTransactionsSchema = z.object({
 export const transactionResponseSchema = z
   .object({
     id: z.string().uuid().openapi({
-      description: "The unique identifier of the transaction.",
+      description: "Unique identifier of the transaction",
       example: "b3b7c8e2-1f2a-4c3d-9e4f-5a6b7c8d9e0f",
     }),
     name: z.string().openapi({
-      description: "The name or description of the transaction.",
+      description: "Name or description of the transaction",
       example: "Office Supplies Purchase",
     }),
     amount: z.number().openapi({
-      description: "The amount of the transaction.",
+      description: "Monetary amount of the transaction",
       example: 150.75,
     }),
     currency: z.string().openapi({
-      description: "The currency code of the transaction.",
+      description: "Currency code of the transaction in ISO 4217 format",
       example: "USD",
     }),
     date: z.string().openapi({
-      description: "The date of the transaction in ISO 8601 format.",
-      example: "2024-05-01T12:00:00Z",
+      description: "Date and time of the transaction in ISO 8601 format",
+      example: "2024-05-01T12:00:00.000Z",
     }),
     category: z
       .object({
         id: z.string().openapi({
-          description: "The unique identifier of the category.",
+          description: "Unique identifier of the category",
           example: "office-supplies",
         }),
         name: z.string().openapi({
-          description: "The display name of the category.",
+          description: "Display name of the category",
           example: "Office Supplies",
         }),
         color: z.string().openapi({
-          description: "The color associated with the category.",
+          description:
+            "Hex color code associated with the category for UI display",
           example: "#FF5733",
         }),
         slug: z.string().openapi({
-          description: "The slug of the category.",
+          description: "URL-friendly slug of the category",
           example: "office-supplies",
         }),
       })
       .nullable()
       .openapi({
-        description: "The category assigned to the transaction.",
+        description:
+          "Category information assigned to the transaction for organization",
         example: {
           id: "office-supplies",
           name: "Office Supplies",
@@ -226,82 +248,84 @@ export const transactionResponseSchema = z
         },
       }),
     status: z.string().openapi({
-      description: "The status of the transaction.",
+      description: "Current status of the transaction",
       example: "completed",
     }),
     internal: z.boolean().nullable().openapi({
-      description: "Whether the transaction is internal.",
+      description: "Whether the transaction is internal (between own accounts)",
       example: false,
     }),
     recurring: z.boolean().nullable().openapi({
-      description: "Whether the transaction is recurring.",
+      description: "Whether the transaction is part of a recurring series",
       example: false,
     }),
     manual: z.boolean().nullable().openapi({
       description:
-        "Whether the transaction was created manually (API/Form) rather than via bank connections.",
+        "Whether the transaction was created manually (via API/form) rather than imported from bank connections",
       example: false,
     }),
     frequency: z.string().nullable().openapi({
-      description: "The frequency of the recurring transaction, if applicable.",
+      description:
+        "Frequency of the recurring transaction if applicable (weekly, monthly, annually, irregular)",
       example: "monthly",
     }),
     isFulfilled: z.boolean().openapi({
-      description: "Whether the transaction is fulfilled.",
+      description: "Whether the transaction has been fulfilled or processed",
       example: true,
     }),
     note: z.string().nullable().openapi({
-      description: "An optional note attached to the transaction.",
-      example: "Paid by company card.",
+      description: "Optional note or memo attached to the transaction",
+      example: "Paid with company credit card for office renovation",
     }),
     account: z
       .object({
         id: z.string().openapi({
-          description: "Bank account ID (UUID).",
+          description: "Unique identifier of the bank account",
           example: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
         }),
         name: z.string().openapi({
-          description: "Name of the bank account.",
-          example: "Company Card",
+          description: "Display name of the bank account",
+          example: "Company Credit Card",
         }),
         currency: z.string().openapi({
-          description: "Currency of the bank account.",
+          description: "Currency of the bank account in ISO 4217 format",
           example: "USD",
         }),
         connection: z
           .object({
             id: z.string().openapi({
-              description: "Bank connection ID (UUID).",
+              description: "Unique identifier of the bank connection",
               example: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
             }),
             name: z.string().openapi({
-              description: "Name of the bank institution.",
-              example: "Company Card",
+              description: "Name of the bank institution",
+              example: "Chase Bank",
             }),
             logoUrl: z.string().nullable().openapi({
-              description: "Logo URL of the bank institution.",
-              example: "https://example.com/logo.png",
+              description: "URL to the bank institution's logo image",
+              example: "https://cdn.midday.ai/logos/chase-bank.png",
             }),
           })
           .openapi({
-            description: "The bank connection associated with the account.",
+            description:
+              "Bank connection information associated with the account",
             example: {
               id: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
-              name: "Company Card",
-              logoUrl: "https://example.com/logo.png",
+              name: "Chase Bank",
+              logoUrl: "https://cdn.midday.ai/logos/chase-bank.png",
             },
           }),
       })
       .openapi({
-        description: "The bank account associated with the transaction.",
+        description: "Bank account information associated with the transaction",
         example: {
           id: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
-          name: "Company Card",
+          name: "Company Credit Card",
           currency: "USD",
           connection: {
             id: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
-            name: "Company Card",
-            logoUrl: "https://example.com/logo.png",
+            name: "Chase Bank",
+            logoUrl: "https://cdn.midday.ai/logos/chase-bank.png",
           },
         },
       }),
@@ -309,18 +333,19 @@ export const transactionResponseSchema = z
       .array(
         z.object({
           id: z.string().openapi({
-            description: "Tag ID (UUID).",
+            description: "Unique identifier of the tag",
             example: "b7e2f8c1-3d4a-4e2b-9f1a-2c3d4e5f6a7b",
           }),
           name: z.string().nullable().openapi({
-            description: "Name of the tag.",
+            description: "Display name of the tag",
             example: "invoice",
           }),
         }),
       )
       .nullable()
       .openapi({
-        description: "List of tags associated with the transaction.",
+        description:
+          "Array of tags associated with the transaction for categorization and filtering",
         example: [
           { id: "b7e2f8c1-3d4a-4e2b-9f1a-2c3d4e5f6a7b", name: "invoice" },
           { id: "c8e2f8c1-3d4a-4e2b-9f1a-2c3d4e5f6a7c", name: "travel" },
@@ -330,35 +355,37 @@ export const transactionResponseSchema = z
       .array(
         z.object({
           id: z.string().openapi({
-            description: "Attachment ID (UUID).",
+            description: "Unique identifier of the attachment",
             example: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
           }),
           path: z.array(z.string()).openapi({
-            description: "Path segments for the attachment file.",
+            description:
+              "Array of path segments for the attachment file storage location",
             example: [
               "dd6a039e-d071-423a-9a4d-9ba71325d890",
               "transactions",
               "1d2c3753-79d7-45b0-9c40-60f482bac8e8",
-              "img_2808-2.heic",
+              "receipt.pdf",
             ],
           }),
           size: z.number().openapi({
-            description: "Size of the attachment in bytes.",
+            description: "Size of the attachment file in bytes",
             example: 1928716,
           }),
           type: z.string().openapi({
-            description: "MIME type of the attachment.",
-            example: "image/heic",
+            description: "MIME type of the attachment file",
+            example: "application/pdf",
           }),
           filename: z.string().nullable().openapi({
-            description: "Original filename of the attachment.",
-            example: "img_2808-2.heic",
+            description: "Original filename of the attachment when uploaded",
+            example: "receipt.pdf",
           }),
         }),
       )
       .nullable()
       .openapi({
-        description: "List of attachments associated with the transaction.",
+        description:
+          "Array of file attachments associated with the transaction (receipts, invoices, etc.)",
         example: [
           {
             id: "b7e2f8c1-3d4a-4e2b-9f1a-2c3d4e5f6a7b",
@@ -366,11 +393,11 @@ export const transactionResponseSchema = z
               "e1f2d3c4-b5a6-7d8e-9f0a-1b2c3d4e5f6a",
               "transactions",
               "9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
-              "invoice.pdf",
+              "receipt.pdf",
             ],
             size: 1928716,
             type: "application/pdf",
-            filename: "invoice.pdf",
+            filename: "receipt.pdf",
           },
         ],
       }),
@@ -378,12 +405,30 @@ export const transactionResponseSchema = z
   .openapi("TransactionResponse");
 
 export const transactionsResponseSchema = z.object({
-  meta: z.object({
-    cursor: z.string().optional(),
-    hasPreviousPage: z.boolean(),
-    hasNextPage: z.boolean(),
+  meta: z
+    .object({
+      cursor: z.string().optional().openapi({
+        description:
+          "Cursor for the next page of results, undefined if no more pages",
+        example: "eyJpZCI6IjQ1NiJ9",
+      }),
+      hasPreviousPage: z.boolean().openapi({
+        description:
+          "Whether there are more transactions available on the previous page",
+        example: false,
+      }),
+      hasNextPage: z.boolean().openapi({
+        description:
+          "Whether there are more transactions available on the next page",
+        example: true,
+      }),
+    })
+    .openapi({
+      description: "Pagination metadata for the transactions response",
+    }),
+  data: z.array(transactionResponseSchema).openapi({
+    description: "Array of transactions matching the query criteria",
   }),
-  data: z.array(transactionResponseSchema),
 });
 
 export const deleteTransactionsSchema = z

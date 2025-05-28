@@ -34,9 +34,7 @@ export function InboxView() {
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
     {
       order: params.order,
-      filter: {
-        ...filter,
-      },
+      ...filter,
     },
     {
       getNextPageParam: ({ meta }) => meta?.cursor,

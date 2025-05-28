@@ -1,24 +1,51 @@
 import {
-  createApiKey,
   deleteApiKey,
   getApiKeysByTeam,
+  upsertApiKey,
 } from "@api/db/queries/api-keys";
-import { createApiKeySchema, deleteApiKeySchema } from "@api/schemas/api-keys";
+import { deleteApiKeySchema, upsertApiKeySchema } from "@api/schemas/api-keys";
+import { resend } from "@api/services/resend";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { logger } from "@api/utils/logger";
+import { ApiKeyCreatedEmail } from "@midday/email/emails/api-key-created";
 
 export const apiKeysRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
     return getApiKeysByTeam(db, teamId!);
   }),
 
-  create: protectedProcedure
-    .input(createApiKeySchema)
-    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
-      return createApiKey(db, {
+  upsert: protectedProcedure
+    .input(upsertApiKeySchema)
+    .mutation(async ({ ctx: { db, teamId, session, geo }, input }) => {
+      const { data, key } = await upsertApiKey(db, {
         teamId: teamId!,
         userId: session.user.id,
         ...input,
       });
+
+      if (data) {
+        try {
+          await resend.emails.send({
+            from: "Midday <support@midday.ai>",
+            to: session.user.email!,
+            subject: "New API Key Created",
+            react: ApiKeyCreatedEmail({
+              fullName: session.user.full_name!,
+              keyName: input.name,
+              createdAt: data.createdAt,
+              email: session.user.email!,
+              ip: geo.ip!,
+            }),
+          });
+        } catch (error) {
+          logger.error(error);
+        }
+      }
+
+      return {
+        key,
+        data,
+      };
     }),
 
   delete: protectedProcedure
