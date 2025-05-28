@@ -1,6 +1,7 @@
 "use client";
 
 import { CreateApiKeyModal } from "@/components/modals/create-api-key-modal";
+import { useTokenModalStore } from "@/store/token-modal";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -22,10 +23,12 @@ import {
 import * as React from "react";
 import { useState } from "react";
 import { columns } from "./columns";
+import { EmptyState } from "./empty-state";
 
 export function DataTable() {
   const trpc = useTRPC();
   const [isOpen, onOpenChange] = useState(false);
+  const { setData } = useTokenModalStore();
   const { data } = useSuspenseQuery({
     ...trpc.apiKeys.get.queryOptions(),
   });
@@ -45,9 +48,9 @@ export function DataTable() {
             API Keys
           </h3>
           <p className="text-sm text-[#606060]">
-            These API keys allow other apps to access your workspace. Use it
-            with caution – do not share your API key with others, or expose it
-            in the browser or other client-side code.
+            These API keys allow other apps to access your team. Use it with
+            caution – do not share your API key with others, or expose it in the
+            browser or other client-side code.
           </p>
         </div>
         <div className="flex-shrink-0">
@@ -57,38 +60,42 @@ export function DataTable() {
           </Dialog>
         </div>
       </div>
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className="hover:bg-transparent"
-              >
+      {data.length > 0 ? (
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className={header.column.columnDef.meta?.className}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id} className="hover:bg-transparent">
                 {row.getAllCells().map((cell) => (
                   <TableCell
                     key={cell.id}
+                    onClick={() => {
+                      if (cell.column.id !== "actions") {
+                        setData(row.original, "edit");
+                      }
+                    }}
                     className={cn(
-                      "border-r-[0px] py-4",
+                      "border-r-[0px] py-4 cursor-pointer",
                       cell.column.columnDef.meta?.className,
                     )}
                   >
@@ -96,16 +103,12 @@ export function DataTable() {
                   </TableCell>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableBody>
+        </Table>
+      ) : (
+        <EmptyState />
+      )}
     </div>
   );
 }

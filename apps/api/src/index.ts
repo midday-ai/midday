@@ -29,7 +29,6 @@ app.use(
     ],
     exposeHeaders: ["Content-Length"],
     maxAge: 86400,
-    credentials: true,
   }),
 );
 

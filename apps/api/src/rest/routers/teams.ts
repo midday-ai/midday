@@ -13,6 +13,7 @@ import {
 } from "@api/schemas/team";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
 
@@ -33,6 +34,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("teams.read")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -61,6 +63,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("teams.read")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -99,6 +102,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("teams.write")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -131,6 +135,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("teams.read")],
   }),
   async (c) => {
     const db = c.get("db");

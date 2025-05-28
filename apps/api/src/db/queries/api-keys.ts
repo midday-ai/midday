@@ -4,6 +4,15 @@ import { generateApiKey } from "@api/utils/api-keys";
 import { encrypt, hash } from "@midday/encryption";
 import { and, eq } from "drizzle-orm";
 
+export type ApiKey = {
+  id: string;
+  name: string;
+  userId: string;
+  teamId: string;
+  createdAt: string;
+  scopes: string[] | null;
+};
+
 export async function getApiKeyByToken(db: Database, token: string) {
   const keyHash = hash(token);
 
@@ -14,6 +23,8 @@ export async function getApiKeyByToken(db: Database, token: string) {
       userId: apiKeys.userId,
       teamId: apiKeys.teamId,
       createdAt: apiKeys.createdAt,
+      scopes: apiKeys.scopes,
+      lastUsedAt: apiKeys.lastUsedAt,
     })
     .from(apiKeys)
     .where(eq(apiKeys.keyHash, keyHash))
@@ -22,17 +33,35 @@ export async function getApiKeyByToken(db: Database, token: string) {
   return result;
 }
 
-type CreateApiKeyData = {
-  name?: string;
+type UpsertApiKeyData = {
+  id?: string;
+  name: string;
   userId: string;
   teamId: string;
+  scopes: string[];
 };
 
-export async function createApiKey(db: Database, data: CreateApiKeyData) {
-  const keyEncrypted = encrypt(generateApiKey());
+export async function upsertApiKey(db: Database, data: UpsertApiKeyData) {
+  if (data.id) {
+    await db
+      .update(apiKeys)
+      .set({
+        name: data.name,
+        scopes: data.scopes,
+      })
+      .where(eq(apiKeys.id, data.id));
+
+    // On update we don't return the key
+    return {
+      key: null,
+    };
+  }
+
+  const key = generateApiKey();
+  const keyEncrypted = encrypt(key);
   const keyHash = hash(keyEncrypted);
 
-  return db
+  const [result] = await db
     .insert(apiKeys)
     .values({
       keyEncrypted,
@@ -40,8 +69,18 @@ export async function createApiKey(db: Database, data: CreateApiKeyData) {
       name: data.name,
       userId: data.userId,
       teamId: data.teamId,
+      scopes: data.scopes,
     })
-    .returning();
+    .returning({
+      id: apiKeys.id,
+      name: apiKeys.name,
+      createdAt: apiKeys.createdAt,
+    });
+
+  return {
+    key,
+    data: result,
+  };
 }
 
 export async function getApiKeysByTeam(db: Database, teamId: string) {
@@ -50,6 +89,8 @@ export async function getApiKeysByTeam(db: Database, teamId: string) {
       id: apiKeys.id,
       name: apiKeys.name,
       createdAt: apiKeys.createdAt,
+      scopes: apiKeys.scopes,
+      lastUsedAt: apiKeys.lastUsedAt,
       user: {
         id: users.id,
         fullName: users.fullName,
@@ -71,4 +112,11 @@ export async function deleteApiKey(db: Database, params: DeleteApiKeyParams) {
   return db
     .delete(apiKeys)
     .where(and(eq(apiKeys.id, params.id), eq(apiKeys.teamId, params.teamId)));
+}
+
+export async function updateApiKeyLastUsedAt(db: Database, id: string) {
+  return db
+    .update(apiKeys)
+    .set({ lastUsedAt: new Date().toISOString() })
+    .where(eq(apiKeys.id, id));
 }

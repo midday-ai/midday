@@ -135,15 +135,12 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
               <ScrollArea className="w-[170px] whitespace-nowrap">
                 <div className="flex items-center space-x-2">
                   {row.tags?.map((tag) => (
-                    <Link
-                      href={`/transactions?tags=${tag.tag.id}`}
-                      key={tag.id}
-                    >
+                    <Link href={`/transactions?tags=${tag.id}`} key={tag.id}>
                       <Badge
                         variant="tag-rounded"
                         className="whitespace-nowrap"
                       >
-                        {tag.tag.name}
+                        {tag.name}
                       </Badge>
                     </Link>
                   ))}

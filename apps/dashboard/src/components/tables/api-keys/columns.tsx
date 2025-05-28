@@ -1,34 +1,30 @@
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Button } from "@midday/ui/button";
-import { useToast } from "@midday/ui/use-toast";
-import type { ColumnDef, FilterFn, Row } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import * as React from "react";
 import "@tanstack/react-table";
-import { useTRPC } from "@/trpc/client";
+import { useTokenModalStore } from "@/store/token-modal";
+import { scopesToName } from "@api/utils/scopes";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
+import { Badge } from "@midday/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 
 type ApiKey = RouterOutputs["apiKeys"]["get"][number];
-
-const nameFilterFn: FilterFn<ApiKey> = (
-  row: Row<ApiKey>,
-  _: string,
-  filterValue: string,
-) => {
-  const name = row.original.name?.toLowerCase();
-  return name?.includes(filterValue.toLowerCase()) ?? false;
-};
 
 export const columns: ColumnDef<ApiKey>[] = [
   {
     id: "name",
     accessorKey: "name",
     header: "Name",
-    filterFn: nameFilterFn,
     cell: ({ row }) => {
-      return <div>{row.original.name}</div>;
+      return row.original.name;
     },
   },
   {
@@ -62,25 +58,12 @@ export const columns: ColumnDef<ApiKey>[] = [
     },
   },
   {
-    id: "permissions",
-    accessorKey: "permissions",
+    id: "scopes",
+    accessorKey: "scopes",
     header: "Permissions",
     cell: ({ row }) => {
-      // Assuming permissions is an array of strings, e.g. ['read', 'write']
-      const perms = row.original.permissions;
-      if (!perms || perms.length === 0)
-        return <span className="text-muted-foreground">None</span>;
       return (
-        <div className="flex flex-wrap gap-1">
-          {perms.map((perm: string) => (
-            <span
-              key={perm}
-              className="bg-muted px-2 py-0.5 rounded text-xs font-medium"
-            >
-              {perm.charAt(0).toUpperCase() + perm.slice(1)}
-            </span>
-          ))}
-        </div>
+        <Badge variant="tag">{scopesToName(row.original.scopes).name}</Badge>
       );
     },
   },
@@ -90,9 +73,13 @@ export const columns: ColumnDef<ApiKey>[] = [
     header: "Created",
     cell: ({ row }) => {
       const createdAt = row.original.createdAt;
-      if (!createdAt) return <span className="text-muted-foreground">-</span>;
+
+      if (!createdAt) {
+        return <span className="text-muted-foreground">-</span>;
+      }
+
       return (
-        <span title={format(new Date(createdAt), "yyyy-MM-dd HH:mm:ss")}>
+        <span>
           {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
         </span>
       );
@@ -101,13 +88,19 @@ export const columns: ColumnDef<ApiKey>[] = [
   {
     id: "lastUsed",
     accessorKey: "lastUsedAt",
-    header: "Last Used",
+    header: "Last used",
+    meta: {
+      className: "border-r-[0px]",
+    },
     cell: ({ row }) => {
       const lastUsedAt = row.original.lastUsedAt;
-      if (!lastUsedAt)
+
+      if (!lastUsedAt) {
         return <span className="text-muted-foreground">Never</span>;
+      }
+
       return (
-        <span title={format(new Date(lastUsedAt), "yyyy-MM-dd HH:mm:ss")}>
+        <span>
           {formatDistanceToNow(new Date(lastUsedAt), { addSuffix: true })}
         </span>
       );
@@ -115,20 +108,31 @@ export const columns: ColumnDef<ApiKey>[] = [
   },
   {
     id: "actions",
-    header: "",
-    cell: ({ row, table }) => {
-      const { toast } = useToast();
-      const meta = table.options.meta;
-      const trpc = useTRPC();
-      const queryClient = useQueryClient();
+    cell: ({ row }) => {
+      const { setData } = useTokenModalStore();
 
-      // Placeholder for delete logic
       return (
         <div className="flex justify-end">
           <div className="flex space-x-2 items-center">
-            <Button variant="outline" size="icon">
-              <Icons.Delete className="w-4 h-4" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <Icons.MoreHoriz className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent sideOffset={10} align="end">
+                <DropdownMenuItem onClick={() => setData(row.original, "edit")}>
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => setData(row.original, "delete")}
+                >
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       );

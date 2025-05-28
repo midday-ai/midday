@@ -24,6 +24,7 @@ import {
 } from "@api/schemas/transactions";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
 
@@ -48,6 +49,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("transactions.read")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -83,6 +85,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("transactions.read")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -117,6 +120,7 @@ app.openapi(
         content: { "application/json": { schema: transactionResponseSchema } },
       },
     },
+    middleware: [withRequiredScope("transactions.write")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -156,6 +160,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("transactions.write")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -195,6 +200,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("transactions.write")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -233,6 +239,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("transactions.write")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -282,6 +289,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("transactions.write")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -318,6 +326,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("transactions.write")],
   }),
   async (c) => {
     const db = c.get("db");

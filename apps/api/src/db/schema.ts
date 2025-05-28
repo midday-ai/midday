@@ -2003,14 +2003,14 @@ export const apiKeys = pgTable(
   {
     id: uuid("id").notNull().defaultRandom().primaryKey(),
     keyEncrypted: text("key_encrypted").notNull(),
-    name: text("name"),
+    name: text("name").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .notNull()
       .defaultNow(),
     userId: uuid("user_id").notNull(),
     teamId: uuid("team_id").notNull(),
     keyHash: text("key_hash"),
-    permissions: text("permissions").array(),
+    scopes: text("scopes").array().notNull().default(sql`'{}'::text[]`),
     lastUsedAt: timestamp("last_used_at", {
       withTimezone: true,
       mode: "string",

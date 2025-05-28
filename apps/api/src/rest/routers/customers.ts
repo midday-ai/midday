@@ -4,6 +4,7 @@ import {
   getCustomers,
   upsertCustomer,
 } from "@api/db/queries/customers";
+import { withRequiredScope } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import {
   customerResponseSchema,
@@ -37,6 +38,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("customers.read")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -79,6 +81,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("customers.read")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -114,8 +117,8 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("customers.read")],
   }),
-  // withRequiredScope("customers.read"),
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
@@ -154,6 +157,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("customers.write")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -191,6 +195,7 @@ app.openapi(
         },
       },
     },
+    middleware: [withRequiredScope("customers.write")],
   }),
   async (c) => {
     const db = c.get("db");

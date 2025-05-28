@@ -16,9 +16,7 @@ export function Inbox({ result }: Props) {
   const trpc = useTRPC();
   const { data, isLoading } = useQuery(
     trpc.inbox.get.queryOptions({
-      filter: {
-        q: result.params.name,
-      },
+      q: result.params.name,
     }),
   );
 

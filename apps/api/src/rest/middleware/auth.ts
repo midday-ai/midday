@@ -1,6 +1,11 @@
-import { getApiKeyByToken } from "@api/db/queries/api-keys";
+import {
+  type ApiKey,
+  getApiKeyByToken,
+  updateApiKeyLastUsedAt,
+} from "@api/db/queries/api-keys";
 import { getUserById } from "@api/db/queries/users";
 import { isValidApiKeyFormat } from "@api/utils/api-keys";
+import { expandScopes } from "@api/utils/scopes";
 import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { LRUCache } from "lru-cache";
@@ -33,7 +38,7 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
   const db = c.get("db");
 
   // Check cache first for API key
-  let apiKey = apiKeyCache.get(token);
+  let apiKey = apiKeyCache.get(token) as ApiKey | undefined;
   if (!apiKey) {
     // If not in cache, query database
 
@@ -75,6 +80,10 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
 
   c.set("session", session);
   c.set("teamId", session.teamId);
+  c.set("scopes", expandScopes(apiKey.scopes ?? []));
+
+  // Update last used at
+  updateApiKeyLastUsedAt(db, apiKey.id);
 
   await next();
 };
