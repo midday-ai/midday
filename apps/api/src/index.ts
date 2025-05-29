@@ -55,18 +55,37 @@ app.doc("/openapi", {
   info: {
     version: "0.0.1",
     title: "Midday API",
+    description:
+      "Midday is a platform for Invoicing, Time tracking, File reconciliation, Storage, Financial Overview & your own Assistant.",
+    contact: {
+      name: "Midday Support",
+      email: "engineer@midday.ai",
+      url: "https://midday.ai",
+    },
+    license: {
+      name: "AGPL-3.0 license",
+      url: "https://github.com/midday-ai/midday/blob/main/LICENSE",
+    },
   },
   servers: [
     {
       url: "https://api.midday.ai",
-      description: "Production server",
+      description: "Production API",
     },
   ],
   security: [
     {
-      bearerAuth: [],
+      token: [],
     },
   ],
+});
+
+// Register security scheme
+app.openAPIRegistry.registerComponent("securitySchemes", "token", {
+  type: "http",
+  scheme: "bearer",
+  description: "Default authentication mechanism",
+  "x-speakeasy-example": "MIDDAY_API_KEY",
 });
 
 app.get(

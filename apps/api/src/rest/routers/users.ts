@@ -13,7 +13,7 @@ app.openapi(
     path: "/me",
     summary: "Retrieve the current user",
     operationId: "getCurrentUser",
-    "x-speakeasy-name-override": "me",
+    "x-speakeasy-name-override": "get",
     description: "Retrieve the current user for the authenticated team.",
     tags: ["Users"],
     responses: {
@@ -44,7 +44,7 @@ app.openapi(
     path: "/me",
     summary: "Update the current user",
     operationId: "updateCurrentUser",
-    "x-speakeasy-name-override": "me",
+    "x-speakeasy-name-override": "update",
     description: "Update the current user for the authenticated team.",
     tags: ["Users"],
     request: {

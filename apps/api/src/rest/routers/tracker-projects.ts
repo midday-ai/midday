@@ -27,7 +27,7 @@ app.openapi(
     operationId: "listTrackerProjects",
     "x-speakeasy-name-override": "list",
     description: "List all tracker projects for the authenticated team.",
-    tags: ["Tracker"],
+    tags: ["Tracker Projects"],
     request: {
       query: getTrackerProjectsSchema,
     },
@@ -69,7 +69,7 @@ app.openapi(
     operationId: "createTrackerProject",
     "x-speakeasy-name-override": "create",
     description: "Create a tracker project for the authenticated team.",
-    tags: ["Tracker"],
+    tags: ["Tracker Projects"],
     request: {
       body: {
         content: {
@@ -116,7 +116,7 @@ app.openapi(
     operationId: "updateTrackerProject",
     "x-speakeasy-name-override": "update",
     description: "Update a tracker project for the authenticated team.",
-    tags: ["Tracker"],
+    tags: ["Tracker Projects"],
     request: {
       params: getTrackerProjectByIdSchema.pick({ id: true }),
       body: {
@@ -163,7 +163,7 @@ app.openapi(
     operationId: "getTrackerProjectById",
     "x-speakeasy-name-override": "get",
     description: "Retrieve a tracker project for the authenticated team.",
-    tags: ["Tracker"],
+    tags: ["Tracker Projects"],
     request: {
       params: getTrackerProjectByIdSchema.pick({ id: true }),
     },
@@ -202,7 +202,7 @@ app.openapi(
     operationId: "deleteTrackerProject",
     "x-speakeasy-name-override": "delete",
     description: "Delete a tracker project for the authenticated team.",
-    tags: ["Tracker"],
+    tags: ["Tracker Projects"],
     request: {
       params: getTrackerProjectByIdSchema.pick({ id: true }),
     },

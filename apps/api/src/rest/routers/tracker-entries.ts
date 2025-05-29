@@ -29,7 +29,7 @@ app.openapi(
     operationId: "listTrackerEntries",
     "x-speakeasy-name-override": "list",
     description: "List all tracker entries for the authenticated team.",
-    tags: ["Tracker"],
+    tags: ["Tracker Entries"],
     request: {
       query: getTrackerRecordsByRangeSchema,
     },
@@ -64,7 +64,7 @@ app.openapi(
 //     path: "/",
 //     summary: "Create a tracker entry",
 //     description: "Create a tracker entry for the authenticated team.",
-//     tags: ["Tracker"],
+//     tags: ["Tracker Entries"],
 //     request: {
 //       body: {
 //         content: {
@@ -142,7 +142,7 @@ app.openapi(
 //     path: "/{id}",
 //     summary: "Update a tracker entry",
 //     description: "Update a tracker entry for the authenticated team.",
-//     tags: ["Tracker"],
+//     tags: ["Tracker Entries"],
 //     request: {
 //       params: deleteTrackerEntrySchema.pick({ id: true }),
 //       body: {
