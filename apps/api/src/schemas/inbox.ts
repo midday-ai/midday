@@ -120,6 +120,9 @@ export const getInboxByIdSchema = z
     id: z.string().openapi({
       description: "The unique identifier of the inbox item.",
       example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+      param: {
+        in: "path",
+      },
     }),
   })
   .openapi({
@@ -131,6 +134,9 @@ export const deleteInboxSchema = z
     id: z.string().openapi({
       description: "The unique identifier of the inbox item to delete.",
       example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+      param: {
+        in: "path",
+      },
     }),
   })
   .openapi({
@@ -151,7 +157,11 @@ export const searchInboxSchema = z.object({
 });
 
 export const updateInboxSchema = z.object({
-  id: z.string(),
+  id: z.string().openapi({
+    param: {
+      in: "path",
+    },
+  }),
   status: z.enum(["new", "archived", "processing", "done", "pending"]),
 });
 

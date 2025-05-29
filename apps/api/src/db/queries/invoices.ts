@@ -60,19 +60,26 @@ export type GetInvoicesParams = {
   teamId: string;
   cursor?: string | null;
   pageSize?: number;
-  filter?: {
-    q?: string | null;
-    statuses?: string[] | null;
-    customers?: string[] | null;
-    start?: string | null;
-    end?: string | null;
-  };
+  q?: string | null;
+  statuses?: string[] | null;
+  customers?: string[] | null;
+  start?: string | null;
+  end?: string | null;
   sort?: string[] | null;
 };
 
 export async function getInvoices(db: Database, params: GetInvoicesParams) {
-  const { teamId, filter, sort, cursor, pageSize = 25 } = params;
-  const { q, statuses, start, end, customers: customerIds } = filter || {};
+  const {
+    teamId,
+    sort,
+    cursor,
+    pageSize = 25,
+    q,
+    statuses,
+    start,
+    end,
+    customers: customerIds,
+  } = params;
 
   const whereConditions: SQL[] = [eq(invoices.teamId, teamId)];
 

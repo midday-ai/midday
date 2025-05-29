@@ -191,6 +191,9 @@ export const getCustomerByIdSchema = z.object({
   id: z.string().openapi({
     description: "Unique identifier of the customer to retrieve",
     example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+    param: {
+      in: "path",
+    },
   }),
 });
 
@@ -198,6 +201,9 @@ export const deleteCustomerSchema = z.object({
   id: z.string().openapi({
     description: "Unique identifier of the customer to delete",
     example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+    param: {
+      in: "path",
+    },
   }),
 });
 

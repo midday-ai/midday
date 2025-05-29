@@ -14,14 +14,12 @@ export type GetTrackerProjectsParams = {
   teamId: string;
   cursor?: string | null;
   pageSize?: number;
-  filter?: {
-    q?: string | null;
-    start?: string | null;
-    end?: string | null;
-    status?: "in_progress" | "completed" | null;
-    customers?: string[] | null;
-    tags?: string[] | null;
-  };
+  q?: string | null;
+  start?: string | null;
+  end?: string | null;
+  status?: "in_progress" | "completed" | null;
+  customers?: string[] | null;
+  tags?: string[] | null;
   sort?: string[] | null;
 };
 
@@ -35,15 +33,18 @@ export async function getTrackerProjects(
   db: Database,
   params: GetTrackerProjectsParams,
 ) {
-  const { teamId, filter, sort, cursor, pageSize = 25 } = params;
   const {
+    teamId,
+    sort,
+    cursor,
+    pageSize = 25,
     q,
     status,
     start,
     end,
     customers: customerIds,
     tags: tagIds,
-  } = filter || {};
+  } = params;
 
   const whereConditions: SQL[] = [eq(trackerProjects.teamId, teamId)];
 

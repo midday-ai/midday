@@ -244,7 +244,16 @@ export const invoiceTemplateSchema = z.object({
   includeQr: z.boolean().optional(),
   taxRate: z.number().min(0).max(100).optional(),
   vatRate: z.number().min(0).max(100).optional(),
-  dateFormat: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"]),
+  dateFormat: z
+    .enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"])
+    .openapi({
+      "x-speakeasy-enums": [
+        { value: "dd/MM/yyyy", name: "DdSlashMmSlashYyyy" },
+        { value: "MM/dd/yyyy", name: "MmSlashDdSlashYyyy" },
+        { value: "yyyy-MM-dd", name: "YyyyDashMmDashDd" },
+        { value: "dd.MM.yyyy", name: "DdDotMmDotYyyy" },
+      ],
+    }),
   deliveryType: z.enum(["create", "create_and_send"]),
   locale: z.string().optional(),
   timezone: z.string().optional(),
@@ -332,7 +341,11 @@ export const getInvoicesSchema = z.object({
 });
 
 export const getInvoiceByIdSchema = z.object({
-  id: z.string(),
+  id: z.string().openapi({
+    param: {
+      in: "path",
+    },
+  }),
 });
 
 export const searchInvoiceNumberSchema = z.object({
@@ -355,14 +368,22 @@ export const invoiceSummarySchema = z
   });
 
 export const updateInvoiceSchema = z.object({
-  id: z.string(),
+  id: z.string().openapi({
+    param: {
+      in: "path",
+    },
+  }),
   status: z.enum(["paid", "canceled", "unpaid"]).optional(),
   paidAt: z.string().nullable().optional(),
   internalNote: z.string().nullable().optional(),
 });
 
 export const deleteInvoiceSchema = z.object({
-  id: z.string(),
+  id: z.string().openapi({
+    param: {
+      in: "path",
+    },
+  }),
 });
 
 export const createInvoiceSchema = z.object({
@@ -371,12 +392,26 @@ export const createInvoiceSchema = z.object({
 });
 
 export const remindInvoiceSchema = z.object({
-  id: z.string().uuid(),
+  id: z
+    .string()
+    .uuid()
+    .openapi({
+      param: {
+        in: "path",
+      },
+    }),
   date: z.string(),
 });
 
 export const duplicateInvoiceSchema = z.object({
-  id: z.string().uuid(),
+  id: z
+    .string()
+    .uuid()
+    .openapi({
+      param: {
+        in: "path",
+      },
+    }),
 });
 
 export const getInvoiceByTokenSchema = z.object({

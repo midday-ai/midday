@@ -139,13 +139,14 @@ app.openapi(
     path: "/:id",
     summary: "Update a transaction",
     description:
-      "Update a transaction for the authenticated team. If there’s no change, returns it as it is.",
+      "Update a transaction for the authenticated team. If there's no change, returns it as it is.",
     tags: ["Transactions"],
     request: {
+      params: transactionResponseSchema.pick({ id: true }),
       body: {
         content: {
           "application/json": {
-            schema: updateTransactionSchema,
+            schema: updateTransactionSchema.omit({ id: true }),
           },
         },
       },
@@ -165,9 +166,10 @@ app.openapi(
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
+    const { id } = c.req.valid("param");
     const params = c.req.valid("json");
 
-    const result = await updateTransaction(db, { teamId, ...params });
+    const result = await updateTransaction(db, { teamId, id, ...params });
 
     return c.json(validateResponse(result, transactionResponseSchema));
   },
@@ -179,7 +181,7 @@ app.openapi(
     path: "/bulk",
     summary: "Bulk update transactions",
     description:
-      "Bulk update transactions for the authenticated team. If there’s no change, returns it as it is.",
+      "Bulk update transactions for the authenticated team. If there's no change, returns it as it is.",
     tags: ["Transactions"],
     request: {
       body: {
