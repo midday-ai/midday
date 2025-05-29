@@ -24,6 +24,8 @@ app.openapi(
     method: "get",
     path: "/",
     summary: "List all tags",
+    operationId: "listTags",
+    "x-speakeasy-name-override": "list",
     description: "Retrieve a list of tags for the authenticated team.",
     tags: ["Tags"],
     responses: {
@@ -58,8 +60,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "get",
-    path: "/:id",
+    path: "/{id}",
     summary: "Retrieve a tag",
+    operationId: "getTagById",
+    "x-speakeasy-name-override": "get",
     description: "Retrieve a tag by ID for the authenticated team.",
     tags: ["Tags"],
     request: {
@@ -93,6 +97,8 @@ app.openapi(
     method: "post",
     path: "/",
     summary: "Create a new tag",
+    operationId: "createTag",
+    "x-speakeasy-name-override": "create",
     description: "Create a new tag for the authenticated team.",
     tags: ["Tags"],
     request: {
@@ -130,8 +136,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "patch",
-    path: "/:id",
+    path: "/{id}",
     summary: "Update a tag",
+    operationId: "updateTag",
+    "x-speakeasy-name-override": "update",
     description: "Update a tag by ID for the authenticated team.",
     tags: ["Tags"],
     request: {
@@ -175,8 +183,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "delete",
-    path: "/:id",
+    path: "/{id}",
     summary: "Delete a tag",
+    operationId: "deleteTag",
+    "x-speakeasy-name-override": "delete",
     description: "Delete a tag by ID for the authenticated team.",
     tags: ["Tags"],
     request: {

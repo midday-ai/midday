@@ -50,8 +50,6 @@ app.get("/health", async (c) => {
   }
 });
 
-app.route("/v1", routers);
-
 app.doc("/openapi", {
   openapi: "3.1.0",
   info: {
@@ -75,6 +73,8 @@ app.get(
   "/",
   Scalar({ url: "/openapi", pageTitle: "Midday API", theme: "saturn" }),
 );
+
+app.route("/", routers);
 
 export default {
   port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3000,

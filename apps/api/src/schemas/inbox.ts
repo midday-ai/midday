@@ -122,6 +122,7 @@ export const getInboxByIdSchema = z
       example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
       param: {
         in: "path",
+        name: "id",
       },
     }),
   })
@@ -136,6 +137,7 @@ export const deleteInboxSchema = z
       example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
       param: {
         in: "path",
+        name: "id",
       },
     }),
   })
@@ -160,6 +162,7 @@ export const updateInboxSchema = z.object({
   id: z.string().openapi({
     param: {
       in: "path",
+      name: "id",
     },
   }),
   status: z.enum(["new", "archived", "processing", "done", "pending"]),

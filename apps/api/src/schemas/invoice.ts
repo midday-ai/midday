@@ -244,16 +244,7 @@ export const invoiceTemplateSchema = z.object({
   includeQr: z.boolean().optional(),
   taxRate: z.number().min(0).max(100).optional(),
   vatRate: z.number().min(0).max(100).optional(),
-  dateFormat: z
-    .enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"])
-    .openapi({
-      "x-speakeasy-enums": [
-        { value: "dd/MM/yyyy", name: "DdSlashMmSlashYyyy" },
-        { value: "MM/dd/yyyy", name: "MmSlashDdSlashYyyy" },
-        { value: "yyyy-MM-dd", name: "YyyyDashMmDashDd" },
-        { value: "dd.MM.yyyy", name: "DdDotMmDotYyyy" },
-      ],
-    }),
+  dateFormat: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"]),
   deliveryType: z.enum(["create", "create_and_send"]),
   locale: z.string().optional(),
   timezone: z.string().optional(),
@@ -344,6 +335,7 @@ export const getInvoiceByIdSchema = z.object({
   id: z.string().openapi({
     param: {
       in: "path",
+      name: "id",
     },
   }),
 });
@@ -371,6 +363,7 @@ export const updateInvoiceSchema = z.object({
   id: z.string().openapi({
     param: {
       in: "path",
+      name: "id",
     },
   }),
   status: z.enum(["paid", "canceled", "unpaid"]).optional(),
@@ -382,6 +375,7 @@ export const deleteInvoiceSchema = z.object({
   id: z.string().openapi({
     param: {
       in: "path",
+      name: "id",
     },
   }),
 });
@@ -398,6 +392,7 @@ export const remindInvoiceSchema = z.object({
     .openapi({
       param: {
         in: "path",
+        name: "id",
       },
     }),
   date: z.string(),
@@ -410,6 +405,7 @@ export const duplicateInvoiceSchema = z.object({
     .openapi({
       param: {
         in: "path",
+        name: "id",
       },
     }),
 });

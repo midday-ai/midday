@@ -19,6 +19,7 @@ export const deleteTagSchema = z
         example: "b3b7c8e2-1f2a-4c3d-9e4f-5a6b7c8d9e0f",
         param: {
           in: "path",
+          name: "id",
         },
       }),
   })
@@ -34,6 +35,7 @@ export const updateTagSchema = z
         example: "b3b7c8e2-1f2a-4c3d-9e4f-5a6b7c8d9e0f",
         param: {
           in: "path",
+          name: "id",
         },
       }),
     name: z.string().openapi({

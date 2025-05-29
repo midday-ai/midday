@@ -91,6 +91,7 @@ export const deleteBankAccountSchema = z.object({
       example: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
       param: {
         in: "path",
+        name: "id",
       },
     }),
 });
@@ -104,6 +105,7 @@ export const getBankAccountByIdSchema = z.object({
       example: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
       param: {
         in: "path",
+        name: "id",
       },
     }),
 });

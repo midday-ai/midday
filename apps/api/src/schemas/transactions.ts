@@ -457,6 +457,7 @@ export const deleteTransactionSchema = z.object({
       description: "Transaction ID (UUID).",
       param: {
         in: "path",
+        name: "id",
       },
     }),
 });
@@ -469,6 +470,7 @@ export const getTransactionByIdSchema = z.object({
       description: "Transaction ID (UUID).",
       param: {
         in: "path",
+        name: "id",
       },
     }),
 });
@@ -481,6 +483,7 @@ export const updateTransactionSchema = z.object({
       description: "Transaction ID (UUID).",
       param: {
         in: "path",
+        name: "id",
       },
     }),
   categorySlug: z.string().nullable().optional().openapi({
@@ -605,6 +608,7 @@ export const updateSimilarTransactionsRecurringSchema = z.object({
       description: "Transaction ID (UUID) to update recurring status.",
       param: {
         in: "path",
+        name: "id",
       },
     }),
 });

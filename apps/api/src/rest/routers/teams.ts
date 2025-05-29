@@ -6,6 +6,7 @@ import {
 import { getTeamsByUserId } from "@api/db/queries/users-on-team";
 import type { Context } from "@api/rest/types";
 import {
+  getTeamByIdSchema,
   teamMembersResponseSchema,
   teamResponseSchema,
   teamsResponseSchema,
@@ -22,6 +23,8 @@ app.openapi(
     method: "get",
     path: "/",
     summary: "List all teams",
+    operationId: "listTeams",
+    "x-speakeasy-name-override": "list",
     description: "Retrieve a list of teams for the authenticated user.",
     tags: ["Teams"],
     responses: {
@@ -49,10 +52,15 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "get",
-    path: "/:id",
+    path: "/{id}",
     summary: "Retrieve a team",
+    operationId: "getTeamById",
+    "x-speakeasy-name-override": "get",
     description: "Retrieve a team by its ID for the authenticated team.",
     tags: ["Teams"],
+    request: {
+      params: getTeamByIdSchema,
+    },
     responses: {
       200: {
         description: "Team details",
@@ -78,12 +86,15 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "patch",
-    path: "/:id",
+    path: "/{id}",
     summary: "Update a team",
+    operationId: "updateTeamById",
+    "x-speakeasy-name-override": "update",
     description:
       "Update a team for the authenticated workspace. If there’s no change, returns it as it is.",
     tags: ["Teams"],
     request: {
+      params: getTeamByIdSchema,
       body: {
         content: {
           "application/json": {
@@ -121,10 +132,15 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "get",
-    path: "/:id/members",
+    path: "/{id}/members",
     summary: "List all team members",
+    operationId: "listTeamMembers",
+    "x-speakeasy-name-override": "members",
     description: "List all team members for the authenticated team.",
     tags: ["Teams"],
+    request: {
+      params: getTeamByIdSchema,
+    },
     responses: {
       200: {
         description: "Team members",

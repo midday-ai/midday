@@ -12,6 +12,8 @@ app.openapi(
     method: "get",
     path: "/",
     summary: "Search",
+    operationId: "search",
+    "x-speakeasy-name-override": "search",
     description:
       "Search across all data, invoices, documents, customers, transactions, and more.",
     tags: ["Search"],
@@ -34,8 +36,6 @@ app.openapi(
     const db = c.get("db");
     const teamId = c.get("teamId");
     const { searchTerm, ...input } = c.req.valid("query");
-
-    console.log(searchTerm);
 
     const results = await globalSearchQuery(db, {
       teamId: teamId!,

@@ -25,6 +25,25 @@ export const teamsResponseSchema = z.object({
   }),
 });
 
+export const getTeamByIdSchema = z.object({
+  id: z
+    .string()
+    .uuid()
+    .openapi({
+      description: "Unique identifier of the team",
+      example: "123e4567-e89b-12d3-a456-426614174000",
+      param: {
+        in: "path",
+        name: "id",
+        required: true,
+      },
+    })
+    .openapi({
+      description: "Unique identifier of the team",
+      example: "123e4567-e89b-12d3-a456-426614174000",
+    }),
+});
+
 export const updateTeamByIdSchema = z.object({
   name: z.string().min(2).max(32).optional().openapi({
     description:

@@ -23,6 +23,8 @@ app.openapi(
     method: "get",
     path: "/",
     summary: "List all documents",
+    operationId: "listDocuments",
+    "x-speakeasy-name-override": "list",
     description: "Retrieve a list of documents for the authenticated team.",
     tags: ["Documents"],
     request: {
@@ -49,7 +51,7 @@ app.openapi(
       teamId,
       pageSize,
       cursor,
-      filter,
+      ...filter,
     });
 
     return c.json(validateResponse(result, documentsResponseSchema));
@@ -59,8 +61,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "get",
-    path: "/:id",
+    path: "/{id}",
     summary: "Retrieve a document",
+    operationId: "getDocumentById",
+    "x-speakeasy-name-override": "get",
     description:
       "Retrieve a document by its unique identifier for the authenticated team.",
     tags: ["Documents"],
@@ -96,8 +100,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "delete",
-    path: "/:id",
+    path: "/{id}",
     summary: "Delete a document",
+    operationId: "deleteDocument",
+    "x-speakeasy-name-override": "delete",
     description:
       "Delete a document by its unique identifier for the authenticated team.",
     tags: ["Documents"],
