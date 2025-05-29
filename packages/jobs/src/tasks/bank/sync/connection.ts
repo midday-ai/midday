@@ -1,8 +1,8 @@
-import { triggerSequenceAndWait } from "@/utils/trigger-sequence";
-import { client } from "@midday/engine/client";
+import { syncConnectionSchema } from "@jobs/schema";
+import { triggerSequenceAndWait } from "@jobs/utils/trigger-sequence";
+import { client } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 import { transactionNotifications } from "../notifications/transactions";
 import { syncAccount } from "./account";
 
@@ -13,10 +13,7 @@ export const syncConnection = schemaTask({
   retry: {
     maxAttempts: 2,
   },
-  schema: z.object({
-    connectionId: z.string().uuid(),
-    manualSync: z.boolean().optional(),
-  }),
+  schema: syncConnectionSchema,
   run: async ({ connectionId, manualSync }, { ctx }) => {
     const supabase = createClient();
 
@@ -35,9 +32,13 @@ export const syncConnection = schemaTask({
 
       const connectionResponse = await client.connections.status.$get({
         query: {
-          id: data.reference_id,
-          provider: data.provider,
-          accessToken: data.access_token,
+          id: data.reference_id!,
+          provider: data.provider as
+            | "gocardless"
+            | "plaid"
+            | "teller"
+            | "enablebanking", // Pluggy not supported yet
+          accessToken: data.access_token ?? undefined,
         },
       });
 
@@ -96,6 +97,7 @@ export const syncConnection = schemaTask({
         // We don't want to delay the sync if it's a manual sync
         // but we do want to delay it if it's an background sync to avoid rate limiting
         if (bankAccounts.length > 0) {
+          // @ts-expect-error - TODO: Fix types
           await triggerSequenceAndWait(bankAccounts, syncAccount, {
             tags: ctx.run.tags,
             delayMinutes: manualSync ? 0 : 1,

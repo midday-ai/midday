@@ -38,7 +38,7 @@ const menuItems = [
     icon: Icons.DateFormat,
     label: "Date format",
     options: dateFormats,
-    key: "date_format",
+    key: "dateFormat",
   },
   {
     icon: Icons.CropFree,
@@ -50,13 +50,13 @@ const menuItems = [
     icon: Icons.Tax,
     label: "Add sales tax",
     options: booleanOptions,
-    key: "include_tax",
+    key: "includeTax",
   },
   {
     icon: Icons.Vat,
     label: "Add VAT",
     options: booleanOptions,
-    key: "include_vat",
+    key: "includeVAT",
   },
   {
     icon: Icons.CurrencyOutline,
@@ -71,31 +71,31 @@ const menuItems = [
     icon: Icons.ConfirmationNumber,
     label: "Add discount",
     options: booleanOptions,
-    key: "include_discount",
+    key: "includeDiscount",
   },
   {
     icon: Icons.PdfOutline,
     label: "Attach PDF in email",
     options: booleanOptions,
-    key: "include_pdf",
+    key: "includePdf",
   },
   {
     icon: Icons.Straighten,
     label: "Add units",
     options: booleanOptions,
-    key: "include_units",
+    key: "includeUnits",
   },
   {
     icon: Icons.Decimals,
     label: "Decimals",
     options: booleanOptions,
-    key: "include_decimals",
+    key: "includeDecimals",
   },
   {
     icon: Icons.QrCode,
     label: "Add QR code",
     options: booleanOptions,
-    key: "include_qr",
+    key: "includeQr",
   },
 ];
 

@@ -35,6 +35,7 @@ export function SpendingPeriod({ period, onChange }: Props) {
       <DropdownMenu>
         <DropdownMenuTrigger>
           <div className="flex items-center space-x-2">
+            {/* @ts-expect-error */}
             <span>{t(`spending_period.${period}`)}</span>
             <Icons.ChevronDown />
           </div>
@@ -46,6 +47,7 @@ export function SpendingPeriod({ period, onChange }: Props) {
               onCheckedChange={() => onChange(option.id)}
               checked={option.id === period}
             >
+              {/* @ts-expect-error */}
               {t(`spending_period.${option.id}`)}
             </DropdownMenuCheckboxItem>
           ))}

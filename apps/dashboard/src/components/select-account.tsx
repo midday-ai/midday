@@ -11,8 +11,8 @@ import { TransactionBankAccount } from "./transaction-bank-account";
 type SelectedItem = ComboboxItem & {
   id: string;
   label: string;
-  logo?: string | null;
-  currency?: string | null;
+  logo: string | null;
+  currency: string | null;
   type?: string | null;
 };
 
@@ -41,11 +41,15 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
           onChange({
             id: data.id,
             label: data.name ?? "",
+            logo: null,
+            currency: null,
           });
 
           setSelectedItem({
             id: data.id,
             label: data.name ?? "",
+            logo: null,
+            currency: null,
           });
         }
       },
@@ -60,8 +64,8 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
         setSelectedItem({
           id: found.id,
           label: found.name ?? "",
-          logo: found.connection?.logo_url,
-          currency: found.currency,
+          logo: found.bankConnection?.logoUrl ?? null,
+          currency: found.currency ?? null,
         });
       }
     }
@@ -80,8 +84,8 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
         data?.map((d) => ({
           id: d.id,
           label: d.name ?? "",
-          logo: d.connection?.logo_url,
-          currency: d.currency,
+          logo: d.bankConnection?.logoUrl ?? null,
+          currency: d.currency ?? null,
         })) ?? []
       }
       selectedItem={selectedItem ?? undefined}

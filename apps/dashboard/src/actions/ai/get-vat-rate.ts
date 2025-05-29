@@ -25,12 +25,12 @@ export const getVatRateAction = authActionClient
       }),
       prompt: `
         You are an expert in VAT rates for the specific country and category \n
-        What's the VAT rate for category ${name} in ${country.name}?
+        What's the VAT rate for category ${name} in ${country?.name}?
       `,
     });
 
     return {
       vat: object.vat,
-      country: country.name,
+      country: country?.name,
     };
   });

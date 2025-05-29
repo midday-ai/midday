@@ -16,9 +16,7 @@ export const getDocuments = tool({
 
     const { data } = await queryClient.fetchQuery(
       trpc.documents.get.queryOptions({
-        filter: {
-          q: name,
-        },
+        q: name,
       }),
     );
 

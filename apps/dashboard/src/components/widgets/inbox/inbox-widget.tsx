@@ -5,14 +5,9 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { getInboxEmail } from "@midday/inbox";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import type { InboxOption } from "./data";
 import { InboxList } from "./inbox-list";
 
-type Props = {
-  filter: InboxOption;
-};
-
-export function InboxWidget({ filter }: Props) {
+export function InboxWidget() {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const { data } = useSuspenseQuery(trpc.inbox.get.queryOptions());
@@ -21,7 +16,7 @@ export function InboxWidget({ filter }: Props) {
     return (
       <div className="flex flex-col space-y-4 items-center justify-center h-full text-center">
         <div>
-          <CopyInput value={getInboxEmail(user?.team?.inbox_id ?? "")} />
+          <CopyInput value={getInboxEmail(user?.team?.inboxId ?? "")} />
         </div>
 
         <p className="text-sm text-[#606060]">

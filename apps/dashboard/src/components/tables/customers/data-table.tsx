@@ -30,11 +30,9 @@ export function DataTable() {
 
   const infiniteQueryOptions = trpc.customers.get.infiniteQueryOptions(
     {
+      ...filter,
       sort: params.sort,
-      filter: {
-        ...filter,
-        q: deferredSearch,
-      },
+      q: deferredSearch,
     },
     {
       getNextPageParam: ({ meta }) => meta?.cursor,

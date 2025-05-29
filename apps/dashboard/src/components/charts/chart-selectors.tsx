@@ -22,7 +22,7 @@ export function ChartSelectors() {
         <ChartPeriod />
         <ChartFilters
           currencies={
-            currencies?.data?.map((currency) => {
+            currencies?.map((currency) => {
               return {
                 id: currency.currency,
                 name: currency.currency,

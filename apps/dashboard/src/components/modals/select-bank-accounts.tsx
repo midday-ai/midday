@@ -140,16 +140,16 @@ const formSchema = z.object({
   accounts: z
     .array(
       z.object({
-        account_id: z.string(),
-        bank_name: z.string(),
+        accountId: z.string(),
+        bankName: z.string(),
         balance: z.number().optional(),
         currency: z.string(),
         name: z.string(),
-        institution_id: z.string(),
-        account_reference: z.string().nullable().optional(), // EnableBanking & GoCardLess
+        institutionId: z.string(),
+        accountReference: z.string().nullable().optional(), // EnableBanking & GoCardLess
         enabled: z.boolean(),
-        logo_url: z.string().nullable().optional(),
-        expires_at: z.string().nullable().optional(), // EnableBanking & GoCardLess
+        logoUrl: z.string().nullable().optional(),
+        expiresAt: z.string().nullable().optional(), // EnableBanking & GoCardLess
         type: z.enum([
           "credit",
           "depository",
@@ -260,17 +260,17 @@ export function SelectBankAccountsModal() {
       referenceId: ref ?? undefined,
       accounts: data?.map((account) => ({
         name: account.name,
-        institution_id: account.institution.id,
-        logo_url: account.institution?.logo,
-        account_id: account.id,
-        account_reference: account.resource_id,
-        bank_name: account.institution.name,
+        institutionId: account.institution.id,
+        logoUrl: account.institution?.logo,
+        accountId: account.id,
+        accountReference: account.resource_id,
+        bankName: account.institution.name,
         // TODO: Remove once we have a fix and return currency from engine
         currency: account.currency ?? account.balance.currency,
         balance: account.balance.amount,
         enabled: true,
         type: account.type,
-        expires_at: account.expires_at,
+        expiresAt: account.expires_at,
       })),
     });
   }, [data, ref]);
@@ -348,13 +348,13 @@ export function SelectBankAccountsModal() {
                                     checked={
                                       field.value?.find(
                                         (value) =>
-                                          value.account_id === account.id,
+                                          value.accountId === account.id,
                                       )?.enabled
                                     }
                                     onCheckedChange={(checked) => {
                                       return field.onChange(
                                         field.value.map((value) => {
-                                          if (value.account_id === account.id) {
+                                          if (value.accountId === account.id) {
                                             return {
                                               ...value,
                                               enabled: checked,

@@ -1,19 +1,10 @@
-import { client } from "@midday/engine/client";
+import { deleteTeamSchema } from "@jobs/schema";
+import { client } from "@midday/engine-client";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 
 export const deleteTeam = schemaTask({
   id: "delete-team",
-  schema: z.object({
-    teamId: z.string().uuid(),
-    connections: z.array(
-      z.object({
-        provider: z.string().nullable(),
-        reference_id: z.string().nullable(),
-        access_token: z.string().nullable(),
-      }),
-    ),
-  }),
+  schema: deleteTeamSchema,
   maxDuration: 60,
   queue: {
     concurrencyLimit: 10,
@@ -24,11 +15,15 @@ export const deleteTeam = schemaTask({
 
     // Delete connections in providers
     const connectionPromises = connections.map(async (connection) => {
-      return client.connections.delete.$post({
+      return client.connections.delete.$delete({
         json: {
-          id: connection.reference_id,
-          provider: connection.provider,
-          accessToken: connection.access_token,
+          id: connection.referenceId!,
+          provider: connection.provider as
+            | "gocardless"
+            | "teller"
+            | "plaid"
+            | "enablebanking",
+          accessToken: connection.accessToken ?? undefined,
         },
       });
     });

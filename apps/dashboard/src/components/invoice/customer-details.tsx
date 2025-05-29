@@ -20,7 +20,7 @@ export function CustomerDetails() {
     trpc.invoiceTemplate.upsert.mutationOptions(),
   );
 
-  const content = watch("customer_details");
+  const content = watch("customerDetails");
   const id = watch("id");
 
   const { data: customer } = useQuery(
@@ -33,21 +33,21 @@ export function CustomerDetails() {
   );
 
   const handleLabelSave = (value: string) => {
-    updateTemplateMutation.mutate({ customer_label: value });
+    updateTemplateMutation.mutate({ customerLabel: value });
   };
 
   const handleOnChange = (content?: JSONContent | null) => {
     // Reset the selected customer id when the content is changed
     setParams({ selectedCustomerId: null });
 
-    setValue("customer_details", content, {
+    setValue("customerDetails", content, {
       shouldValidate: true,
       shouldDirty: true,
     });
 
     if (!content) {
-      setValue("customer_name", null, { shouldValidate: true });
-      setValue("customer_id", null, { shouldValidate: true });
+      setValue("customerName", null, { shouldValidate: true });
+      setValue("customerId", null, { shouldValidate: true });
     }
   };
 
@@ -58,9 +58,9 @@ export function CustomerDetails() {
       // Remove the selected customer id from the url so we don't introduce a race condition
       setParams({ selectedCustomerId: null });
 
-      setValue("customer_name", customer.name, { shouldValidate: true });
-      setValue("customer_id", customer.id, { shouldValidate: true });
-      setValue("customer_details", customerContent, {
+      setValue("customerName", customer.name, { shouldValidate: true });
+      setValue("customerId", customer.id, { shouldValidate: true });
+      setValue("customerDetails", customerContent, {
         shouldValidate: true,
         shouldDirty: true,
       });
@@ -70,13 +70,13 @@ export function CustomerDetails() {
   return (
     <div>
       <LabelInput
-        name="template.customer_label"
+        name="template.customerLabel"
         className="mb-2 block"
         onSave={handleLabelSave}
       />
       {content ? (
         <Controller
-          name="customer_details"
+          name="customerDetails"
           control={control}
           render={({ field }) => (
             <Editor

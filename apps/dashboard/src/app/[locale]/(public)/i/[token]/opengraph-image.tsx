@@ -1,19 +1,24 @@
+import { getQueryClient, trpc } from "@/trpc/server";
 import { getWebsiteLogo } from "@/utils/logos";
 import { OgTemplate, isValidLogoUrl } from "@midday/invoice";
-import { verify } from "@midday/invoice/token";
-import { getInvoiceByIdQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
 import { ImageResponse } from "next/og";
 
 export const contentType = "image/png";
 
 const CDN_URL = "https://cdn.midday.ai";
 
-export default async function Image({ params }: { params: { token: string } }) {
-  const supabase = await createClient({ admin: true });
+type Props = {
+  params: { token: string };
+};
 
-  const { id } = await verify(params.token);
-  const { data: invoice } = await getInvoiceByIdQuery(supabase, id);
+export default async function Image({ params }: Props) {
+  const queryClient = getQueryClient();
+
+  const invoice = await queryClient.fetchQuery(
+    trpc.invoice.getInvoiceByToken.queryOptions({
+      token: params.token,
+    }),
+  );
 
   if (!invoice) {
     return new Response("Not found", { status: 404 });
@@ -32,12 +37,7 @@ export default async function Image({ params }: { params: { token: string } }) {
   const isValidLogo = await isValidLogoUrl(logoUrl);
 
   return new ImageResponse(
-    <OgTemplate
-      {...invoice}
-      name={invoice.customer_name || invoice.customer?.name}
-      isValidLogo={isValidLogo}
-      logoUrl={logoUrl}
-    />,
+    <OgTemplate data={invoice} isValidLogo={isValidLogo} />,
     {
       width: 1200,
       height: 630,

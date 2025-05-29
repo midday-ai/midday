@@ -14,7 +14,7 @@ export function InvoicesPaid() {
     }),
   );
 
-  const totalInvoiceCount = data?.at(0)?.invoice_count;
+  const totalInvoiceCount = data?.at(0)?.invoiceCount;
 
   return (
     <button

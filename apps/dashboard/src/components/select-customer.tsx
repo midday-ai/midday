@@ -96,7 +96,7 @@ export function SelectCustomer() {
               </button>
             </CommandEmpty>
             <CommandGroup>
-              {formatData.map((item) => (
+              {formatData?.map((item) => (
                 <CommandItem
                   key={item.value}
                   value={item.value}

@@ -1,8 +1,8 @@
 "use client";
 
 import { useCustomerParams } from "@/hooks/use-customer-params";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getWebsiteLogo } from "@/utils/logos";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
@@ -14,15 +14,9 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { ScrollArea, ScrollBar } from "@midday/ui/scroll-area";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import type { ColumnDef, RowData } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import * as React from "react";
-
-declare module "@tanstack/react-table" {
-  interface TableMeta<TData extends RowData> {
-    deleteCustomer: (id: string) => void;
-  }
-}
 
 export type Customer = RouterOutputs["customers"]["get"]["data"][number];
 
@@ -70,10 +64,10 @@ export const columns: ColumnDef<Customer>[] = [
     header: "Invoices",
     accessorKey: "invoices",
     cell: ({ row }) => {
-      if (row.original.invoices.length > 0) {
+      if (row.original.invoiceCount > 0) {
         return (
           <Link href={`/invoices?customers=${row.original.id}`}>
-            {row.original.invoices.length}
+            {row.original.invoiceCount}
           </Link>
         );
       }
@@ -85,10 +79,10 @@ export const columns: ColumnDef<Customer>[] = [
     header: "Projects",
     accessorKey: "projects",
     cell: ({ row }) => {
-      if (row.original.projects.length > 0) {
+      if (row.original.projectCount > 0) {
         return (
           <Link href={`/tracker?customers=${row.original.id}`}>
-            {row.original.projects.length}
+            {row.original.projectCount}
           </Link>
         );
       }
@@ -104,7 +98,7 @@ export const columns: ColumnDef<Customer>[] = [
         <div className="relative">
           <ScrollArea className="max-w-[170px] whitespace-nowrap">
             <div className="flex items-center space-x-2">
-              {row.original.tags?.map(({ tag }) => (
+              {row.original.tags?.map((tag) => (
                 <Link href={`/transactions?tags=${tag.id}`} key={tag.id}>
                   <Badge variant="tag-rounded" className="whitespace-nowrap">
                     {tag.name}
@@ -149,7 +143,7 @@ export const columns: ColumnDef<Customer>[] = [
 
               <DropdownMenuItem
                 onClick={() =>
-                  table.options.meta?.deleteCustomer(row.original.id)
+                  table.options.meta?.deleteCustomer?.(row.original.id)
                 }
                 className="text-[#FF3638]"
               >

@@ -34,9 +34,7 @@ export function InboxView() {
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
     {
       order: params.order,
-      filter: {
-        ...filter,
-      },
+      ...filter,
     },
     {
       getNextPageParam: ({ meta }) => meta?.cursor,
@@ -61,7 +59,7 @@ export function InboxView() {
   useRealtime({
     channelName: "realtime_inbox",
     table: "inbox",
-    filter: `team_id=eq.${user?.team_id}`,
+    filter: `team_id=eq.${user?.teamId}`,
     onEvent: (payload) => {
       if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
         debouncedEventHandler();

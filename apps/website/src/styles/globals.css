@@ -3,162 +3,172 @@
 @tailwind utilities;
 
 :root {
-    --sh-class: #FFFFFF;
-    --sh-identifier: #FFFFFF;
-    --sh-sign: #8996a3;
-    --sh-string: #A7A7A7;
-    --sh-keyword: #A7A7A7;
-    --sh-comment: #a19595;
-    --sh-jsxliterals: #FFFFFF;
-    --sh-property: #A7A7A7;
-    --sh-entity: #A7A7A7;
+  --sh-class: #ffffff;
+  --sh-identifier: #ffffff;
+  --sh-sign: #8996a3;
+  --sh-string: #a7a7a7;
+  --sh-keyword: #a7a7a7;
+  --sh-comment: #a19595;
+  --sh-jsxliterals: #ffffff;
+  --sh-property: #a7a7a7;
+  --sh-entity: #a7a7a7;
 }
 
 .updates p {
-    min-height: 1.87em;
-    margin-top: 1px;
-    margin-bottom: 1px;
-    padding: 3px 2px;
+  min-height: 1.87em;
+  margin-top: 1px;
+  margin-bottom: 1px;
+  padding: 3px 2px;
 }
 
 .updates h2 {
-    font-size: 26px;
-    margin-top: .8em;
-    margin-bottom: 10px;
-    font-weight: 500;
+  font-size: 26px;
+  margin-top: .8em;
+  margin-bottom: 10px;
+  font-weight: 500;
 }
 
 .updates h4 {
-    display: block;
-    font-weight: 600;
-    color: white;
-    margin-top: 15px;
+  display: block;
+  font-weight: 600;
+  color: white;
+  margin-top: 15px;
 }
 
 .updates h3 {
-    font-size: 1.25em;
-    margin-top: .8em;
-    margin-bottom: 1px;
-    font-weight: 500;
+  font-size: 1.25em;
+  margin-top: .8em;
+  margin-bottom: 1px;
+  font-weight: 500;
 }
 
 .updates p,
 .updates li {
-    color: #707070;
+  color: #707070;
 }
 
 .updates ul li {
-    margin-top: 1px;
-    margin-bottom: 1px;
-    padding-left: 12px;
-    padding-top: 3px;
-    padding-bottom: 2px;
+  margin-top: 1px;
+  margin-bottom: 1px;
+  padding-left: 12px;
+  padding-top: 3px;
+  padding-bottom: 2px;
 }
 
 .updates ul {
-    list-style-type: disc;
-    list-style-position: inside;
+  list-style-type: disc;
+  list-style-position: inside;
 }
 
 .updates p code span {
-    font-family: var(--font-geist-mono);
-    color: #eb5757 !important;
-    font-size: 85%;
-    font-weight: 600;
+  font-family: var(--font-geist-mono);
+  color: #eb5757 !important;
+  font-size: 85%;
+  font-weight: 600;
 }
 
 .updates p code {
-    border-radius: 4px;
-    background: hsla(44, 6%, 50%, .15);
-    padding: 0 .4em 3px .4em;
-    line-height: normal;
-
+  border-radius: 4px;
+  background: hsla(44, 6%, 50%, 0.15);
+  padding: 0 .4em 3px .4em;
+  line-height: normal;
 }
 
 .updates a {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .updates blockquote p {
-    margin: 7px 2px;
-    padding-left: 14px;
-    padding-right: 14px;
-    border-left: 3px solid;
-    color: hsl(var(--foreground));
+  margin: 7px 2px;
+  padding-left: 14px;
+  padding-right: 14px;
+  border-left: 3px solid;
+  color: hsl(var(--foreground));
 }
 
 .updates b,
 .updates strong {
-    font-weight: 500;
+  font-weight: 500;
 }
 
 pre::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 pre {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-    padding: 20px;
-    border: 1px solid;
-    border-color: hsl(var(--border));
-    border-radius: 10px;
-    margin: 20px 0 !important;
-    background-color: #0C0C0C;
-    overflow: auto;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  padding: 20px;
+  border: 1px solid;
+  border-color: hsl(var(--border));
+  border-radius: 10px;
+  margin: 20px 0 !important;
+  background-color: #0c0c0c;
+  overflow: auto;
 }
 
 pre code {
-    font-size: 13px;
-    font-weight: 500 !important;
+  font-size: 13px;
+  font-weight: 500 !important;
 }
 
 .dark .dotted-bg {
-    background-image: radial-gradient(circle at 1px 1px, #232323 1px, transparent 0);
-    background-size: 8px 8px;
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    #232323 1px,
+    transparent 0
+  );
+  background-size: 8px 8px;
 }
 
 .light .dotted-bg {
-    background-image: radial-gradient(circle at 1px 1px, #e7e7e7 1px, transparent 0);
-    background-size: 8px 8px;
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    #e7e7e7 1px,
+    transparent 0
+  );
+  background-size: 8px 8px;
 }
 
 .text-stroke {
-    color: white;
-    text-shadow: -1px 1px 0 black,
-    1px 1px 0 black,
-    1px -1px 0 black,
-    -1px -1px 0 black;
+  color: white;
+  text-shadow: -1px 1px 0 black, 1px 1px 0 black, 1px -1px 0 black, -1px -1px 0
+    black;
 }
 
- 
 .dark .text-stroke {
-    color: black;
-    text-shadow: -1px 1px 0 white,
-    1px 1px 0 white,
-    1px -1px 0 white,
-    -1px -1px 0 white;
+  color: black;
+  text-shadow: -1px 1px 0 white, 1px 1px 0 white, 1px -1px 0 white, -1px -1px 0
+    white;
 }
- 
+
 .dark .text-dotted {
-    background-image: radial-gradient(circle at 0.4px 0.2px, #fff 1px, transparent 0);
-    background-size: 5px 5px;
-    background-clip: text;  
-   -webkit-text-fill-color: transparent;  
+  background-image: radial-gradient(
+    circle at 0.4px 0.2px,
+    #fff 1px,
+    transparent 0
+  );
+  background-size: 5px 5px;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .text-dotted {
-    background-image: radial-gradient(circle at 0.4px 0.2px, #000 1px, transparent 0);
-    background-size: 5px 5px;
-    background-clip: text;  
-   -webkit-text-fill-color: transparent;  
+  background-image: radial-gradient(
+    circle at 0.4px 0.2px,
+    #000 1px,
+    transparent 0
+  );
+  background-size: 5px 5px;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 ::selection {
-    background: #00cc9937;
-    color: #007763fd
+  background: #00cc9937;
+  color: #007763fd;
 }
 
 img::selection {
-    background: transparent;
- }
+  background: transparent;
+}

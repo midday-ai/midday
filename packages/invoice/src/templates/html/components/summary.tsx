@@ -1,16 +1,16 @@
+import type { LineItem } from "../../../types";
 import { calculateTotal } from "../../../utils/calculate";
-import type { LineItem } from "../../types";
 
 type Props = {
-  includeVAT: boolean;
+  includeVat: boolean;
   includeTax: boolean;
   includeDiscount: boolean;
-  discount?: number;
+  discount?: number | null;
   discountLabel: string;
   taxRate: number;
   vatRate: number;
   locale: string;
-  currency: string;
+  currency: string | null;
   vatLabel: string;
   taxLabel: string;
   totalLabel: string;
@@ -20,7 +20,7 @@ type Props = {
 };
 
 export function Summary({
-  includeVAT,
+  includeVat,
   includeTax,
   includeDiscount,
   discountLabel,
@@ -48,7 +48,7 @@ export function Summary({
     taxRate,
     vatRate,
     discount: discount ?? 0,
-    includeVAT,
+    includeVat,
     includeTax,
   });
 
@@ -59,11 +59,12 @@ export function Summary({
           {subtotalLabel}
         </span>
         <span className="text-right font-mono text-[11px] text-[#878787]">
-          {new Intl.NumberFormat(locale, {
-            style: "currency",
-            currency: currency,
-            maximumFractionDigits,
-          }).format(subTotal)}
+          {currency &&
+            new Intl.NumberFormat(locale, {
+              style: "currency",
+              currency: currency,
+              maximumFractionDigits,
+            }).format(subTotal)}
         </span>
       </div>
 
@@ -73,26 +74,28 @@ export function Summary({
             {discountLabel}
           </span>
           <span className="text-right font-mono text-[11px] text-[#878787]">
-            {new Intl.NumberFormat(locale, {
-              style: "currency",
-              currency: currency,
-              maximumFractionDigits,
-            }).format(discount ?? 0)}
+            {currency &&
+              new Intl.NumberFormat(locale, {
+                style: "currency",
+                currency: currency,
+                maximumFractionDigits,
+              }).format(discount ?? 0)}
           </span>
         </div>
       )}
 
-      {includeVAT && (
+      {includeVat && (
         <div className="flex justify-between items-center py-1">
           <span className="text-[11px] text-[#878787] font-mono">
             {vatLabel} ({vatRate}%)
           </span>
           <span className="text-right font-mono text-[11px] text-[#878787]">
-            {new Intl.NumberFormat(locale, {
-              style: "currency",
-              currency: currency,
-              maximumFractionDigits,
-            }).format(totalVAT)}
+            {currency &&
+              new Intl.NumberFormat(locale, {
+                style: "currency",
+                currency: currency,
+                maximumFractionDigits,
+              }).format(totalVAT)}
           </span>
         </div>
       )}
@@ -103,11 +106,12 @@ export function Summary({
             {taxLabel} ({taxRate}%)
           </span>
           <span className="text-right font-mono text-[11px] text-[#878787]">
-            {new Intl.NumberFormat(locale, {
-              style: "currency",
-              currency: currency,
-              maximumFractionDigits,
-            }).format(totalTax)}
+            {currency &&
+              new Intl.NumberFormat(locale, {
+                style: "currency",
+                currency: currency,
+                maximumFractionDigits,
+              }).format(totalTax)}
           </span>
         </div>
       )}
@@ -117,11 +121,12 @@ export function Summary({
           {totalLabel}
         </span>
         <span className="text-right font-mono text-[21px]">
-          {new Intl.NumberFormat(locale, {
-            style: "currency",
-            currency: currency,
-            maximumFractionDigits,
-          }).format(total)}
+          {currency &&
+            new Intl.NumberFormat(locale, {
+              style: "currency",
+              currency: currency,
+              maximumFractionDigits,
+            }).format(total)}
         </span>
       </div>
     </div>

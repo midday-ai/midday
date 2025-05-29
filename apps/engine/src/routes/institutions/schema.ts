@@ -1,5 +1,5 @@
-import { Providers } from "@/common/schema";
-import { ALL_COUNTRIES } from "@/utils/countries";
+import { Providers } from "@engine/common/schema";
+import { ALL_COUNTRIES } from "@engine/utils/countries";
 import { z } from "@hono/zod-openapi";
 
 export const InstitutionSchema = z
@@ -24,9 +24,35 @@ export const InstitutionSchema = z
         example: 365,
       })
       .nullable(),
+    maximum_consent_validity: z
+      .string()
+      .openapi({
+        example: "personal",
+      })
+      .optional()
+      .nullable(),
+    type: z
+      .enum(["personal", "business"])
+      .openapi({
+        example: "personal",
+      })
+      .nullable()
+      .optional(),
+    popularity: z
+      .number()
+      .openapi({
+        example: 1,
+      })
+      .optional(),
+    country: z
+      .string()
+      .openapi({
+        example: "GB",
+      })
+      .optional(),
     provider: Providers.openapi({
       example: Providers.Enum.teller,
-    }),
+    }).optional(),
   })
   .openapi("InstitutionSchema");
 

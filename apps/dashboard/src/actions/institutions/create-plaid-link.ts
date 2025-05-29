@@ -1,6 +1,6 @@
 "use server";
 
-import { client } from "@midday/engine/client";
+import { client } from "@midday/engine-client";
 import { getSession } from "@midday/supabase/cached-queries";
 
 export const createPlaidLinkTokenAction = async (accessToken?: string) => {

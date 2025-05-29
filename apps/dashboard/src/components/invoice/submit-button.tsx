@@ -21,10 +21,10 @@ type Props = {
 export function SubmitButton({ isSubmitting, disabled }: Props) {
   const { watch, setValue, formState } = useFormContext();
 
-  const selectedOption = watch("template.delivery_type");
+  const selectedOption = watch("template.deliveryType");
   const canUpdate = watch("status") !== "draft";
 
-  const invoiceNumberValid = !formState.errors.invoice_number;
+  const invoiceNumberValid = !formState.errors.invoiceNumber;
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
@@ -35,10 +35,10 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     const deliveryType = value as "create" | "create_and_send";
 
     updateTemplateMutation.mutate({
-      delivery_type: deliveryType,
+      deliveryType,
     });
 
-    setValue("template.delivery_type", deliveryType, {
+    setValue("template.deliveryType", deliveryType, {
       shouldValidate: true,
     });
   };

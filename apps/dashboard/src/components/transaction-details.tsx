@@ -45,6 +45,7 @@ export function TransactionDetails() {
     initialData: () => {
       const pages = queryClient
         .getQueriesData({ queryKey: trpc.transactions.get.infiniteQueryKey() })
+        // @ts-expect-error
         .flatMap(([, data]) => data?.pages ?? [])
         .flatMap((page) => page.data ?? []);
 
@@ -86,12 +87,12 @@ export function TransactionDetails() {
         queryClient.setQueryData(
           trpc.transactions.getById.queryKey({ id: transactionId! }),
           (old: any) => {
-            if (variables.category_slug) {
+            if (variables.categorySlug) {
               const categories = queryClient.getQueryData(
                 trpc.transactionCategories.get.queryKey(),
               );
               const category = categories?.find(
-                (c) => c.slug === variables.category_slug,
+                (c) => c.slug === variables.categorySlug,
               );
 
               if (category) {
@@ -125,12 +126,12 @@ export function TransactionDetails() {
                     ? {
                         ...transaction,
                         ...variables,
-                        ...(variables.category_slug && {
+                        ...(variables.categorySlug && {
                           category: queryClient
                             .getQueryData(
                               trpc.transactionCategories.get.queryKey(),
                             )
-                            ?.find((c) => c.slug === variables.category_slug),
+                            ?.find((c) => c.slug === variables.categorySlug),
                         }),
                       }
                     : transaction,
@@ -168,7 +169,7 @@ export function TransactionDetails() {
   const createTransactionTagMutation = useMutation(
     trpc.transactionTags.create.mutationOptions({
       onSuccess: () => {
-        qqueryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
         });
 
@@ -231,10 +232,10 @@ export function TransactionDetails() {
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              {data?.bank_account?.bank_connection?.logo_url && (
+              {data?.account?.connection?.logoUrl && (
                 <TransactionBankAccount
-                  name={data?.bank_account?.name ?? undefined}
-                  logoUrl={data.bank_account.bank_connection.logo_url}
+                  name={data?.account?.name ?? undefined}
+                  logoUrl={data.account.connection.logoUrl}
                   className="text-[#606060] text-xs"
                 />
               )}
@@ -269,7 +270,7 @@ export function TransactionDetails() {
                 </span>
               )}
               <div className="h-3">
-                {data?.vat ? (
+                {data?.vat && data.vat > 0 ? (
                   <span className="text-[#606060] text-xs select-text">
                     VAT{" "}
                     <FormatAmount amount={data.vat} currency={data.currency} />
@@ -295,12 +296,13 @@ export function TransactionDetails() {
 
           <SelectCategory
             id={transactionId}
+            // @ts-expect-error
             selected={data?.category ?? undefined}
             onChange={async (category) => {
               if (category) {
                 updateTransactionMutation.mutate({
                   id: data?.id,
-                  category_slug: category.slug,
+                  categorySlug: category.slug,
                 });
 
                 const similarTransactions = await queryClient.fetchQuery(
@@ -361,7 +363,7 @@ export function TransactionDetails() {
                 if (user) {
                   updateTransactionMutation.mutate({
                     id: data?.id,
-                    assigned_id: user.id,
+                    assignedId: user.id,
                   });
                 }
               }}
@@ -377,21 +379,25 @@ export function TransactionDetails() {
 
         <SelectTags
           tags={data?.tags?.map((tag) => ({
-            label: tag.tag.name,
-            value: tag.tag.name,
-            id: tag.tag.id,
+            id: tag.id,
+            label: tag.name!,
+            value: tag.name!,
           }))}
           onSelect={(tag) => {
-            createTransactionTagMutation.mutate({
-              tagId: tag.id,
-              transactionId: transactionId!,
-            });
+            if (tag.id) {
+              createTransactionTagMutation.mutate({
+                tagId: tag.id,
+                transactionId: transactionId!,
+              });
+            }
           }}
           onRemove={(tag) => {
-            deleteTransactionTagMutation.mutate({
-              tagId: tag.id,
-              transactionId: transactionId!,
-            });
+            if (tag.id) {
+              deleteTransactionTagMutation.mutate({
+                tagId: tag.id,
+                transactionId: transactionId!,
+              });
+            }
           }}
         />
       </div>
@@ -456,7 +462,11 @@ export function TransactionDetails() {
                 onValueChange={async (value) => {
                   updateTransactionMutation.mutate({
                     id: data?.id,
-                    frequency: value,
+                    frequency: value as
+                      | "weekly"
+                      | "monthly"
+                      | "annually"
+                      | "irregular",
                   });
 
                   const similarTransactions = await queryClient.fetchQuery(

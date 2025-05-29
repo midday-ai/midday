@@ -44,7 +44,7 @@ export function TransactionUnmatchItem() {
         if (previousInboxItem) {
           queryClient.setQueryData(queryKey, {
             ...previousInboxItem,
-            transaction_id: null,
+            transactionId: null,
             transaction: null,
           });
         }
@@ -76,13 +76,13 @@ export function TransactionUnmatchItem() {
   }
 
   return (
-    <div className="bg-background h-12 flex py-3 text-sm w-full px-4 gap-4 items-center overflow-hidden">
+    <div className="bg-background h-12 flex py-3 text-sm w-full px-4 gap-4 items-center overflow-hidden border border-border dark:border-none">
       <Icons.Check className="w-4 h-4" />
 
       <TransactionMatchItem
         date={data?.transaction?.date}
         name={data?.transaction?.name}
-        dateFormat={user?.date_format}
+        dateFormat={user?.dateFormat}
         amount={data?.transaction?.amount}
         currency={data?.transaction?.currency}
       />

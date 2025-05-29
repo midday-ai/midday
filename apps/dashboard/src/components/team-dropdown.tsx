@@ -1,14 +1,12 @@
 "use client";
 
-import { changeTeamAction } from "@/actions/change-team-action";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
@@ -25,13 +23,14 @@ export function TeamDropdown() {
   const [isActive, setActive] = useState(false);
   const [isChangingTeam, setIsChangingTeam] = useState(false);
 
-  const changeTeam = useAction(changeTeamAction, {
-    onSuccess: () => {
-      // Invalidate all queries to refresh the data
-      queryClient.invalidateQueries();
-      setIsChangingTeam(false);
-    },
-  });
+  const changeTeamMutation = useMutation(
+    trpc.user.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries();
+        setIsChangingTeam(false);
+      },
+    }),
+  );
 
   const { data: teams } = useQuery(trpc.team.list.queryOptions());
 
@@ -43,12 +42,13 @@ export function TeamDropdown() {
 
   const sortedTeams =
     teams?.sort((a, b) => {
-      if (a.team.id === selectedId) return -1;
-      if (b.team.id === selectedId) return 1;
+      if (a.id === selectedId) return -1;
+      if (b.id === selectedId) return 1;
 
-      return a.team.id.localeCompare(b.team.id);
+      return (a.id ?? "").localeCompare(b.id ?? "");
     }) ?? [];
 
+  // @ts-expect-error
   useOnClickOutside(ref, () => {
     if (!isChangingTeam) {
       setActive(false);
@@ -67,7 +67,7 @@ export function TeamDropdown() {
     setSelectedId(teamId);
     setActive(false);
 
-    changeTeam.execute({ teamId, redirectTo: "/" });
+    changeTeamMutation.mutate({ teamId });
   };
 
   return (
@@ -97,7 +97,7 @@ export function TeamDropdown() {
             </Link>
           </motion.div>
         )}
-        {sortedTeams.map(({ team }, index) => (
+        {sortedTeams.map((team, index) => (
           <motion.div
             key={team.id}
             className="w-[32px] h-[32px] left-0 overflow-hidden absolute"
@@ -130,13 +130,13 @@ export function TeamDropdown() {
                 if (index === 0) {
                   toggleActive();
                 } else {
-                  handleTeamChange(team.id);
+                  handleTeamChange(team?.id ?? "");
                 }
               }}
             >
               <AvatarImageNext
-                src={team.logo_url ?? ""}
-                alt={team.name ?? ""}
+                src={team?.logoUrl ?? ""}
+                alt={team?.name ?? ""}
                 width={20}
                 height={20}
                 quality={100}

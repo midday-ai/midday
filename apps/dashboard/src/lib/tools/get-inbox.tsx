@@ -18,9 +18,7 @@ export const getInbox = tool({
 
     const { data } = await queryClient.fetchQuery(
       trpc.inbox.get.queryOptions({
-        filter: {
-          q: amount ? amount.toString() : name,
-        },
+        q: amount ? amount.toString() : name,
       }),
     );
 

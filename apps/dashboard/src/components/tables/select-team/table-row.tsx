@@ -1,12 +1,12 @@
 "use client";
 
-import { changeTeamAction } from "@/actions/change-team-action";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { TableRow as BaseTableRow, TableCell } from "@midday/ui/table";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type Props = {
@@ -16,40 +16,45 @@ type Props = {
 export function TableRow({ row }: Props) {
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
+  const trpc = useTRPC();
+  const router = useRouter();
 
-  const changeTeam = useAction(changeTeamAction, {
-    onExecute: () => {
-      setIsLoading(true);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries();
-    },
-    onError: () => {
-      setIsLoading(false);
-    },
-  });
+  const changeTeamMutation = useMutation(
+    trpc.user.update.mutationOptions({
+      onMutate: () => {
+        setIsLoading(true);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries();
+        router.push("/");
+      },
+      onError: () => {
+        setIsLoading(false);
+      },
+    }),
+  );
 
   return (
     <BaseTableRow key={row.id} className="hover:bg-transparent">
       <TableCell className="border-r-[0px] py-4">
         <div className="flex items-center space-x-4">
           <Avatar className="rounded-full w-8 h-8">
-            {row.team?.logo_url && (
+            {row.logoUrl && (
               <AvatarImageNext
-                src={row.team.logo_url}
-                alt={row.team?.name ?? ""}
+                src={row.logoUrl}
+                alt={row.name ?? ""}
                 width={32}
                 height={32}
               />
             )}
             <AvatarFallback>
               <span className="text-xs">
-                {row.team.name?.charAt(0)?.toUpperCase()}
+                {row?.name?.charAt(0)?.toUpperCase()}
               </span>
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="font-medium text-sm">{row.team.name}</span>
+            <span className="font-medium text-sm">{row?.name}</span>
           </div>
         </div>
       </TableCell>
@@ -60,9 +65,8 @@ export function TableRow({ row }: Props) {
               isSubmitting={isLoading}
               variant="outline"
               onClick={() => {
-                changeTeam.execute({
-                  teamId: row.team.id,
-                  redirectTo: "/",
+                changeTeamMutation.mutate({
+                  teamId: row.id!,
                 });
               }}
             >

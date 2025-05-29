@@ -1,6 +1,6 @@
-import { parseAPIError } from "@/utils/parse-error";
-import { getClassification } from "@/utils/transform";
-import { client } from "@midday/engine/client";
+import { parseAPIError } from "@jobs/utils/parse-error";
+import { getClassification } from "@jobs/utils/transform";
+import { client } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";

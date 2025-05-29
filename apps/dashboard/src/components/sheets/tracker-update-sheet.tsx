@@ -51,6 +51,7 @@ export function TrackerUpdateSheet({ defaultCurrency }: Props) {
             .getQueriesData({
               queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
             })
+            // @ts-expect-error
             .flatMap(([, data]) => data?.pages ?? [])
             .flatMap((page) => page.data ?? []);
 

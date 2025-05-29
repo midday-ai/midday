@@ -1,6 +1,6 @@
-import { getTeamId } from "@/utils/team";
+import { getQueryClient, trpc } from "@/trpc/server";
 import { InboxConnector } from "@midday/inbox/connector";
-import type { initialInboxSetup } from "@midday/jobs/tasks/inbox/provider/initial-setup";
+import type { InitialInboxSetupPayload } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { NextResponse } from "next/server";
 
@@ -8,9 +8,10 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const state = searchParams.get("state") as "gmail" | "outlook";
-  const teamId = await getTeamId();
+  const queryClient = getQueryClient();
+  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
 
-  if (!code || !state || !teamId) {
+  if (!code || !state || !user?.teamId) {
     return NextResponse.json(
       { error: "Missing required parameters" },
       { status: 400 },
@@ -19,7 +20,10 @@ export async function GET(request: Request) {
 
   try {
     const connector = new InboxConnector(state);
-    const account = await connector.exchangeCodeForAccount({ code, teamId });
+    const account = await connector.exchangeCodeForAccount({
+      code,
+      teamId: user.teamId,
+    });
 
     if (!account) {
       return NextResponse.redirect(
@@ -28,9 +32,9 @@ export async function GET(request: Request) {
       );
     }
 
-    await tasks.trigger<typeof initialInboxSetup>("initial-inbox-setup", {
+    await tasks.trigger("initial-inbox-setup", {
       id: account.id,
-    });
+    } satisfies InitialInboxSetupPayload);
 
     return NextResponse.redirect(
       new URL(`/inbox?connected=true&provider=${state}`, request.url),

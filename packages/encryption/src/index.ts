@@ -64,3 +64,7 @@ export function decrypt(encryptedPayload: string): string {
 
   return decrypted;
 }
+
+export function hash(str: string): string {
+  return crypto.createHash("sha256").update(str).digest("hex");
+}

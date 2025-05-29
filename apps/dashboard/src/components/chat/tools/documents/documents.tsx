@@ -16,9 +16,7 @@ export function Documents({ result }: Props) {
   const trpc = useTRPC();
   const { data, isLoading } = useQuery(
     trpc.documents.get.queryOptions({
-      filter: {
-        q: result.params.name,
-      },
+      q: result.params.name,
     }),
   );
 
@@ -39,7 +37,7 @@ export function Documents({ result }: Props) {
             ) : (
               <div className="relative group/file">
                 <FilePreview
-                  filePath={document?.path_tokens?.join("/") ?? ""}
+                  filePath={document?.pathTokens?.join("/") ?? ""}
                   mimeType={
                     (document?.metadata as { mimetype?: string })?.mimetype ??
                     ""
@@ -49,7 +47,7 @@ export function Documents({ result }: Props) {
                 <div className="absolute top-2 right-2 opacity-0 group-hover/file:opacity-100 transition-opacity duration-200">
                   <VaultItemActions
                     id={document.id}
-                    filePath={document?.path_tokens ?? []}
+                    filePath={document?.pathTokens ?? []}
                     hideDelete
                   />
                 </div>

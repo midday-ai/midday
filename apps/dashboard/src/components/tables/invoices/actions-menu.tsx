@@ -138,11 +138,7 @@ export function ActionsMenu({ row }: Props) {
 
           {row.status !== "draft" && (
             <DropdownMenuItem>
-              <a
-                // @ts-expect-error
-                href={`/api/download/invoice?id=${row.id}&size=${row.template?.size === "a4" ? "a4" : "letter"}`}
-                download
-              >
+              <a href={`/api/download/invoice?id=${row.id}`} download>
                 Download
               </a>
             </DropdownMenuItem>
@@ -154,7 +150,7 @@ export function ActionsMenu({ row }: Props) {
                 updateInvoiceMutation.mutate({
                   id: row.id,
                   status: "unpaid",
-                  paid_at: null,
+                  paidAt: null,
                 })
               }
             >
@@ -176,14 +172,14 @@ export function ActionsMenu({ row }: Props) {
                         updateInvoiceMutation.mutate({
                           id: row.id,
                           status: "paid",
-                          paid_at: date.toISOString(),
+                          paidAt: date.toISOString(),
                         });
                       } else {
                         // NOTE: Today is undefined
                         updateInvoiceMutation.mutate({
                           id: row.id,
                           status: "paid",
-                          paid_at: new Date().toISOString(),
+                          paidAt: new Date().toISOString(),
                         });
                       }
                     }}

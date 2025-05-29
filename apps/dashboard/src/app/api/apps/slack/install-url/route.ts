@@ -1,26 +1,23 @@
-import { getTeamId } from "@/utils/team";
+import { trpc } from "@/trpc/server";
+import { getQueryClient } from "@/trpc/server";
 import { getInstallUrl } from "@midday/app-store/slack";
-import { getSession } from "@midday/supabase/cached-queries";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const {
-    data: { session },
-  } = await getSession();
+  const queryClient = getQueryClient();
+  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
 
-  const teamId = await getTeamId();
-
-  if (!session) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!teamId) {
+  if (!user.teamId) {
     return NextResponse.json({ error: "Team not found" }, { status: 401 });
   }
 
   const url = await getInstallUrl({
-    teamId,
-    userId: session.user.id,
+    teamId: user.teamId,
+    userId: user.id,
   });
 
   return NextResponse.json({

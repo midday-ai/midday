@@ -18,7 +18,7 @@ export function TrialEndedModal() {
   const pathname = usePathname();
   const daysFromCreation = differenceInDays(
     new Date(),
-    new Date(user?.team?.created_at),
+    new Date(user?.team?.createdAt!),
   );
 
   const isFourteenDaysFromCreation = daysFromCreation >= 14;

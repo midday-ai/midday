@@ -261,17 +261,17 @@ export function ConnectTransactionsModal({
                       provider={institution.provider}
                       // GoCardLess
                       availableHistory={
-                        institution.available_history
-                          ? +institution.available_history
+                        institution.availableHistory
+                          ? +institution.availableHistory
                           : 0
                       }
                       // EnableBanking
                       maximumConsentValidity={
-                        institution.maximum_consent_validity
-                          ? +institution.maximum_consent_validity
+                        institution.maximumConsentValidity
+                          ? +institution.maximumConsentValidity
                           : 0
                       }
-                      type={institution?.type}
+                      type={institution?.type ?? undefined}
                       openPlaid={() => {
                         setParams({ step: null });
                         openPlaid();

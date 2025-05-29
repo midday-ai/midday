@@ -20,7 +20,7 @@ export function Trial() {
   }
 
   // Parse dates using UTCDate for consistent timezone handling
-  const rawCreatedAt = parseISO(team.created_at);
+  const rawCreatedAt = parseISO(team.createdAt);
   const today = new UTCDate();
 
   // Convert to UTCDate for consistent calculation
@@ -35,24 +35,6 @@ export function Trial() {
 
   const isTrialEnded = daysLeft <= 0;
 
-  const canChooseStarterPlan = true;
-  const targetDate = new UTCDate("2025-04-16");
-
-  if (targetDate > today) {
-    return (
-      <ChoosePlanButton
-        initialIsOpen={false}
-        daysLeft={daysLeft}
-        hasDiscount
-        discountPrice={49}
-        teamId={team.id}
-        canChooseStarterPlan={canChooseStarterPlan}
-      >
-        Pro trial - {daysLeft} {daysLeft === 1 ? "day" : "days"} left
-      </ChoosePlanButton>
-    );
-  }
-
   if (isTrialEnded) {
     return (
       <ChoosePlanButton
@@ -60,8 +42,6 @@ export function Trial() {
         daysLeft={daysLeft}
         hasDiscount
         discountPrice={49}
-        teamId={team.id}
-        canChooseStarterPlan={canChooseStarterPlan}
       >
         Upgrade plan
       </ChoosePlanButton>
@@ -69,13 +49,7 @@ export function Trial() {
   }
 
   return (
-    <ChoosePlanButton
-      hasDiscount
-      discountPrice={49}
-      daysLeft={daysLeft}
-      teamId={team.id}
-      canChooseStarterPlan={canChooseStarterPlan}
-    >
+    <ChoosePlanButton hasDiscount discountPrice={49} daysLeft={daysLeft}>
       Pro trial - {daysLeft} {daysLeft === 1 ? "day" : "days"} left
     </ChoosePlanButton>
   );

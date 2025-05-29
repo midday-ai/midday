@@ -1,7 +1,7 @@
 import {
   handleOverdueInvoiceNotifications,
   handlePaidInvoiceNotifications,
-} from "@/utils/invoice-notifications";
+} from "@jobs/utils/invoice-notifications";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
@@ -29,6 +29,7 @@ export const sendInvoiceNotifications = schemaTask({
     switch (status) {
       case "paid":
         await handlePaidInvoiceNotifications({
+          // @ts-expect-error - TODO: Fix types with drizzle
           user,
           invoiceId,
           invoiceNumber,
@@ -36,6 +37,7 @@ export const sendInvoiceNotifications = schemaTask({
         break;
       case "overdue":
         await handleOverdueInvoiceNotifications({
+          // @ts-expect-error - TODO: Fix types with drizzle
           user,
           invoiceId,
           invoiceNumber,

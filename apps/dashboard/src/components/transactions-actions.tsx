@@ -80,7 +80,7 @@ export function TransactionsActions() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                deleteTransactionsMutation.mutate({ ids: transactionIds });
+                deleteTransactionsMutation.mutate(transactionIds);
               }}
             >
               {deleteTransactionsMutation.isPending ? (

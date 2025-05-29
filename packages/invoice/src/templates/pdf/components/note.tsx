@@ -1,8 +1,9 @@
 import { Text, View } from "@react-pdf/renderer";
+import type { EditorDoc } from "../../../types";
 import { EditorContent } from "./editor-content";
 
 type Props = {
-  content?: JSON;
+  content?: EditorDoc | null;
   noteLabel?: string;
 };
 

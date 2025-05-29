@@ -37,7 +37,7 @@ export default async function Page(props: Props) {
 
   batchPrefetch([
     trpc.invoice.get.infiniteQueryOptions({
-      filter,
+      ...filter,
       sort,
     }),
     trpc.invoice.invoiceSummary.queryOptions(),

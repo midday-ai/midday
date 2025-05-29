@@ -1,6 +1,6 @@
 import { Link, Text, View } from "@react-pdf/renderer";
 import type { Style } from "@react-pdf/types";
-import type { EditorDoc } from "../types";
+import type { EditorDoc } from "../../types";
 
 type PDFTextStyle = Style & {
   fontFamily?: string;
@@ -12,7 +12,7 @@ type PDFTextStyle = Style & {
     | "underline line-through";
 };
 
-export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
+export function formatEditorContent(doc?: EditorDoc) {
   if (!doc || !doc.content) {
     return null;
   }

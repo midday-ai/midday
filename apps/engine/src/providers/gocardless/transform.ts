@@ -1,5 +1,5 @@
-import { Providers } from "@/common/schema";
-import { getFileExtension, getLogoURL } from "@/utils/logo";
+import { Providers } from "@engine/common/schema";
+import { getFileExtension, getLogoURL } from "@engine/utils/logo";
 import { capitalCase } from "change-case";
 import { addDays } from "date-fns";
 import type {

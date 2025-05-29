@@ -40,7 +40,7 @@ export function useSliderWithInput({
 
       if (Number.isNaN(numValue)) {
         const newInputValues = [...inputValues];
-        newInputValues[index] = sliderValue[index].toString();
+        newInputValues[index] = sliderValue?.[index]?.toString?.() ?? "0";
         setInputValues(newInputValues);
         return;
       }
@@ -49,9 +49,15 @@ export function useSliderWithInput({
 
       if (sliderValue.length > 1) {
         if (index === 0) {
-          clampedValue = Math.min(clampedValue, sliderValue[1]);
+          clampedValue = Math.min(
+            clampedValue,
+            typeof sliderValue[1] === "number" ? sliderValue[1] : clampedValue,
+          );
         } else {
-          clampedValue = Math.max(clampedValue, sliderValue[0]);
+          clampedValue = Math.max(
+            clampedValue,
+            typeof sliderValue[0] === "number" ? sliderValue[0] : clampedValue,
+          );
         }
       }
 

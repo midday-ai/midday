@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import type { TZDate } from "@date-fns/tz";
 import { format } from "date-fns";
 import { CalendarDay } from "./calendar-day";

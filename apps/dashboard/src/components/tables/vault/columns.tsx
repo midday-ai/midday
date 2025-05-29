@@ -1,7 +1,7 @@
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { formatSize } from "@/utils/format";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -12,17 +12,10 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Skeleton } from "@midday/ui/skeleton";
-import type { ColumnDef, RowData } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 
 type Document = RouterOutputs["documents"]["get"]["data"][number];
-
-declare module "@tanstack/react-table" {
-  interface TableMeta<TData extends RowData> {
-    handleDelete: (id: string) => void;
-    handleShare: (filePath: string[]) => void;
-  }
-}
 
 export const columns: ColumnDef<Document>[] = [
   {
@@ -46,7 +39,7 @@ export const columns: ColumnDef<Document>[] = [
     id: "title",
     accessorKey: "title",
     cell: ({ row }) => {
-      const isLoading = row.original.processing_status === "pending";
+      const isLoading = row.original.processingStatus === "pending";
 
       if (isLoading) {
         return <Skeleton className="w-52 h-4" />;
@@ -61,7 +54,7 @@ export const columns: ColumnDef<Document>[] = [
     cell: ({ row }) => {
       const { setFilter } = useDocumentFilterParams();
 
-      const isLoading = row.original.processing_status === "pending";
+      const isLoading = row.original.processingStatus === "pending";
 
       if (isLoading) {
         return (
@@ -76,16 +69,16 @@ export const columns: ColumnDef<Document>[] = [
       return (
         <div className="relative">
           <div className="flex items-center space-x-2 w-[400px] overflow-x-auto scrollbar-hide">
-            {row.original.tags?.map(({ tag }) => (
+            {row.original.documentTagAssignments?.map(({ documentTag }) => (
               <Badge
-                key={tag.id}
+                key={documentTag.id}
                 variant="tag-rounded"
                 className="whitespace-nowrap"
                 onClick={() => {
-                  setFilter({ tags: [tag.id] });
+                  setFilter({ tags: [documentTag.id] });
                 }}
               >
-                {tag.name}
+                {documentTag.name}
               </Badge>
             ))}
           </div>
@@ -131,7 +124,7 @@ export const columns: ColumnDef<Document>[] = [
             </DropdownMenuItem>
             <DropdownMenuItem>
               <a
-                href={`/api/download/file?path=${row.original.path_tokens?.join(
+                href={`/api/download/file?path=${row.original.pathTokens?.join(
                   "/",
                 )}&filename=${row.original.name?.split("/").at(-1)}`}
                 download
@@ -141,18 +134,18 @@ export const columns: ColumnDef<Document>[] = [
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
-                if (row.original.path_tokens) {
-                  handleShare(row.original.path_tokens);
+                if (row.original.pathTokens) {
+                  handleShare?.(row.original.pathTokens);
                 }
               }}
-              disabled={!row.original.path_tokens}
+              disabled={!row.original.pathTokens}
             >
               Copy link
             </DropdownMenuItem>
 
             <DropdownMenuItem
               onClick={() => {
-                handleDelete(row.original.id);
+                handleDelete?.(row.original.id);
               }}
             >
               Delete

@@ -1,11 +1,16 @@
 {
   "extends": "@midday/tsconfig/base.json",
-  "include": ["src"],
+  "include": ["src", "../../types"],
   "exclude": ["node_modules"],
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "Node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@api/*": ["../../apps/api/src/*"]
+    }
   }
 }

@@ -24,7 +24,7 @@ export function TrackerCalendar() {
   const { data: user } = useUserQuery();
   const trpc = useTRPC();
 
-  const weekStartsOnMonday = user?.week_starts_on_monday ?? false;
+  const weekStartsOnMonday = user?.weekStartsOnMonday ?? false;
 
   const {
     date: currentDate,
@@ -73,6 +73,7 @@ export function TrackerCalendar() {
     enabled: !selectedDate,
   });
 
+  // @ts-expect-error
   useOnClickOutside(ref, () => {
     if (range && range.length === 1) setParams({ range: null });
   });

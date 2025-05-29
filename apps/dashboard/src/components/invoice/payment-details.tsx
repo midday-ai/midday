@@ -18,16 +18,16 @@ export function PaymentDetails() {
   return (
     <div>
       <LabelInput
-        name="template.payment_label"
+        name="template.paymentLabel"
         onSave={(value) => {
-          updateTemplateMutation.mutate({ payment_label: value });
+          updateTemplateMutation.mutate({ paymentLabel: value });
         }}
         className="mb-2 block"
       />
 
       <Controller
         control={control}
-        name="payment_details"
+        name="paymentDetails"
         render={({ field }) => (
           <Editor
             // NOTE: This is a workaround to get the new content to render
@@ -36,7 +36,7 @@ export function PaymentDetails() {
             onChange={field.onChange}
             onBlur={(content) => {
               updateTemplateMutation.mutate({
-                payment_details: content ? JSON.stringify(content) : null,
+                paymentDetails: content ? JSON.stringify(content) : null,
               });
             }}
             className="min-h-[78px]"

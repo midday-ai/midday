@@ -54,10 +54,8 @@ export function DataTable({
 
   const infiniteQueryOptions = trpc.transactions.get.infiniteQueryOptions(
     {
-      filter: {
-        ...filter,
-        q: deferredSearch,
-      },
+      ...filter,
+      q: deferredSearch,
       sort: params.sort,
     },
     {
@@ -147,7 +145,7 @@ export function DataTable({
         });
       },
       onDeleteTransaction: (id: string) => {
-        deleteTransactionMutation.mutate({ ids: [id] });
+        deleteTransactionMutation.mutate([id]);
       },
     },
   });
@@ -278,16 +276,7 @@ export function DataTable({
 
       <ExportBar />
 
-      <AnimatePresence>
-        {showBottomBar && (
-          <BottomBar
-            transactions={tableData.map((row) => ({
-              amount: row?.amount ?? 0,
-              currency: row?.currency ?? "",
-            }))}
-          />
-        )}
-      </AnimatePresence>
+      <AnimatePresence>{showBottomBar && <BottomBar />}</AnimatePresence>
     </div>
   );
 }

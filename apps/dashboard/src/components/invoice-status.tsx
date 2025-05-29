@@ -9,7 +9,7 @@ export function InvoiceStatus({
   isLoading,
   className,
 }: {
-  status: "draft" | "overdue" | "paid" | "unpaid" | "canceled";
+  status?: "draft" | "overdue" | "paid" | "unpaid" | "canceled";
   isLoading?: boolean;
   className?: string;
 }) {
@@ -17,6 +17,10 @@ export function InvoiceStatus({
 
   if (isLoading) {
     return <Skeleton className="w-24 h-6 rounded-full" />;
+  }
+
+  if (!status) {
+    return null;
   }
 
   return (

@@ -1,11 +1,11 @@
 type Props = {
   customerName?: string;
-  logoUrl?: string;
+  logoUrl?: string | null;
   isValidLogo: boolean;
 };
 
 export function Avatar({ logoUrl, isValidLogo, customerName }: Props) {
-  if (isValidLogo) {
+  if (isValidLogo && logoUrl) {
     return (
       <img
         src={logoUrl}
