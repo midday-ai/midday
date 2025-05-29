@@ -9,16 +9,12 @@ export type GetInboxParams = {
   cursor?: string | null;
   order?: string | null;
   pageSize?: number;
-  filter?: {
-    q?: string | null;
-    status?: "new" | "archived" | "processing" | "done" | "pending" | null;
-  };
+  q?: string | null;
+  status?: "new" | "archived" | "processing" | "done" | "pending" | null;
 };
 
 export async function getInbox(db: Database, params: GetInboxParams) {
-  const { teamId, filter = {}, cursor, order, pageSize = 20 } = params;
-
-  const { q, status } = filter;
+  const { teamId, cursor, order, pageSize = 20, q, status } = params;
 
   const whereConditions: SQL[] = [
     eq(inbox.teamId, teamId),

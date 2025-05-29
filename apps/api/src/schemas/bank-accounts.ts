@@ -83,17 +83,29 @@ export const bankAccountsResponseSchema = z
   });
 
 export const deleteBankAccountSchema = z.object({
-  id: z.string().uuid().openapi({
-    description: "The unique identifier of the bank account.",
-    example: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
-  }),
+  id: z
+    .string()
+    .uuid()
+    .openapi({
+      description: "The unique identifier of the bank account.",
+      example: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
+      param: {
+        in: "path",
+      },
+    }),
 });
 
 export const getBankAccountByIdSchema = z.object({
-  id: z.string().uuid().openapi({
-    description: "The unique identifier of the bank account.",
-    example: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
-  }),
+  id: z
+    .string()
+    .uuid()
+    .openapi({
+      description: "The unique identifier of the bank account.",
+      example: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
+      param: {
+        in: "path",
+      },
+    }),
 });
 
 export const updateBankAccountSchema = z

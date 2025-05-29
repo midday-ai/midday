@@ -40,16 +40,34 @@ export const getDocumentsSchema = z
   });
 
 export const getDocumentSchema = z.object({
-  id: z.string().nullable().optional(),
+  id: z
+    .string()
+    .nullable()
+    .optional()
+    .openapi({
+      param: {
+        in: "path",
+      },
+    }),
   filePath: z.string().nullable().optional(),
 });
 
 export const getRelatedDocumentsSchema = z.object({
-  id: z.string(),
+  id: z.string().openapi({
+    param: {
+      in: "path",
+    },
+  }),
   pageSize: z.coerce.number().min(1).max(100),
 });
 
-export const deleteDocumentSchema = z.object({ id: z.string() });
+export const deleteDocumentSchema = z.object({
+  id: z.string().openapi({
+    param: {
+      in: "path",
+    },
+  }),
+});
 
 export const deleteDocumentResponseSchema = z.object({
   id: z.string(),

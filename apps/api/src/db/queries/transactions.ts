@@ -6,7 +6,7 @@ import {
   transactionAttachments,
   transactionCategories,
   type transactionFrequencyEnum,
-  transactionStatusEnum,
+  type transactionStatusEnum,
   transactionTags,
   transactions,
   users,
@@ -35,35 +35,35 @@ export type GetTransactionsParams = {
   cursor?: string | null;
   sort?: string[] | null;
   pageSize?: number;
-  filter?: {
-    q?: string | null;
-    statuses?: string[] | null;
-    attachments?: "include" | "exclude" | null;
-    categories?: string[] | null;
-    tags?: string[] | null;
-    accounts?: string[] | null;
-    assignees?: string[] | null;
-    type?: "income" | "expense" | null;
-    start?: string | null;
-    end?: string | null;
-    recurring?: string[] | null;
-    amount_range?: number[] | null;
-    amount?: string[] | null;
-  };
+  q?: string | null;
+  statuses?: string[] | null;
+  attachments?: "include" | "exclude" | null;
+  categories?: string[] | null;
+  tags?: string[] | null;
+  accounts?: string[] | null;
+  assignees?: string[] | null;
+  type?: "income" | "expense" | null;
+  start?: string | null;
+  end?: string | null;
+  recurring?: string[] | null;
+  amount_range?: number[] | null;
+  amount?: string[] | null;
 };
 
 // Helper type from schema if not already exported
 type TransactionFrequency =
   (typeof transactionFrequencyEnum.enumValues)[number];
-type TransactionStatus = (typeof transactionStatusEnum.enumValues)[number];
 
 export async function getTransactions(
   db: Database,
   params: GetTransactionsParams,
 ) {
   // Always limit by teamId
-  const { teamId, filter, sort, cursor, pageSize = 40 } = params;
   const {
+    teamId,
+    sort,
+    cursor,
+    pageSize = 40,
     q,
     statuses,
     attachments,
@@ -77,7 +77,7 @@ export async function getTransactions(
     recurring: filterRecurring,
     amount: filterAmount,
     amount_range: filterAmountRange,
-  } = filter || {};
+  } = params;
 
   // CTE to determine if a transaction has attachments for the given teamId
   const transactionAttachmentStatus = db.$with("tas").as(
@@ -135,81 +135,25 @@ export async function getTransactions(
     }
   }
 
-  // Attachments filter using the 'tas' CTE
-  if (attachments === "exclude") {
-    whereConditions.push(sql`tas.has_attachment_val IS NULL`);
-  } else if (attachments === "include") {
-    whereConditions.push(sql`COALESCE(tas.has_attachment_val, 0) = 1`);
-  }
-
-  // Status filtering - converted from your original query logic
-  const activeStatusesToFilter: TransactionStatus[] = [];
-  let isArchivedFiltered = false;
-  let isExcludedFiltered = false;
-  let isUncompletedFiltered = false;
-  let isCompletedFiltered = false;
-
-  if (statuses && statuses.length > 0) {
-    // Handle "excluded" status
-    if (statuses.includes("excluded")) {
-      whereConditions.push(eq(transactions.status, "excluded"));
-      isExcludedFiltered = true;
-    }
-
-    // Handle "archived" status
-    if (statuses.includes("archived")) {
-      whereConditions.push(eq(transactions.status, "archived"));
-      isArchivedFiltered = true;
-    }
-
-    // Handle "uncompleted" status (isFulfilled = false)
-    if (statuses.includes("uncompleted")) {
-      whereConditions.push(
-        and(
-          sql`tas.has_attachment_val IS NULL`,
-          ne(transactions.status, "completed"),
-        ),
-      );
-      isUncompletedFiltered = true;
-    }
-
-    // Handle "completed" status (isFulfilled = true)
-    if (statuses.includes("completed")) {
-      whereConditions.push(
-        or(
-          sql`COALESCE(tas.has_attachment_val, 0) = 1`,
-          eq(transactions.status, "completed"),
-        ),
-      );
-      isCompletedFiltered = true;
-    }
-
-    // Handle standard transaction statuses
-    for (const s of statuses) {
-      if (s === "pending" || s === "posted" || s === "completed") {
-        if (transactionStatusEnum.enumValues.includes(s as TransactionStatus)) {
-          activeStatusesToFilter.push(s as TransactionStatus);
-        }
-      }
-    }
-  }
-
-  // Apply active status filters if any, otherwise use defaults
-  if (activeStatusesToFilter.length > 0) {
-    whereConditions.push(inArray(transactions.status, activeStatusesToFilter));
-  } else if (
-    !isArchivedFiltered &&
-    !isExcludedFiltered &&
-    !isUncompletedFiltered &&
-    !isCompletedFiltered
-  ) {
-    // Default to pending, posted, completed if no other status filter is applied
-    // Exclude transactions with status "excluded" by default
+  // Status filtering - simplified logic
+  if (statuses?.includes("uncompleted") || attachments === "exclude") {
+    // is_fulfilled = false
     whereConditions.push(
-      and(
-        inArray(transactions.status, ["posted", "completed"]),
-        ne(transactions.status, "excluded"),
-      ),
+      sql`NOT (COALESCE(tas.has_attachment_val, 0) = 1 OR ${transactions.status} = 'completed')`,
+    );
+  } else if (statuses?.includes("completed") || attachments === "include") {
+    // is_fulfilled = true
+    whereConditions.push(
+      sql`COALESCE(tas.has_attachment_val, 0) = 1 OR ${transactions.status} = 'completed'`,
+    );
+  } else if (statuses?.includes("excluded")) {
+    whereConditions.push(eq(transactions.status, "excluded"));
+  } else if (statuses?.includes("archived")) {
+    whereConditions.push(eq(transactions.status, "archived"));
+  } else {
+    // Default: pending, posted, or completed
+    whereConditions.push(
+      inArray(transactions.status, ["pending", "posted", "completed"]),
     );
   }
 

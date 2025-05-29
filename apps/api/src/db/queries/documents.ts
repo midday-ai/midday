@@ -51,17 +51,14 @@ export type GetDocumentsParams = {
   pageSize?: number;
   cursor?: string | null;
   language?: string | null;
-  filter?: {
-    q?: string | null;
-    tags?: string[] | null;
-    start?: string | null;
-    end?: string | null;
-  };
+  q?: string | null;
+  tags?: string[] | null;
+  start?: string | null;
+  end?: string | null;
 };
 
 export async function getDocuments(db: Database, params: GetDocumentsParams) {
-  const { teamId, pageSize = 20, cursor, filter } = params;
-  const { tags, q, start, end } = filter || {};
+  const { teamId, pageSize = 20, cursor, tags, q, start, end } = params;
 
   // Convert cursor to offset
   const offset = cursor ? Number.parseInt(cursor, 10) : 0;

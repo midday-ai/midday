@@ -73,9 +73,8 @@ export type GetCustomersParams = {
   teamId: string;
   cursor?: string | null;
   pageSize?: number;
-  filter?: {
-    q?: string | null;
-  };
+  q?: string | null;
+
   sort?: string[] | null;
 };
 
@@ -88,8 +87,7 @@ export const getCustomers = async (
   db: Database,
   params: GetCustomersParams,
 ) => {
-  const { teamId, filter, sort, cursor, pageSize = 25 } = params;
-  const { q } = filter || {};
+  const { teamId, sort, cursor, pageSize = 25, q } = params;
 
   const whereConditions: SQL[] = [eq(customers.teamId, teamId)];
 

@@ -11,19 +11,31 @@ export const createTagSchema = z
 
 export const deleteTagSchema = z
   .object({
-    id: z.string().uuid().openapi({
-      description: "The UUID of the tag to delete.",
-      example: "b3b7c8e2-1f2a-4c3d-9e4f-5a6b7c8d9e0f",
-    }),
+    id: z
+      .string()
+      .uuid()
+      .openapi({
+        description: "The UUID of the tag to delete.",
+        example: "b3b7c8e2-1f2a-4c3d-9e4f-5a6b7c8d9e0f",
+        param: {
+          in: "path",
+        },
+      }),
   })
   .openapi("DeleteTag");
 
 export const updateTagSchema = z
   .object({
-    id: z.string().uuid().openapi({
-      description: "The ID of the tag to update.",
-      example: "b3b7c8e2-1f2a-4c3d-9e4f-5a6b7c8d9e0f",
-    }),
+    id: z
+      .string()
+      .uuid()
+      .openapi({
+        description: "The ID of the tag to update.",
+        example: "b3b7c8e2-1f2a-4c3d-9e4f-5a6b7c8d9e0f",
+        param: {
+          in: "path",
+        },
+      }),
     name: z.string().openapi({
       description: "The new name of the tag.",
       example: "Urgent",
@@ -33,10 +45,16 @@ export const updateTagSchema = z
 
 export const tagResponseSchema = z
   .object({
-    id: z.string().uuid().openapi({
-      description: "The UUID of the tag.",
-      example: "b3b7c8e2-1f2a-4c3d-9e4f-5a6b7c8d9e0f",
-    }),
+    id: z
+      .string()
+      .uuid()
+      .openapi({
+        description: "The UUID of the tag.",
+        example: "b3b7c8e2-1f2a-4c3d-9e4f-5a6b7c8d9e0f",
+        param: {
+          in: "path",
+        },
+      }),
     name: z.string().openapi({
       description: "The name of the tag.",
       example: "Important",

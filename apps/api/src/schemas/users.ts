@@ -51,6 +51,12 @@ export const updateUserSchema = z.object({
       description:
         "User's preferred date format. Available options: 'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd', 'dd.MM.yyyy'",
       example: "yyyy-MM-dd",
+      "x-speakeasy-enums": [
+        { value: "dd/MM/yyyy", name: "DdSlashMmSlashYyyy" },
+        { value: "MM/dd/yyyy", name: "MmSlashDdSlashYyyy" },
+        { value: "yyyy-MM-dd", name: "YyyyDashMmDashDd" },
+        { value: "dd.MM.yyyy", name: "DdDotMmDotYyyy" },
+      ],
     }),
 });
 
@@ -97,6 +103,12 @@ export const userSchema = z.object({
       description:
         "User's preferred date format. Available options: 'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd', 'dd.MM.yyyy'",
       example: "yyyy-MM-dd",
+      "x-speakeasy-enums": [
+        { value: "dd/MM/yyyy", name: "DdSlashMmSlashYyyy" },
+        { value: "MM/dd/yyyy", name: "MmSlashDdSlashYyyy" },
+        { value: "yyyy-MM-dd", name: "YyyyDashMmDashDd" },
+        { value: "dd.MM.yyyy", name: "DdDotMmDotYyyy" },
+      ],
     }),
   team: z
     .object({
