@@ -26,6 +26,8 @@ app.openapi(
     method: "get",
     path: "/",
     summary: "List all tracker entries",
+    operationId: "listTrackerEntries",
+    "x-speakeasy-name-override": "list",
     description: "List all tracker entries for the authenticated team.",
     tags: ["Tracker"],
     request: {
@@ -104,6 +106,8 @@ app.openapi(
     method: "delete",
     path: "/{id}",
     summary: "Delete a tracker entry",
+    operationId: "deleteTrackerEntry",
+    "x-speakeasy-name-override": "delete",
     description: "Delete a tracker entry for the authenticated team.",
     tags: ["Tracker"],
     request: {

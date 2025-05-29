@@ -23,6 +23,8 @@ app.openapi(
     method: "get",
     path: "/",
     summary: "List all customers",
+    operationId: "listCustomers",
+    "x-speakeasy-name-override": "list",
     description: "Retrieve a list of customers for the authenticated team.",
     tags: ["Customers"],
     request: {
@@ -48,7 +50,7 @@ app.openapi(
     const result = await getCustomers(db, {
       ...query,
       teamId,
-      filter: { q },
+      q,
     });
 
     return c.json(validateResponse(result, customersResponseSchema));
@@ -60,6 +62,8 @@ app.openapi(
     method: "post",
     path: "/",
     summary: "Create customer",
+    operationId: "createCustomer",
+    "x-speakeasy-name-override": "create",
     description: "Create a new customer for the authenticated team.",
     tags: ["Customers"],
     request: {
@@ -100,8 +104,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "get",
-    path: "/:id",
+    path: "/{id}",
     summary: "Retrieve a customer",
+    operationId: "getCustomerById",
+    "x-speakeasy-name-override": "get",
     description: "Retrieve a customer by ID for the authenticated team.",
     tags: ["Customers"],
     request: {
@@ -133,8 +139,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "patch",
-    path: "/:id",
+    path: "/{id}",
     summary: "Update a customer",
+    operationId: "updateCustomer",
+    "x-speakeasy-name-override": "update",
     description: "Update a customer by ID for the authenticated team.",
     tags: ["Customers"],
     request: {
@@ -178,8 +186,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "delete",
-    path: "/:id",
+    path: "/{id}",
     summary: "Delete a customer",
+    operationId: "deleteCustomer",
+    "x-speakeasy-name-override": "delete",
     description: "Delete a customer by ID for the authenticated team.",
     tags: ["Customers"],
     request: {

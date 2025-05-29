@@ -26,6 +26,8 @@ app.openapi(
     method: "get",
     path: "/",
     summary: "List all bank accounts",
+    operationId: "listBankAccounts",
+    "x-speakeasy-name-override": "list",
     description: "Retrieve a list of bank accounts for the authenticated team.",
     tags: ["Bank Accounts"],
     request: {
@@ -67,8 +69,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "get",
-    path: "/:id",
+    path: "/{id}",
     summary: "Retrieve a bank account",
+    operationId: "getBankAccountById",
+    "x-speakeasy-name-override": "get",
     description: "Retrieve a bank account by ID for the authenticated team.",
     tags: ["Bank Accounts"],
     request: {
@@ -105,6 +109,8 @@ app.openapi(
     method: "post",
     path: "/",
     summary: "Create a bank account",
+    operationId: "createBankAccount",
+    "x-speakeasy-name-override": "create",
     description: "Create a new bank account for the authenticated team.",
     tags: ["Bank Accounts"],
     request: {
@@ -149,6 +155,8 @@ app.openapi(
     method: "patch",
     path: "/{id}",
     summary: "Update a bank account",
+    operationId: "updateBankAccount",
+    "x-speakeasy-name-override": "update",
     description: "Update a bank account by ID for the authenticated team.",
     tags: ["Bank Accounts"],
     request: {
@@ -194,6 +202,8 @@ app.openapi(
     method: "delete",
     path: "/{id}",
     summary: "Delete a bank account",
+    operationId: "deleteBankAccount",
+    "x-speakeasy-name-override": "delete",
     description: "Delete a bank account by ID for the authenticated team.",
     tags: ["Bank Accounts"],
     request: {

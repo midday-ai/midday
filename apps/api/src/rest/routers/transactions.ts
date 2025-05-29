@@ -16,6 +16,7 @@ import {
   deleteTransactionSchema,
   deleteTransactionsResponseSchema,
   deleteTransactionsSchema,
+  getTransactionByIdSchema,
   getTransactionsSchema,
   transactionResponseSchema,
   transactionsResponseSchema,
@@ -33,6 +34,8 @@ app.openapi(
     method: "get",
     path: "/",
     summary: "List all transactions",
+    operationId: "listTransactions",
+    "x-speakeasy-name-override": "list",
     description: "Retrieve a list of transactions for the authenticated team.",
     tags: ["Transactions"],
     request: {
@@ -68,12 +71,14 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "get",
-    path: "/:id",
+    path: "/{id}",
     summary: "Retrieve a transaction",
+    operationId: "getTransactionById",
+    "x-speakeasy-name-override": "get",
     description: "Retrieve a transaction by its ID for the authenticated team.",
     tags: ["Transactions"],
     request: {
-      params: transactionResponseSchema.pick({ id: true }),
+      params: getTransactionByIdSchema.pick({ id: true }),
     },
     responses: {
       200: {
@@ -103,6 +108,8 @@ app.openapi(
     method: "post",
     path: "/",
     summary: "Create a transaction",
+    operationId: "createTransaction",
+    "x-speakeasy-name-override": "create",
     description: "Create a transaction",
     tags: ["Transactions"],
     request: {
@@ -136,13 +143,15 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "patch",
-    path: "/:id",
+    path: "/{id}",
     summary: "Update a transaction",
+    operationId: "updateTransaction",
+    "x-speakeasy-name-override": "update",
     description:
       "Update a transaction for the authenticated team. If there's no change, returns it as it is.",
     tags: ["Transactions"],
     request: {
-      params: transactionResponseSchema.pick({ id: true }),
+      params: getTransactionByIdSchema.pick({ id: true }),
       body: {
         content: {
           "application/json": {
@@ -180,6 +189,8 @@ app.openapi(
     method: "patch",
     path: "/bulk",
     summary: "Bulk update transactions",
+    operationId: "updateTransactions",
+    "x-speakeasy-name-override": "updateMany",
     description:
       "Bulk update transactions for the authenticated team. If there's no change, returns it as it is.",
     tags: ["Transactions"],
@@ -220,6 +231,8 @@ app.openapi(
     method: "post",
     path: "/bulk",
     summary: "Bulk create transactions",
+    operationId: "createTransactions",
+    "x-speakeasy-name-override": "createMany",
     description: "Bulk create transactions for the authenticated team.",
     tags: ["Transactions"],
     request: {
@@ -269,6 +282,8 @@ app.openapi(
     method: "delete",
     path: "/bulk",
     summary: "Bulk delete transactions",
+    operationId: "deleteTransactions",
+    "x-speakeasy-name-override": "deleteMany",
     description:
       "Bulk delete transactions for the authenticated team. Only manually created transactions can be deleted via this endpoint or the form. Transactions inserted by bank connections cannot be deleted, but can be excluded by updating the status.",
     tags: ["Transactions"],
@@ -310,8 +325,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "delete",
-    path: "/:id",
+    path: "/{id}",
     summary: "Delete a transaction",
+    operationId: "deleteTransaction",
+    "x-speakeasy-name-override": "delete",
     description:
       "Delete a transaction for the authenticated team. Only manually created transactions can be deleted via this endpoint or the form. Transactions inserted by bank connections cannot be deleted, but can be excluded by updating the status.",
     tags: ["Transactions"],

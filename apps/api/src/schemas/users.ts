@@ -52,10 +52,10 @@ export const updateUserSchema = z.object({
         "User's preferred date format. Available options: 'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd', 'dd.MM.yyyy'",
       example: "yyyy-MM-dd",
       "x-speakeasy-enums": [
-        { value: "dd/MM/yyyy", name: "DdSlashMmSlashYyyy" },
-        { value: "MM/dd/yyyy", name: "MmSlashDdSlashYyyy" },
-        { value: "yyyy-MM-dd", name: "YyyyDashMmDashDd" },
-        { value: "dd.MM.yyyy", name: "DdDotMmDotYyyy" },
+        "ddSlashMMSlashyyyy",
+        "MMSlashddSlashyyyy",
+        "yyyyDashMMDashdd",
+        "ddDotMMDotyyyy",
       ],
     }),
 });
@@ -104,10 +104,10 @@ export const userSchema = z.object({
         "User's preferred date format. Available options: 'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd', 'dd.MM.yyyy'",
       example: "yyyy-MM-dd",
       "x-speakeasy-enums": [
-        { value: "dd/MM/yyyy", name: "DdSlashMmSlashYyyy" },
-        { value: "MM/dd/yyyy", name: "MmSlashDdSlashYyyy" },
-        { value: "yyyy-MM-dd", name: "YyyyDashMmDashDd" },
-        { value: "dd.MM.yyyy", name: "DdDotMmDotYyyy" },
+        "ddSlashMMSlashyyyy",
+        "MMSlashddSlashyyyy",
+        "yyyyDashMMDashdd",
+        "ddDotMMDotyyyy",
       ],
     }),
   team: z

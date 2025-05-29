@@ -24,6 +24,8 @@ app.openapi(
     method: "get",
     path: "/",
     summary: "List all tracker projects",
+    operationId: "listTrackerProjects",
+    "x-speakeasy-name-override": "list",
     description: "List all tracker projects for the authenticated team.",
     tags: ["Tracker"],
     request: {
@@ -51,7 +53,7 @@ app.openapi(
       teamId,
       cursor,
       pageSize,
-      filter,
+      ...filter,
       sort,
     });
 
@@ -64,6 +66,8 @@ app.openapi(
     method: "post",
     path: "/",
     summary: "Create a tracker project",
+    operationId: "createTrackerProject",
+    "x-speakeasy-name-override": "create",
     description: "Create a tracker project for the authenticated team.",
     tags: ["Tracker"],
     request: {
@@ -109,6 +113,8 @@ app.openapi(
     method: "patch",
     path: "/{id}",
     summary: "Update a tracker project",
+    operationId: "updateTrackerProject",
+    "x-speakeasy-name-override": "update",
     description: "Update a tracker project for the authenticated team.",
     tags: ["Tracker"],
     request: {
@@ -154,6 +160,8 @@ app.openapi(
     method: "get",
     path: "/{id}",
     summary: "Retrieve a tracker project",
+    operationId: "getTrackerProjectById",
+    "x-speakeasy-name-override": "get",
     description: "Retrieve a tracker project for the authenticated team.",
     tags: ["Tracker"],
     request: {
@@ -191,6 +199,8 @@ app.openapi(
     method: "delete",
     path: "/{id}",
     summary: "Delete a tracker project",
+    operationId: "deleteTrackerProject",
+    "x-speakeasy-name-override": "delete",
     description: "Delete a tracker project for the authenticated team.",
     tags: ["Tracker"],
     request: {

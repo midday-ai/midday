@@ -28,6 +28,8 @@ app.openapi(
     method: "get",
     path: "/",
     summary: "List all invoices",
+    operationId: "listInvoices",
+    "x-speakeasy-name-override": "list",
     description: "Retrieve a list of invoices for the authenticated team.",
     tags: ["Invoices"],
     request: {
@@ -55,7 +57,7 @@ app.openapi(
       pageSize,
       cursor,
       sort,
-      filter,
+      ...filter,
     });
 
     return c.json(validateResponse(result, invoicesResponseSchema));
@@ -96,6 +98,8 @@ app.openapi(
     method: "get",
     path: "/summary",
     summary: "Invoice summary",
+    operationId: "getInvoiceSummary",
+    "x-speakeasy-name-override": "summary",
     description: "Get summary of invoices for the authenticated team.",
     tags: ["Invoices"],
     request: {
@@ -130,8 +134,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "get",
-    path: "/:id",
+    path: "/{id}",
     summary: "Retrieve a invoice",
+    operationId: "getInvoiceById",
+    "x-speakeasy-name-override": "get",
     description:
       "Retrieve a invoice by its unique identifier for the authenticated team.",
     tags: ["Invoices"],
@@ -168,8 +174,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "delete",
-    path: "/:id",
+    path: "/{id}",
     summary: "Delete a invoice",
+    operationId: "deleteInvoice",
+    "x-speakeasy-name-override": "delete",
     description:
       "Delete an invoice by its unique identifier for the authenticated team. Only invoices with status 'draft' or 'canceled' can be deleted directly. If the invoice is not in one of these statuses, update its status to 'canceled' before attempting deletion.",
     tags: ["Invoices"],

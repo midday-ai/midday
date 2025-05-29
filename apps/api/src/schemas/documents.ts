@@ -47,6 +47,8 @@ export const getDocumentSchema = z.object({
     .openapi({
       param: {
         in: "path",
+        name: "id",
+        required: true,
       },
     }),
   filePath: z.string().nullable().optional(),
@@ -56,6 +58,7 @@ export const getRelatedDocumentsSchema = z.object({
   id: z.string().openapi({
     param: {
       in: "path",
+      name: "id",
     },
   }),
   pageSize: z.coerce.number().min(1).max(100),
@@ -65,6 +68,7 @@ export const deleteDocumentSchema = z.object({
   id: z.string().openapi({
     param: {
       in: "path",
+      name: "id",
     },
   }),
 });

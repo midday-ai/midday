@@ -31,6 +31,8 @@ app.openapi(
     method: "get",
     path: "/revenue",
     summary: "Revenue metrics",
+    operationId: "getRevenueMetrics",
+    "x-speakeasy-name-override": "revenue",
     description: "Revenue metrics for the authenticated team.",
     tags: ["Metrics"],
     request: {
@@ -70,6 +72,8 @@ app.openapi(
     method: "get",
     path: "/profit",
     summary: "Profit metrics",
+    operationId: "getProfitMetrics",
+    "x-speakeasy-name-override": "profit",
     description: "Profit metrics for the authenticated team.",
     tags: ["Metrics"],
     request: {
@@ -109,6 +113,8 @@ app.openapi(
     method: "get",
     path: "/burn-rate",
     summary: "Burn rate metrics",
+    operationId: "getBurnRateMetrics",
+    "x-speakeasy-name-override": "burn-rate",
     description: "Burn rate metrics for the authenticated team.",
     tags: ["Metrics"],
     request: {
@@ -147,6 +153,8 @@ app.openapi(
     method: "get",
     path: "/runway",
     summary: "Runway metrics",
+    operationId: "getRunwayMetrics",
+    "x-speakeasy-name-override": "runway",
     description: "Runway metrics for the authenticated team.",
     tags: ["Metrics"],
     request: {
@@ -185,6 +193,8 @@ app.openapi(
     method: "get",
     path: "/expenses",
     summary: "Expense metrics",
+    operationId: "getExpensesMetrics",
+    "x-speakeasy-name-override": "expenses",
     description: "Expense metrics for the authenticated team.",
     tags: ["Metrics"],
     request: {
@@ -223,6 +233,8 @@ app.openapi(
     method: "get",
     path: "/spending",
     summary: "Spending metrics",
+    operationId: "getSpendingMetrics",
+    "x-speakeasy-name-override": "spending",
     description: "Spending metrics for the authenticated team.",
     tags: ["Metrics"],
     request: {

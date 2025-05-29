@@ -25,6 +25,8 @@ app.openapi(
     method: "get",
     path: "/",
     summary: "List all inbox items",
+    operationId: "listInboxItems",
+    "x-speakeasy-name-override": "list",
     description: "Retrieve a list of inbox items for the authenticated team.",
     tags: ["Inbox"],
     request: {
@@ -53,7 +55,7 @@ app.openapi(
       pageSize,
       cursor,
       order,
-      filter,
+      ...filter,
     });
 
     return c.json(validateResponse(result, inboxResponseSchema));
@@ -63,8 +65,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "get",
-    path: "/:id",
+    path: "/{id}",
     summary: "Retrieve a inbox item",
+    operationId: "getInboxItemById",
+    "x-speakeasy-name-override": "get",
     description:
       "Retrieve a inbox item by its unique identifier for the authenticated team.",
     tags: ["Inbox"],
@@ -100,8 +104,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "delete",
-    path: "/:id",
+    path: "/{id}",
     summary: "Delete a inbox item",
+    operationId: "deleteInboxItem",
+    "x-speakeasy-name-override": "delete",
     description:
       "Delete a inbox item by its unique identifier for the authenticated team.",
     tags: ["Inbox"],
@@ -137,8 +143,10 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "patch",
-    path: "/:id",
+    path: "/{id}",
     summary: "Update a inbox item",
+    operationId: "updateInboxItem",
+    "x-speakeasy-name-override": "update",
     description:
       "Update fields of an inbox item by its unique identifier for the authenticated team.",
     tags: ["Inbox"],
