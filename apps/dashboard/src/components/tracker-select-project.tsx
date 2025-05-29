@@ -39,8 +39,8 @@ export function TrackerSelectProject({
     trpc.trackerProjects.upsert.mutationOptions({
       onSuccess: (result) => {
         if (result) {
-          // onCreate(result);
-          // handleSelect(result);
+          onCreate(result);
+          handleSelect(result);
           setLatestProjectId(result?.id ?? null);
           refetch();
 
