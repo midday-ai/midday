@@ -2,7 +2,6 @@
 
 import { ApiKeyForm } from "@/components/forms/api-key-form";
 import { useTokenModalStore } from "@/store/token-modal";
-import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -70,9 +69,7 @@ export function CreateApiKeyModal() {
         }, 500);
       }}
     >
-      <DialogContent className="max-w-[455px]">
-        <AnimatedSizeContainer height>{content}</AnimatedSizeContainer>
-      </DialogContent>
+      <DialogContent className="max-w-[455px]">{content}</DialogContent>
     </Dialog>
   );
 }
