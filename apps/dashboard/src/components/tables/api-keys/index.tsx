@@ -1,11 +1,9 @@
 "use client";
 
-import { CreateApiKeyModal } from "@/components/modals/create-api-key-modal";
 import { useTokenModalStore } from "@/store/token-modal";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
-import { Dialog } from "@midday/ui/dialog";
 import {
   Table,
   TableBody,
@@ -21,13 +19,11 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import * as React from "react";
-import { useState } from "react";
 import { columns } from "./columns";
 import { EmptyState } from "./empty-state";
 
 export function DataTable() {
   const trpc = useTRPC();
-  const [isOpen, onOpenChange] = useState(false);
   const { setData } = useTokenModalStore();
   const { data } = useSuspenseQuery({
     ...trpc.apiKeys.get.queryOptions(),
@@ -54,10 +50,9 @@ export function DataTable() {
           </p>
         </div>
         <div className="flex-shrink-0">
-          <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <Button onClick={() => onOpenChange(true)}>Create API Key</Button>
-            <CreateApiKeyModal onOpenChange={onOpenChange} />
-          </Dialog>
+          <Button onClick={() => setData(undefined, "create")}>
+            Create API Key
+          </Button>
         </div>
       </div>
       {data.length > 0 ? (

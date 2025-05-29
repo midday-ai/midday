@@ -1,4 +1,3 @@
-import { decrypt, encrypt } from "@midday/encryption";
 import { type SQL, relations, sql } from "drizzle-orm";
 import {
   bigint,
@@ -50,18 +49,6 @@ export const numericCasted = customType<{
   },
   fromDriver: (value: string) => Number.parseFloat(value),
   toDriver: (value: number) => value.toString(),
-});
-
-const encryptedText = customType<{ data: string }>({
-  dataType() {
-    return "text";
-  },
-  fromDriver(value: unknown) {
-    return decrypt(value as string);
-  },
-  toDriver(value: string) {
-    return encrypt(value);
-  },
 });
 
 export const accountTypeEnum = pgEnum("account_type", [

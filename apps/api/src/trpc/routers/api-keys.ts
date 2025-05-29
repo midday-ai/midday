@@ -25,8 +25,9 @@ export const apiKeysRouter = createTRPCRouter({
 
       if (data) {
         try {
-          await resend.emails.send({
-            from: "Midday <support@midday.ai>",
+          // We don't need to await this, it will be sent in the background
+          resend.emails.send({
+            from: "Middaybot <middaybot@midday.ai>",
             to: session.user.email!,
             subject: "New API Key Created",
             react: ApiKeyCreatedEmail({

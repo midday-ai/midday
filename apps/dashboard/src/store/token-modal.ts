@@ -6,16 +6,20 @@ type Data = {
   scopes?: string[];
 };
 
-type Type = "edit" | "delete";
+type Type = "create" | "edit" | "delete";
 
 interface TokenModalState {
   type?: Type;
   data?: Data;
+  createdKey?: string;
   setData: (data?: Data, type?: Type) => void;
+  setCreatedKey: (key?: string) => void;
 }
 
 export const useTokenModalStore = create<TokenModalState>()((set) => ({
   type: undefined,
   data: undefined,
+  createdKey: undefined,
   setData: (data, type) => set({ data, type }),
+  setCreatedKey: (key) => set({ createdKey: key }),
 }));
