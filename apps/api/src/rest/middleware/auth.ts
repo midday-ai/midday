@@ -1,27 +1,15 @@
 import {
-  type ApiKey,
   getApiKeyByToken,
   updateApiKeyLastUsedAt,
 } from "@api/db/queries/api-keys";
 import { getUserById } from "@api/db/queries/users";
 import { isValidApiKeyFormat } from "@api/utils/api-keys";
+import { apiKeyCache } from "@api/utils/cache/api-key-cache";
+import { userCache } from "@api/utils/cache/user-cache";
 import { expandScopes } from "@api/utils/scopes";
+import { hash } from "@midday/encryption";
 import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { LRUCache } from "lru-cache";
-
-// In-memory cache for API keys and users
-// Note: This cache is per server instance, and we typically run 1 instance per region.
-// Otherwise, we would need to share this state with Redis or a similar external store.
-const apiKeyCache = new LRUCache<string, any>({
-  max: 5_000, // up to 5k entries (adjust based on memory)
-  ttl: 1000 * 60 * 30, // 30 minutes in milliseconds
-});
-
-const userCache = new LRUCache<string, any>({
-  max: 5_000, // up to 5k entries (adjust based on memory)
-  ttl: 1000 * 60 * 30, // 30 minutes in milliseconds
-});
 
 export const withAuth: MiddlewareHandler = async (c, next) => {
   const authHeader = c.req.header("Authorization");
@@ -37,15 +25,17 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
 
   const db = c.get("db");
 
+  const keyHash = hash(token);
+
   // Check cache first for API key
-  let apiKey = apiKeyCache.get(token) as ApiKey | undefined;
+  let apiKey = apiKeyCache.get(keyHash);
+
   if (!apiKey) {
     // If not in cache, query database
-
-    apiKey = await getApiKeyByToken(db, token);
+    apiKey = await getApiKeyByToken(db, keyHash);
     if (apiKey) {
       // Store in cache for future requests
-      apiKeyCache.set(token, apiKey);
+      apiKeyCache.set(keyHash, apiKey);
     }
   }
 
@@ -54,14 +44,14 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
   }
 
   // Check cache first for user
-  const userCacheKey = `user_${apiKey.userId}`;
-  let user = userCache.get(userCacheKey);
+  let user = userCache.get(apiKey.userId);
+
   if (!user) {
     // If not in cache, query database
     user = await getUserById(db, apiKey.userId);
     if (user) {
       // Store in cache for future requests
-      userCache.set(userCacheKey, user);
+      userCache.set(apiKey.userId, user);
     }
   }
 

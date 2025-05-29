@@ -1,3 +1,4 @@
+import { CreateApiKeyModal } from "@/components/modals/create-api-key-modal";
 import { DeleteApiKeyModal } from "@/components/modals/delete-api-key-modal";
 import { EditApiKeyModal } from "@/components/modals/edit-api-key-modal";
 import { DataTable } from "@/components/tables/api-keys";
@@ -16,6 +17,7 @@ export default async function Page() {
       <DataTable />
       <EditApiKeyModal />
       <DeleteApiKeyModal />
+      <CreateApiKeyModal />
     </>
   );
 }

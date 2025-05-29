@@ -1,6 +1,7 @@
 import type { Database } from "@api/db";
 import { apiKeys, users } from "@api/db/schema";
 import { generateApiKey } from "@api/utils/api-keys";
+import { apiKeyCache } from "@api/utils/cache/api-key-cache";
 import { encrypt, hash } from "@midday/encryption";
 import { and, eq } from "drizzle-orm";
 
@@ -13,9 +14,7 @@ export type ApiKey = {
   scopes: string[] | null;
 };
 
-export async function getApiKeyByToken(db: Database, token: string) {
-  const keyHash = hash(token);
-
+export async function getApiKeyByToken(db: Database, keyHash: string) {
   const [result] = await db
     .select({
       id: apiKeys.id,
@@ -43,13 +42,21 @@ type UpsertApiKeyData = {
 
 export async function upsertApiKey(db: Database, data: UpsertApiKeyData) {
   if (data.id) {
-    await db
+    const [result] = await db
       .update(apiKeys)
       .set({
         name: data.name,
         scopes: data.scopes,
       })
-      .where(eq(apiKeys.id, data.id));
+      .where(eq(apiKeys.id, data.id))
+      .returning({
+        keyHash: apiKeys.keyHash,
+      });
+
+    // Delete from cache
+    if (result?.keyHash) {
+      apiKeyCache.delete(result.keyHash);
+    }
 
     // On update we don't return the key
     return {
@@ -59,7 +66,7 @@ export async function upsertApiKey(db: Database, data: UpsertApiKeyData) {
 
   const key = generateApiKey();
   const keyEncrypted = encrypt(key);
-  const keyHash = hash(keyEncrypted);
+  const keyHash = hash(key);
 
   const [result] = await db
     .insert(apiKeys)
@@ -109,9 +116,16 @@ type DeleteApiKeyParams = {
 };
 
 export async function deleteApiKey(db: Database, params: DeleteApiKeyParams) {
-  return db
+  const [result] = await db
     .delete(apiKeys)
-    .where(and(eq(apiKeys.id, params.id), eq(apiKeys.teamId, params.teamId)));
+    .where(and(eq(apiKeys.id, params.id), eq(apiKeys.teamId, params.teamId)))
+    .returning({
+      keyHash: apiKeys.keyHash,
+    });
+
+  if (result?.keyHash) {
+    apiKeyCache.delete(result.keyHash);
+  }
 }
 
 export async function updateApiKeyLastUsedAt(db: Database, id: string) {

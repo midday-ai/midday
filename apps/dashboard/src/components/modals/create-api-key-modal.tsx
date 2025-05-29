@@ -1,58 +1,46 @@
 "use client";
 
 import { ApiKeyForm } from "@/components/forms/api-key-form";
+import { useTokenModalStore } from "@/store/token-modal";
+import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import { Button } from "@midday/ui/button";
 import {
+  Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
-import { useState } from "react";
 import { CopyInput } from "../copy-input";
 
-type CreateApiKeyModalProps = {
-  onOpenChange: (open: boolean) => void;
-};
+export function CreateApiKeyModal() {
+  const { setData, createdKey, type, setCreatedKey } = useTokenModalStore();
 
-export function CreateApiKeyModal({ onOpenChange }: CreateApiKeyModalProps) {
-  const [createdKey, setCreatedKey] = useState<string | null>(null);
-
-  const handleClose = () => {
-    onOpenChange(false);
-
-    setTimeout(() => {
-      setCreatedKey(null);
-    }, 1000);
-  };
+  let content = null;
 
   if (createdKey) {
-    return (
-      <DialogContent className="max-w-[455px]">
-        <div className="p-4 space-y-4">
-          <DialogHeader>
-            <DialogTitle>API Key Created</DialogTitle>
-            <DialogDescription>
-              For security reasons, the key will only be shown once. Please copy
-              and store it in a secure location.
-            </DialogDescription>
-          </DialogHeader>
+    content = (
+      <div className="p-4 space-y-4">
+        <DialogHeader>
+          <DialogTitle>API Key Created</DialogTitle>
+          <DialogDescription>
+            For security reasons, the key will only be shown once. Please copy
+            and store it in a secure location.
+          </DialogDescription>
+        </DialogHeader>
 
-          <CopyInput value={createdKey} />
+        <CopyInput value={createdKey} />
 
-          <DialogFooter>
-            <Button onClick={handleClose} className="w-full">
-              Done
-            </Button>
-          </DialogFooter>
-        </div>
-      </DialogContent>
+        <DialogFooter>
+          <Button onClick={() => setData(undefined)} className="w-full">
+            Done
+          </Button>
+        </DialogFooter>
+      </div>
     );
-  }
-
-  return (
-    <DialogContent className="max-w-[455px]">
+  } else {
+    content = (
       <div className="p-4 space-y-4">
         <DialogHeader>
           <DialogTitle>Create New API Key</DialogTitle>
@@ -61,8 +49,30 @@ export function CreateApiKeyModal({ onOpenChange }: CreateApiKeyModalProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <ApiKeyForm onSuccess={setCreatedKey} />
+        <ApiKeyForm
+          onSuccess={(key) => {
+            if (key) {
+              setCreatedKey(key);
+            }
+          }}
+        />
       </div>
-    </DialogContent>
+    );
+  }
+
+  return (
+    <Dialog
+      open={type === "create"}
+      onOpenChange={() => {
+        setData(undefined);
+        setTimeout(() => {
+          setCreatedKey(undefined);
+        }, 500);
+      }}
+    >
+      <DialogContent className="max-w-[455px]">
+        <AnimatedSizeContainer height>{content}</AnimatedSizeContainer>
+      </DialogContent>
+    </Dialog>
   );
 }
