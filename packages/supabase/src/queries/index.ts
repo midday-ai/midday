@@ -286,10 +286,8 @@ export async function getTransactionsQuery(
   } else if (statuses?.includes("completed") || attachments === "include") {
     query.eq("is_fulfilled", true);
   } else if (statuses?.includes("excluded")) {
-    query.eq("internal", true);
-  }
-
-  if (statuses?.includes("archived")) {
+    query.eq("status", "excluded");
+  } else if (statuses?.includes("archived")) {
     query.eq("status", "archived");
   } else {
     query.or("status.eq.pending,status.eq.posted,status.eq.completed");
