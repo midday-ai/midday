@@ -136,7 +136,12 @@ export function TotalEarnings() {
               className="text-sm text-[#666] cursor-pointer"
             >
               <span className="font-mono">
-                <FormatAmount amount={Math.round(amount)} currency={currency} />
+                <FormatAmount
+                  amount={Math.round(amount)}
+                  currency={currency}
+                  minimumFractionDigits={0}
+                  maximumFractionDigits={0}
+                />
               </span>
               <span> this {view === "week" ? "week" : "month"}</span>
             </button>
@@ -158,6 +163,8 @@ export function TotalEarnings() {
                         <FormatAmount
                           amount={Math.round(project.amount)}
                           currency={project.currency}
+                          minimumFractionDigits={0}
+                          maximumFractionDigits={0}
                         />
                       </div>
                     </div>
