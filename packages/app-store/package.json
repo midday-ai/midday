@@ -14,11 +14,11 @@
     "@slack/bolt": "^4.4.0",
     "@slack/web-api": "^7.9.2",
     "ai": "^4.3.16",
-    "zod": "^3.25.36",
+    "zod": "^3.25.41",
     "@midday/jobs": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22.15.21",
+    "@types/node": "^22.15.27",
     "typescript": "^5.8.3"
   },
   "exports": {

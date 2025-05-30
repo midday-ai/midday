@@ -19,17 +19,17 @@
   },
   "dependencies": {
     "@ai-sdk/mistral": "^1.2.8",
-    "@langchain/community": "^0.3.43",
-    "@langchain/core": "^0.3.56",
+    "@langchain/community": "^0.3.45",
+    "@langchain/core": "^0.3.57",
     "@midday/utils": "workspace:*",
-    "@mistralai/mistralai": "^1.6.0",
+    "@mistralai/mistralai": "^1.7.1",
     "ai": "4.3.16",
-    "mammoth": "^1.9.0",
+    "mammoth": "^1.9.1",
     "officeparser": "^5.1.1",
-    "unpdf": "^1.0.4",
-    "zod": "^3.25.36"
+    "unpdf": "^1.0.5",
+    "zod": "^3.25.41"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.13"
+    "@types/bun": "^1.2.15"
   }
 }

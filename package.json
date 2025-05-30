@@ -27,5 +27,5 @@
     "turbo": "2.5.3",
     "typescript": "^5.8.3"
   },
-  "packageManager": "bun@1.2.14"
+  "packageManager": "bun@1.2.15"
 }

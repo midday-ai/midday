@@ -38,10 +38,11 @@ export function TrackerSelectProject({
   const upsertTrackerProjectMutation = useMutation(
     trpc.trackerProjects.upsert.mutationOptions({
       onSuccess: (result) => {
-        if (result) {
-          // onCreate(result);
-          // handleSelect(result);
-          setLatestProjectId(result?.id ?? null);
+        if (result?.id && result?.name) {
+          const project = { id: result.id, name: result.name };
+          onCreate(project);
+          handleSelect(project);
+          setLatestProjectId(result.id);
           refetch();
 
           queryClient.invalidateQueries({

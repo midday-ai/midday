@@ -8,16 +8,17 @@ export function TimeRangeInput({
   value,
   onChange,
 }: {
-  value: { start: string; stop: string };
+  value: { start: string | undefined; stop: string | undefined };
   onChange: (value: { start: string; stop: string }) => void;
 }) {
-  const [startTime, setStartTime] = useState(value.start);
-  const [stopTime, setStopTime] = useState(value.stop);
+  // Ensure we never have undefined values for controlled inputs
+  const [startTime, setStartTime] = useState(value.start || "");
+  const [stopTime, setStopTime] = useState(value.stop || "");
   const [duration, setDuration] = useState("");
 
   useEffect(() => {
-    setStartTime(value.start);
-    setStopTime(value.stop);
+    setStartTime(value.start || "");
+    setStopTime(value.stop || "");
   }, [value]);
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export function TimeRangeInput({
           value={startTime}
           onChange={(e) => {
             setStartTime(e.target.value);
-            onChange({ ...value, start: e.target.value });
+            onChange({ start: e.target.value, stop: stopTime });
           }}
           className="bg-transparent focus:outline-none text-sm"
         />
@@ -56,7 +57,7 @@ export function TimeRangeInput({
           value={stopTime}
           onChange={(e) => {
             setStopTime(e.target.value);
-            onChange({ ...value, stop: e.target.value });
+            onChange({ start: startTime, stop: e.target.value });
           }}
           className="bg-transparent focus:outline-none text-sm"
         />

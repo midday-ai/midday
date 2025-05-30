@@ -2,8 +2,10 @@ import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   addMinutes,
   addSeconds,
+  differenceInSeconds,
   eachDayOfInterval,
   format,
+  isValid,
   parseISO,
   setHours,
   setMinutes,
@@ -11,8 +13,146 @@ import {
 
 export const NEW_EVENT_ID = "new-event";
 
-type TrackerRecord = RouterOutputs["trackerEntries"]["byDate"]["data"][number];
+// API Response type from the router
+type ApiTrackerRecord =
+  RouterOutputs["trackerEntries"]["byDate"]["data"][number];
 
+// Internal tracker record type with consistent Date handling
+export interface TrackerRecord {
+  id: string;
+  date: string | null;
+  description: string | null;
+  duration: number | null;
+  start: Date;
+  stop: Date;
+  user: {
+    id: string;
+    fullName: string | null;
+    avatarUrl: string | null;
+  } | null;
+  trackerProject: {
+    id: string;
+    name: string;
+    currency: string | null;
+    rate: number | null;
+    customer: {
+      id: string;
+      name: string;
+    } | null;
+  } | null;
+}
+
+// Date utility functions
+export const createSafeDate = (
+  dateInput: string | Date | null | undefined,
+  fallback?: Date,
+): Date => {
+  if (!dateInput) return fallback || new Date();
+
+  const date = typeof dateInput === "string" ? parseISO(dateInput) : dateInput;
+  return isValid(date) ? date : fallback || new Date();
+};
+
+export const formatTimeFromDate = (date: Date | string | null): string => {
+  const safeDate = createSafeDate(date);
+  return format(safeDate, "HH:mm");
+};
+
+export const getSlotFromDate = (date: Date | string | null): number => {
+  const safeDate = createSafeDate(date);
+  return safeDate.getHours() * 4 + Math.floor(safeDate.getMinutes() / 15);
+};
+
+export const calculateDuration = (
+  start: Date | string | null,
+  stop: Date | string | null,
+): number => {
+  const startDate = createSafeDate(start);
+  const stopDate = createSafeDate(stop);
+  return Math.max(0, differenceInSeconds(stopDate, startDate));
+};
+
+// Tracker record transformation
+export const transformApiRecord = (
+  apiRecord: ApiTrackerRecord,
+  selectedDate: string | null,
+): TrackerRecord => {
+  const start = apiRecord.start
+    ? parseISO(apiRecord.start)
+    : parseISO(`${apiRecord.date || selectedDate}T09:00:00`);
+
+  const stop = apiRecord.stop
+    ? parseISO(apiRecord.stop)
+    : addSeconds(start, apiRecord.duration || 0);
+
+  return {
+    id: apiRecord.id,
+    date: apiRecord.date,
+    description: apiRecord.description,
+    duration: apiRecord.duration,
+    start: isValid(start) ? start : new Date(),
+    stop: isValid(stop)
+      ? stop
+      : addMinutes(isValid(start) ? start : new Date(), 15),
+    user: apiRecord.user,
+    trackerProject: apiRecord.trackerProject
+      ? {
+          id: apiRecord.trackerProject.id,
+          name: apiRecord.trackerProject.name || "",
+          currency: apiRecord.trackerProject.currency,
+          rate: apiRecord.trackerProject.rate,
+          customer: apiRecord.trackerProject.customer,
+        }
+      : null,
+  };
+};
+
+export const createNewEvent = (
+  slot: number,
+  selectedProjectId: string | null,
+  selectedDate?: string | null,
+): TrackerRecord => {
+  const baseDate = selectedDate ? parseISO(selectedDate) : new Date();
+  const startDate = setMinutes(
+    setHours(baseDate, Math.floor(slot / 4)),
+    (slot % 4) * 15,
+  );
+  const endDate = addMinutes(startDate, 15);
+
+  return {
+    id: NEW_EVENT_ID,
+    date: format(startDate, "yyyy-MM-dd"),
+    description: null,
+    duration: 15 * 60, // 15 minutes in seconds
+    start: startDate,
+    stop: endDate,
+    user: null,
+    trackerProject: selectedProjectId
+      ? {
+          id: selectedProjectId,
+          name: "",
+          currency: null,
+          rate: null,
+          customer: null,
+        }
+      : null,
+  };
+};
+
+export const updateEventTime = (
+  event: TrackerRecord,
+  start: Date,
+  stop: Date,
+): TrackerRecord => {
+  return {
+    ...event,
+    start: isValid(start) ? start : event.start,
+    stop: isValid(stop) ? stop : event.stop,
+    duration: calculateDuration(start, stop),
+  };
+};
+
+// Date range utilities
 export function sortDates(dates: string[]) {
   return dates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 }
@@ -38,49 +178,6 @@ export const formatHour = (hour: number, timeFormat?: number | null) => {
   return format(date, timeFormat === 12 ? "hh:mm a" : "HH:mm");
 };
 
-export const getTimeFromDate = (date: Date) => {
-  return format(date, "HH:mm");
-};
-
-export const getSlotFromDate = (date: Date) => {
-  return date.getHours() * 4 + Math.floor(date.getMinutes() / 15);
-};
-
-export const createNewEvent = (
-  slot: number,
-  selectedProjectId: string | null,
-): TrackerRecord => {
-  const startDate = setMinutes(
-    setHours(new Date(), Math.floor(slot / 4)),
-    (slot % 4) * 15,
-  );
-  const endDate = addMinutes(startDate, 15);
-  return {
-    id: NEW_EVENT_ID,
-    date: format(startDate, "yyyy-MM-dd"),
-    description: null,
-    duration: 15 * 60, // 15 minutes in seconds
-    start: startDate.toISOString(),
-    stop: endDate.toISOString(),
-    user: null,
-    trackerProject: {
-      id: selectedProjectId ?? "",
-      name: "",
-      currency: null,
-      rate: null,
-      customer: null,
-    },
-  };
-};
-
-export const updateEventTime = (
-  event: TrackerRecord,
-  start: Date,
-  end: Date,
-): TrackerRecord => {
-  return { ...event, start: start.toISOString(), stop: end.toISOString() };
-};
-
 export const getDates = (
   selectedDate: string | null,
   sortedRange: string[] | null,
@@ -98,29 +195,64 @@ export const getDates = (
   return [];
 };
 
-export const transformTrackerData = (
-  event: TrackerRecord,
-  selectedDate: string | null,
-): TrackerRecord => {
-  const start = event.start
-    ? parseISO(event.start)
-    : parseISO(`${event.date || selectedDate}T09:00:00`);
-  const stop = event.stop
-    ? parseISO(event.stop)
-    : addSeconds(start, event.duration || 0);
+// Validation utilities
+export const isValidTimeSlot = (slot: number): boolean => {
+  return slot >= 0 && slot < 96; // 24 hours * 4 slots per hour
+};
+
+export const isValidDateString = (dateStr: string): boolean => {
+  return isValid(parseISO(dateStr));
+};
+
+// Form data conversion utilities
+export const convertToFormData = (record: TrackerRecord) => {
+  return {
+    id: record.id === NEW_EVENT_ID ? undefined : record.id,
+    start: formatTimeFromDate(record.start),
+    stop: formatTimeFromDate(record.stop),
+    projectId: record.trackerProject?.id || "",
+    description: record.description || "",
+    duration: calculateDuration(record.start, record.stop),
+  };
+};
+
+export const convertFromFormData = (
+  formData: {
+    id?: string;
+    start: string;
+    stop: string;
+    projectId: string;
+    assignedId?: string;
+    description?: string;
+    duration: number;
+  },
+  baseDate: Date,
+  dates: string[],
+): {
+  id?: string;
+  start: string;
+  stop: string;
+  dates: string[];
+  assignedId: string | null;
+  projectId: string;
+  description: string | null;
+  duration: number;
+} => {
+  const startDate = parseISO(
+    `${format(baseDate, "yyyy-MM-dd")}T${formData.start}:00`,
+  );
+  const stopDate = parseISO(
+    `${format(baseDate, "yyyy-MM-dd")}T${formData.stop}:00`,
+  );
 
   return {
-    ...event,
-    id: event.id,
-    start: start.toISOString(),
-    stop: stop.toISOString(),
-    trackerProject: {
-      id: event.trackerProject?.id!,
-      name: event.trackerProject?.name || "",
-      currency: event.trackerProject?.currency ?? null,
-      rate: event.trackerProject?.rate ?? null,
-      customer: event.trackerProject?.customer ?? null,
-    },
-    description: event.description,
+    id: formData.id === NEW_EVENT_ID ? undefined : formData.id,
+    start: startDate.toISOString(),
+    stop: stopDate.toISOString(),
+    dates,
+    assignedId: formData.assignedId || null,
+    projectId: formData.projectId,
+    description: formData.description || null,
+    duration: formData.duration,
   };
 };
