@@ -123,7 +123,7 @@
         "tus-js-client": "4.3.1",
         "use-places-autocomplete": "^4.0.1",
         "usehooks-ts": "^3.1.1",
-        "zod": "^3.25.41",
+        "zod": "^3.25.42",
         "zustand": "^5.0.5",
       },
       "devDependencies": {
@@ -154,7 +154,7 @@
         "typesense": "^2.0.3",
         "workers-ai-provider": "^0.5.3",
         "xior": "^0.7.8",
-        "zod": "^3.25.41",
+        "zod": "^3.25.42",
       },
       "devDependencies": {
         "@cloudflare/workers-types": "^4.20250529.0",
@@ -202,7 +202,7 @@
         "@slack/bolt": "^4.4.0",
         "@slack/web-api": "^7.9.2",
         "ai": "^4.3.16",
-        "zod": "^3.25.41",
+        "zod": "^3.25.42",
       },
       "devDependencies": {
         "@types/node": "^22.15.27",
@@ -222,7 +222,7 @@
         "mammoth": "^1.9.1",
         "officeparser": "^5.1.1",
         "unpdf": "^1.0.5",
-        "zod": "^3.25.41",
+        "zod": "^3.25.42",
       },
       "devDependencies": {
         "@types/bun": "^1.2.15",
@@ -288,7 +288,7 @@
         "@midday/encryption": "workspace:*",
         "@midday/supabase": "workspace:*",
         "googleapis": "^149.0.0",
-        "zod": "^3.25.41",
+        "zod": "^3.25.42",
       },
     },
     "packages/invoice": {
@@ -3826,10 +3826,6 @@
     "@langchain/weaviate/uuid": ["uuid@10.0.0", "", { "bin": { "uuid": "dist/bin/uuid" } }, "sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ=="],
 
     "@mdx-js/mdx/source-map": ["source-map@0.7.4", "", {}, "sha512-l3BikUxvPOcn5E74dZiq5BGsTb5yEwhaTSzccU6t4sDOH8NWJCstKO5QT2CvtFoK6F0saL7p9xHAqHOlCPJygA=="],
-
-    "@midday/app-store/zod": ["zod@3.25.41", "", {}, "sha512-8+sDJTGtCYIDBhdqDygp0ffj8kzziRKqAJPhpYObbElJ+3TRe/mnlnwH+/OMa3kKhueS4Drm5UMW00/u1p07zA=="],
-
-    "@midday/dashboard/zod": ["zod@3.25.41", "", {}, "sha512-8+sDJTGtCYIDBhdqDygp0ffj8kzziRKqAJPhpYObbElJ+3TRe/mnlnwH+/OMa3kKhueS4Drm5UMW00/u1p07zA=="],
 
     "@mintlify/cli/fs-extra": ["fs-extra@11.3.0", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^6.0.1", "universalify": "^2.0.0" } }, "sha512-Z4XaCL6dUDHfP/jT25jJKMmtxvuwbkrD1vNSMFlo9lNLY2c5FHYSQgHPRZUjAB26TpDEoW9HCOgplrdbaPV/ew=="],
 
