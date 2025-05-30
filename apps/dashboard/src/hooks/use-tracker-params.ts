@@ -22,6 +22,7 @@ export function useTrackerParams(initialDate?: string) {
     ),
     start: parseAsString,
     end: parseAsString,
+    view: parseAsStringLiteral(["week", "month"]).withDefault("month"),
   });
 
   return {

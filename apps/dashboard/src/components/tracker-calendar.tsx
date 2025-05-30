@@ -16,8 +16,9 @@ import {
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useOnClickOutside } from "usehooks-ts";
-import { CalendarGrid } from "./tracker/calendar-grid";
 import { CalendarHeader } from "./tracker/calendar-header";
+import { CalendarMonthView } from "./tracker/calendar-month-view";
+import { CalendarWeekView } from "./tracker/calendar-week-view";
 
 export function TrackerCalendar() {
   const ref = useRef(null);
@@ -31,6 +32,7 @@ export function TrackerCalendar() {
     range,
     setParams,
     selectedDate,
+    view,
   } = useTrackerParams();
 
   const [isDragging, setIsDragging] = useState(false);
@@ -118,20 +120,38 @@ export function TrackerCalendar() {
     <div ref={ref}>
       <div className="mt-8">
         <CalendarHeader totalDuration={data?.meta?.totalDuration} />
-        <CalendarGrid
-          firstWeek={firstWeek}
-          calendarDays={calendarDays}
-          currentDate={currentTZDate}
-          selectedDate={selectedDate}
-          data={data?.result}
-          range={validRange}
-          localRange={localRange}
-          isDragging={isDragging}
-          weekStartsOnMonday={weekStartsOnMonday}
-          handleMouseDown={handleMouseDown}
-          handleMouseEnter={handleMouseEnter}
-          handleMouseUp={handleMouseUp}
-        />
+        {view === "month" && (
+          <CalendarMonthView
+            firstWeek={firstWeek}
+            calendarDays={calendarDays}
+            currentDate={currentTZDate}
+            selectedDate={selectedDate}
+            data={data?.result}
+            range={validRange}
+            localRange={localRange}
+            isDragging={isDragging}
+            weekStartsOnMonday={weekStartsOnMonday}
+            handleMouseDown={handleMouseDown}
+            handleMouseEnter={handleMouseEnter}
+            handleMouseUp={handleMouseUp}
+          />
+        )}
+
+        {view === "week" && (
+          <CalendarWeekView
+            weekDays={firstWeek}
+            currentDate={currentTZDate}
+            selectedDate={selectedDate}
+            data={data?.result}
+            range={validRange}
+            localRange={localRange}
+            isDragging={isDragging}
+            weekStartsOnMonday={weekStartsOnMonday}
+            handleMouseDown={handleMouseDown}
+            handleMouseEnter={handleMouseEnter}
+            handleMouseUp={handleMouseUp}
+          />
+        )}
       </div>
     </div>
   );
