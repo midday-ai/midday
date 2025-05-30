@@ -95,6 +95,7 @@ export async function getTrackerProjects(
       currency: trackerProjects.currency,
       teamId: trackerProjects.teamId,
       createdAt: trackerProjects.createdAt,
+      rate: trackerProjects.rate,
       totalDuration: sql<number>`total_duration(${trackerProjects})`.as(
         "total_duration",
       ),

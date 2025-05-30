@@ -1,5 +1,6 @@
 "use client";
 
+import { useLatestProjectId } from "@/hooks/use-latest-project-id";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -70,6 +71,7 @@ const createNewEvent = (
   slot: number,
   selectedProjectId: string | null,
   selectedDate?: string | null,
+  projects?: RouterOutputs["trackerProjects"]["get"]["data"],
 ): TrackerRecord => {
   const baseDate = selectedDate ? parseISO(selectedDate) : new Date();
   const startDate = setMinutes(
@@ -77,6 +79,9 @@ const createNewEvent = (
     (slot % 4) * 15,
   );
   const endDate = addMinutes(startDate, 15);
+
+  // Find the project name from projects data
+  const selectedProject = projects?.find((p) => p.id === selectedProjectId);
 
   return {
     id: NEW_EVENT_ID,
@@ -89,10 +94,10 @@ const createNewEvent = (
     trackerProject: selectedProjectId
       ? {
           id: selectedProjectId,
-          name: "",
-          currency: null,
-          rate: null,
-          customer: null,
+          name: selectedProject?.name || "",
+          currency: selectedProject?.currency || null,
+          rate: selectedProject?.rate || null,
+          customer: selectedProject?.customer || null,
         }
       : null,
   };
@@ -123,7 +128,6 @@ const useTrackerData = (selectedDate: string | null) => {
       { date: selectedDate ?? "" },
       {
         enabled: !!selectedDate,
-        staleTime: 60 * 1000,
       },
     ),
   });
@@ -205,8 +209,17 @@ const useSelectedEvent = () => {
 
 export function TrackerSchedule() {
   const { data: user } = useUserQuery();
-  const { selectedDate, range } = useTrackerParams();
+  const { selectedDate, range, projectId: urlProjectId } = useTrackerParams();
+  const { latestProjectId } = useLatestProjectId();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const trpc = useTRPC();
+
+  // Load projects to get project names
+  const { data: projectsData } = useQuery(
+    trpc.trackerProjects.get.queryOptions({
+      pageSize: 100,
+    }),
+  );
 
   const {
     data,
@@ -230,8 +243,13 @@ export function TrackerSchedule() {
   const [moveStartY, setMoveStartY] = useState(0);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    null,
+    urlProjectId || latestProjectId || null,
   );
+
+  // Update selectedProjectId when URL projectId or latestProjectId changes
+  useEffect(() => {
+    setSelectedProjectId(urlProjectId || latestProjectId || null);
+  }, [urlProjectId, latestProjectId]);
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const sortedRange = range?.sort((a, b) => a.localeCompare(b));
@@ -313,11 +331,23 @@ export function TrackerSchedule() {
       setIsDragging(true);
       setDragStartSlot(slot);
 
-      const newEvent = createNewEvent(slot, selectedProjectId, selectedDate);
+      const newEvent = createNewEvent(
+        slot,
+        selectedProjectId,
+        selectedDate,
+        projectsData?.data,
+      );
       setData((prevData) => [...prevData, newEvent]);
       selectEvent(newEvent);
     },
-    [clearNewEvent, setData, selectedProjectId, selectedDate, selectEvent],
+    [
+      clearNewEvent,
+      setData,
+      selectedProjectId,
+      selectedDate,
+      selectEvent,
+      projectsData,
+    ],
   );
 
   const handleMouseMove = useCallback(
@@ -501,6 +531,7 @@ export function TrackerSchedule() {
             getSlotFromDate(startTime),
             selectedProjectId,
             selectedDate,
+            projectsData?.data,
           );
 
           if (newEvent) {
@@ -591,6 +622,7 @@ export function TrackerSchedule() {
       selectedDate,
       setData,
       selectEvent,
+      projectsData,
     ],
   );
 
