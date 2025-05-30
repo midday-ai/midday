@@ -28,7 +28,7 @@ export function TrackerWidget() {
     range,
     setParams,
     selectedDate,
-  } = useTrackerParams(new Date().toISOString());
+  } = useTrackerParams({ initialDate: new Date().toISOString() });
 
   const trpc = useTRPC();
 

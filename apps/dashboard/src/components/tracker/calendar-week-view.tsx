@@ -22,59 +22,79 @@ type CalendarWeekViewProps = {
   handleMouseUp: () => void;
 };
 
-const ROW_HEIGHT = 60;
-const SLOT_HEIGHT = 15;
-const hours = Array.from({ length: 24 }, (_, i) => i);
+const SLOT_HEIGHT = 6.5;
+const HOUR_HEIGHT = 26; // Fill the available height (600px - header) / 24 hours ≈ 26px
+const hours = Array.from({ length: 25 }, (_, i) => i); // 0-24 for cleaner display
 
 export function CalendarWeekView({
   weekDays,
   currentDate,
-  selectedDate,
   data,
-  range,
-  localRange,
-  isDragging,
   handleMouseDown,
   handleMouseEnter,
   handleMouseUp,
 }: CalendarWeekViewProps) {
   const { data: user } = useUserQuery();
+  const is24Hour = user?.timeFormat === 24;
 
   return (
-    <div className="border border-border bg-border">
-      {/* Day headers */}
-      <div className="grid grid-cols-8 gap-px bg-border">
+    <div className="flex flex-col border border-border border-b-0">
+      <div
+        className="grid gap-px bg-border border-b border-border"
+        style={{
+          gridTemplateColumns: is24Hour
+            ? "55px repeat(7, 1fr)"
+            : "80px repeat(7, 1fr)",
+        }}
+      >
         {/* Empty space above time column */}
-        <div className="py-4 px-3 bg-background" />
+        <div className="py-4 px-2 bg-background" />
 
-        {/* Day headers */}
+        {/* Day headers - name and date on same row */}
         {weekDays.map((day) => (
           <div
             key={`header-${day.toString()}`}
-            className="py-4 px-3 bg-background text-xs font-medium text-[#878787] font-mono text-center"
+            className="py-4 px-2 bg-background text-xs font-medium text-[#878787] font-mono text-center"
           >
-            <div className="flex flex-col items-center space-y-1">
-              <div>{format(day, "EEE").toUpperCase()}</div>
-              <div className="text-foreground font-semibold text-sm">
+            <div className="flex flex-row items-end justify-center gap-2">
+              <span className="uppercase">{format(day, "EEE")}</span>
+              <span className="text-foreground font-medium">
                 {format(day, "d")}
-              </div>
+              </span>
+              {day.getMonth() !== currentDate.getMonth() && (
+                <span className="text-[[10px] text-[#878787] uppercase">
+                  {format(day, "MMM")}
+                </span>
+              )}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Time slots and days */}
-      <div className="grid grid-cols-8 gap-px bg-border">
+      {/* Time grid and events */}
+      <div
+        className="grid gap-px bg-border flex-1"
+        style={{
+          gridTemplateColumns: is24Hour
+            ? "55px repeat(7, 1fr)"
+            : "80px repeat(7, 1fr)",
+        }}
+      >
         {/* Time labels column */}
         <div className="bg-background">
-          {hours.map((hour) => (
-            <div
-              key={hour}
-              className="h-[60px] pr-3 pl-3 flex items-start justify-end pt-2 text-xs text-[#878787] font-mono border-b border-border last:border-b-0"
-            >
-              {formatHour(hour, user?.timeFormat)}
-            </div>
-          ))}
+          {hours.slice(0, -1).map(
+            (
+              hour, // Remove the last hour (24) to avoid duplication
+            ) => (
+              <div
+                key={hour}
+                className="flex items-center justify-center text-[12px] text-[#878787] font-mono border-b border-border"
+                style={{ height: `${HOUR_HEIGHT}px` }}
+              >
+                {hour < 24 && formatHour(hour, user?.timeFormat)}
+              </div>
+            ),
+          )}
         </div>
 
         {/* Days columns */}
@@ -83,17 +103,30 @@ export function CalendarWeekView({
           const dayData = data?.[dayKey] || [];
 
           return (
-            <div key={dayKey} className="bg-background relative">
+            <div key={dayKey} className="relative bg-background">
               {/* Hour grid lines */}
-              {hours.map((hour) => (
-                <div
-                  key={`${dayKey}-${hour}`}
-                  className="h-[60px] border-b border-border last:border-b-0 relative"
-                  onMouseDown={() => handleMouseDown(day)}
-                  onMouseEnter={() => handleMouseEnter(day)}
-                  onMouseUp={handleMouseUp}
-                />
-              ))}
+              {hours.slice(0, -1).map((hour) => {
+                return (
+                  <div
+                    key={`${dayKey}-${hour}`}
+                    className={cn(
+                      "hover:bg-muted/10 transition-colors cursor-pointer border-b border-border relative group",
+                    )}
+                    style={{ height: `${HOUR_HEIGHT}px` }}
+                    onMouseDown={() => handleMouseDown(day)}
+                    onMouseEnter={() => handleMouseEnter(day)}
+                    onMouseUp={handleMouseUp}
+                  >
+                    {/* Hour hover indicator */}
+                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 pointer-events-none" />
+
+                    {/* Time indicator on hover */}
+                    <div className="absolute left-1 top-0.5 text-xs font-mono text-muted-foreground opacity-0 group-hover:opacity-100 pointer-events-none bg-background/80 px-1 rounded">
+                      {formatHour(hour, user?.timeFormat)}
+                    </div>
+                  </div>
+                );
+              })}
 
               {/* Events for this day */}
               {dayData.map((event, eventIndex) => {
@@ -104,30 +137,27 @@ export function CalendarWeekView({
                 const top = startSlot * SLOT_HEIGHT;
                 const height = Math.max(
                   (endSlot - startSlot) * SLOT_HEIGHT,
-                  30,
+                  20,
                 );
 
                 return (
                   <div
                     key={`${event.id}-${eventIndex}`}
-                    className={cn(
-                      "absolute left-1 right-1 bg-[#F0F0F0]/95 dark:bg-[#2C2C2C]/95 text-[#606060] dark:text-[#878787] rounded-sm px-2 py-1 text-xs z-10 overflow-hidden",
-                      "border-l-2 border-primary",
-                    )}
+                    className="absolute left-0 right-0 text-xs bg-[#F0F0F0] dark:bg-[#1D1D1D] text-[#606060] dark:text-[#878787] p-2 z-10 overflow-hidden cursor-pointer hover:bg-[#E8E8E8] dark:hover:bg-[#252525] transition-colors"
                     style={{
                       top: `${top}px`,
                       height: `${height}px`,
                     }}
+                    onMouseDown={() => handleMouseDown(day)}
+                    onMouseEnter={() => handleMouseEnter(day)}
+                    onMouseUp={handleMouseUp}
                   >
-                    <div className="font-medium truncate">
+                    <div className="font-medium truncate leading-tight">
                       {event.trackerProject?.name || "No Project"}
                     </div>
-                    <div className="text-xs opacity-75">
-                      ({secondsToHoursAndMinutes(event.duration || 0)})
-                    </div>
-                    {event.description && (
-                      <div className="text-xs opacity-60 truncate mt-1">
-                        {event.description}
+                    {height > 24 && (
+                      <div className="truncate">
+                        ({secondsToHoursAndMinutes(event.duration || 0)})
                       </div>
                     )}
                   </div>
