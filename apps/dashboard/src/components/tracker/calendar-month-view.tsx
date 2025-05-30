@@ -9,7 +9,7 @@ type CalendarGridProps = {
   currentDate: TZDate;
   selectedDate: string | null;
   data: RouterOutputs["trackerEntries"]["byRange"]["result"] | undefined;
-  range: [string, string] | null; // Adjusted type based on potential linter error
+  range: [string, string] | null;
   localRange: [string | null, string | null];
   isDragging: boolean;
   weekStartsOnMonday: boolean;
@@ -18,7 +18,7 @@ type CalendarGridProps = {
   handleMouseUp: () => void;
 };
 
-export function CalendarGrid({
+export function CalendarMonthView({
   firstWeek,
   calendarDays,
   currentDate,

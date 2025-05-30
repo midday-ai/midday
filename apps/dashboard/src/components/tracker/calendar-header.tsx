@@ -1,4 +1,5 @@
 import NumberFlow from "@number-flow/react";
+import { TrackerCalendarType } from "../tracker-calendar-type";
 import { TrackerMonthSelect } from "../tracker-month-select";
 
 type CalendarHeaderProps = {
@@ -18,6 +19,7 @@ export function CalendarHeader({ totalDuration }: CalendarHeaderProps) {
       </div>
       <div className="flex space-x-2">
         <TrackerMonthSelect dateFormat="MMMM" />
+        <TrackerCalendarType />
       </div>
     </div>
   );
