@@ -1,6 +1,8 @@
 import NumberFlow from "@number-flow/react";
+import { TotalEarnings } from "../total-earnings";
 import { TrackerCalendarType } from "../tracker-calendar-type";
-import { TrackerMonthSelect } from "../tracker-month-select";
+import { TrackerPeriodSelect } from "../tracker-period-select";
+import { TrackerSettings } from "../tracker-settings";
 
 type CalendarHeaderProps = {
   totalDuration?: number;
@@ -9,16 +11,18 @@ type CalendarHeaderProps = {
 export function CalendarHeader({ totalDuration }: CalendarHeaderProps) {
   return (
     <div className="flex items-center justify-between mb-6">
-      <div className="space-y-2 select-text">
+      <div className="space-y-1 select-text">
         <h1 className="text-4xl font-mono">
           <NumberFlow
             value={totalDuration ? Math.round(totalDuration / 3600) : 0}
           />
           <span className="relative">h</span>
         </h1>
+        <TotalEarnings />
       </div>
       <div className="flex space-x-2">
-        <TrackerMonthSelect dateFormat="MMMM" />
+        <TrackerPeriodSelect dateFormat="MMMM" />
+        <TrackerSettings />
         <TrackerCalendarType />
       </div>
     </div>

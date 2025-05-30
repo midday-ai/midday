@@ -1,26 +1,26 @@
 "use client";
 
-import { TrackerMonthSelect } from "@/components/tracker-month-select";
-import { secondsToHoursAndMinutes } from "@/utils/format";
-import Link from "next/link";
+import { TrackerPeriodSelect } from "@/components/tracker-period-select";
+import NumberFlow from "@number-flow/react";
 
-type Props = {
+type TrackerHeaderProps = {
   totalDuration?: number;
 };
 
-export function TrackerHeader({ totalDuration }: Props) {
+export function TrackerHeader({ totalDuration }: TrackerHeaderProps) {
   return (
-    <div className="flex justify-between">
-      <div>
-        <Link href="/tracker" prefetch>
-          <h2 className="text-lg">Tracker</h2>
-        </Link>
-        <span className="text-[#878787] text-sm">
-          {totalDuration ? secondsToHoursAndMinutes(totalDuration) : "0h"}
-        </span>
+    <div className="flex items-center justify-between">
+      <div className="space-y-2">
+        <h2 className="text-xl text-[#878787]">
+          <NumberFlow
+            value={totalDuration ? Math.round(totalDuration / 3600) : 0}
+          />
+          <span className="relative">h</span>
+        </h2>
       </div>
-
-      <TrackerMonthSelect />
+      <div className="flex items-center space-x-2">
+        <TrackerPeriodSelect />
+      </div>
     </div>
   );
 }

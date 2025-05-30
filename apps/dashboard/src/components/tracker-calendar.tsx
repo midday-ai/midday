@@ -8,19 +8,29 @@ import { TZDate } from "@date-fns/tz";
 import { useQuery } from "@tanstack/react-query";
 import {
   addMonths,
+  addWeeks,
+  eachDayOfInterval,
   endOfMonth,
+  endOfWeek,
   formatISO,
   startOfMonth,
+  startOfWeek,
   subMonths,
+  subWeeks,
 } from "date-fns";
 import { useRef, useState } from "react";
+import React from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useOnClickOutside } from "usehooks-ts";
 import { CalendarHeader } from "./tracker/calendar-header";
 import { CalendarMonthView } from "./tracker/calendar-month-view";
 import { CalendarWeekView } from "./tracker/calendar-week-view";
 
-export function TrackerCalendar() {
+type Props = {
+  weeklyCalendar: boolean;
+};
+
+export function TrackerCalendar({ weeklyCalendar }: Props) {
   const ref = useRef(null);
   const { data: user } = useUserQuery();
   const trpc = useTRPC();
@@ -33,7 +43,7 @@ export function TrackerCalendar() {
     setParams,
     selectedDate,
     view,
-  } = useTrackerParams();
+  } = useTrackerParams({ defaultView: weeklyCalendar ? "week" : "month" });
 
   const [isDragging, setIsDragging] = useState(false);
   const [localRange, setLocalRange] = useState<[string | null, string | null]>([
@@ -48,30 +58,70 @@ export function TrackerCalendar() {
     weekStartsOnMonday,
   );
 
+  // Calculate current week days for week view
+  const currentWeekDays = React.useMemo(() => {
+    const weekStart = startOfWeek(currentTZDate, {
+      weekStartsOn: weekStartsOnMonday ? 1 : 0,
+    });
+    const weekEnd = endOfWeek(currentTZDate, {
+      weekStartsOn: weekStartsOnMonday ? 1 : 0,
+    });
+    return eachDayOfInterval({
+      start: weekStart,
+      end: weekEnd,
+    }).map((date) => new TZDate(date, "UTC"));
+  }, [currentTZDate, weekStartsOnMonday]);
+
+  // Dynamic data fetching based on view
+  const getDateRange = () => {
+    if (view === "week") {
+      const weekStart = startOfWeek(currentTZDate, {
+        weekStartsOn: weekStartsOnMonday ? 1 : 0,
+      });
+      const weekEnd = endOfWeek(currentTZDate, {
+        weekStartsOn: weekStartsOnMonday ? 1 : 0,
+      });
+      return {
+        from: formatISO(weekStart, { representation: "date" }),
+        to: formatISO(weekEnd, { representation: "date" }),
+      };
+    }
+    return {
+      from: formatISO(startOfMonth(currentTZDate), { representation: "date" }),
+      to: formatISO(endOfMonth(currentTZDate), { representation: "date" }),
+    };
+  };
+
   const { data } = useQuery(
-    trpc.trackerEntries.byRange.queryOptions({
-      from: formatISO(startOfMonth(currentTZDate), {
-        representation: "date",
-      }),
-      to: formatISO(endOfMonth(currentTZDate), {
-        representation: "date",
-      }),
-    }),
+    trpc.trackerEntries.byRange.queryOptions(getDateRange()),
   );
 
-  function handleMonthChange(direction: number) {
-    const newDate =
-      direction > 0 ? addMonths(currentTZDate, 1) : subMonths(currentTZDate, 1);
-    setParams({
-      date: formatISO(newDate, { representation: "date" }),
-    });
+  function handlePeriodChange(direction: number) {
+    if (view === "week") {
+      const newDate =
+        direction > 0 ? addWeeks(currentTZDate, 1) : subWeeks(currentTZDate, 1);
+      setParams({
+        date: formatISO(
+          startOfWeek(newDate, { weekStartsOn: weekStartsOnMonday ? 1 : 0 }),
+          { representation: "date" },
+        ),
+      });
+    } else {
+      const newDate =
+        direction > 0
+          ? addMonths(currentTZDate, 1)
+          : subMonths(currentTZDate, 1);
+      setParams({
+        date: formatISO(newDate, { representation: "date" }),
+      });
+    }
   }
 
-  useHotkeys("arrowLeft", () => handleMonthChange(-1), {
+  useHotkeys("arrowLeft", () => handlePeriodChange(-1), {
     enabled: !selectedDate,
   });
 
-  useHotkeys("arrowRight", () => handleMonthChange(1), {
+  useHotkeys("arrowRight", () => handlePeriodChange(1), {
     enabled: !selectedDate,
   });
 
@@ -139,7 +189,7 @@ export function TrackerCalendar() {
 
         {view === "week" && (
           <CalendarWeekView
-            weekDays={firstWeek}
+            weekDays={currentWeekDays}
             currentDate={currentTZDate}
             selectedDate={selectedDate}
             data={data?.result}
