@@ -165,7 +165,12 @@ export const updateInboxSchema = z.object({
       name: "id",
     },
   }),
-  status: z.enum(["new", "archived", "processing", "done", "pending"]),
+  status: z
+    .enum(["new", "archived", "processing", "done", "pending"])
+    .optional(),
+  displayName: z.string().optional(),
+  currency: z.string().optional(),
+  amount: z.number().optional(),
 });
 
 export const matchTransactionSchema = z.object({

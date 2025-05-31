@@ -175,6 +175,12 @@ export function TableHeader({ table }: Props) {
           </TableHead>
         )}
 
+        {isVisible("internalNote") && (
+          <TableHead className="w-[150px] min-w-[150px]">
+            <span>Internal Note</span>
+          </TableHead>
+        )}
+
         {isVisible("issueDate") && (
           <TableHead className="w-[120px] min-w-[120px]">
             <Button
