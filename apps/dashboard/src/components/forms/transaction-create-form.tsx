@@ -116,12 +116,6 @@ export function TransactionCreateForm() {
   const bankAccountId = form.watch("bankAccountId");
 
   useEffect(() => {
-    if (user) {
-      form.setValue("assignedId", user.id);
-    }
-  }, [user]);
-
-  useEffect(() => {
     if (!bankAccountId && accounts?.length) {
       const firstAccountId = accounts.at(0)?.id;
       if (firstAccountId) {
