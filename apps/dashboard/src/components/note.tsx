@@ -1,5 +1,6 @@
 import { Textarea } from "@midday/ui/textarea";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDebounceValue } from "usehooks-ts";
 
 type Props = {
   defaultValue: string;
@@ -8,6 +9,13 @@ type Props = {
 
 export function Note({ defaultValue, onChange }: Props) {
   const [value, setValue] = useState(defaultValue);
+  const [debouncedValue] = useDebounceValue(value, 500);
+
+  useEffect(() => {
+    if (debouncedValue !== defaultValue) {
+      onChange(debouncedValue?.length > 0 ? debouncedValue : null);
+    }
+  }, [debouncedValue, defaultValue, onChange]);
 
   return (
     <Textarea
@@ -16,11 +24,6 @@ export function Note({ defaultValue, onChange }: Props) {
       autoFocus
       placeholder="Note"
       className="min-h-[100px] resize-none"
-      onBlur={() => {
-        if (value !== defaultValue) {
-          onChange(value?.length > 0 ? value : null);
-        }
-      }}
       onChange={(evt) => setValue(evt.target.value)}
     />
   );

@@ -95,7 +95,7 @@ export async function globalSearchQuery(
     sql`SELECT * FROM global_search(
         ${params.searchTerm ?? null},
         ${params.teamId ?? null},
-        ${params.language ?? null},
+        ${params.language ?? "english"},
         ${params.limit ?? null},
         ${params.itemsPerTableLimit ?? null},
         ${params.relevanceThreshold ?? null}
