@@ -452,8 +452,8 @@ export async function getTrackerProjectById(
   return {
     ...project,
     tags: projectTags.map((pt) => ({
-      id: pt.id,
-      tag: { id: pt.tagId, name: pt.tagName },
+      id: pt.tagId,
+      name: pt.tagName,
     })),
     users: assignedUsers.map((user) => ({
       id: user.user_id,

@@ -100,8 +100,8 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
       customerId: data?.customerId ?? undefined,
       tags:
         data?.tags?.map((tag) => ({
-          id: tag.tag?.id ?? "",
-          value: tag.tag?.name ?? "",
+          id: tag.id ?? "",
+          value: tag.name ?? "",
         })) ?? undefined,
     },
   });

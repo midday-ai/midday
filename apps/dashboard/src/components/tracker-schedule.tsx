@@ -303,7 +303,6 @@ export function TrackerSchedule() {
         !isValid(stopDate) ||
         isAfter(startDate, stopDate)
       ) {
-        console.error("Invalid start or stop time");
         return;
       }
 
