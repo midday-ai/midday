@@ -329,10 +329,7 @@ export async function getTransactions(
       ),
     })
     .from(transactions)
-    .leftJoin(
-      users,
-      and(eq(transactions.assignedId, users.id), eq(users.teamId, teamId)),
-    )
+    .leftJoin(users, eq(transactions.assignedId, users.id))
     .leftJoin(
       transactionCategories,
       and(
