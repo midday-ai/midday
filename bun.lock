@@ -316,6 +316,7 @@
         "@midday/supabase": "workspace:*",
         "@sindresorhus/slugify": "^2.2.1",
         "@zip.js/zip.js": "^2.7.62",
+        "camelcase-keys": "^9.1.3",
         "heic-convert": "1.2.4",
         "node-xlsx": "^0.24.0",
         "sharp": "0.34.1",
