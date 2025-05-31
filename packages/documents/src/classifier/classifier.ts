@@ -10,7 +10,7 @@ import type {
 export class DocumentClassifier {
   async #processDocument({ content }: DocumentClassifierRequest) {
     const result = await generateObject({
-      model: mistral("mistral-small-latest"),
+      model: mistral("mistral-medium-latest"),
       schema: documentClassifierSchema,
       temperature: 0.3,
       messages: [
@@ -30,7 +30,7 @@ export class DocumentClassifier {
 
   async #processImage(request: DocumentClassifierImageRequest) {
     const result = await generateObject({
-      model: mistral("mistral-small-latest"),
+      model: mistral("mistral-medium-latest"),
       schema: imageClassifierSchema,
       temperature: 0.3,
       messages: [

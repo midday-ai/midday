@@ -12,7 +12,7 @@ export class ReceiptProcessor {
     }
 
     const result = await generateObject({
-      model: mistral("mistral-small-latest"),
+      model: mistral("mistral-medium-latest"),
       schema: receiptSchema,
       messages: [
         {

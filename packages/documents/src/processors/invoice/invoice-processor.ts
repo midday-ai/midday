@@ -14,7 +14,7 @@ export class InvoiceProcessor {
 
     try {
       const result = await generateObject({
-        model: mistral("mistral-small-latest"),
+        model: mistral("mistral-medium-latest"),
         schema: invoiceSchema,
         messages: [
           {
@@ -63,7 +63,7 @@ export class InvoiceProcessor {
     const cleanedText = text.replaceAll("\u0000", "");
 
     const result = await generateObject({
-      model: mistral("mistral-small-latest"),
+      model: mistral("mistral-medium-latest"),
       schema: invoiceSchema,
       messages: [
         {
