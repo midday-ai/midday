@@ -4,7 +4,6 @@ import { setWeeklyCalendarAction } from "@/actions/set-weekly-calendar-action";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { useAction } from "next-safe-action/hooks";
-import { useEffect, useRef } from "react";
 
 const options = [
   {
@@ -20,25 +19,14 @@ const options = [
 export function TrackerCalendarType() {
   const { view, setParams } = useTrackerParams();
   const setWeeklyCalendar = useAction(setWeeklyCalendarAction);
-  const hasMounted = useRef(false);
 
-  // Update cookie as a side effect when view changes (but not on initial mount)
-  useEffect(() => {
-    if (hasMounted.current) {
-      setWeeklyCalendar.execute(view === "week");
-    } else {
-      hasMounted.current = true;
-    }
-  }, [view, setWeeklyCalendar]);
+  const handleChange = (value: string) => {
+    setParams({ view: value as "week" | "month" });
+    setWeeklyCalendar.execute(value === "week");
+  };
 
   return (
-    <Tabs
-      className="h-[37px]"
-      value={view}
-      onValueChange={(value) => {
-        setParams({ view: value as "week" | "month" });
-      }}
-    >
+    <Tabs className="h-[37px]" value={view} onValueChange={handleChange}>
       <TabsList className="p-0 h-[37px]">
         {options.map((option) => (
           <TabsTrigger
