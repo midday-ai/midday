@@ -166,7 +166,7 @@ export function InboxDetails() {
   const handleCopyLink = () => {
     if (!data) return;
 
-    copy(`${getUrl()}/inbox?id=${data.id}`);
+    copy(`${getUrl()}/inbox?inboxId=${data.id}`);
 
     toast({
       duration: 4000,
