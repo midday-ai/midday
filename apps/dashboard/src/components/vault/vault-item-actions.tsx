@@ -3,11 +3,7 @@
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import {
-  type InfiniteData,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
 
@@ -45,42 +41,7 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
 
   const deleteDocumentMutation = useMutation(
     trpc.documents.delete.mutationOptions({
-      onMutate: async ({ id }) => {
-        // Cancel outgoing refetches
-        await queryClient.cancelQueries({
-          queryKey: trpc.documents.get.infiniteQueryKey(),
-        });
-
-        // Get current data
-        const previousData = queryClient.getQueriesData({
-          queryKey: trpc.documents.get.infiniteQueryKey(),
-        });
-
-        // Optimistically update infinite query data
-        queryClient.setQueriesData(
-          { queryKey: trpc.documents.get.infiniteQueryKey() },
-          (old: InfiniteData<any>) => ({
-            pages: old.pages.map((page) => ({
-              ...page,
-              data: page.data.filter((item: any) => item.id !== id),
-            })),
-            pageParams: old.pageParams,
-          }),
-        );
-
-        return { previousData };
-      },
-      onError: (_, __, context) => {
-        // Restore previous data on error
-        if (context?.previousData) {
-          queryClient.setQueriesData(
-            { queryKey: trpc.documents.get.infiniteQueryKey() },
-            context.previousData,
-          );
-        }
-      },
-      onSettled: () => {
-        // Refetch after error or success
+      onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.documents.get.infiniteQueryKey(),
         });

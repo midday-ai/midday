@@ -203,7 +203,6 @@ export function InvoiceSearchFilter() {
                 <Calendar
                   mode="range"
                   initialFocus
-                  toDate={new Date()}
                   selected={{
                     from: filter?.start ? new Date(filter.start) : undefined,
                     to: filter?.end ? new Date(filter.end) : undefined,
