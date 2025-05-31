@@ -45,6 +45,10 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
         queryClient.invalidateQueries({
           queryKey: trpc.documents.get.infiniteQueryKey(),
         });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.search.global.queryKey(),
+        });
       },
     }),
   );
