@@ -181,6 +181,13 @@ export const columns: ColumnDef<Invoice>[] = [
     ),
   },
   {
+    header: "Internal Note",
+    accessorKey: "internalNote",
+    cell: ({ row }) => {
+      return <span className="truncate">{row.original.internalNote}</span>;
+    },
+  },
+  {
     header: "Issue date",
     accessorKey: "issueDate",
     cell: ({ row, table }) => {

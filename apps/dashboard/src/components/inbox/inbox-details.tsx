@@ -12,6 +12,7 @@ import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
+import { DialogTrigger } from "@midday/ui/dialog";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -25,6 +26,7 @@ import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useCopyToClipboard } from "usehooks-ts";
+import { EditInboxModal } from "../modals/edit-inbox-modal";
 import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
 import { MatchTransaction } from "./match-transaction";
 
@@ -194,39 +196,49 @@ export function InboxDetails() {
         </div>
 
         <div className="ml-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!data}>
-                <MoreVertical className="h-4 w-4" />
-                <span className="sr-only">More</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <a
-                  href={`/api/download/file?path=${data?.filePath?.join(
-                    "/",
-                  )}&filename=${data?.fileName}`}
-                  download
+          <EditInboxModal>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" disabled={!data}>
+                  <MoreVertical className="h-4 w-4" />
+                  <span className="sr-only">More</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <DialogTrigger className="w-full text-left">
+                    Edit
+                  </DialogTrigger>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <a
+                    href={`/api/download/file?path=${data?.filePath?.join(
+                      "/",
+                    )}&filename=${data?.fileName}`}
+                    download
+                  >
+                    Download
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateInboxMutation.mutate({
+                      id: data?.id!,
+                      status: data?.status === "done" ? "pending" : "done",
+                    })
+                  }
                 >
-                  Download
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() =>
-                  updateInboxMutation.mutate({
-                    id: data?.id!,
-                    status: data?.status === "done" ? "pending" : "done",
-                  })
-                }
-              >
-                {data?.status === "done" ? "Mark as unhandled" : "Mark as done"}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCopyLink}>
-                Copy Link
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  {data?.status === "done"
+                    ? "Mark as unhandled"
+                    : "Mark as done"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleCopyLink}>
+                  Copy Link
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </EditInboxModal>
         </div>
       </div>
       <Separator />

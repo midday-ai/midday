@@ -14,7 +14,10 @@ export default async function Page() {
 
   return (
     <>
-      <DataTable />
+      <div className="space-y-12">
+        <DataTable />
+      </div>
+
       <EditApiKeyModal />
       <DeleteApiKeyModal />
       <CreateApiKeyModal />

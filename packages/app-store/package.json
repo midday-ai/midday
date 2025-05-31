@@ -18,7 +18,7 @@
     "@midday/jobs": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22.15.27",
+    "@types/node": "^22.15.29",
     "typescript": "^5.8.3"
   },
   "exports": {
