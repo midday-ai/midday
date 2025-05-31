@@ -219,13 +219,15 @@ export async function deleteDocument(
   }
 
   // Delete all transaction attachments that have the same path
-  // Using both contains and containedBy for array equality
+  // Convert the array to PostgreSQL array literal format
+  const pathArray = `{${result.pathTokens?.map((token) => `"${token}"`).join(",")}}`;
+
   await db
     .delete(transactionAttachments)
     .where(
       and(
         eq(transactionAttachments.teamId, params.teamId),
-        sql`${transactionAttachments.path} @> ${result.pathTokens}::text[] AND ${transactionAttachments.path} <@ ${result.pathTokens}::text[]`,
+        sql`${transactionAttachments.path} @> ${pathArray}::text[] AND ${transactionAttachments.path} <@ ${pathArray}::text[]`,
       ),
     );
 
