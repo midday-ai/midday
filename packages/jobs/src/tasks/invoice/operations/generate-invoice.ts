@@ -3,6 +3,7 @@ import { processDocument } from "@jobs/tasks/document/process-document";
 import { PdfTemplate, renderToBuffer } from "@midday/invoice";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import camelcaseKeys from "camelcase-keys";
 import { sendInvoiceEmail } from "../email/send-email";
 
 export const generateInvoice = schemaTask({
@@ -28,8 +29,13 @@ export const generateInvoice = schemaTask({
 
     const { user, ...invoice } = invoiceData;
 
+    // NOTE: We can remove this when we use direct database data
+    const camelCaseInvoice = camelcaseKeys(invoice, {
+      deep: true,
+    });
+
     // @ts-expect-error - Template JSONB while EditorDoc in components
-    const buffer = await renderToBuffer(await PdfTemplate(invoice));
+    const buffer = await renderToBuffer(await PdfTemplate(camelCaseInvoice));
 
     const filename = `${invoiceData?.invoice_number}.pdf`;
     const fullPath = `${invoiceData?.team_id}/invoices/${filename}`;
