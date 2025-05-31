@@ -513,7 +513,7 @@ export function TrackerSchedule() {
       if (
         start &&
         isCompleteStartTime &&
-        (!currentEvent || currentEvent.id !== NEW_EVENT_ID) &&
+        !currentEvent &&
         !data.some((ev) => ev.id === NEW_EVENT_ID)
       ) {
         // Format HHMM to HH:mm if necessary
