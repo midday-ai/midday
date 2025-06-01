@@ -187,7 +187,7 @@ const ActionsCell = memo(
             </DropdownMenuItem>
           )}
 
-          {transaction.isFulfilled && transaction.status !== "completed" && (
+          {!transaction.isFulfilled && (
             <DropdownMenuItem onClick={handleUpdateToCompleted}>
               Mark as completed
             </DropdownMenuItem>
