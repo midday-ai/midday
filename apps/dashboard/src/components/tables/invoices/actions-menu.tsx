@@ -144,6 +144,12 @@ export function ActionsMenu({ row }: Props) {
             </DropdownMenuItem>
           )}
 
+          <DropdownMenuItem
+            onClick={() => duplicateInvoiceMutation.mutate({ id: row.id })}
+          >
+            Duplicate
+          </DropdownMenuItem>
+
           {row.status === "paid" && (
             <DropdownMenuItem
               onClick={() =>
