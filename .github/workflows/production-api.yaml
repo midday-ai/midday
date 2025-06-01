@@ -25,9 +25,11 @@ jobs:
       - name: 🏗 Build @midday/engine
         run: bunx turbo run build --filter=@midday/engine...
       - name: 🔦 Run linter
-        run: bunx turbo run lint
+        run: bun run lint
+        working-directory: ./apps/api
       - name: 🪐 Check TypeScript
-        run: bunx turbo run typecheck
+        run: bun run typecheck
+        working-directory: ./apps/api
       - name: 🧪 Run unit tests
         run: bun run test
         working-directory: ./apps/api
