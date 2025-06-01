@@ -14,8 +14,11 @@ import {
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
+import Image from "next/image";
 import Link from "next/link";
 import { userAgent } from "next/server";
+import backgroundDark from "public/assets/bg-login-dark.jpg";
+import backgroundLight from "public/assets/bg-login.jpg";
 
 export const metadata: Metadata = {
   title: "Login | Midday",
@@ -104,66 +107,90 @@ export default async function Page() {
   }
 
   return (
-    <div>
-      <header className="w-full fixed left-0 right-0">
-        <div className="ml-5 mt-4 md:ml-10 md:mt-10">
+    <div className="h-screen p-2">
+      {/* Header - Logo */}
+      <header className="absolute top-0 left-0 z-30 w-full">
+        <div className="p-6 md:p-8">
           <Link href="https://midday.ai">
-            <Icons.Logo />
+            <Icons.LogoSmall className="h-8 w-auto" />
           </Link>
         </div>
       </header>
 
-      <div className="flex min-h-screen justify-center items-center overflow-hidden p-6 md:p-0">
-        <div className="relative z-20 m-auto flex w-full max-w-[380px] flex-col py-8">
-          <div className="flex w-full flex-col relative">
-            <div className="pb-4 bg-gradient-to-r from-primary dark:via-primary dark:to-[#848484] to-[#000] inline-block text-transparent bg-clip-text">
-              <h1 className="font-medium pb-1 text-3xl">Login to midday.</h1>
+      {/* Main Layout */}
+      <div className="flex h-full">
+        {/* Background Image Section - Hidden on mobile, visible on desktop */}
+        <div className="hidden lg:flex lg:w-1/2 relative">
+          <Image
+            src={backgroundLight}
+            alt="Background"
+            className="object-cover dark:hidden"
+            priority
+            fill
+          />
+          <Image
+            src={backgroundDark}
+            alt="Background"
+            className="object-cover hidden dark:block"
+            priority
+            fill
+          />
+        </div>
+
+        {/* Login Form Section */}
+        <div className="w-full lg:w-1/2 relative">
+          {/* Form Content */}
+          <div className="relative z-10 flex h-full items-center justify-center p-6">
+            <div className="w-full max-w-md space-y-8">
+              {/* Welcome Section */}
+              <div className="text-center">
+                <h1 className="text-lg mb-4 font-serif">Welcome to Midday</h1>
+                <p className="text-[#878787] text-sm mb-8">
+                  New here or coming back? Choose how you want to continue
+                </p>
+              </div>
+
+              {/* Sign In Options */}
+              <div className="space-y-4">
+                {/* Primary Sign In Option */}
+                <div className="space-y-3">{preferredSignInOption}</div>
+
+                <div className="flex items-center justify-center">
+                  <span className="text-[#878787] text-sm">Or</span>
+                </div>
+
+                {/* More Options Accordion */}
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1" className="border-0">
+                    <AccordionTrigger className="flex justify-center items-center text-sm py-2 hover:no-underline">
+                      <span>Other options</span>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-4">
+                      <div className="space-y-3">{moreSignInOptions}</div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
+
+              {/* Terms and Privacy */}
+              <div className="text-center absolute bottom-4 left-0 right-0">
+                <p className="text-xs text-[#878787] leading-relaxed font-mono">
+                  By signing in you agree to our{" "}
+                  <Link href="https://midday.ai/terms" className="underline">
+                    Terms of service
+                  </Link>{" "}
+                  &{" "}
+                  <Link href="https://midday.ai/policy" className="underline">
+                    Privacy policy
+                  </Link>
+                </p>
+              </div>
             </div>
-
-            <p className="font-medium pb-1 text-2xl text-[#878787]">
-              Automate financial tasks, <br /> stay organized, and make
-              <br />
-              informed decisions
-              <br /> effortlessly.
-            </p>
-
-            <div className="pointer-events-auto mt-6 flex flex-col mb-6">
-              {preferredSignInOption}
-
-              <Accordion
-                type="single"
-                collapsible
-                className="border-t-[1px] pt-2 mt-6"
-              >
-                <AccordionItem value="item-1" className="border-0">
-                  <AccordionTrigger className="justify-center space-x-2 flex text-sm">
-                    <span>More options</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="mt-4">
-                    <div className="flex flex-col space-y-4">
-                      {moreSignInOptions}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
-
-            <p className="text-xs text-[#878787]">
-              By clicking continue, you acknowledge that you have read and agree
-              to Midday's{" "}
-              <a href="https://midday.ai/terms" className="underline">
-                Terms of Service
-              </a>{" "}
-              and{" "}
-              <a href="https://midday.ai/policy" className="underline">
-                Privacy Policy
-              </a>
-              .
-            </p>
           </div>
         </div>
       </div>
 
+      {/* Consent Banner */}
       {showTrackingConsent && <ConsentBanner />}
     </div>
   );

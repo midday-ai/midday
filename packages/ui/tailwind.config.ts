@@ -6,11 +6,12 @@ export default {
   safelist: ["dark", "light"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: "var(--font-geist-sans)",
+        mono: "var(--font-geist-mono)",
+        serif: "var(--font-serif)",
+      },
       colors: {
-        fontFamily: {
-          sans: "var(--font-geist-sans)",
-          mono: "var(--font-geist-mono)",
-        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

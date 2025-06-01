@@ -8,11 +8,8 @@ on:
     paths:
       - apps/api/**
       - packages/**
-      - packages/email/**
-      - packages/jobs/**
-      - packages/location/**
-      - packages/supabase/**
-      - packages/engine-client/**
+      - "!packages/email/**"
+      - "!packages/ui/**"
 jobs:
   deploy:
     name: 🚀 Deploy to Fly Preview
