@@ -43,7 +43,9 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
     setParams,
     selectedDate,
     view,
-  } = useTrackerParams({ defaultView: weeklyCalendar ? "week" : "month" });
+  } = useTrackerParams();
+
+  const selectedView = view ?? (weeklyCalendar ? "week" : "month");
 
   const [isDragging, setIsDragging] = useState(false);
   const [localRange, setLocalRange] = useState<[string | null, string | null]>([
@@ -74,7 +76,7 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
 
   // Dynamic data fetching based on view
   const getDateRange = () => {
-    if (view === "week") {
+    if (selectedView === "week") {
       const weekStart = startOfWeek(currentTZDate, {
         weekStartsOn: weekStartsOnMonday ? 1 : 0,
       });
@@ -97,7 +99,7 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
   );
 
   function handlePeriodChange(direction: number) {
-    if (view === "week") {
+    if (selectedView === "week") {
       const newDate =
         direction > 0 ? addWeeks(currentTZDate, 1) : subWeeks(currentTZDate, 1);
       setParams({
@@ -169,8 +171,11 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
   return (
     <div ref={ref}>
       <div className="mt-8">
-        <CalendarHeader totalDuration={data?.meta?.totalDuration} />
-        {view === "month" && (
+        <CalendarHeader
+          totalDuration={data?.meta?.totalDuration}
+          selectedView={selectedView}
+        />
+        {selectedView === "month" ? (
           <CalendarMonthView
             firstWeek={firstWeek}
             calendarDays={calendarDays}
@@ -185,9 +190,7 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
             handleMouseEnter={handleMouseEnter}
             handleMouseUp={handleMouseUp}
           />
-        )}
-
-        {view === "week" && (
+        ) : (
           <CalendarWeekView
             weekDays={currentWeekDays}
             currentDate={currentTZDate}

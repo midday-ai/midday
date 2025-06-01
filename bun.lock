@@ -35,7 +35,7 @@
         "camelcase-keys": "^9.1.3",
         "date-fns": "^4.1.0",
         "drizzle-orm": "^0.44.1",
-        "hono": "^4.7.10",
+        "hono": "^4.7.11",
         "hono-rate-limiter": "^0.4.2",
         "jose": "^6.0.11",
         "lru-cache": "^11.1.0",
@@ -46,7 +46,7 @@
         "snakecase-keys": "^8.0.1",
         "superjson": "^2.2.2",
         "uuid": "^11.1.0",
-        "zod": "^3.25.42",
+        "zod": "^3.25.46",
         "zod-openapi": "^4.2.4",
       },
       "devDependencies": {
@@ -92,7 +92,7 @@
         "ai": "^4.3.16",
         "change-case": "^5.4.4",
         "date-fns": "^4.1.0",
-        "dub": "^0.61.15",
+        "dub": "^0.62.0",
         "file-saver": "^2.0.5",
         "framer-motion": "^12.15.0",
         "geist": "^1.4.2",
@@ -123,7 +123,7 @@
         "tus-js-client": "4.3.1",
         "use-places-autocomplete": "^4.0.1",
         "usehooks-ts": "^3.1.1",
-        "zod": "^3.25.42",
+        "zod": "^3.25.46",
         "zustand": "^5.0.5",
       },
       "devDependencies": {
@@ -148,16 +148,16 @@
       "dependencies": {
         "@hono/zod-openapi": "^0.19.8",
         "@hono/zod-validator": "^0.7.0",
-        "hono": "^4.7.10",
+        "hono": "^4.7.11",
         "jose": "^6.0.11",
         "plaid": "^34.0.0",
         "typesense": "^2.0.3",
-        "workers-ai-provider": "^0.5.3",
+        "workers-ai-provider": "^0.6.0",
         "xior": "^0.7.8",
-        "zod": "^3.25.42",
+        "zod": "^3.25.46",
       },
       "devDependencies": {
-        "@cloudflare/workers-types": "^4.20250529.0",
+        "@cloudflare/workers-types": "^4.20250601.0",
         "@types/bun": "^1.2.15",
         "wrangler": "^4.18.0",
       },
@@ -202,7 +202,7 @@
         "@slack/bolt": "^4.4.0",
         "@slack/web-api": "^7.9.2",
         "ai": "^4.3.16",
-        "zod": "^3.25.42",
+        "zod": "^3.25.46",
       },
       "devDependencies": {
         "@types/node": "^22.15.29",
@@ -222,7 +222,7 @@
         "mammoth": "^1.9.1",
         "officeparser": "^5.1.1",
         "unpdf": "^1.0.5",
-        "zod": "^3.25.42",
+        "zod": "^3.25.46",
       },
       "devDependencies": {
         "@types/bun": "^1.2.15",
@@ -288,7 +288,7 @@
         "@midday/encryption": "workspace:*",
         "@midday/supabase": "workspace:*",
         "googleapis": "^149.0.0",
-        "zod": "^3.25.42",
+        "zod": "^3.25.46",
       },
     },
     "packages/invoice": {
@@ -520,7 +520,7 @@
 
     "@cloudflare/workerd-windows-64": ["@cloudflare/workerd-windows-64@1.20250525.0", "", { "os": "win32", "cpu": "x64" }, "sha512-mwTj+9f3uIa4NEXR1cOa82PjLa6dbrb3J+KCVJFYIaq7e63VxEzOchCXS4tublT2pmOhmFqkgBMXrxozxNkR2Q=="],
 
-    "@cloudflare/workers-types": ["@cloudflare/workers-types@4.20250529.0", "", {}, "sha512-l6tVFpI6MUChMD0wK+Jhikb+aCbrmIR58CVpV/BhRT4THjl+nFhTT5N5ZqX42FDXdE3hCPLjueBMpPRhPUOB2A=="],
+    "@cloudflare/workers-types": ["@cloudflare/workers-types@4.20250601.0", "", {}, "sha512-foAgsuo+u+swy5I+xzPwo4MquPhLZW0fuLLsl4uZlZv2k10WziSvZ4wTIkK/AADFtCVRjLNduTT8E/b7DDoInA=="],
 
     "@colors/colors": ["@colors/colors@1.5.0", "", {}, "sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ=="],
 
@@ -1874,7 +1874,7 @@
 
     "drizzle-orm": ["drizzle-orm@0.44.1", "", { "peerDependencies": { "@aws-sdk/client-rds-data": ">=3", "@cloudflare/workers-types": ">=4", "@electric-sql/pglite": ">=0.2.0", "@libsql/client": ">=0.10.0", "@libsql/client-wasm": ">=0.10.0", "@neondatabase/serverless": ">=0.10.0", "@op-engineering/op-sqlite": ">=2", "@opentelemetry/api": "^1.4.1", "@planetscale/database": ">=1.13", "@prisma/client": "*", "@tidbcloud/serverless": "*", "@types/better-sqlite3": "*", "@types/pg": "*", "@types/sql.js": "*", "@upstash/redis": ">=1.34.7", "@vercel/postgres": ">=0.8.0", "@xata.io/client": "*", "better-sqlite3": ">=7", "bun-types": "*", "expo-sqlite": ">=14.0.0", "gel": ">=2", "knex": "*", "kysely": "*", "mysql2": ">=2", "pg": ">=8", "postgres": ">=3", "sql.js": ">=1", "sqlite3": ">=5" }, "optionalPeers": ["@aws-sdk/client-rds-data", "@cloudflare/workers-types", "@electric-sql/pglite", "@libsql/client", "@libsql/client-wasm", "@neondatabase/serverless", "@op-engineering/op-sqlite", "@opentelemetry/api", "@planetscale/database", "@prisma/client", "@tidbcloud/serverless", "@types/better-sqlite3", "@types/pg", "@types/sql.js", "@upstash/redis", "@vercel/postgres", "@xata.io/client", "better-sqlite3", "bun-types", "expo-sqlite", "gel", "knex", "kysely", "mysql2", "pg", "postgres", "sql.js", "sqlite3"] }, "sha512-prIWOlwJbiYInvcJxE+IMiJCtMiFVrSUJCwx6AXSJvGOdLu35qZ46QncTZDgloiLNCG0XxTC8agQElSmsl++TA=="],
 
-    "dub": ["dub@0.61.15", "", { "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0", "zod": ">= 3" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-s1v6XD4BwMOngWbk3VnQ8Y3RDSBNh6oj0++8pPbpNg3CylJ6/8bboSsacSGtGR1d6i3dUnoTf50XtCZqbqHGyQ=="],
+    "dub": ["dub@0.62.0", "", { "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0", "zod": ">= 3" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-ZlDdkMYJpXP4sV9kPO2hvjaFM+d5w77PK8LKVE9cun4/7cYGH4PtCHzbnqlVsg3hlx6u5qoGURh71FjZlfVERw=="],
 
     "duck": ["duck@0.1.12", "", { "dependencies": { "underscore": "^1.13.1" } }, "sha512-wkctla1O6VfP89gQ+J/yDesM0S7B7XLXjKGzXxMDVFg7uEn706niAtyYovKbyq1oT9YwDcly721/iUWoc8MVRg=="],
 
@@ -2218,7 +2218,7 @@
 
     "hls.js": ["hls.js@0.14.17", "", { "dependencies": { "eventemitter3": "^4.0.3", "url-toolkit": "^2.1.6" } }, "sha512-25A7+m6qqp6UVkuzUQ//VVh2EEOPYlOBg32ypr34bcPO7liBMOkKFvbjbCBfiPAOTA/7BSx1Dujft3Th57WyFg=="],
 
-    "hono": ["hono@4.7.10", "", {}, "sha512-QkACju9MiN59CKSY5JsGZCYmPZkA6sIW6OFCUp7qDjZu6S6KHtJHhAc9Uy9mV9F8PJ1/HQ3ybZF2yjCa/73fvQ=="],
+    "hono": ["hono@4.7.11", "", {}, "sha512-rv0JMwC0KALbbmwJDEnxvQCeJh+xbS3KEWW5PC9cMJ08Ur9xgatI0HmtgYZfOdOSOeYsp5LO2cOhdI8cLEbDEQ=="],
 
     "hono-rate-limiter": ["hono-rate-limiter@0.4.2", "", { "peerDependencies": { "hono": "^4.1.1" } }, "sha512-AAtFqgADyrmbDijcRTT/HJfwqfvhalya2Zo+MgfdrMPas3zSMD8SU03cv+ZsYwRU1swv7zgVt0shwN059yzhjw=="],
 
@@ -3714,7 +3714,7 @@
 
     "workerd": ["workerd@1.20250525.0", "", { "optionalDependencies": { "@cloudflare/workerd-darwin-64": "1.20250525.0", "@cloudflare/workerd-darwin-arm64": "1.20250525.0", "@cloudflare/workerd-linux-64": "1.20250525.0", "@cloudflare/workerd-linux-arm64": "1.20250525.0", "@cloudflare/workerd-windows-64": "1.20250525.0" }, "bin": { "workerd": "bin/workerd" } }, "sha512-SXJgLREy/Aqw2J71Oah0Pbu+SShbqbTExjVQyRBTM1r7MG7fS5NUlknhnt6sikjA/t4cO09Bi8OJqHdTkrcnYQ=="],
 
-    "workers-ai-provider": ["workers-ai-provider@0.5.3", "", { "dependencies": { "@ai-sdk/provider": "^1.1.3" } }, "sha512-avRQKVk/z+c/yzR87fbgccxw7ZWVbbiGpY5R7ioNHLFhFwV0bs7hl/jvorr8Rs5Whh1wR2TrpwIMaI6tBHGbgw=="],
+    "workers-ai-provider": ["workers-ai-provider@0.6.0", "", { "dependencies": { "@ai-sdk/provider": "^1.1.3" } }, "sha512-jmpHxaSba+i0xwsCjoLb/ZcHCj3UKhd9TT13kZ3ks6b6TxCWeaioB0zU1Rxq1xcmCNroGAJ0HqFmRpOI8+DHAg=="],
 
     "wrangler": ["wrangler@4.18.0", "", { "dependencies": { "@cloudflare/kv-asset-handler": "0.4.0", "@cloudflare/unenv-preset": "2.3.2", "blake3-wasm": "2.1.5", "esbuild": "0.25.4", "miniflare": "4.20250525.0", "path-to-regexp": "6.3.0", "unenv": "2.0.0-rc.17", "workerd": "1.20250525.0" }, "optionalDependencies": { "fsevents": "~2.3.2" }, "peerDependencies": { "@cloudflare/workers-types": "^4.20250525.0" }, "optionalPeers": ["@cloudflare/workers-types"], "bin": { "wrangler": "bin/wrangler.js", "wrangler2": "bin/wrangler.js" } }, "sha512-/ng0KI9io97SNsBU1rheADBLLTE5Djybgsi4gXuvH1RBKJGpyj1xWvZ2fuWu8vAonit3EiZkwtERTm6kESHP3A=="],
 
@@ -3764,7 +3764,7 @@
 
     "youch": ["youch@3.3.4", "", { "dependencies": { "cookie": "^0.7.1", "mustache": "^4.2.0", "stacktracey": "^2.1.8" } }, "sha512-UeVBXie8cA35DS6+nBkls68xaBBXCye0CNznrhszZjTbRVnJKQuNsyLKBTTL4ln1o1rh2PKtv35twV7irj5SEg=="],
 
-    "zod": ["zod@3.25.42", "", {}, "sha512-PcALTLskaucbeHc41tU/xfjfhcz8z0GdhhDcSgrCTmSazUuqnYqiXO63M0QUBVwpBlsLsNVn5qHSC5Dw3KZvaQ=="],
+    "zod": ["zod@3.25.46", "", {}, "sha512-IqRxcHEIjqLd4LNS/zKffB3Jzg3NwqJxQQ0Ns7pdrvgGkwQsEBdEQcOHaBVqvvZArShRzI39+aMST3FBGmTrLQ=="],
 
     "zod-error": ["zod-error@1.5.0", "", { "dependencies": { "zod": "^3.20.2" } }, "sha512-zzopKZ/skI9iXpqCEPj+iLCKl9b88E43ehcU+sbRoHuwGd9F1IDVGQ70TyO6kmfiRL1g4IXkjsXK+g1gLYl4WQ=="],
 

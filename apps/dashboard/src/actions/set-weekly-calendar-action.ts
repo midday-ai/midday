@@ -11,7 +11,7 @@ export const setWeeklyCalendarAction = actionClient
   .action(async ({ parsedInput: value }) => {
     (await cookies()).set({
       name: Cookies.WeeklyCalendar,
-      value: value ? "1" : "0",
+      value: value ? "true" : "false",
       expires: addYears(new Date(), 1),
     });
 

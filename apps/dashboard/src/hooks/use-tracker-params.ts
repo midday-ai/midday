@@ -8,11 +8,10 @@ import {
 } from "nuqs";
 
 type Props = {
-  defaultView?: "week" | "month";
   initialDate?: string;
 };
 
-export function useTrackerParams({ defaultView, initialDate }: Props = {}) {
+export function useTrackerParams({ initialDate }: Props = {}) {
   const [params, setParams] = useQueryStates({
     date: parseAsString.withDefault(
       initialDate ?? formatISO(new Date(), { representation: "date" }),
@@ -27,9 +26,7 @@ export function useTrackerParams({ defaultView, initialDate }: Props = {}) {
     ),
     start: parseAsString,
     end: parseAsString,
-    view: parseAsStringLiteral(["week", "month"]).withDefault(
-      defaultView ?? "month",
-    ),
+    view: parseAsStringLiteral(["week", "month"]),
   });
 
   return {

@@ -26,12 +26,6 @@ export default async function Page(props: Props) {
   const { sort } = loadSortParams(searchParams);
   const weeklyCalendar = (await cookies()).get(Cookies.WeeklyCalendar);
 
-  // Check if view is explicitly set in URL, otherwise fall back to cookie
-  const urlView = searchParams.view;
-  const shouldUseWeeklyView = urlView
-    ? urlView === "week"
-    : weeklyCalendar?.value === "1";
-
   prefetch(
     trpc.trackerProjects.get.infiniteQueryOptions({
       ...filter,
@@ -41,7 +35,7 @@ export default async function Page(props: Props) {
 
   return (
     <div>
-      <TrackerCalendar weeklyCalendar={shouldUseWeeklyView} />
+      <TrackerCalendar weeklyCalendar={weeklyCalendar?.value === "true"} />
 
       <div className="mt-14 mb-6 flex items-center justify-between space-x-4">
         <h2 className="text-md font-medium">Projects</h2>

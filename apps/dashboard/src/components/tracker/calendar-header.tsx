@@ -6,9 +6,13 @@ import { TrackerSettings } from "../tracker-settings";
 
 type CalendarHeaderProps = {
   totalDuration?: number;
+  selectedView: "week" | "month";
 };
 
-export function CalendarHeader({ totalDuration }: CalendarHeaderProps) {
+export function CalendarHeader({
+  totalDuration,
+  selectedView,
+}: CalendarHeaderProps) {
   return (
     <div className="flex items-center justify-between mb-6">
       <div className="space-y-1 select-text">
@@ -18,12 +22,12 @@ export function CalendarHeader({ totalDuration }: CalendarHeaderProps) {
           />
           <span className="relative">h</span>
         </h1>
-        <TotalEarnings />
+        <TotalEarnings selectedView={selectedView} />
       </div>
       <div className="flex space-x-2">
         <TrackerPeriodSelect dateFormat="MMMM" />
         <TrackerSettings />
-        <TrackerCalendarType />
+        <TrackerCalendarType selectedView={selectedView} />
       </div>
     </div>
   );

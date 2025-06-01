@@ -20,17 +20,21 @@ import {
 import { useMemo } from "react";
 import { FormatAmount } from "./format-amount";
 
-export function TotalEarnings() {
+type Props = {
+  selectedView: "week" | "month";
+};
+
+export function TotalEarnings({ selectedView }: Props) {
   const { data: user } = useUserQuery();
   const trpc = useTRPC();
-  const { date: currentDate, view } = useTrackerParams();
+  const { date: currentDate } = useTrackerParams();
 
   const weekStartsOnMonday = user?.weekStartsOnMonday ?? false;
   const currentTZDate = new TZDate(currentDate, "UTC");
 
   // Calculate date range based on current view
   const dateRange = useMemo(() => {
-    if (view === "week") {
+    if (selectedView === "week") {
       const weekStart = startOfWeek(currentTZDate, {
         weekStartsOn: weekStartsOnMonday ? 1 : 0,
       });
@@ -46,7 +50,7 @@ export function TotalEarnings() {
       from: formatISO(startOfMonth(currentTZDate), { representation: "date" }),
       to: formatISO(endOfMonth(currentTZDate), { representation: "date" }),
     };
-  }, [view, currentTZDate, weekStartsOnMonday]);
+  }, [selectedView, currentTZDate, weekStartsOnMonday]);
 
   const { data } = useQuery(
     trpc.trackerEntries.byRange.queryOptions(dateRange),
@@ -143,7 +147,7 @@ export function TotalEarnings() {
                   maximumFractionDigits={0}
                 />
               </span>
-              <span> this {view === "week" ? "week" : "month"}</span>
+              <span> this {selectedView === "week" ? "week" : "month"}</span>
             </button>
           </HoverCardTrigger>
           <HoverCardContent className="w-48 p-2 mt-1" align="start">
@@ -177,7 +181,8 @@ export function TotalEarnings() {
                 (project) => project.currency === currency,
               ).length === 0 && (
                 <div className="text-[11px] text-muted-foreground text-center py-1">
-                  No billable projects this {view === "week" ? "week" : "month"}
+                  No billable projects this{" "}
+                  {selectedView === "week" ? "week" : "month"}
                 </div>
               )}
             </div>
