@@ -39,9 +39,6 @@ export default async function Layout({
   return (
     <HydrateClient>
       <div className="relative">
-        {/* This is used to make the header draggable on macOS */}
-        <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-4 pointer-events-none" />
-
         <Sidebar />
 
         <div className="md:ml-[70px] pb-8">

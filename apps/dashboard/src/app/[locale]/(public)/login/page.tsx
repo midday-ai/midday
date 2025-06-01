@@ -1,5 +1,6 @@
 import { AppleSignIn } from "@/components/apple-sign-in";
 import { ConsentBanner } from "@/components/consent-banner";
+import { DesktopTrafficLight } from "@/components/desktop-traffic-light";
 import { GithubSignIn } from "@/components/github-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { OTPSignIn } from "@/components/otp-sign-in";
@@ -12,6 +13,7 @@ import {
   AccordionTrigger,
 } from "@midday/ui/accordion";
 import { Icons } from "@midday/ui/icons";
+import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import Image from "next/image";
@@ -110,10 +112,10 @@ export default async function Page() {
     <div className="h-screen p-2">
       {/* Header - Logo */}
       <header className="absolute top-0 left-0 z-30 w-full">
+        {isDesktopApp() && <DesktopTrafficLight />}
+
         <div className="p-6 md:p-8">
-          <Link href="https://midday.ai">
-            <Icons.LogoSmall className="h-8 w-auto" />
-          </Link>
+          <Icons.LogoSmall className="h-8 w-auto" />
         </div>
       </header>
 

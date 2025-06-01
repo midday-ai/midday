@@ -91,6 +91,9 @@ export default async function Layout({
           "whitespace-pre-line overscroll-none antialiased",
         )}
       >
+        {/* This is used to make the header draggable on macOS */}
+        <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-6 pointer-events-none" />
+
         <NuqsAdapter>
           <Providers locale={locale}>{children}</Providers>
           <Toaster />
