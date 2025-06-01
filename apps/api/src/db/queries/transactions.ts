@@ -396,7 +396,6 @@ export async function getTransactions(
     const order = isAscending ? asc : desc;
 
     if (column === "attachment") {
-      // Use direct EXISTS query instead of CTE reference
       query = query.orderBy(
         order(
           sql`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`,
@@ -413,7 +412,6 @@ export async function getTransactions(
         order(transactions.id),
       );
     } else if (column === "tags") {
-      // Use direct EXISTS query instead of CTE reference
       query = query.orderBy(
         order(
           sql`EXISTS (SELECT 1 FROM ${transactionTags} WHERE ${eq(transactionTags.transactionId, transactions.id)} AND ${eq(transactionTags.teamId, teamId)})`,
