@@ -6,8 +6,8 @@ env:
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
 on:
   push:
-    branches:
-      - beta
+    branches-ignore:
+      - main
     paths:
       - apps/dashboard/**
       - packages/**

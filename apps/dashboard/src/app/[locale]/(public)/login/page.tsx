@@ -17,7 +17,8 @@ import { cookies, headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { userAgent } from "next/server";
-import background from "public/assets/bg-login.jpg";
+import backgroundDark from "public/assets/bg-login-dark.jpg";
+import backgroundLight from "public/assets/bg-login.jpg";
 
 export const metadata: Metadata = {
   title: "Login | Midday",
@@ -111,7 +112,7 @@ export default async function Page() {
       <header className="absolute top-0 left-0 z-30 w-full">
         <div className="p-6 md:p-8">
           <Link href="https://midday.ai">
-            <Icons.LogoSmall className="h-8 w-auto text-white" />
+            <Icons.LogoSmall className="h-8 w-auto" />
           </Link>
         </div>
       </header>
@@ -121,9 +122,16 @@ export default async function Page() {
         {/* Background Image Section - Hidden on mobile, visible on desktop */}
         <div className="hidden lg:flex lg:w-1/2 relative">
           <Image
-            src={background}
+            src={backgroundLight}
             alt="Background"
-            className="object-cover"
+            className="object-cover dark:hidden"
+            priority
+            fill
+          />
+          <Image
+            src={backgroundDark}
+            alt="Background"
+            className="object-cover hidden dark:block"
             priority
             fill
           />
