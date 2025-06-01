@@ -160,8 +160,8 @@ export function Footer() {
           <Link href="https://go.midday.ai/lS72Toq">
             <Img
               src={`${baseUrl}/email/x.png`}
-              width="22"
-              height="22"
+              width="18"
+              height="18"
               alt="Midday on X"
             />
           </Link>
@@ -219,7 +219,7 @@ export function Footer() {
       <Link href="https://go.midday.ai/FZwOHud">
         <Img
           src={`${baseUrl}/email/logo-footer.png`}
-          width="100"
+          width="80"
           alt="Midday"
           className="block"
         />
