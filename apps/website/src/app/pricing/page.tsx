@@ -54,7 +54,7 @@ export default function Page() {
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
                       <span className="text-sm">
-                        Up to 10 invoices per month
+                        Send up to 10 invoices per month
                       </span>
                     </li>
                     <li className="flex items-start">
@@ -144,7 +144,7 @@ export default function Page() {
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-primary flex-shrink-0 mr-2" />
                       <span className="text-sm">
-                        Up to 50 invoices per month
+                        Send up to 50 invoices per month
                       </span>
                     </li>
                     <li className="flex items-start">
