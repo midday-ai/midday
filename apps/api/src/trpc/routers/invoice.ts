@@ -33,7 +33,6 @@ import {
 } from "@api/trpc/init";
 import { parseInputValue } from "@api/utils/parse";
 import { UTCDate } from "@date-fns/utc";
-import { generateToken } from "@midday/invoice/token";
 import { verify } from "@midday/invoice/token";
 import type {
   GenerateInvoicePayload,
@@ -323,11 +322,8 @@ export const invoiceRouter = createTRPCRouter({
     .mutation(async ({ input, ctx: { db, session, teamId } }) => {
       const nextInvoiceNumber = await getNextInvoiceNumber(db, teamId!);
 
-      const token = await generateToken(input.id);
-
       return duplicateInvoice(db, {
         id: input.id,
-        token,
         userId: session?.user.id!,
         invoiceNumber: nextInvoiceNumber!,
         teamId: teamId!,

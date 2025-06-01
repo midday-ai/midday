@@ -18,6 +18,7 @@ import {
   sql,
 } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
+import { v4 as uuidv4 } from "uuid";
 
 export type Template = {
   customerLabel: string;
@@ -432,7 +433,7 @@ type DraftInvoiceTemplateParams = {
 };
 
 type DraftInvoiceParams = {
-  id?: string;
+  id: string;
   template: DraftInvoiceTemplateParams;
   fromDetails?: string | null;
   customerDetails?: string | null;
@@ -471,7 +472,7 @@ export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
     ...restInput
   } = params;
 
-  const useToken = token ?? (await generateToken(id!));
+  const useToken = token ?? (await generateToken(id));
 
   const { paymentDetails: _, fromDetails: __, ...restTemplate } = template;
 
@@ -566,7 +567,6 @@ export async function deleteInvoice(db: Database, params: DeleteInvoiceParams) {
 
 export type DuplicateInvoiceParams = {
   id: string;
-  token: string;
   userId: string;
   invoiceNumber: string;
   teamId: string;
@@ -576,7 +576,7 @@ export async function duplicateInvoice(
   db: Database,
   params: DuplicateInvoiceParams,
 ) {
-  const { id, token, userId, invoiceNumber, teamId } = params;
+  const { id, userId, invoiceNumber, teamId } = params;
 
   // 1. Fetch the invoice that needs to be duplicated
   const [invoice] = await db
@@ -605,7 +605,11 @@ export async function duplicateInvoice(
     throw new Error("Invoice not found");
   }
 
+  const draftId = uuidv4();
+  const token = await generateToken(draftId);
+
   return draftInvoice(db, {
+    id: draftId,
     token,
     userId,
     teamId: invoice.teamId,
