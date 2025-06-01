@@ -79,28 +79,6 @@ export async function getTransactions(
     amount_range: filterAmountRange,
   } = params;
 
-  // CTE to determine if a transaction has attachments for the given teamId
-  const transactionAttachmentStatus = db.$with("tas").as(
-    db
-      .selectDistinct({
-        transactionId: transactionAttachments.transactionId,
-        has_attachment_val: sql<number>`1`.as("has_attachment_val"),
-      })
-      .from(transactionAttachments)
-      .where(eq(transactionAttachments.teamId, teamId)),
-  );
-
-  // CTE to determine if a transaction has any tags for the given teamId
-  const transactionTagStatus = db.$with("tts").as(
-    db
-      .selectDistinct({
-        transactionId: transactionTags.transactionId,
-        has_tag_val: sql<number>`1`.as("has_tag_val"),
-      })
-      .from(transactionTags)
-      .where(eq(transactionTags.teamId, teamId)),
-  );
-
   // Always start with teamId filter
   const whereConditions: (SQL | undefined)[] = [
     eq(transactions.teamId, teamId),
@@ -135,16 +113,16 @@ export async function getTransactions(
     }
   }
 
-  // Status filtering - simplified logic
+  // Status filtering - simplified logic using direct EXISTS subqueries
   if (statuses?.includes("uncompleted") || attachments === "exclude") {
-    // is_fulfilled = false
+    // Transaction is NOT fulfilled (no attachments AND status is not completed)
     whereConditions.push(
-      sql`NOT (COALESCE(tas.has_attachment_val, 0) = 1 OR ${transactions.status} = 'completed')`,
+      sql`NOT (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`,
     );
   } else if (statuses?.includes("completed") || attachments === "include") {
-    // is_fulfilled = true
+    // Transaction is fulfilled (has attachments OR status is completed)
     whereConditions.push(
-      sql`COALESCE(tas.has_attachment_val, 0) = 1 OR ${transactions.status} = 'completed'`,
+      sql`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`,
     );
   } else if (statuses?.includes("excluded")) {
     whereConditions.push(eq(transactions.status, "excluded"));
@@ -215,12 +193,22 @@ export async function getTransactions(
 
   // Accounts filter
   if (filterAccounts && filterAccounts.length > 0) {
-    whereConditions.push(inArray(transactions.bankAccountId, filterAccounts));
+    whereConditions.push(
+      and(
+        inArray(transactions.bankAccountId, filterAccounts),
+        sql`EXISTS (SELECT 1 FROM ${bankAccounts} WHERE ${eq(bankAccounts.id, transactions.bankAccountId)} AND ${eq(bankAccounts.teamId, teamId)})`,
+      ),
+    );
   }
 
   // Assignees filter
   if (filterAssignees && filterAssignees.length > 0) {
-    whereConditions.push(inArray(transactions.assignedId, filterAssignees));
+    whereConditions.push(
+      and(
+        inArray(transactions.assignedId, filterAssignees),
+        sql`EXISTS (SELECT 1 FROM ${users} WHERE ${eq(users.id, transactions.assignedId)} AND ${eq(users.teamId, teamId)})`,
+      ),
+    );
   }
 
   // Amount range filter
@@ -254,7 +242,6 @@ export async function getTransactions(
 
   // All joins must also be limited by teamId where relevant
   const queryBuilder = db
-    .with(transactionAttachmentStatus, transactionTagStatus) // Add both CTEs
     .select({
       id: transactions.id,
       date: transactions.date,
@@ -271,7 +258,7 @@ export async function getTransactions(
       description: transactions.description,
       createdAt: transactions.createdAt,
       isFulfilled:
-        sql<boolean>`COALESCE(tas.has_attachment_val, 0) = 1 OR ${transactions.status} = 'completed'`.as(
+        sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`.as(
           "isFulfilled",
         ),
       vat: sql<number>`
@@ -329,7 +316,10 @@ export async function getTransactions(
       ),
     })
     .from(transactions)
-    .leftJoin(users, eq(transactions.assignedId, users.id))
+    .leftJoin(
+      users,
+      and(eq(transactions.assignedId, users.id), eq(users.teamId, teamId)),
+    )
     .leftJoin(
       transactionCategories,
       and(
@@ -349,14 +339,6 @@ export async function getTransactions(
       eq(bankAccounts.bankConnectionId, bankConnections.id),
     )
     .leftJoin(
-      transactionAttachmentStatus,
-      eq(transactions.id, transactionAttachmentStatus.transactionId),
-    )
-    .leftJoin(
-      transactionTagStatus,
-      eq(transactions.id, transactionTagStatus.transactionId),
-    )
-    .leftJoin(
       transactionTags,
       and(
         eq(transactionTags.transactionId, transactions.id),
@@ -369,7 +351,10 @@ export async function getTransactions(
     )
     .leftJoin(
       transactionAttachments,
-      eq(transactionAttachments.transactionId, transactions.id),
+      and(
+        eq(transactionAttachments.transactionId, transactions.id),
+        eq(transactionAttachments.teamId, teamId),
+      ),
     )
     .where(and(...finalWhereConditions))
     .groupBy(
@@ -400,8 +385,6 @@ export async function getTransactions(
       bankAccounts.currency,
       bankConnections.id,
       bankConnections.logoUrl,
-      transactionAttachmentStatus.has_attachment_val,
-      transactionTagStatus.has_tag_val,
     );
 
   let query = queryBuilder.$dynamic();
@@ -413,10 +396,10 @@ export async function getTransactions(
     const order = isAscending ? asc : desc;
 
     if (column === "attachment") {
-      // Use the same logic as isFulfilled, referencing the CTE's aliased column
+      // Use direct EXISTS query instead of CTE reference
       query = query.orderBy(
         order(
-          sql`COALESCE(tas.has_attachment_val, 0) = 1 OR ${transactions.status} = 'completed'`,
+          sql`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`,
         ),
         order(transactions.id),
       );
@@ -430,9 +413,11 @@ export async function getTransactions(
         order(transactions.id),
       );
     } else if (column === "tags") {
-      // Use the tts CTE for sorting by tags
+      // Use direct EXISTS query instead of CTE reference
       query = query.orderBy(
-        order(sql`COALESCE(tts.has_tag_val, 0)`),
+        order(
+          sql`EXISTS (SELECT 1 FROM ${transactionTags} WHERE ${eq(transactionTags.transactionId, transactions.id)} AND ${eq(transactionTags.teamId, teamId)})`,
+        ),
         order(transactions.id),
       );
     } else if (column === "date") {
@@ -514,7 +499,7 @@ export async function getTransactionById(
       description: transactions.description,
       createdAt: transactions.createdAt,
       isFulfilled:
-        sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)})) OR ${transactions.status} = 'completed'`.as(
+        sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, params.teamId)})) OR ${transactions.status} = 'completed'`.as(
           "isFulfilled",
         ),
       vat: sql<number>`
@@ -572,12 +557,27 @@ export async function getTransactionById(
       ),
     })
     .from(transactions)
-    .leftJoin(users, eq(transactions.assignedId, users.id))
+    .leftJoin(
+      users,
+      and(
+        eq(transactions.assignedId, users.id),
+        eq(users.teamId, params.teamId),
+      ),
+    )
     .leftJoin(
       transactionCategories,
-      eq(transactions.categorySlug, transactionCategories.slug),
+      and(
+        eq(transactions.categorySlug, transactionCategories.slug),
+        eq(transactionCategories.teamId, params.teamId),
+      ),
     )
-    .leftJoin(bankAccounts, eq(transactions.bankAccountId, bankAccounts.id))
+    .leftJoin(
+      bankAccounts,
+      and(
+        eq(transactions.bankAccountId, bankAccounts.id),
+        eq(bankAccounts.teamId, params.teamId),
+      ),
+    )
     .leftJoin(
       bankConnections,
       eq(bankAccounts.bankConnectionId, bankConnections.id),
@@ -585,17 +585,23 @@ export async function getTransactionById(
     .leftJoin(
       // For transactionTags aggregation
       transactionTags,
-      eq(transactionTags.transactionId, transactions.id),
+      and(
+        eq(transactionTags.transactionId, transactions.id),
+        eq(transactionTags.teamId, params.teamId),
+      ),
     )
     .leftJoin(
       // For transactionTags aggregation
       tags,
-      eq(tags.id, transactionTags.tagId),
+      and(eq(tags.id, transactionTags.tagId), eq(tags.teamId, params.teamId)),
     )
     .leftJoin(
       // For attachments aggregation
       transactionAttachments,
-      eq(transactionAttachments.transactionId, transactions.id),
+      and(
+        eq(transactionAttachments.transactionId, transactions.id),
+        eq(transactionAttachments.teamId, params.teamId),
+      ),
     )
     .where(
       and(
