@@ -30,7 +30,6 @@ import {
   MdOutlineMemory,
 } from "react-icons/md";
 import { DynamicImage } from "./dynamic-image";
-import { LogoIcon } from "./logo-icon";
 
 const listVariant = {
   show: {
@@ -200,12 +199,12 @@ export function Header() {
           <ContextMenuTrigger>
             <Link href="/">
               <span className="sr-only">Midday Logo</span>
-              <LogoIcon />
+              <Icons.LogoSmall className="size-6" />
             </Link>
           </ContextMenuTrigger>
 
           <ContextMenuContent
-            className="w-[200px] dark:bg-[]dark:bg-[#121212] bg-[#fff] rounded-none"
+            className="w-[200px] dark:bg-[#121212] bg-[#fff] rounded-none"
             alignOffset={20}
           >
             <div className="divide-y">
@@ -236,7 +235,7 @@ export function Header() {
                   } catch {}
                 }}
               >
-                <Icons.LogoIcon />
+                <Icons.LogoSmall className="size-3" />
                 <span className="font-medium text-sm">Copy Logo as SVG</span>
               </ContextMenuItem>
               <ContextMenuItem asChild>
@@ -355,7 +354,7 @@ export function Header() {
           <div className="mt-4 flex justify-between p-3 px-4 relative ml-[1px]">
             <button type="button" onClick={handleToggleMenu}>
               <span className="sr-only">Midday Logo</span>
-              <LogoIcon />
+              <Icons.LogoSmall />
             </button>
 
             <button
