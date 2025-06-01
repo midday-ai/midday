@@ -8,7 +8,12 @@ import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { type FileRejection, useDropzone } from "react-dropzone";
+
+type UploadResult = {
+  filename: string;
+  file: File;
+};
 
 type Props = {
   children: ReactNode;
@@ -27,8 +32,8 @@ export function VaultUploadZone({ onUpload, children }: Props) {
   const supabase = createClient();
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
-  const [toastId, setToastId] = useState(null);
-  const uploadProgress = useRef([]);
+  const [toastId, setToastId] = useState<string | null>(null);
+  const uploadProgress = useRef<number[]>([]);
   const { toast, dismiss, update } = useToast();
 
   const processDocumentMutation = useMutation(
@@ -46,15 +51,17 @@ export function VaultUploadZone({ onUpload, children }: Props) {
       });
 
       setToastId(id);
-    } else {
+    } else if (toastId) {
       update(toastId, {
-        progress,
+        id: toastId,
         title: `Uploading ${uploadProgress.current.length} files`,
+        progress,
+        variant: "progress",
       });
     }
   }, [showProgress, progress, toastId]);
 
-  const onDrop = async (files) => {
+  const onDrop = async (files: File[]) => {
     // NOTE: If onDropRejected
     if (!files.length) {
       return;
@@ -66,16 +73,16 @@ export function VaultUploadZone({ onUpload, children }: Props) {
     setShowProgress(true);
 
     // Add uploaded (team_id)
-    const path = [user?.team_id];
+    const path = [user?.teamId] as string[];
 
     try {
-      const results = await Promise.all(
-        files.map(async (file, idx) =>
+      const results = (await Promise.all(
+        files.map(async (file: File, idx: number) =>
           resumableUpload(supabase, {
             bucket: "vault",
-            path: [user?.team_id],
+            path,
             file,
-            onProgress: (bytesUploaded, bytesTotal) => {
+            onProgress: (bytesUploaded: number, bytesTotal: number) => {
               uploadProgress.current[idx] = (bytesUploaded / bytesTotal) * 100;
 
               const _progress = uploadProgress.current.reduce(
@@ -89,12 +96,12 @@ export function VaultUploadZone({ onUpload, children }: Props) {
             },
           }),
         ),
-      );
+      )) as UploadResult[];
 
       // Trigger the upload jobs
       processDocumentMutation.mutate(
         results.map((result) => ({
-          file_path: [...path, result.filename],
+          filePath: [...path, result.filename],
           mimetype: result.file.type,
           size: result.file.size,
         })),
@@ -112,8 +119,18 @@ export function VaultUploadZone({ onUpload, children }: Props) {
 
       setShowProgress(false);
       setToastId(null);
-      dismiss(toastId);
-      onUpload?.(results);
+      if (toastId) {
+        dismiss(toastId);
+      }
+
+      // Type the results properly for onUpload callback
+      const typedResults = results.map((result) => ({
+        file_path: [...path, result.filename],
+        mimetype: result.file.type,
+        size: result.file.size,
+      }));
+
+      onUpload?.(typedResults);
     } catch {
       toast({
         duration: 2500,
@@ -125,7 +142,7 @@ export function VaultUploadZone({ onUpload, children }: Props) {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    onDropRejected: ([reject]) => {
+    onDropRejected: ([reject]: FileRejection[]) => {
       if (reject?.errors.find(({ code }) => code === "file-too-large")) {
         toast({
           duration: 2500,
@@ -165,8 +182,6 @@ export function VaultUploadZone({ onUpload, children }: Props) {
       "text/markdown": [".md"],
       "application/rtf": [".rtf"],
       "application/zip": [".zip"],
-      // "application/epub+zip": [".epub"],
-      // "application/vnd.apple.pages": [".pages"],
     },
   });
 

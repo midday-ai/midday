@@ -1,7 +1,7 @@
 "use client";
 
 import { Category } from "@/components/category";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   HoverCard,
   HoverCardContent,

@@ -15,10 +15,10 @@
     "date-fns": "^4.1.0",
     "react": "19.1.0",
     "server-only": "^0.0.1",
-    "supabase": "^2.22.12"
+    "supabase": "^2.23.4"
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.49.4",
+    "@supabase/supabase-js": "^2.49.8",
     "typescript": "^5.8.3"
   },
   "exports": {

@@ -1,0 +1,37 @@
+name: Fly Deploy
+permissions:
+  contents: read
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/api/**
+      - packages/**
+      - "!packages/email/**"
+      - "!packages/ui/**"
+jobs:
+  deploy:
+    name: 🚀 Deploy to Fly Production
+    runs-on: ubuntu-latest
+    concurrency: fly-production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install
+      - name: 🏗 Build @midday/engine
+        run: bunx turbo run build --filter=@midday/engine...
+      - name: 🔦 Run linter
+        run: bunx turbo run lint
+      - name: 🪐 Check TypeScript
+        run: bunx turbo run typecheck
+      - name: 🧪 Run unit tests
+        run: bun run test
+        working-directory: ./apps/api
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only --dockerfile apps/api/Dockerfile --config apps/api/fly.toml
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

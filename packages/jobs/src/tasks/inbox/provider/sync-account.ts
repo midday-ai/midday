@@ -1,4 +1,4 @@
-import { processBatch } from "@/utils/process-batch";
+import { processBatch } from "@jobs/utils/process-batch";
 import { InboxConnector } from "@midday/inbox/connector";
 import { createClient } from "@midday/supabase/job";
 import { getExistingInboxAttachmentsQuery } from "@midday/supabase/queries";
@@ -75,7 +75,7 @@ export const syncInboxAccount = schemaTask({
           if (uploadData) {
             results.push({
               payload: {
-                file_path: uploadData.path.split("/"),
+                filePath: uploadData.path.split("/"),
                 size: item.size,
                 mimetype: item.mimeType,
                 website: item.website,

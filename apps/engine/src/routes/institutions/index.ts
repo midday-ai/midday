@@ -1,10 +1,9 @@
-import type { Bindings } from "@/common/bindings";
-import { ErrorSchema } from "@/common/schema";
-import type { Providers } from "@/providers/types";
-import { createErrorResponse } from "@/utils/error";
-import { SearchClient } from "@/utils/search";
-import { createRoute } from "@hono/zod-openapi";
-import { OpenAPIHono } from "@hono/zod-openapi";
+import type { Bindings } from "@engine/common/bindings";
+import { ErrorSchema } from "@engine/common/schema";
+import type { Providers } from "@engine/providers/types";
+import { createErrorResponse } from "@engine/utils/error";
+import { SearchClient } from "@engine/utils/search";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
   InstitutionByIdParamsSchema,
@@ -98,20 +97,22 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
               name: document.name,
               logo: document.logo ?? null,
               popularity: document.popularity,
-              available_history: document.available_history
-                ? +document.available_history
-                : null,
-              maximum_consent_validity: document.maximum_consent_validity
-                ? +document.maximum_consent_validity
-                : null,
+              available_history:
+                typeof document.available_history === "number"
+                  ? document.available_history
+                  : null,
+              maximum_consent_validity:
+                typeof document.maximum_consent_validity === "string"
+                  ? document.maximum_consent_validity
+                  : null,
               provider: document.provider,
-              type: document.type,
+              type: document.type ?? null,
             })),
           },
           200,
         );
       } catch (error) {
-        const errorResponse = createErrorResponse(error, c.get("requestId"));
+        const errorResponse = createErrorResponse(error);
 
         return c.json(errorResponse, 400);
       }
@@ -169,14 +170,29 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
         return c.json(
           {
             data: {
-              ...data,
-              country: data.countries.at(0),
+              id: data.id,
+              name: data.name,
+              logo: data.logo ?? null,
+              available_history:
+                typeof data.available_history === "number"
+                  ? data.available_history
+                  : null,
+              maximum_consent_validity:
+                typeof data.maximum_consent_validity === "string"
+                  ? data.maximum_consent_validity
+                  : null,
+              popularity: data.popularity,
+              provider: data.provider,
+              type: data.type ?? null,
+              country: Array.isArray(data.countries)
+                ? data.countries.at(0)
+                : undefined,
             },
           },
           200,
         );
       } catch (error) {
-        const errorResponse = createErrorResponse(error, c.get("requestId"));
+        const errorResponse = createErrorResponse(error);
 
         return c.json(errorResponse, 400);
       }
@@ -220,7 +236,6 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
     async (c) => {
       const envs = env(c);
       const { id } = c.req.valid("param");
-      const requestId = c.get("requestId");
 
       const typesense = SearchClient(envs);
 
@@ -235,16 +250,23 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
             name: result.name,
             provider: result.provider,
             id: result.id,
-            logo: result.logo,
-            available_history: result.available_history,
-            maximum_consent_validity: result.maximum_consent_validity,
-            country: result.countries.at(0),
-            type: result.type,
+            logo: result.logo ?? null,
+            available_history: result.available_history ?? null,
+            maximum_consent_validity:
+              typeof result.maximum_consent_validity === "string" ||
+              result.maximum_consent_validity == null
+                ? result.maximum_consent_validity
+                : (result.maximum_consent_validity?.toString() ?? null),
+            country: Array.isArray(result.countries)
+              ? result.countries.at(0)
+              : undefined,
+            type: result.type ?? null,
+            popularity: result.popularity,
           },
           200,
         );
       } catch (error) {
-        const errorResponse = createErrorResponse(error, requestId);
+        const errorResponse = createErrorResponse(error);
         return c.json(errorResponse, 404);
       }
     },

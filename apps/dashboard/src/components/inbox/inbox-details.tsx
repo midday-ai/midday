@@ -6,10 +6,13 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { formatDate } from "@/utils/format";
+import { getInitials } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
+import { DialogTrigger } from "@midday/ui/dialog";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -23,6 +26,7 @@ import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useCopyToClipboard } from "usehooks-ts";
+import { EditInboxModal } from "../modals/edit-inbox-modal";
 import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
 import { MatchTransaction } from "./match-transaction";
 
@@ -46,10 +50,13 @@ export function InboxDetails() {
         initialData: () => {
           const pages = queryClient
             .getQueriesData({ queryKey: trpc.inbox.get.infiniteQueryKey() })
+            // @ts-expect-error
             .flatMap(([, data]) => data?.pages ?? [])
             .flatMap((page) => page.data ?? []);
 
-          return pages.find((d) => d.id === id);
+          return pages.find(
+            (d) => d.id === id,
+          ) as RouterOutputs["inbox"]["getById"];
         },
       },
     ),
@@ -70,6 +77,7 @@ export function InboxDetails() {
 
         // Flatten the data from all pages to find the current index and the next item
         const allInboxes = previousData
+          // @ts-expect-error
           .flatMap(([, data]) => data?.pages ?? [])
           .flatMap((page) => page.data ?? []);
 
@@ -158,7 +166,7 @@ export function InboxDetails() {
   const handleCopyLink = () => {
     if (!data) return;
 
-    copy(`${getUrl()}/inbox?id=${data.id}`);
+    copy(`${getUrl()}/inbox?inboxId=${data.id}`);
 
     toast({
       duration: 4000,
@@ -167,7 +175,7 @@ export function InboxDetails() {
     });
   };
 
-  const fallback = showFallback || (!data?.website && data?.display_name);
+  const fallback = showFallback || (!data?.website && data?.displayName);
 
   if (isLoading) {
     return <InboxDetailsSkeleton />;
@@ -188,39 +196,49 @@ export function InboxDetails() {
         </div>
 
         <div className="ml-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={!data}>
-                <MoreVertical className="h-4 w-4" />
-                <span className="sr-only">More</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <a
-                  href={`/api/download/file?path=${data?.file_path?.join(
-                    "/",
-                  )}&filename=${data?.file_name}`}
-                  download
+          <EditInboxModal>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" disabled={!data}>
+                  <MoreVertical className="h-4 w-4" />
+                  <span className="sr-only">More</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <DialogTrigger className="w-full text-left">
+                    Edit
+                  </DialogTrigger>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <a
+                    href={`/api/download/file?path=${data?.filePath?.join(
+                      "/",
+                    )}&filename=${data?.fileName}`}
+                    download
+                  >
+                    Download
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateInboxMutation.mutate({
+                      id: data?.id!,
+                      status: data?.status === "done" ? "pending" : "done",
+                    })
+                  }
                 >
-                  Download
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() =>
-                  updateInboxMutation.mutate({
-                    id: data?.id,
-                    status: data?.status === "done" ? "pending" : "done",
-                  })
-                }
-              >
-                {data?.status === "done" ? "Mark as unhandled" : "Mark as done"}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCopyLink}>
-                Copy Link
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  {data?.status === "done"
+                    ? "Mark as unhandled"
+                    : "Mark as done"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleCopyLink}>
+                  Copy Link
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </EditInboxModal>
         </div>
       </div>
       <Separator />
@@ -252,11 +270,7 @@ export function InboxDetails() {
 
                   {fallback && (
                     <AvatarFallback>
-                      {data?.display_name
-                        ?.split(" ")
-                        .slice(0, 2)
-                        .map((chunk) => chunk[0])
-                        .join("")}
+                      {getInitials(data?.displayName ?? "")}
                     </AvatarFallback>
                   )}
                 </Avatar>
@@ -267,7 +281,7 @@ export function InboxDetails() {
                   {isProcessing ? (
                     <Skeleton className="h-3 w-[120px] mb-1" />
                   ) : (
-                    data.display_name
+                    data.displayName
                   )}
                 </div>
                 <div className="line-clamp-1 text-xs">
@@ -288,7 +302,7 @@ export function InboxDetails() {
                 {isProcessing && !data.date && (
                   <Skeleton className="h-3 w-[50px]" />
                 )}
-                {data.date && formatDate(data.date, user?.date_format)}
+                {data.date && formatDate(data.date, user?.dateFormat)}
               </div>
             </div>
           </div>
@@ -299,10 +313,10 @@ export function InboxDetails() {
             <MatchTransaction />
           </div>
 
-          {data?.file_path && (
+          {data?.filePath && (
             <FileViewer
-              mimeType={data.content_type}
-              url={`/api/proxy?filePath=vault/${data?.file_path.join("/")}`}
+              mimeType={data.contentType}
+              url={`/api/proxy?filePath=vault/${data?.filePath.join("/")}`}
               // If the order changes, the file viewer will remount otherwise the PDF worker will crash
               key={`${params.order}-${JSON.stringify(filterParams)}`}
             />

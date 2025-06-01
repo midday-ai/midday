@@ -7,7 +7,7 @@ import { useLatestProjectId } from "@/hooks/use-latest-project-id";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
 import { CurrencyInput } from "@midday/ui/currency-input";
@@ -44,7 +44,7 @@ const formSchema = z.object({
   rate: z.number().min(1).optional(),
   currency: z.string().optional(),
   status: z.enum(["in_progress", "completed"]).optional(),
-  customer_id: z.string().uuid().nullable().optional(),
+  customerId: z.string().uuid().nullable().optional(),
   tags: z
     .array(
       z.object({
@@ -97,11 +97,11 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
       billable: data?.billable ?? false,
       estimate: data?.estimate ?? 0,
       currency: data?.currency ?? defaultCurrency,
-      customer_id: data?.customer_id ?? undefined,
+      customerId: data?.customerId ?? undefined,
       tags:
         data?.tags?.map((tag) => ({
-          id: tag.tag?.id ?? "",
-          value: tag.tag?.name ?? "",
+          id: tag.id ?? "",
+          value: tag.name ?? "",
         })) ?? undefined,
     },
   });
@@ -116,7 +116,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
       billable: data.billable || false,
       estimate: data.estimate || null,
       status: data.status || "in_progress",
-      customer_id: data.customer_id || null,
+      customerId: data.customerId || null,
       tags: data.tags?.length ? data.tags : null,
     };
 
@@ -154,7 +154,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
 
         <FormField
           control={form.control}
-          name="customer_id"
+          name="customerId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Customer</FormLabel>

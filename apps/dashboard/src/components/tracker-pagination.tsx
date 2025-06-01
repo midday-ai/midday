@@ -10,12 +10,22 @@ import {
   subMonths,
 } from "date-fns";
 
-export function TrackerPagination({ numberOfMonths, onChange, startDate }) {
+type Props = {
+  numberOfMonths: number;
+  onChange: (date: string) => void;
+  startDate: Date;
+};
+
+export function TrackerPagination({
+  numberOfMonths,
+  onChange,
+  startDate,
+}: Props) {
   const selectPrevPeriod = () => {
     onChange(
       formatISO(startOfMonth(subMonths(startDate, numberOfMonths)), {
         representation: "date",
-      })
+      }),
     );
   };
 
@@ -23,7 +33,7 @@ export function TrackerPagination({ numberOfMonths, onChange, startDate }) {
     onChange(
       formatISO(startOfMonth(addMonths(startDate, numberOfMonths)), {
         representation: "date",
-      })
+      }),
     );
   };
 

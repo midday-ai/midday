@@ -1,6 +1,5 @@
 "use client";
 
-import { changeTeamAction } from "@/actions/change-team-action";
 import { SelectCurrency } from "@/components/select-currency";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
@@ -16,8 +15,8 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
-import { useMutation } from "@tanstack/react-query";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { use } from "react";
 import { z } from "zod";
 
@@ -35,16 +34,23 @@ type Props = {
 export function CreateTeamForm({ defaultCurrencyPromise }: Props) {
   const currency = use(defaultCurrencyPromise);
   const trpc = useTRPC();
-  const changeTeam = useAction(changeTeamAction);
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  const changeTeamMutation = useMutation(
+    trpc.user.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries();
+        router.push("/");
+      },
+    }),
+  );
 
   const createTeamMutation = useMutation(
     trpc.team.create.mutationOptions({
-      onSuccess: ({ data }) => {
-        if (!data) return;
-
-        changeTeam.execute({
-          teamId: data.id,
-          redirectTo: "/teams/invite",
+      onSuccess: (teamId) => {
+        changeTeamMutation.mutate({
+          teamId,
         });
       },
     }),
@@ -113,9 +119,9 @@ export function CreateTeamForm({ defaultCurrencyPromise }: Props) {
         <SubmitButton
           className="mt-6 w-full"
           type="submit"
-          isSubmitting={createTeamMutation.isPending}
+          isSubmitting={changeTeamMutation.isPending}
         >
-          Next
+          Create
         </SubmitButton>
       </form>
     </Form>

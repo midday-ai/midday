@@ -20,10 +20,10 @@ jobs:
           bun-version: latest
       - name: Install dependencies
         run: bun install
-      # - name: 🔦 Run linter
-      #   run: bun run lint --filter=@midday/email
-      # - name: 🪐 Check TypeScript
-      #   run: bun run typecheck --filter=@midday/email
+      - name: 🔦 Run linter
+        run: bun run lint --filter=@midday/email
+      - name: 🪐 Check TypeScript
+        run: bun run typecheck --filter=@midday/email
       - name: 📤 Pull Vercel Environment Information
         run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 📤 Pull Vercel Environment Information

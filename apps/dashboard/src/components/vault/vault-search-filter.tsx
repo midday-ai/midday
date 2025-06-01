@@ -179,10 +179,16 @@ export function VaultSearchFilter() {
                   mode="range"
                   initialFocus
                   toDate={new Date()}
-                  selected={{
-                    from: filter.start && new Date(filter.start),
-                    to: filter.end && new Date(filter.end),
-                  }}
+                  selected={
+                    filter.start || filter.end
+                      ? {
+                          from: filter.start
+                            ? new Date(filter.start)
+                            : undefined,
+                          to: filter.end ? new Date(filter.end) : undefined,
+                        }
+                      : undefined
+                  }
                   onSelect={(range) => {
                     if (!range) return;
 

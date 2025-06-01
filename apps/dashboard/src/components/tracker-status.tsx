@@ -1,9 +1,14 @@
 "use client";
 
 import { useI18n } from "@/locales/client";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 
-export function TrackerStatus({ status }) {
+type Props = {
+  status: NonNullable<RouterOutputs["trackerProjects"]["getById"]>["status"];
+};
+
+export function TrackerStatus({ status }: Props) {
   const t = useI18n();
 
   return (
@@ -11,9 +16,10 @@ export function TrackerStatus({ status }) {
       <div
         className={cn(
           "w-[6px] h-[6px] rounded-full bg-[#FFD02B]",
-          status === "completed" && "bg-primary"
+          status === "completed" && "bg-primary",
         )}
       />
+      {/* @ts-expect-error */}
       <span>{t(`tracker_status.${status}`)}</span>
     </div>
   );

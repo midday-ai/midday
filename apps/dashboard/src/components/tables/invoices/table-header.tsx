@@ -55,7 +55,7 @@ export function TableHeader({ table }: Props) {
   return (
     <BaseTableHeader>
       <TableRow>
-        {isVisible("invoice_number") && (
+        {isVisible("invoiceNumber") && (
           <TableHead className="w-[200px]">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
@@ -63,10 +63,10 @@ export function TableHeader({ table }: Props) {
               onClick={() => createSortQuery("invoice_number")}
             >
               <span>Invoice no.</span>
-              {"invoice_number" === column && value === "asc" && (
+              {"invoiceNumber" === column && value === "asc" && (
                 <ArrowDown size={16} />
               )}
-              {"invoice_number" === column && value === "desc" && (
+              {"invoiceNumber" === column && value === "desc" && (
                 <ArrowUp size={16} />
               )}
             </Button>
@@ -88,7 +88,7 @@ export function TableHeader({ table }: Props) {
           </TableHead>
         )}
 
-        {isVisible("due_date") && (
+        {isVisible("dueDate") && (
           <TableHead className="w-[180px]">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
@@ -96,10 +96,10 @@ export function TableHeader({ table }: Props) {
               onClick={() => createSortQuery("due_date")}
             >
               <span>Due Date</span>
-              {"due_date" === column && value === "asc" && (
+              {"dueDate" === column && value === "asc" && (
                 <ArrowDown size={16} />
               )}
-              {"due_date" === column && value === "desc" && (
+              {"dueDate" === column && value === "desc" && (
                 <ArrowUp size={16} />
               )}
             </Button>
@@ -139,43 +139,49 @@ export function TableHeader({ table }: Props) {
           </TableHead>
         )}
 
-        {isVisible("vat_rate") && (
+        {isVisible("vatRate") && (
           <TableHead className="w-[100px] min-w-[100px]">
             <span>VAT Rate</span>
           </TableHead>
         )}
 
-        {isVisible("vat_amount") && (
+        {isVisible("vatAmount") && (
           <TableHead className="w-[150px] min-w-[150px]">
             <span>VAT Amount</span>
           </TableHead>
         )}
 
-        {isVisible("tax_rate") && (
+        {isVisible("taxRate") && (
           <TableHead className="w-[100px] min-w-[100px]">
             <span>Tax Rate</span>
           </TableHead>
         )}
 
-        {isVisible("tax_amount") && (
+        {isVisible("taxAmount") && (
           <TableHead className="w-[150px] min-w-[150px]">
             <span>Tax Amount</span>
           </TableHead>
         )}
 
-        {isVisible("excl_vat") && (
+        {isVisible("exclVat") && (
           <TableHead className="w-[150px] min-w-[150px]">
             <span>Excl. VAT</span>
           </TableHead>
         )}
 
-        {isVisible("excl_tax") && (
+        {isVisible("exclTax") && (
           <TableHead className="w-[150px] min-w-[150px]">
             <span>Excl. Tax</span>
           </TableHead>
         )}
 
-        {isVisible("issue_date") && (
+        {isVisible("internalNote") && (
+          <TableHead className="w-[150px] min-w-[150px]">
+            <span>Internal Note</span>
+          </TableHead>
+        )}
+
+        {isVisible("issueDate") && (
           <TableHead className="w-[120px] min-w-[120px]">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
@@ -183,17 +189,17 @@ export function TableHeader({ table }: Props) {
               onClick={() => createSortQuery("issue_date")}
             >
               <span>Issue Date</span>
-              {"issue_date" === column && value === "asc" && (
+              {"issueDate" === column && value === "asc" && (
                 <ArrowDown size={16} />
               )}
-              {"issue_date" === column && value === "desc" && (
+              {"issueDate" === column && value === "desc" && (
                 <ArrowUp size={16} />
               )}
             </Button>
           </TableHead>
         )}
 
-        {isVisible("sent_at") && (
+        {isVisible("sentAt") && (
           <TableHead className="w-[150px] min-w-[150px]">
             <span>Sent at</span>
           </TableHead>

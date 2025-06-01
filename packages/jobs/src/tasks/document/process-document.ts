@@ -1,9 +1,8 @@
-import { DocumentClient } from "@midday/documents";
+import { processDocumentSchema } from "@jobs/schema";
 import { loadDocument } from "@midday/documents/loader";
 import { getContentSample } from "@midday/documents/utils";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 import { classifyDocument } from "./classify-document";
 import { classifyImage } from "./classify-image";
 import { convertHeic } from "./convert-heic";
@@ -11,30 +10,26 @@ import { convertHeic } from "./convert-heic";
 // NOTE: Process documents and images for classification
 export const processDocument = schemaTask({
   id: "process-document",
-  schema: z.object({
-    mimetype: z.string(),
-    file_path: z.array(z.string()),
-    teamId: z.string(),
-  }),
+  schema: processDocumentSchema,
   maxDuration: 60,
   queue: {
     concurrencyLimit: 100,
   },
-  run: async ({ mimetype, file_path, teamId }) => {
+  run: async ({ mimetype, filePath, teamId }) => {
     const supabase = createClient();
 
     try {
       // If the file is a HEIC we need to convert it to a JPG
       if (mimetype === "image/heic") {
         await convertHeic.triggerAndWait({
-          file_path,
+          filePath,
         });
       }
 
       // If the file is an image, we have a special classifier for it
       if (mimetype.startsWith("image/")) {
         await classifyImage.trigger({
-          fileName: file_path.join("/"),
+          fileName: filePath.join("/"),
           teamId,
         });
 
@@ -43,7 +38,7 @@ export const processDocument = schemaTask({
 
       const { data: fileData } = await supabase.storage
         .from("vault")
-        .download(file_path.join("/"));
+        .download(filePath.join("/"));
 
       if (!fileData) {
         throw new Error("File not found");
@@ -62,7 +57,7 @@ export const processDocument = schemaTask({
 
       await classifyDocument.trigger({
         content: sample,
-        fileName: file_path.join("/"),
+        fileName: filePath.join("/"),
         teamId,
       });
     } catch (error) {
@@ -73,7 +68,7 @@ export const processDocument = schemaTask({
         .update({
           processing_status: "failed",
         })
-        .eq("id", file_path.join("/"));
+        .eq("id", filePath.join("/"));
     }
   },
 });

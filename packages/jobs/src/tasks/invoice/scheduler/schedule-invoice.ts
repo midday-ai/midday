@@ -1,4 +1,4 @@
-import { triggerBatch } from "@/utils/trigger-batch";
+import { triggerBatch } from "@jobs/utils/trigger-batch";
 import { createClient } from "@midday/supabase/job";
 import { logger, schedules } from "@trigger.dev/sdk/v3";
 import { checkInvoiceStatus } from "../operations/check-status";

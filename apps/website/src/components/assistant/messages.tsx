@@ -17,7 +17,7 @@ async function concatCharacter(inputString, callback) {
   for (let i = 0; i < words.length; i++) {
     result += (i > 0 ? " " : "") + words[i];
     await new Promise((resolve) =>
-      setTimeout(resolve, getRandomDelay(70, 100))
+      setTimeout(resolve, getRandomDelay(70, 100)),
     );
     callback(result); // Call the callback with the intermediate result
   }
@@ -77,7 +77,7 @@ export function BotCard({
       <div
         className={cn(
           "ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono leading-relaxed",
-          className
+          className,
         )}
       >
         {text}
@@ -114,7 +114,7 @@ export function SignUpCard({
         <div
           className={cn(
             "ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono leading-relaxed",
-            className
+            className,
           )}
         >
           {text}

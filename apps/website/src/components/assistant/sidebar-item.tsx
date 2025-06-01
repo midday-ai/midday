@@ -10,7 +10,7 @@ export function SidebarItem({ chat, onSelect }: SidebarItemProps) {
     <button
       type="button"
       className={cn(
-        "text-left transition-colors px-0 py-1 rounded-lg w-full text-[#878787] hover:text-primary"
+        "text-left transition-colors px-0 py-1 rounded-lg w-full text-[#878787] hover:text-primary",
       )}
       onClick={() => onSelect(chat.title)}
     >

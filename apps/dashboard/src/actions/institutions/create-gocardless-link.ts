@@ -1,6 +1,6 @@
 "use server";
 
-import { client } from "@midday/engine/client";
+import { client } from "@midday/engine-client";
 import { LogEvents } from "@midday/events/events";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -49,6 +49,10 @@ export const createGoCardLessLinkAction = authActionClient
           },
         });
 
+        if (!agreementResponse.ok) {
+          throw new Error("Failed to create agreement");
+        }
+
         const { data: agreementData } = await agreementResponse.json();
 
         const linkResponse = await client.auth.gocardless.link.$post({
@@ -58,6 +62,10 @@ export const createGoCardLessLinkAction = authActionClient
             redirect: redirectTo.toString(),
           },
         });
+
+        if (!linkResponse.ok) {
+          throw new Error("Failed to create link");
+        }
 
         const { data: linkData } = await linkResponse.json();
 

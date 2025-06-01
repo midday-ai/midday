@@ -1,5 +1,6 @@
 "use client";
 
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
@@ -8,7 +9,11 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 
-export function InboxStatus({ item }) {
+type Props = {
+  item: RouterOutputs["inbox"]["get"]["data"][number];
+};
+
+export function InboxStatus({ item }: Props) {
   if (item.status === "processing" || item.status === "new") {
     return (
       <div className="flex space-x-1 items-center py-1 px-2 h-[26px]">
@@ -17,7 +22,7 @@ export function InboxStatus({ item }) {
     );
   }
 
-  if (item?.transaction_id) {
+  if (item?.transactionId) {
     return (
       <div className="flex space-x-1 items-center py-1 px-2 h-[26px]">
         <Icons.Check />
@@ -26,7 +31,7 @@ export function InboxStatus({ item }) {
     );
   }
 
-  if (item.pending || item.status === "pending") {
+  if (item.status === "pending") {
     return (
       <TooltipProvider delayDuration={0}>
         <Tooltip>

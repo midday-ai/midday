@@ -46,7 +46,6 @@ export default async function Overview(props: Props) {
     }),
     trpc.transactions.get.queryOptions({
       pageSize: 15,
-      filter: { type: undefined },
     }),
   ]);
 

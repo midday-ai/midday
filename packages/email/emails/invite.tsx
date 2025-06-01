@@ -24,7 +24,6 @@ interface Props {
   teamName?: string;
   inviteCode?: string;
   ip?: string;
-  location?: string;
   locale: string;
 }
 
@@ -37,7 +36,6 @@ export const InviteEmail = ({
   teamName = "Acme Co",
   inviteCode = "jnwe9203frnwefl239jweflasn1230oqef",
   ip = "204.13.186.218",
-  location = "São Paulo, Brazil",
   locale = "en",
 }: Props) => {
   const { t } = getI18n({ locale });
@@ -115,9 +113,7 @@ export const InviteEmail = ({
                 {t("invite.footer1")}{" "}
                 <span className="text-[#121212] ">{email}</span>.{" "}
                 {t("invite.footer2")}{" "}
-                <span className="text-[#121212] ">{ip}</span>{" "}
-                {t("invite.footer3")}{" "}
-                <span className="text-[#121212] ">{location}</span>.{" "}
+                <span className="text-[#121212] ">{ip}</span> .{" "}
                 {t("invite.footer4")}
               </Text>
             </Section>

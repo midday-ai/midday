@@ -19,8 +19,6 @@ const schema = z.object({
     ),
 });
 
-const VALID_FILTERS = ["name", "start", "end"];
-
 export async function generateVaultFilters(prompt: string, context?: string) {
   const stream = createStreamableValue();
 
@@ -31,12 +29,7 @@ export async function generateVaultFilters(prompt: string, context?: string) {
                Current date is: ${new Date().toISOString().split("T")[0]} \n
                ${context}
       `,
-      schema: schema.pick({
-        ...(VALID_FILTERS.reduce((acc, filter) => {
-          acc[filter] = true;
-          return acc;
-        }, {}) as any),
-      }),
+      schema,
       prompt,
     });
 

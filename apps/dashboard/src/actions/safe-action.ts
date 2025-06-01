@@ -1,7 +1,6 @@
+import { getQueryClient, trpc } from "@/trpc/server";
 import { logger } from "@/utils/logger";
-import { getTeamId } from "@/utils/team";
 import { setupAnalytics } from "@midday/events/server";
-import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import {
   DEFAULT_SERVER_ERROR_MESSAGE,
@@ -55,21 +54,18 @@ export const authActionClient = actionClientWithMeta
     return result;
   })
   .use(async ({ next, metadata }) => {
-    const {
-      data: { session },
-    } = await getSession();
-
-    const teamId = await getTeamId();
+    const queryClient = getQueryClient();
+    const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
 
     const supabase = await createClient();
 
-    if (!session) {
+    if (!user) {
       throw new Error("Unauthorized");
     }
 
     const analytics = await setupAnalytics({
-      userId: session.user.id,
-      fullName: session.user.user_metadata.full_name,
+      userId: user.id,
+      fullName: user.fullName,
     });
 
     if (metadata?.track) {
@@ -80,8 +76,8 @@ export const authActionClient = actionClientWithMeta
       ctx: {
         supabase,
         analytics,
-        user: session.user,
-        teamId,
+        user,
+        teamId: user.teamId,
       },
     });
   });

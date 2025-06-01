@@ -1,7 +1,7 @@
 import * as crypto from "node:crypto";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
-import type { onboardTeam } from "@midday/jobs/tasks/team/onboarding";
+import type { OnboardTeamPayload } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -48,11 +48,11 @@ export async function POST(req: Request) {
     channel: LogEvents.Registered.channel,
   });
 
-  await tasks.trigger<typeof onboardTeam>(
+  await tasks.trigger(
     "onboard-team",
     {
       userId,
-    },
+    } satisfies OnboardTeamPayload,
     {
       delay: "5m",
     },

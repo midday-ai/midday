@@ -22,7 +22,7 @@ export const chartExampleData = {
         currency: "USD",
         value: 20300,
       },
-      precentage: {
+      percentage: {
         value: 110,
         status: "positive",
       },
@@ -39,7 +39,7 @@ export const chartExampleData = {
         currency: "USD",
         value: 14000,
       },
-      precentage: {
+      percentage: {
         value: 1000,
         status: "positive",
       },
@@ -56,7 +56,7 @@ export const chartExampleData = {
         currency: "USD",
         value: 18000,
       },
-      precentage: {
+      percentage: {
         value: 1000,
         status: "positive",
       },
@@ -75,7 +75,7 @@ export const chartExampleData = {
         value: 10000,
         status: "positive",
       },
-      precentage: {
+      percentage: {
         value: 1000,
         status: "positive",
       },
@@ -94,7 +94,7 @@ export const chartExampleData = {
         value: 12000,
         status: "positive",
       },
-      precentage: {
+      percentage: {
         value: 1000,
         status: "positive",
       },
@@ -113,7 +113,7 @@ export const chartExampleData = {
         value: 2800,
         status: "positive",
       },
-      precentage: {
+      percentage: {
         value: 1000,
         status: "positive",
       },
@@ -132,7 +132,7 @@ export const chartExampleData = {
         value: 1000,
         status: "positive",
       },
-      precentage: {
+      percentage: {
         value: 1000,
         status: "positive",
       },
@@ -151,7 +151,7 @@ export const chartExampleData = {
         value: 1000,
         status: "positive",
       },
-      precentage: {
+      percentage: {
         value: 43,
         status: "positive",
       },
@@ -170,7 +170,7 @@ export const chartExampleData = {
         value: -3000,
         status: "negative",
       },
-      precentage: {
+      percentage: {
         value: 53,
         status: "positive",
       },
@@ -189,7 +189,7 @@ export const chartExampleData = {
         value: 20000,
         status: "negative",
       },
-      precentage: {
+      percentage: {
         value: 0,
         status: "positive",
       },
@@ -208,7 +208,7 @@ export const chartExampleData = {
         value: 20000,
         status: "negative",
       },
-      precentage: {
+      percentage: {
         value: 0,
         status: "negative",
       },

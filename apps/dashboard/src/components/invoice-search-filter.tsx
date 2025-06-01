@@ -43,6 +43,7 @@ export function InvoiceSearchFilter() {
 
   const statusFilters = allowedStatuses.map((status) => ({
     id: status,
+    // @ts-expect-error
     name: t(`invoice_status.${status}`),
   }));
 
@@ -202,18 +203,17 @@ export function InvoiceSearchFilter() {
                 <Calendar
                   mode="range"
                   initialFocus
-                  toDate={new Date()}
                   selected={{
                     from: filter?.start ? new Date(filter.start) : undefined,
                     to: filter?.end ? new Date(filter.end) : undefined,
                   }}
-                  onSelect={({ from, to }) => {
+                  onSelect={(range) => {
                     setFilter({
-                      start: from
-                        ? formatISO(from, { representation: "date" })
+                      start: range?.from
+                        ? formatISO(range.from, { representation: "date" })
                         : null,
-                      end: to
-                        ? formatISO(to, { representation: "date" })
+                      end: range?.to
+                        ? formatISO(range.to, { representation: "date" })
                         : null,
                     });
                   }}

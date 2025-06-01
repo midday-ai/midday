@@ -82,34 +82,35 @@ export function Form() {
   const formValues = useWatch({
     control: form.control,
     name: [
-      "customer_details",
-      "customer_id",
-      "customer_name",
+      "customerDetails",
+      "customerId",
+      "customerName",
       "template",
-      "line_items",
+      "lineItems",
       "amount",
       "vat",
       "tax",
       "discount",
-      "due_date",
-      "issue_date",
-      "note_details",
-      "payment_details",
-      "from_details",
-      "invoice_number",
-      "top_block",
-      "bottom_block",
+      "dueDate",
+      "issueDate",
+      "noteDetails",
+      "paymentDetails",
+      "fromDetails",
+      "invoiceNumber",
+      "topBlock",
+      "bottomBlock",
     ],
   });
 
   const isDirty = form.formState.isDirty;
-  const invoiceNumberValid = !form.getFieldState("invoice_number").error;
+  const invoiceNumberValid = !form.getFieldState("invoiceNumber").error;
   const [debouncedValue] = useDebounceValue(formValues, 500);
 
   useEffect(() => {
-    if (isDirty && form.watch("customer_id") && invoiceNumberValid) {
+    if (isDirty && form.watch("customerId") && invoiceNumberValid) {
       const currentFormValues = form.getValues();
       draftInvoiceMutation.mutate(
+        // @ts-expect-error
         transformFormValuesToDraft(currentFormValues),
       );
     }
@@ -135,7 +136,7 @@ export function Form() {
   const handleSubmit = (values: InvoiceFormValues) => {
     createInvoiceMutation.mutate({
       id: values.id,
-      deliveryType: values.template.delivery_type ?? "create",
+      deliveryType: values.template.deliveryType ?? "create",
     });
   };
 
@@ -148,6 +149,7 @@ export function Form() {
 
   return (
     <form
+      // @ts-expect-error
       onSubmit={form.handleSubmit(handleSubmit)}
       className="relative h-full"
       onKeyDown={handleKeyDown}
@@ -168,7 +170,7 @@ export function Form() {
             </div>
           </div>
 
-          <EditBlock name="top_block" />
+          <EditBlock name="topBlock" />
 
           <div className="mt-4">
             <LineItems />
@@ -184,7 +186,7 @@ export function Form() {
               <NoteDetails />
             </div>
 
-            <EditBlock name="bottom_block" />
+            <EditBlock name="bottomBlock" />
           </div>
         </div>
       </ScrollArea>

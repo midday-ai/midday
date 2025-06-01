@@ -1,6 +1,7 @@
-import { getTeamId } from "@/utils/team";
+// @ts-nocheck - will be removed soon
+import { trpc } from "@/trpc/server";
+import { getQueryClient } from "@/trpc/server";
 import { getSubscriberPreferences } from "@midday/notification";
-import { getSession } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
 import { NotificationSetting } from "./notification-setting";
 
@@ -11,15 +12,12 @@ export function NotificationSettingsSkeleton() {
 }
 
 export async function NotificationSettings() {
-  const {
-    data: { session },
-  } = await getSession();
-
-  const teamId = await getTeamId();
+  const queryClient = getQueryClient();
+  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
 
   const { data: subscriberPreferences } = await getSubscriberPreferences({
-    subscriberId: session?.user.id!,
-    teamId: teamId!,
+    subscriberId: user.id,
+    teamId: user.teamId,
   });
 
   const emailSettings = subscriberPreferences
@@ -33,8 +31,8 @@ export async function NotificationSettings() {
           id={setting.template._id}
           name={setting.template.name}
           enabled={setting.preference.channels?.email}
-          subscriberId={session?.user.id!}
-          teamId={teamId!}
+          subscriberId={user.id}
+          teamId={user.teamId}
           type="email"
         />
       );

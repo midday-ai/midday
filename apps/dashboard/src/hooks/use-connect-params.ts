@@ -13,7 +13,7 @@ export function useConnectParams(initialCountryCode?: string) {
     token: parseAsString,
     enrollment_id: parseAsString,
     institution_id: parseAsString,
-    q: parseAsString.withDefault("").withOptions({ clearOnDefault: true }),
+    search: parseAsString.withDefault("").withOptions({ clearOnDefault: true }),
     error: parseAsString,
     ref: parseAsString,
     details: parseAsString,

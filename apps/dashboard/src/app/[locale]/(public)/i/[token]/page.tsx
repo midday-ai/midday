@@ -1,9 +1,8 @@
 import CustomerHeader from "@/components/customer-header";
 import InvoiceToolbar from "@/components/invoice-toolbar";
+import { getQueryClient, trpc } from "@/trpc/server";
 import { decrypt } from "@midday/encryption";
 import { HtmlTemplate } from "@midday/invoice/templates/html";
-import { verify } from "@midday/invoice/token";
-import { getInvoiceByIdQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { waitUntil } from "@vercel/functions";
 import type { Metadata } from "next";
@@ -14,11 +13,14 @@ export async function generateMetadata(props: {
   params: Promise<{ token: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
-  const supabase = await createClient({ admin: true });
+  const queryClient = getQueryClient();
 
   try {
-    const { id } = await verify(params.token);
-    const { data: invoice } = await getInvoiceByIdQuery(supabase, id);
+    const invoice = await queryClient.fetchQuery(
+      trpc.invoice.getInvoiceByToken.queryOptions({
+        token: params.token,
+      }),
+    );
 
     if (!invoice) {
       return {
@@ -30,8 +32,8 @@ export async function generateMetadata(props: {
       };
     }
 
-    const title = `Invoice ${invoice.invoice_number} | ${invoice.team?.name}`;
-    const description = `Invoice for ${invoice.customer?.name || "Customer"}`;
+    const title = `Invoice ${invoice.invoiceNumber} | ${invoice.team?.name}`;
+    const description = `Invoice for ${invoice.customerName || invoice.customer?.name || "Customer"}`;
 
     return {
       title,
@@ -52,7 +54,7 @@ export async function generateMetadata(props: {
     };
   } catch (error) {
     return {
-      title: "Invalid Invoice",
+      title: "Invoice Not Found",
       robots: {
         index: false,
         follow: false,
@@ -87,11 +89,17 @@ export default async function Page(props: Props) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  const { id } = (await verify(decodeURIComponent(params.token))) as {
-    id: string;
-  };
+  const queryClient = getQueryClient();
 
-  const { data: invoice } = await getInvoiceByIdQuery(supabase, id);
+  const invoice = await queryClient.fetchQuery(
+    trpc.invoice.getInvoiceByToken.queryOptions({
+      token: params.token,
+    }),
+  );
+
+  if (!invoice) {
+    notFound();
+  }
 
   if (viewer) {
     try {
@@ -99,7 +107,7 @@ export default async function Page(props: Props) {
 
       if (decryptedEmail === invoice?.customer?.email) {
         // Only update the invoice viewed_at if the user is a viewer
-        waitUntil(updateInvoiceViewedAt(id));
+        waitUntil(updateInvoiceViewedAt(invoice.id!));
       }
     } catch (error) {
       console.log(error);
@@ -111,9 +119,7 @@ export default async function Page(props: Props) {
     notFound();
   }
 
-  // @ts-expect-error - template.size is not typed (JSONB)
   const width = invoice.template.size === "letter" ? 750 : 595;
-  // @ts-expect-error - template.size is not typed (JSONB)
   const height = invoice.template.size === "letter" ? 1056 : 842;
 
   return (
@@ -123,23 +129,18 @@ export default async function Page(props: Props) {
         style={{ maxWidth: width }}
       >
         <CustomerHeader
-          name={invoice.customer_name || invoice.customer?.name}
+          name={invoice.customerName || (invoice.customer?.name as string)}
           website={invoice.customer?.website}
           status={invoice.status}
         />
         <div className="pb-24 md:pb-0">
           <div className="shadow-[0_24px_48px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
-            <HtmlTemplate {...invoice} width={width} height={height} />
+            <HtmlTemplate data={invoice} width={width} height={height} />
           </div>
         </div>
       </div>
 
-      <InvoiceToolbar
-        id={invoice.id}
-        size={invoice.template.size}
-        customer={invoice.customer}
-        viewedAt={invoice.viewed_at}
-      />
+      <InvoiceToolbar token={invoice.token} />
 
       <div className="fixed bottom-4 right-4 hidden md:block">
         <a

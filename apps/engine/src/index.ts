@@ -1,9 +1,6 @@
-import type { Bindings } from "@/common/bindings";
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { requestId } from "hono/request-id";
 import {
   authMiddleware,
-  cacheMiddleware,
   loggingMiddleware,
   securityMiddleware,
 } from "./middleware";
@@ -16,7 +13,7 @@ import institutionRoutes from "./routes/institutions";
 import ratesRoutes from "./routes/rates";
 import transactionsRoutes from "./routes/transactions";
 
-const app = new OpenAPIHono<{ Bindings: Bindings }>({
+const app = new OpenAPIHono({
   defaultHook: (result, c) => {
     if (!result.success) {
       return c.json({ success: false, errors: result.error.errors }, 422);
@@ -24,23 +21,15 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>({
   },
 });
 
-app.use("*", requestId());
 app.use(authMiddleware);
 app.use(securityMiddleware);
 app.use(loggingMiddleware);
-app.get("/institutions", cacheMiddleware);
-app.get("/rates", cacheMiddleware);
-
-app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
-  type: "http",
-  scheme: "bearer",
-});
 
 app.get("/", (c) => {
   return c.redirect("https://midday.ai", 302);
 });
 
-const appRoutes = app
+export const appRoutes = app
   .route("/transactions", transactionsRoutes)
   .route("/accounts", accountRoutes)
   .route("/institutions", institutionRoutes)

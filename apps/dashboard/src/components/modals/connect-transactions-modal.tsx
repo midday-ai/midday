@@ -117,7 +117,7 @@ export function ConnectTransactionsModal({
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
   const {
     countryCode,
-    q: query,
+    search: query,
     step,
     setParams,
   } = useConnectParams(initialCountryCode);
@@ -166,7 +166,7 @@ export function ConnectTransactionsModal({
     setParams({
       step: null,
       countryCode: null,
-      q: null,
+      search: null,
       ref: null,
     });
   };
@@ -225,7 +225,9 @@ export function ConnectTransactionsModal({
                 <Input
                   placeholder="Search bank..."
                   type="search"
-                  onChange={(evt) => setParams({ q: evt.target.value || null })}
+                  onChange={(evt) =>
+                    setParams({ search: evt.target.value || null })
+                  }
                   autoComplete="off"
                   autoCapitalize="none"
                   autoCorrect="off"
@@ -261,17 +263,17 @@ export function ConnectTransactionsModal({
                       provider={institution.provider}
                       // GoCardLess
                       availableHistory={
-                        institution.available_history
-                          ? +institution.available_history
+                        institution.availableHistory
+                          ? +institution.availableHistory
                           : 0
                       }
                       // EnableBanking
                       maximumConsentValidity={
-                        institution.maximum_consent_validity
-                          ? +institution.maximum_consent_validity
+                        institution.maximumConsentValidity
+                          ? +institution.maximumConsentValidity
                           : 0
                       }
-                      type={institution?.type}
+                      type={institution?.type ?? undefined}
                       openPlaid={() => {
                         setParams({ step: null });
                         openPlaid();

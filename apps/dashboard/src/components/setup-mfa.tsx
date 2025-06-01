@@ -6,7 +6,11 @@ import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
 import { useState } from "react";
 
-function MfaStart({ setEnroll }) {
+type Props = {
+  setEnroll: (enroll: boolean) => void;
+};
+
+function MfaStart({ setEnroll }: Props) {
   return (
     <>
       <div className="flex w-full flex-col relative">
@@ -45,12 +49,6 @@ function MfaStart({ setEnroll }) {
 export function SetupMfa() {
   const [enroll, setEnroll] = useState(false);
 
-  let content = <MfaStart setEnroll={setEnroll} />;
-
-  if (enroll) {
-    content = <EnrollMFA />;
-  }
-
   return (
     <div>
       <div className="absolute left-5 top-4 md:left-10 md:top-10">
@@ -61,7 +59,7 @@ export function SetupMfa() {
 
       <div className="flex min-h-screen justify-center items-center overflow-hidden p-6 md:p-0">
         <div className="relative z-20 m-auto flex w-full max-w-[380px] flex-col">
-          {content}
+          {enroll ? <EnrollMFA /> : <MfaStart setEnroll={setEnroll} />}
         </div>
       </div>
     </div>

@@ -17,10 +17,9 @@
   "dependencies": {
     "@midday/encryption": "workspace:*",
     "@midday/supabase": "workspace:*",
-    "googleapis": "^148.0.0",
-    "zod": "^3.24.3",
+    "googleapis": "^149.0.0",
+    "zod": "^3.25.46",
     "@microsoft/microsoft-graph-client": "^3.0.7",
-    "@azure/identity": "^4.9.0",
-    "@azure/msal-node": "^3.5.1"
+    "@azure/msal-node": "^3.5.3"
   }
 }

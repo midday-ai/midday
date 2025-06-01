@@ -1,4 +1,5 @@
-import { resend } from "@/utils/resend";
+import { sendInvoiceReminderSchema } from "@jobs/schema";
+import { resend } from "@jobs/utils/resend";
 import InvoiceReminderEmail from "@midday/email/emails/invoice-reminder";
 import { render } from "@midday/email/render";
 import { encrypt } from "@midday/encryption";
@@ -6,13 +7,10 @@ import { createClient } from "@midday/supabase/job";
 import { getAppUrl } from "@midday/utils/envs";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { nanoid } from "nanoid";
-import { z } from "zod";
 
 export const sendInvoiceReminder = schemaTask({
   id: "send-invoice-reminder",
-  schema: z.object({
-    invoiceId: z.string().uuid(),
-  }),
+  schema: sendInvoiceReminderSchema,
   maxDuration: 60,
   queue: {
     concurrencyLimit: 10,

@@ -8,9 +8,15 @@ import { useDebounceValue } from "usehooks-ts";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 
+type Attachment = {
+  id: string;
+  name: string;
+  data?: unknown;
+};
+
 type Props = {
   placeholder: string;
-  onSelect: (file: any) => void;
+  onSelect: (file: Attachment) => void;
 };
 
 export function SelectAttachment({ placeholder, onSelect }: Props) {
@@ -28,16 +34,17 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
     enabled: Boolean(debouncedValue),
   });
 
-  const handleOnSelect = (item: any) => {
+  const handleOnSelect = (item: Attachment) => {
     onSelect(item);
   };
 
   const options = items?.map((item) => ({
     id: item.id,
-    name: item.display_name,
+    name: item.displayName,
     data: item,
     component: () => {
-      const filePath = `${item?.file_path?.join("/")}`;
+      const filePath = `${item?.filePath?.join("/")}`;
+
       return (
         <div className="flex w-full items-center justify-between gap-2 text-sm">
           <div className="flex gap-2 items-center">
@@ -49,16 +56,16 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
                   setParams({ filePath });
                 }}
               >
-                <FilePreview mimeType={item.content_type} filePath={filePath} />
+                <FilePreview mimeType={item.contentType!} filePath={filePath} />
               </button>
             </div>
             <div className="flex flex-col">
               <span className="truncate">
-                {item.display_name || item.file_name}
+                {item.displayName || item.fileName}
               </span>
               {item?.date && (
                 <span className="text-muted-foreground text-xs">
-                  {formatDate(item.date, user?.date_format, true)}
+                  {formatDate(item.date, user?.dateFormat, true)}
                 </span>
               )}
             </div>
@@ -81,8 +88,15 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
       onValueChange={(query) => {
         setDebouncedValue(query);
       }}
-      onSelect={handleOnSelect}
-      options={isLoading ? [] : options}
+      onSelect={(value) => {
+        if (value) {
+          handleOnSelect(value);
+        }
+      }}
+      options={(options ?? []).map((opt) => ({
+        ...opt,
+        name: opt.name!,
+      }))}
       isLoading={isLoading}
       classNameList="mt-2 max-h-[161px]"
     />

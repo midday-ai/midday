@@ -8,30 +8,44 @@ import { TZDate } from "@date-fns/tz";
 import { useQuery } from "@tanstack/react-query";
 import {
   addMonths,
+  addWeeks,
+  eachDayOfInterval,
   endOfMonth,
+  endOfWeek,
   formatISO,
   startOfMonth,
+  startOfWeek,
   subMonths,
+  subWeeks,
 } from "date-fns";
 import { useRef, useState } from "react";
+import React from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useOnClickOutside } from "usehooks-ts";
-import { CalendarGrid } from "./tracker/calendar-grid";
 import { CalendarHeader } from "./tracker/calendar-header";
+import { CalendarMonthView } from "./tracker/calendar-month-view";
+import { CalendarWeekView } from "./tracker/calendar-week-view";
 
-export function TrackerCalendar() {
+type Props = {
+  weeklyCalendar: boolean;
+};
+
+export function TrackerCalendar({ weeklyCalendar }: Props) {
   const ref = useRef(null);
   const { data: user } = useUserQuery();
   const trpc = useTRPC();
 
-  const weekStartsOnMonday = user?.week_starts_on_monday ?? false;
+  const weekStartsOnMonday = user?.weekStartsOnMonday ?? false;
 
   const {
     date: currentDate,
     range,
     setParams,
     selectedDate,
+    view,
   } = useTrackerParams();
+
+  const selectedView = view ?? (weeklyCalendar ? "week" : "month");
 
   const [isDragging, setIsDragging] = useState(false);
   const [localRange, setLocalRange] = useState<[string | null, string | null]>([
@@ -46,33 +60,74 @@ export function TrackerCalendar() {
     weekStartsOnMonday,
   );
 
+  // Calculate current week days for week view
+  const currentWeekDays = React.useMemo(() => {
+    const weekStart = startOfWeek(currentTZDate, {
+      weekStartsOn: weekStartsOnMonday ? 1 : 0,
+    });
+    const weekEnd = endOfWeek(currentTZDate, {
+      weekStartsOn: weekStartsOnMonday ? 1 : 0,
+    });
+    return eachDayOfInterval({
+      start: weekStart,
+      end: weekEnd,
+    }).map((date) => new TZDate(date, "UTC"));
+  }, [currentTZDate, weekStartsOnMonday]);
+
+  // Dynamic data fetching based on view
+  const getDateRange = () => {
+    if (selectedView === "week") {
+      const weekStart = startOfWeek(currentTZDate, {
+        weekStartsOn: weekStartsOnMonday ? 1 : 0,
+      });
+      const weekEnd = endOfWeek(currentTZDate, {
+        weekStartsOn: weekStartsOnMonday ? 1 : 0,
+      });
+      return {
+        from: formatISO(weekStart, { representation: "date" }),
+        to: formatISO(weekEnd, { representation: "date" }),
+      };
+    }
+    return {
+      from: formatISO(startOfMonth(currentTZDate), { representation: "date" }),
+      to: formatISO(endOfMonth(currentTZDate), { representation: "date" }),
+    };
+  };
+
   const { data } = useQuery(
-    trpc.trackerEntries.byRange.queryOptions({
-      from: formatISO(startOfMonth(currentTZDate), {
-        representation: "date",
-      }),
-      to: formatISO(endOfMonth(currentTZDate), {
-        representation: "date",
-      }),
-    }),
+    trpc.trackerEntries.byRange.queryOptions(getDateRange()),
   );
 
-  function handleMonthChange(direction: number) {
-    const newDate =
-      direction > 0 ? addMonths(currentTZDate, 1) : subMonths(currentTZDate, 1);
-    setParams({
-      date: formatISO(newDate, { representation: "date" }),
-    });
+  function handlePeriodChange(direction: number) {
+    if (selectedView === "week") {
+      const newDate =
+        direction > 0 ? addWeeks(currentTZDate, 1) : subWeeks(currentTZDate, 1);
+      setParams({
+        date: formatISO(
+          startOfWeek(newDate, { weekStartsOn: weekStartsOnMonday ? 1 : 0 }),
+          { representation: "date" },
+        ),
+      });
+    } else {
+      const newDate =
+        direction > 0
+          ? addMonths(currentTZDate, 1)
+          : subMonths(currentTZDate, 1);
+      setParams({
+        date: formatISO(newDate, { representation: "date" }),
+      });
+    }
   }
 
-  useHotkeys("arrowLeft", () => handleMonthChange(-1), {
+  useHotkeys("arrowLeft", () => handlePeriodChange(-1), {
     enabled: !selectedDate,
   });
 
-  useHotkeys("arrowRight", () => handleMonthChange(1), {
+  useHotkeys("arrowRight", () => handlePeriodChange(1), {
     enabled: !selectedDate,
   });
 
+  // @ts-expect-error
   useOnClickOutside(ref, () => {
     if (range && range.length === 1) setParams({ range: null });
   });
@@ -116,21 +171,40 @@ export function TrackerCalendar() {
   return (
     <div ref={ref}>
       <div className="mt-8">
-        <CalendarHeader totalDuration={data?.meta?.totalDuration} />
-        <CalendarGrid
-          firstWeek={firstWeek}
-          calendarDays={calendarDays}
-          currentDate={currentTZDate}
-          selectedDate={selectedDate}
-          data={data?.result}
-          range={validRange}
-          localRange={localRange}
-          isDragging={isDragging}
-          weekStartsOnMonday={weekStartsOnMonday}
-          handleMouseDown={handleMouseDown}
-          handleMouseEnter={handleMouseEnter}
-          handleMouseUp={handleMouseUp}
+        <CalendarHeader
+          totalDuration={data?.meta?.totalDuration}
+          selectedView={selectedView as "week" | "month"}
         />
+        {selectedView === "month" ? (
+          <CalendarMonthView
+            firstWeek={firstWeek}
+            calendarDays={calendarDays}
+            currentDate={currentTZDate}
+            selectedDate={selectedDate}
+            data={data?.result}
+            range={validRange}
+            localRange={localRange}
+            isDragging={isDragging}
+            weekStartsOnMonday={weekStartsOnMonday}
+            handleMouseDown={handleMouseDown}
+            handleMouseEnter={handleMouseEnter}
+            handleMouseUp={handleMouseUp}
+          />
+        ) : (
+          <CalendarWeekView
+            weekDays={currentWeekDays}
+            currentDate={currentTZDate}
+            selectedDate={selectedDate}
+            data={data?.result}
+            range={validRange}
+            localRange={localRange}
+            isDragging={isDragging}
+            weekStartsOnMonday={weekStartsOnMonday}
+            handleMouseDown={handleMouseDown}
+            handleMouseEnter={handleMouseEnter}
+            handleMouseUp={handleMouseUp}
+          />
+        )}
       </div>
     </div>
   );

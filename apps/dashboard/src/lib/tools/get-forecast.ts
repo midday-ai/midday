@@ -1,5 +1,5 @@
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getQueryClient, trpc } from "@/trpc/server";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { tool } from "ai";
 import { startOfMonth, subMonths } from "date-fns";
 import { z } from "zod";

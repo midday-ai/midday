@@ -30,13 +30,31 @@ const options = [
     label: "Expire in 1 year",
     expireIn: Math.floor(addYears(new Date(), 1).getTime() / 1000),
   },
-];
+] as const;
+
+type ShareOptions = {
+  expireIn: number;
+  fullPath: string;
+};
+
+type ExportResult = {
+  totalItems: number;
+  fullPath: string;
+  fileName: string;
+};
+
+type ExportData = {
+  runId?: string;
+  accessToken?: string;
+};
 
 export function ExportStatus() {
   const { toast, dismiss, update } = useToast();
-  const [toastId, setToastId] = useState(null);
+  const [toastId, setToastId] = useState<string | null>(null);
   const { exportData, setExportData } = useExportStore();
-  const { status, progress, result } = useExportStatus(exportData);
+  const { status, progress, result } = useExportStatus(
+    exportData as ExportData,
+  );
   const [, copy] = useCopyToClipboard();
 
   const shareFile = useAction(shareFileAction, {
@@ -59,12 +77,16 @@ export function ExportStatus() {
   });
 
   const handleOnDownload = () => {
-    dismiss(toastId);
+    if (toastId) {
+      dismiss(toastId);
+    }
   };
 
-  const handleOnShare = ({ expireIn, fullPath }) => {
+  const handleOnShare = ({ expireIn, fullPath }: ShareOptions) => {
     shareFile.execute({ expireIn, fullPath });
-    dismiss(toastId);
+    if (toastId) {
+      dismiss(toastId);
+    }
   };
 
   useEffect(() => {
@@ -91,14 +113,16 @@ export function ExportStatus() {
       });
 
       setToastId(id);
-    } else {
+    } else if (toastId) {
       update(toastId, {
-        progress,
+        id: toastId,
+        progress: Number(progress),
       });
     }
 
-    if (status === "COMPLETED" && result) {
+    if (status === "COMPLETED" && result && toastId) {
       update(toastId, {
+        id: toastId,
         title: "Export completed",
         description: `Your export is ready based on ${result.totalItems} transactions. It's stored in your Vault.`,
         variant: "success",

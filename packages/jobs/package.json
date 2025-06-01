@@ -4,50 +4,24 @@
   "private": true,
   "scripts": {
     "dev": "trigger dev",
-    "deploy": "trigger deploy"
+    "deploy": "trigger deploy",
+    "typecheck": "tsc --noEmit"
   },
   "exports": {
-    "./tasks/bank/setup/initial": "./src/tasks/bank/setup/initial.ts",
-    "./tasks/bank/setup/refresh": "./src/tasks/bank/setup/refresh.ts",
-    "./tasks/bank/sync/accounts": "./src/tasks/bank/sync/accounts.ts",
-    "./tasks/bank/sync/transactions": "./src/tasks/bank/sync/transactions.ts",
-    "./tasks/bank/sync/connection": "./src/tasks/bank/sync/connection.ts",
-    "./tasks/bank/utils/plaid": "./src/tasks/bank/utils/plaid.ts",
-    "./tasks/bank/utils/nordigen": "./src/tasks/bank/utils/nordigen.ts",
-    "./tasks/bank/delete/delete-connection": "./src/tasks/bank/delete/delete-connection.ts",
-    "./tasks/email/send": "./src/tasks/email/send.ts",
-    "./tasks/files/convert": "./src/tasks/files/convert.ts",
-    "./tasks/files/upload": "./src/tasks/files/upload.ts",
-    "./tasks/inbox/process": "./src/tasks/inbox/process.ts",
-    "./tasks/inbox/process-attachment": "./src/tasks/inbox/process-attachment.ts",
-    "./tasks/inbox/provider/initial-setup": "./src/tasks/inbox/provider/initial-setup.ts",
-    "./tasks/inbox/slack-upload": "./src/tasks/inbox/slack-upload.ts",
-    "./tasks/invoice/generate": "./src/tasks/invoice/generate.ts",
-    "./tasks/invoice/send": "./src/tasks/invoice/send.ts",
-    "./tasks/notification/send": "./src/tasks/notification/send.ts",
-    "./tasks/team/onboarding": "./src/tasks/team/onboarding.ts",
-    "./tasks/team/delete": "./src/tasks/team/delete.ts",
-    "./tasks/team/invite": "./src/tasks/team/invite.ts",
-    "./tasks/transactions/export": "./src/tasks/transactions/export.ts",
-    "./tasks/transactions/import": "./src/tasks/transactions/import.ts",
-    "./tasks/transactions/update-base-currency": "./src/tasks/transactions/update-base-currency.ts",
-    "./tasks/user/setup": "./src/tasks/user/setup.ts",
-    "./tasks/reconnect/connection": "./src/tasks/reconnect/connection.ts",
-    "./tasks/document/process-document": "./src/tasks/document/process-document.ts",
-    "./tasks/invoice/email/send-reminder": "./src/tasks/invoice/email/send-reminder.tsx",
-    "./tasks/invoice/email/send-email": "./src/tasks/invoice/email/send-email.tsx",
-    "./tasks/invoice/operations/generate-invoice": "./src/tasks/invoice/operations/generate-invoice.ts"
+    "./schema": "./src/schema.ts"
   },
   "dependencies": {
     "@fast-csv/format": "5.0.2",
     "@midday/email": "workspace:*",
     "@midday/engine": "workspace:*",
+    "@midday/engine-client": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@sindresorhus/slugify": "^2.2.1",
-    "@zip.js/zip.js": "2.7.60",
+    "@zip.js/zip.js": "^2.7.62",
+    "camelcase-keys": "^9.1.3",
     "heic-convert": "1.2.4",
     "node-xlsx": "^0.24.0",
-    "sharp": "^0.34.1"
+    "sharp": "0.34.1"
   },
   "devDependencies": {
     "trigger.dev": "3.3.17",

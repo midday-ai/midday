@@ -26,19 +26,19 @@ export function LineItems() {
 
   const includeDecimals = useWatch({
     control,
-    name: "template.include_decimals",
+    name: "template.includeDecimals",
   });
 
   const includeUnits = useWatch({
     control,
-    name: "template.include_units",
+    name: "template.includeUnits",
   });
 
   const maximumFractionDigits = includeDecimals ? 2 : 0;
 
   const { fields, append, remove, swap } = useFieldArray({
     control,
-    name: "line_items",
+    name: "lineItems",
   });
 
   const reorderList = (newFields: typeof fields) => {
@@ -69,40 +69,40 @@ export function LineItems() {
         className={`grid ${includeUnits ? "grid-cols-[1.5fr_15%25%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end mb-2`}
       >
         <LabelInput
-          name="template.description_label"
+          name="template.descriptionLabel"
           onSave={(value) => {
             updateTemplateMutation.mutate({
-              description_label: value,
+              descriptionLabel: value,
             });
           }}
           className="truncate"
         />
 
         <LabelInput
-          name="template.quantity_label"
+          name="template.quantityLabel"
           onSave={(value) => {
             updateTemplateMutation.mutate({
-              quantity_label: value,
+              quantityLabel: value,
             });
           }}
           className="truncate"
         />
 
         <LabelInput
-          name="template.price_label"
+          name="template.priceLabel"
           onSave={(value) => {
             updateTemplateMutation.mutate({
-              price_label: value,
+              priceLabel: value,
             });
           }}
           className="truncate"
         />
 
         <LabelInput
-          name="template.total_label"
+          name="template.totalLabel"
           onSave={(value) => {
             updateTemplateMutation.mutate({
-              total_label: value,
+              totalLabel: value,
             });
           }}
           className="text-right truncate"
@@ -118,6 +118,7 @@ export function LineItems() {
         {fields.map((field, index) => (
           <LineItemRow
             key={field.id}
+            // @ts-expect-error
             item={field}
             index={index}
             handleRemove={handleRemove}
@@ -159,7 +160,7 @@ function LineItemRow({
   index: number;
   handleRemove: (index: number) => void;
   isReorderable: boolean;
-  item: InvoiceFormValues["line_items"][number];
+  item: InvoiceFormValues["lineItems"][number];
   currency: string;
   maximumFractionDigits: number;
   includeUnits?: boolean;
@@ -171,12 +172,12 @@ function LineItemRow({
 
   const price = useWatch({
     control,
-    name: `line_items.${index}.price`,
+    name: `lineItems.${index}.price`,
   });
 
   const quantity = useWatch({
     control,
-    name: `line_items.${index}.quantity`,
+    name: `lineItems.${index}.quantity`,
   });
 
   return (
@@ -197,14 +198,14 @@ function LineItemRow({
         </Button>
       )}
 
-      <Description name={`line_items.${index}.name`} />
+      <Description name={`lineItems.${index}.name`} />
 
-      <QuantityInput name={`line_items.${index}.quantity`} />
+      <QuantityInput name={`lineItems.${index}.quantity`} />
 
       <div className="flex items-center gap-2">
-        <AmountInput name={`line_items.${index}.price`} />
+        <AmountInput name={`lineItems.${index}.price`} />
         {includeUnits && <span className="text-xs text-[#878787]">/</span>}
-        {includeUnits && <Input name={`line_items.${index}.unit`} />}
+        {includeUnits && <Input name={`lineItems.${index}.unit`} />}
       </div>
 
       <div className="text-right">

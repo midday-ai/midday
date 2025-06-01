@@ -159,7 +159,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
       });
 
       queryClient.invalidateQueries({
-        queryKey: trpc.metrics.queryKey(),
+        queryKey: trpc.metrics.pathKey(),
       });
 
       toast({
@@ -227,7 +227,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                       const filename = stripSpecialCharacters(data.file.name);
                       const { path } = await uploadFile({
                         bucket: "vault",
-                        path: [user?.team_id, "imports", filename],
+                        path: [user?.team?.id ?? "", "imports", filename],
                         file,
                       });
 

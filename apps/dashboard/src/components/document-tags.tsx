@@ -2,11 +2,12 @@
 
 import { VaultSelectTags } from "@/components/vault/vault-select-tags";
 import { useTRPC } from "@/trpc/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-// Assuming the correct procedure to fetch a single document is 'getById'
-type Tag = NonNullable<RouterOutputs["documents"]["getById"]>["tags"][number];
+type Tag = NonNullable<
+  RouterOutputs["documents"]["getById"]
+>["documentTagAssignments"][number];
 
 interface Props {
   id: string;
@@ -58,9 +59,9 @@ export function DocumentTags({ id, tags }: Props) {
   return (
     <VaultSelectTags
       tags={tags.map((tag) => ({
-        value: tag.tag.id,
-        label: tag.tag.name,
-        id: tag.tag.id,
+        value: tag.documentTag.id,
+        label: tag.documentTag.name,
+        id: tag.documentTag.id,
       }))}
       onSelect={(tag) => {
         if (tag.id) {

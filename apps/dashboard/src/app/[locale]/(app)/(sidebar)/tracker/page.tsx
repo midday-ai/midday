@@ -6,7 +6,9 @@ import { TrackerSearchFilter } from "@/components/tracker-search-filter";
 import { loadSortParams } from "@/hooks/use-sort-params";
 import { loadTrackerFilterParams } from "@/hooks/use-tracker-filter-params";
 import { prefetch, trpc } from "@/trpc/server";
+import { Cookies } from "@/utils/constants";
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
 
@@ -22,17 +24,18 @@ export default async function Page(props: Props) {
   const searchParams = await props.searchParams;
   const filter = loadTrackerFilterParams(searchParams);
   const { sort } = loadSortParams(searchParams);
+  const weeklyCalendar = (await cookies()).get(Cookies.WeeklyCalendar);
 
   prefetch(
     trpc.trackerProjects.get.infiniteQueryOptions({
-      filter,
+      ...filter,
       sort,
     }),
   );
 
   return (
     <div>
-      <TrackerCalendar />
+      <TrackerCalendar weeklyCalendar={weeklyCalendar?.value === "true"} />
 
       <div className="mt-14 mb-6 flex items-center justify-between space-x-4">
         <h2 className="text-md font-medium">Projects</h2>

@@ -21,7 +21,7 @@ jobs:
         run: bun run lint
         working-directory: ./apps/engine
       - name: 🪐 Check TypeScript
-        run: bun run check:types
+        run: bun run typecheck
         working-directory: ./apps/engine
       - name: 🧪 Run unit tests
         run: bun test

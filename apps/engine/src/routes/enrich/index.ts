@@ -1,5 +1,5 @@
-import { GeneralErrorSchema } from "@/common/schema";
-import { enrichTransactionWithLLM } from "@/utils/enrich";
+import { GeneralErrorSchema } from "@engine/common/schema";
+import { enrichTransactionWithLLM } from "@engine/utils/enrich";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import type { Bindings } from "hono/types";
 import { EnrichBodySchema, EnrichSchema } from "./schema";
@@ -64,7 +64,6 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
         {
           error: "Internal server error",
           message: "Internal server error",
-          requestId: c.get("requestId"),
           code: "400",
         },
         400,

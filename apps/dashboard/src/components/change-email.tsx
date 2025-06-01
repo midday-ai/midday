@@ -31,7 +31,7 @@ export function ChangeEmail() {
 
   const form = useZodForm(formSchema, {
     defaultValues: {
-      email: user.email ?? undefined,
+      email: user?.email ?? undefined,
     },
   });
 

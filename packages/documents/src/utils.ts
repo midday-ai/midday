@@ -140,7 +140,19 @@ export function cleanText(text: string): string {
   // Using Unicode escapes to avoid eslint `no-control-regex` error
   // \u0000-\u001F corresponds to \x00-\x1F
   // \u007F-\u009F corresponds to \x7F-\x9F
-  let cleanedText = text.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+  // Remove control characters (C0 and C1 controls) using Unicode escapes to avoid eslint `no-control-regex` error
+  let cleanedText = text.replace(
+    new RegExp(
+      [
+        "[",
+        "\\u0000-\\u001F", // C0 controls
+        "\\u007F-\\u009F", // C1 controls
+        "]",
+      ].join(""),
+      "g",
+    ),
+    "",
+  );
 
   // Normalize spaces: replace multiple spaces, tabs, or line breaks with a single space
   cleanedText = cleanedText.replace(/\s+/g, " ").trim();

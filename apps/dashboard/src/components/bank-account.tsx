@@ -2,8 +2,8 @@
 
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
 import { getInitials } from "@/utils/format";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,16 +24,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import { Switch } from "@midday/ui/switch";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontal } from "lucide-react";
 import { Loader2 } from "lucide-react";
@@ -45,7 +38,7 @@ import { EditBankAccountModal } from "./modals/edit-bank-account-modal";
 type Props = {
   data: NonNullable<
     RouterOutputs["bankConnections"]["get"]
-  >[number]["accounts"][number];
+  >[number]["bankAccounts"][number];
 };
 
 export function BankAccount({ data }: Props) {
@@ -62,24 +55,7 @@ export function BankAccount({ data }: Props) {
     type: parseAsString,
   });
 
-  const {
-    id,
-    enabled,
-    manual,
-    connection,
-    type,
-    name,
-    balance,
-    currency,
-    error_retries,
-  } = data;
-
-  const hasError =
-    enabled &&
-    connection != null &&
-    connection.status !== "disconnected" &&
-    error_retries != null &&
-    error_retries > 0;
+  const { id, enabled, manual, type, name, balance, currency } = data;
 
   const deleteAccountMutation = useMutation(
     trpc.bankAccounts.delete.mutationOptions({
@@ -128,36 +104,9 @@ export function BankAccount({ data }: Props) {
         <div className="flex items-center justify-between w-full">
           <div className="flex flex-col">
             <p className="font-medium leading-none mb-1 text-sm">{name}</p>
-            {!hasError && (
-              <span className="text-xs text-[#878787] font-normal">
-                {type && t(`account_type.${type}`)}
-              </span>
-            )}
-            {hasError && (
-              <TooltipProvider delayDuration={70}>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <div className="flex items-center space-x-1">
-                      <Icons.Error size={14} className="text-[#FFD02B]" />
-                      <span className="text-xs text-[#FFD02B] font-normal">
-                        Connection issue
-                      </span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    className="px-3 py-1.5 text-xs max-w-[400px]"
-                    sideOffset={20}
-                    side="left"
-                  >
-                    There is a problem with this account, please reconnect the
-                    bank connection.
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
           </div>
 
-          {balance && balance > 0 ? (
+          {balance && currency ? (
             <span className="text-[#878787] text-sm">
               <FormatAmount amount={balance} currency={currency} />
             </span>

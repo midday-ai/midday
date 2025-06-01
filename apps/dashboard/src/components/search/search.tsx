@@ -33,7 +33,27 @@ interface SearchItem {
   id: string;
   type: string;
   title: string;
-  data?: Record<string, unknown>;
+  data?: {
+    name?: string;
+    email?: string;
+    invoice_number?: string;
+    status?: string;
+    amount?: number;
+    currency?: string;
+    date?: string;
+    display_name?: string;
+    file_name?: string;
+    file_path?: string[];
+    path_tokens?: string[];
+    title?: string;
+    metadata?: {
+      mimetype?: string;
+    };
+    template?: {
+      size?: string;
+    };
+    url?: string;
+  };
   action?: () => void;
 }
 
@@ -136,7 +156,6 @@ const SearchResultItemDisplay = ({
 
         icon = (
           <FilePreviewIcon
-            // @ts-expect-error - Unstructured data
             mimetype={item.data?.metadata?.mimetype}
             className="size-4 dark:text-[#666] text-primary"
           />
@@ -144,16 +163,19 @@ const SearchResultItemDisplay = ({
         resultDisplay = (
           <div className="flex items-center justify-between w-full">
             <span className="flex-grow truncate">
-              {/* @ts-expect-error - Unstructured data */}
-              {item.data.title ||
-                (item.data?.name as string)?.split("/").at(-1)}
+              {
+                (item.data?.title ||
+                  (item.data?.name as string)?.split("/").at(-1) ||
+                  "") as string
+              }
             </span>
             <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`?documentId=${item.id}`} />
               <DownloadButton
-                href={`/api/download/file?path=${item.data.path_tokens?.join("/")}&filename=${
-                  item.data.title ||
-                  (item.data?.name as string)?.split("/").at(-1)
+                href={`/api/download/file?path=${item.data?.path_tokens?.join("/")}&filename=${
+                  (item.data?.title ||
+                    (item.data?.name as string)?.split("/").at(-1) ||
+                    "") as string
                 }`}
               />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
@@ -206,7 +228,8 @@ const SearchResultItemDisplay = ({
           <div className="flex items-center w-full">
             <div className="flex-grow truncate flex gap-2 items-center">
               <span>{item.data.invoice_number as string}</span>
-              <InvoiceStatus status={item.data?.status as string} />
+              {/* @ts-expect-error - Unstructured data */}
+              <InvoiceStatus status={item.data?.status} />
             </div>
             <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`?invoiceId=${item.id}&type=details`} />
@@ -233,32 +256,27 @@ const SearchResultItemDisplay = ({
             <div className="flex-grow truncate flex gap-2 items-center">
               <span>
                 {
-                  (item.data.display_name ||
-                    (item.data.file_name as string)
-                      ?.split("/")
-                      .at(-1)) as string
+                  (item.data?.display_name ||
+                    (item.data?.file_name as string)?.split("/").at(-1) ||
+                    "") as string
                 }
               </span>
-              {/* @ts-expect-error - Unstructured data */}
-              {item.data.amount && item.data.currency && (
+              {item.data?.amount && item.data?.currency && (
                 <span className="text-xs text-muted-foreground">
                   <FormatAmount
-                    currency={item.data.currency as string}
-                    amount={item.data.amount as number}
+                    currency={item.data.currency}
+                    amount={item.data.amount}
                   />
                 </span>
               )}
               <span className="text-xs text-muted-foreground">
-                {item.data.date &&
-                  formatDate(item.data.date as string, dateFormat)}
+                {item.data?.date && formatDate(item.data.date, dateFormat)}
               </span>
             </div>
             <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`/inbox?inboxId=${item.id}`} />
               <DownloadButton
-                href={`/api/download/file?path=${item.data?.file_path?.join(
-                  "/",
-                )}&filename=${item.data?.file_name}`}
+                href={`/api/download/file?path=${item.data?.file_path?.join("/")}&filename=${item.data?.file_name || ""}`}
               />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
             </div>
@@ -304,20 +322,21 @@ const SearchResultItemDisplay = ({
         resultDisplay = (
           <div className="flex items-center justify-between w-full">
             <div className="flex-grow truncate flex gap-2 items-center">
-              <span>{item.data.name as string}</span>
+              <span>{(item.data?.name || "") as string}</span>
               <span className="text-xs text-muted-foreground">
                 <FormatAmount
-                  currency={item.data.currency as string}
-                  amount={item.data.amount as number}
+                  currency={item.data?.currency as string}
+                  amount={item.data?.amount as number}
                 />
               </span>
               <span className="text-xs text-muted-foreground">
-                {item.data.date &&
-                  formatDate(item.data.date as string, dateFormat)}
+                {item.data?.date
+                  ? formatDate(item.data.date, dateFormat)
+                  : null}
               </span>
             </div>
             <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
-              <CopyButton url={item.data?.url as string} />
+              <CopyButton path={item.data?.url as string} />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
             </div>
           </div>
@@ -482,7 +501,7 @@ export function Search() {
   });
 
   // Extract search results array from queryResult
-  const searchResults: SearchItem[] = queryResult?.data || [];
+  const searchResults: SearchItem[] = queryResult || [];
 
   const combinedData = useMemo(() => {
     // Type assertion for searchResults from DB to ensure they have actions if needed,
@@ -621,7 +640,7 @@ export function Search() {
                   <SearchResultItemDisplay
                     key={item.id}
                     item={item}
-                    dateFormat={user?.date_format ?? undefined}
+                    dateFormat={user?.dateFormat ?? undefined}
                   />
                 ))}
               </CommandGroup>

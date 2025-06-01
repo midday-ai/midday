@@ -1,6 +1,6 @@
-import { generateCronTag } from "@/utils/generate-cron-tag";
+import { initialBankSetupSchema } from "@jobs/schema";
+import { generateCronTag } from "@jobs/utils/generate-cron-tag";
 import { schedules, schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 import { bankSyncScheduler } from "../scheduler/bank-scheduler";
 import { syncConnection } from "../sync/connection";
 
@@ -8,10 +8,7 @@ import { syncConnection } from "../sync/connection";
 // runs the initial sync for transactions and balance
 export const initialBankSetup = schemaTask({
   id: "initial-bank-setup",
-  schema: z.object({
-    teamId: z.string().uuid(),
-    connectionId: z.string().uuid(),
-  }),
+  schema: initialBankSetupSchema,
   maxDuration: 120,
   queue: {
     concurrencyLimit: 50,

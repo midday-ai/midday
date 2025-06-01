@@ -12,7 +12,6 @@ import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import {
-  type InfiniteData,
   useMutation,
   useQueryClient,
   useSuspenseInfiniteQuery,
@@ -42,18 +41,18 @@ export function DataTable() {
   const { setParams, params } = useDocumentParams();
   const [, copy] = useCopyToClipboard();
 
-  const infiniteQueryOptions = trpc.documents.get.infiniteQueryOptions(
-    {
-      pageSize: 20,
-      filter,
-    },
-    {
-      getNextPageParam: ({ meta }) => meta?.cursor,
-    },
-  );
-
   const { data, fetchNextPage, hasNextPage, refetch, isFetching } =
-    useSuspenseInfiniteQuery(infiniteQueryOptions);
+    useSuspenseInfiniteQuery(
+      trpc.documents.get.infiniteQueryOptions(
+        {
+          pageSize: 20,
+          ...filter,
+        },
+        {
+          getNextPageParam: ({ meta }) => meta?.cursor,
+        },
+      ),
+    );
 
   const documents = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) ?? [];
@@ -76,7 +75,7 @@ export function DataTable() {
   useRealtime({
     channelName: "realtime_documents",
     table: "documents",
-    filter: `team_id=eq.${user?.team_id}`,
+    filter: `team_id=eq.${user?.teamId}`,
     onEvent: (payload) => {
       if (
         payload.eventType === "INSERT" ||
@@ -89,46 +88,18 @@ export function DataTable() {
 
   const deleteDocumentMutation = useMutation(
     trpc.documents.delete.mutationOptions({
-      onMutate: async ({ id }) => {
-        setParams({ documentId: null });
-
-        // Cancel outgoing refetches
-        await queryClient.cancelQueries({
-          queryKey: trpc.documents.get.infiniteQueryKey(),
-        });
-
-        // Get current data
-        const previousData = queryClient.getQueriesData({
-          queryKey: trpc.documents.get.infiniteQueryKey(),
-        });
-
-        // Optimistically update infinite query data
-        queryClient.setQueriesData(
-          { queryKey: trpc.documents.get.infiniteQueryKey() },
-          (old: InfiniteData<any>) => ({
-            pages: old.pages.map((page) => ({
-              ...page,
-              data: page.data.filter((item: any) => item.id !== id),
-            })),
-            pageParams: old.pageParams,
-          }),
-        );
-
-        return { previousData };
-      },
-      onError: (_, __, context) => {
-        // Restore previous data on error
-        if (context?.previousData) {
-          queryClient.setQueriesData(
-            { queryKey: trpc.documents.get.infiniteQueryKey() },
-            context.previousData,
-          );
-        }
-      },
-      onSettled: () => {
-        // Refetch after error or success
+      onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.queryKey(),
+        });
+
+        // Invalidate global search
+        queryClient.invalidateQueries({
+          queryKey: trpc.search.global.queryKey(),
         });
       },
     }),
@@ -158,7 +129,7 @@ export function DataTable() {
   };
 
   const files = useMemo(() => {
-    return documents.map((document) => document.path_tokens?.join("/") ?? "");
+    return documents.map((document) => document.pathTokens?.join("/") ?? "");
   }, [documents]);
 
   const showBottomBar = Object.keys(rowSelection).length > 0;

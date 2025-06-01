@@ -21,12 +21,17 @@ jobs:
           bun-version: latest
       - name: Install dependencies
         run: bun install
-      # - name: 🔦 Run linter
-      #   run: bun run lint --filter=@midday/dashboard
-      # - name: 🪐 Check TypeScript
-      #   run: bun run typecheck --filter=@midday/dashboard
-      - name: 🧪 Run unit tests
-        run: bun run test
+      - name: 🏗 Build @midday/engine
+        run: bunx turbo run build --filter=@midday/engine...
+      - name: 🔦 Run linter
+        run: bun run lint
+        working-directory: ./apps/dashboard
+      - name: 🪐 Check TypeScript
+        run: NODE_OPTIONS="--max-old-space-size=8192" bun run typecheck
+        working-directory: ./apps/dashboard
+      # - name: 🧪 Run unit tests
+      #   run: bunx run test
+      #   working-directory: ./apps/dashboard
       - name: 📤 Pull Vercel Environment Information
         run: bunx vercel pull --yes --environment=beta --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts

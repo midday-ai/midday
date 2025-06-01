@@ -1,7 +1,6 @@
-import { changeTeamAction } from "@/actions/change-team-action";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
-import type { RouterOutputs } from "@/trpc/routers/_app";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,18 +22,18 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { toast } from "@midday/ui/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef, FilterFn, Row } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 
 const teamNameFilterFn: FilterFn<RouterOutputs["team"]["list"][number]> = (
   row: Row<RouterOutputs["team"]["list"][number]>,
   _: string,
   filterValue: string,
 ) => {
-  const teamName = row.original.team?.name?.toLowerCase();
+  const teamName = row.original.name?.toLowerCase();
 
   return teamName?.includes(filterValue.toLowerCase()) ?? false;
 };
@@ -51,22 +50,21 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
         <div className="flex items-center space-x-4">
           <Avatar className="rounded-full w-8 h-8">
             <AvatarImageNext
-              src={row.original.team?.logo_url ?? ""}
-              alt={row.original.team?.name ?? ""}
+              src={row.original.logoUrl ?? ""}
+              alt={row.original.name ?? ""}
               width={32}
               height={32}
             />
             <AvatarFallback>
               <span className="text-xs">
-                {row.original.team.name?.charAt(0)?.toUpperCase()}
+                {row.original.name?.charAt(0)?.toUpperCase()}
               </span>
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="font-medium text-sm">
-              {row.original.team.name}
-            </span>
+            <span className="font-medium text-sm">{row.original.name}</span>
             <span className="text-sm text-[#606060]">
+              {/* @ts-expect-error */}
               {t(`roles.${row.original.role}`)}
             </span>
           </div>
@@ -78,6 +76,24 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
     id: "actions",
     cell: ({ row }) => {
       const trpc = useTRPC();
+      const queryClient = useQueryClient();
+      const router = useRouter();
+
+      const viewTeamMutation = useMutation(
+        trpc.user.update.mutationOptions({
+          onSuccess: () => {
+            queryClient.invalidateQueries();
+          },
+        }),
+      );
+
+      const manageTeamMutation = useMutation(
+        trpc.user.update.mutationOptions({
+          onSuccess: () => {
+            queryClient.invalidateQueries();
+          },
+        }),
+      );
 
       const leaveTeamMutation = useMutation(
         trpc.team.leave.mutationOptions({
@@ -92,20 +108,23 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
         }),
       );
 
-      const viewTeam = useAction(changeTeamAction);
-      const manageTeam = useAction(changeTeamAction);
-
       return (
         <div className="flex justify-end">
           <div className="flex space-x-3 items-center">
             <SubmitButton
               variant="outline"
-              isSubmitting={viewTeam.status === "executing"}
+              isSubmitting={viewTeamMutation.isPending}
               onClick={() =>
-                viewTeam.execute({
-                  teamId: row.original.team.id,
-                  redirectTo: "/",
-                })
+                viewTeamMutation.mutate(
+                  {
+                    teamId: row.original.id!,
+                  },
+                  {
+                    onSuccess: () => {
+                      router.push("/");
+                    },
+                  },
+                )
               }
             >
               View
@@ -113,12 +132,18 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
             {row.original.role === "owner" && (
               <SubmitButton
                 variant="outline"
-                isSubmitting={manageTeam.status === "executing"}
+                isSubmitting={manageTeamMutation.isPending}
                 onClick={() =>
-                  manageTeam.execute({
-                    teamId: row.original.team.id,
-                    redirectTo: "/settings",
-                  })
+                  manageTeamMutation.mutate(
+                    {
+                      teamId: row.original.id!,
+                    },
+                    {
+                      onSuccess: () => {
+                        router.push("/settings");
+                      },
+                    },
+                  )
                 }
               >
                 Manage
@@ -157,7 +182,7 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
                         disabled={leaveTeamMutation.isPending}
                         onClick={() =>
                           leaveTeamMutation.mutate({
-                            teamId: row.original.team.id,
+                            teamId: row.original.id!,
                           })
                         }
                       >

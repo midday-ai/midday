@@ -141,7 +141,7 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                           <FormItem className="flex-1">
                             <FormControl>
                               <VatInput
-                                value={field.value?.toString() ?? ""}
+                                value={field.value}
                                 name={
                                   form.watch(`categories.${index}.name`) ?? ""
                                 }

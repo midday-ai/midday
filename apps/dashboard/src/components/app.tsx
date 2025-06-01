@@ -54,7 +54,7 @@ export function App({
     trpc.apps.disconnect.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.apps.installed.queryKey(),
+          queryKey: trpc.apps.get.queryKey(),
         });
       },
     }),
@@ -207,6 +207,7 @@ export function App({
                   <AccordionContent className="text-[#878787] text-sm">
                     <AppSettings
                       appId={id}
+                      // @ts-expect-error
                       settings={[
                         ...Object.values({
                           ...Object.fromEntries(

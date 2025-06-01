@@ -1,13 +1,8 @@
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 
-interface Member {
-  id: string;
-  avatar_url?: string;
-  full_name?: string;
-}
-
 interface ProjectMembersProps {
-  members: Member[];
+  members: RouterOutputs["trackerProjects"]["get"]["data"][number]["users"];
 }
 
 export function ProjectMembers({ members }: ProjectMembersProps) {
@@ -17,14 +12,14 @@ export function ProjectMembers({ members }: ProjectMembersProps) {
         <div key={member.id} className="relative">
           <Avatar className="rounded-full w-5 h-5">
             <AvatarImageNext
-              src={member?.avatar_url}
-              alt={member?.full_name ?? ""}
+              src={member?.avatarUrl ?? ""}
+              alt={member?.fullName ?? ""}
               width={20}
               height={20}
             />
             <AvatarFallback>
               <span className="text-xs">
-                {member?.full_name?.charAt(0)?.toUpperCase()}
+                {member?.fullName?.charAt(0)?.toUpperCase()}
               </span>
             </AvatarFallback>
           </Avatar>

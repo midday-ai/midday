@@ -49,7 +49,7 @@ export const AvatarUpload = forwardRef<HTMLInputElement, Props>(
       });
 
       if (url) {
-        updateUserMutation.mutate({ avatar_url: url });
+        updateUserMutation.mutate({ avatarUrl: url });
         setAvatar(url);
         onUpload?.(url);
       }

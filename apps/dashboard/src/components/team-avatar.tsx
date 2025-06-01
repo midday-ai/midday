@@ -24,16 +24,16 @@ export function TeamAvatar() {
     const { files } = evt.target;
     const selectedFile = files as FileList;
 
-    const filename = stripSpecialCharacters(selectedFile[0]?.name);
+    const filename = stripSpecialCharacters(selectedFile[0]?.name ?? "");
 
     const { url } = await uploadFile({
       bucket: "avatars",
-      path: [data?.id, filename],
+      path: [data?.id ?? "", filename],
       file: selectedFile[0] as File,
     });
 
     if (url) {
-      updateTeam({ logo_url: url });
+      updateTeam({ logoUrl: url });
     }
   };
 
@@ -57,7 +57,7 @@ export function TeamAvatar() {
           ) : (
             <>
               <AvatarImage
-                src={data?.logo_url ?? undefined}
+                src={data?.logoUrl ?? undefined}
                 alt={data?.name ?? undefined}
                 width={64}
                 height={64}

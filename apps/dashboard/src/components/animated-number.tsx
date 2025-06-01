@@ -31,7 +31,7 @@ export function AnimatedNumber({
         maximumFractionDigits,
       }}
       willChange
-      locales={localeToUse}
+      locales={localeToUse ?? "en"}
     />
   );
 }

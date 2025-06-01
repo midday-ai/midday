@@ -12,16 +12,16 @@ export const convertHeic = schemaTask({
     preset: "large-1x",
   },
   schema: z.object({
-    file_path: z.array(z.string()),
+    filePath: z.array(z.string()),
   }),
-  run: async ({ file_path }) => {
+  run: async ({ filePath }) => {
     const supabase = createClient();
 
     console.log("Converting HEIC to JPG");
 
     const { data } = await supabase.storage
       .from("vault")
-      .download(file_path.join("/"));
+      .download(filePath.join("/"));
 
     if (!data) {
       throw new Error("File not found");
@@ -45,7 +45,7 @@ export const convertHeic = schemaTask({
     // Upload the converted image with .jpg extension
     const { data: uploadedData } = await supabase.storage
       .from("vault")
-      .upload(file_path.join("/"), image, {
+      .upload(filePath.join("/"), image, {
         contentType: "image/jpeg",
         upsert: true,
       });

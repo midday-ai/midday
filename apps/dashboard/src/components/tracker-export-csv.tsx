@@ -52,7 +52,7 @@ export function TrackerExportCSV({ name, projectId }: Props) {
 
     const formattedData = entries.map((item: TrackerEntry) => {
       const formattedItem: Record<string, string | null> = {
-        Date: format(new Date(item.date), user?.date_format ?? "P"),
+        Date: format(new Date(item.date), user?.dateFormat ?? "P"),
         Description: item.description ?? null,
         Time: secondsToHoursAndMinutes(item.duration ?? 0),
         Assigned: item.assigned?.full_name ?? null,

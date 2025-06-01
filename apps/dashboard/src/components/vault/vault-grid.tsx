@@ -29,7 +29,7 @@ export function VaultGrid() {
   const infiniteQueryOptions = trpc.documents.get.infiniteQueryOptions(
     {
       pageSize: 20,
-      filter,
+      ...filter,
     },
     {
       getNextPageParam: ({ meta }) => meta?.cursor,
@@ -56,6 +56,10 @@ export function VaultGrid() {
       queryKey: trpc.documents.get.queryKey(),
     });
 
+    queryClient.invalidateQueries({
+      queryKey: trpc.documents.get.infiniteQueryKey(),
+    });
+
     // Invalidate global search
     queryClient.invalidateQueries({
       queryKey: trpc.search.global.queryKey(),
@@ -65,7 +69,7 @@ export function VaultGrid() {
   useRealtime({
     channelName: "realtime_documents",
     table: "documents",
-    filter: `team_id=eq.${user?.team_id}`,
+    filter: `team_id=eq.${user?.teamId}`,
     onEvent: (payload) => {
       if (
         payload.eventType === "INSERT" ||
@@ -88,6 +92,7 @@ export function VaultGrid() {
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 3xl:grid-cols-6 gap-8">
         {documents.map((document) => (
+          // @ts-expect-error
           <VaultItem key={document.id} data={document} />
         ))}
       </div>

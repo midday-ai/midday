@@ -20,7 +20,7 @@ type Props = {
 
 export function VatAssistant({ name, onSelect, isFocused, value }: Props) {
   const [result, setResult] = useState<
-    { vat: number; country: string } | undefined
+    { vat: number; country?: string } | undefined
   >();
   const [isLoading, setLoading] = useState(false);
 

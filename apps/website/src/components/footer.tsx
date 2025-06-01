@@ -70,9 +70,6 @@ export function Footer() {
                 <li className="transition-colors text-[#878787]">
                   <Link href="/branding">Branding</Link>
                 </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/feature-request">Feature Request</Link>
-                </li>
               </ul>
             </div>
 

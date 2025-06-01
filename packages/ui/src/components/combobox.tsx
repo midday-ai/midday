@@ -1,7 +1,6 @@
 "use client";
 
 import { Command as CommandPrimitive } from "cmdk";
-import { Loader2 } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { cn } from "../utils";
 import {
@@ -11,10 +10,14 @@ import {
   CommandList,
 } from "./command";
 import { Icons } from "./icons";
+import { Spinner } from "./spinner";
 
-export type Option = Record<"id" | "name", string> & {
+export type Option = {
+  id: string;
+  name: string;
   component?: () => React.ReactNode;
-} & Record<string, string>;
+  data?: unknown;
+};
 
 type ComboboxProps = {
   options: Option[];
@@ -135,7 +138,7 @@ export const Combobox = ({
         />
 
         {isLoading && (
-          <Loader2 className="w-[16px] h-[16px] absolute right-2 animate-spin text-dark-gray" />
+          <Spinner className="w-[16px] h-[16px] absolute right-2 text-dark-gray" />
         )}
 
         {!isLoading && selected && onRemove && (

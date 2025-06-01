@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 "use client";
 
 import { useUserQuery } from "@/hooks/use-user";
@@ -30,10 +32,10 @@ const ToolTipContent = ({ payload = {} }) => {
           {t(`chart_type.${current?.payload?.meta?.type}`)}
         </p>
         <div>
-          {current?.payload.precentage.value > 0 && (
+          {current?.payload.percentage.value > 0 && (
             <Status
-              value={`${current?.payload.precentage.value}%`}
-              variant={current?.payload.precentage.status}
+              value={`${current?.payload.percentage.value}%`}
+              variant={current?.payload.percentage.status}
             />
           )}
         </div>

@@ -72,7 +72,7 @@ export function ExportBar() {
               onClick={() =>
                 execute({
                   transactionIds: ids,
-                  dateFormat: user?.date_format ?? undefined,
+                  dateFormat: user?.dateFormat ?? undefined,
                   locale: user?.locale ?? undefined,
                 })
               }
