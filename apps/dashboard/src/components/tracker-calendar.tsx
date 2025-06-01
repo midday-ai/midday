@@ -173,7 +173,7 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
       <div className="mt-8">
         <CalendarHeader
           totalDuration={data?.meta?.totalDuration}
-          selectedView={selectedView}
+          selectedView={selectedView as "week" | "month"}
         />
         {selectedView === "month" ? (
           <CalendarMonthView
