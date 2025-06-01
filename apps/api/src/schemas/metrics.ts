@@ -139,7 +139,7 @@ export const getRevenueResponseSchema = z
               description: "Date for the metric (ISO 8601)",
               example: "2023-01-31",
             }),
-            precentage: z
+            percentage: z
               .object({
                 value: z.number().openapi({
                   description: "Percentage change compared to previous period",
@@ -227,7 +227,7 @@ export const getProfitResponseSchema = z
               description: "Date for the metric (ISO 8601)",
               example: "2023-01-31",
             }),
-            precentage: z
+            percentage: z
               .object({
                 value: z.number().openapi({
                   description: "Percentage change compared to previous period",

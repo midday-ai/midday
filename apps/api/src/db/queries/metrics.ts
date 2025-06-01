@@ -76,7 +76,7 @@ export async function getMetrics(db: Database, params: GetMetricsParams) {
 
       return {
         date: record.date,
-        precentage: {
+        percentage: {
           value: Number(
             getPercentageIncrease(Math.abs(prevValue), Math.abs(recordValue)) ||
               0,
