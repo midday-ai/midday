@@ -14,6 +14,7 @@ import {
   createTeamInvites,
   declineTeamInvite,
   deleteTeamInvite,
+  getInvitesByEmail,
   getTeamInvites,
 } from "@api/db/queries/user-invites";
 import {
@@ -154,8 +155,12 @@ export const teamRouter = createTRPCRouter({
       return updateTeamMember(db, input);
     }),
 
-  invites: protectedProcedure.query(async ({ ctx: { db, session } }) => {
-    return getTeamInvites(db, session.user.email!);
+  teamInvites: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
+    return getTeamInvites(db, teamId!);
+  }),
+
+  invitesByEmail: protectedProcedure.query(async ({ ctx: { db, session } }) => {
+    return getInvitesByEmail(db, session.user.email!);
   }),
 
   invite: protectedProcedure
@@ -167,7 +172,7 @@ export const teamRouter = createTRPCRouter({
         teamId: teamId!,
         invites: input.map((invite) => ({
           ...invite,
-          invited_by: session.user.id,
+          invitedBy: session.user.id,
         })),
       });
 

@@ -9,7 +9,7 @@ import type { Table } from "@tanstack/react-table";
 import { useState } from "react";
 
 type Props = {
-  table?: Table<RouterOutputs["team"]["invites"][number]>;
+  table?: Table<RouterOutputs["team"]["teamInvites"][number]>;
 };
 
 export function DataTableHeader({ table }: Props) {

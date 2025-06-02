@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 type Props = {
-  invite: RouterOutputs["team"]["invites"][number];
+  invite: RouterOutputs["team"]["invitesByEmail"][number];
 };
 
 export function TeamInvite({ invite }: Props) {
@@ -45,7 +45,7 @@ export function TeamInvite({ invite }: Props) {
     trpc.team.declineInvite.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.team.invites.queryKey(),
+          queryKey: trpc.team.invitesByEmail.queryKey(),
         });
       },
     }),

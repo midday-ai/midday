@@ -16,7 +16,7 @@ export default async function Teams() {
   const queryClient = getQueryClient();
   const teams = await queryClient.fetchQuery(trpc.team.list.queryOptions());
   const invites = await queryClient.fetchQuery(
-    trpc.team.invites.queryOptions(),
+    trpc.team.invitesByEmail.queryOptions(),
   );
 
   prefetch(trpc.user.me.queryOptions());

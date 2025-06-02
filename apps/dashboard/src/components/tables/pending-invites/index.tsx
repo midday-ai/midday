@@ -20,7 +20,7 @@ export function DataTable() {
 
   const trpc = useTRPC();
   const { data } = useSuspenseQuery({
-    ...trpc.team.invites.queryOptions(),
+    ...trpc.team.teamInvites.queryOptions(),
   });
 
   const table = useReactTable({

@@ -2,7 +2,6 @@
 import { getAccessValidForDays } from "@midday/engine/gocardless/utils";
 import { addDays, addMonths } from "date-fns";
 import { nanoid } from "nanoid";
-import { getUserInviteQuery } from "../queries";
 import type { Client } from "../types";
 import { remove } from "../utils/storage";
 
@@ -30,47 +29,6 @@ export async function updateBankConnection(
     .eq("id", id)
     .select()
     .single();
-}
-
-export async function joinTeamByInviteCode(supabase: Client, code: string) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session?.user.email) {
-    return;
-  }
-
-  const { data: inviteData } = await getUserInviteQuery(supabase, {
-    code,
-    email: session.user.email,
-  });
-
-  if (inviteData) {
-    // Add user team
-    await supabase.from("users_on_team").insert({
-      user_id: session.user.id,
-      team_id: inviteData?.team_id,
-      role: inviteData.role,
-    });
-
-    // Set current team
-    const { data } = await supabase
-      .from("users")
-      .update({
-        team_id: inviteData?.team_id,
-      })
-      .eq("id", session.user.id)
-      .select()
-      .single();
-
-    // remove invite
-    await supabase.from("user_invites").delete().eq("code", code);
-
-    return data;
-  }
-
-  return null;
 }
 
 type UpdateTeamPlanData = {

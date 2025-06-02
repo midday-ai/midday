@@ -32,7 +32,6 @@ export const inviteTeamMembers = schemaTask({
           invitedByName: invite.invitedByName,
           email: invite.email,
           teamName: invite.teamName,
-          inviteCode: invite.inviteCode,
           ip,
           locale,
         }),

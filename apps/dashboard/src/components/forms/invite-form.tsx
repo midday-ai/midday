@@ -39,7 +39,7 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
     trpc.team.invite.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.team.invites.queryKey(),
+          queryKey: trpc.team.teamInvites.queryKey(),
         });
 
         onSuccess?.();
