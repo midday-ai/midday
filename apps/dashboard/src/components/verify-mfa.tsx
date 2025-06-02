@@ -1,6 +1,6 @@
 import { createClient } from "@midday/supabase/client";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export function VerifyMfa() {
@@ -8,6 +8,7 @@ export function VerifyMfa() {
   const [error, setError] = useState(false);
   const supabase = createClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const onComplete = async (code: string) => {
     setError(false);
@@ -60,7 +61,9 @@ export function VerifyMfa() {
         return;
       }
 
-      router.replace("/");
+      router.push(
+        `${window.location.origin}/${searchParams.get("return_to") || ""}`,
+      );
     }
   };
 

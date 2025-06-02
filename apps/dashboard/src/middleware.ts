@@ -25,6 +25,10 @@ export async function middleware(request: NextRequest) {
   // Create a new URL without the locale in the pathname
   const newUrl = new URL(pathnameWithoutLocale || "/", request.url);
 
+  const encodedSearchParams = `${newUrl?.pathname?.substring(1)}${
+    newUrl.search
+  }`;
+
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -35,10 +39,6 @@ export async function middleware(request: NextRequest) {
     newUrl.pathname !== "/login" &&
     !newUrl.pathname.includes("/i/")
   ) {
-    const encodedSearchParams = `${newUrl.pathname.substring(1)}${
-      newUrl.search
-    }`;
-
     const url = new URL("/login", request.url);
 
     if (encodedSearchParams) {
@@ -72,8 +72,14 @@ export async function middleware(request: NextRequest) {
       mfaData.nextLevel !== mfaData.currentLevel &&
       newUrl.pathname !== "/mfa/verify"
     ) {
+      const url = new URL("/mfa/verify", request.url);
+
+      if (encodedSearchParams) {
+        url.searchParams.append("return_to", encodedSearchParams);
+      }
+
       // Redirect to MFA verification if needed and not already there
-      return NextResponse.redirect(`${url.origin}/mfa/verify`);
+      return NextResponse.redirect(url);
     }
   }
 
