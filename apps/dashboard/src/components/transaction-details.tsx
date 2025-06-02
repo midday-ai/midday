@@ -379,6 +379,7 @@ export function TransactionDetails() {
         </Label>
 
         <SelectTags
+          key={data?.id}
           tags={data?.tags?.map((tag) => ({
             id: tag.id,
             label: tag.name!,
