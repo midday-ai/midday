@@ -221,7 +221,7 @@ export function TransactionsSearchFilter() {
     },
     {
       enableOnFormTags: true,
-      enabled: Boolean(prompt),
+      enabled: Boolean(prompt) && isFocused,
     },
   );
 

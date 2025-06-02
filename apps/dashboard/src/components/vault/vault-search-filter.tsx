@@ -30,6 +30,7 @@ export function VaultSearchFilter() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const trpc = useTRPC();
 
   const { filter, setFilter } = useDocumentFilterParams();
@@ -51,6 +52,7 @@ export function VaultSearchFilter() {
     },
     {
       enableOnFormTags: true,
+      enabled: Boolean(prompt) && isFocused,
     },
   );
 
@@ -131,6 +133,8 @@ export function VaultSearchFilter() {
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck="false"
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
           />
 
           <DropdownMenuTrigger asChild>
