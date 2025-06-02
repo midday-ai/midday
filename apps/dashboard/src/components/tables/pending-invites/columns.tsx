@@ -83,7 +83,7 @@ export const columns: ColumnDef<TeamInvite>[] = [
                   className="text-destructive"
                   onClick={() =>
                     deleteInvite.mutate({
-                      inviteId: row.original.id,
+                      id: row.original.id,
                     })
                   }
                 >
