@@ -90,9 +90,16 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
     }
   } else {
     logger.debug({
-      msg: "No team ID in context, using default DB routing",
+      msg: "No team ID in context, using primary DB",
       operationType: type,
     });
+
+    // When no team ID is present, always use primary DB
+    const dbWithPrimary = ctx.db as DatabaseWithPrimary;
+    if (dbWithPrimary.usePrimaryOnly) {
+      ctx.db = dbWithPrimary.usePrimaryOnly();
+    }
+    // If usePrimaryOnly doesn't exist, we're already using the primary DB
   }
 
   const start = performance.now();

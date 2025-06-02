@@ -72,7 +72,6 @@ export const inviteTeamMembersSchema = z.object({
       invitedByName: z.string(),
       invitedByEmail: z.string().email(),
       teamName: z.string(),
-      inviteCode: z.string(),
     }),
   ),
 });

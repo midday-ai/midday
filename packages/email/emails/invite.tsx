@@ -22,7 +22,6 @@ interface Props {
   invitedByEmail?: string;
   invitedByName?: string;
   teamName?: string;
-  inviteCode?: string;
   ip?: string;
   locale: string;
 }
@@ -34,12 +33,11 @@ export const InviteEmail = ({
   invitedByName = "Pontus Abrahamsson",
   email = "pontus@lostisland.co",
   teamName = "Acme Co",
-  inviteCode = "jnwe9203frnwefl239jweflasn1230oqef",
   ip = "204.13.186.218",
   locale = "en",
 }: Props) => {
   const { t } = getI18n({ locale });
-  const inviteLink = `${baseAppUrl}/teams/invite/${inviteCode}`;
+  const inviteLink = `${baseAppUrl}/teams`;
 
   return (
     <Html>

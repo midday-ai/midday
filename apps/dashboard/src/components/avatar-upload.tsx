@@ -3,6 +3,7 @@
 import { useUpload } from "@/hooks/use-upload";
 import { useTRPC } from "@/trpc/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { stripSpecialCharacters } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -15,10 +16,14 @@ type Props = {
   avatarUrl?: string | null;
   onUpload?: (url: string) => void;
   size?: number;
+  className?: string;
 };
 
 export const AvatarUpload = forwardRef<HTMLInputElement, Props>(
-  ({ userId, avatarUrl: initialAvatarUrl, size = 65, onUpload }, ref) => {
+  (
+    { userId, avatarUrl: initialAvatarUrl, size = 65, onUpload, className },
+    ref,
+  ) => {
     const [avatar, setAvatar] = useState(initialAvatarUrl);
     const inputRef = useRef<HTMLInputElement>(null);
     const trpc = useTRPC();
@@ -59,7 +64,10 @@ export const AvatarUpload = forwardRef<HTMLInputElement, Props>(
 
     return (
       <Avatar
-        className="rounded-full flex items-center justify-center bg-accent cursor-pointer border border-border"
+        className={cn(
+          "rounded-full flex items-center justify-center bg-accent cursor-pointer border border-border",
+          className,
+        )}
         style={{ width: size, height: size }}
         onClick={() => {
           if ("current" in fileInputRef && fileInputRef.current) {

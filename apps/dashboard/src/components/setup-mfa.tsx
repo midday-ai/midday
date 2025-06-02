@@ -14,16 +14,16 @@ function MfaStart({ setEnroll }: Props) {
   return (
     <>
       <div className="flex w-full flex-col relative">
-        <div className="pb-4 bg-gradient-to-r from-primary dark:via-primary dark:to-[#848484] to-[#000] inline-block text-transparent bg-clip-text">
-          <h1 className="font-medium pb-1 text-3xl">
-            Multi-factor <br />
-            authentication
-          </h1>
+        <div className="pb-4">
+          <div className="text-center">
+            <h1 className="text-lg mb-2 font-serif">
+              Multi-factor authentication
+            </h1>
+            <p className="text-[#878787] text-sm">
+              Add an additional layer of security to your account.
+            </p>
+          </div>
         </div>
-
-        <p className="font-medium pb-1 text-2xl text-[#606060]">
-          Add an additional layer of security to your account.
-        </p>
 
         <div className="pointer-events-auto mt-6 flex flex-col mb-4">
           <Button className="w-full" onClick={() => setEnroll(true)}>
@@ -53,7 +53,7 @@ export function SetupMfa() {
     <div>
       <div className="absolute left-5 top-4 md:left-10 md:top-10">
         <Link href="https://midday.ai">
-          <Icons.Logo />
+          <Icons.LogoSmall />
         </Link>
       </div>
 

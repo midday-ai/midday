@@ -22,23 +22,6 @@ export async function getUserQuery(supabase: Client, userId: string) {
     .throwOnError();
 }
 
-type GetUserInviteQueryParams = {
-  code: string;
-  email: string;
-};
-
-export async function getUserInviteQuery(
-  supabase: Client,
-  params: GetUserInviteQueryParams,
-) {
-  return supabase
-    .from("user_invites")
-    .select("*")
-    .eq("code", params.code)
-    .eq("email", params.email)
-    .single();
-}
-
 export async function getTeamByIdQuery(supabase: Client, teamId: string) {
   return supabase.from("teams").select("*").eq("id", teamId).single();
 }

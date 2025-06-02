@@ -36,9 +36,9 @@ export function TableRow({ row }: Props) {
 
   return (
     <BaseTableRow key={row.id} className="hover:bg-transparent">
-      <TableCell className="border-r-[0px] py-4">
+      <TableCell className="border-r-[0px] py-4 px-0">
         <div className="flex items-center space-x-4">
-          <Avatar className="rounded-full w-8 h-8">
+          <Avatar className="size-8 rounded-none">
             {row.logoUrl && (
               <AvatarImageNext
                 src={row.logoUrl}
@@ -47,7 +47,7 @@ export function TableRow({ row }: Props) {
                 height={32}
               />
             )}
-            <AvatarFallback>
+            <AvatarFallback className="rounded-none">
               <span className="text-xs">
                 {row?.name?.charAt(0)?.toUpperCase()}
               </span>
@@ -58,7 +58,7 @@ export function TableRow({ row }: Props) {
           </div>
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="px-0">
         <div className="flex justify-end">
           <div className="flex space-x-3 items-center">
             <SubmitButton

@@ -31,9 +31,8 @@ export async function getUserInvites(db: Database, email: string) {
 }
 
 type AcceptTeamInviteParams = {
+  id: string;
   userId: string;
-  email: string;
-  teamId: string;
 };
 
 export async function acceptTeamInvite(
@@ -41,13 +40,11 @@ export async function acceptTeamInvite(
   params: AcceptTeamInviteParams,
 ) {
   const inviteData = await db.query.userInvites.findFirst({
-    where: and(
-      eq(userInvites.teamId, params.teamId),
-      eq(userInvites.email, params.email),
-    ),
+    where: and(eq(userInvites.id, params.id)),
     columns: {
       id: true,
       role: true,
+      teamId: true,
     },
   });
 
@@ -59,28 +56,30 @@ export async function acceptTeamInvite(
     await tx.insert(usersOnTeam).values({
       userId: params.userId,
       role: inviteData.role,
-      teamId: params.teamId,
+      teamId: inviteData.teamId!,
     });
 
     // Delete the invite
     await tx.delete(userInvites).where(eq(userInvites.id, inviteData.id));
   });
+
+  return inviteData;
 }
 
 type DeclineTeamInviteParams = {
+  id: string;
   email: string;
-  teamId: string;
 };
 
 export async function declineTeamInvite(
   db: Database,
   params: DeclineTeamInviteParams,
 ) {
-  const { email, teamId } = params;
+  const { id, email } = params;
 
   return db
     .delete(userInvites)
-    .where(and(eq(userInvites.email, email), eq(userInvites.teamId, teamId)));
+    .where(and(eq(userInvites.id, id), eq(userInvites.email, email)));
 }
 
 export async function getTeamInvites(db: Database, teamId: string) {
@@ -104,6 +103,35 @@ export async function getTeamInvites(db: Database, teamId: string) {
         columns: {
           id: true,
           name: true,
+          logoUrl: true,
+        },
+      },
+    },
+  });
+}
+
+export async function getInvitesByEmail(db: Database, email: string) {
+  return db.query.userInvites.findMany({
+    where: eq(userInvites.email, email),
+    columns: {
+      id: true,
+      email: true,
+      code: true,
+      role: true,
+    },
+    with: {
+      user: {
+        columns: {
+          id: true,
+          fullName: true,
+          email: true,
+        },
+      },
+      team: {
+        columns: {
+          id: true,
+          name: true,
+          logoUrl: true,
         },
       },
     },
@@ -111,19 +139,19 @@ export async function getTeamInvites(db: Database, teamId: string) {
 }
 
 type DeleteTeamInviteParams = {
+  id: string;
   teamId: string;
-  inviteId: string;
 };
 
 export async function deleteTeamInvite(
   db: Database,
   params: DeleteTeamInviteParams,
 ) {
-  const { teamId, inviteId } = params;
+  const { id, teamId } = params;
 
   const [deleted] = await db
     .delete(userInvites)
-    .where(and(eq(userInvites.id, inviteId), eq(userInvites.teamId, teamId)))
+    .where(and(eq(userInvites.id, id), eq(userInvites.teamId, teamId)))
     .returning();
 
   return deleted;
@@ -134,7 +162,7 @@ type CreateTeamInvitesParams = {
   invites: {
     email: string;
     role: "owner" | "member";
-    invited_by: string;
+    invitedBy: string;
   }[];
 };
 
@@ -153,14 +181,14 @@ export async function createTeamInvites(
           .values({
             email: invite.email,
             role: invite.role,
-            invitedBy: invite.invited_by,
+            invitedBy: invite.invitedBy,
             teamId: teamId,
           })
           .onConflictDoUpdate({
             target: [userInvites.email, userInvites.teamId],
             set: {
               role: invite.role,
-              invitedBy: invite.invited_by,
+              invitedBy: invite.invitedBy,
             },
           })
           .returning({

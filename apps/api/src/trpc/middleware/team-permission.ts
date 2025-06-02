@@ -20,7 +20,7 @@ export const withTeamPermission = async <TReturn>(opts: {
     ctx: {
       session?: Session | null;
       db: Database;
-      teamId: string;
+      teamId: string | null;
     };
   }) => Promise<TReturn>;
 }) => {
@@ -54,30 +54,27 @@ export const withTeamPermission = async <TReturn>(opts: {
     });
   }
 
-  if (!result.teamId) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "User has no team assigned",
-    });
-  }
-
   const teamId = result.teamId;
-  const cacheKey = `user:${userId}:team:${teamId}`;
-  let hasAccess = cache.get(cacheKey);
 
-  if (hasAccess === undefined) {
-    hasAccess = result.usersOnTeams.some(
-      (membership) => membership.teamId === teamId,
-    );
+  // If teamId is null, user has no team assigned but this is now allowed
+  if (teamId !== null) {
+    const cacheKey = `user:${userId}:team:${teamId}`;
+    let hasAccess = cache.get(cacheKey);
 
-    cache.set(cacheKey, hasAccess);
-  }
+    if (hasAccess === undefined) {
+      hasAccess = result.usersOnTeams.some(
+        (membership) => membership.teamId === teamId,
+      );
 
-  if (!hasAccess) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "No permission to access this team",
-    });
+      cache.set(cacheKey, hasAccess);
+    }
+
+    if (!hasAccess) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "No permission to access this team",
+      });
+    }
   }
 
   return next({

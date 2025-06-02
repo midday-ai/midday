@@ -13,9 +13,10 @@ export const verifyOtpAction = actionClient
     z.object({
       token: z.string(),
       email: z.string(),
+      redirectTo: z.string(),
     }),
   )
-  .action(async ({ parsedInput: { email, token } }) => {
+  .action(async ({ parsedInput: { email, token, redirectTo } }) => {
     const supabase = await createClient();
 
     await supabase.auth.verifyOtp({
@@ -28,5 +29,5 @@ export const verifyOtpAction = actionClient
       expires: addYears(new Date(), 1),
     });
 
-    redirect("/");
+    redirect(redirectTo);
   });

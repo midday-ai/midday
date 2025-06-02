@@ -9,6 +9,7 @@ import { Input } from "@midday/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useAction } from "next-safe-action/hooks";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -27,6 +28,7 @@ export function OTPSignIn({ className }: Props) {
   const [isSent, setSent] = useState(false);
   const [email, setEmail] = useState<string>();
   const supabase = createClient();
+  const searchParams = useSearchParams();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,6 +54,7 @@ export function OTPSignIn({ className }: Props) {
     verifyOtp.execute({
       token,
       email,
+      redirectTo: `${window.location.origin}/${searchParams.get("return_to") || ""}`,
     });
   }
 

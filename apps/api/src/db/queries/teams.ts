@@ -68,11 +68,18 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
       throw new Error("Failed to create team.");
     }
 
+    // Add user to team membership
     await tx.insert(usersOnTeam).values({
       userId: params.userId,
       teamId: newTeam.id,
       role: "owner",
     });
+
+    // Set the user's teamId
+    await tx
+      .update(users)
+      .set({ teamId: newTeam.id })
+      .where(eq(users.id, params.userId));
 
     return newTeam.id;
   });

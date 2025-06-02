@@ -36,6 +36,14 @@ export default async function Layout({
     redirect("/login");
   }
 
+  if (!user.fullName) {
+    redirect("/setup");
+  }
+
+  if (!user.teamId) {
+    redirect("/teams");
+  }
+
   return (
     <HydrateClient>
       <div className="relative">

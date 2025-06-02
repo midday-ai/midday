@@ -13,7 +13,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef, FilterFn, Row } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 
-type TeamInvite = RouterOutputs["team"]["invites"][number];
+type TeamInvite = RouterOutputs["team"]["teamInvites"][number];
 
 const emailFilterFn: FilterFn<TeamInvite> = (
   row: Row<TeamInvite>,
@@ -58,7 +58,7 @@ export const columns: ColumnDef<TeamInvite>[] = [
         trpc.team.deleteInvite.mutationOptions({
           onSuccess: () => {
             queryClient.invalidateQueries({
-              queryKey: trpc.team.invites.queryKey(),
+              queryKey: trpc.team.teamInvites.queryKey(),
             });
           },
         }),
@@ -83,7 +83,7 @@ export const columns: ColumnDef<TeamInvite>[] = [
                   className="text-destructive"
                   onClick={() =>
                     deleteInvite.mutate({
-                      inviteId: row.original.id,
+                      id: row.original.id,
                     })
                   }
                 >
