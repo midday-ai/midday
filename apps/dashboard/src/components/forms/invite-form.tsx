@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useFieldArray } from "react-hook-form";
@@ -35,11 +36,19 @@ type InviteFormProps = {
 export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const inviteMutation = useMutation(
     trpc.team.invite.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.team.teamInvites.queryKey(),
+        });
+
+        toast({
+          title: "Invites sent",
+          description: "Invites sent to the team members",
+          variant: "success",
         });
 
         onSuccess?.();

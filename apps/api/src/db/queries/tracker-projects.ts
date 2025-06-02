@@ -282,95 +282,90 @@ export async function upsertTrackerProject(
 ) {
   const { tags: projectTags, teamId, ...projectData } = params;
 
-  // Begin transaction
-  return await db.transaction(async (tx) => {
-    // Upsert project using a valid insert type
-    const [result] = await tx
-      .insert(trackerProjects)
-      .values({
+  // Upsert project using a valid insert type
+  const [result] = await db
+    .insert(trackerProjects)
+    .values({
+      ...projectData,
+      teamId,
+      rate: projectData.rate !== undefined ? projectData.rate : undefined,
+      estimate:
+        projectData.estimate !== undefined ? projectData.estimate : undefined,
+    })
+    .onConflictDoUpdate({
+      target: trackerProjects.id,
+      set: {
         ...projectData,
         teamId,
         rate: projectData.rate !== undefined ? projectData.rate : undefined,
         estimate:
           projectData.estimate !== undefined ? projectData.estimate : undefined,
-      })
-      .onConflictDoUpdate({
-        target: trackerProjects.id,
-        set: {
-          ...projectData,
-          teamId,
-          rate: projectData.rate !== undefined ? projectData.rate : undefined,
-          estimate:
-            projectData.estimate !== undefined
-              ? projectData.estimate
-              : undefined,
-        },
-        where: projectData.id
-          ? and(
-              eq(trackerProjects.id, projectData.id),
-              eq(trackerProjects.teamId, teamId),
-            )
-          : undefined,
-      })
-      .returning({
-        id: trackerProjects.id,
-      });
-
-    if (!result) {
-      throw new Error("Failed to upsert tracker project");
-    }
-
-    const projectId = result.id;
-
-    // If we have tags to process
-    if (projectTags) {
-      // Get current tags for the project
-      const currentTags = await tx
-        .select({ tagId: trackerProjectTags.tagId })
-        .from(trackerProjectTags)
-        .where(eq(trackerProjectTags.trackerProjectId, projectId));
-
-      const currentTagIds = new Set(currentTags.map((t) => t.tagId));
-      const inputTagIds = new Set(projectTags.map((t) => t.id));
-
-      // Tags to insert (in input but not current)
-      const tagsToInsert = projectTags.filter(
-        (tag) => !currentTagIds.has(tag.id),
-      );
-
-      // Tag IDs to delete (in current but not input)
-      const tagIdsToDelete = currentTags
-        .filter((tag) => !inputTagIds.has(tag.tagId))
-        .map((t) => t.tagId);
-
-      // Perform inserts
-      if (tagsToInsert.length > 0) {
-        await tx.insert(trackerProjectTags).values(
-          tagsToInsert.map((tag) => ({
-            tagId: tag.id,
-            trackerProjectId: projectId,
-            teamId: params.teamId,
-          })),
-        );
-      }
-
-      // Perform deletes
-      if (tagIdsToDelete.length > 0) {
-        await tx
-          .delete(trackerProjectTags)
-          .where(
-            and(
-              eq(trackerProjectTags.trackerProjectId, projectId),
-              inArray(trackerProjectTags.tagId, tagIdsToDelete),
-            ),
-          );
-      }
-    }
-
-    return getTrackerProjectById(db, {
-      teamId,
-      id: projectId,
+      },
+      where: projectData.id
+        ? and(
+            eq(trackerProjects.id, projectData.id),
+            eq(trackerProjects.teamId, teamId),
+          )
+        : undefined,
+    })
+    .returning({
+      id: trackerProjects.id,
     });
+
+  if (!result) {
+    throw new Error("Failed to upsert tracker project");
+  }
+
+  const projectId = result.id;
+
+  // If we have tags to process
+  if (projectTags) {
+    // Get current tags for the project
+    const currentTags = await tx
+      .select({ tagId: trackerProjectTags.tagId })
+      .from(trackerProjectTags)
+      .where(eq(trackerProjectTags.trackerProjectId, projectId));
+
+    const currentTagIds = new Set(currentTags.map((t) => t.tagId));
+    const inputTagIds = new Set(projectTags.map((t) => t.id));
+
+    // Tags to insert (in input but not current)
+    const tagsToInsert = projectTags.filter(
+      (tag) => !currentTagIds.has(tag.id),
+    );
+
+    // Tag IDs to delete (in current but not input)
+    const tagIdsToDelete = currentTags
+      .filter((tag) => !inputTagIds.has(tag.tagId))
+      .map((t) => t.tagId);
+
+    // Perform inserts
+    if (tagsToInsert.length > 0) {
+      await tx.insert(trackerProjectTags).values(
+        tagsToInsert.map((tag) => ({
+          tagId: tag.id,
+          trackerProjectId: projectId,
+          teamId: params.teamId,
+        })),
+      );
+    }
+
+    // Perform deletes
+    if (tagIdsToDelete.length > 0) {
+      await tx
+        .delete(trackerProjectTags)
+        .where(
+          and(
+            eq(trackerProjectTags.trackerProjectId, projectId),
+            inArray(trackerProjectTags.tagId, tagIdsToDelete),
+          ),
+        );
+    }
+  }
+
+  return getTrackerProjectById(db, {
+    teamId,
+    id: projectId,
   });
 }
 

@@ -69,14 +69,13 @@ export function VerifyMfa() {
 
   return (
     <>
-      <div className="pb-4 bg-gradient-to-r from-primary dark:via-primary dark:to-[#848484] to-[#000] inline-block text-transparent bg-clip-text">
-        <h1 className="font-medium pb-1 text-3xl">Verify your identity.</h1>
-      </div>
-
-      <div className="mb-8">
-        <p className="font-medium pb-1 text-2xl text-[#606060]">
-          Please enter the code from your authenticator app.
-        </p>
+      <div className="pb-4">
+        <div className="text-center">
+          <h1 className="text-lg mb-2 font-serif">Verify your identity.</h1>
+          <p className="text-[#878787] text-sm mb-8">
+            Please enter the code from your authenticator app.
+          </p>
+        </div>
       </div>
 
       <div className="flex w-full mb-6">
@@ -96,7 +95,7 @@ export function VerifyMfa() {
         />
       </div>
 
-      <p className="text-xs text-[#878787]">
+      <p className="text-xs text-[#878787] text-center font-mono">
         Open your authenticator apps like 1Password, Authy, etc. to verify your
         identity.
       </p>

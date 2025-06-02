@@ -19,7 +19,7 @@ export default async function Teams() {
     trpc.team.invitesByEmail.queryOptions(),
   );
 
-  prefetch(trpc.user.me.queryOptions());
+  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
 
   // If no teams and no invites, redirect to create team
   if (!teams?.length && !invites?.length) {
@@ -44,10 +44,18 @@ export default async function Teams() {
         <div className="relative z-20 m-auto flex w-full max-w-[480px] flex-col">
           <div>
             <div className="text-center">
-              <h1 className="text-lg mb-2 font-serif">Welcome back</h1>
-              <p className="text-[#878787] text-sm mb-8">
-                Select team or create a new one.
-              </p>
+              <h1 className="text-lg mb-2 font-serif">
+                Welcome, {user?.fullName?.split(" ").at(0)}
+              </h1>
+              {invites?.length > 0 ? (
+                <p className="text-[#878787] text-sm mb-8">
+                  Join a team you’ve been invited to or create a new one.
+                </p>
+              ) : (
+                <p className="text-[#878787] text-sm mb-8">
+                  Select a team or create a new one.
+                </p>
+              )}
             </div>
           </div>
 
