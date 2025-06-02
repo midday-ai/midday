@@ -115,9 +115,9 @@ export async function getTransactions(
 
   // Status filtering - simplified logic using direct EXISTS subqueries
   if (statuses?.includes("uncompleted") || attachments === "exclude") {
-    // Transaction is NOT fulfilled (no attachments AND status is not completed)
+    // Transaction is NOT fulfilled (no attachments AND status is not completed) AND status is not excluded
     whereConditions.push(
-      sql`NOT (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`,
+      sql`NOT (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed') AND ${transactions.status} != 'excluded'`,
     );
   } else if (statuses?.includes("completed") || attachments === "include") {
     // Transaction is fulfilled (has attachments OR status is completed)
