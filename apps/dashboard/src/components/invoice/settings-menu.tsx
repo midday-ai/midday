@@ -56,7 +56,7 @@ const menuItems = [
     icon: Icons.Vat,
     label: "Add VAT",
     options: booleanOptions,
-    key: "includeVAT",
+    key: "includeVat",
   },
   {
     icon: Icons.CurrencyOutline,

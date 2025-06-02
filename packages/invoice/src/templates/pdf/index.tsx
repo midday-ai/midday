@@ -135,7 +135,7 @@ export async function PdfTemplate({
             discount={discount}
             discountLabel={template.discountLabel}
             includeDiscount={template.includeDiscount}
-            includeVAT={template.includeVat}
+            includeVat={template.includeVat}
             includeTax={template.includeTax}
             includeDecimals={template.includeDecimals}
             subtotalLabel={template.subtotalLabel}

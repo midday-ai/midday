@@ -15,7 +15,7 @@ interface SummaryProps {
   discount?: number | null;
   discountLabel: string;
   includeDiscount: boolean;
-  includeVAT: boolean;
+  includeVat: boolean;
   includeTax: boolean;
   includeDecimals: boolean;
   subtotalLabel: string;
@@ -36,7 +36,7 @@ export function Summary({
   discount,
   discountLabel,
   includeDiscount,
-  includeVAT,
+  includeVat,
   includeTax,
   includeDecimals,
   subtotalLabel,
@@ -82,7 +82,7 @@ export function Summary({
         </View>
       )}
 
-      {includeVAT && (
+      {includeVat && (
         <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
           <Text style={{ fontSize: 9, flex: 1 }}>
             {vatLabel} ({vatRate}%)

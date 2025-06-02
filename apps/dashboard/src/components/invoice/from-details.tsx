@@ -12,23 +12,11 @@ import { LabelInput } from "./label-input";
 export function FromDetails() {
   const { control, watch } = useFormContext();
   const id = watch("id");
-  const [editorContent, setEditorContent] = useState<
-    JSONContent | null | undefined
-  >(null);
-  const [debouncedContent] = useDebounceValue(editorContent, 400);
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
     trpc.invoiceTemplate.upsert.mutationOptions(),
   );
-
-  useEffect(() => {
-    if (debouncedContent !== null) {
-      updateTemplateMutation.mutate({
-        fromDetails: debouncedContent ? JSON.stringify(debouncedContent) : null,
-      });
-    }
-  }, [debouncedContent, updateTemplateMutation]);
 
   return (
     <div>
@@ -48,9 +36,11 @@ export function FromDetails() {
             // NOTE: This is a workaround to get the new content to render
             key={id}
             initialContent={field.value}
-            onChange={(content) => {
-              field.onChange(content);
-              setEditorContent(content);
+            onChange={field.onChange}
+            onBlur={(content) => {
+              updateTemplateMutation.mutate({
+                fromDetails: content ? JSON.stringify(content) : null,
+              });
             }}
             className="min-h-[90px] [&>div]:min-h-[90px]"
           />

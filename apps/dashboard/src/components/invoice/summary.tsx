@@ -50,9 +50,9 @@ export function Summary() {
     name: "template.vatRate",
   });
 
-  const includeVAT = useWatch({
+  const includeVat = useWatch({
     control,
-    name: "template.includeVAT",
+    name: "template.includeVat",
   });
 
   const includeDiscount = useWatch({
@@ -102,10 +102,10 @@ export function Summary() {
   }, [includeTax]);
 
   useEffect(() => {
-    if (!includeVAT) {
+    if (!includeVat) {
       setValue("template.vatRate", 0, { shouldValidate: true });
     }
-  }, [includeVAT]);
+  }, [includeVat]);
 
   useEffect(() => {
     if (!includeDiscount) {
@@ -151,7 +151,7 @@ export function Summary() {
         </div>
       )}
 
-      {includeVAT && (
+      {includeVat && (
         <div className="flex justify-between items-center py-1">
           <div className="flex items-center gap-1">
             <LabelInput
