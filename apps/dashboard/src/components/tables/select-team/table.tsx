@@ -11,7 +11,7 @@ type Props = {
 export function SelectTeamTable({ data }: Props) {
   return (
     <Table>
-      <TableBody>
+      <TableBody className="border-none">
         {data.map((row) => (
           <TableRow key={row.id} row={row} />
         ))}

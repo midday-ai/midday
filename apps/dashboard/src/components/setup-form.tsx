@@ -40,7 +40,7 @@ export function SetupForm() {
   const updateUserMutation = useMutation(
     trpc.user.update.mutationOptions({
       onSuccess: () => {
-        router.replace("/");
+        router.push("/");
       },
     }),
   );
@@ -59,13 +59,6 @@ export function SetupForm() {
             size={80}
             ref={uploadRef}
           />
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => uploadRef.current?.click()}
-          >
-            Upload
-          </Button>
         </div>
 
         <FormField

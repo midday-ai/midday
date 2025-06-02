@@ -3,7 +3,7 @@
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
-import { Button } from "@midday/ui/button";
+import { SubmitButton } from "@midday/ui/submit-button";
 import {
   useMutation,
   useQueryClient,
@@ -81,26 +81,28 @@ export function Invites() {
             </div>
             <div className="flex justify-end">
               <div className="flex space-x-3 items-center">
-                <Button
+                <SubmitButton
                   variant="outline"
                   onClick={() => {
                     declineInviteMutation.mutate({
-                      teamId: invite.team?.id!,
+                      id: invite.id,
                     });
                   }}
+                  isSubmitting={declineInviteMutation.isPending}
                 >
                   Decline
-                </Button>
-                <Button
+                </SubmitButton>
+                <SubmitButton
                   variant="outline"
                   onClick={() => {
                     acceptInviteMutation.mutate({
-                      teamId: invite.team?.id!,
+                      id: invite.id,
                     });
                   }}
+                  isSubmitting={acceptInviteMutation.isPending}
                 >
                   Accept
-                </Button>
+                </SubmitButton>
               </div>
             </div>
           </div>

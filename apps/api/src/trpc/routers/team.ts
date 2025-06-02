@@ -97,9 +97,8 @@ export const teamRouter = createTRPCRouter({
     .input(acceptTeamInviteSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
       return acceptTeamInvite(db, {
+        id: input.id,
         userId: session.user.id,
-        email: session.user.email!,
-        teamId: input.teamId,
       });
     }),
 
@@ -107,8 +106,8 @@ export const teamRouter = createTRPCRouter({
     .input(declineTeamInviteSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
       return declineTeamInvite(db, {
+        id: input.id,
         email: session.user.email!,
-        teamId: input.teamId,
       });
     }),
 
@@ -155,8 +154,8 @@ export const teamRouter = createTRPCRouter({
       return updateTeamMember(db, input);
     }),
 
-  invites: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
-    return getTeamInvites(db, teamId!);
+  invites: protectedProcedure.query(async ({ ctx: { db, session } }) => {
+    return getTeamInvites(db, session.user.email!);
   }),
 
   invite: protectedProcedure
@@ -195,7 +194,7 @@ export const teamRouter = createTRPCRouter({
     .mutation(async ({ ctx: { db, teamId }, input }) => {
       return deleteTeamInvite(db, {
         teamId: teamId!,
-        inviteId: input.inviteId,
+        id: input.id,
       });
     }),
 

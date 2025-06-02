@@ -28,10 +28,12 @@ export default async function Page() {
 
       <div className="flex min-h-screen justify-center items-center overflow-hidden p-6 md:p-0">
         <div className="relative z-20 m-auto flex w-full max-w-[380px] flex-col">
-          <h1 className="text-2xl font-medium pb-4">Update your account</h1>
-          <p className="text-sm text-[#878787] mb-8">
-            Add your name and an optional avatar.
-          </p>
+          <div className="text-center">
+            <h1 className="text-lg mb-2 font-serif">Update your account</h1>
+            <p className="text-[#878787] text-sm mb-8">
+              Add your name and an optional avatar.
+            </p>
+          </div>
 
           <HydrateClient>
             <SetupForm />

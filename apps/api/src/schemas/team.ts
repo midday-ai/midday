@@ -93,14 +93,14 @@ export const leaveTeamSchema = z.object({
 });
 
 export const acceptTeamInviteSchema = z.object({
-  teamId: z.string().openapi({
+  id: z.string().openapi({
     description: "Unique identifier of the team invitation to accept",
     example: "123e4567-e89b-12d3-a456-426614174000",
   }),
 });
 
 export const declineTeamInviteSchema = z.object({
-  teamId: z.string().openapi({
+  id: z.string().openapi({
     description: "Unique identifier of the team invitation to decline",
     example: "123e4567-e89b-12d3-a456-426614174000",
   }),
@@ -163,7 +163,7 @@ export const inviteTeamMembersSchema = z
   });
 
 export const deleteTeamInviteSchema = z.object({
-  inviteId: z.string().openapi({
+  id: z.string().openapi({
     description: "Unique identifier of the team invitation to delete",
     example: "invite-123abc456def",
   }),
