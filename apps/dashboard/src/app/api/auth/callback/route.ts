@@ -48,6 +48,11 @@ export async function GET(req: NextRequest) {
         channel: LogEvents.SignIn.channel,
       });
 
+      // If user is redirected from an invite, redirect to teams page to accept/decline the invite
+      if (returnTo?.startsWith("teams/invite/")) {
+        return NextResponse.redirect(`${requestUrl.origin}/teams`);
+      }
+
       // If user have no teams, redirect to team creation
       const { count } = await supabase
         .from("users_on_team")
