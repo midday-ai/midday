@@ -52,7 +52,7 @@ export function TransactionShortcuts() {
   );
 
   return (
-    <div className="absolute bottom-4 right-4 left-4 bg-background">
+    <div className="absolute bottom-4 right-4 left-4 bg-[#FAFAF9] dark:bg-[#121212]">
       <div className="flex justify-between">
         <div className="flex items-center gap-2">
           <span className="text-[10px] h-6 flex items-center justify-center text-[#666] border border-border px-2">

@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import type { ColumnDef } from "@tanstack/react-table";
 import { memo, useCallback } from "react";
 
@@ -61,31 +61,33 @@ const DescriptionCell = memo(
     categorySlug?: string | null;
   }) => (
     <div className="flex items-center space-x-2">
-      <TooltipTrigger asChild>
-        <span className={cn(categorySlug === "income" && "text-[#00C969]")}>
-          <div className="flex space-x-2 items-center">
-            <span className="line-clamp-1 text-ellipsis max-w-[100px] md:max-w-none">
-              {name}
-            </span>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className={cn(categorySlug === "income" && "text-[#00C969]")}>
+            <div className="flex space-x-2 items-center">
+              <span className="line-clamp-1 text-ellipsis max-w-[100px] md:max-w-none">
+                {name}
+              </span>
 
-            {status === "pending" && (
-              <div className="flex space-x-1 items-center border rounded-md text-[10px] py-1 px-2 h-[22px] text-[#878787]">
-                <span>Pending</span>
-              </div>
-            )}
-          </div>
-        </span>
-      </TooltipTrigger>
+              {status === "pending" && (
+                <div className="flex space-x-1 items-center border rounded-md text-[10px] py-1 px-2 h-[22px] text-[#878787]">
+                  <span>Pending</span>
+                </div>
+              )}
+            </div>
+          </span>
+        </TooltipTrigger>
 
-      {description && (
-        <TooltipContent
-          className="px-3 py-1.5 text-xs max-w-[380px]"
-          side="left"
-          sideOffset={10}
-        >
-          {description}
-        </TooltipContent>
-      )}
+        {description && (
+          <TooltipContent
+            className="px-3 py-1.5 text-xs max-w-[380px]"
+            side="right"
+            sideOffset={10}
+          >
+            {description}
+          </TooltipContent>
+        )}
+      </Tooltip>
     </div>
   ),
 );
