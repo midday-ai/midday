@@ -31,6 +31,7 @@ import { SelectCategory } from "./select-category";
 import { SelectTags } from "./select-tags";
 import { TransactionAttachments } from "./transaction-attachments";
 import { TransactionBankAccount } from "./transaction-bank-account";
+import { TransactionShortcuts } from "./transaction-shortcuts";
 
 export function TransactionDetails() {
   const trpc = useTRPC();
@@ -219,7 +220,7 @@ export function TransactionDetails() {
   }
 
   return (
-    <div className="h-[calc(100vh-80px)] scrollbar-hide overflow-auto">
+    <div className="h-[calc(100vh-80px)] scrollbar-hide overflow-auto pb-12">
       <div className="flex justify-between mb-8">
         <div className="flex-1 flex-col">
           {isLoading ? (
@@ -404,42 +405,45 @@ export function TransactionDetails() {
 
       <Accordion type="multiple" defaultValue={defaultValue}>
         <AccordionItem value="attachment">
-          <AccordionTrigger>Attachment</AccordionTrigger>
+          <AccordionTrigger>Attachments</AccordionTrigger>
           <AccordionContent className="select-text">
             <TransactionAttachments id={data?.id} data={data?.attachments} />
           </AccordionContent>
         </AccordionItem>
 
-        <div className="mt-6 mb-4">
-          <Label htmlFor="settings" className="mb-2 block font-medium text-md">
-            Exclude from analytics
-          </Label>
-          <div className="flex flex-row items-center justify-between">
-            <div className="space-y-0.5 pr-4">
-              <p className="text-xs text-muted-foreground">
-                Exclude this transaction from analytics like profit, expense and
-                revenue. This is useful for internal transfers between accounts
-                to avoid double-counting.
-              </p>
+        <AccordionItem value="general">
+          <AccordionTrigger>General</AccordionTrigger>
+          <AccordionContent className="select-text">
+            <div className="mb-4 border-b pb-4">
+              <Label className="mb-2 block font-medium text-md">
+                Exclude from analytics
+              </Label>
+              <div className="flex flex-row items-center justify-between">
+                <div className="space-y-0.5 pr-4">
+                  <p className="text-xs text-muted-foreground">
+                    Exclude this transaction from analytics like profit, expense
+                    and revenue. This is useful for internal transfers between
+                    accounts to avoid double-counting.
+                  </p>
+                </div>
+
+                <Switch
+                  checked={data?.internal ?? false}
+                  onCheckedChange={(checked) => {
+                    updateTransactionMutation.mutate({
+                      id: data?.id,
+                      internal: checked,
+                    });
+                  }}
+                />
+              </div>
             </div>
 
-            <Switch
-              checked={data?.internal ?? false}
-              onCheckedChange={(checked) => {
-                updateTransactionMutation.mutate({
-                  id: data?.id,
-                  internal: checked,
-                });
-              }}
-            />
-          </div>
-        </div>
-
-        <AccordionItem value="recurring">
-          <AccordionTrigger>Recurring</AccordionTrigger>
-          <AccordionContent>
             <div className="flex flex-row items-center justify-between">
               <div className="space-y-0.5">
+                <Label className="mb-2 block font-medium text-md">
+                  Mark as recurring
+                </Label>
                 <p className="text-xs text-muted-foreground">
                   Mark as recurring. Similar future transactions will be
                   automatically categorized and flagged as recurring.
@@ -553,6 +557,8 @@ export function TransactionDetails() {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+
+      <TransactionShortcuts />
     </div>
   );
 }
