@@ -22,7 +22,7 @@ export default async function Page() {
     <div>
       <div className="absolute left-5 top-4 md:left-10 md:top-10">
         <Link href="/">
-          <Icons.Logo />
+          <Icons.LogoSmall />
         </Link>
       </div>
 

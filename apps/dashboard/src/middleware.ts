@@ -50,13 +50,7 @@ export async function middleware(request: NextRequest) {
 
   // If authenticated, proceed with other checks
   if (session) {
-    // 2. Check user setup (full_name)
-    if (
-      newUrl.pathname !== "/setup" &&
-      newUrl.pathname !== "/teams/create" &&
-      newUrl.pathname !== "/teams" &&
-      !session?.user?.user_metadata?.full_name
-    ) {
+    if (newUrl.pathname !== "/teams/create" && newUrl.pathname !== "/teams") {
       // Check if the URL contains an invite code
       const inviteCodeMatch = newUrl.pathname.startsWith("/teams/invite/");
 
@@ -67,8 +61,6 @@ export async function middleware(request: NextRequest) {
           `${url.origin}${request.nextUrl.pathname}`,
         );
       }
-      // Redirect to setup if not on setup, create team, or invite page and full_name is missing
-      return NextResponse.redirect(`${url.origin}/setup`);
     }
 
     // 3. Check MFA Verification

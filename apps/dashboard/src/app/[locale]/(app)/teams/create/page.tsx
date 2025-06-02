@@ -16,7 +16,7 @@ export default function CreateTeam() {
       <header className="w-full absolute left-0 right-0 flex justify-between items-center">
         <div className="ml-5 mt-4 md:ml-10 md:mt-10">
           <Link href="/">
-            <Icons.Logo />
+            <Icons.LogoSmall />
           </Link>
         </div>
       </header>

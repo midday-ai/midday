@@ -78,20 +78,3 @@ export const protectedProcedure = t.procedure
       },
     });
   });
-
-// Procedure for operations that don't require a team (like creating first team)
-export const teamlessProcedure = t.procedure
-  .use(withPrimaryDbMiddleware)
-  .use(async (opts) => {
-    const { session } = opts.ctx;
-
-    if (!session) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-
-    return opts.next({
-      ctx: {
-        session,
-      },
-    });
-  });

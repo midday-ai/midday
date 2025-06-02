@@ -33,11 +33,7 @@ import {
   updateTeamByIdSchema,
   updateTeamMemberSchema,
 } from "@api/schemas/team";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  teamlessProcedure,
-} from "@api/trpc/init";
+import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import type {
   DeleteTeamPayload,
   InviteTeamMembersPayload,
@@ -68,7 +64,7 @@ export const teamRouter = createTRPCRouter({
     return getTeamsByUserId(db, session.user.id);
   }),
 
-  create: teamlessProcedure
+  create: protectedProcedure
     .input(createTeamSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
       return createTeam(db, { ...input, userId: session.user.id });
