@@ -4,17 +4,12 @@
   "version": "0.1.0",
   "identifier": "ai.midday.app",
   "app": {
-    "windows": [
-      {
-        "title": "Midday",
-        "width": 1450,
-        "height": 900,
-        "minWidth": 1450,
-        "minHeight": 900
-      }
-    ],
+    "withGlobalTauri": true,
     "security": {
-      "csp": null
+      "csp": null,
+      "dangerousDisableAssetCspModification": true,
+      "freezePrototype": false,
+      "capabilities": ["default"]
     }
   },
   "bundle": {

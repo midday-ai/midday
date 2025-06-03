@@ -1,0 +1,12 @@
+{
+  "name": "@midday/desktop-client",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "@tauri-apps/api": "^2.5.0"
+  },
+  "exports": {
+    "./platform": "./src/platform.ts"
+  }
+}

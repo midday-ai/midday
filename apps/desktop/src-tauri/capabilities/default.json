@@ -5,6 +5,22 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "opener:default"
-  ]
+    "core:webview:default",
+    "opener:default",
+    "core:window:default",
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-start-dragging",
+    "core:app:default",
+    "core:event:default"
+  ],
+  "remote": {
+    "urls": [
+      "http://localhost:3001/**",
+      "https://beta.midday.ai/**",
+      "https://app.midday.ai/**"
+    ]
+  },
+  "platforms": ["linux", "macOS", "windows"]
 }
