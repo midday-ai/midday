@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
 import { DesktopHeader } from "@/components/desktop-header";
+import { DesktopPageLoaded } from "@/components/desktop-page-loaded";
 import { isDesktopApp } from "@/utils/desktop";
 import { Provider as Analytics } from "@midday/events/client";
 import { Toaster } from "@midday/ui/toaster";
@@ -87,15 +88,19 @@ export default async function Layout({
   const isDesktop = await isDesktopApp();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      className={cn(isDesktop && "desktop")}
+    >
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable} ${lora.variable} font-sans`,
           "whitespace-pre-line overscroll-none antialiased",
-          isDesktop && "desktop",
         )}
       >
         <DesktopHeader />
+        <DesktopPageLoaded />
 
         <NuqsAdapter>
           <Providers locale={locale}>{children}</Providers>
