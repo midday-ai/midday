@@ -2,7 +2,7 @@
 
 import { isDesktopApp } from "@midday/desktop-client/platform";
 import { cn } from "@midday/ui/cn";
-import { platform } from "@todesktop/client-core";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 export function OpenURL({
   href,
@@ -11,7 +11,7 @@ export function OpenURL({
 }: { href: string; children: React.ReactNode; className?: string }) {
   const handleOnClick = () => {
     if (isDesktopApp()) {
-      platform.os.openURL(href);
+      openUrl(href);
     } else {
       window.open(href, "_blank");
     }
