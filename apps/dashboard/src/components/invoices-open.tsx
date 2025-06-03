@@ -7,7 +7,11 @@ import { InvoiceSummary } from "./invoice-summary";
 
 export function InvoicesOpen() {
   const trpc = useTRPC();
-  const { data } = useSuspenseQuery(trpc.invoice.invoiceSummary.queryOptions());
+  const { data } = useSuspenseQuery(
+    trpc.invoice.invoiceSummary.queryOptions({
+      status: "unpaid",
+    }),
+  );
   const { setFilter } = useInvoiceFilterParams();
 
   const totalInvoiceCount = data?.reduce(

@@ -40,7 +40,9 @@ export default async function Page(props: Props) {
       ...filter,
       sort,
     }),
-    trpc.invoice.invoiceSummary.queryOptions(),
+    trpc.invoice.invoiceSummary.queryOptions({
+      status: "unpaid",
+    }),
     trpc.invoice.invoiceSummary.queryOptions({
       status: "paid",
     }),
