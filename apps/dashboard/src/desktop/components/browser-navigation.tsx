@@ -1,11 +1,16 @@
 "use client";
 
+import { isDesktopApp } from "@midday/desktop-client/platform";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { webContents } from "@todesktop/client-core";
 import { useEffect, useState } from "react";
 
 export function BrowserNavigation() {
+  if (!isDesktopApp()) {
+    return null;
+  }
+
   const [canGoForward, setCanGoForward] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
 

@@ -1,6 +1,12 @@
 # Midday Desktop App
 
-A Tauri-based desktop application for Midday that supports multiple environments.
+A Tauri-based desktop application for Midday that supports multiple environments with a native transparent titlebar on macOS.
+
+## Features
+
+- **Environment Support**: Development, Staging, and Production environments
+- **Transparent Titlebar**: Native macOS transparent titlebar with traffic light buttons
+- **Responsive Design**: Minimum window size of 1450x900 for optimal experience
 
 ## Environment Configuration
 
@@ -70,4 +76,10 @@ $env:MIDDAY_ENV="staging"; tauri dev
 
 # Windows (Command Prompt)
 set MIDDAY_ENV=staging && tauri dev
-``` 
+```
+
+## Window Features
+
+- **Transparent Titlebar**: On macOS, the app uses a transparent titlebar while keeping the native traffic light buttons (red, yellow, green)
+- **Minimum Size**: 1450x900 pixels for optimal user experience
+- **Responsive**: Window can be resized but maintains minimum dimensions 
