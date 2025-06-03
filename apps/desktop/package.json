@@ -8,18 +8,19 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "tauri:dev": "MIDDAY_ENV=development tauri dev",
-    "tauri:staging": "MIDDAY_ENV=staging tauri dev",
+    "tauri:dev": "MIDDAY_ENV=development tauri dev --config src-tauri/tauri.dev.conf.json",
+    "tauri:staging": "MIDDAY_ENV=staging tauri dev --config src-tauri/tauri.staging.conf.json",
     "tauri:prod": "MIDDAY_ENV=production tauri dev",
-    "tauri:build": "tauri build",
-    "tauri:build:staging": "MIDDAY_ENV=staging tauri build",
-    "tauri:build:prod": "MIDDAY_ENV=production tauri build"
+    "tauri:build:dev": "tauri build --config src-tauri/tauri.dev.conf.json",
+    "tauri:build:staging": "tauri build --config src-tauri/tauri.staging.conf.json",
+    "tauri:build:prod": "tauri build"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-opener": "^2"
+    "@tauri-apps/plugin-deep-link": "~2",
+    "@tauri-apps/plugin-opener": "^2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.1",

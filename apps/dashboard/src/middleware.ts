@@ -37,7 +37,9 @@ export async function middleware(request: NextRequest) {
   if (
     !session &&
     newUrl.pathname !== "/login" &&
-    !newUrl.pathname.includes("/i/")
+    !newUrl.pathname.includes("/i/") &&
+    !newUrl.pathname.includes("/verify") &&
+    !newUrl.pathname.includes("/all-done")
   ) {
     const url = new URL("/login", request.url);
 
