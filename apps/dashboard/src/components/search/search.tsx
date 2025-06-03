@@ -599,7 +599,7 @@ export function Search() {
   return (
     <Command
       shouldFilter={false}
-      className="overflow-hidden p-0 relative w-full bg-background backdrop-filter dark:border-[#2C2C2C] backdrop-blur-lg dark:bg-[#151515]/[99] h-auto border border-border"
+      className="overflow-hidden p-0 relative w-full bg-background backdrop-filter dark:border-[#2C2C2C] backdrop-blur-lg desktop-search:backdrop-blur-none dark:bg-[#151515]/[99] desktop-search:bg-transparent desktop-search:border-none h-auto border border-border"
     >
       <div className="border-b border-border relative">
         <CommandInput
