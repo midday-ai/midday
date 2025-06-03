@@ -14,21 +14,21 @@ export function BrowserNavigation() {
   const [canGoForward, setCanGoForward] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
 
-  useEffect(() => {
-    webContents.on("did-navigate", async () => {
-      if (await webContents.canGoForward()) {
-        setCanGoForward(true);
-      } else {
-        setCanGoForward(false);
-      }
+  // useEffect(() => {
+  //   webContents.on("did-navigate", async () => {
+  //     if (await webContents.canGoForward()) {
+  //       setCanGoForward(true);
+  //     } else {
+  //       setCanGoForward(false);
+  //     }
 
-      if (await webContents.canGoBack()) {
-        setCanGoBack(true);
-      } else {
-        setCanGoBack(false);
-      }
-    });
-  }, []);
+  //     if (await webContents.canGoBack()) {
+  //       setCanGoBack(true);
+  //     } else {
+  //       setCanGoBack(false);
+  //     }
+  //   });
+  // }, []);
 
   const handleOnNavigate = (dir: "back" | "forward") => {
     if (dir === "back") {
