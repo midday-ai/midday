@@ -1,5 +1,9 @@
 import { Search } from "@/components/search/search";
 
 export default function Page() {
-  return <Search />;
+  return (
+    <div className="desktop-search">
+      <Search />
+    </div>
+  );
 }

@@ -1,5 +1,5 @@
 use std::env;
-use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder, Position, PhysicalPosition};
 use tauri_plugin_deep_link::DeepLinkExt;
 
 #[cfg(target_os = "macos")]
@@ -49,23 +49,77 @@ fn toggle_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error
                     println!("🔍 Search window is visible, hiding it");
                     window.hide()?;
                 } else {
-                    // Window exists but is hidden, show and focus it
-                    println!("🔍 Search window is hidden, showing it");
+                    // Window exists but is hidden, show and focus it on current monitor
+                    println!("🔍 Search window is hidden, showing it on current monitor");
+                    position_window_on_current_monitor(app, &window)?;
                     window.show()?;
-                    window.set_focus()?;
                 }
             }
             Err(e) => {
                 eprintln!("⚠️ Failed to check window visibility: {}", e);
                 // Fallback: try to show the window
+                position_window_on_current_monitor(app, &window)?;
                 window.show()?;
-                window.set_focus()?;
             }
         }
         return Ok(());
     }
 
     // Window doesn't exist, create it
+    create_new_search_window(app)
+}
+
+fn position_window_on_current_monitor(app: &tauri::AppHandle, window: &tauri::WebviewWindow) -> Result<(), Box<dyn std::error::Error>> {
+    // Get cursor position to determine current monitor
+    if let Ok(cursor_position) = app.cursor_position() {
+        // Get all monitors
+        if let Ok(monitors) = app.available_monitors() {
+            // Find which monitor contains the cursor
+            let current_monitor = monitors.iter().find(|monitor| {
+                let pos = monitor.position();
+                let size = monitor.size();
+                cursor_position.x >= pos.x as f64 
+                    && cursor_position.x < (pos.x + size.width as i32) as f64
+                    && cursor_position.y >= pos.y as f64 
+                    && cursor_position.y < (pos.y + size.height as i32) as f64
+            });
+
+            if let Some(monitor) = current_monitor {
+                let monitor_size = monitor.size();
+                let monitor_position = monitor.position();
+                
+                // Get the actual window size to ensure accurate centering
+                let window_size = window.outer_size().unwrap_or(tauri::PhysicalSize { width: 720, height: 450 });
+                
+                // Calculate center position on the monitor with slight offset for system UI
+                let center_x = monitor_position.x + (monitor_size.width as i32 / 2) - (window_size.width as i32 / 2);
+                let center_y = monitor_position.y + (monitor_size.height as i32 / 2) - (window_size.height as i32 / 2);
+                
+                // Adjust for macOS menu bar (typically 25-30px) and other system UI
+                #[cfg(target_os = "macos")]
+                let center_y = center_y + 15; // Slight downward adjustment for menu bar
+                
+                window.set_position(Position::Physical(PhysicalPosition {
+                    x: center_x,
+                    y: center_y,
+                }))?;
+                
+                println!("✅ Positioned search window on monitor {}x{} at center ({}, {}) with window size {}x{}", 
+                    monitor_size.width, monitor_size.height, center_x, center_y, 
+                    window_size.width, window_size.height);
+                return Ok(());
+            }
+        }
+    }
+    
+    // Fallback to default center if monitor detection fails
+    window.center()?;
+    println!("⚠️ Using fallback center positioning");
+    Ok(())
+}
+
+fn create_new_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+    let search_window_label = "search";
     let app_url = get_app_url();
     let search_url = format!("{}/desktop/search", app_url);
 
@@ -77,10 +131,9 @@ fn toggle_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error
         WebviewUrl::External(tauri::Url::parse(&search_url)?),
     )
     .title("Midday Search")
-    .inner_size(800.0, 500.0)
-    .min_inner_size(700.0, 400.0)
+    .inner_size(720.0, 450.0)
+    .min_inner_size(720.0, 450.0)
     .resizable(true)
-    .center()
     .user_agent("Mozilla/5.0 (compatible; Midday Desktop App)")
     .transparent(true)
     .always_on_top(true)
@@ -98,6 +151,9 @@ fn toggle_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error
         .shadow(false)
         .build()?;
 
+    // Position window on current monitor
+    position_window_on_current_monitor(app, &search_window)?;
+
     // Close window when clicking outside (losing focus)
     let window_clone = search_window.clone();
     search_window.on_window_event(move |event| {
@@ -110,7 +166,6 @@ fn toggle_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error
     });
 
     search_window.show()?;
-    search_window.set_focus()?;
 
     println!("✅ Search window created and shown");
     Ok(())
