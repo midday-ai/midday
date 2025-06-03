@@ -273,7 +273,7 @@ export function Header() {
                 {children && (
                   <div
                     className={cn(
-                      "absolute top-[48px] left-0 -mx-[calc(var(--pixel-ratio)_*_2px)] bg-[#fff] dark:bg-[#121212] flex h-0 group-hover:h-[250px] overflow-hidden transition-all duration-300 ease-in-out border-l border-r",
+                      "absolute top-[48px] -inset-x-px bg-[#fff] dark:bg-[#121212] flex h-0 group-hover:h-[250px] overflow-hidden transition-all duration-300 ease-in-out border-l border-r",
                       hidden && "hidden",
                     )}
                   >
