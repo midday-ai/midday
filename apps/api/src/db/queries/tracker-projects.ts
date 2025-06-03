@@ -321,7 +321,7 @@ export async function upsertTrackerProject(
   // If we have tags to process
   if (projectTags) {
     // Get current tags for the project
-    const currentTags = await tx
+    const currentTags = await db
       .select({ tagId: trackerProjectTags.tagId })
       .from(trackerProjectTags)
       .where(eq(trackerProjectTags.trackerProjectId, projectId));
@@ -341,7 +341,7 @@ export async function upsertTrackerProject(
 
     // Perform inserts
     if (tagsToInsert.length > 0) {
-      await tx.insert(trackerProjectTags).values(
+      await db.insert(trackerProjectTags).values(
         tagsToInsert.map((tag) => ({
           tagId: tag.id,
           trackerProjectId: projectId,
@@ -352,7 +352,7 @@ export async function upsertTrackerProject(
 
     // Perform deletes
     if (tagIdsToDelete.length > 0) {
-      await tx
+      await db
         .delete(trackerProjectTags)
         .where(
           and(
