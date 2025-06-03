@@ -7,7 +7,13 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "tauri:dev": "MIDDAY_ENV=development tauri dev",
+    "tauri:staging": "MIDDAY_ENV=staging tauri dev",
+    "tauri:prod": "MIDDAY_ENV=production tauri dev",
+    "tauri:build": "tauri build",
+    "tauri:build:staging": "MIDDAY_ENV=staging tauri build",
+    "tauri:build:prod": "MIDDAY_ENV=production tauri build"
   },
   "dependencies": {
     "react": "^18.3.1",
