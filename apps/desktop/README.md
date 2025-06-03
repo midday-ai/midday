@@ -1,7 +1,73 @@
-# Tauri + React + Typescript
+# Midday Desktop App
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+A Tauri-based desktop application for Midday that supports multiple environments.
 
-## Recommended IDE Setup
+## Environment Configuration
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+The desktop app supports three environments, each loading a different URL:
+
+- **Development**: `http://localhost:3001`
+- **Staging**: `https://beta.midday.ai`
+- **Production**: `https://app.midday.ai`
+
+## Running the App
+
+### Development Mode
+```bash
+# Run in development environment (loads localhost:3001)
+bun run tauri:dev
+```
+
+### Staging Mode
+```bash
+# Run in staging environment (loads beta.midday.ai)
+bun run tauri:staging
+```
+
+### Production Mode
+```bash
+# Run in production environment (loads app.midday.ai)
+bun run tauri:prod
+```
+
+## Building the App
+
+### Development Build
+```bash
+bun run tauri:build
+```
+
+### Staging Build
+```bash
+bun run tauri:build:staging
+```
+
+### Production Build
+```bash
+bun run tauri:build:prod
+```
+
+## Environment Variable
+
+The environment is controlled by the `MIDDAY_ENV` environment variable:
+
+- `development` or `dev` → `http://localhost:3001`
+- `staging` → `https://beta.midday.ai`
+- `production` or `prod` → `https://app.midday.ai`
+
+If no environment is specified, it defaults to development mode.
+
+## Manual Environment Setting
+
+You can also set the environment manually:
+
+```bash
+# macOS/Linux
+MIDDAY_ENV=staging tauri dev
+
+# Windows (PowerShell)
+$env:MIDDAY_ENV="staging"; tauri dev
+
+# Windows (Command Prompt)
+set MIDDAY_ENV=staging && tauri dev
+``` 

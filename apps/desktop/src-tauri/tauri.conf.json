@@ -3,18 +3,14 @@
   "productName": "midday",
   "version": "0.1.0",
   "identifier": "ai.midday.app",
-  "build": {
-    "beforeDevCommand": "bun run dev",
-    "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "bun run build",
-    "frontendDist": "../dist"
-  },
   "app": {
     "windows": [
       {
-        "title": "midday",
-        "width": 800,
-        "height": 600
+        "title": "Midday",
+        "width": 1450,
+        "height": 900,
+        "minWidth": 1450,
+        "minHeight": 900
       }
     ],
     "security": {
