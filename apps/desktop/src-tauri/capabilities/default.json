@@ -2,7 +2,9 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     "core:webview:default",
@@ -15,7 +17,12 @@
     "core:window:allow-start-dragging",
     "core:window:allow-set-focus",
     "core:app:default",
-    "core:event:default"
+    "core:event:default",
+    "global-shortcut:default",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister",
+    "global-shortcut:allow-is-registered",
+    "global-shortcut:default"
   ],
   "remote": {
     "urls": [
@@ -24,5 +31,9 @@
       "https://app.midday.ai/**"
     ]
   },
-  "platforms": ["linux", "macOS", "windows"]
+  "platforms": [
+    "linux",
+    "macOS",
+    "windows"
+  ]
 }
