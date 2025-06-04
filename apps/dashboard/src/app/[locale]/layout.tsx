@@ -103,7 +103,9 @@ export default async function Layout({
         <DesktopPageLoaded />
 
         <NuqsAdapter>
-          <Providers locale={locale}>{children}</Providers>
+          <div className="wrapper">
+            <Providers locale={locale}>{children}</Providers>
+          </div>
           <Toaster />
           <Analytics />
         </NuqsAdapter>

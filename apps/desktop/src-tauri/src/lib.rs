@@ -22,9 +22,9 @@ fn show_window(window: tauri::Window) -> Result<(), String> {
     };
 
     // Re-enable shadow on macOS
-    if let Err(e) = main_window.set_shadow(true) {
-        eprintln!("Failed to set shadow: {}", e);
-    }
+    // if let Err(e) = main_window.set_shadow(true) {
+    //     eprintln!("Failed to set shadow: {}", e);
+    // }
 
     main_window
         .show()
@@ -289,9 +289,9 @@ pub fn run() {
             .inner_size(1450.0, 900.0)
             .min_inner_size(1450.0, 900.0)
             .user_agent("Mozilla/5.0 (compatible; Midday Desktop App)")
-            .transparent(true)
             .decorations(false)
             .visible(false)
+            .transparent(true)
             .shadow(false)
             .hidden_title(true)
             .title_bar_style(TitleBarStyle::Overlay)
