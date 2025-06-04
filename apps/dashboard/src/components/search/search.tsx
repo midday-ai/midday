@@ -21,6 +21,7 @@ import {
 } from "@midday/ui/command";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
+import { listen } from "@tauri-apps/api/event";
 import { formatISO } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -375,6 +376,7 @@ export function Search() {
   const { data: user } = useUserQuery();
   const [debounceDelay, setDebounceDelay] = useState(200);
   const ref = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const height = useRef<HTMLDivElement>(null);
   const { setOpen } = useSearchStore();
   const { setParams: setInvoiceParams } = useInvoiceParams();
@@ -382,6 +384,23 @@ export function Search() {
   const { setParams: setTrackerParams } = useTrackerParams();
   const { setParams: setTransactionParams } = useTransactionParams();
   const router = useRouter();
+
+  useEffect(() => {
+    const unlistenPromise = listen("search-window-open", (event) => {
+      const isOpen = event.payload as boolean;
+      if (isOpen) {
+        // Focus the search input field when window opens
+        setTimeout(() => {
+          searchInputRef.current?.focus();
+        }, 100); // Small delay to ensure window is fully rendered
+      }
+    });
+
+    // Cleanup function
+    return () => {
+      unlistenPromise.then((unlisten) => unlisten());
+    };
+  }, []);
 
   const handleNavigation = (path: string) => {
     setOpen();
@@ -603,6 +622,7 @@ export function Search() {
     >
       <div className="border-b border-border relative">
         <CommandInput
+          ref={searchInputRef}
           placeholder="Type a command or search..."
           onValueChange={(value: string) => {
             setDebouncedSearch(value);
