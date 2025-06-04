@@ -93,29 +93,40 @@ body {
 }
 
 /* Desktop App */
-html.desktop {
-  background: hsl(var(--background));
+.desktop {
+  background: transparent !important;
   user-select: none;
   -webkit-user-select: none;
-  border-radius: 12px;
-  overflow: hidden;
-  background: transparent;
+  overscroll-behavior: none !important;
 }
 
-html.desktop {
-  border: 1px solid #f2f2f2;
-  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+.desktop body {
+  background: transparent !important;
 }
 
-html.desktop.dark {
+html.desktop .wrapper::-webkit-scrollbar,
+html.desktop::-webkit-scrollbar,
+html.desktop body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+html.desktop.dark body::before {
   border: 1px solid #444;
   box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1);
 }
 
-html.desktop,
-html.desktop div,
-html.desktop a,
-html.desktop button {
+html.desktop .wrapper {
+  overscroll-behavior: none !important;
+  background: hsl(var(--background));
+  border-radius: 10px;
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  overflow: auto;
+  height: 100vh;
+}
+
+.desktop div,
+.desktop a,
+.desktop button {
   cursor: default !important;
 }
 
