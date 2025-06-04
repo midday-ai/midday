@@ -12,10 +12,19 @@ use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent}
 fn show_window(window: tauri::Window) -> Result<(), String> {
     println!("📄 Show window command called");
 
+    // Always target the main window specifically, not the calling window
+    let app_handle = window.app_handle();
+    let main_window = match app_handle.get_webview_window("main") {
+        Some(window) => window,
+        None => {
+            return Err("Main window not found".to_string());
+        }
+    };
+
     // Configure window properly before showing
     #[cfg(not(target_os = "macos"))]
     {
-        if let Err(e) = window.set_decorations(true) {
+        if let Err(e) = main_window.set_decorations(true) {
             eprintln!("Failed to set decorations: {}", e);
         }
     }
@@ -23,19 +32,19 @@ fn show_window(window: tauri::Window) -> Result<(), String> {
     #[cfg(target_os = "macos")]
     {
         // Re-enable shadow on macOS
-        if let Err(e) = window.set_shadow(true) {
+        if let Err(e) = main_window.set_shadow(true) {
             eprintln!("Failed to set shadow: {}", e);
         }
     }
 
-    window
+    main_window
         .show()
         .map_err(|e| format!("Failed to show window: {}", e))?;
-    window
+    main_window
         .set_focus()
         .map_err(|e| format!("Failed to set focus: {}", e))?;
 
-    println!("✅ Window shown and focused");
+    println!("✅ Main window shown and focused");
     Ok(())
 }
 
@@ -177,9 +186,71 @@ fn create_new_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::e
         }
     });
 
-    search_window.show()?;
+    // Don't show the window automatically - let toggle function handle visibility
+    // search_window.show()?;
 
-    println!("✅ Search window created and shown");
+    println!("✅ Search window created (hidden)");
+    Ok(())
+}
+
+async fn create_preloaded_search_window(app: &tauri::AppHandle, app_url: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let search_window_label = "search";
+    let search_url = format!("{}/desktop/search", app_url);
+
+    println!("🔍 Preloading search window with URL: {}", search_url);
+
+    let mut search_builder = WebviewWindowBuilder::new(
+        app,
+        search_window_label,
+        WebviewUrl::External(tauri::Url::parse(&search_url)?),
+    )
+    .title("Midday Search")
+    .inner_size(720.0, 450.0)
+    .min_inner_size(720.0, 450.0)
+    .resizable(true)
+    .user_agent("Mozilla/5.0 (compatible; Midday Desktop App)")
+    .transparent(true)
+    .decorations(false)
+    .visible(false);  // Start hidden for preloading
+
+    // Platform-specific styling
+    #[cfg(target_os = "macos")]
+    {
+        search_builder = search_builder
+            .hidden_title(true)
+            .title_bar_style(TitleBarStyle::Overlay);
+    }
+
+    let search_window = search_builder
+        .shadow(false)
+        .build()?;
+
+    // Position window on primary monitor (will be repositioned when shown)
+    search_window.center()?;
+
+    // Handle window events - simplified auto-hide behavior
+    let window_clone = search_window.clone();
+    let app_handle_clone = app.clone();
+    search_window.on_window_event(move |event| {
+        if let tauri::WindowEvent::Focused(false) = event {
+            // Search window lost focus - auto-hide if main window is visible
+            if let Some(main_window) = app_handle_clone.get_webview_window("main") {
+                if main_window.is_visible().unwrap_or(false) {
+                    // Main window is visible, safe to auto-hide search
+                    println!("🔍 Search window lost focus, hiding (main window is visible)");
+                    if let Err(e) = window_clone.hide() {
+                        eprintln!("⚠️ Failed to hide search window: {}", e);
+                    }
+                } else {
+                    // Main window is hidden, keep search visible
+                    println!("🔍 Search window lost focus but main is hidden - keeping visible");
+                }
+            }
+        }
+    });
+
+    // Window is created and hidden, ready for instant access
+    println!("✅ Search window preloaded (hidden)");
     Ok(())
 }
 
@@ -435,6 +506,42 @@ pub fn run() {
             });
 
             let window = win_builder.build().unwrap();
+
+            // Fallback timer to ensure main window shows on first launch
+            let window_clone = window.clone();
+            tauri::async_runtime::spawn(async move {
+                std::thread::sleep(std::time::Duration::from_secs(2));
+
+                // Check if window is still hidden after 2 seconds
+                if let Ok(is_visible) = window_clone.is_visible() {
+                    if !is_visible {
+                        println!("⚠️ Main window still hidden after 2s, showing as fallback");
+                        if let Err(e) = window_clone.show() {
+                            eprintln!("Failed to show main window: {}", e);
+                        } else {
+                            if let Err(e) = window_clone.set_focus() {
+                                eprintln!("Failed to focus main window: {}", e);
+                            } else {
+                                println!("✅ Main window shown via fallback timer");
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Preload search window for instant access
+            let app_url_for_search = app_url.clone();
+            let app_handle_for_preload = app_handle.clone();
+            tauri::async_runtime::spawn(async move {
+                // Small delay to let main window initialize first
+                std::thread::sleep(std::time::Duration::from_millis(500));
+                
+                if let Err(e) = create_preloaded_search_window(&app_handle_for_preload, &app_url_for_search).await {
+                    eprintln!("⚠️ Failed to preload search window: {}", e);
+                } else {
+                    println!("✅ Search window preloaded and ready");
+                }
+            });
 
             // Setup simple system tray for search toggle only
             let _tray = TrayIconBuilder::new()
