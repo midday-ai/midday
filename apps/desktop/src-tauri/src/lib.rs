@@ -1,13 +1,11 @@
 use std::env;
-use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder, Position, PhysicalPosition, Listener};
+use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder, Position, PhysicalPosition, Listener, TitleBarStyle};
 use tauri_plugin_deep_link::DeepLinkExt;
-
-#[cfg(target_os = "macos")]
-use tauri::TitleBarStyle;
 
 // Add tray imports
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::image::Image;
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 
 // Add image crate for PNG decoding
 use image;
@@ -23,20 +21,9 @@ fn show_window(window: tauri::Window) -> Result<(), String> {
         }
     };
 
-    // Configure window properly before showing
-    #[cfg(not(target_os = "macos"))]
-    {
-        if let Err(e) = main_window.set_decorations(true) {
-            eprintln!("Failed to set decorations: {}", e);
-        }
-    }
-
-    #[cfg(target_os = "macos")]
-    {
-        // Re-enable shadow on macOS
-        if let Err(e) = main_window.set_shadow(true) {
-            eprintln!("Failed to set shadow: {}", e);
-        }
+    // Re-enable shadow on macOS
+    if let Err(e) = main_window.set_shadow(true) {
+        eprintln!("Failed to set shadow: {}", e);
     }
 
     main_window
@@ -99,7 +86,6 @@ fn position_window_on_current_monitor(app: &tauri::AppHandle, window: &tauri::We
                 let center_y = monitor_position.y + (monitor_size.height as i32 / 2) - (window_size.height as i32 / 2);
                 
                 // Adjust for macOS menu bar (typically 25-30px) and other system UI
-                #[cfg(target_os = "macos")]
                 let center_y = center_y + 15; // Slight downward adjustment for menu bar
                 
                 window.set_position(Position::Physical(PhysicalPosition {
@@ -141,12 +127,9 @@ async fn create_preloaded_search_window(app: &tauri::AppHandle, app_url: &str) -
     });
 
     // Platform-specific styling
-    #[cfg(target_os = "macos")]
-    {
-        search_builder = search_builder
-            .hidden_title(true)
-            .title_bar_style(TitleBarStyle::Overlay);
-    }
+    search_builder = search_builder
+        .hidden_title(true)
+        .title_bar_style(TitleBarStyle::Overlay);
 
     let search_window = search_builder
         .shadow(false)
@@ -261,7 +244,6 @@ pub fn run() {
             let app_handle_for_tray = app_handle.clone();
 
             // Initialize global shortcuts
-            #[cfg(desktop)]
             {
                 use tauri_plugin_global_shortcut::{
                     Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState,
@@ -285,8 +267,8 @@ pub fn run() {
                 }
             }
 
-            // Register deep links at runtime for development (Linux and Windows)
-            #[cfg(any(target_os = "linux", all(debug_assertions, windows)))]
+            // Register deep links at runtime for development
+            #[cfg(debug_assertions)]
             {
                 let _ = app_handle.deep_link().register_all();
             }
@@ -311,6 +293,8 @@ pub fn run() {
             .decorations(false)
             .visible(false)
             .shadow(false)
+            .hidden_title(true)
+            .title_bar_style(TitleBarStyle::Overlay)
             .on_download(|_window, _event| {
                 println!("Download triggered!");
                 // Allow all downloads - they will go to default Downloads folder
@@ -377,10 +361,57 @@ pub fn run() {
                 Image::new_owned(rgba.into_raw(), width, height)
             };
 
+            // Create tray context menu
+            let show_item = MenuItem::with_id(app, "show", "Open Midday", true, None::<&str>)?;
+            let search_item = MenuItem::with_id(app, "search", "Open Search\tShift+Alt+K", true, None::<&str>)?;
+            let separator1 = PredefinedMenuItem::separator(app)?;
+            let updates_item = MenuItem::with_id(app, "updates", "Check for Updates", true, None::<&str>)?;
+            let separator2 = PredefinedMenuItem::separator(app)?;
+            let quit_item = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+
+            let menu = Menu::with_items(app, &[
+                &show_item,
+                &search_item,
+                &separator1,
+                &updates_item,
+                &separator2,
+                &quit_item,
+            ])?;
+
+            // Clone app handle for menu events
+            let app_handle_for_menu = app_handle.clone();
+
             let _tray = TrayIconBuilder::new()
                 .icon(tray_icon)
+                .menu(&menu)
+                .show_menu_on_left_click(false)
+                .on_menu_event(move |_tray, event| {
+                    match event.id().as_ref() {
+                        "show" => {
+                            // Show main window
+                            if let Some(main_window) = app_handle_for_menu.get_webview_window("main") {
+                                let _ = main_window.show();
+                                let _ = main_window.set_focus();
+                            }
+                        }
+                        "search" => {
+                            // Toggle search window
+                            let _ = toggle_search_window(&app_handle_for_menu);
+                        }
+                        "updates" => {
+                            // Placeholder for future update functionality
+                            println!("Check for updates clicked - feature to be implemented");
+                            // TODO: Implement update checking functionality
+                        }
+                        "quit" => {
+                            // Actually quit the application
+                            std::process::exit(0);
+                        }
+                        _ => {}
+                    }
+                })
                 .on_tray_icon_event(move |_tray, event| {
-                    // Handle clicks to toggle search window
+                    // Handle left clicks to toggle search window (keep existing behavior)
                     if let TrayIconEvent::Click {
                         button: MouseButton::Left,
                         button_state: MouseButtonState::Up,
@@ -397,7 +428,6 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building tauri app")
         .run(|app_handle, event| match event {
-            #[cfg(target_os = "macos")]
             tauri::RunEvent::Reopen { .. } => {
                 if let Some(main_window) = app_handle.get_webview_window("main") {
                     let _ = main_window.show();
