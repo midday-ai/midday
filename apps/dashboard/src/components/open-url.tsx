@@ -1,8 +1,8 @@
 "use client";
 
+import { openUrl } from "@midday/desktop-client/core";
 import { isDesktopApp } from "@midday/desktop-client/platform";
 import { cn } from "@midday/ui/cn";
-import { openUrl } from "@tauri-apps/plugin-opener";
 
 export function OpenURL({
   href,

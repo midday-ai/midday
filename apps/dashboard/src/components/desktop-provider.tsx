@@ -1,11 +1,10 @@
 "use client";
 
+import { getCurrentWindow, invoke } from "@midday/desktop-client/core";
 import {
   isDesktopApp,
   listenForDeepLinks,
 } from "@midday/desktop-client/platform";
-import { invoke } from "@tauri-apps/api/core";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
