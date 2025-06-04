@@ -287,7 +287,7 @@ pub fn run() {
             let app_handle_for_search = app_handle.clone();
             let app_handle_for_tray = app_handle.clone();
 
-            // Initialize global shortcut plugin for search
+            // Initialize global shortcuts
             #[cfg(desktop)]
             {
                 use tauri_plugin_global_shortcut::{
@@ -296,6 +296,9 @@ pub fn run() {
 
                 let search_shortcut =
                     Shortcut::new(Some(Modifiers::SHIFT | Modifiers::ALT), Code::KeyK);
+                    
+                let show_main_shortcut =
+                    Shortcut::new(Some(Modifiers::SHIFT | Modifiers::ALT), Code::KeyM);
 
                 match app.handle().plugin(
                     tauri_plugin_global_shortcut::Builder::new()
@@ -309,18 +312,44 @@ pub fn run() {
                                 {
                                     eprintln!("❌ Failed to toggle search window: {}", e);
                                 }
+                            } else if shortcut == &show_main_shortcut
+                                && event.state() == ShortcutState::Pressed
+                            {
+                                println!("🏠 Global show main window shortcut triggered");
+                                if let Some(main_window) = app_handle_for_search.get_webview_window("main") {
+                                    if let Err(e) = main_window.show() {
+                                        eprintln!("❌ Failed to show main window: {}", e);
+                                    } else {
+                                        if let Err(e) = main_window.set_focus() {
+                                            eprintln!("⚠️ Failed to focus main window: {}", e);
+                                        } else {
+                                            println!("✅ Main window shown via global shortcut");
+                                        }
+                                    }
+                                }
                             }
                         })
                         .build(),
                 ) {
                     Ok(_) => {
-                        // Register the shortcut
+                        // Register both shortcuts
                         match app.global_shortcut().register(search_shortcut) {
                             Ok(_) => {
                                 println!("✅ Global search shortcut registered: Shift+Option+K");
                             }
                             Err(e) => {
                                 eprintln!("⚠️ Failed to register search shortcut: {}", e);
+                                #[cfg(target_os = "macos")]
+                                eprintln!("💡 On macOS, please grant Accessibility permissions in System Preferences → Privacy & Security → Accessibility");
+                            }
+                        }
+                        
+                        match app.global_shortcut().register(show_main_shortcut) {
+                            Ok(_) => {
+                                println!("✅ Global show main window shortcut registered: Shift+Option+M");
+                            }
+                            Err(e) => {
+                                eprintln!("⚠️ Failed to register show main shortcut: {}", e);
                                 #[cfg(target_os = "macos")]
                                 eprintln!("💡 On macOS, please grant Accessibility permissions in System Preferences → Privacy & Security → Accessibility");
                             }
@@ -351,7 +380,7 @@ pub fn run() {
                 handle_deep_link_event(&app_handle_for_deep_links, url_strings);
             });
 
-            let mut win_builder = WebviewWindowBuilder::new(
+            let win_builder = WebviewWindowBuilder::new(
                 app,
                 "main",
                 WebviewUrl::External(tauri::Url::parse(&app_url).unwrap()),
@@ -360,53 +389,41 @@ pub fn run() {
             .inner_size(1450.0, 900.0)
             .min_inner_size(1450.0, 900.0)
             .user_agent("Mozilla/5.0 (compatible; Midday Desktop App)")
-            .transparent(true);
+            .transparent(true)
+            .decorations(false)
+            .visible(false)
+            .shadow(false)
+            .on_navigation(move |url| {
+                let url_str = url.as_str();
 
-            // Platform-specific window styling for rounded corners
-            #[cfg(target_os = "macos")]
-            {
-                win_builder = win_builder.decorations(false);
-            }
+                println!("🔗 Navigation attempt to: {}", url_str);
 
-            #[cfg(not(target_os = "macos"))]
-            {
-                win_builder = win_builder.decorations(false);
-            }
+                // Check if this is an external URL
+                if is_external_url(url_str, &app_url_clone) {
+                    println!("🌐 Opening external URL in system browser: {}", url_str);
 
-            let win_builder = win_builder
-                .visible(false)
-                .shadow(false)
-                .on_navigation(move |url| {
-                    let url_str = url.as_str();
+                    // Clone the URL string to avoid lifetime issues
+                    let url_string = url_str.to_string();
+                    let app_handle_clone = app_handle_for_navigation.clone();
 
-                    println!("🔗 Navigation attempt to: {}", url_str);
+                    // Open in system browser using the opener plugin
+                    tauri::async_runtime::spawn(async move {
+                        if let Err(e) =
+                            tauri_plugin_opener::OpenerExt::opener(&app_handle_clone)
+                                .open_url(url_string, None::<String>)
+                        {
+                            eprintln!("Failed to open URL in external browser: {}", e);
+                        }
+                    });
 
-                    // Check if this is an external URL
-                    if is_external_url(url_str, &app_url_clone) {
-                        println!("🌐 Opening external URL in system browser: {}", url_str);
+                    // Prevent navigation in webview
+                    return false;
+                }
 
-                        // Clone the URL string to avoid lifetime issues
-                        let url_string = url_str.to_string();
-                        let app_handle_clone = app_handle_for_navigation.clone();
-
-                        // Open in system browser using the opener plugin
-                        tauri::async_runtime::spawn(async move {
-                            if let Err(e) =
-                                tauri_plugin_opener::OpenerExt::opener(&app_handle_clone)
-                                    .open_url(url_string, None::<String>)
-                            {
-                                eprintln!("Failed to open URL in external browser: {}", e);
-                            }
-                        });
-
-                        // Prevent navigation in webview
-                        return false;
-                    }
-
-                    // Allow internal navigation
-                    println!("✅ Allowing internal navigation to: {}", url_str);
-                    true
-                });
+                // Allow internal navigation
+                println!("✅ Allowing internal navigation to: {}", url_str);
+                true
+            });
 
             let window = win_builder.build().unwrap();
 
@@ -429,7 +446,11 @@ pub fn run() {
                 }
             });
 
-            // Setup simple system tray for search window toggle
+            // Simple tray solution - no complex permissions needed
+            // Use global shortcuts for window management
+            println!("💡 Controls: ⇧⌥K (search), ⇧⌥M (show main), Left-click tray (search)");
+
+            // Setup simple system tray for search toggle only
             let _tray = TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
                 .on_tray_icon_event(move |_tray, event| {
