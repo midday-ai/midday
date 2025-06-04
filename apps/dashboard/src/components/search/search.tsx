@@ -11,6 +11,7 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useSearchStore } from "@/store/search";
 import { useTRPC } from "@/trpc/client";
 import { formatDate } from "@/utils/format";
+import { emit, listen } from "@midday/desktop-client/core";
 import { isDesktopApp } from "@midday/desktop-client/platform";
 import {
   Command,
@@ -22,8 +23,6 @@ import {
 } from "@midday/ui/command";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
-import { listen } from "@tauri-apps/api/event";
-import { emit } from "@tauri-apps/api/event";
 import { formatISO } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";

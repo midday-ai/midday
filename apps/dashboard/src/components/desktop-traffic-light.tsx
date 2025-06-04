@@ -1,6 +1,6 @@
 "use client";
 
-import { Window } from "@tauri-apps/api/window";
+import { Window } from "@midday/desktop-client/core";
 
 export function DesktopTrafficLight() {
   const getMainWindow = async () => {
