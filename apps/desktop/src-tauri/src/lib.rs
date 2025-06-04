@@ -115,7 +115,7 @@ async fn create_preloaded_search_window(app: &tauri::AppHandle, app_url: &str) -
     .title("Midday Search")
     .inner_size(720.0, 450.0)
     .min_inner_size(720.0, 450.0)
-    .resizable(true)
+    .resizable(false)
     .user_agent("Mozilla/5.0 (compatible; Midday Desktop App)")
     .transparent(true)
     .decorations(false)

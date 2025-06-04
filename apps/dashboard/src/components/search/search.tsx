@@ -11,6 +11,7 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useSearchStore } from "@/store/search";
 import { useTRPC } from "@/trpc/client";
 import { formatDate } from "@/utils/format";
+import { isDesktopApp } from "@midday/desktop-client/platform";
 import {
   Command,
   CommandEmpty,
@@ -390,6 +391,7 @@ export function Search() {
   useHotkeys(
     "esc",
     () => {
+      setDebouncedSearch("");
       emit("search-window-close-requested");
     },
     {
@@ -609,7 +611,7 @@ export function Search() {
   }, [combinedData, debouncedSearch]);
 
   useEffect(() => {
-    if (height.current && ref.current) {
+    if (height.current && ref.current && !isDesktopApp()) {
       const el = height.current;
       const wrapper = ref.current;
       let animationFrame: number;
@@ -630,7 +632,7 @@ export function Search() {
   return (
     <Command
       shouldFilter={false}
-      className="overflow-hidden p-0 relative w-full bg-background backdrop-filter dark:border-[#2C2C2C] backdrop-blur-lg desktop-search:backdrop-blur-none dark:bg-[#151515]/[99] desktop-search:bg-transparent desktop-search:border-none h-auto border border-border"
+      className="search-container overflow-hidden p-0 relative w-full bg-background backdrop-filter dark:border-[#2C2C2C] backdrop-blur-lg dark:bg-[#151515]/[99] h-auto border border-border"
     >
       <div className="border-b border-border relative">
         <CommandInput
