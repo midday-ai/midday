@@ -16,6 +16,11 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "macOS": {
+      "dmg": {
+        "background": "./images/installer.png"
+      }
+    },
     "icon": [
       "icons/production/32x32.png",
       "icons/production/128x128.png",
