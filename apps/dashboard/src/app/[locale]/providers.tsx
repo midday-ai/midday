@@ -1,6 +1,6 @@
 "use client";
 
-import { DeepLinkProvider } from "@/components/deep-link-provider";
+import { DesktopProvider } from "@/components/desktop-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProviderClient } from "@/locales/client";
 import { TRPCReactProvider } from "@/trpc/client";
@@ -15,7 +15,7 @@ export function Providers({ locale, children }: ProviderProps) {
   return (
     <TRPCReactProvider>
       <I18nProviderClient locale={locale}>
-        <DeepLinkProvider />
+        <DesktopProvider />
 
         <ThemeProvider
           attribute="class"

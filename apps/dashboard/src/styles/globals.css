@@ -93,15 +93,30 @@ body {
 }
 
 /* Desktop App */
-.desktop {
+html.desktop {
   background: transparent !important;
   user-select: none;
   -webkit-user-select: none;
   overscroll-behavior: none !important;
+  border-radius: 10px;
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
-.desktop body {
-  background: transparent !important;
+html.desktop body {
+  background: hsl(var(--background)) !important;
+  overscroll-behavior: none !important;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  height: 100vh;
+  width: 100%;
+  overflow: auto;
 }
 
 html.desktop .wrapper::-webkit-scrollbar,
@@ -113,15 +128,6 @@ html.desktop body::-webkit-scrollbar {
 html.desktop.dark body::before {
   border: 1px solid #444;
   box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1);
-}
-
-html.desktop .wrapper {
-  overscroll-behavior: none !important;
-  background: hsl(var(--background));
-  border-radius: 10px;
-  border: 0.5px solid rgba(255, 255, 255, 0.1);
-  overflow: auto;
-  height: 100vh;
 }
 
 .desktop div,
