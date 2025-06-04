@@ -1,29 +1,38 @@
 "use client";
 
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { Window } from "@tauri-apps/api/window";
 
 export function DesktopTrafficLight() {
+  const getMainWindow = async () => {
+    const mainWindow = await Window.getByLabel("main");
+    if (!mainWindow) {
+      throw new Error("Main window not found");
+    }
+    return mainWindow;
+  };
+
   const handleClose = async () => {
     try {
-      const window = getCurrentWindow();
+      const window = await getMainWindow();
+      // Hide the main window instead of closing it
       await window.close();
     } catch (error) {
-      console.error("Failed to close window:", error);
+      console.error("Failed to hide main window:", error);
     }
   };
 
   const handleMinimize = async () => {
     try {
-      const window = getCurrentWindow();
+      const window = await getMainWindow();
       await window.minimize();
     } catch (error) {
-      console.error("Failed to minimize window:", error);
+      console.error("Failed to minimize main window:", error);
     }
   };
 
   const handleMaximize = async () => {
     try {
-      const window = getCurrentWindow();
+      const window = await getMainWindow();
       const isMaximized = await window.isMaximized();
 
       if (isMaximized) {
@@ -32,7 +41,7 @@ export function DesktopTrafficLight() {
         await window.toggleMaximize();
       }
     } catch (error) {
-      console.error("Failed to toggle maximize:", error);
+      console.error("Failed to toggle maximize main window:", error);
     }
   };
 
