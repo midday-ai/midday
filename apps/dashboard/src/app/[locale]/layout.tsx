@@ -2,7 +2,6 @@ import "@/styles/globals.css";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
 import { DesktopHeader } from "@/components/desktop-header";
-import { DesktopPageLoaded } from "@/components/desktop-page-loaded";
 import { isDesktopApp } from "@/utils/desktop";
 import { Provider as Analytics } from "@midday/events/client";
 import { Toaster } from "@midday/ui/toaster";
@@ -100,12 +99,9 @@ export default async function Layout({
         )}
       >
         <DesktopHeader />
-        <DesktopPageLoaded />
 
         <NuqsAdapter>
-          <div className="wrapper">
-            <Providers locale={locale}>{children}</Providers>
-          </div>
+          <Providers locale={locale}>{children}</Providers>
           <Toaster />
           <Analytics />
         </NuqsAdapter>

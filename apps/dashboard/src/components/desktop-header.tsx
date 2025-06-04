@@ -12,7 +12,7 @@ export function DesktopHeader() {
   return (
     <div
       data-tauri-drag-region={true}
-      className="fixed top-0 w-full h-8 z-50 group"
+      className="absolute top-0 left-0 right-0 h-8 z-50 group border-radius-[10px] overflow-hidden"
     >
       <div className="hidden group-hover:flex">
         <DesktopTrafficLight />
