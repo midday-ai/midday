@@ -22,10 +22,12 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { listen } from "@tauri-apps/api/event";
+import { emit } from "@tauri-apps/api/event";
 import { formatISO } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { useDebounceValue } from "usehooks-ts";
 import { useCopyToClipboard } from "usehooks-ts";
 import { FilePreviewIcon } from "../file-preview-icon";
@@ -384,6 +386,16 @@ export function Search() {
   const { setParams: setTrackerParams } = useTrackerParams();
   const { setParams: setTransactionParams } = useTransactionParams();
   const router = useRouter();
+
+  useHotkeys(
+    "esc",
+    () => {
+      emit("search-window-close-requested");
+    },
+    {
+      enableOnFormTags: true,
+    },
+  );
 
   useEffect(() => {
     const unlistenPromise = listen("search-window-open", (event) => {
