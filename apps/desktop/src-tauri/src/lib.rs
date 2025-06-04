@@ -5,6 +5,9 @@ use tauri_plugin_deep_link::DeepLinkExt;
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 
+// Add tray imports
+use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+
 #[tauri::command]
 fn show_window(window: tauri::Window) -> Result<(), String> {
     println!("📄 Show window command called");
@@ -282,8 +285,9 @@ pub fn run() {
             let app_handle_for_deep_links = app_handle.clone();
             let app_handle_for_navigation = app_handle.clone();
             let app_handle_for_search = app_handle.clone();
+            let app_handle_for_tray = app_handle.clone();
 
-            // Initialize global shortcut plugin
+            // Initialize global shortcut plugin for search
             #[cfg(desktop)]
             {
                 use tauri_plugin_global_shortcut::{
@@ -313,10 +317,10 @@ pub fn run() {
                         // Register the shortcut
                         match app.global_shortcut().register(search_shortcut) {
                             Ok(_) => {
-                                println!("✅ Global shortcut registered: Shift+Option+K");
+                                println!("✅ Global search shortcut registered: Shift+Option+K");
                             }
                             Err(e) => {
-                                eprintln!("⚠️ Failed to register global shortcut: {}", e);
+                                eprintln!("⚠️ Failed to register search shortcut: {}", e);
                                 #[cfg(target_os = "macos")]
                                 eprintln!("💡 On macOS, please grant Accessibility permissions in System Preferences → Privacy & Security → Accessibility");
                             }
@@ -331,7 +335,6 @@ pub fn run() {
             }
 
             // Register deep links at runtime for development (Linux and Windows)
-            // This ensures deep links work in development mode without requiring installation
             #[cfg(any(target_os = "linux", all(debug_assertions, windows)))]
             {
                 if let Err(e) = app_handle.deep_link().register_all() {
@@ -410,12 +413,12 @@ pub fn run() {
             // Fallback timer in case the show_window command isn't called
             let window_clone = window.clone();
             tauri::async_runtime::spawn(async move {
-                std::thread::sleep(std::time::Duration::from_secs(8));
+                std::thread::sleep(std::time::Duration::from_secs(2));
 
-                // Check if window is still hidden after 8 seconds
+                // Check if window is still hidden after 2 seconds
                 if let Ok(is_visible) = window_clone.is_visible() {
                     if !is_visible {
-                        println!("⚠️ Window still hidden after 8s, showing as fallback");
+                        println!("⚠️ Window still hidden after 2s, showing as fallback");
                         if let Err(e) = window_clone.show() {
                             eprintln!("Failed to show window: {}", e);
                         }
@@ -425,6 +428,25 @@ pub fn run() {
                     }
                 }
             });
+
+            // Setup simple system tray for search window toggle
+            let _tray = TrayIconBuilder::new()
+                .icon(app.default_window_icon().unwrap().clone())
+                .on_tray_icon_event(move |_tray, event| {
+                    // Handle clicks to toggle search window
+                    if let TrayIconEvent::Click {
+                        button: MouseButton::Left,
+                        button_state: MouseButtonState::Up,
+                        ..
+                    } = event
+                    {
+                        println!("🔍 Tray clicked - toggling search window");
+                        if let Err(e) = toggle_search_window(&app_handle_for_tray) {
+                            eprintln!("❌ Failed to toggle search window from tray: {}", e);
+                        }
+                    }
+                })
+                .build(app)?;
 
             Ok(())
         })
