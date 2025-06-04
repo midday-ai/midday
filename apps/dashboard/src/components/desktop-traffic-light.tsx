@@ -15,7 +15,7 @@ export function DesktopTrafficLight() {
     try {
       const window = await getMainWindow();
       // Hide the main window instead of closing it
-      await window.close();
+      await window.hide();
     } catch (error) {
       console.error("Failed to hide main window:", error);
     }
