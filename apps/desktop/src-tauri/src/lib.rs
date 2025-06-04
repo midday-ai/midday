@@ -1,5 +1,5 @@
 use std::env;
-use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder, Position, PhysicalPosition};
+use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder, Position, PhysicalPosition, Listener};
 use tauri_plugin_deep_link::DeepLinkExt;
 
 #[cfg(target_os = "macos")]
@@ -155,6 +155,16 @@ async fn create_preloaded_search_window(app: &tauri::AppHandle, app_url: &str) -
     // Position window on primary monitor (will be repositioned when shown)
     search_window.center()?;
 
+    // Listen for close requests from frontend (e.g., ESC key)
+    let window_for_close = search_window.clone();
+    search_window.listen("search-window-close-requested", move |_event| {
+        // Emit close event to search window
+        let _ = window_for_close.emit("search-window-open", false);
+        // Turn off always on top and hide
+        let _ = window_for_close.set_always_on_top(false);
+        let _ = window_for_close.hide();
+    });
+
     // Handle window events - comprehensive auto-hide behavior
     let window_clone = search_window.clone();
     search_window.on_window_event(move |event| {
@@ -301,9 +311,9 @@ pub fn run() {
             .decorations(false)
             .visible(false)
             .shadow(false)
-            .on_download(|_window, event| {
-                // Allow all downloads - they will be saved to the default download directory
-                // You can customize this behavior if needed
+            .on_download(|_window, _event| {
+                println!("Download triggered!");
+                // Allow all downloads - they will go to default Downloads folder
                 true
             })
             .on_navigation(move |url| {
