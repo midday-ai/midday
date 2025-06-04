@@ -5,6 +5,7 @@ import {
   listenForDeepLinks,
 } from "@midday/desktop-client/platform";
 import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -20,6 +21,17 @@ export function DesktopProvider() {
 
     const showWindow = async () => {
       try {
+        // Only run show_window logic if we're in the main window
+        const currentWindow = getCurrentWindow();
+        const label = currentWindow.label;
+
+        if (label !== "main") {
+          console.log(
+            `📄 Skipping show_window - not in main window (current: ${label})`,
+          );
+          return;
+        }
+
         console.log("📄 Calling show_window command");
         await invoke("show_window");
         console.log("✅ Window shown successfully");
@@ -43,25 +55,40 @@ export function DesktopProvider() {
     let cleanup: (() => void) | undefined;
 
     const setupDeepLinkListener = async () => {
-      console.log("🔗 Setting up deep link listener...");
+      try {
+        // Only set up deep link listeners if we're in the main window
+        const currentWindow = getCurrentWindow();
+        const label = await currentWindow.label;
 
-      cleanup = await listenForDeepLinks((path) => {
-        console.log("🎯 Deep link navigation received:", path);
-
-        // Handle different paths
-        if (path === "" || path === "dashboard") {
-          console.log("📍 Navigating to dashboard");
-          router.push("/");
-        } else if (path.startsWith("api/auth/callback")) {
-          // Handle authentication callback
-          console.log("🔐 Handling auth callback");
-          router.push(`/${path}`);
-        } else {
-          // Handle other paths
-          console.log(`📍 Navigating to: /${path}`);
-          router.push(`/${path}`);
+        if (label !== "main") {
+          console.log(
+            `🔗 Skipping deep link setup - not in main window (current: ${label})`,
+          );
+          return;
         }
-      });
+
+        console.log("🔗 Setting up deep link listener...");
+
+        cleanup = await listenForDeepLinks((path) => {
+          console.log("🎯 Deep link navigation received:", path);
+
+          // Handle different paths
+          if (path === "" || path === "dashboard") {
+            console.log("📍 Navigating to dashboard");
+            router.push("/");
+          } else if (path.startsWith("api/auth/callback")) {
+            // Handle authentication callback
+            console.log("🔐 Handling auth callback");
+            router.push(`/${path}`);
+          } else {
+            // Handle other paths
+            console.log(`📍 Navigating to: /${path}`);
+            router.push(`/${path}`);
+          }
+        });
+      } catch (error) {
+        console.error("Failed to set up deep link listener:", error);
+      }
     };
 
     setupDeepLinkListener();

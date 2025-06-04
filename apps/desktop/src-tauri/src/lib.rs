@@ -21,11 +21,6 @@ fn show_window(window: tauri::Window) -> Result<(), String> {
         }
     };
 
-    // Re-enable shadow on macOS
-    // if let Err(e) = main_window.set_shadow(true) {
-    //     eprintln!("Failed to set shadow: {}", e);
-    // }
-
     main_window
         .show()
         .map_err(|e| format!("Failed to show window: {}", e))?;
@@ -217,7 +212,8 @@ fn handle_deep_link_event(app_handle: &tauri::AppHandle, urls: Vec<String>) {
             if let Some(window) = app_handle.get_webview_window("main") {
                 // Emit event to frontend with just the path - frontend handles the full URL construction
                 if let Ok(_) = window.emit("deep-link-navigate", clean_path) {
-                    // Bring the window to front
+                    // Always show the window first, then bring it to front
+                    let _ = window.show();
                     let _ = window.set_focus();
                 }
             }
@@ -411,7 +407,7 @@ pub fn run() {
                     }
                 })
                 .on_tray_icon_event(move |_tray, event| {
-                    // Handle left clicks to toggle search window (keep existing behavior)
+                    // Handle left clicks to toggle search window (keep existing behaıvior)
                     if let TrayIconEvent::Click {
                         button: MouseButton::Left,
                         button_state: MouseButtonState::Up,
