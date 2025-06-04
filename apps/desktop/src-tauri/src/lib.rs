@@ -49,10 +49,12 @@ fn show_window(window: tauri::Window) -> Result<(), String> {
 }
 
 fn toggle_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+    println!("🔍 toggle_search_window called!");
     let search_window_label = "search";
 
     // Check if search window already exists
     if let Some(window) = app.get_webview_window(search_window_label) {
+        println!("✅ Search window found!");
         // Window exists, check if it's visible
         match window.is_visible() {
             Ok(is_visible) => {
@@ -78,6 +80,11 @@ fn toggle_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error
     }
 
     // Window doesn't exist, create it
+    println!("❌ Search window not found! Available windows:");
+    let all_windows = app.webview_windows();
+    for (label, _) in all_windows.iter() {
+        println!("  - {}", label);
+    }
     create_new_search_window(app)
 }
 
@@ -148,7 +155,8 @@ fn create_new_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::e
     .resizable(true)
     .user_agent("Mozilla/5.0 (compatible; Midday Desktop App)")
     .transparent(true)
-    .decorations(false);  // Secondary window - not always on top
+    .decorations(false)  // Secondary window - not always on top
+    .always_on_top(true);  // Always on top for global shortcut access
 
     // Platform-specific styling
     #[cfg(target_os = "macos")]
@@ -194,6 +202,7 @@ fn create_new_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::e
 }
 
 async fn create_preloaded_search_window(app: &tauri::AppHandle, app_url: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    println!("🚀 create_preloaded_search_window function called");
     let search_window_label = "search";
     let search_url = format!("{}/desktop/search", app_url);
 
@@ -211,6 +220,7 @@ async fn create_preloaded_search_window(app: &tauri::AppHandle, app_url: &str) -
     .user_agent("Mozilla/5.0 (compatible; Midday Desktop App)")
     .transparent(true)
     .decorations(false)
+    .always_on_top(true)  // Always on top for global shortcut access
     .visible(false);  // Start hidden for preloading
 
     // Platform-specific styling
@@ -383,6 +393,8 @@ pub fn run() {
                 match app.handle().plugin(
                     tauri_plugin_global_shortcut::Builder::new()
                         .with_handler(move |_app, shortcut, event| {
+                            println!("🔑 Shortcut handler called: {:?} state: {:?}", shortcut, event.state());
+                            
                             if shortcut == &search_shortcut
                                 && event.state() == ShortcutState::Pressed
                             {
@@ -547,6 +559,7 @@ pub fn run() {
             let _tray = TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
                 .on_tray_icon_event(move |_tray, event| {
+                    println!("🖱️ Tray event: {:?}", event);
                     // Handle clicks to toggle search window
                     if let TrayIconEvent::Click {
                         button: MouseButton::Left,
@@ -580,6 +593,19 @@ pub fn run() {
                             println!("✅ Main window shown via dock activation");
                         }
                     }
+                }
+            }
+            tauri::RunEvent::ExitRequested { api, .. } => {
+                // Prevent app from quitting to keep global shortcuts working
+                println!("🚫 Exit requested - preventing quit to keep global shortcuts active");
+                api.prevent_exit();
+                
+                // Hide all windows instead of quitting
+                if let Some(main_window) = app_handle.get_webview_window("main") {
+                    let _ = main_window.hide();
+                }
+                if let Some(search_window) = app_handle.get_webview_window("search") {
+                    let _ = search_window.hide();
                 }
             }
             _ => {}
