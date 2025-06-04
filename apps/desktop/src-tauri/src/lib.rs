@@ -139,8 +139,7 @@ fn create_new_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::e
     .resizable(true)
     .user_agent("Mozilla/5.0 (compatible; Midday Desktop App)")
     .transparent(true)
-    .always_on_top(true)
-    .decorations(false);
+    .decorations(false);  // Secondary window - not always on top
 
     // Platform-specific styling
     #[cfg(target_os = "macos")]
@@ -157,13 +156,23 @@ fn create_new_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::e
     // Position window on current monitor
     position_window_on_current_monitor(app, &search_window)?;
 
-    // Close window when clicking outside (losing focus)
+    // Handle window events - simplified auto-hide behavior
     let window_clone = search_window.clone();
+    let app_handle_clone = app.clone();
     search_window.on_window_event(move |event| {
         if let tauri::WindowEvent::Focused(false) = event {
-            println!("🔍 Search window lost focus, hiding it");
-            if let Err(e) = window_clone.hide() {
-                eprintln!("⚠️ Failed to hide search window: {}", e);
+            // Search window lost focus - auto-hide if main window is visible
+            if let Some(main_window) = app_handle_clone.get_webview_window("main") {
+                if main_window.is_visible().unwrap_or(false) {
+                    // Main window is visible, safe to auto-hide search
+                    println!("🔍 Search window lost focus, hiding (main window is visible)");
+                    if let Err(e) = window_clone.hide() {
+                        eprintln!("⚠️ Failed to hide search window: {}", e);
+                    }
+                } else {
+                    // Main window is hidden, keep search visible
+                    println!("🔍 Search window lost focus but main is hidden - keeping visible");
+                }
             }
         }
     });
@@ -427,29 +436,6 @@ pub fn run() {
 
             let window = win_builder.build().unwrap();
 
-            // Fallback timer in case the show_window command isn't called
-            let window_clone = window.clone();
-            tauri::async_runtime::spawn(async move {
-                std::thread::sleep(std::time::Duration::from_secs(2));
-
-                // Check if window is still hidden after 2 seconds
-                if let Ok(is_visible) = window_clone.is_visible() {
-                    if !is_visible {
-                        println!("⚠️ Window still hidden after 2s, showing as fallback");
-                        if let Err(e) = window_clone.show() {
-                            eprintln!("Failed to show window: {}", e);
-                        }
-                        if let Err(e) = window_clone.set_focus() {
-                            eprintln!("Failed to focus window: {}", e);
-                        }
-                    }
-                }
-            });
-
-            // Simple tray solution - no complex permissions needed
-            // Use global shortcuts for window management
-            println!("💡 Controls: ⇧⌥K (search), ⇧⌥M (show main), Left-click tray (search)");
-
             // Setup simple system tray for search toggle only
             let _tray = TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
@@ -471,6 +457,24 @@ pub fn run() {
 
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri app")
+        .run(|app_handle, event| match event {
+            #[cfg(target_os = "macos")]
+            tauri::RunEvent::Reopen { .. } => {
+                println!("🏠 Dock icon clicked - showing main window");
+                if let Some(main_window) = app_handle.get_webview_window("main") {
+                    if let Err(e) = main_window.show() {
+                        eprintln!("❌ Failed to show main window: {}", e);
+                    } else {
+                        if let Err(e) = main_window.set_focus() {
+                            eprintln!("⚠️ Failed to focus main window: {}", e);
+                        } else {
+                            println!("✅ Main window shown via dock activation");
+                        }
+                    }
+                }
+            }
+            _ => {}
+        });
 }
