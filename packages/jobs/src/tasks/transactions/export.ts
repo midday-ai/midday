@@ -23,6 +23,7 @@ const columns = [
   { label: "Currency", key: "currency" },
   { label: "Formatted amount", key: "formattedAmount" },
   { label: "VAT", key: "vat" },
+  { label: "From / To", key: "counterpartyName" },
   { label: "Category", key: "category" },
   { label: "Category description", key: "categoryDescription" },
   { label: "Status", key: "status" },

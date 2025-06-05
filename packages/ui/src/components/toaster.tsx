@@ -1,8 +1,8 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import { Icons } from "./icons";
 import { Progress } from "./progress";
+import { Spinner } from "./spinner";
 import {
   Toast,
   ToastClose,
@@ -44,10 +44,10 @@ export function Toaster() {
                             <Icons.Error className="text-[#FF3638]" />
                           )}
                           {props?.variant === "progress" && (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Spinner className="h-4 w-4 animate-spin" />
                           )}
                           {props?.variant === "spinner" && (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Spinner className="h-4 w-4 animate-spin" />
                           )}
                         </div>
                       )}

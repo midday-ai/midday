@@ -37,6 +37,7 @@ export const processExport = schemaTask({
         balance,
         currency,
         vat:calculated_vat,
+        counterparty_name,
         attachments:transaction_attachments(*),
         category:transaction_categories(id, name, description),
         bank_account:bank_accounts(id, name),
@@ -101,6 +102,7 @@ export const processExport = schemaTask({
               currency: transaction.currency,
             }).format(transaction?.vat)
           : "",
+        transaction?.counterparty_name ?? "",
         transaction?.category?.name ?? "",
         transaction?.category?.description ?? "",
         transaction?.attachments?.length > 0 ||

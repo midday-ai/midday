@@ -37,12 +37,6 @@ type ShareOptions = {
   fullPath: string;
 };
 
-type ExportResult = {
-  totalItems: number;
-  fullPath: string;
-  fileName: string;
-};
-
 type ExportData = {
   runId?: string;
   accessToken?: string;
@@ -113,14 +107,15 @@ export function ExportStatus() {
       });
 
       setToastId(id);
-    } else if (toastId) {
+    } else if (toastId && status === "IN_PROGRESS") {
       update(toastId, {
         id: toastId,
         progress: Number(progress),
       });
     }
 
-    if (status === "COMPLETED" && result && toastId) {
+    if (status === "COMPLETED" && result) {
+      // @ts-expect-error
       update(toastId, {
         id: toastId,
         title: "Export completed",
