@@ -17,16 +17,16 @@
     "@hono/zod-validator": "^0.7.0",
     "hono": "^4.7.11",
     "jose": "^6.0.11",
-    "plaid": "^34.0.0",
+    "plaid": "^35.0.0",
     "typesense": "^2.0.3",
     "workers-ai-provider": "^0.6.0",
     "xior": "^0.7.8",
-    "zod": "^3.25.46"
+    "zod": "^3.25.51"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250601.0",
+    "@cloudflare/workers-types": "^4.20250605.0",
     "@types/bun": "^1.2.15",
-    "wrangler": "^4.18.0"
+    "wrangler": "^4.19.1"
   },
   "exports": {
     ".": "./dist/index.js",

@@ -98,8 +98,8 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
               logo: document.logo ?? null,
               popularity: document.popularity,
               available_history:
-                typeof document.available_history === "number"
-                  ? document.available_history
+                typeof document.available_history === "string"
+                  ? Number(document.available_history)
                   : null,
               maximum_consent_validity:
                 typeof document.maximum_consent_validity === "number"
@@ -174,8 +174,8 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
               name: data.name,
               logo: data.logo ?? null,
               available_history:
-                typeof data.available_history === "number"
-                  ? data.available_history
+                typeof data.available_history === "string"
+                  ? Number(data.available_history)
                   : null,
               maximum_consent_validity:
                 typeof data.maximum_consent_validity === "string"
@@ -251,7 +251,10 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
             provider: result.provider,
             id: result.id,
             logo: result.logo ?? null,
-            available_history: result.available_history ?? null,
+            available_history:
+              typeof result.available_history === "string"
+                ? Number(result.available_history)
+                : null,
             maximum_consent_validity:
               typeof result.maximum_consent_validity === "number"
                 ? result.maximum_consent_validity
