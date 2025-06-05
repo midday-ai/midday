@@ -3,10 +3,7 @@
 import { Editor } from "@/components/invoice/editor";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
-import type { JSONContent } from "@tiptap/react";
-import { useEffect, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { useDebounceValue } from "usehooks-ts";
 import { LabelInput } from "./label-input";
 
 export function FromDetails() {
@@ -29,7 +26,7 @@ export function FromDetails() {
       />
 
       <Controller
-        name="template.fromDetails"
+        name="fromDetails"
         control={control}
         render={({ field }) => (
           <Editor
