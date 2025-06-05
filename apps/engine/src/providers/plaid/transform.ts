@@ -160,6 +160,9 @@ export const transformTransaction = ({
       transaction?.unofficial_currency_code?.toUpperCase() ||
       "USD",
     category: mapTransactionCategory({ transaction, amount }),
+    counterparty_name: transaction?.counterparties?.[0]?.name
+      ? capitalCase(transaction.counterparties[0].name)
+      : null,
     balance: null,
     status: transaction.pending ? "pending" : "posted",
   };

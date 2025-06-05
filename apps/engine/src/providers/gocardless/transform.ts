@@ -111,6 +111,18 @@ const transformDescription = ({
   return null;
 };
 
+const transformCounterpartyName = (transaction: Transaction) => {
+  if (transaction?.debtorName) {
+    return capitalCase(transaction.debtorName);
+  }
+
+  if (transaction?.creditorName) {
+    return capitalCase(transaction.creditorName);
+  }
+
+  return null;
+};
+
 export const transformTransaction = (
   transaction: TransformTransaction,
 ): BaseTransaction => {
@@ -154,6 +166,7 @@ export const transformTransaction = (
     currency_rate: currencyExchange?.rate || null,
     currency_source: currencyExchange?.currency?.toUpperCase() || null,
     balance,
+    counterparty_name: transformCounterpartyName(transaction),
     description,
     status: "posted",
   };

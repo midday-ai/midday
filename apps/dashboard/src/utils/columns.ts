@@ -29,7 +29,9 @@ export async function getInitialInvoicesColumnVisibility() {
     "vatRate",
     "taxRate",
     "internalNote",
+    "counterpartyName",
   ];
+
   const savedColumns = cookieStore.get(Cookies.InvoicesColumns)?.value;
   return savedColumns
     ? JSON.parse(savedColumns)

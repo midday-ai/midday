@@ -26,6 +26,7 @@ export type Transaction = {
   status: "posted" | "pending";
   balance: number | null;
   category: string | null;
+  counterparty_name: string | null;
   method: string;
   name: string;
   description: string | null;
