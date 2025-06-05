@@ -427,6 +427,11 @@ export async function getTransactions(
       query = query.orderBy(order(transactions.name), order(transactions.id));
     } else if (column === "status") {
       query = query.orderBy(order(transactions.status), order(transactions.id));
+    } else if (column === "counterparty") {
+      query = query.orderBy(
+        order(transactions.counterpartyName),
+        order(transactions.id),
+      );
     } else {
       query = query.orderBy(desc(transactions.date), desc(transactions.id));
     }

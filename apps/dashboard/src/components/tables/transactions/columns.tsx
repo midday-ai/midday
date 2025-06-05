@@ -279,11 +279,11 @@ export const columns: ColumnDef<Transaction>[] = [
       />
     ),
   },
-  // {
-  //   accessorKey: "counterpartyName",
-  //   header: "Counterparty",
-  //   cell: ({ row }) => row.original.counterpartyName ?? "-",
-  // },
+  {
+    accessorKey: "counterparty",
+    header: "Counterparty",
+    cell: ({ row }) => row.original.counterpartyName ?? "-",
+  },
   {
     accessorKey: "tags",
     header: "Tags",
