@@ -102,7 +102,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
                   ? document.available_history
                   : null,
               maximum_consent_validity:
-                typeof document.maximum_consent_validity === "string"
+                typeof document.maximum_consent_validity === "number"
                   ? document.maximum_consent_validity
                   : null,
               provider: document.provider,
