@@ -7,12 +7,9 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@midday/ui/command";
-import {
-  Popover,
-  PopoverContentWithoutPortal,
-  PopoverTrigger,
-} from "@midday/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import * as React from "react";
 import { useEffect } from "react";
@@ -42,39 +39,45 @@ export function CountrySelector({ defaultValue, onSelect }: Props) {
         <Button
           variant="outline"
           aria-expanded={open}
-          className="w-full justify-between font-normal truncate bg-accent"
+          className="w-full justify-between font-normal truncate"
         >
           {value ? selected?.name : "Select country"}
           <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContentWithoutPortal className="w-[225px] p-0">
-        <Command>
-          <CommandInput placeholder="Search country..." className="h-9 px-2" />
+      <PopoverContent className="w-[225px] p-0" align="start" portal={false}>
+        <Command loop>
+          <CommandInput
+            placeholder="Search country..."
+            className="h-9 px-2"
+            autoComplete="off"
+          />
           <CommandEmpty>No country found.</CommandEmpty>
-          <CommandGroup className="overflow-y-auto max-h-[230px] pt-2">
-            {Object.values(countries).map((country) => (
-              <CommandItem
-                key={country.code}
-                value={country.name}
-                onSelect={() => {
-                  setValue(country.code);
-                  onSelect?.(country.code, country.name);
-                  setOpen(false);
-                }}
-              >
-                {country.name}
-                <CheckIcon
-                  className={cn(
-                    "ml-auto h-4 w-4",
-                    value === country.code ? "opacity-100" : "opacity-0",
-                  )}
-                />
-              </CommandItem>
-            ))}
+          <CommandGroup>
+            <CommandList className="overflow-y-auto max-h-[230px] pt-2">
+              {Object.values(countries).map((country) => (
+                <CommandItem
+                  key={country.code}
+                  value={country.name}
+                  onSelect={() => {
+                    setValue(country.code);
+                    onSelect?.(country.code, country.name);
+                    setOpen(false);
+                  }}
+                >
+                  {country.name}
+                  <CheckIcon
+                    className={cn(
+                      "ml-auto h-4 w-4",
+                      value === country.code ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandList>
           </CommandGroup>
         </Command>
-      </PopoverContentWithoutPortal>
+      </PopoverContent>
     </Popover>
   );
 }

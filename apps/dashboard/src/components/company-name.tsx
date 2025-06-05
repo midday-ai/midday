@@ -25,7 +25,7 @@ const formSchema = z.object({
   name: z.string().min(2).max(32),
 });
 
-export function TeamName() {
+export function CompanyName() {
   const { data } = useTeamQuery();
   const updateTeamMutation = useTeamMutation();
 
@@ -44,10 +44,10 @@ export function TeamName() {
       <form onSubmit={onSubmit}>
         <Card>
           <CardHeader>
-            <CardTitle>Team Name</CardTitle>
+            <CardTitle>Company name</CardTitle>
             <CardDescription>
-              This is your team's visible name within Midday. For example, the
-              name of your company or department.
+              This is your company's visible name within Midday. For example,
+              the name of your company or department.
             </CardDescription>
           </CardHeader>
 

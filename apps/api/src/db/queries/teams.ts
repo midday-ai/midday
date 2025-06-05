@@ -12,6 +12,7 @@ export const getTeamById = async (db: Database, id: string) => {
       inboxId: teams.inboxId,
       plan: teams.plan,
       baseCurrency: teams.baseCurrency,
+      countryCode: teams.countryCode,
     })
     .from(teams)
     .where(eq(teams.id, id));
@@ -42,6 +43,7 @@ export const updateTeamById = async (
       inboxId: teams.inboxId,
       plan: teams.plan,
       baseCurrency: teams.baseCurrency,
+      countryCode: teams.countryCode,
     });
 
   return result;
@@ -51,6 +53,8 @@ type CreateTeamParams = {
   name: string;
   userId: string;
   baseCurrency?: string;
+  countryCode?: string;
+  logoUrl?: string;
 };
 
 export const createTeam = async (db: Database, params: CreateTeamParams) => {
@@ -60,6 +64,8 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
       .values({
         name: params.name,
         baseCurrency: params.baseCurrency,
+        countryCode: params.countryCode,
+        logoUrl: params.logoUrl,
       })
       .returning({ id: teams.id });
 

@@ -10,11 +10,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { Spinner } from "@midday/ui/spinner";
 import { stripSpecialCharacters } from "@midday/utils";
-import { Loader2 } from "lucide-react";
 import { useRef } from "react";
 
-export function TeamAvatar() {
+export function CompanyLogo() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { isLoading, uploadFile } = useUpload();
   const { data } = useTeamQuery();
@@ -41,19 +41,19 @@ export function TeamAvatar() {
     <Card>
       <div className="flex justify-between items-center pr-6">
         <CardHeader>
-          <CardTitle>Team Avatar</CardTitle>
+          <CardTitle>Company logo</CardTitle>
           <CardDescription>
-            This is your team's avatar. Click on the avatar to upload a custom
+            This is your company's logo. Click on the logo to upload a custom
             one from your files.
           </CardDescription>
         </CardHeader>
 
         <Avatar
-          className="rounded-full w-16 h-16 flex items-center justify-center bg-accent cursor-pointer"
+          className="rounded-none w-16 h-16 flex items-center justify-center bg-accent cursor-pointer"
           onClick={() => inputRef?.current?.click()}
         >
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Spinner className="h-4 w-4" />
           ) : (
             <>
               <AvatarImage

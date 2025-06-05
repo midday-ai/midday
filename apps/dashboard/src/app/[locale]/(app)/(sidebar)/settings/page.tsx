@@ -1,6 +1,7 @@
+import { CompanyCountry } from "@/components/company-country";
+import { CompanyLogo } from "@/components/company-logo";
+import { CompanyName } from "@/components/company-name";
 import { DeleteTeam } from "@/components/delete-team";
-import { TeamAvatar } from "@/components/team-avatar";
-import { TeamName } from "@/components/team-name";
 import { prefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 
@@ -13,8 +14,9 @@ export default async function Account() {
 
   return (
     <div className="space-y-12">
-      <TeamAvatar />
-      <TeamName />
+      <CompanyLogo />
+      <CompanyName />
+      <CompanyCountry />
       <DeleteTeam />
     </div>
   );

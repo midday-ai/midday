@@ -71,6 +71,10 @@ export const updateTeamByIdSchema = z.object({
       "Base currency for the team in ISO 4217 format (3-letter currency code)",
     example: "USD",
   }),
+  countryCode: z.string().optional().openapi({
+    description: "Country code for the team",
+    example: "US",
+  }),
 });
 
 export const createTeamSchema = z.object({
@@ -82,6 +86,14 @@ export const createTeamSchema = z.object({
     description:
       "Base currency for the team in ISO 4217 format (3-letter currency code)",
     example: "USD",
+  }),
+  countryCode: z.string().optional().openapi({
+    description: "Country code for the team",
+    example: "US",
+  }),
+  logoUrl: z.string().url().optional().openapi({
+    description: "URL to the team's logo image",
+    example: "https://cdn.midday.ai/logos/acme-corp.png",
   }),
 });
 

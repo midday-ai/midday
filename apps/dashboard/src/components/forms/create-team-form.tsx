@@ -19,20 +19,27 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 import { z } from "zod";
+import { CountrySelector } from "../country-selector";
 
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Team name must be at least 2 characters.",
   }),
+  countryCode: z.string(),
   baseCurrency: z.string(),
 });
 
 type Props = {
   defaultCurrencyPromise: Promise<string>;
+  defaultCountryCodePromise: Promise<string>;
 };
 
-export function CreateTeamForm({ defaultCurrencyPromise }: Props) {
+export function CreateTeamForm({
+  defaultCurrencyPromise,
+  defaultCountryCodePromise,
+}: Props) {
   const currency = use(defaultCurrencyPromise);
+  const countryCode = use(defaultCountryCodePromise);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -60,6 +67,7 @@ export function CreateTeamForm({ defaultCurrencyPromise }: Props) {
     defaultValues: {
       name: "",
       baseCurrency: currency,
+      countryCode: countryCode ?? "",
     },
   });
 
@@ -67,6 +75,7 @@ export function CreateTeamForm({ defaultCurrencyPromise }: Props) {
     createTeamMutation.mutate({
       name: values.name,
       baseCurrency: values.baseCurrency,
+      countryCode: values.countryCode,
     });
   }
 
@@ -77,12 +86,13 @@ export function CreateTeamForm({ defaultCurrencyPromise }: Props) {
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Company name</FormLabel>
+            <FormItem className="mt-4 w-full">
+              <FormLabel className="text-xs text-[#666] font-normal">
+                Company name
+              </FormLabel>
               <FormControl>
                 <Input
                   autoFocus
-                  className="mt-2"
                   placeholder="Ex: Acme Marketing or Acme Co"
                   autoComplete="off"
                   autoCapitalize="none"
@@ -99,17 +109,42 @@ export function CreateTeamForm({ defaultCurrencyPromise }: Props) {
 
         <FormField
           control={form.control}
+          name="countryCode"
+          render={({ field }) => (
+            <FormItem className="mt-4 w-full">
+              <FormLabel className="text-xs text-[#666] font-normal">
+                Country
+              </FormLabel>
+              <FormControl className="w-full">
+                <CountrySelector
+                  defaultValue={field.value ?? ""}
+                  onSelect={(code, name) => {
+                    field.onChange(name);
+                    form.setValue("countryCode", code);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="baseCurrency"
           render={({ field }) => (
             <FormItem className="mt-4 border-b border-border pb-4">
-              <FormLabel>Base currency</FormLabel>
+              <FormLabel className="text-xs text-[#666] font-normal">
+                Base currency
+              </FormLabel>
               <FormControl>
                 <SelectCurrency currencies={uniqueCurrencies} {...field} />
               </FormControl>
 
               <FormDescription>
                 If you have multiple accounts in different currencies, this will
-                be the default currency for your team. You can change it later.
+                be the default currency for your company. You can change it
+                later.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -119,7 +154,9 @@ export function CreateTeamForm({ defaultCurrencyPromise }: Props) {
         <SubmitButton
           className="mt-6 w-full"
           type="submit"
-          isSubmitting={changeTeamMutation.isPending}
+          isSubmitting={
+            changeTeamMutation.isPending || createTeamMutation.isPending
+          }
         >
           Create
         </SubmitButton>

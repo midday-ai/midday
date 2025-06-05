@@ -1224,6 +1224,7 @@ export const teams = pgTable(
     inboxEmail: text("inbox_email"),
     inboxForwarding: boolean("inbox_forwarding").default(true),
     baseCurrency: text("base_currency"),
+    countryCode: text("country_code"),
     documentClassification: boolean("document_classification").default(false),
     flags: text().array(),
     canceledAt: timestamp("canceled_at", {
