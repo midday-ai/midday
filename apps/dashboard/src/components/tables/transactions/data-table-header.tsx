@@ -135,7 +135,7 @@ export function DataTableHeader({ table, loading }: Props) {
               variant="ghost"
               onClick={() => createSortQuery("counterparty")}
             >
-              <span>Counterparty</span>
+              <span>From / To</span>
               {"counterparty" === column && value === "asc" && (
                 <ArrowDown size={16} />
               )}

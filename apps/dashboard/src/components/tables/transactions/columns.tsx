@@ -281,7 +281,7 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "counterparty",
-    header: "Counterparty",
+    header: "From / To",
     cell: ({ row }) => row.original.counterpartyName ?? "-",
   },
   {
