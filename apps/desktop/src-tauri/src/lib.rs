@@ -1,4 +1,5 @@
 use std::env;
+use std::sync::{Arc, Mutex};
 use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder, Position, PhysicalPosition, Listener, TitleBarStyle};
 use tauri_plugin_deep_link::DeepLinkExt;
 
@@ -9,6 +10,9 @@ use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 
 // Add image crate for PNG decoding
 use image;
+
+// Global state for authentication status
+type AuthState = Arc<Mutex<bool>>;
 
 #[tauri::command]
 fn show_window(window: tauri::Window) -> Result<(), String> {
@@ -31,15 +35,33 @@ fn show_window(window: tauri::Window) -> Result<(), String> {
     Ok(())
 }
 
-fn toggle_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+fn toggle_search_window(app: &tauri::AppHandle, auth_state: &AuthState) -> Result<(), Box<dyn std::error::Error>> {
+    let is_authenticated = *auth_state.lock().unwrap();
+    
+    println!("🔍 Toggle search window called - authenticated: {}", is_authenticated);
+    
+    if !is_authenticated {
+        println!("❌ User not authenticated, showing main window instead");
+        // User is not authenticated, show main window to allow login
+        if let Some(main_window) = app.get_webview_window("main") {
+            main_window.show()?;
+            main_window.set_focus()?;
+        }
+        return Ok(());
+    }
+
+    println!("✅ User authenticated, proceeding with search toggle");
+    // User is authenticated, proceed with search toggle
     let search_window_label = "search";
 
     if let Some(window) = app.get_webview_window(search_window_label) {
         if window.is_visible()? {
+            println!("🔍 Search window is visible, hiding it");
             // Emit close event to search window
             let _ = window.emit("search-window-open", false);
             window.hide()?;
         } else {
+            println!("🔍 Search window is hidden, showing it");
             // Set always on top when showing
             window.set_always_on_top(true)?;
             position_window_on_current_monitor(app, &window)?;
@@ -49,6 +71,8 @@ fn toggle_search_window(app: &tauri::AppHandle) -> Result<(), Box<dyn std::error
             // Emit open event to search window
             let _ = window.emit("search-window-open", true);
         }
+    } else {
+        println!("❌ Search window not found!");
     }
 
     Ok(())
@@ -233,11 +257,20 @@ pub fn run() {
             let app_url_clone = app_url.clone();
             let app_handle = app.handle().clone();
 
+            // Create shared authentication state
+            let auth_state: AuthState = Arc::new(Mutex::new(false));
+
             // Clone app_handle before it gets moved into closures
             let app_handle_for_deep_links = app_handle.clone();
             let app_handle_for_navigation = app_handle.clone();
             let app_handle_for_search = app_handle.clone();
             let app_handle_for_tray = app_handle.clone();
+            
+            // Clone auth_state for closures
+            let auth_state_for_shortcut = auth_state.clone();
+            let auth_state_for_tray = auth_state.clone();
+            let auth_state_for_menu = auth_state.clone();
+            let auth_state_for_listener = auth_state.clone();
 
             // Initialize global shortcuts
             {
@@ -254,7 +287,7 @@ pub fn run() {
                             if shortcut == &search_shortcut
                                 && event.state() == ShortcutState::Pressed
                             {
-                                let _ = toggle_search_window(&app_handle_for_search);
+                                let _ = toggle_search_window(&app_handle_for_search, &auth_state_for_shortcut);
                             }
                         })
                         .build(),
@@ -288,7 +321,7 @@ pub fn run() {
             .decorations(false)
             .visible(false)
             .transparent(true)
-            .shadow(false)
+            .shadow(true)
             .hidden_title(true)
             .title_bar_style(TitleBarStyle::Overlay)
             .on_download(|_window, _event| {
@@ -320,6 +353,19 @@ pub fn run() {
             });
 
             let window = win_builder.build().unwrap();
+
+            // Listen for authentication status changes from frontend
+            window.listen("auth-status-changed", move |event| {
+                println!("🔐 Received auth-status-changed event");
+                let payload = event.payload();
+                println!("🔐 Auth payload: {}", payload);
+                if let Ok(is_authenticated) = payload.parse::<bool>() {
+                    println!("🔐 Setting auth state to: {}", is_authenticated);
+                    *auth_state_for_listener.lock().unwrap() = is_authenticated;
+                } else {
+                    println!("❌ Failed to parse auth status from payload: {}", payload);
+                }
+            });
 
             // Fallback timer to ensure main window shows on first launch
             let window_clone = window.clone();
@@ -374,7 +420,7 @@ pub fn run() {
                 &quit_item,
             ])?;
 
-            // Clone app handle for menu events
+            // Clone app handle for menu events  
             let app_handle_for_menu = app_handle.clone();
 
             let _tray = TrayIconBuilder::new()
@@ -392,7 +438,7 @@ pub fn run() {
                         }
                         "search" => {
                             // Toggle search window
-                            let _ = toggle_search_window(&app_handle_for_menu);
+                            let _ = toggle_search_window(&app_handle_for_menu, &auth_state_for_menu);
                         }
                         "updates" => {
                             // Placeholder for future update functionality
@@ -414,7 +460,7 @@ pub fn run() {
                         ..
                     } = event
                     {
-                        let _ = toggle_search_window(&app_handle_for_tray);
+                        let _ = toggle_search_window(&app_handle_for_tray, &auth_state_for_tray);
                     }
                 })
                 .build(app)?;

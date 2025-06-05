@@ -1,10 +1,11 @@
 "use client";
 
-import { getCurrentWindow, invoke } from "@midday/desktop-client/core";
+import { emit, getCurrentWindow, invoke } from "@midday/desktop-client/core";
 import {
   isDesktopApp,
   listenForDeepLinks,
 } from "@midday/desktop-client/platform";
+import { createClient } from "@midday/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -12,6 +13,87 @@ import { useEffect } from "react";
 // And to handle deep links
 export function DesktopProvider() {
   const router = useRouter();
+
+  const supabase = createClient();
+
+  useEffect(() => {
+    if (!isDesktopApp()) {
+      return;
+    }
+
+    console.log("🔐 Setting up auth state management");
+
+    // Check initial auth state immediately
+    const checkInitialAuthState = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        const authenticated = !!session;
+
+        console.log("🔐 Initial auth state check:", {
+          authenticated,
+          hasSession: !!session,
+          sessionUserId: session?.user?.id,
+        });
+
+        // Emit initial auth status to Tauri backend
+        console.log("🔐 Emitting initial auth-status-changed:", authenticated);
+        await emit("auth-status-changed", authenticated);
+        console.log(
+          "✅ Successfully emitted initial auth-status-changed:",
+          authenticated,
+        );
+      } catch (error) {
+        console.error("❌ Failed to check/emit initial auth status:", error);
+      }
+    };
+
+    // Check auth state immediately
+    checkInitialAuthState();
+
+    // Listen for auth state changes - this fires immediately with current session
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const authenticated = !!session;
+
+      console.log("🔐 Auth state change detected:", {
+        event,
+        authenticated,
+        hasSession: !!session,
+        sessionUserId: session?.user?.id,
+      });
+
+      // Emit auth status to Tauri backend
+      try {
+        console.log("🔐 About to emit auth-status-changed:", authenticated);
+        await emit("auth-status-changed", authenticated);
+        console.log(
+          "✅ Successfully emitted auth-status-changed:",
+          authenticated,
+        );
+      } catch (error) {
+        console.error("❌ Failed to emit auth status:", error);
+      }
+
+      // If user logs out, request search window to close
+      if (!authenticated) {
+        console.log("🔐 User logged out, closing search window");
+        try {
+          await emit("search-window-close-requested", {});
+        } catch (error) {
+          console.error("Failed to close search window:", error);
+        }
+      } else {
+        console.log("🔐 User is authenticated, search should be available now");
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   useEffect(() => {
     if (!isDesktopApp()) {
