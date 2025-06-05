@@ -4,6 +4,7 @@ import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-
 import { getUrl } from "@/utils/environment";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { Spinner } from "@midday/ui/spinner";
 import {
   Tooltip,
   TooltipContent,
@@ -12,7 +13,6 @@ import {
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
-import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -166,11 +166,7 @@ export function ReconnectProvider({
   if (variant === "button") {
     return (
       <Button variant="outline" onClick={handleOnClick} disabled={isLoading}>
-        {isLoading ? (
-          <Loader2 className="size-3.5 animate-spin" />
-        ) : (
-          "Reconnect"
-        )}
+        {isLoading ? <Spinner className="size-3.5" /> : "Reconnect"}
       </Button>
     );
   }
@@ -187,7 +183,7 @@ export function ReconnectProvider({
             disabled={isLoading}
           >
             {isLoading ? (
-              <Loader2 className="size-3.5 animate-spin" />
+              <Spinner className="size-3.5" />
             ) : (
               <Icons.Reconnect size={16} />
             )}

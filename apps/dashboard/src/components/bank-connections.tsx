@@ -218,6 +218,14 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
       queryClient.invalidateQueries({
         queryKey: trpc.team.current.queryKey(),
       });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.transactions.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.transactions.get.infiniteQueryKey(),
+      });
     }
   }, [status]);
 
