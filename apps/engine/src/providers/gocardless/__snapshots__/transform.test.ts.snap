@@ -5,6 +5,7 @@ exports[`Transform income transaction 1`] = `
   "amount": -38000,
   "balance": null,
   "category": null,
+  "counterparty_name": null,
   "currency": "SEK",
   "currency_rate": null,
   "currency_source": null,

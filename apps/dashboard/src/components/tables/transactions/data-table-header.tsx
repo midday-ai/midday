@@ -128,6 +128,24 @@ export function DataTableHeader({ table, loading }: Props) {
           </TableHead>
         )}
 
+        {/* {isVisible("counterpartyName") && (
+          <TableHead className="md:min-w-[200px] hidden md:table-cell px-3 md:px-4 py-2">
+            <Button
+              className="p-0 hover:bg-transparent space-x-2"
+              variant="ghost"
+              onClick={() => createSortQuery("counterpartyName")}
+            >
+              <span>Counterparty</span>
+              {"counterpartyName" === column && value === "asc" && (
+                <ArrowDown size={16} />
+              )}
+              {"counterpartyName" === column && value === "desc" && (
+                <ArrowUp size={16} />
+              )}
+            </Button>
+          </TableHead>
+        )} */}
+
         {isVisible("tags") && (
           <TableHead className="md:min-w-[170px] hidden md:table-cell px-3 md:px-4 py-2">
             <Button

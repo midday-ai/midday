@@ -218,6 +218,7 @@ export const transactions = pgTable(
     description: text(),
     categorySlug: text("category_slug"),
     baseAmount: numericCasted({ precision: 10, scale: 2 }),
+    counterpartyName: text("counterparty_name"),
     baseCurrency: text("base_currency"),
     recurring: boolean(),
     frequency: transactionFrequencyEnum(),

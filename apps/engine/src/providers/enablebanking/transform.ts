@@ -98,7 +98,10 @@ export const transformTransactionName = (
   transaction: GetTransaction,
 ): string => {
   // Try to get name from remittance information first
-  if (transaction.remittance_information?.length) {
+  if (
+    transaction.remittance_information?.length &&
+    transaction.remittance_information[0] !== ""
+  ) {
     return transaction.remittance_information[0];
   }
 
@@ -164,8 +167,15 @@ const transformDescription = ({
   transaction,
   name,
 }: TransactionDescription) => {
-  if (transaction?.remittance_information?.length) {
-    const text = transaction.remittance_information.join(" ");
+  if (
+    transaction?.remittance_information?.length &&
+    transaction.remittance_information.some(
+      (info) => info && info.trim() !== "",
+    )
+  ) {
+    const text = transaction.remittance_information
+      .filter((info) => info && info.trim() !== "")
+      .join(" ");
     const description = capitalCase(text);
 
     // NOTE: Sometimes the description is the same as name
@@ -183,6 +193,20 @@ const formatAmount = (transaction: GetTransaction): number => {
   return transaction.credit_debit_indicator === "CRDT" ? amount : -amount;
 };
 
+const transformCounterpartyName = (transaction: GetTransaction) => {
+  const { credit_debit_indicator, debtor, creditor } = transaction;
+
+  if (credit_debit_indicator === "CRDT" && debtor?.name) {
+    return capitalCase(debtor.name);
+  }
+
+  if (credit_debit_indicator === "DBIT" && creditor?.name) {
+    return capitalCase(creditor.name);
+  }
+
+  return null;
+};
+
 export const transformTransaction = (
   transaction: GetTransaction,
 ): Transaction => {
@@ -195,8 +219,11 @@ export const transformTransaction = (
     currency: transaction.transaction_amount.currency,
     date: transaction.booking_date,
     status: "posted",
-    balance: null,
+    balance: transaction.balance_after_transaction
+      ? Number.parseFloat(transaction.balance_after_transaction.amount)
+      : null,
     category: transformTransactionCategory(transaction),
+    counterparty_name: transformCounterpartyName(transaction),
     method: transformTransactionMethod(transaction),
     name,
     description,

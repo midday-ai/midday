@@ -3,8 +3,9 @@
 exports[`Transform income transaction 1`] = `
 {
   "amount": 25000,
-  "balance": null,
+  "balance": 25000,
   "category": "income",
+  "counterparty_name": null,
   "currency": "SEK",
   "currency_rate": null,
   "currency_source": null,
@@ -20,8 +21,9 @@ exports[`Transform income transaction 1`] = `
 exports[`Transform expense transaction 1`] = `
 {
   "amount": 25000,
-  "balance": null,
+  "balance": 25000,
   "category": "income",
+  "counterparty_name": null,
   "currency": "SEK",
   "currency_rate": null,
   "currency_source": null,

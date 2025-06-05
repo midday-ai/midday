@@ -212,6 +212,10 @@ export const transactionResponseSchema = z
       description: "Currency code of the transaction in ISO 4217 format",
       example: "USD",
     }),
+    counterpartyName: z.string().nullable().openapi({
+      description: "Name of the counterparty",
+      example: "Spotify AB",
+    }),
     date: z.string().openapi({
       description: "Date and time of the transaction in ISO 8601 format",
       example: "2024-05-01T12:00:00.000Z",

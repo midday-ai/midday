@@ -131,6 +131,9 @@ export const transformTransaction = ({
     currency: "USD",
     category: mapTransactionCategory({ transaction, amount }),
     balance: transaction?.running_balance ? +transaction.running_balance : null,
+    counterparty_name: transaction?.details?.counterparty?.name
+      ? capitalCase(transaction.details.counterparty.name)
+      : null,
     status: transaction?.status === "posted" ? "posted" : "pending",
   };
 };

@@ -10,6 +10,7 @@ const transactionSchema = z.object({
   date: z.string(),
   name: z.string(),
   status: z.enum(["pending", "posted"]),
+  counterparty_name: z.string().nullable(),
   balance: z.number().nullable(),
   currency: z.string(),
   amount: z.number(),

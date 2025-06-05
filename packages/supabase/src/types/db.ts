@@ -9,6 +9,67 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      api_keys: {
+        Row: {
+          created_at: string;
+          id: string;
+          is_active: boolean;
+          key_encrypted: string;
+          key_hash: string | null;
+          last_used_at: string | null;
+          name: string | null;
+          scopes: string[];
+          team_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          key_encrypted: string;
+          key_hash?: string | null;
+          last_used_at?: string | null;
+          name?: string | null;
+          scopes: string[];
+          team_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          key_encrypted?: string;
+          key_hash?: string | null;
+          last_used_at?: string | null;
+          name?: string | null;
+          scopes?: string[];
+          team_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "team_limits_metrics";
+            referencedColumns: ["team_id"];
+          },
+          {
+            foreignKeyName: "api_keys_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "api_keys_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       apps: {
         Row: {
           app_id: string;
@@ -928,6 +989,8 @@ export type Database = {
           paid_at: string | null;
           payment_details: Json | null;
           reminder_sent_at: string | null;
+          scheduled_at: string | null;
+          scheduled_job_id: string | null;
           sent_at: string | null;
           sent_to: string | null;
           status: Database["public"]["Enums"]["invoice_status"];
@@ -968,6 +1031,8 @@ export type Database = {
           paid_at?: string | null;
           payment_details?: Json | null;
           reminder_sent_at?: string | null;
+          scheduled_at?: string | null;
+          scheduled_job_id?: string | null;
           sent_at?: string | null;
           sent_to?: string | null;
           status?: Database["public"]["Enums"]["invoice_status"];
@@ -1008,6 +1073,8 @@ export type Database = {
           paid_at?: string | null;
           payment_details?: Json | null;
           reminder_sent_at?: string | null;
+          scheduled_at?: string | null;
+          scheduled_job_id?: string | null;
           sent_at?: string | null;
           sent_to?: string | null;
           status?: Database["public"]["Enums"]["invoice_status"];
@@ -1684,6 +1751,7 @@ export type Database = {
           base_currency: string | null;
           category: Database["public"]["Enums"]["transactionCategories"] | null;
           category_slug: string | null;
+          counterparty_name: string | null;
           created_at: string;
           currency: string;
           date: string;
@@ -1718,6 +1786,7 @@ export type Database = {
             | Database["public"]["Enums"]["transactionCategories"]
             | null;
           category_slug?: string | null;
+          counterparty_name?: string | null;
           created_at?: string;
           currency: string;
           date: string;
@@ -1749,6 +1818,7 @@ export type Database = {
             | Database["public"]["Enums"]["transactionCategories"]
             | null;
           category_slug?: string | null;
+          counterparty_name?: string | null;
           created_at?: string;
           currency?: string;
           date?: string;
@@ -2140,6 +2210,7 @@ export type Database = {
           base_currency: string | null;
           category: Database["public"]["Enums"]["transactionCategories"] | null;
           category_slug: string | null;
+          counterparty_name: string | null;
           created_at: string;
           currency: string;
           date: string;
@@ -2544,39 +2615,23 @@ export type Database = {
         }[];
       };
       global_semantic_search: {
-        Args:
-          | {
-              search_term: string;
-              team_id: string;
-              start_date?: string;
-              end_date?: string;
-              types?: string[];
-              amount?: number;
-              amount_min?: number;
-              amount_max?: number;
-              status?: string;
-              currency?: string;
-              language?: string;
-              due_date_start?: string;
-              due_date_end?: string;
-            }
-          | {
-              search_term: string;
-              team_id: string;
-              start_date?: string;
-              end_date?: string;
-              types?: string[];
-              amount?: number;
-              amount_min?: number;
-              amount_max?: number;
-              status?: string;
-              currency?: string;
-              language?: string;
-              due_date_start?: string;
-              due_date_end?: string;
-              max_results?: number;
-              items_per_table_limit?: number;
-            };
+        Args: {
+          team_id: string;
+          search_term?: string;
+          start_date?: string;
+          end_date?: string;
+          types?: string[];
+          amount?: number;
+          amount_min?: number;
+          amount_max?: number;
+          status?: string;
+          currency?: string;
+          language?: string;
+          due_date_start?: string;
+          due_date_end?: string;
+          max_results?: number;
+          items_per_table_limit?: number;
+        };
         Returns: {
           id: string;
           type: string;
@@ -2806,7 +2861,7 @@ export type Database = {
         | "deleted"
         | "done";
       inbox_type: "invoice" | "expense";
-      invoice_delivery_type: "create" | "create_and_send";
+      invoice_delivery_type: "create" | "create_and_send" | "scheduled";
       invoice_size: "a4" | "letter";
       invoice_status: "draft" | "overdue" | "paid" | "unpaid" | "canceled";
       plans: "trial" | "starter" | "pro";
@@ -3006,7 +3061,7 @@ export const Constants = {
         "done",
       ],
       inbox_type: ["invoice", "expense"],
-      invoice_delivery_type: ["create", "create_and_send"],
+      invoice_delivery_type: ["create", "create_and_send", "scheduled"],
       invoice_size: ["a4", "letter"],
       invoice_status: ["draft", "overdue", "paid", "unpaid", "canceled"],
       plans: ["trial", "starter", "pro"],
