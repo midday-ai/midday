@@ -8,5 +8,5 @@ export default {
     "../../packages/invoice/src/**/*.{ts,tsx}",
   ],
   presets: [baseConfig],
-  plugins: [require("@todesktop/tailwind-variants")],
+  plugins: [require("@midday/desktop-client/desktop-variants")],
 } satisfies Config;

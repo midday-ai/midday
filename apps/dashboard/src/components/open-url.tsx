@@ -1,8 +1,8 @@
 "use client";
 
+import { openUrl } from "@midday/desktop-client/core";
+import { isDesktopApp } from "@midday/desktop-client/platform";
 import { cn } from "@midday/ui/cn";
-import { platform } from "@todesktop/client-core";
-import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 
 export function OpenURL({
   href,
@@ -11,7 +11,7 @@ export function OpenURL({
 }: { href: string; children: React.ReactNode; className?: string }) {
   const handleOnClick = () => {
     if (isDesktopApp()) {
-      platform.os.openURL(href);
+      openUrl(href);
     } else {
       window.open(href, "_blank");
     }

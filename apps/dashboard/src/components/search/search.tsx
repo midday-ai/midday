@@ -11,6 +11,8 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useSearchStore } from "@/store/search";
 import { useTRPC } from "@/trpc/client";
 import { formatDate } from "@/utils/format";
+import { emit, listen } from "@midday/desktop-client/core";
+import { isDesktopApp } from "@midday/desktop-client/platform";
 import {
   Command,
   CommandEmpty,
@@ -25,6 +27,7 @@ import { formatISO } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { useDebounceValue } from "usehooks-ts";
 import { useCopyToClipboard } from "usehooks-ts";
 import { FilePreviewIcon } from "../file-preview-icon";
@@ -375,6 +378,7 @@ export function Search() {
   const { data: user } = useUserQuery();
   const [debounceDelay, setDebounceDelay] = useState(200);
   const ref = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const height = useRef<HTMLDivElement>(null);
   const { setOpen } = useSearchStore();
   const { setParams: setInvoiceParams } = useInvoiceParams();
@@ -382,6 +386,34 @@ export function Search() {
   const { setParams: setTrackerParams } = useTrackerParams();
   const { setParams: setTransactionParams } = useTransactionParams();
   const router = useRouter();
+
+  useHotkeys(
+    "esc",
+    () => {
+      setDebouncedSearch("");
+      emit("search-window-close-requested");
+    },
+    {
+      enableOnFormTags: true,
+    },
+  );
+
+  useEffect(() => {
+    const unlistenPromise = listen("search-window-open", (event) => {
+      const isOpen = event.payload as boolean;
+      if (isOpen) {
+        // Focus the search input field when window opens
+        setTimeout(() => {
+          searchInputRef.current?.focus();
+        }, 100); // Small delay to ensure window is fully rendered
+      }
+    });
+
+    // Cleanup function
+    return () => {
+      unlistenPromise.then((unlisten) => unlisten());
+    };
+  }, []);
 
   const handleNavigation = (path: string) => {
     setOpen();
@@ -578,7 +610,7 @@ export function Search() {
   }, [combinedData, debouncedSearch]);
 
   useEffect(() => {
-    if (height.current && ref.current) {
+    if (height.current && ref.current && !isDesktopApp()) {
       const el = height.current;
       const wrapper = ref.current;
       let animationFrame: number;
@@ -599,10 +631,11 @@ export function Search() {
   return (
     <Command
       shouldFilter={false}
-      className="overflow-hidden p-0 relative w-full bg-background backdrop-filter dark:border-[#2C2C2C] backdrop-blur-lg dark:bg-[#151515]/[99] h-auto border border-border"
+      className="search-container overflow-hidden p-0 relative w-full bg-background backdrop-filter dark:border-[#2C2C2C] backdrop-blur-lg dark:bg-[#151515]/[99] h-auto border border-border"
     >
       <div className="border-b border-border relative">
         <CommandInput
+          ref={searchInputRef}
           placeholder="Type a command or search..."
           onValueChange={(value: string) => {
             setDebouncedSearch(value);

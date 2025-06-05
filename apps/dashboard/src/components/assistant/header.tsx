@@ -12,7 +12,7 @@ export function Header() {
       </div>
 
       <Button
-        className="flex md:hidden todesktop:hidden"
+        className="flex md:hidden desktop:hidden"
         size="icon"
         variant="ghost"
         onClick={() => setOpen()}

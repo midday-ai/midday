@@ -1,6 +1,6 @@
 import { createEnableBankingLinkAction } from "@/actions/institutions/create-enablebanking-link";
+import { isDesktopApp } from "@midday/desktop-client/platform";
 import { useToast } from "@midday/ui/use-toast";
-import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { useAction } from "next-safe-action/hooks";
 import { BankConnectButton } from "./bank-connect-button";
 

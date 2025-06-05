@@ -2,6 +2,7 @@
 
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { isDesktopApp } from "@midday/desktop-client/platform";
 import { cn } from "@midday/ui/cn";
 import { SubmitButton } from "@midday/ui/submit-button";
 import {
@@ -11,7 +12,6 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useQuery } from "@tanstack/react-query";
-import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Check } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";

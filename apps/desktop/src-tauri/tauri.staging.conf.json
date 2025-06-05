@@ -1,0 +1,12 @@
+{
+  "productName": "Midday Staging",
+  "identifier": "ai.midday.app.staging",
+  "bundle": {
+    "icon": [
+      "icons/staging/32x32.png",
+      "icons/staging/128x128.png",
+      "icons/staging/128x128@2x.png",
+      "icons/staging/icon.icns"
+    ]
+  }
+}

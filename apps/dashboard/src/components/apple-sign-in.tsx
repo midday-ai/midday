@@ -1,10 +1,10 @@
 "use client";
 
 import { getUrl } from "@/utils/environment";
+import { isDesktopApp } from "@midday/desktop-client/platform";
 import { createClient } from "@midday/supabase/client";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
-import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { useState } from "react";
 
 export function AppleSignIn() {
