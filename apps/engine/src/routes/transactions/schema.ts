@@ -83,6 +83,9 @@ export const TransactionSchema = z
     status: z.enum(["pending", "posted"]).openapi({
       example: "posted",
     }),
+    counterparty_name: z.string().nullable().openapi({
+      example: "Spotify AB",
+    }),
     category: z
       .string()
       .openapi({
