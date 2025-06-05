@@ -25,9 +25,9 @@ export const InstitutionSchema = z
       })
       .nullable(),
     maximum_consent_validity: z
-      .string()
+      .number()
       .openapi({
-        example: "personal",
+        example: 365,
       })
       .optional()
       .nullable(),

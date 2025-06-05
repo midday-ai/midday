@@ -253,10 +253,9 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
             logo: result.logo ?? null,
             available_history: result.available_history ?? null,
             maximum_consent_validity:
-              typeof result.maximum_consent_validity === "string" ||
-              result.maximum_consent_validity == null
+              typeof result.maximum_consent_validity === "number"
                 ? result.maximum_consent_validity
-                : (result.maximum_consent_validity?.toString() ?? null),
+                : null,
             country: Array.isArray(result.countries)
               ? result.countries.at(0)
               : undefined,
