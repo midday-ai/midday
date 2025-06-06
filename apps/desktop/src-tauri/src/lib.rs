@@ -1,6 +1,6 @@
 use std::env;
 use std::sync::{Arc, Mutex};
-use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder, Position, PhysicalPosition, Listener, TitleBarStyle};
+use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder, Position, PhysicalPosition, TitleBarStyle};
 use tauri_plugin_deep_link::DeepLinkExt;
 
 // Add tray imports
@@ -53,15 +53,26 @@ fn set_auth_status(auth_status: bool, app_state: tauri::State<AuthState>, app_ha
     Ok(())
 }
 
+#[tauri::command]
+fn get_auth_status(app_state: tauri::State<AuthState>) -> Result<bool, String> {
+    let status = *app_state.lock().map_err(|e| format!("Failed to lock auth state: {}", e))?;
+    println!("🔐 Debug command: Current auth status is {}", status);
+    Ok(status)
+}
+
+
+
 fn toggle_search_window(app: &tauri::AppHandle, auth_state: &AuthState) -> Result<(), Box<dyn std::error::Error>> {
+    println!("🔍 === TOGGLE_SEARCH_WINDOW CALLED ===");
+    
     let is_authenticated = {
         let guard = auth_state.lock().unwrap();
         let value = *guard;
-        println!("🔍 Current auth state lock acquired: {}", value);
+        println!("🔍 Current auth state from lock: {}", value);
         value
     };
     
-    println!("🔍 Toggle search window called - authenticated: {}", is_authenticated);
+    println!("🔍 Final auth decision: authenticated = {}", is_authenticated);
     
     if !is_authenticated {
         println!("❌ User not authenticated, showing main window instead");
@@ -77,7 +88,9 @@ fn toggle_search_window(app: &tauri::AppHandle, auth_state: &AuthState) -> Resul
     // User is authenticated, proceed with search toggle
     let search_window_label = "search";
 
+    println!("🔍 Looking for existing search window...");
     if let Some(window) = app.get_webview_window(search_window_label) {
+        println!("🔍 Found existing search window");
         if window.is_visible()? {
             println!("🔍 Search window is visible, hiding it");
             // Emit close event to search window
@@ -99,9 +112,11 @@ fn toggle_search_window(app: &tauri::AppHandle, auth_state: &AuthState) -> Resul
         // Create search window on-demand
         let app_url = get_app_url();
         let app_clone = app.clone();
-        tauri::async_runtime::spawn(async move {
+        
+        // Use blocking approach for shortcut/tray handlers to ensure window is created
+        tauri::async_runtime::block_on(async move {
             if let Ok(_) = create_preloaded_search_window(&app_clone, &app_url).await {
-                println!("✅ Search window created successfully");
+                println!("✅ Search window created successfully via block_on");
                 // After creation, show it immediately
                 if let Some(window) = app_clone.get_webview_window("search") {
                     let _ = window.set_always_on_top(true);
@@ -109,6 +124,9 @@ fn toggle_search_window(app: &tauri::AppHandle, auth_state: &AuthState) -> Resul
                     let _ = window.show();
                     let _ = window.set_focus();
                     let _ = window.emit("search-window-open", true);
+                    println!("✅ Search window shown successfully");
+                } else {
+                    println!("❌ Search window not found after creation");
                 }
             } else {
                 println!("❌ Failed to create search window");
@@ -198,15 +216,7 @@ async fn create_preloaded_search_window(app: &tauri::AppHandle, app_url: &str) -
     // Position window on primary monitor (will be repositioned when shown)
     search_window.center()?;
 
-    // Listen for close requests from frontend (e.g., ESC key)
-    let window_for_close = search_window.clone();
-    search_window.listen("search-window-close-requested", move |_event| {
-        // Emit close event to search window
-        let _ = window_for_close.emit("search-window-open", false);
-        // Turn off always on top and hide
-        let _ = window_for_close.set_always_on_top(false);
-        let _ = window_for_close.hide();
-    });
+    // Close requests are now handled via auth state changes and direct window management
 
     // Handle window events - comprehensive auto-hide behavior
     let window_clone = search_window.clone();
@@ -293,7 +303,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_deep_link::init())
-        .invoke_handler(tauri::generate_handler![show_window, set_auth_status])
+        .invoke_handler(tauri::generate_handler![show_window, set_auth_status, get_auth_status])
         .setup(move |app| {
             let app_url_clone = app_url.clone();
             let app_handle = app.handle().clone();
@@ -307,13 +317,8 @@ pub fn run() {
             // Clone app_handle before it gets moved into closures
             let app_handle_for_deep_links = app_handle.clone();
             let app_handle_for_navigation = app_handle.clone();
-            let app_handle_for_search = app_handle.clone();
-            let app_handle_for_tray = app_handle.clone();
             
-            // Clone auth_state for closures
-            let auth_state_for_shortcut = auth_state.clone();
-            let auth_state_for_tray = auth_state.clone();
-            let auth_state_for_menu = auth_state.clone();
+            // Auth state is now accessed via managed state for consistency
 
             // Initialize global shortcuts
             {
@@ -326,11 +331,25 @@ pub fn run() {
 
                 if let Ok(_) = app.handle().plugin(
                     tauri_plugin_global_shortcut::Builder::new()
-                        .with_handler(move |_app, shortcut, event| {
+                        .with_handler(move |app_handle, shortcut, event| {
                             if shortcut == &search_shortcut
                                 && event.state() == ShortcutState::Pressed
                             {
-                                let _ = toggle_search_window(&app_handle_for_search, &auth_state_for_shortcut);
+                                println!("🔍 Global shortcut triggered - checking auth via managed state");
+                                // Get auth state from managed state (same as commands use)
+                                if let Some(managed_auth_state) = app_handle.try_state::<AuthState>() {
+                                    let current_auth = *managed_auth_state.lock().unwrap();
+                                    println!("🔍 Shortcut: Auth state from managed state: {}", current_auth);
+                                    
+                                    // Use the same app_handle for both auth state and toggle function
+                                    let result = toggle_search_window(app_handle, &managed_auth_state);
+                                    match result {
+                                        Ok(_) => println!("🔍 Shortcut: toggle_search_window returned Ok"),
+                                        Err(e) => println!("🔍 Shortcut: toggle_search_window returned Err: {}", e)
+                                    }
+                                } else {
+                                    println!("❌ Failed to get managed auth state for shortcut");
+                                }
                             }
                         })
                         .build(),
@@ -463,8 +482,13 @@ pub fn run() {
                             }
                         }
                         "search" => {
-                            // Toggle search window
-                            let _ = toggle_search_window(&app_handle_for_menu, &auth_state_for_menu);
+                            // Toggle search window using managed state
+                            println!("🔍 Tray menu search clicked - checking auth via managed state");
+                            if let Some(managed_auth_state) = app_handle_for_menu.try_state::<AuthState>() {
+                                let _ = toggle_search_window(&app_handle_for_menu, &managed_auth_state);
+                            } else {
+                                println!("❌ Failed to get managed auth state for tray menu");
+                            }
                         }
                         "updates" => {
                             // Placeholder for future update functionality
@@ -478,15 +502,21 @@ pub fn run() {
                         _ => {}
                     }
                 })
-                .on_tray_icon_event(move |_tray, event| {
-                    // Handle left clicks to toggle search window (keep existing behaıvior)
+                .on_tray_icon_event(move |tray, event| {
+                    // Handle left clicks to toggle search window (keep existing behavior)
                     if let TrayIconEvent::Click {
                         button: MouseButton::Left,
                         button_state: MouseButtonState::Up,
                         ..
                     } = event
                     {
-                        let _ = toggle_search_window(&app_handle_for_tray, &auth_state_for_tray);
+                        println!("🔍 Tray icon clicked - checking auth via managed state");
+                        let app_handle = tray.app_handle();
+                        if let Some(managed_auth_state) = app_handle.try_state::<AuthState>() {
+                            let _ = toggle_search_window(app_handle, &managed_auth_state);
+                        } else {
+                            println!("❌ Failed to get managed auth state for tray click");
+                        }
                     }
                 })
                 .build(app)?;

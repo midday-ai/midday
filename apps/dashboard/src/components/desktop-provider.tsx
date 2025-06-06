@@ -21,66 +21,27 @@ export function DesktopProvider() {
       return;
     }
 
-    console.log("🔐 Setting up auth state management");
+    // Only run auth state management if we're in the main window
+    const currentWindow = getCurrentWindow();
+    const label = currentWindow.label;
 
-    // Check initial auth state immediately
-    const checkInitialAuthState = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        const authenticated = !!session;
-
-        console.log("🔐 Initial auth state check:", {
-          authenticated,
-          hasSession: !!session,
-          sessionUserId: session?.user?.id,
-        });
-
-        // Set initial auth status via direct command
-        console.log("🔐 Calling set_auth_status command:", authenticated);
-        await invoke("set_auth_status", { authStatus: authenticated });
-        console.log("✅ Successfully called set_auth_status:", authenticated);
-      } catch (error) {
-        console.error("❌ Failed to check/emit initial auth status:", error);
-      }
-    };
-
-    // Check auth state immediately
-    checkInitialAuthState();
+    if (label !== "main") {
+      console.log(
+        `🔐 Skipping auth state management - not in main window (current: ${label})`,
+      );
+      return;
+    }
 
     // Listen for auth state changes - this fires immediately with current session
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const authenticated = !!session;
-
-      console.log("🔐 Auth state change detected:", {
-        event,
-        authenticated,
-        hasSession: !!session,
-        sessionUserId: session?.user?.id,
-      });
-
-      // Set auth status via direct command
-      try {
-        console.log("🔐 About to call set_auth_status command:", authenticated);
-        await invoke("set_auth_status", { authStatus: authenticated });
-        console.log("✅ Successfully called set_auth_status:", authenticated);
-      } catch (error) {
-        console.error("❌ Failed to call set_auth_status:", error);
+    } = supabase.auth.onAuthStateChange(async (event) => {
+      if (event === "SIGNED_IN") {
+        await invoke("set_auth_status", { authStatus: true });
       }
 
-      // If user logs out, request search window to close
-      if (!authenticated) {
-        console.log("🔐 User logged out, closing search window");
-        try {
-          await emit("search-window-close-requested", {});
-        } catch (error) {
-          console.error("Failed to close search window:", error);
-        }
-      } else {
-        console.log("🔐 User is authenticated, search should be available now");
+      if (event === "SIGNED_OUT") {
+        await invoke("set_auth_status", { authStatus: false });
       }
     });
 
@@ -133,7 +94,7 @@ export function DesktopProvider() {
       try {
         // Only set up deep link listeners if we're in the main window
         const currentWindow = getCurrentWindow();
-        const label = await currentWindow.label;
+        const label = currentWindow.label;
 
         if (label !== "main") {
           console.log(
