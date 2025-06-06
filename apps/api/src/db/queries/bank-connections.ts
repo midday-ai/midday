@@ -108,6 +108,7 @@ export const createBankConnection = async (
 
   // Get first account to create a bank connection
   const account = accounts?.at(0);
+
   if (!account) {
     return;
   }
@@ -146,34 +147,21 @@ export const createBankConnection = async (
   }
 
   // Create or update bank accounts
-  await db
-    .insert(bankAccounts)
-    .values(
-      accounts.map((account) => ({
-        accountId: account.accountId,
-        bankConnectionId: bankConnection.id,
-        teamId,
-        createdBy: userId,
-        name: account.name,
-        currency: account.currency,
-        enabled: account.enabled,
-        type: account.type,
-        accountReference: account.accountReference,
-        balance: account.balance ?? 0,
-        manual: false,
-      })),
-    )
-    .onConflictDoUpdate({
-      target: [bankAccounts.accountId],
-      set: {
-        name: undefined, // Using undefined triggers SQL's DEFAULT which keeps existing value
-        currency: undefined,
-        enabled: undefined,
-        type: undefined,
-        accountReference: undefined,
-        balance: undefined,
-      },
-    });
+  await db.insert(bankAccounts).values(
+    accounts.map((account) => ({
+      accountId: account.accountId,
+      bankConnectionId: bankConnection.id,
+      teamId,
+      createdBy: userId,
+      name: account.name,
+      currency: account.currency,
+      enabled: account.enabled,
+      type: account.type,
+      accountReference: account.accountReference,
+      balance: account.balance ?? 0,
+      manual: false,
+    })),
+  );
 
   return bankConnection;
 };
