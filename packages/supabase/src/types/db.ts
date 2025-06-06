@@ -337,6 +337,7 @@ export type Database = {
         Row: {
           address_line_1: string | null
           address_line_2: string | null
+          billing_email: string | null
           city: string | null
           contact: string | null
           country: string | null
@@ -358,6 +359,7 @@ export type Database = {
         Insert: {
           address_line_1?: string | null
           address_line_2?: string | null
+          billing_email?: string | null
           city?: string | null
           contact?: string | null
           country?: string | null
@@ -379,6 +381,7 @@ export type Database = {
         Update: {
           address_line_1?: string | null
           address_line_2?: string | null
+          billing_email?: string | null
           city?: string | null
           contact?: string | null
           country?: string | null
@@ -859,6 +862,7 @@ export type Database = {
           payment_label: string | null
           price_label: string | null
           quantity_label: string | null
+          send_copy: boolean | null
           size: Database["public"]["Enums"]["invoice_size"] | null
           subtotal_label: string | null
           tax_label: string | null
@@ -897,6 +901,7 @@ export type Database = {
           payment_label?: string | null
           price_label?: string | null
           quantity_label?: string | null
+          send_copy?: boolean | null
           size?: Database["public"]["Enums"]["invoice_size"] | null
           subtotal_label?: string | null
           tax_label?: string | null
@@ -935,6 +940,7 @@ export type Database = {
           payment_label?: string | null
           price_label?: string | null
           quantity_label?: string | null
+          send_copy?: boolean | null
           size?: Database["public"]["Enums"]["invoice_size"] | null
           subtotal_label?: string | null
           tax_label?: string | null

@@ -43,6 +43,13 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Email is not valid.",
   }),
+  billingEmail: z
+    .string()
+    .email({
+      message: "Email is not valid.",
+    })
+    .nullable()
+    .optional(),
   phone: z.string().optional(),
   website: z
     .string()
@@ -135,6 +142,7 @@ export function CustomerForm({ data }: Props) {
       id: data?.id,
       name: name ?? data?.name ?? undefined,
       email: data?.email ?? undefined,
+      billingEmail: data?.billingEmail ?? null,
       website: data?.website ?? undefined,
       addressLine1: data?.addressLine1 ?? undefined,
       addressLine2: data?.addressLine2 ?? undefined,
@@ -181,6 +189,7 @@ export function CustomerForm({ data }: Props) {
       id: data.id || undefined,
       addressLine1: data.addressLine1 || null,
       addressLine2: data.addressLine2 || null,
+      billingEmail: data.billingEmail || null,
       city: data.city || null,
       state: data.state || null,
       country: data.country || null,
@@ -238,51 +247,83 @@ export function CustomerForm({ data }: Props) {
                       )}
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-xs text-[#878787] font-normal">
-                              Email
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                value={field.value ?? ""}
-                                placeholder="acme@example.com"
-                                type="email"
-                                autoComplete="off"
-                                onBlur={handleEmailBlur}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-xs text-[#878787] font-normal">
-                              Phone
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                value={field.value ?? ""}
-                                placeholder="+1 (555) 123-4567"
-                                type="tel"
-                                autoComplete="off"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs text-[#878787] font-normal">
+                            Email
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              value={field.value ?? ""}
+                              placeholder="acme@example.com"
+                              type="email"
+                              autoComplete="off"
+                              onBlur={handleEmailBlur}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="billingEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs text-[#878787] font-normal">
+                            Billing Email
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                field.onChange(
+                                  e.target.value.trim().length > 0
+                                    ? e.target.value.trim()
+                                    : null,
+                                );
+                              }}
+                              placeholder="finance@example.com"
+                              type="email"
+                              autoComplete="off"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            This is an additional email that will be used to
+                            send invoices to.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs text-[#878787] font-normal">
+                            Phone
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              value={field.value ?? ""}
+                              placeholder="+1 (555) 123-4567"
+                              type="tel"
+                              autoComplete="off"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     <FormField
                       control={form.control}

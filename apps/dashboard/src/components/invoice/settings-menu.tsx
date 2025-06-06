@@ -74,10 +74,16 @@ const menuItems = [
     key: "includeDiscount",
   },
   {
-    icon: Icons.PdfOutline,
+    icon: Icons.AttachEmail,
     label: "Attach PDF in email",
     options: booleanOptions,
     key: "includePdf",
+  },
+  {
+    icon: Icons.OutgoingMail,
+    label: "Send copy (BCC)",
+    options: booleanOptions,
+    key: "sendCopy",
   },
   {
     icon: Icons.Straighten,

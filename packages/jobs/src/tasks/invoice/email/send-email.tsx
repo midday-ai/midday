@@ -25,7 +25,7 @@ export const sendInvoiceEmail = schemaTask({
     const { data: invoice } = await supabase
       .from("invoices")
       .select(
-        "id, token, template, customer:customer_id(name, website, email), team:team_id(name, email)",
+        "id, token, template, customer:customer_id(name, website, email, billing_email), team:team_id(name, email), user:user_id(email)",
       )
       .eq("id", invoiceId)
       .single();
@@ -56,6 +56,17 @@ export const sendInvoiceEmail = schemaTask({
     }
 
     const customerEmail = invoice?.customer?.email;
+    const userEmail = invoice?.user?.email;
+
+    // @ts-expect-error template is a jsonb field
+    const shouldSendCopy = invoice?.template?.sendCopy;
+
+    const bcc = [
+      ...(invoice?.customer?.billing_email
+        ? [invoice?.customer?.billing_email]
+        : []),
+      ...(shouldSendCopy && userEmail ? [userEmail] : []),
+    ];
 
     if (!customerEmail) {
       logger.error("Invoice customer email not found");
@@ -65,6 +76,7 @@ export const sendInvoiceEmail = schemaTask({
     const response = await resend.emails.send({
       from: "Midday <middaybot@midday.ai>",
       to: customerEmail,
+      bcc,
       replyTo: invoice?.team.email ?? undefined,
       subject: `${invoice?.team.name} sent you an invoice`,
       headers: {

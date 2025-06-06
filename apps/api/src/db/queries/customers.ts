@@ -25,6 +25,7 @@ export const getCustomerById = async (
       id: customers.id,
       name: customers.name,
       email: customers.email,
+      billingEmail: customers.billingEmail,
       phone: customers.phone,
       website: customers.website,
       createdAt: customers.createdAt,
@@ -112,6 +113,7 @@ export const getCustomers = async (
       id: customers.id,
       name: customers.name,
       email: customers.email,
+      billingEmail: customers.billingEmail,
       phone: customers.phone,
       website: customers.website,
       createdAt: customers.createdAt,
@@ -222,6 +224,7 @@ export type UpsertCustomerParams = {
   teamId: string;
   name: string;
   email: string;
+  billingEmail?: string | null;
   country?: string | null;
   addressLine1?: string | null;
   addressLine2?: string | null;
@@ -260,6 +263,7 @@ export const upsertCustomer = async (
         set: {
           name: rest.name,
           email: rest.email,
+          billingEmail: rest.billingEmail,
           token,
           country: rest.country,
           addressLine1: rest.addressLine1,
@@ -338,6 +342,7 @@ export const upsertCustomer = async (
         id: customers.id,
         name: customers.name,
         email: customers.email,
+        billingEmail: customers.billingEmail,
         phone: customers.phone,
         website: customers.website,
         createdAt: customers.createdAt,

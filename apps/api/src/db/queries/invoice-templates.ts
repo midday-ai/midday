@@ -18,6 +18,7 @@ type DraftInvoiceTemplateParams = {
   subtotalLabel?: string;
   taxLabel?: string;
   discountLabel?: string;
+  sendCopy?: boolean;
   timezone?: string;
   paymentLabel?: string;
   noteLabel?: string;
@@ -101,6 +102,7 @@ export async function getInvoiceTemplate(db: Database, teamId: string) {
       vatRate: invoiceTemplates.vatRate,
       includeUnits: invoiceTemplates.includeUnits,
       includePdf: invoiceTemplates.includePdf,
+      sendCopy: invoiceTemplates.sendCopy,
     })
     .from(invoiceTemplates)
     .where(eq(invoiceTemplates.teamId, teamId))

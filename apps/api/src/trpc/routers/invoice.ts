@@ -72,6 +72,7 @@ const defaultTemplate = {
   includeUnits: false,
   includeDecimals: false,
   includePdf: false,
+  sendCopy: false,
   includeQr: true,
   dateFormat: "dd/MM/yyyy",
   taxRate: 0,
@@ -179,6 +180,7 @@ export const invoiceRouter = createTRPCRouter({
         includeUnits: template?.includeUnits ?? defaultTemplate.includeUnits,
         includeQr: template?.includeQr ?? defaultTemplate.includeQr,
         includePdf: template?.includePdf ?? defaultTemplate.includePdf,
+        sendCopy: template?.sendCopy ?? defaultTemplate.sendCopy,
         customerLabel: template?.customerLabel ?? defaultTemplate.customerLabel,
         fromLabel: template?.fromLabel ?? defaultTemplate.fromLabel,
         invoiceNoLabel:
@@ -221,6 +223,7 @@ export const invoiceRouter = createTRPCRouter({
         includeDiscount: false,
         includeDecimals: false,
         includePdf: false,
+        sendCopy: false,
         includeUnits: false,
         includeQr: true,
         invoiceNumber: nextInvoiceNumber,
