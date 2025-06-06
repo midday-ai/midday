@@ -37,13 +37,10 @@ export function DesktopProvider() {
           sessionUserId: session?.user?.id,
         });
 
-        // Emit initial auth status to Tauri backend
-        console.log("🔐 Emitting initial auth-status-changed:", authenticated);
-        await emit("auth-status-changed", authenticated);
-        console.log(
-          "✅ Successfully emitted initial auth-status-changed:",
-          authenticated,
-        );
+        // Set initial auth status via direct command
+        console.log("🔐 Calling set_auth_status command:", authenticated);
+        await invoke("set_auth_status", { authStatus: authenticated });
+        console.log("✅ Successfully called set_auth_status:", authenticated);
       } catch (error) {
         console.error("❌ Failed to check/emit initial auth status:", error);
       }
@@ -65,16 +62,13 @@ export function DesktopProvider() {
         sessionUserId: session?.user?.id,
       });
 
-      // Emit auth status to Tauri backend
+      // Set auth status via direct command
       try {
-        console.log("🔐 About to emit auth-status-changed:", authenticated);
-        await emit("auth-status-changed", authenticated);
-        console.log(
-          "✅ Successfully emitted auth-status-changed:",
-          authenticated,
-        );
+        console.log("🔐 About to call set_auth_status command:", authenticated);
+        await invoke("set_auth_status", { authStatus: authenticated });
+        console.log("✅ Successfully called set_auth_status:", authenticated);
       } catch (error) {
-        console.error("❌ Failed to emit auth status:", error);
+        console.error("❌ Failed to call set_auth_status:", error);
       }
 
       // If user logs out, request search window to close

@@ -35,8 +35,31 @@ fn show_window(window: tauri::Window) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn set_auth_status(auth_status: bool, app_state: tauri::State<AuthState>, app_handle: tauri::AppHandle) -> Result<(), String> {
+    println!("🔐 Direct command: Setting auth status to {}", auth_status);
+    *app_state.lock().map_err(|e| format!("Failed to lock auth state: {}", e))? = auth_status;
+    println!("🔐 Direct command: Auth status successfully set to {}", auth_status);
+    
+    // If user logged out, clean up search window to prevent interference with future logins
+    if !auth_status {
+        println!("🔐 User logged out, cleaning up search window");
+        if let Some(search_window) = app_handle.get_webview_window("search") {
+            let _ = search_window.close();
+            println!("🔐 Search window closed and cleaned up");
+        }
+    }
+    
+    Ok(())
+}
+
 fn toggle_search_window(app: &tauri::AppHandle, auth_state: &AuthState) -> Result<(), Box<dyn std::error::Error>> {
-    let is_authenticated = *auth_state.lock().unwrap();
+    let is_authenticated = {
+        let guard = auth_state.lock().unwrap();
+        let value = *guard;
+        println!("🔍 Current auth state lock acquired: {}", value);
+        value
+    };
     
     println!("🔍 Toggle search window called - authenticated: {}", is_authenticated);
     
@@ -72,7 +95,25 @@ fn toggle_search_window(app: &tauri::AppHandle, auth_state: &AuthState) -> Resul
             let _ = window.emit("search-window-open", true);
         }
     } else {
-        println!("❌ Search window not found!");
+        println!("🔍 Search window doesn't exist, creating it now...");
+        // Create search window on-demand
+        let app_url = get_app_url();
+        let app_clone = app.clone();
+        tauri::async_runtime::spawn(async move {
+            if let Ok(_) = create_preloaded_search_window(&app_clone, &app_url).await {
+                println!("✅ Search window created successfully");
+                // After creation, show it immediately
+                if let Some(window) = app_clone.get_webview_window("search") {
+                    let _ = window.set_always_on_top(true);
+                    let _ = position_window_on_current_monitor(&app_clone, &window);
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                    let _ = window.emit("search-window-open", true);
+                }
+            } else {
+                println!("❌ Failed to create search window");
+            }
+        });
     }
 
     Ok(())
@@ -252,13 +293,16 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_deep_link::init())
-        .invoke_handler(tauri::generate_handler![show_window])
+        .invoke_handler(tauri::generate_handler![show_window, set_auth_status])
         .setup(move |app| {
             let app_url_clone = app_url.clone();
             let app_handle = app.handle().clone();
 
             // Create shared authentication state
             let auth_state: AuthState = Arc::new(Mutex::new(false));
+            
+            // Add auth state to managed state so commands can access it
+            app.manage(auth_state.clone());
 
             // Clone app_handle before it gets moved into closures
             let app_handle_for_deep_links = app_handle.clone();
@@ -270,7 +314,6 @@ pub fn run() {
             let auth_state_for_shortcut = auth_state.clone();
             let auth_state_for_tray = auth_state.clone();
             let auth_state_for_menu = auth_state.clone();
-            let auth_state_for_listener = auth_state.clone();
 
             // Initialize global shortcuts
             {
@@ -354,18 +397,8 @@ pub fn run() {
 
             let window = win_builder.build().unwrap();
 
-            // Listen for authentication status changes from frontend
-            window.listen("auth-status-changed", move |event| {
-                println!("🔐 Received auth-status-changed event");
-                let payload = event.payload();
-                println!("🔐 Auth payload: {}", payload);
-                if let Ok(is_authenticated) = payload.parse::<bool>() {
-                    println!("🔐 Setting auth state to: {}", is_authenticated);
-                    *auth_state_for_listener.lock().unwrap() = is_authenticated;
-                } else {
-                    println!("❌ Failed to parse auth status from payload: {}", payload);
-                }
-            });
+            // Auth status is now handled via direct commands (set_auth_status)
+            // No need for event listeners anymore
 
             // Fallback timer to ensure main window shows on first launch
             let window_clone = window.clone();
@@ -381,15 +414,8 @@ pub fn run() {
                 }
             });
 
-            // Preload search window for instant access
-            let app_url_for_search = app_url.clone();
-            let app_handle_for_preload = app_handle.clone();
-            tauri::async_runtime::spawn(async move {
-                // Small delay to let main window initialize first
-                std::thread::sleep(std::time::Duration::from_millis(500));
-                
-                let _ = create_preloaded_search_window(&app_handle_for_preload, &app_url_for_search).await;
-            });
+            // Don't preload search window immediately - create it on first use instead
+            // This prevents interference with the login flow
 
             // Setup simple system tray for search toggle only
             // Load custom tray icon
