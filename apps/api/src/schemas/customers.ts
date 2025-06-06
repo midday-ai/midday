@@ -70,6 +70,10 @@ export const customerResponseSchema = z.object({
     description: "Primary email address of the customer",
     example: "contact@acme.com",
   }),
+  billingEmail: z.string().email().nullable().openapi({
+    description: "Billing email address of the customer",
+    example: "finance@acme.com",
+  }),
   phone: z.string().nullable().openapi({
     description: "Primary phone number of the customer",
     example: "+1-555-123-4567",

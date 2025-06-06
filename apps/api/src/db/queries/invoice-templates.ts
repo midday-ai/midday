@@ -18,6 +18,7 @@ type DraftInvoiceTemplateParams = {
   subtotalLabel?: string;
   taxLabel?: string;
   discountLabel?: string;
+  sendCopy?: boolean;
   timezone?: string;
   paymentLabel?: string;
   noteLabel?: string;
