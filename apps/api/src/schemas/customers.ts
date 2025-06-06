@@ -223,6 +223,10 @@ export const upsertCustomerSchema = z.object({
     description: "Primary email address of the customer",
     example: "contact@acme.com",
   }),
+  billingEmail: z.string().email().nullable().optional().openapi({
+    description: "Billing email address of the customer",
+    example: "finance@acme.com",
+  }),
   country: z.string().nullable().optional().openapi({
     description: "Country name where the customer is located",
     example: "United States",

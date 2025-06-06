@@ -29,6 +29,7 @@ import {
   MdOutlineAdd,
   MdOutlineArrowOutward,
   MdOutlineAssuredWorkload,
+  MdOutlineAttachEmail,
   MdOutlineAttachFile,
   MdOutlineAttachMoney,
   MdOutlineAutoAwesome,
@@ -58,6 +59,7 @@ import {
   MdOutlineQrCode2,
   MdOutlineReorder,
   MdOutlineRepeat,
+  MdOutlineSignpost,
   MdOutlineSquareFoot,
   MdOutlineStyle,
   MdOutlineSubdirectoryArrowLeft,
@@ -612,4 +614,6 @@ export const Icons = {
   ArrowDownward: MdArrowDownward,
   ArrowUpward: MdArrowUpward,
   SubdirectoryArrowLeft: MdOutlineSubdirectoryArrowLeft,
+  OutgoingMail: MdOutlineSignpost,
+  AttachEmail: MdOutlineAttachEmail,
 };

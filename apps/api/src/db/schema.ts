@@ -688,6 +688,7 @@ export const customers = pgTable(
       .notNull(),
     name: text().notNull(),
     email: text().notNull(),
+    billingEmail: text(),
     country: text(),
     addressLine1: text("address_line_1"),
     addressLine2: text("address_line_2"),
@@ -1455,6 +1456,7 @@ export const invoiceTemplates = pgTable(
     includeUnits: boolean("include_units"),
     subtotalLabel: text("subtotal_label"),
     includePdf: boolean("include_pdf"),
+    sendCopy: boolean("send_copy"),
   },
   (table) => [
     foreignKey({
