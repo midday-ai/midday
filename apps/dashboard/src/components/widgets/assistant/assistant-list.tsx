@@ -2,9 +2,20 @@
 
 import { chatExamples } from "@/components/chat/examples";
 import { useAssistantStore } from "@/store/assistant";
+import { invoke } from "@midday/desktop-client/core";
 
 export function AssistantList() {
   const { setOpen } = useAssistantStore();
+
+  const toggle = async () => {
+    await invoke("set_auth_status", { authStatus: true });
+  };
+
+  return (
+    <button onClick={toggle} type="button">
+      Toggle
+    </button>
+  );
 
   return (
     <div className="mb-16">
