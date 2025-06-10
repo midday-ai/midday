@@ -16,6 +16,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "macOS": {
       "dmg": {
         "background": "./images/installer.png"
