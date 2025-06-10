@@ -1,4 +1,4 @@
-name: Beta Deployment - Desktop
+name: Production Deployment - Desktop
 
 # on:
 #   workflow_dispatch:
@@ -45,11 +45,11 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MIDDAY_ENV: staging
+          MIDDAY_ENV: production
         with:
           tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
-          releaseName: 'App v__VERSION__'
+          releaseName: 'Midday v__VERSION__'
           releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
           prerelease: false
-          args: ${{ matrix.args }} --config "apps/desktop/src-tauri/tauri.staging.conf.json"
+          args: ${{ matrix.args }} --config "apps/desktop/src-tauri/tauri.conf.json"

@@ -34,6 +34,14 @@
       "desktop": {
         "schemes": ["midday"]
       }
+    },
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkwNzNERjA3NzVBNDM3QkMKUldTOE42UjFCOTl6a0IrZW1EcEhhRHlUZ0Z2YW5sT0N4aVdQVE5aOEVTem9GTE1QRzJPM2JaUmMK",
+      "endpoints": [
+        "https://github.com/midday-ai/midday/releases/latest/download/latest.json"
+      ],
+      "createUpdaterArtifacts": true,
+      "dangerousInsecureTransportProtocol": true
     }
   }
 }
