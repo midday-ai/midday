@@ -8,6 +8,7 @@ import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useUserQuery } from "@/hooks/use-user";
+import { downloadFile } from "@/lib/download";
 import { useSearchStore } from "@/store/search";
 import { useTRPC } from "@/trpc/client";
 import { formatDate } from "@/utils/format";
@@ -22,6 +23,7 @@ import {
   CommandList,
 } from "@midday/ui/command";
 import { Icons } from "@midday/ui/icons";
+import { Spinner } from "@midday/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { formatISO } from "date-fns";
 import { useRouter } from "next/navigation";
@@ -85,18 +87,37 @@ function CopyButton({ path }: { path: string }) {
   );
 }
 
-function DownloadButton({ href }: { href: string }) {
+function DownloadButton({
+  href,
+  filename,
+}: { href: string; filename?: string }) {
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    try {
+      setIsDownloading(true);
+      await downloadFile(href, filename || "download");
+
+      // Keep spinner for 1 second
+      setTimeout(() => {
+        setIsDownloading(false);
+      }, 1000);
+    } catch (error) {
+      console.error("Download failed:", error);
+      setIsDownloading(false);
+    }
+  };
+
   return (
-    <a
-      type="a"
-      href={href}
-      download
-      onClick={(e) => {
-        e.stopPropagation();
-      }}
-    >
-      <Icons.ArrowCoolDown className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
-    </a>
+    <button type="button" onClick={handleDownload}>
+      {isDownloading ? (
+        <Spinner size={16} />
+      ) : (
+        <Icons.ArrowCoolDown className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
+      )}
+    </button>
   );
 }
 
@@ -131,13 +152,7 @@ const handleDesktopNavigation = async (
   if (!isDesktopApp()) return false;
 
   try {
-    console.log("🚀 Desktop navigation called from search window:", {
-      path,
-      params,
-    });
-
     // Step 1: Get the main window first to check its current path
-    console.log("✅ Step 1: Getting main window...");
     const mainWindow = await Window.getByLabel("main");
 
     if (!mainWindow) {
@@ -146,16 +161,12 @@ const handleDesktopNavigation = async (
     }
 
     // Step 2: Close search window
-    console.log("✅ Step 2: Closing search window...");
     await emit("search-window-close-requested");
 
     // Step 3: Show and focus main window
-    console.log("✅ Step 3: Showing and focusing main window...");
     await invoke("show_window");
 
     // Step 4: Navigate in main window context
-    console.log("✅ Step 4: Emitting navigation event to main window...");
-
     // If we have params, we need to use the main window's current path
     // If it's a full path (like /inbox?inboxId=...), use it directly
     if (params && Object.keys(params).length > 0) {
@@ -168,7 +179,6 @@ const handleDesktopNavigation = async (
       await mainWindow.emit("desktop-navigate", { path, params });
     }
 
-    console.log("✅ Desktop navigation completed successfully");
     return true;
   } catch (error) {
     console.error("❌ Failed to handle desktop navigation:", error);
@@ -185,54 +195,63 @@ const useSearchNavigation = () => {
   const { setParams: setTransactionParams } = useTransactionParams();
   const { setParams: setDocumentParams } = useDocumentParams();
 
+  const shouldUseWebNavigation = async () => {
+    if (!isDesktopApp()) {
+      return true;
+    }
+
+    try {
+      const currentWindow = await Window.getCurrent();
+      const currentLabel = currentWindow.label;
+      return currentLabel === "main";
+    } catch (error) {
+      console.error("Failed to get current window label:", error);
+      return false;
+    }
+  };
+
   const navigateWithParams = async (
     params: Record<string, any>,
     paramSetter: (params: any) => void,
   ) => {
-    if (isDesktopApp()) {
-      console.log("📱 Desktop mode: Using desktop navigation with params");
-      // In desktop mode, use params-only navigation to stay on current main window page
-      await handleDesktopNavigation("", params);
+    const useWebNav = await shouldUseWebNavigation();
+
+    if (useWebNav) {
+      // Web mode - use traditional navigation
+      setOpen();
+      paramSetter(params);
       return;
     }
 
-    console.log("🌐 Web mode: Using traditional navigation");
-    // Web mode - use traditional navigation
-    setOpen();
-    paramSetter(params);
+    // Desktop mode - use params-only navigation to stay on current main window page
+    await handleDesktopNavigation("", params);
   };
 
   const navigateToPath = async (path: string) => {
-    if (isDesktopApp()) {
-      console.log(
-        "📱 Desktop mode: Using desktop navigation for full path:",
-        path,
-      );
-      // In desktop mode, use full path navigation
-      await handleDesktopNavigation(path);
+    const useWebNav = await shouldUseWebNavigation();
+
+    if (useWebNav) {
+      // Web mode - use traditional navigation
+      setOpen();
+      router.push(path);
       return;
     }
 
-    console.log("🌐 Web mode: Using router navigation for path:", path);
-    // Web mode - use traditional navigation
-    setOpen();
-    router.push(path);
+    // Desktop mode - use full path navigation
+    await handleDesktopNavigation(path);
   };
 
   return {
     navigateToDocument: (params: { documentId: string }) => {
-      console.log("📁 Navigate to document:", params);
       return navigateWithParams(params, setDocumentParams);
     },
     navigateToCustomer: (params: { customerId: string }) => {
-      console.log("👤 Navigate to customer:", params);
       return navigateWithParams(params, setCustomerParams);
     },
     navigateToInvoice: (params: {
       invoiceId: string;
       type: "details" | "create" | "edit" | "success";
     }) => {
-      console.log("🧾 Navigate to invoice:", params);
       return navigateWithParams(params, setInvoiceParams);
     },
     navigateToTracker: (params: {
@@ -241,42 +260,34 @@ const useSearchNavigation = () => {
       create?: boolean;
       selectedDate?: string;
     }) => {
-      console.log("⏱️ Navigate to tracker:", params);
       return navigateWithParams(params, setTrackerParams);
     },
     navigateToTransaction: (params: {
       transactionId?: string;
       createTransaction?: boolean;
     }) => {
-      console.log("💰 Navigate to transaction:", params);
       return navigateWithParams(params, setTransactionParams);
     },
     navigateToPath: (path: string) => {
-      console.log("🔗 Navigate to path:", path);
       return navigateToPath(path);
     },
     // Action helpers
     createInvoice: () => {
-      console.log("➕ Create invoice");
       return navigateWithParams({ type: "create" as const }, setInvoiceParams);
     },
     createCustomer: (params = { createCustomer: true }) => {
-      console.log("➕ Create customer:", params);
       return navigateWithParams(params, setCustomerParams);
     },
     createTransaction: () => {
-      console.log("➕ Create transaction");
       return navigateWithParams(
         { createTransaction: true },
         setTransactionParams,
       );
     },
     createProject: () => {
-      console.log("➕ Create project");
       return navigateWithParams({ create: true }, setTrackerParams);
     },
     trackTime: () => {
-      console.log("⏰ Track time");
       return navigateWithParams(
         { selectedDate: formatISO(new Date(), { representation: "date" }) },
         setTrackerParams,
@@ -331,6 +342,11 @@ const SearchResultItemDisplay = ({
                     (item.data?.name as string)?.split("/").at(-1) ||
                     "") as string
                 }`}
+                filename={
+                  (item.data?.title ||
+                    (item.data?.name as string)?.split("/").at(-1) ||
+                    "") as string
+                }
               />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
             </div>
@@ -379,6 +395,7 @@ const SearchResultItemDisplay = ({
               <CopyButton path={`?invoiceId=${item.id}&type=details`} />
               <DownloadButton
                 href={`/api/download/invoice?id=${item.id}&size=${item?.data?.template?.size}`}
+                filename={`${item.data.invoice_number || "invoice"}.pdf`}
               />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
             </div>
@@ -418,6 +435,7 @@ const SearchResultItemDisplay = ({
               <CopyButton path={`/inbox?inboxId=${item.id}`} />
               <DownloadButton
                 href={`/api/download/file?path=${item.data?.file_path?.join("/")}&filename=${item.data?.file_name || ""}`}
+                filename={item.data?.file_name || "download"}
               />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
             </div>
@@ -634,7 +652,7 @@ export function Search() {
     // or map them to include default actions. For now, assuming they come with 'type' and 'title'.
     const mappedSearchResults = searchResults.map((res) => ({
       ...res,
-      action: () => console.log(`Selected DB Item: ${res.type} - ${res.title}`),
+      action: () => {},
     }));
     return [...mappedSearchResults];
   }, [debouncedSearch, searchResults]);

@@ -1,5 +1,6 @@
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
+import { downloadFile } from "@/lib/download";
 import { formatSize } from "@/utils/format";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
@@ -122,15 +123,19 @@ export const columns: ColumnDef<Document>[] = [
             >
               View details
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <a
-                href={`/api/download/file?path=${row.original.pathTokens?.join(
-                  "/",
-                )}&filename=${row.original.name?.split("/").at(-1)}`}
-                download
-              >
-                Download
-              </a>
+            <DropdownMenuItem
+              onClick={async () => {
+                try {
+                  await downloadFile(
+                    `/api/download/file?path=${row.original.pathTokens?.join("/")}&filename=${row.original.name?.split("/").at(-1)}`,
+                    row.original.name?.split("/").at(-1) || "download",
+                  );
+                } catch (error) {
+                  console.error("Download failed:", error);
+                }
+              }}
+            >
+              Download
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
