@@ -36,5 +36,5 @@
       "https://app.midday.ai/**"
     ]
   },
-  "platforms": ["linux", "macOS", "windows"]
+  "platforms": ["macOS"]
 }

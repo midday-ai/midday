@@ -38,8 +38,6 @@ fn show_window(window: tauri::Window) -> Result<(), String> {
     Ok(())
 }
 
-
-
 fn toggle_search_window(
     app: &tauri::AppHandle,
     search_state: &SearchWindowState,
@@ -289,6 +287,7 @@ pub fn run() {
     let app_url = get_app_url();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_deep_link::init())
         .invoke_handler(tauri::generate_handler![show_window])
