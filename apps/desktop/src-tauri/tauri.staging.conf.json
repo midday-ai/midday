@@ -1,5 +1,6 @@
 {
   "productName": "Midday Staging",
+  "version": "0.1.0",
   "identifier": "ai.midday.app.staging",
   "bundle": {
     "icon": [
