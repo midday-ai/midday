@@ -1,12 +1,17 @@
 name: Beta Deployment - Desktop
 
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       force_release:
+#         description: Make a release
+#         type: boolean
+#         default: false
+
 on:
-  workflow_dispatch:
-    inputs:
-      force_release:
-        description: Make a release
-        type: boolean
-        default: false
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   publish-tauri:
