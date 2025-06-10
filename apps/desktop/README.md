@@ -77,9 +77,3 @@ $env:MIDDAY_ENV="staging"; tauri dev
 # Windows (Command Prompt)
 set MIDDAY_ENV=staging && tauri dev
 ```
-
-## Window Features
-
-- **Transparent Titlebar**: On macOS, the app uses a transparent titlebar while keeping the native traffic light buttons (red, yellow, green)
-- **Minimum Size**: 1450x900 pixels for optimal user experience
-- **Responsive**: Window can be resized but maintains minimum dimensions 
