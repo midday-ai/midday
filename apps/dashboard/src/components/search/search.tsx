@@ -11,7 +11,7 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useSearchStore } from "@/store/search";
 import { useTRPC } from "@/trpc/client";
 import { formatDate } from "@/utils/format";
-import { emit, listen } from "@midday/desktop-client/core";
+import { Window, emit, invoke, listen } from "@midday/desktop-client/core";
 import { isDesktopApp } from "@midday/desktop-client/platform";
 import {
   Command,
@@ -123,11 +123,60 @@ const formatGroupName = (name: string): string | null => {
   }
 };
 
-// Sub-component to render each search item
-const SearchResultItemDisplay = ({
-  item,
-  dateFormat,
-}: { item: SearchItem; dateFormat?: string }) => {
+// Add desktop navigation function
+const handleDesktopNavigation = async (
+  path: string,
+  params?: Record<string, any>,
+) => {
+  if (!isDesktopApp()) return false;
+
+  try {
+    console.log("🚀 Desktop navigation called from search window:", {
+      path,
+      params,
+    });
+
+    // Step 1: Get the main window first to check its current path
+    console.log("✅ Step 1: Getting main window...");
+    const mainWindow = await Window.getByLabel("main");
+
+    if (!mainWindow) {
+      console.error("❌ Main window not found for navigation");
+      return false;
+    }
+
+    // Step 2: Close search window
+    console.log("✅ Step 2: Closing search window...");
+    await emit("search-window-close-requested");
+
+    // Step 3: Show and focus main window
+    console.log("✅ Step 3: Showing and focusing main window...");
+    await invoke("show_window");
+
+    // Step 4: Navigate in main window context
+    console.log("✅ Step 4: Emitting navigation event to main window...");
+
+    // If we have params, we need to use the main window's current path
+    // If it's a full path (like /inbox?inboxId=...), use it directly
+    if (params && Object.keys(params).length > 0) {
+      // For param navigation, we want to stay on the current main window page
+      // but we can't easily get the main window's current path from here
+      // So let's send a special signal to navigate with params on current page
+      await mainWindow.emit("desktop-navigate-with-params", { params });
+    } else {
+      // For full path navigation, use the path directly
+      await mainWindow.emit("desktop-navigate", { path, params });
+    }
+
+    console.log("✅ Desktop navigation completed successfully");
+    return true;
+  } catch (error) {
+    console.error("❌ Failed to handle desktop navigation:", error);
+    return false;
+  }
+};
+
+const useSearchNavigation = () => {
   const router = useRouter();
   const { setOpen } = useSearchStore();
   const { setParams: setInvoiceParams } = useInvoiceParams();
@@ -135,6 +184,113 @@ const SearchResultItemDisplay = ({
   const { setParams: setTrackerParams } = useTrackerParams();
   const { setParams: setTransactionParams } = useTransactionParams();
   const { setParams: setDocumentParams } = useDocumentParams();
+
+  const navigateWithParams = async (
+    params: Record<string, any>,
+    paramSetter: (params: any) => void,
+  ) => {
+    if (isDesktopApp()) {
+      console.log("📱 Desktop mode: Using desktop navigation with params");
+      // In desktop mode, use params-only navigation to stay on current main window page
+      await handleDesktopNavigation("", params);
+      return;
+    }
+
+    console.log("🌐 Web mode: Using traditional navigation");
+    // Web mode - use traditional navigation
+    setOpen();
+    paramSetter(params);
+  };
+
+  const navigateToPath = async (path: string) => {
+    if (isDesktopApp()) {
+      console.log(
+        "📱 Desktop mode: Using desktop navigation for full path:",
+        path,
+      );
+      // In desktop mode, use full path navigation
+      await handleDesktopNavigation(path);
+      return;
+    }
+
+    console.log("🌐 Web mode: Using router navigation for path:", path);
+    // Web mode - use traditional navigation
+    setOpen();
+    router.push(path);
+  };
+
+  return {
+    navigateToDocument: (params: { documentId: string }) => {
+      console.log("📁 Navigate to document:", params);
+      return navigateWithParams(params, setDocumentParams);
+    },
+    navigateToCustomer: (params: { customerId: string }) => {
+      console.log("👤 Navigate to customer:", params);
+      return navigateWithParams(params, setCustomerParams);
+    },
+    navigateToInvoice: (params: {
+      invoiceId: string;
+      type: "details" | "create" | "edit" | "success";
+    }) => {
+      console.log("🧾 Navigate to invoice:", params);
+      return navigateWithParams(params, setInvoiceParams);
+    },
+    navigateToTracker: (params: {
+      projectId?: string;
+      update?: boolean;
+      create?: boolean;
+      selectedDate?: string;
+    }) => {
+      console.log("⏱️ Navigate to tracker:", params);
+      return navigateWithParams(params, setTrackerParams);
+    },
+    navigateToTransaction: (params: {
+      transactionId?: string;
+      createTransaction?: boolean;
+    }) => {
+      console.log("💰 Navigate to transaction:", params);
+      return navigateWithParams(params, setTransactionParams);
+    },
+    navigateToPath: (path: string) => {
+      console.log("🔗 Navigate to path:", path);
+      return navigateToPath(path);
+    },
+    // Action helpers
+    createInvoice: () => {
+      console.log("➕ Create invoice");
+      return navigateWithParams({ type: "create" as const }, setInvoiceParams);
+    },
+    createCustomer: (params = { createCustomer: true }) => {
+      console.log("➕ Create customer:", params);
+      return navigateWithParams(params, setCustomerParams);
+    },
+    createTransaction: () => {
+      console.log("➕ Create transaction");
+      return navigateWithParams(
+        { createTransaction: true },
+        setTransactionParams,
+      );
+    },
+    createProject: () => {
+      console.log("➕ Create project");
+      return navigateWithParams({ create: true }, setTrackerParams);
+    },
+    trackTime: () => {
+      console.log("⏰ Track time");
+      return navigateWithParams(
+        { selectedDate: formatISO(new Date(), { representation: "date" }) },
+        setTrackerParams,
+      );
+    },
+  };
+};
+
+// Sub-component to render each search item
+const SearchResultItemDisplay = ({
+  item,
+  dateFormat,
+}: { item: SearchItem; dateFormat?: string }) => {
+  const nav = useSearchNavigation();
 
   let icon: ReactNode | undefined;
   let resultDisplay: ReactNode;
@@ -150,12 +306,7 @@ const SearchResultItemDisplay = ({
 
     switch (item.type) {
       case "vault": {
-        onSelect = () => {
-          setOpen();
-          setDocumentParams({
-            documentId: item.id,
-          });
-        };
+        onSelect = () => nav.navigateToDocument({ documentId: item.id });
 
         icon = (
           <FilePreviewIcon
@@ -188,12 +339,7 @@ const SearchResultItemDisplay = ({
         break;
       }
       case "customer": {
-        onSelect = () => {
-          setOpen();
-          setCustomerParams({
-            customerId: item.id,
-          });
-        };
+        onSelect = () => nav.navigateToCustomer({ customerId: item.id });
 
         icon = (
           <Icons.Customers className="size-4 dark:text-[#666] text-primary" />
@@ -216,13 +362,8 @@ const SearchResultItemDisplay = ({
         break;
       }
       case "invoice": {
-        onSelect = () => {
-          setOpen();
-          setInvoiceParams({
-            invoiceId: item.id,
-            type: "details",
-          });
-        };
+        onSelect = () =>
+          nav.navigateToInvoice({ invoiceId: item.id, type: "details" });
 
         icon = (
           <Icons.Invoice className="size-4 dark:text-[#666] text-primary" />
@@ -246,10 +387,7 @@ const SearchResultItemDisplay = ({
         break;
       }
       case "inbox": {
-        onSelect = () => {
-          setOpen();
-          router.push(`/inbox?inboxId=${item.id}`);
-        };
+        onSelect = () => nav.navigateToPath(`/inbox?inboxId=${item.id}`);
 
         icon = (
           <Icons.Inbox2 size={14} className="dark:text-[#666] text-primary" />
@@ -288,13 +426,9 @@ const SearchResultItemDisplay = ({
         break;
       }
       case "tracker_project": {
-        onSelect = () => {
-          setOpen();
-          setTrackerParams({
-            projectId: item.id,
-            update: true,
-          });
-        };
+        onSelect = () =>
+          nav.navigateToTracker({ projectId: item.id, update: true });
+
         icon = (
           <Icons.Tracker className="size-4 dark:text-[#666] text-primary" />
         );
@@ -312,12 +446,7 @@ const SearchResultItemDisplay = ({
         break;
       }
       case "transaction": {
-        onSelect = () => {
-          setOpen();
-          setTransactionParams({
-            transactionId: item.id,
-          });
-        };
+        onSelect = () => nav.navigateToTransaction({ transactionId: item.id });
 
         icon = (
           <Icons.Transactions className="size-4 dark:text-[#666] text-primary" />
@@ -380,12 +509,7 @@ export function Search() {
   const ref = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const height = useRef<HTMLDivElement>(null);
-  const { setOpen } = useSearchStore();
-  const { setParams: setInvoiceParams } = useInvoiceParams();
-  const { setParams: setCustomerParams } = useCustomerParams();
-  const { setParams: setTrackerParams } = useTrackerParams();
-  const { setParams: setTransactionParams } = useTransactionParams();
-  const router = useRouter();
+  const nav = useSearchNavigation();
 
   useHotkeys(
     "esc",
@@ -415,11 +539,6 @@ export function Search() {
     };
   }, []);
 
-  const handleNavigation = (path: string) => {
-    setOpen();
-    router.push(path);
-  };
-
   const [debouncedSearch, setDebouncedSearch] = useDebounceValue(
     "",
     debounceDelay,
@@ -431,92 +550,67 @@ export function Search() {
       id: "sc-create-invoice",
       type: "invoice",
       title: "Create invoice",
-      action: () => {
-        setOpen();
-        setInvoiceParams({
-          type: "create",
-        });
-      },
+      action: nav.createInvoice,
     },
     {
       id: "sc-create-customer",
       type: "customer",
       title: "Create customer",
-      action: () => {
-        setOpen();
-        setCustomerParams({
-          createCustomer: true,
-        });
-      },
+      action: nav.createCustomer,
     },
     {
       id: "sc-create-transaction",
       type: "transaction",
       title: "Create transaction",
-      action: () => {
-        setOpen();
-        setTransactionParams({
-          createTransaction: true,
-        });
-      },
+      action: nav.createTransaction,
     },
     {
       id: "sc-create-project",
       type: "tracker_project",
       title: "Create project",
-      action: () => {
-        setOpen();
-        setTrackerParams({
-          create: true,
-        });
-      },
+      action: nav.createProject,
     },
     {
       id: "sc-track-time",
       type: "tracker_project",
       title: "Track time",
-      action: () => {
-        setOpen();
-        setTrackerParams({
-          selectedDate: formatISO(new Date(), { representation: "date" }),
-        });
-      },
+      action: nav.trackTime,
     },
     {
       id: "sc-view-documents",
       type: "vault",
       title: "View vault",
-      action: () => handleNavigation("/vault"),
+      action: () => nav.navigateToPath("/vault"),
     },
     {
       id: "sc-view-customers",
       type: "customer",
       title: "View customers",
-      action: () => handleNavigation("/customers"),
+      action: () => nav.navigateToPath("/customers"),
     },
     {
       id: "sc-view-transactions",
       type: "transaction",
       title: "View transactions",
-      action: () => handleNavigation("/transactions"),
+      action: () => nav.navigateToPath("/transactions"),
     },
     {
       id: "sc-view-inbox",
       type: "inbox",
       title: "View inbox",
-      action: () => handleNavigation("/inbox"),
+      action: () => nav.navigateToPath("/inbox"),
     },
     {
       id: "sc-view-invoices",
       type: "invoice",
       title: "View invoices",
-      action: () => handleNavigation("/invoices"),
+      action: () => nav.navigateToPath("/invoices"),
     },
     {
       id: "sc-view-tracker",
       type: "tracker_project",
       title: "View tracker",
-      action: () => handleNavigation("/tracker"),
+      action: () => nav.navigateToPath("/tracker"),
     },
   ];
 

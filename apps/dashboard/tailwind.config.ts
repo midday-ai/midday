@@ -1,3 +1,4 @@
+import desktopPlugin from "@midday/desktop-client/desktop-variants";
 import baseConfig from "@midday/ui/tailwind.config";
 import type { Config } from "tailwindcss";
 
@@ -8,5 +9,5 @@ export default {
     "../../packages/invoice/src/**/*.{ts,tsx}",
   ],
   presets: [baseConfig],
-  plugins: [require("@midday/desktop-client/desktop-variants")],
+  plugins: [desktopPlugin],
 } satisfies Config;

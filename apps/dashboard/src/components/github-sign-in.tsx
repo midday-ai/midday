@@ -48,6 +48,10 @@ export function GithubSignIn() {
         },
       });
     }
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
   };
 
   return (

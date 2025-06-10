@@ -37,6 +37,10 @@ export function AppleSignIn() {
         },
       });
     }
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
   };
 
   return (
