@@ -39,7 +39,6 @@ jobs:
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - uses: tauri-apps/tauri-action@v0
-        working-directory: ./apps/desktop
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MIDDAY_ENV: staging
@@ -49,4 +48,4 @@ jobs:
           releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
           prerelease: false
-          args: ${{ matrix.args }} --config src-tauri/tauri.staging.conf.json
+          args: ${{ matrix.args }} --config apps/desktop/src-tauri/tauri.staging.conf.json
