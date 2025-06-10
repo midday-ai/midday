@@ -42,13 +42,12 @@ jobs:
         run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
       - name: Create API Key File
         run: echo "${{ secrets.APPLE_API_KEY_FILE }}" > api.p8
-      - uses: apple-actions/import-codesign-certs@v2
-        if: ${{ matrix.settings.runner == 'macos-latest' }}
+      - name: Import codesign certs
+        uses: apple-actions/import-codesign-certs@v2
         with:
           p12-file-base64: ${{ secrets.APPLE_CERTIFICATE }}
           p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-        - name: Verify certificate
-        if: ${{ matrix.settings.runner == 'macos-latest' }}
+      - name: Verify certificate
         run: security find-identity -v -p codesigning ${{ runner.temp }}/build.keychain
       - uses: tauri-apps/tauri-action@v0
         env:
@@ -66,7 +65,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          tagName: app-v__VERSION__ # the action automatically replaces __VERSION__ with the app version.
           releaseName: 'Midday v__VERSION__'
           releaseBody: 'See the assets to download this version and install.'
           releaseDraft: false
