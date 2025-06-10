@@ -52,6 +52,10 @@ export function GoogleSignIn() {
         },
       });
     }
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
   };
 
   return (
