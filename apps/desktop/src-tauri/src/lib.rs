@@ -1,13 +1,15 @@
+use serde_json;
 use std::env;
 use std::sync::{Arc, Mutex};
-use tauri::{Emitter, Listener, Manager, WebviewUrl, WebviewWindowBuilder, Position, PhysicalPosition, TitleBarStyle};
-use serde_json;
+use tauri::{
+    Emitter, Listener, Manager, PhysicalPosition, Position, TitleBarStyle, WebviewUrl,
+    WebviewWindowBuilder,
+};
 use tauri_plugin_deep_link::DeepLinkExt;
 
 // Add tray imports
-use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::image::Image;
-use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 
 // Add image crate for PNG decoding
 use image;
@@ -36,16 +38,21 @@ fn show_window(window: tauri::Window) -> Result<(), String> {
     Ok(())
 }
 
-fn toggle_search_window(app: &tauri::AppHandle, search_state: &SearchWindowState) -> Result<(), Box<dyn std::error::Error>> {
+
+
+fn toggle_search_window(
+    app: &tauri::AppHandle,
+    search_state: &SearchWindowState,
+) -> Result<(), Box<dyn std::error::Error>> {
     println!("🔍 === TOGGLE_SEARCH_WINDOW CALLED ===");
-    
+
     let is_search_enabled = {
         let guard = search_state.lock().unwrap();
         let value = *guard;
         println!("🔍 Current search window state from lock: {}", value);
         value
     };
-        
+
     if !is_search_enabled {
         println!("❌ Search window disabled, showing main window instead");
         // Search is disabled, show main window
@@ -74,8 +81,8 @@ fn toggle_search_window(app: &tauri::AppHandle, search_state: &SearchWindowState
             window.set_always_on_top(true)?;
             position_window_on_current_monitor(app, &window)?;
             window.show()?;
-            window.set_focus()?;  // Focus the window so it can detect focus loss
-            
+            window.set_focus()?; // Focus the window so it can detect focus loss
+
             // Emit open event to search window
             let _ = window.emit("search-window-open", true);
         }
@@ -84,7 +91,7 @@ fn toggle_search_window(app: &tauri::AppHandle, search_state: &SearchWindowState
         // Create search window on-demand
         let app_url = get_app_url();
         let app_clone = app.clone();
-        
+
         // Use blocking approach for shortcut/tray handlers to ensure window is created
         tauri::async_runtime::block_on(async move {
             if let Ok(_) = create_preloaded_search_window(&app_clone, &app_url).await {
@@ -109,7 +116,10 @@ fn toggle_search_window(app: &tauri::AppHandle, search_state: &SearchWindowState
     Ok(())
 }
 
-fn position_window_on_current_monitor(app: &tauri::AppHandle, window: &tauri::WebviewWindow) -> Result<(), Box<dyn std::error::Error>> {
+fn position_window_on_current_monitor(
+    app: &tauri::AppHandle,
+    window: &tauri::WebviewWindow,
+) -> Result<(), Box<dyn std::error::Error>> {
     // Get cursor position to determine current monitor
     if let Ok(cursor_position) = app.cursor_position() {
         // Get all monitors
@@ -118,42 +128,50 @@ fn position_window_on_current_monitor(app: &tauri::AppHandle, window: &tauri::We
             let current_monitor = monitors.iter().find(|monitor| {
                 let pos = monitor.position();
                 let size = monitor.size();
-                cursor_position.x >= pos.x as f64 
+                cursor_position.x >= pos.x as f64
                     && cursor_position.x < (pos.x + size.width as i32) as f64
-                    && cursor_position.y >= pos.y as f64 
+                    && cursor_position.y >= pos.y as f64
                     && cursor_position.y < (pos.y + size.height as i32) as f64
             });
 
             if let Some(monitor) = current_monitor {
                 let monitor_size = monitor.size();
                 let monitor_position = monitor.position();
-                
+
                 // Get the actual window size to ensure accurate centering
-                let window_size = window.outer_size().unwrap_or(tauri::PhysicalSize { width: 720, height: 450 });
-                
+                let window_size = window.outer_size().unwrap_or(tauri::PhysicalSize {
+                    width: 720,
+                    height: 450,
+                });
+
                 // Calculate center position on the monitor with slight offset for system UI
-                let center_x = monitor_position.x + (monitor_size.width as i32 / 2) - (window_size.width as i32 / 2);
-                let center_y = monitor_position.y + (monitor_size.height as i32 / 2) - (window_size.height as i32 / 2);
-                
+                let center_x = monitor_position.x + (monitor_size.width as i32 / 2)
+                    - (window_size.width as i32 / 2);
+                let center_y = monitor_position.y + (monitor_size.height as i32 / 2)
+                    - (window_size.height as i32 / 2);
+
                 // Adjust for macOS menu bar (typically 25-30px) and other system UI
                 let center_y = center_y + 15; // Slight downward adjustment for menu bar
-                
+
                 window.set_position(Position::Physical(PhysicalPosition {
                     x: center_x,
                     y: center_y,
                 }))?;
-                
+
                 return Ok(());
             }
         }
     }
-    
+
     // Fallback to default center if monitor detection fails
     window.center()?;
     Ok(())
 }
 
-async fn create_preloaded_search_window(app: &tauri::AppHandle, app_url: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+async fn create_preloaded_search_window(
+    app: &tauri::AppHandle,
+    app_url: &str,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let search_window_label = "search";
     let search_url = format!("{}/desktop/search", app_url);
 
@@ -169,7 +187,7 @@ async fn create_preloaded_search_window(app: &tauri::AppHandle, app_url: &str) -
     .user_agent("Mozilla/5.0 (compatible; Midday Desktop App)")
     .transparent(true)
     .decorations(false)
-    .visible(false)  // Start hidden for preloading
+    .visible(false) // Start hidden for preloading
     .on_download(|_window, _event| {
         println!("Search window download triggered!");
         // Allow downloads from search window too
@@ -181,9 +199,7 @@ async fn create_preloaded_search_window(app: &tauri::AppHandle, app_url: &str) -
         .hidden_title(true)
         .title_bar_style(TitleBarStyle::Overlay);
 
-    let search_window = search_builder
-        .shadow(false)
-        .build()?;
+    let search_window = search_builder.shadow(false).build()?;
 
     // Position window on primary monitor (will be repositioned when shown)
     search_window.center()?;
@@ -449,60 +465,8 @@ pub fn run() {
                 Image::new_owned(rgba.into_raw(), width, height)
             };
 
-            // Create tray context menu
-            let show_item = MenuItem::with_id(app, "show", "Open Midday", true, None::<&str>)?;
-            let search_item = MenuItem::with_id(app, "search", "Open Search\tShift+Alt+K", true, None::<&str>)?;
-            let separator1 = PredefinedMenuItem::separator(app)?;
-            let updates_item = MenuItem::with_id(app, "updates", "Check for Updates", true, None::<&str>)?;
-            let separator2 = PredefinedMenuItem::separator(app)?;
-            let quit_item = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-
-            let menu = Menu::with_items(app, &[
-                &show_item,
-                &search_item,
-                &separator1,
-                &updates_item,
-                &separator2,
-                &quit_item,
-            ])?;
-
-            // Clone app handle for menu events  
-            let app_handle_for_menu = app_handle.clone();
-
             let _tray = TrayIconBuilder::new()
                 .icon(tray_icon)
-                .menu(&menu)
-                .show_menu_on_left_click(false)
-                .on_menu_event(move |_tray, event| {
-                    match event.id().as_ref() {
-                        "show" => {
-                            // Show main window
-                            if let Some(main_window) = app_handle_for_menu.get_webview_window("main") {
-                                let _ = main_window.show();
-                                let _ = main_window.set_focus();
-                            }
-                        }
-                        "search" => {
-                            // Toggle search window using managed state
-                            println!("🔍 Tray menu search clicked - checking search state via managed state");
-                            if let Some(managed_search_state) = app_handle_for_menu.try_state::<SearchWindowState>() {
-                                let _ = toggle_search_window(&app_handle_for_menu, &managed_search_state);
-                            } else {
-                                println!("❌ Failed to get managed search state for tray menu");
-                            }
-                        }
-                        "updates" => {
-                            // Placeholder for future update functionality
-                            println!("Check for updates clicked - feature to be implemented");
-                            // TODO: Implement update checking functionality
-                        }
-                        "quit" => {
-                            // Actually quit the application
-                            std::process::exit(0);
-                        }
-                        _ => {}
-                    }
-                })
                 .on_tray_icon_event(move |tray, event| {
                     // Handle left clicks to toggle search window (keep existing behavior)
                     if let TrayIconEvent::Click {
@@ -547,4 +511,4 @@ pub fn run() {
             }
             _ => {}
         });
-} 
+}
