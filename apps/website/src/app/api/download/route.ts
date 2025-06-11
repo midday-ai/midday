@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     // Validate query parameters with Zod
     const queryValidation = QueryParamsSchema.safeParse({
-      platform: searchParams.get("platform"),
+      platform: searchParams.get("platform") || undefined,
     });
 
     if (!queryValidation.success) {
@@ -59,22 +59,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Use platform from query params or detect from User-Agent
-    let platform = queryValidation.data.platform;
+    // Detect platform from User-Agent first, then allow query param to override
+    let platform = detectPlatformFromUserAgent(userAgent);
 
+    // Override with query parameter if provided
+    if (queryValidation.data.platform) {
+      platform = queryValidation.data.platform;
+    }
+
+    // If we still don't have a platform, return error
     if (!platform) {
-      platform = detectPlatformFromUserAgent(userAgent);
-
-      if (!platform) {
-        return NextResponse.json(
-          {
-            error:
-              "Could not detect platform. Please specify platform as 'aarch64' or 'x64' in query parameters.",
-            hint: "Add ?platform=aarch64 or ?platform=x64 to the URL",
-          },
-          { status: 400 },
-        );
-      }
+      return NextResponse.json(
+        {
+          error:
+            "Could not detect platform. Please specify platform as 'aarch64' or 'x64' in query parameters.",
+          hint: "Add ?platform=aarch64 or ?platform=x64 to the URL",
+        },
+        { status: 400 },
+      );
     }
 
     // Fetch the latest release info from GitHub API to get version
