@@ -14,8 +14,8 @@ const config = {
     inlineCss: true,
   },
   images: {
-    // loader: "custom",
-    // loaderFile: "./image-loader.ts",
+    loader: "custom",
+    loaderFile: "./image-loader.ts",
     remotePatterns: [
       {
         protocol: "https",
