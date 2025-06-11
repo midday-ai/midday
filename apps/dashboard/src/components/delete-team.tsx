@@ -25,14 +25,22 @@ import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function DeleteTeam() {
   const [value, setValue] = useState("");
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
+  const router = useRouter();
 
-  const deleteTeamMutation = useMutation(trpc.team.delete.mutationOptions());
+  const deleteTeamMutation = useMutation(
+    trpc.team.delete.mutationOptions({
+      onSuccess: () => {
+        router.push("/");
+      },
+    }),
+  );
 
   return (
     <Card className="border-destructive">
