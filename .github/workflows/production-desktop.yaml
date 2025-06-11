@@ -7,11 +7,6 @@ on:
         description: Make a release
         type: boolean
         default: false
-  push:
-    branches:
-      - main
-    paths:
-      - apps/desktop/**
 
 jobs:
   draft:
