@@ -1,6 +1,6 @@
 [package]
 name = "Midday"
-version = "0.1.7"
+version = "0.1.8"
 description = ""
 authors = ["Midday Labs AB"]
 edition = "2024"
