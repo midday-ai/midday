@@ -1,6 +1,8 @@
 import "@/styles/globals.css";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
+import { DesktopHeader } from "@/components/desktop-header";
+import { isDesktopApp } from "@/utils/desktop";
 import { Provider as Analytics } from "@midday/events/client";
 import { Toaster } from "@midday/ui/toaster";
 import { GeistMono } from "geist/font/mono";
@@ -82,17 +84,21 @@ export default async function Layout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const isDesktop = await isDesktopApp();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      className={cn(isDesktop && "desktop")}
+    >
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable} ${lora.variable} font-sans`,
           "whitespace-pre-line overscroll-none antialiased",
         )}
       >
-        {/* This is used to make the header draggable on macOS */}
-        <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-6 pointer-events-none" />
+        <DesktopHeader />
 
         <NuqsAdapter>
           <Providers locale={locale}>{children}</Providers>

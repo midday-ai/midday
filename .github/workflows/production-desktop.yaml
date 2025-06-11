@@ -1,0 +1,148 @@
+name: Production Deployment - Desktop
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_release:
+        description: Make a release
+        type: boolean
+        default: false
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - apps/desktop/**
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.read_version.outputs.value }}
+      tag_name: ${{ steps.create_tag.outputs.tag_name }}
+      needs_release: ${{ steps.create_tag.outputs.tag_existed != 'true' }}
+      gh_release_url: ${{ steps.create_gh_release.outputs.url }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version number
+        uses: SebRollen/toml-action@v1.0.2
+        id: read_version
+        with:
+          file: apps/desktop/src-tauri/Cargo.toml
+          field: "package.version"
+
+      - name: Create tag
+        id: create_tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = "midday-v${{ steps.read_version.outputs.value }}";
+            const tagRef = `tags/${tag}`;
+
+            const TAG_EXISTED = "tag_existed";
+            const TAG_NAME = "tag_name";
+
+            core.setOutput(TAG_NAME, tag);
+
+            async function main() {
+              let tagExisted = true;
+
+              try {
+                await github.rest.git.getRef({
+                  ref: tagRef,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                });
+
+                tagExisted = true;
+                core.notice(`Release skipped as tag '${tag}' already exists. Update the version in 'apps/desktop/src-tauri/Cargo.toml' before starting another release.`);
+              } catch (error) {
+                if ("status" in error && error.status === 404) tagExisted = false;
+                else throw error;
+              }
+
+              core.setOutput(TAG_EXISTED, tagExisted);
+
+              if (!tagExisted)
+                await github.rest.git.createRef({
+                  ref: `refs/${tagRef}`,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  sha: context.sha,
+                });
+            }
+
+            main();
+
+
+
+      - name: Create draft GH release
+        id: create_gh_release
+        if: ${{ steps.create_tag.outputs.tag_existed != 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          name: 'Midday v${{ steps.read_version.outputs.value }}'
+          tag_name: ${{ steps.create_tag.outputs.tag_name }}
+          draft: true
+          generate_release_notes: true
+
+  publish-tauri:
+    needs: draft
+    if: ${{ needs.draft.outputs.needs_release == 'true' }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'macos-latest' # for Arm based macs (M1 and above).
+            args: '--target aarch64-apple-darwin'
+          - platform: 'macos-latest' # for Intel based macs.
+            args: '--target x86_64-apple-darwin'
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: install Rust target
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+      - name: Create API Key File
+        run: echo "${{ secrets.APPLE_API_KEY_FILE }}" > api.p8
+      - name: Import codesign certs
+        uses: apple-actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.APPLE_CERTIFICATE }}
+          p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+      - name: Verify certificate
+        run: security find-identity -v -p codesigning ${{ runner.temp }}/build.keychain
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MIDDAY_ENV: production
+          # codesigning
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          # notarization
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_PATH: ${{ github.workspace }}/api.p8
+          APPLE_KEYCHAIN: ${{ runner.temp }}/build.keychain
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ needs.draft.outputs.tag_name }}
+          releaseName: 'Midday v${{ needs.draft.outputs.version }}'
+          releaseBody: 'See the assets to download this version and install.'
+          releaseDraft: true
+          prerelease: false
+          appVersion: ${{ needs.draft.outputs.version }}
+          args: ${{ matrix.args }}

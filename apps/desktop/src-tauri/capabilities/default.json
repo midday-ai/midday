@@ -1,0 +1,40 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Default capabilities for Midday desktop app including download support",
+  "windows": ["main", "search"],
+  "permissions": [
+    "core:default",
+    "core:webview:default",
+    "opener:default",
+    "deep-link:default",
+    "core:window:default",
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-hide",
+    "core:window:allow-start-dragging",
+    "core:window:allow-set-focus",
+    "core:app:default",
+    "core:event:default",
+    "core:event:allow-listen",
+    "core:event:allow-emit",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister",
+    "global-shortcut:allow-is-registered",
+    "global-shortcut:default",
+    "core:image:default",
+    "core:resources:default",
+    "core:menu:default",
+    "core:tray:default",
+    "core:path:default"
+  ],
+  "remote": {
+    "urls": [
+      "http://localhost:3001/**",
+      "https://beta.midday.ai/**",
+      "https://app.midday.ai/**"
+    ]
+  },
+  "platforms": ["macOS"]
+}

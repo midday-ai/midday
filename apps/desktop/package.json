@@ -1,0 +1,38 @@
+{
+  "name": "@midday/desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "MIDDAY_ENV=development tauri dev --config src-tauri/tauri.dev.conf.json",
+    "tauri:staging": "MIDDAY_ENV=staging tauri dev --config src-tauri/tauri.staging.conf.json",
+    "tauri:prod": "MIDDAY_ENV=production tauri dev",
+    "tauri:build:dev": "tauri build --config src-tauri/tauri.dev.conf.json",
+    "tauri:build:staging": "tauri build --config src-tauri/tauri.staging.conf.json",
+    "tauri:build:prod": "tauri build"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-deep-link": "~2",
+    "@tauri-apps/plugin-dialog": "^2.2.2",
+    "@tauri-apps/plugin-global-shortcut": "~2",
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-process": "^2.2.1",
+    "@tauri-apps/plugin-updater": "^2.7.1",
+    "@tauri-apps/plugin-upload": "~2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3",
+    "@tauri-apps/cli": "^2"
+  }
+}

@@ -55,15 +55,15 @@ We are working on the documentation to get started with Midday for local develop
 - Nextjs
 - Supabase
 - Shadcn
-- ToDesktop
+- Tauri
 - Expo
 - TailwindCSS
 
 ### Hosting
 
 - Supabase (database, storage, realtime, auth)
-- Vercel (Website, edge-config, and metrics)
-- Upstash (redis)
+- Vercel (Website, Dashboard)
+- Fly.io (API/tRPC)
 
 ### Services
 

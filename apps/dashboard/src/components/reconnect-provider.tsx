@@ -2,6 +2,7 @@ import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-
 import { reconnectEnableBankingLinkAction } from "@/actions/institutions/reconnect-enablebanking-link";
 import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-gocardless-link";
 import { getUrl } from "@/utils/environment";
+import { isDesktopApp } from "@midday/desktop-client/platform";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
@@ -12,7 +13,6 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { useAction } from "next-safe-action/hooks";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";

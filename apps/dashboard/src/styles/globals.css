@@ -93,99 +93,61 @@ body {
 }
 
 /* Desktop App */
-html.todesktop {
+html.desktop {
+  background: transparent !important;
   user-select: none;
   -webkit-user-select: none;
-}
-
-html.todesktop,
-html.todesktop div {
-  cursor: default !important;
-}
-
-html.todesktop,
-html.todesktop.div {
-  cursor: default !important;
-}
-
-html.todesktop a {
-  cursor: pointer !important;
-}
-
-.update-available {
-  background: #68a7ff;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  position: relative;
-}
-
-.update-available svg {
-  position: absolute;
-  width: 12px;
-  height: 12px;
+  overscroll-behavior: none !important;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
   top: 0;
   left: 0;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.update-available svg path.svg-update {
-  opacity: 1;
-  transform: scale(1);
+html.desktop body {
+  position: relative;
+  background: hsl(var(--background)) !important;
+  overscroll-behavior: none !important;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  height: 100vh;
+  width: 100%;
+  overflow: auto;
 }
 
-.update-available svg circle.svg-progress {
-  stroke-dashoffset: 16px;
-  stroke-dasharray: 16px;
-  transform: rotate(270deg);
-  transform-origin: center;
+html.desktop body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  z-index: 100;
+  pointer-events: none;
 }
 
-.update-available.progress svg path.svg-update,
-.update-available.update-downloaded svg path.svg-update {
-  opacity: 0;
-  transform: scale(0.5);
+html.desktop.dark body::before {
+  border: 0.5px solid rgba(255, 255, 255, 0.15);
 }
 
-.update-available.progress svg circle.svg-progress {
-  stroke-dashoffset: 0px;
-  transform: rotate(270deg);
-  transition: all 4s linear;
+html.desktop .wrapper::-webkit-scrollbar,
+html.desktop::-webkit-scrollbar,
+html.desktop body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
-.update-available svg path.svg-refresh {
-  opacity: 0;
-  transform: scale(0.2) rotate(-135deg);
-  transition: all .3s ease;
-  transform-origin: center;
-}
-
-.update-available.update-downloaded svg path.svg-refresh {
-  opacity: 1;
-  transform: scale(1) rotate(0);
-}
-
-@keyframes anim-update {
-  0% {
-    transform: scale(0);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-/* Desktop Command menu */
-html.light.todesktop-panel {
-  background-color: rgba(255, 255, 255, 0.5);
-}
-
-html.dark.todesktop-panel {
-  background-color: rgba(000, 000, 000, 0.3);
-}
-
-html.todesktop-panel body {
-  background-color: transparent !important;
+.desktop div,
+.desktop a,
+.desktop button {
+  cursor: default !important;
 }
 
 .color-picker .react-colorful {
@@ -274,4 +236,20 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   overscroll-behavior: contain;
   transition: 100ms ease;
   transition-property: height;
+}
+
+.desktop-search .global-search-list {
+  height: 450px;
+}
+
+.desktop-search .search-container {
+  border: none;
+  border-bottom: 0.5px solid hsl(var(--border));
+}
+
+.desktop-search .search-footer {
+  border-left: 0px;
+  border-right: 0px;
+  border-bottom: 0px;
+  border-top: 1px;
 }
