@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "Midday"
-version = "0.1.9"
+version = "0.2.0"
 dependencies = [
  "image",
  "serde",
