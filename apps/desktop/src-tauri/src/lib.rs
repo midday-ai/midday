@@ -310,15 +310,37 @@ async fn create_preloaded_search_window(
 }
 
 fn get_app_url() -> String {
-    let env = env::var("MIDDAY_ENV").unwrap_or_else(|_| "development".to_string());
+    // Try runtime environment variable first, then fall back to compile-time
+    let env = env::var("MIDDAY_ENV")
+        .unwrap_or_else(|_| {
+            option_env!("MIDDAY_ENV")
+                .unwrap_or("development")
+                .to_string()
+        });
+
+    println!("🌍 Environment detected: {}", env);
 
     match env.as_str() {
-        "development" | "dev" => "http://localhost:3001".to_string(),
-        "staging" => "https://beta.midday.ai".to_string(),
-        "production" | "prod" => "https://app.midday.ai".to_string(),
+        "development" | "dev" => {
+            let url = "http://localhost:3001".to_string();
+            println!("🌍 Using development URL: {}", url);
+            url
+        },
+        "staging" => {
+            let url = "https://beta.midday.ai".to_string();
+            println!("🌍 Using staging URL: {}", url);
+            url
+        },
+        "production" | "prod" => {
+            let url = "https://app.midday.ai".to_string();
+            println!("🌍 Using production URL: {}", url);
+            url
+        },
         _ => {
             eprintln!("Unknown environment: {}, defaulting to development", env);
-            "http://localhost:3001".to_string()
+            let url = "http://localhost:3001".to_string();
+            println!("🌍 Using fallback development URL: {}", url);
+            url
         }
     }
 }
@@ -373,22 +395,6 @@ pub fn run() {
             // Add updater plugin conditionally for desktop
             #[cfg(desktop)]
             app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
-
-            // Restore the default app menu and add "Check for Updates..."
-            let check_updates_item = MenuItem::with_id(app, "check_updates", "Check for Updates...", true, None::<&str>)?;
-            let app_menu = Menu::with_items(app, &[&check_updates_item])?;
-            app.set_menu(app_menu)?;
-
-            // Handle menu events
-            let app_handle_for_menu = app.handle().clone();
-            app.on_menu_event(move |_app, event| {
-                if event.id() == "check_updates" {
-                    let app_clone = app_handle_for_menu.clone();
-                    tauri::async_runtime::spawn(async move {
-                        let _ = check_for_updates(app_clone).await;
-                    });
-                }
-            });
 
             let app_url_clone = app_url.clone();
             let app_handle = app.handle().clone();

@@ -145,5 +145,4 @@ jobs:
           releaseDraft: true
           prerelease: false
           appVersion: ${{ needs.draft.outputs.version }}
-          configPath: apps/desktop/src-tauri/tauri.conf.json
           args: ${{ matrix.args }}
