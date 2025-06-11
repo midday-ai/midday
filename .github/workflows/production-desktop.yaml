@@ -76,16 +76,7 @@ jobs:
 
             main();
 
-      - name: Sync tauri.conf.json version
-        if: ${{ steps.create_tag.outputs.tag_existed != 'true' }}
-        run: |
-          # Update tauri.conf.json to match Cargo.toml version
-          node -e "
-            const fs = require('fs');
-            const config = JSON.parse(fs.readFileSync('apps/desktop/src-tauri/tauri.conf.json', 'utf8'));
-            config.version = '${{ steps.read_version.outputs.value }}';
-            fs.writeFileSync('apps/desktop/src-tauri/tauri.conf.json', JSON.stringify(config, null, 2));
-          "
+
 
       - name: Create draft GH release
         id: create_gh_release
@@ -151,7 +142,8 @@ jobs:
           tagName: ${{ needs.draft.outputs.tag_name }}
           releaseName: 'Midday v${{ needs.draft.outputs.version }}'
           releaseBody: 'See the assets to download this version and install.'
-          releaseDraft: false
+          releaseDraft: true
           prerelease: false
+          appVersion: ${{ needs.draft.outputs.version }}
           configPath: apps/desktop/src-tauri/tauri.conf.json
           args: ${{ matrix.args }}
