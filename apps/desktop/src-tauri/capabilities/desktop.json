@@ -2,5 +2,13 @@
   "identifier": "desktop-capability",
   "platforms": ["macOS"],
   "windows": ["main"],
-  "permissions": ["updater:default"]
+  "permissions": [
+    "updater:default",
+    "dialog:default",
+    "dialog:allow-ask",
+    "dialog:allow-message",
+    "updater:allow-check",
+    "updater:allow-download-and-install",
+    "process:allow-restart"
+  ]
 }

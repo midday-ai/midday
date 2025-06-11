@@ -6,12 +6,12 @@ use tauri::{
     WebviewWindowBuilder,
 };
 use tauri_plugin_deep_link::DeepLinkExt;
-
-// Add tray imports
+use tauri_plugin_updater;
+use tauri_plugin_dialog;
+use tauri_plugin_process;
+use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::image::Image;
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-
-// Add image crate for PNG decoding
 use image;
 
 // Global state for search window availability
@@ -35,6 +35,76 @@ fn show_window(window: tauri::Window) -> Result<(), String> {
         .set_focus()
         .map_err(|e| format!("Failed to set focus: {}", e))?;
 
+    Ok(())
+}
+
+#[tauri::command]
+async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+    use tauri_plugin_updater::UpdaterExt;
+    
+    #[cfg(desktop)]
+    {
+        // Try to check for updates
+        if let Ok(updater) = app.updater() {
+            match updater.check().await {
+                Ok(Some(update)) => {
+                    // Update available - show update dialog
+                    let answer = app.dialog()
+                        .message(format!("A new version {} is available. Would you like to update now?", update.version))
+                        .title("Update Available")
+                        .kind(MessageDialogKind::Info)
+                        .ok_button_label("Update")
+                        .cancel_button_label("Later")
+                        .blocking_show();
+                    
+                    if answer {
+                        // User wants to update
+                        let _ = update.download_and_install().await;
+                    }
+                }
+                Ok(None) => {
+                    // No update available - show current version info
+                    let version = app.package_info().version.to_string();
+                    app.dialog()
+                        .message(format!("Midday\nversion {}\n\nYou're up to date!", version))
+                        .title("No Updates Available")
+                        .kind(MessageDialogKind::Info)
+                        .ok_button_label("OK")
+                        .blocking_show();
+                }
+                Err(e) => {
+                    // Error checking for updates
+                    app.dialog()
+                        .message(format!("Failed to check for updates: {}", e))
+                        .title("Update Check Failed")
+                        .kind(MessageDialogKind::Error)
+                        .ok_button_label("OK")
+                        .blocking_show();
+                }
+            }
+        } else {
+            // Updater not available
+            app.dialog()
+                .message("Update checking is not available in this build.")
+                .title("Updates Not Available")
+                .kind(MessageDialogKind::Warning)
+                .ok_button_label("OK")
+                .blocking_show();
+        }
+    }
+    
+    #[cfg(not(desktop))]
+    {
+        // Mobile platforms don't support auto-updates
+        app.dialog()
+            .message("Updates are managed through your app store.")
+            .title("Check App Store")
+            .kind(MessageDialogKind::Info)
+            .ok_button_label("OK")
+            .blocking_show();
+    }
+    
     Ok(())
 }
 
@@ -287,11 +357,34 @@ pub fn run() {
     let app_url = get_app_url();
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_deep_link::init())
-        .invoke_handler(tauri::generate_handler![show_window])
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_process::init())
+        .invoke_handler(tauri::generate_handler![show_window, check_for_updates])
         .setup(move |app| {
+            // Add updater plugin conditionally for desktop
+            #[cfg(desktop)]
+            app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
+
+            // Create menu
+            let check_updates_item = MenuItemBuilder::with_id("check_updates", "Check for Updates...").build(app)?;
+            let app_menu = MenuBuilder::new(app)
+                .items(&[&check_updates_item])
+                .build()?;
+            app.set_menu(app_menu)?;
+
+            // Handle menu events
+            let app_handle_for_menu = app.handle().clone();
+            app.on_menu_event(move |app, event| {
+                if event.id() == "check_updates" {
+                    let app_clone = app_handle_for_menu.clone();
+                    tauri::async_runtime::spawn(async move {
+                        let _ = check_for_updates(app_clone).await;
+                    });
+                }
+            });
+
             let app_url_clone = app_url.clone();
             let app_handle = app.handle().clone();
 
@@ -459,7 +552,9 @@ pub fn run() {
                 // For now, let's decode the PNG to get RGBA data and dimensions
                 // This is a simplified approach - you might need to add the `image` crate to Cargo.toml
                 let img = image::load_from_memory(icon_bytes).map_err(|e| format!("Failed to load tray icon: {}", e))?;
-                let rgba = img.to_rgba8();
+                // Resize to a smaller tray icon size (18x18 pixels)
+                let resized_img = img.resize(18, 18, image::imageops::FilterType::Lanczos3);
+                let rgba = resized_img.to_rgba8();
                 let (width, height) = rgba.dimensions();
                 Image::new_owned(rgba.into_raw(), width, height)
             };
