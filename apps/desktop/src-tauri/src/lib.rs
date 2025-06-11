@@ -40,7 +40,7 @@ fn show_window(window: tauri::Window) -> Result<(), String> {
 
 #[tauri::command]
 async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
-    use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+    use tauri_plugin_dialog::{DialogExt, MessageDialogKind, MessageDialogButtons};
     use tauri_plugin_updater::UpdaterExt;
     
     #[cfg(desktop)]
@@ -54,13 +54,20 @@ async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
                         .message(format!("A new version {} is available. Would you like to update now?", update.version))
                         .title("Update Available")
                         .kind(MessageDialogKind::Info)
-                        .ok_button_label("Update")
-                        .cancel_button_label("Later")
+                        .buttons(MessageDialogButtons::OkCancel)
                         .blocking_show();
                     
                     if answer {
-                        // User wants to update
-                        let _ = update.download_and_install().await;
+                        // User wants to update - provide required callbacks
+                        let _ = update.download_and_install(
+                            |_chunk_length, _content_length| {
+                                // Progress callback - could show progress here
+                            },
+                            || {
+                                // Download finished callback
+                                println!("Update download finished");
+                            }
+                        ).await;
                     }
                 }
                 Ok(None) => {
@@ -70,7 +77,7 @@ async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
                         .message(format!("Midday\nversion {}\n\nYou're up to date!", version))
                         .title("No Updates Available")
                         .kind(MessageDialogKind::Info)
-                        .ok_button_label("OK")
+                        .buttons(MessageDialogButtons::Ok)
                         .blocking_show();
                 }
                 Err(e) => {
@@ -79,7 +86,7 @@ async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
                         .message(format!("Failed to check for updates: {}", e))
                         .title("Update Check Failed")
                         .kind(MessageDialogKind::Error)
-                        .ok_button_label("OK")
+                        .buttons(MessageDialogButtons::Ok)
                         .blocking_show();
                 }
             }
@@ -89,7 +96,7 @@ async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
                 .message("Update checking is not available in this build.")
                 .title("Updates Not Available")
                 .kind(MessageDialogKind::Warning)
-                .ok_button_label("OK")
+                .buttons(MessageDialogButtons::Ok)
                 .blocking_show();
         }
     }
@@ -101,7 +108,7 @@ async fn check_for_updates(app: tauri::AppHandle) -> Result<(), String> {
             .message("Updates are managed through your app store.")
             .title("Check App Store")
             .kind(MessageDialogKind::Info)
-            .ok_button_label("OK")
+            .buttons(MessageDialogButtons::Ok)
             .blocking_show();
     }
     
@@ -376,7 +383,7 @@ pub fn run() {
 
             // Handle menu events
             let app_handle_for_menu = app.handle().clone();
-            app.on_menu_event(move |app, event| {
+            app.on_menu_event(move |_app, event| {
                 if event.id() == "check_updates" {
                     let app_clone = app_handle_for_menu.clone();
                     tauri::async_runtime::spawn(async move {
