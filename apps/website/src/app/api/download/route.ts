@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse, userAgent } from "next/server";
 import { z } from "zod";
 
 const PlatformSchema = z.enum(["aarch64", "x64"]);
@@ -13,36 +13,49 @@ const GitHubReleaseSchema = z.object({
   name: z.string(),
 });
 
-function detectPlatformFromUserAgent(
-  userAgent: string,
+function detectPlatformFromRequest(
+  request: NextRequest,
 ): "aarch64" | "x64" | undefined {
-  const ua = userAgent.toLowerCase();
+  const { os, cpu } = userAgent(request);
 
   // Check if it's macOS
-  if (!ua.includes("mac os x") && !ua.includes("macintosh")) {
+  if (!os.name?.toLowerCase().includes("mac")) {
     return undefined;
   }
 
-  // Try to detect Apple Silicon vs Intel
-  // Apple Silicon indicators
-  if (ua.includes("arm64") || ua.includes("aarch64")) {
-    return "aarch64";
+  // Use CPU architecture information from Next.js userAgent
+  if (cpu.architecture) {
+    const arch = cpu.architecture.toLowerCase();
+
+    // Apple Silicon indicators
+    if (
+      arch.includes("arm64") ||
+      arch.includes("arm") ||
+      arch.includes("aarch64")
+    ) {
+      return "aarch64";
+    }
+
+    // Intel indicators
+    if (
+      arch.includes("x64") ||
+      arch.includes("amd64") ||
+      arch.includes("x86_64") ||
+      arch.includes("ia32")
+    ) {
+      return "x64";
+    }
   }
 
-  // Intel indicators
-  if (ua.includes("intel") || ua.includes("x86_64") || ua.includes("x64")) {
-    return "x64";
-  }
+  // For macOS without clear CPU architecture, default to Apple Silicon
+  // Most new Macs (2020+) are Apple Silicon
 
-  // Default to Apple Silicon for newer Macs (since most new Macs are Apple Silicon)
-  // This is a reasonable default as of 2024+
   return "aarch64";
 }
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userAgent = request.headers.get("user-agent") || "";
 
     // Validate query parameters with Zod
     const queryValidation = QueryParamsSchema.safeParse({
@@ -59,8 +72,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Detect platform from User-Agent first, then allow query param to override
-    let platform = detectPlatformFromUserAgent(userAgent);
+    // Detect platform from request first, then allow query param to override
+    let platform = detectPlatformFromRequest(request);
 
     // Override with query parameter if provided
     if (queryValidation.data.platform) {
@@ -124,8 +137,6 @@ export async function GET(request: NextRequest) {
 
     // Construct download URL using the full tag name
     const downloadUrl = `https://github.com/midday-ai/midday/releases/download/${tag_name}/${filename}`;
-
-    console.log(downloadUrl);
 
     // Fetch the DMG file from GitHub
     const fileResponse = await fetch(downloadUrl, {
