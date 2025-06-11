@@ -8,7 +8,7 @@ on:
         type: boolean
         default: false
   push:
-    branches-ignore:
+    branches:
       - main
     paths:
       - apps/desktop/**
