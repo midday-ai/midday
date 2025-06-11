@@ -99,16 +99,18 @@ html.desktop {
   -webkit-user-select: none;
   overscroll-behavior: none !important;
   border-radius: 10px;
-  border: 0.5px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
   height: 100vh;
   width: 100vw;
   position: fixed;
   top: 0;
   left: 0;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html.desktop body {
+  position: relative;
   background: hsl(var(--background)) !important;
   overscroll-behavior: none !important;
   margin: 0;
@@ -119,15 +121,27 @@ html.desktop body {
   overflow: auto;
 }
 
+html.desktop body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+html.desktop.dark body::before {
+  border: 0.5px solid rgba(255, 255, 255, 0.15);
+}
+
 html.desktop .wrapper::-webkit-scrollbar,
 html.desktop::-webkit-scrollbar,
 html.desktop body::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
-}
-
-html.desktop.dark body::before {
-  border: 1px solid #444;
-  box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1);
 }
 
 .desktop div,

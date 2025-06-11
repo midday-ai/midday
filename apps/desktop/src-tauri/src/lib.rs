@@ -9,7 +9,7 @@ use tauri_plugin_deep_link::DeepLinkExt;
 use tauri_plugin_updater;
 use tauri_plugin_dialog;
 use tauri_plugin_process;
-use tauri::menu::{MenuBuilder, MenuItemBuilder};
+use tauri::menu::{Menu, MenuItem};
 use tauri::image::Image;
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use image;
@@ -374,11 +374,9 @@ pub fn run() {
             #[cfg(desktop)]
             app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
 
-            // Create menu
-            let check_updates_item = MenuItemBuilder::with_id("check_updates", "Check for Updates...").build(app)?;
-            let app_menu = MenuBuilder::new(app)
-                .items(&[&check_updates_item])
-                .build()?;
+            // Restore the default app menu and add "Check for Updates..."
+            let check_updates_item = MenuItem::with_id(app, "check_updates", "Check for Updates...", true, None::<&str>)?;
+            let app_menu = Menu::with_items(app, &[&check_updates_item])?;
             app.set_menu(app_menu)?;
 
             // Handle menu events
@@ -552,37 +550,52 @@ pub fn run() {
             // Don't preload search window immediately - create it on first use instead
             // This prevents interference with the login flow
 
+            // Set the default app menu to restore the Midday menu
+            let app_menu = Menu::default(app.handle())?;
+            app.set_menu(app_menu)?;
+
             // Setup simple system tray for search toggle only
             // Load custom tray icon
             let tray_icon = {
                 let icon_bytes = include_bytes!("../icons/tray-icon.png");
-                // For now, let's decode the PNG to get RGBA data and dimensions
-                // This is a simplified approach - you might need to add the `image` crate to Cargo.toml
                 let img = image::load_from_memory(icon_bytes).map_err(|e| format!("Failed to load tray icon: {}", e))?;
-                // Resize to a smaller tray icon size (18x18 pixels)
-                let resized_img = img.resize(18, 18, image::imageops::FilterType::Lanczos3);
-                let rgba = resized_img.to_rgba8();
+                let rgba = img.to_rgba8();
                 let (width, height) = rgba.dimensions();
                 Image::new_owned(rgba.into_raw(), width, height)
             };
 
+            // Create tray menu
+            let check_updates_item = MenuItem::with_id(app, "check_updates", "Check for Updates...", true, None::<&str>)?;
+            let tray_menu = Menu::with_items(app, &[&check_updates_item])?;
+
             let _tray = TrayIconBuilder::new()
                 .icon(tray_icon)
+                .menu(&tray_menu)
+                .show_menu_on_left_click(false)
+                .on_menu_event(|app, event| {
+                    println!("🔧 Tray menu event triggered: {:?}", event.id);
+                    if event.id == "check_updates" {
+                        println!("🔧 Calling check_for_updates...");
+                        let app_handle = app.clone();
+                        tauri::async_runtime::spawn(async move {
+                            let _ = check_for_updates(app_handle).await;
+                        });
+                    }
+                })
                 .on_tray_icon_event(move |tray, event| {
-                    // Handle left clicks to toggle search window (keep existing behavior)
-                    if let TrayIconEvent::Click {
-                        button: MouseButton::Left,
-                        button_state: MouseButtonState::Up,
-                        ..
-                    } = event
-                    {
-                        println!("🔍 Tray icon clicked - checking search state via managed state");
-                        let app_handle = tray.app_handle();
-                        if let Some(managed_search_state) = app_handle.try_state::<SearchWindowState>() {
-                            let _ = toggle_search_window(app_handle, &managed_search_state);
-                        } else {
-                            println!("❌ Failed to get managed search state for tray click");
-                        }
+                    match event {
+                        // Handle left clicks to toggle search window (keep existing behavior)
+                        TrayIconEvent::Click {
+                            button: MouseButton::Left,
+                            button_state: MouseButtonState::Up,
+                            ..
+                        } => {
+                            let app_handle = tray.app_handle();
+                            if let Some(managed_search_state) = app_handle.try_state::<SearchWindowState>() {
+                                let _ = toggle_search_window(app_handle, &managed_search_state);
+                            }
+                        },
+                        _ => {}
                     }
                 })
                 .build(app)?;
