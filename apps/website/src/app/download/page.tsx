@@ -1,9 +1,9 @@
-import { CopyInput } from "@/components/copy-input";
-import { Keyboard } from "@/components/keyboard";
+import { DynamicImage } from "@/components/dynamic-image";
 import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
 import Image from "next/image";
-import appIcon from "public/app-icon.png";
+import dockDark from "public/dock-dark.png";
+import dock from "public/dock.png";
 
 export const metadata: Metadata = {
   title: "Download",
@@ -14,21 +14,17 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="container flex flex-col items-center mb-12 md:mb-48 text-center">
-      <h1 className="mt-24 font-medium text-center text-5xl mb-24">
-        Always at your fingertips.
-      </h1>
-
-      <Keyboard />
-
-      <Image
-        src={appIcon}
+      <DynamicImage
+        darkSrc={dockDark}
+        lightSrc={dock}
         alt="Midday App"
-        width={120}
-        height={120}
-        quality={90}
-        className="w-[80px] h-[80px] mt-12 md:mt-0 md:h-auto md:w-auto"
+        width={655}
+        height={140}
+        className="mt-48"
+        quality={95}
       />
-      <p className="mb-4 text-2xl	font-medium mt-8">Midday for Mac</p>
+
+      <p className="mb-4 -mt-24 text-2xl	font-medium">Midday for Mac</p>
       <p className="text-[#878787] font-sm max-w-[500px]">
         With Midday on Mac you have everything <br />
         accessible just one click away.
