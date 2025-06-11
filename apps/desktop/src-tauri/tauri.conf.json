@@ -1,7 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Midday",
-  "version": "0.1.0",
   "identifier": "ai.midday.app",
   "app": {
     "macOSPrivateApi": true,
