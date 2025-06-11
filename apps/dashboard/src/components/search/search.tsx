@@ -541,6 +541,10 @@ export function Search() {
   );
 
   useEffect(() => {
+    if (!isDesktopApp()) {
+      return;
+    }
+
     const unlistenPromise = listen("search-window-open", (event) => {
       const isOpen = event.payload as boolean;
       if (isOpen) {
