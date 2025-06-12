@@ -1,6 +1,6 @@
 import type { Database } from "@api/db";
 import { transactionCategories } from "@api/db/schema";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull } from "drizzle-orm";
 
 export type GetCategoriesParams = {
   teamId: string;
@@ -13,7 +13,8 @@ export const getCategories = async (
 ) => {
   const { teamId, limit = 1000 } = params;
 
-  return db
+  // First get all parent categories (categories with no parentId)
+  const parentCategories = await db
     .select({
       id: transactionCategories.id,
       name: transactionCategories.name,
@@ -21,15 +22,61 @@ export const getCategories = async (
       slug: transactionCategories.slug,
       description: transactionCategories.description,
       system: transactionCategories.system,
-      vat: transactionCategories.vat,
+      taxRate: transactionCategories.taxRate,
+      taxType: transactionCategories.taxType,
+      parentId: transactionCategories.parentId,
     })
     .from(transactionCategories)
-    .where(eq(transactionCategories.teamId, teamId))
+    .where(
+      and(
+        eq(transactionCategories.teamId, teamId),
+        isNull(transactionCategories.parentId),
+      ),
+    )
     .orderBy(
       desc(transactionCategories.createdAt),
       asc(transactionCategories.name),
     )
     .limit(limit);
+
+  // Then get all child categories for these parents
+  const childCategories = await db
+    .select({
+      id: transactionCategories.id,
+      name: transactionCategories.name,
+      color: transactionCategories.color,
+      slug: transactionCategories.slug,
+      description: transactionCategories.description,
+      system: transactionCategories.system,
+      taxRate: transactionCategories.taxRate,
+      taxType: transactionCategories.taxType,
+      parentId: transactionCategories.parentId,
+    })
+    .from(transactionCategories)
+    .where(
+      and(
+        eq(transactionCategories.teamId, teamId),
+        isNotNull(transactionCategories.parentId),
+      ),
+    )
+    .orderBy(asc(transactionCategories.name));
+
+  // Group children by parentId for efficient lookup
+  const childrenByParentId = new Map<string, typeof childCategories>();
+  for (const child of childCategories) {
+    if (child.parentId) {
+      if (!childrenByParentId.has(child.parentId)) {
+        childrenByParentId.set(child.parentId, []);
+      }
+      childrenByParentId.get(child.parentId)!.push(child);
+    }
+  }
+
+  // Attach children to their parents
+  return parentCategories.map((parent) => ({
+    ...parent,
+    children: childrenByParentId.get(parent.id) || [],
+  }));
 };
 
 export type CreateTransactionCategoryParams = {
@@ -37,14 +84,17 @@ export type CreateTransactionCategoryParams = {
   name: string;
   color?: string | null;
   description?: string | null;
-  vat?: number | null;
+  taxRate?: number | null;
+  taxType?: string | null;
+  parentId?: string | null;
 };
 
 export const createTransactionCategory = async (
   db: Database,
   params: CreateTransactionCategoryParams,
 ) => {
-  const { teamId, name, color, description, vat } = params;
+  const { teamId, name, color, description, taxRate, taxType, parentId } =
+    params;
 
   const [result] = await db
     .insert(transactionCategories)
@@ -53,7 +103,9 @@ export const createTransactionCategory = async (
       name,
       color,
       description,
-      vat,
+      taxRate,
+      taxType,
+      parentId,
     })
     .returning();
 
@@ -66,7 +118,9 @@ export type CreateTransactionCategoriesParams = {
     name: string;
     color?: string | null;
     description?: string | null;
-    vat?: number | null;
+    taxRate?: number | null;
+    taxType?: string | null;
+    parentId?: string | null;
   }[];
 };
 
@@ -97,7 +151,9 @@ export type UpdateTransactionCategoryParams = {
   name?: string;
   color?: string | null;
   description?: string | null;
-  vat?: number | null;
+  taxRate?: number | null;
+  taxType?: string | null;
+  parentId?: string | null;
 };
 
 export const updateTransactionCategory = async (

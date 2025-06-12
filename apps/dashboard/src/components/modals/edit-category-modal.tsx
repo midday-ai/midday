@@ -21,7 +21,7 @@ import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { InputColor } from "../input-color";
-import { VatInput } from "../vat-input";
+import { TaxRateInput } from "../tax-rate-input";
 
 type Props = {
   id: string;
@@ -31,7 +31,8 @@ type Props = {
     name: string;
     color: string | null;
     description?: string | null;
-    vat?: number | null;
+    taxRate?: number | null;
+    taxType?: string | null;
   };
 };
 
@@ -40,7 +41,8 @@ const updateCategorySchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional().nullable(),
   color: z.string().optional().nullable(),
-  vat: z.number().optional().nullable(),
+  taxRate: z.number().optional().nullable(),
+  taxType: z.string().optional().nullable(),
 });
 
 type UpdateCategoriesFormValues = z.infer<typeof updateCategorySchema>;
@@ -72,7 +74,8 @@ export function EditCategoryModal({
       name: defaultValue.name,
       color: defaultValue.color,
       description: defaultValue.description ?? undefined,
-      vat: defaultValue?.vat ? Number(defaultValue.vat) : undefined,
+      taxRate: defaultValue?.taxRate ? Number(defaultValue.taxRate) : undefined,
+      taxType: defaultValue?.taxType ?? undefined,
     },
   });
 
@@ -80,7 +83,12 @@ export function EditCategoryModal({
     updateCategoryMutation.mutate({
       ...values,
       description: values.description ?? null,
-      vat: values.vat ? (values.vat > 0 ? values.vat : null) : null,
+      taxRate: values.taxRate
+        ? values.taxRate > 0
+          ? values.taxRate
+          : null
+        : null,
+      taxType: values.taxType ?? null,
       color: values.color ?? null,
     });
   }
@@ -132,19 +140,19 @@ export function EditCategoryModal({
                   <div className="flex-1 relative">
                     <FormField
                       control={form.control}
-                      name="vat"
+                      name="taxRate"
                       render={({ field }) => (
                         <FormItem className="flex-1">
                           <FormControl>
-                            <VatInput
+                            <TaxRateInput
                               value={field.value}
                               name={form.watch("name")}
-                              onChange={(vat) => {
-                                field.onChange(+vat);
+                              onChange={(taxRate) => {
+                                field.onChange(+taxRate);
                               }}
-                              onSelect={(vat) => {
-                                if (vat) {
-                                  form.setValue("vat", +vat);
+                              onSelect={(taxRate) => {
+                                if (taxRate) {
+                                  form.setValue("taxRate", +taxRate);
                                 }
                               }}
                             />

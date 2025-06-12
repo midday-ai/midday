@@ -4,7 +4,8 @@ export const createTransactionCategorySchema = z.object({
   name: z.string(),
   color: z.string().optional(),
   description: z.string().optional(),
-  vat: z.number().optional(),
+  taxRate: z.number().optional(),
+  taxType: z.string().optional(),
 });
 
 export const createManyTransactionCategorySchema = z.array(
@@ -12,7 +13,8 @@ export const createManyTransactionCategorySchema = z.array(
     name: z.string(),
     color: z.string().optional(),
     description: z.string().optional(),
-    vat: z.number().optional(),
+    taxRate: z.number().optional(),
+    taxType: z.string().optional(),
   }),
 );
 
@@ -21,7 +23,8 @@ export const updateTransactionCategorySchema = z.object({
   name: z.string(),
   color: z.string().nullable(),
   description: z.string().nullable(),
-  vat: z.number().nullable(),
+  taxRate: z.number().nullable(),
+  taxType: z.string().nullable(),
 });
 
 export const deleteTransactionCategorySchema = z.object({ id: z.string() });

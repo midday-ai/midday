@@ -16,6 +16,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./envs": "./src/envs.ts",
-    "./format": "./src/format.ts"
+    "./format": "./src/format.ts",
+    "./tax": "./src/tax.ts"
   }
 }

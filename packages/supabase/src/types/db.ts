@@ -1602,8 +1602,11 @@ export type Database = {
           embedding: string | null
           id: string
           name: string
+          parent_id: string | null
           slug: string
           system: boolean | null
+          tax_rate: number | null
+          tax_type: string | null
           team_id: string
           vat: number | null
         }
@@ -1614,8 +1617,11 @@ export type Database = {
           embedding?: string | null
           id?: string
           name: string
+          parent_id?: string | null
           slug: string
           system?: boolean | null
+          tax_rate?: number | null
+          tax_type?: string | null
           team_id?: string
           vat?: number | null
         }
@@ -1626,8 +1632,11 @@ export type Database = {
           embedding?: string | null
           id?: string
           name?: string
+          parent_id?: string | null
           slug?: string
           system?: boolean | null
+          tax_rate?: number | null
+          tax_type?: string | null
           team_id?: string
           vat?: number | null
         }
@@ -1777,6 +1786,8 @@ export type Database = {
           notified: boolean | null
           recurring: boolean | null
           status: Database["public"]["Enums"]["transactionStatus"] | null
+          tax_rate: number | null
+          tax_type: string | null
           team_id: string
           amount_text: string | null
           calculated_vat: number | null
@@ -1810,6 +1821,8 @@ export type Database = {
           notified?: boolean | null
           recurring?: boolean | null
           status?: Database["public"]["Enums"]["transactionStatus"] | null
+          tax_rate?: number | null
+          tax_type?: string | null
           team_id: string
         }
         Update: {
@@ -1840,6 +1853,8 @@ export type Database = {
           notified?: boolean | null
           recurring?: boolean | null
           status?: Database["public"]["Enums"]["transactionStatus"] | null
+          tax_rate?: number | null
+          tax_type?: string | null
           team_id?: string
         }
         Relationships: [
@@ -2230,6 +2245,8 @@ export type Database = {
           notified: boolean | null
           recurring: boolean | null
           status: Database["public"]["Enums"]["transactionStatus"] | null
+          tax_rate: number | null
+          tax_type: string | null
           team_id: string
         }[]
       }

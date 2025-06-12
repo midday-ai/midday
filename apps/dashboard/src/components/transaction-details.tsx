@@ -22,6 +22,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { Switch } from "@midday/ui/switch";
 import { ToastAction } from "@midday/ui/toast";
 import { toast } from "@midday/ui/use-toast";
+import { getTaxTypeLabel } from "@midday/utils/tax";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { AssignUser } from "./assign-user";
@@ -271,10 +272,13 @@ export function TransactionDetails() {
                 </span>
               )}
               <div className="h-3">
-                {data?.vat && data.vat > 0 ? (
+                {data?.taxAmount && data.taxAmount > 0 ? (
                   <span className="text-[#606060] text-xs select-text">
-                    VAT{" "}
-                    <FormatAmount amount={data.vat} currency={data.currency} />
+                    {data.taxType && `${getTaxTypeLabel(data.taxType)} `}
+                    <FormatAmount
+                      amount={data.taxAmount}
+                      currency={data.currency}
+                    />
                   </span>
                 ) : null}
               </div>
