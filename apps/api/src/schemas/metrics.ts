@@ -387,3 +387,32 @@ export const getSpendingResponseSchema = z
     }),
   )
   .openapi("SpendingResultArray");
+
+export const getTaxSummarySchema = z
+  .object({
+    from: z.string().openapi({
+      description: "Start date (ISO 8601 format)",
+      example: "2023-01-01",
+    }),
+    to: z.string().openapi({
+      description: "End date (ISO 8601 format)",
+      example: "2023-12-31",
+    }),
+    currency: z.string().optional().openapi({
+      description: "Currency code (ISO 4217)",
+      example: "USD",
+    }),
+    type: z.enum(["paid", "collected"]).openapi({
+      description: "Type of tax",
+      example: "paid",
+    }),
+    categorySlug: z.string().optional().openapi({
+      description: "Category slug",
+      example: "taxes",
+    }),
+    taxType: z.string().optional().openapi({
+      description: "Tax type",
+      example: "vat",
+    }),
+  })
+  .openapi("GetTaxSummarySchema");

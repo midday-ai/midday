@@ -61,6 +61,7 @@ export function InboxView() {
     table: "inbox",
     filter: `team_id=eq.${user?.teamId}`,
     onEvent: (payload) => {
+      console.log(payload);
       if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
         debouncedEventHandler();
       }

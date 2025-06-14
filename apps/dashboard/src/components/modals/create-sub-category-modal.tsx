@@ -18,47 +18,44 @@ import {
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { InputColor } from "../input-color";
 import { SelectTaxType } from "../select-tax-type";
 import { TaxRateInput } from "../tax-rate-input";
 
 type Props = {
-  id: string;
   onOpenChange: (isOpen: boolean) => void;
   isOpen: boolean;
-  defaultValue: {
-    name: string;
-    color: string | null;
-    description?: string | null;
-    taxRate?: number | null;
-    taxType?: string | null;
-  };
+  parentId: string;
+  defaultTaxRate?: number;
+  defaultTaxType?: string;
+  defaultColor?: string;
 };
 
 const formSchema = z.object({
-  id: z.string().uuid(),
   name: z.string().min(1, "Name is required"),
   description: z.string().optional().nullable(),
   color: z.string().optional().nullable(),
   taxRate: z.number().optional().nullable(),
   taxType: z.string().optional().nullable(),
+  parentId: z.string().uuid(),
 });
 
-type UpdateCategoriesFormValues = z.infer<typeof formSchema>;
+type CreateSubCategoryFormValues = z.infer<typeof formSchema>;
 
-export function EditCategoryModal({
-  id,
+export function CreateSubCategoryModal({
+  parentId,
   onOpenChange,
   isOpen,
-  defaultValue,
+  defaultTaxRate,
+  defaultTaxType,
+  defaultColor,
 }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const updateCategoryMutation = useMutation(
-    trpc.transactionCategories.update.mutationOptions({
+  const createSubCategoryMutation = useMutation(
+    trpc.transactionCategories.create.mutationOptions({
       onSuccess: () => {
         onOpenChange(false);
         queryClient.invalidateQueries({
@@ -70,26 +67,22 @@ export function EditCategoryModal({
 
   const form = useZodForm(formSchema, {
     defaultValues: {
-      id,
-      name: defaultValue.name,
-      color: defaultValue.color,
-      description: defaultValue.description ?? undefined,
-      taxRate: defaultValue?.taxRate ? Number(defaultValue.taxRate) : undefined,
-      taxType: defaultValue?.taxType ?? undefined,
+      name: "",
+      description: "",
+      parentId,
+      taxRate: defaultTaxRate,
+      taxType: defaultTaxType,
+      color: defaultColor,
     },
   });
 
-  function onSubmit(values: UpdateCategoriesFormValues) {
-    updateCategoryMutation.mutate({
+  function onSubmit(values: CreateSubCategoryFormValues) {
+    createSubCategoryMutation.mutate({
       ...values,
-      description: values.description ?? null,
-      taxRate: values.taxRate
-        ? values.taxRate > 0
-          ? values.taxRate
-          : null
-        : null,
-      taxType: values.taxType ?? null,
-      color: values.color ?? null,
+      description: values.description ?? undefined,
+      color: values.color ?? undefined,
+      taxRate: values.taxRate ?? undefined,
+      taxType: values.taxType ?? undefined,
     });
   }
 
@@ -98,7 +91,7 @@ export function EditCategoryModal({
       <DialogContent className="max-w-[455px]">
         <div className="p-4">
           <DialogHeader>
-            <DialogTitle>Edit Category</DialogTitle>
+            <DialogTitle>Create Sub Category</DialogTitle>
           </DialogHeader>
 
           <Form {...form}>
@@ -202,7 +195,7 @@ export function EditCategoryModal({
               <DialogFooter className="mt-8 w-full">
                 <div className="space-y-4 w-full">
                   <SubmitButton
-                    isSubmitting={updateCategoryMutation.isPending}
+                    isSubmitting={createSubCategoryMutation.isPending}
                     className="w-full"
                   >
                     Save

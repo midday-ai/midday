@@ -24,11 +24,14 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import React from "react";
-import { columns } from "./columns";
+import { columns, flattenCategories } from "./columns";
 import { Header } from "./header";
 
 export function DataTable() {
   const [isOpen, onOpenChange] = React.useState(false);
+  const [expandedCategories, setExpandedCategories] = React.useState<
+    Set<string>
+  >(new Set());
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -47,8 +50,23 @@ export function DataTable() {
     }),
   );
 
+  // Flatten categories and filter based on expanded state
+  const flattenedData = React.useMemo(() => {
+    const flattened = flattenCategories(data ?? []);
+
+    // Filter to only show parent categories and children of expanded parents
+    return flattened.filter((category) => {
+      // Always show parent categories
+      if (!category.isChild) {
+        return true;
+      }
+      // Only show children if their parent is expanded
+      return category.parentId && expandedCategories.has(category.parentId);
+    });
+  }, [data, expandedCategories]);
+
   const table = useReactTable({
-    data: data ?? [],
+    data: flattenedData,
     getRowId: ({ id }) => id,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -57,6 +75,8 @@ export function DataTable() {
       deleteCategory: (id: string) => {
         deleteCategoryMutation.mutate({ id });
       },
+      expandedCategories,
+      setExpandedCategories,
     },
   });
 
@@ -83,13 +103,14 @@ export function DataTable() {
             </TableRow>
           ))}
         </TableHeader>
+
         <TableBody>
           {table.getRowModel().rows.map((row) => (
             <TableRow className="hover:bg-transparent" key={row.id}>
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell
                   key={cell.id}
-                  className={cn(index === 2 && "w-[50px]")}
+                  className={cn(index === 3 && "w-[50px]")}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>

@@ -208,6 +208,18 @@ export const transactionResponseSchema = z
       description: "Monetary amount of the transaction",
       example: 150.75,
     }),
+    taxAmount: z.number().nullable().openapi({
+      description: "Tax amount of the transaction",
+      example: 15.07,
+    }),
+    taxRate: z.number().nullable().openapi({
+      description: "Tax rate of the transaction",
+      example: 10,
+    }),
+    taxType: z.string().nullable().openapi({
+      description: "Tax type of the transaction",
+      example: "VAT",
+    }),
     currency: z.string().openapi({
       description: "Currency code of the transaction in ISO 4217 format",
       example: "USD",
@@ -235,6 +247,14 @@ export const transactionResponseSchema = z
             "Hex color code associated with the category for UI display",
           example: "#FF5733",
         }),
+        taxRate: z.number().nullable().openapi({
+          description: "Tax rate of the category",
+          example: 10,
+        }),
+        taxType: z.string().nullable().openapi({
+          description: "Tax type of the category",
+          example: "VAT",
+        }),
         slug: z.string().openapi({
           description: "URL-friendly slug of the category",
           example: "office-supplies",
@@ -249,6 +269,8 @@ export const transactionResponseSchema = z
           name: "Office Supplies",
           color: "#FF5733",
           slug: "office-supplies",
+          taxRate: 10,
+          taxType: "VAT",
         },
       }),
     status: z.string().openapi({

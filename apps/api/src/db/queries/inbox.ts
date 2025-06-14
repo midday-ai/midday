@@ -269,6 +269,8 @@ export async function matchTransaction(
       filePath: inbox.filePath,
       size: inbox.size,
       fileName: inbox.fileName,
+      taxRate: inbox.taxRate,
+      taxType: inbox.taxType,
     })
     .from(inbox)
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
@@ -288,6 +290,17 @@ export async function matchTransaction(
       teamId,
     })
     .returning({ id: transactionAttachments.id });
+
+  // Update transaction with tax rate and type
+  if (result.taxRate && result.taxType) {
+    await db
+      .update(transactions)
+      .set({
+        taxRate: result.taxRate,
+        taxType: result.taxType,
+      })
+      .where(eq(transactions.id, transactionId));
+  }
 
   if (attachmentData) {
     // Update inbox with attachment and transaction IDs
@@ -373,6 +386,15 @@ export async function unmatchTransaction(
           eq(transactionAttachments.teamId, teamId),
         ),
       );
+
+    // Reset tax rate and type
+    await db
+      .update(transactions)
+      .set({
+        taxRate: null,
+        taxType: null,
+      })
+      .where(eq(transactions.id, result.transactionId));
   }
 
   // Return updated inbox with transaction data

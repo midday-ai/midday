@@ -4,6 +4,7 @@ import {
   getMetrics,
   getRunway,
   getSpending,
+  getTaxSummary,
 } from "@api/db/queries/metrics";
 import {
   getBurnRateSchema,
@@ -12,6 +13,7 @@ import {
   getRevenueSchema,
   getRunwaySchema,
   getSpendingSchema,
+  getTaxSummarySchema,
 } from "@api/schemas/metrics";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 
@@ -81,6 +83,20 @@ export const metricsRouter = createTRPCRouter({
         from: input.from,
         to: input.to,
         currency: input.currency,
+      });
+    }),
+
+  taxSummary: protectedProcedure
+    .input(getTaxSummarySchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getTaxSummary(db, {
+        teamId: teamId!,
+        from: input.from,
+        to: input.to,
+        currency: input.currency,
+        type: input.type,
+        categorySlug: input.categorySlug,
+        taxType: input.taxType,
       });
     }),
 });

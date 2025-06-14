@@ -293,12 +293,22 @@ export function TransactionCreateForm() {
                     }}
                     hideLoading
                     selected={categories
-                      ?.map((category) =>
-                        category && category.slug !== null
-                          ? { ...category, slug: category.slug }
-                          : undefined,
+                      ?.map((category) => {
+                        if (!category) return undefined;
+
+                        const { id, name, color, slug } = category;
+                        return {
+                          id,
+                          name,
+                          color,
+                          slug: slug!,
+                        };
+                      })
+                      .filter(
+                        (category): category is NonNullable<typeof category> =>
+                          category !== undefined,
                       )
-                      .find((category) => category?.slug === field.value)}
+                      .find((category) => category.slug === field.value)}
                   />
                 </FormControl>
 
