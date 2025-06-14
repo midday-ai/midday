@@ -8,7 +8,6 @@ import { loadMetricsParams } from "@/hooks/use-metrics-params";
 import { HydrateClient, batchPrefetch, trpc } from "@/trpc/server";
 import { getQueryClient } from "@/trpc/server";
 import { Cookies } from "@/utils/constants";
-import { cn } from "@midday/ui/cn";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import type { SearchParams } from "nuqs";
@@ -49,8 +48,8 @@ export default async function Overview(props: Props) {
     }),
   ]);
 
-  // Preload the data for the first visible chart
-  const [accounts] = await Promise.all([
+  // Load the data for the first visible chart
+  await Promise.all([
     queryClient.fetchQuery(
       trpc.bankAccounts.get.queryOptions({
         enabled: true,
@@ -64,8 +63,6 @@ export default async function Overview(props: Props) {
     ),
   ]);
 
-  const isEmpty = !accounts?.length;
-
   return (
     <HydrateClient>
       <div>
@@ -73,18 +70,15 @@ export default async function Overview(props: Props) {
           <ChartSelectors />
 
           <div className="mt-8 relative">
-            {isEmpty && <EmptyState />}
-
-            <div className={cn(isEmpty && "blur-[8px] opacity-20")}>
-              <Charts disabled={isEmpty} />
-            </div>
+            <EmptyState />
+            <Charts />
           </div>
         </div>
 
-        <Widgets disabled={false} />
+        <Widgets />
       </div>
 
-      <OverviewModal defaultOpen={isEmpty && !hideConnectFlow} />
+      <OverviewModal hideConnectFlow={hideConnectFlow} />
     </HydrateClient>
   );
 }

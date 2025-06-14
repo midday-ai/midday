@@ -1,3 +1,6 @@
+"use client";
+
+import { useTRPC } from "@/trpc/client";
 import {
   Carousel,
   CarouselContent,
@@ -5,6 +8,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@midday/ui/carousel";
+import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
 import { AccountBalance } from "./account-balance";
 import { Assistant } from "./assistant";
@@ -16,11 +20,18 @@ import { Tracker } from "./tracker";
 import { Transactions } from "./transactions/transactions";
 import { Vault } from "./vault";
 
-type Props = {
-  disabled: boolean;
-};
+export function Widgets() {
+  const trpc = useTRPC();
 
-export async function Widgets({ disabled }: Props) {
+  const { data: accounts } = useQuery(
+    trpc.bankAccounts.get.queryOptions({
+      enabled: true,
+    }),
+  );
+
+  // If the user has not connected any accounts, disable the widgets
+  const disabled = !accounts?.length;
+
   const items = [
     <Assistant key="assistant" />,
     <Spending disabled={disabled} key="spending" />,

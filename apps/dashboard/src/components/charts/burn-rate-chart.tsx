@@ -41,7 +41,11 @@ export function BurnRateChart({ disabled }: Props) {
   });
 
   return (
-    <div className={cn(disabled && "pointer-events-none select-none")}>
+    <div
+      className={cn(
+        disabled && "pointer-events-none select-none blur-[8px] opacity-20",
+      )}
+    >
       <div className="space-y-2 mb-14 select-text">
         <h1 className="text-4xl font-mono">
           <AnimatedNumber

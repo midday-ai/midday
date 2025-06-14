@@ -1,6 +1,24 @@
+"use client";
+
 import { AddAccountButton } from "@/components/add-account-button";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
 
 export function EmptyState() {
+  const trpc = useTRPC();
+
+  const { data: accounts } = useQuery(
+    trpc.bankAccounts.get.queryOptions({
+      enabled: true,
+    }),
+  );
+
+  const isEmpty = !accounts?.length;
+
+  if (!isEmpty) {
+    return null;
+  }
+
   return (
     <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center z-20">
       <div className="text-center max-w-md mx-auto flex flex-col items-center justify-center">

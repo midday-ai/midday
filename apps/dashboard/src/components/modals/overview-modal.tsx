@@ -2,28 +2,39 @@
 
 import { hideConnectFlowAction } from "@/actions/hide-connect-flow-action";
 import { AddAccountButton } from "@/components/add-account-button";
+import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
+import { useQuery } from "@tanstack/react-query";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
 import OverViewScreenOneLight from "public/assets/overview-1-light.png";
 import OverViewScreenOne from "public/assets/overview-1.png";
 import OverViewScreenTwoLight from "public/assets/overview-2-light.png";
 import OverViewScreenTwo from "public/assets/overview-2.png";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 const images = [
   { id: 1, src: OverViewScreenOne, src2: OverViewScreenOneLight },
   { id: 2, src: OverViewScreenTwo, src2: OverViewScreenTwoLight },
 ];
 
-export function OverviewModal({
-  defaultOpen = false,
-}: { defaultOpen?: boolean }) {
+type Props = {
+  hideConnectFlow: boolean;
+};
+
+export function OverviewModal({ hideConnectFlow: hasHideConnectFlow }: Props) {
+  const trpc = useTRPC();
   const [activeId, setActive] = useState(1);
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isOpen, setIsOpen] = useState(false);
 
   const hideConnectFlow = useAction(hideConnectFlowAction);
+
+  const { data: accounts } = useQuery(
+    trpc.bankAccounts.get.queryOptions({
+      enabled: true,
+    }),
+  );
 
   const handleOnOpenChange = () => {
     setIsOpen(!isOpen);
@@ -33,12 +44,15 @@ export function OverviewModal({
     }
   };
 
+  useEffect(() => {
+    // If the user has not connected any accounts and the modal is defaultOpen, open the modal
+    if (!accounts?.length && !hasHideConnectFlow) {
+      setIsOpen(true);
+    }
+  }, [accounts, hasHideConnectFlow]);
+
   return (
-    <Dialog
-      defaultOpen={defaultOpen}
-      open={isOpen}
-      onOpenChange={handleOnOpenChange}
-    >
+    <Dialog open={isOpen} onOpenChange={handleOnOpenChange}>
       <DialogContent
         onInteractOutside={(e) => {
           e.preventDefault();
