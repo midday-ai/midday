@@ -1,4 +1,5 @@
 import { logger } from "@/utils/logger";
+import { resend } from "@api/services/resend";
 import { getAllowedAttachments } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
@@ -19,6 +20,9 @@ const ipRange = [
 ];
 
 const FORWARD_FROM_EMAIL = "inbox@midday.ai";
+
+// These are used by Google Workspace to forward emails to our inbox
+const ALLOWED_FORWARDING_EMAILS = ["forwarding-noreply@google.com"];
 
 export async function POST(req: Request) {
   const clientIp = (await headers()).get("x-forwarded-for") ?? "";
@@ -44,8 +48,15 @@ export async function POST(req: Request) {
     );
   }
 
-  const { MessageID, FromFull, Subject, Attachments, OriginalRecipient } =
-    parsedBody.data;
+  const {
+    MessageID,
+    FromFull,
+    Subject,
+    Attachments,
+    OriginalRecipient,
+    TextBody,
+    HtmlBody,
+  } = parsedBody.data;
 
   const inboxId = getInboxIdFromEmail(OriginalRecipient);
 
@@ -66,7 +77,7 @@ export async function POST(req: Request) {
   try {
     const { data: teamData } = await supabase
       .from("teams")
-      .select("id")
+      .select("id, email")
       .eq("inbox_id", inboxId)
       .single()
       .throwOnError();
@@ -79,6 +90,23 @@ export async function POST(req: Request) {
     });
 
     const teamId = teamData?.id;
+
+    // If the email is forwarded from a Google Workspace account, we need to send a reply to the team email
+    if (teamData?.email && ALLOWED_FORWARDING_EMAILS.includes(FromFull.Email)) {
+      await resend.emails.send({
+        from: `${FromFull?.Name} <${FORWARD_FROM_EMAIL}>`,
+        to: teamData.email,
+        subject: Subject ?? FromFull?.Name,
+        text: TextBody,
+        html: HtmlBody,
+        react: null,
+        headers: {
+          "X-Entity-Ref-ID": nanoid(),
+        },
+      });
+
+      return NextResponse.json({ success: true });
+    }
 
     const allowedAttachments = getAllowedAttachments(Attachments);
 

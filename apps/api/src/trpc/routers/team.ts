@@ -68,7 +68,11 @@ export const teamRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createTeamSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
-      return createTeam(db, { ...input, userId: session.user.id });
+      return createTeam(db, {
+        ...input,
+        userId: session.user.id,
+        email: session.user.email!,
+      });
     }),
 
   leave: protectedProcedure

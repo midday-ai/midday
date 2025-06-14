@@ -52,6 +52,7 @@ export const updateTeamById = async (
 type CreateTeamParams = {
   name: string;
   userId: string;
+  email: string;
   baseCurrency?: string;
   countryCode?: string;
   logoUrl?: string;
@@ -66,6 +67,7 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
         baseCurrency: params.baseCurrency,
         countryCode: params.countryCode,
         logoUrl: params.logoUrl,
+        email: params.email,
       })
       .returning({ id: teams.id });
 
