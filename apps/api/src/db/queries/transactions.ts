@@ -457,7 +457,9 @@ export async function getTransactions(
       account: newAccount,
       taxRate,
       taxType: rest.taxType ?? rest.category?.taxType ?? null,
-      taxAmount: Math.abs(+((taxRate * rest.amount) / 100).toFixed(2)),
+      taxAmount: Math.abs(
+        +((taxRate * rest.amount) / (100 + taxRate)).toFixed(2),
+      ),
     };
   });
 
@@ -649,7 +651,9 @@ export async function getTransactionById(
     account: newAccount,
     taxRate,
     taxType: rest.taxType ?? rest.category?.taxType ?? null,
-    taxAmount: Math.abs(+((taxRate * rest.amount) / 100).toFixed(2)),
+    taxAmount: Math.abs(
+      +((taxRate * rest.amount) / (100 + taxRate)).toFixed(2),
+    ),
   };
 }
 

@@ -160,3 +160,14 @@ export const inboxSlackUploadSchema = z.object({
 });
 
 export type InboxSlackUploadPayload = z.infer<typeof inboxSlackUploadSchema>;
+
+export const processTransactionAttachmentSchema = z.object({
+  transactionId: z.string().uuid(),
+  mimetype: z.string(),
+  filePath: z.array(z.string()),
+  teamId: z.string().uuid(),
+});
+
+export type ProcessTransactionAttachmentPayload = z.infer<
+  typeof processTransactionAttachmentSchema
+>;

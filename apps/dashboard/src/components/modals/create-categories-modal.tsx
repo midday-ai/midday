@@ -1,7 +1,7 @@
 import { InputColor } from "@/components/input-color";
 import { useUserQuery } from "@/hooks/use-user";
+import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
   DialogContent,
@@ -19,11 +19,11 @@ import {
 } from "@midday/ui/form";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { getTaxTypeForCountry, taxTypes } from "@midday/utils/tax";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { SelectTaxType } from "../select-tax-type";
 import { TaxRateInput } from "../tax-rate-input";
@@ -45,7 +45,7 @@ interface CreateCategoriesFormValues {
   categories: CategoryFormValues[];
 }
 
-const createCategoriesSchema = z.object({
+const formSchema = z.object({
   categories: z.array(
     z.object({
       name: z.string().min(1, "Name is required"),
@@ -82,8 +82,7 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
     taxRate: undefined,
   };
 
-  const form = useForm<CreateCategoriesFormValues>({
-    resolver: zodResolver(createCategoriesSchema),
+  const form = useZodForm(formSchema, {
     defaultValues: {
       categories: [newItem],
     },
@@ -139,6 +138,25 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                             defaultColor={form.watch(
                               `categories.${index}.color`,
                             )}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name={`categories.${index}.description`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1 space-y-1">
+                        <FormLabel className="text-xs text-[#878787] font-normal">
+                          Description
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            autoFocus={false}
+                            placeholder="Description"
                           />
                         </FormControl>
                       </FormItem>
@@ -206,25 +224,6 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                       )?.description
                     }
                   </span>
-
-                  <FormField
-                    control={form.control}
-                    name={`categories.${index}.description`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1 !mt-4 space-y-1">
-                        <FormLabel className="text-xs text-[#878787] font-normal">
-                          Description
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            autoFocus={false}
-                            placeholder="Description"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
                 </div>
               ))}
             </div>
@@ -249,13 +248,9 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                   </span>
                 )}
               </div>
-              <Button type="submit" disabled={categoriesMutation.isPending}>
-                {categoriesMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Create"
-                )}
-              </Button>
+              <SubmitButton isSubmitting={categoriesMutation.isPending}>
+                Create
+              </SubmitButton>
             </DialogFooter>
           </div>
         </form>

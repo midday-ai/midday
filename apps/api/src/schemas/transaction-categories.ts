@@ -6,6 +6,7 @@ export const createTransactionCategorySchema = z.object({
   description: z.string().optional(),
   taxRate: z.number().optional(),
   taxType: z.string().optional(),
+  parentId: z.string().optional(),
 });
 
 export const createManyTransactionCategorySchema = z.array(

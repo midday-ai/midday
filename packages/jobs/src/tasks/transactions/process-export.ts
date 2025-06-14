@@ -91,7 +91,7 @@ export const processExport = schemaTask({
         const taxRate =
           transaction?.tax_rate ?? transaction?.category?.tax_rate ?? 0;
         const taxAmount = Math.abs(
-          +((taxRate * transaction.amount) / 100).toFixed(2),
+          +((taxRate * transaction.amount) / (100 + taxRate)).toFixed(2),
         );
 
         const formattedTaxType = getTaxTypeLabel(

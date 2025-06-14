@@ -10,6 +10,7 @@ type Selected = {
   name: string;
   color?: string | null;
   slug: string;
+  children?: Selected[];
 };
 
 type Props = {
@@ -23,17 +24,54 @@ function transformCategory(category: {
   id: string;
   name: string;
   color: string | null;
-  slug: string;
+  slug: string | null;
   description: string | null;
   system: boolean | null;
-  vat: number | null;
-}) {
+  taxRate: number | null;
+  taxType: string | null;
+  parentId: string | null;
+  children?: any[];
+}): {
+  id: string;
+  label: string;
+  color: string;
+  slug: string;
+  children: any[];
+} {
   return {
     id: category.id,
     label: category.name,
-    color: category.color ?? getColorFromName(category.name),
-    slug: category.slug,
+    color: category.color ?? getColorFromName(category.name) ?? "#606060",
+    slug: category.slug ?? "",
+    children: category.children?.map(transformCategory) || [],
   };
+}
+
+// Flatten categories to include both parents and children
+function flattenCategories(categories: any[]): any[] {
+  const flattened: any[] = [];
+
+  for (const category of categories) {
+    // Add parent category
+    flattened.push({
+      ...category,
+      isChild: false,
+    });
+
+    // Add children if they exist
+    if (category.children && category.children.length > 0) {
+      for (const child of category.children) {
+        flattened.push({
+          ...child,
+          label: `  ${child.label}`, // Add indentation for visual hierarchy
+          isChild: true,
+          parentId: category.id,
+        });
+      }
+    }
+  }
+
+  return flattened;
 }
 
 export function SelectCategory({
@@ -48,8 +86,9 @@ export function SelectCategory({
     trpc.transactionCategories.get.queryOptions(),
   );
 
-  // @ts-expect-error - slug is not nullable
-  const categories = data?.map(transformCategory) ?? [];
+  // Transform and flatten categories to include children
+  const transformedCategories = data?.map(transformCategory) ?? [];
+  const categories = flattenCategories(transformedCategories);
 
   const createCategoryMutation = useMutation(
     trpc.transactionCategories.create.mutationOptions({

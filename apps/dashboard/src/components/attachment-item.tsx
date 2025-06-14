@@ -18,7 +18,7 @@ export function AttachmentItem({ file, onDelete }: Props) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex space-x-4 items-center">
-        <div className="border w-[40px] h-[40px] overflow-hidden cursor-pointer">
+        <div className="w-[40px] h-[40px] overflow-hidden cursor-pointer">
           {file.isUploading ? (
             <Skeleton className="w-full h-full" />
           ) : (

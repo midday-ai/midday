@@ -11,3 +11,11 @@ export const createAttachmentsSchema = z.array(
 );
 
 export const deleteAttachmentSchema = z.object({ id: z.string() });
+
+export const processTransactionAttachmentSchema = z.array(
+  z.object({
+    transactionId: z.string(),
+    mimetype: z.string(),
+    filePath: z.array(z.string()),
+  }),
+);

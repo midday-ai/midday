@@ -103,13 +103,14 @@ export function DataTable() {
             </TableRow>
           ))}
         </TableHeader>
+
         <TableBody>
           {table.getRowModel().rows.map((row) => (
             <TableRow className="hover:bg-transparent" key={row.id}>
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell
                   key={cell.id}
-                  className={cn(index === 2 && "w-[50px]")}
+                  className={cn(index === 3 && "w-[50px]")}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>

@@ -270,6 +270,16 @@ export const columns: ColumnDef<Transaction>[] = [
     ),
   },
   {
+    accessorKey: "taxAmount",
+    header: "Tax Amount",
+    cell: ({ row }) => (
+      <FormatAmount
+        amount={row.original.taxAmount}
+        currency={row.original.currency}
+      />
+    ),
+  },
+  {
     accessorKey: "category",
     header: "Category",
     cell: ({ row }) => (

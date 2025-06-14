@@ -6,6 +6,7 @@ import { getProfit } from "@/lib/tools/get-profit";
 import { getRevenue } from "@/lib/tools/get-revenue";
 import { getRunway } from "@/lib/tools/get-runway";
 import { getSpending } from "@/lib/tools/get-spending";
+import { getTaxSummary } from "@/lib/tools/get-tax-summary";
 import { getTransactions } from "@/lib/tools/get-transactions";
 import { openai } from "@ai-sdk/openai";
 import { createDataStreamResponse, smoothStream, streamText } from "ai";
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
         model: openai("gpt-4.1-mini"),
         system: `
         You are Midday AI, an expert financial assistant for the user's business.
-        Your goal is to help users understand their business finances by analyzing transactions, revenue, spending, and key financial metrics, as well as finding specific documents, receipts, and invoices.
+        Your goal is to help users understand their business finances by analyzing transactions, revenue, tax, spending, and key financial metrics, as well as finding specific documents, receipts, and invoices.
 
         When responding to user queries:
         1. Identify the core question and the financial data or document needed.
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
           getProfit,
           getRunway,
           getInbox,
+          getTaxSummary,
         },
       });
 

@@ -1,5 +1,5 @@
 import type { Database } from "@api/db";
-import { inbox, transactionAttachments } from "@api/db/schema";
+import { inbox, transactionAttachments, transactions } from "@api/db/schema";
 import { and, eq } from "drizzle-orm";
 
 export type Attachment = {
@@ -67,6 +67,14 @@ export async function deleteAttachment(
       .update(inbox)
       .set({ transactionId: null })
       .where(eq(inbox.transactionId, result.transactionId));
+  }
+
+  // Delete tax_rate and tax_type from the transaction
+  if (result.transactionId) {
+    await db
+      .update(transactions)
+      .set({ taxRate: null, taxType: null })
+      .where(eq(transactions.id, result.transactionId));
   }
 
   // Delete the attachment

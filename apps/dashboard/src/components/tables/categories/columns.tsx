@@ -1,5 +1,6 @@
 "use client";
 
+import { CreateSubCategoryModal } from "@/components/modals/create-sub-category-modal";
 import { EditCategoryModal } from "@/components/modals/edit-category-modal";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Button } from "@midday/ui/button";
@@ -16,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { getTaxTypeLabel } from "@midday/utils/tax";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight } from "lucide-react";
@@ -131,6 +133,12 @@ export const columns: ColumnDef<any>[] = [
     },
   },
   {
+    header: "Tax Type",
+    accessorKey: "taxType",
+    cell: ({ row }) =>
+      row.getValue("taxType") ? getTaxTypeLabel(row.getValue("taxType")) : "-",
+  },
+  {
     header: "Tax Rate",
     accessorKey: "taxRate",
     cell: ({ row }) =>
@@ -181,11 +189,14 @@ export const columns: ColumnDef<any>[] = [
             onOpenChange={setIsEditOpen}
           />
 
-          {/* <CreateSubcategoryModal
+          <CreateSubCategoryModal
             isOpen={isCreateSubcategoryOpen}
             onOpenChange={setIsCreateSubcategoryOpen}
             parentId={row.original.id}
-          /> */}
+            defaultTaxRate={row.original.taxRate}
+            defaultTaxType={row.original.taxType}
+            defaultColor={row.original.color}
+          />
         </div>
       );
     },
