@@ -33,7 +33,6 @@ export function LoadingTransactionsEvent({
   const [step, setStep] = useState(1);
   const { resolvedTheme } = useTheme();
   const { setParams } = useConnectParams();
-  const router = useRouter();
 
   const { status } = useInitialConnectionStatus({
     runId,
@@ -54,7 +53,6 @@ export function LoadingTransactionsEvent({
       setTimeout(() => {
         setRunId(undefined);
         setParams(null);
-        router.push("/");
       }, 1000);
     }
   }, [status]);

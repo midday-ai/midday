@@ -220,6 +220,8 @@ export const transactions = pgTable(
     baseAmount: numericCasted({ precision: 10, scale: 2 }),
     counterpartyName: text("counterparty_name"),
     baseCurrency: text("base_currency"),
+    taxRate: numericCasted({ precision: 10, scale: 2 }),
+    taxType: text("tax_type"),
     recurring: boolean(),
     frequency: transactionFrequencyEnum(),
     ftsVector: tsvector("fts_vector")
@@ -1859,20 +1861,31 @@ export const transactionCategories = pgTable(
     }).defaultNow(),
     system: boolean().default(false),
     slug: text(), // Generated in database
-    vat: numericCasted("vat", { precision: 10, scale: 2 }),
+    taxRate: numericCasted("tax_rate", { precision: 10, scale: 2 }),
+    taxType: text("tax_type"),
     description: text(),
     embedding: vector({ dimensions: 384 }),
+    parentId: uuid("parent_id"),
   },
   (table) => [
     index("transaction_categories_team_id_idx").using(
       "btree",
       table.teamId.asc().nullsLast().op("uuid_ops"),
     ),
+    index("transaction_categories_parent_id_idx").using(
+      "btree",
+      table.parentId.asc().nullsLast().op("uuid_ops"),
+    ),
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [teams.id],
       name: "transaction_categories_team_id_fkey",
     }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.parentId],
+      foreignColumns: [table.id],
+      name: "transaction_categories_parent_id_fkey",
+    }).onDelete("set null"),
     primaryKey({
       columns: [table.teamId, table.slug],
       name: "transaction_categories_pkey",
@@ -2150,6 +2163,14 @@ export const transactionCategoriesRelations = relations(
     team: one(teams, {
       fields: [transactionCategories.teamId],
       references: [teams.id],
+    }),
+    parent: one(transactionCategories, {
+      fields: [transactionCategories.parentId],
+      references: [transactionCategories.id],
+      relationName: "parent_child",
+    }),
+    children: many(transactionCategories, {
+      relationName: "parent_child",
     }),
   }),
 );

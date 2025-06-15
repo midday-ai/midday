@@ -211,7 +211,7 @@ export async function getSpending(
   const { teamId, from, to, currency: inputCurrency } = params;
 
   const rawData = (await db.executeOnReplica(
-    sql`SELECT * FROM ${sql.raw("get_spending_v3")}(${teamId}, ${startOfMonth(parseISO(from)).toISOString()}, ${endOfMonth(parseISO(to)).toISOString()}, ${inputCurrency ?? null})`,
+    sql`SELECT * FROM ${sql.raw("get_spending_v4")}(${teamId}, ${startOfMonth(parseISO(from)).toISOString()}, ${endOfMonth(parseISO(to)).toISOString()}, ${inputCurrency ?? null})`,
   )) as unknown as SpendingResultItem[];
 
   return Array.isArray(rawData)
@@ -248,4 +248,158 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
   }
 
   return 0;
+}
+
+export type GetTaxParams = {
+  teamId: string;
+  type: "paid" | "collected";
+  from: string;
+  to: string;
+  categorySlug?: string;
+  taxType?: string;
+  currency?: string;
+};
+
+interface TaxResultItem {
+  amount: string;
+  tax_rate: string;
+  tax_type: string;
+  date: string;
+  currency: string;
+  category_slug?: string;
+}
+
+export async function getTaxSummary(db: Database, params: GetTaxParams) {
+  const {
+    teamId,
+    type,
+    from,
+    to,
+    categorySlug,
+    taxType,
+    currency: inputCurrency,
+  } = params;
+
+  const fromDate = startOfMonth(parseISO(from)).toISOString();
+  const toDate = endOfMonth(parseISO(to)).toISOString();
+
+  // Build the base query with conditions
+  const conditions = [
+    sql`t.team_id = ${teamId}`,
+    sql`t.date >= ${fromDate}`,
+    sql`t.date <= ${toDate}`,
+  ];
+
+  // Add amount condition based on type (paid < 0, collected > 0)
+  if (type === "paid") {
+    conditions.push(sql`t.amount < 0`);
+  } else {
+    conditions.push(sql`t.amount > 0`);
+  }
+
+  // Add optional filters
+  if (categorySlug) {
+    conditions.push(sql`tc.slug = ${categorySlug}`);
+  }
+
+  if (taxType) {
+    conditions.push(sql`(COALESCE(t.vat_type, tc.vat_type) = ${taxType})`);
+  }
+
+  if (inputCurrency) {
+    conditions.push(sql`t.currency = ${inputCurrency}`);
+  }
+
+  // Add condition to only include transactions with tax rates
+  conditions.push(sql`(t.tax_rate IS NOT NULL OR tc.tax_rate IS NOT NULL)`);
+
+  const whereClause = sql.join(conditions, sql` AND `);
+
+  const query = sql`
+    SELECT 
+      COALESCE(tc.slug, 'uncategorized') as category_slug,
+      COALESCE(tc.name, 'Uncategorized') as category_name,
+      SUM(t.amount * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0)))::text as total_tax_amount,
+      SUM(t.amount)::text as total_transaction_amount,
+      COUNT(t.id) as transaction_count,
+      AVG(COALESCE(t.tax_rate, tc.tax_rate))::text as avg_tax_rate,
+      COALESCE(t.tax_type, tc.tax_type) as tax_type,
+      t.currency,
+      MIN(t.date) as earliest_date,
+      MAX(t.date) as latest_date
+    FROM transactions t
+    LEFT JOIN transaction_categories tc ON t.category_slug = tc.slug AND t.team_id = tc.team_id
+    WHERE ${whereClause}
+    GROUP BY 
+      COALESCE(tc.slug, 'uncategorized'),
+      COALESCE(tc.name, 'Uncategorized'),
+      COALESCE(t.tax_type, tc.tax_type),
+      t.currency
+    ORDER BY ABS(SUM(t.amount * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0)))) DESC
+  `;
+
+  const rawData = (await db.executeOnReplica(query)) as unknown as Array<{
+    category_slug: string;
+    category_name: string;
+    total_tax_amount: string;
+    total_transaction_amount: string;
+    transaction_count: number;
+    avg_tax_rate: string;
+    tax_type: string;
+    currency: string;
+    earliest_date: string;
+    latest_date: string;
+  }>;
+
+  const processedData = rawData?.map((item) => ({
+    category_slug: item.category_slug,
+    category_name: item.category_name,
+    total_tax_amount: Number.parseFloat(item.total_tax_amount),
+    total_transaction_amount: Number.parseFloat(item.total_transaction_amount),
+    transaction_count: Number(item.transaction_count),
+    avg_tax_rate: Number.parseFloat(item.avg_tax_rate || "0"),
+    tax_type: item.tax_type,
+    currency: item.currency,
+    earliest_date: item.earliest_date,
+    latest_date: item.latest_date,
+  }));
+
+  const totalTaxAmount = Number(
+    (
+      processedData?.reduce((sum, item) => sum + item.total_tax_amount, 0) ?? 0
+    ).toFixed(2),
+  );
+
+  const totalTransactionAmount = Number(
+    (
+      processedData?.reduce(
+        (sum, item) => sum + item.total_transaction_amount,
+        0,
+      ) ?? 0
+    ).toFixed(2),
+  );
+
+  const totalTransactions =
+    processedData?.reduce((sum, item) => sum + item.transaction_count, 0) ?? 0;
+
+  return {
+    summary: {
+      totalTaxAmount,
+      totalTransactionAmount,
+      totalTransactions,
+      categoryCount: processedData?.length ?? 0,
+      type,
+      currency: processedData?.at(0)?.currency ?? inputCurrency,
+    },
+    meta: {
+      type: "tax",
+      taxType: type,
+      currency: processedData?.at(0)?.currency ?? inputCurrency,
+      period: {
+        from,
+        to,
+      },
+    },
+    result: processedData,
+  };
 }

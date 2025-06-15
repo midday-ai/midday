@@ -1,6 +1,7 @@
 import { InputColor } from "@/components/input-color";
+import { useUserQuery } from "@/hooks/use-user";
+import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
   DialogContent,
@@ -9,46 +10,49 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
-import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@midday/ui/form";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
+import { SubmitButton } from "@midday/ui/submit-button";
+import { getTaxTypeForCountry, taxTypes } from "@midday/utils/tax";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray } from "react-hook-form";
 import { z } from "zod";
-import { VatInput } from "../vat-input";
+import { SelectTaxType } from "../select-tax-type";
+import { TaxRateInput } from "../tax-rate-input";
 
 type Props = {
   onOpenChange: (isOpen: boolean) => void;
   isOpen: boolean;
 };
 
-const newItem = {
-  name: "",
-  description: "",
-  vat: undefined,
-  color: undefined,
-};
-
 interface CategoryFormValues {
   name: string;
   description?: string;
   color?: string;
-  vat?: number;
+  taxRate?: number;
+  taxType?: string;
 }
 
 interface CreateCategoriesFormValues {
   categories: CategoryFormValues[];
 }
 
-const createCategoriesSchema = z.object({
+const formSchema = z.object({
   categories: z.array(
     z.object({
       name: z.string().min(1, "Name is required"),
       description: z.string().optional(),
       color: z.string().optional(),
-      vat: z.number().optional(),
+      taxRate: z.number().optional(),
+      taxType: z.string().optional(),
     }),
   ),
 });
@@ -56,6 +60,7 @@ const createCategoriesSchema = z.object({
 export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { data: user } = useUserQuery();
 
   const categoriesMutation = useMutation(
     trpc.transactionCategories.createMany.mutationOptions({
@@ -69,8 +74,15 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
     }),
   );
 
-  const form = useForm<CreateCategoriesFormValues>({
-    resolver: zodResolver(createCategoriesSchema),
+  const newItem = {
+    name: "",
+    description: "",
+    color: undefined,
+    taxType: getTaxTypeForCountry(user?.team?.countryCode ?? "").value,
+    taxRate: undefined,
+  };
+
+  const form = useZodForm(formSchema, {
     defaultValues: {
       categories: [newItem],
     },
@@ -106,68 +118,40 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
             <div className="flex flex-col space-y-6 max-h-[400px] overflow-auto">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex flex-col space-y-2">
-                  <div className="flex space-x-2">
-                    <FormField
-                      control={form.control}
-                      name={`categories.${index}.name`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormControl>
-                            <InputColor
-                              autoFocus
-                              placeholder="Name"
-                              onChange={({ name, color }) => {
-                                field.onChange(name);
-                                form.setValue(
-                                  `categories.${index}.color`,
-                                  color,
-                                );
-                              }}
-                              defaultValue={field.value}
-                              defaultColor={form.watch(
-                                `categories.${index}.color`,
-                              )}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="flex-1 relative">
-                      <FormField
-                        control={form.control}
-                        name={`categories.${index}.vat`}
-                        render={({ field }) => (
-                          <FormItem className="flex-1">
-                            <FormControl>
-                              <VatInput
-                                value={field.value}
-                                name={
-                                  form.watch(`categories.${index}.name`) ?? ""
-                                }
-                                onChange={(value: string) => {
-                                  field.onChange(
-                                    value ? Number(value) : undefined,
-                                  );
-                                }}
-                                onSelect={(vat) => {
-                                  if (vat) {
-                                    field.onChange(vat);
-                                  }
-                                }}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name={`categories.${index}.name`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1 space-y-1">
+                        <FormLabel className="text-xs text-[#878787] font-normal">
+                          Name
+                        </FormLabel>
+                        <FormControl>
+                          <InputColor
+                            autoFocus
+                            placeholder="Name"
+                            onChange={({ name, color }) => {
+                              field.onChange(name);
+                              form.setValue(`categories.${index}.color`, color);
+                            }}
+                            defaultValue={field.value}
+                            defaultColor={form.watch(
+                              `categories.${index}.color`,
+                            )}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={form.control}
                     name={`categories.${index}.description`}
                     render={({ field }) => (
-                      <FormItem className="flex-1">
+                      <FormItem className="flex-1 space-y-1">
+                        <FormLabel className="text-xs text-[#878787] font-normal">
+                          Description
+                        </FormLabel>
                         <FormControl>
                           <Input
                             {...field}
@@ -178,6 +162,68 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                       </FormItem>
                     )}
                   />
+
+                  <div className="flex relative gap-2">
+                    <FormField
+                      control={form.control}
+                      name={`categories.${index}.taxType`}
+                      render={({ field }) => (
+                        <FormItem className="w-[300px] space-y-1">
+                          <FormLabel className="text-xs text-[#878787] font-normal">
+                            Tax Type
+                          </FormLabel>
+                          <FormControl>
+                            <SelectTaxType
+                              value={field.value ?? ""}
+                              onChange={(value) => {
+                                field.onChange(value);
+                              }}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`categories.${index}.taxRate`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1 space-y-1">
+                          <FormLabel className="text-xs text-[#878787] font-normal">
+                            Tax Rate
+                          </FormLabel>
+                          <FormControl>
+                            <TaxRateInput
+                              value={field.value}
+                              name={
+                                form.watch(`categories.${index}.name`) ?? ""
+                              }
+                              onChange={(value: string) => {
+                                field.onChange(
+                                  value ? Number(value) : undefined,
+                                );
+                              }}
+                              onSelect={(taxRate) => {
+                                if (taxRate) {
+                                  field.onChange(taxRate);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <span className="text-xs text-muted-foreground">
+                    {
+                      taxTypes.find(
+                        (taxType) =>
+                          taxType.value ===
+                          form.watch(`categories.${index}.taxType`),
+                      )?.description
+                    }
+                  </span>
                 </div>
               ))}
             </div>
@@ -202,13 +248,9 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                   </span>
                 )}
               </div>
-              <Button type="submit" disabled={categoriesMutation.isPending}>
-                {categoriesMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Create"
-                )}
-              </Button>
+              <SubmitButton isSubmitting={categoriesMutation.isPending}>
+                Create
+              </SubmitButton>
             </DialogFooter>
           </div>
         </form>

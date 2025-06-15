@@ -6,7 +6,6 @@ import {
   transactionAttachments,
   transactionCategories,
   type transactionFrequencyEnum,
-  type transactionStatusEnum,
   transactionTags,
   transactions,
   users,
@@ -258,26 +257,12 @@ export async function getTransactions(
       name: transactions.name,
       description: transactions.description,
       createdAt: transactions.createdAt,
+      taxRate: transactions.taxRate,
+      taxType: transactions.taxType,
       isFulfilled:
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`.as(
           "isFulfilled",
         ),
-      vat: sql<number>`
-        CASE
-          WHEN ${transactions.categorySlug} IS NULL THEN 0
-          ELSE ABS(ROUND(
-            ${transactions.amount} * (
-              COALESCE((
-                SELECT tc.vat
-                FROM ${transactionCategories} as tc
-                WHERE tc.slug = ${transactions.categorySlug}
-                  AND tc.team_id = ${transactions.teamId}
-                LIMIT 1
-              ), 0) / 100.0
-            ), 2
-          ))
-        END
-      `.as("vat"),
       attachments: sql<
         Array<{
           id: string;
@@ -299,6 +284,8 @@ export async function getTransactions(
         name: transactionCategories.name,
         color: transactionCategories.color,
         slug: transactionCategories.slug,
+        taxRate: transactionCategories.taxRate,
+        taxType: transactionCategories.taxType,
       },
       account: {
         id: bankAccounts.id,
@@ -381,6 +368,8 @@ export async function getTransactions(
       transactionCategories.name,
       transactionCategories.color,
       transactionCategories.slug,
+      transactionCategories.taxRate,
+      transactionCategories.taxType,
       bankAccounts.id,
       bankAccounts.name,
       bankAccounts.currency,
@@ -461,9 +450,16 @@ export async function getTransactions(
         : null,
     };
 
+    const taxRate = rest.taxRate ?? rest.category?.taxRate ?? 0;
+
     return {
       ...rest,
       account: newAccount,
+      taxRate,
+      taxType: rest.taxType ?? rest.category?.taxType ?? null,
+      taxAmount: Math.abs(
+        +((taxRate * rest.amount) / (100 + taxRate)).toFixed(2),
+      ),
     };
   });
 
@@ -503,26 +499,12 @@ export async function getTransactionById(
       name: transactions.name,
       description: transactions.description,
       createdAt: transactions.createdAt,
+      taxRate: transactions.taxRate,
+      taxType: transactions.taxType,
       isFulfilled:
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, params.teamId)})) OR ${transactions.status} = 'completed'`.as(
           "isFulfilled",
         ),
-      vat: sql<number>`
-        CASE
-          WHEN ${transactions.categorySlug} IS NULL THEN 0
-          ELSE ABS(ROUND(
-            ${transactions.amount} * (
-              COALESCE((
-                SELECT tc.vat
-                FROM ${transactionCategories} as tc
-                WHERE tc.slug = ${transactions.categorySlug}
-                  AND tc.team_id = ${transactions.teamId}
-                LIMIT 1
-              ), 0) / 100.0
-            ), 2
-          ))
-        END
-      `.as("vat"),
       assigned: {
         id: users.id,
         fullName: users.fullName,
@@ -533,6 +515,8 @@ export async function getTransactionById(
         name: transactionCategories.name,
         color: transactionCategories.color,
         slug: transactionCategories.slug,
+        taxRate: transactionCategories.taxRate,
+        taxType: transactionCategories.taxType,
       },
       account: {
         id: bankAccounts.id,
@@ -621,6 +605,8 @@ export async function getTransactionById(
       transactionCategories.name,
       transactionCategories.color,
       transactionCategories.slug,
+      transactionCategories.taxRate,
+      transactionCategories.taxType,
       bankAccounts.id,
       bankConnections.id,
       transactions.date,
@@ -658,9 +644,16 @@ export async function getTransactionById(
       }
     : null;
 
+  const taxRate = rest.taxRate ?? rest.category?.taxRate ?? 0;
+
   return {
     ...rest,
     account: newAccount,
+    taxRate,
+    taxType: rest.taxType ?? rest.category?.taxType ?? null,
+    taxAmount: Math.abs(
+      +((taxRate * rest.amount) / (100 + taxRate)).toFixed(2),
+    ),
   };
 }
 

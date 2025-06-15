@@ -2,6 +2,7 @@ export const chatExamples = [
   `What's my burn rate`,
   `What's my runway`,
   "Show transactions without receipts",
+  "What's my tax summary",
   "What is my spending on Software",
   "Find a receipt or invoice",
   "Find a transaction",

@@ -1,4 +1,4 @@
-import { getVatRateAction } from "@/actions/ai/get-vat-rate";
+import { getTaxRateAction } from "@/actions/ai/get-tax-rate";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -18,13 +18,13 @@ type Props = {
   isFocused: boolean;
 };
 
-export function VatAssistant({ name, onSelect, isFocused, value }: Props) {
+export function TaxRateAssistant({ name, onSelect, isFocused, value }: Props) {
   const [result, setResult] = useState<
-    { vat: number; country?: string } | undefined
+    { taxRate: number; country?: string } | undefined
   >();
   const [isLoading, setLoading] = useState(false);
 
-  const getVatRate = useAction(getVatRateAction, {
+  const getVatRate = useAction(getTaxRateAction, {
     onSuccess: ({ data }) => {
       setLoading(false);
 
@@ -38,8 +38,8 @@ export function VatAssistant({ name, onSelect, isFocused, value }: Props) {
   });
 
   const handleOnSelect = () => {
-    if (result?.vat) {
-      onSelect(result.vat);
+    if (result?.taxRate) {
+      onSelect(result.taxRate);
     }
   };
 
@@ -54,26 +54,26 @@ export function VatAssistant({ name, onSelect, isFocused, value }: Props) {
     <TooltipProvider delayDuration={0}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="absolute right-2 top-3">
+          <div className="absolute right-2 top-2.5">
             <Icons.AIOutline
               className={cn(
                 "pointer-events-none opacity-50 transition-colors",
-                result?.vat && "opacity-100",
+                result?.taxRate && "opacity-100",
                 isLoading && "animate-pulse opacity-100",
               )}
             />
           </div>
         </TooltipTrigger>
-        {result?.vat && (
+        {result?.taxRate && (
           <TooltipContent
             sideOffset={20}
             className="flex flex-col max-w-[310px] space-y-2"
           >
             <div className="flex space-x-2 items-center">
-              <span>VAT Assistant</span>
+              <span>Tax Rate Assistant</span>
             </div>
             <span className="text-xs text-[#878787]">
-              {`The VAT rate for ${name} in ${result.country} is generally ${result.vat}%. Please remember to confirm this with your local Tax office.`}
+              {`The tax rate for ${name} in ${result.country} is generally ${result.taxRate}%. Please remember to confirm this with your local Tax office.`}
             </span>
 
             <div className="flex justify-end mt-3 pt-3">

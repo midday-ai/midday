@@ -2,6 +2,7 @@ import { blobToSerializable } from "@jobs/utils/blob";
 import { processBatch } from "@jobs/utils/process-batch";
 import { createClient } from "@midday/supabase/job";
 import { download } from "@midday/supabase/storage";
+import { getTaxTypeLabel } from "@midday/utils/tax";
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { format, parseISO } from "date-fns";
 import { z } from "zod";
@@ -36,10 +37,11 @@ export const processExport = schemaTask({
         note,
         balance,
         currency,
-        vat:calculated_vat,
         counterparty_name,
+        tax_type,
+        tax_rate,
         attachments:transaction_attachments(*),
-        category:transaction_categories(id, name, description),
+        category:transaction_categories(id, name, description, tax_rate, tax_type),
         bank_account:bank_accounts(id, name),
         tags:transaction_tags(id, tag:tags(id, name)),
         status
@@ -85,41 +87,55 @@ export const processExport = schemaTask({
 
     const rows = transactionsData
       ?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .map((transaction) => [
-        transaction.id,
-        format(parseISO(transaction.date), dateFormat ?? "LLL dd, y"),
-        transaction.name,
-        transaction.description,
-        transaction.amount,
-        transaction.currency,
-        Intl.NumberFormat(locale, {
-          style: "currency",
-          currency: transaction.currency,
-        }).format(transaction.amount),
-        transaction?.vat
-          ? Intl.NumberFormat(locale, {
-              style: "currency",
-              currency: transaction.currency,
-            }).format(transaction?.vat)
-          : "",
-        transaction?.counterparty_name ?? "",
-        transaction?.category?.name ?? "",
-        transaction?.category?.description ?? "",
-        transaction?.attachments?.length > 0 ||
-        transaction?.status === "completed"
-          ? "Completed"
-          : "Not completed",
+      .map((transaction) => {
+        const taxRate =
+          transaction?.tax_rate ?? transaction?.category?.tax_rate ?? 0;
+        const taxAmount = Math.abs(
+          +((taxRate * transaction.amount) / (100 + taxRate)).toFixed(2),
+        );
 
-        attachments
-          .filter((a) => a.id === transaction.id)
-          .map((a) => a.name)
-          .join(", ") ?? "",
+        const formattedTaxType = getTaxTypeLabel(
+          transaction?.tax_type ?? transaction?.category?.tax_type ?? "",
+        );
 
-        transaction?.balance ?? "",
-        transaction?.bank_account?.name ?? "",
-        transaction?.note ?? "",
-        transaction?.tags?.map((t) => t.tag?.name).join(", ") ?? "",
-      ]);
+        const formattedTaxRate = taxRate > 0 ? `${taxRate}%` : "";
+
+        return [
+          transaction.id,
+          format(parseISO(transaction.date), dateFormat ?? "LLL dd, y"),
+          transaction.name,
+          transaction.description,
+          transaction.amount,
+          transaction.currency,
+          Intl.NumberFormat(locale, {
+            style: "currency",
+            currency: transaction.currency,
+          }).format(transaction.amount),
+          formattedTaxType,
+          formattedTaxRate,
+          Intl.NumberFormat(locale, {
+            style: "currency",
+            currency: transaction.currency,
+          }).format(taxAmount),
+          transaction?.counterparty_name ?? "",
+          transaction?.category?.name ?? "",
+          transaction?.category?.description ?? "",
+          transaction?.attachments?.length > 0 ||
+          transaction?.status === "completed"
+            ? "Completed"
+            : "Not completed",
+
+          attachments
+            .filter((a) => a.id === transaction.id)
+            .map((a) => a.name)
+            .join(", ") ?? "",
+
+          transaction?.balance ?? "",
+          transaction?.bank_account?.name ?? "",
+          transaction?.note ?? "",
+          transaction?.tags?.map((t) => t.tag?.name).join(", ") ?? "",
+        ];
+      });
 
     return {
       rows: rows ?? [],
