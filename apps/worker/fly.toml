@@ -11,12 +11,6 @@ primary_region = 'fra'
 [env]
   PORT = '8080'
 
-# Removed [http_service] section - workers don't need public HTTP access
-# This worker processes background jobs from Redis queues only
-
-[processes]
-  app = ""
-
 [processes.app]
   auto_stop_machines = 'off'
   auto_start_machines = true
