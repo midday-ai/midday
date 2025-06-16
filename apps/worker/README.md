@@ -28,11 +28,7 @@ REDIS_URL=redis://localhost:6379
 # Database Configuration
 DATABASE_PRIMARY_URL=postgresql://user:password@localhost:5432/midday
 
-# Fly.io region (for database replica selection)
-FLY_REGION=fra
-
-# Environment
-NODE_ENV=development
+ENVIRONMENT=development
 ```
 
 ## Development

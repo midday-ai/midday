@@ -1,4 +1,5 @@
 import Redis, { type RedisOptions } from "ioredis";
+import { logger } from "../monitoring/logger";
 
 const redisUrl = process.env.REDIS_URL;
 
@@ -6,48 +7,54 @@ if (!redisUrl) {
   throw new Error("REDIS_URL environment variable is required");
 }
 
+const isDevelopment = process.env.ENVIRONMENT === "development";
+
 // Parse Redis URL for connection options
 const connectionOptions: RedisOptions = {
-  // Enable retries
-  enableReadyCheck: false,
-  maxRetriesPerRequest: 3,
+  // BullMQ requires this to be enabled for proper job handling
+  enableReadyCheck: true,
+  maxRetriesPerRequest: null,
 
-  // Connection pool settings
+  // Connection settings
   lazyConnect: true,
 
-  // Timeouts
-  connectTimeout: 10000,
-  commandTimeout: 5000,
+  // Environment-specific timeouts
+  connectTimeout: isDevelopment ? 60000 : 10000, // Longer timeout for local Docker
+  commandTimeout: isDevelopment ? 30000 : 5000, // Longer timeout for local Docker
 
-  // Keep-alive
+  // Keep-alive settings
   keepAlive: 30000,
 
-  // Use IPv6
-  family: 6,
+  // Network family: IPv6 for Fly.io production, IPv4 for local Docker
+  family: isDevelopment ? 4 : 6,
+
+  // Additional settings based on environment
+  autoResendUnfulfilledCommands: !isDevelopment,
+  autoResubscribe: true,
 };
 
 // Create Redis connection
 export const redisConnection = new Redis(redisUrl, connectionOptions);
 
-// Connection event handlers
+// Connection event handlers for debugging
 redisConnection.on("connect", () => {
-  console.log("Redis connected");
+  logger.info("Redis connected");
 });
 
 redisConnection.on("ready", () => {
-  console.log("Redis ready");
+  logger.info("Redis ready");
 });
 
 redisConnection.on("error", (error: Error) => {
-  console.error("Redis connection error:", error);
+  logger.error("Redis connection error", error);
 });
 
 redisConnection.on("close", () => {
-  console.log("Redis connection closed");
+  logger.info("Redis connection closed");
 });
 
-redisConnection.on("reconnecting", () => {
-  console.log("Redis reconnecting...");
+redisConnection.on("reconnecting", (delay: number) => {
+  logger.info(`Redis reconnecting in ${delay}ms...`);
 });
 
 // Graceful shutdown helper

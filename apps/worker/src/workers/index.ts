@@ -1,8 +1,10 @@
-import type { Database } from "@midday/db/client";
+import type { PrimaryDatabase } from "@midday/db/client";
 import type { Job, Processor } from "bullmq";
 import { emailTaskHandler } from "../processors/email";
 
-export function createWorkerHandlers(db: Database): Record<string, Processor> {
+export function createWorkerHandlers(
+  db: PrimaryDatabase,
+): Record<string, Processor> {
   return {
     email: async (job: Job) => {
       await emailTaskHandler(job, db);

@@ -1,9 +1,8 @@
-import type { Database } from "@midday/db/client";
+import type { PrimaryDatabase } from "@midday/db/client";
 import type { Job } from "bullmq";
 import {
   type EmailJobData,
   type InvoiceReminderData,
-  type NotificationData,
   type TeamInviteData,
   emailJobSchema,
 } from "../../types/email";
@@ -13,7 +12,7 @@ import { teamInviteTask } from "./team-invite";
 // Main email task handler that routes to specific tasks
 export async function emailTaskHandler(
   job: Job<EmailJobData>,
-  db: Database,
+  db: PrimaryDatabase,
 ): Promise<void> {
   // Validate the job data against the union schema
   const data = emailJobSchema.parse(job.data);

@@ -13,7 +13,7 @@ COPY . .
 # Use turbo CLI from Bun global install to prune workspaces
 RUN turbo prune @midday/worker --docker
 
-# Installer stage
+# Installer stage - install all dependencies including devDependencies for building
 FROM base AS installer
 WORKDIR /app
 
@@ -25,14 +25,35 @@ RUN bun install
 # Copy the full source code
 COPY --from=builder /app/out/full/ .
 
-# Runner stage (same as installer to avoid another copy)
-FROM installer AS runner
+# Production dependencies installer stage - install only production dependencies
+FROM base AS prod-deps
+WORKDIR /app
+
+# Copy package files
+COPY --from=builder /app/out/json/ .
+# Install only production dependencies
+RUN bun install --production
+
+# Final runtime stage - use base image for smallest footprint
+FROM base AS runner
+WORKDIR /app
+
+# Copy only production dependencies
+COPY --from=prod-deps /app/node_modules ./node_modules
+COPY --from=prod-deps /app/packages ./packages
+
+# Copy only the worker app files needed for runtime
+COPY --from=builder /app/out/full/apps/worker/src ./apps/worker/src
+COPY --from=builder /app/out/full/apps/worker/package.json ./apps/worker/package.json
 
 # Set the API directory as working directory
 WORKDIR /app/apps/worker
 
 # Set environment variables
 ENV NODE_ENV=production
+
+# Change to non-root user
+USER bun
 
 # Expose the port the API runs on
 EXPOSE 3000
