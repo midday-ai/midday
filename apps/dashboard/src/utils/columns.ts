@@ -4,8 +4,16 @@ import { Cookies } from "./constants";
 export async function getInitialTransactionsColumnVisibility() {
   const cookieStore = await cookies();
 
-  const columnsToHide = ["assigned", "tags", "method", "counterpartyName"];
+  const columnsToHide = [
+    "assigned",
+    "tags",
+    "method",
+    "counterparty",
+    "taxAmount",
+  ];
+
   const savedColumns = cookieStore.get(Cookies.TransactionsColumns)?.value;
+
   return savedColumns
     ? JSON.parse(savedColumns)
     : columnsToHide.reduce(
