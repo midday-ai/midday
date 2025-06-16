@@ -1,13 +1,4 @@
 import {
-  deleteInbox,
-  getInbox,
-  getInboxById,
-  getInboxSearch,
-  matchTransaction,
-  unmatchTransaction,
-  updateInbox,
-} from "@api/db/queries/inbox";
-import {
   deleteInboxSchema,
   getInboxByIdSchema,
   getInboxSchema,
@@ -18,6 +9,15 @@ import {
   updateInboxSchema,
 } from "@api/schemas/inbox";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  deleteInbox,
+  getInbox,
+  getInboxById,
+  getInboxSearch,
+  matchTransaction,
+  unmatchTransaction,
+  updateInbox,
+} from "@midday/db/queries";
 import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk/v3";
 

@@ -1,4 +1,4 @@
-import { connectDb } from "@api/db";
+import { connectDb } from "@midday/db/client";
 import type { MiddlewareHandler } from "hono";
 
 /**

@@ -1,5 +1,5 @@
+import { connectDb } from "@midday/db/client";
 import { sql } from "drizzle-orm";
-import { connectDb } from "../db";
 
 export async function checkHealth() {
   const db = await connectDb();

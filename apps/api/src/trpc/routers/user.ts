@@ -1,8 +1,12 @@
-import { getUserInvites } from "@api/db/queries/user-invites";
-import { deleteUser, getUserById, updateUser } from "@api/db/queries/users";
 import { updateUserSchema } from "@api/schemas/users";
 import { resend } from "@api/services/resend";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  deleteUser,
+  getUserById,
+  getUserInvites,
+  updateUser,
+} from "@midday/db/queries";
 
 export const userRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx: { db, session } }) => {

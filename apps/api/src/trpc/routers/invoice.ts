@@ -1,18 +1,3 @@
-import { getInvoiceTemplate } from "@api/db/queries/invoice-templates";
-import {
-  deleteInvoice,
-  draftInvoice,
-  duplicateInvoice,
-  getInvoiceById,
-  getInvoiceSummary,
-  getInvoices,
-  getNextInvoiceNumber,
-  getPaymentStatus,
-  searchInvoiceNumber,
-  updateInvoice,
-} from "@api/db/queries/invoices";
-import { getTeamById } from "@api/db/queries/teams";
-import { getUserById } from "@api/db/queries/users";
 import {
   createInvoiceSchema,
   deleteInvoiceSchema,
@@ -33,6 +18,21 @@ import {
 } from "@api/trpc/init";
 import { parseInputValue } from "@api/utils/parse";
 import { UTCDate } from "@date-fns/utc";
+import {
+  deleteInvoice,
+  draftInvoice,
+  duplicateInvoice,
+  getInvoiceById,
+  getInvoiceSummary,
+  getInvoiceTemplate,
+  getInvoices,
+  getNextInvoiceNumber,
+  getPaymentStatus,
+  getTeamById,
+  getUserById,
+  searchInvoiceNumber,
+  updateInvoice,
+} from "@midday/db/queries";
 import { verify } from "@midday/invoice/token";
 import type {
   GenerateInvoicePayload,
