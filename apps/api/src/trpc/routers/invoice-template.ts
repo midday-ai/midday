@@ -1,7 +1,7 @@
-import { updateInvoiceTemplate } from "@api/db/queries/invoice-templates";
 import { upsertInvoiceTemplateSchema } from "@api/schemas/invoice";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { parseInputValue } from "@api/utils/parse";
+import { updateInvoiceTemplate } from "@midday/db/queries";
 
 export const invoiceTemplateRouter = createTRPCRouter({
   upsert: protectedProcedure
