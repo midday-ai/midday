@@ -13,7 +13,7 @@ const isDevelopment = process.env.ENVIRONMENT === "development";
 const connectionOptions: RedisOptions = {
   // BullMQ requires this to be enabled for proper job handling
   enableReadyCheck: true,
-  maxRetriesPerRequest: isDevelopment ? null : 3,
+  maxRetriesPerRequest: null,
 
   // Connection settings
   lazyConnect: true,
