@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "bun --watch src/index.ts",
-    "start": "bun src/index.ts",
-    "build": "bun build src/index.ts --outdir dist --target bun",
+    "dev": "TZ=UTC bun --watch src/index.ts",
+    "lint": "biome check .",
+    "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
-    "lint": "biome check ."
+    "test": "bun test",
+    "test:watch": "bun test --watch"
   },
   "dependencies": {
     "@midday/db": "workspace:*",
