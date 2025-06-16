@@ -1,0 +1,12 @@
+app = 'midday-worker-staging'
+primary_region = 'fra'
+
+[build]
+
+[[restart]]
+  policy = "always"
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
