@@ -14,7 +14,7 @@ const connectionOptions: RedisOptions = {
   // BullMQ requires this to be enabled for proper job handling
   enableReadyCheck: true,
   maxRetriesPerRequest: null,
-  lazyConnect: true,
+  lazyConnect: false,
   connectTimeout: isDevelopment ? 60000 : 20000, // Increased for production
   commandTimeout: isDevelopment ? 30000 : 15000, // Increased for production
   keepAlive: 30000,
