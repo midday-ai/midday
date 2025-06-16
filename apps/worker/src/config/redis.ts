@@ -1,22 +1,20 @@
 import Redis, { type RedisOptions } from "ioredis";
 import { logger } from "../monitoring/logger";
 
-const redisUrl = process.env.REDIS_URL;
+const redisUrl = process.env.REDIS_WORKER_URL;
 
 if (!redisUrl) {
-  throw new Error("REDIS_URL environment variable is required");
+  throw new Error("REDIS_WORKER_URL environment variable is required");
 }
 
 const isDevelopment = process.env.ENVIRONMENT === "development";
 
-// Parse Redis URL for connection options
 const connectionOptions: RedisOptions = {
-  // BullMQ requires this to be enabled for proper job handling
   enableReadyCheck: true,
   maxRetriesPerRequest: null,
   lazyConnect: false,
-  connectTimeout: isDevelopment ? 60000 : 20000, // Increased for production
-  commandTimeout: isDevelopment ? 30000 : 15000, // Increased for production
+  connectTimeout: isDevelopment ? 60000 : 20000,
+  commandTimeout: isDevelopment ? 30000 : 15000,
   keepAlive: 30000,
   family: isDevelopment ? 4 : 6,
   autoResendUnfulfilledCommands: true,
