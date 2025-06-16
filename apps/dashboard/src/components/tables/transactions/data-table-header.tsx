@@ -54,7 +54,7 @@ export function DataTableHeader({ table, loading }: Props) {
   return (
     <TableHeader>
       <TableRow className="h-[45px] hover:bg-transparent">
-        <TableHead className="min-w-[50px] hidden md:table-cell px-3 md:px-4 py-2">
+        <TableHead className="min-w-[50px] w-[50px] hidden md:table-cell px-3 md:px-4 py-2">
           <Checkbox
             checked={
               table?.getIsAllPageRowsSelected() ||
@@ -67,7 +67,7 @@ export function DataTableHeader({ table, loading }: Props) {
         </TableHead>
 
         {isVisible("date") && (
-          <TableHead className="min-w-[120px] px-3 md:px-4 py-2">
+          <TableHead className="w-[110px] px-3 md:px-4 py-2">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -81,7 +81,7 @@ export function DataTableHeader({ table, loading }: Props) {
         )}
 
         {isVisible("description") && (
-          <TableHead className="w-[100px] md:w-[320px] px-3 md:px-4 py-2">
+          <TableHead className="w-[320px] px-3 md:px-4 py-2">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -95,7 +95,7 @@ export function DataTableHeader({ table, loading }: Props) {
         )}
 
         {isVisible("amount") && (
-          <TableHead className="md:min-w-[200px] px-3 md:px-4 py-2">
+          <TableHead className="w-[170px] px-3 md:px-4 py-2">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -110,8 +110,14 @@ export function DataTableHeader({ table, loading }: Props) {
           </TableHead>
         )}
 
+        {isVisible("taxAmount") && (
+          <TableHead className="w-[170px] px-3 md:px-4 py-2">
+            <span>Tax Amount</span>
+          </TableHead>
+        )}
+
         {isVisible("category") && (
-          <TableHead className="md:min-w-[200px] hidden md:table-cell px-3 md:px-4 py-2">
+          <TableHead className="w-[250px] px-3 md:px-4 py-2">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -129,7 +135,7 @@ export function DataTableHeader({ table, loading }: Props) {
         )}
 
         {isVisible("counterparty") && (
-          <TableHead className="md:min-w-[200px] hidden md:table-cell px-3 md:px-4 py-2">
+          <TableHead className="w-[200px] px-3 md:px-4 py-2">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -147,7 +153,7 @@ export function DataTableHeader({ table, loading }: Props) {
         )}
 
         {isVisible("tags") && (
-          <TableHead className="md:min-w-[170px] hidden md:table-cell px-3 md:px-4 py-2">
+          <TableHead className="w-[170px] px-3 md:px-4 py-2">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -161,7 +167,7 @@ export function DataTableHeader({ table, loading }: Props) {
         )}
 
         {isVisible("bank_account") && (
-          <TableHead className="md:w-[250px] hidden md:table-cell px-3 md:px-4 py-2">
+          <TableHead className="w-[250px] px-3 md:px-4 py-2">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -179,7 +185,7 @@ export function DataTableHeader({ table, loading }: Props) {
         )}
 
         {isVisible("method") && (
-          <TableHead className="md:min-w-[140px] hidden md:table-cell px-3 md:px-4 py-2">
+          <TableHead className="w-[140px] px-3 md:px-4 py-2">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -195,7 +201,7 @@ export function DataTableHeader({ table, loading }: Props) {
         )}
 
         {isVisible("assigned") && (
-          <TableHead className="md:w-[220px] hidden md:table-cell px-3 md:px-4 py-2">
+          <TableHead className="w-[220px] px-3 md:px-4 py-2">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -213,7 +219,7 @@ export function DataTableHeader({ table, loading }: Props) {
         )}
 
         {isVisible("status") && (
-          <TableHead className="hidden md:table-cell px-3 md:px-4 py-2">
+          <TableHead className="w-[100px] px-3 md:px-4 py-2">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"

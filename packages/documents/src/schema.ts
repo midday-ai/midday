@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+export const taxTypeSchema = z.enum([
+  "vat",
+  "sales_tax",
+  "gst",
+  "withholding_tax",
+  "service_tax",
+  "excise_tax",
+  "reverse_charge",
+  "custom_tax",
+]);
+
 export const invoiceSchema = z.object({
   invoice_number: z
     .string()
@@ -21,9 +32,11 @@ export const invoiceSchema = z.object({
     .number()
     .nullable()
     .describe("Tax rate as a percentage value (e.g., 20 for 20%)"),
-  tax_type: z
-    .enum(["vat", "sales_tax", "gst", "hst", "unknown"])
-    .describe("Type of tax applied to the invoice"),
+  tax_type: taxTypeSchema
+    .nullable()
+    .describe(
+      "The type of tax applied to the invoice, such as VAT, Sales Tax, GST, Withholding Tax, Service Tax, Excise Tax, Reverse Charge, or Custom Tax. This field should reflect the tax regime or system referenced on the invoice, and is important for correct accounting and compliance. If the document does not specify a tax type, infer it based on the country or context if possible.",
+    ),
   vendor_name: z
     .string()
     .nullable()
@@ -84,9 +97,11 @@ export const receiptSchema = z.object({
     .number()
     .optional()
     .describe("Tax rate percentage (e.g., 20 for 20%)"),
-  tax_type: z
-    .enum(["vat", "sales_tax", "gst", "hst", "unknown"])
-    .describe("Type of tax applied"),
+  tax_type: taxTypeSchema
+    .nullable()
+    .describe(
+      "The type of tax applied to the receipt, such as VAT, Sales Tax, GST, Withholding Tax, Service Tax, Excise Tax, Reverse Charge, or Custom Tax. This field should reflect the tax regime or system referenced on the receipt, and is important for correct accounting and compliance. If the document does not specify a tax type, infer it based on the country or context if possible.",
+    ),
   store_name: z.string().nullable().describe("Name of the store/merchant"),
   website: z
     .string()

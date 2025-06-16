@@ -6,14 +6,14 @@ import { generateObject } from "ai";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
 
-export const getVatRateAction = authActionClient
+export const getTaxRateAction = authActionClient
   .schema(
     z.object({
       name: z.string().min(2),
     }),
   )
   .metadata({
-    name: "get-vat-rate",
+    name: "get-tax-rate",
   })
   .action(async ({ parsedInput: { name } }) => {
     const country = await getCountry();
@@ -21,16 +21,16 @@ export const getVatRateAction = authActionClient
     const { object } = await generateObject({
       model: openai("gpt-4o-mini"),
       schema: z.object({
-        vat: z.number().min(5).max(100),
+        taxRate: z.number().min(5).max(100),
       }),
       prompt: `
-        You are an expert in VAT rates for the specific country and category \n
-        What's the VAT rate for category ${name} in ${country?.name}?
+        You are an expert in tax/vat rates for the specific country and category \n
+        What's the tax/vat rate for category ${name} in ${country?.name}?
       `,
     });
 
     return {
-      vat: object.vat,
+      taxRate: object.taxRate,
       country: country?.name,
     };
   });

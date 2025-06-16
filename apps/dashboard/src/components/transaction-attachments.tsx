@@ -3,11 +3,13 @@
 import { useUpload } from "@/hooks/use-upload";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { formatAmount } from "@/utils/format";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getTaxTypeLabel } from "@midday/utils/tax";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { AttachmentItem } from "./attachment-item";
@@ -33,9 +35,10 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const queryClient = useQueryClient();
+  const [pollingForTax, setPollingForTax] = useState(false);
 
-  const processDocumentMutation = useMutation(
-    trpc.documents.processDocument.mutationOptions(),
+  const processTransactionAttachmentMutation = useMutation(
+    trpc.transactionAttachments.processAttachment.mutationOptions(),
   );
 
   const createAttachmentsMutation = useMutation(
@@ -49,6 +52,13 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.getById.queryKey({ id }),
         });
+
+        // Start polling for tax information
+        if (
+          pollingTransaction?.taxRate !== pollingTransaction?.category?.taxRate
+        ) {
+          setPollingForTax(true);
+        }
       },
     }),
   );
@@ -67,6 +77,59 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
       },
     }),
   );
+
+  // Polling query for tax information
+  const { data: pollingTransaction } = useQuery({
+    ...trpc.transactions.getById.queryOptions({ id }),
+    enabled: pollingForTax,
+    refetchInterval: pollingForTax ? 1000 : false,
+  });
+
+  // Handle tax information detection
+  useEffect(() => {
+    if (
+      pollingForTax &&
+      pollingTransaction?.taxRate &&
+      pollingTransaction?.taxRate > 0 &&
+      pollingTransaction?.taxType
+    ) {
+      toast({
+        variant: "success",
+        duration: 8000,
+        title: `${getTaxTypeLabel(pollingTransaction!.taxType)} extracted and applied`,
+        description: `${pollingTransaction!.taxRate}% ${getTaxTypeLabel(pollingTransaction!.taxType)} (${formatAmount(
+          {
+            amount: pollingTransaction!.taxAmount!,
+            currency: pollingTransaction!.currency!,
+            locale: user?.locale,
+          },
+        )}) was detected from the uploaded receipt and added to this transaction.`,
+      });
+
+      // invalidate the transaction details query
+      queryClient.invalidateQueries({
+        queryKey: trpc.transactions.getById.queryKey({ id }),
+      });
+
+      // invalidate the transaction list query
+      queryClient.invalidateQueries({
+        queryKey: trpc.transactions.get.infiniteQueryKey(),
+      });
+
+      setPollingForTax(false);
+    }
+  }, [pollingTransaction, pollingForTax, toast]);
+
+  // Stop polling after 10 seconds
+  useEffect(() => {
+    if (pollingForTax) {
+      const timeout = setTimeout(() => {
+        setPollingForTax(false);
+      }, 10000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [pollingForTax]);
 
   const handleOnDelete = (id: string) => {
     setFiles((files) => files.filter((file) => file?.id !== id));
@@ -112,11 +175,11 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
       })),
     );
 
-    processDocumentMutation.mutate(
+    processTransactionAttachmentMutation.mutate(
       uploadedFiles.map((file) => ({
         filePath: file.path,
         mimetype: file.type,
-        size: file.size,
+        transactionId: id,
       })),
     );
   };

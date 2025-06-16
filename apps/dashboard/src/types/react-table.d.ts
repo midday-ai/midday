@@ -16,6 +16,8 @@ declare module "@tanstack/table-core" {
 
     // Categories table meta
     deleteCategory?: (id: string) => void;
+    expandedCategories?: Set<string>;
+    setExpandedCategories?: React.Dispatch<React.SetStateAction<Set<string>>>;
 
     // Customers table meta
     deleteCustomer?: (id: string) => void;
