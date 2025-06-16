@@ -11,14 +11,17 @@ primary_region = 'fra'
 [env]
   PORT = '8080'
 
-[http_service]
-  internal_port = 3000
-  force_https = true
+# Removed [http_service] section - workers don't need public HTTP access
+# This worker processes background jobs from Redis queues only
+
+[processes]
+  app = ""
+
+[processes.app]
   auto_stop_machines = 'off'
   auto_start_machines = true
   min_machines_running = 2
   max_machines_running = 2
-  processes = ['app']
 
 [[vm]]
   memory = '2gb'
