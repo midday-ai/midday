@@ -14,26 +14,15 @@ const connectionOptions: RedisOptions = {
   // BullMQ requires this to be enabled for proper job handling
   enableReadyCheck: true,
   maxRetriesPerRequest: null,
-
-  // Connection settings
   lazyConnect: true,
-
-  // Environment-specific timeouts
-  connectTimeout: isDevelopment ? 60000 : 10000, // Longer timeout for local Docker
-  commandTimeout: isDevelopment ? 30000 : 5000, // Longer timeout for local Docker
-
-  // Keep-alive settings
+  connectTimeout: isDevelopment ? 60000 : 20000, // Increased for production
+  commandTimeout: isDevelopment ? 30000 : 15000, // Increased for production
   keepAlive: 30000,
-
-  // Network family: IPv6 for Fly.io production, IPv4 for local Docker
-  family: 6,
-
-  // Additional settings based on environment
-  autoResendUnfulfilledCommands: !isDevelopment,
+  family: isDevelopment ? 4 : 6,
+  autoResendUnfulfilledCommands: true,
   autoResubscribe: true,
+  enableOfflineQueue: false,
 };
-
-logger.info("Redis connection options", connectionOptions);
 
 // Create Redis connection
 export const redisConnection = new Redis(redisUrl, connectionOptions);
