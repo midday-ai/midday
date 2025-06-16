@@ -16,6 +16,7 @@
     "dev:engine": "turbo dev --filter=@midday/engine",
     "dev:website": "turbo dev --filter=@midday/website ",
     "dev:desktop": "turbo dev --filter=@midday/desktop",
+    "dev:worker": "turbo dev --filter=@midday/worker",
     "jobs:dashboard": "turbo jobs --filter=@midday/jobs",
     "format": "biome format --write .",
     "lint": "turbo lint && manypkg check",
