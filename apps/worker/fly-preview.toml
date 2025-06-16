@@ -7,6 +7,6 @@ primary_region = 'fra'
   policy = "always"
 
 [[vm]]
-  memory = '1gb'
+  memory = '512mb'
   cpu_kind = 'shared'
   cpus = 1
