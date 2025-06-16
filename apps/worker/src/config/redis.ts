@@ -26,7 +26,7 @@ const connectionOptions: RedisOptions = {
   keepAlive: 30000,
 
   // Network family: IPv6 for Fly.io production, IPv4 for local Docker
-  family: isDevelopment ? 4 : 6,
+  family: 6,
 
   // Additional settings based on environment
   autoResendUnfulfilledCommands: !isDevelopment,
