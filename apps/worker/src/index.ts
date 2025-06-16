@@ -1,4 +1,5 @@
-import { connectDb } from "@midday/db/client";
+import { type PrimaryDatabase, primaryDb } from "@midday/db/client";
+import { checkPrimaryHealth } from "@midday/db/utils/health";
 import { Worker } from "bullmq";
 import { redisConnection } from "./config/redis";
 import { logger } from "./monitoring/logger";
@@ -6,16 +7,18 @@ import { createWorkerHandlers } from "./workers";
 
 class WorkerService {
   private activeWorkers: Worker[] = [];
-  private database: Awaited<ReturnType<typeof connectDb>> | null = null;
+  private db: PrimaryDatabase | null = null;
 
   async initialize() {
     try {
       // Initialize database connection
-      this.database = await connectDb();
+      this.db = primaryDb;
+
+      await checkPrimaryHealth();
       logger.databaseConnected();
 
       // Initialize worker handlers with database context
-      const workerHandlers = createWorkerHandlers(this.database);
+      const workerHandlers = createWorkerHandlers(this.db);
 
       // Create and configure workers for each job queue
       for (const [queueName, handler] of Object.entries(workerHandlers)) {

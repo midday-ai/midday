@@ -1,11 +1,12 @@
-import type { Database } from "@midday/db/client";
+import type { PrimaryDatabase } from "@midday/db/client";
 import type { Job } from "bullmq";
+import { logger } from "../../monitoring/logger";
 import type { TeamInviteData } from "../../types/email";
 import { teamInviteSchema } from "../../types/email";
 
 export async function teamInviteTask(
   job: Job<TeamInviteData>,
-  db: Database,
+  db: PrimaryDatabase,
 ): Promise<void> {
   // Validate job data
   const data = teamInviteSchema.parse(job.data);
@@ -83,7 +84,7 @@ export async function teamInviteTask(
 
   await job.updateProgress(100);
 
-  console.log("Team invite email sent successfully", {
+  logger.info("Team invite email sent successfully", {
     to: recipientEmail,
     teamName: templateData.teamName,
     role: templateData.role,

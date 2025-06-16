@@ -1,11 +1,12 @@
-import type { Database } from "@midday/db/client";
+import type { PrimaryDatabase } from "@midday/db/client";
 import type { Job } from "bullmq";
+import { logger } from "../../monitoring/logger";
 import type { InvoiceReminderData } from "../../types/email";
 import { invoiceReminderSchema } from "../../types/email";
 
 export async function invoiceReminderTask(
   job: Job<InvoiceReminderData>,
-  db: Database,
+  db: PrimaryDatabase,
 ): Promise<void> {
   // Validate job data
   const data = invoiceReminderSchema.parse(job.data);
@@ -73,7 +74,7 @@ export async function invoiceReminderTask(
 
   await job.updateProgress(100);
 
-  console.log("Invoice reminder email sent successfully", {
+  logger.info("Invoice reminder email sent successfully", {
     to: recipientEmail,
     invoiceId: templateData.invoiceId,
     amount: templateData.amount,

@@ -1,20 +1,19 @@
-name: Fly Deploy API Preview
+name: Fly Deploy Worker
 permissions:
   contents: read
 on:
   push:
-    branches-ignore:
+    branches:
       - main
     paths:
-      - apps/api/**
-      - packages/**
-      - "!packages/email/**"
-      - "!packages/ui/**"
+      - apps/worker/**
+      - packages/db/**
+      - packages/email/**
 jobs:
   deploy:
-    name: 🚀 Deploy to Fly Preview
+    name: 🚀 Deploy to Fly Worker
     runs-on: ubuntu-latest
-    concurrency: fly-preview
+    concurrency: fly-worker
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
@@ -26,14 +25,14 @@ jobs:
         run: bunx turbo run build --filter=@midday/engine...
       - name: 🔦 Run linter
         run: bun run lint
-        working-directory: ./apps/api
+        working-directory: ./apps/worker
       - name: 🪐 Check TypeScript
         run: bun run typecheck
-        working-directory: ./apps/api
+        working-directory: ./apps/worker
       - name: 🧪 Run unit tests
         run: bun run test
-        working-directory: ./apps/api
+        working-directory: ./apps/worker
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --dockerfile apps/api/Dockerfile --config apps/api/fly-preview.yml
+      - run: flyctl deploy --remote-only --dockerfile apps/worker/Dockerfile --config apps/worker/fly.toml
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

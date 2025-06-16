@@ -12,6 +12,8 @@
     "@midday/db": "workspace:*",
     "bullmq": "^5.54.0",
     "ioredis": "^5.6.1",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

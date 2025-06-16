@@ -1,8 +1,5 @@
 import type { Job } from "bullmq";
-
-// ===============================
-// Logger Configuration
-// ===============================
+import pino from "pino";
 
 export enum LogLevel {
   ERROR = 0,
@@ -14,114 +11,147 @@ export enum LogLevel {
 const LOG_LEVEL =
   process.env.LOG_LEVEL === "debug" ? LogLevel.DEBUG : LogLevel.INFO;
 
-// ===============================
-// Logger Utilities
-// ===============================
+// Configure Pino
+const pinoLogger = pino({
+  level: LOG_LEVEL === LogLevel.DEBUG ? "debug" : "info",
+  transport: {
+    target: "pino-pretty",
+    options: {
+      colorize: true,
+      translateTime: "HH:MM:ss dd-mm-yyyy",
+      ignore: "pid,hostname",
+    },
+  },
+});
 
 class WorkerLogger {
-  private log(level: LogLevel, message: string, data?: any): void {
-    if (level > LOG_LEVEL) return;
+  private pino = pinoLogger;
 
-    const timestamp = new Date().toISOString();
-    const levelName = LogLevel[level];
-    const prefix = `[${timestamp}] [${levelName}]`;
-
+  error(message: string, data?: any): void {
     if (data) {
-      console.log(`${prefix} ${message}`, JSON.stringify(data, null, 2));
+      this.pino.error(data, `❌ ${message}`);
     } else {
-      console.log(`${prefix} ${message}`);
+      this.pino.error(`❌ ${message}`);
     }
   }
 
-  error(message: string, data?: any): void {
-    this.log(LogLevel.ERROR, `❌ ${message}`, data);
-  }
-
   warn(message: string, data?: any): void {
-    this.log(LogLevel.WARN, `⚠️ ${message}`, data);
+    if (data) {
+      this.pino.warn(data, `⚠️ ${message}`);
+    } else {
+      this.pino.warn(`⚠️ ${message}`);
+    }
   }
 
   info(message: string, data?: any): void {
-    this.log(LogLevel.INFO, `ℹ️ ${message}`, data);
+    if (data) {
+      this.pino.info(data, `ℹ️  ${message}`);
+    } else {
+      this.pino.info(`ℹ️  ${message}`);
+    }
   }
 
   debug(message: string, data?: any): void {
-    this.log(LogLevel.DEBUG, `🐛 ${message}`, data);
+    if (data) {
+      this.pino.debug(data, `🐛 ${message}`);
+    } else {
+      this.pino.debug(`🐛 ${message}`);
+    }
   }
 
-  // Specialized job logging methods
   jobStarted(job: Job): void {
-    this.info("Job started", {
-      id: job.id,
-      name: job.name,
-      queue: job.queueName,
-      data: job.data,
-    });
+    this.pino.info(
+      {
+        id: job.id,
+        name: job.name,
+        queue: job.queueName,
+        data: job.data,
+      },
+      "Job started",
+    );
   }
 
   jobCompleted(job: Job, duration?: number): void {
-    this.info("Job completed", {
-      id: job.id,
-      name: job.name,
-      queue: job.queueName,
-      duration: duration ? `${duration}ms` : undefined,
-    });
+    this.pino.info(
+      {
+        id: job.id,
+        name: job.name,
+        queue: job.queueName,
+        duration: duration ? `${duration}ms` : undefined,
+      },
+      "Job completed",
+    );
   }
 
   jobFailed(job: Job, error: Error): void {
-    this.error("Job failed", {
-      id: job.id,
-      name: job.name,
-      queue: job.queueName,
-      error: error.message,
-      stack: error.stack,
-      data: job.data,
-    });
+    this.pino.error(
+      {
+        id: job.id,
+        name: job.name,
+        queue: job.queueName,
+        error: error.message,
+        stack: error.stack,
+        data: job.data,
+      },
+      "Job failed",
+    );
   }
 
   jobProgress(job: Job, progress: number): void {
-    this.debug("Job progress updated", {
-      id: job.id,
-      name: job.name,
-      progress: `${progress}%`,
-    });
+    this.pino.debug(
+      {
+        id: job.id,
+        name: job.name,
+        progress: `${progress}%`,
+      },
+      "Job progress updated",
+    );
   }
 
   workerStarted(queueName: string, concurrency: number): void {
-    this.info("Worker started", {
-      queue: queueName,
-      concurrency,
-    });
+    this.pino.info(
+      {
+        queue: queueName,
+        concurrency,
+      },
+      "Worker started",
+    );
   }
 
   workerStopped(queueName: string): void {
-    this.info("Worker stopped", {
-      queue: queueName,
-    });
+    this.pino.info(
+      {
+        queue: queueName,
+      },
+      "Worker stopped",
+    );
   }
 
   workerError(queueName: string, error: Error): void {
-    this.error("Worker error", {
-      queue: queueName,
-      error: error.message,
-      stack: error.stack,
-    });
+    this.pino.error(
+      {
+        queue: queueName,
+        error: error.message,
+        stack: error.stack,
+      },
+      "Worker error",
+    );
   }
 
   databaseConnected(): void {
-    this.info("Database connected successfully");
+    this.pino.info("Database connected successfully");
   }
 
   serviceStarted(): void {
-    this.info("🚀 Midday Worker Service started successfully");
+    this.pino.info("🚀 Worker service started successfully");
   }
 
   serviceShuttingDown(): void {
-    this.warn("🛑 Worker service shutting down...");
+    this.pino.warn("🛑 Worker service shutting down...");
   }
 
   serviceShutdownComplete(): void {
-    this.info("✅ Worker service shutdown complete");
+    this.pino.info("✅ Worker service shutdown complete");
   }
 }
 
