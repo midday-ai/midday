@@ -7,7 +7,8 @@
       "@api/*": ["../api/src/*"],
       "@engine/*": ["../engine/src/*"],
       "@jobs/*": ["../../packages/jobs/src/*"],
-      "@db/*": ["../../packages/db/src/*"]
+      "@db/*": ["../../packages/db/src/*"],
+      "@worker/*": ["../worker/src/*"]
     },
     "strict": true
   },
