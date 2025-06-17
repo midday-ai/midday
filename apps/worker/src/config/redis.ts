@@ -1,5 +1,5 @@
+import { logger } from "@worker/monitoring/logger";
 import Redis, { type RedisOptions } from "ioredis";
-import { logger } from "../monitoring/logger";
 
 const redisUrl = process.env.REDIS_WORKER_URL;
 

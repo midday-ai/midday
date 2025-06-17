@@ -1,21 +1,19 @@
-import type { PrimaryDatabase } from "@midday/db/client";
+import type { Database } from "@midday/db/client";
+import { executeJob } from "@worker/jobs";
 import type { Job, Processor } from "bullmq";
-import { emailTaskHandler } from "../processors/email";
 
-export function createWorkerHandlers(
-  db: PrimaryDatabase,
-): Record<string, Processor> {
+export function createWorkerHandlers(db: Database): Record<string, Processor> {
   return {
     email: async (job: Job) => {
-      await emailTaskHandler(job, db);
+      // Use the simplified job executor
+      return executeJob(job.name, job, db);
     },
-    // Future job handlers can be added here
-    // documents: async (job: Job) => {
-    //   await documentTaskHandler(job, db);
-    // },
-    // transactions: async (job: Job) => {
-    //   await transactionTaskHandler(job, db);
-    // },
+    documents: async (job: Job) => {
+      // Document jobs will also use the same system
+      return executeJob(job.name, job, db);
+    },
+    // All handlers use the same executeJob function
+    // which routes to the appropriate job based on job.name
   };
 }
 
