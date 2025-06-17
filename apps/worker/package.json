@@ -11,6 +11,7 @@
     "test:watch": "bun test --watch"
   },
   "dependencies": {
+    "@bull-board/hono": "^6.10.1",
     "@midday/db": "workspace:*",
     "bullmq": "^5.54.1",
     "hono": "^4.7.11",

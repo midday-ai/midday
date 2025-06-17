@@ -1,10 +1,41 @@
+import { createBullBoard } from "@bull-board/api";
+import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
+import { HonoAdapter } from "@bull-board/hono";
 import { Hono } from "hono";
+import { basicAuth } from "hono/basic-auth";
+import { serveStatic } from "hono/bun";
 import { emailQueue } from "./queues";
 import { checkQueueHealth } from "./utils/health";
 
 const app = new Hono();
 
-app.get("/", (c) => c.text("Hello World"));
+const basePath = "/admin";
+
+app.use(
+  "/admin",
+  basicAuth({
+    username: process.env.BULL_BOARD_USERNAME!,
+    password: process.env.BULL_BOARD_PASSWORD!,
+  }),
+);
+
+app.use(
+  "/admin/*",
+  basicAuth({
+    username: process.env.BULL_BOARD_USERNAME!,
+    password: process.env.BULL_BOARD_PASSWORD!,
+  }),
+);
+
+const serverAdapter = new HonoAdapter(serveStatic);
+serverAdapter.setBasePath(basePath);
+
+createBullBoard({
+  queues: [new BullMQAdapter(emailQueue)],
+  serverAdapter: serverAdapter,
+});
+
+app.route(basePath, serverAdapter.registerPlugin());
 
 app.get("/health", async (c) => {
   try {
