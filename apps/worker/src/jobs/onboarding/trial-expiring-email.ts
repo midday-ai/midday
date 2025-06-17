@@ -1,4 +1,5 @@
 import { job } from "@worker/core/job";
+import { emailQueue } from "@worker/queues/queues";
 import { z } from "zod";
 
 export const trialExpiringEmailJob = job(
@@ -9,6 +10,9 @@ export const trialExpiringEmailJob = job(
     fullName: z.string(),
     teamId: z.string(),
   }),
+  {
+    queue: emailQueue,
+  },
   async (data, ctx) => {
     ctx.logger.info(
       `Sending trial expiring email to ${data.email} (${data.fullName})`,
@@ -36,12 +40,4 @@ export const trialExpiringEmailJob = job(
       userId: data.userId,
     };
   },
-  {
-    priority: 2,
-    attempts: 3,
-  },
 );
-
-export type TrialExpiringEmailData = z.infer<
-  (typeof trialExpiringEmailJob)["schema"]
->;

@@ -13,28 +13,22 @@ export async function initializeAllQueues(): Promise<void> {
   initializeEmailQueue();
   initializeDocumentQueue();
 
-  // Set up queue resolver - determines which queue each job goes to
-  setQueueResolver((jobId: string) => {
-    // Email-related jobs go to email queue
-    if (
-      jobId.includes("email") ||
-      jobId.includes("onboard") ||
-      jobId.includes("invite")
-    ) {
-      return queueRegistry.getQueue("email");
+  // Set up metadata-based queue resolver - always uses job queue metadata
+  setQueueResolver((jobId: string, jobQueue: string) => {
+    if (!jobQueue) {
+      throw new Error(
+        `No queue specified for job "${jobId}". All jobs must have a queue property.`,
+      );
     }
 
-    // Document-related jobs go to documents queue
-    if (
-      jobId.includes("document") ||
-      jobId.includes("pdf") ||
-      jobId.includes("extract")
-    ) {
-      return queueRegistry.getQueue("documents");
+    const queue = queueRegistry.getQueue(jobQueue);
+    if (!queue) {
+      throw new Error(
+        `Queue "${jobQueue}" not found for job "${jobId}". Make sure the queue is initialized.`,
+      );
     }
 
-    // Default to email queue for other jobs
-    return queueRegistry.getQueue("email");
+    return queue;
   });
 
   // Initialize FlowProducer for flow support

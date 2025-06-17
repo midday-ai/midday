@@ -1,4 +1,5 @@
 import { job } from "@worker/core/job";
+import { emailQueue } from "@worker/queues/queues";
 import { z } from "zod";
 
 export const welcomeEmailJob = job(
@@ -9,6 +10,9 @@ export const welcomeEmailJob = job(
     fullName: z.string(),
     teamId: z.string(),
   }),
+  {
+    queue: emailQueue,
+  },
   async (data, ctx) => {
     // This would be your resend/email implementation
     ctx.logger.info(
@@ -37,10 +41,4 @@ export const welcomeEmailJob = job(
       userId: data.userId,
     };
   },
-  {
-    priority: 2,
-    attempts: 3,
-  },
 );
-
-export type WelcomeEmailData = z.infer<(typeof welcomeEmailJob)["schema"]>;

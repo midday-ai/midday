@@ -1,6 +1,7 @@
 import type { Database } from "@midday/db/client";
 import { logger } from "@worker/monitoring/logger";
 import type { Job } from "bullmq";
+import { Queue } from "bullmq";
 import type { FlowProducer } from "bullmq";
 import type { z } from "zod";
 
@@ -11,8 +12,9 @@ export interface JobContext {
   logger: typeof logger;
 }
 
-// Simplified job configuration with smart defaults
+// Job configuration - queue is required, everything else optional with defaults
 interface JobOptions {
+  queue: string | { name: string; [key: string]: any };
   priority?: number;
   attempts?: number;
   delay?: number;
@@ -20,29 +22,37 @@ interface JobOptions {
   removeOnFail?: number;
 }
 
-// Flow job definition that integrates with our job system
-interface FlowJobDefinition {
-  job: SimpleJob<any>;
-  data: any;
-  options?: Record<string, any>;
-  children?: FlowJobDefinition[];
-}
-
 // Queue resolver function type
-type QueueResolver = (jobId: string) => any;
+type QueueResolver = (jobId: string, queueName: string) => any;
 
-// Auto-registry for jobs
-class SimpleJobRegistry {
-  private static instance: SimpleJobRegistry;
+// Simple job metadata registry
+class JobRegistry {
+  private static instance: JobRegistry;
   private jobs: Map<string, any> = new Map();
+  private jobQueues: Map<string, string> = new Map();
   private queueResolver: QueueResolver | null = null;
   private flowProducer: FlowProducer | null = null;
+  private externalQueues: Map<string, Queue> = new Map();
 
-  static getInstance(): SimpleJobRegistry {
-    if (!SimpleJobRegistry.instance) {
-      SimpleJobRegistry.instance = new SimpleJobRegistry();
+  static getInstance(): JobRegistry {
+    if (!JobRegistry.instance) {
+      JobRegistry.instance = new JobRegistry();
     }
-    return SimpleJobRegistry.instance;
+    return JobRegistry.instance;
+  }
+
+  register(id: string, job: any, queueName: string) {
+    this.jobs.set(id, job);
+    this.jobQueues.set(id, queueName);
+    return job;
+  }
+
+  get(id: string) {
+    return this.jobs.get(id);
+  }
+
+  getAll() {
+    return Array.from(this.jobs.values());
   }
 
   setQueueResolver(resolver: QueueResolver) {
@@ -61,36 +71,81 @@ class SimpleJobRegistry {
   }
 
   getQueue(jobId: string) {
-    if (!this.queueResolver) {
-      throw new Error("Queue resolver not set. Call setQueueResolver() first.");
+    const queueName = this.jobQueues.get(jobId);
+    if (!queueName) {
+      throw new Error(
+        `No queue found for job "${jobId}". Make sure the job has a queue property.`,
+      );
     }
-    return this.queueResolver(jobId);
+
+    // Try the queue resolver first (worker context)
+    if (this.queueResolver) {
+      try {
+        return this.queueResolver(jobId, queueName);
+      } catch (error) {
+        // Fall through to external queue creation
+      }
+    }
+
+    // Create external queue (API context)
+    if (!this.externalQueues.has(queueName)) {
+      const queue = new Queue(queueName, {
+        connection: {
+          host: process.env.REDIS_HOST || "localhost",
+          port: process.env.REDIS_PORT
+            ? Number.parseInt(process.env.REDIS_PORT)
+            : 6379,
+          ...(process.env.REDIS_URL && { url: process.env.REDIS_URL }),
+        },
+        defaultJobOptions: {
+          removeOnComplete: { count: 50, age: 24 * 3600 },
+          removeOnFail: { count: 50, age: 7 * 24 * 3600 },
+          attempts: 3,
+          backoff: { type: "exponential", delay: 2000 },
+        },
+      });
+
+      this.externalQueues.set(queueName, queue);
+      console.log(`Created external queue: ${queueName} for job: ${jobId}`);
+    }
+
+    return this.externalQueues.get(queueName)!;
   }
 
-  register(id: string, job: any) {
-    this.jobs.set(id, job);
-    return job;
-  }
-
-  get(id: string) {
-    return this.jobs.get(id);
-  }
-
-  getAll() {
-    return Array.from(this.jobs.values());
+  async closeExternalQueues() {
+    for (const [name, queue] of this.externalQueues) {
+      await queue.close();
+      console.log(`Closed external queue: ${name}`);
+    }
+    this.externalQueues.clear();
   }
 }
 
-const registry = SimpleJobRegistry.getInstance();
+const registry = JobRegistry.getInstance();
+
+// Flow job definition
+interface FlowJobDefinition {
+  job: SimpleJob<any>;
+  data: any;
+  options?: Record<string, any>;
+  children?: FlowJobDefinition[];
+}
 
 // Clean job class with instance methods and flow support
 class SimpleJob<T = any> {
   constructor(
     public id: string,
-    private schema: z.ZodSchema<T>,
+    public schema: z.ZodSchema<T>,
     private handler: (payload: T, ctx: JobContext) => Promise<any>,
-    private options: JobOptions = {},
-  ) {}
+    private options: JobOptions,
+  ) {
+    // Extract queue name for registration
+    const queueName =
+      typeof this.options.queue === "string"
+        ? this.options.queue
+        : this.options.queue.name;
+    registry.register(this.id, this, queueName);
+  }
 
   private validate(data: unknown): T {
     try {
@@ -108,7 +163,7 @@ class SimpleJob<T = any> {
     return queue.name;
   }
 
-  async trigger(payload: unknown, options: Record<string, any> = {}) {
+  async trigger(payload: T, options: Record<string, any> = {}) {
     const queue = registry.getQueue(this.id);
     const validated = this.validate(payload);
 
@@ -128,12 +183,12 @@ class SimpleJob<T = any> {
       ...options,
     });
 
-    logger.info("Job triggered", { jobId: job.id, type: this.id });
+    console.log(`Job triggered: ${job.id} (${this.id})`);
     return job;
   }
 
   async batchTrigger(
-    payloads: Array<{ payload: unknown; options?: Record<string, any> }>,
+    payloads: Array<{ payload: T; options?: Record<string, any> }>,
   ) {
     const queue = registry.getQueue(this.id);
 
@@ -158,22 +213,20 @@ class SimpleJob<T = any> {
     }));
 
     const jobs = await queue.addBulk(bulkJobs);
-    logger.info("Batch jobs triggered", { count: jobs.length, type: this.id });
+    console.log(`Batch jobs triggered: ${jobs.length} (${this.id})`);
     return jobs;
   }
 
-  // Delayed trigger with clean API
   async triggerDelayed(
-    payload: unknown,
+    payload: T,
     delayMs: number,
     options: Record<string, any> = {},
   ) {
     return this.trigger(payload, { ...options, delay: delayMs });
   }
 
-  // Recurring trigger
   async triggerRecurring(
-    payload: unknown,
+    payload: T,
     cron: string,
     options: Record<string, any> = {},
   ) {
@@ -188,7 +241,6 @@ class SimpleJob<T = any> {
     const flowProducer = registry.getFlowProducer();
     const validated = this.validate(flowDef.data);
 
-    // Convert our clean flow definition to BullMQ format
     const bullMqFlow = this.convertToBullMqFlow({
       job: this,
       data: validated,
@@ -207,7 +259,6 @@ class SimpleJob<T = any> {
     return flow;
   }
 
-  // Convert our clean flow definition to BullMQ's FlowJob format
   private convertToBullMqFlow(flowDef: FlowJobDefinition): any {
     const result = {
       name: flowDef.job.id,
@@ -234,7 +285,6 @@ class SimpleJob<T = any> {
     return result;
   }
 
-  // 🌟 Helper methods for working with flows in job handlers
   static async getChildrenValues(job: Job): Promise<Record<string, any>> {
     return job.getChildrenValues();
   }
@@ -268,15 +318,13 @@ class SimpleJob<T = any> {
   }
 }
 
-// Job factory function
 export function job<T = any>(
   id: string,
   schema: z.ZodSchema<T>,
+  options: JobOptions,
   handler: (payload: T, ctx: JobContext) => Promise<any>,
-  options: JobOptions = {},
 ): SimpleJob<T> {
-  const jobInstance = new SimpleJob(id, schema, handler, options);
-  return registry.register(id, jobInstance);
+  return new SimpleJob(id, schema, handler, options);
 }
 
 // Execute any job by ID
@@ -296,6 +344,11 @@ export function setQueueResolver(resolver: QueueResolver) {
 // Set flow producer (called during app initialization)
 export function setFlowProducer(producer: FlowProducer) {
   registry.setFlowProducer(producer);
+}
+
+// Clean up external queues (useful for external apps)
+export async function closeExternalQueues() {
+  return registry.closeExternalQueues();
 }
 
 // Export flow types for easy use

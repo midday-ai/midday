@@ -10,6 +10,9 @@
     "test": "bun test",
     "test:watch": "bun test --watch"
   },
+  "exports": {
+    "./jobs": "./src/jobs/index.ts"
+  },
   "dependencies": {
     "@bull-board/hono": "^6.10.1",
     "@midday/db": "workspace:*",
