@@ -25,5 +25,6 @@ app.get("/health", async (c) => {
 
 export default {
   port: process.env.PORT || 3000,
+  hostname: "::",
   fetch: app.fetch,
 };

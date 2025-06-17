@@ -97,5 +97,6 @@ app.route("/", routers);
 
 export default {
   port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3000,
+  hostname: "::",
   fetch: app.fetch,
 };
