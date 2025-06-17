@@ -1,22 +1,32 @@
-import { type PrimaryDatabase, primaryDb } from "@midday/db/client";
+import type { Database } from "@midday/db/client";
+import { primaryOnlyDb } from "@midday/db/client";
 import { checkPrimaryHealth } from "@midday/db/utils/health";
+import { redisConnection } from "@worker/config/redis";
+import { logger } from "@worker/monitoring/logger";
+import { initializeAllQueues } from "@worker/queues";
+import server, { initializeBullBoard } from "@worker/server";
+import { createWorkerHandlers } from "@worker/workers";
 import { Worker } from "bullmq";
-import { redisConnection } from "./config/redis";
-import { logger } from "./monitoring/logger";
-import server from "./server";
-import { createWorkerHandlers } from "./workers";
 
 class WorkerService {
   private activeWorkers: Worker[] = [];
-  private db: PrimaryDatabase | null = null;
+  private db: Database | null = null;
 
   async initialize() {
     try {
-      // Initialize database connection
-      this.db = primaryDb;
+      // Initialize database connection using primary-only database
+      // This gives us a Database type that's compatible with queries
+      // but only uses the primary database for consistency in jobs
+      this.db = primaryOnlyDb;
 
       await checkPrimaryHealth();
       logger.databaseConnected();
+
+      // Initialize all queues
+      await initializeAllQueues();
+
+      // Initialize BullBoard now that queues are ready
+      initializeBullBoard();
 
       // Initialize worker handlers with database context
       const workerHandlers = createWorkerHandlers(this.db);
@@ -119,10 +129,11 @@ class WorkerService {
     // Configure optimal concurrency based on queue type and resource requirements
     const concurrencyMap: Record<string, number> = {
       email: 5,
+      documents: 3, // Lower concurrency for resource-intensive document processing
       // Future job queues can be configured here
-      // 'document-processing': 3,
+      // 'transactions': 10,
+      // 'notifications': 8,
       // 'data-import': 2,
-      // 'transaction-sync': 10,
     };
 
     return concurrencyMap[queueName] ?? 5;

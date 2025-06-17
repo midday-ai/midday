@@ -20,7 +20,7 @@
     "jsxImportSource": "react",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      "@worker/*": ["src/*"],
       "@db/*": ["../../packages/db/src/*"]
     },
     "types": ["bun-types"]

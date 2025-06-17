@@ -60,3 +60,13 @@ export type DatabaseWithPrimary = Database & {
   $primary?: Database;
   usePrimaryOnly?: () => Database;
 };
+
+/**
+ * Primary-only database instance that's compatible with Database type.
+ *
+ * This is perfect for scenarios where you want:
+ * - Consistency (no read-replica lag)
+ * - Type compatibility with queries expecting Database type
+ * - Primary database access only (like worker jobs)
+ */
+export const primaryOnlyDb: Database = primaryDb as Database;

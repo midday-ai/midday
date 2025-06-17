@@ -1,65 +1,63 @@
-import { Queue, type QueueOptions } from "bullmq";
-import { redisConnection } from "../config/redis";
-import { logger } from "../monitoring/logger";
-import type { EmailJobData, EmailJobType } from "../types/email";
-import { EMAIL_JOB_PRIORITIES } from "../types/email";
+import { setFlowProducer, setQueueResolver } from "@worker/jobs";
+import { logger } from "@worker/monitoring/logger";
+import { queueRegistry } from "@worker/queues/base";
+import { initializeDocumentQueue } from "@worker/queues/documents";
+import { initializeEmailQueue } from "@worker/queues/email";
+import { FlowProducer } from "bullmq";
 
-const defaultQueueOptions: QueueOptions = {
-  connection: redisConnection,
-  defaultJobOptions: {
-    removeOnComplete: { count: 50, age: 24 * 3600 }, // Keep 50 jobs or 24 hours
-    removeOnFail: { count: 50, age: 7 * 24 * 3600 }, // Keep 50 failed jobs or 7 days
-    attempts: 3,
-    backoff: {
-      type: "exponential",
-      delay: 2000,
-    },
-  },
+// Initialize all queues
+export async function initializeAllQueues(): Promise<void> {
+  logger.info("Initializing all queues...");
+
+  // Initialize each queue type
+  initializeEmailQueue();
+  initializeDocumentQueue();
+
+  // Set up queue resolver - determines which queue each job goes to
+  setQueueResolver((jobId: string) => {
+    // Email-related jobs go to email queue
+    if (
+      jobId.includes("email") ||
+      jobId.includes("onboard") ||
+      jobId.includes("invite")
+    ) {
+      return queueRegistry.getQueue("email");
+    }
+
+    // Document-related jobs go to documents queue
+    if (
+      jobId.includes("document") ||
+      jobId.includes("pdf") ||
+      jobId.includes("extract")
+    ) {
+      return queueRegistry.getQueue("documents");
+    }
+
+    // Default to email queue for other jobs
+    return queueRegistry.getQueue("email");
+  });
+
+  // Initialize FlowProducer for flow support
+  const flowProducer = new FlowProducer();
+  setFlowProducer(flowProducer);
+
+  logger.info("All queues initialized", {
+    queueCount: queueRegistry.getAllQueues().length,
+    queueNames: queueRegistry.getAllQueues().map((q) => q.name),
+    flowsEnabled: true,
+  });
+}
+
+// Export commonly used functions
+export const getAllQueues = () => queueRegistry.getAllQueues();
+export const getQueue = (name: string) => queueRegistry.getQueue(name);
+export const closeQueues = async () => {
+  await queueRegistry.closeAll();
+  // Close FlowProducer connections too
+  const flowProducer = new FlowProducer();
+  await flowProducer.close();
 };
 
-export const emailQueue = new Queue("email", defaultQueueOptions);
-
-// Export all queues in one place for easy access
-export function getAllQueues() {
-  return [emailQueue];
-}
-
-export async function enqueueEmailJob(
-  data: EmailJobData,
-  options: Record<string, any> = {},
-) {
-  try {
-    const job = await emailQueue.add(data.type, data, {
-      priority: getEmailJobPriority(data.type),
-      ...options,
-    });
-
-    logger.info("Email job enqueued", {
-      jobId: job.id,
-      type: data.type,
-      recipient: data.recipientEmail,
-      priority: getEmailJobPriority(data.type),
-    });
-
-    return job;
-  } catch (error) {
-    logger.error("Failed to enqueue email job", {
-      data,
-      error: error instanceof Error ? error.message : error,
-    });
-    throw error;
-  }
-}
-
-// Get job priority from centralized configuration
-function getEmailJobPriority(type: EmailJobType): number {
-  return EMAIL_JOB_PRIORITIES[type] ?? 1;
-}
-
-// Graceful shutdown for queues
-export async function closeQueues(): Promise<void> {
-  console.log("Closing queues...");
-  const queues = getAllQueues();
-  await Promise.all(queues.map((queue) => queue.close()));
-  console.log("All queues closed");
-}
+export * from "@worker/queues/base";
+export * from "@worker/queues/documents";
+export * from "@worker/queues/email";
