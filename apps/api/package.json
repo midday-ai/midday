@@ -28,10 +28,10 @@
     "@midday/jobs": "workspace:*",
     "@midday/location": "workspace:*",
     "@midday/supabase": "workspace:*",
-    "@scalar/hono-api-reference": "^0.9.1",
+    "@scalar/hono-api-reference": "^0.9.4",
     "@sindresorhus/slugify": "^2.2.1",
     "@trigger.dev/sdk": "3.3.17",
-    "@trpc/server": "^11.2.0",
+    "@trpc/server": "^11.4.1",
     "ai": "^4.3.16",
     "date-fns": "^4.1.0",
     "hono": "^4.7.11",
@@ -39,13 +39,13 @@
     "jose": "^6.0.11",
     "nanoid": "^5.1.5",
     "pino": "^9.7.0",
-    "resend": "^4.5.1",
+    "resend": "^4.6.0",
     "superjson": "^2.2.2",
     "uuid": "^11.1.0",
-    "zod": "^3.25.46",
+    "zod": "^3.25.67",
     "zod-openapi": "^4.2.4"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.15"
+    "@types/bun": "^1.2.16"
   }
 }

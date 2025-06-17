@@ -1,7 +1,5 @@
-import type { Database } from "@api/db";
-import { inbox, transactionAttachments, transactions } from "@api/db/schema";
-import type { Database } from "@db/client";
-import { inbox, transactionAttachments } from "@db/schema";
+import type { Database } from "@midday/db/client";
+import { inbox, transactionAttachments, transactions } from "@midday/db/schema";
 import { and, eq } from "drizzle-orm";
 
 export type Attachment = {

@@ -10,6 +10,6 @@
     "./team-permissions-cache": "./src/team-permissions-cache.ts"
   },
   "dependencies": {
-    "lru-cache": "^10.0.0"
+    "lru-cache": "^11.1.0"
   }
 }
