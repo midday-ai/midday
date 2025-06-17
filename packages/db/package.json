@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@midday/cache": "workspace:*",
-    "drizzle-orm": "^0.44.1",
+    "drizzle-orm": "^0.44.2",
     "postgres": "^3.4.7",
     "snakecase-keys": "^8.0.1",
     "camelcase-keys": "^9.1.3"

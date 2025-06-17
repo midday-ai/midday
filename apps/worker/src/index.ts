@@ -3,6 +3,7 @@ import { checkPrimaryHealth } from "@midday/db/utils/health";
 import { Worker } from "bullmq";
 import { redisConnection } from "./config/redis";
 import { logger } from "./monitoring/logger";
+import server from "./server";
 import { createWorkerHandlers } from "./workers";
 
 class WorkerService {
@@ -170,3 +171,5 @@ workerService.initialize().catch((error: Error) => {
   });
   process.exit(1);
 });
+
+export default server;
