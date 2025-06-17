@@ -1,9 +1,8 @@
-import { setFlowProducer, setQueueResolver } from "@worker/jobs";
+import { setQueueResolver } from "@worker/jobs";
 import { logger } from "@worker/monitoring/logger";
 import { queueRegistry } from "@worker/queues/base";
 import { initializeDocumentQueue } from "@worker/queues/documents";
 import { initializeEmailQueue } from "@worker/queues/email";
-import { FlowProducer } from "bullmq";
 
 // Initialize all queues
 export async function initializeAllQueues(): Promise<void> {
@@ -31,26 +30,16 @@ export async function initializeAllQueues(): Promise<void> {
     return queue;
   });
 
-  // Initialize FlowProducer for flow support
-  const flowProducer = new FlowProducer();
-  setFlowProducer(flowProducer);
-
   logger.info("All queues initialized", {
     queueCount: queueRegistry.getAllQueues().length,
     queueNames: queueRegistry.getAllQueues().map((q) => q.name),
-    flowsEnabled: true,
   });
 }
 
 // Export commonly used functions
 export const getAllQueues = () => queueRegistry.getAllQueues();
 export const getQueue = (name: string) => queueRegistry.getQueue(name);
-export const closeQueues = async () => {
-  await queueRegistry.closeAll();
-  // Close FlowProducer connections too
-  const flowProducer = new FlowProducer();
-  await flowProducer.close();
-};
+export const closeQueues = async () => queueRegistry.closeAll();
 
 export * from "@worker/queues/base";
 export * from "@worker/queues/documents";

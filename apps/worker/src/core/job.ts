@@ -2,7 +2,7 @@ import type { Database } from "@midday/db/client";
 import { logger } from "@worker/monitoring/logger";
 import type { Job } from "bullmq";
 import { Queue } from "bullmq";
-import type { FlowProducer } from "bullmq";
+import { FlowProducer } from "bullmq";
 import type { z } from "zod";
 
 // Job execution context
@@ -59,13 +59,18 @@ class JobRegistry {
     this.queueResolver = resolver;
   }
 
-  setFlowProducer(producer: FlowProducer) {
-    this.flowProducer = producer;
-  }
-
   getFlowProducer(): FlowProducer {
     if (!this.flowProducer) {
-      throw new Error("FlowProducer not set. Call setFlowProducer() first.");
+      // Create FlowProducer lazily when actually needed
+      this.flowProducer = new FlowProducer({
+        connection: {
+          host: process.env.REDIS_HOST || "localhost",
+          port: process.env.REDIS_PORT
+            ? Number.parseInt(process.env.REDIS_PORT)
+            : 6379,
+          ...(process.env.REDIS_URL && { url: process.env.REDIS_URL }),
+        },
+      });
     }
     return this.flowProducer;
   }
@@ -339,11 +344,6 @@ export async function executeJob(jobId: string, job: Job, db: Database) {
 // Set queue resolver (called during app initialization)
 export function setQueueResolver(resolver: QueueResolver) {
   registry.setQueueResolver(resolver);
-}
-
-// Set flow producer (called during app initialization)
-export function setFlowProducer(producer: FlowProducer) {
-  registry.setFlowProducer(producer);
 }
 
 // Clean up external queues (useful for external apps)
