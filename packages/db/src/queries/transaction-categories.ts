@@ -1,9 +1,6 @@
-import type { Database } from "@api/db";
-import { transactionCategories } from "@api/db/schema";
 import type { Database } from "@db/client";
 import { transactionCategories } from "@db/schema";
 import { and, asc, desc, eq, isNotNull, isNull } from "drizzle-orm";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
 
 export type GetCategoriesParams = {
   teamId: string;
