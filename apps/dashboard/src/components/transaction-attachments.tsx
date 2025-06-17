@@ -191,8 +191,8 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
     const item = {
       name: filename,
       size: file.data.size,
-      type: file.data.content_type,
-      path: file.data.file_path,
+      type: file.data.contentType,
+      path: file.data.filePath,
       transactionId: id,
     };
 
