@@ -1,4 +1,4 @@
-app = "midday-api-staging"
+app = 'midday-api-staging'
 primary_region = 'fra'
 
 [build]
