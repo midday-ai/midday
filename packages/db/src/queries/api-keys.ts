@@ -55,7 +55,7 @@ export async function upsertApiKey(db: Database, data: UpsertApiKeyData) {
 
     // Delete from cache
     if (result?.keyHash) {
-      // apiKeyCache.delete(result.keyHash);
+      apiKeyCache.delete(result.keyHash);
     }
 
     // On update we don't return the key
