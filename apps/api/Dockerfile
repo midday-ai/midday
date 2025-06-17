@@ -38,7 +38,7 @@ WORKDIR /app/apps/api
 ENV NODE_ENV=production
 
 # Expose the port the API runs on
-EXPOSE 3000
+EXPOSE 8080
 
 # Run the API directly with Bun
 CMD ["bun", "run", "src/index.ts"]
