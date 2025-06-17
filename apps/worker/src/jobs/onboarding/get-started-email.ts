@@ -1,5 +1,9 @@
+import { getTeamPlan } from "@db/queries";
+import GetStartedEmail from "@midday/email/emails/get-started";
+import { render } from "@midday/email/render";
 import { job } from "@worker/core/job";
 import { emailQueue } from "@worker/queues/queues";
+import { resend } from "@worker/services/resend";
 import { z } from "zod";
 
 export const getStartedEmailJob = job(
@@ -18,20 +22,16 @@ export const getStartedEmailJob = job(
       `Sending get started email to ${data.email} (${data.fullName})`,
     );
 
-    // Example implementation:
-    // const { resend } = await import("@jobs/utils/resend");
-    // const { GetStartedEmail } = await import("@midday/email/emails/get-started");
-    // const { render } = await import("@midday/email/render");
-    // const { shouldSendEmail } = await import("@jobs/utils/check-team-plan");
+    const plan = await getTeamPlan(ctx.db, data.teamId);
 
-    // if (await shouldSendEmail(data.teamId)) {
-    //   await resend.emails.send({
-    //     from: "Pontus from Midday <pontus@midday.ai>",
-    //     to: data.email,
-    //     subject: "Get the most out of Midday",
-    //     html: await render(GetStartedEmail({ fullName: data.fullName })),
-    //   });
-    // }
+    if (plan?.plan === "trial") {
+      await resend.emails.send({
+        to: data.email,
+        subject: "Get the most out of Midday",
+        from: "Pontus from Midday <pontus@midday.ai>",
+        html: render(GetStartedEmail({ fullName: data.fullName })),
+      });
+    }
 
     return {
       type: "get-started",

@@ -1,18 +1,21 @@
 import { setQueueResolver } from "@worker/jobs";
 import { logger } from "@worker/monitoring/logger";
 import { queueRegistry } from "@worker/queues/base";
-import { initializeDocumentQueue } from "@worker/queues/documents";
-import { initializeEmailQueue } from "@worker/queues/email";
+import { queues } from "@worker/queues/config";
+import { Queue } from "bullmq";
 
-// Initialize all queues
+// Generic function to initialize all queues from config
 export async function initializeAllQueues(): Promise<void> {
   logger.info("Initializing all queues...");
 
-  // Initialize each queue type
-  initializeEmailQueue();
-  initializeDocumentQueue();
+  // Initialize all queues from config
+  for (const [_, config] of Object.entries(queues)) {
+    const queue = new Queue(config.name, config.options);
+    queueRegistry.registerQueue(config.name, queue);
+    logger.info("Queue initialized", { queueName: config.name });
+  }
 
-  // Set up metadata-based queue resolver - always uses job queue metadata
+  // Set up metadata-based queue resolver
   setQueueResolver((jobId: string, jobQueue: string) => {
     if (!jobQueue) {
       throw new Error(
@@ -41,6 +44,6 @@ export const getAllQueues = () => queueRegistry.getAllQueues();
 export const getQueue = (name: string) => queueRegistry.getQueue(name);
 export const closeQueues = async () => queueRegistry.closeAll();
 
+// Export queue config for worker concurrency
+export { queues } from "@worker/queues/config";
 export * from "@worker/queues/base";
-export * from "@worker/queues/documents";
-export * from "@worker/queues/email";

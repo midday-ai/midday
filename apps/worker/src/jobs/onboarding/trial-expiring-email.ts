@@ -1,5 +1,9 @@
+import { getTeamPlan } from "@db/queries";
+import { TrialExpiringEmail } from "@midday/email/emails/trial-expiring";
+import { render } from "@midday/email/render";
 import { job } from "@worker/core/job";
 import { emailQueue } from "@worker/queues/queues";
+import { resend } from "@worker/services/resend";
 import { z } from "zod";
 
 export const trialExpiringEmailJob = job(
@@ -18,20 +22,16 @@ export const trialExpiringEmailJob = job(
       `Sending trial expiring email to ${data.email} (${data.fullName})`,
     );
 
-    // Example implementation:
-    // const { resend } = await import("@jobs/utils/resend");
-    // const { TrialExpiringEmail } = await import("@midday/email/emails/trial-expiring");
-    // const { render } = await import("@midday/email/render");
-    // const { shouldSendEmail } = await import("@jobs/utils/check-team-plan");
+    const plan = await getTeamPlan(ctx.db, data.teamId);
 
-    // if (await shouldSendEmail(data.teamId)) {
-    //   await resend.emails.send({
-    //     from: "Pontus from Midday <pontus@midday.ai>",
-    //     to: data.email,
-    //     subject: "Your trial is expiring soon",
-    //     html: await render(TrialExpiringEmail({ fullName: data.fullName })),
-    //   });
-    // }
+    if (plan?.plan === "trial") {
+      await resend.emails.send({
+        to: data.email,
+        subject: "Your trial is expiring soon",
+        from: "Pontus from Midday <pontus@midday.ai>",
+        html: render(TrialExpiringEmail({ fullName: data.fullName })),
+      });
+    }
 
     return {
       type: "trial-expiring",

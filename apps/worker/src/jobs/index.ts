@@ -1,5 +1,3 @@
-export { teamInviteJob } from "./team-invite";
-
 // Onboarding jobs
 export {
   onboardTeamJob,
