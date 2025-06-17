@@ -207,3 +207,14 @@ export async function getAvailablePlans(
     };
   });
 }
+
+export async function getTeamPlan(db: Database, teamId: string) {
+  const [result] = await db
+    .select({
+      plan: teams.plan,
+    })
+    .from(teams)
+    .where(eq(teams.id, teamId));
+
+  return result;
+}

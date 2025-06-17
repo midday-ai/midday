@@ -89,43 +89,29 @@ const emailQueueConfig = {
 
 ### Adding New Queues
 
-1. **Create Queue Configuration**:
+Simply add to the config object:
+
 ```typescript
-// apps/worker/src/queues/my-queue/config.ts
-export const MY_QUEUE_NAME = "my-queue";
-export const myQueueConfig = createBaseQueueOptions({
-  defaultJobOptions: {
-    priority: 5,
-    attempts: 2,
+// apps/worker/src/queues/config.ts
+export const queues = {
+  email: { /* existing config */ },
+  documents: { /* existing config */ },
+  
+  // Add your new queue here - that's it!
+  notifications: {
+    name: "notifications" as const,
+    concurrency: 8,
+    options: createBaseQueueOptions({
+      defaultJobOptions: {
+        priority: 2,
+        attempts: 5,
+      }
+    })
   }
-});
+} as const;
 ```
 
-2. **Initialize Queue**:
-```typescript
-// apps/worker/src/queues/my-queue/index.ts
-import { Queue } from "bullmq";
-import { queueRegistry } from "@worker/queues/base";
-
-export const myQueue = new Queue(MY_QUEUE_NAME, myQueueConfig);
-
-export function initializeMyQueue(): void {
-  queueRegistry.registerQueue(MY_QUEUE_NAME, myQueue);
-}
-```
-
-3. **Register in Main**:
-```typescript
-// apps/worker/src/queues/index.ts
-import { initializeMyQueue } from "@worker/queues/my-queue";
-
-export async function initializeAllQueues(): Promise<void> {
-  initializeEmailQueue();
-  initializeDocumentQueue();
-  initializeMyQueue(); // Add your queue here
-  // ... rest of initialization
-}
-```
+The queue will be automatically initialized on startup. No separate files or registration needed!
 
 ### Queue Management
 
@@ -426,12 +412,7 @@ apps/worker/src/
 ├── queues/
 │   ├── index.ts           # Queue initialization & registry
 │   ├── base.ts           # Queue registry and base config
-│   ├── email/            # Email queue configuration
-│   │   ├── index.ts      # Email queue initialization
-│   │   └── config.ts     # Email-specific config
-│   └── documents/        # Document queue configuration
-│       ├── index.ts      # Document queue initialization
-│       └── config.ts     # Document-specific config
+│   └── config.ts         # All queue configurations
 ├── workers/
 │   └── index.ts          # Worker processes
 └── main.ts               # Application entry point
@@ -485,6 +466,10 @@ cd apps/worker && bun dev
 2. Define with `job()` factory
 3. Export from `apps/worker/src/jobs/index.ts`
 4. Auto-registered and ready to use!
+
+### Add a New Queue
+1. Add entry to `queues` in `apps/worker/src/queues/config.ts`
+2. That's it! Auto-initialized on startup
 
 ### Create Complex Workflows
 1. Define individual jobs

@@ -92,7 +92,7 @@ class JobRegistry {
       }
     }
 
-    // Create external queue (API context)
+    // Create external queue (API context) - use same Redis connection logic as FlowProducer
     if (!this.externalQueues.has(queueName)) {
       const queue = new Queue(queueName, {
         connection: {
@@ -102,16 +102,9 @@ class JobRegistry {
             : 6379,
           ...(process.env.REDIS_URL && { url: process.env.REDIS_URL }),
         },
-        defaultJobOptions: {
-          removeOnComplete: { count: 50, age: 24 * 3600 },
-          removeOnFail: { count: 50, age: 7 * 24 * 3600 },
-          attempts: 3,
-          backoff: { type: "exponential", delay: 2000 },
-        },
       });
 
       this.externalQueues.set(queueName, queue);
-      console.log(`Created external queue: ${queueName} for job: ${jobId}`);
     }
 
     return this.externalQueues.get(queueName)!;

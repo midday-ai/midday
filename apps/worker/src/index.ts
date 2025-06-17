@@ -3,7 +3,7 @@ import { primaryOnlyDb } from "@midday/db/client";
 import { checkPrimaryHealth } from "@midday/db/utils/health";
 import { redisConnection } from "@worker/config/redis";
 import { logger } from "@worker/monitoring/logger";
-import { initializeAllQueues } from "@worker/queues";
+import { initializeAllQueues, queues } from "@worker/queues";
 import server, { initializeBullBoard } from "@worker/server";
 import { createWorkerHandlers } from "@worker/workers";
 import { Worker } from "bullmq";
@@ -126,17 +126,11 @@ class WorkerService {
   }
 
   private getOptimalConcurrency(queueName: string): number {
-    // Configure optimal concurrency based on queue type and resource requirements
-    const concurrencyMap: Record<string, number> = {
-      email: 5,
-      documents: 3, // Lower concurrency for resource-intensive document processing
-      // Future job queues can be configured here
-      // 'transactions': 10,
-      // 'notifications': 8,
-      // 'data-import': 2,
-    };
-
-    return concurrencyMap[queueName] ?? 5;
+    // Find concurrency from queue config
+    const queueConfig = Object.values(queues).find(
+      (config) => config.name === queueName,
+    );
+    return queueConfig?.concurrency ?? 5;
   }
 }
 
