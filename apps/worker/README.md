@@ -75,11 +75,16 @@ export type MyJobData = z.infer<typeof myJob.schema>;
 // Anywhere in your application
 import { myJob } from "@worker/jobs/my-job";
 
-// Simple trigger
+// ✅ Simple trigger - FULLY TYPED based on schema
 await myJob.trigger({
   userId: "user_123",
   action: "email",
 });
+
+// ❌ TypeScript will catch these errors at compile time:
+// await myJob.trigger({ userId: 123 }); // Error: number not assignable to string
+// await myJob.trigger({ wrongField: "value" }); // Error: unknown property
+// await myJob.trigger({}); // Error: missing required properties
 
 // With options
 await myJob.trigger(
@@ -87,17 +92,23 @@ await myJob.trigger(
   { delay: 5000, priority: 10 }
 );
 
-// Batch trigger
+// Batch trigger - each payload is typed
 await myJob.batchTrigger([
   { payload: { userId: "user_1", action: "email" } },
   { payload: { userId: "user_2", action: "notification" } },
 ]);
 
-// Delayed trigger
-await myJob.triggerDelayed(data, 30000); // 30 seconds
+// Delayed trigger - payload is typed
+await myJob.triggerDelayed(
+  { userId: "user_123", action: "email" }, 
+  30000 // 30 seconds
+);
 
-// Recurring trigger
-await myJob.triggerRecurring(data, "0 9 * * *"); // Daily at 9 AM
+// Recurring trigger - payload is typed
+await myJob.triggerRecurring(
+  { userId: "user_123", action: "email" },
+  "0 9 * * *" // Daily at 9 AM
+);
 ```
 
 ### 3. Export Your Jobs
@@ -105,6 +116,100 @@ await myJob.triggerRecurring(data, "0 9 * * *"); // Daily at 9 AM
 ```typescript
 // apps/worker/src/jobs/index.ts
 export { myJob, type MyJobData } from "./my-job";
+```
+
+## 🛡️ Type Safety & IntelliSense
+
+Our job system provides **complete type safety** from schema to trigger calls:
+
+### Automatic Type Inference
+```typescript
+// Define once with Zod schema
+const orderJob = job(
+  "process-order",
+  z.object({
+    orderId: z.string().uuid(),
+    customerId: z.string(),
+    items: z.array(z.object({
+      productId: z.string(),
+      quantity: z.number().min(1),
+    })),
+    metadata: z.object({
+      priority: z.enum(["low", "normal", "high"]),
+      source: z.string(),
+    }).optional(),
+  }),
+  async (data, ctx) => {
+    // `data` is fully typed here - no manual type assertions needed!
+    ctx.logger.info(`Processing order ${data.orderId} for customer ${data.customerId}`);
+    data.items.forEach(item => {
+      // TypeScript knows `item` has productId (string) and quantity (number)
+    });
+  }
+);
+
+// Trigger calls are fully typed - IntelliSense and error checking included!
+await orderJob.trigger({
+  orderId: "550e8400-e29b-41d4-a716-446655440000",
+  customerId: "cust_123",
+  items: [
+    { productId: "prod_1", quantity: 2 },
+    { productId: "prod_2", quantity: 1 },
+  ],
+  metadata: {
+    priority: "high",
+    source: "web"
+  }
+});
+```
+
+### Compile-Time Error Prevention
+```typescript
+// ❌ These will be caught by TypeScript BEFORE runtime:
+
+// Wrong property name
+await orderJob.trigger({
+  orderID: "123", // ❌ Error: Object literal may only specify known properties
+  customerId: "cust_123",
+  items: []
+});
+
+// Wrong type
+await orderJob.trigger({
+  orderId: 123, // ❌ Error: Type 'number' is not assignable to type 'string'
+  customerId: "cust_123", 
+  items: []
+});
+
+// Missing required properties
+await orderJob.trigger({
+  orderId: "123"
+  // ❌ Error: Property 'customerId' is missing
+  // ❌ Error: Property 'items' is missing
+});
+
+// Invalid enum value
+await orderJob.trigger({
+  orderId: "123",
+  customerId: "cust_123",
+  items: [],
+  metadata: {
+    priority: "urgent" // ❌ Error: '"urgent"' is not assignable to '"low" | "normal" | "high"'
+  }
+});
+```
+
+### Type Extraction for Reuse
+```typescript
+// Extract types from your job schemas
+type OrderJobData = z.infer<typeof orderJob.schema>;
+type OrderItem = OrderJobData['items'][0];
+type OrderPriority = NonNullable<OrderJobData['metadata']>['priority'];
+
+// Use in other parts of your application
+function createOrder(data: OrderJobData): Promise<void> {
+  return orderJob.trigger(data);
+}
 ```
 
 ## 🌊 Flows: Complex Workflows

@@ -1,4 +1,4 @@
-export { teamInviteJob, type TeamInviteData } from "./team-invite";
+export { teamInviteJob } from "./team-invite";
 
 // Onboarding jobs
 export {
@@ -7,11 +7,6 @@ export {
   getStartedEmailJob,
   trialExpiringEmailJob,
   trialEndedEmailJob,
-  type OnboardTeamData,
-  type WelcomeEmailData,
-  type GetStartedEmailData,
-  type TrialExpiringEmailData,
-  type TrialEndedEmailData,
 } from "./onboarding";
 
 // Export job utilities with flow support

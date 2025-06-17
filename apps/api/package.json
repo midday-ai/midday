@@ -28,6 +28,7 @@
     "@midday/jobs": "workspace:*",
     "@midday/location": "workspace:*",
     "@midday/supabase": "workspace:*",
+    "@midday/worker": "workspace:*",
     "@scalar/hono-api-reference": "^0.9.4",
     "@sindresorhus/slugify": "^2.2.1",
     "@trigger.dev/sdk": "3.3.17",

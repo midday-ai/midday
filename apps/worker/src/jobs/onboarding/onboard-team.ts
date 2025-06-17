@@ -1,5 +1,6 @@
 import { getUserById } from "@db/queries";
 import { job } from "@worker/core/job";
+import { emailQueue } from "@worker/queues/queues";
 import { resend } from "@worker/services/resend";
 import { z } from "zod";
 import { getStartedEmailJob } from "./get-started-email";
@@ -12,10 +13,16 @@ export const onboardTeamJob = job(
   z.object({
     userId: z.string(),
   }),
+  {
+    queue: emailQueue,
+    removeOnComplete: 100, // Override just this option - keep more onboarding logs
+  },
   async ({ userId }, ctx) => {
     ctx.logger.info(`Starting onboarding for user ${userId}`);
 
     const user = await getUserById(ctx.db, userId);
+
+    console.log(user);
 
     if (!user || !user.fullName || !user.email || !user.teamId) {
       throw new Error("User data is missing");
@@ -75,11 +82,4 @@ export const onboardTeamJob = job(
     //   startedAt: new Date(),
     // };
   },
-  {
-    priority: 1,
-    attempts: 3,
-    removeOnComplete: 100,
-  },
 );
-
-export type OnboardTeamData = z.infer<(typeof onboardTeamJob)["schema"]>;

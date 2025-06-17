@@ -1,4 +1,5 @@
 import { job } from "@worker/core/job";
+import { emailQueue } from "@worker/queues/queues";
 import { z } from "zod";
 
 export const getStartedEmailJob = job(
@@ -9,6 +10,9 @@ export const getStartedEmailJob = job(
     fullName: z.string(),
     teamId: z.string(),
   }),
+  {
+    queue: emailQueue,
+  },
   async (data, ctx) => {
     ctx.logger.info(
       `Sending get started email to ${data.email} (${data.fullName})`,
@@ -36,12 +40,4 @@ export const getStartedEmailJob = job(
       userId: data.userId,
     };
   },
-  {
-    priority: 2,
-    attempts: 3,
-  },
 );
-
-export type GetStartedEmailData = z.infer<
-  (typeof getStartedEmailJob)["schema"]
->;

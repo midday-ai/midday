@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { job } from "../core/job";
+import { emailQueue } from "../queues/queues";
 
 export const teamInviteJob = job(
   "team-invite",
@@ -8,6 +9,9 @@ export const teamInviteJob = job(
     teamId: z.string(),
     inviterName: z.string(),
   }),
+  {
+    queue: emailQueue,
+  },
   async (data, ctx) => {
     ctx.logger.info(`Sending team invite to ${data.email}`, {
       teamId: data.teamId,
@@ -29,10 +33,4 @@ export const teamInviteJob = job(
       sentAt: new Date(),
     };
   },
-  {
-    priority: 2,
-    attempts: 3,
-  },
 );
-
-export type TeamInviteData = z.infer<(typeof teamInviteJob)["schema"]>;
