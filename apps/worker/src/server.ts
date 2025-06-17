@@ -9,11 +9,10 @@ app.get("/", (c) => c.text("Hello World"));
 app.get("/health", async (c) => {
   try {
     await checkQueueHealth(emailQueue);
-  } catch (error) {
     return c.json({ status: "ok" }, 200);
+  } catch {
+    return c.json({ status: "error" }, 500);
   }
-
-  return c.json({ status: "error" }, 500);
 });
 
 export default {
