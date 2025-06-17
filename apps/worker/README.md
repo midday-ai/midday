@@ -50,7 +50,7 @@ Queue Registry (Singleton)
 └── Custom Queues
     └── (Add your own)
 
-Flow Producer
+Flow Producer (created on-demand)
 ├── Parent-child relationships
 ├── Complex workflows
 └── Dependency management
@@ -61,7 +61,7 @@ Flow Producer
 - **Queue Registry**: Centralized management of all queues
 - **Automatic Initialization**: Queues are registered automatically on startup
 - **Metadata-Based Routing**: Jobs specify their queue in metadata
-- **Flow Producer**: Handles complex parent-child job relationships
+- **Flow Producer**: Created automatically when flows are needed
 - **Graceful Shutdown**: Clean queue closure with connection cleanup
 
 ### Queue Configuration

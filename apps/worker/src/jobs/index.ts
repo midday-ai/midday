@@ -15,6 +15,5 @@ export {
   executeJob,
   jobRegistry,
   setQueueResolver,
-  setFlowProducer,
   type FlowJobDefinition,
 } from "../core/job";
