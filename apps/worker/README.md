@@ -11,6 +11,7 @@ A modern, type-safe background job processing system for Midday built on [BullMQ
 - **🔄 Scalable** - Easy to add new jobs (~30 lines each)
 - **🧪 Testable** - Isolated job definitions with clear interfaces
 - **🎯 Context-Based** - Clean context object with job, db, logger, etc.
+- **🚀 Queue Management** - Automatic queue initialization and management
 
 ## 🏗️ Architecture
 
@@ -30,6 +31,116 @@ Job System Flow:
 job() factory → Auto-register → .trigger() → Queue → Worker → Execute
 ```
 
+## 🚦 Queue System
+
+The worker uses a sophisticated queue management system built on BullMQ with automatic queue registration and intelligent job routing.
+
+### Queue Architecture
+
+```
+Queue Registry (Singleton)
+├── Email Queue
+│   ├── Welcome emails
+│   ├── Notifications  
+│   └── Marketing campaigns
+├── Document Queue
+│   ├── PDF processing
+│   ├── OCR tasks
+│   └── File uploads
+└── Custom Queues
+    └── (Add your own)
+
+Flow Producer
+├── Parent-child relationships
+├── Complex workflows
+└── Dependency management
+```
+
+### Key Components
+
+- **Queue Registry**: Centralized management of all queues
+- **Automatic Initialization**: Queues are registered automatically on startup
+- **Metadata-Based Routing**: Jobs specify their queue in metadata
+- **Flow Producer**: Handles complex parent-child job relationships
+- **Graceful Shutdown**: Clean queue closure with connection cleanup
+
+### Queue Configuration
+
+Each queue can be customized with specific options:
+
+```typescript
+// Base configuration applied to all queues
+const baseConfig = {
+  removeOnComplete: { count: 50, age: 24 * 3600 }, // Keep 50 jobs or 24 hours
+  removeOnFail: { count: 50, age: 7 * 24 * 3600 }, // Keep failed jobs for 7 days
+  attempts: 3,
+  backoff: { type: "exponential", delay: 2000 }
+};
+
+// Queue-specific overrides
+const emailQueueConfig = {
+  ...baseConfig,
+  defaultJobOptions: {
+    priority: 1, // High priority for emails
+    attempts: 5, // More retries for critical emails
+  }
+};
+```
+
+### Adding New Queues
+
+1. **Create Queue Configuration**:
+```typescript
+// apps/worker/src/queues/my-queue/config.ts
+export const MY_QUEUE_NAME = "my-queue";
+export const myQueueConfig = createBaseQueueOptions({
+  defaultJobOptions: {
+    priority: 5,
+    attempts: 2,
+  }
+});
+```
+
+2. **Initialize Queue**:
+```typescript
+// apps/worker/src/queues/my-queue/index.ts
+import { Queue } from "bullmq";
+import { queueRegistry } from "@worker/queues/base";
+
+export const myQueue = new Queue(MY_QUEUE_NAME, myQueueConfig);
+
+export function initializeMyQueue(): void {
+  queueRegistry.registerQueue(MY_QUEUE_NAME, myQueue);
+}
+```
+
+3. **Register in Main**:
+```typescript
+// apps/worker/src/queues/index.ts
+import { initializeMyQueue } from "@worker/queues/my-queue";
+
+export async function initializeAllQueues(): Promise<void> {
+  initializeEmailQueue();
+  initializeDocumentQueue();
+  initializeMyQueue(); // Add your queue here
+  // ... rest of initialization
+}
+```
+
+### Queue Management
+
+```typescript
+import { getAllQueues, getQueue, closeQueues } from "@worker/queues";
+
+// Get all registered queues
+const queues = getAllQueues();
+
+// Get specific queue by name
+const emailQueue = getQueue("email");
+
+// Graceful shutdown (handles flows too)
+await closeQueues();
+```
 ## 🚀 Quick Start
 
 ### 1. Define a Job
@@ -313,9 +424,14 @@ apps/worker/src/
 │       ├── usage-example.ts        # Usage examples
 │       └── README.md               # Onboarding documentation
 ├── queues/
-│   ├── index.ts           # Queue initialization
-│   ├── base.ts           # Queue registry
-│   └── documents/        # Queue-specific config
+│   ├── index.ts           # Queue initialization & registry
+│   ├── base.ts           # Queue registry and base config
+│   ├── email/            # Email queue configuration
+│   │   ├── index.ts      # Email queue initialization
+│   │   └── config.ts     # Email-specific config
+│   └── documents/        # Document queue configuration
+│       ├── index.ts      # Document queue initialization
+│       └── config.ts     # Document-specific config
 ├── workers/
 │   └── index.ts          # Worker processes
 └── main.ts               # Application entry point
@@ -323,17 +439,34 @@ apps/worker/src/
 
 ## 🔧 Environment Setup
 
-Create `.env` file:
+### Prerequisites
+- **Redis** - Required for job queues (BullMQ backend)
+- **PostgreSQL** - Database for job data and application state
+
+### Quick Setup
 
 ```bash
-# Redis Configuration (required for BullMQ)
+# Start Redis (choose one)
+docker run -p 6379:6379 redis:alpine
+# OR brew install redis && redis-server
+# OR use hosted Redis (Upstash, Redis Cloud, etc.)
+
+# Create .env file
+cp .env.example .env
+```
+
+### Environment Variables
+
+```bash
+# Redis Configuration (REQUIRED)
 REDIS_URL=redis://localhost:6379
 
-# Database Configuration  
+# Database Configuration (REQUIRED)
 DATABASE_PRIMARY_URL=postgresql://user:password@localhost:5432/midday
 
-# Environment
+# Optional Configuration
 ENVIRONMENT=development
+WORKER_CONCURRENCY=10
 ```
 
 ## 🚀 Development
