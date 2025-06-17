@@ -540,8 +540,27 @@ async (data, ctx) => {
 
 - **Logging**: Structured logging with job context
 - **Metrics**: Built-in job success/failure tracking  
-- **BullMQ Dashboard**: Visual queue monitoring
+- **BullMQ Dashboard**: Visual queue monitoring at `/admin`
 - **Type Safety**: Catch data validation errors early
+
+### Health Check
+
+- **`GET /health`** - Lightweight health check (only 1 Redis call)
+  - Verifies Redis connectivity with simple ping
+  - Lists registered queues without additional Redis calls
+  - Optimized for frequent health checks (every 60 seconds)
+
+```typescript
+// Health check response
+{
+  "status": "healthy",
+  "redis": "connected", 
+  "queues": ["email", "documents"],
+  "queueCount": 2
+}
+```
+
+Use the BullMQ dashboard at `/admin` for detailed queue monitoring and job statistics.
 
 ## 🎨 API Reference
 

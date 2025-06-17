@@ -1,17 +1,15 @@
-import type { Queue } from "bullmq";
-import { getAllQueues } from "../queues";
+import { redisConnection } from "@worker/config/redis";
 
-export async function checkQueueHealth() {
-  const queues = getAllQueues();
-  const healthChecks = await Promise.all(
-    queues.map(async (queue) => {
-      const jobCounts = await queue.getJobCounts();
-      return {
-        queueName: queue.name,
-        jobCounts,
-      };
-    }),
-  );
+export async function getHealthCheck() {
+  try {
+    await redisConnection.ping();
 
-  return healthChecks;
+    return {
+      status: "ok",
+    };
+  } catch (error) {
+    throw new Error(
+      `Queue health check failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
 }

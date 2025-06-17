@@ -2,7 +2,7 @@ import { createBullBoard } from "@bull-board/api";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { HonoAdapter } from "@bull-board/hono";
 import { getAllQueues } from "@worker/queues";
-import { checkQueueHealth } from "@worker/utils/health";
+import { getHealthCheck } from "@worker/utils/health";
 import { Hono } from "hono";
 import { basicAuth } from "hono/basic-auth";
 import { serveStatic } from "hono/bun";
@@ -91,13 +91,18 @@ export function initializeBullBoard() {
   }
 }
 
-// Health check endpoint
 app.get("/health", async (c) => {
   try {
-    await checkQueueHealth();
-    return c.json({ status: "ok" }, 200);
-  } catch {
-    return c.json({ status: "error" }, 500);
+    const health = await getHealthCheck();
+    return c.json(health, 200);
+  } catch (error) {
+    return c.json(
+      {
+        status: "error",
+        error: error instanceof Error ? error.message : "Health check failed",
+      },
+      500,
+    );
   }
 });
 
