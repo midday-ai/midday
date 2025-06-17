@@ -29,7 +29,7 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
   const { data: items, isLoading } = useQuery({
     ...trpc.inbox.search.queryOptions({
       query: debouncedValue,
-      limit: 10,
+      limit: 30,
     }),
     enabled: Boolean(debouncedValue),
   });
