@@ -19,6 +19,11 @@ const defaultQueueOptions: QueueOptions = {
 
 export const emailQueue = new Queue("email", defaultQueueOptions);
 
+// Export all queues in one place for easy access
+export function getAllQueues() {
+  return [emailQueue];
+}
+
 export async function enqueueEmailJob(
   data: EmailJobData,
   options: Record<string, any> = {},
@@ -54,6 +59,7 @@ function getEmailJobPriority(type: EmailJobType): number {
 // Graceful shutdown for queues
 export async function closeQueues(): Promise<void> {
   console.log("Closing queues...");
-  await emailQueue.close();
+  const queues = getAllQueues();
+  await Promise.all(queues.map((queue) => queue.close()));
   console.log("All queues closed");
 }

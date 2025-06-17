@@ -4,7 +4,7 @@ import { HonoAdapter } from "@bull-board/hono";
 import { Hono } from "hono";
 import { basicAuth } from "hono/basic-auth";
 import { serveStatic } from "hono/bun";
-import { emailQueue } from "./queues";
+import { getAllQueues } from "./queues";
 import { checkQueueHealth } from "./utils/health";
 
 const app = new Hono();
@@ -31,7 +31,7 @@ const serverAdapter = new HonoAdapter(serveStatic);
 serverAdapter.setBasePath(basePath);
 
 createBullBoard({
-  queues: [new BullMQAdapter(emailQueue)],
+  queues: getAllQueues().map((queue) => new BullMQAdapter(queue)),
   serverAdapter: serverAdapter,
 });
 
@@ -39,7 +39,7 @@ app.route(basePath, serverAdapter.registerPlugin());
 
 app.get("/health", async (c) => {
   try {
-    await checkQueueHealth(emailQueue);
+    await checkQueueHealth();
     return c.json({ status: "ok" }, 200);
   } catch {
     return c.json({ status: "error" }, 500);
