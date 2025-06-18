@@ -4,10 +4,9 @@ import {
   processTransactionAttachmentSchema,
 } from "@api/schemas/transaction-attachments";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import type { ProcessTransactionAttachmentPayload } from "@jobs/schema";
 import { createAttachments, deleteAttachment } from "@midday/db/queries";
 import { allowedMimeTypes } from "@midday/documents/utils";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { processAttachmentJob } from "@worker/jobs/documents/process-attachment";
 
 export const transactionAttachmentsRouter = createTRPCRouter({
   createMany: protectedProcedure
@@ -39,19 +38,15 @@ export const transactionAttachmentsRouter = createTRPCRouter({
         return;
       }
 
-      return tasks.batchTrigger(
-        "process-transaction-attachment",
-        allowedAttachments.map(
-          (item) =>
-            ({
-              payload: {
-                filePath: item.filePath,
-                mimetype: item.mimetype,
-                teamId: teamId!,
-                transactionId: item.transactionId,
-              },
-            }) as { payload: ProcessTransactionAttachmentPayload },
-        ),
+      return processAttachmentJob.batchTrigger(
+        allowedAttachments.map((item) => ({
+          payload: {
+            filePath: item.filePath,
+            mimetype: item.mimetype,
+            teamId: teamId!,
+            transactionId: item.transactionId,
+          },
+        })),
       );
     }),
 });

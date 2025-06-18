@@ -22,8 +22,6 @@ export const processTransactionAttachment = schemaTask({
       });
     }
 
-    const filename = filePath.at(-1);
-
     const { data } = await supabase.storage
       .from("vault")
       .createSignedUrl(filePath.join("/"), 60);
