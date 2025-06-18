@@ -1,6 +1,6 @@
 import type { Database } from "@db/client";
 import { documentTags } from "@db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 export const getDocumentTags = async (db: Database, teamId: string) => {
   return db.query.documentTags.findMany({
@@ -58,4 +58,40 @@ export const deleteDocumentTag = async (
     });
 
   return result;
+};
+
+export type UpsertDocumentTagParams = {
+  name: string;
+  slug: string;
+  teamId: string;
+};
+
+export const upsertDocumentTags = async (
+  db: Database,
+  params: UpsertDocumentTagParams[],
+) => {
+  if (params.length === 0) {
+    return [];
+  }
+
+  const values = params.map((param) => ({
+    name: param.name,
+    slug: param.slug,
+    teamId: param.teamId,
+  }));
+
+  return db
+    .insert(documentTags)
+    .values(values)
+    .onConflictDoUpdate({
+      target: [documentTags.slug, documentTags.teamId],
+      set: {
+        name: sql`excluded.name`,
+      },
+    })
+    .returning({
+      id: documentTags.id,
+      slug: documentTags.slug,
+      name: documentTags.name,
+    });
 };
