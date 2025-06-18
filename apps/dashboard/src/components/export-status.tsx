@@ -184,7 +184,7 @@ export function ExportStatus() {
               </DropdownMenu>
 
               <a
-                href={`/api/download/file?path=${exportData?.result?.fullPath}&filename=${exportData?.result?.filePath}`}
+                href={`/api/download/file?path=${exportData?.result?.fullPath}&filename=${exportData?.result?.fullPath?.split("/").at(-1)}`}
                 download
               >
 >>>>>>> 4001cbca (wip)
@@ -261,7 +261,7 @@ export function ExportStatus() {
       setExportData(undefined);
 =======
               <a
-                href={`/api/download/file?path=${exportData?.result?.fullPath}&filename=${exportData?.result?.filePath}`}
+                href={`/api/download/file?path=${exportData?.result?.fullPath}&filename=${exportData?.result?.fullPath?.split("/").at(-1)}`}
                 download
               >
                 <Button
