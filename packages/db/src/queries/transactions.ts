@@ -922,6 +922,8 @@ type UpdateTransactionData = {
   assignedId?: string | null;
   recurring?: boolean;
   frequency?: "weekly" | "monthly" | "annually" | "irregular" | null;
+  taxRate?: number;
+  taxType?: string;
 };
 
 export async function updateTransaction(

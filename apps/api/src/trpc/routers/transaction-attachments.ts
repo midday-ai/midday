@@ -4,17 +4,10 @@ import {
 	processTransactionAttachmentSchema,
 } from "@api/schemas/transaction-attachments";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-<<<<<<< HEAD
 import { createAttachments, deleteAttachment } from "@midday/db/queries";
 import { allowedMimeTypes } from "@midday/documents/utils";
 import { tasks } from "@worker/jobs/tasks";
 import { processAttachmentSchema } from "@worker/schemas/jobs";
-=======
-import type { ProcessTransactionAttachmentPayload } from "@jobs/schema";
-import { createAttachments, deleteAttachment } from "@midday/db/queries";
-import { allowedMimeTypes } from "@midday/documents/utils";
-import { tasks } from "@trigger.dev/sdk/v3";
->>>>>>> 71080fc1 (wip)
 
 export const transactionAttachmentsRouter = createTRPCRouter({
 	createMany: protectedProcedure

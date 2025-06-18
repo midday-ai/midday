@@ -1,6 +1,5 @@
 export * from "./api-keys";
 export * from "./bank-accounts";
-export * from "./bank-accounts";
 export * from "./bank-connections";
 export * from "./customers";
 export * from "./document-tag-assignments";
