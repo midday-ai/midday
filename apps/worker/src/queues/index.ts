@@ -1,7 +1,7 @@
 import { setQueueResolver } from "@worker/jobs";
 import { logger } from "@worker/monitoring/logger";
 import { queueRegistry } from "@worker/queues/base";
-import { queues } from "@worker/queues/config";
+import { queues } from "@worker/queues/queues";
 import { Queue } from "bullmq";
 
 // Generic function to initialize all queues from config
@@ -39,11 +39,11 @@ export async function initializeAllQueues(): Promise<void> {
   });
 }
 
-// Export commonly used functions
-export const getAllQueues = () => queueRegistry.getAllQueues();
-export const getQueue = (name: string) => queueRegistry.getQueue(name);
-export const closeQueues = async () => queueRegistry.closeAll();
+// Export all queues
+export function getAllQueues() {
+  return queueRegistry.getAllQueues();
+}
 
 // Export queue config for worker concurrency
-export { queues } from "@worker/queues/config";
+export { queues } from "@worker/queues/queues";
 export * from "@worker/queues/base";

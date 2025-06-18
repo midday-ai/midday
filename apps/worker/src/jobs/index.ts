@@ -21,6 +21,7 @@ export {
 export {
   sendInvoiceEmailJob,
   sendInvoiceReminderJob,
+  generateInvoiceJob,
 } from "./invoice";
 
 // Export job utilities with flow support
