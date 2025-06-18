@@ -61,15 +61,13 @@ class JobRegistry {
 
   getFlowProducer(): FlowProducer {
     if (!this.flowProducer) {
-      // Create FlowProducer lazily when actually needed
+      // Create FlowProducer using REDIS_WORKER_URL
+      if (!process.env.REDIS_WORKER_URL) {
+        throw new Error("REDIS_WORKER_URL environment variable is required");
+      }
+
       this.flowProducer = new FlowProducer({
-        connection: {
-          host: process.env.REDIS_HOST || "localhost",
-          port: process.env.REDIS_PORT
-            ? Number.parseInt(process.env.REDIS_PORT)
-            : 6379,
-          ...(process.env.REDIS_URL && { url: process.env.REDIS_URL }),
-        },
+        connection: { url: process.env.REDIS_WORKER_URL },
       });
     }
     return this.flowProducer;
@@ -92,16 +90,14 @@ class JobRegistry {
       }
     }
 
-    // Create external queue (API context) - use same Redis connection logic as FlowProducer
+    // Create external queue (API context) using REDIS_WORKER_URL
     if (!this.externalQueues.has(queueName)) {
+      if (!process.env.REDIS_WORKER_URL) {
+        throw new Error("REDIS_WORKER_URL environment variable is required");
+      }
+
       const queue = new Queue(queueName, {
-        connection: {
-          host: process.env.REDIS_HOST || "localhost",
-          port: process.env.REDIS_PORT
-            ? Number.parseInt(process.env.REDIS_PORT)
-            : 6379,
-          ...(process.env.REDIS_URL && { url: process.env.REDIS_URL }),
-        },
+        connection: { url: process.env.REDIS_WORKER_URL },
       });
 
       this.externalQueues.set(queueName, queue);
