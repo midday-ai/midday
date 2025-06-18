@@ -17,6 +17,9 @@ export {
   embedDocumentTagsJob,
 } from "./documents";
 
+// Export jobs
+export { exportTransactionsJob } from "./exports";
+
 // Invoice jobs
 export {
   sendInvoiceEmailJob,

@@ -1,7 +1,6 @@
 "use client";
 
 import { shareFileAction } from "@/actions/share-file-action";
-import { useExportStatus } from "@/hooks/use-export-status";
 import { useExportStore } from "@/store/export";
 import { Button } from "@midday/ui/button";
 import {
@@ -37,18 +36,10 @@ type ShareOptions = {
   fullPath: string;
 };
 
-type ExportData = {
-  runId?: string;
-  accessToken?: string;
-};
-
 export function ExportStatus() {
   const { toast, dismiss, update } = useToast();
   const [toastId, setToastId] = useState<string | null>(null);
   const { exportData, setExportData } = useExportStore();
-  const { status, progress, result } = useExportStatus(
-    exportData as ExportData,
-  );
   const [, copy] = useCopyToClipboard();
 
   const shareFile = useAction(shareFileAction, {
@@ -74,6 +65,8 @@ export function ExportStatus() {
     if (toastId) {
       dismiss(toastId);
     }
+    setToastId(null);
+    setExportData(undefined);
   };
 
   const handleOnShare = ({ expireIn, fullPath }: ShareOptions) => {
@@ -81,10 +74,12 @@ export function ExportStatus() {
     if (toastId) {
       dismiss(toastId);
     }
+    setToastId(null);
+    setExportData(undefined);
   };
 
   useEffect(() => {
-    if (status === "FAILED") {
+    if (exportData?.status === "failed") {
       toast({
         duration: 2500,
         variant: "error",
@@ -94,7 +89,7 @@ export function ExportStatus() {
       setToastId(null);
       setExportData(undefined);
     }
-  }, [status]);
+  }, [exportData]);
 
   useEffect(() => {
     if (exportData && !toastId) {
@@ -107,66 +102,129 @@ export function ExportStatus() {
       });
 
       setToastId(id);
-    } else if (toastId && status === "IN_PROGRESS") {
+    } else if (
+      toastId &&
+      (exportData?.status === "active" || exportData?.status === "waiting")
+    ) {
       update(toastId, {
         id: toastId,
-        progress: Number(progress),
+        progress: Number(exportData?.progress),
       });
     }
 
-    if (status === "COMPLETED" && result) {
-      // @ts-expect-error
-      update(toastId, {
-        id: toastId,
-        title: "Export completed",
-        description: `Your export is ready based on ${result.totalItems} transactions. It's stored in your Vault.`,
-        variant: "success",
-        footer: (
-          <div className="mt-4 flex space-x-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+    if (exportData?.status === "completed" && exportData?.result) {
+      if (toastId) {
+        update(toastId, {
+          id: toastId,
+          title: "Export completed",
+          description: `Your export is ready based on ${exportData?.result?.totalItems} transactions. It's stored in your Vault.`,
+          variant: "success",
+          footer: (
+            <div className="mt-4 flex space-x-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="border space-x-2"
+                  >
+                    <span>Share URL</span>
+                    <Icons.ChevronDown />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="z-[100]">
+                  {options.map((option, idx) => (
+                    <DropdownMenuItem
+                      key={idx.toString()}
+                      onClick={() =>
+                        handleOnShare({
+                          expireIn: option.expireIn,
+                          fullPath: exportData?.result?.fullPath!,
+                        })
+                      }
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <a
+                href={`/api/download/file?path=${exportData?.result?.fullPath}&filename=${exportData?.result?.filePath}`}
+                download
+              >
                 <Button
                   size="sm"
-                  variant="secondary"
-                  className="border space-x-2"
+                  onClick={() => {
+                    dismiss(toastId);
+                    setToastId(null);
+                    setExportData(undefined);
+                  }}
                 >
-                  <span>Share URL</span>
-                  <Icons.ChevronDown />
+                  Download
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="z-[100]">
-                {options.map((option, idx) => (
-                  <DropdownMenuItem
-                    key={idx.toString()}
-                    onClick={() =>
-                      handleOnShare({
-                        expireIn: option.expireIn,
-                        fullPath: result.fullPath,
-                      })
-                    }
+              </a>
+            </div>
+          ),
+        });
+      } else {
+        const { id } = toast({
+          title: "Export completed",
+          description: `Your export is ready based on ${exportData?.result?.totalItems} transactions. It's stored in your Vault.`,
+          variant: "success",
+          duration: Number.POSITIVE_INFINITY,
+          footer: (
+            <div className="mt-4 flex space-x-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="border space-x-2"
                   >
-                    {option.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    <span>Share URL</span>
+                    <Icons.ChevronDown />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="z-[100]">
+                  {options.map((option, idx) => (
+                    <DropdownMenuItem
+                      key={idx.toString()}
+                      onClick={() =>
+                        handleOnShare({
+                          expireIn: option.expireIn,
+                          fullPath: exportData?.result?.fullPath!,
+                        })
+                      }
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-            <a
-              href={`/api/download/file?path=${result.fullPath}&filename=${result.fileName}`}
-              download
-            >
-              <Button size="sm" onClick={handleOnDownload}>
-                Download
-              </Button>
-            </a>
-          </div>
-        ),
-      });
-
-      setToastId(null);
-      setExportData(undefined);
+              <a
+                href={`/api/download/file?path=${exportData?.result?.fullPath}&filename=${exportData?.result?.filePath}`}
+                download
+              >
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    dismiss(id);
+                    setToastId(null);
+                    setExportData(undefined);
+                  }}
+                >
+                  Download
+                </Button>
+              </a>
+            </div>
+          ),
+        });
+        setToastId(id);
+      }
     }
-  }, [toastId, progress, status]);
+  }, [toastId, exportData]);
 
   return null;
 }

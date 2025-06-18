@@ -1,7 +1,4 @@
-import {
-  updateDocumentClassification,
-  updateDocumentProcessingStatus,
-} from "@midday/db/queries";
+import { updateDocument } from "@midday/db/queries";
 import { limitWords } from "@midday/documents";
 import { DocumentClassifier } from "@midday/documents/classifier";
 import { createClient } from "@midday/supabase/job";
@@ -54,7 +51,7 @@ export const classifyImageJob = job(
         tagsCount: result.tags?.length || 0,
       });
 
-      const [updatedDocument] = await updateDocumentClassification(ctx.db, {
+      const [updatedDocument] = await updateDocument(ctx.db, {
         teamId,
         fileName,
         title: result.title || undefined,
@@ -118,7 +115,7 @@ export const classifyImageJob = job(
       });
 
       // Update processing status to failed
-      await updateDocumentProcessingStatus(ctx.db, {
+      await updateDocument(ctx.db, {
         teamId,
         fileName,
         processingStatus: "failed",

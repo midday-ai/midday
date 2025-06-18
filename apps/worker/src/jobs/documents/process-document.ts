@@ -1,4 +1,4 @@
-import { updateDocumentProcessingStatus } from "@midday/db/queries";
+import { updateDocument } from "@midday/db/queries";
 import { loadDocument } from "@midday/documents/loader";
 import { getContentSample } from "@midday/documents/utils";
 import { createClient } from "@midday/supabase/job";
@@ -104,7 +104,7 @@ export const processDocumentJob = job(
       });
 
       // Update processing status to failed
-      await updateDocumentProcessingStatus(ctx.db, {
+      await updateDocument(ctx.db, {
         teamId,
         fileName: filePath.join("/"),
         processingStatus: "failed",
