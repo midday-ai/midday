@@ -50,6 +50,7 @@ export class InvoiceProcessor {
             documentPageLimit: 10,
           },
         },
+        abortSignal: AbortSignal.timeout(120000), // 2 minutes timeout for AI processing
       });
 
       // Check data quality and merge with fallback if poor
@@ -105,11 +106,17 @@ export class InvoiceProcessor {
 
       return result.object;
     } catch (error) {
+<<<<<<< HEAD
       console.log(
         "Primary processing failed, falling back to OCR + LLM:",
         error,
       );
       // Fallback to OCR + LLM
+=======
+      // Log the specific error for debugging
+      console.error("AI processing failed:", error);
+      // Fallback to text extraction
+>>>>>>> eb0145e8 (wip)
       return this.#fallbackExtract(documentUrl);
     }
   }
@@ -149,6 +156,7 @@ export class InvoiceProcessor {
           ],
         },
       ],
+      abortSignal: AbortSignal.timeout(90000), // 1.5 minutes timeout for text-based processing
     });
 
     return result.object;

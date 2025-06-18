@@ -8,10 +8,7 @@ export {
 } from "./onboarding";
 
 // Document processing jobs
-export {
-  convertHeicJob,
-  processAttachmentJob,
-} from "./documents";
+export { convertHeicJob, processInboxJob } from "./documents";
 
 // Export job utilities with flow support
 export {

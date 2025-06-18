@@ -35,6 +35,7 @@ export class ReceiptProcessor {
           documentImageLimit: 4,
         },
       },
+      abortSignal: AbortSignal.timeout(120000), // 2 minutes timeout for AI processing
     });
 
     return result.object;

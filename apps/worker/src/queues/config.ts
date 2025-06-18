@@ -18,8 +18,8 @@ export const queues = {
     options: createBaseQueueOptions({
       defaultJobOptions: {
         removeOnComplete: { count: 30, age: 24 * 3600 }, // Keep fewer document jobs
-        attempts: 2, // Fewer attempts for document processing
-        backoff: { type: "exponential", delay: 5000 }, // Longer delay
+        attempts: 3, // Increased from 2 to match other jobs, AI timeouts need more retries
+        backoff: { type: "exponential", delay: 10000 }, // Longer delay for AI processing
       },
     }),
   },
