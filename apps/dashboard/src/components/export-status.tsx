@@ -150,7 +150,7 @@ export function ExportStatus() {
               </DropdownMenu>
 
               <a
-                href={`/api/download/file?path=${exportData?.result?.fullPath}&filename=${exportData?.result?.filePath}`}
+                href={`/api/download/file?path=${exportData?.result?.fullPath}&filename=${exportData?.result?.fullPath?.split("/").at(-1)}`}
                 download
               >
                 <Button
@@ -204,7 +204,7 @@ export function ExportStatus() {
               </DropdownMenu>
 
               <a
-                href={`/api/download/file?path=${exportData?.result?.fullPath}&filename=${exportData?.result?.filePath}`}
+                href={`/api/download/file?path=${exportData?.result?.fullPath}&filename=${exportData?.result?.fullPath?.split("/").at(-1)}`}
                 download
               >
                 <Button
