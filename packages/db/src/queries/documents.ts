@@ -256,3 +256,100 @@ export async function updateDocuments(
     .where(and(eq(documents.teamId, teamId), inArray(documents.name, ids)))
     .returning();
 }
+
+export type GetDocumentByNameParams = {
+  teamId: string;
+  fileName: string;
+};
+
+export async function getDocumentByName(
+  db: Database,
+  params: GetDocumentByNameParams,
+) {
+  return db.query.documents.findFirst({
+    where: and(
+      eq(documents.teamId, params.teamId),
+      eq(documents.name, params.fileName),
+    ),
+    columns: {
+      id: true,
+      name: true,
+      processingStatus: true,
+    },
+  });
+}
+
+export type UpdateDocumentClassificationParams = {
+  teamId: string;
+  fileName: string;
+  title?: string;
+  summary?: string;
+  content?: string;
+  date?: string;
+  language?: string;
+  processingStatus?: "pending" | "processing" | "completed" | "failed";
+};
+
+export async function updateDocumentClassification(
+  db: Database,
+  params: UpdateDocumentClassificationParams,
+) {
+  const { teamId, fileName, ...updateFields } = params;
+
+  return db
+    .update(documents)
+    .set(updateFields)
+    .where(and(eq(documents.teamId, teamId), eq(documents.name, fileName)))
+    .returning({
+      id: documents.id,
+      name: documents.name,
+      title: documents.title,
+      processingStatus: documents.processingStatus,
+    });
+}
+
+export type UpdateDocumentProcessingStatusParams = {
+  teamId: string;
+  fileName: string;
+  processingStatus: "pending" | "processing" | "completed" | "failed";
+};
+
+export async function updateDocumentProcessingStatus(
+  db: Database,
+  params: UpdateDocumentProcessingStatusParams,
+) {
+  return db
+    .update(documents)
+    .set({ processingStatus: params.processingStatus })
+    .where(
+      and(
+        eq(documents.teamId, params.teamId),
+        eq(documents.name, params.fileName),
+      ),
+    )
+    .returning({
+      id: documents.id,
+      name: documents.name,
+      processingStatus: documents.processingStatus,
+    });
+}
+
+export type UpdateDocumentProcessingStatusByIdParams = {
+  id: string;
+  processingStatus: "pending" | "processing" | "completed" | "failed";
+};
+
+export async function updateDocumentProcessingStatusById(
+  db: Database,
+  params: UpdateDocumentProcessingStatusByIdParams,
+) {
+  return db
+    .update(documents)
+    .set({ processingStatus: params.processingStatus })
+    .where(eq(documents.id, params.id))
+    .returning({
+      id: documents.id,
+      name: documents.name,
+      processingStatus: documents.processingStatus,
+    });
+}

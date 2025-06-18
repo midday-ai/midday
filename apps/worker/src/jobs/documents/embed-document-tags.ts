@@ -1,5 +1,11 @@
+import {
+  getDocumentTagEmbeddings,
+  updateDocumentProcessingStatusById,
+  upsertDocumentTagAssignments,
+  upsertDocumentTagEmbeddings,
+  upsertDocumentTags,
+} from "@midday/db/queries";
 import { Embed } from "@midday/documents/embed";
-import { createClient } from "@midday/supabase/job";
 import slugify from "@sindresorhus/slugify";
 import { job } from "@worker/core/job";
 import { documentsQueue } from "@worker/queues/queues";
@@ -26,7 +32,6 @@ export const embedDocumentTagsJob = job(
       tags: tags.slice(0, 5), // Log first 5 tags for debugging
     });
 
-    const supabase = createClient();
     const embed = new Embed();
 
     try {
@@ -44,20 +49,12 @@ export const embedDocumentTagsJob = job(
       });
 
       // 2. Check existing embeddings in document_tag_embeddings
-      const { data: existingEmbeddingsData, error: existingEmbeddingsError } =
-        await supabase
-          .from("document_tag_embeddings")
-          .select("slug")
-          .in("slug", slugs);
-
-      if (existingEmbeddingsError) {
-        throw new Error(
-          `Failed to fetch existing embeddings: ${existingEmbeddingsError.message}`,
-        );
-      }
+      const existingEmbeddingsData = await getDocumentTagEmbeddings(ctx.db, {
+        slugs,
+      });
 
       const existingEmbeddingSlugs = new Set(
-        (existingEmbeddingsData || []).map((e: { slug: string }) => e.slug),
+        existingEmbeddingsData.map((e) => e.slug),
       );
 
       // 3. Identify tags needing new embeddings
@@ -95,15 +92,7 @@ export const embedDocumentTagsJob = job(
         }));
 
         // Upsert embeddings to handle potential race conditions or duplicates
-        const { error: insertEmbeddingsError } = await supabase
-          .from("document_tag_embeddings")
-          .upsert(newEmbeddingsToInsert, { onConflict: "slug" });
-
-        if (insertEmbeddingsError) {
-          throw new Error(
-            `Failed to insert new embeddings: ${insertEmbeddingsError.message}`,
-          );
-        }
+        await upsertDocumentTagEmbeddings(ctx.db, newEmbeddingsToInsert);
 
         ctx.logger.info("Successfully inserted new embeddings", {
           documentId,
@@ -117,21 +106,10 @@ export const embedDocumentTagsJob = job(
       const tagsToUpsert = tagsWithSlugs.map((tag) => ({
         name: tag.name,
         slug: tag.slug,
-        team_id: teamId,
+        teamId: teamId,
       }));
 
-      const { data: upsertedTagsData, error: upsertTagsError } = await supabase
-        .from("document_tags")
-        .upsert(tagsToUpsert, {
-          onConflict: "slug, team_id",
-        })
-        .select("id, slug");
-
-      if (upsertTagsError) {
-        throw new Error(
-          `Failed to upsert document tags: ${upsertTagsError.message}`,
-        );
-      }
+      const upsertedTagsData = await upsertDocumentTags(ctx.db, tagsToUpsert);
 
       if (!upsertedTagsData || upsertedTagsData.length === 0) {
         throw new Error("Failed to get IDs from upserted document tags");
@@ -147,30 +125,18 @@ export const embedDocumentTagsJob = job(
       // 6. Create assignments in document_tag_assignments using upsert
       if (allTagIds.length > 0) {
         const assignmentsToInsert = allTagIds.map((tagId) => ({
-          document_id: documentId,
-          tag_id: tagId,
-          team_id: teamId,
+          documentId: documentId,
+          tagId: tagId,
+          teamId: teamId,
         }));
 
-        const { error: assignmentError } = await supabase
-          .from("document_tag_assignments")
-          .upsert(assignmentsToInsert, {
-            onConflict: "document_id, tag_id",
-          });
-
-        if (assignmentError) {
-          throw new Error(
-            `Failed to create tag assignments: ${assignmentError.message}`,
-          );
-        }
+        await upsertDocumentTagAssignments(ctx.db, assignmentsToInsert);
 
         // Update the document processing status to completed
-        await supabase
-          .from("documents")
-          .update({
-            processing_status: "completed",
-          })
-          .eq("id", documentId);
+        await updateDocumentProcessingStatusById(ctx.db, {
+          id: documentId,
+          processingStatus: "completed",
+        });
 
         ctx.logger.info("Document tag embedding completed", {
           documentId,
@@ -202,12 +168,10 @@ export const embedDocumentTagsJob = job(
       });
 
       // Update document processing status to failed
-      await supabase
-        .from("documents")
-        .update({
-          processing_status: "failed",
-        })
-        .eq("id", documentId);
+      await updateDocumentProcessingStatusById(ctx.db, {
+        id: documentId,
+        processingStatus: "failed",
+      });
 
       throw error;
     }

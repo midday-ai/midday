@@ -1,6 +1,9 @@
+import {
+  updateDocumentClassification,
+  updateDocumentProcessingStatus,
+} from "@midday/db/queries";
 import { limitWords } from "@midday/documents";
 import { DocumentClassifier } from "@midday/documents/classifier";
-import { createClient } from "@midday/supabase/job";
 import { job } from "@worker/core/job";
 import { documentsQueue } from "@worker/queues/queues";
 import { z } from "zod";
@@ -26,7 +29,6 @@ export const classifyDocumentJob = job(
       contentLength: content.length,
     });
 
-    const supabase = createClient();
     const classifier = new DocumentClassifier();
 
     try {
@@ -41,36 +43,35 @@ export const classifyDocumentJob = job(
         tagsCount: result.tags?.length || 0,
       });
 
-      const { data, error } = await supabase
-        .from("documents")
-        .update({
-          title: result.title,
-          summary: result.summary,
-          content: limitWords(content, 10000),
-          date: result.date,
-          language: result.language,
-          // If the document has no tags, we consider it as processed
-          processing_status:
-            !result.tags || result.tags.length === 0 ? "completed" : undefined,
-        })
-        .eq("name", fileName)
-        .select("id")
-        .single();
+      const [updatedDocument] = await updateDocumentClassification(ctx.db, {
+        teamId,
+        fileName,
+        title: result.title || undefined,
+        summary: result.summary || undefined,
+        content: limitWords(content, 10000),
+        date: result.date || undefined,
+        language: result.language || undefined,
+        // If the document has no tags, we consider it as processed
+        processingStatus:
+          !result.tags || result.tags.length === 0 ? "completed" : undefined,
+      });
 
-      if (error) {
-        throw new Error(`Database update failed: ${error.message}`);
+      if (!updatedDocument) {
+        throw new Error(
+          "Failed to update document with classification results",
+        );
       }
 
       // If there are tags, trigger embedding job
       if (result.tags && result.tags.length > 0) {
         ctx.logger.info("Triggering tag embedding", {
           fileName,
-          documentId: data.id,
+          documentId: updatedDocument.id,
           tagsCount: result.tags.length,
         });
 
         await embedDocumentTagsJob.trigger({
-          documentId: data.id,
+          documentId: updatedDocument.id,
           tags: result.tags,
           teamId,
         });
@@ -78,13 +79,13 @@ export const classifyDocumentJob = job(
 
       ctx.logger.info("Document classification completed", {
         fileName,
-        documentId: data.id,
+        documentId: updatedDocument.id,
         tagsCount: result.tags?.length || 0,
       });
 
       return {
         fileName,
-        documentId: data.id,
+        documentId: updatedDocument.id,
         result: {
           title: result.title,
           summary: result.summary,
@@ -105,12 +106,11 @@ export const classifyDocumentJob = job(
       });
 
       // Update processing status to failed
-      await supabase
-        .from("documents")
-        .update({
-          processing_status: "failed",
-        })
-        .eq("name", fileName);
+      await updateDocumentProcessingStatus(ctx.db, {
+        teamId,
+        fileName,
+        processingStatus: "failed",
+      });
 
       throw error;
     }

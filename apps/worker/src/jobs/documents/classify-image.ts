@@ -1,3 +1,7 @@
+import {
+  updateDocumentClassification,
+  updateDocumentProcessingStatus,
+} from "@midday/db/queries";
 import { limitWords } from "@midday/documents";
 import { DocumentClassifier } from "@midday/documents/classifier";
 import { createClient } from "@midday/supabase/job";
@@ -50,36 +54,35 @@ export const classifyImageJob = job(
         tagsCount: result.tags?.length || 0,
       });
 
-      const { data, error } = await supabase
-        .from("documents")
-        .update({
-          title: result.title,
-          summary: result.summary,
-          content: result.content ? limitWords(result.content, 10000) : null,
-          date: result.date,
-          language: result.language,
-          // If the document has no tags, we consider it as processed
-          processing_status:
-            !result.tags || result.tags.length === 0 ? "completed" : undefined,
-        })
-        .eq("name", fileName)
-        .select("id")
-        .single();
+      const [updatedDocument] = await updateDocumentClassification(ctx.db, {
+        teamId,
+        fileName,
+        title: result.title || undefined,
+        summary: result.summary || undefined,
+        content: result.content ? limitWords(result.content, 10000) : undefined,
+        date: result.date || undefined,
+        language: result.language || undefined,
+        // If the document has no tags, we consider it as processed
+        processingStatus:
+          !result.tags || result.tags.length === 0 ? "completed" : undefined,
+      });
 
-      if (error) {
-        throw new Error(`Database update failed: ${error.message}`);
+      if (!updatedDocument) {
+        throw new Error(
+          "Failed to update document with image classification results",
+        );
       }
 
       // If there are tags, trigger embedding job
       if (result.tags && result.tags.length > 0) {
         ctx.logger.info("Triggering tag embedding for image", {
           fileName,
-          documentId: data.id,
+          documentId: updatedDocument.id,
           tagsCount: result.tags.length,
         });
 
         await embedDocumentTagsJob.trigger({
-          documentId: data.id,
+          documentId: updatedDocument.id,
           tags: result.tags,
           teamId,
         });
@@ -87,13 +90,13 @@ export const classifyImageJob = job(
 
       ctx.logger.info("Image classification completed", {
         fileName,
-        documentId: data.id,
+        documentId: updatedDocument.id,
         tagsCount: result.tags?.length || 0,
       });
 
       return {
         fileName,
-        documentId: data.id,
+        documentId: updatedDocument.id,
         result: {
           title: result.title,
           summary: result.summary,
@@ -115,12 +118,11 @@ export const classifyImageJob = job(
       });
 
       // Update processing status to failed
-      await supabase
-        .from("documents")
-        .update({
-          processing_status: "failed",
-        })
-        .eq("name", fileName);
+      await updateDocumentProcessingStatus(ctx.db, {
+        teamId,
+        fileName,
+        processingStatus: "failed",
+      });
 
       throw error;
     }
