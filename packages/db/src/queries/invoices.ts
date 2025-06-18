@@ -664,6 +664,8 @@ export type UpdateInvoiceParams = {
   reminderSentAt?: string | null;
   sentTo?: string | null;
   sentAt?: string | null;
+  filePath?: string[] | null;
+  fileSize?: number | null;
   teamId: string;
 };
 
