@@ -97,7 +97,9 @@ class JobRegistry {
       }
 
       const queue = new Queue(queueName, {
-        connection: { url: process.env.REDIS_WORKER_URL },
+        connection: {
+          url: process.env.REDIS_WORKER_URL,
+        },
       });
 
       this.externalQueues.set(queueName, queue);

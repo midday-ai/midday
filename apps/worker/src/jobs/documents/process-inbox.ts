@@ -1,4 +1,4 @@
-import { createInbox, updateInbox } from "@midday/db/queries";
+import { updateInbox } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
 import { createClient } from "@midday/supabase/job";
 import { job } from "@worker/core/job";
@@ -6,15 +6,13 @@ import { documentsQueue } from "@worker/queues/queues";
 import { z } from "zod";
 import { convertHeicJob } from "./convert-heic";
 
-export const processAttachmentJob = job(
-  "process-attachment",
+export const processInboxJob = job(
+  "process-inbox",
   z.object({
+    inboxId: z.string().uuid(),
     teamId: z.string().uuid(),
     mimetype: z.string(),
-    size: z.number(),
     filePath: z.array(z.string()),
-    referenceId: z.string().optional(),
-    website: z.string().optional(),
   }),
   {
     queue: documentsQueue,
@@ -22,8 +20,9 @@ export const processAttachmentJob = job(
     priority: 1,
     removeOnComplete: 100, // Keep more attachment processing logs
   },
-  async ({ teamId, mimetype, size, filePath, referenceId, website }, ctx) => {
-    ctx.logger.info("Processing attachment", {
+  async ({ inboxId, teamId, mimetype, filePath }, ctx) => {
+    ctx.logger.info("Processing inbox", {
+      inboxId,
       teamId,
       mimetype,
       filePath: filePath.join("/"),
@@ -39,29 +38,7 @@ export const processAttachmentJob = job(
       });
     }
 
-    const filename = filePath.at(-1);
-
-    if (!filename) {
-      throw new Error("Filename not found");
-    }
-
-    const inboxData = await createInbox(ctx.db, {
-      teamId,
-      // NOTE: If we can't parse the name using OCR this will be the fallback name
-      displayName: filename,
-      filePath,
-      fileName: filename,
-      contentType: mimetype,
-      size,
-      referenceId,
-      website,
-    });
-
-    if (!inboxData) {
-      throw new Error("Inbox data not found");
-    }
-
-    ctx.logger.info("Created inbox record", { inboxId: inboxData.id });
+    ctx.logger.info("Processing document with AI", { inboxId });
 
     const { data } = await supabase.storage
       .from("vault")
@@ -74,15 +51,20 @@ export const processAttachmentJob = job(
     try {
       const document = new DocumentClient();
 
-      ctx.logger.info("Processing document with AI", { inboxId: inboxData.id });
+      // Add progress tracking for long-running AI processing
+      await ctx.job.updateProgress(25);
+      ctx.logger.info("Starting AI document parsing", { inboxId });
 
       const result = await document.getInvoiceOrReceipt({
         documentUrl: data?.signedUrl,
         mimetype,
       });
 
+      await ctx.job.updateProgress(75);
+      ctx.logger.info("AI parsing completed, updating database", { inboxId });
+
       await updateInbox(ctx.db, {
-        id: inboxData.id,
+        id: inboxId,
         teamId,
         amount: result.amount,
         currency: result.currency,
@@ -96,8 +78,10 @@ export const processAttachmentJob = job(
         status: "pending",
       });
 
+      await ctx.job.updateProgress(100);
+
       ctx.logger.info("Updated inbox with parsed data", {
-        inboxId: inboxData.id,
+        inboxId,
         amount: result.amount,
         currency: result.currency,
         type: result.type,
@@ -114,7 +98,7 @@ export const processAttachmentJob = job(
       // TODO: Send event to match inbox
 
       return {
-        inboxId: inboxData.id,
+        inboxId,
         teamId,
         processed: true,
         documentParsed: true,
@@ -126,25 +110,44 @@ export const processAttachmentJob = job(
         },
       };
     } catch (error) {
-      // If we end up here we could not parse the document
-      // But we want to update the status so we show the record with fallback name
+      // Enhanced error logging for better debugging
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const isTimeoutError =
+        errorMessage.toLowerCase().includes("timeout") ||
+        errorMessage.toLowerCase().includes("aborted") ||
+        errorMessage.toLowerCase().includes("timed out");
+
       ctx.logger.warn("Could not parse document", {
-        inboxId: inboxData.id,
-        error: error instanceof Error ? error.message : error,
+        inboxId,
+        error: errorMessage,
+        isTimeoutError,
+        errorType: error?.constructor?.name,
       });
 
+      // If it's a timeout error, log additional context
+      if (isTimeoutError) {
+        ctx.logger.warn("AI processing timeout detected", {
+          inboxId,
+          mimetype,
+          filePath: filePath.join("/"),
+          suggestion: "Consider reducing document complexity or file size",
+        });
+      }
+
       await updateInbox(ctx.db, {
-        id: inboxData.id,
+        id: inboxId,
         teamId,
         status: "pending",
       });
 
       return {
-        inboxId: inboxData.id,
+        inboxId,
         teamId,
         processed: true,
         documentParsed: false,
         fallbackUsed: true,
+        error: isTimeoutError ? "AI_TIMEOUT" : "PARSING_ERROR",
       };
     }
   },

@@ -145,11 +145,13 @@ export const deleteInboxSchema = z
     description: "Schema for deleting an inbox item by its ID.",
   });
 
-export const processAttachmentsSchema = z.array(
+export const processInboxSchema = z.array(
   z.object({
     mimetype: z.string(),
     size: z.number(),
     filePath: z.array(z.string()),
+    referenceId: z.string().optional(),
+    website: z.string().optional(),
   }),
 );
 
