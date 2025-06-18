@@ -32,6 +32,17 @@ const QUEUES = {
       },
     }),
   },
+  exports: {
+    concurrency: 2, // Low concurrency for resource-intensive export tasks
+    options: createBaseQueueOptions({
+      defaultJobOptions: {
+        removeOnComplete: { count: 20, age: 7 * 24 * 3600 }, // Keep export jobs for 7 days for audit
+        attempts: 3,
+        priority: 3, // Lower priority since exports are not time-critical
+        backoff: { type: "exponential", delay: 5000 }, // Longer delay for large exports
+      },
+    }),
+  },
 } as const;
 
 // Simple helper to create job queue config
@@ -52,10 +63,12 @@ function createJobQueue(name: keyof typeof QUEUES) {
 export const emailQueue = createJobQueue("emails");
 export const documentsQueue = createJobQueue("documents");
 export const invoicesQueue = createJobQueue("invoices");
+export const exportsQueue = createJobQueue("exports");
 
 // Simple worker queue configs - just add name to each config
 export const queues = {
   emails: { name: "emails", ...QUEUES.emails },
   documents: { name: "documents", ...QUEUES.documents },
   invoices: { name: "invoices", ...QUEUES.invoices },
+  exports: { name: "exports", ...QUEUES.exports },
 } as const;

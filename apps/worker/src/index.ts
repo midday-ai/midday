@@ -95,7 +95,7 @@ class WorkerService {
     });
 
     // Job-level event handling
-    worker.on("completed", (job) => {
+    worker.on("completed", (job, result) => {
       logger.jobCompleted(job);
     });
 

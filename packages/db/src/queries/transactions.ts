@@ -1104,3 +1104,137 @@ export async function createTransactions(
   // Filter out any null results
   return fullTransactions.filter((transaction) => transaction !== null);
 }
+
+type GetTransactionsForExportParams = {
+  teamId: string;
+  transactionIds: string[];
+};
+
+export async function getTransactionsForExport(
+  db: Database,
+  params: GetTransactionsForExportParams,
+) {
+  const { teamId, transactionIds } = params;
+
+  return await db
+    .select({
+      id: transactions.id,
+      date: transactions.date,
+      name: transactions.name,
+      description: transactions.description,
+      amount: transactions.amount,
+      note: transactions.note,
+      balance: transactions.balance,
+      currency: transactions.currency,
+      counterpartyName: transactions.counterpartyName,
+      taxType: transactions.taxType,
+      taxRate: transactions.taxRate,
+      status: transactions.status,
+      categorySlug: transactions.categorySlug,
+      // Category information
+      category: {
+        id: transactionCategories.id,
+        name: transactionCategories.name,
+        description: transactionCategories.description,
+        taxRate: transactionCategories.taxRate,
+        taxType: transactionCategories.taxType,
+      },
+      // Bank account information
+      bankAccount: {
+        id: bankAccounts.id,
+        name: bankAccounts.name,
+      },
+      // Aggregated attachments
+      attachments: sql<
+        Array<{
+          id: string;
+          name: string | null;
+          path: string[] | null;
+        }>
+      >`COALESCE(
+        json_agg(
+          DISTINCT jsonb_build_object(
+            'id', ${transactionAttachments.id},
+            'name', ${transactionAttachments.name},
+            'path', ${transactionAttachments.path}
+          )
+        ) FILTER (WHERE ${transactionAttachments.id} IS NOT NULL),
+        '[]'::json
+      )`.as("attachments"),
+      // Aggregated tags
+      tags: sql<Array<{ id: string; name: string | null }>>`COALESCE(
+        json_agg(
+          DISTINCT jsonb_build_object(
+            'id', ${tags.id},
+            'name', ${tags.name}
+          )
+        ) FILTER (WHERE ${tags.id} IS NOT NULL),
+        '[]'::json
+      )`.as("tags"),
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionCategories,
+      and(
+        eq(transactions.categorySlug, transactionCategories.slug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .leftJoin(
+      bankAccounts,
+      and(
+        eq(transactions.bankAccountId, bankAccounts.id),
+        eq(bankAccounts.teamId, teamId),
+      ),
+    )
+    .leftJoin(
+      bankConnections,
+      eq(bankAccounts.bankConnectionId, bankConnections.id),
+    )
+    .leftJoin(
+      transactionTags,
+      and(
+        eq(transactionTags.transactionId, transactions.id),
+        eq(transactionTags.teamId, teamId),
+      ),
+    )
+    .leftJoin(
+      tags,
+      and(eq(tags.id, transactionTags.tagId), eq(tags.teamId, teamId)),
+    )
+    .leftJoin(
+      transactionAttachments,
+      and(
+        eq(transactionAttachments.transactionId, transactions.id),
+        eq(transactionAttachments.teamId, teamId),
+      ),
+    )
+    .where(
+      and(
+        eq(transactions.teamId, teamId),
+        inArray(transactions.id, transactionIds),
+      ),
+    )
+    .groupBy(
+      transactions.id,
+      transactions.date,
+      transactions.name,
+      transactions.description,
+      transactions.amount,
+      transactions.note,
+      transactions.balance,
+      transactions.currency,
+      transactions.counterpartyName,
+      transactions.taxType,
+      transactions.taxRate,
+      transactions.status,
+      transactions.categorySlug,
+      transactionCategories.id,
+      transactionCategories.name,
+      transactionCategories.description,
+      transactionCategories.taxRate,
+      transactionCategories.taxType,
+      bankAccounts.id,
+      bankAccounts.name,
+    );
+}

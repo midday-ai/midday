@@ -1,0 +1,84 @@
+import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { Queue } from "bullmq";
+import { z } from "zod";
+
+export const jobsRouter = createTRPCRouter({
+  getStatus: protectedProcedure
+    .input(
+      z.object({
+        jobId: z.string(),
+        queue: z.string(),
+      }),
+    )
+    .query(async ({ input, ctx: { teamId } }) => {
+      const { jobId, queue: queueName } = input;
+
+      if (!process.env.REDIS_WORKER_URL) {
+        throw new Error("REDIS_WORKER_URL environment variable is required");
+      }
+
+      let jobData = null;
+      let queue: Queue | null = null;
+
+      try {
+        // Create queue instance for the specific queue
+        queue = new Queue(queueName, {
+          connection: { url: process.env.REDIS_WORKER_URL },
+        });
+
+        const foundJob = await queue.getJob(jobId);
+        if (foundJob) {
+          // Security check: ensure job belongs to the user's team
+          if (foundJob.data.teamId !== teamId) {
+            throw new Error("Job not found");
+          }
+
+          // Extract all data we need BEFORE closing the connection
+          const progress = foundJob.progress;
+          const state = await foundJob.getState();
+
+          let status: "waiting" | "active" | "completed" | "failed";
+          switch (state) {
+            case "waiting":
+            case "delayed":
+              status = "waiting";
+              break;
+            case "active":
+              status = "active";
+              break;
+            case "completed":
+              status = "completed";
+              break;
+            case "failed":
+              status = "failed";
+              break;
+            default:
+              status = "waiting";
+          }
+
+          jobData = {
+            jobId,
+            jobName: foundJob.name,
+            status,
+            progress: typeof progress === "number" ? progress : 0,
+            result: status === "completed" ? foundJob.returnvalue : null,
+            error: status === "failed" ? foundJob.failedReason : null,
+            timestamp: Date.now(),
+          };
+        }
+
+        if (!jobData) {
+          throw new Error("Job not found");
+        }
+
+        return jobData;
+      } catch (error) {
+        throw new Error("Failed to get job status");
+      } finally {
+        // Ensure we close the queue connection
+        if (queue) {
+          await queue.close().catch(console.error);
+        }
+      }
+    }),
+});

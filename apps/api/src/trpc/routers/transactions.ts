@@ -1,6 +1,7 @@
 import {
   createTransactionSchema,
   deleteTransactionsSchema,
+  exportTransactionsSchema,
   getSimilarTransactionsSchema,
   getTransactionByIdSchema,
   getTransactionsSchema,
@@ -24,6 +25,7 @@ import {
   updateTransaction,
   updateTransactions,
 } from "@midday/db/queries";
+import { exportTransactionsJob } from "@worker/jobs";
 
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -120,5 +122,18 @@ export const transactionsRouter = createTRPCRouter({
         ...input,
         teamId: teamId!,
       });
+    }),
+
+  exportTransactions: protectedProcedure
+    .input(exportTransactionsSchema)
+    .mutation(async ({ input, ctx: { teamId } }) => {
+      const job = await exportTransactionsJob.trigger({
+        ...input,
+        teamId: teamId!,
+      });
+
+      return {
+        jobId: job.id,
+      };
     }),
 });

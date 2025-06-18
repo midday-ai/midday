@@ -1,7 +1,4 @@
-import {
-  updateDocumentClassification,
-  updateDocumentProcessingStatus,
-} from "@midday/db/queries";
+import { updateDocument } from "@midday/db/queries";
 import { limitWords } from "@midday/documents";
 import { DocumentClassifier } from "@midday/documents/classifier";
 import { job } from "@worker/core/job";
@@ -43,7 +40,7 @@ export const classifyDocumentJob = job(
         tagsCount: result.tags?.length || 0,
       });
 
-      const [updatedDocument] = await updateDocumentClassification(ctx.db, {
+      const [updatedDocument] = await updateDocument(ctx.db, {
         teamId,
         fileName,
         title: result.title || undefined,
@@ -106,7 +103,7 @@ export const classifyDocumentJob = job(
       });
 
       // Update processing status to failed
-      await updateDocumentProcessingStatus(ctx.db, {
+      await updateDocument(ctx.db, {
         teamId,
         fileName,
         processingStatus: "failed",

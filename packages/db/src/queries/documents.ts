@@ -279,61 +279,6 @@ export async function getDocumentByName(
   });
 }
 
-export type UpdateDocumentClassificationParams = {
-  teamId: string;
-  fileName: string;
-  title?: string;
-  summary?: string;
-  content?: string;
-  date?: string;
-  language?: string;
-  processingStatus?: "pending" | "processing" | "completed" | "failed";
-};
-
-export async function updateDocumentClassification(
-  db: Database,
-  params: UpdateDocumentClassificationParams,
-) {
-  const { teamId, fileName, ...updateFields } = params;
-
-  return db
-    .update(documents)
-    .set(updateFields)
-    .where(and(eq(documents.teamId, teamId), eq(documents.name, fileName)))
-    .returning({
-      id: documents.id,
-      name: documents.name,
-      title: documents.title,
-      processingStatus: documents.processingStatus,
-    });
-}
-
-export type UpdateDocumentProcessingStatusParams = {
-  teamId: string;
-  fileName: string;
-  processingStatus: "pending" | "processing" | "completed" | "failed";
-};
-
-export async function updateDocumentProcessingStatus(
-  db: Database,
-  params: UpdateDocumentProcessingStatusParams,
-) {
-  return db
-    .update(documents)
-    .set({ processingStatus: params.processingStatus })
-    .where(
-      and(
-        eq(documents.teamId, params.teamId),
-        eq(documents.name, params.fileName),
-      ),
-    )
-    .returning({
-      id: documents.id,
-      name: documents.name,
-      processingStatus: documents.processingStatus,
-    });
-}
-
 export type UpdateDocumentProcessingStatusByIdParams = {
   id: string;
   processingStatus: "pending" | "processing" | "completed" | "failed";
@@ -351,5 +296,36 @@ export async function updateDocumentProcessingStatusById(
       id: documents.id,
       name: documents.name,
       processingStatus: documents.processingStatus,
+    });
+}
+
+export type UpdateDocumentParams = {
+  teamId: string;
+  fileName: string;
+  title?: string;
+  body?: string;
+  content?: string;
+  summary?: string;
+  processingStatus?: "pending" | "processing" | "completed" | "failed";
+  date?: string;
+  language?: string;
+  metadata?: Record<string, unknown>;
+};
+
+export async function updateDocument(
+  db: Database,
+  params: UpdateDocumentParams,
+) {
+  const { teamId, fileName, ...updateFields } = params;
+
+  return db
+    .update(documents)
+    .set(updateFields)
+    .where(and(eq(documents.teamId, teamId), eq(documents.name, fileName)))
+    .returning({
+      id: documents.id,
+      name: documents.name,
+      processingStatus: documents.processingStatus,
+      title: documents.title,
     });
 }

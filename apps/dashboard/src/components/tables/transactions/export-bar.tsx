@@ -1,47 +1,92 @@
-import { exportTransactionsAction } from "@/actions/export-transactions-action";
+import { useJobProgress } from "@/hooks/use-job-progress";
 import { useUserQuery } from "@/hooks/use-user";
 import { useExportStore } from "@/store/export";
 import { useTransactionsStore } from "@/store/transactions";
+import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useToast } from "@midday/ui/use-toast";
 import NumberFlow from "@number-flow/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
 export function ExportBar() {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const { setExportData } = useExportStore();
   const { rowSelection, setRowSelection } = useTransactionsStore();
   const [isOpen, setOpen] = useState(false);
   const { data: user } = useUserQuery();
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+
+  // Track export job progress
+  const {
+    progress,
+    status: jobStatus,
+    result,
+    error: jobError,
+    isActive,
+    isCompleted,
+    isFailed,
+  } = useJobProgress({
+    jobId: currentJobId || "",
+    queue: "exports",
+    enabled: !!currentJobId,
+    pollInterval: 250,
+    onCompleted: (result) => {
+      setCurrentJobId(null);
+      setRowSelection(() => ({}));
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.documents.get.infiniteQueryKey(),
+      });
+    },
+    onFailed: (error) => {
+      setCurrentJobId(null);
+    },
+  });
+
+  // Update export data based on job status
+  useEffect(() => {
+    if (currentJobId && jobStatus) {
+      setExportData({
+        progress,
+        status: jobStatus,
+        result,
+      });
+    } else if (!currentJobId && jobStatus !== "completed" && !result) {
+      // Only clear export data if there's no result (meaning job didn't complete successfully)
+      setExportData(undefined);
+    }
+    // If jobStatus is "completed" or there's a result, preserve the export data for ExportStatus
+  }, [currentJobId, jobStatus, progress, result]);
 
   const ids = Object.keys(rowSelection);
   const totalSelected = ids.length;
 
-  const { execute, status } = useAction(exportTransactionsAction, {
-    onSuccess: ({ data }) => {
-      if (data?.id && data?.publicAccessToken) {
-        setExportData({
-          runId: data.id,
-          accessToken: data.publicAccessToken,
-        });
+  const exportTransactionsMutation = useMutation(
+    trpc.transactions.exportTransactions.mutationOptions({
+      onSuccess: (data) => {
+        setCurrentJobId(data.jobId);
 
         setRowSelection(() => ({}));
-      }
 
-      setOpen(false);
-    },
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+      },
+      onError: () => {
+        toast({
+          duration: 3500,
+          variant: "error",
+          title: "Something went wrong please try again.",
+        });
+      },
+    }),
+  );
 
   useEffect(() => {
     if (totalSelected) {
@@ -68,9 +113,9 @@ export function ExportBar() {
               <span>Deselect all</span>
             </Button>
             <SubmitButton
-              isSubmitting={status === "executing"}
+              isSubmitting={exportTransactionsMutation.isPending}
               onClick={() =>
-                execute({
+                exportTransactionsMutation.mutate({
                   transactionIds: ids,
                   dateFormat: user?.dateFormat ?? undefined,
                   locale: user?.locale ?? undefined,
