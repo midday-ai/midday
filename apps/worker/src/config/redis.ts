@@ -12,7 +12,7 @@ const isDevelopment = process.env.ENVIRONMENT === "development";
 const connectionOptions: RedisOptions = {
   enableReadyCheck: true,
   maxRetriesPerRequest: null,
-  lazyConnect: false,
+  lazyConnect: true,
   connectTimeout: isDevelopment ? 60000 : 20000,
   commandTimeout: isDevelopment ? 30000 : 15000,
   keepAlive: 30000,
