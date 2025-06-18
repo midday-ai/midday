@@ -5,6 +5,7 @@ import { job } from "@worker/core/job";
 import { documentsQueue } from "@worker/queues/queues";
 import { z } from "zod";
 import { convertHeicJob } from "./convert-heic";
+import { processDocumentJob } from "./process-document";
 
 export const processInboxJob = job(
   "process-inbox",
@@ -51,8 +52,6 @@ export const processInboxJob = job(
     try {
       const document = new DocumentClient();
 
-      // Add progress tracking for long-running AI processing
-      await ctx.job.updateProgress(25);
       ctx.logger.info("Starting AI document parsing", { inboxId });
 
       const result = await document.getInvoiceOrReceipt({
@@ -60,7 +59,6 @@ export const processInboxJob = job(
         mimetype,
       });
 
-      await ctx.job.updateProgress(75);
       ctx.logger.info("AI parsing completed, updating database", { inboxId });
 
       await updateInbox(ctx.db, {
@@ -78,8 +76,6 @@ export const processInboxJob = job(
         status: "pending",
       });
 
-      await ctx.job.updateProgress(100);
-
       ctx.logger.info("Updated inbox with parsed data", {
         inboxId,
         amount: result.amount,
@@ -88,14 +84,15 @@ export const processInboxJob = job(
       });
 
       // NOTE: Process documents and images for classification
-      // TODO: Implement processDocument job if needed
-      // await processDocumentJob.trigger({
-      //   mimetype,
-      //   filePath,
-      //   teamId,
-      // });
+      ctx.logger.info("Triggering document processing for classification", {
+        inboxId,
+      });
 
-      // TODO: Send event to match inbox
+      await processDocumentJob.trigger({
+        mimetype,
+        filePath,
+        teamId,
+      });
 
       return {
         inboxId,
