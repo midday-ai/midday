@@ -1,5 +1,11 @@
 import type { Database } from "@db/client";
-import { customers, invoiceStatusEnum, invoices, teams } from "@db/schema";
+import {
+  customers,
+  invoiceStatusEnum,
+  invoices,
+  teams,
+  users,
+} from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { generateToken } from "@midday/invoice/token";
 import type { EditorDoc, LineItem } from "@midday/invoice/types";
@@ -279,15 +285,22 @@ export async function getInvoiceById(
         name: customers.name,
         website: customers.website,
         email: customers.email,
+        billingEmail: customers.billingEmail,
       },
       customerId: invoices.customerId,
       team: {
+        id: teams.id,
         name: teams.name,
+        email: teams.email,
+      },
+      user: {
+        email: users.email,
       },
     })
     .from(invoices)
     .leftJoin(customers, eq(invoices.customerId, customers.id))
     .leftJoin(teams, eq(invoices.teamId, teams.id))
+    .leftJoin(users, eq(invoices.userId, users.id))
     .where(
       and(
         eq(invoices.id, id),
@@ -649,6 +662,8 @@ export type UpdateInvoiceParams = {
   paidAt?: string | null;
   internalNote?: string | null;
   reminderSentAt?: string | null;
+  sentTo?: string | null;
+  sentAt?: string | null;
   teamId: string;
 };
 

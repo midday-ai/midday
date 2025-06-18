@@ -17,6 +17,12 @@ export {
   embedDocumentTagsJob,
 } from "./documents";
 
+// Invoice jobs
+export {
+  sendInvoiceEmailJob,
+  sendInvoiceReminderJob,
+} from "./invoice";
+
 // Export job utilities with flow support
 export {
   job,
