@@ -36,17 +36,10 @@ import type {
   InviteTeamMembersPayload,
   UpdateBaseCurrencyPayload,
 } from "@midday/jobs/schema";
-import { onboardTeamJob } from "@midday/worker/jobs";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 
 export const teamRouter = createTRPCRouter({
-  testKatt: protectedProcedure.mutation(async ({ ctx: { session } }) => {
-    return onboardTeamJob.trigger({
-      userId: session.user.id,
-    });
-  }),
-
   current: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
     return getTeamById(db, teamId!);
   }),

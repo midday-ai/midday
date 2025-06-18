@@ -4,6 +4,24 @@ import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { and, asc, desc, eq, ne, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 
+export type CreateInboxParams = {
+  teamId: string;
+  displayName: string;
+  fileName?: string | null;
+  filePath?: string[] | null;
+  contentType?: string | null;
+  size?: number | null;
+  referenceId?: string | null;
+  website?: string | null;
+  amount?: number | null;
+  currency?: string | null;
+  date?: string | null;
+  description?: string | null;
+  type?: "invoice" | "expense" | null;
+  meta?: Record<string, any> | null;
+  status?: "new" | "archived" | "processing" | "done" | "pending" | null;
+};
+
 export type GetInboxParams = {
   teamId: string;
   cursor?: string | null;
@@ -12,6 +30,30 @@ export type GetInboxParams = {
   q?: string | null;
   status?: "new" | "archived" | "processing" | "done" | "pending" | null;
 };
+
+export async function createInbox(db: Database, params: CreateInboxParams) {
+  const [result] = await db.insert(inbox).values(params).returning({
+    id: inbox.id,
+    fileName: inbox.fileName,
+    filePath: inbox.filePath,
+    displayName: inbox.displayName,
+    transactionId: inbox.transactionId,
+    amount: inbox.amount,
+    currency: inbox.currency,
+    contentType: inbox.contentType,
+    date: inbox.date,
+    status: inbox.status,
+    createdAt: inbox.createdAt,
+    website: inbox.website,
+    description: inbox.description,
+    referenceId: inbox.referenceId,
+    size: inbox.size,
+    type: inbox.type,
+    meta: inbox.meta,
+  });
+
+  return result;
+}
 
 export async function getInbox(db: Database, params: GetInboxParams) {
   const { teamId, cursor, order, pageSize = 20, q, status } = params;
@@ -206,6 +248,22 @@ export type UpdateInboxParams = {
   id: string;
   teamId: string;
   status?: "deleted" | "new" | "archived" | "processing" | "done" | "pending";
+  amount?: number | null;
+  currency?: string | null;
+  displayName?: string | null;
+  website?: string | null;
+  date?: string | null;
+  taxAmount?: number | null;
+  taxRate?: number | null;
+  taxType?: string | null;
+  type?: "invoice" | "expense" | null;
+  description?: string | null;
+  fileName?: string | null;
+  filePath?: string[] | null;
+  contentType?: string | null;
+  size?: number | null;
+  referenceId?: string | null;
+  meta?: Record<string, any> | null;
 };
 
 export async function updateInbox(db: Database, params: UpdateInboxParams) {
@@ -233,6 +291,13 @@ export async function updateInbox(db: Database, params: UpdateInboxParams) {
       createdAt: inbox.createdAt,
       website: inbox.website,
       description: inbox.description,
+      referenceId: inbox.referenceId,
+      size: inbox.size,
+      type: inbox.type,
+      meta: inbox.meta,
+      taxAmount: inbox.taxAmount,
+      taxRate: inbox.taxRate,
+      taxType: inbox.taxType,
       transaction: {
         id: transactions.id,
         amount: transactions.amount,
