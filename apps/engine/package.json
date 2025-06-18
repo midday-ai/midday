@@ -15,7 +15,7 @@
   "dependencies": {
     "@hono/zod-openapi": "^0.19.8",
     "@hono/zod-validator": "^0.7.0",
-    "hono": "^4.7.11",
+    "hono": "^4.8.0",
     "jose": "^6.0.11",
     "plaid": "^36.0.0",
     "typesense": "^2.0.3",
@@ -24,9 +24,9 @@
     "zod": "^3.25.67"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250617.0",
+    "@cloudflare/workers-types": "^4.20250618.0",
     "@types/bun": "^1.2.16",
-    "wrangler": "^4.20.0"
+    "wrangler": "^4.20.1"
   },
   "exports": {
     ".": "./dist/index.js",

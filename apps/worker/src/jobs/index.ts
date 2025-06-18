@@ -7,6 +7,12 @@ export {
   trialEndedEmailJob,
 } from "./onboarding";
 
+// Document processing jobs
+export {
+  convertHeicJob,
+  processAttachmentJob,
+} from "./documents";
+
 // Export job utilities with flow support
 export {
   job,

@@ -2,22 +2,12 @@
 
 import { chatExamples } from "@/components/chat/examples";
 import { useAssistantStore } from "@/store/assistant";
-import { useTRPC } from "@/trpc/client";
-import { useMutation } from "@tanstack/react-query";
 
 export function AssistantList() {
   const { setOpen } = useAssistantStore();
-  const trpc = useTRPC();
-
-  const katt = useMutation(trpc.team.testKatt.mutationOptions());
-
-  console.log(trpc.team.testKatt);
 
   return (
     <div className="mb-16">
-      <button onClick={() => katt.mutate()} type="button">
-        Katt
-      </button>
       <ul className="flex flex-col justify-center items-center space-y-3 flex-shrink">
         {chatExamples.slice(0, 5).map((example) => (
           <li

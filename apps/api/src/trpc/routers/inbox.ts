@@ -18,8 +18,7 @@ import {
   unmatchTransaction,
   updateInbox,
 } from "@midday/db/queries";
-import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { processAttachmentJob } from "@midday/worker/jobs";
 
 export const inboxRouter = createTRPCRouter({
   get: protectedProcedure
@@ -52,8 +51,7 @@ export const inboxRouter = createTRPCRouter({
   processAttachments: protectedProcedure
     .input(processAttachmentsSchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
-      return tasks.batchTrigger(
-        "process-attachment",
+      return await processAttachmentJob.batchTrigger(
         input.map((item) => ({
           payload: {
             filePath: item.filePath,
@@ -61,7 +59,7 @@ export const inboxRouter = createTRPCRouter({
             size: item.size,
             teamId: teamId!,
           },
-        })) as { payload: ProcessAttachmentPayload }[],
+        })),
       );
     }),
 
