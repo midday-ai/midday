@@ -147,3 +147,28 @@ export async function getBankAccountsCurrencies(db: Database, teamId: string) {
 
   return result;
 }
+
+export type UpdateAccountBaseCurrencyParams = {
+  accountId: string;
+  teamId: string;
+  baseBalance: number;
+  baseCurrency: string;
+};
+
+export async function updateAccountBaseCurrency(
+  db: Database,
+  params: UpdateAccountBaseCurrencyParams,
+) {
+  const { accountId, teamId, baseBalance, baseCurrency } = params;
+
+  const [result] = await db
+    .update(bankAccounts)
+    .set({
+      baseBalance,
+      baseCurrency,
+    })
+    .where(and(eq(bankAccounts.id, accountId), eq(bankAccounts.teamId, teamId)))
+    .returning();
+
+  return result;
+}

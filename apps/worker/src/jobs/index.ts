@@ -42,3 +42,9 @@ export { updateRatesJob } from "./rates";
 
 // Team jobs
 export { deleteTeamJob, inviteTeamMembersJob } from "./team";
+
+// Currency jobs
+export {
+  updateBaseCurrencyJob,
+  updateAccountBaseCurrencyJob,
+} from "./currency";

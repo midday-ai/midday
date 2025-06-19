@@ -7,7 +7,8 @@
     "./schema": "./src/schema.ts",
     "./utils/api-keys": "./src/utils/api-keys.ts",
     "./utils/search-query": "./src/utils/search-query.ts",
-    "./utils/health": "./src/utils/health.ts"
+    "./utils/health": "./src/utils/health.ts",
+    "./utils/currency": "./src/utils/currency.ts"
   },
   "dependencies": {
     "@midday/cache": "workspace:*",

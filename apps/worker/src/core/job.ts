@@ -1,6 +1,6 @@
 import type { Database } from "@midday/db/client";
 import { logger } from "@worker/monitoring/logger";
-import type { Job } from "bullmq";
+import type { Job, JobNode } from "bullmq";
 import { Queue } from "bullmq";
 import { FlowProducer } from "bullmq";
 import type { z } from "zod";
@@ -233,7 +233,7 @@ class SimpleJob<T = any> {
     data: T;
     options?: Record<string, any>;
     children?: FlowJobDefinition[];
-  }) {
+  }): Promise<JobNode> {
     const flowProducer = registry.getFlowProducer();
     const validated = this.validate(flowDef.data);
 

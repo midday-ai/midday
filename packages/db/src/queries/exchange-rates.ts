@@ -1,6 +1,6 @@
 import type { Database } from "@db/client";
 import { exchangeRates } from "@db/schema";
-import { sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 export type ExchangeRateData = {
   base: string;
@@ -56,3 +56,25 @@ export const upsertExchangeRates = async (
     batchesProcessed,
   };
 };
+
+export type GetExchangeRateParams = {
+  base: string;
+  target: string;
+};
+
+export async function getExchangeRate(
+  db: Database,
+  params: GetExchangeRateParams,
+) {
+  const { base, target } = params;
+
+  const [result] = await db
+    .select({
+      rate: exchangeRates.rate,
+    })
+    .from(exchangeRates)
+    .where(and(eq(exchangeRates.base, base), eq(exchangeRates.target, target)))
+    .limit(1);
+
+  return result;
+}
