@@ -15,10 +15,10 @@ primary_region = 'fra'
   processes = ['app']
 
 [[http_service.checks]]
-  grace_period = "15s"
-  interval = "60s"
+  grace_period = "45s"
+  interval = "90s"
   method = "GET"
-  timeout = "10s"
+  timeout = "25s"
   path = "/health"
 
 [[restart]]

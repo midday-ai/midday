@@ -48,7 +48,7 @@ export const GET = async (req: NextRequest) => {
   const checkout = await api.checkouts.create({
     products: [selectedPlan.id],
     successUrl: successUrl.toString(),
-    customerExternalId: team.id,
+    externalCustomerId: team.id,
     customerEmail: session.user.email ?? undefined,
     customerName: team.name ?? undefined,
     discountId: discountId?.id,
