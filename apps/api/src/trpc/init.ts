@@ -84,7 +84,7 @@ export const protectedProcedure = t.procedure
 export const internalProcedure = t.procedure
   .use(withPrimaryDbMiddleware)
   .use(async (opts) => {
-    const authHeader = opts.ctx.req?.headers?.authorization;
+    const authHeader = opts.ctx.req?.header("Authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       throw new TRPCError({

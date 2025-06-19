@@ -26,7 +26,8 @@ export async function createServerTRPCClient(teamId?: string) {
     geo: {
       ip: null,
       country: null,
-      city: null,
+      locale: null,
+      timezone: null,
     },
     teamId: teamId || undefined,
   });
