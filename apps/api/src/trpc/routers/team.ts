@@ -31,13 +31,8 @@ import {
   updateTeamById,
   updateTeamMember,
 } from "@midday/db/queries";
-import type {
-  DeleteTeamPayload,
-  InviteTeamMembersPayload,
-  UpdateBaseCurrencyPayload,
-} from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
+import { deleteTeamJob, inviteTeamMembersJob } from "@worker/jobs";
 
 export const teamRouter = createTRPCRouter({
   current: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -129,15 +124,17 @@ export const teamRouter = createTRPCRouter({
       });
 
       if (bankConnections.length > 0) {
-        await tasks.trigger("delete-team", {
+        await deleteTeamJob.trigger({
           teamId: input.teamId!,
           connections: bankConnections.map((connection) => ({
             accessToken: connection.accessToken,
-            provider: connection.provider,
+            provider: connection.provider!,
             referenceId: connection.referenceId,
           })),
-        } satisfies DeleteTeamPayload);
+        });
       }
+
+      return data;
     }),
 
   deleteMember: protectedProcedure
@@ -186,12 +183,12 @@ export const teamRouter = createTRPCRouter({
           inviteCode: invite?.code!,
         })) ?? [];
 
-      await tasks.trigger("invite-team-members", {
+      await inviteTeamMembersJob.trigger({
         teamId: teamId!,
         invites,
         ip,
         locale: "en",
-      } satisfies InviteTeamMembersPayload);
+      });
     }),
 
   deleteInvite: protectedProcedure
@@ -210,11 +207,10 @@ export const teamRouter = createTRPCRouter({
   updateBaseCurrency: protectedProcedure
     .input(updateBaseCurrencySchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
-      const event = await tasks.trigger("update-base-currency", {
-        teamId: teamId!,
-        baseCurrency: input.baseCurrency,
-      } satisfies UpdateBaseCurrencyPayload);
-
-      return event;
+      // const event = await tasks.trigger("update-base-currency", {
+      //   teamId: teamId!,
+      //   baseCurrency: input.baseCurrency,
+      // } satisfies UpdateBaseCurrencyPayload);
+      // return event;
     }),
 });

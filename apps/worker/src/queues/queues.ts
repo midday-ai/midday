@@ -43,6 +43,28 @@ const QUEUES = {
       },
     }),
   },
+  teams: {
+    concurrency: 2, // Low concurrency for admin operations
+    options: createBaseQueueOptions({
+      defaultJobOptions: {
+        removeOnComplete: { count: 50, age: 7 * 24 * 3600 }, // Keep team jobs for 7 days for audit
+        attempts: 3,
+        priority: 2, // Medium priority for team operations
+        backoff: { type: "exponential", delay: 5000 }, // Longer delay for external API calls
+      },
+    }),
+  },
+  system: {
+    concurrency: 1, // Single concurrency for system operations
+    options: createBaseQueueOptions({
+      defaultJobOptions: {
+        removeOnComplete: { count: 20, age: 7 * 24 * 3600 }, // Keep system jobs for 7 days for audit
+        attempts: 3,
+        priority: 4, // Lower priority for system operations
+        backoff: { type: "exponential", delay: 10000 }, // Longer delay for external API calls
+      },
+    }),
+  },
 } as const;
 
 // Simple helper to create job queue config
@@ -64,6 +86,8 @@ export const emailQueue = createJobQueue("emails");
 export const documentsQueue = createJobQueue("documents");
 export const invoicesQueue = createJobQueue("invoices");
 export const exportsQueue = createJobQueue("exports");
+export const teamsQueue = createJobQueue("teams");
+export const systemQueue = createJobQueue("system");
 
 // Simple worker queue configs - just add name to each config
 export const queues = {
@@ -71,4 +95,6 @@ export const queues = {
   documents: { name: "documents", ...QUEUES.documents },
   invoices: { name: "invoices", ...QUEUES.invoices },
   exports: { name: "exports", ...QUEUES.exports },
+  teams: { name: "teams", ...QUEUES.teams },
+  system: { name: "system", ...QUEUES.system },
 } as const;

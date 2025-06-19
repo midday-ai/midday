@@ -19,14 +19,14 @@
     "jose": "^6.0.11",
     "plaid": "^36.0.0",
     "typesense": "^2.0.3",
-    "workers-ai-provider": "^0.6.1",
+    "workers-ai-provider": "^0.6.5",
     "xior": "^0.7.8",
     "zod": "^3.25.67"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250618.0",
+    "@cloudflare/workers-types": "^4.20250619.0",
     "@types/bun": "^1.2.16",
-    "wrangler": "^4.20.1"
+    "wrangler": "^4.20.3"
   },
   "exports": {
     ".": "./dist/index.js",

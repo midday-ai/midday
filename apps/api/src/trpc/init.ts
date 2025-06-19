@@ -17,6 +17,7 @@ type TRPCContext = {
   db: Database;
   geo: ReturnType<typeof getGeoContext>;
   teamId?: string;
+  req?: Context["req"];
 };
 
 export const createTRPCContext = async (
@@ -34,6 +35,7 @@ export const createTRPCContext = async (
     supabase,
     db,
     geo,
+    req: c.req,
   };
 };
 
@@ -77,4 +79,28 @@ export const protectedProcedure = t.procedure
         session,
       },
     });
+  });
+
+export const internalProcedure = t.procedure
+  .use(withPrimaryDbMiddleware)
+  .use(async (opts) => {
+    const authHeader = opts.ctx.req?.headers?.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Missing or invalid internal service authorization header",
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    if (token !== process.env.INTERNAL_SERVICE_SECRET) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Invalid internal service credentials",
+      });
+    }
+
+    return opts.next();
   });

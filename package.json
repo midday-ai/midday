@@ -1,32 +1,36 @@
 {
-  "name": "midday",
-  "private": true,
-  "workspaces": ["packages/*", "apps/*", "packages/email/*"],
-  "scripts": {
-    "build": "turbo build",
-    "clean": "git clean -xdf node_modules",
-    "clean:workspaces": "turbo clean",
-    "dev": "turbo dev --parallel",
-    "test": "turbo test --parallel",
-    "start:dashboard": "turbo start --filter=@midday/dashboard",
-    "start:website": "turbo start --filter=@midday/website",
-    "dev:api": "turbo dev --filter=@midday/api",
-    "dev:dashboard": "turbo dev --filter=@midday/dashboard",
-    "build:dashboard": "turbo build --filter=@midday/dashboard",
-    "dev:engine": "turbo dev --filter=@midday/engine",
-    "dev:website": "turbo dev --filter=@midday/website ",
-    "dev:desktop": "turbo dev --filter=@midday/desktop",
-    "dev:worker": "turbo dev --filter=@midday/worker",
-    "jobs:dashboard": "turbo jobs --filter=@midday/jobs",
-    "format": "biome format --write .",
-    "lint": "turbo lint && manypkg check",
-    "typecheck": "turbo typecheck"
-  },
-  "dependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@manypkg/cli": "^0.24.0",
-    "turbo": "2.5.4",
-    "typescript": "^5.8.3"
-  },
-  "packageManager": "bun@1.2.16"
+	"name": "midday",
+	"private": true,
+	"workspaces": [
+		"packages/*",
+		"apps/*",
+		"packages/email/*"
+	],
+	"scripts": {
+		"build": "turbo build",
+		"clean": "git clean -xdf node_modules",
+		"clean:workspaces": "turbo clean",
+		"dev": "turbo dev --parallel",
+		"test": "turbo test --parallel",
+		"start:dashboard": "turbo start --filter=@midday/dashboard",
+		"start:website": "turbo start --filter=@midday/website",
+		"dev:api": "turbo dev --filter=@midday/api",
+		"dev:dashboard": "turbo dev --filter=@midday/dashboard",
+		"build:dashboard": "turbo build --filter=@midday/dashboard",
+		"dev:engine": "turbo dev --filter=@midday/engine",
+		"dev:website": "turbo dev --filter=@midday/website ",
+		"dev:desktop": "turbo dev --filter=@midday/desktop",
+		"dev:worker": "turbo dev --filter=@midday/worker",
+		"jobs:dashboard": "turbo jobs --filter=@midday/jobs",
+		"format": "biome format --write .",
+		"lint": "turbo lint && manypkg check",
+		"typecheck": "turbo typecheck"
+	},
+	"dependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@manypkg/cli": "^0.24.0",
+		"turbo": "2.5.4",
+		"typescript": "^5.8.3"
+	},
+	"packageManager": "bun@1.2.16"
 }

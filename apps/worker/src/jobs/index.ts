@@ -1,20 +1,22 @@
 // Onboarding jobs
+
+// Export job utilities with flow support
 export {
-  onboardTeamJob,
-  welcomeEmailJob,
-  getStartedEmailJob,
-  trialExpiringEmailJob,
-  trialEndedEmailJob,
-} from "./onboarding";
+  executeJob,
+  type FlowJobDefinition,
+  job,
+  jobRegistry,
+  setQueueResolver,
+} from "../core/job";
 
 // Document processing jobs
 export {
-  convertHeicJob,
-  processInboxJob,
-  processDocumentJob,
   classifyDocumentJob,
   classifyImageJob,
+  convertHeicJob,
   embedDocumentTagsJob,
+  processDocumentJob,
+  processInboxJob,
 } from "./documents";
 
 // Export jobs
@@ -22,16 +24,21 @@ export { exportTransactionsJob } from "./exports";
 
 // Invoice jobs
 export {
+  generateInvoiceJob,
   sendInvoiceEmailJob,
   sendInvoiceReminderJob,
-  generateInvoiceJob,
 } from "./invoice";
 
-// Export job utilities with flow support
 export {
-  job,
-  executeJob,
-  jobRegistry,
-  setQueueResolver,
-  type FlowJobDefinition,
-} from "../core/job";
+  getStartedEmailJob,
+  onboardTeamJob,
+  trialEndedEmailJob,
+  trialExpiringEmailJob,
+  welcomeEmailJob,
+} from "./onboarding";
+
+// Rates jobs
+export { updateRatesJob } from "./rates";
+
+// Team jobs
+export { deleteTeamJob, inviteTeamMembersJob } from "./team";

@@ -6,6 +6,7 @@ export * from "./document-tag-assignments";
 export * from "./document-tag-embedings";
 export * from "./document-tags";
 export * from "./documents";
+export * from "./exchange-rates";
 export * from "./inbox-accounts";
 export * from "./inbox";
 export * from "./invoice-templates";

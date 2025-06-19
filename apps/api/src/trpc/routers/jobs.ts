@@ -1,8 +1,35 @@
-import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  createTRPCRouter,
+  internalProcedure,
+  protectedProcedure,
+} from "@api/trpc/init";
+import { onboardTeamJob } from "@midday/worker/jobs";
 import { Queue } from "bullmq";
 import { z } from "zod";
 
 export const jobsRouter = createTRPCRouter({
+  onboardTeam: internalProcedure
+    .input(
+      z.object({
+        userId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { userId } = input;
+
+      try {
+        const job = await onboardTeamJob.triggerDelayed(
+          { userId },
+          5 * 60 * 1000, // 5 minutes
+        );
+
+        return job.id;
+      } catch (error) {
+        console.error("Failed to trigger system onboarding job:", error);
+        throw new Error("Failed to schedule onboarding job");
+      }
+    }),
+
   getStatus: protectedProcedure
     .input(
       z.object({
