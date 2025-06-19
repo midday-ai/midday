@@ -1238,3 +1238,87 @@ export async function getTransactionsForExport(
       bankAccounts.name,
     );
 }
+
+export type GetTransactionsByAccountParams = {
+  accountId: string;
+  teamId: string;
+};
+
+export async function getTransactionsByAccount(
+  db: Database,
+  params: GetTransactionsByAccountParams,
+) {
+  const { accountId, teamId } = params;
+
+  const result = await db
+    .select({
+      id: transactions.id,
+      amount: transactions.amount,
+      currency: transactions.currency,
+      internalId: transactions.internalId,
+    })
+    .from(transactions)
+    .where(
+      and(
+        eq(transactions.bankAccountId, accountId),
+        eq(transactions.teamId, teamId),
+      ),
+    );
+
+  return result;
+}
+
+export type BulkUpdateTransactionsBaseCurrencyParams = {
+  transactionUpdates: Array<{
+    id: string;
+    baseAmount: number;
+    baseCurrency: string;
+  }>;
+  teamId: string;
+};
+
+export async function bulkUpdateTransactionsBaseCurrency(
+  db: Database,
+  params: BulkUpdateTransactionsBaseCurrencyParams,
+) {
+  const { transactionUpdates, teamId } = params;
+
+  // Process in batches to avoid database limitations
+  const batchSize = 500;
+  const results = [];
+
+  for (let i = 0; i < transactionUpdates.length; i += batchSize) {
+    const batch = transactionUpdates.slice(i, i + batchSize);
+
+    // Use a transaction to ensure consistency
+    const batchResults = await db.transaction(async (tx) => {
+      const updates = [];
+
+      for (const update of batch) {
+        const [result] = await tx
+          .update(transactions)
+          .set({
+            baseAmount: update.baseAmount,
+            baseCurrency: update.baseCurrency,
+          })
+          .where(
+            and(
+              eq(transactions.id, update.id),
+              eq(transactions.teamId, teamId),
+            ),
+          )
+          .returning({ id: transactions.id });
+
+        if (result) {
+          updates.push(result);
+        }
+      }
+
+      return updates;
+    });
+
+    results.push(...batchResults);
+  }
+
+  return results;
+}

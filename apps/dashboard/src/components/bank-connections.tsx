@@ -1,7 +1,5 @@
 "use client";
 
-import { manualSyncTransactionsAction } from "@/actions/transactions/manual-sync-transactions-action";
-import { reconnectConnectionAction } from "@/actions/transactions/reconnect-connection-action";
 import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useTRPC } from "@/trpc/client";
 import { connectionStatus } from "@/utils/connection-status";
@@ -22,7 +20,6 @@ import {
 import { useToast } from "@midday/ui/use-toast";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { BankAccount } from "./bank-account";
@@ -148,47 +145,47 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
     id: parseAsString,
   });
 
-  const manualSyncTransactions = useAction(manualSyncTransactionsAction, {
-    onExecute: () => setSyncing(true),
-    onSuccess: ({ data }) => {
-      if (data) {
-        setRunId(data.id);
-        setAccessToken(data.publicAccessToken);
-      }
-    },
-    onError: () => {
-      setSyncing(false);
-      setRunId(undefined);
-      setStatus("FAILED");
+  // const manualSyncTransactions = useAction(manualSyncTransactionsAction, {
+  //   onExecute: () => setSyncing(true),
+  //   onSuccess: ({ data }) => {
+  //     if (data) {
+  //       setRunId(data.id);
+  //       setAccessToken(data.publicAccessToken);
+  //     }
+  //   },
+  //   onError: () => {
+  //     setSyncing(false);
+  //     setRunId(undefined);
+  //     setStatus("FAILED");
 
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
+  //     toast({
+  //       duration: 3500,
+  //       variant: "error",
+  //       title: "Something went wrong please try again.",
+  //     });
+  //   },
+  // });
 
-  const reconnectConnection = useAction(reconnectConnectionAction, {
-    onExecute: () => setSyncing(true),
-    onSuccess: ({ data }) => {
-      if (data) {
-        setRunId(data.id);
-        setAccessToken(data.publicAccessToken);
-      }
-    },
-    onError: () => {
-      setSyncing(false);
-      setRunId(undefined);
-      setStatus("FAILED");
+  // const reconnectConnection = useAction(reconnectConnectionAction, {
+  //   onExecute: () => setSyncing(true),
+  //   onSuccess: ({ data }) => {
+  //     if (data) {
+  //       setRunId(data.id);
+  //       setAccessToken(data.publicAccessToken);
+  //     }
+  //   },
+  //   onError: () => {
+  //     setSyncing(false);
+  //     setRunId(undefined);
+  //     setStatus("FAILED");
 
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
+  //     toast({
+  //       duration: 3500,
+  //       variant: "error",
+  //       title: "Something went wrong please try again.",
+  //     });
+  //   },
+  // });
 
   useEffect(() => {
     if (isSyncing) {
@@ -253,21 +250,21 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
   // NOTE: GoCardLess reconnect flow (redirect from API route)
   useEffect(() => {
     if (params.step === "reconnect" && params.id) {
-      reconnectConnection.execute({
-        connectionId: params.id,
-        provider: connection.provider as
-          | "gocardless"
-          | "plaid"
-          | "teller"
-          | "enablebanking",
-      });
+      // reconnectConnection.execute({
+      //   connectionId: params.id,
+      //   provider: connection.provider as
+      //     | "gocardless"
+      //     | "plaid"
+      //     | "teller"
+      //     | "enablebanking",
+      // });
     }
   }, [params]);
 
   const handleManualSync = () => {
-    manualSyncTransactions.execute({
-      connectionId: connection.id,
-    });
+    // manualSyncTransactions.execute({
+    //   connectionId: connection.id,
+    // });
   };
 
   return (
