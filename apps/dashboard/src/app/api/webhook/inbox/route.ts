@@ -1,12 +1,11 @@
+import { createServerTRPCClient } from "@/trpc/server-client";
 import { logger } from "@/utils/logger";
 import { resend } from "@api/services/resend";
 import { getAllowedAttachments } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
-import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/server";
-import { tasks } from "@trigger.dev/sdk/v3";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -167,15 +166,15 @@ export async function POST(req: Request) {
 
     const insertData = await Promise.all(uploadedAttachments ?? []);
 
-    await tasks.batchTrigger(
-      "process-attachment",
+    // Use the server-to-server tRPC client to process attachments
+    const caller = await createServerTRPCClient(teamId!);
+
+    await caller.inbox.processAttachments(
       insertData.map((item) => ({
-        payload: {
-          filePath: item.file_path!,
-          mimetype: item.content_type!,
-          size: item.size!,
-          teamId: teamId!,
-        } satisfies ProcessAttachmentPayload,
+        filePath: item.file_path!,
+        mimetype: item.content_type!,
+        size: item.size!,
+        referenceId: item.reference_id,
       })),
     );
   } catch (error) {

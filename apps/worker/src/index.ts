@@ -2,6 +2,10 @@ import type { Database } from "@midday/db/client";
 import { primaryOnlyDb } from "@midday/db/client";
 import { checkPrimaryHealth } from "@midday/db/utils/health";
 import { redisConnection } from "@worker/config/redis";
+import {
+  initializeRecurringJobs,
+  shutdownRecurringJobs,
+} from "@worker/config/scheduled-jobs";
 import { logger } from "@worker/monitoring/logger";
 import { initializeAllQueues, queues } from "@worker/queues";
 import server, { initializeBullBoard } from "@worker/server";
@@ -50,6 +54,9 @@ class WorkerService {
         logger.workerStarted(queueName, concurrency);
       }
 
+      // Initialize recurring jobs after all workers are ready
+      await initializeRecurringJobs();
+
       logger.serviceStarted();
     } catch (error) {
       logger.error("Failed to initialize worker service", {
@@ -62,6 +69,9 @@ class WorkerService {
 
   async shutdown() {
     logger.serviceShuttingDown();
+
+    // Shutdown schedulers first to prevent new jobs from being scheduled
+    await shutdownRecurringJobs();
 
     const shutdownPromises = this.activeWorkers.map(async (worker) => {
       const queueName = worker.name;

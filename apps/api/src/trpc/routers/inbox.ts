@@ -83,7 +83,7 @@ export const inboxRouter = createTRPCRouter({
       );
 
       // Trigger jobs with inbox IDs
-      return await processInboxJob.batchTrigger(
+      return processInboxJob.batchTrigger(
         inboxRecords.map((inboxRecord, index) => ({
           payload: {
             inboxId: inboxRecord.id,

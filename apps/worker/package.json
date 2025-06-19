@@ -24,7 +24,7 @@
     "@midday/supabase": "workspace:*",
     "@sindresorhus/slugify": "^2.2.1",
     "@zip.js/zip.js": "^2.7.62",
-    "bullmq": "^5.54.2",
+    "bullmq": "^5.54.3",
     "date-fns": "^4.1.0",
     "heic-convert": "1.2.4",
     "hono": "^4.8.0",
