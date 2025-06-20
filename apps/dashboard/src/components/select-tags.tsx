@@ -67,7 +67,7 @@ export function SelectTags({ tags, onSelect, onRemove, onChange }: Props) {
 
   const transformedTags = data
     ?.map((tag) => ({
-      value: tag.id,
+      value: tag.name,
       label: tag.name,
       id: tag.id,
     }))
