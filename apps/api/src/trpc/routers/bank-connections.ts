@@ -1,14 +1,14 @@
 import {
-  createBankConnection,
-  deleteBankConnection,
-  getBankConnections,
-} from "@api/db/queries/bank-connections";
-import {
   createBankConnectionSchema,
   deleteBankConnectionSchema,
   getBankConnectionsSchema,
 } from "@api/schemas/bank-connections";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  createBankConnection,
+  deleteBankConnection,
+  getBankConnections,
+} from "@midday/db/queries";
 import type {
   DeleteConnectionPayload,
   InitialBankSetupPayload,

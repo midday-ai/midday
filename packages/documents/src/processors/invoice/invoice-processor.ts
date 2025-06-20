@@ -37,10 +37,13 @@ export class InvoiceProcessor {
             documentPageLimit: 10,
           },
         },
+        abortSignal: AbortSignal.timeout(120000), // 2 minutes timeout for AI processing
       });
 
       return result.object;
-    } catch {
+    } catch (error) {
+      // Log the specific error for debugging
+      console.error("AI processing failed:", error);
       // Fallback to text extraction
       return this.#fallbackExtract(documentUrl);
     }
@@ -80,6 +83,7 @@ export class InvoiceProcessor {
           ],
         },
       ],
+      abortSignal: AbortSignal.timeout(90000), // 1.5 minutes timeout for text-based processing
     });
 
     return result.object;

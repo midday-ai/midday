@@ -22,6 +22,7 @@
     "./types": "./src/types.ts"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.2.0",
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
     "@react-pdf/renderer": "^4.3.0",

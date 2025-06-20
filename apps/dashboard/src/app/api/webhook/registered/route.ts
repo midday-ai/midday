@@ -1,12 +1,9 @@
 import * as crypto from "node:crypto";
+import { createServerTRPCClient } from "@/trpc/server-client";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
-import type { OnboardTeamPayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-
-export const dynamic = "force-dynamic";
 
 // NOTE: This is trigger from supabase database webhook
 export async function POST(req: Request) {
@@ -48,15 +45,20 @@ export async function POST(req: Request) {
     channel: LogEvents.Registered.channel,
   });
 
-  await tasks.trigger(
-    "onboard-team",
-    {
+  try {
+    const caller = await createServerTRPCClient();
+
+    const result = await caller.jobs.onboardTeam({
       userId,
-    } satisfies OnboardTeamPayload,
-    {
-      delay: "5m",
-    },
-  );
+    });
+
+    console.log(
+      `Onboarding job scheduled for user ${userId} with job ID: ${result.jobId}`,
+    );
+  } catch (error) {
+    console.error("Failed to schedule onboarding job:", error);
+    // Don't fail the webhook if job scheduling fails
+  }
 
   return NextResponse.json({ success: true });
 }

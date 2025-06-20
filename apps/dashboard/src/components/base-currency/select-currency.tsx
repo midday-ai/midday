@@ -20,28 +20,28 @@ export function SelectCurrency() {
   const updateTeamMutation = useTeamMutation();
   const { data: team } = useTeamQuery();
 
-  const updateBaseCurrencyMutation = useMutation(
-    trpc.team.updateBaseCurrency.mutationOptions({
-      onMutate: () => {
-        setSyncing(true);
-      },
-      onSuccess: (data) => {
-        if (data) {
-          setRunId(data.id);
-          setAccessToken(data.publicAccessToken);
-        }
-      },
-      onError: () => {
-        setRunId(undefined);
+  // const updateBaseCurrencyMutation = useMutation(
+  //   trpc.team.updateBaseCurrency.mutationOptions({
+  //     onMutate: () => {
+  //       setSyncing(true);
+  //     },
+  //     onSuccess: (data) => {
+  //       if (data) {
+  //         setRunId(data.id);
+  //         setAccessToken(data.publicAccessToken);
+  //       }
+  //     },
+  //     onError: () => {
+  //       setRunId(undefined);
 
-        toast({
-          duration: 3500,
-          variant: "error",
-          title: "Something went wrong pleaase try again.",
-        });
-      },
-    }),
-  );
+  //       toast({
+  //         duration: 3500,
+  //         variant: "error",
+  //         title: "Something went wrong pleaase try again.",
+  //       });
+  //     },
+  //   }),
+  // );
 
   const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
@@ -59,11 +59,11 @@ export function SelectCurrency() {
             duration: 7000,
             footer: (
               <Button
-                onClick={() =>
-                  updateBaseCurrencyMutation.mutate({
-                    baseCurrency: baseCurrency.toUpperCase(),
-                  })
-                }
+              // onClick={() =>
+              // updateBaseCurrencyMutation.mutate({
+              //   baseCurrency: baseCurrency.toUpperCase(),
+              // })
+              // }
               >
                 Update
               </Button>

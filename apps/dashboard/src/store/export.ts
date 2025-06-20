@@ -1,13 +1,21 @@
 import { create } from "zustand";
 
+type Result = {
+  totalItems: number;
+  fullPath: string;
+  filePath: string;
+};
+
 interface ExportState {
   exportData?: {
-    runId?: string;
-    accessToken?: string;
+    progress?: number;
+    status?: string;
+    result?: Result;
   };
   setExportData: (exportData?: {
-    runId?: string;
-    accessToken?: string;
+    progress?: number;
+    status?: string;
+    result?: Result;
   }) => void;
 }
 

@@ -64,10 +64,11 @@ We are working on the documentation to get started with Midday for local develop
 - Supabase (database, storage, realtime, auth)
 - Vercel (Website, Dashboard)
 - Fly.io (API/tRPC)
+- Redis (job queues & caching)
 
 ### Services
 
-- Trigger.dev (background jobs)
+- BullMQ (background jobs & queues)
 - Resend (Transactional & Marketing)
 - Novu (notifications)
 - Github Actions (CI/CD)

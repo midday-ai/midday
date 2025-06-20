@@ -1,4 +1,18 @@
 import {
+  createTransactionSchema,
+  deleteTransactionsSchema,
+  exportTransactionsSchema,
+  getSimilarTransactionsSchema,
+  getTransactionByIdSchema,
+  getTransactionsSchema,
+  searchTransactionMatchSchema,
+  updateSimilarTransactionsCategorySchema,
+  updateSimilarTransactionsRecurringSchema,
+  updateTransactionSchema,
+  updateTransactionsSchema,
+} from "@api/schemas/transactions";
+import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
   createTransaction,
   deleteTransactions,
   getSimilarTransactions,
@@ -10,20 +24,8 @@ import {
   updateSimilarTransactionsRecurring,
   updateTransaction,
   updateTransactions,
-} from "@api/db/queries/transactions";
-import {
-  createTransactionSchema,
-  deleteTransactionsSchema,
-  getSimilarTransactionsSchema,
-  getTransactionByIdSchema,
-  getTransactionsSchema,
-  searchTransactionMatchSchema,
-  updateSimilarTransactionsCategorySchema,
-  updateSimilarTransactionsRecurringSchema,
-  updateTransactionSchema,
-  updateTransactionsSchema,
-} from "@api/schemas/transactions";
-import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+} from "@midday/db/queries";
+import { exportTransactionsJob } from "@worker/jobs";
 
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -120,5 +122,18 @@ export const transactionsRouter = createTRPCRouter({
         ...input,
         teamId: teamId!,
       });
+    }),
+
+  exportTransactions: protectedProcedure
+    .input(exportTransactionsSchema)
+    .mutation(async ({ input, ctx: { teamId } }) => {
+      const job = await exportTransactionsJob.trigger({
+        ...input,
+        teamId: teamId!,
+      });
+
+      return {
+        jobId: job.id,
+      };
     }),
 });

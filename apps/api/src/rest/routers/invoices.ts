@@ -1,10 +1,3 @@
-import {
-  deleteInvoice,
-  getInvoiceById,
-  getInvoiceSummary,
-  getInvoices,
-  getPaymentStatus,
-} from "@api/db/queries/invoices";
 import type { Context } from "@api/rest/types";
 import {
   deleteInvoiceResponseSchema,
@@ -19,6 +12,13 @@ import {
 } from "@api/schemas/invoice";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import {
+  deleteInvoice,
+  getInvoiceById,
+  getInvoiceSummary,
+  getInvoices,
+  getPaymentStatus,
+} from "@midday/db/queries";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();

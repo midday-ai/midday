@@ -1,16 +1,16 @@
 import {
-  deleteTrackerEntry,
-  getTrackerRecordsByDate,
-  getTrackerRecordsByRange,
-  upsertTrackerEntries,
-} from "@api/db/queries/tracker-entries";
-import {
   deleteTrackerEntrySchema,
   getTrackerRecordsByDateSchema,
   getTrackerRecordsByRangeSchema,
   upsertTrackerEntriesSchema,
 } from "@api/schemas/tracker-entries";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  deleteTrackerEntry,
+  getTrackerRecordsByDate,
+  getTrackerRecordsByRange,
+  upsertTrackerEntries,
+} from "@midday/db/queries";
 
 export const trackerEntriesRouter = createTRPCRouter({
   byDate: protectedProcedure

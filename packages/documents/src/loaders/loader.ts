@@ -37,6 +37,7 @@ export async function loadDocument({
         const base64Content = Buffer.from(await content.arrayBuffer()).toString(
           "base64",
         );
+
         const ocrResponse = await mistralClient.ocr.process({
           model: "mistral-ocr-latest",
           document: {

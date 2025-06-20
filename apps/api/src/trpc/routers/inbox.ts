@@ -1,4 +1,16 @@
 import {
+  deleteInboxSchema,
+  getInboxByIdSchema,
+  getInboxSchema,
+  matchTransactionSchema,
+  processInboxSchema,
+  searchInboxSchema,
+  unmatchTransactionSchema,
+  updateInboxSchema,
+} from "@api/schemas/inbox";
+import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  createInbox,
   deleteInbox,
   getInbox,
   getInboxById,
@@ -6,20 +18,8 @@ import {
   matchTransaction,
   unmatchTransaction,
   updateInbox,
-} from "@api/db/queries/inbox";
-import {
-  deleteInboxSchema,
-  getInboxByIdSchema,
-  getInboxSchema,
-  matchTransactionSchema,
-  processAttachmentsSchema,
-  searchInboxSchema,
-  unmatchTransactionSchema,
-  updateInboxSchema,
-} from "@api/schemas/inbox";
-import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
+} from "@midday/db/queries";
+import { processInboxJob } from "@midday/worker/jobs";
 
 export const inboxRouter = createTRPCRouter({
   get: protectedProcedure
@@ -50,18 +50,48 @@ export const inboxRouter = createTRPCRouter({
     }),
 
   processAttachments: protectedProcedure
-    .input(processAttachmentsSchema)
-    .mutation(async ({ ctx: { teamId }, input }) => {
-      return tasks.batchTrigger(
-        "process-attachment",
-        input.map((item) => ({
-          payload: {
+    .input(processInboxSchema)
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      // Create inbox records first
+      const inboxRecords = await Promise.all(
+        input.map(async (item) => {
+          const filename = item.filePath.at(-1);
+
+          if (!filename) {
+            throw new Error("Filename not found");
+          }
+
+          const inboxRecord = await createInbox(db, {
+            teamId: teamId!,
+            // NOTE: If we can't parse the name using OCR this will be the fallback name
+            displayName: filename,
             filePath: item.filePath,
-            mimetype: item.mimetype,
+            fileName: filename,
+            contentType: item.mimetype,
             size: item.size,
+            referenceId: item.referenceId,
+            website: item.website,
+            status: "processing",
+          });
+
+          if (!inboxRecord) {
+            throw new Error("Failed to create inbox record");
+          }
+
+          return inboxRecord;
+        }),
+      );
+
+      // Trigger jobs with inbox IDs
+      return processInboxJob.batchTrigger(
+        inboxRecords.map((inboxRecord, index) => ({
+          payload: {
+            inboxId: inboxRecord.id,
+            filePath: input[index]!.filePath,
+            mimetype: input[index]!.mimetype,
             teamId: teamId!,
           },
-        })) as { payload: ProcessAttachmentPayload }[],
+        })),
       );
     }),
 
