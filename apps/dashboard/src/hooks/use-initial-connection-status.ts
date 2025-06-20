@@ -1,4 +1,3 @@
-import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { useEffect, useState } from "react";
 
 type UseInitialConnectionStatusProps = {
@@ -18,28 +17,28 @@ export function useInitialConnectionStatus({
     "FAILED" | "SYNCING" | "COMPLETED" | null
   >(null);
 
-  const { run, error } = useRealtimeRun(runId, {
-    enabled: !!runId && !!accessToken,
-    accessToken,
-  });
+  // const { run, error } = useRealtimeRun(runId, {
+  //   enabled: !!runId && !!accessToken,
+  //   accessToken,
+  // });
 
-  useEffect(() => {
-    if (initialRunId && initialAccessToken) {
-      setAccessToken(initialAccessToken);
-      setRunId(initialRunId);
-      setStatus("SYNCING");
-    }
-  }, [initialRunId, initialAccessToken]);
+  // useEffect(() => {
+  //   if (initialRunId && initialAccessToken) {
+  //     setAccessToken(initialAccessToken);
+  //     setRunId(initialRunId);
+  //     setStatus("SYNCING");
+  //   }
+  // }, [initialRunId, initialAccessToken]);
 
-  useEffect(() => {
-    if (error || run?.status === "FAILED") {
-      setStatus("FAILED");
-    }
+  // useEffect(() => {
+  //   if (error || run?.status === "FAILED") {
+  //     setStatus("FAILED");
+  //   }
 
-    if (run?.status === "COMPLETED") {
-      setStatus("COMPLETED");
-    }
-  }, [error, run]);
+  //   if (run?.status === "COMPLETED") {
+  //     setStatus("COMPLETED");
+  //   }
+  // }, [error, run]);
 
   return {
     status,

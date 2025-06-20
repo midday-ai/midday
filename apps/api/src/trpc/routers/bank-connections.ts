@@ -9,11 +9,6 @@ import {
   deleteBankConnection,
   getBankConnections,
 } from "@midday/db/queries";
-import type {
-  DeleteConnectionPayload,
-  InitialBankSetupPayload,
-} from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 
 export const bankConnectionsRouter = createTRPCRouter({
@@ -42,12 +37,12 @@ export const bankConnectionsRouter = createTRPCRouter({
         });
       }
 
-      const event = await tasks.trigger("initial-bank-setup", {
-        connectionId: data.id,
-        teamId: teamId!,
-      } satisfies InitialBankSetupPayload);
+      // const event = await tasks.trigger("initial-bank-setup", {
+      //   connectionId: data.id,
+      //   teamId: teamId!,
+      // } satisfies InitialBankSetupPayload);
 
-      return event;
+      // return event;
     }),
 
   delete: protectedProcedure
@@ -62,11 +57,11 @@ export const bankConnectionsRouter = createTRPCRouter({
         throw new Error("Bank connection not found");
       }
 
-      await tasks.trigger("delete-connection", {
-        referenceId: data.referenceId,
-        provider: data.provider!,
-        accessToken: data.accessToken,
-      } satisfies DeleteConnectionPayload);
+      // await tasks.trigger("delete-connection", {
+      //   referenceId: data.referenceId,
+      //   provider: data.provider!,
+      //   accessToken: data.accessToken,
+      // } satisfies DeleteConnectionPayload);
 
       return data;
     }),

@@ -57,9 +57,6 @@ tailwind.css
 .branches
 .temp
 
-# Trigger
-.trigger
-
 # Logs
 logs
 *.log

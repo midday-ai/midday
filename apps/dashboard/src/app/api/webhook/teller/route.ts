@@ -1,7 +1,5 @@
 import { validateTellerSignature } from "@/utils/teller";
-import type { SyncConnectionPayload } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/server";
-import { tasks } from "@trigger.dev/sdk/v3";
 import { isAfter, subDays } from "date-fns";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -88,10 +86,10 @@ export async function POST(req: NextRequest) {
           subDays(new Date(), 1),
         );
 
-        await tasks.trigger("sync-connection", {
-          connectionId: connectionData.id,
-          manualSync,
-        } satisfies SyncConnectionPayload);
+        // await tasks.trigger("sync-connection", {
+        //   connectionId: connectionData.id,
+        //   manualSync,
+        // } satisfies SyncConnectionPayload);
       }
       break;
   }

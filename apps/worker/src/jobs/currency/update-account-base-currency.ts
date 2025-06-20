@@ -45,17 +45,9 @@ export const updateAccountBaseCurrencyJob = job(
         baseCurrency,
       });
 
-      // Still update the database to ensure consistency
-      await updateAccountBaseCurrency(db, {
-        accountId,
-        teamId,
-        baseBalance: balance,
-        baseCurrency,
-      });
-
       return {
         converted: false,
-        rate: 1,
+        baseBalance: balance,
         transactionsUpdated: 0,
       };
     }
@@ -72,6 +64,7 @@ export const updateAccountBaseCurrencyJob = job(
         fromCurrency: currency,
         toCurrency: baseCurrency,
       });
+
       throw new Error(
         `No exchange rate found for ${currency} to ${baseCurrency}`,
       );

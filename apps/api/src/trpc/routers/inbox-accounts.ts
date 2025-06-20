@@ -5,7 +5,6 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { deleteInboxAccount, getInboxAccounts } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
-import { schedules } from "@trigger.dev/sdk/v3";
 
 export const inboxAccountsRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -29,7 +28,7 @@ export const inboxAccountsRouter = createTRPCRouter({
       });
 
       if (data?.scheduleId) {
-        await schedules.deactivate(data.scheduleId);
+        // await schedules.deactivate(data.scheduleId);
       }
 
       return data;
