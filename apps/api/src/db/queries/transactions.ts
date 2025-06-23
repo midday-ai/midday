@@ -965,22 +965,35 @@ export async function updateTransactions(
   const { ids, tagId, teamId, ...input } = data;
 
   if (tagId) {
-    await db.insert(transactionTags).values(
-      ids.map((id) => ({
-        transactionId: id,
-        tagId,
-        teamId,
-      })),
-    );
+    await db
+      .insert(transactionTags)
+      .values(
+        ids.map((id) => ({
+          transactionId: id,
+          tagId,
+          teamId,
+        })),
+      )
+      .onConflictDoNothing();
   }
 
-  const results = await db
-    .update(transactions)
-    .set(input)
-    .where(and(eq(transactions.teamId, teamId), inArray(transactions.id, ids)))
-    .returning({
-      id: transactions.id,
-    });
+  let results: { id: string }[] = [];
+
+  // Only update transactions if there are fields to update
+  if (Object.keys(input).length > 0) {
+    results = await db
+      .update(transactions)
+      .set(input)
+      .where(
+        and(eq(transactions.teamId, teamId), inArray(transactions.id, ids)),
+      )
+      .returning({
+        id: transactions.id,
+      });
+  } else {
+    // If no fields to update, just return the transaction IDs
+    results = ids.map((id) => ({ id }));
+  }
 
   // Get full transaction data for each updated transaction
   const fullTransactions = await Promise.all(

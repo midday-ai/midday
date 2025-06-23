@@ -43,7 +43,7 @@ export function TransactionDetails() {
   const { data, isLoading } = useQuery({
     ...trpc.transactions.getById.queryOptions({ id: transactionId! }),
     enabled: Boolean(transactionId),
-    staleTime: 60 * 1000,
+    staleTime: 0, // Always consider data stale so it always refetches
     initialData: () => {
       const pages = queryClient
         .getQueriesData({ queryKey: trpc.transactions.get.infiniteQueryKey() })
@@ -383,7 +383,7 @@ export function TransactionDetails() {
         </Label>
 
         <SelectTags
-          key={data?.id}
+          key={data?.id + data?.tags?.length}
           tags={data?.tags?.map((tag) => ({
             id: tag.id,
             label: tag.name!,

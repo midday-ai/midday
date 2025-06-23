@@ -45,7 +45,7 @@ export function TrackerUpdateSheet({ defaultCurrency }: Props) {
       { id: projectId! },
       {
         enabled: isOpen,
-        staleTime: 60 * 1000,
+        staleTime: 0, // Always consider data stale so it always refetches
         initialData: () => {
           const pages = queryClient
             .getQueriesData({
