@@ -1,7 +1,11 @@
 {
   "name": "midday",
   "private": true,
-  "workspaces": ["packages/*", "apps/*", "packages/email/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "packages/email/*"
+  ],
   "scripts": {
     "build": "turbo build",
     "clean": "git clean -xdf node_modules",

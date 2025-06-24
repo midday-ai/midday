@@ -19,7 +19,10 @@ export const slackInstaller = new InstallProvider({
 export const createSlackApp = ({
   token,
   botId,
-}: { token: string; botId: string }) => {
+}: {
+  token: string;
+  botId: string;
+}) => {
   return new SlackApp({
     signingSecret: SLACK_SIGNING_SECRET,
     token,
@@ -27,18 +30,17 @@ export const createSlackApp = ({
   });
 };
 
-export const createSlackWebClient = ({
-  token,
-}: {
-  token: string;
-}) => {
+export const createSlackWebClient = ({ token }: { token: string }) => {
   return new WebClient(token);
 };
 
 export const getInstallUrl = ({
   teamId,
   userId,
-}: { teamId: string; userId: string }) => {
+}: {
+  teamId: string;
+  userId: string;
+}) => {
   return slackInstaller.generateInstallUrl({
     scopes: [
       "incoming-webhook",
@@ -58,7 +60,10 @@ export const getInstallUrl = ({
 export const downloadFile = async ({
   privateDownloadUrl,
   token,
-}: { privateDownloadUrl: string; token: string }) => {
+}: {
+  privateDownloadUrl: string;
+  token: string;
+}) => {
   const response = await fetch(privateDownloadUrl, {
     method: "GET",
     headers: {

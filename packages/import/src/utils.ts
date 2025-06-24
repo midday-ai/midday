@@ -75,7 +75,10 @@ export function formatDate(date: string) {
 export function formatAmountValue({
   amount,
   inverted,
-}: { amount: string; inverted?: boolean }) {
+}: {
+  amount: string;
+  inverted?: boolean;
+}) {
   let value: number;
 
   // Handle special minus sign (−) by replacing with standard minus (-)

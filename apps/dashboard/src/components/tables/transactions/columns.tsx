@@ -30,9 +30,10 @@ const SelectCell = memo(
   ({
     checked,
     onChange,
-  }: { checked: boolean; onChange: (value: boolean) => void }) => (
-    <Checkbox checked={checked} onCheckedChange={onChange} />
-  ),
+  }: {
+    checked: boolean;
+    onChange: (value: boolean) => void;
+  }) => <Checkbox checked={checked} onCheckedChange={onChange} />,
 );
 
 SelectCell.displayName = "SelectCell";
@@ -42,8 +43,11 @@ const DateCell = memo(
     date,
     format,
     noSort,
-  }: { date: string; format?: string | null; noSort?: boolean }) =>
-    formatDate(date, format, noSort),
+  }: {
+    date: string;
+    format?: string | null;
+    noSort?: boolean;
+  }) => formatDate(date, format, noSort),
 );
 
 DateCell.displayName = "DateCell";

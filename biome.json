@@ -1,21 +1,20 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "files": {
-    "ignore": [
-      "dist",
-      "dist/**",
-      "node_modules",
-      "node_modules/**",
-      ".turbo",
-      ".next",
-      ".next/**"
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/dist/**",
+      "!**/node_modules",
+      "!**/node_modules/**",
+      "!**/.turbo",
+      "!**/.next",
+      "!**/.next/**"
     ]
   },
   "linter": {
-    "ignore": [".wrangler", "node_modules"],
+    "includes": ["**", "!**/.wrangler", "!**/node_modules"],
     "enabled": true,
     "rules": {
       "recommended": true,
@@ -24,7 +23,17 @@
         "useKeyWithClickEvents": "off"
       },
       "style": {
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "noParameterAssign": "error",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error"
       },
       "correctness": {
         "useExhaustiveDependencies": "off"

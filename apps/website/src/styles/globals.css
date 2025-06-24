@@ -23,7 +23,7 @@
 
 .updates h2 {
   font-size: 26px;
-  margin-top: .8em;
+  margin-top: 0.8em;
   margin-bottom: 10px;
   font-weight: 500;
 }
@@ -37,7 +37,7 @@
 
 .updates h3 {
   font-size: 1.25em;
-  margin-top: .8em;
+  margin-top: 0.8em;
   margin-bottom: 1px;
   font-weight: 500;
 }
@@ -70,7 +70,7 @@
 .updates p code {
   border-radius: 4px;
   background: hsla(44, 6%, 50%, 0.15);
-  padding: 0 .4em 3px .4em;
+  padding: 0 0.4em 3px 0.4em;
   line-height: normal;
 }
 
@@ -132,14 +132,20 @@ pre code {
 
 .text-stroke {
   color: white;
-  text-shadow: -1px 1px 0 black, 1px 1px 0 black, 1px -1px 0 black, -1px -1px 0
-    black;
+  text-shadow:
+    -1px 1px 0 black,
+    1px 1px 0 black,
+    1px -1px 0 black,
+    -1px -1px 0 black;
 }
 
 .dark .text-stroke {
   color: black;
-  text-shadow: -1px 1px 0 white, 1px 1px 0 white, 1px -1px 0 white, -1px -1px 0
-    white;
+  text-shadow:
+    -1px 1px 0 white,
+    1px 1px 0 white,
+    1px -1px 0 white,
+    -1px -1px 0 white;
 }
 
 .dark .text-dotted {

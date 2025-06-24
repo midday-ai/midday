@@ -459,15 +459,11 @@ export function TrackerSchedule() {
   }, [handleMouseUp]);
 
   // Keyboard shortcuts
-  useHotkeys(
-    "backspace",
-    () => {
-      if (selectedEvent && selectedEvent.id !== NEW_EVENT_ID) {
-        handleDeleteEvent(selectedEvent.id);
-      }
-    },
-    [selectedEvent, handleDeleteEvent],
-  );
+  useHotkeys("backspace", () => {
+    if (selectedEvent && selectedEvent.id !== NEW_EVENT_ID) {
+      handleDeleteEvent(selectedEvent.id);
+    }
+  }, [selectedEvent, handleDeleteEvent]);
 
   const handleEventResizeStart = useCallback(
     (e: React.MouseEvent, event: TrackerRecord, type: "top" | "bottom") => {

@@ -50,7 +50,10 @@ type BankConnection = NonNullable<
 function ConnectionState({
   connection,
   isSyncing,
-}: { connection: BankConnection; isSyncing: boolean }) {
+}: {
+  connection: BankConnection;
+  isSyncing: boolean;
+}) {
   const { show, expired } = connectionStatus(connection);
 
   if (isSyncing) {

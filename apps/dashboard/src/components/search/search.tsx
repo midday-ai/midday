@@ -90,7 +90,10 @@ function CopyButton({ path }: { path: string }) {
 function DownloadButton({
   href,
   filename,
-}: { href: string; filename?: string }) {
+}: {
+  href: string;
+  filename?: string;
+}) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async (e: React.MouseEvent) => {
@@ -300,7 +303,10 @@ const useSearchNavigation = () => {
 const SearchResultItemDisplay = ({
   item,
   dateFormat,
-}: { item: SearchItem; dateFormat?: string }) => {
+}: {
+  item: SearchItem;
+  dateFormat?: string;
+}) => {
   const nav = useSearchNavigation();
 
   let icon: ReactNode | undefined;

@@ -44,7 +44,10 @@ export class ReceiptProcessor {
   #getWebsite({
     website,
     email,
-  }: { website: string | null; email: string | null }) {
+  }: {
+    website: string | null;
+    email: string | null;
+  }) {
     if (website) {
       return website;
     }

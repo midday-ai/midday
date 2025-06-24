@@ -8,7 +8,11 @@ export function OpenURL({
   href,
   children,
   className,
-}: { href: string; children: React.ReactNode; className?: string }) {
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   const handleOnClick = () => {
     if (isDesktopApp()) {
       openUrl(href);
