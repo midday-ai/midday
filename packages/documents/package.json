@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "@ai-sdk/mistral": "^1.2.8",
-    "@langchain/community": "^0.3.46",
-    "@langchain/core": "^0.3.59",
+    "@langchain/community": "^0.3.47",
+    "@langchain/core": "^0.3.61",
     "@midday/utils": "workspace:*",
     "@mistralai/mistralai": "^1.7.2",
     "ai": "4.3.16",
@@ -30,6 +30,6 @@
     "zod": "^3.25.67"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.16"
+    "@types/bun": "^1.2.17"
   }
 }

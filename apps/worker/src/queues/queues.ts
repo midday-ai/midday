@@ -1,9 +1,9 @@
 import { createBaseQueueOptions } from "@worker/queues/base";
 
-// 🎯 ONLY THING YOU NEED TO DEFINE - everything else is auto-generated
+// 🎯 OPTIMIZED CONCURRENCY - with improved DB connections + external API limits
 const QUEUES = {
   emails: {
-    concurrency: 5,
+    concurrency: 80, // MUCH higher - DB connections no longer bottleneck, fast Resend API
     options: createBaseQueueOptions({
       defaultJobOptions: {
         removeOnComplete: { count: 100, age: 24 * 3600 }, // Keep more email jobs for audit
@@ -13,38 +13,39 @@ const QUEUES = {
     }),
   },
   documents: {
-    concurrency: 3, // Lower for resource-intensive tasks
+    concurrency: 3, // REDUCED - Mistral rate limit: 6 req/sec total across both machines
     options: createBaseQueueOptions({
       defaultJobOptions: {
         removeOnComplete: { count: 30, age: 24 * 3600 }, // Keep fewer document jobs
         attempts: 3, // Increased from 2 to match other jobs, AI timeouts need more retries
-        backoff: { type: "exponential", delay: 10000 }, // Longer delay for AI processing
+        backoff: { type: "exponential", delay: 20000 }, // Longer delay due to rate limits
       },
     }),
   },
   invoices: {
-    concurrency: 5, // Moderate concurrency for invoice processing
+    concurrency: 25, // Higher - PDF generation + DB no longer bottleneck
     options: createBaseQueueOptions({
       defaultJobOptions: {
         removeOnComplete: { count: 50, age: 24 * 3600 }, // Keep invoice jobs for audit
         attempts: 3,
         priority: 2, // Medium priority for invoices
+        backoff: { type: "exponential", delay: 3000 }, // Slightly longer delay
       },
     }),
   },
   exports: {
-    concurrency: 2, // Low concurrency for resource-intensive export tasks
+    concurrency: 6, // Higher - memory is main constraint, not DB connections
     options: createBaseQueueOptions({
       defaultJobOptions: {
         removeOnComplete: { count: 20, age: 7 * 24 * 3600 }, // Keep export jobs for 7 days for audit
         attempts: 3,
         priority: 3, // Lower priority since exports are not time-critical
-        backoff: { type: "exponential", delay: 5000 }, // Longer delay for large exports
+        backoff: { type: "exponential", delay: 8000 }, // Longer delay for large exports
       },
     }),
   },
   teams: {
-    concurrency: 2, // Low concurrency for admin operations
+    concurrency: 40, // MUCH higher - just DB calls and API calls, no external limits
     options: createBaseQueueOptions({
       defaultJobOptions: {
         removeOnComplete: { count: 50, age: 7 * 24 * 3600 }, // Keep team jobs for 7 days for audit
@@ -55,7 +56,7 @@ const QUEUES = {
     }),
   },
   system: {
-    concurrency: 1, // Single concurrency for system operations
+    concurrency: 8, // Higher - just database operations and exchange rate APIs
     options: createBaseQueueOptions({
       defaultJobOptions: {
         removeOnComplete: { count: 20, age: 7 * 24 * 3600 }, // Keep system jobs for 7 days for audit

@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@openpanel/nextjs": "^1.0.8",
-    "@vercel/functions": "^2.2.0"
+    "@vercel/functions": "^2.2.2"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

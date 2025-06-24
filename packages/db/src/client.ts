@@ -3,13 +3,19 @@ import postgres from "postgres";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
-const primaryPool = postgres(process.env.DATABASE_PRIMARY_URL!, {
+const poolConfig = {
   prepare: false,
-});
+  max: 100,
+  idle_timeout: 20,
+  max_lifetime: 60 * 60,
+  onnotice: process.env.NODE_ENV === "development" ? console.log : undefined,
+};
 
-const fraPool = postgres(process.env.DATABASE_FRA_URL!, { prepare: false });
-const sjcPool = postgres(process.env.DATABASE_SJC_URL!, { prepare: false });
-const iadPool = postgres(process.env.DATABASE_IAD_URL!, { prepare: false });
+const primaryPool = postgres(process.env.DATABASE_PRIMARY_URL!, poolConfig);
+
+const fraPool = postgres(process.env.DATABASE_FRA_URL!, poolConfig);
+const sjcPool = postgres(process.env.DATABASE_SJC_URL!, poolConfig);
+const iadPool = postgres(process.env.DATABASE_IAD_URL!, poolConfig);
 
 export const primaryDb = drizzle(primaryPool, {
   schema,

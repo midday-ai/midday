@@ -20,6 +20,6 @@
     "googleapis": "^150.0.1",
     "zod": "^3.25.67",
     "@microsoft/microsoft-graph-client": "^3.0.7",
-    "@azure/msal-node": "^3.6.0"
+    "@azure/msal-node": "^3.6.1"
   }
 }

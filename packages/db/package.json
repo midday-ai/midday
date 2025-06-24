@@ -20,6 +20,6 @@
     "camelcase-keys": "^9.1.3"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.1"
+    "drizzle-kit": "^0.31.2"
   }
 }

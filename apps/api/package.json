@@ -15,7 +15,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^1.3.22",
     "@date-fns/utc": "^2.1.0",
-    "@hono/trpc-server": "^0.3.4",
+    "@hono/trpc-server": "^0.4.0",
     "@hono/zod-openapi": "^0.19.8",
     "@hono/zod-validator": "^0.7.0",
     "@midday/cache": "workspace:*",
@@ -26,16 +26,15 @@
     "@midday/engine-client": "workspace:*",
     "@midday/inbox": "workspace:*",
     "@midday/invoice": "workspace:*",
-    "@midday/jobs": "workspace:*",
     "@midday/location": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/worker": "workspace:*",
-    "@scalar/hono-api-reference": "^0.9.4",
+    "@scalar/hono-api-reference": "^0.9.6",
     "@sindresorhus/slugify": "^2.2.1",
     "@trpc/server": "^11.4.2",
     "ai": "^4.3.16",
     "date-fns": "^4.1.0",
-    "hono": "^4.8.0",
+    "hono": "^4.8.2",
     "hono-rate-limiter": "^0.4.2",
     "jose": "^6.0.11",
     "nanoid": "^5.1.5",
@@ -47,6 +46,6 @@
     "zod-openapi": "^4.2.4"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.16"
+    "@types/bun": "^1.2.17"
   }
 }
