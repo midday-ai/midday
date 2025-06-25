@@ -128,7 +128,7 @@ export const transactionsRouter = createTRPCRouter({
   exportTransactions: protectedProcedure
     .input(exportTransactionsSchema)
     .mutation(async ({ input, ctx: { teamId } }) => {
-      const job = await tasks.trigger(
+      return tasks.trigger(
         exportTransactionsJobSchema,
         "exports",
         "export-transactions",
@@ -137,9 +137,5 @@ export const transactionsRouter = createTRPCRouter({
           teamId: teamId!,
         },
       );
-
-      return {
-        jobId: job.id,
-      };
     }),
 });

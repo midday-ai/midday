@@ -20,15 +20,13 @@ export const jobsRouter = createTRPCRouter({
       const { userId } = input;
 
       try {
-        const job = await tasks.trigger(
+        return tasks.trigger(
           onboardTeamSchema,
           "onboarding",
           "onboard-team",
           { userId },
           { delay: 5 * 60 * 1000 }, // 5 minutes
         );
-
-        return job.id;
       } catch (error) {
         console.error("Failed to trigger system onboarding job:", error);
         throw new Error("Failed to schedule onboarding job");

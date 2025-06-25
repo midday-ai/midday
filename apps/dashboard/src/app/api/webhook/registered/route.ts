@@ -1,9 +1,9 @@
 import * as crypto from "node:crypto";
-import { createServerTRPCClient } from "@/trpc/server-client";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { createServerTRPCClient } from "@/trpc/server-client";
 
 // NOTE: This is trigger from supabase database webhook
 export async function POST(req: Request) {
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     });
 
     console.log(
-      `Onboarding job scheduled for user ${userId} with job ID: ${result.jobId}`,
+      `Onboarding job scheduled for user ${userId} with job ID: ${result.id}`,
     );
   } catch (error) {
     console.error("Failed to schedule onboarding job:", error);

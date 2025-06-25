@@ -3,10 +3,6 @@ import Redis, { type RedisOptions } from "ioredis";
 
 const redisUrl = process.env.REDIS_WORKER_URL;
 
-if (!redisUrl) {
-  throw new Error("REDIS_WORKER_URL environment variable is required");
-}
-
 const isDevelopment = process.env.ENVIRONMENT === "development";
 
 const connectionOptions: RedisOptions = {
@@ -23,7 +19,7 @@ const connectionOptions: RedisOptions = {
 };
 
 // Create Redis connection
-export const redisConnection = new Redis(redisUrl, connectionOptions);
+export const redisConnection = new Redis(redisUrl!, connectionOptions);
 
 // Connection event handlers for debugging
 redisConnection.on("connect", () => {

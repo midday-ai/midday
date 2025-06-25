@@ -70,7 +70,9 @@ export function ExportBar() {
   const exportTransactionsMutation = useMutation(
     trpc.transactions.exportTransactions.mutationOptions({
       onSuccess: (data) => {
-        setCurrentJobId(data.jobId);
+        if (data.id) {
+          setCurrentJobId(data.id);
+        }
 
         setRowSelection(() => ({}));
 
