@@ -1,13 +1,13 @@
 "use client";
 
-import { useUpload } from "@/hooks/use-upload";
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
+import { useUpload } from "@/hooks/use-upload";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 
 export function Logo() {
   const { watch, setValue } = useFormContext();
@@ -35,7 +35,7 @@ export function Logo() {
         setValue("template.logoUrl", url, { shouldValidate: true });
 
         updateTemplateMutation.mutate({ logoUrl: url });
-      } catch (error) {
+      } catch (_error) {
         toast({
           title: "Something went wrong, please try again.",
           variant: "error",

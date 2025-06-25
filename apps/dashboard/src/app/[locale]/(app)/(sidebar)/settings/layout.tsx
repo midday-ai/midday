@@ -1,4 +1,3 @@
-import { Header } from "@/components/header";
 import { SecondaryMenu } from "@/components/secondary-menu";
 
 export default function Layout({ children }: { children: React.ReactNode }) {

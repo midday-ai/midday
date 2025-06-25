@@ -1,9 +1,8 @@
 "use client";
 
+import { Sheet, SheetContent } from "@midday/ui/sheet";
 import { DocumentDetails } from "@/components/document-details";
 import { useDocumentParams } from "@/hooks/use-document-params";
-import { Sheet, SheetContent } from "@midday/ui/sheet";
-import React from "react";
 
 export function DocumentSheet() {
   const { params, setParams } = useDocumentParams();

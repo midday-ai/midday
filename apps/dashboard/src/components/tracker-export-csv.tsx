@@ -1,6 +1,3 @@
-import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
-import { secondsToHoursAndMinutes } from "@/utils/format";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import {
@@ -13,8 +10,11 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import Papa from "papaparse";
-import React, { useState } from "react";
+import { useState } from "react";
 import type { DateRange } from "react-day-picker";
+import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
+import { secondsToHoursAndMinutes } from "@/utils/format";
 
 interface TrackerEntry {
   date: string;

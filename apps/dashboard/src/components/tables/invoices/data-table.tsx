@@ -1,5 +1,15 @@
 "use client";
 
+import { Table, TableBody } from "@midday/ui/table";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import {
+  getCoreRowModel,
+  getFilteredRowModel,
+  useReactTable,
+  type VisibilityState,
+} from "@tanstack/react-table";
+import { use, useEffect, useMemo, useState } from "react";
+import { useInView } from "react-intersection-observer";
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
 import { LoadMore } from "@/components/load-more";
 import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
@@ -9,19 +19,8 @@ import { useUserQuery } from "@/hooks/use-user";
 import { useInvoiceStore } from "@/store/invoice";
 import { useTRPC } from "@/trpc/client";
 import { Cookies } from "@/utils/constants";
-import { Table, TableBody } from "@midday/ui/table";
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import {
-  type VisibilityState,
-  getCoreRowModel,
-  getFilteredRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import React, { use, useEffect, useMemo, useState } from "react";
-import { useInView } from "react-intersection-observer";
 import { columns } from "./columns";
-import { NoResults } from "./empty-states";
-import { EmptyState } from "./empty-states";
+import { EmptyState, NoResults } from "./empty-states";
 import { InvoiceRow } from "./row";
 import { TableHeader } from "./table-header";
 

@@ -37,7 +37,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [runId, setRunId] = useState<string | undefined>();
-  const [accessToken, setAccessToken] = useState<string | undefined>();
+  const [accessToken, _setAccessToken] = useState<string | undefined>();
   const [isImporting, setIsImporting] = useState(false);
   const [fileColumns, setFileColumns] = useState<string[] | null>(null);
   const [firstRows, setFirstRows] = useState<Record<string, string>[] | null>(

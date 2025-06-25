@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { useDraggable } from "react-use-draggable-scroll";
 import { chatExamples } from "./examples";
 

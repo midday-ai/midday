@@ -9,10 +9,10 @@ export function useSyncStatus({
   runId: initialRunId,
   accessToken: initialAccessToken,
 }: UseSyncStatusProps) {
-  const [accessToken, setAccessToken] = useState<string | undefined>(
+  const [_accessToken, setAccessToken] = useState<string | undefined>(
     initialAccessToken,
   );
-  const [runId, setRunId] = useState<string | undefined>(initialRunId);
+  const [_runId, setRunId] = useState<string | undefined>(initialRunId);
   const [status, setStatus] = useState<
     "FAILED" | "SYNCING" | "COMPLETED" | null
   >(null);

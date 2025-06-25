@@ -1,8 +1,8 @@
-import { validateTellerSignature } from "@/utils/teller";
 import { createClient } from "@midday/supabase/server";
 import { isAfter, subDays } from "date-fns";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { validateTellerSignature } from "@/utils/teller";
 
 const webhookSchema = z.object({
   id: z.string(),
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     case "transactions.processed":
       {
         // Only run manual sync if the connection was created in the last 24 hours
-        const manualSync = isAfter(
+        const _manualSync = isAfter(
           new Date(connectionData.created_at),
           subDays(new Date(), 1),
         );

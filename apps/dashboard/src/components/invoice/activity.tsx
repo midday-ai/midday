@@ -1,10 +1,9 @@
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { format } from "date-fns";
-import React from "react";
+import { useUserQuery } from "@/hooks/use-user";
 
 type ActivityItemProps = {
   label: string;

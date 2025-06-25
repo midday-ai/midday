@@ -1,15 +1,5 @@
 "use client";
 
-import { LoadMore } from "@/components/load-more";
-import { NoResults } from "@/components/vault/empty-states";
-import { VaultGetStarted } from "@/components/vault/vault-get-started";
-import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
-import { useDocumentParams } from "@/hooks/use-document-params";
-import { useRealtime } from "@/hooks/use-realtime";
-import { useTableScroll } from "@/hooks/use-table-scroll";
-import { useUserQuery } from "@/hooks/use-user";
-import { useDocumentsStore } from "@/store/vault";
-import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import {
@@ -23,11 +13,18 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { AnimatePresence } from "framer-motion";
-import * as React from "react";
 import { useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
-import { useCopyToClipboard } from "usehooks-ts";
-import { useDebounceCallback } from "usehooks-ts";
+import { useCopyToClipboard, useDebounceCallback } from "usehooks-ts";
+import { LoadMore } from "@/components/load-more";
+import { NoResults } from "@/components/vault/empty-states";
+import { VaultGetStarted } from "@/components/vault/vault-get-started";
+import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
+import { useDocumentParams } from "@/hooks/use-document-params";
+import { useRealtime } from "@/hooks/use-realtime";
+import { useUserQuery } from "@/hooks/use-user";
+import { useDocumentsStore } from "@/store/vault";
+import { useTRPC } from "@/trpc/client";
 import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";

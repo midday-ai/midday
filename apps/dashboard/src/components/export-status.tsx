@@ -1,13 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
-import { useExportStatus } from "@/hooks/use-export-status";
-import { downloadFile } from "@/lib/download";
-=======
-import { shareFileAction } from "@/actions/share-file-action";
->>>>>>> 4001cbca (wip)
-import { useExportStore } from "@/store/export";
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -17,10 +9,12 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addDays, addYears } from "date-fns";
+import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
+import { shareFileAction } from "@/actions/share-file-action";
+import { useExportStore } from "@/store/export";
 
 const options = [
   {
@@ -43,35 +37,31 @@ type ShareOptions = {
 };
 
 export function ExportStatus() {
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const { toast, dismiss, update } = useToast();
   const [toastId, setToastId] = useState<string | null>(null);
   const { exportData, setExportData } = useExportStore();
   const [, copy] = useCopyToClipboard();
 
-  const shareFileMutation = useMutation(
-    trpc.shortLinks.createForFile.mutationOptions({
-      onError: () => {
-        toast({
-          duration: 2500,
-          variant: "error",
-          title: "Something went wrong please try again.",
-        });
-      },
-      onSuccess: ({ shortUrl }) => {
-        copy(shortUrl ?? "");
+  const shareFile = useAction(shareFileAction, {
+    onError: () => {
+      toast({
+        duration: 2500,
+        variant: "error",
+        title: "Something went wrong please try again.",
+      });
+    },
+    onSuccess: ({ data }) => {
+      copy(data ?? "");
 
-        toast({
-          duration: 2500,
-          title: "Copied URL to clipboard.",
-          variant: "success",
-        });
-      },
-    }),
-  );
+      toast({
+        duration: 2500,
+        title: "Copied URL to clipboard.",
+        variant: "success",
+      });
+    },
+  });
 
-  const handleOnDownload = () => {
+  const _handleOnDownload = () => {
     if (toastId) {
       dismiss(toastId);
     }
@@ -80,8 +70,7 @@ export function ExportStatus() {
   };
 
   const handleOnShare = ({ expireIn, fullPath }: ShareOptions) => {
-    shareFileMutation.mutate({ expireIn, fullPath });
-
+    shareFile.execute({ expireIn, fullPath });
     if (toastId) {
       dismiss(toastId);
     }
@@ -123,29 +112,6 @@ export function ExportStatus() {
       });
     }
 
-<<<<<<< HEAD
-    if (status === "COMPLETED" && result) {
-      // Invalidate documents query to refresh the list
-      queryClient.invalidateQueries({
-        queryKey: trpc.documents.get.infiniteQueryKey(),
-      });
-
-      // Invalidate search query to refresh the results
-      queryClient.invalidateQueries({
-        queryKey: trpc.search.global.queryKey(),
-      });
-
-      // @ts-expect-error
-      update(toastId, {
-        id: toastId,
-        title: "Export completed",
-        description: `Your export is ready based on ${result.totalItems} transactions. It's stored in your Vault.`,
-        variant: "success",
-        footer: (
-          <div className="mt-4 flex space-x-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-=======
     if (exportData?.status === "completed" && exportData?.result) {
       if (toastId) {
         update(toastId, {
@@ -187,7 +153,6 @@ export function ExportStatus() {
                 href={`/api/download/file?path=${exportData?.result?.fullPath}&filename=${exportData?.result?.fullPath?.split("/").at(-1)}`}
                 download
               >
->>>>>>> 4001cbca (wip)
                 <Button
                   size="sm"
                   onClick={() => {
@@ -238,28 +203,6 @@ export function ExportStatus() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-<<<<<<< HEAD
-            <Button
-              size="sm"
-              onClick={() => {
-                if (result?.fullPath && result?.fileName) {
-                  downloadFile(
-                    `/api/download/file?path=${result.fullPath}&filename=${result.fileName}`,
-                    result.fileName,
-                  );
-                }
-                handleOnDownload();
-              }}
-            >
-              Download
-            </Button>
-          </div>
-        ),
-      });
-
-      setToastId(null);
-      setExportData(undefined);
-=======
               <a
                 href={`/api/download/file?path=${exportData?.result?.fullPath}&filename=${exportData?.result?.fullPath?.split("/").at(-1)}`}
                 download
@@ -280,7 +223,6 @@ export function ExportStatus() {
         });
         setToastId(id);
       }
->>>>>>> 4001cbca (wip)
     }
   }, [toastId, exportData]);
 

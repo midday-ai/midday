@@ -1,8 +1,3 @@
-import { useJobProgress } from "@/hooks/use-job-progress";
-import { useUserQuery } from "@/hooks/use-user";
-import { useExportStore } from "@/store/export";
-import { useTransactionsStore } from "@/store/transactions";
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
@@ -11,6 +6,11 @@ import NumberFlow from "@number-flow/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useJobProgress } from "@/hooks/use-job-progress";
+import { useUserQuery } from "@/hooks/use-user";
+import { useExportStore } from "@/store/export";
+import { useTransactionsStore } from "@/store/transactions";
+import { useTRPC } from "@/trpc/client";
 
 export function ExportBar() {
   const trpc = useTRPC();
@@ -36,7 +36,7 @@ export function ExportBar() {
     queue: "exports",
     enabled: !!currentJobId,
     pollInterval: 250,
-    onCompleted: (result) => {
+    onCompleted: (_result) => {
       setCurrentJobId(null);
       setRowSelection(() => ({}));
 
@@ -44,7 +44,7 @@ export function ExportBar() {
         queryKey: trpc.documents.get.infiniteQueryKey(),
       });
     },
-    onFailed: (error) => {
+    onFailed: (_error) => {
       setCurrentJobId(null);
     },
   });

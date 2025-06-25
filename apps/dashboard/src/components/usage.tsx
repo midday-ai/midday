@@ -1,6 +1,6 @@
-import { getPlanLimits } from "@/utils/plans";
 import { Card } from "@midday/ui/card";
 import { Skeleton } from "@midday/ui/skeleton";
+import { getPlanLimits } from "@/utils/plans";
 
 interface UsageItemProps {
   label: string;
@@ -40,7 +40,7 @@ function CircularProgress({ value }: { value: number }) {
 }
 
 // Helper function to format file size
-function formatFileSize(bytes: number): { value: number; unit: string } {
+function _formatFileSize(bytes: number): { value: number; unit: string } {
   const KB = 1024;
   const MB = KB * 1024;
   const GB = MB * 1024;
@@ -118,8 +118,8 @@ export function Usage({
   const selectedPlan = getPlanLimits(plan);
 
   // Always convert to GB regardless of size
-  const storageInGB = data?.total_document_size ?? 0 / GB;
-  const maxStorageInGB = selectedPlan?.storage ?? 0 / GB;
+  const _storageInGB = data?.total_document_size ?? 0 / GB;
+  const _maxStorageInGB = selectedPlan?.storage ?? 0 / GB;
 
   return (
     <div>

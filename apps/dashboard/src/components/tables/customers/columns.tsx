@@ -1,7 +1,5 @@
 "use client";
 
-import { useCustomerParams } from "@/hooks/use-customer-params";
-import { getWebsiteLogo } from "@/utils/logos";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Badge } from "@midday/ui/badge";
@@ -16,7 +14,8 @@ import { ScrollArea, ScrollBar } from "@midday/ui/scroll-area";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
-import * as React from "react";
+import { useCustomerParams } from "@/hooks/use-customer-params";
+import { getWebsiteLogo } from "@/utils/logos";
 
 export type Customer = RouterOutputs["customers"]["get"]["data"][number];
 

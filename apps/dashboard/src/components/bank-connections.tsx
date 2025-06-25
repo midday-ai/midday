@@ -1,8 +1,5 @@
 "use client";
 
-import { useSyncStatus } from "@/hooks/use-sync-status";
-import { useTRPC } from "@/trpc/client";
-import { connectionStatus } from "@/utils/connection-status";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   Accordion,
@@ -22,6 +19,9 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
+import { useSyncStatus } from "@/hooks/use-sync-status";
+import { useTRPC } from "@/trpc/client";
+import { connectionStatus } from "@/utils/connection-status";
 import { BankAccount } from "./bank-account";
 import { BankLogo } from "./bank-logo";
 import { DeleteConnection } from "./delete-connection";
@@ -136,7 +136,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [runId, setRunId] = useState<string | undefined>();
-  const [accessToken, setAccessToken] = useState<string | undefined>();
+  const [accessToken, _setAccessToken] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
 

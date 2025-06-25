@@ -1,9 +1,9 @@
-import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
-import MultipleSelector from "@midday/ui/multiple-selector";
 import type { Option as MultipleSelectorOption } from "@midday/ui/multiple-selector";
+import MultipleSelector from "@midday/ui/multiple-selector";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useState } from "react";
+import { useState } from "react";
+import { useTRPC } from "@/trpc/client";
 
 type Option = MultipleSelectorOption & {
   id: string;

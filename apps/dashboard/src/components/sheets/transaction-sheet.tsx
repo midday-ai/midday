@@ -1,8 +1,7 @@
 "use client";
 
-import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { Sheet, SheetContent } from "@midday/ui/sheet";
-import React from "react";
+import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { TransactionDetails } from "../transaction-details";
 
 export function TransactionSheet() {

@@ -1,9 +1,8 @@
 "use client";
 
-import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { VaultGridSkeleton } from "./vault-grid-skeleton";
+import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 
 export function NoResults() {
   const { setFilter } = useDocumentFilterParams();

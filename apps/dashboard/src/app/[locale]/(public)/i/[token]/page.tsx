@@ -10,136 +10,137 @@ import InvoiceToolbar from "@/components/invoice-toolbar";
 import { getQueryClient, trpc } from "@/trpc/server";
 
 export async function generateMetadata(props: {
-	params: Promise<{ token: string }>;
+  params: Promise<{ token: string }>;
 }): Promise<Metadata> {
-	const params = await props.params;
-	const queryClient = getQueryClient();
+  const params = await props.params;
+  const queryClient = getQueryClient();
 
-	try {
-		const invoice = await queryClient.fetchQuery(
-			trpc.invoice.getInvoiceByToken.queryOptions({
-				token: params.token,
-			}),
-		);
+  try {
+    const invoice = await queryClient.fetchQuery(
+      trpc.invoice.getInvoiceByToken.queryOptions({
+        token: params.token,
+      }),
+    );
 
-		if (!invoice) {
-			return {
-				title: "Invoice Not Found",
-				robots: {
-					index: false,
-					follow: false,
-				},
-			};
-		}
+    if (!invoice) {
+      return {
+        title: "Invoice Not Found",
+        robots: {
+          index: false,
+          follow: false,
+        },
+      };
+    }
 
-		const title = `Invoice ${invoice.invoiceNumber} | ${invoice.team?.name}`;
-		const description = `Invoice for ${invoice.customerName || invoice.customer?.name || "Customer"}`;
+    const title = `Invoice ${invoice.invoiceNumber} | ${invoice.team?.name}`;
+    const description = `Invoice for ${invoice.customerName || invoice.customer?.name || "Customer"}`;
 
-		return {
-			title,
-			description,
-			openGraph: {
-				title,
-				description,
-			},
-			twitter: {
-				card: "summary",
-				title,
-				description,
-			},
-			robots: {
-				index: false,
-				follow: false,
-			},
-		};
-	} catch (error) {
-		return {
-			title: "Invoice Not Found",
-			robots: {
-				index: false,
-				follow: false,
-			},
-		};
-	}
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+      },
+      twitter: {
+        card: "summary",
+        title,
+        description,
+      },
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  } catch (_error) {
+    return {
+      title: "Invoice Not Found",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
 }
 
 type Props = {
-	params: Promise<{ token: string }>;
-	searchParams: Promise<SearchParams>;
+  params: Promise<{ token: string }>;
+  searchParams: Promise<SearchParams>;
 };
 
 async function updateInvoiceViewedAt(id: string) {
-	const supabase = await createClient({ admin: true });
+  const supabase = await createClient({ admin: true });
 
-	await supabase
-		.from("invoices")
-		.update({
-			viewed_at: new Date().toISOString(),
-		})
-		.eq("id", id);
+  await supabase
+    .from("invoices")
+    .update({
+      viewed_at: new Date().toISOString(),
+    })
+    .eq("id", id);
 }
 
 export default async function Page(props: Props) {
-	const params = await props.params;
-	const supabase = await createClient({ admin: true });
-	const searchParams = await props.searchParams;
-	const viewer = decodeURIComponent(searchParams?.viewer as string);
+  const params = await props.params;
+  const supabase = await createClient({ admin: true });
+  const searchParams = await props.searchParams;
+  const viewer = decodeURIComponent(searchParams?.viewer as string);
 
-	const {
-		data: { session },
-	} = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-	const queryClient = getQueryClient();
+  const queryClient = getQueryClient();
 
-	const invoice = await queryClient.fetchQuery(
-		trpc.invoice.getInvoiceByToken.queryOptions({
-			token: params.token,
-		}),
-	);
+  const invoice = await queryClient.fetchQuery(
+    trpc.invoice.getInvoiceByToken.queryOptions({
+      token: params.token,
+    }),
+  );
 
-	if (!invoice) {
-		notFound();
-	}
+  if (!invoice) {
+    notFound();
+  }
 
-	if (viewer) {
-		try {
-			const decryptedEmail = decrypt(viewer);
+  if (viewer) {
+    try {
+      const decryptedEmail = decrypt(viewer);
 
-			if (decryptedEmail === invoice?.customer?.email) {
-				// Only update the invoice viewed_at if the user is a viewer
-				waitUntil(updateInvoiceViewedAt(invoice.id!));
-			}
-		} catch (error) {
-			console.log(error);
-		}
-	}
+      if (decryptedEmail === invoice?.customer?.email) {
+        // Only update the invoice viewed_at if the user is a viewer
+        waitUntil(updateInvoiceViewedAt(invoice.id!));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
-	// If the invoice is draft and the user is not logged in, return 404 or if the invoice is not found
-	if (!invoice || (invoice.status === "draft" && !session)) {
-		notFound();
-	}
+  // If the invoice is draft and the user is not logged in, return 404 or if the invoice is not found
+  if (!invoice || (invoice.status === "draft" && !session)) {
+    notFound();
+  }
 
-	const width = invoice.template.size === "letter" ? 750 : 595;
-	const height = invoice.template.size === "letter" ? 1056 : 842;
+  const width = invoice.template.size === "letter" ? 750 : 595;
+  const height = invoice.template.size === "letter" ? 1056 : 842;
 
-	return (
-		<div className="flex flex-col justify-center items-center min-h-screen dotted-bg p-4 sm:p-6 md:p-0">
-			<div
-				className="flex flex-col w-full max-w-full py-6"
-				style={{ maxWidth: width }}
-			>
-				<CustomerHeader
-					name={invoice.customerName || (invoice.customer?.name as string)}
-					website={invoice.customer?.website}
-					status={invoice.status}
-				/>
-				<div className="pb-24 md:pb-0">
-					<div className="shadow-[0_24px_48px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
-						<HtmlTemplate data={invoice} width={width} height={height} />
-					</div>
-				</div>
-			</div>
+  return (
+    <div className="flex flex-col justify-center items-center min-h-screen dotted-bg p-4 sm:p-6 md:p-0">
+      <div
+        className="flex flex-col w-full max-w-full py-6"
+        style={{ maxWidth: width }}
+      >
+        <CustomerHeader
+          name={invoice.customerName || (invoice.customer?.name as string)}
+          website={invoice.customer?.website}
+          status={invoice.status}
+        />
+        <div className="pb-24 md:pb-0">
+          <div className="shadow-[0_24px_48px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
+            <HtmlTemplate data={invoice} width={width} height={height} />
+          </div>
+        </div>
+      </div>
 
+<<<<<<< HEAD
 <<<<<<< HEAD
       <InvoiceToolbar
         token={invoice.token}
@@ -148,17 +149,20 @@ export default async function Page(props: Props) {
 =======
 			<InvoiceToolbar token={invoice.token} />
 >>>>>>> 68f4dc3c (wip)
+=======
+      <InvoiceToolbar token={invoice.token} />
+>>>>>>> b83e2047 (wip)
 
-			<div className="fixed bottom-4 right-4 hidden md:block">
-				<a
-					href="https://midday.ai?utm_source=invoice"
-					target="_blank"
-					rel="noreferrer"
-					className="text-[9px] text-[#878787]"
-				>
-					Powered by <span className="text-primary">midday</span>
-				</a>
-			</div>
-		</div>
-	);
+      <div className="fixed bottom-4 right-4 hidden md:block">
+        <a
+          href="https://midday.ai?utm_source=invoice"
+          target="_blank"
+          rel="noreferrer"
+          className="text-[9px] text-[#878787]"
+        >
+          Powered by <span className="text-primary">midday</span>
+        </a>
+      </div>
+    </div>
+  );
 }
