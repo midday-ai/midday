@@ -21,6 +21,7 @@ import {
   deleteTeamInvite,
   deleteTeamMember,
   getAvailablePlans,
+  getBankAccounts,
   getBankConnections,
   getInvitesByEmail,
   getTeamById,
@@ -32,6 +33,7 @@ import {
   updateTeamMember,
 } from "@midday/db/queries";
 import { TRPCError } from "@trpc/server";
+import { jobRegistry } from "@worker/core/job";
 import { tasks } from "@worker/jobs/tasks";
 import {
   deleteTeamJobSchema,
@@ -215,11 +217,38 @@ export const teamRouter = createTRPCRouter({
 
   updateBaseCurrency: protectedProcedure
     .input(updateBaseCurrencySchema)
-    .mutation(async ({ ctx: { teamId }, input }) => {
-      // const event = await tasks.trigger("update-base-currency", {
-      //   teamId: teamId!,
-      //   baseCurrency: input.baseCurrency,
-      // } satisfies UpdateBaseCurrencyPayload);
-      // return event;
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      const flowProducer = jobRegistry.getFlowProducer();
+
+      const accounts = await getBankAccounts(db, {
+        teamId: teamId!,
+        enabled: true,
+      });
+
+      const flow = await flowProducer.add({
+        name: "update-base-currency",
+        queueName: "teams",
+        data: {
+          teamId,
+          baseCurrency: input.baseCurrency,
+        },
+        children: accounts.map((account) => ({
+          name: "update-account-base-currency",
+          queueName: "teams",
+          data: {
+            accountId: account.id,
+            teamId,
+            currency: account.currency,
+            balance: Number(account.balance) || 0,
+            baseCurrency: input.baseCurrency,
+          },
+        })),
+      });
+
+      return {
+        flowJobId: flow.job.id,
+        parentJobId: flow.job.id,
+        childJobsCount: accounts.length,
+      };
     }),
 });

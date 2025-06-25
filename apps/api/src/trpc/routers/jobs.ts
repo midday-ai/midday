@@ -62,6 +62,7 @@ export const jobsRouter = createTRPCRouter({
           switch (state) {
             case "waiting":
             case "delayed":
+            case "waiting-children": // Special state for flow parent jobs
               status = "waiting";
               break;
             case "active":

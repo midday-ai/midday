@@ -21,11 +21,13 @@ import {
   getTransactions,
   getTransactionsAmountFullRangeData,
   searchTransactionMatch,
+  updateBankAccount,
   updateSimilarTransactionsCategory,
   updateSimilarTransactionsRecurring,
   updateTransaction,
   updateTransactions,
 } from "@midday/db/queries";
+import { formatAmountValue } from "@midday/import";
 import { tasks } from "@worker/jobs/tasks";
 import {
   exportTransactionsSchema as exportTransactionsJobSchema,
@@ -145,7 +147,18 @@ export const transactionsRouter = createTRPCRouter({
 
   importTransactions: protectedProcedure
     .input(importTransactionsSchema)
-    .mutation(async ({ input, ctx: { teamId } }) => {
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      const balance = input.currentBalance
+        ? formatAmountValue({ amount: input.currentBalance })
+        : null;
+
+      await updateBankAccount(db, {
+        id: input.bankAccountId,
+        teamId: teamId!,
+        currency: input.currency,
+        balance: balance ?? undefined,
+      });
+
       return tasks.trigger(
         importTransactionsJobSchema,
         "imports",

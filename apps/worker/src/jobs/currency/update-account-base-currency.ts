@@ -9,21 +9,13 @@ import {
   calculateTransactionBaseAmount,
 } from "@midday/db/utils/currency";
 import { job } from "@worker/core/job";
-import { z } from "zod";
-
-const updateAccountBaseCurrencySchema = z.object({
-  accountId: z.string().uuid(),
-  teamId: z.string().uuid(),
-  currency: z.string().min(3).max(3),
-  balance: z.number(),
-  baseCurrency: z.string().min(3).max(3),
-});
+import { updateAccountBaseCurrencySchema } from "@worker/schemas/jobs";
 
 export const updateAccountBaseCurrencyJob = job(
   "update-account-base-currency",
   updateAccountBaseCurrencySchema,
   {
-    queue: "system",
+    queue: "teams",
     priority: 3,
     attempts: 3,
   },
@@ -120,7 +112,7 @@ export const updateAccountBaseCurrencyJob = job(
       transactionCount: transactions.length,
     });
 
-    // Prepare transaction updates
+    // Prepare transaction updates with proper base amount calculation
     const transactionUpdates = transactions.map((transaction) => ({
       id: transaction.id,
       baseAmount: calculateTransactionBaseAmount({
@@ -132,7 +124,7 @@ export const updateAccountBaseCurrencyJob = job(
       baseCurrency,
     }));
 
-    // Bulk update transactions
+    // Bulk update transactions in optimized batches
     const updatedTransactions = await bulkUpdateTransactionsBaseCurrency(db, {
       transactionUpdates,
       teamId,
@@ -148,6 +140,7 @@ export const updateAccountBaseCurrencyJob = job(
     return {
       converted: true,
       rate,
+      baseBalance,
       transactionsUpdated: updatedTransactions.length,
     };
   },

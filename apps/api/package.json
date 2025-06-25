@@ -26,6 +26,7 @@
     "@midday/engine-client": "workspace:*",
     "@midday/inbox": "workspace:*",
     "@midday/invoice": "workspace:*",
+    "@midday/import": "workspace:*",
     "@midday/location": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/worker": "workspace:*",

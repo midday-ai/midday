@@ -1,7 +1,6 @@
 import type { Database } from "@db/client";
 import { bankAccounts } from "@db/schema";
-import { and, asc, desc, eq } from "drizzle-orm";
-import { sql } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 export type CreateBankAccountParams = {
