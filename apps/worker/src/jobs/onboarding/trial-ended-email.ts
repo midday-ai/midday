@@ -1,6 +1,6 @@
 import { getTeamPlan } from "@db/queries";
 import TrialEndedEmail from "@midday/email/emails/trial-ended";
-import { render } from "@midday/email/render";
+import { render } from "@react-email/render";
 import { job } from "@worker/core/job";
 import { emailQueue } from "@worker/queues/queues";
 import { resend } from "@worker/services/resend";
@@ -29,7 +29,7 @@ export const trialEndedEmailJob = job(
         from: "Pontus from Midday <pontus@midday.ai>",
         to: data.email,
         subject: "Your trial has ended",
-        html: render(TrialEndedEmail({ fullName: data.fullName })),
+        html: await render(TrialEndedEmail({ fullName: data.fullName })),
       });
     }
 

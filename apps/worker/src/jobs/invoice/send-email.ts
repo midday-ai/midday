@@ -1,9 +1,9 @@
 import { getInvoiceById, updateInvoice } from "@midday/db/queries";
 import InvoiceEmail from "@midday/email/emails/invoice";
-import { render } from "@midday/email/render";
 import { encrypt } from "@midday/encryption";
 import { createClient } from "@midday/supabase/job";
 import { getAppUrl } from "@midday/utils/envs";
+import { render } from "@react-email/render";
 import { job } from "@worker/core/job";
 import { emailQueue } from "@worker/queues/queues";
 import { resend } from "@worker/services/resend";
@@ -87,7 +87,7 @@ export const sendInvoiceEmailJob = job(
         "X-Entity-Ref-ID": nanoid(),
       },
       attachments,
-      html: render(
+      html: await render(
         InvoiceEmail({
           customerName: invoice?.customer?.name!,
           teamName: invoice?.team?.name!,

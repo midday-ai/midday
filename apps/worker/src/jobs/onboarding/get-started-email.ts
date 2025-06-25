@@ -1,6 +1,6 @@
 import { getTeamPlan } from "@db/queries";
 import GetStartedEmail from "@midday/email/emails/get-started";
-import { render } from "@midday/email/render";
+import { render } from "@react-email/render";
 import { job } from "@worker/core/job";
 import { emailQueue } from "@worker/queues/queues";
 import { resend } from "@worker/services/resend";
@@ -29,7 +29,7 @@ export const getStartedEmailJob = job(
         to: data.email,
         subject: "Get the most out of Midday",
         from: "Pontus from Midday <pontus@midday.ai>",
-        html: render(GetStartedEmail({ fullName: data.fullName })),
+        html: await render(GetStartedEmail({ fullName: data.fullName })),
       });
     }
 

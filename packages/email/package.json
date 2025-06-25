@@ -5,8 +5,7 @@
   "main": "index.ts",
   "exports": {
     "./emails/*": "./emails/*.tsx",
-    "./locales": "./locales/index.ts",
-    "./render": "./render.ts"
+    "./locales": "./locales/index.ts"
   },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",

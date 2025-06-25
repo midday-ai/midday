@@ -1,8 +1,8 @@
 import { getInvoiceById, updateInvoice } from "@midday/db/queries";
 import InvoiceReminderEmail from "@midday/email/emails/invoice-reminder";
-import { render } from "@midday/email/render";
 import { encrypt } from "@midday/encryption";
 import { getAppUrl } from "@midday/utils/envs";
+import { render } from "@react-email/render";
 import { job } from "@worker/core/job";
 import { emailQueue } from "@worker/queues/queues";
 import { resend } from "@worker/services/resend";
@@ -45,7 +45,7 @@ export const sendInvoiceReminderJob = job(
       headers: {
         "X-Entity-Ref-ID": nanoid(),
       },
-      html: render(
+      html: await render(
         InvoiceReminderEmail({
           companyName: invoice.customer?.name!,
           teamName: invoice.team?.name!,

@@ -1,6 +1,6 @@
 import { InviteEmail } from "@midday/email/emails/invite";
 import { getI18n } from "@midday/email/locales";
-import { render } from "@midday/email/render";
+import { render } from "@react-email/render";
 import { job } from "@worker/core/job";
 import { emailQueue } from "@worker/queues/queues";
 import { resend } from "@worker/services/resend";
@@ -34,27 +34,29 @@ export const inviteTeamMembersJob = job(
 
     const { t } = getI18n({ locale: data.locale });
 
-    const emails = data.invites.map((invite) => ({
-      from: "Midday <middaybot@midday.ai>",
-      to: [invite.email],
-      subject: t("invite.subject", {
-        invitedByName: invite.invitedByName,
-        teamName: invite.teamName,
-      }),
-      headers: {
-        "X-Entity-Ref-ID": nanoid(),
-      },
-      html: render(
-        InviteEmail({
-          invitedByEmail: invite.invitedByEmail,
+    const emails = await Promise.all(
+      data.invites.map(async (invite) => ({
+        from: "Midday <middaybot@midday.ai>",
+        to: [invite.email],
+        subject: t("invite.subject", {
           invitedByName: invite.invitedByName,
-          email: invite.email,
           teamName: invite.teamName,
-          ip: data.ip,
-          locale: data.locale,
         }),
-      ),
-    }));
+        headers: {
+          "X-Entity-Ref-ID": nanoid(),
+        },
+        html: await render(
+          InviteEmail({
+            invitedByEmail: invite.invitedByEmail,
+            invitedByName: invite.invitedByName,
+            email: invite.email,
+            teamName: invite.teamName,
+            ip: data.ip,
+            locale: data.locale,
+          }),
+        ),
+      })),
+    );
 
     await resend.batch.send(emails);
 

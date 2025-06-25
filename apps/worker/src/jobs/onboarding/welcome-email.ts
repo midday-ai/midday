@@ -1,6 +1,6 @@
 import { getTeamPlan } from "@midday/db/queries";
 import WelcomeEmail from "@midday/email/emails/welcome";
-import { render } from "@midday/email/render";
+import { render } from "@react-email/render";
 import { job } from "@worker/core/job";
 import { emailQueue } from "@worker/queues/queues";
 import { resend } from "@worker/services/resend";
@@ -29,7 +29,7 @@ export const welcomeEmailJob = job(
         to: data.email,
         subject: "Welcome to Midday",
         from: "Pontus from Midday <pontus@midday.ai>",
-        html: render(WelcomeEmail({ fullName: data.fullName })),
+        html: await render(WelcomeEmail({ fullName: data.fullName })),
       });
     }
 
