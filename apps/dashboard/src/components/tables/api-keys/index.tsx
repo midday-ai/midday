@@ -1,7 +1,5 @@
 "use client";
 
-import { useTokenModalStore } from "@/store/token-modal";
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import {
@@ -18,7 +16,8 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import * as React from "react";
+import { useTokenModalStore } from "@/store/token-modal";
+import { useTRPC } from "@/trpc/client";
 import { columns } from "./columns";
 import { EmptyState } from "./empty-state";
 
@@ -55,7 +54,7 @@ export function DataTable() {
           </Button>
         </div>
       </div>
-      {data.length > 0 ? (
+      {data?.length > 0 ? (
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
