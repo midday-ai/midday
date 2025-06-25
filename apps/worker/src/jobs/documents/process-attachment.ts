@@ -7,14 +7,16 @@ import { z } from "zod";
 import { convertHeicJob } from "./convert-heic";
 import { processDocumentJob } from "./process-document";
 
+export const processAttachmentSchema = z.object({
+  transactionId: z.string().uuid(),
+  mimetype: z.string(),
+  filePath: z.array(z.string()),
+  teamId: z.string().uuid(),
+});
+
 export const processAttachmentJob = job(
   "process-attachment",
-  z.object({
-    transactionId: z.string().uuid(),
-    mimetype: z.string(),
-    filePath: z.array(z.string()),
-    teamId: z.string().uuid(),
-  }),
+  processAttachmentSchema,
   {
     queue: documentsQueue,
     attempts: 3,

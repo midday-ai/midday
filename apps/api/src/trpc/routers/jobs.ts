@@ -1,111 +1,110 @@
 import {
-	createTRPCRouter,
-	internalProcedure,
-	protectedProcedure,
+  createTRPCRouter,
+  internalProcedure,
+  protectedProcedure,
 } from "@api/trpc/init";
-import { onboardTeamJob } from "@midday/worker/jobs";
+import { onboardTeamSchema } from "@worker/jobs/onboarding/onboard-team";
+import { tasks } from "@worker/jobs/tasks";
+import { createBaseQueueOptions } from "@worker/queues/base";
 import { Queue } from "bullmq";
 import { z } from "zod";
 
 export const jobsRouter = createTRPCRouter({
-	onboardTeam: internalProcedure
-		.input(
-			z.object({
-				userId: z.string().uuid(),
-			}),
-		)
-		.mutation(async ({ input }) => {
-			const { userId } = input;
+  onboardTeam: internalProcedure
+    .input(
+      z.object({
+        userId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { userId } = input;
 
-			try {
-				const job = await onboardTeamJob.triggerDelayed(
-					{ userId },
-					5 * 60 * 1000, // 5 minutes
-				);
+      try {
+        const job = await tasks.trigger(
+          onboardTeamSchema,
+          "onboarding",
+          "onboard-team",
+          { userId },
+          { delay: 5 * 60 * 1000 }, // 5 minutes
+        );
 
-				return job.id;
-			} catch (error) {
-				console.error("Failed to trigger system onboarding job:", error);
-				throw new Error("Failed to schedule onboarding job");
-			}
-		}),
+        return job.id;
+      } catch (error) {
+        console.error("Failed to trigger system onboarding job:", error);
+        throw new Error("Failed to schedule onboarding job");
+      }
+    }),
 
-	getStatus: protectedProcedure
-		.input(
-			z.object({
-				jobId: z.string(),
-				queue: z.string(),
-			}),
-		)
-		.query(async ({ input, ctx: { teamId } }) => {
-			const { jobId, queue: queueName } = input;
+  getStatus: protectedProcedure
+    .input(
+      z.object({
+        jobId: z.string(),
+        queue: z.string(),
+      }),
+    )
+    .query(async ({ input, ctx: { teamId } }) => {
+      const { jobId, queue: queueName } = input;
 
-			if (!process.env.REDIS_WORKER_URL) {
-				throw new Error("REDIS_WORKER_URL environment variable is required");
-			}
+      let jobData = null;
+      let queue: Queue | null = null;
 
-			let jobData = null;
-			let queue: Queue | null = null;
+      try {
+        // Create queue instance using base configuration
+        queue = new Queue(queueName, createBaseQueueOptions());
 
-			try {
-				// Create queue instance for the specific queue
-				queue = new Queue(queueName, {
-					connection: { url: process.env.REDIS_WORKER_URL },
-				});
+        const foundJob = await queue.getJob(jobId);
+        if (foundJob) {
+          // Security check: ensure job belongs to the user's team
+          if (foundJob.data.teamId !== teamId) {
+            throw new Error("Job not found");
+          }
 
-				const foundJob = await queue.getJob(jobId);
-				if (foundJob) {
-					// Security check: ensure job belongs to the user's team
-					if (foundJob.data.teamId !== teamId) {
-						throw new Error("Job not found");
-					}
+          // Extract all data we need BEFORE closing the connection
+          const progress = foundJob.progress;
+          const state = await foundJob.getState();
 
-					// Extract all data we need BEFORE closing the connection
-					const progress = foundJob.progress;
-					const state = await foundJob.getState();
+          let status: "waiting" | "active" | "completed" | "failed";
+          switch (state) {
+            case "waiting":
+            case "delayed":
+              status = "waiting";
+              break;
+            case "active":
+              status = "active";
+              break;
+            case "completed":
+              status = "completed";
+              break;
+            case "failed":
+              status = "failed";
+              break;
+            default:
+              status = "waiting";
+          }
 
-					let status: "waiting" | "active" | "completed" | "failed";
-					switch (state) {
-						case "waiting":
-						case "delayed":
-							status = "waiting";
-							break;
-						case "active":
-							status = "active";
-							break;
-						case "completed":
-							status = "completed";
-							break;
-						case "failed":
-							status = "failed";
-							break;
-						default:
-							status = "waiting";
-					}
+          jobData = {
+            jobId,
+            jobName: foundJob.name,
+            status,
+            progress: typeof progress === "number" ? progress : 0,
+            result: status === "completed" ? foundJob.returnvalue : null,
+            error: status === "failed" ? foundJob.failedReason : null,
+            timestamp: Date.now(),
+          };
+        }
 
-					jobData = {
-						jobId,
-						jobName: foundJob.name,
-						status,
-						progress: typeof progress === "number" ? progress : 0,
-						result: status === "completed" ? foundJob.returnvalue : null,
-						error: status === "failed" ? foundJob.failedReason : null,
-						timestamp: Date.now(),
-					};
-				}
+        if (!jobData) {
+          throw new Error("Job not found");
+        }
 
-				if (!jobData) {
-					throw new Error("Job not found");
-				}
-
-				return jobData;
-			} catch {
-				throw new Error("Failed to get job status");
-			} finally {
-				// Ensure we close the queue connection
-				if (queue) {
-					await queue.close().catch(console.error);
-				}
-			}
-		}),
+        return jobData;
+      } catch {
+        throw new Error("Failed to get job status");
+      } finally {
+        // Ensure we close the queue connection
+        if (queue) {
+          await queue.close().catch(console.error);
+        }
+      }
+    }),
 });

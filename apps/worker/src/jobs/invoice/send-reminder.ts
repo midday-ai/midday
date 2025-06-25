@@ -9,11 +9,13 @@ import { resend } from "@worker/services/resend";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
+export const sendInvoiceReminderSchema = z.object({
+  invoiceId: z.string().uuid(),
+});
+
 export const sendInvoiceReminderJob = job(
   "send-invoice-reminder",
-  z.object({
-    invoiceId: z.string().uuid(),
-  }),
+  sendInvoiceReminderSchema,
   {
     queue: emailQueue,
     attempts: 3,

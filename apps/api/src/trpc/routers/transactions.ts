@@ -25,7 +25,8 @@ import {
   updateTransaction,
   updateTransactions,
 } from "@midday/db/queries";
-import { exportTransactionsJob } from "@worker/jobs";
+import { exportTransactionsSchema as exportTransactionsJobSchema } from "@worker/jobs/exports/export-transactions";
+import { tasks } from "@worker/jobs/tasks";
 
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -127,10 +128,15 @@ export const transactionsRouter = createTRPCRouter({
   exportTransactions: protectedProcedure
     .input(exportTransactionsSchema)
     .mutation(async ({ input, ctx: { teamId } }) => {
-      const job = await exportTransactionsJob.trigger({
-        ...input,
-        teamId: teamId!,
-      });
+      const job = await tasks.trigger(
+        exportTransactionsJobSchema,
+        "exports",
+        "export-transactions",
+        {
+          ...input,
+          teamId: teamId!,
+        },
+      );
 
       return {
         jobId: job.id,

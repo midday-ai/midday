@@ -7,12 +7,14 @@ import { invoicesQueue } from "@worker/queues/queues";
 import { z } from "zod";
 import { sendInvoiceEmailJob } from "./send-email";
 
+export const generateInvoiceSchema = z.object({
+  invoiceId: z.string().uuid(),
+  deliveryType: z.enum(["create", "create_and_send"]),
+});
+
 export const generateInvoiceJob = job(
   "generate-invoice",
-  z.object({
-    invoiceId: z.string().uuid(),
-    deliveryType: z.enum(["create", "create_and_send"]),
-  }),
+  generateInvoiceSchema,
   {
     queue: invoicesQueue,
     attempts: 3,

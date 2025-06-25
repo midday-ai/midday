@@ -19,7 +19,8 @@ import {
   unmatchTransaction,
   updateInbox,
 } from "@midday/db/queries";
-import { processInboxJob } from "@midday/worker/jobs";
+import { processInboxSchema as processInboxJobSchema } from "@worker/jobs/documents/process-inbox";
+import { tasks } from "@worker/jobs/tasks";
 
 export const inboxRouter = createTRPCRouter({
   get: protectedProcedure
@@ -83,7 +84,10 @@ export const inboxRouter = createTRPCRouter({
       );
 
       // Trigger jobs with inbox IDs
-      return processInboxJob.batchTrigger(
+      return tasks.batchTrigger(
+        processInboxJobSchema,
+        "documents",
+        "process-inbox",
         inboxRecords.map((inboxRecord, index) => ({
           payload: {
             inboxId: inboxRecord.id,

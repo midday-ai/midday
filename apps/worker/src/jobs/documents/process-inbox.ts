@@ -7,14 +7,16 @@ import { z } from "zod";
 import { convertHeicJob } from "./convert-heic";
 import { processDocumentJob } from "./process-document";
 
+export const processInboxSchema = z.object({
+  inboxId: z.string().uuid(),
+  teamId: z.string().uuid(),
+  mimetype: z.string(),
+  filePath: z.array(z.string()),
+});
+
 export const processInboxJob = job(
   "process-inbox",
-  z.object({
-    inboxId: z.string().uuid(),
-    teamId: z.string().uuid(),
-    mimetype: z.string(),
-    filePath: z.array(z.string()),
-  }),
+  processInboxSchema,
   {
     queue: documentsQueue,
     attempts: 3,

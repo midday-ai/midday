@@ -3,7 +3,7 @@ import { job } from "@worker/core/job";
 import { teamsQueue } from "@worker/queues/queues";
 import { z } from "zod";
 
-const deleteTeamSchema = z.object({
+export const deleteTeamSchema = z.object({
   teamId: z.string().uuid(),
   connections: z.array(
     z.object({

@@ -7,7 +7,7 @@ import { resend } from "@worker/services/resend";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
-const inviteTeamMembersSchema = z.object({
+export const inviteTeamMembersSchema = z.object({
   teamId: z.string().uuid(),
   ip: z.string(),
   locale: z.string(),

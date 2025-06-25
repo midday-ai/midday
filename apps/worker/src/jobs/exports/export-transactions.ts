@@ -16,7 +16,7 @@ import { format, parseISO } from "date-fns";
 import xlsx from "node-xlsx";
 import { z } from "zod";
 
-const exportTransactionsSchema = z.object({
+export const exportTransactionsSchema = z.object({
   teamId: z.string().uuid(),
   locale: z.string(),
   dateFormat: z.string().nullable().optional(),

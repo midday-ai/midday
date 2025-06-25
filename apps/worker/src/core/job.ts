@@ -1,8 +1,8 @@
 import type { Database } from "@midday/db/client";
 import { logger } from "@worker/monitoring/logger";
+import { createBaseQueueOptions } from "@worker/queues/base";
 import type { Job, JobNode } from "bullmq";
-import { Queue } from "bullmq";
-import { FlowProducer } from "bullmq";
+import { FlowProducer, Queue } from "bullmq";
 import type { z } from "zod";
 
 // Job execution context
@@ -61,13 +61,10 @@ class JobRegistry {
 
   getFlowProducer(): FlowProducer {
     if (!this.flowProducer) {
-      // Create FlowProducer using REDIS_WORKER_URL
-      if (!process.env.REDIS_WORKER_URL) {
-        throw new Error("REDIS_WORKER_URL environment variable is required");
-      }
-
+      // Create FlowProducer using base configuration
+      const baseOptions = createBaseQueueOptions();
       this.flowProducer = new FlowProducer({
-        connection: { url: process.env.REDIS_WORKER_URL },
+        connection: baseOptions.connection,
       });
     }
     return this.flowProducer;
@@ -90,18 +87,9 @@ class JobRegistry {
       }
     }
 
-    // Create external queue (API context) using REDIS_WORKER_URL
+    // Create external queue (API context) using base configuration
     if (!this.externalQueues.has(queueName)) {
-      if (!process.env.REDIS_WORKER_URL) {
-        throw new Error("REDIS_WORKER_URL environment variable is required");
-      }
-
-      const queue = new Queue(queueName, {
-        connection: {
-          url: process.env.REDIS_WORKER_URL,
-        },
-      });
-
+      const queue = new Queue(queueName, createBaseQueueOptions());
       this.externalQueues.set(queueName, queue);
     }
 
@@ -162,20 +150,21 @@ class SimpleJob<T = any> {
   async trigger(payload: T, options: Record<string, any> = {}) {
     const queue = registry.getQueue(this.id);
     const validated = this.validate(payload);
+    const baseOptions = createBaseQueueOptions().defaultJobOptions || {};
 
     const job = await queue.add(this.id, validated, {
-      priority: this.options.priority ?? 1,
-      attempts: this.options.attempts ?? 3,
+      priority: this.options.priority ?? baseOptions.priority ?? 1,
+      attempts: this.options.attempts ?? baseOptions.attempts ?? 3,
       delay: this.options.delay ?? options.delay ?? 0,
-      removeOnComplete: {
-        count: this.options.removeOnComplete ?? 50,
-        age: 24 * 3600,
-      },
-      removeOnFail: {
-        count: this.options.removeOnFail ?? 50,
-        age: 7 * 24 * 3600,
-      },
-      backoff: { type: "exponential", delay: 2000 },
+      removeOnComplete:
+        this.options.removeOnComplete !== undefined
+          ? { count: this.options.removeOnComplete, age: 24 * 3600 }
+          : baseOptions.removeOnComplete,
+      removeOnFail:
+        this.options.removeOnFail !== undefined
+          ? { count: this.options.removeOnFail, age: 7 * 24 * 3600 }
+          : baseOptions.removeOnFail,
+      backoff: baseOptions.backoff,
       ...options,
     });
 
@@ -187,23 +176,24 @@ class SimpleJob<T = any> {
     payloads: Array<{ payload: T; options?: Record<string, any> }>,
   ) {
     const queue = registry.getQueue(this.id);
+    const baseOptions = createBaseQueueOptions().defaultJobOptions || {};
 
     const bulkJobs = payloads.map(({ payload, options = {} }) => ({
       name: this.id,
       data: this.validate(payload),
       opts: {
-        priority: this.options.priority ?? 1,
-        attempts: this.options.attempts ?? 3,
+        priority: this.options.priority ?? baseOptions.priority ?? 1,
+        attempts: this.options.attempts ?? baseOptions.attempts ?? 3,
         delay: this.options.delay ?? options.delay ?? 0,
-        removeOnComplete: {
-          count: this.options.removeOnComplete ?? 50,
-          age: 24 * 3600,
-        },
-        removeOnFail: {
-          count: this.options.removeOnFail ?? 50,
-          age: 7 * 24 * 3600,
-        },
-        backoff: { type: "exponential", delay: 2000 },
+        removeOnComplete:
+          this.options.removeOnComplete !== undefined
+            ? { count: this.options.removeOnComplete, age: 24 * 3600 }
+            : baseOptions.removeOnComplete,
+        removeOnFail:
+          this.options.removeOnFail !== undefined
+            ? { count: this.options.removeOnFail, age: 7 * 24 * 3600 }
+            : baseOptions.removeOnFail,
+        backoff: baseOptions.backoff,
         ...options,
       },
     }));
@@ -256,22 +246,24 @@ class SimpleJob<T = any> {
   }
 
   private convertToBullMqFlow(flowDef: FlowJobDefinition): any {
+    const baseOptions = createBaseQueueOptions().defaultJobOptions || {};
+
     const result = {
       name: flowDef.job.id,
       queueName: flowDef.job.getQueueName(),
       data: flowDef.data,
       opts: {
-        priority: flowDef.job.options.priority ?? 1,
-        attempts: flowDef.job.options.attempts ?? 3,
-        removeOnComplete: {
-          count: flowDef.job.options.removeOnComplete ?? 50,
-          age: 24 * 3600,
-        },
-        removeOnFail: {
-          count: flowDef.job.options.removeOnFail ?? 50,
-          age: 7 * 24 * 3600,
-        },
-        backoff: { type: "exponential", delay: 2000 },
+        priority: flowDef.job.options.priority ?? baseOptions.priority ?? 1,
+        attempts: flowDef.job.options.attempts ?? baseOptions.attempts ?? 3,
+        removeOnComplete:
+          flowDef.job.options.removeOnComplete !== undefined
+            ? { count: flowDef.job.options.removeOnComplete, age: 24 * 3600 }
+            : baseOptions.removeOnComplete,
+        removeOnFail:
+          flowDef.job.options.removeOnFail !== undefined
+            ? { count: flowDef.job.options.removeOnFail, age: 7 * 24 * 3600 }
+            : baseOptions.removeOnFail,
+        backoff: baseOptions.backoff,
         ...flowDef.options,
       },
       children:

@@ -18,7 +18,8 @@ import {
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
 import { remove, signedUrl } from "@midday/supabase/storage";
 import { TRPCError } from "@trpc/server";
-import { processDocumentJob } from "@worker/jobs/documents/process-document";
+import { processDocumentSchema as processDocumentJobSchema } from "@worker/jobs/documents/process-document";
+import { tasks } from "@worker/jobs/tasks";
 
 export const documentsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -102,7 +103,10 @@ export const documentsRouter = createTRPCRouter({
       }
 
       // Trigger processing task only for supported documents
-      await processDocumentJob.batchTrigger(
+      await tasks.batchTrigger(
+        processDocumentJobSchema,
+        "documents",
+        "process-document",
         supportedDocuments.map((item) => ({
           payload: {
             filePath: item.filePath,

@@ -8,11 +8,13 @@ import { trialEndedEmailJob } from "./trial-ended-email";
 import { trialExpiringEmailJob } from "./trial-expiring-email";
 import { welcomeEmailJob } from "./welcome-email";
 
+export const onboardTeamSchema = z.object({
+  userId: z.string().uuid(),
+});
+
 export const onboardTeamJob = job(
   "onboard-team",
-  z.object({
-    userId: z.string(),
-  }),
+  onboardTeamSchema,
   {
     queue: emailQueue,
     removeOnComplete: 100, // Override just this option - keep more onboarding logs

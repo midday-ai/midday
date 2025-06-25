@@ -9,13 +9,15 @@ import { classifyDocumentJob } from "./classify-document";
 import { classifyImageJob } from "./classify-image";
 import { convertHeicJob } from "./convert-heic";
 
+export const processDocumentSchema = z.object({
+  mimetype: z.string(),
+  filePath: z.array(z.string()),
+  teamId: z.string().uuid(),
+});
+
 export const processDocumentJob = job(
   "process-document",
-  z.object({
-    mimetype: z.string(),
-    filePath: z.array(z.string()),
-    teamId: z.string().uuid(),
-  }),
+  processDocumentSchema,
   {
     queue: documentsQueue,
     attempts: 3,

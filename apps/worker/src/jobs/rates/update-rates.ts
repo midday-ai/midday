@@ -6,7 +6,7 @@ import { z } from "zod";
 
 export const updateRatesJob = job(
   "update-rates",
-  z.null(),
+  z.any(),
   {
     queue: systemQueue,
     attempts: 3,

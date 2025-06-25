@@ -32,7 +32,9 @@ import {
   updateTeamMember,
 } from "@midday/db/queries";
 import { TRPCError } from "@trpc/server";
-import { deleteTeamJob, inviteTeamMembersJob } from "@worker/jobs";
+import { tasks } from "@worker/jobs/tasks";
+import { deleteTeamSchema as deleteTeamJobSchema } from "@worker/jobs/team/delete-team";
+import { inviteTeamMembersSchema as inviteTeamMembersJobSchema } from "@worker/jobs/team/invite-members";
 
 export const teamRouter = createTRPCRouter({
   current: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -124,7 +126,7 @@ export const teamRouter = createTRPCRouter({
       });
 
       if (bankConnections.length > 0) {
-        await deleteTeamJob.trigger({
+        await tasks.trigger(deleteTeamJobSchema, "team", "delete-team", {
           teamId: input.teamId!,
           connections: bankConnections.map((connection) => ({
             accessToken: connection.accessToken,
@@ -183,12 +185,17 @@ export const teamRouter = createTRPCRouter({
           inviteCode: invite?.code!,
         })) ?? [];
 
-      await inviteTeamMembersJob.trigger({
-        teamId: teamId!,
-        invites,
-        ip,
-        locale: "en",
-      });
+      await tasks.trigger(
+        inviteTeamMembersJobSchema,
+        "team",
+        "invite-team-members",
+        {
+          teamId: teamId!,
+          invites,
+          ip,
+          locale: "en",
+        },
+      );
     }),
 
   deleteInvite: protectedProcedure
