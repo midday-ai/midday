@@ -13,29 +13,29 @@ import { formatAmount } from "@midday/utils/format";
  * @returns Properly formatted currency string with minus sign preserved
  */
 export function formatCurrencyForPDF({
-	amount,
-	currency,
-	locale,
-	maximumFractionDigits,
+  amount,
+  currency,
+  locale,
+  maximumFractionDigits,
 }: {
-	amount: number;
-	currency: string;
-	locale?: string;
-	maximumFractionDigits?: number;
+  amount: number;
+  currency: string;
+  locale?: string;
+  maximumFractionDigits?: number;
 }): string {
-	if (!currency) return "";
+  if (!currency) return "";
 
-	const isNegative = amount < 0;
-	const absoluteAmount = Math.abs(amount);
+  const isNegative = amount < 0;
+  const absoluteAmount = Math.abs(amount);
 
-	// Format the absolute value using the standard formatAmount function
-	const formatted = formatAmount({
-		currency,
-		amount: absoluteAmount,
-		locale,
-		maximumFractionDigits,
-	});
+  // Format the absolute value using the standard formatAmount function
+  const formatted = formatAmount({
+    currency,
+    amount: absoluteAmount,
+    locale,
+    maximumFractionDigits,
+  });
 
-	// Manually prepend minus sign for negative values
-	return isNegative ? `-${formatted}` : formatted || "";
+  // Manually prepend minus sign for negative values
+  return isNegative ? `-${formatted}` : formatted || "";
 }
