@@ -2,6 +2,7 @@ import { formatAmount } from "@midday/utils/format";
 import { Text, View } from "@react-pdf/renderer";
 import type { LineItem } from "../../../types";
 import { calculateLineItemTotal } from "../../../utils/calculate";
+import { formatCurrencyForPDF } from "../../../utils/pdf-format";
 import { Description } from "./description";
 
 type Props = {
@@ -77,9 +78,9 @@ export function LineItems({
 
 					<Text style={{ flex: 1, fontSize: 9 }}>
 						{currency &&
-							formatAmount({
-								currency,
+							formatCurrencyForPDF({
 								amount: item.price ?? 0,
+								currency,
 								locale,
 								maximumFractionDigits,
 							})}
@@ -88,12 +89,12 @@ export function LineItems({
 
 					<Text style={{ flex: 1, fontSize: 9, textAlign: "right" }}>
 						{currency &&
-							formatAmount({
-								currency,
+							formatCurrencyForPDF({
 								amount: calculateLineItemTotal({
 									price: item.price,
 									quantity: item.quantity,
 								}),
+								currency,
 								locale,
 								maximumFractionDigits,
 							})}
