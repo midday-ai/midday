@@ -152,3 +152,10 @@ export const updateBaseCurrencySchema = z.object({
   teamId: z.string().uuid(),
   baseCurrency: z.string().min(3).max(3),
 });
+
+// Connection schemas
+export const deleteConnectionSchema = z.object({
+  referenceId: z.string(),
+  provider: z.enum(["gocardless", "teller", "plaid", "enablebanking"]),
+  accessToken: z.string().nullable(),
+});

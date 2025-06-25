@@ -8,6 +8,8 @@ export {
   jobRegistry,
   setQueueResolver,
 } from "../core/job";
+// Connection jobs
+export { deleteConnectionJob } from "./connections";
 // Currency jobs
 export {
   updateAccountBaseCurrencyJob,

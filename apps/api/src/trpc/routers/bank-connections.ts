@@ -10,6 +10,7 @@ import {
   getBankConnections,
 } from "@midday/db/queries";
 import { TRPCError } from "@trpc/server";
+import { deleteConnectionJob } from "@worker/jobs";
 
 export const bankConnectionsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -57,11 +58,11 @@ export const bankConnectionsRouter = createTRPCRouter({
         throw new Error("Bank connection not found");
       }
 
-      // await tasks.trigger("delete-connection", {
-      //   referenceId: data.referenceId,
-      //   provider: data.provider!,
-      //   accessToken: data.accessToken,
-      // } satisfies DeleteConnectionPayload);
+      await deleteConnectionJob.trigger({
+        referenceId: data.referenceId!,
+        provider: data.provider!,
+        accessToken: data.accessToken,
+      });
 
       return data;
     }),
