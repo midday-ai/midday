@@ -1,7 +1,7 @@
 export type LineItem = {
   name: string;
-  quantity: number;
-  price: number;
+  quantity?: number;
+  price?: number;
   unit?: string;
 };
 

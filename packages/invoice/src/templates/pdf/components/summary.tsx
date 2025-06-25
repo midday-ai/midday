@@ -1,5 +1,5 @@
-import { formatAmount } from "@midday/utils/format";
 import { Text, View } from "@react-pdf/renderer";
+import { formatCurrencyForPDF } from "../../../utils/pdf-format";
 
 interface SummaryProps {
   amount?: number | null;
@@ -44,6 +44,11 @@ export function Summary({
 }: SummaryProps) {
   const maximumFractionDigits = includeDecimals ? 2 : 0;
 
+  const displayTotal = amount ?? 0;
+  const displaySubtotal = subtotal ?? 0;
+  const displayVat = vat ?? 0;
+  const displayTax = tax ?? 0;
+
   return (
     <View
       style={{
@@ -58,9 +63,9 @@ export function Summary({
         <Text style={{ fontSize: 9, flex: 1 }}>{subtotalLabel}</Text>
         <Text style={{ fontSize: 9, textAlign: "right" }}>
           {currency &&
-            formatAmount({
+            formatCurrencyForPDF({
+              amount: displaySubtotal,
               currency,
-              amount: subtotal,
               locale,
               maximumFractionDigits,
             })}
@@ -72,9 +77,9 @@ export function Summary({
           <Text style={{ fontSize: 9, flex: 1 }}>{discountLabel}</Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
             {currency &&
-              formatAmount({
-                currency,
+              formatCurrencyForPDF({
                 amount: discount,
+                currency,
                 locale,
                 maximumFractionDigits,
               })}
@@ -89,9 +94,9 @@ export function Summary({
           </Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
             {currency &&
-              formatAmount({
+              formatCurrencyForPDF({
+                amount: displayVat,
                 currency,
-                amount: vat || 0,
                 locale,
                 maximumFractionDigits,
               })}
@@ -106,9 +111,9 @@ export function Summary({
           </Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
             {currency &&
-              formatAmount({
+              formatCurrencyForPDF({
+                amount: displayTax,
                 currency,
-                amount: tax || 0,
                 locale,
                 maximumFractionDigits,
               })}
@@ -131,8 +136,12 @@ export function Summary({
         <Text style={{ fontSize: 9, marginRight: 10 }}>{totalLabel}</Text>
         <Text style={{ fontSize: 21 }}>
           {currency &&
-            amount &&
-            formatAmount({ currency, amount, locale, maximumFractionDigits })}
+            formatCurrencyForPDF({
+              amount: displayTotal,
+              currency,
+              locale,
+              maximumFractionDigits,
+            })}
         </Text>
       </View>
     </View>

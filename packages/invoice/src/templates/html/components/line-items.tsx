@@ -47,19 +47,19 @@ export function LineItems({
           <div className="self-start">
             <Description content={item.name} />
           </div>
-          <div className="text-[11px] self-start">{item.quantity}</div>
+          <div className="text-[11px] self-start">{item.quantity ?? 0}</div>
           <div className="text-[11px] self-start">
             {currency && includeUnits && item.unit
               ? `${formatAmount({
                   currency,
-                  amount: item.price,
+                  amount: item.price ?? 0,
                   maximumFractionDigits,
                   locale,
                 })}/${item.unit}`
               : currency &&
                 formatAmount({
                   currency,
-                  amount: item.price,
+                  amount: item.price ?? 0,
                   maximumFractionDigits,
                   locale,
                 })}
