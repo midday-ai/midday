@@ -171,8 +171,8 @@ export const invoiceRouter = createTRPCRouter({
         logoUrl,
         currency,
         size: template?.size ?? defaultTemplate.size,
-        includeTax: template?.includeTax ?? defaultTemplate.includeTax,
-        includeVat: template?.includeVat ?? defaultTemplate.includeVat,
+        includeTax: template?.includeTax ?? includeTax,
+        includeVat: template?.includeVat ?? !includeTax,
         includeDiscount:
           template?.includeDiscount ?? defaultTemplate.includeDiscount,
         includeDecimals:
@@ -218,8 +218,8 @@ export const invoiceRouter = createTRPCRouter({
         currency,
         status: "draft",
         size,
-        includeTax,
-        includeVat: !includeTax,
+        includeTax: savedTemplate?.includeTax ?? includeTax,
+        includeVat: savedTemplate?.includeVat ?? !includeTax,
         includeDiscount: false,
         includeDecimals: false,
         includePdf: false,
