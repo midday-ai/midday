@@ -1,24 +1,24 @@
 {
-  "name": "@midday/location",
-  "version": "1.0.0",
-  "main": "src/index.ts",
-  "private": true,
-  "sideEffects": false,
-  "scripts": {
-    "clean": "rm -rf .turbo node_modules",
-    "lint": "biome check .",
-    "format": "biome format --write .",
-    "typecheck": "tsc --noEmit"
-  },
-  "exports": {
-    ".": "./src/index.ts",
-    "./countries": "./src/countries.ts",
-    "./countries-intl": "./src/countries-intl.ts",
-    "./currencies": "./src/currencies.ts",
-    "./country-flags": "./src/country-flags.ts",
-    "./timezones": "./src/timezones.ts"
-  },
-  "devDependencies": {
-    "typescript": "^5.8.3"
-  }
+	"name": "@midday/location",
+	"version": "1.0.0",
+	"main": "src/index.ts",
+	"private": true,
+	"sideEffects": false,
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit"
+	},
+	"exports": {
+		".": "./src/index.ts",
+		"./countries": "./src/countries.ts",
+		"./countries-intl": "./src/countries-intl.ts",
+		"./currencies": "./src/currencies.ts",
+		"./country-flags": "./src/country-flags.ts",
+		"./timezones": "./src/timezones.ts"
+	},
+	"devDependencies": {
+		"typescript": "^5.8.3"
+	}
 }

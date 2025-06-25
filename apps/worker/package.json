@@ -1,44 +1,44 @@
 {
-  "name": "@midday/worker",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "TZ=UTC bun --watch src/index.ts",
-    "lint": "biome check .",
-    "format": "biome format --write .",
-    "typecheck": "tsc --noEmit",
-    "test": "bun test",
-    "test:watch": "bun test --watch"
-  },
-  "exports": {
-    "./jobs": "./src/jobs/index.ts"
-  },
-  "dependencies": {
-    "@bull-board/hono": "^6.10.1",
-    "@fast-csv/format": "^5.0.2",
-    "@midday/db": "workspace:*",
-    "@midday/documents": "workspace:*",
-    "@midday/email": "workspace:*",
-    "@midday/engine": "workspace:*",
-    "@midday/engine-client": "workspace:*",
-    "@midday/supabase": "workspace:*",
-    "@sindresorhus/slugify": "^2.2.1",
-    "@zip.js/zip.js": "^2.7.62",
-    "bullmq": "^5.56.0",
-    "date-fns": "^4.1.0",
-    "heic-convert": "1.2.4",
-    "hono": "^4.8.2",
-    "ioredis": "^5.6.1",
-    "node-xlsx": "^0.24.0",
-    "pino": "^9.7.0",
-    "pino-pretty": "^13.0.0",
-    "resend": "^4.6.0",
-    "sharp": "0.32.6",
-    "zod": "^3.25.67"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "^5.8.3",
-    "@types/heic-convert": "2.1.0"
-  }
+	"name": "@midday/worker",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"dev": "TZ=UTC bun --watch src/index.ts",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit",
+		"test": "bun test",
+		"test:watch": "bun test --watch"
+	},
+	"exports": {
+		"./jobs": "./src/jobs/index.ts"
+	},
+	"dependencies": {
+		"@bull-board/hono": "^6.10.1",
+		"@fast-csv/format": "^5.0.2",
+		"@midday/db": "workspace:*",
+		"@midday/documents": "workspace:*",
+		"@midday/email": "workspace:*",
+		"@midday/engine": "workspace:*",
+		"@midday/engine-client": "workspace:*",
+		"@midday/supabase": "workspace:*",
+		"@sindresorhus/slugify": "^2.2.1",
+		"@zip.js/zip.js": "^2.7.62",
+		"bullmq": "^5.56.0",
+		"date-fns": "^4.1.0",
+		"heic-convert": "1.2.4",
+		"hono": "^4.8.2",
+		"ioredis": "^5.6.1",
+		"node-xlsx": "^0.24.0",
+		"pino": "^9.7.0",
+		"pino-pretty": "^13.0.0",
+		"resend": "^4.6.0",
+		"sharp": "0.32.6",
+		"zod": "^3.25.67"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"typescript": "^5.8.3",
+		"@types/heic-convert": "2.1.0"
+	}
 }

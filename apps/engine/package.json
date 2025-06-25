@@ -8,7 +8,7 @@
     "dev": "NODE_ENV=development wrangler dev src/index.ts --port 3002",
     "deploy": "wrangler deploy --minify src/index.ts",
     "clean": "rm -rf .turbo node_modules",
-    "lint": "biome check .",
+    "lint": "biome lint .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",

@@ -138,7 +138,7 @@ export class PlaidApi {
     latest,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse | undefined> {
     let added: Array<Transaction> = [];
-    let cursor = undefined;
+    let cursor ;
     let hasMore = true;
     try {
       if (latest) {

@@ -4,11 +4,11 @@ import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Icons } from "@midday/ui/icons";
 
 type Props = {
-  role: "assistant" | "user";
+  type: "assistant" | "user";
 };
 
-export function ChatAvatar({ role }: Props) {
-  switch (role) {
+export function ChatAvatar({ type = "assistant" }: Props) {
+  switch (type) {
     case "user": {
       return (
         <Avatar className="size-6">

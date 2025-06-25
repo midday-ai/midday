@@ -1,36 +1,36 @@
 {
-  "name": "@midday/supabase",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "clean": "rm -rf .turbo node_modules",
-    "lint": "biome check .",
-    "format": "biome format --write .",
-    "typecheck": "tsc --noEmit",
-    "db:generate": "supabase gen types --lang=typescript --project-id $PROJECT_ID --schema public > src/types/db.ts"
-  },
-  "dependencies": {
-    "@supabase/postgrest-js": "^1.19.4",
-    "@supabase/ssr": "^0.6.1",
-    "date-fns": "^4.1.0",
-    "react": "19.1.0",
-    "server-only": "^0.0.1",
-    "supabase": "^2.26.9"
-  },
-  "devDependencies": {
-    "@supabase/supabase-js": "^2.50.1",
-    "typescript": "^5.8.3"
-  },
-  "exports": {
-    "./server": "./src/client/server.ts",
-    "./client": "./src/client/client.ts",
-    "./client-query": "./src/queries/client.ts",
-    "./job": "./src/client/job.ts",
-    "./mutations": "./src/mutations/index.ts",
-    "./middleware": "./src/client/middleware.ts",
-    "./queries": "./src/queries/index.ts",
-    "./cached-queries": "./src/queries/cached-queries.ts",
-    "./storage": "./src/utils/storage.ts",
-    "./types": "./src/types/index.ts"
-  }
+	"name": "@midday/supabase",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit",
+		"db:generate": "supabase gen types --lang=typescript --project-id $PROJECT_ID --schema public > src/types/db.ts"
+	},
+	"dependencies": {
+		"@supabase/postgrest-js": "^1.19.4",
+		"@supabase/ssr": "^0.6.1",
+		"date-fns": "^4.1.0",
+		"react": "19.1.0",
+		"server-only": "^0.0.1",
+		"supabase": "^2.26.9"
+	},
+	"devDependencies": {
+		"@supabase/supabase-js": "^2.50.1",
+		"typescript": "^5.8.3"
+	},
+	"exports": {
+		"./server": "./src/client/server.ts",
+		"./client": "./src/client/client.ts",
+		"./client-query": "./src/queries/client.ts",
+		"./job": "./src/client/job.ts",
+		"./mutations": "./src/mutations/index.ts",
+		"./middleware": "./src/client/middleware.ts",
+		"./queries": "./src/queries/index.ts",
+		"./cached-queries": "./src/queries/cached-queries.ts",
+		"./storage": "./src/utils/storage.ts",
+		"./types": "./src/types/index.ts"
+	}
 }

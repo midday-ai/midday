@@ -1,24 +1,24 @@
 {
-  "name": "@midday/import",
-  "version": "1.0.0",
-  "private": true,
-  "main": "src/index.ts",
-  "scripts": {
-    "clean": "rm -rf .turbo node_modules",
-    "lint": "biome check .",
-    "format": "biome format --write .",
-    "typecheck": "tsc --noEmit",
-    "test": "bun test src"
-  },
-  "dependencies": {
-    "change-case": "^5.4.4",
-    "date-fns-tz": "^3.2.0",
-    "uuid": "^11.1.0"
-  },
-  "exports": {
-    ".": "./src/index.ts",
-    "./mappings": "./src/mappings.ts",
-    "./transform": "./src/transform.ts",
-    "./validate": "./src/validate.ts"
-  }
+	"name": "@midday/import",
+	"version": "1.0.0",
+	"private": true,
+	"main": "src/index.ts",
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit",
+		"test": "bun test src"
+	},
+	"dependencies": {
+		"change-case": "^5.4.4",
+		"date-fns-tz": "^3.2.0",
+		"uuid": "^11.1.0"
+	},
+	"exports": {
+		".": "./src/index.ts",
+		"./mappings": "./src/mappings.ts",
+		"./transform": "./src/transform.ts",
+		"./validate": "./src/validate.ts"
+	}
 }

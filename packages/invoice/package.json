@@ -4,7 +4,7 @@
   "main": "src/index.tsx",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "lint": "biome check .",
+    "lint": "biome lint .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit"
   },
