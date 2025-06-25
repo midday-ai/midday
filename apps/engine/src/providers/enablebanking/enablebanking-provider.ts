@@ -1,13 +1,11 @@
 import type { Provider } from "../interface";
 import type {
-  DeleteAccountsRequest,
   DeleteConnectionRequest,
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
   GetAccountsRequest,
   GetAccountsResponse,
   GetConnectionStatusRequest,
-  GetInstitutionsRequest,
   GetTransactionsRequest,
   GetTransactionsResponse,
   ProviderParams,
@@ -32,7 +30,7 @@ export class EnableBankingProvider implements Provider {
     return this.#api.getHealthCheck();
   }
 
-  async getInstitutions(params: GetInstitutionsRequest) {
+  async getInstitutions() {
     const response = await this.#api.getInstitutions();
     return response.map(transformInstitution);
   }
@@ -75,7 +73,7 @@ export class EnableBankingProvider implements Provider {
     await this.#api.deleteSession(params.id);
   }
 
-  async deleteAccounts(params: DeleteAccountsRequest) {
+  async deleteAccounts() {
     return;
   }
 }

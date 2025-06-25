@@ -196,7 +196,7 @@ export class EnableBankingApi {
     try {
       await this.#get<{ message: string }>("/application");
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

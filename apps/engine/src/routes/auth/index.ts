@@ -4,8 +4,7 @@ import { EnableBankingApi } from "@engine/providers/enablebanking/enablebanking-
 import { GoCardLessApi } from "@engine/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@engine/providers/plaid/plaid-api";
 import { createErrorResponse } from "@engine/utils/error";
-import { createRoute } from "@hono/zod-openapi";
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
   EnableBankingLinkBodySchema,
@@ -245,8 +244,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
     async (c) => {
       const envs = env(c);
 
-      const { institutionId, transactionTotalDays, reference } =
-        await c.req.json();
+      const { institutionId, transactionTotalDays } = await c.req.json();
 
       const api = new GoCardLessApi({
         kv: c.env.KV,

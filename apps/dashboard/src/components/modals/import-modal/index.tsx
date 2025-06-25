@@ -1,11 +1,5 @@
 "use client";
 
-import { importTransactionsAction } from "@/actions/transactions/import-transactions";
-import { useSyncStatus } from "@/hooks/use-sync-status";
-import { useUpload } from "@/hooks/use-upload";
-import { useUserQuery } from "@/hooks/use-user";
-import { useZodForm } from "@/hooks/use-zod-form";
-import { useTRPC } from "@/trpc/client";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import {
   Dialog,
@@ -22,6 +16,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
+import { importTransactionsAction } from "@/actions/transactions/import-transactions";
+import { useSyncStatus } from "@/hooks/use-sync-status";
+import { useUpload } from "@/hooks/use-upload";
+import { useUserQuery } from "@/hooks/use-user";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useTRPC } from "@/trpc/client";
 import { ImportCsvContext, importSchema } from "./context";
 import { FieldMapping } from "./field-mapping";
 import { SelectFile } from "./select-file";
@@ -67,8 +67,8 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
   const importTransactions = useAction(importTransactionsAction, {
     onSuccess: ({ data }) => {
       if (data) {
-        setRunId(data.id);
-        setAccessToken(data.publicAccessToken);
+        // setRunId(data.id);
+        // setAccessToken(data.publicAccessToken);
       }
     },
     onError: () => {

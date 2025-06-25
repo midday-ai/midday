@@ -34,7 +34,7 @@
 		"@trpc/server": "^11.4.2",
 		"ai": "^4.3.16",
 		"date-fns": "^4.1.0",
-		"hono": "^4.8.2",
+		"hono": "^4.8.3",
 		"hono-rate-limiter": "^0.4.2",
 		"jose": "^6.0.11",
 		"nanoid": "^5.1.5",

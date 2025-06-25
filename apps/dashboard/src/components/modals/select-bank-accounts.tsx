@@ -1,11 +1,5 @@
 "use client";
 
-import { sendSupportAction } from "@/actions/send-support-action";
-import { useConnectParams } from "@/hooks/use-connect-params";
-import { useZodForm } from "@/hooks/use-zod-form";
-import { useI18n } from "@/locales/client";
-import { useTRPC } from "@/trpc/client";
-import { getInitials } from "@/utils/format";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
@@ -30,13 +24,18 @@ import { Switch } from "@midday/ui/switch";
 import { Tabs, TabsContent } from "@midday/ui/tabs";
 import { Textarea } from "@midday/ui/textarea";
 import { useToast } from "@midday/ui/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
+import { sendSupportAction } from "@/actions/send-support-action";
+import { useConnectParams } from "@/hooks/use-connect-params";
+import { useZodForm } from "@/hooks/use-zod-form";
+import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
+import { getInitials } from "@/utils/format";
 import { FormatAmount } from "../format-amount";
 import { LoadingTransactionsEvent } from "../loading-transactions-event";
 
@@ -216,11 +215,11 @@ export function SelectBankAccountsModal() {
         });
       },
       onSuccess: (data) => {
-        if (data?.id) {
-          setRunId(data.id);
-          setAccessToken(data.publicAccessToken);
-          setActiveTab("loading");
-        }
+        // if (data?.id) {
+        //   setRunId(data.id);
+        //   setAccessToken(data.publicAccessToken);
+        //   setActiveTab("loading");
+        // }
       },
     }),
   );

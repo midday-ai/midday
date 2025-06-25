@@ -27,7 +27,7 @@
 		"bullmq": "^5.56.0",
 		"date-fns": "^4.1.0",
 		"heic-convert": "1.2.4",
-		"hono": "^4.8.2",
+		"hono": "^4.8.3",
 		"ioredis": "^5.6.1",
 		"node-xlsx": "^0.24.0",
 		"pino": "^9.7.0",

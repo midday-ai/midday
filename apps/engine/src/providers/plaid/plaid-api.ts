@@ -138,8 +138,10 @@ export class PlaidApi {
     latest,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse | undefined> {
     let added: Array<Transaction> = [];
-    let cursor ;
+    let cursor: string | undefined;
+
     let hasMore = true;
+
     try {
       if (latest) {
         const { data } = await this.#client.transactionsSync({

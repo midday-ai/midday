@@ -1,6 +1,6 @@
 import { GeneralErrorSchema } from "@engine/common/schema";
 import { getRates } from "@engine/utils/rates";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import type { Bindings } from "hono/types";
 import { RatesSchema } from "./schema";
 
@@ -38,7 +38,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
         },
         200,
       );
-    } catch (error) {
+    } catch {
       return c.json(
         {
           error: "Internal server error",
