@@ -44,7 +44,6 @@ export function Summary({
 }: SummaryProps) {
   const maximumFractionDigits = includeDecimals ? 2 : 0;
 
-  // Use pre-calculated values passed as props
   const displayTotal = amount ?? 0;
   const displaySubtotal = subtotal ?? 0;
   const displayVat = vat ?? 0;
