@@ -23,7 +23,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
         <div className="flex space-x-1 items-center">
           <div className="flex items-center flex-shrink-0 space-x-1">
             <span className="truncate font-mono text-[11px] text-[#878787]">
-              {template.invoiceNoLabel}:
+              {template.invoiceNoLabel ? `${template.invoiceNoLabel}:` : ""}
             </span>
             <span className="text-[11px] font-mono flex-shrink-0">
               {invoiceNumber}
@@ -36,7 +36,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
             <div className="flex space-x-1 items-center">
               <div className="flex items-center flex-shrink-0 space-x-1">
                 <span className="truncate font-mono text-[11px] text-[#878787]">
-                  {template.issueDateLabel}:
+                  {template.issueDateLabel ? `${template.issueDateLabel}:` : ""}
                 </span>
                 <span className="text-[11px] font-mono flex-shrink-0">
                   {issueDate
@@ -55,7 +55,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
             <div className="flex space-x-1 items-center">
               <div className="flex items-center flex-shrink-0 space-x-1">
                 <span className="truncate font-mono text-[11px] text-[#878787]">
-                  {template.dueDateLabel}:
+                  {template.dueDateLabel ? `${template.dueDateLabel}:` : ""}
                 </span>
                 <span className="text-[11px] font-mono flex-shrink-0">
                   {dueDate

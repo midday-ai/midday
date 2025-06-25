@@ -33,13 +33,13 @@ export function Meta({
       <View style={{ flexDirection: "column", gap: 4 }}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Text style={{ fontSize: 9, fontWeight: 500, marginRight: 2 }}>
-            {invoiceNoLabel}:
+            {invoiceNoLabel ? `${invoiceNoLabel}:` : ""}
           </Text>
           <Text style={{ fontSize: 9 }}>{invoiceNo}</Text>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Text style={{ fontSize: 9, fontWeight: 500, marginRight: 2 }}>
-            {issueDateLabel}:
+            {issueDateLabel ? `${issueDateLabel}:` : ""}
           </Text>
           <Text style={{ fontSize: 9 }}>
             {issueDate
@@ -49,7 +49,7 @@ export function Meta({
         </View>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Text style={{ fontSize: 9, fontWeight: 500, marginRight: 2 }}>
-            {dueDateLabel}:
+            {dueDateLabel ? `${dueDateLabel}:` : ""}
           </Text>
           <Text style={{ fontSize: 9 }}>
             {dueDate ? format(new TZDate(dueDate, timezone), dateFormat) : ""}
