@@ -1,8 +1,8 @@
-import { logger } from "@/utils/logger";
 import { createClient } from "@midday/supabase/server";
 import { isAfter, subDays } from "date-fns";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { logger } from "@/utils/logger";
 
 // https://plaid.com/docs/api/webhooks/#configuring-webhooks
 const ALLOWED_IPS = [

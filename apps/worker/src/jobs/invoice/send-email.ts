@@ -1,7 +1,6 @@
 import { getInvoiceById, updateInvoice } from "@midday/db/queries";
 import InvoiceEmail from "@midday/email/emails/invoice";
 import { encrypt } from "@midday/encryption";
-import { createClient } from "@midday/supabase/job";
 import { getAppUrl } from "@midday/utils/envs";
 import { render } from "@react-email/render";
 import { job } from "@worker/core/job";
@@ -30,8 +29,6 @@ export const sendInvoiceEmailJob = job(
       fullPath,
     });
 
-    const supabase = createClient();
-
     const invoice = await getInvoiceById(ctx.db, { id: invoiceId });
 
     if (!invoice) {
@@ -43,7 +40,7 @@ export const sendInvoiceEmailJob = job(
 
     // @ts-expect-error template is a jsonb field
     if (invoice.template.includePdf) {
-      const { data: attachmentData } = await supabase.storage
+      const { data: attachmentData } = await ctx.supabase.storage
         .from("vault")
         .download(fullPath);
 

@@ -11,19 +11,19 @@ export function transform({
   inverted: boolean;
 }) {
   return {
-    internal_id: `${transaction.teamId}_${uuidv4()}`,
-    team_id: transaction.teamId,
+    internalId: `${transaction.teamId}_${uuidv4()}`,
+    teamId: transaction.teamId,
     status: "posted",
     method: "other",
     date: formatDate(transaction.date),
     amount: formatAmountValue({ amount: transaction.amount, inverted }),
     name: transaction?.description && capitalCase(transaction.description),
     manual: true,
-    category_slug:
+    categorySlug:
       formatAmountValue({ amount: transaction.amount, inverted }) > 0
         ? "income"
         : null,
-    bank_account_id: transaction.bankAccountId,
+    bankAccountId: transaction.bankAccountId,
     currency: transaction.currency.toUpperCase(),
     notified: true,
   };

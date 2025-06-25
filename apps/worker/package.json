@@ -22,6 +22,7 @@
     "@midday/email": "workspace:*",
     "@midday/engine": "workspace:*",
     "@midday/engine-client": "workspace:*",
+    "@midday/import": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@sindresorhus/slugify": "^2.2.1",
     "@zip.js/zip.js": "^2.7.62",
@@ -31,6 +32,7 @@
     "hono": "^4.8.3",
     "ioredis": "^5.6.1",
     "node-xlsx": "^0.24.0",
+    "papaparse": "^5.4.1",
     "pino": "^9.7.0",
     "pino-pretty": "^13.0.0",
     "resend": "^4.6.0",
@@ -39,7 +41,8 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "typescript": "^5.8.3",
-    "@types/heic-convert": "2.1.0"
+    "@types/heic-convert": "2.1.0",
+    "@types/papaparse": "^5.3.14",
+    "typescript": "^5.8.3"
   }
 }

@@ -1,4 +1,3 @@
-import { createClient } from "@midday/supabase/job";
 import { job } from "@worker/core/job";
 import { documentsQueue } from "@worker/queues/queues";
 import convert from "heic-convert";
@@ -20,9 +19,7 @@ export const convertHeicJob = job(
   async ({ filePath }, ctx) => {
     ctx.logger.info("Converting HEIC to JPG", { filePath });
 
-    const supabase = createClient();
-
-    const { data } = await supabase.storage
+    const { data } = await ctx.supabase.storage
       .from("vault")
       .download(filePath.join("/"));
 
@@ -46,7 +43,7 @@ export const convertHeicJob = job(
       .toBuffer();
 
     // Upload the converted image with .jpg extension
-    const { data: uploadedData } = await supabase.storage
+    const { data: uploadedData } = await ctx.supabase.storage
       .from("vault")
       .upload(filePath.join("/"), image, {
         contentType: "image/jpeg",

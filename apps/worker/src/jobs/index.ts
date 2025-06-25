@@ -8,7 +8,11 @@ export {
   jobRegistry,
   setQueueResolver,
 } from "../core/job";
-
+// Currency jobs
+export {
+  updateAccountBaseCurrencyJob,
+  updateBaseCurrencyJob,
+} from "./currency";
 // Document processing jobs
 export {
   classifyDocumentJob,
@@ -18,17 +22,16 @@ export {
   processDocumentJob,
   processInboxJob,
 } from "./documents";
-
 // Export jobs
 export { exportTransactionsJob } from "./exports";
-
+// Import jobs
+export { importTransactionsJob } from "./import";
 // Invoice jobs
 export {
   generateInvoiceJob,
   sendInvoiceEmailJob,
   sendInvoiceReminderJob,
 } from "./invoice";
-
 export {
   getStartedEmailJob,
   onboardTeamJob,
@@ -36,15 +39,7 @@ export {
   trialExpiringEmailJob,
   welcomeEmailJob,
 } from "./onboarding";
-
 // Rates jobs
 export { updateRatesJob } from "./rates";
-
 // Team jobs
 export { deleteTeamJob, inviteTeamMembersJob } from "./team";
-
-// Currency jobs
-export {
-  updateBaseCurrencyJob,
-  updateAccountBaseCurrencyJob,
-} from "./currency";

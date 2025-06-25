@@ -1,6 +1,6 @@
 import { writeToString } from "@fast-csv/format";
 import { getTransactionsForExport, updateDocument } from "@midday/db/queries";
-import { createClient } from "@midday/supabase/job";
+import type { createClient } from "@midday/supabase/job";
 import { download } from "@midday/supabase/storage";
 import { getTaxTypeLabel } from "@midday/utils/tax";
 import { job } from "@worker/core/job";
@@ -255,7 +255,6 @@ export const exportTransactionsJob = job(
   async ({ teamId, locale, transactionIds, dateFormat }, ctx) => {
     const startTime = Date.now();
 
-    const supabase = createClient();
     const baseFileName = `export-${format(new Date(), dateFormat ?? "yyyy-MM-dd")}`;
     const filePath = `${baseFileName}.zip`;
     const fullPath = `${teamId}/exports/${filePath}`;
@@ -274,7 +273,10 @@ export const exportTransactionsJob = job(
       }
 
       // Download attachments
-      const attachments = await downloadAttachments(supabase, transactionsData);
+      const attachments = await downloadAttachments(
+        ctx.supabase,
+        transactionsData,
+      );
       await ctx.job.updateProgress(50);
 
       // Sort transactions by date (newest first)
@@ -340,7 +342,7 @@ export const exportTransactionsJob = job(
       // Upload ZIP to storage
       ctx.logger.info("Uploading export file to storage", { fullPath });
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await ctx.supabase.storage
         .from("vault")
         .upload(fullPath, await zip.arrayBuffer(), {
           upsert: true,

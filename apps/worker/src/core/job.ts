@@ -1,4 +1,5 @@
 import type { Database } from "@midday/db/client";
+import { createClient } from "@midday/supabase/job";
 import { logger } from "@worker/monitoring/logger";
 import { createBaseQueueOptions } from "@worker/queues/base";
 import type { Job, JobNode } from "bullmq";
@@ -10,6 +11,7 @@ export interface JobContext {
   job: Job;
   db: Database;
   logger: typeof logger;
+  supabase: ReturnType<typeof createClient>;
 }
 
 // Job configuration - queue is required, everything else optional with defaults
@@ -294,6 +296,7 @@ class SimpleJob<T = any> {
         job,
         db,
         logger,
+        supabase: createClient(),
       };
 
       const result = await this.handler(validated, ctx);

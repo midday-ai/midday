@@ -19,7 +19,7 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
-import { useSyncStatus } from "@/hooks/use-sync-status";
+// import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useTRPC } from "@/trpc/client";
 import { connectionStatus } from "@/utils/connection-status";
 import { BankAccount } from "./bank-account";
@@ -141,7 +141,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
   const { toast, dismiss } = useToast();
 
   const { show } = connectionStatus(connection);
-  const { status, setStatus } = useSyncStatus({ runId, accessToken });
+  // const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
   const [params] = useQueryStates({
     step: parseAsString,
@@ -201,54 +201,54 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
     }
   }, [isSyncing]);
 
-  useEffect(() => {
-    if (status === "COMPLETED") {
-      dismiss();
-      setRunId(undefined);
-      setSyncing(false);
+  // useEffect(() => {
+  //   if (status === "COMPLETED") {
+  //     dismiss();
+  //     setRunId(undefined);
+  //     setSyncing(false);
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankConnections.get.queryKey(),
-      });
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.bankConnections.get.queryKey(),
+  //     });
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankAccounts.get.queryKey(),
-      });
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.bankAccounts.get.queryKey(),
+  //     });
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.team.current.queryKey(),
-      });
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.team.current.queryKey(),
+  //     });
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.transactions.get.queryKey(),
-      });
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.transactions.get.queryKey(),
+  //     });
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.transactions.get.infiniteQueryKey(),
-      });
-    }
-  }, [status]);
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.transactions.get.infiniteQueryKey(),
+  //     });
+  //   }
+  // }, [status]);
 
-  useEffect(() => {
-    if (status === "FAILED") {
-      setSyncing(false);
-      setRunId(undefined);
+  // useEffect(() => {
+  //   if (status === "FAILED") {
+  //     setSyncing(false);
+  //     setRunId(undefined);
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankConnections.get.queryKey(),
-      });
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.bankConnections.get.queryKey(),
+  //     });
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankAccounts.get.queryKey(),
-      });
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.bankAccounts.get.queryKey(),
+  //     });
 
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    }
-  }, [status]);
+  //     toast({
+  //       duration: 3500,
+  //       variant: "error",
+  //       title: "Something went wrong please try again.",
+  //     });
+  //   }
+  // }, [status]);
 
   // NOTE: GoCardLess reconnect flow (redirect from API route)
   useEffect(() => {

@@ -97,6 +97,22 @@ export const exportTransactionsSchema = z.object({
   transactionIds: z.array(z.string().uuid()),
 });
 
+// Import schemas
+export const importTransactionsSchema = z.object({
+  teamId: z.string().uuid(),
+  filePath: z.array(z.string()).optional(),
+  bankAccountId: z.string().uuid(),
+  currency: z.string(),
+  currentBalance: z.string().optional(),
+  inverted: z.boolean(),
+  mappings: z.object({
+    amount: z.string(),
+    date: z.string(),
+    description: z.string(),
+    balance: z.string().optional(),
+  }),
+});
+
 // Team schemas
 export const deleteTeamJobSchema = z.object({
   teamId: z.string().uuid(),

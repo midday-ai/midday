@@ -1,6 +1,5 @@
 import { updateInbox } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
-import { createClient } from "@midday/supabase/job";
 import { job } from "@worker/core/job";
 import { documentsQueue } from "@worker/queues/queues";
 import { z } from "zod";
@@ -31,8 +30,6 @@ export const processInboxJob = job(
       filePath: filePath.join("/"),
     });
 
-    const supabase = createClient();
-
     // If the file is a HEIC we need to convert it to a JPG
     if (mimetype === "image/heic") {
       ctx.logger.info("Converting HEIC file", { filePath });
@@ -43,7 +40,7 @@ export const processInboxJob = job(
 
     ctx.logger.info("Processing document with AI", { inboxId });
 
-    const { data } = await supabase.storage
+    const { data } = await ctx.supabase.storage
       .from("vault")
       .createSignedUrl(filePath.join("/"), 60);
 

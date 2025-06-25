@@ -20,7 +20,7 @@ export function ExportBar() {
   const { rowSelection, setRowSelection } = useTransactionsStore();
   const [isOpen, setOpen] = useState(false);
   const { data: user } = useUserQuery();
-  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const [currentJobId, setCurrentJobId] = useState<string | undefined>();
 
   // Track export job progress
   const {
@@ -32,12 +32,12 @@ export function ExportBar() {
     isCompleted,
     isFailed,
   } = useJobProgress({
-    jobId: currentJobId || "",
+    jobId: currentJobId,
     queue: "exports",
     enabled: !!currentJobId,
     pollInterval: 250,
     onCompleted: (_result) => {
-      setCurrentJobId(null);
+      setCurrentJobId(undefined);
       setRowSelection(() => ({}));
 
       queryClient.invalidateQueries({
@@ -45,7 +45,7 @@ export function ExportBar() {
       });
     },
     onFailed: (_error) => {
-      setCurrentJobId(null);
+      setCurrentJobId(undefined);
     },
   });
 

@@ -6,8 +6,8 @@ import {
   transactionAttachments,
   transactionCategories,
   type transactionFrequencyEnum,
-  transactionTags,
   transactions,
+  transactionTags,
   users,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
@@ -1103,6 +1103,48 @@ export async function createTransactions(
 
   // Filter out any null results
   return fullTransactions.filter((transaction) => transaction !== null);
+}
+
+export type BulkImportTransactionParams = {
+  name: string;
+  amount: number;
+  currency: string;
+  teamId: string;
+  date: string;
+  bankAccountId: string;
+  categorySlug?: string | null;
+};
+
+export async function bulkImportTransactions(
+  db: Database,
+  params: BulkImportTransactionParams[],
+) {
+  const transactionsToInsert = params.map((transaction) => ({
+    name: transaction.name,
+    amount: transaction.amount,
+    currency: transaction.currency,
+    teamId: transaction.teamId,
+    date: transaction.date,
+    bankAccountId: transaction.bankAccountId,
+    method: "other" as const,
+    manual: true,
+    notified: true,
+    status: "posted" as const,
+    internalId: `${transaction.teamId}_${nanoid()}`,
+    categorySlug: transaction.categorySlug,
+  }));
+
+  const results = await db
+    .insert(transactions)
+    .values(transactionsToInsert)
+    .returning({
+      id: transactions.id,
+    });
+
+  return {
+    insertedCount: results.length,
+    transactionIds: results.map((r) => r.id),
+  };
 }
 
 type GetTransactionsForExportParams = {

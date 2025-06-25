@@ -1,6 +1,6 @@
-import { getQueryClient, trpc } from "@/trpc/server";
 import { InboxConnector } from "@midday/inbox/connector";
 import { NextResponse } from "next/server";
+import { getQueryClient, trpc } from "@/trpc/server";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

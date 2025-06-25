@@ -1,8 +1,8 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { useTRPC } from "@/trpc/client";
 
 export interface JobProgressUpdate {
   jobId: string;
@@ -15,7 +15,7 @@ export interface JobProgressUpdate {
 }
 
 interface UseJobProgressOptions {
-  jobId: string;
+  jobId?: string;
   queue: string;
   enabled?: boolean;
   onProgress?: (update: JobProgressUpdate) => void;
@@ -38,7 +38,7 @@ export function useJobProgress({
   const { data, error, isLoading, refetch } = useQuery(
     trpc.jobs.getStatus.queryOptions(
       {
-        jobId,
+        jobId: jobId ?? "",
         queue,
       },
       {

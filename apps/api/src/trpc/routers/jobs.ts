@@ -1,3 +1,4 @@
+import { onboardTeamSchema } from "@api/schemas/jobs";
 import {
   createTRPCRouter,
   internalProcedure,
@@ -5,23 +6,19 @@ import {
 } from "@api/trpc/init";
 import { tasks } from "@worker/jobs/tasks";
 import { createBaseQueueOptions } from "@worker/queues/base";
-import { onboardTeamSchema } from "@worker/schemas/jobs";
+import { onboardTeamSchema as onboardTeamJobSchema } from "@worker/schemas/jobs";
 import { Queue } from "bullmq";
 import { z } from "zod";
 
 export const jobsRouter = createTRPCRouter({
   onboardTeam: internalProcedure
-    .input(
-      z.object({
-        userId: z.string().uuid(),
-      }),
-    )
+    .input(onboardTeamSchema)
     .mutation(async ({ input }) => {
       const { userId } = input;
 
       try {
         return tasks.trigger(
-          onboardTeamSchema,
+          onboardTeamJobSchema,
           "onboarding",
           "onboard-team",
           { userId },

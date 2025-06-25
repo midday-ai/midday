@@ -1,7 +1,6 @@
 import { updateDocument } from "@midday/db/queries";
 import { loadDocument } from "@midday/documents/loader";
 import { getContentSample } from "@midday/documents/utils";
-import { createClient } from "@midday/supabase/job";
 import { job } from "@worker/core/job";
 import { documentsQueue } from "@worker/queues/queues";
 import { processDocumentSchema } from "@worker/schemas/jobs";
@@ -24,8 +23,6 @@ export const processDocumentJob = job(
       filePath: filePath.join("/"),
       teamId,
     });
-
-    const supabase = createClient();
 
     try {
       // If the file is a HEIC we need to convert it to a JPG
@@ -54,7 +51,7 @@ export const processDocumentJob = job(
 
       // Process non-image documents
       ctx.logger.info("Downloading document for processing", { filePath });
-      const { data: fileData } = await supabase.storage
+      const { data: fileData } = await ctx.supabase.storage
         .from("vault")
         .download(filePath.join("/"));
 

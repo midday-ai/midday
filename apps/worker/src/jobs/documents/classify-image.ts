@@ -1,7 +1,6 @@
 import { updateDocument } from "@midday/db/queries";
 import { limitWords } from "@midday/documents";
 import { DocumentClassifier } from "@midday/documents/classifier";
-import { createClient } from "@midday/supabase/job";
 import { job } from "@worker/core/job";
 import { documentsQueue } from "@worker/queues/queues";
 import { z } from "zod";
@@ -25,12 +24,11 @@ export const classifyImageJob = job(
       teamId,
     });
 
-    const supabase = createClient();
     const classifier = new DocumentClassifier();
 
     try {
       ctx.logger.info("Downloading image file", { fileName });
-      const { data: fileData } = await supabase.storage
+      const { data: fileData } = await ctx.supabase.storage
         .from("vault")
         .download(fileName);
 

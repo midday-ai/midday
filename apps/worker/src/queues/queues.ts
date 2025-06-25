@@ -44,6 +44,17 @@ const QUEUES = {
       },
     }),
   },
+  imports: {
+    concurrency: 3, // Lower concurrency for imports to manage memory and DB load
+    options: createBaseQueueOptions({
+      defaultJobOptions: {
+        removeOnComplete: { count: 50, age: 7 * 24 * 3600 }, // Keep import jobs for 7 days for audit
+        attempts: 3,
+        priority: 2, // Medium priority for imports
+        backoff: { type: "exponential", delay: 5000 }, // Longer delay for large imports
+      },
+    }),
+  },
   teams: {
     concurrency: 40, // MUCH higher - just DB calls and API calls, no external limits
     options: createBaseQueueOptions({
@@ -87,6 +98,7 @@ export const emailQueue = createJobQueue("emails");
 export const documentsQueue = createJobQueue("documents");
 export const invoicesQueue = createJobQueue("invoices");
 export const exportsQueue = createJobQueue("exports");
+export const importsQueue = createJobQueue("imports");
 export const teamsQueue = createJobQueue("teams");
 export const systemQueue = createJobQueue("system");
 
@@ -96,6 +108,7 @@ export const queues = {
   documents: { name: "documents", ...QUEUES.documents },
   invoices: { name: "invoices", ...QUEUES.invoices },
   exports: { name: "exports", ...QUEUES.exports },
+  imports: { name: "imports", ...QUEUES.imports },
   teams: { name: "teams", ...QUEUES.teams },
   system: { name: "system", ...QUEUES.system },
 } as const;

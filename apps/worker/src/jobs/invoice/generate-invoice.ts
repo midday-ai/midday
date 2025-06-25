@@ -1,6 +1,5 @@
 import { getInvoiceById, updateInvoice } from "@midday/db/queries";
 import { PdfTemplate, renderToBuffer } from "@midday/invoice";
-import { createClient } from "@midday/supabase/job";
 import { job } from "@worker/core/job";
 import { processDocumentJob } from "@worker/jobs/documents/process-document";
 import { invoicesQueue } from "@worker/queues/queues";
@@ -26,8 +25,6 @@ export const generateInvoiceJob = job(
       throw new Error("Invoice not found");
     }
 
-    const supabase = createClient();
-
     ctx.logger.info("Rendering PDF template", { invoiceId });
 
     const buffer = await renderToBuffer(await PdfTemplate(invoice));
@@ -50,7 +47,7 @@ export const generateInvoiceJob = job(
     });
 
     // Upload PDF to storage
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await ctx.supabase.storage
       .from("vault")
       .upload(fullPath, buffer, {
         contentType: "application/pdf",
