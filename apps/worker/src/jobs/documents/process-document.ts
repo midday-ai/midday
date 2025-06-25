@@ -4,16 +4,10 @@ import { getContentSample } from "@midday/documents/utils";
 import { createClient } from "@midday/supabase/job";
 import { job } from "@worker/core/job";
 import { documentsQueue } from "@worker/queues/queues";
-import { z } from "zod";
+import { processDocumentSchema } from "@worker/schemas/jobs";
 import { classifyDocumentJob } from "./classify-document";
 import { classifyImageJob } from "./classify-image";
 import { convertHeicJob } from "./convert-heic";
-
-export const processDocumentSchema = z.object({
-  mimetype: z.string(),
-  filePath: z.array(z.string()),
-  teamId: z.string().uuid(),
-});
 
 export const processDocumentJob = job(
   "process-document",
@@ -98,7 +92,7 @@ export const processDocumentJob = job(
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
-      ctx.logger.error("Failed to process document", {
+      ctx.logger.error("Document processing failed", {
         filePath: filePath.join("/"),
         teamId,
         error: errorMessage,

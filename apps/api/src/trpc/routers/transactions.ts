@@ -25,8 +25,8 @@ import {
   updateTransaction,
   updateTransactions,
 } from "@midday/db/queries";
-import { exportTransactionsSchema as exportTransactionsJobSchema } from "@worker/jobs/exports/export-transactions";
 import { tasks } from "@worker/jobs/tasks";
+import { exportTransactionsSchema as exportTransactionsJobSchema } from "@worker/schemas/jobs";
 
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure

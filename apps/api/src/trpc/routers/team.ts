@@ -33,8 +33,10 @@ import {
 } from "@midday/db/queries";
 import { TRPCError } from "@trpc/server";
 import { tasks } from "@worker/jobs/tasks";
-import { deleteTeamSchema as deleteTeamJobSchema } from "@worker/jobs/team/delete-team";
-import { inviteTeamMembersSchema as inviteTeamMembersJobSchema } from "@worker/jobs/team/invite-members";
+import {
+  deleteTeamJobSchema,
+  inviteTeamMembersJobSchema,
+} from "@worker/schemas/jobs";
 
 export const teamRouter = createTRPCRouter({
   current: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {

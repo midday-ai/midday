@@ -35,9 +35,11 @@ import {
 } from "@midday/db/queries";
 import { verify } from "@midday/invoice/token";
 import { TRPCError } from "@trpc/server";
-import { generateInvoiceSchema } from "@worker/jobs/invoice/generate-invoice";
-import { sendInvoiceReminderSchema } from "@worker/jobs/invoice/send-reminder";
 import { tasks } from "@worker/jobs/tasks";
+import {
+  generateInvoiceSchema,
+  sendInvoiceReminderSchema,
+} from "@worker/schemas/jobs";
 import { addMonths } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 

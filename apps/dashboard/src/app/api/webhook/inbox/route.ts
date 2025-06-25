@@ -1,5 +1,3 @@
-import { createServerTRPCClient } from "@/trpc/server-client";
-import { logger } from "@/utils/logger";
 import { resend } from "@api/services/resend";
 import { getAllowedAttachments } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
@@ -9,6 +7,8 @@ import { createClient } from "@midday/supabase/server";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { createServerTRPCClient } from "@/trpc/server-client";
+import { logger } from "@/utils/logger";
 
 // https://postmarkapp.com/support/article/800-ips-for-firewalls#webhooks
 const ipRange = [

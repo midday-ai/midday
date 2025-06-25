@@ -3,9 +3,9 @@ import {
   internalProcedure,
   protectedProcedure,
 } from "@api/trpc/init";
-import { onboardTeamSchema } from "@worker/jobs/onboarding/onboard-team";
 import { tasks } from "@worker/jobs/tasks";
 import { createBaseQueueOptions } from "@worker/queues/base";
+import { onboardTeamSchema } from "@worker/schemas/jobs";
 import { Queue } from "bullmq";
 import { z } from "zod";
 

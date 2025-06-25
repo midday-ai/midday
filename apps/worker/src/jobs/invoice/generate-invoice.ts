@@ -4,13 +4,8 @@ import { createClient } from "@midday/supabase/job";
 import { job } from "@worker/core/job";
 import { processDocumentJob } from "@worker/jobs/documents/process-document";
 import { invoicesQueue } from "@worker/queues/queues";
-import { z } from "zod";
+import { generateInvoiceSchema } from "@worker/schemas/jobs";
 import { sendInvoiceEmailJob } from "./send-email";
-
-export const generateInvoiceSchema = z.object({
-  invoiceId: z.string().uuid(),
-  deliveryType: z.enum(["create", "create_and_send"]),
-});
 
 export const generateInvoiceJob = job(
   "generate-invoice",

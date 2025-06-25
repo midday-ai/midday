@@ -1,16 +1,12 @@
-import { getUserById } from "@db/queries";
+import { getUserById } from "@midday/db/queries";
 import { job } from "@worker/core/job";
 import { emailQueue } from "@worker/queues/queues";
+import { onboardTeamSchema } from "@worker/schemas/jobs";
 import { resend } from "@worker/services/resend";
-import { z } from "zod";
 import { getStartedEmailJob } from "./get-started-email";
 import { trialEndedEmailJob } from "./trial-ended-email";
 import { trialExpiringEmailJob } from "./trial-expiring-email";
 import { welcomeEmailJob } from "./welcome-email";
-
-export const onboardTeamSchema = z.object({
-  userId: z.string().uuid(),
-});
 
 export const onboardTeamJob = job(
   "onboard-team",

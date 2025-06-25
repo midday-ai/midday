@@ -18,8 +18,8 @@ import {
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
 import { remove, signedUrl } from "@midday/supabase/storage";
 import { TRPCError } from "@trpc/server";
-import { processDocumentSchema as processDocumentJobSchema } from "@worker/jobs/documents/process-document";
 import { tasks } from "@worker/jobs/tasks";
+import { processDocumentSchema as processDocumentJobSchema } from "@worker/schemas/jobs";
 
 export const documentsRouter = createTRPCRouter({
   get: protectedProcedure

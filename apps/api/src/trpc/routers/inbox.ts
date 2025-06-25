@@ -19,8 +19,8 @@ import {
   unmatchTransaction,
   updateInbox,
 } from "@midday/db/queries";
-import { processInboxSchema as processInboxJobSchema } from "@worker/jobs/documents/process-inbox";
 import { tasks } from "@worker/jobs/tasks";
+import { processInboxSchema as processInboxJobSchema } from "@worker/schemas/jobs";
 
 export const inboxRouter = createTRPCRouter({
   get: protectedProcedure
