@@ -1,8 +1,11 @@
 import { resend } from "@api/services/resend";
-import { getAllowedAttachments } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
-import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
+import {
+  getAllowedAttachments,
+  getInboxIdFromEmail,
+  inboxWebhookPostSchema,
+} from "@midday/inbox";
 import { createClient } from "@midday/supabase/server";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
