@@ -1,9 +1,9 @@
 "use client";
 
-import { shareFileAction } from "@/actions/share-file-action";
 import { useExportStatus } from "@/hooks/use-export-status";
 import { downloadFile } from "@/lib/download";
 import { useExportStore } from "@/store/export";
+import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -13,8 +13,8 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
+import { useMutation } from "@tanstack/react-query";
 import { addDays, addYears } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
 
@@ -44,6 +44,7 @@ type ExportData = {
 };
 
 export function ExportStatus() {
+  const trpc = useTRPC();
   const { toast, dismiss, update } = useToast();
   const [toastId, setToastId] = useState<string | null>(null);
   const { exportData, setExportData } = useExportStore();
@@ -52,24 +53,26 @@ export function ExportStatus() {
   );
   const [, copy] = useCopyToClipboard();
 
-  const shareFile = useAction(shareFileAction, {
-    onError: () => {
-      toast({
-        duration: 2500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-    onSuccess: ({ data }) => {
-      copy(data ?? "");
+  const shareFileMutation = useMutation(
+    trpc.shortLinks.createForFile.mutationOptions({
+      onError: () => {
+        toast({
+          duration: 2500,
+          variant: "error",
+          title: "Something went wrong please try again.",
+        });
+      },
+      onSuccess: ({ shortUrl }) => {
+        copy(shortUrl ?? "");
 
-      toast({
-        duration: 2500,
-        title: "Copied URL to clipboard.",
-        variant: "success",
-      });
-    },
-  });
+        toast({
+          duration: 2500,
+          title: "Copied URL to clipboard.",
+          variant: "success",
+        });
+      },
+    }),
+  );
 
   const handleOnDownload = () => {
     if (toastId) {
@@ -78,7 +81,8 @@ export function ExportStatus() {
   };
 
   const handleOnShare = ({ expireIn, fullPath }: ShareOptions) => {
-    shareFile.execute({ expireIn, fullPath });
+    shareFileMutation.mutate({ expireIn, fullPath });
+
     if (toastId) {
       dismiss(toastId);
     }

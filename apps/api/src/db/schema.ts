@@ -2002,6 +2002,69 @@ export const usersInAuth = pgTable(
   ],
 );
 
+export const shortLinks = pgTable(
+  "short_links",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    shortId: text("short_id").notNull(),
+    url: text().notNull(),
+    teamId: uuid("team_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("short_links_short_id_idx").using(
+      "btree",
+      table.shortId.asc().nullsLast().op("text_ops"),
+    ),
+    index("short_links_team_id_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("short_links_user_id_idx").using(
+      "btree",
+      table.userId.asc().nullsLast().op("uuid_ops"),
+    ),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "short_links_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "short_links_team_id_fkey",
+    }).onDelete("cascade"),
+    unique("short_links_short_id_unique").on(table.shortId),
+    pgPolicy("Short links can be created by a member of the team", {
+      as: "permissive",
+      for: "insert",
+      to: ["authenticated"],
+      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Short links can be selected by a member of the team", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Short links can be updated by a member of the team", {
+      as: "permissive",
+      for: "update",
+      to: ["authenticated"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Short links can be deleted by a member of the team", {
+      as: "permissive",
+      for: "delete",
+      to: ["authenticated"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
 export const apiKeys = pgTable(
   "api_keys",
   {
@@ -2084,6 +2147,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   documents: many(documents),
   apps: many(apps),
   apiKeys: many(apiKeys),
+  shortLinks: many(shortLinks),
   usersInAuth: one(usersInAuth, {
     fields: [users.id],
     references: [usersInAuth.id],
@@ -2093,6 +2157,17 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     references: [teams.id],
   }),
   usersOnTeams: many(usersOnTeam),
+}));
+
+export const shortLinksRelations = relations(shortLinks, ({ one }) => ({
+  user: one(users, {
+    fields: [shortLinks.userId],
+    references: [users.id],
+  }),
+  team: one(teams, {
+    fields: [shortLinks.teamId],
+    references: [teams.id],
+  }),
 }));
 
 export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
@@ -2126,6 +2201,7 @@ export const teamsRelations = relations(teams, ({ many }) => ({
   documents: many(documents),
   apps: many(apps),
   apiKeys: many(apiKeys),
+  shortLinks: many(shortLinks),
   invoiceTemplates: many(invoiceTemplates),
   transactionEnrichments: many(transactionEnrichments),
   users: many(users),

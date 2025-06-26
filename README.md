@@ -75,9 +75,10 @@ We are working on the documentation to get started with Midday for local develop
 - Plaid (Bank connection in Canada and US)
 - Teller (Bank connection in the US)
 - OpenPanel (Events and Analytics)
-- Dub (Short URLs)
 - Polar (Payment processing)
 - Typesense (Search)
+- Mistral
+- OpenAI
 
 ## Repo Activity
 
