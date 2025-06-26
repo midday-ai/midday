@@ -102,14 +102,31 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: Props) => {
             Best regards, founders
           </Text>
 
+          <style>{`
+            .signature-blend {
+              filter: none;
+            }
+            
+            /* Regular dark mode - exclude Outlook.com */
+            @media (prefers-color-scheme: dark) {
+              .signature-blend:not([class^="x_"]) {
+                filter: invert(1) brightness(1);
+              }
+            }
+            
+            /* Outlook.com specific dark mode targeting */
+            [data-ogsb] .signature-blend,
+            [data-ogsc] .signature-blend,
+            [data-ogac] .signature-blend,
+            [data-ogab] .signature-blend {
+              filter: invert(1) brightness(1);
+            }
+          `}</style>
+
           <Img
             src={`${baseUrl}/email/signature.png`}
             alt="Signature"
-            className="block w-full w-[143px] h-[20px]"
-            style={{
-              mixBlendMode: "difference",
-              filter: "invert(1) contrast(1.2)",
-            }}
+            className="block w-full w-[143px] h-[20px] signature-blend"
           />
 
           <br />
