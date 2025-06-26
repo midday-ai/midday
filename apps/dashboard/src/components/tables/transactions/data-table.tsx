@@ -3,7 +3,7 @@
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
 import { LoadMore } from "@/components/load-more";
 import { useSortParams } from "@/hooks/use-sort-params";
-import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
+import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useTransactionsStore } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
@@ -37,14 +37,13 @@ export function DataTable({
   columnVisibility: columnVisibilityPromise,
 }: Props) {
   const trpc = useTRPC();
-  const { filter } = useTransactionFilterParams();
+  const { filter, hasFilters } = useTransactionFilterParamsWithPersistence();
   const { setRowSelection, rowSelection, setColumns, setCanDelete } =
     useTransactionsStore();
   const deferredSearch = useDeferredValue(filter.q);
   const { params } = useSortParams();
   const { ref, inView } = useInView();
   const { transactionId, setParams } = useTransactionParams();
-  const { hasFilters } = useTransactionFilterParams();
 
   const showBottomBar = hasFilters && !Object.keys(rowSelection).length;
   const initialColumnVisibility = use(columnVisibilityPromise);

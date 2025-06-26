@@ -2,6 +2,7 @@
 
 import { generateTransactionsFilters } from "@/actions/ai/filters/generate-transactions-filters";
 import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
+import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTRPC } from "@/trpc/client";
 import { formatAccountName } from "@/utils/format";
 import { Calendar } from "@midday/ui/calendar";
@@ -200,7 +201,8 @@ export function TransactionsSearchFilter() {
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const { filter = defaultSearch, setFilter } = useTransactionFilterParams();
+  const { filter = defaultSearch, setFilter } =
+    useTransactionFilterParamsWithPersistence();
   const { tags, accounts, categories } = useFilterData(isOpen, isFocused);
   const [prompt, setPrompt] = useState(filter.q ?? "");
 

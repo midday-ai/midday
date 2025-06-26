@@ -1,12 +1,12 @@
 "use client";
 
 import { AddAccountButton } from "@/components/add-account-button";
-import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
+import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 
 export function NoResults() {
-  const { setFilter } = useTransactionFilterParams();
+  const { clearAllFilters } = useTransactionFilterParamsWithPersistence();
 
   return (
     <div className="h-[calc(100vh-300px)] flex items-center justify-center">
@@ -19,7 +19,7 @@ export function NoResults() {
           </p>
         </div>
 
-        <Button variant="outline" onClick={() => setFilter(null)}>
+        <Button variant="outline" onClick={clearAllFilters}>
           Clear filters
         </Button>
       </div>

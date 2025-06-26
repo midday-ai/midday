@@ -8,7 +8,7 @@ export function CustomersSkeleton() {
       <div className="overflow-x-auto border-l border-r border-border">
         <Table className="min-w-[1000px]">
           <TableHeader />
-          <TableBody className="border-l-0 border-r-0">
+          <TableBody className="border-l-0 border-r-0 border-t-0 border-b-0">
             {Array.from({ length: 25 }).map((_, index) => (
               <TableRow key={index.toString()} className="h-[45px]">
                 <TableCell>

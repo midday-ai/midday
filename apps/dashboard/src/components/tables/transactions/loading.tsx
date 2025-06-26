@@ -19,7 +19,7 @@ export function Loading({ isEmpty }: { isEmpty?: boolean }) {
         >
           <DataTableHeader loading />
 
-          <TableBody className="border-l-0 border-r-0">
+          <TableBody className="border-l-0 border-r-0 border-t-0 border-b-0">
             {data?.map((row) => (
               <TableRow key={row.id} className="h-[45px]">
                 <TableCell className="w-[50px]">
