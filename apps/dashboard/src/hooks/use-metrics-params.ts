@@ -84,6 +84,7 @@ export const metricsParamsSchema = {
     chartPeriodOptions.map((option) => option.value),
   ).withDefault("12m"),
   chart: parseAsStringLiteral(chartTypeOptions).withDefault("revenue"),
+  currency: parseAsString,
 };
 
 export function useMetricsParams() {

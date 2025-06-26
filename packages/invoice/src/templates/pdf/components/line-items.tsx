@@ -1,4 +1,3 @@
-import { formatAmount } from "@midday/utils/format";
 import { Text, View } from "@react-pdf/renderer";
 import type { LineItem } from "../../../types";
 import { calculateLineItemTotal } from "../../../utils/calculate";

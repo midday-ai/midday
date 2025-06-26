@@ -27,6 +27,7 @@ export function RevenueChart({ disabled }: Props) {
     ...trpc.metrics.revenue.queryOptions({
       from: params.from,
       to: params.to,
+      currency: params.currency ?? undefined,
     }),
     placeholderData: (previousData) => previousData ?? chartExampleData,
   });

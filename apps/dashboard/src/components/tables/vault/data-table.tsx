@@ -158,45 +158,53 @@ export function DataTable() {
 
   return (
     <div className="w-full">
-      <Table>
-        <DataTableHeader table={table} />
+      <div className="overflow-x-auto border-l border-r border-border">
+        <Table className="min-w-[800px]">
+          <DataTableHeader table={table} />
 
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className="h-[40px] md:h-[45px] cursor-pointer select-text"
-              >
-                {row.getAllCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    className={cn(cell.column.columnDef.meta?.className)}
-                    onClick={() => {
-                      if (
-                        cell.column.id !== "select" &&
-                        cell.column.id !== "tags" &&
-                        cell.column.id !== "actions"
-                      ) {
-                        setParams({ documentId: row.original.id });
-                      }
-                    }}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+          <TableBody className="border-l-0 border-r-0">
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="h-[40px] md:h-[45px] cursor-pointer select-text"
+                >
+                  {row.getAllCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className={cn(cell.column.columnDef.meta?.className)}
+                      onClick={() => {
+                        if (
+                          cell.column.id !== "select" &&
+                          cell.column.id !== "tags" &&
+                          cell.column.id !== "actions"
+                        ) {
+                          setParams({ documentId: row.original.id });
+                        }
+                      }}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow className="hover:bg-transparent">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
               </TableRow>
-            ))
-          ) : (
-            <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <AnimatePresence>
         {showBottomBar && <BottomBar data={files} />}

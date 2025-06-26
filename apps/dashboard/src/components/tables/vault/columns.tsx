@@ -46,12 +46,19 @@ export const columns: ColumnDef<Document>[] = [
         return <Skeleton className="w-52 h-4" />;
       }
 
-      return row.original.title ?? row.original.name?.split("/").at(-1);
+      return (
+        <div className="truncate">
+          {row.original.title ?? row.original.name?.split("/").at(-1)}
+        </div>
+      );
     },
   },
   {
     id: "tags",
     accessorKey: "tags",
+    meta: {
+      className: "w-[280px] max-w-[280px]",
+    },
     cell: ({ row }) => {
       const { setFilter } = useDocumentFilterParams();
 
@@ -68,13 +75,13 @@ export const columns: ColumnDef<Document>[] = [
       }
 
       return (
-        <div className="relative">
-          <div className="flex items-center space-x-2 w-[400px] overflow-x-auto scrollbar-hide">
+        <div className="relative w-full">
+          <div className="flex items-center space-x-2 overflow-x-auto scrollbar-hide">
             {row.original.documentTagAssignments?.map(({ documentTag }) => (
               <Badge
                 key={documentTag.id}
                 variant="tag-rounded"
-                className="whitespace-nowrap"
+                className="whitespace-nowrap flex-shrink-0"
                 onClick={() => {
                   setFilter({ tags: [documentTag.id] });
                 }}
@@ -160,7 +167,8 @@ export const columns: ColumnDef<Document>[] = [
       );
     },
     meta: {
-      className: "text-right",
+      className:
+        "text-right sticky right-0 bg-background z-10 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]",
     },
   },
 ];

@@ -28,6 +28,7 @@ export function ExpenseChart({ disabled }: Props) {
     ...trpc.metrics.expense.queryOptions({
       from: params.from,
       to: params.to,
+      currency: params.currency ?? undefined,
     }),
     placeholderData: (previousData) => previousData ?? expenseChartExampleData,
   });

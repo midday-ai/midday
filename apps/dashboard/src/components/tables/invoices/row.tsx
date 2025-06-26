@@ -22,7 +22,10 @@ export function InvoiceRow({ row }: Props) {
         {row.getVisibleCells().map((cell, index) => (
           <TableCell
             key={cell.id}
-            className={cn(index === 2 && "w-[50px]")}
+            className={cn(
+              index === 2 && "w-[50px] min-w-[50px]",
+              cell.column.columnDef.meta?.className,
+            )}
             onClick={() => {
               if (index !== row.getVisibleCells().length - 1) {
                 setParams({

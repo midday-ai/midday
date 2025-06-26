@@ -227,50 +227,55 @@ export function DataTable({
     <div className="relative">
       <TooltipProvider delayDuration={20}>
         <Tooltip>
-          <Table>
-            <DataTableHeader table={table} />
+          <div className="w-full">
+            <div className="overflow-x-auto border-l border-r border-border">
+              <Table className="min-w-[1600px]">
+                <DataTableHeader table={table} />
 
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    className="h-[40px] md:h-[45px] cursor-pointer select-text"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        onClick={() => {
-                          if (
-                            cell.column.id !== "select" &&
-                            cell.column.id !== "actions"
-                          ) {
-                            setParams({ transactionId: row.original.id });
-                          }
-                        }}
+                <TableBody className="border-l-0 border-r-0">
+                  {table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        className="h-[40px] md:h-[45px] cursor-pointer select-text"
                       >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell
+                            key={cell.id}
+                            className={cell.column.columnDef.meta?.className}
+                            onClick={() => {
+                              if (
+                                cell.column.id !== "select" &&
+                                cell.column.id !== "actions"
+                              ) {
+                                setParams({ transactionId: row.original.id });
+                              }
+                            }}
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={columns.length}
+                        className="h-24 text-center"
+                      >
+                        No results.
                       </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
 
-          <LoadMore ref={ref} hasNextPage={hasNextPage} />
+            <LoadMore ref={ref} hasNextPage={hasNextPage} />
+          </div>
         </Tooltip>
       </TooltipProvider>
 

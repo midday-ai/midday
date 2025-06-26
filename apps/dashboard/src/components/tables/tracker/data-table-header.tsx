@@ -27,7 +27,7 @@ export function DataTableHeader() {
   };
 
   return (
-    <TableHeader>
+    <TableHeader className="border-l-0 border-r-0">
       <TableRow className="h-[45px]">
         <TableHead className="w-[320px]">
           <Button
@@ -117,7 +117,7 @@ export function DataTableHeader() {
             {"assigned" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead className="w-[170px]">
+        <TableHead className="w-[120px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -127,6 +127,9 @@ export function DataTableHeader() {
             {"status" === column && value === "asc" && <ArrowDown size={16} />}
             {"status" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
+        </TableHead>
+        <TableHead className="w-[100px] sticky right-0 bg-background z-10 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]">
+          Actions
         </TableHead>
       </TableRow>
     </TableHeader>

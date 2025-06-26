@@ -53,10 +53,10 @@ export function TableHeader({ table }: Props) {
       ?.getIsVisible();
 
   return (
-    <BaseTableHeader>
+    <BaseTableHeader className="border-l-0 border-r-0">
       <TableRow>
         {isVisible("invoiceNumber") && (
-          <TableHead className="w-[200px]">
+          <TableHead className="w-[200px] min-w-[200px]">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -206,7 +206,9 @@ export function TableHeader({ table }: Props) {
         )}
 
         {isVisible("actions") && (
-          <TableHead className="w-[100px]">Actions</TableHead>
+          <TableHead className="w-[100px] sticky right-0 bg-background z-10 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]">
+            Actions
+          </TableHead>
         )}
       </TableRow>
     </BaseTableHeader>
