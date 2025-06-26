@@ -1,5 +1,6 @@
 "use client";
 
+import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
@@ -55,15 +56,19 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
 
   return (
     <div className="flex flex-row gap-2">
-      <a href={`${downloadUrl}&filename=${fileName}`} download>
-        <Button
-          variant="outline"
-          size="icon"
-          className="rounded-full size-7 bg-background"
-        >
-          <Icons.ArrowCoolDown className="size-3.5" />
-        </Button>
-      </a>
+      <Button
+        variant="outline"
+        size="icon"
+        className="rounded-full size-7 bg-background"
+        onClick={() => {
+          downloadFile(
+            `${downloadUrl}&filename=${fileName}`,
+            fileName || "download",
+          );
+        }}
+      >
+        <Icons.ArrowCoolDown className="size-3.5" />
+      </Button>
 
       <Button
         variant="outline"

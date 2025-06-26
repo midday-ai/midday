@@ -1,5 +1,6 @@
 "use client";
 
+import { downloadFile } from "@/lib/download";
 import { Button } from "@midday/ui/button";
 import {
   Tooltip,
@@ -13,9 +14,10 @@ import { useCopyToClipboard } from "usehooks-ts";
 
 type Props = {
   token: string;
+  invoiceNumber: string;
 };
 
-export default function InvoiceToolbar({ token }: Props) {
+export default function InvoiceToolbar({ token, invoiceNumber }: Props) {
   const [, copy] = useCopyToClipboard();
 
   const handleCopyLink = () => {
@@ -34,15 +36,19 @@ export default function InvoiceToolbar({ token }: Props) {
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <a href={`/api/download/invoice?token=${token}`} download>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full size-8"
-                >
-                  <MdOutlineFileDownload className="size-[18px]" />
-                </Button>
-              </a>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full size-8"
+                onClick={() => {
+                  downloadFile(
+                    `/api/download/invoice?token=${token}`,
+                    `${invoiceNumber}.pdf`,
+                  );
+                }}
+              >
+                <MdOutlineFileDownload className="size-[18px]" />
+              </Button>
             </TooltipTrigger>
             <TooltipContent
               sideOffset={15}

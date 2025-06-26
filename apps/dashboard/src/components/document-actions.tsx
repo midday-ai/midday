@@ -1,6 +1,7 @@
 "use client";
 
 import { useDocumentParams } from "@/hooks/use-document-params";
+import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
@@ -61,14 +62,20 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
 
   return (
     <div className="flex flex-row">
-      <a
-        href={`/api/download/file?path=${filePath?.join("/")}&filename=${filename}`}
-        download
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => {
+          if (filePath && filename) {
+            downloadFile(
+              `/api/download/file?path=${filePath.join("/")}&filename=${filename}`,
+              filename,
+            );
+          }
+        }}
       >
-        <Button variant="ghost" size="icon">
-          <Icons.ArrowCoolDown className="size-4" />
-        </Button>
-      </a>
+        <Icons.ArrowCoolDown className="size-4" />
+      </Button>
 
       <Button
         variant="ghost"

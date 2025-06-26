@@ -2,6 +2,7 @@
 
 import { shareFileAction } from "@/actions/share-file-action";
 import { useExportStatus } from "@/hooks/use-export-status";
+import { downloadFile } from "@/lib/download";
 import { useExportStore } from "@/store/export";
 import { Button } from "@midday/ui/button";
 import {
@@ -151,14 +152,20 @@ export function ExportStatus() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <a
-              href={`/api/download/file?path=${result.fullPath}&filename=${result.fileName}`}
-              download
+            <Button
+              size="sm"
+              onClick={() => {
+                if (result?.fullPath && result?.fileName) {
+                  downloadFile(
+                    `/api/download/file?path=${result.fullPath}&filename=${result.fileName}`,
+                    result.fileName,
+                  );
+                }
+                handleOnDownload();
+              }}
             >
-              <Button size="sm" onClick={handleOnDownload}>
-                Download
-              </Button>
-            </a>
+              Download
+            </Button>
           </div>
         ),
       });
