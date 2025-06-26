@@ -182,15 +182,16 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
 
 function updateArrayFilter(
   value: string,
-  currentValues: string[] | null,
+  currentValues: string[] | null | undefined,
   setFilter: (update: Record<string, unknown>) => void,
   key: string,
 ) {
-  const newValues = currentValues?.includes(value)
-    ? currentValues.filter((v) => v !== value).length > 0
-      ? currentValues.filter((v) => v !== value)
+  const normalizedValues = currentValues ?? null;
+  const newValues = normalizedValues?.includes(value)
+    ? normalizedValues.filter((v) => v !== value).length > 0
+      ? normalizedValues.filter((v) => v !== value)
       : null
-    : [...(currentValues ?? []), value];
+    : [...(normalizedValues ?? []), value];
 
   setFilter({ [key]: newValues });
 }
