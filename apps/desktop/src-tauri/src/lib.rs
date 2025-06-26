@@ -477,6 +477,7 @@ pub fn run() {
             .shadow(true)
             .hidden_title(true)
             .title_bar_style(TitleBarStyle::Overlay)
+            .disable_drag_drop_handler()
             .on_download(|_window, _event| {
                 println!("Download triggered!");
                 // Allow all downloads - they will go to default Downloads folder

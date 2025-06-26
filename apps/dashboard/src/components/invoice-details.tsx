@@ -1,6 +1,7 @@
 "use client";
 
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { getWebsiteLogo } from "@/utils/logos";
@@ -196,16 +197,20 @@ export function InvoiceDetails() {
             </div>
 
             {status !== "draft" && (
-              <a href={`/api/download/invoice?id=${id}`} download>
-                <Button
-                  variant="secondary"
-                  className="size-[38px] hover:bg-secondary shrink-0"
-                >
-                  <div>
-                    <Icons.ArrowCoolDown className="size-4" />
-                  </div>
-                </Button>
-              </a>
+              <Button
+                variant="secondary"
+                className="size-[38px] hover:bg-secondary shrink-0"
+                onClick={() => {
+                  downloadFile(
+                    `/api/download/invoice?id=${id}`,
+                    `${invoiceNumber}.pdf`,
+                  );
+                }}
+              >
+                <div>
+                  <Icons.ArrowCoolDown className="size-4" />
+                </div>
+              </Button>
             )}
           </div>
         </div>

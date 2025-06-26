@@ -3,6 +3,7 @@ import { FormatAmount } from "@/components/format-amount";
 import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
+import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { formatDate } from "@/utils/format";
@@ -211,15 +212,17 @@ export function InboxDetails() {
                   </DialogTrigger>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem>
-                  <a
-                    href={`/api/download/file?path=${data?.filePath?.join(
-                      "/",
-                    )}&filename=${data?.fileName}`}
-                    download
-                  >
-                    Download
-                  </a>
+                <DropdownMenuItem
+                  onClick={() => {
+                    if (data?.filePath && data?.fileName) {
+                      downloadFile(
+                        `/api/download/file?path=${data.filePath.join("/")}&filename=${data.fileName}`,
+                        data.fileName,
+                      );
+                    }
+                  }}
+                >
+                  Download
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() =>

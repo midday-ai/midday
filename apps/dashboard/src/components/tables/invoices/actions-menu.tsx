@@ -2,6 +2,7 @@
 
 import { OpenURL } from "@/components/open-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { Button } from "@midday/ui/button";
@@ -137,10 +138,15 @@ export function ActionsMenu({ row }: Props) {
           </DropdownMenuItem>
 
           {row.status !== "draft" && (
-            <DropdownMenuItem>
-              <a href={`/api/download/invoice?id=${row.id}`} download>
-                Download
-              </a>
+            <DropdownMenuItem
+              onClick={() => {
+                downloadFile(
+                  `/api/download/invoice?id=${row.id}`,
+                  `${row.invoiceNumber || "invoice"}.pdf`,
+                );
+              }}
+            >
+              Download
             </DropdownMenuItem>
           )}
 
