@@ -1,20 +1,21 @@
 import { getAppUrl } from "@midday/utils/envs";
 import {
   Body,
-  Button,
   Container,
-  Font,
-  Head,
   Heading,
-  Html,
   Link,
   Preview,
   Section,
-  Tailwind,
   Text,
 } from "@react-email/components";
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
+import {
+  Button,
+  EmailThemeProvider,
+  getEmailInlineStyles,
+  getEmailThemeClasses,
+} from "../components/theme";
 import { getI18n } from "../locales";
 
 interface Props {
@@ -38,91 +39,97 @@ export const InviteEmail = ({
 }: Props) => {
   const { t } = getI18n({ locale });
   const inviteLink = `${baseAppUrl}/teams`;
+  const themeClasses = getEmailThemeClasses();
+  const lightStyles = getEmailInlineStyles("light");
 
   return (
-    <Html>
-      <Tailwind>
-        <head>
-          <Font
-            fontFamily="Geist"
-            fallbackFontFamily="Helvetica"
-            webFont={{
-              url: "https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.0.1/files/geist-sans-latin-400-normal.woff2",
-              format: "woff2",
-            }}
-            fontWeight={400}
-            fontStyle="normal"
-          />
-
-          <Font
-            fontFamily="Geist"
-            fallbackFontFamily="Helvetica"
-            webFont={{
-              url: "https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.0.1/files/geist-sans-latin-500-normal.woff2",
-              format: "woff2",
-            }}
-            fontWeight={500}
-            fontStyle="normal"
-          />
-        </head>
-        <Preview>{t("invite.preview", { teamName })}</Preview>
-
-        <Body className="bg-[#fff] my-auto mx-auto font-sans">
-          <Container
-            className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
-            style={{ borderStyle: "solid", borderWidth: 1 }}
+    <EmailThemeProvider
+      preview={<Preview>{t("invite.preview", { teamName })}</Preview>}
+    >
+      <Body
+        className={`my-auto mx-auto font-sans ${themeClasses.body}`}
+        style={lightStyles.body}
+      >
+        <Container
+          className={`my-[40px] mx-auto p-[20px] max-w-[600px] ${themeClasses.container}`}
+          style={{
+            borderStyle: "solid",
+            borderWidth: 1,
+            borderColor: lightStyles.container.borderColor,
+          }}
+        >
+          <Logo />
+          <Heading
+            className={`mx-0 my-[30px] p-0 text-[24px] font-normal text-center ${themeClasses.heading}`}
+            style={{ color: lightStyles.text.color }}
           >
-            <Logo />
-            <Heading className="mx-0 my-[30px] p-0 text-[24px] font-normal text-[#121212] text-center">
-              {t("invite.title1")} <strong>{teamName}</strong>{" "}
-              {t("invite.title2")} <strong>Midday</strong>
-            </Heading>
+            {t("invite.title1")} <strong>{teamName}</strong>{" "}
+            {t("invite.title2")} <strong>Midday</strong>
+          </Heading>
 
-            <Text className="text-[14px] leading-[24px] text-[#121212]">
-              {invitedByName} (
-              <Link
-                href={`mailto:${invitedByEmail}`}
-                className="text-[#121212] no-underline"
+          <Text
+            className={`text-[14px] leading-[24px] ${themeClasses.text}`}
+            style={{ color: lightStyles.text.color }}
+          >
+            {invitedByName} (
+            <Link
+              href={`mailto:${invitedByEmail}`}
+              className={`no-underline ${themeClasses.link}`}
+              style={{ color: lightStyles.text.color }}
+            >
+              {invitedByEmail}
+            </Link>
+            ) {t("invite.link1")} <strong>{teamName}</strong>{" "}
+            {t("invite.link2")} <strong>Midday</strong>.
+          </Text>
+          <Section className="mb-[42px] mt-[32px] text-center">
+            <Button href={inviteLink}>{t("invite.join")}</Button>
+          </Section>
+
+          <Text
+            className={`text-[14px] leading-[24px] break-all ${themeClasses.mutedText}`}
+            style={{ color: lightStyles.mutedText.color }}
+          >
+            {t("invite.link3")}:{" "}
+            <Link
+              href={inviteLink}
+              className={`underline ${themeClasses.mutedLink}`}
+              style={{ color: lightStyles.mutedText.color }}
+            >
+              {inviteLink}
+            </Link>
+          </Text>
+
+          <br />
+          <Section>
+            <Text
+              className={`text-[12px] leading-[24px] ${themeClasses.mutedText}`}
+              style={{ color: lightStyles.mutedText.color }}
+            >
+              {t("invite.footer1")}{" "}
+              <span
+                className={themeClasses.text}
+                style={{ color: lightStyles.text.color }}
               >
-                {invitedByEmail}
-              </Link>
-              ) {t("invite.link1")} <strong>{teamName}</strong>{" "}
-              {t("invite.link2")} <strong>Midday</strong>.
-            </Text>
-            <Section className="mb-[42px] mt-[32px] text-center">
-              <Button
-                className="bg-transparent text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
-                href={inviteLink}
+                {email}
+              </span>
+              . {t("invite.footer2")}{" "}
+              <span
+                className={themeClasses.text}
+                style={{ color: lightStyles.text.color }}
               >
-                {t("invite.join")}
-              </Button>
-            </Section>
-
-            <Text className="text-[14px] leading-[24px] text-[#707070] break-all">
-              {t("invite.link3")}:{" "}
-              <Link href={inviteLink} className="text-[#707070] underline">
-                {inviteLink}
-              </Link>
+                {ip}
+              </span>{" "}
+              . {t("invite.footer4")}
             </Text>
+          </Section>
 
-            <br />
-            <Section>
-              <Text className="text-[12px] leading-[24px] text-[#666666]">
-                {t("invite.footer1")}{" "}
-                <span className="text-[#121212] ">{email}</span>.{" "}
-                {t("invite.footer2")}{" "}
-                <span className="text-[#121212] ">{ip}</span> .{" "}
-                {t("invite.footer4")}
-              </Text>
-            </Section>
+          <br />
 
-            <br />
-
-            <Footer />
-          </Container>
-        </Body>
-      </Tailwind>
-    </Html>
+          <Footer />
+        </Container>
+      </Body>
+    </EmailThemeProvider>
   );
 };
 

@@ -1,12 +1,11 @@
 import { getEmailUrl } from "@midday/utils/envs";
-import { Img, Section } from "@react-email/components";
+import { Img, Link, Section } from "@react-email/components";
 
 const baseUrl = getEmailUrl();
 
-export function Logo() {
-  // CSS-blended version for automatic dark mode adaptation
+export function LogoFooter() {
   return (
-    <Section className="mt-[32px]">
+    <Section>
       <style>{`
           .logo-blend {
             filter: none;
@@ -28,13 +27,14 @@ export function Logo() {
           }
         `}</style>
 
-      <Img
-        src={`${baseUrl}/email/logo.png`}
-        width="40"
-        height="40"
-        alt="Midday"
-        className="my-0 mx-auto block logo-blend"
-      />
+      <Link href="https://go.midday.ai/FZwOHud">
+        <Img
+          src={`${baseUrl}/email/logo-footer.png`}
+          width="80"
+          alt="Midday"
+          className="block logo-blend"
+        />
+      </Link>
     </Section>
   );
 }
