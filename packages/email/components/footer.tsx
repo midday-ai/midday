@@ -89,13 +89,6 @@ export function Footer() {
           </Link>
           <Link
             className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.midday.ai/E24P3oY"
-            style={{ color: lightStyles.mutedText.color }}
-          >
-            Engine
-          </Link>
-          <Link
-            className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
             href="https://midday.ai/download"
             style={{ color: lightStyles.mutedText.color }}
           >
@@ -153,13 +146,6 @@ export function Footer() {
             style={{ color: lightStyles.mutedText.color }}
           >
             Branding
-          </Link>
-          <Link
-            className={`text-[14px] block mb-1.5 ${themeClasses.mutedLink}`}
-            href="https://go.midday.ai/x5ohOs7"
-            style={{ color: lightStyles.mutedText.color }}
-          >
-            Feature Request
           </Link>
         </Column>
 
@@ -222,16 +208,6 @@ export function Footer() {
               width="22"
               height="22"
               alt="Midday on Producthunt"
-            />
-          </Link>
-        </Column>
-        <Column className="align-middle w-[40px]">
-          <Link href="https://go.midday.ai/anPiuRx">
-            <Img
-              src={`${baseUrl}/email/discord.png`}
-              width="22"
-              height="22"
-              alt="Midday on Discord"
             />
           </Link>
         </Column>
