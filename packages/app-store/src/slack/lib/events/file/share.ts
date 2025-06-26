@@ -1,6 +1,4 @@
-import type { InboxSlackUploadPayload } from "@midday/jobs/schema";
 import type { FileShareMessageEvent } from "@slack/web-api";
-import { tasks } from "@trigger.dev/sdk/v3";
 
 export async function fileShare(
   event: FileShareMessageEvent,
@@ -15,23 +13,23 @@ export async function fileShare(
   }));
 
   if (files && files.length > 0) {
-    await tasks.batchTrigger(
-      "inbox-slack-upload",
-      files.map((file) => ({
-        payload: {
-          teamId,
-          token,
-          channelId: event.channel,
-          threadId: event.thread_ts,
-          file: {
-            id: file.id,
-            name: file.name!,
-            mimetype: file.mimetype,
-            size: file.size,
-            url: file.url!,
-          },
-        } satisfies InboxSlackUploadPayload,
-      })),
-    );
+    // await tasks.batchTrigger(
+    //   "inbox-slack-upload",
+    //   files.map((file) => ({
+    //     payload: {
+    //       teamId,
+    //       token,
+    //       channelId: event.channel,
+    //       threadId: event.thread_ts,
+    //       file: {
+    //         id: file.id,
+    //         name: file.name!,
+    //         mimetype: file.mimetype,
+    //         size: file.size,
+    //         url: file.url!,
+    //       },
+    //     } satisfies InboxSlackUploadPayload,
+    //   })),
+    // );
   }
 }

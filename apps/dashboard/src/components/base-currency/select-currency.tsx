@@ -1,38 +1,40 @@
 "use client";
 
-import { SelectCurrency as SelectCurrencyBase } from "@/components/select-currency";
-import { useSyncStatus } from "@/hooks/use-sync-status";
-import { useTeamMutation } from "@/hooks/use-team";
-import { useTeamQuery } from "@/hooks/use-team";
-import { useTRPC } from "@/trpc/client";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { Button } from "@midday/ui/button";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { SelectCurrency as SelectCurrencyBase } from "@/components/select-currency";
+import { useJobProgress } from "@/hooks/use-job-progress";
+import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
+import { useTRPC } from "@/trpc/client";
 
 export function SelectCurrency() {
-  const trpc = useTRPC();
   const { toast } = useToast();
-  const [isSyncing, setSyncing] = useState(false);
-  const [runId, setRunId] = useState<string | undefined>();
-  const [accessToken, setAccessToken] = useState<string | undefined>();
   const updateTeamMutation = useTeamMutation();
   const { data: team } = useTeamQuery();
+  const trpc = useTRPC();
+  const [currentJobId, setCurrentJobId] = useState<string | undefined>();
+  const [isSyncing, setIsSyncing] = useState(false);
 
+  const { status: jobStatus, result } = useJobProgress({
+    jobId: currentJobId,
+    queue: "teams",
+    enabled: !!currentJobId,
+  });
   const updateBaseCurrencyMutation = useMutation(
     trpc.team.updateBaseCurrency.mutationOptions({
       onMutate: () => {
-        setSyncing(true);
+        setIsSyncing(true);
       },
       onSuccess: (data) => {
         if (data) {
-          setRunId(data.id);
-          setAccessToken(data.publicAccessToken);
+          setCurrentJobId(data.flowJobId);
         }
       },
       onError: () => {
-        setRunId(undefined);
+        setCurrentJobId(undefined);
 
         toast({
           duration: 3500,
@@ -42,8 +44,6 @@ export function SelectCurrency() {
       },
     }),
   );
-
-  const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
   const handleChange = async (baseCurrency: string) => {
     updateTeamMutation.mutate(
@@ -75,17 +75,24 @@ export function SelectCurrency() {
   };
 
   useEffect(() => {
-    if (status === "COMPLETED") {
-      setSyncing(false);
-      setStatus(null);
-      setRunId(undefined);
+    if (jobStatus === "completed") {
+      setIsSyncing(false);
+      setCurrentJobId(undefined);
+
+      const accountsProcessed = result?.accountsProcessed || 0;
+      const totalTransactions =
+        result?.childResults?.reduce((sum: number, child: any) => {
+          return sum + (child?.transactionsUpdated || 0);
+        }, 0) || 0;
+
       toast({
-        duration: 3500,
+        duration: 5000,
         variant: "success",
-        title: "Transactions and account balances updated.",
+        title: "Base currency updated successfully!",
+        description: `Updated ${accountsProcessed} account${accountsProcessed !== 1 ? "s" : ""} and ${totalTransactions} transaction${totalTransactions !== 1 ? "s" : ""}.`,
       });
     }
-  }, [status]);
+  }, [jobStatus, result]);
 
   useEffect(() => {
     if (isSyncing) {
@@ -99,9 +106,9 @@ export function SelectCurrency() {
   }, [isSyncing]);
 
   useEffect(() => {
-    if (status === "FAILED") {
-      setSyncing(false);
-      setRunId(undefined);
+    if (jobStatus === "failed") {
+      setIsSyncing(false);
+      setCurrentJobId(undefined);
 
       toast({
         duration: 3500,
@@ -109,7 +116,7 @@ export function SelectCurrency() {
         title: "Something went wrong pleaase try again.",
       });
     }
-  }, [status]);
+  }, [jobStatus]);
 
   return (
     <div className="w-[200px]">

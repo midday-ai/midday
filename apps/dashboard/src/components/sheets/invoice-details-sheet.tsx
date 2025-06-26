@@ -1,6 +1,5 @@
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { Sheet, SheetContent } from "@midday/ui/sheet";
-import React from "react";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { InvoiceDetails } from "../invoice-details";
 
 export function InvoiceDetailsSheet() {

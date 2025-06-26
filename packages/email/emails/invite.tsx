@@ -4,7 +4,6 @@ import {
   Button,
   Container,
   Font,
-  Head,
   Heading,
   Html,
   Link,

@@ -18,6 +18,7 @@ export function BankAccountListSkeleton() {
               </div>
             </div>
           </div>
+
           <div className="flex justify-between items-center mb-4 pt-4">
             <div className="flex items-center">
               <Skeleton className="flex h-9 w-9 items-center justify-center space-y-0 rounded-full" />

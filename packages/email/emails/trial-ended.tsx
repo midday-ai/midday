@@ -1,4 +1,3 @@
-import { getEmailUrl } from "@midday/utils/envs";
 import {
   Body,
   Button,
@@ -6,7 +5,6 @@ import {
   Font,
   Heading,
   Html,
-  Link,
   Preview,
   Section,
   Tailwind,

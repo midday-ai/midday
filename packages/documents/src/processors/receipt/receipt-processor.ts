@@ -34,6 +34,7 @@ export class ReceiptProcessor {
           documentImageLimit: 4,
         },
       },
+      abortSignal: AbortSignal.timeout(120000), // 2 minutes timeout for AI processing
     });
 
     return result.object;
@@ -42,7 +43,10 @@ export class ReceiptProcessor {
   #getWebsite({
     website,
     email,
-  }: { website: string | null; email: string | null }) {
+  }: {
+    website: string | null;
+    email: string | null;
+  }) {
     if (website) {
       return website;
     }

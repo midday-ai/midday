@@ -1,11 +1,3 @@
-// @ts-nocheck
-import {
-  endOfMonth,
-  formatISO,
-  parseISO,
-  startOfMonth,
-  subYears,
-} from "date-fns";
 import type { Client } from "../types";
 
 export async function getUserQuery(supabase: Client, userId: string) {

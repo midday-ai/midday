@@ -4,15 +4,15 @@ import type { Transaction } from "./types";
 export const createTransactionSchema = z.object({
   name: z.string(),
   currency: z.string(),
-  bank_account_id: z.string(),
-  team_id: z.string(),
-  internal_id: z.string(),
+  bankAccountId: z.string(),
+  teamId: z.string(),
+  internalId: z.string(),
   status: z.enum(["posted", "pending"]),
   method: z.enum(["card", "bank", "other"]),
   date: z.coerce.date(),
   amount: z.number(),
   manual: z.boolean(),
-  category_slug: z.string().nullable(),
+  categorySlug: z.string().nullable(),
 });
 
 export const validateTransactions = (transactions: Transaction[]) => {

@@ -1,6 +1,3 @@
-import CustomerHeader from "@/components/customer-header";
-import InvoiceToolbar from "@/components/invoice-toolbar";
-import { getQueryClient, trpc } from "@/trpc/server";
 import { decrypt } from "@midday/encryption";
 import { HtmlTemplate } from "@midday/invoice/templates/html";
 import { createClient } from "@midday/supabase/server";
@@ -8,6 +5,9 @@ import { waitUntil } from "@vercel/functions";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { SearchParams } from "nuqs";
+import CustomerHeader from "@/components/customer-header";
+import InvoiceToolbar from "@/components/invoice-toolbar";
+import { getQueryClient, trpc } from "@/trpc/server";
 
 export async function generateMetadata(props: {
   params: Promise<{ token: string }>;
@@ -52,7 +52,7 @@ export async function generateMetadata(props: {
         follow: false,
       },
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       title: "Invoice Not Found",
       robots: {

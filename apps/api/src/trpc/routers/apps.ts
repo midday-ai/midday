@@ -1,13 +1,9 @@
 import {
-  disconnectApp,
-  getApps,
-  updateAppSettings,
-} from "@api/db/queries/apps";
-import {
   disconnectAppSchema,
   updateAppSettingsSchema,
 } from "@api/schemas/apps";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { disconnectApp, getApps, updateAppSettings } from "@midday/db/queries";
 
 export const appsRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {

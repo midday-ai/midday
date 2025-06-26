@@ -52,7 +52,10 @@ export const Messages = memo(PureMessages, (prevProps, nextProps) => {
 export function BotMessage({
   children,
   className,
-}: { children: React.ReactNode; className?: string }) {
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div
       className={cn(

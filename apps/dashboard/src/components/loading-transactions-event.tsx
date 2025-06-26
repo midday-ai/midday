@@ -1,132 +1,131 @@
 "use client";
 
-import { useConnectParams } from "@/hooks/use-connect-params";
-import { useInitialConnectionStatus } from "@/hooks/use-initial-connection-status";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
-import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useConnectParams } from "@/hooks/use-connect-params";
+import { useInitialConnectionStatus } from "@/hooks/use-initial-connection-status";
 
 const Lottie = dynamic(() => import("lottie-react"), {
-  ssr: false,
+	ssr: false,
 });
 
 type Props = {
-  accessToken?: string;
-  runId?: string;
-  setRunId: (runId?: string) => void;
-  onClose: () => void;
-  setActiveTab: (value: "support" | "loading" | "select-accounts") => void;
+	accessToken?: string;
+	runId?: string;
+	setRunId: (runId?: string) => void;
+	onClose: () => void;
+	setActiveTab: (value: "support" | "loading" | "select-accounts") => void;
 };
 
 export function LoadingTransactionsEvent({
-  accessToken,
-  runId,
-  setRunId,
-  onClose,
-  setActiveTab,
+	accessToken,
+	runId,
+	setRunId,
+	onClose,
+	setActiveTab,
 }: Props) {
-  const queryClient = useQueryClient();
-  const [step, setStep] = useState(1);
-  const { resolvedTheme } = useTheme();
-  const { setParams } = useConnectParams();
+	const queryClient = useQueryClient();
+	const [step, setStep] = useState(1);
+	const { resolvedTheme } = useTheme();
+	const { setParams } = useConnectParams();
 
-  const { status } = useInitialConnectionStatus({
-    runId,
-    accessToken,
-  });
+	const { status } = useInitialConnectionStatus({
+		runId,
+		accessToken,
+	});
 
-  useEffect(() => {
-    if (status === "SYNCING") {
-      setStep(2);
-    }
+	useEffect(() => {
+		if (status === "SYNCING") {
+			setStep(2);
+		}
 
-    if (status === "COMPLETED") {
-      setStep(3);
+		if (status === "COMPLETED") {
+			setStep(3);
 
-      // Invalidate queries to refresh the data
-      queryClient.invalidateQueries();
+			// Invalidate queries to refresh the data
+			queryClient.invalidateQueries();
 
-      setTimeout(() => {
-        setRunId(undefined);
-        setParams(null);
-      }, 1000);
-    }
-  }, [status]);
+			setTimeout(() => {
+				setRunId(undefined);
+				setParams(null);
+			}, 1000);
+		}
+	}, [status]);
 
-  return (
-    <div className="w-full">
-      <Lottie
-        className="mb-6"
-        animationData={
-          resolvedTheme === "dark"
-            ? require("public/assets/setup-animation.json")
-            : require("public/assets/setup-animation-dark.json")
-        }
-        loop={true}
-        style={{ width: 50, height: 50 }}
-        rendererSettings={{
-          preserveAspectRatio: "xMidYMid slice",
-        }}
-      />
-      <h2 className="text-lg font-semibold leading-none tracking-tight mb-2">
-        Setting up account
-      </h2>
+	return (
+		<div className="w-full">
+			<Lottie
+				className="mb-6"
+				animationData={
+					resolvedTheme === "dark"
+						? require("public/assets/setup-animation.json")
+						: require("public/assets/setup-animation-dark.json")
+				}
+				loop={true}
+				style={{ width: 50, height: 50 }}
+				rendererSettings={{
+					preserveAspectRatio: "xMidYMid slice",
+				}}
+			/>
+			<h2 className="text-lg font-semibold leading-none tracking-tight mb-2">
+				Setting up account
+			</h2>
 
-      <p className="text-sm text-[#878787] mb-8">
-        Depending on the bank it can take up to 1 hour to fetch all
-        transactions, feel free to close this window and we will notify you when
-        it is done.
-      </p>
+			<p className="text-sm text-[#878787] mb-8">
+				Depending on the bank it can take up to 1 hour to fetch all
+				transactions, feel free to close this window and we will notify you when
+				it is done.
+			</p>
 
-      <ul className="text-md text-[#878787] space-y-4 transition-all">
-        <li
-          className={cn(
-            "opacity-50 dark:opacity-20",
-            step > 0 && "!opacity-100",
-          )}
-        >
-          Connecting bank
-          {step === 1 && <span className="loading-ellipsis" />}
-        </li>
-        <li
-          className={cn(
-            "opacity-50 dark:opacity-20",
-            step > 1 && "!opacity-100",
-          )}
-        >
-          Getting transactions
-          {step === 2 && <span className="loading-ellipsis" />}
-        </li>
-        <li
-          className={cn(
-            "opacity-50 dark:opacity-20",
-            step > 2 && "!opacity-100",
-          )}
-        >
-          Completed
-          {step === 3 && <span className="loading-ellipsis" />}
-        </li>
-      </ul>
+			<ul className="text-md text-[#878787] space-y-4 transition-all">
+				<li
+					className={cn(
+						"opacity-50 dark:opacity-20",
+						step > 0 && "!opacity-100",
+					)}
+				>
+					Connecting bank
+					{step === 1 && <span className="loading-ellipsis" />}
+				</li>
+				<li
+					className={cn(
+						"opacity-50 dark:opacity-20",
+						step > 1 && "!opacity-100",
+					)}
+				>
+					Getting transactions
+					{step === 2 && <span className="loading-ellipsis" />}
+				</li>
+				<li
+					className={cn(
+						"opacity-50 dark:opacity-20",
+						step > 2 && "!opacity-100",
+					)}
+				>
+					Completed
+					{step === 3 && <span className="loading-ellipsis" />}
+				</li>
+			</ul>
 
-      <div className="w-full mt-12">
-        <Button className="w-full" onClick={onClose}>
-          Close
-        </Button>
+			<div className="w-full mt-12">
+				<Button className="w-full" onClick={onClose}>
+					Close
+				</Button>
 
-        <div className="flex justify-center mt-4">
-          <button
-            type="button"
-            className="text-xs text-[#878787]"
-            onClick={() => setActiveTab("support")}
-          >
-            Need support
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+				<div className="flex justify-center mt-4">
+					<button
+						type="button"
+						className="text-xs text-[#878787]"
+						onClick={() => setActiveTab("support")}
+					>
+						Need support
+					</button>
+				</div>
+			</div>
+		</div>
+	);
 }

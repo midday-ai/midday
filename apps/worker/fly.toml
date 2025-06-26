@@ -1,0 +1,30 @@
+app = 'midday-worker'
+primary_region = 'fra'
+
+[build]
+
+[env]
+  PORT = '8080'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 2
+  processes = ['app']
+
+[[http_service.checks]]
+  grace_period = "45s"
+  interval = "90s"
+  method = "GET"
+  timeout = "25s"
+  path = "/health"
+
+[[restart]]
+  policy = "always"
+
+[[vm]]
+  memory = '2gb'
+  cpu_kind = 'shared'
+  cpus = 1

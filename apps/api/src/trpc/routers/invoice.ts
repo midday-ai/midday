@@ -1,18 +1,3 @@
-import { getInvoiceTemplate } from "@api/db/queries/invoice-templates";
-import {
-  deleteInvoice,
-  draftInvoice,
-  duplicateInvoice,
-  getInvoiceById,
-  getInvoiceSummary,
-  getInvoices,
-  getNextInvoiceNumber,
-  getPaymentStatus,
-  searchInvoiceNumber,
-  updateInvoice,
-} from "@api/db/queries/invoices";
-import { getTeamById } from "@api/db/queries/teams";
-import { getUserById } from "@api/db/queries/users";
 import {
   createInvoiceSchema,
   deleteInvoiceSchema,
@@ -33,13 +18,28 @@ import {
 } from "@api/trpc/init";
 import { parseInputValue } from "@api/utils/parse";
 import { UTCDate } from "@date-fns/utc";
+import {
+  deleteInvoice,
+  draftInvoice,
+  duplicateInvoice,
+  getInvoiceById,
+  getInvoiceSummary,
+  getInvoices,
+  getInvoiceTemplate,
+  getNextInvoiceNumber,
+  getPaymentStatus,
+  getTeamById,
+  getUserById,
+  searchInvoiceNumber,
+  updateInvoice,
+} from "@midday/db/queries";
 import { verify } from "@midday/invoice/token";
-import type {
-  GenerateInvoicePayload,
-  SendInvoiceReminderPayload,
-} from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
+import { tasks } from "@worker/jobs/tasks";
+import {
+  generateInvoiceSchema,
+  sendInvoiceReminderSchema,
+} from "@worker/schemas/jobs";
 import { addMonths } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 
@@ -298,26 +298,30 @@ export const invoiceRouter = createTRPCRouter({
         throw new Error("Invoice not found");
       }
 
-      await tasks.trigger("generate-invoice", {
-        invoiceId: data.id,
-        deliveryType: input.deliveryType,
-      } satisfies GenerateInvoicePayload);
+      await tasks.trigger(
+        generateInvoiceSchema,
+        "invoice",
+        "generate-invoice",
+        {
+          invoiceId: data.id,
+          deliveryType: input.deliveryType,
+        },
+      );
 
       return data;
     }),
 
   remind: protectedProcedure
     .input(remindInvoiceSchema)
-    .mutation(async ({ input, ctx: { db, teamId } }) => {
-      await tasks.trigger("send-invoice-reminder", {
-        invoiceId: input.id,
-      } satisfies SendInvoiceReminderPayload);
-
-      return updateInvoice(db, {
-        id: input.id,
-        teamId: teamId!,
-        reminderSentAt: input.date,
-      });
+    .mutation(async ({ input }) => {
+      return tasks.trigger(
+        sendInvoiceReminderSchema,
+        "invoice",
+        "send-invoice-reminder",
+        {
+          invoiceId: input.id,
+        },
+      );
     }),
 
   duplicate: protectedProcedure

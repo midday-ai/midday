@@ -1,10 +1,5 @@
 "use client";
 
-import { manualSyncTransactionsAction } from "@/actions/transactions/manual-sync-transactions-action";
-import { reconnectConnectionAction } from "@/actions/transactions/reconnect-connection-action";
-import { useSyncStatus } from "@/hooks/use-sync-status";
-import { useTRPC } from "@/trpc/client";
-import { connectionStatus } from "@/utils/connection-status";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   Accordion,
@@ -22,9 +17,11 @@ import {
 import { useToast } from "@midday/ui/use-toast";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
+// import { useSyncStatus } from "@/hooks/use-sync-status";
+import { useTRPC } from "@/trpc/client";
+import { connectionStatus } from "@/utils/connection-status";
 import { BankAccount } from "./bank-account";
 import { BankLogo } from "./bank-logo";
 import { DeleteConnection } from "./delete-connection";
@@ -53,7 +50,10 @@ type BankConnection = NonNullable<
 function ConnectionState({
   connection,
   isSyncing,
-}: { connection: BankConnection; isSyncing: boolean }) {
+}: {
+  connection: BankConnection;
+  isSyncing: boolean;
+}) {
   const { show, expired } = connectionStatus(connection);
 
   if (isSyncing) {
@@ -136,59 +136,59 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [runId, setRunId] = useState<string | undefined>();
-  const [accessToken, setAccessToken] = useState<string | undefined>();
+  const [accessToken, _setAccessToken] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
 
   const { show } = connectionStatus(connection);
-  const { status, setStatus } = useSyncStatus({ runId, accessToken });
+  // const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
   const [params] = useQueryStates({
     step: parseAsString,
     id: parseAsString,
   });
 
-  const manualSyncTransactions = useAction(manualSyncTransactionsAction, {
-    onExecute: () => setSyncing(true),
-    onSuccess: ({ data }) => {
-      if (data) {
-        setRunId(data.id);
-        setAccessToken(data.publicAccessToken);
-      }
-    },
-    onError: () => {
-      setSyncing(false);
-      setRunId(undefined);
-      setStatus("FAILED");
+  // const manualSyncTransactions = useAction(manualSyncTransactionsAction, {
+  //   onExecute: () => setSyncing(true),
+  //   onSuccess: ({ data }) => {
+  //     if (data) {
+  //       setRunId(data.id);
+  //       setAccessToken(data.publicAccessToken);
+  //     }
+  //   },
+  //   onError: () => {
+  //     setSyncing(false);
+  //     setRunId(undefined);
+  //     setStatus("FAILED");
 
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
+  //     toast({
+  //       duration: 3500,
+  //       variant: "error",
+  //       title: "Something went wrong please try again.",
+  //     });
+  //   },
+  // });
 
-  const reconnectConnection = useAction(reconnectConnectionAction, {
-    onExecute: () => setSyncing(true),
-    onSuccess: ({ data }) => {
-      if (data) {
-        setRunId(data.id);
-        setAccessToken(data.publicAccessToken);
-      }
-    },
-    onError: () => {
-      setSyncing(false);
-      setRunId(undefined);
-      setStatus("FAILED");
+  // const reconnectConnection = useAction(reconnectConnectionAction, {
+  //   onExecute: () => setSyncing(true),
+  //   onSuccess: ({ data }) => {
+  //     if (data) {
+  //       setRunId(data.id);
+  //       setAccessToken(data.publicAccessToken);
+  //     }
+  //   },
+  //   onError: () => {
+  //     setSyncing(false);
+  //     setRunId(undefined);
+  //     setStatus("FAILED");
 
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
+  //     toast({
+  //       duration: 3500,
+  //       variant: "error",
+  //       title: "Something went wrong please try again.",
+  //     });
+  //   },
+  // });
 
   useEffect(() => {
     if (isSyncing) {
@@ -201,73 +201,73 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
     }
   }, [isSyncing]);
 
-  useEffect(() => {
-    if (status === "COMPLETED") {
-      dismiss();
-      setRunId(undefined);
-      setSyncing(false);
+  // useEffect(() => {
+  //   if (status === "COMPLETED") {
+  //     dismiss();
+  //     setRunId(undefined);
+  //     setSyncing(false);
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankConnections.get.queryKey(),
-      });
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.bankConnections.get.queryKey(),
+  //     });
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankAccounts.get.queryKey(),
-      });
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.bankAccounts.get.queryKey(),
+  //     });
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.team.current.queryKey(),
-      });
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.team.current.queryKey(),
+  //     });
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.transactions.get.queryKey(),
-      });
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.transactions.get.queryKey(),
+  //     });
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.transactions.get.infiniteQueryKey(),
-      });
-    }
-  }, [status]);
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.transactions.get.infiniteQueryKey(),
+  //     });
+  //   }
+  // }, [status]);
 
-  useEffect(() => {
-    if (status === "FAILED") {
-      setSyncing(false);
-      setRunId(undefined);
+  // useEffect(() => {
+  //   if (status === "FAILED") {
+  //     setSyncing(false);
+  //     setRunId(undefined);
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankConnections.get.queryKey(),
-      });
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.bankConnections.get.queryKey(),
+  //     });
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankAccounts.get.queryKey(),
-      });
+  //     queryClient.invalidateQueries({
+  //       queryKey: trpc.bankAccounts.get.queryKey(),
+  //     });
 
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    }
-  }, [status]);
+  //     toast({
+  //       duration: 3500,
+  //       variant: "error",
+  //       title: "Something went wrong please try again.",
+  //     });
+  //   }
+  // }, [status]);
 
   // NOTE: GoCardLess reconnect flow (redirect from API route)
   useEffect(() => {
     if (params.step === "reconnect" && params.id) {
-      reconnectConnection.execute({
-        connectionId: params.id,
-        provider: connection.provider as
-          | "gocardless"
-          | "plaid"
-          | "teller"
-          | "enablebanking",
-      });
+      // reconnectConnection.execute({
+      //   connectionId: params.id,
+      //   provider: connection.provider as
+      //     | "gocardless"
+      //     | "plaid"
+      //     | "teller"
+      //     | "enablebanking",
+      // });
     }
   }, [params]);
 
   const handleManualSync = () => {
-    manualSyncTransactions.execute({
-      connectionId: connection.id,
-    });
+    // manualSyncTransactions.execute({
+    //   connectionId: connection.id,
+    // });
   };
 
   return (

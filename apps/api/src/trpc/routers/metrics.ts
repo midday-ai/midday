@@ -1,12 +1,4 @@
 import {
-  getBurnRate,
-  getExpenses,
-  getMetrics,
-  getRunway,
-  getSpending,
-  getTaxSummary,
-} from "@api/db/queries/metrics";
-import {
   getBurnRateSchema,
   getExpensesSchema,
   getProfitSchema,
@@ -16,6 +8,14 @@ import {
   getTaxSummarySchema,
 } from "@api/schemas/metrics";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  getBurnRate,
+  getExpenses,
+  getMetrics,
+  getRunway,
+  getSpending,
+  getTaxSummary,
+} from "@midday/db/queries";
 
 export const metricsRouter = createTRPCRouter({
   revenue: protectedProcedure

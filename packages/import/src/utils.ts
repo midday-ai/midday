@@ -57,7 +57,7 @@ export function formatDate(date: string) {
   }
 
   // If the date includes a time, we don't need to remove the time.
-  const value = date.includes("T") ? date : date.replace(/[^0-9-\.\/]/g, "");
+  const value = date.includes("T") ? date : date.replace(/[^0-9-./]/g, "");
 
   try {
     const parsedDate = parseISO(value);
@@ -75,7 +75,10 @@ export function formatDate(date: string) {
 export function formatAmountValue({
   amount,
   inverted,
-}: { amount: string; inverted?: boolean }) {
+}: {
+  amount: string;
+  inverted?: boolean;
+}) {
   let value: number;
 
   // Handle special minus sign (−) by replacing with standard minus (-)
