@@ -64,22 +64,24 @@ export function DataTable() {
   }
 
   return (
-    <>
-      <Table>
-        <DataTableHeader />
+    <div className="w-full">
+      <div className="overflow-x-auto border-l border-r border-border">
+        <Table className="min-w-[1500px]">
+          <DataTableHeader />
 
-        <TableBody>
-          {pageData?.map((row) => (
-            <DataTableRow
-              row={row}
-              key={row.id}
-              onDelete={deleteTrackerProjectMutation.mutate}
-            />
-          ))}
-        </TableBody>
-      </Table>
+          <TableBody className="border-l-0 border-r-0">
+            {pageData?.map((row) => (
+              <DataTableRow
+                row={row}
+                key={row.id}
+                onDelete={deleteTrackerProjectMutation.mutate}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <LoadMore ref={ref} hasNextPage={hasNextPage} />
-    </>
+    </div>
   );
 }

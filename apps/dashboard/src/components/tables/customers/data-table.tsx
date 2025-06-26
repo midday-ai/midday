@@ -92,18 +92,20 @@ export function DataTable() {
   }
 
   return (
-    <>
-      <Table>
-        <TableHeader />
+    <div className="w-full">
+      <div className="overflow-x-auto border-l border-r border-border">
+        <Table className="min-w-[1000px]">
+          <TableHeader />
 
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <CustomerRow key={row.id} row={row} setOpen={setOpen} />
-          ))}
-        </TableBody>
-      </Table>
+          <TableBody className="border-l-0 border-r-0">
+            {table.getRowModel().rows.map((row) => (
+              <CustomerRow key={row.id} row={row} setOpen={setOpen} />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <LoadMore ref={ref} hasNextPage={hasNextPage} />
-    </>
+    </div>
   );
 }

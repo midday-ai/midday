@@ -93,23 +93,24 @@ export const columns: ColumnDef<Customer>[] = [
   {
     header: "Tags",
     accessorKey: "tags",
+    meta: {
+      className: "w-[280px] max-w-[280px]",
+    },
     cell: ({ row }) => {
       return (
-        <div className="relative">
-          <ScrollArea className="max-w-[170px] whitespace-nowrap">
-            <div className="flex items-center space-x-2">
-              {row.original.tags?.map((tag) => (
-                <Link href={`/transactions?tags=${tag.id}`} key={tag.id}>
-                  <Badge variant="tag-rounded" className="whitespace-nowrap">
-                    {tag.name}
-                  </Badge>
-                </Link>
-              ))}
-            </div>
-
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-
+        <div className="relative w-full">
+          <div className="flex items-center space-x-2 overflow-x-auto scrollbar-hide">
+            {row.original.tags?.map((tag) => (
+              <Link href={`/transactions?tags=${tag.id}`} key={tag.id}>
+                <Badge
+                  variant="tag-rounded"
+                  className="whitespace-nowrap flex-shrink-0"
+                >
+                  {tag.name}
+                </Badge>
+              </Link>
+            ))}
+          </div>
           <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
         </div>
       );
@@ -118,6 +119,10 @@ export const columns: ColumnDef<Customer>[] = [
   {
     id: "actions",
     header: "Actions",
+    meta: {
+      className:
+        "text-right sticky right-0 bg-background z-10 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]",
+    },
     cell: ({ row, table }) => {
       const { setParams } = useCustomerParams();
 

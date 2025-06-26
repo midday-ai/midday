@@ -30,38 +30,31 @@ export default function Page() {
         accessible just one click away.
       </p>
 
-      <div className="flex gap-3 mt-8 w-full max-w-xs mb-2">
+      <div className="mt-8 w-full max-w-xs mb-2 flex justify-center">
         <a
           href="/api/download?platform=aarch64"
           download
-          className="w-full"
+          className="block"
           tabIndex={-1}
         >
           <Button
             variant="default"
-            className="w-full h-12 px-6 flex items-center justify-center gap-2 border border-primary"
+            className="h-12 px-6 flex items-center justify-center gap-2 border border-primary"
             size="lg"
           >
-            <span>Apple Silicon</span>
-          </Button>
-        </a>
-        <a
-          href="/api/download?platform=x64"
-          download
-          className="w-full"
-          tabIndex={-1}
-        >
-          <Button
-            variant="outline"
-            className="w-full h-12 px-6 flex items-center justify-center gap-2 border border-primary"
-            size="lg"
-          >
-            <span>Intel Macs</span>
+            <span>Download for Mac</span>
           </Button>
         </a>
       </div>
       <p className="text-xs text-[#878787] mt-2">
-        Not sure? Most Macs since 2020 use Apple Silicon (M1/M2/M3).
+        Not sure? Most Macs since 2020 use Apple Silicon (M1/M2/M3). <br />
+        <a
+          href="/api/download?platform=x64"
+          download
+          className="underline hover:no-underline"
+        >
+          Download for Intel Macs
+        </a>
       </p>
     </div>
   );

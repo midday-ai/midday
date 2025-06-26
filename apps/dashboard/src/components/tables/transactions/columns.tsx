@@ -116,10 +116,14 @@ AmountCell.displayName = "AmountCell";
 
 const TagsCell = memo(
   ({ tags }: { tags?: { id: string; name: string | null }[] }) => (
-    <div className="relative">
-      <div className="flex items-center space-x-2">
+    <div className="relative w-full">
+      <div className="flex items-center space-x-2 overflow-x-auto scrollbar-hide">
         {tags?.map(({ id, name }) => (
-          <Badge key={id} variant="tag-rounded" className="whitespace-nowrap">
+          <Badge
+            key={id}
+            variant="tag-rounded"
+            className="whitespace-nowrap flex-shrink-0"
+          >
             {name}
           </Badge>
         ))}
@@ -297,6 +301,9 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "tags",
     header: "Tags",
+    meta: {
+      className: "w-[280px] max-w-[280px]",
+    },
     cell: ({ row }) => <TagsCell tags={row.original.tags} />,
   },
   {
@@ -343,6 +350,10 @@ export const columns: ColumnDef<Transaction>[] = [
     id: "actions",
     enableSorting: false,
     enableHiding: false,
+    meta: {
+      className:
+        "text-right sticky right-0 bg-background z-10 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]",
+    },
     cell: ({ row, table }) => {
       const meta = table.options.meta;
 

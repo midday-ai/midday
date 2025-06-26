@@ -101,18 +101,20 @@ export function DataTable({
   }
 
   return (
-    <>
-      <Table>
-        <TableHeader table={table} />
+    <div className="w-full">
+      <div className="overflow-x-auto border-l border-r border-border">
+        <Table className="min-w-[1200px]">
+          <TableHeader table={table} />
 
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <InvoiceRow key={row.id} row={row} />
-          ))}
-        </TableBody>
-      </Table>
+          <TableBody className="border-l-0 border-r-0">
+            {table.getRowModel().rows.map((row) => (
+              <InvoiceRow key={row.id} row={row} />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <LoadMore ref={ref} hasNextPage={hasNextPage} />
-    </>
+    </div>
   );
 }

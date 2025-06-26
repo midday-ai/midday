@@ -21,7 +21,10 @@ export function CustomerRow({ row, setOpen }: Props) {
           <TableCell
             key={cell.id}
             onClick={() => ![3, 4, 5, 6].includes(index) && setOpen(row.id)}
-            className={cn(index !== 0 && "hidden md:table-cell")}
+            className={cn(
+              index !== 0 && "hidden md:table-cell",
+              cell.column.columnDef.meta?.className,
+            )}
           >
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </TableCell>

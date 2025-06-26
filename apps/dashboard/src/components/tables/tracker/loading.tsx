@@ -8,39 +8,46 @@ const data = [...Array(10)].map((_, i) => ({ id: i.toString() }));
 
 export function Loading() {
   return (
-    <Table>
-      <DataTableHeader />
+    <div className="w-full">
+      <div className="overflow-x-auto border-l border-r border-border">
+        <Table className="min-w-[1500px]">
+          <DataTableHeader />
 
-      <TableBody>
-        {data?.map((row) => (
-          <TableRow key={row.id} className="h-[45px]">
-            <TableCell className="w-[320px]">
-              <Skeleton className="h-3.5 w-[60%]" />
-            </TableCell>
-            <TableCell className="w-[180px]">
-              <Skeleton className="h-3.5 w-[50%]" />
-            </TableCell>
-            <TableCell className="w-[180px]">
-              <Skeleton className="h-3.5 w-[40%]" />
-            </TableCell>
-            <TableCell className="w-[190px]">
-              <Skeleton className="h-3.5 w-[50%]" />
-            </TableCell>
-            <TableCell className="w-[330px]">
-              <Skeleton className="h-3.5 w-[70%]" />
-            </TableCell>
-            <TableCell className="min-w-[170px]">
-              <Skeleton className="h-3.5 w-[60%]" />
-            </TableCell>
-            <TableCell className="w-[140px]">
-              <Skeleton className="h-3.5 w-[50%]" />
-            </TableCell>
-            <TableCell className="w-[170px]">
-              <Skeleton className="h-3.5 w-[40%]" />
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+          <TableBody className="border-l-0 border-r-0">
+            {data?.map((row) => (
+              <TableRow key={row.id} className="h-[45px]">
+                <TableCell className="w-[320px]">
+                  <Skeleton className="h-3.5 w-[60%]" />
+                </TableCell>
+                <TableCell className="w-[180px]">
+                  <Skeleton className="h-3.5 w-[50%]" />
+                </TableCell>
+                <TableCell className="w-[180px]">
+                  <Skeleton className="h-3.5 w-[40%]" />
+                </TableCell>
+                <TableCell className="w-[190px]">
+                  <Skeleton className="h-3.5 w-[50%]" />
+                </TableCell>
+                <TableCell className="w-[330px]">
+                  <Skeleton className="h-3.5 w-[70%]" />
+                </TableCell>
+                <TableCell className="min-w-[170px]">
+                  <Skeleton className="h-3.5 w-[60%]" />
+                </TableCell>
+                <TableCell className="w-[140px]">
+                  <Skeleton className="h-3.5 w-[50%]" />
+                </TableCell>
+                <TableCell className="w-[120px]">
+                  <Skeleton className="h-3.5 w-[40%]" />
+                </TableCell>
+                <TableCell className="w-[100px]">
+                  <Skeleton className="h-3.5 w-[30%]" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
   );
 }

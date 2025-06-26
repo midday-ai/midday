@@ -29,6 +29,7 @@ export function BurnRateChart({ disabled }: Props) {
     ...trpc.metrics.burnRate.queryOptions({
       from: params.from,
       to: params.to,
+      currency: params.currency ?? undefined,
     }),
     placeholderData: (previousData) => previousData ?? burnRateExamleData,
   });
@@ -37,6 +38,7 @@ export function BurnRateChart({ disabled }: Props) {
     ...trpc.metrics.runway.queryOptions({
       from: params.from,
       to: params.to,
+      currency: params.currency ?? undefined,
     }),
   });
 
@@ -75,7 +77,7 @@ export function BurnRateChart({ disabled }: Props) {
                   balance, estimating how long your funds will last.
                 </h3>
                 <p>
-                  Explanation: This tracks how fast you’re spending. If it’s
+                  Explanation: This tracks how fast you're spending. If it's
                   incorrect, internal transfers may be counted as income. You
                   can adjust this by excluding the transactions from the
                   calculations.

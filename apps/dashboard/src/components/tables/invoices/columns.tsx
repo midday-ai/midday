@@ -235,6 +235,10 @@ export const columns: ColumnDef<Invoice>[] = [
   {
     id: "actions",
     header: "Actions",
+    meta: {
+      className:
+        "text-right sticky right-0 bg-background z-10 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]",
+    },
     cell: ({ row }) => {
       return <ActionsMenu row={row.original} />;
     },
