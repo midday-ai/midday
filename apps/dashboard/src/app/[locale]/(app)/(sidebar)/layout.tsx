@@ -46,7 +46,7 @@ export default async function Layout({
 
   return (
     <HydrateClient>
-      <div className="overflow-hidden desktop:h-screen">
+      <div className="relative">
         <Sidebar />
 
         <div className="md:ml-[70px] pb-8">
