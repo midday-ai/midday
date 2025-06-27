@@ -2,6 +2,7 @@
 
 import { useSortParams } from "@/hooks/use-sort-params";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
@@ -29,7 +30,7 @@ export function DataTableHeader() {
   return (
     <TableHeader className="border-l-0 border-r-0">
       <TableRow className="h-[45px]">
-        <TableHead className="w-[320px]">
+        <TableHead className="w-[300px] min-w-[300px] sticky left-0 bg-background z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -54,7 +55,7 @@ export function DataTableHeader() {
           </Button>
         </TableHead>
 
-        <TableHead className="w-[180px]">
+        <TableHead className="w-[180px] min-w-[180px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -65,7 +66,7 @@ export function DataTableHeader() {
             {"time" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead className="w-[190px]">
+        <TableHead className="w-[190px] min-w-[190px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -76,7 +77,7 @@ export function DataTableHeader() {
             {"amount" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead className="w-[330px]">
+        <TableHead className="w-[200px] min-w-[200px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -117,7 +118,7 @@ export function DataTableHeader() {
             {"assigned" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead className="w-[120px]">
+        <TableHead className="w-[150px] min-w-[150px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -128,7 +129,13 @@ export function DataTableHeader() {
             {"status" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead className="w-[100px] sticky right-0 bg-background z-10 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]">
+        <TableHead
+          className={cn(
+            "w-[100px] sticky right-0 bg-background z-30",
+            "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
+            "after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]",
+          )}
+        >
           Actions
         </TableHead>
       </TableRow>

@@ -10,7 +10,7 @@ export function DataTableSkeleton() {
   return (
     <div className="w-full">
       <div className="overflow-x-auto border-l border-r border-border">
-        <Table className="min-w-[800px]">
+        <Table>
           <DataTableHeader />
 
           <TableBody className="border-l-0 border-r-0 border-t-0 border-b-0">
@@ -33,7 +33,7 @@ export function DataTableSkeleton() {
                   <Skeleton className="h-3.5 w-[50%]" />
                 </TableCell>
                 {/* Actions column */}
-                <TableCell className="w-[100px] px-3 md:px-4 py-2 text-right sticky right-0 bg-background z-10">
+                <TableCell className="w-[100px] px-3 md:px-4 py-2 text-right sticky right-0 bg-background z-30">
                   <Skeleton className="h-3.5 w-[50%]" />
                 </TableCell>
               </TableRow>

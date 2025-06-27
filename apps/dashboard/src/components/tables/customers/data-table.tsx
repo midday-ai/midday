@@ -94,7 +94,7 @@ export function DataTable() {
   return (
     <div className="w-full">
       <div className="overflow-x-auto border-l border-r border-border">
-        <Table className="min-w-[1000px]">
+        <Table>
           <TableHeader />
 
           <TableBody className="border-l-0 border-r-0">

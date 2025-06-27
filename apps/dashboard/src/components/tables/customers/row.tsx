@@ -14,7 +14,7 @@ export function CustomerRow({ row, setOpen }: Props) {
   return (
     <>
       <TableRow
-        className="hover:bg-transparent cursor-default h-[45px]"
+        className="group h-[45px] cursor-pointer hover:bg-muted"
         key={row.id}
       >
         {row.getVisibleCells().map((cell, index) => (

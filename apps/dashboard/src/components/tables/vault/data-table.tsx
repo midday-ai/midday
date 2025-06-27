@@ -159,7 +159,7 @@ export function DataTable() {
   return (
     <div className="w-full">
       <div className="overflow-x-auto border-l border-r border-border">
-        <Table className="min-w-[800px]">
+        <Table>
           <DataTableHeader table={table} />
 
           <TableBody className="border-l-0 border-r-0">
@@ -168,7 +168,7 @@ export function DataTable() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="h-[40px] md:h-[45px] cursor-pointer select-text"
+                  className="group h-[40px] md:h-[45px] cursor-pointer select-text hover:bg-muted"
                 >
                   {row.getAllCells().map((cell) => (
                     <TableCell

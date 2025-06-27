@@ -73,10 +73,6 @@ export function DataTable({
     });
   }, [columnVisibility]);
 
-  useEffect(() => {
-    setColumns(table.getAllLeafColumns());
-  }, [columnVisibility]);
-
   const table = useReactTable({
     data: tableData,
     getRowId: ({ id }) => id,
@@ -92,6 +88,10 @@ export function DataTable({
     },
   });
 
+  useEffect(() => {
+    setColumns(table.getAllLeafColumns());
+  }, [columnVisibility]);
+
   if (hasFilters && !tableData?.length) {
     return <NoResults />;
   }
@@ -103,7 +103,7 @@ export function DataTable({
   return (
     <div className="w-full">
       <div className="overflow-x-auto border-l border-r border-border">
-        <Table className="min-w-[1200px]">
+        <Table>
           <TableHeader table={table} />
 
           <TableBody className="border-l-0 border-r-0">

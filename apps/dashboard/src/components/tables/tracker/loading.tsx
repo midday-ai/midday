@@ -10,13 +10,13 @@ export function Loading() {
   return (
     <div className="w-full">
       <div className="overflow-x-auto border-l border-r border-border">
-        <Table className="min-w-[1500px]">
+        <Table>
           <DataTableHeader />
 
           <TableBody className="border-l-0 border-r-0 border-t-0 border-b-0">
             {data?.map((row) => (
               <TableRow key={row.id} className="h-[45px]">
-                <TableCell className="w-[320px]">
+                <TableCell className="w-[450px] min-w-[450px] sticky left-0 bg-background z-20">
                   <Skeleton className="h-3.5 w-[60%]" />
                 </TableCell>
                 <TableCell className="w-[180px]">
@@ -37,10 +37,10 @@ export function Loading() {
                 <TableCell className="w-[140px]">
                   <Skeleton className="h-3.5 w-[50%]" />
                 </TableCell>
-                <TableCell className="w-[120px]">
+                <TableCell className="w-[150px] min-w-[150px]">
                   <Skeleton className="h-3.5 w-[40%]" />
                 </TableCell>
-                <TableCell className="w-[100px]">
+                <TableCell className="w-[100px] sticky right-0 bg-background z-30">
                   <Skeleton className="h-3.5 w-[30%]" />
                 </TableCell>
               </TableRow>

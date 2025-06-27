@@ -2,6 +2,7 @@
 
 import { useSortParams } from "@/hooks/use-sort-params";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import {
   TableHeader as BaseTableHeader,
   TableHead,
@@ -16,9 +17,6 @@ interface TableColumn {
 
 interface TableInterface {
   getAllLeafColumns: () => TableColumn[];
-  getIsAllPageRowsSelected: () => boolean;
-  getIsSomePageRowsSelected: () => boolean;
-  toggleAllPageRowsSelected: (value: boolean) => void;
 }
 
 interface Props {
@@ -56,7 +54,7 @@ export function TableHeader({ table }: Props) {
     <BaseTableHeader className="border-l-0 border-r-0">
       <TableRow>
         {isVisible("invoiceNumber") && (
-          <TableHead className="w-[200px] min-w-[200px]">
+          <TableHead className="w-[200px] min-w-[200px] sticky left-0 bg-background z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -206,7 +204,13 @@ export function TableHeader({ table }: Props) {
         )}
 
         {isVisible("actions") && (
-          <TableHead className="w-[100px] sticky right-0 bg-background z-10 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]">
+          <TableHead
+            className={cn(
+              "w-[100px] sticky right-0 bg-background z-30",
+              "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
+              "after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]",
+            )}
+          >
             Actions
           </TableHead>
         )}

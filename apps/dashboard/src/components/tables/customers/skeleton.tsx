@@ -6,7 +6,7 @@ export function CustomersSkeleton() {
   return (
     <div className="w-full">
       <div className="overflow-x-auto border-l border-r border-border">
-        <Table className="min-w-[1000px]">
+        <Table>
           <TableHeader />
           <TableBody className="border-l-0 border-r-0 border-t-0 border-b-0">
             {Array.from({ length: 25 }).map((_, index) => (
@@ -29,7 +29,7 @@ export function CustomersSkeleton() {
                 <TableCell className="w-[280px] max-w-[280px]">
                   <Skeleton className="h-4 w-20" />
                 </TableCell>
-                <TableCell className="w-[100px] sticky right-0 bg-background z-10">
+                <TableCell className="w-[100px] sticky right-0 bg-background z-30">
                   <Skeleton className="h-4 w-8" />
                 </TableCell>
               </TableRow>

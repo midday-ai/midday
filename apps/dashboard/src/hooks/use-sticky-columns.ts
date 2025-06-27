@@ -30,7 +30,7 @@ export function useStickyColumns({
       ?.getIsVisible() ||
     (columnVisibility && columnVisibility[id] !== false);
 
-  // Calculate dynamic sticky positions for columns
+  // Calculate dynamic sticky positions for transaction columns
   const stickyPositions = useMemo(() => {
     let position = 0;
     const positions: Record<string, number> = {};
@@ -63,7 +63,8 @@ export function useStickyColumns({
 
   // Function to get sticky class names
   const getStickyClassName = (columnId: string, baseClassName?: string) => {
-    const isSticky = ["select", "date", "description"].includes(columnId);
+    const stickyColumns = ["select", "date", "description"];
+    const isSticky = stickyColumns.includes(columnId);
     return cn(baseClassName, isSticky && "sticky left-[var(--stick-left)]");
   };
 

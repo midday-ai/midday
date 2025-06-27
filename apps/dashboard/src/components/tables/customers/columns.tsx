@@ -24,6 +24,10 @@ export const columns: ColumnDef<Customer>[] = [
   {
     header: "Name",
     accessorKey: "name",
+    meta: {
+      className:
+        "sticky left-0 bg-background group-hover:bg-muted z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]",
+    },
     cell: ({ row }) => {
       const name = row.original.name;
 
@@ -111,7 +115,7 @@ export const columns: ColumnDef<Customer>[] = [
               </Link>
             ))}
           </div>
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+          <div className="absolute group-hover:hidden right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
         </div>
       );
     },
@@ -121,7 +125,7 @@ export const columns: ColumnDef<Customer>[] = [
     header: "Actions",
     meta: {
       className:
-        "text-right sticky right-0 bg-background z-10 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]",
+        "text-right sticky right-0 bg-background group-hover:bg-muted z-30 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]",
     },
     cell: ({ row, table }) => {
       const { setParams } = useCustomerParams();
