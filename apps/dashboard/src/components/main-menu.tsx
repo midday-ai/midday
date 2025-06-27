@@ -2,12 +2,6 @@
 
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -65,57 +59,62 @@ const items = [
 interface ItemProps {
   item: { path: string; name: string };
   isActive: boolean;
+  isExpanded: boolean;
   onSelect?: () => void;
 }
 
-const Item = ({ item, isActive, onSelect }: ItemProps) => {
+const Item = ({ item, isActive, isExpanded, onSelect }: ItemProps) => {
   const Icon = icons[item.path as keyof typeof icons];
 
   return (
-    <TooltipProvider delayDuration={70}>
-      <Link prefetch href={item.path} onClick={() => onSelect?.()}>
-        <Tooltip>
-          <TooltipTrigger className="w-full">
-            <div
+    <Link prefetch href={item.path} onClick={() => onSelect?.()}>
+      <div className="relative">
+        <div
+          className={cn(
+            "border border-transparent h-[40px] transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ml-[15px] mr-[15px]",
+            "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
+            isActive &&
+              "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
+            isExpanded ? "w-[calc(100%-30px)]" : "w-[40px]",
+          )}
+        />
+
+        {/* Icon - always in same position */}
+        <div className="absolute top-0 left-[15px] w-[40px] h-[40px] flex items-center justify-center dark:text-[#666666] text-black hover:!text-primary">
+          <div className={cn(isActive && "dark:!text-white")}>
+            <Icon />
+          </div>
+        </div>
+
+        {isExpanded && (
+          <div className="absolute top-0 left-[55px] right-[8px] h-[40px] flex items-center">
+            <span
               className={cn(
-                "relative border border-transparent size-[40px] flex items-center md:justify-center",
-                "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C] dark:text-[#666666] text-black hover:!text-primary",
-                isActive &&
-                  "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C] dark:!text-white",
+                "text-sm font-medium transition-opacity duration-200 ease-in-out text-[#666]",
+                isActive && "text-primary",
               )}
             >
-              <div className="relative">
-                <div className="flex space-x-3 p-0 items-center pl-2 md:pl-0">
-                  <Icon />
-                  <span className="flex md:hidden">{item.name}</span>
-                </div>
-              </div>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent
-            side="left"
-            className="px-3 py-1.5 text-xs hidden md:flex items-center gap-1"
-            sideOffset={6}
-          >
-            {item.name}
-          </TooltipContent>
-        </Tooltip>
-      </Link>
-    </TooltipProvider>
+              {item.name}
+            </span>
+          </div>
+        )}
+      </div>
+    </Link>
   );
 };
 
 type Props = {
   onSelect?: () => void;
+  isExpanded?: boolean;
 };
 
-export function MainMenu({ onSelect }: Props) {
+export function MainMenu({ onSelect, isExpanded = false }: Props) {
   const pathname = usePathname();
   const part = pathname?.split("/")[1];
 
   return (
-    <div className="mt-6">
-      <nav>
+    <div className="mt-6 w-full">
+      <nav className="w-full">
         <div className="flex flex-col gap-2">
           {items.map((item) => {
             const isActive =
@@ -127,6 +126,7 @@ export function MainMenu({ onSelect }: Props) {
                 key={item.path}
                 item={item}
                 isActive={isActive}
+                isExpanded={isExpanded}
                 onSelect={onSelect}
               />
             );
