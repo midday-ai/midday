@@ -3,6 +3,7 @@
 import { LoadMore } from "@/components/load-more";
 import { useLatestProjectId } from "@/hooks/use-latest-project-id";
 import { useSortParams } from "@/hooks/use-sort-params";
+import { useTableScroll } from "@/hooks/use-table-scroll";
 import { useTrackerFilterParams } from "@/hooks/use-tracker-filter-params";
 import { useTRPC } from "@/trpc/client";
 import { Table, TableBody } from "@midday/ui/table";
@@ -20,6 +21,11 @@ export function DataTable() {
   const { params } = useSortParams();
   const { hasFilters, filter } = useTrackerFilterParams();
   const deferredSearch = useDeferredValue(filter.q);
+
+  const tableScroll = useTableScroll({
+    useColumnWidths: true,
+    startFromColumn: 1,
+  });
 
   const infiniteQueryOptions = trpc.trackerProjects.get.infiniteQueryOptions(
     {
@@ -65,9 +71,12 @@ export function DataTable() {
 
   return (
     <div className="w-full">
-      <div className="overflow-x-auto border-l border-r border-border">
-        <Table className="min-w-[1500px]">
-          <DataTableHeader />
+      <div
+        ref={tableScroll.containerRef}
+        className="overflow-x-auto md:border-l md:border-r border-border"
+      >
+        <Table>
+          <DataTableHeader tableScroll={tableScroll} />
 
           <TableBody className="border-l-0 border-r-0">
             {pageData?.map((row) => (

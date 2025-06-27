@@ -4,6 +4,7 @@ import { FiGithub } from "react-icons/fi";
 import {
   MdArrowBack,
   MdArrowDownward,
+  MdArrowForward,
   MdArrowRightAlt,
   MdArrowUpward,
   MdAttachMoney,
@@ -565,6 +566,7 @@ export const Icons = {
   ChevronRight: MdChevronRight,
   ChevronLeft: MdChevronLeft,
   ArrowBack: MdArrowBack,
+  ArrowForward: MdArrowForward,
   Folder: MdFolder,
   Search: MdSearch,
   Error: MdErrorOutline,

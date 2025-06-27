@@ -3,11 +3,14 @@
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
 import { LoadMore } from "@/components/load-more";
 import { useSortParams } from "@/hooks/use-sort-params";
-import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
+import { useStickyColumns } from "@/hooks/use-sticky-columns";
+import { useTableScroll } from "@/hooks/use-table-scroll";
+import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useTransactionsStore } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
 import { Cookies } from "@/utils/constants";
+import { cn } from "@midday/ui/cn";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
@@ -37,14 +40,13 @@ export function DataTable({
   columnVisibility: columnVisibilityPromise,
 }: Props) {
   const trpc = useTRPC();
-  const { filter } = useTransactionFilterParams();
+  const { filter, hasFilters } = useTransactionFilterParamsWithPersistence();
   const { setRowSelection, rowSelection, setColumns, setCanDelete } =
     useTransactionsStore();
   const deferredSearch = useDeferredValue(filter.q);
   const { params } = useSortParams();
   const { ref, inView } = useInView();
   const { transactionId, setParams } = useTransactionParams();
-  const { hasFilters } = useTransactionFilterParams();
 
   const showBottomBar = hasFilters && !Object.keys(rowSelection).length;
   const initialColumnVisibility = use(columnVisibilityPromise);
@@ -150,6 +152,18 @@ export function DataTable({
     },
   });
 
+  // Use the reusable sticky columns hook
+  const { getStickyStyle, getStickyClassName } = useStickyColumns({
+    columnVisibility,
+    table,
+  });
+
+  // Use the reusable table scroll hook with column-width scrolling starting after sticky columns
+  const tableScroll = useTableScroll({
+    useColumnWidths: true,
+    startFromColumn: 3, // Skip sticky columns: select, date, description
+  });
+
   useEffect(() => {
     setColumns(table.getAllLeafColumns());
   }, [columnVisibility]);
@@ -228,21 +242,28 @@ export function DataTable({
       <TooltipProvider delayDuration={20}>
         <Tooltip>
           <div className="w-full">
-            <div className="overflow-x-auto border-l border-r border-border">
-              <Table className="min-w-[1600px]">
-                <DataTableHeader table={table} />
+            <div
+              ref={tableScroll.containerRef}
+              className="overflow-x-auto md:border-l md:border-r border-border"
+            >
+              <Table>
+                <DataTableHeader table={table} tableScroll={tableScroll} />
 
                 <TableBody className="border-l-0 border-r-0">
                   {table.getRowModel().rows?.length ? (
                     table.getRowModel().rows.map((row) => (
                       <TableRow
                         key={row.id}
-                        className="h-[40px] md:h-[45px] cursor-pointer select-text"
+                        className="group h-[40px] md:h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-secondary"
                       >
                         {row.getVisibleCells().map((cell) => (
                           <TableCell
                             key={cell.id}
-                            className={cell.column.columnDef.meta?.className}
+                            className={getStickyClassName(
+                              cell.column.id,
+                              cell.column.columnDef.meta?.className,
+                            )}
+                            style={getStickyStyle(cell.column.id)}
                             onClick={() => {
                               if (
                                 cell.column.id !== "select" &&

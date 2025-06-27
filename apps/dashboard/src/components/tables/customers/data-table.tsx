@@ -4,6 +4,7 @@ import { LoadMore } from "@/components/load-more";
 import { useCustomerFilterParams } from "@/hooks/use-customer-filter-params";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useSortParams } from "@/hooks/use-sort-params";
+import { useTableScroll } from "@/hooks/use-table-scroll";
 import { useTRPC } from "@/trpc/client";
 import { Table, TableBody } from "@midday/ui/table";
 import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
@@ -27,6 +28,11 @@ export function DataTable() {
   const { params } = useSortParams();
 
   const deferredSearch = useDeferredValue(filter.q);
+
+  const tableScroll = useTableScroll({
+    useColumnWidths: true,
+    startFromColumn: 1,
+  });
 
   const infiniteQueryOptions = trpc.customers.get.infiniteQueryOptions(
     {
@@ -93,9 +99,12 @@ export function DataTable() {
 
   return (
     <div className="w-full">
-      <div className="overflow-x-auto border-l border-r border-border">
-        <Table className="min-w-[1000px]">
-          <TableHeader />
+      <div
+        ref={tableScroll.containerRef}
+        className="overflow-x-auto md:border-l md:border-r border-border"
+      >
+        <Table>
+          <TableHeader tableScroll={tableScroll} />
 
           <TableBody className="border-l-0 border-r-0">
             {table.getRowModel().rows.map((row) => (

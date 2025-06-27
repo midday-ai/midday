@@ -10,7 +10,12 @@ const data = [...Array(40)].map((_, i) => ({ id: i.toString() }));
 export function Loading({ isEmpty }: { isEmpty?: boolean }) {
   return (
     <div className="w-full">
-      <div className="overflow-x-auto border-l border-r border-border">
+      <div
+        className={cn(
+          "overflow-x-auto",
+          !isEmpty && "md:border-l md:border-r border-border",
+        )}
+      >
         <Table
           className={cn(
             "min-w-[1600px]",
@@ -19,7 +24,7 @@ export function Loading({ isEmpty }: { isEmpty?: boolean }) {
         >
           <DataTableHeader loading />
 
-          <TableBody className="border-l-0 border-r-0">
+          <TableBody className="border-l-0 border-r-0 border-t-0 border-b-0">
             {data?.map((row) => (
               <TableRow key={row.id} className="h-[45px]">
                 <TableCell className="w-[50px]">

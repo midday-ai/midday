@@ -9,14 +9,14 @@ const data = [...Array(10)].map((_, i) => ({ id: i.toString() }));
 export function Loading() {
   return (
     <div className="w-full">
-      <div className="overflow-x-auto border-l border-r border-border">
-        <Table className="min-w-[1500px]">
+      <div className="overflow-x-auto md:border-l md:border-r border-border">
+        <Table>
           <DataTableHeader />
 
-          <TableBody className="border-l-0 border-r-0">
+          <TableBody className="border-l-0 border-r-0 border-t-0 border-b-0">
             {data?.map((row) => (
               <TableRow key={row.id} className="h-[45px]">
-                <TableCell className="w-[320px]">
+                <TableCell className="w-[240px] min-w-[240px] sticky left-0 bg-background z-20">
                   <Skeleton className="h-3.5 w-[60%]" />
                 </TableCell>
                 <TableCell className="w-[180px]">
@@ -37,10 +37,10 @@ export function Loading() {
                 <TableCell className="w-[140px]">
                   <Skeleton className="h-3.5 w-[50%]" />
                 </TableCell>
-                <TableCell className="w-[120px]">
+                <TableCell className="w-[150px] min-w-[150px]">
                   <Skeleton className="h-3.5 w-[40%]" />
                 </TableCell>
-                <TableCell className="w-[100px]">
+                <TableCell className="w-[100px] sticky right-0 bg-background z-30">
                   <Skeleton className="h-3.5 w-[30%]" />
                 </TableCell>
               </TableRow>

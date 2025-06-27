@@ -55,7 +55,11 @@ type RowProps = {
 };
 
 export function Row({ children }: RowProps) {
-  return <TableRow className="h-[45px]">{children}</TableRow>;
+  return (
+    <TableRow className="group h-[45px] hover:bg-[#F2F1EF] hover:dark:bg-secondary">
+      {children}
+    </TableRow>
+  );
 }
 
 type DataTableRowProps = {
@@ -78,7 +82,10 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
     <AlertDialog>
       <DropdownMenu>
         <Row>
-          <DataTableCell onClick={onClick} className="cursor-pointer">
+          <DataTableCell
+            onClick={onClick}
+            className="w-[240px] min-w-[240px] cursor-pointer md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-secondary z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]"
+          >
             {row.name}
           </DataTableCell>
           <DataTableCell onClick={onClick} className="cursor-pointer">
@@ -149,7 +156,7 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
 
-              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+              <div className="absolute group-hover:hidden right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
             </div>
           </DataTableCell>
           <DataTableCell onClick={onClick} className="cursor-pointer">
@@ -172,7 +179,7 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
           <DataTableCell onClick={onClick} className="cursor-pointer">
             <TrackerStatus status={row.status} />
           </DataTableCell>
-          <DataTableCell className="sticky right-0 bg-background z-10 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]">
+          <DataTableCell className="md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-secondary z-30 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]">
             <div className="flex justify-center">
               <DropdownMenuTrigger>
                 <Icons.MoreHoriz />

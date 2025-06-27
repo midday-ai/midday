@@ -15,6 +15,7 @@ import { invoiceRouter } from "./invoice";
 import { invoiceTemplateRouter } from "./invoice-template";
 import { metricsRouter } from "./metrics";
 import { searchRouter } from "./search";
+import { shortLinksRouter } from "./short-links";
 import { tagsRouter } from "./tags";
 import { teamRouter } from "./team";
 import { trackerEntriesRouter } from "./tracker-entries";
@@ -49,6 +50,7 @@ export const appRouter = createTRPCRouter({
   transactionTags: transactionTagsRouter,
   user: userRouter,
   search: searchRouter,
+  shortLinks: shortLinksRouter,
   apiKeys: apiKeysRouter,
 });
 

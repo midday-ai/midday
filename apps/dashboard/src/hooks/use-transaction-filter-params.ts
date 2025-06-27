@@ -32,7 +32,10 @@ export const transactionFilterParamsSchema = {
 };
 
 export function useTransactionFilterParams() {
-  const [filter, setFilter] = useQueryStates(transactionFilterParamsSchema);
+  const [filter, setFilter] = useQueryStates(transactionFilterParamsSchema, {
+    // Clear URL when values are null/default
+    clearOnDefault: true,
+  });
 
   return {
     filter,

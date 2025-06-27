@@ -9,11 +9,11 @@ const data = [...Array(10)].map((_, i) => ({ id: i.toString() }));
 export function DataTableSkeleton() {
   return (
     <div className="w-full">
-      <div className="overflow-x-auto border-l border-r border-border">
-        <Table className="min-w-[800px]">
+      <div className="overflow-x-auto md:border-l md:border-r border-border">
+        <Table>
           <DataTableHeader />
 
-          <TableBody className="border-l-0 border-r-0">
+          <TableBody className="border-l-0 border-r-0 border-t-0 border-b-0">
             {data?.map((row) => (
               <TableRow key={row.id} className="h-[45px]">
                 {/* Checkbox column */}
@@ -21,7 +21,7 @@ export function DataTableSkeleton() {
                   <Skeleton className="h-4 w-4" />
                 </TableCell>
                 {/* Name column */}
-                <TableCell className="w-2/5 min-w-[400px] px-3 py-2">
+                <TableCell className="w-[250px] min-w-[250px] px-3 py-2">
                   <Skeleton className="h-3.5 w-[60%]" />
                 </TableCell>
                 {/* Tags column */}
@@ -33,7 +33,7 @@ export function DataTableSkeleton() {
                   <Skeleton className="h-3.5 w-[50%]" />
                 </TableCell>
                 {/* Actions column */}
-                <TableCell className="w-[100px] px-3 md:px-4 py-2 text-right sticky right-0 bg-background z-10">
+                <TableCell className="w-[100px] px-3 md:px-4 py-2 text-right sticky right-0 bg-background z-30">
                   <Skeleton className="h-3.5 w-[50%]" />
                 </TableCell>
               </TableRow>

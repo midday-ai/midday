@@ -2,6 +2,7 @@
 
 import { generateTransactionsFilters } from "@/actions/ai/filters/generate-transactions-filters";
 import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
+import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTRPC } from "@/trpc/client";
 import { formatAccountName } from "@/utils/format";
 import { Calendar } from "@midday/ui/calendar";
@@ -181,15 +182,16 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
 
 function updateArrayFilter(
   value: string,
-  currentValues: string[] | null,
+  currentValues: string[] | null | undefined,
   setFilter: (update: Record<string, unknown>) => void,
   key: string,
 ) {
-  const newValues = currentValues?.includes(value)
-    ? currentValues.filter((v) => v !== value).length > 0
-      ? currentValues.filter((v) => v !== value)
+  const normalizedValues = currentValues ?? null;
+  const newValues = normalizedValues?.includes(value)
+    ? normalizedValues.filter((v) => v !== value).length > 0
+      ? normalizedValues.filter((v) => v !== value)
       : null
-    : [...(currentValues ?? []), value];
+    : [...(normalizedValues ?? []), value];
 
   setFilter({ [key]: newValues });
 }
@@ -200,7 +202,8 @@ export function TransactionsSearchFilter() {
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const { filter = defaultSearch, setFilter } = useTransactionFilterParams();
+  const { filter = defaultSearch, setFilter } =
+    useTransactionFilterParamsWithPersistence();
   const { tags, accounts, categories } = useFilterData(isOpen, isFocused);
   const [prompt, setPrompt] = useState(filter.q ?? "");
 
@@ -327,9 +330,9 @@ export function TransactionsSearchFilter() {
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <div className="flex space-x-4 items-center">
+      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0 items-stretch sm:items-center w-full">
         <form
-          className="relative"
+          className="relative flex-1 sm:flex-initial"
           onSubmit={(e) => {
             e.preventDefault();
             handleSubmit();
@@ -339,7 +342,7 @@ export function TransactionsSearchFilter() {
           <Input
             ref={inputRef}
             placeholder={placeholder}
-            className="pl-9 w-full md:w-[350px] pr-8"
+            className="pl-9 w-full sm:w-[350px] pr-8"
             value={prompt}
             onChange={handleSearch}
             onFocus={() => setIsFocused(true)}
