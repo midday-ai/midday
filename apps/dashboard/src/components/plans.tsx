@@ -96,6 +96,7 @@ export function Plans() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
+                  prefetch={false}
                   href={`/api/checkout?plan=starter&teamId=${user?.team?.id}&isDesktop=${isDesktop}&planType=starter`}
                   className={cn(!data?.starter && "opacity-50 cursor-default")}
                   onClick={(evt) => {
@@ -212,6 +213,7 @@ export function Plans() {
 
           <div className="mt-8 border-t border-border pt-4">
             <Link
+              prefetch={false}
               href={`/api/checkout?plan=pro&teamId=${user?.team?.id}&isDesktop=${isDesktop}&planType=pro`}
             >
               <SubmitButton
