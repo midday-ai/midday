@@ -50,9 +50,10 @@ const items = [
     path: "/invoices",
     name: "Invoices",
     children: [
-      { path: "/invoices?statuses=overdue", name: "Overdue" },
       { path: "/invoices?statuses=paid", name: "Paid" },
       { path: "/invoices?statuses=unpaid", name: "Unpaid" },
+      { path: "/invoices?statuses=overdue", name: "Overdue" },
+      { path: "/invoices?statuses=draft", name: "Draft" },
       { path: "/invoices?type=create", name: "Create new" },
     ],
   },
