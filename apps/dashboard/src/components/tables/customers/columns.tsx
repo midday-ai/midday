@@ -26,7 +26,7 @@ export const columns: ColumnDef<Customer>[] = [
     accessorKey: "name",
     meta: {
       className:
-        "w-[240px] min-w-[240px] sticky left-0 bg-background group-hover:bg-muted z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]",
+        "w-[240px] min-w-[240px] sticky left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-secondary z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]",
     },
     cell: ({ row }) => {
       const name = row.original.name;
@@ -125,7 +125,7 @@ export const columns: ColumnDef<Customer>[] = [
     header: "Actions",
     meta: {
       className:
-        "text-right sticky right-0 bg-background group-hover:bg-muted z-30 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]",
+        "text-right sticky right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-secondary z-30 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]",
     },
     cell: ({ row, table }) => {
       const { setParams } = useCustomerParams();

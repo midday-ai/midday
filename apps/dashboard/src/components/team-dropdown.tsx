@@ -166,7 +166,7 @@ export function TeamDropdown({ isExpanded = false }: Props) {
       {isExpanded && sortedTeams[0] && (
         <div className="fixed left-[62px] bottom-4 h-[32px] flex items-center">
           <span
-            className="text-sm font-medium text-primary truncate transition-opacity duration-200 ease-in-out cursor-pointer hover:opacity-80"
+            className="text-sm text-primary truncate transition-opacity duration-200 ease-in-out cursor-pointer hover:opacity-80"
             onClick={(e) => {
               e.stopPropagation();
               toggleActive();

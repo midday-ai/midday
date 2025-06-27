@@ -254,7 +254,7 @@ export function DataTable({
                     table.getRowModel().rows.map((row) => (
                       <TableRow
                         key={row.id}
-                        className="group h-[40px] md:h-[45px] cursor-pointer select-text hover:bg-muted"
+                        className="group h-[40px] md:h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-secondary"
                       >
                         {row.getVisibleCells().map((cell) => (
                           <TableCell

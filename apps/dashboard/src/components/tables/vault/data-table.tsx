@@ -177,7 +177,7 @@ export function DataTable() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="group h-[40px] md:h-[45px] cursor-pointer select-text hover:bg-muted"
+                  className="group h-[40px] md:h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-secondary"
                 >
                   {row.getAllCells().map((cell) => (
                     <TableCell
