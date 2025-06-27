@@ -45,7 +45,7 @@ export function TableHeader({ tableScroll }: Props) {
   return (
     <BaseTableHeader className="border-l-0 border-r-0">
       <TableRow>
-        <TableHead className="w-[240px] min-w-[240px] sticky left-0 bg-background z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]">
+        <TableHead className="w-[240px] min-w-[240px] md:sticky md:left-0 bg-background z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]">
           <div className="flex items-center justify-between">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
@@ -62,7 +62,7 @@ export function TableHeader({ tableScroll }: Props) {
                 canScrollRight={tableScroll.canScrollRight}
                 onScrollLeft={tableScroll.scrollLeft}
                 onScrollRight={tableScroll.scrollRight}
-                className="ml-auto"
+                className="ml-auto hidden md:flex"
               />
             )}
           </div>
@@ -130,7 +130,7 @@ export function TableHeader({ tableScroll }: Props) {
 
         <TableHead
           className={cn(
-            "w-[100px] sticky right-0 bg-background z-30",
+            "w-[100px] md:sticky md:right-0 bg-background z-30",
             "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
             "after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]",
           )}

@@ -32,7 +32,7 @@ export function DataTableHeader({ table, tableScroll }: Props) {
   return (
     <TableHeader className="border-l-0 border-r-0">
       <TableRow className="h-[45px] hover:bg-transparent">
-        <TableHead className="w-[50px] min-w-[50px] px-3 md:px-4 py-2 sticky left-0 bg-background z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]">
+        <TableHead className="w-[50px] min-w-[50px] px-3 md:px-4 py-2 md:sticky md:left-0 bg-background z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]">
           <Checkbox
             checked={
               table?.getIsAllPageRowsSelected() ||
@@ -44,7 +44,7 @@ export function DataTableHeader({ table, tableScroll }: Props) {
           />
         </TableHead>
 
-        <TableHead className="w-[250px] min-w-[250px] px-3 py-2 sticky left-[50px] bg-background z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]">
+        <TableHead className="w-[250px] min-w-[250px] px-3 py-2 md:sticky md:left-[50px] bg-background z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]">
           <div className="flex items-center justify-between">
             <span>Name</span>
             {tableScroll?.isScrollable && (
@@ -53,7 +53,7 @@ export function DataTableHeader({ table, tableScroll }: Props) {
                 canScrollRight={tableScroll.canScrollRight}
                 onScrollLeft={tableScroll.scrollLeft}
                 onScrollRight={tableScroll.scrollRight}
-                className="ml-auto"
+                className="ml-auto hidden md:flex"
               />
             )}
           </div>
@@ -69,7 +69,7 @@ export function DataTableHeader({ table, tableScroll }: Props) {
 
         <TableHead
           className={cn(
-            "px-3 md:px-4 py-2 text-right w-[100px] sticky right-0 bg-background z-30",
+            "px-3 md:px-4 py-2 text-right w-[100px] md:sticky md:right-0 bg-background z-30",
             "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
             "after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]",
           )}

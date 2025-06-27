@@ -68,7 +68,7 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
       <TableRow className="h-[45px] hover:bg-transparent">
         <TableHead
           className={cn(
-            "min-w-[50px] w-[50px] hidden md:table-cell px-3 md:px-4 py-2 sticky left-[var(--stick-left)] bg-background z-10 border-r border-border",
+            "min-w-[50px] w-[50px] hidden md:table-cell px-3 md:px-4 py-2 md:sticky md:left-[var(--stick-left)] bg-background z-10 border-r border-border",
             "before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
             "after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]",
           )}
@@ -88,7 +88,7 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
         {isVisible("date") && (
           <TableHead
             className={cn(
-              "w-[110px] min-w-[110px] px-3 md:px-4 py-2 sticky left-[var(--stick-left)] bg-background z-10 border-r border-border",
+              "w-[110px] min-w-[110px] px-3 md:px-4 py-2 md:sticky md:left-[var(--stick-left)] bg-background z-10 border-r border-border",
               "before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
               "after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]",
             )}
@@ -109,7 +109,7 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
         {isVisible("description") && (
           <TableHead
             className={cn(
-              "w-[320px] min-w-[320px] px-3 md:px-4 py-2 sticky left-[var(--stick-left)] bg-background z-10 border-r border-border",
+              "w-[320px] min-w-[320px] px-3 md:px-4 py-2 md:sticky md:left-[var(--stick-left)] bg-background z-10 border-r border-border",
               "before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
               "after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]",
             )}
@@ -133,6 +133,7 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
                   canScrollRight={tableScroll.canScrollRight}
                   onScrollLeft={tableScroll.scrollLeft}
                   onScrollRight={tableScroll.scrollRight}
+                  className="hidden md:flex"
                 />
               )}
             </div>
@@ -284,7 +285,7 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
         {isVisible("actions") && (
           <TableHead
             className={cn(
-              "w-[100px] sticky right-0 bg-background z-10",
+              "w-[100px] md:sticky md:right-0 bg-background z-10",
               "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
               "after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]",
             )}

@@ -9,7 +9,7 @@ const data = [...Array(10)].map((_, i) => ({ id: i.toString() }));
 export function Loading() {
   return (
     <div className="w-full">
-      <div className="overflow-x-auto border-l border-r border-border">
+      <div className="overflow-x-auto md:border-l md:border-r border-border">
         <Table>
           <DataTableHeader />
 

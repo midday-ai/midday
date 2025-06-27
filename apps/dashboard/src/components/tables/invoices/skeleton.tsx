@@ -5,7 +5,7 @@ import { TableHeader } from "./table-header";
 export function InvoiceSkeleton() {
   return (
     <div className="w-full">
-      <div className="overflow-x-auto border-l border-r border-border">
+      <div className="overflow-x-auto md:border-l md:border-r border-border">
         <Table>
           <TableHeader />
           <TableBody className="border-l-0 border-r-0 border-t-0 border-b-0">

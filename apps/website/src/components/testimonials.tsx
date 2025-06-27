@@ -86,7 +86,7 @@ const testimonials = [
   {
     name: "Steven Tey",
     avatarUrl:
-      "https://pbs.twimg.com/profile_images/1506792347840888834/dS-r50Je_400x400.jpg",
+      "https://pbs.twimg.com/profile_images/1923813473240203264/owJG92AC_400x400.jpg",
     handle: "@steventey",
     verified: true,
     quote: `Just found my new favorite open-source project → http://midday.ai
@@ -98,14 +98,6 @@ const testimonials = [
      + 
     @viktorhofte
      👏`,
-  },
-  {
-    name: "Gokul",
-    avatarUrl:
-      "https://pbs.twimg.com/profile_images/1805103400549318656/EEQpiO7e_400x400.jpg",
-    handle: "@KyTechInc",
-    verified: true,
-    quote: "🖤 Awesome work. just love it.",
   },
   {
     name: "Peer Richelsen — oss/acc",

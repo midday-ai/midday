@@ -330,9 +330,9 @@ export function TransactionsSearchFilter() {
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <div className="flex space-x-4 items-center">
+      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0 items-stretch sm:items-center w-full">
         <form
-          className="relative"
+          className="relative flex-1 sm:flex-initial"
           onSubmit={(e) => {
             e.preventDefault();
             handleSubmit();
@@ -342,7 +342,7 @@ export function TransactionsSearchFilter() {
           <Input
             ref={inputRef}
             placeholder={placeholder}
-            className="pl-9 w-full md:w-[350px] pr-8"
+            className="pl-9 w-full sm:w-[350px] pr-8"
             value={prompt}
             onChange={handleSearch}
             onFocus={() => setIsFocused(true)}
