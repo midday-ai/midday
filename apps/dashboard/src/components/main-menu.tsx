@@ -212,7 +212,6 @@ const Item = ({ item, isActive, isExpanded, onSelect }: ItemProps) => {
           <div
             className={cn(
               "border border-transparent h-[40px] transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ml-[15px] mr-[15px]",
-              "group-hover:bg-accent group-hover:border-[#DCDAD2] group-hover:dark:border-[#2C2C2C]",
               isActive &&
                 "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
               isExpanded ? "w-[calc(100%-30px)]" : "w-[40px]",
