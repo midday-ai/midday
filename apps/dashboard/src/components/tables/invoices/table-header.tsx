@@ -1,5 +1,6 @@
 "use client";
 
+import { HorizontalPagination } from "@/components/horizontal-pagination";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -21,9 +22,16 @@ interface TableInterface {
 
 interface Props {
   table?: TableInterface;
+  tableScroll?: {
+    canScrollLeft: boolean;
+    canScrollRight: boolean;
+    isScrollable: boolean;
+    scrollLeft: () => void;
+    scrollRight: () => void;
+  };
 }
 
-export function TableHeader({ table }: Props) {
+export function TableHeader({ table, tableScroll }: Props) {
   const { params, setParams } = useSortParams();
 
   const [column, value] = params.sort || [];
@@ -54,20 +62,31 @@ export function TableHeader({ table }: Props) {
     <BaseTableHeader className="border-l-0 border-r-0">
       <TableRow>
         {isVisible("invoiceNumber") && (
-          <TableHead className="w-[200px] min-w-[200px] sticky left-0 bg-background z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]">
-            <Button
-              className="p-0 hover:bg-transparent space-x-2"
-              variant="ghost"
-              onClick={() => createSortQuery("invoice_number")}
-            >
-              <span>Invoice no.</span>
-              {"invoiceNumber" === column && value === "asc" && (
-                <ArrowDown size={16} />
+          <TableHead className="w-[220px] min-w-[220px] sticky left-0 bg-background z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]">
+            <div className="flex items-center justify-between">
+              <Button
+                className="p-0 hover:bg-transparent space-x-2"
+                variant="ghost"
+                onClick={() => createSortQuery("invoice_number")}
+              >
+                <span>Invoice no.</span>
+                {"invoiceNumber" === column && value === "asc" && (
+                  <ArrowDown size={16} />
+                )}
+                {"invoiceNumber" === column && value === "desc" && (
+                  <ArrowUp size={16} />
+                )}
+              </Button>
+              {tableScroll?.isScrollable && (
+                <HorizontalPagination
+                  canScrollLeft={tableScroll.canScrollLeft}
+                  canScrollRight={tableScroll.canScrollRight}
+                  onScrollLeft={tableScroll.scrollLeft}
+                  onScrollRight={tableScroll.scrollRight}
+                  className="ml-auto"
+                />
               )}
-              {"invoiceNumber" === column && value === "desc" && (
-                <ArrowUp size={16} />
-              )}
-            </Button>
+            </div>
           </TableHead>
         )}
         {isVisible("status") && (

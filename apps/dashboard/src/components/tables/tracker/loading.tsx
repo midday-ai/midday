@@ -16,7 +16,7 @@ export function Loading() {
           <TableBody className="border-l-0 border-r-0 border-t-0 border-b-0">
             {data?.map((row) => (
               <TableRow key={row.id} className="h-[45px]">
-                <TableCell className="w-[450px] min-w-[450px] sticky left-0 bg-background z-20">
+                <TableCell className="w-[240px] min-w-[240px] sticky left-0 bg-background z-20">
                   <Skeleton className="h-3.5 w-[60%]" />
                 </TableCell>
                 <TableCell className="w-[180px]">

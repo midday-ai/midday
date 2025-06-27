@@ -6,6 +6,7 @@ import { VaultGetStarted } from "@/components/vault/vault-get-started";
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
 import { useRealtime } from "@/hooks/use-realtime";
+import { useTableScroll } from "@/hooks/use-table-scroll";
 import { useUserQuery } from "@/hooks/use-user";
 import { useDocumentsStore } from "@/store/vault";
 import { useTRPC } from "@/trpc/client";
@@ -40,6 +41,11 @@ export function DataTable() {
   const { setRowSelection, rowSelection } = useDocumentsStore();
   const { setParams, params } = useDocumentParams();
   const [, copy] = useCopyToClipboard();
+
+  const tableScroll = useTableScroll({
+    useColumnWidths: true,
+    startFromColumn: 2,
+  });
 
   const { data, fetchNextPage, hasNextPage, refetch, isFetching } =
     useSuspenseInfiniteQuery(
@@ -158,9 +164,12 @@ export function DataTable() {
 
   return (
     <div className="w-full">
-      <div className="overflow-x-auto border-l border-r border-border">
+      <div
+        ref={tableScroll.containerRef}
+        className="overflow-x-auto border-l border-r border-border"
+      >
         <Table>
-          <DataTableHeader table={table} />
+          <DataTableHeader table={table} tableScroll={tableScroll} />
 
           <TableBody className="border-l-0 border-r-0">
             {table.getRowModel().rows?.length ? (

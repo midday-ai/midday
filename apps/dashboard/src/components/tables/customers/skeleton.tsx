@@ -11,7 +11,7 @@ export function CustomersSkeleton() {
           <TableBody className="border-l-0 border-r-0 border-t-0 border-b-0">
             {Array.from({ length: 25 }).map((_, index) => (
               <TableRow key={index.toString()} className="h-[45px]">
-                <TableCell>
+                <TableCell className="w-[240px] min-w-[240px]">
                   <Skeleton className="h-4 w-24" />
                 </TableCell>
                 <TableCell>

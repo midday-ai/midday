@@ -25,7 +25,7 @@ export const columns: ColumnDef<Invoice>[] = [
     accessorKey: "invoiceNumber",
     meta: {
       className:
-        "sticky left-0 bg-background group-hover:bg-muted z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]",
+        "w-[220px] min-w-[220px] sticky left-0 bg-background group-hover:bg-muted z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]",
     },
     cell: ({ row }) => row.getValue("invoiceNumber"),
   },

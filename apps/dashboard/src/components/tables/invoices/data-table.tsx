@@ -4,6 +4,7 @@ import { updateColumnVisibilityAction } from "@/actions/update-column-visibility
 import { LoadMore } from "@/components/load-more";
 import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
 import { useSortParams } from "@/hooks/use-sort-params";
+import { useTableScroll } from "@/hooks/use-table-scroll";
 import { useUserQuery } from "@/hooks/use-user";
 import { useInvoiceStore } from "@/store/invoice";
 import { useTRPC } from "@/trpc/client";
@@ -42,6 +43,11 @@ export function DataTable({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility ?? {},
   );
+
+  const tableScroll = useTableScroll({
+    useColumnWidths: true,
+    startFromColumn: 1,
+  });
 
   const infiniteQueryOptions = trpc.invoice.get.infiniteQueryOptions(
     {
@@ -102,9 +108,12 @@ export function DataTable({
 
   return (
     <div className="w-full">
-      <div className="overflow-x-auto border-l border-r border-border">
+      <div
+        ref={tableScroll.containerRef}
+        className="overflow-x-auto border-l border-r border-border"
+      >
         <Table>
-          <TableHeader table={table} />
+          <TableHeader table={table} tableScroll={tableScroll} />
 
           <TableBody className="border-l-0 border-r-0">
             {table.getRowModel().rows.map((row) => (

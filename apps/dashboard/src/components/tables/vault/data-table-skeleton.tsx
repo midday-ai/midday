@@ -21,7 +21,7 @@ export function DataTableSkeleton() {
                   <Skeleton className="h-4 w-4" />
                 </TableCell>
                 {/* Name column */}
-                <TableCell className="w-2/5 min-w-[400px] px-3 py-2">
+                <TableCell className="w-[250px] min-w-[250px] px-3 py-2">
                   <Skeleton className="h-3.5 w-[60%]" />
                 </TableCell>
                 {/* Tags column */}
