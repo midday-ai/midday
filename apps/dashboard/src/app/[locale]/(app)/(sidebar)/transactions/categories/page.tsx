@@ -12,10 +12,12 @@ export default async function Categories() {
   prefetch(trpc.transactionCategories.get.queryOptions());
 
   return (
-    <HydrateClient>
-      <Suspense fallback={<CategoriesSkeleton />}>
-        <DataTable />
-      </Suspense>
-    </HydrateClient>
+    <div className="max-w-screen-lg">
+      <HydrateClient>
+        <Suspense fallback={<CategoriesSkeleton />}>
+          <DataTable />
+        </Suspense>
+      </HydrateClient>
+    </div>
   );
 }
