@@ -67,7 +67,7 @@ export function TableHeader({ tableScroll }: Props) {
             )}
           </div>
         </TableHead>
-        <TableHead className="w-[180px] min-w-[180px] hidden md:table-cell">
+        <TableHead className="w-[180px] min-w-[180px] ">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -78,7 +78,7 @@ export function TableHeader({ tableScroll }: Props) {
             {"contact" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead className="hidden md:table-cell">
+        <TableHead>
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -89,7 +89,7 @@ export function TableHeader({ tableScroll }: Props) {
             {"email" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead className="w-[200px] hidden md:table-cell">
+        <TableHead className="w-[200px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -102,7 +102,7 @@ export function TableHeader({ tableScroll }: Props) {
             {"invoices" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
-        <TableHead className="hidden md:table-cell">
+        <TableHead>
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -116,7 +116,7 @@ export function TableHeader({ tableScroll }: Props) {
           </Button>
         </TableHead>
 
-        <TableHead className="w-[280px] max-w-[280px] hidden md:table-cell">
+        <TableHead className="w-[280px] max-w-[280px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
