@@ -1,8 +1,10 @@
 "use client";
 
 import { useSortParams } from "@/hooks/use-sort-params";
+import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
+import { cn } from "@midday/ui/cn";
 import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { useCallback } from "react";
@@ -44,17 +46,23 @@ export function DataTableHeader({ table, loading }: Props) {
     [value, setParams],
   );
 
-  const isVisible = (id: string) =>
-    loading ||
-    table
-      ?.getAllLeafColumns()
-      .find((col) => col.id === id)
-      ?.getIsVisible();
+  // Use the reusable sticky columns hook
+  const { getStickyStyle, isVisible } = useStickyColumns({
+    table,
+    loading,
+  });
 
   return (
     <TableHeader className="border-l-0 border-r-0">
       <TableRow className="h-[45px] hover:bg-transparent">
-        <TableHead className="min-w-[50px] w-[50px] hidden md:table-cell px-3 md:px-4 py-2">
+        <TableHead
+          className={cn(
+            "min-w-[50px] w-[50px] hidden md:table-cell px-3 md:px-4 py-2 sticky left-[var(--stick-left)] bg-background z-10 border-r border-border",
+            "before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
+            "after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]",
+          )}
+          style={getStickyStyle("select")}
+        >
           <Checkbox
             checked={
               table?.getIsAllPageRowsSelected() ||
@@ -67,7 +75,14 @@ export function DataTableHeader({ table, loading }: Props) {
         </TableHead>
 
         {isVisible("date") && (
-          <TableHead className="w-[110px] min-w-[110px] px-3 md:px-4 py-2">
+          <TableHead
+            className={cn(
+              "w-[110px] min-w-[110px] px-3 md:px-4 py-2 sticky left-[var(--stick-left)] bg-background z-10 border-r border-border",
+              "before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
+              "after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]",
+            )}
+            style={getStickyStyle("date")}
+          >
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -81,7 +96,14 @@ export function DataTableHeader({ table, loading }: Props) {
         )}
 
         {isVisible("description") && (
-          <TableHead className="w-[320px] min-w-[320px] px-3 md:px-4 py-2">
+          <TableHead
+            className={cn(
+              "w-[320px] min-w-[320px] px-3 md:px-4 py-2 sticky left-[var(--stick-left)] bg-background z-10 border-r border-border",
+              "before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
+              "after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]",
+            )}
+            style={getStickyStyle("description")}
+          >
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -95,7 +117,7 @@ export function DataTableHeader({ table, loading }: Props) {
         )}
 
         {isVisible("amount") && (
-          <TableHead className="w-[170px] min-w-[170px] px-3 md:px-4 py-2">
+          <TableHead className="w-[170px] min-w-[170px] px-3 md:px-4 py-2 border-l border-border">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
@@ -237,7 +259,13 @@ export function DataTableHeader({ table, loading }: Props) {
         )}
 
         {isVisible("actions") && (
-          <TableHead className="w-[100px] sticky right-0 bg-background z-10 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]">
+          <TableHead
+            className={cn(
+              "w-[100px] sticky right-0 bg-background z-10",
+              "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
+              "after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]",
+            )}
+          >
             Actions
           </TableHead>
         )}

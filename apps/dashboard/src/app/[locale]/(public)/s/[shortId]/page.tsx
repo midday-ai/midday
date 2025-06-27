@@ -1,4 +1,5 @@
 import { getQueryClient, trpc } from "@/trpc/server";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
 
@@ -25,7 +26,7 @@ export default async function Page({ params }: Props) {
     redirect(shortLink.url);
   } catch (error) {
     // Check if it's a Next.js redirect (expected behavior)
-    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+    if (isRedirectError(error)) {
       throw error; // Re-throw redirect errors
     }
 

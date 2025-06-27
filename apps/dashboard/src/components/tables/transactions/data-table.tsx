@@ -3,11 +3,13 @@
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
 import { LoadMore } from "@/components/load-more";
 import { useSortParams } from "@/hooks/use-sort-params";
+import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useTransactionsStore } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
 import { Cookies } from "@/utils/constants";
+import { cn } from "@midday/ui/cn";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
@@ -149,6 +151,12 @@ export function DataTable({
     },
   });
 
+  // Use the reusable sticky columns hook
+  const { getStickyStyle, getStickyClassName } = useStickyColumns({
+    columnVisibility,
+    table,
+  });
+
   useEffect(() => {
     setColumns(table.getAllLeafColumns());
   }, [columnVisibility]);
@@ -228,7 +236,7 @@ export function DataTable({
         <Tooltip>
           <div className="w-full">
             <div className="overflow-x-auto border-l border-r border-border">
-              <Table className="min-w-[1600px]">
+              <Table>
                 <DataTableHeader table={table} />
 
                 <TableBody className="border-l-0 border-r-0">
@@ -236,12 +244,16 @@ export function DataTable({
                     table.getRowModel().rows.map((row) => (
                       <TableRow
                         key={row.id}
-                        className="h-[40px] md:h-[45px] cursor-pointer select-text"
+                        className="group h-[40px] md:h-[45px] cursor-pointer select-text hover:bg-muted"
                       >
                         {row.getVisibleCells().map((cell) => (
                           <TableCell
                             key={cell.id}
-                            className={cell.column.columnDef.meta?.className}
+                            className={getStickyClassName(
+                              cell.column.id,
+                              cell.column.columnDef.meta?.className,
+                            )}
+                            style={getStickyStyle(cell.column.id)}
                             onClick={() => {
                               if (
                                 cell.column.id !== "select" &&
