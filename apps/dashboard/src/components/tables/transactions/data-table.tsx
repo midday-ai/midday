@@ -4,6 +4,7 @@ import { updateColumnVisibilityAction } from "@/actions/update-column-visibility
 import { LoadMore } from "@/components/load-more";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useStickyColumns } from "@/hooks/use-sticky-columns";
+import { useTableScroll } from "@/hooks/use-table-scroll";
 import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useTransactionsStore } from "@/store/transactions";
@@ -157,6 +158,12 @@ export function DataTable({
     table,
   });
 
+  // Use the reusable table scroll hook with column-width scrolling starting after sticky columns
+  const tableScroll = useTableScroll({
+    useColumnWidths: true,
+    startFromColumn: 3, // Skip sticky columns: select, date, description
+  });
+
   useEffect(() => {
     setColumns(table.getAllLeafColumns());
   }, [columnVisibility]);
@@ -235,9 +242,12 @@ export function DataTable({
       <TooltipProvider delayDuration={20}>
         <Tooltip>
           <div className="w-full">
-            <div className="overflow-x-auto border-l border-r border-border">
+            <div
+              ref={tableScroll.containerRef}
+              className="overflow-x-auto border-l border-r border-border"
+            >
               <Table>
-                <DataTableHeader table={table} />
+                <DataTableHeader table={table} tableScroll={tableScroll} />
 
                 <TableBody className="border-l-0 border-r-0">
                   {table.getRowModel().rows?.length ? (

@@ -1,5 +1,6 @@
 "use client";
 
+import { HorizontalPagination } from "@/components/horizontal-pagination";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import { Button } from "@midday/ui/button";
@@ -21,12 +22,22 @@ interface TableInterface {
   toggleAllPageRowsSelected: (value: boolean) => void;
 }
 
+interface TableScrollState {
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  canScrollLeft: boolean;
+  canScrollRight: boolean;
+  isScrollable: boolean;
+  scrollLeft: () => void;
+  scrollRight: () => void;
+}
+
 interface Props {
   table?: TableInterface;
   loading?: boolean;
+  tableScroll?: TableScrollState;
 }
 
-export function DataTableHeader({ table, loading }: Props) {
+export function DataTableHeader({ table, loading, tableScroll }: Props) {
   const { params, setParams } = useSortParams();
   const [column, value] = params.sort || [];
 
@@ -104,15 +115,27 @@ export function DataTableHeader({ table, loading }: Props) {
             )}
             style={getStickyStyle("description")}
           >
-            <Button
-              className="p-0 hover:bg-transparent space-x-2"
-              variant="ghost"
-              onClick={() => createSortQuery("name")}
-            >
-              <span>Description</span>
-              {"name" === column && value === "asc" && <ArrowDown size={16} />}
-              {"name" === column && value === "desc" && <ArrowUp size={16} />}
-            </Button>
+            <div className="flex items-center justify-between">
+              <Button
+                className="p-0 hover:bg-transparent space-x-2"
+                variant="ghost"
+                onClick={() => createSortQuery("name")}
+              >
+                <span>Description</span>
+                {"name" === column && value === "asc" && (
+                  <ArrowDown size={16} />
+                )}
+                {"name" === column && value === "desc" && <ArrowUp size={16} />}
+              </Button>
+              {tableScroll?.isScrollable && (
+                <HorizontalPagination
+                  canScrollLeft={tableScroll.canScrollLeft}
+                  canScrollRight={tableScroll.canScrollRight}
+                  onScrollLeft={tableScroll.scrollLeft}
+                  onScrollRight={tableScroll.scrollRight}
+                />
+              )}
+            </div>
           </TableHead>
         )}
 
