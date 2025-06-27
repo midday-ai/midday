@@ -1,6 +1,7 @@
 "use client";
 
 import { useUserQuery } from "@/hooks/use-user";
+import { UTCDate } from "@date-fns/utc";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
-import { differenceInDays } from "date-fns";
+import { addDays, differenceInDays, isSameDay, parseISO } from "date-fns";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plans } from "../plans";
@@ -16,13 +17,23 @@ import { Plans } from "../plans";
 export function TrialEndedModal() {
   const { data: user } = useUserQuery();
   const pathname = usePathname();
-  const daysFromCreation = differenceInDays(
-    new Date(),
-    new Date(user?.team?.createdAt!),
-  );
 
-  const isFourteenDaysFromCreation = daysFromCreation >= 14;
-  const showModal = user?.team?.plan === "trial" && isFourteenDaysFromCreation;
+  // Parse dates using UTCDate for consistent timezone handling
+  const rawCreatedAt = parseISO(user?.team?.createdAt!);
+  const today = new UTCDate();
+
+  // Convert to UTCDate for consistent calculation
+  const createdAt = new UTCDate(rawCreatedAt);
+
+  // Set trial end date 14 days from creation
+  const trialEndDate = addDays(createdAt, 14);
+
+  const daysLeft = isSameDay(createdAt, today)
+    ? 14
+    : Math.max(0, differenceInDays(trialEndDate, today));
+  const isTrialEnded = daysLeft <= 0;
+
+  const showModal = user?.team?.plan === "trial" && isTrialEnded;
 
   if (
     pathname.includes("/settings") ||
