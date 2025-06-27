@@ -67,30 +67,36 @@ const Item = ({ item, isActive, isExpanded, onSelect }: ItemProps) => {
   const Icon = icons[item.path as keyof typeof icons];
 
   return (
-    <Link prefetch href={item.path} onClick={() => onSelect?.()}>
+    <Link
+      prefetch
+      href={item.path}
+      onClick={() => onSelect?.()}
+      className="group"
+    >
       <div className="relative">
+        {/* Background that expands */}
         <div
           className={cn(
             "border border-transparent h-[40px] transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] ml-[15px] mr-[15px]",
-            "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
+            "group-hover:bg-accent group-hover:border-[#DCDAD2] group-hover:dark:border-[#2C2C2C]",
             isActive &&
               "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
             isExpanded ? "w-[calc(100%-30px)]" : "w-[40px]",
           )}
         />
 
-        {/* Icon - always in same position */}
-        <div className="absolute top-0 left-[15px] w-[40px] h-[40px] flex items-center justify-center dark:text-[#666666] text-black hover:!text-primary">
+        {/* Icon - always in same position from sidebar edge */}
+        <div className="absolute top-0 left-[15px] w-[40px] h-[40px] flex items-center justify-center dark:text-[#666666] text-black group-hover:!text-primary pointer-events-none">
           <div className={cn(isActive && "dark:!text-white")}>
             <Icon />
           </div>
         </div>
 
         {isExpanded && (
-          <div className="absolute top-0 left-[55px] right-[8px] h-[40px] flex items-center">
+          <div className="absolute top-0 left-[55px] right-[8px] h-[40px] flex items-center pointer-events-none">
             <span
               className={cn(
-                "text-sm font-medium transition-opacity duration-200 ease-in-out text-[#666]",
+                "text-sm font-medium transition-opacity duration-200 ease-in-out text-[#666] group-hover:text-primary",
                 isActive && "text-primary",
               )}
             >
