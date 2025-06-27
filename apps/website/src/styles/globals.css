@@ -31,7 +31,7 @@
 .updates h4 {
   display: block;
   font-weight: 600;
-  color: white;
+  color: var(--text-primary);
   margin-top: 15px;
 }
 

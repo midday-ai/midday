@@ -1,0 +1,90 @@
+---
+title: "Midday v1.1"
+publishedAt: "2025-06-27"
+summary: "Our biggest update yet introduces intelligent tax extraction from receipts, an AI tax assistant for instant tax insights, public APIs with SDKs, invoice duplication, and dozens of quality-of-life improvements that make financial management effortless."
+tag: "Updates"
+---
+
+We're excited to release Midday v1.1—our biggest update yet! This release brings intelligent tax automation, a native desktop app, public APIs, and dozens of improvements that make managing your business finances faster and more intuitive than ever.
+
+<br />
+![Tax assistant](https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/blog/v1.1/tax-assistant.png)
+
+#### Tax assistant
+<br />
+Say goodbye to manual tax calculations. Midday now automatically extracts tax rates and types from your uploaded receipts and applies them to transactions, making reconciliation fast and accurate. Plus, get instant tax insights with our AI assistant:
+
+- **Smart receipt processing:** Upload receipts to your inbox and they're automatically matched against transactions with tax information extracted
+- **Intelligent tax detection:** Supports Sales Tax, VAT, GST, and more—no matter where you do business
+- **Tax rate validation:** Get notified if the applied category tax rate doesn't match the receipt
+- **Instant tax insights:** Ask the assistant questions like "How much tax did I pay this quarter?" or "Show me VAT breakdown by category"
+- **Comprehensive reporting:** Get detailed breakdowns of tax paid or collected for any period
+
+<br />
+![Desktop app](https://cdn.midday.ai/blog/v1.1/desktop.png)
+<br />
+#### Desktop app
+
+Midday is now just one keystroke away with our new native desktop app. Access your financial data instantly and search across your entire business.
+
+- **Instant access:** Launch Midday with a simple keyboard shortcut from anywhere on your computer—no more hunting through browser tabs
+- **Lightning-fast global search:** Find any transaction, invoice, customer, or document instantly with our powerful search that works across your entire business data
+- **Always at your fingertips:** Whether you're in a meeting, on a call, or working in another app, Midday is ready when you need it
+- **Native speed:** Everything feels snappier and more responsive than the web version, making your daily workflow smoother
+
+<br />
+![Search](https://cdn.midday.ai/blog/v1.1/sdk.png)
+<br />
+#### APIs and SDKs
+
+Build your own integrations and automate your workflows with Midday's new public API and SDKs. Connect Midday to your existing tools, create custom dashboards, or automate repetitive tasks.
+
+- **RESTful API:** Access your Midday data securely and reliably at [api.midday.ai](https://api.midday.ai)
+- **Multiple SDKs:** Available for JavaScript/TypeScript, Python, Ruby, Go, and PHP
+- **Easy setup:** Generate your API key from the [API Keys section](https://app.midday.ai/settings/developer) in your dashboard settings
+- **Extensible platform:** Soon you'll be able to contribute apps and functionality through our Apps & Integrations platform
+
+<br />
+#### Stability & Performance
+<br />
+We've upgraded our infrastructure, added replicas in the US, and reworked how we read and write data under the hood. As a result, Midday is now ~70% faster in the US. These changes lay the foundation for an even better experience, especially with the upcoming Assistant and Mobile App.
+
+<br />
+#### Quality of Life Improvements
+
+Your feedback drives our development, and this release includes dozens of improvements that make your daily workflow smoother:
+
+**Invoicing & Billing:**
+- **Duplicate invoices:** Quickly create new invoices based on existing ones, saving time on recurring billing
+- **Internal notes in invoice table:** Add private notes to invoices that are visible only to your team
+- **Extra billing email for customers:** Add additional billing email addresses to customers for CC-style invoice delivery
+- **Send copy to invoice creator:** Automatically send a copy of each invoice to the person who created it
+- **Include PDF in sent invoices:** Invoices now include PDF attachments by default
+
+**Time Tracking:**
+- **Edit inbox items:** Modify and update items directly in your inbox for better organization and accuracy
+- **Tracker settings:** Customize your time format and choose when your week starts to match your workflow
+
+**Transactions & Data:**
+- **Excel export for transactions:** Export your transaction data as Excel files (.xlsx) included in your download ZIP—perfect for analysis or sharing with your accountant
+- **From/To support on transactions:** See who sent or received each payment across all banking providers (GoCardless, Enable Banking, Teller, and Plaid)
+- **Mark transactions as completed/uncompleted:** Keep track of your workflow and what still needs attention
+- **Faster global search:** Find what you need instantly with our improved search functionality
+- **Better file extraction:** Enhanced processing for both Vault documents and invoice uploads
+
+**Navigation & Productivity:**
+- **Arrow Up/Down navigation:** Use arrow keys to quickly move between transactions in the list
+- **Esc key shortcuts:** Press Escape to instantly close transaction details and return to your list
+
+Tons of fixes & stability improvements: We've squashed bugs and made under-the-hood enhancements for a more reliable and polished experience.
+
+<br />
+#### Coming soon
+
+We're already working on the next wave of enhancements to make Midday even more indispensable:
+
+- **Scheduled invoices:** Automate billing with recurring invoices
+- **Gmail Connect for automatic inbox matching:** *(Under review with Google)* Soon you'll be able to connect your Gmail account for fully automatic transaction matching from your inbox
+- **Webhooks:** Get real-time notifications and trigger workflows in your own systems when key events happen in Midday
+- **Create invoice from tracked time:** Instantly generate invoices based on your tracked time entries, making billing for your work seamless and accurate
+- **Transaction rules engine:** Set up custom rules to automatically categorize, tag, or take action on transactions as they come in—saving you time and reducing manual work
