@@ -170,7 +170,7 @@ export function EmailThemeProvider({
   disableDarkMode = false,
 }: EmailThemeProviderProps) {
   return (
-    <Html>
+    <Html className={disableDarkMode ? "disable-dark-mode" : ""}>
       <Tailwind>
         <Head>
           {/* Essential meta tags for email dark mode support */}

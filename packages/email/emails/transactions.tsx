@@ -171,7 +171,7 @@ export const TransactionsEmail = ({
       disableDarkMode
     >
       <Body
-        className={`my-auto mx-auto font-sans ${themeClasses.body}`}
+        className={`my-auto mx-auto font-sans ${themeClasses.body} disable-dark-mode`}
         style={lightStyles.body}
       >
         <Container

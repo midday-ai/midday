@@ -31,7 +31,7 @@ export const InvoicePaidEmail = ({
   return (
     <EmailThemeProvider preview={<Preview>{text}</Preview>} disableDarkMode>
       <Body
-        className={`my-auto mx-auto font-sans ${themeClasses.body}`}
+        className={`my-auto mx-auto font-sans ${themeClasses.body} disable-dark-mode`}
         style={lightStyles.body}
       >
         <Container
