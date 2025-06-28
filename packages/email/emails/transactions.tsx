@@ -166,7 +166,10 @@ export const TransactionsEmail = ({
   const displayedTransactions = transactions.slice(0, 10);
 
   return (
-    <EmailThemeProvider preview={<Preview>{previewText}</Preview>}>
+    <EmailThemeProvider
+      preview={<Preview>{previewText}</Preview>}
+      disableDarkMode
+    >
       <Body
         className={`my-auto mx-auto font-sans ${themeClasses.body}`}
         style={lightStyles.body}

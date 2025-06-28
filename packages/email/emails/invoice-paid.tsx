@@ -29,7 +29,7 @@ export const InvoicePaidEmail = ({
   const lightStyles = getEmailInlineStyles("light");
 
   return (
-    <EmailThemeProvider preview={<Preview>{text}</Preview>}>
+    <EmailThemeProvider preview={<Preview>{text}</Preview>} disableDarkMode>
       <Body
         className={`my-auto mx-auto font-sans ${themeClasses.body}`}
         style={lightStyles.body}
