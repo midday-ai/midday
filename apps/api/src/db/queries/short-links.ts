@@ -40,6 +40,11 @@ type CreateShortLinkData = {
   url: string;
   teamId: string;
   userId: string;
+  type: "redirect" | "download";
+  fileName?: string;
+  mimeType?: string;
+  size?: number;
+  expiresAt?: string;
 };
 
 export async function createShortLink(db: Database, data: CreateShortLinkData) {
@@ -52,12 +57,22 @@ export async function createShortLink(db: Database, data: CreateShortLinkData) {
       url: data.url,
       teamId: data.teamId,
       userId: data.userId,
+      type: data.type,
+      fileName: data.fileName,
+      mimeType: data.mimeType,
+      size: data.size,
+      expiresAt: data.expiresAt,
     })
     .returning({
       id: shortLinks.id,
       shortId: shortLinks.shortId,
       url: shortLinks.url,
+      type: shortLinks.type,
+      fileName: shortLinks.fileName,
+      mimeType: shortLinks.mimeType,
+      size: shortLinks.size,
       createdAt: shortLinks.createdAt,
+      expiresAt: shortLinks.expiresAt,
     });
 
   return result;

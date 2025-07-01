@@ -1,9 +1,10 @@
+import { getDocumentById } from "@api/db/queries/documents";
 import {
   createShortLink,
   getShortLinkByShortId,
 } from "@api/db/queries/short-links";
 import {
-  createShortLinkForFileSchema,
+  createShortLinkForDocumentSchema,
   createShortLinkSchema,
   getShortLinkSchema,
 } from "@api/schemas/short-links";
@@ -22,6 +23,7 @@ export const shortLinksRouter = createTRPCRouter({
         url: input.url,
         teamId: teamId!,
         userId: session.user.id,
+        type: "redirect",
       });
 
       if (!result) {
@@ -34,13 +36,23 @@ export const shortLinksRouter = createTRPCRouter({
       };
     }),
 
-  createForFile: protectedProcedure
-    .input(createShortLinkForFileSchema)
+  createForDocument: protectedProcedure
+    .input(createShortLinkForDocumentSchema)
     .mutation(async ({ ctx: { db, teamId, session, supabase }, input }) => {
+      const document = await getDocumentById(db, {
+        id: input.documentId,
+        filePath: input.filePath,
+        teamId: teamId!,
+      });
+
+      if (!document) {
+        throw new Error("Document not found");
+      }
+
       // First create the signed URL for the file
       const response = await signedUrl(supabase, {
         bucket: "vault",
-        path: input.fullPath,
+        path: document.pathTokens?.join("/") ?? "",
         expireIn: input.expireIn,
         options: {
           download: true,
@@ -56,6 +68,15 @@ export const shortLinksRouter = createTRPCRouter({
         url: response.data.signedUrl,
         teamId: teamId!,
         userId: session.user.id,
+        type: "download",
+        fileName: document.name ?? undefined,
+        // @ts-expect-error
+        mimeType: document.metadata?.contentType ?? undefined,
+        // @ts-expect-error
+        size: document.metadata?.size ?? undefined,
+        expiresAt: input.expireIn
+          ? new Date(Date.now() + input.expireIn * 1000).toISOString()
+          : undefined,
       });
 
       if (!result) {

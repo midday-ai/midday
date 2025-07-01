@@ -23,14 +23,14 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
 
   const filename = filePath?.at(-1);
 
-  const shareDocumentMutation = useMutation(
-    trpc.documents.signedUrl.mutationOptions({
+  const shortLinkMutation = useMutation(
+    trpc.shortLinks.createForDocument.mutationOptions({
       onMutate: () => {
         setIsCopied(true);
       },
       onSuccess: (data) => {
-        if (data?.signedUrl) {
-          copy(data.signedUrl);
+        if (data?.shortUrl) {
+          copy(data.shortUrl);
 
           setTimeout(() => {
             setIsCopied(false);
@@ -81,7 +81,7 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
         variant="ghost"
         size="icon"
         onClick={() =>
-          shareDocumentMutation.mutate({
+          shortLinkMutation.mutate({
             filePath: filePath?.join("/") ?? "",
             expireIn: 60 * 60 * 24 * 30, // 30 days
           })
