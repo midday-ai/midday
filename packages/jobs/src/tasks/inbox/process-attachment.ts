@@ -1,7 +1,7 @@
 import { processAttachmentSchema } from "@jobs/schema";
 import { DocumentClient } from "@midday/documents";
 import { createClient } from "@midday/supabase/job";
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { convertHeic } from "../document/convert-heic";
 import { processDocument } from "../document/process-document";
 
@@ -9,6 +9,13 @@ export const processAttachment = schemaTask({
   id: "process-attachment",
   schema: processAttachmentSchema,
   maxDuration: 60,
+  retry: {
+    maxAttempts: 3,
+    minTimeoutInMs: 5000,
+    maxTimeoutInMs: 60000,
+    factor: 2,
+    randomize: true,
+  },
   queue: {
     concurrencyLimit: 100,
   },
@@ -24,22 +31,39 @@ export const processAttachment = schemaTask({
 
     const filename = filePath.at(-1);
 
-    const { data: inboxData } = await supabase
+    // Check if inbox item already exists (for retry scenarios)
+    let inboxData = null;
+
+    const { data: existingInbox } = await supabase
       .from("inbox")
-      .insert({
-        // NOTE: If we can't parse the name using OCR this will be the fallback name
-        display_name: filename,
-        team_id: teamId,
-        file_path: filePath,
-        file_name: filename,
-        content_type: mimetype,
-        size,
-        reference_id: referenceId,
-        website,
-      })
-      .select("*")
-      .single()
-      .throwOnError();
+      .select("id")
+      .contains("file_path", filePath)
+      .eq("team_id", teamId)
+      .single();
+
+    inboxData = existingInbox;
+
+    // Only create new inbox item if it doesn't exist
+    if (!inboxData) {
+      const { data: newInboxData } = await supabase
+        .from("inbox")
+        .insert({
+          // NOTE: If we can't parse the name using OCR this will be the fallback name
+          display_name: filename,
+          team_id: teamId,
+          file_path: filePath,
+          file_name: filename,
+          content_type: mimetype,
+          size,
+          reference_id: referenceId,
+          website,
+        })
+        .select("*")
+        .single()
+        .throwOnError();
+
+      inboxData = newInboxData;
+    }
 
     if (!inboxData) {
       throw Error("Inbox data not found");
@@ -56,9 +80,21 @@ export const processAttachment = schemaTask({
     try {
       const document = new DocumentClient();
 
+      logger.info("Starting document processing", {
+        inboxId: inboxData.id,
+        mimetype,
+        referenceId,
+      });
+
       const result = await document.getInvoiceOrReceipt({
         documentUrl: data?.signedUrl,
         mimetype,
+      });
+
+      logger.info("Document processing completed", {
+        inboxId: inboxData.id,
+        resultType: result.type,
+        hasAmount: !!result.amount,
       });
 
       await supabase
@@ -85,11 +121,39 @@ export const processAttachment = schemaTask({
         filePath,
         teamId,
       });
+    } catch (error) {
+      logger.error("Document processing failed", {
+        inboxId: inboxData.id,
+        error: error instanceof Error ? error.message : "Unknown error",
+        referenceId,
+        mimetype,
+      });
 
-      // TODO: Send event to match inbox
-    } catch {
-      // If we end up here we could not parse the document
-      // But we want to update the status so we show the record with fallback name
+      // Re-throw timeout errors to trigger retry
+      if (error instanceof Error && error.name === "AbortError") {
+        logger.warn(
+          "Document processing failed with retryable error, will retry",
+          {
+            inboxId: inboxData.id,
+            referenceId,
+            errorType: error.name,
+            errorMessage: error.message,
+          },
+        );
+        throw error;
+      }
+
+      // For non-retryable errors, mark as pending with fallback name
+      logger.info(
+        "Document processing failed, marking as pending with fallback name",
+        {
+          inboxId: inboxData.id,
+          referenceId,
+          errorMessage:
+            error instanceof Error ? error.message : "Unknown error",
+        },
+      );
+
       await supabase
         .from("inbox")
         .update({ status: "pending" })

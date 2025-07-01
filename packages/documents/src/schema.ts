@@ -22,6 +22,7 @@ export const invoiceSchema = z.object({
     .describe("Date of invoice in ISO 8601 format (YYYY-MM-DD)"),
   due_date: z
     .string()
+    .nullable()
     .describe("Payment due date in ISO 8601 format (YYYY-MM-DD)"),
   currency: z
     .string()
@@ -86,7 +87,10 @@ export const invoiceSchema = z.object({
 });
 
 export const receiptSchema = z.object({
-  date: z.string().describe("Date of receipt in ISO 8601 format (YYYY-MM-DD)"),
+  date: z
+    .string()
+    .nullable()
+    .describe("Date of receipt in ISO 8601 format (YYYY-MM-DD)"),
   currency: z
     .string()
     .describe("Three-letter ISO 4217 currency code (e.g., USD, EUR, SEK)"),
