@@ -72,9 +72,9 @@ export class ReceiptProcessor {
       tax_type: result.tax_type,
       language: result.language,
       metadata: {
-        register_number: result.register_number,
-        cashier_name: result.cashier_name,
-        email: result.email,
+        register_number: result.register_number ?? null,
+        cashier_name: result.cashier_name ?? null,
+        email: result.email ?? null,
       },
     };
   }

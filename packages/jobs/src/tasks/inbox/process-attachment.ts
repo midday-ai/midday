@@ -36,8 +36,8 @@ export const processAttachment = schemaTask({
 
     const { data: existingInbox } = await supabase
       .from("inbox")
-      .select("*")
-      .eq("file_path", filePath)
+      .select("id")
+      .contains("file_path", filePath)
       .eq("team_id", teamId)
       .single();
 
