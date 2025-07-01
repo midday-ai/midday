@@ -1,5 +1,5 @@
 import type { Database } from "@api/db";
-import { shortLinks } from "@api/db/schema";
+import { shortLinks, teams } from "@api/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
@@ -21,8 +21,15 @@ export async function getShortLinkByShortId(db: Database, shortId: string) {
       teamId: shortLinks.teamId,
       userId: shortLinks.userId,
       createdAt: shortLinks.createdAt,
+      fileName: shortLinks.fileName,
+      teamName: teams.name,
+      type: shortLinks.type,
+      size: shortLinks.size,
+      mimeType: shortLinks.mimeType,
+      expiresAt: shortLinks.expiresAt,
     })
     .from(shortLinks)
+    .leftJoin(teams, eq(shortLinks.teamId, teams.id))
     .where(eq(shortLinks.shortId, shortId))
     .limit(1);
 
