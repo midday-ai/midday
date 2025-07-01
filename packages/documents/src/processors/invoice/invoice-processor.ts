@@ -16,6 +16,7 @@ export class InvoiceProcessor {
       const result = await generateObject({
         model: mistral("mistral-medium-latest"),
         schema: invoiceSchema,
+        abortSignal: AbortSignal.timeout(45000),
         messages: [
           {
             role: "system",
@@ -40,7 +41,11 @@ export class InvoiceProcessor {
       });
 
       return result.object;
-    } catch {
+    } catch (error) {
+      console.log(
+        "Mistral processing failed, falling back to text extraction:",
+        error,
+      );
       // Fallback to text extraction
       return this.#fallbackExtract(documentUrl);
     }
@@ -65,6 +70,7 @@ export class InvoiceProcessor {
     const result = await generateObject({
       model: mistral("mistral-medium-latest"),
       schema: invoiceSchema,
+      abortSignal: AbortSignal.timeout(45000),
       messages: [
         {
           role: "system",

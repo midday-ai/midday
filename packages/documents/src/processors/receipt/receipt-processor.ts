@@ -14,6 +14,7 @@ export class ReceiptProcessor {
     const result = await generateObject({
       model: mistral("mistral-medium-latest"),
       schema: receiptSchema,
+      abortSignal: AbortSignal.timeout(45000),
       messages: [
         {
           role: "system",
