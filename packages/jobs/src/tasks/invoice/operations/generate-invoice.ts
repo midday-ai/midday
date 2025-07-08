@@ -13,6 +13,9 @@ export const generateInvoice = schemaTask({
   queue: {
     concurrencyLimit: 50,
   },
+  machine: {
+    preset: "large-1x",
+  },
   run: async (payload) => {
     const supabase = createClient();
 
