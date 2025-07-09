@@ -91,21 +91,6 @@ export function SectionTwo() {
                 Unified currency overview across all your accounts
               </span>
             </div>
-
-            <div className="flex space-x-2 items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
-                fill="none"
-              >
-                <path
-                  fill="currentColor"
-                  d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
-                />
-              </svg>
-              <span className="text-primary text-sm">Shareable reports</span>
-            </div>
           </div>
 
           <div className="absolute bottom-0 right-0">
