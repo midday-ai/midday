@@ -13,7 +13,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addDays, addYears } from "date-fns";
 import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
@@ -45,6 +45,7 @@ type ExportData = {
 
 export function ExportStatus() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { toast, dismiss, update } = useToast();
   const [toastId, setToastId] = useState<string | null>(null);
   const { exportData, setExportData } = useExportStore();
@@ -120,6 +121,16 @@ export function ExportStatus() {
     }
 
     if (status === "COMPLETED" && result) {
+      // Invalidate documents query to refresh the list
+      queryClient.invalidateQueries({
+        queryKey: trpc.documents.get.infiniteQueryKey(),
+      });
+
+      // Invalidate search query to refresh the results
+      queryClient.invalidateQueries({
+        queryKey: trpc.search.global.queryKey(),
+      });
+
       // @ts-expect-error
       update(toastId, {
         id: toastId,
