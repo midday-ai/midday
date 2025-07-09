@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import { ScrollArea } from "@midday/ui/scroll-area";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CopyInput } from "./copy-input";
@@ -67,7 +68,7 @@ export function InvoiceDetails() {
   } = data;
 
   return (
-    <div>
+    <div className="h-full">
       <div className="flex justify-between items-center">
         <div className="flex space-x-2 mt-1 items-center">
           <Avatar className="size-5">
@@ -122,118 +123,127 @@ export function InvoiceDetails() {
 
       <InvoiceActions status={status} id={id} />
 
-      {status === "paid" && (
-        <div className="mt-8 flex flex-col space-y-1">
-          <span className="text-base font-medium">
-            Paid on {paidAt && format(new Date(paidAt), "MMM dd")}
-          </span>
-          <span className="text-xs">
-            <span className="text-[#606060]">Marked as paid</span>
-          </span>
-        </div>
-      )}
+      <ScrollArea className="h-full p-0 pb-[143px]" hideScrollbar>
+        <div>
+          {status === "paid" && (
+            <div className="mt-8 flex flex-col space-y-1">
+              <span className="text-base font-medium">
+                Paid on {paidAt && format(new Date(paidAt), "MMM dd")}
+              </span>
+              <span className="text-xs">
+                <span className="text-[#606060]">Marked as paid</span>
+              </span>
+            </div>
+          )}
 
-      {status === "canceled" && (
-        <div className="mt-8 flex flex-col space-y-1">
-          <span className="text-base font-medium">
-            Canceled on {updatedAt && format(new Date(updatedAt), "MMM dd")}
-          </span>
-          <span className="text-xs">
-            <span className="text-[#606060]">Marked as canceled</span>
-          </span>
-        </div>
-      )}
+          {status === "canceled" && (
+            <div className="mt-8 flex flex-col space-y-1">
+              <span className="text-base font-medium">
+                Canceled on {updatedAt && format(new Date(updatedAt), "MMM dd")}
+              </span>
+              <span className="text-xs">
+                <span className="text-[#606060]">Marked as canceled</span>
+              </span>
+            </div>
+          )}
 
-      <div className="mt-6 flex flex-col space-y-4 border-t border-border pt-6">
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-[#606060]">Due date</span>
-          <span className="text-sm">
-            <span>{dueDate && format(new Date(dueDate), "MMM dd")}</span>
-          </span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-[#606060]">Issue date</span>
-          <span className="text-sm">
-            <span>{issueDate && format(new Date(issueDate), "MMM dd")}</span>
-          </span>
-        </div>
-
-        {sentAt && (
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-[#606060]">Sent at</span>
-            <span className="text-sm">
-              <span>{sentAt && format(new Date(sentAt), "MMM dd")}</span>
-            </span>
-          </div>
-        )}
-
-        {sentTo && (
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-[#606060]">Sent to</span>
-            <span className="text-sm">{sentTo}</span>
-          </div>
-        )}
-
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-[#606060]">Invoice no.</span>
-          <span className="text-sm">
-            <span>{invoiceNumber}</span>
-          </span>
-        </div>
-      </div>
-
-      {customer && (
-        <div className="mt-6 flex flex-col space-y-2 border-t border-border pt-6">
-          <span className="text-sm text-[#606060]">Invoice link</span>
-          <div className="flex w-full gap-2">
-            <div className="flex-1 min-w-0 relative">
-              <CopyInput value={`${getUrl()}/i/${token}`} className="pr-14" />
-
-              <div className="absolute right-10 top-[11px] border-r border-border pr-2">
-                <OpenURL href={`${getUrl()}/i/${token}`}>
-                  <Icons.OpenInNew />
-                </OpenURL>
-              </div>
+          <div className="mt-6 flex flex-col space-y-4 border-t border-border pt-6">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#606060]">Due date</span>
+              <span className="text-sm">
+                <span>{dueDate && format(new Date(dueDate), "MMM dd")}</span>
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#606060]">Issue date</span>
+              <span className="text-sm">
+                <span>
+                  {issueDate && format(new Date(issueDate), "MMM dd")}
+                </span>
+              </span>
             </div>
 
-            {status !== "draft" && (
-              <Button
-                variant="secondary"
-                className="size-[38px] hover:bg-secondary shrink-0"
-                onClick={() => {
-                  downloadFile(
-                    `/api/download/invoice?id=${id}`,
-                    `${invoiceNumber}.pdf`,
-                  );
-                }}
-              >
-                <div>
-                  <Icons.ArrowCoolDown className="size-4" />
-                </div>
-              </Button>
+            {sentAt && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-[#606060]">Sent at</span>
+                <span className="text-sm">
+                  <span>{sentAt && format(new Date(sentAt), "MMM dd")}</span>
+                </span>
+              </div>
             )}
-          </div>
-        </div>
-      )}
 
-      <Accordion
-        type="multiple"
-        className="mt-6"
-        defaultValue={internalNote ? ["note", "activity"] : ["activity"]}
-      >
-        <AccordionItem value="activity">
-          <AccordionTrigger>Activity</AccordionTrigger>
-          <AccordionContent>
-            <InvoiceActivity data={data} />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="note">
-          <AccordionTrigger>Internal note</AccordionTrigger>
-          <AccordionContent>
-            <InvoiceNote id={id} defaultValue={internalNote} />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+            {sentTo && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-[#606060]">Sent to</span>
+                <span className="text-sm">{sentTo}</span>
+              </div>
+            )}
+
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#606060]">Invoice no.</span>
+              <span className="text-sm">
+                <span>{invoiceNumber}</span>
+              </span>
+            </div>
+          </div>
+
+          {customer && (
+            <div className="mt-6 flex flex-col space-y-2 border-t border-border pt-6">
+              <span className="text-sm text-[#606060]">Invoice link</span>
+              <div className="flex w-full gap-2">
+                <div className="flex-1 min-w-0 relative">
+                  <CopyInput
+                    value={`${getUrl()}/i/${token}`}
+                    className="pr-14"
+                  />
+
+                  <div className="absolute right-10 top-[11px] border-r border-border pr-2">
+                    <OpenURL href={`${getUrl()}/i/${token}`}>
+                      <Icons.OpenInNew />
+                    </OpenURL>
+                  </div>
+                </div>
+
+                {status !== "draft" && (
+                  <Button
+                    variant="secondary"
+                    className="size-[38px] hover:bg-secondary shrink-0"
+                    onClick={() => {
+                      downloadFile(
+                        `/api/download/invoice?id=${id}`,
+                        `${invoiceNumber}.pdf`,
+                      );
+                    }}
+                  >
+                    <div>
+                      <Icons.ArrowCoolDown className="size-4" />
+                    </div>
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          <Accordion
+            type="multiple"
+            className="mt-6"
+            defaultValue={internalNote ? ["note", "activity"] : ["activity"]}
+          >
+            <AccordionItem value="activity">
+              <AccordionTrigger>Activity</AccordionTrigger>
+              <AccordionContent>
+                <InvoiceActivity data={data} />
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="note">
+              <AccordionTrigger>Internal note</AccordionTrigger>
+              <AccordionContent>
+                <InvoiceNote id={id} defaultValue={internalNote} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </ScrollArea>
     </div>
   );
 }
