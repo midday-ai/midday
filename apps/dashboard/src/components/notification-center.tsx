@@ -60,7 +60,7 @@ function NotificationItem({
               <Button
                 size="icon"
                 variant="secondary"
-                className="rounded-full bg-transparent hover:bg-[#1A1A1A]"
+                className="rounded-full bg-transparent dark:hover:bg-[#1A1A1A] hover:bg-[#F6F6F3]"
                 onClick={() => markMessageAsRead(id)}
               >
                 <Icons.Inventory2 />
@@ -95,7 +95,7 @@ function NotificationItem({
               <Button
                 size="icon"
                 variant="secondary"
-                className="rounded-full bg-transparent hover:bg-[#1A1A1A]"
+                className="rounded-full bg-transparent dark:hover:bg-[#1A1A1A] hover:bg-[#F6F6F3]"
                 onClick={() => markMessageAsRead(id)}
               >
                 <Icons.Inventory2 />
@@ -130,7 +130,7 @@ function NotificationItem({
               <Button
                 size="icon"
                 variant="secondary"
-                className="rounded-full bg-transparent hover:bg-[#1A1A1A]"
+                className="rounded-full bg-transparent dark:hover:bg-[#1A1A1A] hover:bg-[#F6F6F3]"
                 onClick={() => markMessageAsRead(id)}
               >
                 <Icons.Inventory2 />
@@ -165,7 +165,7 @@ function NotificationItem({
               <Button
                 size="icon"
                 variant="secondary"
-                className="rounded-full bg-transparent hover:bg-[#1A1A1A]"
+                className="rounded-full bg-transparent dark:hover:bg-[#1A1A1A] hover:bg-[#F6F6F3]"
                 onClick={() => markMessageAsRead(id)}
               >
                 <Icons.Inventory2 />
@@ -300,11 +300,14 @@ export function NotificationCenter() {
                     return (
                       <NotificationItem
                         key={notification.id}
+                        id={notification.id}
                         setOpen={setOpen}
                         description={notification.payload.description}
                         createdAt={notification.createdAt}
                         recordId={notification.payload.recordId}
                         type={notification.payload.type}
+                        from={notification.payload?.from}
+                        to={notification.payload?.to}
                       />
                     );
                   })}
