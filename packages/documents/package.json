@@ -1,35 +1,35 @@
 {
-	"name": "@midday/documents",
-	"version": "1.0.0",
-	"private": true,
-	"main": "src/index.ts",
-	"exports": {
-		".": "./src/index.ts",
-		"./loader": "./src/loaders/loader.ts",
-		"./classifier": "./src/classifier/classifier.ts",
-		"./embed": "./src/embed/embed.ts",
-		"./utils": "./src/utils.ts"
-	},
-	"scripts": {
-		"clean": "rm -rf .turbo node_modules",
-		"lint": "biome lint .",
-		"format": "biome format --write .",
-		"typecheck": "tsc --noEmit",
-		"test": "bun test src"
-	},
-	"dependencies": {
-		"@ai-sdk/mistral": "^1.2.8",
-		"@langchain/community": "^0.3.48",
-		"@langchain/core": "^0.3.62",
-		"@midday/utils": "workspace:*",
-		"@mistralai/mistralai": "^1.7.3",
-		"ai": "4.3.17",
-		"mammoth": "^1.9.1",
-		"officeparser": "^5.2.0",
-		"unpdf": "^1.0.6",
-		"zod": "^4.0.2"
-	},
-	"devDependencies": {
-		"@types/bun": "^1.2.18"
-	}
+  "name": "@midday/documents",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./loader": "./src/loaders/loader.ts",
+    "./classifier": "./src/classifier/classifier.ts",
+    "./embed": "./src/embed/embed.ts",
+    "./utils": "./src/utils.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test src"
+  },
+  "dependencies": {
+    "@ai-sdk/mistral": "^1.2.8",
+    "@langchain/community": "^0.3.48",
+    "@langchain/core": "^0.3.62",
+    "@midday/utils": "workspace:*",
+    "@mistralai/mistralai": "^1.7.3",
+    "ai": "4.3.17",
+    "mammoth": "^1.9.1",
+    "officeparser": "^5.2.0",
+    "unpdf": "^1.0.6",
+    "zod": "3.25.67"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.18"
+  }
 }

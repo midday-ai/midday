@@ -16,7 +16,7 @@
     "@ai-sdk/openai": "^1.3.23",
     "@date-fns/utc": "^2.1.0",
     "@hono/trpc-server": "^0.4.0",
-    "@hono/zod-openapi": "^0.19.9",
+    "@hono/zod-openapi": "^0.19.8",
     "@hono/zod-validator": "^0.7.0",
     "@midday/cache": "workspace:*",
     "@midday/documents": "workspace:*",
@@ -43,8 +43,8 @@
     "resend": "^4.6.0",
     "superjson": "^2.2.2",
     "uuid": "^11.1.0",
-    "zod": "^4.0.2",
-    "zod-openapi": "^5.1.0"
+    "zod": "3.25.67",
+    "zod-openapi": "^4.2.4"
   },
   "devDependencies": {
     "@types/bun": "^1.2.18"

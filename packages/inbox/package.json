@@ -1,25 +1,25 @@
 {
-	"name": "@midday/inbox",
-	"version": "1.0.0",
-	"private": true,
-	"main": "src/index.ts",
-	"exports": {
-		".": "./src/index.ts",
-		"./connector": "./src/connector.ts"
-	},
-	"scripts": {
-		"clean": "rm -rf .turbo node_modules",
-		"lint": "biome lint .",
-		"format": "biome format --write .",
-		"typecheck": "tsc --noEmit",
-		"test": "bun test src"
-	},
-	"dependencies": {
-		"@midday/encryption": "workspace:*",
-		"@midday/supabase": "workspace:*",
-		"googleapis": "^152.0.0",
-		"zod": "^4.0.2",
-		"@microsoft/microsoft-graph-client": "^3.0.7",
-		"@azure/msal-node": "^3.6.3"
-	}
+  "name": "@midday/inbox",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./connector": "./src/connector.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test src"
+  },
+  "dependencies": {
+    "@midday/encryption": "workspace:*",
+    "@midday/supabase": "workspace:*",
+    "googleapis": "^152.0.0",
+    "zod": "3.25.67",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@azure/msal-node": "^3.6.3"
+  }
 }
