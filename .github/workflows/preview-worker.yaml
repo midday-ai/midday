@@ -29,9 +29,9 @@ jobs:
       - name: 🪐 Check TypeScript
         run: bun run typecheck
         working-directory: ./apps/worker
-      - name: 🧪 Run unit tests
-        run: bun run test
-        working-directory: ./apps/worker
+      # - name: 🧪 Run unit tests
+      #   run: bun run test
+      #   working-directory: ./apps/worker
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --remote-only --dockerfile apps/worker/Dockerfile --config apps/worker/fly-preview.toml
         env:

@@ -1,5 +1,5 @@
 # Base image with Bun
-FROM oven/bun:1.2.17 AS base
+FROM oven/bun:1.2.18 AS base
 
 # Install turbo CLI globally using Bun
 FROM base AS turbo-cli
