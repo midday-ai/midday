@@ -140,18 +140,10 @@ export default async function Page(props: Props) {
         </div>
       </div>
 
-<<<<<<< HEAD
-<<<<<<< HEAD
       <InvoiceToolbar
         token={invoice.token}
-        invoiceNumber={invoice.invoiceNumber || "invoice"}
+        invoiceNumber={invoice.invoiceNumber ?? "invoice"}
       />
-=======
-			<InvoiceToolbar token={invoice.token} />
->>>>>>> 68f4dc3c (wip)
-=======
-      <InvoiceToolbar token={invoice.token} />
->>>>>>> b83e2047 (wip)
 
       <div className="fixed bottom-4 right-4 hidden md:block">
         <a

@@ -22,6 +22,7 @@ import { VaultGetStarted } from "@/components/vault/vault-get-started";
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
 import { useRealtime } from "@/hooks/use-realtime";
+import { useTableScroll } from "@/hooks/use-table-scroll";
 import { useUserQuery } from "@/hooks/use-user";
 import { useDocumentsStore } from "@/store/vault";
 import { useTRPC } from "@/trpc/client";
