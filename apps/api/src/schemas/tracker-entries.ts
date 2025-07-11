@@ -166,11 +166,11 @@ export const trackerEntryResponseSchema = z.object({
           "Date and time when the project was created in ISO 8601 format",
         example: "2024-03-01T10:00:00.000Z",
       }),
-      rate: z.number().openapi({
+      rate: z.number().nullable().openapi({
         description: "Default hourly rate for the project",
         example: 75.0,
       }),
-      currency: z.string().openapi({
+      currency: z.string().nullable().openapi({
         description: "Currency code for the project rate in ISO 4217 format",
         example: "USD",
       }),
@@ -178,7 +178,7 @@ export const trackerEntryResponseSchema = z.object({
         description: "Current status of the project",
         example: "in_progress",
       }),
-      description: z.string().openapi({
+      description: z.string().nullable().openapi({
         description: "Description of the project",
         example: "Complete website redesign with modern UI/UX",
       }),
@@ -186,11 +186,11 @@ export const trackerEntryResponseSchema = z.object({
         description: "Name of the project",
         example: "Website Redesign Project",
       }),
-      billable: z.boolean().openapi({
+      billable: z.boolean().nullable().openapi({
         description: "Whether the project is billable to the customer",
         example: true,
       }),
-      estimate: z.number().openapi({
+      estimate: z.number().nullable().openapi({
         description: "Estimated total hours for the project",
         example: 120,
       }),
@@ -205,6 +205,7 @@ export const trackerEntryResponseSchema = z.object({
             example: "Acme Corporation",
           }),
         })
+        .nullable()
         .openapi({
           description: "Customer information associated with the project",
         }),
@@ -245,3 +246,13 @@ export const trackerEntriesResponseSchema = z.object({
       "Tracker entries grouped by date, where each key is a date in YYYY-MM-DD format and the value is an array of tracker entries for that date",
   }),
 });
+
+export const createTrackerEntriesResponseSchema = z
+  .object({
+    data: z.array(trackerEntryResponseSchema).openapi({
+      description: "Array of created tracker entries",
+    }),
+  })
+  .openapi({
+    description: "Response schema for created tracker entries",
+  });

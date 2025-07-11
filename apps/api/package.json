@@ -4,6 +4,7 @@
     "dev": "TZ=UTC PORT=3003 bun run --hot src/index.ts",
     "db:pull": "drizzle-kit pull",
     "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
