@@ -7,6 +7,7 @@
     "clean": "git clean -xdf .next .turbo node_modules",
     "dev": "TZ=UTC next dev -p 3001 --turbopack",
     "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "start": "next start",
     "typecheck": "tsc --noEmit",
