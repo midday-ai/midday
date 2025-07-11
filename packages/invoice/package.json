@@ -4,7 +4,7 @@
   "main": "src/index.tsx",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "lint": "biome check .",
+    "lint": "biome lint .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit"
   },
@@ -22,6 +22,7 @@
     "./types": "./src/types.ts"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.2.0",
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
     "@react-pdf/renderer": "^4.3.0",

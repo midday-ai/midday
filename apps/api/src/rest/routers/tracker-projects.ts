@@ -1,9 +1,3 @@
-import {
-  deleteTrackerProject,
-  getTrackerProjectById,
-  getTrackerProjects,
-  upsertTrackerProject,
-} from "@api/db/queries/tracker-projects";
 import type { Context } from "@api/rest/types";
 import {
   deleteTrackerProjectSchema,
@@ -15,6 +9,12 @@ import {
 } from "@api/schemas/tracker-projects";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import {
+  deleteTrackerProject,
+  getTrackerProjectById,
+  getTrackerProjects,
+  upsertTrackerProject,
+} from "@midday/db/queries";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();

@@ -1,7 +1,7 @@
 import type { RouterOutputs } from "@/trpc/client";
 
 declare module "@tanstack/table-core" {
-  interface TableMeta<TData extends RowData> {
+  interface TableMeta extends RowData {
     // Transaction table meta
     dateFormat?: string | null;
     hasSorting?: boolean;
@@ -27,7 +27,7 @@ declare module "@tanstack/table-core" {
     totalOwners?: number;
   }
 
-  interface ColumnMeta<TData extends RowData, TValue> {
+  interface ColumnMeta extends RowData, TValue {
     className?: string;
   }
 }

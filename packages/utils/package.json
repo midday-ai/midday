@@ -1,22 +1,22 @@
 {
-  "name": "@midday/utils",
-  "version": "1.0.0",
-  "main": "src/index.ts",
-  "private": true,
-  "sideEffects": false,
-  "scripts": {
-    "clean": "rm -rf .turbo node_modules",
-    "lint": "biome check .",
-    "format": "biome format --write .",
-    "typecheck": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "typescript": "^5.8.3"
-  },
-  "exports": {
-    ".": "./src/index.ts",
-    "./envs": "./src/envs.ts",
-    "./format": "./src/format.ts",
-    "./tax": "./src/tax.ts"
-  }
+	"name": "@midday/utils",
+	"version": "1.0.0",
+	"main": "src/index.ts",
+	"private": true,
+	"sideEffects": false,
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"typescript": "^5.8.3"
+	},
+	"exports": {
+		".": "./src/index.ts",
+		"./envs": "./src/envs.ts",
+		"./format": "./src/format.ts",
+		"./tax": "./src/tax.ts"
+	}
 }

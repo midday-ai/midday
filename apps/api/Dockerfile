@@ -1,5 +1,5 @@
 # Base image with Bun
-FROM oven/bun:1.2.13 AS base
+FROM oven/bun:1.2.18 AS base
 
 # Install turbo CLI globally using Bun
 FROM base AS turbo-cli
@@ -38,7 +38,7 @@ WORKDIR /app/apps/api
 ENV NODE_ENV=production
 
 # Expose the port the API runs on
-EXPOSE 3000
+EXPOSE 8080
 
 # Run the API directly with Bun
 CMD ["bun", "run", "src/index.ts"]

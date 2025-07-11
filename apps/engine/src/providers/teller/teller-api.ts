@@ -29,7 +29,7 @@ export class TellerApi {
     try {
       await fetch(`${this.#baseUrl}/health`);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

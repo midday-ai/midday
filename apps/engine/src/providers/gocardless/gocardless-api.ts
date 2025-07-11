@@ -1,8 +1,8 @@
 import { ProviderError } from "@engine/utils/error";
 import { logger } from "@engine/utils/logger";
 import { formatISO, subDays } from "date-fns";
-import xior from "xior";
 import type { XiorInstance, XiorRequestConfig } from "xior";
+import xior from "xior";
 import type { GetInstitutionsRequest, ProviderParams } from "../types";
 import type {
   DeleteRequistionResponse,
@@ -105,7 +105,7 @@ export class GoCardLessApi {
           expirationTtl: response.refresh_expires - this.#oneHour,
         }),
       ]);
-    } catch (error) {
+    } catch {
       logger("Error saving tokens");
     }
 

@@ -31,3 +31,5 @@ export const inboxWebhookPostSchema = z.object({
   }),
   MessageID: z.string({ required_error: "MessageID is required" }),
 });
+
+export type Attachment = z.infer<typeof inboxAttachment>;

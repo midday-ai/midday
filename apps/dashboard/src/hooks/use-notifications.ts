@@ -1,7 +1,8 @@
 // @ts-nocheck - will be removed soon
-import { useUserQuery } from "@/hooks/use-user";
+
 import { HeadlessService } from "@novu/headless";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useUserQuery } from "@/hooks/use-user";
 
 export function useNotifications() {
   const [isLoading, setLoading] = useState(true);
@@ -48,8 +49,8 @@ export function useNotifications() {
 
       headlessService.markNotificationsAsRead({
         messageId: [messageId],
-        listener: (result) => {},
-        onError: (error) => {},
+        listener: (_result) => {},
+        onError: (_error) => {},
       });
     }
   };

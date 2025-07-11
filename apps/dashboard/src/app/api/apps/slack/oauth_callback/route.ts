@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
         `${requestUrl.origin}/all-done?event=app_oauth_completed`,
       );
     }
-  } catch (err) {
+  } catch (_err) {
     return NextResponse.json(
       { error: "Failed to exchange code for token" },
       { status: 500 },

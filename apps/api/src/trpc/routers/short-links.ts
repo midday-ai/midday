@@ -1,8 +1,4 @@
 import {
-  createShortLink,
-  getShortLinkByShortId,
-} from "@api/db/queries/short-links";
-import {
   createShortLinkForFileSchema,
   createShortLinkSchema,
   getShortLinkSchema,
@@ -12,6 +8,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@api/trpc/init";
+import { createShortLink, getShortLinkByShortId } from "@midday/db/queries";
 import { signedUrl } from "@midday/supabase/storage";
 
 export const shortLinksRouter = createTRPCRouter({

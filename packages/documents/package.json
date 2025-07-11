@@ -12,24 +12,24 @@
   },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "lint": "biome check .",
+    "lint": "biome lint .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "test": "bun test src"
   },
   "dependencies": {
     "@ai-sdk/mistral": "^1.2.8",
-    "@langchain/community": "^0.3.46",
-    "@langchain/core": "^0.3.58",
+    "@langchain/community": "^0.3.48",
+    "@langchain/core": "^0.3.62",
     "@midday/utils": "workspace:*",
-    "@mistralai/mistralai": "^1.7.2",
-    "ai": "4.3.16",
+    "@mistralai/mistralai": "^1.7.3",
+    "ai": "4.3.17",
     "mammoth": "^1.9.1",
-    "officeparser": "^5.1.1",
+    "officeparser": "^5.2.0",
     "unpdf": "^1.0.6",
-    "zod": "^3.25.64"
+    "zod": "3.25.67"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.16"
+    "@types/bun": "^1.2.18"
   }
 }

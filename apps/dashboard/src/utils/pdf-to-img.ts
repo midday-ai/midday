@@ -41,7 +41,7 @@ export async function getPdfImage(data: ArrayBuffer) {
     // Return image as PNG buffer
     const canvas = canvasAndContext.canvas;
     return canvas.toBuffer("image/png");
-  } catch (error) {
+  } catch {
     return null;
   }
 }

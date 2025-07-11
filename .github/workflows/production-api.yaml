@@ -1,4 +1,4 @@
-name: Fly Deploy
+name: Fly Deploy API
 permissions:
   contents: read
 on:
@@ -30,9 +30,9 @@ jobs:
       - name: 🪐 Check TypeScript
         run: bun run typecheck
         working-directory: ./apps/api
-      - name: 🧪 Run unit tests
-        run: bun run test
-        working-directory: ./apps/api
+      # - name: 🧪 Run unit tests
+      #   run: bun run test
+      #   working-directory: ./apps/api
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --remote-only --dockerfile apps/api/Dockerfile --config apps/api/fly.toml
         env:

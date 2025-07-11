@@ -741,3 +741,23 @@ export const createTransactionsSchema = z
 export const createTransactionsResponseSchema = z.array(
   transactionResponseSchema,
 );
+
+export const exportTransactionsSchema = z.object({
+  transactionIds: z.array(z.string()),
+  dateFormat: z.string().optional().default("MM/DD/YYYY"),
+  locale: z.string().optional().default("en"),
+});
+
+export const importTransactionsSchema = z.object({
+  filePath: z.array(z.string()).optional(),
+  bankAccountId: z.string(),
+  currency: z.string(),
+  currentBalance: z.string().optional(),
+  inverted: z.boolean(),
+  mappings: z.object({
+    amount: z.string(),
+    date: z.string(),
+    description: z.string(),
+    balance: z.string().optional(),
+  }),
+});

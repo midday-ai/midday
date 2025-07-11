@@ -1,8 +1,5 @@
 "use client";
 
-import { useI18n } from "@/locales/client";
-import { useTRPC } from "@/trpc/client";
-import { getInitials } from "@/utils/format";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   AlertDialog,
@@ -28,10 +25,12 @@ import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import { Switch } from "@midday/ui/switch";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { MoreHorizontal } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { Loader2, MoreHorizontal } from "lucide-react";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
+import { useI18n } from "@/locales/client";
+import { useTRPC } from "@/trpc/client";
+import { getInitials } from "@/utils/format";
 import { FormatAmount } from "./format-amount";
 import { EditBankAccountModal } from "./modals/edit-bank-account-modal";
 
@@ -46,7 +45,7 @@ export function BankAccount({ data }: Props) {
   const queryClient = useQueryClient();
   const [value, setValue] = useState("");
   const [isOpen, setOpen] = useState(false);
-  const t = useI18n();
+  const _t = useI18n();
 
   const [_, setParams] = useQueryStates({
     step: parseAsString,

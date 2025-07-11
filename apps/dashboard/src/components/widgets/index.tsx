@@ -1,6 +1,5 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
 import {
   Carousel,
   CarouselContent,
@@ -9,7 +8,7 @@ import {
   CarouselPrevious,
 } from "@midday/ui/carousel";
 import { useQuery } from "@tanstack/react-query";
-import * as React from "react";
+import { useTRPC } from "@/trpc/client";
 import { AccountBalance } from "./account-balance";
 import { Assistant } from "./assistant";
 import { Inbox } from "./inbox";

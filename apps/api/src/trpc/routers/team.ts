@@ -1,26 +1,3 @@
-import { getBankConnections } from "@api/db/queries/bank-connections";
-import {
-  createTeam,
-  deleteTeam,
-  deleteTeamMember,
-  getAvailablePlans,
-  getTeamById,
-  leaveTeam,
-  updateTeamById,
-  updateTeamMember,
-} from "@api/db/queries/teams";
-import {
-  acceptTeamInvite,
-  createTeamInvites,
-  declineTeamInvite,
-  deleteTeamInvite,
-  getInvitesByEmail,
-  getTeamInvites,
-} from "@api/db/queries/user-invites";
-import {
-  getTeamMembers,
-  getTeamsByUserId,
-} from "@api/db/queries/users-on-team";
 import {
   acceptTeamInviteSchema,
   createTeamSchema,
@@ -35,13 +12,33 @@ import {
   updateTeamMemberSchema,
 } from "@api/schemas/team";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import type {
-  DeleteTeamPayload,
-  InviteTeamMembersPayload,
-  UpdateBaseCurrencyPayload,
-} from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
+import {
+  acceptTeamInvite,
+  createTeam,
+  createTeamInvites,
+  declineTeamInvite,
+  deleteTeam,
+  deleteTeamInvite,
+  deleteTeamMember,
+  getAvailablePlans,
+  getBankAccounts,
+  getBankConnections,
+  getInvitesByEmail,
+  getTeamById,
+  getTeamInvites,
+  getTeamMembersByTeamId,
+  getTeamsByUserId,
+  leaveTeam,
+  updateTeamById,
+  updateTeamMember,
+} from "@midday/db/queries";
 import { TRPCError } from "@trpc/server";
+import { jobRegistry } from "@worker/core/job";
+import { tasks } from "@worker/jobs/tasks";
+import {
+  deleteTeamJobSchema,
+  inviteTeamMembersJobSchema,
+} from "@worker/schemas/jobs";
 
 export const teamRouter = createTRPCRouter({
   current: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -58,7 +55,7 @@ export const teamRouter = createTRPCRouter({
     }),
 
   members: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
-    return getTeamMembers(db, teamId!);
+    return getTeamMembersByTeamId(db, teamId!);
   }),
 
   list: protectedProcedure.query(async ({ ctx: { db, session } }) => {
@@ -78,7 +75,7 @@ export const teamRouter = createTRPCRouter({
   leave: protectedProcedure
     .input(leaveTeamSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
-      const teamMembersData = await getTeamMembers(db, input.teamId);
+      const teamMembersData = await getTeamMembersByTeamId(db, input.teamId);
 
       const currentUser = teamMembersData?.find(
         (member) => member.user?.id === session.user.id,
@@ -133,15 +130,17 @@ export const teamRouter = createTRPCRouter({
       });
 
       if (bankConnections.length > 0) {
-        await tasks.trigger("delete-team", {
+        await tasks.trigger(deleteTeamJobSchema, "team", "delete-team", {
           teamId: input.teamId!,
           connections: bankConnections.map((connection) => ({
             accessToken: connection.accessToken,
-            provider: connection.provider,
+            provider: connection.provider!,
             referenceId: connection.referenceId,
           })),
-        } satisfies DeleteTeamPayload);
+        });
       }
+
+      return data;
     }),
 
   deleteMember: protectedProcedure
@@ -190,12 +189,17 @@ export const teamRouter = createTRPCRouter({
           inviteCode: invite?.code!,
         })) ?? [];
 
-      await tasks.trigger("invite-team-members", {
-        teamId: teamId!,
-        invites,
-        ip,
-        locale: "en",
-      } satisfies InviteTeamMembersPayload);
+      await tasks.trigger(
+        inviteTeamMembersJobSchema,
+        "team",
+        "invite-team-members",
+        {
+          teamId: teamId!,
+          invites,
+          ip,
+          locale: "en",
+        },
+      );
     }),
 
   deleteInvite: protectedProcedure
@@ -213,12 +217,38 @@ export const teamRouter = createTRPCRouter({
 
   updateBaseCurrency: protectedProcedure
     .input(updateBaseCurrencySchema)
-    .mutation(async ({ ctx: { teamId }, input }) => {
-      const event = await tasks.trigger("update-base-currency", {
-        teamId: teamId!,
-        baseCurrency: input.baseCurrency,
-      } satisfies UpdateBaseCurrencyPayload);
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      const flowProducer = jobRegistry.getFlowProducer();
 
-      return event;
+      const accounts = await getBankAccounts(db, {
+        teamId: teamId!,
+        enabled: true,
+      });
+
+      const flow = await flowProducer.add({
+        name: "update-base-currency",
+        queueName: "teams",
+        data: {
+          teamId,
+          baseCurrency: input.baseCurrency,
+        },
+        children: accounts.map((account) => ({
+          name: "update-account-base-currency",
+          queueName: "teams",
+          data: {
+            accountId: account.id,
+            teamId,
+            currency: account.currency,
+            balance: Number(account.balance) || 0,
+            baseCurrency: input.baseCurrency,
+          },
+        })),
+      });
+
+      return {
+        flowJobId: flow.job.id,
+        parentJobId: flow.job.id,
+        childJobsCount: accounts.length,
+      };
     }),
 });

@@ -1,9 +1,5 @@
 "use client";
 
-import { useExportStatus } from "@/hooks/use-export-status";
-import { downloadFile } from "@/lib/download";
-import { useExportStore } from "@/store/export";
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -17,6 +13,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addDays, addYears } from "date-fns";
 import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
+import { downloadFile } from "@/lib/download";
+import { useExportStore } from "@/store/export";
+import { useTRPC } from "@/trpc/client";
 
 const options = [
   {
@@ -38,20 +37,12 @@ type ShareOptions = {
   fullPath: string;
 };
 
-type ExportData = {
-  runId?: string;
-  accessToken?: string;
-};
-
 export function ExportStatus() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { toast, dismiss, update } = useToast();
   const [toastId, setToastId] = useState<string | null>(null);
   const { exportData, setExportData } = useExportStore();
-  const { status, progress, result } = useExportStatus(
-    exportData as ExportData,
-  );
   const [, copy] = useCopyToClipboard();
 
   const shareFileMutation = useMutation(
@@ -79,6 +70,9 @@ export function ExportStatus() {
     if (toastId) {
       dismiss(toastId);
     }
+
+    setToastId(null);
+    setExportData(undefined);
   };
 
   const handleOnShare = ({ expireIn, fullPath }: ShareOptions) => {
@@ -90,7 +84,7 @@ export function ExportStatus() {
   };
 
   useEffect(() => {
-    if (status === "FAILED") {
+    if (exportData?.status === "failed") {
       toast({
         duration: 2500,
         variant: "error",
@@ -100,7 +94,7 @@ export function ExportStatus() {
       setToastId(null);
       setExportData(undefined);
     }
-  }, [status]);
+  }, [exportData]);
 
   useEffect(() => {
     if (exportData && !toastId) {
@@ -113,14 +107,17 @@ export function ExportStatus() {
       });
 
       setToastId(id);
-    } else if (toastId && status === "IN_PROGRESS") {
+    } else if (
+      toastId &&
+      (exportData?.status === "active" || exportData?.status === "waiting")
+    ) {
       update(toastId, {
         id: toastId,
-        progress: Number(progress),
+        progress: Number(exportData?.progress),
       });
     }
 
-    if (status === "COMPLETED" && result) {
+    if (exportData?.status === "completed" && exportData?.result) {
       // Invalidate documents query to refresh the list
       queryClient.invalidateQueries({
         queryKey: trpc.documents.get.infiniteQueryKey(),
@@ -135,7 +132,7 @@ export function ExportStatus() {
       update(toastId, {
         id: toastId,
         title: "Export completed",
-        description: `Your export is ready based on ${result.totalItems} transactions. It's stored in your Vault.`,
+        description: `Your export is ready based on ${exportData?.result?.totalItems} transactions. It's stored in your Vault.`,
         variant: "success",
         footer: (
           <div className="mt-4 flex space-x-4">
@@ -157,7 +154,7 @@ export function ExportStatus() {
                     onClick={() =>
                       handleOnShare({
                         expireIn: option.expireIn,
-                        fullPath: result.fullPath,
+                        fullPath: exportData?.result?.fullPath!,
                       })
                     }
                   >
@@ -170,10 +167,13 @@ export function ExportStatus() {
             <Button
               size="sm"
               onClick={() => {
-                if (result?.fullPath && result?.fileName) {
+                if (exportData?.result?.fullPath) {
+                  const filename = exportData?.result?.fullPath
+                    ?.split("/")
+                    .at(-1);
                   downloadFile(
-                    `/api/download/file?path=${result.fullPath}&filename=${result.fileName}`,
-                    result.fileName,
+                    `/api/download/file?path=${exportData?.result?.fullPath}&filename=${filename}`,
+                    filename ?? "export",
                   );
                 }
                 handleOnDownload();
@@ -184,11 +184,8 @@ export function ExportStatus() {
           </div>
         ),
       });
-
-      setToastId(null);
-      setExportData(undefined);
     }
-  }, [toastId, progress, status]);
+  }, [toastId, exportData]);
 
   return null;
 }

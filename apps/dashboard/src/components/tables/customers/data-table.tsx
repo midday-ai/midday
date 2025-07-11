@@ -1,11 +1,5 @@
 "use client";
 
-import { LoadMore } from "@/components/load-more";
-import { useCustomerFilterParams } from "@/hooks/use-customer-filter-params";
-import { useCustomerParams } from "@/hooks/use-customer-params";
-import { useSortParams } from "@/hooks/use-sort-params";
-import { useTableScroll } from "@/hooks/use-table-scroll";
-import { useTRPC } from "@/trpc/client";
 import { Table, TableBody } from "@midday/ui/table";
 import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import {
@@ -13,8 +7,14 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import React, { useDeferredValue, useEffect, useMemo } from "react";
+import { useDeferredValue, useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
+import { LoadMore } from "@/components/load-more";
+import { useCustomerFilterParams } from "@/hooks/use-customer-filter-params";
+import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useSortParams } from "@/hooks/use-sort-params";
+import { useTableScroll } from "@/hooks/use-table-scroll";
+import { useTRPC } from "@/trpc/client";
 import { columns } from "./columns";
 import { EmptyState, NoResults } from "./empty-states";
 import { CustomerRow } from "./row";

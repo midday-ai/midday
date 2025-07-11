@@ -1,7 +1,7 @@
 "use server";
 
 async function getAllStargazers({ owner, name }) {
-  let endCursor = undefined;
+  let endCursor ;
   let hasNextPage = true;
   let added = [];
 

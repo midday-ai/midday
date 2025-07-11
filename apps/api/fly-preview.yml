@@ -1,4 +1,4 @@
-app = "midday-api-staging"
+app = 'midday-api-staging'
 primary_region = 'fra'
 
 [build]
@@ -14,7 +14,14 @@ primary_region = 'fra'
   min_machines_running = 1
   processes = ['app']
 
+[[http_service.checks]]
+  grace_period = "10s"
+  interval = "30s"
+  method = "GET"
+  timeout = "5s"
+  path = "/health"
+
 [[vm]]
-  memory = '512mb'
+  memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1

@@ -1,6 +1,5 @@
 "use client";
 
-import { downloadFile } from "@/lib/download";
 import { Button } from "@midday/ui/button";
 import {
   Tooltip,
@@ -11,6 +10,7 @@ import {
 import { motion } from "framer-motion";
 import { MdContentCopy, MdOutlineFileDownload } from "react-icons/md";
 import { useCopyToClipboard } from "usehooks-ts";
+import { downloadFile } from "@/lib/download";
 
 type Props = {
   token: string;

@@ -7,11 +7,14 @@ import { useEffect, useState } from "react";
 import { ChatAvatar } from "./chat-avatar";
 import { spinner } from "./spinner";
 
-function getRandomDelay(min, max) {
+function getRandomDelay(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-async function concatCharacter(inputString, callback) {
+async function concatCharacter(
+  inputString: string,
+  callback: (result: string) => void,
+) {
   const words = inputString.split(" ");
   let result = "";
   for (let i = 0; i < words.length; i++) {
@@ -27,7 +30,7 @@ export function UserMessage({ children }: { children: React.ReactNode }) {
   return (
     <div className="group relative flex items-start">
       <div className="flex size-[25px] shrink-0 select-none items-center justify-center">
-        <ChatAvatar role="user" />
+        <ChatAvatar type="user" />
       </div>
 
       <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono leading-relaxed">
@@ -41,7 +44,7 @@ export function SpinnerMessage() {
   return (
     <div className="group relative flex items-start">
       <div className="flex size-[25px] shrink-0 select-none items-center justify-center">
-        <ChatAvatar role="assistant" />
+        <ChatAvatar type="assistant" />
       </div>
 
       <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2">
@@ -71,7 +74,7 @@ export function BotCard({
   return (
     <div className="group relative flex items-start">
       <div className="flex size-[25px] shrink-0 select-none items-center justify-center">
-        {showAvatar && <ChatAvatar role="assistant" />}
+        {showAvatar && <ChatAvatar type="assistant" />}
       </div>
 
       <div
@@ -108,7 +111,7 @@ export function SignUpCard({
     <div>
       <div className="group relative flex items-start">
         <div className="flex size-[25px] shrink-0 select-none items-center justify-center">
-          {showAvatar && <ChatAvatar role="assistant" />}
+          {showAvatar && <ChatAvatar type="assistant" />}
         </div>
 
         <div

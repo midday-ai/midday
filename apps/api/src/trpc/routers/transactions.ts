@@ -1,22 +1,11 @@
 import {
-  createTransaction,
-  deleteTransactions,
-  getSimilarTransactions,
-  getTransactionById,
-  getTransactions,
-  getTransactionsAmountFullRangeData,
-  searchTransactionMatch,
-  updateSimilarTransactionsCategory,
-  updateSimilarTransactionsRecurring,
-  updateTransaction,
-  updateTransactions,
-} from "@api/db/queries/transactions";
-import {
   createTransactionSchema,
   deleteTransactionsSchema,
+  exportTransactionsSchema,
   getSimilarTransactionsSchema,
   getTransactionByIdSchema,
   getTransactionsSchema,
+  importTransactionsSchema,
   searchTransactionMatchSchema,
   updateSimilarTransactionsCategorySchema,
   updateSimilarTransactionsRecurringSchema,
@@ -24,6 +13,26 @@ import {
   updateTransactionsSchema,
 } from "@api/schemas/transactions";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  createTransaction,
+  deleteTransactions,
+  getSimilarTransactions,
+  getTransactionById,
+  getTransactions,
+  getTransactionsAmountFullRangeData,
+  searchTransactionMatch,
+  updateBankAccount,
+  updateSimilarTransactionsCategory,
+  updateSimilarTransactionsRecurring,
+  updateTransaction,
+  updateTransactions,
+} from "@midday/db/queries";
+import { formatAmountValue } from "@midday/import";
+import { tasks } from "@worker/jobs/tasks";
+import {
+  exportTransactionsSchema as exportTransactionsJobSchema,
+  importTransactionsSchema as importTransactionsJobSchema,
+} from "@worker/schemas/jobs";
 
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -120,5 +129,44 @@ export const transactionsRouter = createTRPCRouter({
         ...input,
         teamId: teamId!,
       });
+    }),
+
+  exportTransactions: protectedProcedure
+    .input(exportTransactionsSchema)
+    .mutation(async ({ input, ctx: { teamId } }) => {
+      return tasks.trigger(
+        exportTransactionsJobSchema,
+        "exports",
+        "export-transactions",
+        {
+          ...input,
+          teamId: teamId!,
+        },
+      );
+    }),
+
+  importTransactions: protectedProcedure
+    .input(importTransactionsSchema)
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      const balance = input.currentBalance
+        ? formatAmountValue({ amount: input.currentBalance })
+        : null;
+
+      await updateBankAccount(db, {
+        id: input.bankAccountId,
+        teamId: teamId!,
+        currency: input.currency,
+        balance: balance ?? undefined,
+      });
+
+      return tasks.trigger(
+        importTransactionsJobSchema,
+        "imports",
+        "import-transactions",
+        {
+          ...input,
+          teamId: teamId!,
+        },
+      );
     }),
 });

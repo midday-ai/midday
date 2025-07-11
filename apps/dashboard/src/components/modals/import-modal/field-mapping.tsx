@@ -1,10 +1,5 @@
 "use client";
 
-import { generateCsvMapping } from "@/actions/ai/generate-csv-mapping";
-import { SelectAccount } from "@/components/select-account";
-import { SelectCurrency } from "@/components/select-currency";
-import { useUserQuery } from "@/hooks/use-user";
-import { formatAmount } from "@/utils/format";
 import { formatAmountValue, formatDate } from "@midday/import";
 import {
   Accordion,
@@ -35,6 +30,11 @@ import { readStreamableValue } from "ai/rsc";
 import { capitalCase } from "change-case";
 import { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
+import { generateCsvMapping } from "@/actions/ai/generate-csv-mapping";
+import { SelectAccount } from "@/components/select-account";
+import { SelectCurrency } from "@/components/select-currency";
+import { useUserQuery } from "@/hooks/use-user";
+import { formatAmount } from "@/utils/format";
 import { mappableFields, useCsvContext } from "./context";
 
 export function FieldMapping({ currencies }: { currencies: string[] }) {
