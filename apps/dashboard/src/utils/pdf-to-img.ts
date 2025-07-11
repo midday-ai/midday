@@ -34,6 +34,7 @@ export async function getPdfImage(data: ArrayBuffer) {
       canvasFactory,
     };
 
+    // @ts-expect-error
     const renderTask = page.render(renderContext);
     await renderTask.promise;
 
