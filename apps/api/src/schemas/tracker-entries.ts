@@ -83,6 +83,37 @@ export const upsertTrackerEntriesSchema = z.object({
   }),
 });
 
+export const bulkCreateTrackerEntriesSchema = z.object({
+  entries: z
+    .array(upsertTrackerEntriesSchema.omit({ id: true }))
+    .max(100)
+    .min(1)
+    .openapi({
+      description:
+        "Array of tracker entries to create (maximum 100 entries per request)",
+      example: [
+        {
+          start: "2024-04-15T09:00:00.000Z",
+          stop: "2024-04-15T17:00:00.000Z",
+          dates: ["2024-04-15"],
+          assignedId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          projectId: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
+          description: "Working on authentication feature",
+          duration: 28800,
+        },
+        {
+          start: "2024-04-16T09:00:00.000Z",
+          stop: "2024-04-16T17:00:00.000Z",
+          dates: ["2024-04-16"],
+          assignedId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          projectId: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
+          description: "Working on dashboard feature",
+          duration: 28800,
+        },
+      ],
+    }),
+});
+
 export const deleteTrackerEntrySchema = z.object({
   id: z.string().uuid().openapi({
     description: "Unique identifier of the tracker entry to delete",

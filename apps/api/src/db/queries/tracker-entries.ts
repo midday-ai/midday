@@ -262,6 +262,85 @@ export async function upsertTrackerEntries(
   return result;
 }
 
+export type BulkCreateTrackerEntriesParams = {
+  teamId: string;
+  entries: Array<{
+    start: string;
+    stop: string;
+    dates: string[];
+    assignedId?: string | null;
+    projectId: string;
+    description?: string | null;
+    duration: number;
+  }>;
+};
+
+export async function bulkCreateTrackerEntries(
+  db: Database,
+  params: BulkCreateTrackerEntriesParams,
+) {
+  const { teamId, entries } = params;
+
+  // Flatten all entries and their dates into a single array for bulk insert
+  const flatEntries = entries.flatMap((entry) =>
+    entry.dates.map((date) => ({
+      teamId,
+      date,
+      start: entry.start,
+      stop: entry.stop,
+      assignedId: entry.assignedId,
+      projectId: entry.projectId,
+      description: entry.description,
+      duration: entry.duration,
+    })),
+  );
+
+  if (flatEntries.length === 0) {
+    return [];
+  }
+
+  // Insert all entries in a single database operation
+  const insertedEntries = await db
+    .insert(trackerEntries)
+    .values(flatEntries)
+    .returning({
+      id: trackerEntries.id,
+    });
+
+  // Get all inserted IDs
+  const insertedIds = insertedEntries.map((entry) => entry.id);
+
+  // Fetch the complete entries with related data
+  const result = await db.query.trackerEntries.findMany({
+    where: and(
+      eq(trackerEntries.teamId, teamId),
+      inArray(trackerEntries.id, insertedIds),
+    ),
+    with: {
+      user: {
+        columns: {
+          id: true,
+          fullName: true,
+          avatarUrl: true,
+        },
+      },
+      trackerProject: {
+        with: {
+          customer: {
+            columns: {
+              id: true,
+              name: true,
+              website: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return result;
+}
+
 export type DeleteTrackerEntryParams = {
   teamId: string;
   id: string;

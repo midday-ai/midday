@@ -1,10 +1,12 @@
 import {
+  bulkCreateTrackerEntries,
   deleteTrackerEntry,
   getTrackerRecordsByRange,
   upsertTrackerEntries,
 } from "@api/db/queries/tracker-entries";
 import type { Context } from "@api/rest/types";
 import {
+  bulkCreateTrackerEntriesSchema,
   createTrackerEntriesResponseSchema,
   deleteTrackerEntrySchema,
   getTrackerRecordsByRangeSchema,
@@ -97,6 +99,65 @@ app.openapi(
     });
 
     // Map trackerProject to project to match the response schema
+    const dataWithProject = result.map((item) => ({
+      ...item,
+      project: item.trackerProject,
+    }));
+
+    return c.json(
+      validateResponse(
+        { data: dataWithProject },
+        createTrackerEntriesResponseSchema,
+      ),
+    );
+  },
+);
+
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/bulk",
+    summary: "Create multiple tracker entries",
+    operationId: "createTrackerEntriesBulk",
+    "x-speakeasy-name-override": "createBulk",
+    description:
+      "Create multiple tracker entries in a single request for efficient data migration.",
+    tags: ["Tracker Entries"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: bulkCreateTrackerEntriesSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      201: {
+        description: "Tracker entries created successfully.",
+        content: {
+          "application/json": {
+            schema: createTrackerEntriesResponseSchema,
+          },
+        },
+      },
+    },
+    middleware: [withRequiredScope("tracker-entries.write")],
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const session = c.get("session");
+    const { entries } = c.req.valid("json");
+
+    const result = await bulkCreateTrackerEntries(db, {
+      teamId,
+      entries: entries.map(({ assignedId, ...rest }) => ({
+        assignedId: assignedId ?? session.user.id,
+        ...rest,
+      })),
+    });
+
     const dataWithProject = result.map((item) => ({
       ...item,
       project: item.trackerProject,
