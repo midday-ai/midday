@@ -2,6 +2,7 @@ import { useQueryStates } from "nuqs";
 import { createLoader, parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 export const oauthParamsSchema = {
+  response_type: parseAsString,
   client_id: parseAsString,
   redirect_uri: parseAsString,
   scope: parseAsString,

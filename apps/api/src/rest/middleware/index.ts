@@ -17,7 +17,7 @@ export const publicMiddleware: MiddlewareHandler[] = [withDatabase];
  */
 export const protectedMiddleware: MiddlewareHandler[] = [
   withDatabase,
-  withAuth, // Unified auth middleware supports both API keys and OAuth tokens
+  withAuth,
   rateLimiter({
     windowMs: 10 * 60 * 1000, // 10 minutes
     limit: 100,
