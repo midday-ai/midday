@@ -12,12 +12,12 @@ export const publicMiddleware: MiddlewareHandler[] = [withDatabase];
 
 /**
  * Protected endpoint middleware - requires authentication
- * Includes database with smart routing and authentication
+ * Supports both API keys and OAuth tokens in a single unified middleware
  * Note: withAuth must be first to set session in context
  */
 export const protectedMiddleware: MiddlewareHandler[] = [
   withDatabase,
-  withAuth,
+  withAuth, // Unified auth middleware supports both API keys and OAuth tokens
   rateLimiter({
     windowMs: 10 * 60 * 1000, // 10 minutes
     limit: 100,

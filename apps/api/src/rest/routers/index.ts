@@ -6,6 +6,7 @@ import { documentsRouter } from "./documents";
 import { inboxRouter } from "./inbox";
 import { invoicesRouter } from "./invoices";
 import { metricsRouter } from "./metrics";
+import oauthRouter from "./oauth";
 import { searchRouter } from "./search";
 import { tagsRouter } from "./tags";
 import { teamsRouter } from "./teams";
@@ -31,5 +32,6 @@ routers.route("/search", searchRouter);
 routers.route("/metrics", metricsRouter);
 routers.route("/tracker-projects", trackerProjectsRouter);
 routers.route("/tracker-entries", trackerEntriesRouter);
+routers.route("/oauth", oauthRouter);
 
 export { routers };

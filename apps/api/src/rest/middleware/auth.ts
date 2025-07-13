@@ -2,6 +2,7 @@ import {
   getApiKeyByToken,
   updateApiKeyLastUsedAt,
 } from "@api/db/queries/api-keys";
+import { validateAccessToken } from "@api/db/queries/oauth-flow";
 import { getUserById } from "@api/db/queries/users";
 import { isValidApiKeyFormat } from "@api/utils/api-keys";
 import { apiKeyCache } from "@api/utils/cache/api-key-cache";
@@ -13,17 +14,59 @@ import { HTTPException } from "hono/http-exception";
 
 export const withAuth: MiddlewareHandler = async (c, next) => {
   const authHeader = c.req.header("Authorization");
-  const token = authHeader?.split(" ")[1];
 
-  if (token && !isValidApiKeyFormat(token)) {
-    throw new HTTPException(401, { message: "Invalid API key format" });
+  if (!authHeader) {
+    throw new HTTPException(401, { message: "Authorization header required" });
+  }
+
+  const [scheme, token] = authHeader.split(" ");
+
+  if (scheme !== "Bearer") {
+    throw new HTTPException(401, { message: "Invalid authorization scheme" });
   }
 
   if (!token) {
-    throw new HTTPException(401, { message: "Unauthorized" });
+    throw new HTTPException(401, { message: "Token required" });
   }
 
   const db = c.get("db");
+
+  // Handle OAuth access tokens (start with mid_access_token_)
+  if (token.startsWith("mid_access_token_")) {
+    const tokenData = await validateAccessToken(db, token);
+
+    if (!tokenData || !tokenData.user) {
+      throw new HTTPException(401, {
+        message: "Invalid or expired access token",
+      });
+    }
+
+    const session = {
+      teamId: tokenData.teamId,
+      user: {
+        id: tokenData.user.id,
+        email: tokenData.user.email,
+        full_name: tokenData.user.fullName,
+      },
+      oauth: {
+        applicationId: tokenData.applicationId,
+        clientId: tokenData.application?.clientId,
+        applicationName: tokenData.application?.name,
+      },
+    };
+
+    c.set("session", session);
+    c.set("teamId", session.teamId);
+    c.set("scopes", expandScopes(tokenData.scopes ?? []));
+
+    await next();
+    return;
+  }
+
+  // Handle API keys (start with mid_ but not mid_access_token_)
+  if (!token.startsWith("mid_") || !isValidApiKeyFormat(token)) {
+    throw new HTTPException(401, { message: "Invalid token format" });
+  }
 
   const keyHash = hash(token);
 
