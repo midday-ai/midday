@@ -8,7 +8,13 @@ import { useOAuthSecretModalStore } from "@/store/oauth-secret-modal";
 import { useTRPC } from "@/trpc/client";
 import { RESOURCES } from "@/utils/scopes";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
-import { SCOPES, type Scope } from "@api/utils/scopes";
+import {
+  SCOPES,
+  type Scope,
+  type ScopePreset,
+  scopePresets,
+  scopesToName,
+} from "@api/utils/scopes";
 import {
   Accordion,
   AccordionContent,
@@ -29,11 +35,12 @@ import {
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Switch } from "@midday/ui/switch";
+import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { Textarea } from "@midday/ui/textarea";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { z } from "zod";
 import { LogoUpload } from "../logo-upload";
@@ -47,9 +54,18 @@ const formSchema = z.object({
   description: z.string().optional(),
   overview: z.string().optional(),
   developerName: z.string().optional(),
-  logoUrl: z.string().url().optional().or(z.literal("")),
-  website: z.string().url().optional().or(z.literal("")),
-  installUrl: z.string().url().optional().or(z.literal("")),
+  logoUrl: z
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .pipe(z.string().url().optional()),
+  website: z
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .pipe(z.string().url().optional()),
+  installUrl: z
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .pipe(z.string().url().optional()),
   screenshots: z.array(z.string()).max(4).default([]),
   redirectUris: z
     .array(
@@ -80,9 +96,12 @@ const formSchema = z.object({
     .min(1, {
       message: "At least one redirect URI is required.",
     }),
-  scopes: z.array(z.enum(SCOPES)).min(1, {
-    message: "At least one scope must be selected.",
-  }),
+  scopes: z
+    .array(z.enum(SCOPES))
+    .min(1, {
+      message: "At least one scope must be selected.",
+    })
+    .default(["apis.all"]),
   isPublic: z.boolean().default(false),
   active: z.boolean().default(true),
 });
@@ -95,6 +114,11 @@ export function OAuthApplicationForm({ data }: Props) {
   const { setParams } = useOAuthApplicationParams();
   const { setSecret } = useOAuthSecretModalStore();
   const [redirectUriInput, setRedirectUriInput] = useState("");
+  const [preset, setPreset] = useState<ScopePreset>(() =>
+    data?.scopes
+      ? (scopesToName(data.scopes).preset as ScopePreset)
+      : "all_access",
+  );
   const { toast } = useToast();
   const { uploadFile } = useUpload();
   const { data: user } = useUserQuery();
@@ -113,11 +137,24 @@ export function OAuthApplicationForm({ data }: Props) {
       installUrl: data?.installUrl || "",
       screenshots: data?.screenshots || [],
       redirectUris: data?.redirectUris || [],
-      scopes: (data?.scopes as Scope[]) || [],
+      scopes: (data?.scopes as Scope[]) || ["apis.all"],
       isPublic: data?.isPublic || false,
       active: data?.active ?? true,
     },
   });
+
+  // Effect to ensure proper initialization when editing existing OAuth application
+  useEffect(() => {
+    if (data?.scopes) {
+      const detectedPreset = scopesToName(data.scopes).preset as ScopePreset;
+      setPreset(detectedPreset);
+
+      // If it's restricted, make sure the form has the correct scopes
+      if (detectedPreset === "restricted") {
+        form.setValue("scopes", data.scopes as Scope[], { shouldDirty: true });
+      }
+    }
+  }, [data?.scopes, form]);
 
   const createMutation = useMutation(
     trpc.oauthApplications.create.mutationOptions({
@@ -176,18 +213,21 @@ export function OAuthApplicationForm({ data }: Props) {
     const currentUris = form.getValues("redirectUris");
     form.setValue(
       "redirectUris",
-      currentUris.filter((_, i) => i !== index),
+      currentUris.filter((_: string, i: number) => i !== index),
     );
   };
 
   const handleResourceScopeChange = (resourceKey: string, scope: string) => {
+    if (preset !== "restricted") return;
+
     const currentScopes = form.getValues("scopes");
     const resource = RESOURCES.find((r) => r.key === resourceKey);
     if (!resource) return;
 
     // Remove any existing scopes for this resource
     const filteredScopes = currentScopes.filter(
-      (currentScope) => !resource.scopes.some((s) => s.scope === currentScope),
+      (currentScope: string) =>
+        !resource.scopes.some((s) => s.scope === currentScope),
     );
 
     // Add the new scope if it's not empty
@@ -195,7 +235,42 @@ export function OAuthApplicationForm({ data }: Props) {
       ? [...filteredScopes, scope as Scope]
       : filteredScopes;
 
-    form.setValue("scopes", newScopes);
+    form.setValue("scopes", newScopes, { shouldDirty: true });
+  };
+
+  // Update form scopes based on preset
+  const updateScopesFromPreset = (newPreset: ScopePreset) => {
+    let newScopes: Scope[] = [];
+
+    switch (newPreset) {
+      case "all_access":
+        newScopes = ["apis.all"];
+        break;
+      case "read_only":
+        newScopes = ["apis.read"];
+        break;
+      case "restricted": {
+        // Keep existing scopes when switching to restricted mode
+        const currentScopes = form.getValues("scopes");
+        // Get all valid scopes from RESOURCES
+        const validScopes = RESOURCES.flatMap((resource) =>
+          resource.scopes.map((scope) => scope.scope),
+        );
+        // Only keep scopes that are defined in RESOURCES
+        newScopes = currentScopes.filter((scope: string): scope is Scope =>
+          validScopes.some((validScope: string) => validScope === scope),
+        );
+        break;
+      }
+    }
+
+    form.setValue("scopes", newScopes, { shouldDirty: true });
+  };
+
+  const handlePresetChange = (value: string) => {
+    const scopePreset = value as ScopePreset;
+    setPreset(scopePreset);
+    updateScopesFromPreset(scopePreset);
   };
 
   const onScreenshotDrop = async (acceptedFiles: File[]) => {
@@ -302,6 +377,29 @@ export function OAuthApplicationForm({ data }: Props) {
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
+  // Helper function to check if an accordion section has errors
+  const hasErrors = (fields: string[]) => {
+    return fields.some((field) => {
+      const fieldError =
+        form.formState.errors[field as keyof typeof form.formState.errors];
+      return fieldError !== undefined;
+    });
+  };
+
+  const generalErrors = hasErrors([
+    "name",
+    "description",
+    "overview",
+    "developerName",
+    "logoUrl",
+    "website",
+    "installUrl",
+  ]);
+  const redirectErrors = hasErrors(["redirectUris"]);
+  const permissionErrors = hasErrors(["scopes"]);
+  const screenshotErrors = hasErrors(["screenshots"]);
+  const settingsErrors = hasErrors(["isPublic", "active"]);
+
   return (
     <Form {...form}>
       <form
@@ -311,7 +409,11 @@ export function OAuthApplicationForm({ data }: Props) {
         <div className="flex-1 space-y-6 overflow-auto">
           <Accordion type="multiple" defaultValue={["general", "redirects"]}>
             <AccordionItem value="general">
-              <AccordionTrigger>General</AccordionTrigger>
+              <AccordionTrigger
+                className={cn(generalErrors && "text-destructive")}
+              >
+                General
+              </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-4 flex flex-col">
                   <div className="flex-shrink-0">
@@ -425,6 +527,7 @@ export function OAuthApplicationForm({ data }: Props) {
                             <FormControl>
                               <Input
                                 {...field}
+                                value={field.value || ""}
                                 placeholder="https://example.com"
                                 type="url"
                               />
@@ -448,6 +551,7 @@ export function OAuthApplicationForm({ data }: Props) {
                             <FormControl>
                               <Input
                                 {...field}
+                                value={field.value || ""}
                                 placeholder="https://example.com/install"
                                 type="url"
                               />
@@ -466,7 +570,11 @@ export function OAuthApplicationForm({ data }: Props) {
             </AccordionItem>
 
             <AccordionItem value="redirects">
-              <AccordionTrigger>Redirect URIs</AccordionTrigger>
+              <AccordionTrigger
+                className={cn(redirectErrors && "text-destructive")}
+              >
+                Redirect URIs
+              </AccordionTrigger>
               <AccordionContent className="space-y-4">
                 <div>
                   <FormDescription className="mb-3">
@@ -516,18 +624,61 @@ export function OAuthApplicationForm({ data }: Props) {
             </AccordionItem>
 
             <AccordionItem value="permissions">
-              <AccordionTrigger>Permissions</AccordionTrigger>
+              <AccordionTrigger
+                className={cn(permissionErrors && "text-destructive")}
+              >
+                Permissions
+              </AccordionTrigger>
               <AccordionContent>
-                <ScopeSelector
-                  selectedScopes={form.watch("scopes")}
-                  onResourceScopeChange={handleResourceScopeChange}
-                  errorMessage={form.formState.errors.scopes?.message}
-                />
+                <Tabs
+                  value={preset}
+                  className="w-full"
+                  onValueChange={handlePresetChange}
+                >
+                  <TabsList className="w-full flex">
+                    {scopePresets.map((scope) => (
+                      <TabsTrigger
+                        value={scope.value}
+                        className="flex-1"
+                        key={scope.value}
+                      >
+                        {scope.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+
+                <p className="text-sm text-[#878787] mt-4">
+                  This OAuth application will have{" "}
+                  <span className="font-semibold">
+                    {
+                      scopePresets.find((scope) => scope.value === preset)
+                        ?.description
+                    }
+                  </span>
+                  .
+                </p>
+
+                <div className="mt-4">
+                  {preset === "restricted" && (
+                    <ScopeSelector
+                      selectedScopes={form.watch("scopes")}
+                      onResourceScopeChange={handleResourceScopeChange}
+                      description="Select which scopes this OAuth application can request access to."
+                      height="max-h-full"
+                      errorMessage={form.formState.errors.scopes?.message}
+                    />
+                  )}
+                </div>
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="screenshots">
-              <AccordionTrigger>Screenshots</AccordionTrigger>
+              <AccordionTrigger
+                className={cn(screenshotErrors && "text-destructive")}
+              >
+                Screenshots
+              </AccordionTrigger>
               <AccordionContent>
                 <span className="text-[0.8rem] text-muted-foreground">
                   You can upload up to 4 screenshots that will be displayed on
@@ -605,7 +756,11 @@ export function OAuthApplicationForm({ data }: Props) {
             </AccordionItem>
 
             <AccordionItem value="settings">
-              <AccordionTrigger>Settings</AccordionTrigger>
+              <AccordionTrigger
+                className={cn(settingsErrors && "text-destructive")}
+              >
+                Settings
+              </AccordionTrigger>
               <AccordionContent className="space-y-6">
                 <div className="space-y-4">
                   <FormField

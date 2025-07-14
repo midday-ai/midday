@@ -5,12 +5,7 @@ import slugify from "@sindresorhus/slugify";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
-// Helper function to ensure slug uniqueness
-async function generateUniqueSlug(
-  db: Database,
-  name: string,
-  teamId: string,
-): Promise<string> {
+async function generateUniqueSlug(db: Database, name: string): Promise<string> {
   const baseSlug = slugify(name, { lowercase: true });
 
   let slug = baseSlug;
@@ -20,12 +15,7 @@ async function generateUniqueSlug(
     const existing = await db
       .select({ id: oauthApplications.id })
       .from(oauthApplications)
-      .where(
-        and(
-          eq(oauthApplications.slug, slug),
-          eq(oauthApplications.teamId, teamId),
-        ),
-      )
+      .where(eq(oauthApplications.slug, slug))
       .limit(1);
 
     if (existing.length === 0) {
@@ -119,7 +109,7 @@ export async function createOAuthApplication(
     generateClientCredentials();
 
   // Generate unique slug
-  const slug = await generateUniqueSlug(db, params.name, params.teamId);
+  const slug = await generateUniqueSlug(db, params.name);
 
   const [result] = await db
     .insert(oauthApplications)
@@ -326,7 +316,7 @@ export async function updateOAuthApplication(
   // If name is being updated, regenerate the slug
   let slug: string | undefined;
   if (updateData.name) {
-    slug = await generateUniqueSlug(db, updateData.name, teamId);
+    slug = await generateUniqueSlug(db, updateData.name);
   }
 
   const [result] = await db
