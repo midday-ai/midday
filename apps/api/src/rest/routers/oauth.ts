@@ -19,18 +19,29 @@ import {
   oauthTokenResponseSchema,
 } from "@api/schemas/oauth-flow";
 import { verifyAccessToken } from "@api/utils/auth";
+import { validateClientCredentials } from "@api/utils/oauth";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { hash } from "@midday/encryption";
+import { rateLimiter } from "hono-rate-limiter";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
 const app = new OpenAPIHono<Context>();
 
-// Apply public middleware to all routes
 app.use("*", ...publicMiddleware);
 
-// OAuth Authorization Endpoint - GET (for consent screen)
+app.use(
+  "*",
+  rateLimiter({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 50, // per IP
+    keyGenerator: (c) =>
+      c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown",
+    statusCode: 429,
+    message: "Rate limit exceeded",
+  }),
+);
+
 app.openapi(
   createRoute({
     method: "get",
@@ -65,20 +76,20 @@ app.openapi(
   async (c) => {
     const db = c.get("db") as Database;
     const query = c.req.valid("query");
-    const {
-      client_id,
-      redirect_uri,
-      scope,
-      state,
-      code_challenge,
-      code_challenge_method,
-    } = query;
+    const { client_id, redirect_uri, scope, state, code_challenge } = query;
 
     // Validate client_id
     const application = await getOAuthApplicationByClientId(db, client_id);
     if (!application || !application.active) {
       throw new HTTPException(400, {
         message: "Invalid client_id",
+      });
+    }
+
+    // Enforce PKCE for public clients
+    if (application.isPublic && !code_challenge) {
+      throw new HTTPException(400, {
+        message: "PKCE is required for public clients",
       });
     }
 
@@ -176,15 +187,8 @@ app.openapi(
     const authHeader = c.req.header("Authorization");
     const body = c.req.valid("json");
 
-    const {
-      client_id,
-      decision,
-      scopes,
-      redirect_uri,
-      state,
-      code_challenge,
-      code_challenge_method,
-    } = body;
+    const { client_id, decision, scopes, redirect_uri, state, code_challenge } =
+      body;
 
     // Verify user authentication
     const accessToken = authHeader?.split(" ")[1];
@@ -201,6 +205,13 @@ app.openapi(
     if (!application || !application.active) {
       throw new HTTPException(400, {
         message: "Invalid client_id",
+      });
+    }
+
+    // Enforce PKCE for public clients
+    if (application.isPublic && !code_challenge) {
+      throw new HTTPException(400, {
+        message: "PKCE is required for public clients",
       });
     }
 
@@ -224,7 +235,6 @@ app.openapi(
       scopes,
       redirectUri: redirect_uri,
       codeChallenge: code_challenge,
-      codeChallengeMethod: code_challenge_method,
     });
 
     if (!authCode) {
@@ -317,7 +327,7 @@ app.openapi(
     if (
       !application ||
       !application.active ||
-      application.clientSecret !== hash(client_secret)
+      !validateClientCredentials(application, client_secret)
     ) {
       throw new HTTPException(400, {
         message: "Invalid client credentials",
@@ -438,7 +448,7 @@ app.openapi(
     if (
       !application ||
       !application.active ||
-      application.clientSecret !== hash(client_secret)
+      !validateClientCredentials(application, client_secret)
     ) {
       throw new HTTPException(400, {
         message: "Invalid client credentials",

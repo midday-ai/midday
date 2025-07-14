@@ -19,17 +19,13 @@ export const oauthAuthorizationRequestSchema = z.object({
     description: "Space-separated list of requested scopes",
     example: "transactions.read invoices.read",
   }),
-  state: z.string().optional().openapi({
-    description: "State parameter for CSRF protection",
+  state: z.string().min(1).openapi({
+    description: "State parameter for CSRF protection (required)",
     example: "random_state_123",
   }),
   code_challenge: z.string().optional().openapi({
     description: "Code challenge for PKCE",
     example: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
-  }),
-  code_challenge_method: z.enum(["S256", "plain"]).optional().openapi({
-    description: "Code challenge method for PKCE",
-    example: "S256",
   }),
 });
 
@@ -179,17 +175,13 @@ export const oauthAuthorizationDecisionSchema = z.object({
     description: "Redirect URI for OAuth callback",
     example: "https://myapp.com/callback",
   }),
-  state: z.string().optional().openapi({
-    description: "State parameter for CSRF protection",
+  state: z.string().min(1).openapi({
+    description: "State parameter for CSRF protection (required)",
     example: "random_state_123",
   }),
   code_challenge: z.string().optional().openapi({
-    description: "Code challenge for PKCE",
+    description: "Code challenge for PKCE (S256 method assumed)",
     example: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
-  }),
-  code_challenge_method: z.enum(["S256", "plain"]).optional().openapi({
-    description: "Code challenge method for PKCE",
-    example: "S256",
   }),
 });
 

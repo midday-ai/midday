@@ -16,7 +16,6 @@ export type CreateAuthorizationCodeParams = {
   scopes: string[];
   redirectUri: string;
   codeChallenge?: string;
-  codeChallengeMethod?: string;
 };
 
 export type CreateAccessTokenParams = {
@@ -45,7 +44,7 @@ export async function createAuthorizationCode(
   params: CreateAuthorizationCodeParams,
 ) {
   const code = `mid_authorization_code_${nanoid(32)}`;
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
   const [result] = await db
     .insert(oauthAuthorizationCodes)
@@ -58,7 +57,7 @@ export async function createAuthorizationCode(
       redirectUri: params.redirectUri,
       expiresAt: expiresAt.toISOString(),
       codeChallenge: params.codeChallenge,
-      codeChallengeMethod: params.codeChallengeMethod,
+      codeChallengeMethod: params.codeChallenge ? "S256" : null,
     })
     .returning({
       id: oauthAuthorizationCodes.id,
@@ -118,19 +117,10 @@ export async function exchangeAuthorizationCode(
       );
     }
 
-    let computedChallenge: string;
-
-    if (authCode.codeChallengeMethod === "S256") {
-      // SHA256 hash of code verifier, then base64url encode
-      computedChallenge = createHash("sha256")
-        .update(codeVerifier)
-        .digest("base64url");
-    } else if (authCode.codeChallengeMethod === "plain") {
-      // Plain text challenge
-      computedChallenge = codeVerifier;
-    } else {
-      throw new Error("Invalid code challenge method");
-    }
+    // Always use S256 method since it's the only supported method
+    const computedChallenge = createHash("sha256")
+      .update(codeVerifier)
+      .digest("base64url");
 
     if (computedChallenge !== authCode.codeChallenge) {
       throw new Error("Invalid code verifier");

@@ -91,7 +91,6 @@ export const oauthApplicationsRouter = createTRPCRouter({
         redirectUri: z.string().url(),
         state: z.string().optional(),
         codeChallenge: z.string().optional(),
-        codeChallengeMethod: z.enum(["S256", "plain"]).optional(),
         teamId: z.string().uuid(),
       }),
     )
@@ -104,7 +103,6 @@ export const oauthApplicationsRouter = createTRPCRouter({
         redirectUri,
         state,
         codeChallenge,
-        codeChallengeMethod,
         teamId,
       } = input;
 
@@ -112,6 +110,11 @@ export const oauthApplicationsRouter = createTRPCRouter({
       const application = await getOAuthApplicationByClientId(db, clientId);
       if (!application || !application.active) {
         throw new Error("Invalid client_id");
+      }
+
+      // Enforce PKCE for public clients
+      if (application.isPublic && !codeChallenge) {
+        throw new Error("PKCE is required for public clients");
       }
 
       const redirectUrl = new URL(redirectUri);
@@ -134,7 +137,6 @@ export const oauthApplicationsRouter = createTRPCRouter({
         scopes,
         redirectUri,
         codeChallenge,
-        codeChallengeMethod,
       });
 
       if (!authCode) {
