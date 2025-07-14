@@ -37,7 +37,6 @@ export function OAuthConsentScreen() {
     scope,
     state,
     code_challenge: codeChallenge,
-    code_challenge_method: codeChallengeMethod,
   } = useOAuthParams();
 
   const trpc = useTRPC();
@@ -94,7 +93,6 @@ export function OAuthConsentScreen() {
       redirectUri,
       state: state || undefined,
       codeChallenge: codeChallenge || undefined,
-      codeChallengeMethod: codeChallengeMethod || undefined,
       teamId: selectedTeamId,
     });
   };
@@ -109,7 +107,6 @@ export function OAuthConsentScreen() {
       redirectUri,
       state: state || undefined,
       codeChallenge: codeChallenge || undefined,
-      codeChallengeMethod: codeChallengeMethod || undefined,
       teamId: selectedTeamId || "",
     });
   };

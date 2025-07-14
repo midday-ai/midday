@@ -21,13 +21,12 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-import { RadioGroup, RadioGroupItem } from "@midday/ui/radio-group";
-import { ScrollArea } from "@midday/ui/scroll-area";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod";
+import { ScopeSelector } from "../scope-selector";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -72,21 +71,6 @@ export function ApiKeyForm({ onSuccess }: Props) {
     },
   });
 
-  // Helper function to get the selected scope for a resource from form state
-  const getResourceScope = (resourceKey: string): string => {
-    const currentScopes = form.watch("scopes");
-    const resource = RESOURCES.find((r) => r.key === resourceKey);
-    if (!resource) return "";
-
-    // Find which scope from this resource is currently selected
-    for (const scope of resource.scopes) {
-      if (currentScopes.includes(scope.scope as Scope)) {
-        return scope.scope;
-      }
-    }
-    return "";
-  };
-
   // Effect to ensure proper initialization when editing existing API key
   useEffect(() => {
     if (data?.scopes) {
@@ -114,10 +98,9 @@ export function ApiKeyForm({ onSuccess }: Props) {
       case "restricted": {
         // Keep existing scopes when switching to restricted mode
         const currentScopes = form.getValues("scopes");
-        newScopes = currentScopes.filter((scope) =>
-          RESOURCES.some((resource) =>
-            resource.scopes.some((s) => s.scope === scope),
-          ),
+        // Filter out general access scopes, keep specific ones
+        newScopes = currentScopes.filter(
+          (scope) => scope !== "apis.all" && scope !== "apis.read",
         );
         break;
       }
@@ -214,56 +197,12 @@ export function ApiKeyForm({ onSuccess }: Props) {
 
         <AnimatedSizeContainer height className="mt-4">
           {preset === "restricted" && (
-            <ScrollArea className="flex flex-col text-sm max-h-[300px]">
-              {RESOURCES.map((resource) => (
-                <div
-                  className="flex items-center justify-between py-4 border-b"
-                  key={resource.key}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-medium text-[#878787]">
-                      {resource.name}
-                    </span>
-                  </div>
-                  <div>
-                    <RadioGroup
-                      value={getResourceScope(resource.key)}
-                      className="flex gap-4"
-                      onValueChange={(value) =>
-                        handleResourceScopeChange(resource.key, value)
-                      }
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="" id={`${resource.key}-none`} />
-                        <label
-                          htmlFor={`${resource.key}-none`}
-                          className="text-sm"
-                        >
-                          None
-                        </label>
-                      </div>
-                      {resource.scopes.map((scope) => (
-                        <div
-                          className="flex items-center space-x-2"
-                          key={scope.scope}
-                        >
-                          <RadioGroupItem
-                            value={scope.scope}
-                            id={`${resource.key}-${scope.type}`}
-                          />
-                          <label
-                            htmlFor={`${resource.key}-${scope.type}`}
-                            className="text-sm font-normal capitalize text-[#878787]"
-                          >
-                            {scope.label}
-                          </label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
-                </div>
-              ))}
-            </ScrollArea>
+            <ScopeSelector
+              selectedScopes={form.watch("scopes")}
+              onResourceScopeChange={handleResourceScopeChange}
+              description="Select which scopes this API key can access."
+              height="max-h-[300px]"
+            />
           )}
         </AnimatedSizeContainer>
 

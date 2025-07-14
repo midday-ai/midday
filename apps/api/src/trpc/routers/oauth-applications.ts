@@ -12,6 +12,7 @@ import {
   getUserAuthorizedApplications,
   revokeUserApplicationTokens,
 } from "@api/db/queries/oauth-flow";
+import { getTeamsByUserId } from "@api/db/queries/users-on-team";
 import {
   createOAuthApplicationSchema,
   deleteOAuthApplicationSchema,
@@ -73,8 +74,12 @@ export const oauthApplicationsRouter = createTRPCRouter({
         id: application.id,
         name: application.name,
         description: application.description,
+        overview: application.overview,
+        developerName: application.developerName,
         logoUrl: application.logoUrl,
         website: application.website,
+        installUrl: application.installUrl,
+        screenshots: application.screenshots,
         clientId: application.clientId,
         scopes: requestedScopes,
         redirectUri: redirectUri,
@@ -105,6 +110,19 @@ export const oauthApplicationsRouter = createTRPCRouter({
         codeChallenge,
         teamId,
       } = input;
+
+      // Validate that the user is a member of the specified team
+      const userTeams = await getTeamsByUserId(db, session.user.id);
+
+      if (!userTeams) {
+        throw new Error("User not found");
+      }
+
+      const hasTeamAccess = userTeams.some((team) => team.id === teamId);
+
+      if (!hasTeamAccess) {
+        throw new Error("User is not a member of the specified team");
+      }
 
       // Validate client_id
       const application = await getOAuthApplicationByClientId(db, clientId);

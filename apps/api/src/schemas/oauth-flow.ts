@@ -183,6 +183,10 @@ export const oauthAuthorizationDecisionSchema = z.object({
     description: "Code challenge for PKCE (S256 method assumed)",
     example: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
   }),
+  teamId: z.string().uuid().openapi({
+    description: "Team ID to authorize the application for",
+    example: "123e4567-e89b-12d3-a456-426614174000",
+  }),
 });
 
 // OAuth Application Info Schema (for consent screen)
@@ -199,6 +203,15 @@ export const oauthApplicationInfoSchema = z.object({
     description: "Application description",
     example: "A Raycast extension for managing transactions",
   }),
+  overview: z.string().nullable().openapi({
+    description: "Application overview (supports markdown)",
+    example:
+      "This application provides advanced transaction management features including:\n- Real-time sync\n- Advanced filtering",
+  }),
+  developerName: z.string().nullable().openapi({
+    description: "The person or company developing this application",
+    example: "Acme Corp",
+  }),
   logoUrl: z.string().nullable().openapi({
     description: "Application logo URL",
     example: "https://example.com/logo.png",
@@ -206,6 +219,17 @@ export const oauthApplicationInfoSchema = z.object({
   website: z.string().nullable().openapi({
     description: "Application website",
     example: "https://myapp.com",
+  }),
+  installUrl: z.string().nullable().openapi({
+    description: "An optional URL for installing the application",
+    example: "https://myapp.com/install",
+  }),
+  screenshots: z.array(z.string().url()).openapi({
+    description: "Up to 4 screenshots that will be displayed on the apps page",
+    example: [
+      "https://example.com/screenshot1.png",
+      "https://example.com/screenshot2.png",
+    ],
   }),
   clientId: z.string().openapi({
     description: "Client ID",
@@ -232,8 +256,12 @@ export const userAuthorizedApplicationsSchema = z.object({
       id: z.string().uuid(),
       name: z.string(),
       description: z.string().nullable(),
+      overview: z.string().nullable(),
+      developerName: z.string().nullable(),
       logoUrl: z.string().nullable(),
       website: z.string().nullable(),
+      installUrl: z.string().nullable(),
+      screenshots: z.array(z.string().url()),
       scopes: z.array(z.string()),
       lastUsedAt: z.string().nullable(),
       createdAt: z.string(),

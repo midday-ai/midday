@@ -8,8 +8,12 @@ export type OAuthApplication = {
   id: string;
   name: string;
   description: string | null;
+  overview: string | null;
+  developerName: string | null;
   logoUrl: string | null;
   website: string | null;
+  installUrl: string | null;
+  screenshots: string[];
   redirectUris: string[];
   clientId: string;
   scopes: string[];
@@ -24,8 +28,12 @@ export type OAuthApplication = {
 export type CreateOAuthApplicationParams = {
   name: string;
   description?: string;
+  overview?: string;
+  developerName?: string;
   logoUrl?: string;
   website?: string;
+  installUrl?: string;
+  screenshots?: string[];
   redirectUris: string[];
   scopes: string[];
   teamId: string;
@@ -37,8 +45,12 @@ export type UpdateOAuthApplicationParams = {
   id: string;
   name?: string;
   description?: string;
+  overview?: string;
+  developerName?: string;
   logoUrl?: string;
   website?: string;
+  installUrl?: string;
+  screenshots?: string[];
   redirectUris?: string[];
   scopes?: string[];
   isPublic?: boolean;
@@ -83,8 +95,12 @@ export async function createOAuthApplication(
       id: oauthApplications.id,
       name: oauthApplications.name,
       description: oauthApplications.description,
+      overview: oauthApplications.overview,
+      developerName: oauthApplications.developerName,
       logoUrl: oauthApplications.logoUrl,
       website: oauthApplications.website,
+      installUrl: oauthApplications.installUrl,
+      screenshots: oauthApplications.screenshots,
       redirectUris: oauthApplications.redirectUris,
       clientId: oauthApplications.clientId,
       scopes: oauthApplications.scopes,
@@ -109,8 +125,12 @@ export async function getOAuthApplicationsByTeam(db: Database, teamId: string) {
       id: oauthApplications.id,
       name: oauthApplications.name,
       description: oauthApplications.description,
+      overview: oauthApplications.overview,
+      developerName: oauthApplications.developerName,
       logoUrl: oauthApplications.logoUrl,
       website: oauthApplications.website,
+      installUrl: oauthApplications.installUrl,
+      screenshots: oauthApplications.screenshots,
       redirectUris: oauthApplications.redirectUris,
       clientId: oauthApplications.clientId,
       scopes: oauthApplications.scopes,
@@ -143,8 +163,12 @@ export async function getOAuthApplicationById(
       id: oauthApplications.id,
       name: oauthApplications.name,
       description: oauthApplications.description,
+      overview: oauthApplications.overview,
+      developerName: oauthApplications.developerName,
       logoUrl: oauthApplications.logoUrl,
       website: oauthApplications.website,
+      installUrl: oauthApplications.installUrl,
+      screenshots: oauthApplications.screenshots,
       redirectUris: oauthApplications.redirectUris,
       clientId: oauthApplications.clientId,
       scopes: oauthApplications.scopes,
@@ -180,8 +204,12 @@ export async function getOAuthApplicationByClientId(
       id: oauthApplications.id,
       name: oauthApplications.name,
       description: oauthApplications.description,
+      overview: oauthApplications.overview,
+      developerName: oauthApplications.developerName,
       logoUrl: oauthApplications.logoUrl,
       website: oauthApplications.website,
+      installUrl: oauthApplications.installUrl,
+      screenshots: oauthApplications.screenshots,
       redirectUris: oauthApplications.redirectUris,
       clientId: oauthApplications.clientId,
       clientSecret: oauthApplications.clientSecret,
@@ -220,8 +248,12 @@ export async function updateOAuthApplication(
       id: oauthApplications.id,
       name: oauthApplications.name,
       description: oauthApplications.description,
+      overview: oauthApplications.overview,
+      developerName: oauthApplications.developerName,
       logoUrl: oauthApplications.logoUrl,
       website: oauthApplications.website,
+      installUrl: oauthApplications.installUrl,
+      screenshots: oauthApplications.screenshots,
       redirectUris: oauthApplications.redirectUris,
       clientId: oauthApplications.clientId,
       scopes: oauthApplications.scopes,

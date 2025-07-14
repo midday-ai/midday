@@ -6,6 +6,7 @@ import {
   refreshAccessToken,
   revokeAccessToken,
 } from "@api/db/queries/oauth-flow";
+import { getTeamsByUserId } from "@api/db/queries/users-on-team";
 import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import {
@@ -187,8 +188,15 @@ app.openapi(
     const authHeader = c.req.header("Authorization");
     const body = c.req.valid("json");
 
-    const { client_id, decision, scopes, redirect_uri, state, code_challenge } =
-      body;
+    const {
+      client_id,
+      decision,
+      scopes,
+      redirect_uri,
+      state,
+      code_challenge,
+      teamId,
+    } = body;
 
     // Verify user authentication
     const accessToken = authHeader?.split(" ")[1];
@@ -215,6 +223,16 @@ app.openapi(
       });
     }
 
+    // Validate user is a member of the selected team
+    const userTeams = await getTeamsByUserId(db, session.user.id);
+    const isMemberOfTeam = userTeams.some((team) => team.id === teamId);
+
+    if (!isMemberOfTeam) {
+      throw new HTTPException(403, {
+        message: "User is not a member of the selected team",
+      });
+    }
+
     const redirectUrl = new URL(redirect_uri);
 
     // Handle denial
@@ -231,7 +249,7 @@ app.openapi(
     const authCode = await createAuthorizationCode(db, {
       applicationId: application.id,
       userId: session.user.id,
-      teamId: application.teamId,
+      teamId: teamId,
       scopes,
       redirectUri: redirect_uri,
       codeChallenge: code_challenge,
@@ -367,27 +385,54 @@ app.openapi(
         });
       }
 
-      // Parse requested scopes
-      const requestedScopes = scope
-        ? scope.split(" ").filter(Boolean)
-        : undefined;
+      try {
+        // Parse requested scopes
+        const requestedScopes = scope
+          ? scope.split(" ").filter(Boolean)
+          : undefined;
 
-      // Refresh access token
-      const tokenResponse = await refreshAccessToken(db, {
-        refreshToken: refresh_token,
-        applicationId: application.id,
-        scopes: requestedScopes,
-      });
+        // Refresh access token
+        const tokenResponse = await refreshAccessToken(db, {
+          refreshToken: refresh_token,
+          applicationId: application.id,
+          scopes: requestedScopes,
+        });
 
-      const response = {
-        access_token: tokenResponse.accessToken,
-        token_type: tokenResponse.tokenType,
-        expires_in: tokenResponse.expiresIn,
-        refresh_token: tokenResponse.refreshToken || "",
-        scope: tokenResponse.scopes.join(" "),
-      };
+        const response = {
+          access_token: tokenResponse.accessToken,
+          token_type: tokenResponse.tokenType,
+          expires_in: tokenResponse.expiresIn,
+          refresh_token: tokenResponse.refreshToken || "",
+          scope: tokenResponse.scopes.join(" "),
+        };
 
-      return c.json(validateResponse(response, oauthTokenResponseSchema));
+        return c.json(validateResponse(response, oauthTokenResponseSchema));
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+
+        if (errorMessage.includes("Invalid refresh token")) {
+          throw new HTTPException(400, {
+            message: "Invalid refresh token",
+          });
+        }
+
+        if (errorMessage.includes("expired")) {
+          throw new HTTPException(400, {
+            message: "Refresh token expired",
+          });
+        }
+
+        if (errorMessage.includes("revoked")) {
+          throw new HTTPException(400, {
+            message: "Refresh token revoked",
+          });
+        }
+
+        throw new HTTPException(400, {
+          message: "Failed to refresh access token",
+        });
+      }
     }
 
     throw new HTTPException(400, {

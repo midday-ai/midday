@@ -28,7 +28,7 @@ export function OAuthApplicationCreateSheet() {
           </Button>
         </SheetHeader>
 
-        <ScrollArea className="h-full p-0 pb-28" hideScrollbar>
+        <ScrollArea className="h-full p-0 pb-10" hideScrollbar>
           <OAuthApplicationForm />
         </ScrollArea>
       </SheetContent>

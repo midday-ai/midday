@@ -1,5 +1,5 @@
 import { useQueryStates } from "nuqs";
-import { createLoader, parseAsString, parseAsStringLiteral } from "nuqs/server";
+import { createLoader, parseAsString } from "nuqs/server";
 
 export const oauthParamsSchema = {
   response_type: parseAsString,
@@ -8,7 +8,6 @@ export const oauthParamsSchema = {
   scope: parseAsString,
   state: parseAsString,
   code_challenge: parseAsString,
-  code_challenge_method: parseAsStringLiteral(["S256", "plain"]),
 };
 
 export function useOAuthParams() {

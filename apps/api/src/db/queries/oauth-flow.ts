@@ -151,7 +151,7 @@ export async function createAccessToken(
 ) {
   const token = `mid_access_token_${nanoid(32)}`;
   const refreshToken = `mid_refresh_token_${nanoid(32)}`;
-  const expiresInSeconds = params.expiresInSeconds ?? 3600; // 1 hour default
+  const expiresInSeconds = params.expiresInSeconds ?? 7200; // 2 hours default
   const refreshTokenExpiresInSeconds =
     params.refreshTokenExpiresInSeconds ?? 86400 * 30; // 30 days default
 
@@ -356,11 +356,17 @@ export async function getUserAuthorizedApplications(
       id: oauthApplications.id,
       name: oauthApplications.name,
       description: oauthApplications.description,
+      overview: oauthApplications.overview,
+      developerName: oauthApplications.developerName,
       logoUrl: oauthApplications.logoUrl,
       website: oauthApplications.website,
+      installUrl: oauthApplications.installUrl,
+      screenshots: oauthApplications.screenshots,
       scopes: oauthAccessTokens.scopes,
       lastUsedAt: oauthAccessTokens.lastUsedAt,
       createdAt: oauthAccessTokens.createdAt,
+      expiresAt: oauthAccessTokens.expiresAt,
+      refreshTokenExpiresAt: oauthAccessTokens.refreshTokenExpiresAt,
     })
     .from(oauthAccessTokens)
     .leftJoin(
