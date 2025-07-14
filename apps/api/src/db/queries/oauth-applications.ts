@@ -1,12 +1,46 @@
 import type { Database } from "@api/db";
 import { oauthApplications, users } from "@api/db/schema";
 import { hash } from "@midday/encryption";
+import slugify from "@sindresorhus/slugify";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
+
+// Helper function to ensure slug uniqueness
+async function generateUniqueSlug(
+  db: Database,
+  name: string,
+  teamId: string,
+): Promise<string> {
+  const baseSlug = slugify(name, { lowercase: true });
+
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (true) {
+    const existing = await db
+      .select({ id: oauthApplications.id })
+      .from(oauthApplications)
+      .where(
+        and(
+          eq(oauthApplications.slug, slug),
+          eq(oauthApplications.teamId, teamId),
+        ),
+      )
+      .limit(1);
+
+    if (existing.length === 0) {
+      return slug;
+    }
+
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+}
 
 export type OAuthApplication = {
   id: string;
   name: string;
+  slug: string;
   description: string | null;
   overview: string | null;
   developerName: string | null;
@@ -84,16 +118,21 @@ export async function createOAuthApplication(
   const { clientId, clientSecret, clientSecretHash } =
     generateClientCredentials();
 
+  // Generate unique slug
+  const slug = await generateUniqueSlug(db, params.name, params.teamId);
+
   const [result] = await db
     .insert(oauthApplications)
     .values({
       ...params,
+      slug,
       clientId,
       clientSecret: clientSecretHash, // Store hashed secret
     })
     .returning({
       id: oauthApplications.id,
       name: oauthApplications.name,
+      slug: oauthApplications.slug,
       description: oauthApplications.description,
       overview: oauthApplications.overview,
       developerName: oauthApplications.developerName,
@@ -124,6 +163,7 @@ export async function getOAuthApplicationsByTeam(db: Database, teamId: string) {
     .select({
       id: oauthApplications.id,
       name: oauthApplications.name,
+      slug: oauthApplications.slug,
       description: oauthApplications.description,
       overview: oauthApplications.overview,
       developerName: oauthApplications.developerName,
@@ -162,6 +202,7 @@ export async function getOAuthApplicationById(
     .select({
       id: oauthApplications.id,
       name: oauthApplications.name,
+      slug: oauthApplications.slug,
       description: oauthApplications.description,
       overview: oauthApplications.overview,
       developerName: oauthApplications.developerName,
@@ -203,6 +244,7 @@ export async function getOAuthApplicationByClientId(
     .select({
       id: oauthApplications.id,
       name: oauthApplications.name,
+      slug: oauthApplications.slug,
       description: oauthApplications.description,
       overview: oauthApplications.overview,
       developerName: oauthApplications.developerName,
@@ -228,6 +270,52 @@ export async function getOAuthApplicationByClientId(
   return result;
 }
 
+// Get OAuth application by slug
+export async function getOAuthApplicationBySlug(
+  db: Database,
+  slug: string,
+  teamId: string,
+) {
+  const [result] = await db
+    .select({
+      id: oauthApplications.id,
+      name: oauthApplications.name,
+      slug: oauthApplications.slug,
+      description: oauthApplications.description,
+      overview: oauthApplications.overview,
+      developerName: oauthApplications.developerName,
+      logoUrl: oauthApplications.logoUrl,
+      website: oauthApplications.website,
+      installUrl: oauthApplications.installUrl,
+      screenshots: oauthApplications.screenshots,
+      redirectUris: oauthApplications.redirectUris,
+      clientId: oauthApplications.clientId,
+      scopes: oauthApplications.scopes,
+      teamId: oauthApplications.teamId,
+      createdBy: oauthApplications.createdBy,
+      createdAt: oauthApplications.createdAt,
+      updatedAt: oauthApplications.updatedAt,
+      isPublic: oauthApplications.isPublic,
+      active: oauthApplications.active,
+      createdByUser: {
+        id: users.id,
+        fullName: users.fullName,
+        avatarUrl: users.avatarUrl,
+      },
+    })
+    .from(oauthApplications)
+    .leftJoin(users, eq(oauthApplications.createdBy, users.id))
+    .where(
+      and(
+        eq(oauthApplications.slug, slug),
+        eq(oauthApplications.teamId, teamId),
+      ),
+    )
+    .limit(1);
+
+  return result;
+}
+
 // Update OAuth application
 export async function updateOAuthApplication(
   db: Database,
@@ -235,10 +323,17 @@ export async function updateOAuthApplication(
 ) {
   const { id, teamId, ...updateData } = params;
 
+  // If name is being updated, regenerate the slug
+  let slug: string | undefined;
+  if (updateData.name) {
+    slug = await generateUniqueSlug(db, updateData.name, teamId);
+  }
+
   const [result] = await db
     .update(oauthApplications)
     .set({
       ...updateData,
+      ...(slug && { slug }),
       updatedAt: sql`NOW()`,
     })
     .where(
@@ -247,6 +342,7 @@ export async function updateOAuthApplication(
     .returning({
       id: oauthApplications.id,
       name: oauthApplications.name,
+      slug: oauthApplications.slug,
       description: oauthApplications.description,
       overview: oauthApplications.overview,
       developerName: oauthApplications.developerName,

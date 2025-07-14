@@ -98,9 +98,13 @@ export function ApiKeyForm({ onSuccess }: Props) {
       case "restricted": {
         // Keep existing scopes when switching to restricted mode
         const currentScopes = form.getValues("scopes");
-        // Filter out general access scopes, keep specific ones
-        newScopes = currentScopes.filter(
-          (scope) => scope !== "apis.all" && scope !== "apis.read",
+        // Get all valid scopes from RESOURCES
+        const validScopes = RESOURCES.flatMap((resource) =>
+          resource.scopes.map((scope) => scope.scope),
+        );
+        // Only keep scopes that are defined in RESOURCES
+        newScopes = currentScopes.filter((scope): scope is Scope =>
+          validScopes.some((validScope) => validScope === scope),
         );
         break;
       }
