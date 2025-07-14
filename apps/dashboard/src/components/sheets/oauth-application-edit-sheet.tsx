@@ -23,11 +23,15 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
+import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCopyToClipboard } from "usehooks-ts";
 
 export function OAuthApplicationEditSheet() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [, copy] = useCopyToClipboard();
   const { setParams, applicationId, editApplication } =
     useOAuthApplicationParams();
 
@@ -53,6 +57,16 @@ export function OAuthApplicationEditSheet() {
     }),
   );
 
+  const handleCopyClientId = () => {
+    if (application?.clientId) {
+      copy(application.clientId);
+      toast({
+        title: "Client ID copied to clipboard",
+        variant: "success",
+      });
+    }
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
       <SheetContent stack>
@@ -67,6 +81,9 @@ export function OAuthApplicationEditSheet() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent sideOffset={10} align="end">
+                <DropdownMenuItem onClick={handleCopyClientId}>
+                  Copy Client ID
+                </DropdownMenuItem>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <DropdownMenuItem
@@ -108,7 +125,7 @@ export function OAuthApplicationEditSheet() {
         </SheetHeader>
 
         <ScrollArea className="h-full p-0 pb-10" hideScrollbar>
-          <OAuthApplicationForm data={application} />
+          <OAuthApplicationForm data={application} key={application?.id} />
         </ScrollArea>
       </SheetContent>
     </Sheet>

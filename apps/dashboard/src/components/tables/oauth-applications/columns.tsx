@@ -12,6 +12,14 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
+import { format } from "date-fns";
+import { useCopyToClipboard } from "usehooks-ts";
 
 type OAuthApplication =
   RouterOutputs["oauthApplications"]["list"]["data"][number];
@@ -37,16 +45,16 @@ export const columns: ColumnDef<OAuthApplication>[] = [
     },
   },
   {
-    id: "description",
-    accessorKey: "description",
-    header: "Description",
+    id: "updatedAt",
+    accessorKey: "updatedAt",
+    header: "Updated",
     cell: ({ row }) => {
-      const description = row.original.description;
-      if (!description) return <span className="text-muted-foreground">-</span>;
+      const updatedAt = row.original.updatedAt;
+      if (!updatedAt) return <span className="text-muted-foreground">-</span>;
 
       return (
         <span className="text-sm text-muted-foreground truncate max-w-[200px]">
-          {description}
+          {format(new Date(updatedAt), "MMM d, yyyy")}
         </span>
       );
     },
@@ -58,11 +66,33 @@ export const columns: ColumnDef<OAuthApplication>[] = [
     cell: ({ row }) => {
       const clientId = row.original.clientId;
       const shortId = `${clientId.slice(0, 12)}...`;
+      const [, copy] = useCopyToClipboard();
+      const [isCopied, setIsCopied] = React.useState(false);
+
+      const handleCopyClientId = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        copy(clientId);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      };
 
       return (
-        <span className="font-mono text-sm text-muted-foreground">
-          {shortId}
-        </span>
+        <TooltipProvider>
+          <Tooltip open={isCopied}>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={handleCopyClientId}
+                className="font-mono text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              >
+                {shortId}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="px-3 py-1.5 text-xs" sideOffset={10}>
+              <p>Copied!</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       );
     },
   },
