@@ -1,19 +1,9 @@
 "use client";
 
 import { OAuthApplicationForm } from "@/components/forms/oauth-application-form";
+import { DeleteOAuthApplicationModal } from "@/components/modals/delete-oauth-application-modal";
 import { useOAuthApplicationParams } from "@/hooks/use-oauth-application-params";
 import { useTRPC } from "@/trpc/client";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,14 +14,15 @@ import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
 
 export function OAuthApplicationEditSheet() {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const { toast } = useToast();
   const [, copy] = useCopyToClipboard();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { setParams, applicationId, editApplication } =
     useOAuthApplicationParams();
 
@@ -44,17 +35,6 @@ export function OAuthApplicationEditSheet() {
         enabled: isOpen,
       },
     ),
-  );
-
-  const deleteApplicationMutation = useMutation(
-    trpc.oauthApplications.delete.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.oauthApplications.list.queryKey(),
-        });
-        setParams(null);
-      },
-    }),
   );
 
   const handleCopyClientId = () => {
@@ -84,41 +64,12 @@ export function OAuthApplicationEditSheet() {
                 <DropdownMenuItem onClick={handleCopyClientId}>
                   Copy Client ID
                 </DropdownMenuItem>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem
-                      className="text-destructive"
-                      onSelect={(e) => e.preventDefault()}
-                    >
-                      Delete
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Are you absolutely sure?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone. This will permanently
-                        delete the OAuth application and revoke all active
-                        tokens. Applications using this will stop working
-                        immediately.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() =>
-                          deleteApplicationMutation.mutate({
-                            id: applicationId,
-                          })
-                        }
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  Delete
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -128,6 +79,13 @@ export function OAuthApplicationEditSheet() {
           <OAuthApplicationForm data={application} key={application?.id} />
         </ScrollArea>
       </SheetContent>
+
+      <DeleteOAuthApplicationModal
+        applicationId={applicationId!}
+        applicationName={application?.name || ""}
+        isOpen={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+      />
     </Sheet>
   );
 }

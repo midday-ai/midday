@@ -387,7 +387,7 @@ export async function regenerateClientSecret(
     .update(oauthApplications)
     .set({
       clientSecret: clientSecretHash, // Store hashed secret
-      updatedAt: new Date().toISOString(),
+      updatedAt: sql`NOW()`,
     })
     .where(
       and(eq(oauthApplications.id, id), eq(oauthApplications.teamId, teamId)),

@@ -3,7 +3,7 @@ import { apiKeys, users } from "@api/db/schema";
 import { generateApiKey } from "@api/utils/api-keys";
 import { apiKeyCache } from "@api/utils/cache/api-key-cache";
 import { encrypt, hash } from "@midday/encryption";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 export type ApiKey = {
   id: string;
@@ -131,6 +131,6 @@ export async function deleteApiKey(db: Database, params: DeleteApiKeyParams) {
 export async function updateApiKeyLastUsedAt(db: Database, id: string) {
   return db
     .update(apiKeys)
-    .set({ lastUsedAt: new Date().toISOString() })
+    .set({ lastUsedAt: sql`NOW()` })
     .where(eq(apiKeys.id, id));
 }

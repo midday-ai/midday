@@ -6,7 +6,7 @@ import {
   oauthAuthorizationCodes,
   users,
 } from "@api/db/schema";
-import { and, desc, eq, gt } from "drizzle-orm";
+import { and, desc, eq, gt, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 export type CreateAuthorizationCodeParams = {
@@ -246,7 +246,7 @@ export async function validateAccessToken(db: Database, token: string) {
   // Update last used timestamp
   await db
     .update(oauthAccessTokens)
-    .set({ lastUsedAt: new Date().toISOString() })
+    .set({ lastUsedAt: sql`NOW()` })
     .where(eq(oauthAccessTokens.id, result.id));
 
   return result;
@@ -299,7 +299,7 @@ export async function refreshAccessToken(
     .update(oauthAccessTokens)
     .set({
       revoked: true,
-      revokedAt: new Date().toISOString(),
+      revokedAt: sql`NOW()`,
     })
     .where(eq(oauthAccessTokens.id, existingToken.id));
 
@@ -334,7 +334,7 @@ export async function revokeAccessToken(
     .update(oauthAccessTokens)
     .set({
       revoked: true,
-      revokedAt: new Date().toISOString(),
+      revokedAt: sql`NOW()`,
     })
     .where(and(...whereConditions))
     .returning({
@@ -394,7 +394,7 @@ export async function revokeUserApplicationTokens(
     .update(oauthAccessTokens)
     .set({
       revoked: true,
-      revokedAt: new Date().toISOString(),
+      revokedAt: sql`NOW()`,
     })
     .where(
       and(

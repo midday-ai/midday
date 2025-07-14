@@ -20,6 +20,7 @@ import {
 } from "@midday/ui/tooltip";
 import { format } from "date-fns";
 import { useCopyToClipboard } from "usehooks-ts";
+import { DeleteOAuthApplicationModal } from "../../modals/delete-oauth-application-modal";
 
 type OAuthApplication =
   RouterOutputs["oauthApplications"]["list"]["data"][number];
@@ -115,6 +116,7 @@ export const columns: ColumnDef<OAuthApplication>[] = [
     id: "actions",
     cell: ({ row }) => {
       const { setParams } = useOAuthApplicationParams();
+      const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
       return (
         <div className="flex justify-end">
@@ -139,12 +141,19 @@ export const columns: ColumnDef<OAuthApplication>[] = [
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-destructive"
-                  onClick={() => setParams({ applicationId: row.original.id })}
+                  onClick={() => setShowDeleteModal(true)}
                 >
                   Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <DeleteOAuthApplicationModal
+              applicationId={row.original.id}
+              applicationName={row.original.name}
+              isOpen={showDeleteModal}
+              onOpenChange={setShowDeleteModal}
+            />
           </div>
         </div>
       );
