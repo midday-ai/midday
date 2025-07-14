@@ -110,8 +110,14 @@ export async function exchangeAuthorizationCode(
     throw new Error("Invalid redirect URI");
   }
 
-  // Verify PKCE code verifier if present
-  if (authCode.codeChallenge && codeVerifier) {
+  // Verify PKCE code verifier if code challenge exists
+  if (authCode.codeChallenge) {
+    if (!codeVerifier) {
+      throw new Error(
+        "Code verifier is required when code challenge is present",
+      );
+    }
+
     let computedChallenge: string;
 
     if (authCode.codeChallengeMethod === "S256") {
@@ -291,7 +297,10 @@ export async function refreshAccessToken(
     throw new Error("Refresh token revoked");
   }
 
-  if (new Date() > new Date(existingToken.refreshTokenExpiresAt || 0)) {
+  if (
+    existingToken.refreshTokenExpiresAt &&
+    new Date() > new Date(existingToken.refreshTokenExpiresAt)
+  ) {
     throw new Error("Refresh token expired");
   }
 
