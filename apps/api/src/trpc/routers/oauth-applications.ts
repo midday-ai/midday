@@ -19,10 +19,7 @@ import {
   regenerateClientSecretSchema,
   updateOAuthApplicationSchema,
 } from "@api/schemas/oauth-applications";
-import {
-  oauthApplicationInfoSchema,
-  revokeUserApplicationAccessSchema,
-} from "@api/schemas/oauth-flow";
+import { revokeUserApplicationAccessSchema } from "@api/schemas/oauth-flow";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { z } from "zod";
 

@@ -2,6 +2,7 @@
 
 import { useOAuthParams } from "@/hooks/use-oauth-params";
 import { useTRPC } from "@/trpc/client";
+import { getScopeDescription } from "@/utils/scopes";
 import { Button } from "@midday/ui/button";
 import {
   Card,
@@ -24,132 +25,6 @@ import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { CheckCircle, ExternalLink, Globe, Shield, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-const SCOPE_DESCRIPTIONS = {
-  "transactions.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read access to Transactions",
-  },
-  "transactions.write": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read and write access to Transactions",
-  },
-  "tracker-entries.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read access to Tracker",
-  },
-  "tracker-entries.write": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read and write access to Tracker",
-  },
-  "tracker-projects.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read access to Tracker",
-  },
-  "tracker-projects.write": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read and write access to Tracker",
-  },
-  "invoices.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read access to Invoices",
-  },
-  "invoices.write": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read and write access to Invoices",
-  },
-  "inbox.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read access to Inbox",
-  },
-  "inbox.write": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read and write access to Inbox",
-  },
-  "customers.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read access to Customers",
-  },
-  "customers.write": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read and write access to Customers",
-  },
-  "documents.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read access to Documents",
-  },
-  "documents.write": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read and write access to Documents",
-  },
-  "bank-accounts.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read access to Bank Accounts",
-  },
-  "bank-accounts.write": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read and write access to Bank Accounts",
-  },
-  "tags.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read access to Tags",
-  },
-  "tags.write": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read and write access to Tags",
-  },
-  "teams.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read access to Teams",
-  },
-  "teams.write": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read and write access to Teams",
-  },
-  "users.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read access to Users",
-  },
-  "users.write": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read and write access to Users",
-  },
-  "metrics.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read access to Metrics",
-  },
-  "search.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read access to Search",
-  },
-  "apis.all": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Full access to all resources",
-  },
-  "apis.read": {
-    icon: <CheckCircle className="h-4 w-4" />,
-    label: "Read-only access to all resources",
-  },
-} as const;
-
-function getScopeDescription(scope: string) {
-  return (
-    SCOPE_DESCRIPTIONS[scope as keyof typeof SCOPE_DESCRIPTIONS] || {
-      icon: <CheckCircle className="h-4 w-4" />,
-      label: scope,
-    }
-  );
-}
-
-type Team = {
-  id: string | null;
-  name: string | null;
-  plan: string | null;
-  role: string | null;
-  createdAt: string | null;
-  updatedAt: string | null;
-  logoUrl: string | null;
-};
 
 export function OAuthConsentScreen() {
   const router = useRouter();
@@ -303,11 +178,13 @@ export function OAuthConsentScreen() {
           <div>
             <Label className="text-sm font-medium">Grant permissions</Label>
             <div className="mt-2 space-y-2">
-              {applicationInfo.scopes.map((scope: string) => {
+              {applicationInfo.scopes.map((scope) => {
                 const description = getScopeDescription(scope);
                 return (
                   <div key={scope} className="flex items-center gap-2">
-                    <div className="text-green-500">{description.icon}</div>
+                    <div className="text-green-500">
+                      <CheckCircle className="h-4 w-4" />
+                    </div>
                     <span className="text-sm text-muted-foreground">
                       {description.label}
                     </span>
@@ -328,7 +205,7 @@ export function OAuthConsentScreen() {
                 <SelectValue placeholder="Search workspaces" />
               </SelectTrigger>
               <SelectContent>
-                {teams?.map((team: Team) => (
+                {teams?.map((team) => (
                   <SelectItem key={team.id} value={team.id!}>
                     {team.name}
                   </SelectItem>

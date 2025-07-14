@@ -18,7 +18,6 @@ export type OAuthErrorType =
   | "grant_type_not_supported"
   | "failed_to_create_authorization_code"
   | "invalid_authorization_code"
-  | "network_error"
   | "invalid_url_format"
   | "empty_scopes"
   | "unauthorized_team_access"
@@ -147,12 +146,7 @@ export function OAuthErrorMessage({
           message:
             "The provided authorization code is invalid or does not exist.",
         };
-      case "network_error":
-        return {
-          title: "Network Error",
-          message:
-            "A network error occurred. Please check your connection and try again.",
-        };
+
       case "invalid_url_format":
         return {
           title: "Invalid URL Format",

@@ -1,7 +1,6 @@
 import type { Database } from "@api/db";
 import { oauthApplications, users } from "@api/db/schema";
-import { generateApiKey } from "@api/utils/api-keys";
-import { encrypt, hash } from "@midday/encryption";
+import { hash } from "@midday/encryption";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
@@ -55,7 +54,7 @@ export type DeleteOAuthApplicationParams = {
 // Generate client credentials
 function generateClientCredentials() {
   const clientId = `mid_client_${nanoid(24)}`;
-  const clientSecret = generateApiKey();
+  const clientSecret = `mid_app_secret_${nanoid(32)}`;
   const clientSecretHash = hash(clientSecret);
 
   return {
@@ -263,7 +262,8 @@ export async function regenerateClientSecret(
   id: string,
   teamId: string,
 ) {
-  const { clientSecret, clientSecretHash } = generateClientCredentials();
+  const clientSecret = `mid_app_secret_${nanoid(32)}`;
+  const clientSecretHash = hash(clientSecret);
 
   const [result] = await db
     .update(oauthApplications)

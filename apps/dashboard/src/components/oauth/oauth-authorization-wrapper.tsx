@@ -163,14 +163,6 @@ export async function OAuthAuthorizationWrapper({
     }
 
     if (
-      errorMessage.includes("network") ||
-      errorMessage.includes("connection") ||
-      errorMessage.includes("timeout")
-    ) {
-      return { errorType: "network_error", details: error.message };
-    }
-
-    if (
       errorMessage.includes("invalid url") ||
       errorMessage.includes("malformed url")
     ) {
