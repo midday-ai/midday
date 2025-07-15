@@ -377,6 +377,12 @@ export const trackerEntries = pgTable(
       "btree",
       table.teamId.asc().nullsLast().op("uuid_ops"),
     ),
+    index("tracker_entries_running_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+      table.assignedId.asc().nullsLast().op("uuid_ops"),
+      table.duration.asc().nullsLast(),
+    ),
     foreignKey({
       columns: [table.assignedId],
       foreignColumns: [users.id],
