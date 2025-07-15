@@ -66,6 +66,7 @@ import {
   MdOutlineStop,
   MdOutlineStyle,
   MdOutlineSubdirectoryArrowLeft,
+  MdOutlineSyncAlt,
   MdOutlineTask,
   MdOutlineTune,
   MdOutlineVisibility,
@@ -624,4 +625,5 @@ export const Icons = {
   SubdirectoryArrowLeft: MdOutlineSubdirectoryArrowLeft,
   OutgoingMail: MdOutlineSignpost,
   AttachEmail: MdOutlineAttachEmail,
+  SyncAlt: MdOutlineSyncAlt,
 };

@@ -42,6 +42,7 @@ import { stripSpecialCharacters } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { LogoUpload } from "../logo-upload";
 import { ScopeSelector } from "../scope-selector";
@@ -69,29 +70,31 @@ const formSchema = z.object({
   screenshots: z.array(z.string()).max(4).default([]),
   redirectUris: z
     .array(
-      z
-        .string()
-        .url()
-        .refine(
-          (url) => {
-            try {
-              const urlObj = new URL(url);
-              // Allow localhost with HTTP, all others must use HTTPS
-              if (
-                urlObj.hostname === "localhost" ||
-                urlObj.hostname === "127.0.0.1"
-              ) {
-                return true;
+      z.object({
+        url: z
+          .string()
+          .url()
+          .refine(
+            (url) => {
+              try {
+                const urlObj = new URL(url);
+                // Allow localhost with HTTP, all others must use HTTPS
+                if (
+                  urlObj.hostname === "localhost" ||
+                  urlObj.hostname === "127.0.0.1"
+                ) {
+                  return true;
+                }
+                return urlObj.protocol === "https:";
+              } catch {
+                return false;
               }
-              return urlObj.protocol === "https:";
-            } catch {
-              return false;
-            }
-          },
-          {
-            message: "All URLs must use HTTPS, except for localhost.",
-          },
-        ),
+            },
+            {
+              message: "All URLs must use HTTPS, except for localhost.",
+            },
+          ),
+      }),
     )
     .min(1, {
       message: "At least one redirect URI is required.",
@@ -113,7 +116,6 @@ type Props = {
 export function OAuthApplicationForm({ data }: Props) {
   const { setParams } = useOAuthApplicationParams();
   const { setSecret } = useOAuthSecretModalStore();
-  const [redirectUriInput, setRedirectUriInput] = useState("");
   const [preset, setPreset] = useState<ScopePreset>(() =>
     data?.scopes
       ? (scopesToName(data.scopes).preset as ScopePreset)
@@ -136,25 +138,51 @@ export function OAuthApplicationForm({ data }: Props) {
       website: data?.website || "",
       installUrl: data?.installUrl || "",
       screenshots: data?.screenshots || [],
-      redirectUris: data?.redirectUris || [],
+      redirectUris: data?.redirectUris?.map((uri) => ({ url: uri })) || [
+        { url: "" },
+      ],
       scopes: (data?.scopes as Scope[]) || ["apis.all"],
       isPublic: data?.isPublic || false,
       active: data?.active ?? true,
     },
   });
 
-  // Effect to ensure proper initialization when editing existing OAuth application
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "redirectUris",
+  });
+
+  // Effect to reset form and ensure proper initialization when editing existing OAuth application
   useEffect(() => {
-    if (data?.scopes) {
+    if (data) {
+      form.reset({
+        id: data.id,
+        name: data.name || "",
+        description: data.description || "",
+        overview: data.overview || "",
+        developerName: data.developerName || "",
+        logoUrl: data.logoUrl || "",
+        website: data.website || "",
+        installUrl: data.installUrl || "",
+        screenshots: data.screenshots || [],
+        redirectUris: data.redirectUris?.map((uri) => ({ url: uri })) || [
+          { url: "" },
+        ],
+        scopes: (data.scopes as Scope[]) || ["apis.all"],
+        isPublic: data.isPublic || false,
+        active: data.active ?? true,
+      });
+
+      // Update preset state based on the scopes
       const detectedPreset = scopesToName(data.scopes).preset as ScopePreset;
       setPreset(detectedPreset);
 
-      // If it's restricted, make sure the form has the correct scopes
+      // If it's restricted, make sure the form has the correct scopes with dirty flag
       if (detectedPreset === "restricted") {
         form.setValue("scopes", data.scopes as Scope[], { shouldDirty: true });
       }
     }
-  }, [data?.scopes, form]);
+  }, [data, form]);
 
   const createMutation = useMutation(
     trpc.oauthApplications.create.mutationOptions({
@@ -162,6 +190,12 @@ export function OAuthApplicationForm({ data }: Props) {
         queryClient.invalidateQueries({
           queryKey: trpc.oauthApplications.list.queryKey(),
         });
+
+        // Also invalidate the individual get query for consistency
+        queryClient.invalidateQueries({
+          queryKey: trpc.oauthApplications.get.queryKey(),
+        });
+
         // Close the sheet first
         setParams(null);
         // Then open the modal with the secret
@@ -178,43 +212,33 @@ export function OAuthApplicationForm({ data }: Props) {
         queryClient.invalidateQueries({
           queryKey: trpc.oauthApplications.list.queryKey(),
         });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.oauthApplications.get.queryKey(),
+        });
+
         setParams(null);
       },
     }),
   );
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    // Convert redirect URIs from object array to string array for API
+    const formattedValues = {
+      ...values,
+      redirectUris: values.redirectUris
+        .map((uri) => uri.url)
+        .filter((url) => url.trim() !== ""),
+    };
+
     if (data?.id) {
       updateMutation.mutate({
         id: data.id,
-        ...values,
+        ...formattedValues,
       });
     } else {
-      createMutation.mutate(values);
+      createMutation.mutate(formattedValues);
     }
-  };
-
-  const addRedirectUri = () => {
-    if (redirectUriInput.trim()) {
-      try {
-        new URL(redirectUriInput); // Validate URL
-        const currentUris = form.getValues("redirectUris");
-        if (!currentUris.includes(redirectUriInput)) {
-          form.setValue("redirectUris", [...currentUris, redirectUriInput]);
-          setRedirectUriInput("");
-        }
-      } catch {
-        // Invalid URL - could show an error here
-      }
-    }
-  };
-
-  const removeRedirectUri = (index: number) => {
-    const currentUris = form.getValues("redirectUris");
-    form.setValue(
-      "redirectUris",
-      currentUris.filter((_: string, i: number) => i !== index),
-    );
   };
 
   const handleResourceScopeChange = (resourceKey: string, scope: string) => {
@@ -576,44 +600,55 @@ export function OAuthApplicationForm({ data }: Props) {
                 Redirect URIs
               </AccordionTrigger>
               <AccordionContent className="space-y-4">
-                <div>
-                  <FormDescription className="mb-3">
-                    All OAuth redirect URLs, All URLs must use HTTPS, except for
-                    localhost.
-                  </FormDescription>
+                <FormDescription>
+                  All OAuth redirect URLs, All URLs must use HTTPS, except for
+                  localhost.
+                </FormDescription>
 
-                  <Input
-                    value={redirectUriInput}
-                    onChange={(e) => setRedirectUriInput(e.target.value)}
-                    placeholder="https://your-app.com/callback"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        addRedirectUri();
-                      }
-                    }}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  {form.watch("redirectUris").map((uri, index) => (
-                    <div
-                      key={uri}
-                      className="flex items-center justify-between p-2 bg-muted rounded"
-                    >
-                      <span className="text-sm font-mono">{uri}</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeRedirectUri(index)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        Remove
-                      </Button>
+                <div className="space-y-3 mt-2">
+                  {fields.map((field, index) => (
+                    <div key={field.id} className="flex gap-2">
+                      <FormField
+                        control={form.control}
+                        name={`redirectUris.${index}.url`}
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="https://your-app.com/callback"
+                                autoComplete="off"
+                                autoCapitalize="none"
+                                autoCorrect="off"
+                                spellCheck="false"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      {fields.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => remove(index)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          Remove
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => append({ url: "" })}
+                  className="border-none bg-[#F2F1EF] text-[11px] dark:bg-[#1D1D1D] mt-2"
+                >
+                  Add more
+                </Button>
 
                 {form.formState.errors.redirectUris && (
                   <p className="text-sm font-medium text-destructive">

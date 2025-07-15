@@ -1,3 +1,16 @@
+"use client";
+
+import { Button } from "@midday/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@midday/ui/card";
+import { Icons } from "@midday/ui/icons";
+import { useRouter } from "next/navigation";
+
 export type OAuthErrorType =
   | "missing_params"
   | "invalid_response_type"
@@ -34,6 +47,8 @@ export function OAuthErrorMessage({
   customMessage,
   details,
 }: OAuthErrorMessageProps) {
+  const router = useRouter();
+
   const getErrorContent = () => {
     switch (errorType) {
       case "missing_params":
@@ -182,29 +197,32 @@ export function OAuthErrorMessage({
   const { title, message } = getErrorContent();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-        <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-            <svg
-              className="h-6 w-6 text-red-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
-              />
-            </svg>
+    <div className="flex items-center justify-center min-h-screen p-4 bg-background">
+      <Card className="w-full max-w-[448px]">
+        <CardHeader className="text-center pb-8">
+          <div className="flex items-center justify-center gap-4 mb-8">
+            <div className="w-16 h-16 rounded-full bg-background border border-border flex items-center justify-center">
+              <Icons.Close className="size-5 text-[#666666]" />
+            </div>
           </div>
-          <h3 className="mt-4 text-lg font-semibold text-gray-900">{title}</h3>
-          <p className="mt-2 text-sm text-gray-500">{message}</p>
-          {details && <p className="mt-2 text-xs text-gray-400">{details}</p>}
-        </div>
-      </div>
+          <CardTitle className="text-lg mb-2 font-serif">{title}</CardTitle>
+          <CardDescription className="text-sm text-muted-foreground text-center">
+            {message}
+            {details && (
+              <span className="block mt-2 text-xs text-muted-foreground/70">
+                {details}
+              </span>
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex gap-3 pt-4">
+            <Button onClick={() => router.push("/")} className="w-full">
+              Go to Dashboard
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

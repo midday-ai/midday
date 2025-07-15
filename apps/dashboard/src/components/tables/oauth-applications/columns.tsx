@@ -4,6 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import * as React from "react";
 import "@tanstack/react-table";
 import { useOAuthApplicationParams } from "@/hooks/use-oauth-application-params";
+import { scopesToName } from "@api/utils/scopes";
 import { Badge } from "@midday/ui/badge";
 import {
   DropdownMenu,
@@ -100,16 +101,11 @@ export const columns: ColumnDef<OAuthApplication>[] = [
   {
     id: "scopes",
     accessorKey: "scopes",
-    header: "Scopes",
+    header: "Permissions",
     cell: ({ row }) => {
-      const scopes = row.original.scopes;
-      const scopeCount = scopes?.length || 0;
+      const scopes = row.original.scopes || [];
 
-      return (
-        <Badge variant="tag">
-          {scopeCount} scope{scopeCount !== 1 ? "s" : ""}
-        </Badge>
-      );
+      return <Badge variant="tag">{scopesToName(scopes).name}</Badge>;
     },
   },
   {

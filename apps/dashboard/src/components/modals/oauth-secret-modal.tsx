@@ -32,7 +32,7 @@ export function OAuthSecretModal() {
 
           <div className="space-y-3">
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-1 block">
+              <Label className="text-sm font-medium mb-1 block">
                 Client Secret
               </Label>
               <CopyInput value={clientSecret || ""} />

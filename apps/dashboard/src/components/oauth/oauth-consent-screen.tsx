@@ -1,6 +1,7 @@
 "use client";
 
 import { useOAuthParams } from "@/hooks/use-oauth-params";
+import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 import { getScopeDescription } from "@/utils/scopes";
 import { Button } from "@midday/ui/button";
@@ -11,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { Icons } from "@midday/ui/icons";
 import { Label } from "@midday/ui/label";
 import {
   Select,
@@ -19,17 +21,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { Separator } from "@midday/ui/separator";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { CheckCircle, ExternalLink, Globe, Shield, X } from "lucide-react";
+import { ArrowLeftRight, Check, X } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function OAuthConsentScreen() {
   const router = useRouter();
   const { toast } = useToast();
-  const [selectedTeamId, setSelectedTeamId] = useState<string>("");
 
   const {
     client_id: clientId,
@@ -40,6 +41,15 @@ export function OAuthConsentScreen() {
   } = useOAuthParams();
 
   const trpc = useTRPC();
+  const { data: currentTeam } = useTeamQuery();
+  const [selectedTeamId, setSelectedTeamId] = useState<string>("");
+
+  // Preselect the current team when data is available
+  useEffect(() => {
+    if (currentTeam?.id && !selectedTeamId) {
+      setSelectedTeamId(currentTeam.id);
+    }
+  }, [currentTeam?.id, selectedTeamId]);
 
   const { data: applicationInfo } = useSuspenseQuery(
     trpc.oauthApplications.getApplicationInfo.queryOptions({
@@ -113,22 +123,28 @@ export function OAuthConsentScreen() {
 
   if (!applicationInfo) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <X className="h-5 w-5 text-red-500" />
+      <div className="flex items-center justify-center min-h-screen p-4 bg-background">
+        <Card className="w-full max-w-[448px]">
+          <CardHeader className="text-center pb-8">
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <div className="w-16 h-16 rounded-full bg-background border border-border flex items-center justify-center">
+                <X className="h-8 w-8 text-muted-foreground" />
+              </div>
+            </div>
+            <CardTitle className="text-lg mb-2 font-serif">
               Authorization Error
             </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
+            <CardDescription className="text-sm text-muted-foreground text-center">
               Invalid authorization request. Please check the parameters and try
               again.
-            </p>
-            <Button onClick={() => router.push("/")} className="w-full">
-              Go to Dashboard
-            </Button>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex gap-3 pt-4">
+              <Button onClick={() => router.push("/")} className="w-full">
+                Go to Dashboard
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -136,69 +152,83 @@ export function OAuthConsentScreen() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <Shield className="h-8 w-8 text-blue-500" />
+    <div className="flex items-center justify-center min-h-screen p-4 bg-background">
+      <Card className="w-full max-w-[448px]">
+        <CardHeader className="text-center pb-8">
+          {/* Logo section with two circles and arrow */}
+          <div className="flex items-center justify-center gap-4 mb-8">
+            <div className="w-16 h-16 rounded-full bg-background border border-border flex items-center justify-center overflow-hidden">
+              {applicationInfo.logoUrl ? (
+                <Image
+                  src={applicationInfo.logoUrl}
+                  alt={applicationInfo.name}
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
+              ) : (
+                <div className="w-8 h-8 bg-muted rounded-full" />
+              )}
+            </div>
+            <Icons.SyncAlt className="size-4 text-[#666666]" />
+            <div className="w-16 h-16 rounded-full bg-background border border-border flex items-center justify-center overflow-hidden">
+              <Icons.LogoSmall className="h-8 w-8" />
+            </div>
           </div>
-          <CardTitle className="text-xl">
-            {applicationInfo.name} is requesting API access to a workspace in
+
+          <CardTitle className="text-lg mb-2 font-serif">
+            {applicationInfo.name} is requesting API access <br /> to a team in
             Midday.
           </CardTitle>
-          <CardDescription>
-            {applicationInfo.description && (
-              <div className="mt-2 text-sm text-muted-foreground">
-                {applicationInfo.description}
-              </div>
-            )}
-            <div className="mt-2 text-sm text-muted-foreground">
+
+          <CardDescription className="text-sm text-muted-foreground text-center">
+            <span className="flex items-center justify-center gap-1 text-[#878787] text-sm mb-8">
               Built by{" "}
               {applicationInfo.website ? (
                 <a
                   href={applicationInfo.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                  className="inline-flex items-center gap-1 underline"
                 >
-                  <Globe className="h-3 w-3" />
-                  {new URL(applicationInfo.website).hostname}
-                  <ExternalLink className="h-3 w-3" />
+                  {applicationInfo.developerName ||
+                    new URL(applicationInfo.website).hostname}
                 </a>
               ) : (
-                "Unknown"
+                <span className="underline">
+                  {applicationInfo.developerName || "Unknown"}
+                </span>
               )}
-            </div>
+            </span>
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label className="text-sm font-medium">Grant permissions</Label>
-            <div className="mt-2 space-y-2">
-              {applicationInfo.scopes.map((scope) => {
-                const description = getScopeDescription(scope);
-                return (
-                  <div key={scope} className="flex items-center gap-2">
-                    <div className="text-green-500">
-                      <CheckCircle className="h-4 w-4" />
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      {description.label}
-                    </span>
+
+        <CardContent className="space-y-6">
+          {/* Permissions list */}
+          <div className="space-y-4 border-t border-b border-border border-dashed py-6">
+            <span className="text-sm">Grant permissions</span>
+            {applicationInfo.scopes.map((scope) => {
+              const description = getScopeDescription(scope);
+              return (
+                <div key={scope} className="flex items-center gap-3">
+                  <div className="flex-shrink-0">
+                    <Check className="size-3.5 text-[#878787]" />
                   </div>
-                );
-              })}
-            </div>
+                  <span className="text-sm text-[#878787]">
+                    {description.label}
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
-          <Separator />
-
-          <div>
-            <Label htmlFor="workspace" className="text-sm font-medium">
-              Select a workspace to grant api access to
+          {/* Workspace selection */}
+          <div className="space-y-3">
+            <Label htmlFor="workspace" className="text-sm font-normal">
+              Select a team to grant API access to
             </Label>
             <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
-              <SelectTrigger className="mt-2">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Search workspaces" />
               </SelectTrigger>
               <SelectContent>
@@ -211,7 +241,8 @@ export function OAuthConsentScreen() {
             </Select>
           </div>
 
-          <div className="flex gap-2 pt-4">
+          {/* Action buttons */}
+          <div className="flex gap-3 pt-4">
             <Button
               variant="outline"
               onClick={handleDecline}

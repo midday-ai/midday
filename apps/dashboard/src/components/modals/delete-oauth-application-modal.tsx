@@ -67,7 +67,7 @@ export function DeleteOAuthApplicationModal({
         </AlertDialogHeader>
 
         <div className="space-y-4 mt-4">
-          <div className="p-4 bg-muted rounded-lg">
+          <div className="p-4 bg-muted">
             <h4 className="font-medium mb-2">What will happen:</h4>
             <ul className="text-sm space-y-1 text-muted-foreground">
               <li>• All active OAuth tokens will be revoked immediately</li>
@@ -100,12 +100,12 @@ export function DeleteOAuthApplicationModal({
               })
             }
             disabled={value !== "DELETE" || deleteApplicationMutation.isPending}
-            className="bg-destructive hover:bg-destructive/90"
+            className="bg-destructive hover:bg-destructive"
           >
             {deleteApplicationMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              "Delete OAuth Application"
+              "Delete"
             )}
           </AlertDialogAction>
         </AlertDialogFooter>
