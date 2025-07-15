@@ -4,12 +4,14 @@ import type { ColumnDef } from "@tanstack/react-table";
 import * as React from "react";
 import "@tanstack/react-table";
 import { useOAuthApplicationParams } from "@/hooks/use-oauth-application-params";
+import { useTRPC } from "@/trpc/client";
 import { scopesToName } from "@api/utils/scopes";
 import { Badge } from "@midday/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
@@ -22,6 +24,7 @@ import {
 import { format } from "date-fns";
 import { useCopyToClipboard } from "usehooks-ts";
 import { DeleteOAuthApplicationModal } from "../../modals/delete-oauth-application-modal";
+import { OAuthApplicationStatusBadge } from "../../oauth-application-status-badge";
 
 type OAuthApplication =
   RouterOutputs["oauthApplications"]["list"]["data"][number];
@@ -109,6 +112,18 @@ export const columns: ColumnDef<OAuthApplication>[] = [
     },
   },
   {
+    id: "status",
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      return (
+        <div className="flex items-center space-x-2">
+          <OAuthApplicationStatusBadge status={row.original.status} />
+        </div>
+      );
+    },
+  },
+  {
     id: "actions",
     cell: ({ row }) => {
       const { setParams } = useOAuthApplicationParams();
@@ -135,6 +150,8 @@ export const columns: ColumnDef<OAuthApplication>[] = [
                 >
                   Edit
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+
                 <DropdownMenuItem
                   className="text-destructive"
                   onClick={() => setShowDeleteModal(true)}

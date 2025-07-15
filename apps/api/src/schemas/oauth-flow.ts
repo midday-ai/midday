@@ -247,6 +247,10 @@ export const oauthApplicationInfoSchema = z.object({
     description: "State parameter",
     example: "random_state_123",
   }),
+  status: z.enum(["draft", "pending", "approved", "rejected"]).openapi({
+    description: "Application verification status",
+    example: "approved",
+  }),
 });
 
 // User's Authorized Applications Schema

@@ -47,6 +47,7 @@ export type OAuthApplication = {
   updatedAt: string;
   isPublic: boolean;
   active: boolean;
+  status: "draft" | "pending" | "approved" | "rejected";
 };
 
 export type CreateOAuthApplicationParams = {
@@ -79,6 +80,7 @@ export type UpdateOAuthApplicationParams = {
   scopes?: string[];
   isPublic?: boolean;
   active?: boolean;
+  status?: "draft" | "pending" | "approved" | "rejected";
   teamId: string;
 };
 
@@ -139,6 +141,7 @@ export async function createOAuthApplication(
       updatedAt: oauthApplications.updatedAt,
       isPublic: oauthApplications.isPublic,
       active: oauthApplications.active,
+      status: oauthApplications.status,
     });
 
   return {
@@ -170,6 +173,7 @@ export async function getOAuthApplicationsByTeam(db: Database, teamId: string) {
       updatedAt: oauthApplications.updatedAt,
       isPublic: oauthApplications.isPublic,
       active: oauthApplications.active,
+      status: oauthApplications.status,
       createdByUser: {
         id: users.id,
         fullName: users.fullName,
@@ -209,6 +213,7 @@ export async function getOAuthApplicationById(
       updatedAt: oauthApplications.updatedAt,
       isPublic: oauthApplications.isPublic,
       active: oauthApplications.active,
+      status: oauthApplications.status,
       createdByUser: {
         id: users.id,
         fullName: users.fullName,
@@ -252,6 +257,7 @@ export async function getOAuthApplicationByClientId(
       updatedAt: oauthApplications.updatedAt,
       isPublic: oauthApplications.isPublic,
       active: oauthApplications.active,
+      status: oauthApplications.status,
     })
     .from(oauthApplications)
     .where(eq(oauthApplications.clientId, clientId))
@@ -287,6 +293,7 @@ export async function getOAuthApplicationBySlug(
       updatedAt: oauthApplications.updatedAt,
       isPublic: oauthApplications.isPublic,
       active: oauthApplications.active,
+      status: oauthApplications.status,
       createdByUser: {
         id: users.id,
         fullName: users.fullName,
@@ -349,6 +356,36 @@ export async function updateOAuthApplication(
       updatedAt: oauthApplications.updatedAt,
       isPublic: oauthApplications.isPublic,
       active: oauthApplications.active,
+      status: oauthApplications.status,
+    });
+
+  return result;
+}
+
+// Update OAuth application approval status
+export async function updateOAuthApplicationstatus(
+  db: Database,
+  params: {
+    id: string;
+    teamId: string;
+    status: "draft" | "pending" | "approved" | "rejected";
+  },
+) {
+  const { id, teamId, status } = params;
+
+  const [result] = await db
+    .update(oauthApplications)
+    .set({
+      status,
+      updatedAt: sql`NOW()`,
+    })
+    .where(
+      and(eq(oauthApplications.id, id), eq(oauthApplications.teamId, teamId)),
+    )
+    .returning({
+      id: oauthApplications.id,
+      name: oauthApplications.name,
+      status: oauthApplications.status,
     });
 
   return result;

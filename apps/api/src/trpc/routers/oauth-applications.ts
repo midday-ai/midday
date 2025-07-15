@@ -6,6 +6,7 @@ import {
   getOAuthApplicationsByTeam,
   regenerateClientSecret,
   updateOAuthApplication,
+  updateOAuthApplicationstatus,
 } from "@api/db/queries/oauth-applications";
 import {
   createAuthorizationCode,
@@ -21,7 +22,11 @@ import {
   updateOAuthApplicationSchema,
 } from "@api/schemas/oauth-applications";
 import { revokeUserApplicationAccessSchema } from "@api/schemas/oauth-flow";
+import { resend } from "@api/services/resend";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { AppInstalledEmail } from "@midday/email/emails/app-installed";
+import { AppReviewRequestEmail } from "@midday/email/emails/app-review-request";
+import { render } from "@midday/email/render";
 import { z } from "zod";
 
 export const oauthApplicationsRouter = createTRPCRouter({
@@ -84,6 +89,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
         scopes: requestedScopes,
         redirectUri: redirectUri,
         state,
+        status: application.status,
       };
     }),
 
@@ -159,6 +165,33 @@ export const oauthApplicationsRouter = createTRPCRouter({
 
       if (!authCode) {
         throw new Error("Failed to create authorization code");
+      }
+
+      // Send app installation email
+      try {
+        // Get team information
+        const userTeam = userTeams.find((team) => team.id === teamId);
+
+        if (userTeam && session.user.email) {
+          const html = await render(
+            AppInstalledEmail({
+              email: session.user.email,
+              teamName: userTeam.name,
+              appName: application.name,
+              locale: "en",
+            }),
+          );
+
+          await resend.emails.send({
+            from: "Midday <middaybot@midday.ai>",
+            to: session.user.email,
+            subject: "An app has been added to your team",
+            html,
+          });
+        }
+      } catch (error) {
+        // Log error but don't fail the OAuth flow
+        console.error("Failed to send app installation email:", error);
       }
 
       // Build success redirect URL
@@ -274,5 +307,65 @@ export const oauthApplicationsRouter = createTRPCRouter({
       );
 
       return { success: true };
+    }),
+
+  updateApprovalStatus: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        status: z.enum(["draft", "pending"]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db, teamId, session } = ctx;
+
+      // Get full application details before updating
+      const application = await getOAuthApplicationById(db, input.id, teamId!);
+
+      if (!application) {
+        throw new Error("OAuth application not found");
+      }
+
+      const result = await updateOAuthApplicationstatus(db, {
+        id: input.id,
+        teamId: teamId!,
+        status: input.status,
+      });
+
+      if (!result) {
+        throw new Error("OAuth application not found");
+      }
+
+      // Send email notification when status changes to "pending"
+      if (input.status === "pending") {
+        try {
+          // Get team information
+          const userTeams = await getTeamsByUserId(db, session.user.id);
+          const currentTeam = userTeams?.find((team) => team.id === teamId);
+
+          if (currentTeam && session.user.email) {
+            const html = await render(
+              AppReviewRequestEmail({
+                applicationName: application.name,
+                developerName: application.developerName || undefined,
+                teamName: currentTeam.name,
+                userEmail: session.user.email,
+              }),
+            );
+
+            await resend.emails.send({
+              from: "Midday <middaybot@midday.ai>",
+              to: "pontus@midday.ai",
+              subject: `Application Review Request - ${application.name}`,
+              html,
+            });
+          }
+        } catch (error) {
+          // Log error but don't fail the mutation
+          console.error("Failed to send application review request:", error);
+        }
+      }
+
+      return result;
     }),
 });
