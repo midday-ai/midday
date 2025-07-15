@@ -176,7 +176,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
           const html = await render(
             AppInstalledEmail({
               email: session.user.email,
-              teamName: userTeam.name,
+              teamName: userTeam.name!,
               appName: application.name,
               locale: "en",
             }),
@@ -348,7 +348,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
               AppReviewRequestEmail({
                 applicationName: application.name,
                 developerName: application.developerName || undefined,
-                teamName: currentTeam.name,
+                teamName: currentTeam.name!,
                 userEmail: session.user.email,
               }),
             );

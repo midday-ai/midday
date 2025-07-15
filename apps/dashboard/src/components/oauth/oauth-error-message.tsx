@@ -206,13 +206,8 @@ export function OAuthErrorMessage({
             </div>
           </div>
           <CardTitle className="text-lg mb-2 font-serif">{title}</CardTitle>
-          <CardDescription className="text-sm text-muted-foreground text-center">
+          <CardDescription className="text-sm text-muted-foreground text-center leading-relaxed break-words whitespace-pre-wrap">
             {message}
-            {details && (
-              <span className="block mt-2 text-xs text-muted-foreground/70">
-                {details}
-              </span>
-            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

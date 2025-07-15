@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Label } from "@midday/ui/label";
 import {
@@ -23,7 +24,7 @@ import {
 } from "@midday/ui/select";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { AlertTriangle, ArrowLeftRight, Check, X } from "lucide-react";
+import { AlertTriangle, Check, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -155,7 +156,6 @@ export function OAuthConsentScreen() {
     <div className="flex items-center justify-center min-h-screen p-4 bg-background">
       <Card className="w-full max-w-[448px]">
         <CardHeader className="text-center pb-8">
-          {/* Logo section with two circles and arrow */}
           <div className="flex items-center justify-center gap-4 mb-8">
             <div className="w-16 h-16 rounded-full bg-background border border-border flex items-center justify-center overflow-hidden">
               {applicationInfo.logoUrl ? (
@@ -215,25 +215,38 @@ export function OAuthConsentScreen() {
         )}
 
         <CardContent className="space-y-6">
-          {/* Permissions list */}
           <div className="space-y-4 border-t border-b border-border border-dashed py-6">
             <span className="text-sm">Grant permissions</span>
-            {applicationInfo.scopes.map((scope) => {
-              const description = getScopeDescription(scope);
-              return (
-                <div key={scope} className="flex items-center gap-3">
-                  <div className="flex-shrink-0">
-                    <Check className="size-3.5 text-[#878787]" />
-                  </div>
-                  <span className="text-sm text-[#878787]">
-                    {description.label}
-                  </span>
-                </div>
-              );
-            })}
+            <div
+              className={`${applicationInfo.scopes.length > 3 ? "relative" : ""}`}
+            >
+              <div
+                className={cn(
+                  "space-y-4",
+                  applicationInfo.scopes.length > 3 &&
+                    "max-h-[92px] overflow-y-auto pr-2 pb-2",
+                )}
+              >
+                {applicationInfo.scopes.map((scope) => {
+                  const description = getScopeDescription(scope);
+                  return (
+                    <div key={scope} className="flex items-center gap-3">
+                      <div className="flex-shrink-0">
+                        <Check className="size-3.5 text-[#878787]" />
+                      </div>
+                      <span className="text-sm text-[#878787]">
+                        {description.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              {applicationInfo.scopes.length > 3 && (
+                <div className="absolute bottom-0 left-0 right-0 h-5 bg-gradient-to-t from-card to-transparent pointer-events-none" />
+              )}
+            </div>
           </div>
 
-          {/* Workspace selection */}
           <div className="space-y-3">
             <Label htmlFor="workspace" className="text-sm font-normal">
               Select a team to grant API access to
@@ -252,7 +265,6 @@ export function OAuthConsentScreen() {
             </Select>
           </div>
 
-          {/* Action buttons */}
           <div className="flex gap-3 pt-4">
             <Button
               variant="outline"
