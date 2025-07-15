@@ -2,6 +2,7 @@
 
 import { useLatestProjectId } from "@/hooks/use-latest-project-id";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { NEW_EVENT_ID } from "@/utils/tracker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
@@ -53,6 +54,7 @@ export function TrackerEntriesForm({
 }: Props) {
   const { projectId: selectedProjectId } = useTrackerParams();
   const { latestProjectId } = useLatestProjectId();
+  const { data: user } = useUserQuery();
 
   const isUpdate = eventId && eventId !== NEW_EVENT_ID;
 
@@ -121,6 +123,7 @@ export function TrackerEntriesForm({
               end: value.stop,
             });
           }}
+          timeFormat={user?.timeFormat || 24}
         />
 
         <FormField

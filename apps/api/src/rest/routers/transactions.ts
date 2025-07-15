@@ -98,7 +98,7 @@ app.openapi(
     const { id } = c.req.valid("param");
 
     const result = await getTransactionById(db, { id, teamId });
-    console.log(result);
+
     return c.json(validateResponse(result, transactionResponseSchema));
   },
 );
