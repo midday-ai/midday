@@ -117,7 +117,34 @@ export const oauthApplicationsRouter = createTRPCRouter({
         teamId,
       } = input;
 
-      // Validate that the user is a member of the specified team
+      // Validate client_id first (needed for both allow and deny)
+      const application = await getOAuthApplicationByClientId(db, clientId);
+      if (!application || !application.active) {
+        throw new Error("Invalid client_id");
+      }
+
+      // Validate scopes against application's registered scopes (prevent privilege escalation)
+      const invalidScopes = scopes.filter(
+        (scope) => !application.scopes.includes(scope),
+      );
+
+      if (invalidScopes.length > 0) {
+        throw new Error(`Invalid scopes: ${invalidScopes.join(", ")}`);
+      }
+
+      const redirectUrl = new URL(redirectUri);
+
+      // Handle denial early - no need to check team membership for denial
+      if (decision === "deny") {
+        redirectUrl.searchParams.set("error", "access_denied");
+        redirectUrl.searchParams.set("error_description", "User denied access");
+        if (state) {
+          redirectUrl.searchParams.set("state", state);
+        }
+        return { redirect_url: redirectUrl.toString() };
+      }
+
+      // Only validate team membership for "allow" decisions
       const userTeams = await getTeamsByUserId(db, session.user.id);
 
       if (!userTeams) {
@@ -130,27 +157,9 @@ export const oauthApplicationsRouter = createTRPCRouter({
         throw new Error("User is not a member of the specified team");
       }
 
-      // Validate client_id
-      const application = await getOAuthApplicationByClientId(db, clientId);
-      if (!application || !application.active) {
-        throw new Error("Invalid client_id");
-      }
-
       // Enforce PKCE for public clients
       if (application.isPublic && !codeChallenge) {
         throw new Error("PKCE is required for public clients");
-      }
-
-      const redirectUrl = new URL(redirectUri);
-
-      // Handle denial
-      if (decision === "deny") {
-        redirectUrl.searchParams.set("error", "access_denied");
-        redirectUrl.searchParams.set("error_description", "User denied access");
-        if (state) {
-          redirectUrl.searchParams.set("state", state);
-        }
-        return { redirect_url: redirectUrl.toString() };
       }
 
       // Create authorization code
