@@ -53,6 +53,11 @@ export function formatAmount({
 }
 
 export function secondsToHoursAndMinutes(seconds: number) {
+  // Handle edge cases
+  if (seconds == null || Number.isNaN(seconds) || seconds < 0) {
+    return "0h";
+  }
+
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
 

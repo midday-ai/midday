@@ -1,7 +1,18 @@
+import { secondsToHoursAndMinutes } from "@/utils/format";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import type { TZDate } from "@date-fns/tz";
+import { cn } from "@midday/ui/cn";
 import { format } from "date-fns";
 import { CalendarDay } from "./calendar-day";
+
+type SpanningEntry = {
+  entry: any;
+  startDate: string;
+  endDate: string;
+  startIndex: number;
+  endIndex: number;
+  week: number;
+};
 
 type CalendarGridProps = {
   firstWeek: TZDate[];
@@ -9,6 +20,7 @@ type CalendarGridProps = {
   currentDate: TZDate;
   selectedDate: string | null;
   data: RouterOutputs["trackerEntries"]["byRange"]["result"] | undefined;
+  spanningEntries: SpanningEntry[];
   range: [string, string] | null;
   localRange: [string | null, string | null];
   isDragging: boolean;
@@ -24,6 +36,7 @@ export function CalendarMonthView({
   currentDate,
   selectedDate,
   data,
+  spanningEntries,
   range,
   localRange,
   isDragging,

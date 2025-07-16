@@ -13,7 +13,9 @@ import {
   formatTimeFromDate,
   getDates,
   getSlotFromDate,
+  isCrossDayEntry,
   isValidTimeSlot,
+  splitCrossDayForDisplay,
 } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
@@ -27,6 +29,7 @@ import {
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  addDays,
   addMinutes,
   differenceInSeconds,
   endOfDay,
@@ -160,16 +163,25 @@ const useTrackerData = (selectedDate: string | null) => {
     }),
   );
 
-  // Process API data
+  // Process API data with visual splitting for cross-day entries
   useEffect(() => {
-    if (trackerData?.data) {
-      setData(trackerData.data);
+    if (trackerData?.data && selectedDate) {
+      // Split cross-day entries for display
+      const splitData = trackerData.data.flatMap((entry) =>
+        splitCrossDayForDisplay(entry, selectedDate),
+      );
+      setData(splitData);
       setTotalDuration(trackerData.meta?.totalDuration || 0);
     } else {
       setData([]);
       setTotalDuration(0);
     }
-  }, [trackerData]);
+  }, [trackerData, selectedDate]);
+
+  // Helper function to get original entry data for editing
+  const getOriginalEntry = (splitEntryId: string) => {
+    return trackerData?.data?.find((entry) => entry.id === splitEntryId);
+  };
 
   return {
     data,
@@ -177,6 +189,7 @@ const useTrackerData = (selectedDate: string | null) => {
     totalDuration,
     deleteTrackerEntry,
     upsertTrackerEntry,
+    getOriginalEntry,
   };
 };
 
@@ -227,6 +240,7 @@ export function TrackerSchedule() {
     totalDuration,
     deleteTrackerEntry,
     upsertTrackerEntry,
+    getOriginalEntry,
   } = useTrackerData(selectedDate);
 
   const { selectedEvent, selectEvent, clearNewEvent } = useSelectedEvent();
@@ -296,13 +310,24 @@ export function TrackerSchedule() {
       const baseDate = getBaseDate();
 
       const startDate = parse(formValues.start, "HH:mm", baseDate);
-      const stopDate = parse(formValues.stop, "HH:mm", baseDate);
+      let stopDate = parse(formValues.stop, "HH:mm", baseDate);
 
-      if (
-        !isValid(startDate) ||
-        !isValid(stopDate) ||
-        isAfter(startDate, stopDate)
-      ) {
+      // If stop time is before start time, assume it's the next day
+      if (stopDate < startDate) {
+        stopDate = addDays(stopDate, 1);
+      }
+
+      // Ensure cross-day entries maintain different dates even in UTC
+      // by forcing the stop date to be at least the next day
+      const isCrossDay =
+        parse(formValues.stop, "HH:mm", baseDate) <
+        parse(formValues.start, "HH:mm", baseDate);
+      if (isCrossDay) {
+        // Force the stop date to be on the next day to preserve cross-day nature
+        stopDate = addDays(parse(formValues.stop, "HH:mm", baseDate), 1);
+      }
+
+      if (!isValid(startDate) || !isValid(stopDate) || stopDate <= startDate) {
         return;
       }
 
@@ -319,7 +344,7 @@ export function TrackerSchedule() {
 
       upsertTrackerEntry.mutate(apiData);
     },
-    [selectedDate, sortedRange, getBaseDate, upsertTrackerEntry],
+    [selectedDate, sortedRange, getBaseDate, upsertTrackerEntry, user?.id],
   );
 
   const handleMouseDown = useCallback(
@@ -673,6 +698,12 @@ export function TrackerSchedule() {
   const formEvent =
     data.find((event) => event.id === NEW_EVENT_ID) || selectedEvent;
 
+  // Get original entry data for editing cross-day entries
+  const originalEntry =
+    formEvent && formEvent.id !== NEW_EVENT_ID
+      ? getOriginalEntry(formEvent.id)
+      : null;
+
   return (
     <div className="w-full">
       <div className="text-left mb-8">
@@ -751,12 +782,17 @@ export function TrackerSchedule() {
                       }
                     >
                       <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
-                        <span>
+                        <span className="flex items-center gap-1">
                           {event.trackerProject?.name || "No Project"} (
                           {secondsToHoursAndMinutes(
                             safeCalculateDuration(event.start, event.stop),
                           )}
                           )
+                          {isCrossDayEntry(event) && (
+                            <span className="text-xs text-[#878787] bg-[#E8E8E8] dark:bg-[#2D2D2D] px-1 py-0.5 rounded">
+                              spans days
+                            </span>
+                          )}
                         </span>
                         {event?.trackerProject?.customer && (
                           <span>{event.trackerProject.customer.name}</span>
@@ -807,8 +843,20 @@ export function TrackerSchedule() {
         teamId={user?.teamId || ""}
         projectId={formEvent?.trackerProject?.id ?? selectedProjectId}
         description={formEvent?.description ?? undefined}
-        start={formEvent?.start ? safeFormatTime(formEvent.start) : undefined}
-        stop={formEvent?.stop ? safeFormatTime(formEvent.stop) : undefined}
+        start={
+          originalEntry?.start
+            ? safeFormatTime(originalEntry.start)
+            : formEvent?.start
+              ? safeFormatTime(formEvent.start)
+              : undefined
+        }
+        stop={
+          originalEntry?.stop
+            ? safeFormatTime(originalEntry.stop)
+            : formEvent?.stop
+              ? safeFormatTime(formEvent.stop)
+              : undefined
+        }
         onSelectProject={handleSelectProject}
         onTimeChange={handleTimeChange}
       />

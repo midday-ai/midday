@@ -76,7 +76,11 @@ export function CalendarDay({
       )}
     >
       <div>{format(date, "d")}</div>
-      <TrackerEvents data={dayData} isToday={isToday(date)} />
+      <TrackerEvents
+        data={dayData}
+        isToday={isToday(date)}
+        currentDate={formatISO(date, { representation: "date" })}
+      />
     </div>
   );
 }

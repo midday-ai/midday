@@ -8,7 +8,7 @@ import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { TimeRangeInput } from "@midday/ui/time-range-input";
-import { differenceInSeconds, parse } from "date-fns";
+import { addDays, differenceInSeconds, parse } from "date-fns";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -93,12 +93,18 @@ export function TrackerEntriesForm({
     }
 
     if (start && stop) {
-      const startDate = parse(start, "HH:mm", new Date());
-      const endDate = parse(stop, "HH:mm", new Date());
+      const baseDate = new Date();
+      const startDate = parse(start, "HH:mm", baseDate);
+      let endDate = parse(stop, "HH:mm", baseDate);
+
+      // If stop time is before start time, assume it's the next day for duration calculation
+      if (endDate < startDate) {
+        endDate = addDays(endDate, 1);
+      }
 
       const durationInSeconds = differenceInSeconds(endDate, startDate);
 
-      if (durationInSeconds) {
+      if (durationInSeconds > 0) {
         form.setValue("duration", durationInSeconds, { shouldValidate: true });
       }
     }

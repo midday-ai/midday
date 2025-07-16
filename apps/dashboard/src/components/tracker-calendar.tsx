@@ -4,6 +4,7 @@ import { useCalendarDates } from "@/hooks/use-calendar-dates";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { splitCrossDayForDisplay } from "@/utils/tracker";
 import { TZDate } from "@date-fns/tz";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -18,7 +19,7 @@ import {
   subMonths,
   subWeeks,
 } from "date-fns";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import React from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useOnClickOutside } from "usehooks-ts";
@@ -97,6 +98,107 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
   const { data } = useQuery(
     trpc.trackerEntries.byRange.queryOptions(getDateRange()),
   );
+
+  // Process data for calendar display with cross-day spanning
+  const { processedData, spanningEntries } = useMemo(() => {
+    if (!data?.result) return { processedData: undefined, spanningEntries: [] };
+
+    const processedResult: Record<string, any[]> = {};
+    const spanningEntries: Array<{
+      entry: any;
+      startDate: string;
+      endDate: string;
+      startIndex: number;
+      endIndex: number;
+      week: number;
+    }> = [];
+
+    // Process each day's entries
+    for (const [originalDate, entries] of Object.entries(data.result)) {
+      for (const entry of entries) {
+        if (!entry.start || !entry.stop) continue;
+
+        // Use local time boundaries for cross-day detection (consistent with splitCrossDayForDisplay)
+        const startDateObj = new Date(entry.start);
+        const stopDateObj = new Date(entry.stop);
+        const startDateLocal = new Date(
+          startDateObj.getTime() - startDateObj.getTimezoneOffset() * 60000,
+        );
+        const stopDateLocal = new Date(
+          stopDateObj.getTime() - stopDateObj.getTimezoneOffset() * 60000,
+        );
+        const startDate = startDateLocal.toISOString().split("T")[0];
+        const stopDate = stopDateLocal.toISOString().split("T")[0];
+
+        if (!startDate || !stopDate) continue;
+
+        // Check if this is a cross-day entry
+        if (startDate !== stopDate) {
+          // Calculate grid positions for spanning
+          const startDay = calendarDays.find(
+            (d) => d.toISOString().split("T")[0] === startDate,
+          );
+          const endDay = calendarDays.find(
+            (d) => d.toISOString().split("T")[0] === stopDate,
+          );
+
+          if (startDay && endDay) {
+            const startIndex = calendarDays.indexOf(startDay);
+            const endIndex = calendarDays.indexOf(endDay);
+            const week = Math.floor(startIndex / 7);
+
+            spanningEntries.push({
+              entry,
+              startDate,
+              endDate: stopDate,
+              startIndex,
+              endIndex,
+              week,
+            });
+          }
+        }
+
+        // For cross-day entries, we need to process them for all dates they span
+        if (startDate !== stopDate) {
+          // Get all dates between start and stop
+          const datesInRange = [];
+
+          const currentDate = new Date(startDate);
+          const endDate = new Date(stopDate);
+          while (currentDate <= endDate) {
+            datesInRange.push(currentDate.toISOString().split("T")[0]);
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
+
+          // Process entry for each date it spans
+          for (const dateInRange of datesInRange) {
+            if (!dateInRange) continue;
+            const splitEntries = splitCrossDayForDisplay(entry, dateInRange);
+            for (const splitEntry of splitEntries) {
+              // Use the dateInRange instead of deriving from start time
+              // This ensures cross-day entries appear on the correct days
+              if (!processedResult[dateInRange]) {
+                processedResult[dateInRange] = [];
+              }
+              processedResult[dateInRange].push(splitEntry);
+            }
+          }
+        } else {
+          // For non-cross-day entries, process normally
+          const splitEntries = splitCrossDayForDisplay(entry, originalDate);
+          for (const splitEntry of splitEntries) {
+            // Use the originalDate instead of deriving from start time
+            if (!processedResult[originalDate]) {
+              processedResult[originalDate] = [];
+            }
+            processedResult[originalDate].push(splitEntry);
+          }
+        }
+      }
+    }
+
+    return { processedData: processedResult, spanningEntries };
+  }, [data?.result, calendarDays]);
 
   function handlePeriodChange(direction: number) {
     if (selectedView === "week") {
@@ -181,7 +283,8 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
             calendarDays={calendarDays}
             currentDate={currentTZDate}
             selectedDate={selectedDate}
-            data={data?.result}
+            data={processedData}
+            spanningEntries={spanningEntries}
             range={validRange}
             localRange={localRange}
             isDragging={isDragging}
@@ -195,7 +298,7 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
             weekDays={currentWeekDays}
             currentDate={currentTZDate}
             selectedDate={selectedDate}
-            data={data?.result}
+            data={processedData}
             range={validRange}
             localRange={localRange}
             isDragging={isDragging}

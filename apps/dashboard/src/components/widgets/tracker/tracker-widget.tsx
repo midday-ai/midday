@@ -3,7 +3,7 @@
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
-import { sortDates } from "@/utils/tracker";
+import { sortDates, splitCrossDayForDisplay } from "@/utils/tracker";
 import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -16,7 +16,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 import { TrackerHeader } from "./tracker-header";
 import { TrackerIndicator } from "./tracker-indicator";
@@ -79,9 +79,76 @@ export function TrackerWidget() {
     }
   });
 
+  // Process data with cross-day splitting for calendar display
+  const processedData = useMemo(() => {
+    if (!data?.result) return undefined;
+
+    const processedResult: Record<string, any[]> = {};
+
+    // Process each day's entries
+    for (const [originalDate, entries] of Object.entries(data.result)) {
+      for (const entry of entries) {
+        if (!entry.start || !entry.stop) continue;
+
+        // Use local time boundaries for cross-day detection (consistent with splitCrossDayForDisplay)
+        const startDateObj = new Date(entry.start);
+        const stopDateObj = new Date(entry.stop);
+        const startDateLocal = new Date(
+          startDateObj.getTime() - startDateObj.getTimezoneOffset() * 60000,
+        );
+        const stopDateLocal = new Date(
+          stopDateObj.getTime() - stopDateObj.getTimezoneOffset() * 60000,
+        );
+        const startDate = startDateLocal.toISOString().split("T")[0];
+        const stopDate = stopDateLocal.toISOString().split("T")[0];
+
+        if (!startDate || !stopDate) continue;
+
+        // For cross-day entries, we need to process them for all dates they span
+        if (startDate !== stopDate) {
+          // Get all dates between start and stop
+          const datesInRange = [];
+
+          const currentDate = new Date(startDate);
+          const endDate = new Date(stopDate);
+          while (currentDate <= endDate) {
+            datesInRange.push(currentDate.toISOString().split("T")[0]);
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
+
+          // Process entry for each date it spans
+          for (const dateInRange of datesInRange) {
+            if (!dateInRange) continue;
+            const splitEntries = splitCrossDayForDisplay(entry, dateInRange);
+            for (const splitEntry of splitEntries) {
+              // Use the dateInRange instead of deriving from start time
+              // This ensures cross-day entries appear on the correct days
+              if (!processedResult[dateInRange]) {
+                processedResult[dateInRange] = [];
+              }
+              processedResult[dateInRange].push(splitEntry);
+            }
+          }
+        } else {
+          // For non-cross-day entries, process normally
+          const splitEntries = splitCrossDayForDisplay(entry, originalDate);
+          for (const splitEntry of splitEntries) {
+            // Use the originalDate instead of deriving from start time
+            if (!processedResult[originalDate]) {
+              processedResult[originalDate] = [];
+            }
+            processedResult[originalDate].push(splitEntry);
+          }
+        }
+      }
+    }
+
+    return processedResult;
+  }, [data?.result]);
+
   const getEventCount = (date: Date) => {
     const formattedDate = formatISO(date, { representation: "date" });
-    const result = data?.result ?? {};
+    const result = processedData ?? {};
     return result[formattedDate]?.length ?? 0;
   };
 

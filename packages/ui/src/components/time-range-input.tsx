@@ -1,6 +1,6 @@
 "use client";
 
-import { differenceInMinutes, parse } from "date-fns";
+import { addDays, differenceInMinutes, parse } from "date-fns";
 import { useEffect, useState } from "react";
 import { Icons } from "./icons";
 
@@ -26,12 +26,27 @@ export function TimeRangeInput({
       return;
     }
 
-    const start = parse(startTime, "HH:mm", new Date());
-    const stop = parse(stopTime, "HH:mm", new Date());
+    const baseDate = new Date();
+    const start = parse(startTime, "HH:mm", baseDate);
+    let stop = parse(stopTime, "HH:mm", baseDate);
+
+    // If stop time is before start time, assume it's the next day
+    const crossesMidnight = stop < start;
+    if (crossesMidnight) {
+      stop = addDays(stop, 1);
+    }
+
     const diff = differenceInMinutes(stop, start);
     const hours = Math.floor(diff / 60);
     const minutes = diff % 60;
-    setDuration(`${hours}h ${minutes}min`);
+
+    // Format duration more concisely
+    let durationText = `${hours}h`;
+    if (minutes > 0) {
+      durationText += ` ${minutes}min`;
+    }
+
+    setDuration(durationText);
   }, [startTime, stopTime]);
 
   return (

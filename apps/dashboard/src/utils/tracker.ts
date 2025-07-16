@@ -256,3 +256,90 @@ export const convertFromFormData = (
     duration: formData.duration,
   };
 };
+
+// Utility function to split cross-day entries for display
+export function splitCrossDayForDisplay(
+  entry: any, // Use any to handle API data structure
+  selectedDate: string,
+): any[] {
+  const startDate = createSafeDate(entry.start);
+  const stopDate = createSafeDate(entry.stop);
+
+  // Check if entry spans multiple days using LOCAL time boundaries
+  const startDateLocal = new Date(
+    startDate.getTime() - startDate.getTimezoneOffset() * 60000,
+  );
+  const stopDateLocal = new Date(
+    stopDate.getTime() - stopDate.getTimezoneOffset() * 60000,
+  );
+
+  const startDay = startDateLocal.toISOString().split("T")[0];
+  const stopDay = stopDateLocal.toISOString().split("T")[0];
+  const selectedDay = selectedDate;
+
+  // If it's not cross-day, return as-is
+  if (startDay === stopDay) {
+    return [entry];
+  }
+
+  // If entry doesn't involve the selected date, return as-is
+  if (selectedDay !== startDay && selectedDay !== stopDay) {
+    return [entry];
+  }
+
+  // For first day (start day)
+  if (selectedDay === startDay) {
+    // Find midnight at the end of the selected day in local timezone
+    // new Date(selectedDate) already creates midnight in LOCAL time
+    // and toISOString() shows the correct UTC equivalent
+    const nextDayMidnightUTC = new Date(selectedDate);
+    nextDayMidnightUTC.setDate(nextDayMidnightUTC.getDate() + 1);
+    nextDayMidnightUTC.setHours(0, 0, 0, 0);
+
+    const durationUntilMidnight = Math.floor(
+      (nextDayMidnightUTC.getTime() - startDate.getTime()) / 1000,
+    );
+
+    return [
+      {
+        ...entry,
+        stop: nextDayMidnightUTC.toISOString(),
+        duration: Math.max(0, durationUntilMidnight),
+      },
+    ];
+  }
+
+  // For second day (stop day)
+  if (selectedDay === stopDay) {
+    // Find midnight at the start of the selected day in local timezone
+    // new Date(selectedDate) already creates midnight in LOCAL time
+    // and toISOString() shows the correct UTC equivalent
+    const dayMidnightUTC = new Date(selectedDate);
+    dayMidnightUTC.setHours(0, 0, 0, 0);
+
+    const durationFromMidnight = Math.floor(
+      (stopDate.getTime() - dayMidnightUTC.getTime()) / 1000,
+    );
+
+    return [
+      {
+        ...entry,
+        start: dayMidnightUTC.toISOString(),
+        duration: Math.max(0, durationFromMidnight),
+      },
+    ];
+  }
+
+  return [entry];
+}
+
+// Check if an entry spans multiple days
+export function isCrossDayEntry(entry: any): boolean {
+  const startDate = createSafeDate(entry.start);
+  const stopDate = createSafeDate(entry.stop);
+
+  const startDay = startDate.toISOString().split("T")[0];
+  const stopDay = stopDate.toISOString().split("T")[0];
+
+  return startDay !== stopDay;
+}
