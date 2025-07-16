@@ -24,14 +24,17 @@ interface Props {
 }
 
 export const ApiKeyCreatedEmail = ({
-  fullName = "Viktor Hofte",
+  fullName = "",
   keyName = "Midday API Key",
   createdAt = "May 28, 2025",
-  email = "viktor@midday.ai",
+  email = "user@example.com",
   ip = "204.13.186.218",
 }: Props) => {
-  const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName},\n\nYou've created a new API key with the name "${keyName}" on ${format(new Date(createdAt), "MMM d, yyyy")}. If this was not you, please contact support immediately.\n\nBest,\nThe Midday Team`;
+  // Extract firstName from fullName, or use empty string for generic greeting
+  const firstName = fullName?.trim() ? fullName.split(" ").at(0) : "";
+  const greeting = firstName ? `Hi ${firstName},` : "Hi,";
+
+  const text = `${greeting}\n\nYou've created a new API key with the name "${keyName}" on ${format(new Date(createdAt), "MMM d, yyyy")}. If this was not you, please contact support immediately.\n\nBest,\nThe Midday Team`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -63,7 +66,7 @@ export const ApiKeyCreatedEmail = ({
             className={`font-medium ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            Hi {firstName},
+            {greeting}
           </span>
           <Text
             className={themeClasses.text}
