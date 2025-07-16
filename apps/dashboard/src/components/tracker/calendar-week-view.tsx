@@ -133,7 +133,34 @@ export function CalendarWeekView({
                 const startDate = createSafeDate(event.start);
                 const endDate = createSafeDate(event.stop);
                 const startSlot = getSlotFromDate(startDate);
-                const endSlot = getSlotFromDate(endDate);
+
+                // Helper function to get end slot for cross-day entries
+                const getEndSlotForEntry = (
+                  entry: any,
+                  selectedDate: string,
+                ): number => {
+                  const stopDate = createSafeDate(entry.stop);
+                  const stopSlot = getSlotFromDate(stopDate);
+
+                  // Check if this entry segment ends at local midnight (for cross-day entries)
+                  // Use the exact same logic as splitCrossDayForDisplay
+                  const nextDayMidnightUTC = new Date(selectedDate);
+                  nextDayMidnightUTC.setDate(nextDayMidnightUTC.getDate() + 1);
+                  nextDayMidnightUTC.setHours(0, 0, 0, 0);
+
+                  // If the stop time matches the calculated midnight, this is the end of the first day
+                  if (
+                    Math.abs(
+                      stopDate.getTime() - nextDayMidnightUTC.getTime(),
+                    ) < 1000
+                  ) {
+                    return 96; // End of day (24 hours * 4 slots per hour)
+                  }
+
+                  return stopSlot;
+                };
+
+                const endSlot = getEndSlotForEntry(event, dayKey);
                 const top = startSlot * SLOT_HEIGHT;
                 const height = Math.max(
                   (endSlot - startSlot) * SLOT_HEIGHT,
