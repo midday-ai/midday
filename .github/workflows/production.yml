@@ -6,7 +6,7 @@ env:
   NODE_OPTIONS: --max-old-space-size=8192
   # Speed optimizations
   TURBO_REMOTE_CACHE_TIMEOUT: 60
-  TURBO_REMOTE_CACHE_READ_ONLY: false
+  TURBO_CACHE: remote
 
 on:
   push:
