@@ -149,6 +149,11 @@ jobs:
           extra_args: --debug --only-verified
         continue-on-error: true
 
+      - name: 🏗️ Build dependencies first
+        run: |
+          # Build core dependencies that other packages rely on for TypeScript
+          bunx turbo build --filter='@midday/engine-client' --filter='@midday/engine' --filter='@midday/utils' --filter='@midday/ui' --filter='@midday/tsconfig'
+
       - name: 🔦 Lint (changed packages only)
         run: |
           if [ "${{ github.event.inputs.force_deploy }}" = "true" ]; then
@@ -157,12 +162,13 @@ jobs:
             bunx turbo lint --filter='[HEAD^1]'
           fi
 
-      - name: 🪐 TypeScript check (changed packages only)
+      - name: 🪐 TypeScript check (with dependencies)
         run: |
           if [ "${{ github.event.inputs.force_deploy }}" = "true" ]; then
             bunx turbo typecheck
           else
-            bunx turbo typecheck --filter='[HEAD^1]'
+            # Include dependencies in TypeScript check to ensure types are available
+            bunx turbo typecheck --filter='[HEAD^1]...'
           fi
 
       - name: 🧪 Tests (changed packages only)
@@ -178,7 +184,7 @@ jobs:
     name: 🏗️ Build Shared
     runs-on: ubuntu-latest
     needs: [setup, security-quality]
-    if: needs.security-quality.outputs.has-engine-changes == 'true' || needs.security-quality.outputs.has-packages-changes == 'true' || github.event.inputs.force_deploy == 'true'
+    if: needs.security-quality.result == 'success' && (needs.security-quality.outputs.has-engine-changes == 'true' || needs.security-quality.outputs.has-packages-changes == 'true' || github.event.inputs.force_deploy == 'true')
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
@@ -218,7 +224,7 @@ jobs:
     name: 🚀 Deploy Engine (Beta)
     runs-on: ubuntu-latest
     needs: [security-quality, build-shared]
-    if: needs.security-quality.outputs.has-engine-changes == 'true' || github.event.inputs.force_deploy == 'true'
+    if: needs.security-quality.result == 'success' && (needs.security-quality.outputs.has-engine-changes == 'true' || github.event.inputs.force_deploy == 'true') && (needs.build-shared.result == 'success' || needs.build-shared.result == 'skipped')
     environment: beta
     outputs:
       deployment-url: ${{ steps.deploy.outputs.deployment-url }}
@@ -271,7 +277,7 @@ jobs:
     name: 🚀 Deploy API (Beta)
     runs-on: ubuntu-latest
     needs: [security-quality, deploy-engine]
-    if: (needs.security-quality.outputs.has-api-changes == 'true' || github.event.inputs.force_deploy == 'true') && always()
+    if: needs.security-quality.result == 'success' && (needs.security-quality.outputs.has-api-changes == 'true' || github.event.inputs.force_deploy == 'true') && (needs.deploy-engine.result == 'success' || needs.deploy-engine.result == 'skipped')
     environment: beta
     concurrency: fly-preview
     outputs:
@@ -324,7 +330,7 @@ jobs:
     name: 🚀 Deploy Dashboard (Beta)
     runs-on: ubuntu-latest
     needs: [security-quality, deploy-api]
-    if: (needs.security-quality.outputs.has-dashboard-changes == 'true' || github.event.inputs.force_deploy == 'true') && always()
+    if: needs.security-quality.result == 'success' && (needs.security-quality.outputs.has-dashboard-changes == 'true' || github.event.inputs.force_deploy == 'true') && (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
     environment: beta
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -390,7 +396,7 @@ jobs:
     name: 🚀 Deploy Website (Beta)
     runs-on: ubuntu-latest
     needs: security-quality
-    if: needs.security-quality.outputs.has-website-changes == 'true' || github.event.inputs.force_deploy == 'true'
+    if: needs.security-quality.result == 'success' && (needs.security-quality.outputs.has-website-changes == 'true' || github.event.inputs.force_deploy == 'true')
     environment: beta
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -445,7 +451,7 @@ jobs:
     name: 🚀 Deploy Email (Beta)
     runs-on: ubuntu-latest
     needs: security-quality
-    if: needs.security-quality.outputs.has-email-changes == 'true' || github.event.inputs.force_deploy == 'true'
+    if: needs.security-quality.result == 'success' && (needs.security-quality.outputs.has-email-changes == 'true' || github.event.inputs.force_deploy == 'true')
     environment: beta
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
