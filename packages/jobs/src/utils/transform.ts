@@ -22,6 +22,8 @@ type Transaction = {
   status: "posted";
   notified?: boolean;
   counterparty_name: string | null;
+  tax_rate: number | null;
+  tax_type: string | null;
 };
 
 export function transformTransaction({
@@ -43,6 +45,8 @@ export function transformTransaction({
     balance: transaction.balance,
     team_id: teamId,
     counterparty_name: transaction.counterparty_name,
+    tax_rate: transaction.tax_rate,
+    tax_type: transaction.tax_type,
     // We only support posted transactions for now
     status: "posted",
     // If the transactions are being synced manually, we don't want to notify
