@@ -56,6 +56,7 @@ export function CustomerEditSheet() {
         queryClient.invalidateQueries({
           queryKey: trpc.customers.get.infiniteQueryKey(),
         });
+        setParams(null);
       },
     }),
   );

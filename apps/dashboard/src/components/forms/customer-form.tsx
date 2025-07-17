@@ -38,7 +38,7 @@ import { VatNumberInput } from "../vat-number-input";
 const formSchema = z.object({
   id: z.string().uuid().optional(),
   name: z.string().min(2, {
-    message: "Name must be at least 1 characters.",
+    message: "Name must be at least 2 characters.",
   }),
   email: z.string().email({
     message: "Email is not valid.",
