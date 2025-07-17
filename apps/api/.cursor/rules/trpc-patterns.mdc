@@ -1,0 +1,89 @@
+---
+globs: src/trpc/**/*.ts
+description: tRPC patterns and conventions for the API
+---
+
+# tRPC Patterns and Conventions
+
+## Router Structure
+- **Main Router**: [src/trpc/routers/_app.ts](mdc:src/trpc/routers/_app.ts) - Combines all feature routers
+- **Feature Routers**: [src/trpc/routers/](mdc:src/trpc/routers/) - Individual routers per feature
+- **Context**: [src/trpc/init.ts](mdc:src/trpc/init.ts) - Context creation and middleware
+- **Middleware**: [src/trpc/middleware/](mdc:src/trpc/middleware/) - Reusable middleware
+
+## Router Conventions
+```typescript
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "@api/trpc/init";
+import { getEntitySchema, createEntitySchema } from "@api/schemas/entity";
+
+export const entityRouter = createTRPCRouter({
+  // Query operations
+  get: protectedProcedure
+    .input(getEntitySchema.optional())
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getEntity(db, { teamId: teamId!, ...input });
+    }),
+
+  // Mutation operations
+  create: protectedProcedure
+    .input(createEntitySchema)
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return createEntity(db, { teamId: teamId!, ...input });
+    }),
+});
+```
+
+## Procedure Types
+- **publicProcedure**: No authentication required
+- **protectedProcedure**: Requires authentication and team permission
+- Use `.input()` for input validation with Zod schemas
+- Use `.query()` for read operations
+- Use `.mutation()` for write operations
+
+## Context Access
+Available in all procedures:
+- `db`: Database instance with replica support
+- `teamId`: Current team ID (available in protected procedures)
+- `session`: User session data
+- `supabase`: Supabase client
+- `geo`: Geographic context
+
+## Input Validation
+- Always use Zod schemas from [src/schemas/](mdc:src/schemas/)
+- Use `.input()` to validate incoming data
+- Use `.optional()` for optional parameters
+- Import schemas with descriptive names
+
+## Error Handling
+```typescript
+import { TRPCError } from "@trpc/server";
+
+// Throw appropriate errors
+throw new TRPCError({
+  code: "NOT_FOUND",
+  message: "Entity not found",
+});
+
+// Common error codes:
+// - UNAUTHORIZED: Authentication required
+// - FORBIDDEN: Insufficient permissions
+// - NOT_FOUND: Resource not found
+// - BAD_REQUEST: Invalid input
+// - INTERNAL_SERVER_ERROR: Server error
+```
+
+## Middleware Usage
+- **withTeamPermission**: Ensures user has team access
+- **withPrimaryReadAfterWrite**: Handles read-after-write consistency
+- Apply middleware using `.use()` method
+
+## Type Safety
+- Export router types for frontend consumption
+- Use `inferRouterInputs` and `inferRouterOutputs` for type inference
+- Maintain type safety across client-server boundary
+
+## Router Organization
+- One router per feature/entity
+- Group related operations together
+- Use descriptive procedure names
+- Keep procedures focused and single-purpose

@@ -1,0 +1,153 @@
+---
+globs: src/schemas/**/*.ts
+description: Schema validation patterns and conventions
+---
+
+# Schema Validation Patterns and Conventions
+
+## Schema Structure
+All validation schemas are located in [src/schemas/](mdc:src/schemas/) and follow consistent patterns:
+
+## Naming Conventions
+- `create{Entity}Schema` - For creating new entities
+- `update{Entity}Schema` - For updating existing entities  
+- `get{Entity}Schema` - For retrieving entities (query parameters)
+- `delete{Entity}Schema` - For deleting entities
+- `{entity}ResponseSchema` - For response validation
+
+## Schema Patterns
+```typescript
+import { z } from "@hono/zod-openapi";
+
+// Input schema with OpenAPI metadata
+export const createEntitySchema = z.object({
+  name: z.string().min(1).openapi({
+    description: "The name of the entity",
+    example: "Example Entity",
+  }),
+  description: z.string().optional().openapi({
+    description: "Optional description",
+    example: "This is an example entity",
+  }),
+  tags: z.array(z.string()).optional().openapi({
+    description: "Array of tags",
+    example: ["tag1", "tag2"],
+  }),
+});
+
+// Response schema
+export const entityResponseSchema = z.object({
+  id: z.string().openapi({
+    description: "Unique identifier",
+    example: "123e4567-e89b-12d3-a456-426614174000",
+  }),
+  name: z.string().openapi({
+    description: "Entity name",
+    example: "Example Entity",
+  }),
+  createdAt: z.string().openapi({
+    description: "Creation timestamp",
+    example: "2023-01-01T00:00:00.000Z",
+  }),
+});
+```
+
+## OpenAPI Metadata
+Always include OpenAPI metadata for documentation:
+- `description`: Clear description of the field
+- `example`: Example value for documentation
+- `format`: For specific formats (email, date, etc.)
+- `minimum`, `maximum`: For numeric constraints
+- `minLength`, `maxLength`: For string constraints
+
+## Common Field Patterns
+```typescript
+// ID fields
+id: z.string().openapi({
+  description: "Unique identifier",
+  example: "123e4567-e89b-12d3-a456-426614174000",
+}),
+
+// Team ID (always required for multi-tenancy)
+teamId: z.string().openapi({
+  description: "Team identifier",
+  example: "team_123",
+}),
+
+// Timestamps
+createdAt: z.string().openapi({
+  description: "Creation timestamp",
+  example: "2023-01-01T00:00:00.000Z",
+}),
+
+// Optional fields
+description: z.string().optional().openapi({
+  description: "Optional description",
+  example: "Description text",
+}),
+
+// Arrays
+tags: z.array(z.string()).openapi({
+  description: "Array of tags",
+  example: ["tag1", "tag2"],
+}),
+
+// Enums
+status: z.enum(["active", "inactive"]).openapi({
+  description: "Status of the entity",
+  example: "active",
+}),
+```
+
+## Validation Rules
+- Use appropriate Zod validators (`.min()`, `.max()`, `.email()`, etc.)
+- Make required fields explicit
+- Use `.optional()` for optional fields
+- Use `.default()` for default values
+- Use `.refine()` for custom validation logic
+
+## Schema Composition
+```typescript
+// Base schema for common fields
+const baseEntitySchema = z.object({
+  id: z.string().openapi({ description: "Unique identifier" }),
+  teamId: z.string().openapi({ description: "Team identifier" }),
+  createdAt: z.string().openapi({ description: "Creation timestamp" }),
+  updatedAt: z.string().optional().openapi({ description: "Update timestamp" }),
+});
+
+// Extend base schema
+export const entitySchema = baseEntitySchema.extend({
+  name: z.string().openapi({ description: "Entity name" }),
+  description: z.string().optional().openapi({ description: "Description" }),
+});
+```
+
+## Error Handling
+- Zod automatically provides validation errors
+- Use `.parse()` for throwing errors
+- Use `.safeParse()` for non-throwing validation
+- Custom error messages using `.refine()`
+
+## TypeScript Integration
+```typescript
+// Extract types from schemas
+export type CreateEntityInput = z.infer<typeof createEntitySchema>;
+export type EntityResponse = z.infer<typeof entityResponseSchema>;
+
+// Use in function signatures
+export async function createEntity(
+  db: Database,
+  input: CreateEntityInput
+): Promise<EntityResponse> {
+  // Implementation
+}
+```
+
+## Best Practices
+- Keep schemas focused and single-purpose
+- Use descriptive field names and documentation
+- Include realistic examples in OpenAPI metadata
+- Validate at the boundary (API endpoints)
+- Share common schemas between tRPC and REST
+- Use schema composition for reusable patterns

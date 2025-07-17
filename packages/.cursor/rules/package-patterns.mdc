@@ -1,0 +1,71 @@
+---
+alwaysApply: true
+description: Shared package patterns and conventions
+---
+
+# Shared Package Patterns
+
+## Package Structure
+The packages directory contains reusable modules shared across the monorepo:
+
+- **UI Components**: [ui/](mdc:ui/) - Shared UI components with Tailwind CSS
+- **Utility Functions**: [utils/](mdc:utils/) - Common utility functions
+- **Database**: [supabase/](mdc:supabase/) - Supabase client and utilities
+- **Email**: [email/](mdc:email/) - Email templates and components
+- **Documents**: [documents/](mdc:documents/) - Document processing utilities
+- **Encryption**: [encryption/](mdc:encryption/) - Encryption utilities
+- **Location**: [location/](mdc:location/) - Location and country utilities
+- **Import**: [import/](mdc:import/) - Data import utilities
+- **Invoice**: [invoice/](mdc:invoice/) - Invoice templates and utilities
+- **Jobs**: [jobs/](mdc:jobs/) - Background job definitions
+- **Notification**: [notification/](mdc:notification/) - Notification utilities
+- **Events**: [events/](mdc:events/) - Event handling utilities
+
+## Package Conventions
+Each package follows a consistent structure:
+
+```
+package-name/
+├── src/
+│   ├── index.ts          # Main export file
+│   ├── components/       # Components (if applicable)
+│   └── utils/           # Utility functions
+├── package.json         # Package configuration
+├── tsconfig.json        # TypeScript configuration
+└── README.md           # Documentation
+```
+
+## Development Guidelines
+- **Export Everything**: Use `src/index.ts` as the main export file
+- **TypeScript First**: All packages use TypeScript
+- **Minimal Dependencies**: Keep dependencies to a minimum
+- **Tree Shaking**: Structure exports for optimal tree shaking
+- **Documentation**: Include README.md with usage examples
+
+## Import/Export Patterns
+```typescript
+// Main export file (src/index.ts)
+export * from './components';
+export * from './utils';
+export { default as SomeComponent } from './components/SomeComponent';
+
+// Package imports in applications
+import { SomeComponent, someUtility } from '@midday/package-name';
+```
+
+## TypeScript Configuration
+- Extend base TypeScript config from `@midday/tsconfig`
+- Use consistent compiler options across packages
+- Include proper type exports for consumers
+
+## Testing
+- Co-locate tests with source files
+- Use consistent testing framework across packages
+- Include unit tests for utility functions
+- Test components in isolation
+
+## Package.json Best Practices
+- Use workspace protocol for internal dependencies
+- Include proper exports field for Node.js compatibility
+- Set appropriate peer dependencies
+- Include build scripts for compiled packages

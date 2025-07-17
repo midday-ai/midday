@@ -1,0 +1,131 @@
+---
+alwaysApply: true
+description: Desktop app patterns and conventions (Tauri + React + TypeScript)
+---
+
+# Desktop App Patterns
+
+## Technology Stack
+The desktop app is built with:
+- **Tauri 2.0**: Cross-platform desktop framework using Rust
+- **React 19**: Frontend framework with TypeScript
+- **Vite**: Build tool and development server
+- **Rust**: Backend runtime for native OS integration
+
+## Architecture Overview
+- **Frontend**: React/TypeScript running in webview
+- **Backend**: Rust with Tauri for native OS APIs
+- **Environment Support**: Dev, staging, and production environments
+- **Platform Focus**: macOS with transparent titlebar support
+
+## Directory Structure
+- **Frontend**: [src/](mdc:src/) - React TypeScript components
+- **Backend**: [src-tauri/src/](mdc:src-tauri/src/) - Rust source code
+- **Config**: [src-tauri/*.conf.json](mdc:src-tauri/) - Environment configurations
+- **Build**: [src-tauri/build.rs](mdc:src-tauri/build.rs) - Rust build script
+
+## Frontend Patterns
+```typescript
+// Component structure
+import React from "react";
+import { invoke } from "@tauri-apps/api/core";
+
+export function Component() {
+  const handleAction = async () => {
+    try {
+      const result = await invoke("rust_command", { param: "value" });
+      console.log(result);
+    } catch (error) {
+      console.error("Command failed:", error);
+    }
+  };
+
+  return (
+    <div>
+      <button onClick={handleAction}>Execute Command</button>
+    </div>
+  );
+}
+```
+
+## Rust Backend Patterns
+```rust
+// Command handlers
+#[tauri::command]
+fn show_window(window: tauri::Window) -> Result<(), String> {
+    let app_handle = window.app_handle();
+    let main_window = match app_handle.get_webview_window("main") {
+        Some(window) => window,
+        None => return Err("Main window not found".to_string()),
+    };
+
+    main_window.show().map_err(|e| format!("Failed to show window: {}", e))?;
+    main_window.set_focus().map_err(|e| format!("Failed to set focus: {}", e))?;
+    
+    Ok(())
+}
+```
+
+## Environment Management
+- **Development**: `http://localhost:3001`
+- **Staging**: `https://beta.midday.ai`
+- **Production**: `https://app.midday.ai`
+
+Environment controlled by `MIDDAY_ENV` variable:
+```bash
+# Development
+MIDDAY_ENV=development tauri dev
+
+# Staging
+MIDDAY_ENV=staging tauri dev
+
+# Production
+MIDDAY_ENV=production tauri dev
+```
+
+## Build Scripts
+```json
+{
+  "scripts": {
+    "tauri:dev": "MIDDAY_ENV=development tauri dev --config src-tauri/tauri.dev.conf.json",
+    "tauri:staging": "MIDDAY_ENV=staging tauri dev --config src-tauri/tauri.staging.conf.json",
+    "tauri:prod": "MIDDAY_ENV=production tauri dev",
+    "tauri:build:dev": "tauri build --config src-tauri/tauri.dev.conf.json",
+    "tauri:build:staging": "tauri build --config src-tauri/tauri.staging.conf.json",
+    "tauri:build:prod": "tauri build"
+  }
+}
+```
+
+## Platform-Specific Features
+- **macOS**: Transparent titlebar with traffic light buttons
+- **Window Management**: Minimum size 1450x900 for optimal UX
+- **Deep Links**: Support for `midday://` protocol
+- **Global Shortcuts**: System-wide keyboard shortcuts
+- **Tray Integration**: System tray with menu and click handlers
+- **Auto-Updates**: Built-in update mechanism
+
+## Security & Capabilities
+- **Permissions**: Defined in [src-tauri/capabilities/](mdc:src-tauri/capabilities/)
+- **Remote URLs**: Whitelist for dev/staging/prod environments
+- **mTLS**: Support for mutual TLS authentication
+- **Secure Context**: CSP configuration for webview security
+
+## Development Guidelines
+- **TypeScript**: Use strict typing for all frontend code
+- **Rust**: Follow Rust best practices for backend commands
+- **Error Handling**: Comprehensive error handling in both frontend and backend
+- **Testing**: Unit tests for Rust commands, integration tests for workflows
+- **Documentation**: Comment complex Rust functions and TypeScript components
+
+## Window Management
+- **Main Window**: Primary application interface
+- **Search Window**: Preloaded search functionality
+- **Auto-Hide**: Automatic window hiding on focus loss
+- **Center on Monitor**: Automatic positioning on primary monitor
+
+## API Integration
+- **Commands**: Use `invoke()` for frontend-to-backend communication
+- **Events**: Use Tauri event system for backend-to-frontend updates
+- **State Management**: Managed state in Rust, reactive state in React
+- **Caching**: Local caching for performance optimization

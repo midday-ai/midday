@@ -1,0 +1,182 @@
+---
+globs: src/rest/middleware/**/*.ts,src/trpc/middleware/**/*.ts,src/utils/auth.ts
+description: Authentication and middleware patterns
+---
+
+# Authentication and Middleware Patterns
+
+## Authentication Overview
+The API uses a hybrid authentication system supporting both API keys and JWT tokens:
+
+- **API Keys**: For programmatic access with scoped permissions
+- **JWT Tokens**: For user session-based access
+- **Multi-tenancy**: Team-based access control
+
+## Middleware Structure
+- **REST Middleware**: [src/rest/middleware/](mdc:src/rest/middleware/)
+- **tRPC Middleware**: [src/trpc/middleware/](mdc:src/trpc/middleware/)
+- **Auth Utils**: [src/utils/auth.ts](mdc:src/utils/auth.ts)
+
+## REST Middleware Patterns
+
+### Middleware Types
+```typescript
+// Public endpoints - database only
+export const publicMiddleware: MiddlewareHandler[] = [withDatabase];
+
+// Protected endpoints - full authentication
+export const protectedMiddleware: MiddlewareHandler[] = [
+  withDatabase,
+  withAuth,
+  rateLimiter({
+    windowMs: 10 * 60 * 1000, // 10 minutes
+    limit: 100,
+    keyGenerator: (c) => c.get("session")?.user?.id ?? "unknown",
+  }),
+  withPrimaryReadAfterWrite,
+];
+```
+
+### Authentication Middleware
+```typescript
+// API key authentication
+export const withAuth: MiddlewareHandler = async (c, next) => {
+  const token = c.req.header("Authorization")?.split(" ")[1];
+  
+  if (!token || !isValidApiKeyFormat(token)) {
+    throw new HTTPException(401, { message: "Invalid API key format" });
+  }
+  
+  const apiKey = await getApiKeyByToken(db, hash(token));
+  if (!apiKey) {
+    throw new HTTPException(401, { message: "Invalid API key" });
+  }
+  
+  // Set session and scopes in context
+  c.set("session", session);
+  c.set("scopes", expandScopes(apiKey.scopes));
+  
+  await next();
+};
+```
+
+### Scope-based Authorization
+```typescript
+export const withRequiredScope = (requiredScope: string): MiddlewareHandler => {
+  return async (c, next) => {
+    const scopes = c.get("scopes") || [];
+    
+    if (!scopes.includes(requiredScope)) {
+      throw new HTTPException(403, { 
+        message: `Insufficient permissions. Required scope: ${requiredScope}` 
+      });
+    }
+    
+    await next();
+  };
+};
+```
+
+## tRPC Middleware Patterns
+
+### Context Creation
+```typescript
+export const createTRPCContext = async (
+  ctx: Context,
+): Promise<TRPCContext> => {
+  const session = await verifyAccessToken(ctx);
+  const supabase = createClient();
+  const db = await connectDb();
+  const geo = getGeoContext(ctx);
+  
+  return {
+    session,
+    supabase,
+    db,
+    geo,
+  };
+};
+```
+
+### Procedure Middleware
+```typescript
+// Team permission middleware
+export const withTeamPermission = t.middleware(async (opts) => {
+  const { session } = opts.ctx;
+  
+  if (!session?.user?.id) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  
+  const teamId = getTeamIdFromContext(opts.ctx);
+  
+  return opts.next({
+    ctx: {
+      ...opts.ctx,
+      teamId,
+    },
+  });
+});
+
+// Primary database middleware
+export const withPrimaryReadAfterWrite = t.middleware(async (opts) => {
+  const { ctx, type } = opts;
+  
+  if (type === "mutation") {
+    // Use primary database for writes
+    ctx.db = ctx.db.usePrimaryOnly();
+  }
+  
+  return opts.next({ ctx });
+});
+```
+
+## Authentication Flow
+
+### API Key Authentication
+1. Extract token from `Authorization: Bearer {token}` header
+2. Validate token format
+3. Hash token and lookup in database
+4. Check API key validity and expiration
+5. Load user and team information
+6. Set session and scopes in context
+7. Apply rate limiting based on user ID
+
+### JWT Token Authentication
+1. Extract token from request
+2. Verify JWT signature and expiration
+3. Extract user information from payload
+4. Load additional user/team data if needed
+5. Set session in context
+
+## Security Features
+
+### Rate Limiting
+- Applied to all protected endpoints
+- 100 requests per 10 minutes per user
+- Uses user ID as key for API key requests
+- Configurable limits per endpoint
+
+### Scopes System
+- Granular permissions for API keys
+- Format: `{resource}.{action}` (e.g., `transactions.read`)
+- Expandable scopes (e.g., `transactions.*` includes read/write)
+- Enforced at endpoint level
+
+### Multi-tenancy
+- All data scoped to team level
+- Team ID extracted from session/API key
+- Automatic filtering in database queries
+- Prevents cross-team data access
+
+## Caching Strategy
+- API key lookup caching with LRU cache
+- User data caching to reduce database hits
+- Cache invalidation on key/user updates
+- Per-instance caching (not shared across servers)
+
+## Error Handling
+- Consistent error responses
+- Appropriate HTTP status codes
+- Detailed error messages for debugging
+- Security-conscious error exposure

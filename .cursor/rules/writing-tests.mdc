@@ -1,0 +1,31 @@
+---
+description: Writing tests for Bun
+globs: 
+---
+# Writing tests for Bun
+
+## How tests are written
+
+Bun's tests are written as JavaScript and TypeScript files with the Jest-style APIs, like `test`, `describe`, and `expect`. They are tested using Bun's own test runner, `bun test`. 
+
+```js
+import { describe, test, expect } from "bun:test";
+import assert, { AssertionError } from "assert";
+
+describe("assert(expr)", () => {
+  test.each([true, 1, "foo"])(`assert(%p) does not throw`, expr => {
+    expect(() => assert(expr)).not.toThrow();
+  });
+
+  test.each([false, 0, "", null, undefined])(`assert(%p) throws`, expr => {
+    expect(() => assert(expr)).toThrow(AssertionError);
+  });
+});
+```
+
+## Before writing a test
+
+* If you are fixing a bug, write the test first and make sure it fails (as expected) with the canary version of Bun
+* If you are fixing a Node.js compatibility bug, create a throw-away snippet of code and test that it works as you expect in Node.js, then that it fails (as expected) with the canary version of Bun
+* When the expected behaviour is ambigious, defer to matching what happens in Node.js
+* Always attempt to find related tests in an existing test file before creating a new test file

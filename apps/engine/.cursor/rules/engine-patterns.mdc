@@ -1,0 +1,270 @@
+---
+alwaysApply: true
+description: Engine app patterns and conventions (Cloudflare Workers + Hono + TypeScript)
+---
+
+# Engine App Patterns
+
+## Technology Stack
+The engine is built with:
+- **Cloudflare Workers**: Serverless compute platform
+- **Hono**: Ultra-fast web framework for edge computing
+- **TypeScript**: Type-safe JavaScript for better development experience
+- **Wrangler**: CLI tool for managing Cloudflare Workers
+
+## Architecture Overview
+- **API Gateway**: Single API interface for multiple banking providers
+- **Provider Pattern**: Unified interface for different banking services
+- **Edge Computing**: Global deployment via Cloudflare Workers
+- **Real-time Processing**: Transaction enrichment and matching
+
+## Directory Structure
+- **Core**: [src/index.ts](mdc:src/index.ts) - Main application entry point
+- **Routes**: [src/routes/](mdc:src/routes/) - API endpoint handlers
+- **Providers**: [src/providers/](mdc:src/providers/) - Banking provider implementations
+- **Middleware**: [src/middleware.ts](mdc:src/middleware.ts) - Request/response middleware
+- **Utils**: [src/utils/](mdc:src/utils/) - Utility functions and helpers
+- **Common**: [src/common/](mdc:src/common/) - Shared types and schemas
+
+## Route Patterns
+```typescript
+// Route structure
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import type { Bindings } from "@engine/common/bindings";
+
+const app = new OpenAPIHono<{ Bindings: Bindings }>().openapi(
+  createRoute({
+    method: "get",
+    path: "/",
+    summary: "Get transactions",
+    request: {
+      query: TransactionsParamsSchema,
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: TransactionsSchema,
+          },
+        },
+        description: "Retrieve transactions",
+      },
+    },
+  }),
+  async (c) => {
+    const envs = env(c);
+    const query = c.req.valid("query");
+    
+    // Implementation
+    return c.json({ data: results }, 200);
+  },
+);
+```
+
+## Provider Pattern
+```typescript
+// Provider interface
+export interface Provider {
+  getTransactions: (params: GetTransactionsRequest) => Promise<GetTransactionsResponse>;
+  getAccounts: (params: GetAccountsRequest) => Promise<GetAccountsResponse>;
+  getAccountBalance: (params: GetAccountBalanceRequest) => Promise<GetAccountBalanceResponse>;
+  getInstitutions: (params: GetInstitutionsRequest) => Promise<GetInstitutionsResponse>;
+  getHealthCheck: () => Promise<boolean>;
+  deleteAccounts: (params: DeleteAccountsRequest) => void;
+  getConnectionStatus: (params: GetConnectionStatusRequest) => Promise<GetConnectionStatusResponse>;
+  deleteConnection: (params: DeleteConnectionRequest) => void;
+}
+
+// Provider implementation
+export class Provider {
+  #provider: PlaidProvider | TellerProvider | GoCardLessProvider | null = null;
+
+  constructor(params?: ProviderParams) {
+    switch (params?.provider) {
+      case "plaid":
+        this.#provider = new PlaidProvider(params);
+        break;
+      case "teller":
+        this.#provider = new TellerProvider(params);
+        break;
+      case "gocardless":
+        this.#provider = new GoCardLessProvider(params);
+        break;
+    }
+  }
+}
+```
+
+## Middleware Patterns
+```typescript
+// Authentication middleware
+const authMiddleware = (c: Context, next: Next) => {
+  if (PUBLIC_PATHS.includes(c.req.path)) {
+    return next();
+  }
+
+  const { API_SECRET_KEY } = env(c);
+  const bearer = bearerAuth({ token: API_SECRET_KEY });
+  
+  return bearer(c, next);
+};
+
+// Security middleware
+const securityMiddleware = secureHeaders();
+
+// Logging middleware
+const loggingMiddleware = logger();
+```
+
+## Environment Configuration
+```toml
+# wrangler.toml
+[env.production]
+name = "engine"
+route = { pattern = "engine.midday.ai/*", zone_name = "midday.ai" }
+
+[env.staging]
+name = "engine-staging"
+route = { pattern = "engine-staging.midday.ai/*", zone_name = "midday.ai" }
+
+kv_namespaces = [
+  { binding = "KV", id = "..." },
+  { binding = "ENRICH_KV", id = "..." }
+]
+
+r2_buckets = [
+  { binding = "STORAGE", bucket_name = "engine-assets" }
+]
+```
+
+## Bindings & Services
+```typescript
+// Cloudflare bindings
+export type Bindings = {
+  KV: KVNamespace;
+  ENRICH_KV: KVNamespace;
+  STORAGE: R2Bucket;
+  TELLER_CERT: Fetcher;
+  AI: Ai;
+  API_SECRET_KEY: string;
+  GOCARDLESS_SECRET_ID: string;
+  GOCARDLESS_SECRET_KEY: string;
+  PLAID_CLIENT_ID: string;
+  PLAID_SECRET: string;
+  TYPESENSE_API_KEY: string;
+  TYPESENSE_ENDPOINT: string;
+};
+```
+
+## Error Handling
+```typescript
+// Custom error class
+export class ProviderError extends Error {
+  code: string;
+
+  constructor({ message, code }: { message: string; code: string }) {
+    super(message);
+    this.code = this.setCode(code);
+  }
+
+  setCode(code: string) {
+    switch (code) {
+      case "ITEM_LOGIN_REQUIRED":
+      case "AccessExpiredError":
+        return "disconnected";
+      default:
+        return "unknown";
+    }
+  }
+}
+
+// Error response helper
+export function createErrorResponse(error: any) {
+  if (error instanceof ProviderError) {
+    return {
+      message: error.message,
+      code: error.code,
+    };
+  }
+  
+  return {
+    message: "Internal server error",
+    code: "internal_error",
+  };
+}
+```
+
+## AI Integration
+```typescript
+// Transaction enrichment with AI
+export async function enrichTransactionWithLLM(
+  c: Context<{ Bindings: Bindings }>,
+  data: TransactionData,
+) {
+  const model = createWorkersAI({ binding: c.env.AI });
+  
+  const result = await generateObject({
+    mode: "json",
+    model: model("@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+    temperature: 0,
+    maxTokens: 2048,
+    prompt: `${prompt}\n\nTransaction: ${JSON.stringify(data)}`,
+    schema: OutputSchema,
+  });
+
+  return result.object;
+}
+```
+
+## Search Integration
+```typescript
+// Typesense client
+export function SearchClient(envs: Bindings) {
+  return new Typesense.Client({
+    nearestNode: {
+      host: envs.TYPESENSE_ENDPOINT!,
+      port: 443,
+      protocol: "https",
+    },
+    nodes: [
+      { host: envs.TYPESENSE_ENDPOINT_US!, port: 443, protocol: "https" },
+      { host: envs.TYPESENSE_ENDPOINT_EU!, port: 443, protocol: "https" },
+    ],
+    apiKey: envs.TYPESENSE_API_KEY,
+  });
+}
+```
+
+## Development Guidelines
+- **TypeScript**: Use strict typing for all code
+- **OpenAPI**: Document all endpoints with Zod schemas
+- **Error Handling**: Consistent error responses across all providers
+- **Security**: Bearer token authentication for all non-public endpoints
+- **Performance**: Leverage Cloudflare's edge network for low latency
+- **Monitoring**: Implement comprehensive logging and health checks
+
+## Banking Provider Integration
+- **Plaid**: US banking integration
+- **Teller**: Alternative US banking provider
+- **GoCardless**: European banking integration
+- **EnableBanking**: European open banking
+
+## Data Flow
+1. **Request**: Client sends API request to engine
+2. **Authentication**: Validate API key and permissions
+3. **Provider Selection**: Route to appropriate banking provider
+4. **Transform**: Convert provider-specific data to unified format
+5. **Enrichment**: Apply AI-powered transaction categorization
+6. **Response**: Return standardized data to client
+
+## Caching Strategy
+- **KV Storage**: Cache provider responses and enrichments
+- **TTL**: Implement appropriate cache expiration
+- **Invalidation**: Clear cache on data updates
+- **Performance**: Reduce external API calls through intelligent caching
+
+## Deployment
+- **Wrangler**: Use `wrangler deploy` for production deployments
+- **Environments**: Separate staging and production configurations
+- **Secrets**: Manage sensitive data through Wrangler secrets
+- **Monitoring**: Use Cloudflare Analytics for performance insights

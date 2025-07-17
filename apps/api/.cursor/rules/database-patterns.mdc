@@ -1,0 +1,72 @@
+---
+globs: src/db/**/*.ts
+description: Database patterns and conventions for the API
+---
+
+# Database Patterns and Conventions
+
+## Database Structure
+- **Schema**: [src/db/schema.ts](mdc:src/db/schema.ts) - Central schema definitions using Drizzle ORM
+- **Queries**: [src/db/queries/](mdc:src/db/queries/) - Organized by feature/entity
+- **Connection**: [src/db/index.ts](mdc:src/db/index.ts) - Database connection with replica support
+- **Replicas**: [src/db/replicas.ts](mdc:src/db/replicas.ts) - Read replica management
+
+## Query Function Patterns
+All query functions follow consistent patterns:
+
+### Function Naming
+- `create{Entity}` - Create operations
+- `update{Entity}` - Update operations  
+- `delete{Entity}` - Delete operations
+- `get{Entity}` - Single entity retrieval
+- `get{Entity}s` - Multiple entities retrieval
+- `get{Entity}By{Field}` - Query by specific field
+
+### Parameter Patterns
+```typescript
+// Create functions
+export async function createBankAccount(
+  db: Database,
+  params: CreateBankAccountParams,
+) {
+  // Implementation
+}
+
+// Always include teamId for multi-tenancy
+type CreateBankAccountParams = {
+  teamId: string;
+  userId: string;
+  // ... other fields
+};
+```
+
+### Database Operations
+- Always use `db` parameter as first argument
+- Include `teamId` filtering for multi-tenancy
+- Use `and()` for combining conditions
+- Use `returning()` to get created/updated records
+- Handle both single and batch operations
+
+### Error Handling
+- Use Drizzle's built-in error handling
+- Return null/undefined for not found cases
+- Let database constraints handle validation
+
+## Multi-Tenancy
+- Every table includes `teamId` field
+- Always filter by `teamId` in queries
+- Use `and(eq(table.teamId, teamId))` pattern consistently
+
+## Database Connection Management
+- Primary database for writes
+- Read replicas for read operations
+- Automatic failover to primary if replica fails
+- Regional replica selection based on deployment
+
+## Schema Conventions
+- Use `uuid()` for primary keys with `defaultRandom()`
+- Use `timestamp()` with timezone for dates
+- Use `text()` for strings, `jsonb()` for JSON data
+- Include `createdAt` and `updatedAt` timestamps
+- Use foreign keys with cascade deletes where appropriate
+- Use indexes for frequently queried fields
