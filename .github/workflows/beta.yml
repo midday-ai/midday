@@ -266,7 +266,7 @@ jobs:
     name: 🚀 Deploy Engine (Beta)
     runs-on: ubuntu-latest
     needs: [detect-changes, quality-checks, build-shared]
-    if: needs.quality-checks.result == 'success' && (needs.detect-changes.outputs.has-engine-changes == 'true' || github.event.inputs.force_deploy == 'true') && (needs.build-shared.result == 'success' || needs.build-shared.result == 'skipped')
+    if: needs.quality-checks.result == 'success' && (needs.detect-changes.outputs.has-engine-changes == 'true' || github.event.inputs.force_deploy == 'true') && (always() && (needs.build-shared.result == 'success' || needs.build-shared.result == 'skipped' || !needs.build-shared.result))
     environment: beta
     outputs:
       deployment-url: ${{ steps.deploy.outputs.deployment-url }}
@@ -309,11 +309,6 @@ jobs:
           wranglerVersion: "3.93.0"
           command: deploy --minify src/index.ts --env staging
 
-      - name: 🏥 Health check
-        run: |
-          sleep 30
-          curl -f https://staging-engine.midday.ai/health || echo "Health check failed, but continuing..."
-
       - name: 📢 Deployment notification
         if: always()
         uses: 8398a7/action-slack@v3
@@ -323,7 +318,7 @@ jobs:
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
         continue-on-error: true
 
-  # Deploy API second (dependency for dashboard)
+  # Deploy API (waits for Engine only if Engine has changes)
   deploy-api:
     name: 🚀 Deploy API (Beta)
     runs-on: ubuntu-latest
@@ -371,11 +366,6 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
-      - name: 🏥 Health check
-        run: |
-          sleep 60
-          curl -f https://preview-api.midday.ai/health || echo "Health check failed, but continuing..."
-
       - name: 📢 Deployment notification
         if: always()
         uses: 8398a7/action-slack@v3
@@ -385,7 +375,7 @@ jobs:
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
         continue-on-error: true
 
-  # Deploy Dashboard (depends on API)
+  # Deploy Dashboard (waits for API only if API has changes)
   deploy-dashboard:
     name: 🚀 Deploy Dashboard (Beta)
     runs-on: ubuntu-latest
@@ -446,11 +436,6 @@ jobs:
           bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set $url beta.midday.ai
           echo "deployment-url=https://beta.midday.ai" >> $GITHUB_OUTPUT
 
-      - name: 🏥 Health check
-        run: |
-          sleep 30
-          curl -f https://beta.midday.ai/api/health || echo "Health check failed, but continuing..."
-
       - name: 📢 Deployment notification
         if: always()
         uses: 8398a7/action-slack@v3
@@ -500,11 +485,6 @@ jobs:
         run: |
           url=$(bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }})
           echo "deployment-url=$url" >> $GITHUB_OUTPUT
-
-      - name: 🏥 Health check
-        run: |
-          sleep 30
-          curl -f ${{ steps.deploy.outputs.deployment-url }} || echo "Health check failed, but continuing..."
 
       - name: 📢 Deployment notification
         if: always()
@@ -556,11 +536,6 @@ jobs:
           url=$(bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }})
           echo "deployment-url=$url" >> $GITHUB_OUTPUT
 
-      - name: 🏥 Health check
-        run: |
-          sleep 30
-          curl -f ${{ steps.deploy.outputs.deployment-url }} || echo "Health check failed, but continuing..."
-
       - name: 📢 Deployment notification
         if: always()
         uses: 8398a7/action-slack@v3
@@ -574,7 +549,7 @@ jobs:
   post-deployment:
     name: 📊 Post-Deployment
     runs-on: ubuntu-latest
-    needs: [deploy-engine, deploy-api, deploy-dashboard, deploy-website, deploy-email]
+    needs: [deploy-engine, deploy-api, deploy-dashboard]
     if: always()
     steps:
       - name: 🔍 Integration tests
