@@ -68,6 +68,8 @@ test("transformTransaction should correctly transform transaction data", () => {
     balance: 100.5,
     team_id: "team123",
     status: "posted",
+    tax_rate: null,
+    tax_type: null,
   });
 });
 
@@ -138,5 +140,7 @@ test("transformTransaction should handle null values correctly", () => {
     balance: null,
     team_id: "team456",
     status: "posted",
+    tax_rate: null,
+    tax_type: null,
   });
 });

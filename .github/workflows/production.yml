@@ -1,9 +1,12 @@
-name: Production Deployment
+name: Production Deployment (Speed Optimized)
 
 env:
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
   NODE_OPTIONS: --max-old-space-size=8192
+  # Speed optimizations
+  TURBO_REMOTE_CACHE_TIMEOUT: 60
+  TURBO_REMOTE_CACHE_READ_ONLY: false
 
 on:
   push:
@@ -133,7 +136,8 @@ jobs:
 
       - name: 📦 Install dependencies (if cache miss)
         if: needs.setup.outputs.cache-hit != 'true'
-        run: bun install --frozen-lockfile
+        run: |
+          bun install --frozen-lockfile --concurrent=10
 
       - name: 🔒 Security audit
         run: |
@@ -216,14 +220,25 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
 
-      - name: 🏗️ Build Engine
-        run: bunx turbo build --filter=@midday/engine
+      - name: 🏗️ Build Engine and Dependencies (parallel)
+        run: |
+          # Build all core packages in parallel with optimal concurrency
+          bunx turbo build --filter=@midday/engine --filter=@midday/engine-client --filter=@midday/utils --filter=@midday/ui --concurrency=50%
 
       - name: 📦 Cache Engine build
         uses: actions/cache@v4
         with:
           path: apps/engine/dist
           key: engine-build-${{ github.sha }}
+
+      - name: 📦 Cache Core Packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/engine-client/dist
+            packages/utils/dist
+            packages/ui/dist
+          key: core-packages-${{ github.sha }}
 
   # Deploy Engine (first in dependency chain)
   deploy-engine:
