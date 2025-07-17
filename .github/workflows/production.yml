@@ -1,12 +1,9 @@
-name: Production Deployment (Speed Optimized)
+name: Production Deployment
 
 env:
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
   NODE_OPTIONS: --max-old-space-size=8192
-  # Speed optimizations
-  TURBO_REMOTE_CACHE_TIMEOUT: 60
-  TURBO_CACHE: remote
 
 on:
   push:

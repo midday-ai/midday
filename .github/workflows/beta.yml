@@ -1,12 +1,9 @@
-name: Beta Deployment (Speed Optimized)
+name: Beta Deployment
 
 env:
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
   NODE_OPTIONS: --max-old-space-size=8192
-  # Speed optimizations
-  TURBO_REMOTE_CACHE_TIMEOUT: 60
-  TURBO_CACHE: remote
 
 on:
   push:
@@ -592,14 +589,14 @@ jobs:
 
       - name: 📈 Deployment metrics
         run: |
-          echo "## Beta Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Service | Status | URL | Changes |" >> $GITHUB_STEP_SUMMARY
-          echo "|---------|--------|-----|---------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Engine | ${{ needs.deploy-engine.result || 'Skipped' }} | ${{ needs.deploy-engine.outputs.deployment-url || 'N/A' }} | ${{ needs.detect-changes.outputs.has-engine-changes }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| API | ${{ needs.deploy-api.result || 'Skipped' }} | ${{ needs.deploy-api.outputs.deployment-url || 'N/A' }} | ${{ needs.detect-changes.outputs.has-api-changes }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Dashboard | ${{ needs.deploy-dashboard.result || 'Skipped' }} | ${{ needs.deploy-dashboard.outputs.deployment-url || 'N/A' }} | ${{ needs.detect-changes.outputs.has-dashboard-changes }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Website | ${{ needs.deploy-website.result || 'Skipped' }} | ${{ needs.deploy-website.outputs.deployment-url || 'N/A' }} | ${{ needs.detect-changes.outputs.has-website-changes }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Email | ${{ needs.deploy-email.result || 'Skipped' }} | ${{ needs.deploy-email.outputs.deployment-url || 'N/A' }} | ${{ needs.detect-changes.outputs.has-email-changes }} |" >> $GITHUB_STEP_SUMMARY
+           echo "## Beta Deployment Summary" >> $GITHUB_STEP_SUMMARY
+           echo "| Service | Status | URL | Changes |" >> $GITHUB_STEP_SUMMARY
+           echo "|---------|--------|-----|---------|" >> $GITHUB_STEP_SUMMARY
+           echo "| Engine | ${{ needs.deploy-engine.result || 'Skipped' }} | ${{ needs.deploy-engine.outputs.deployment-url || 'N/A' }} | ${{ needs.detect-changes.outputs.has-engine-changes }} |" >> $GITHUB_STEP_SUMMARY
+           echo "| API | ${{ needs.deploy-api.result || 'Skipped' }} | ${{ needs.deploy-api.outputs.deployment-url || 'N/A' }} | ${{ needs.detect-changes.outputs.has-api-changes }} |" >> $GITHUB_STEP_SUMMARY
+           echo "| Dashboard | ${{ needs.deploy-dashboard.result || 'Skipped' }} | ${{ needs.deploy-dashboard.outputs.deployment-url || 'N/A' }} | ${{ needs.detect-changes.outputs.has-dashboard-changes }} |" >> $GITHUB_STEP_SUMMARY
+           echo "| Website | ${{ needs.deploy-website.result || 'Skipped' }} | ${{ needs.deploy-website.outputs.deployment-url || 'N/A' }} | ${{ needs.detect-changes.outputs.has-website-changes }} |" >> $GITHUB_STEP_SUMMARY
+           echo "| Email | ${{ needs.deploy-email.result || 'Skipped' }} | ${{ needs.deploy-email.outputs.deployment-url || 'N/A' }} | ${{ needs.detect-changes.outputs.has-email-changes }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: 📢 Final deployment notification
         uses: 8398a7/action-slack@v3
