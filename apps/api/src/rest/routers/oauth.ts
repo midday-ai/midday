@@ -38,7 +38,7 @@ app.use(
   "*",
   rateLimiter({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 50, // per IP
+    limit: 20, // per IP
     keyGenerator: (c) =>
       c.req.header("x-forwarded-for") || c.req.header("x-real-ip") || "unknown",
     statusCode: 429,
@@ -533,14 +533,26 @@ app.openapi(
 
     // Validate client credentials
     const application = await getOAuthApplicationByClientId(db, client_id);
-    if (
-      !application ||
-      !application.active ||
-      !validateClientCredentials(application, client_secret)
-    ) {
+    if (!application || !application.active) {
       throw new HTTPException(400, {
         message: "Invalid client credentials",
       });
+    }
+
+    // For public clients, client_secret should not be provided
+    if (application.isPublic) {
+      if (client_secret) {
+        throw new HTTPException(400, {
+          message: "Public clients must not send client_secret",
+        });
+      }
+    } else {
+      // For confidential clients, validate client_secret
+      if (!validateClientCredentials(application, client_secret)) {
+        throw new HTTPException(400, {
+          message: "Invalid client credentials",
+        });
+      }
     }
 
     // Revoke token
