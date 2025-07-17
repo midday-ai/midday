@@ -273,7 +273,7 @@ app.openapi(
         const html = await render(
           AppInstalledEmail({
             email: session.user.email,
-            teamName: userTeam.name,
+            teamName: userTeam.name!,
             appName: application.name,
             locale: "en",
           }),
@@ -372,14 +372,26 @@ app.openapi(
 
     // Validate client credentials
     const application = await getOAuthApplicationByClientId(db, client_id);
-    if (
-      !application ||
-      !application.active ||
-      !validateClientCredentials(application, client_secret)
-    ) {
+    if (!application || !application.active) {
       throw new HTTPException(400, {
         message: "Invalid client credentials",
       });
+    }
+
+    // For public clients, client_secret should not be provided
+    if (application.isPublic) {
+      if (client_secret) {
+        throw new HTTPException(400, {
+          message: "Public clients must not send client_secret",
+        });
+      }
+    } else {
+      // For confidential clients, validate client_secret
+      if (!validateClientCredentials(application, client_secret)) {
+        throw new HTTPException(400, {
+          message: "Invalid client credentials",
+        });
+      }
     }
 
     if (grant_type === "authorization_code") {
@@ -394,6 +406,7 @@ app.openapi(
         db,
         code,
         redirect_uri,
+        application.id,
         code_verifier,
       );
 

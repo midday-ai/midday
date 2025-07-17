@@ -17,8 +17,13 @@ import { usersRouter } from "./users";
 
 const routers = new OpenAPIHono();
 
+// Mount OAuth routes first (publicly accessible)
+routers.route("/oauth", oauthRouter);
+
+// Apply protected middleware to all subsequent routes
 routers.use(...protectedMiddleware);
 
+// Mount protected routes
 routers.route("/transactions", transactionsRouter);
 routers.route("/teams", teamsRouter);
 routers.route("/users", usersRouter);
@@ -32,6 +37,5 @@ routers.route("/search", searchRouter);
 routers.route("/metrics", metricsRouter);
 routers.route("/tracker-projects", trackerProjectsRouter);
 routers.route("/tracker-entries", trackerEntriesRouter);
-routers.route("/oauth", oauthRouter);
 
 export { routers };

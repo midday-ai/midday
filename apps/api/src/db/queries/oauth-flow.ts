@@ -73,6 +73,7 @@ export async function exchangeAuthorizationCode(
   db: Database,
   code: string,
   redirectUri: string,
+  applicationId: string,
   codeVerifier?: string,
 ) {
   // Get the authorization code
@@ -95,6 +96,11 @@ export async function exchangeAuthorizationCode(
 
   if (!authCode) {
     throw new Error("Invalid authorization code");
+  }
+
+  // Validate that the authorization code belongs to the same application
+  if (authCode.applicationId !== applicationId) {
+    throw new Error("Authorization code does not belong to this application");
   }
 
   if (authCode.used) {
@@ -294,6 +300,25 @@ export async function refreshAccessToken(
     throw new Error("Refresh token expired");
   }
 
+  // Validate scopes if provided
+  let validatedScopes = existingToken.scopes;
+  if (scopes && scopes.length > 0) {
+    // Ensure requested scopes are a subset of the original token's scopes
+    const originalScopes = new Set(existingToken.scopes);
+    const requestedScopes = new Set(scopes);
+
+    for (const scope of requestedScopes) {
+      if (!originalScopes.has(scope)) {
+        throw new Error(
+          `Requested scope '${scope}' is not authorized for this token`,
+        );
+      }
+    }
+
+    // Use the validated subset of scopes
+    validatedScopes = scopes;
+  }
+
   // Revoke the old token
   await db
     .update(oauthAccessTokens)
@@ -308,7 +333,7 @@ export async function refreshAccessToken(
     applicationId,
     userId: existingToken.userId,
     teamId: existingToken.teamId,
-    scopes: scopes ?? existingToken.scopes,
+    scopes: validatedScopes,
   });
 
   return newToken;
