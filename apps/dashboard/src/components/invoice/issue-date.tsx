@@ -1,10 +1,10 @@
 import { useTRPC } from "@/trpc/client";
-import { TZDate } from "@date-fns/tz";
 import { Calendar } from "@midday/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
+import { TZDate } from "react-day-picker";
 import { useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
@@ -51,6 +51,7 @@ export function IssueDate() {
             selected={issueDate ? new TZDate(issueDate, "UTC") : undefined}
             onSelect={handleSelect}
             initialFocus
+            timeZone="UTC"
           />
         </PopoverContent>
       </Popover>

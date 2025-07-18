@@ -4,6 +4,7 @@ import {
   chartPeriodOptions,
   useMetricsParams,
 } from "@/hooks/use-metrics-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import { Icons } from "@midday/ui/icons";
@@ -26,6 +27,7 @@ type Props = {
 
 export function ChartPeriod({ disabled }: Props) {
   const { params, setParams } = useMetricsParams();
+  const { data: user } = useUserQuery();
 
   const handleChangePeriod = (
     range: DateRange | undefined,
@@ -112,6 +114,8 @@ export function ChartPeriod({ disabled }: Props) {
             initialFocus
             toDate={new Date()}
             onSelect={handleCalendarSelect}
+            weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
+            timeZone="UTC"
           />
         </PopoverContent>
       </Popover>

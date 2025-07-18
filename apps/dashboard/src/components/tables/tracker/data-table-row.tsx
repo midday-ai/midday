@@ -1,5 +1,6 @@
 "use client";
 
+import { TrackerCreateInvoice } from "@/components/tracker-create-invoice";
 import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
@@ -210,6 +211,8 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
           >
             Edit
           </DropdownMenuItem>
+
+          <TrackerCreateInvoice projectId={row.id} projectName={row.name} />
 
           <TrackerExportCSV name={row.name} projectId={row.id} />
 

@@ -1,3 +1,4 @@
+import { getCustomerById } from "@api/db/queries/customers";
 import { getInvoiceTemplate } from "@api/db/queries/invoice-templates";
 import {
   deleteInvoice,
@@ -12,6 +13,8 @@ import {
   updateInvoice,
 } from "@api/db/queries/invoices";
 import { getTeamById } from "@api/db/queries/teams";
+import { getTrackerRecordsByRange } from "@api/db/queries/tracker-entries";
+import { getTrackerProjectById } from "@api/db/queries/tracker-projects";
 import { getUserById } from "@api/db/queries/users";
 import {
   createInvoiceSchema,
@@ -42,6 +45,7 @@ import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 import { addMonths } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 
 const defaultTemplate = {
   title: "Invoice",
@@ -139,6 +143,244 @@ export const invoiceRouter = createTRPCRouter({
       });
     }),
 
+  createFromTracker: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid(),
+        dateFrom: z.string(),
+        dateTo: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
+      const { projectId, dateFrom, dateTo } = input;
+
+      // Get project data and tracker entries
+      const [projectData, trackerData] = await Promise.all([
+        getTrackerProjectById(db, { id: projectId, teamId: teamId! }),
+        getTrackerRecordsByRange(db, {
+          teamId: teamId!,
+          projectId,
+          from: dateFrom,
+          to: dateTo,
+        }),
+      ]);
+
+      if (!projectData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "PROJECT_NOT_FOUND",
+        });
+      }
+
+      // Check if project is billable
+      if (!projectData.billable) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "PROJECT_NOT_BILLABLE",
+        });
+      }
+
+      // Check if project has a rate
+      if (!projectData.rate || projectData.rate <= 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "PROJECT_NO_RATE",
+        });
+      }
+
+      // Calculate total hours from tracker entries
+      const allEntries = Object.values(trackerData.result || {}).flat();
+      const totalDuration = allEntries.reduce(
+        (sum, entry) => sum + (entry.duration || 0),
+        0,
+      );
+      const totalHours = Math.round((totalDuration / 3600) * 100) / 100;
+
+      if (totalHours === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "NO_TRACKED_HOURS",
+        });
+      }
+
+      // Get default invoice settings and customer details
+      const [nextInvoiceNumber, template, team, user, fullCustomer] =
+        await Promise.all([
+          getNextInvoiceNumber(db, teamId!),
+          getInvoiceTemplate(db, teamId!),
+          getTeamById(db, teamId!),
+          getUserById(db, session?.user.id!),
+          projectData.customerId
+            ? getCustomerById(db, {
+                id: projectData.customerId,
+                teamId: teamId!,
+              })
+            : null,
+        ]);
+
+      const invoiceId = uuidv4();
+      const currency = projectData.currency || team?.baseCurrency || "USD";
+      const amount = totalHours * Number(projectData.rate);
+
+      // Create draft invoice with tracker data
+      const templateData = {
+        ...defaultTemplate,
+        currency: currency.toUpperCase(),
+        ...(template
+          ? Object.fromEntries(
+              Object.entries(template).map(([key, value]) => [
+                key,
+                value === null ? undefined : value,
+              ]),
+            )
+          : {}),
+        size:
+          (template?.size as "a4" | "letter" | undefined) ??
+          defaultTemplate.size,
+      };
+
+      const invoiceData = {
+        id: invoiceId,
+        teamId: teamId!,
+        userId: session?.user.id!,
+        customerId: projectData.customerId,
+        customerName: fullCustomer?.name,
+        invoiceNumber: nextInvoiceNumber,
+        currency: currency.toUpperCase(),
+        amount,
+        lineItems: [
+          {
+            name: projectData.name,
+            quantity: totalHours,
+            price: Number(projectData.rate),
+            vat: 0,
+            // unit: "Hours",
+          },
+        ],
+        issueDate: new Date().toISOString(),
+        dueDate: addMonths(new Date(), 1).toISOString(),
+        template: templateData,
+        fromDetails: template?.fromDetails,
+        paymentDetails: template?.paymentDetails,
+        customerDetails: fullCustomer
+          ? JSON.stringify({
+              type: "doc",
+              content: [
+                {
+                  type: "paragraph",
+                  content: [
+                    {
+                      text: fullCustomer.name,
+                      type: "text",
+                    },
+                  ],
+                },
+                ...(fullCustomer.addressLine1
+                  ? [
+                      {
+                        type: "paragraph",
+                        content: [
+                          {
+                            text: fullCustomer.addressLine1,
+                            type: "text",
+                          },
+                        ],
+                      },
+                    ]
+                  : []),
+                ...(fullCustomer.addressLine2
+                  ? [
+                      {
+                        type: "paragraph",
+                        content: [
+                          {
+                            text: fullCustomer.addressLine2,
+                            type: "text",
+                          },
+                        ],
+                      },
+                    ]
+                  : []),
+                ...(fullCustomer.zip || fullCustomer.city
+                  ? [
+                      {
+                        type: "paragraph",
+                        content: [
+                          {
+                            text: `${fullCustomer.zip || ""} ${fullCustomer.city || ""}`.trim(),
+                            type: "text",
+                          },
+                        ],
+                      },
+                    ]
+                  : []),
+                ...(fullCustomer.country
+                  ? [
+                      {
+                        type: "paragraph",
+                        content: [
+                          {
+                            text: fullCustomer.country,
+                            type: "text",
+                          },
+                        ],
+                      },
+                    ]
+                  : []),
+                ...(fullCustomer.email
+                  ? [
+                      {
+                        type: "paragraph",
+                        content: [
+                          {
+                            text: fullCustomer.email,
+                            type: "text",
+                          },
+                        ],
+                      },
+                    ]
+                  : []),
+                ...(fullCustomer.phone
+                  ? [
+                      {
+                        type: "paragraph",
+                        content: [
+                          {
+                            text: fullCustomer.phone,
+                            type: "text",
+                          },
+                        ],
+                      },
+                    ]
+                  : []),
+                ...(fullCustomer.website
+                  ? [
+                      {
+                        type: "paragraph",
+                        content: [
+                          {
+                            text: fullCustomer.website,
+                            type: "text",
+                          },
+                        ],
+                      },
+                    ]
+                  : []),
+              ],
+            })
+          : null,
+        noteDetails: null,
+        topBlock: null,
+        bottomBlock: null,
+        vat: null,
+        tax: null,
+        discount: null,
+        subtotal: null,
+      };
+
+      return draftInvoice(db, invoiceData);
+    }),
+
   defaultSettings: protectedProcedure.query(
     async ({ ctx: { db, teamId, session, geo } }) => {
       // Fetch invoice number, template, and team details concurrently
@@ -156,7 +398,7 @@ export const invoiceRouter = createTRPCRouter({
       const dateFormat =
         template?.dateFormat ?? user?.dateFormat ?? defaultTemplate.dateFormat;
       const logoUrl = template?.logoUrl ?? defaultTemplate.logoUrl;
-      const countryCode = geo.country ?? "US";
+      const countryCode = geo?.country ?? "US";
 
       // Default to letter size for US/CA, A4 for rest of world
       const size = ["US", "CA"].includes(countryCode) ? "letter" : "a4";
@@ -188,7 +430,7 @@ export const invoiceRouter = createTRPCRouter({
         subtotalLabel: template?.subtotalLabel ?? defaultTemplate.subtotalLabel,
         issueDateLabel:
           template?.issueDateLabel ?? defaultTemplate.issueDateLabel,
-        total_summary_label:
+        totalSummaryLabel:
           template?.totalSummaryLabel ?? defaultTemplate.totalSummaryLabel,
         dueDateLabel: template?.dueDateLabel ?? defaultTemplate.dueDateLabel,
         discountLabel: template?.discountLabel ?? defaultTemplate.discountLabel,
