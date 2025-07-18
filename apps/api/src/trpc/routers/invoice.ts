@@ -204,12 +204,11 @@ export const invoiceRouter = createTRPCRouter({
       }
 
       // Get default invoice settings and customer details
-      const [nextInvoiceNumber, template, team, user, fullCustomer] =
+      const [nextInvoiceNumber, template, team, fullCustomer] =
         await Promise.all([
           getNextInvoiceNumber(db, teamId!),
           getInvoiceTemplate(db, teamId!),
           getTeamById(db, teamId!),
-          getUserById(db, session?.user.id!),
           projectData.customerId
             ? getCustomerById(db, {
                 id: projectData.customerId,
@@ -234,9 +233,16 @@ export const invoiceRouter = createTRPCRouter({
               ]),
             )
           : {}),
-        size:
-          (template?.size as "a4" | "letter" | undefined) ??
-          defaultTemplate.size,
+        size: (template?.size === "a4" || template?.size === "letter"
+          ? template.size
+          : defaultTemplate.size) as "a4" | "letter",
+        deliveryType: (template?.deliveryType === "create" ||
+        template?.deliveryType === "create_and_send"
+          ? template.deliveryType
+          : defaultTemplate.deliveryType) as
+          | "create"
+          | "create_and_send"
+          | undefined,
       };
 
       const invoiceData = {
@@ -254,14 +260,17 @@ export const invoiceRouter = createTRPCRouter({
             quantity: totalHours,
             price: Number(projectData.rate),
             vat: 0,
-            // unit: "Hours",
           },
         ],
         issueDate: new Date().toISOString(),
         dueDate: addMonths(new Date(), 1).toISOString(),
         template: templateData,
-        fromDetails: template?.fromDetails,
-        paymentDetails: template?.paymentDetails,
+        fromDetails: parseInputValue(
+          template?.fromDetails as string | null | undefined,
+        ),
+        paymentDetails: parseInputValue(
+          template?.paymentDetails as string | null | undefined,
+        ),
         customerDetails: fullCustomer
           ? JSON.stringify({
               type: "doc",
