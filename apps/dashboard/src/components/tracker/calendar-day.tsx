@@ -26,6 +26,7 @@ type CalendarDayProps = {
   handleMouseDown: (date: TZDate) => void;
   handleMouseEnter: (date: TZDate) => void;
   handleMouseUp: () => void;
+  onEventClick?: (eventId: string, date: TZDate) => void;
 };
 
 export function CalendarDay({
@@ -40,6 +41,7 @@ export function CalendarDay({
   handleMouseDown,
   handleMouseEnter,
   handleMouseUp,
+  onEventClick,
 }: CalendarDayProps) {
   const isCurrentMonth = date.getMonth() === currentDate.getMonth();
   const formattedDate = formatISO(date, { representation: "date" });
@@ -88,6 +90,7 @@ export function CalendarDay({
     const target = event.target as HTMLElement;
     const isContinuation = target.closest('[data-is-continuation="true"]');
     const isShowAllEvents = target.closest('[data-show-all-events="true"]');
+    const eventTarget = target.closest("[data-event-id]");
 
     if (isContinuation) {
       // If this is a continuation event, select the previous day
@@ -97,6 +100,15 @@ export function CalendarDay({
       previousDay.setDate(previousDay.getDate() - 1);
       const previousDayTZ = new TZDate(previousDay, "UTC");
       handleMouseDown(previousDayTZ);
+    } else if (eventTarget && onEventClick) {
+      // Handle event click on current day
+      const eventId = eventTarget.getAttribute("data-event-id");
+      if (eventId) {
+        event.preventDefault();
+        event.stopPropagation();
+        onEventClick(eventId, date);
+        return;
+      }
     } else {
       // Normal behavior - select current day (including for "show all events" clicks)
       handleMouseDown(date);
@@ -129,6 +141,7 @@ export function CalendarDay({
         currentDate={new Date(date)}
         currentTZDate={date}
         hasContinuationEvents={hasContinuationEvents()}
+        onEventClick={onEventClick}
       />
     </div>
   );

@@ -15,6 +15,7 @@ type Props = {
   currentDate: Date;
   currentTZDate?: TZDate;
   hasContinuationEvents?: boolean;
+  onEventClick?: (eventId: string, date: TZDate) => void;
 };
 
 export function TrackerEvents({
@@ -24,6 +25,7 @@ export function TrackerEvents({
   currentDate,
   currentTZDate,
   hasContinuationEvents,
+  onEventClick,
 }: Props) {
   // Process entries to handle midnight spanning
   const processedEntries = (() => {
@@ -123,7 +125,7 @@ export function TrackerEvents({
               key={entry.id}
               className={cn(
                 "text-xs bg-[#F0F0F0] dark:bg-[#1D1D1D] text-[#606060] dark:text-[#878787] p-1 w-full text-left line-clamp-1 min-h-[23px]",
-                entry.isContinuation && "cursor-pointer", // Only show cursor for continuation events
+                (entry.isContinuation || onEventClick) && "cursor-pointer", // Show cursor for continuation events or when event click is enabled
                 isToday && "!bg-background",
               )}
               data-is-continuation={entry.isContinuation}
