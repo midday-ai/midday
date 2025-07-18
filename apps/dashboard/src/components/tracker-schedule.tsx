@@ -723,90 +723,148 @@ export function TrackerSchedule() {
                 />
               </React.Fragment>
             ))}
-            {data?.map((event) => {
-              const startSlot = safeGetSlot(event.start);
-              let endSlot = safeGetSlot(event.stop);
+            {(() => {
+              // Process events to handle midnight spanning
+              const processedEntries = [];
 
-              // Handle midnight crossing - if end slot is before start slot,
-              // it means the entry crosses midnight, so extend to end of day
-              if (endSlot < startSlot) {
-                endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+              if (data) {
+                for (const event of data) {
+                  const startDate = createSafeDate(event.start);
+                  const endDate = createSafeDate(event.stop);
+
+                  // Check if this entry spans midnight by comparing dates
+                  const startDateStr = format(startDate, "yyyy-MM-dd");
+                  const endDateStr = format(endDate, "yyyy-MM-dd");
+                  const spansMidnight = startDateStr !== endDateStr;
+
+                  if (spansMidnight) {
+                    // This is a split entry - only show the first part (with → arrow)
+                    const currentSelectedDate =
+                      selectedDate || format(new Date(), "yyyy-MM-dd");
+
+                    if (startDateStr === currentSelectedDate) {
+                      // This is the first part of the entry (ends at midnight)
+                      const endOfDay = new Date(startDate);
+                      endOfDay.setHours(23, 59, 59, 999);
+                      const firstPartDuration =
+                        Math.floor(
+                          (endOfDay.getTime() - startDate.getTime()) / 1000,
+                        ) + 1;
+
+                      processedEntries.push({
+                        ...event,
+                        duration: firstPartDuration,
+                        isFirstPart: true,
+                        originalDuration: event.duration,
+                        displayStart: event.start,
+                        displayStop: endOfDay.toISOString(),
+                      });
+                    }
+                    // Skip the continuation part for the next day
+                  } else {
+                    // Normal entry that doesn't span midnight
+                    processedEntries.push({
+                      ...event,
+                      isFirstPart: false,
+                      originalDuration: event.duration,
+                      displayStart: event.start,
+                      displayStop: event.stop,
+                    });
+                  }
+                }
               }
 
-              const height = (endSlot - startSlot) * SLOT_HEIGHT;
+              return processedEntries.map((event) => {
+                const startSlot = safeGetSlot(event.displayStart);
+                let endSlot: number;
 
-              return (
-                <ContextMenu
-                  key={event.id}
-                  onOpenChange={(open) => {
-                    if (!open) {
-                      setTimeout(() => setIsContextMenuOpen(false), 50);
-                    } else {
-                      setIsContextMenuOpen(true);
-                    }
-                  }}
-                >
-                  <ContextMenuTrigger>
-                    <div
-                      onClick={() => handleEventClick(event)}
-                      className={cn(
-                        "absolute w-full bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
-                        selectedEvent?.id === event.id && "!text-primary",
-                        event.id !== NEW_EVENT_ID && "cursor-move",
-                      )}
-                      style={{
-                        top: `${startSlot * SLOT_HEIGHT}px`,
-                        height: `${height}px`,
-                      }}
-                      onMouseDown={(e) =>
-                        event.id !== NEW_EVENT_ID &&
-                        handleEventMoveStart(e, event)
+                // For midnight-spanning entries, extend to end of day
+                if (event.isFirstPart) {
+                  endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+                } else {
+                  endSlot = safeGetSlot(event.displayStop);
+                  // Handle midnight crossing - if end slot is before start slot,
+                  // it means the entry crosses midnight, so extend to end of day
+                  if (endSlot < startSlot) {
+                    endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+                  }
+                }
+
+                const height = (endSlot - startSlot) * SLOT_HEIGHT;
+
+                return (
+                  <ContextMenu
+                    key={`${event.id}-${event.isFirstPart ? "first" : "normal"}`}
+                    onOpenChange={(open) => {
+                      if (!open) {
+                        setTimeout(() => setIsContextMenuOpen(false), 50);
+                      } else {
+                        setIsContextMenuOpen(true);
                       }
-                    >
-                      <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
-                        <span>
-                          {event.trackerProject?.name || "No Project"} (
-                          {secondsToHoursAndMinutes(
-                            safeCalculateDuration(event.start, event.stop),
-                          )}
-                          )
-                        </span>
-                        {event?.trackerProject?.customer && (
-                          <span>{event.trackerProject.customer.name}</span>
+                    }}
+                  >
+                    <ContextMenuTrigger>
+                      <div
+                        onClick={() => handleEventClick(event)}
+                        className={cn(
+                          "absolute w-full bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
+                          selectedEvent?.id === event.id && "!text-primary",
+                          event.id !== NEW_EVENT_ID && "cursor-move",
                         )}
-                        <span>{event.description}</span>
+                        style={{
+                          top: `${startSlot * SLOT_HEIGHT}px`,
+                          height: `${height}px`,
+                        }}
+                        onMouseDown={(e) =>
+                          event.id !== NEW_EVENT_ID &&
+                          handleEventMoveStart(e, event)
+                        }
+                      >
+                        <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
+                          <span>
+                            {event.trackerProject?.name || "No Project"}
+                            {event.isFirstPart && " →"}
+                            {" ("}
+                            {secondsToHoursAndMinutes(event.duration ?? 0)}
+                            {")"}
+                          </span>
+                          {event?.trackerProject?.customer && (
+                            <span>{event.trackerProject.customer.name}</span>
+                          )}
+                          <span>{event.description}</span>
+                        </div>
+                        {event.id !== NEW_EVENT_ID && (
+                          <>
+                            <div
+                              className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize"
+                              onMouseDown={(e) =>
+                                handleEventResizeStart(e, event, "top")
+                              }
+                            />
+                            <div
+                              className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
+                              onMouseDown={(e) =>
+                                handleEventResizeStart(e, event, "bottom")
+                              }
+                            />
+                          </>
+                        )}
                       </div>
-                      {event.id !== NEW_EVENT_ID && (
-                        <>
-                          <div
-                            className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize"
-                            onMouseDown={(e) =>
-                              handleEventResizeStart(e, event, "top")
-                            }
-                          />
-                          <div
-                            className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
-                            onMouseDown={(e) =>
-                              handleEventResizeStart(e, event, "bottom")
-                            }
-                          />
-                        </>
-                      )}
-                    </div>
-                  </ContextMenuTrigger>
-                  <ContextMenuContent>
-                    <ContextMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteEvent(event.id);
-                      }}
-                    >
-                      Delete <ContextMenuShortcut>⌫</ContextMenuShortcut>
-                    </ContextMenuItem>
-                  </ContextMenuContent>
-                </ContextMenu>
-              );
-            })}
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                      <ContextMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteEvent(event.id);
+                        }}
+                      >
+                        Delete <ContextMenuShortcut>⌫</ContextMenuShortcut>
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
+                );
+              });
+            })()}
           </div>
         </div>
       </ScrollArea>

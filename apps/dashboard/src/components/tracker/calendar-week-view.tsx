@@ -232,8 +232,35 @@ export function CalendarWeekView({
                         height: `${height}px`,
                       }}
                       onMouseDown={handleEventClick}
-                      onMouseEnter={() => handleMouseEnter(day)}
+                      onMouseEnter={() => {
+                        if (entry.spansMidnight) {
+                          const allParts = document.querySelectorAll(
+                            `[data-event-id="${entry.event.id}"]`,
+                          );
+                          for (const part of allParts) {
+                            part.classList.add(
+                              "!bg-[#E8E8E8]",
+                              "dark:!bg-[#252525]",
+                            );
+                          }
+                        }
+                        handleMouseEnter(day);
+                      }}
+                      onMouseLeave={() => {
+                        if (entry.spansMidnight) {
+                          const allParts = document.querySelectorAll(
+                            `[data-event-id="${entry.event.id}"]`,
+                          );
+                          for (const part of allParts) {
+                            part.classList.remove(
+                              "!bg-[#E8E8E8]",
+                              "dark:!bg-[#252525]",
+                            );
+                          }
+                        }
+                      }}
                       onMouseUp={handleMouseUp}
+                      data-event-id={entry.event.id}
                     >
                       <div className="font-medium truncate leading-tight">
                         {entry.event.trackerProject?.name || "No Project"}
