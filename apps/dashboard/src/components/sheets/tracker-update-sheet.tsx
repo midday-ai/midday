@@ -103,11 +103,7 @@ export function TrackerUpdateSheet({ defaultCurrency }: Props) {
           </SheetHeader>
 
           <ScrollArea className="h-full p-0 pb-28" hideScrollbar>
-            <TrackerProjectForm
-              data={data}
-              key={data?.id}
-              defaultCurrency={defaultCurrency}
-            />
+            <TrackerProjectForm data={data} defaultCurrency={defaultCurrency} />
           </ScrollArea>
         </SheetContent>
       </Sheet>

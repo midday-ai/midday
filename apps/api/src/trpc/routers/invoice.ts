@@ -265,14 +265,10 @@ export const invoiceRouter = createTRPCRouter({
         issueDate: new Date().toISOString(),
         dueDate: addMonths(new Date(), 1).toISOString(),
         template: templateData,
-        fromDetails: parseInputValue(
-          template?.fromDetails as string | null | undefined,
-        ),
-        paymentDetails: parseInputValue(
-          template?.paymentDetails as string | null | undefined,
-        ),
+        fromDetails: template?.fromDetails || null,
+        paymentDetails: template?.paymentDetails || null,
         customerDetails: fullCustomer
-          ? JSON.stringify({
+          ? {
               type: "doc",
               content: [
                 {
@@ -376,7 +372,7 @@ export const invoiceRouter = createTRPCRouter({
                     ]
                   : []),
               ],
-            })
+            }
           : null,
         noteDetails: null,
         topBlock: null,

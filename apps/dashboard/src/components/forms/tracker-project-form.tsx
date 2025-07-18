@@ -33,6 +33,7 @@ import { SubmitButton } from "@midday/ui/submit-button";
 import { Switch } from "@midday/ui/switch";
 import { Textarea } from "@midday/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -122,6 +123,27 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
 
     upsertTrackerProjectMutation.mutate(formattedData);
   };
+
+  useEffect(() => {
+    if (data) {
+      form.reset({
+        id: data?.id,
+        name: data?.name ?? undefined,
+        description: data?.description ?? undefined,
+        rate: data?.rate ?? undefined,
+        status: data?.status ?? "in_progress",
+        billable: data?.billable ?? false,
+        estimate: data?.estimate ?? 0,
+        currency: data?.currency ?? defaultCurrency,
+        customerId: data?.customerId ?? undefined,
+        tags:
+          data?.tags?.map((tag) => ({
+            id: tag.id ?? "",
+            value: tag.name ?? "",
+          })) ?? undefined,
+      });
+    }
+  }, [data]);
 
   return (
     <Form {...form}>
