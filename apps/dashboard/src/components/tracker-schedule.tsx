@@ -51,9 +51,9 @@ type TrackerRecord = NonNullable<
 
 type ProcessedScheduleEntry = TrackerRecord & {
   isFirstPart: boolean;
-  originalDuration: number;
-  displayStart: string;
-  displayStop: string;
+  originalDuration: number | null;
+  displayStart: string | null;
+  displayStop: string | null;
 };
 
 const ROW_HEIGHT = 36;
@@ -745,9 +745,9 @@ export function TrackerSchedule() {
               ...event,
               duration: firstPartDuration,
               isFirstPart: true,
-              originalDuration: event.duration,
-              displayStart: event.start,
-              displayStop: endOfDay.toISOString(),
+              originalDuration: event.duration ?? null,
+              displayStart: event.start ?? null,
+              displayStop: endOfDay.toISOString() ?? null,
             });
           }
           // Skip the continuation part for the next day
@@ -756,9 +756,9 @@ export function TrackerSchedule() {
           processedEntries.push({
             ...event,
             isFirstPart: false,
-            originalDuration: event.duration,
-            displayStart: event.start,
-            displayStop: event.stop,
+            originalDuration: event.duration ?? null,
+            displayStart: event.start ?? null,
+            displayStop: event.stop ?? null,
           });
         }
       }
