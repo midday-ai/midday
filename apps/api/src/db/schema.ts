@@ -2008,8 +2008,13 @@ export const shortLinks = pgTable(
     id: uuid().defaultRandom().primaryKey().notNull(),
     shortId: text("short_id").notNull(),
     url: text().notNull(),
+    type: text("type"),
+    size: numericCasted("size", { precision: 10, scale: 2 }),
+    mimeType: text("mime_type"),
+    fileName: text("file_name"),
     teamId: uuid("team_id").notNull(),
     userId: uuid("user_id").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "string" }),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .defaultNow()
       .notNull(),
