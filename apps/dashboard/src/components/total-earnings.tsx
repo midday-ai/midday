@@ -3,6 +3,7 @@
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { secondsToHoursAndMinutes } from "@/utils/format";
 import { TZDate } from "@date-fns/tz";
 import {
   HoverCard,
@@ -90,7 +91,7 @@ export function TotalEarnings({ selectedView }: Props) {
       string,
       {
         name: string;
-        hours: number;
+        duration: number;
         amount: number;
         currency: string;
       }
@@ -108,16 +109,16 @@ export function TotalEarnings({ selectedView }: Props) {
         const projectName = entry.trackerProject.name;
         const currency = entry.trackerProject.currency || "USD";
         const rate = Number(entry.trackerProject.rate);
-        const hours = entry.duration / 3600; // Convert seconds to hours
+        const hours = entry.duration / 3600; // Convert seconds to hours for calculation
         const earning = rate * hours;
 
         if (projects[projectId]) {
-          projects[projectId].hours += hours;
+          projects[projectId].duration += entry.duration;
           projects[projectId].amount += earning;
         } else {
           projects[projectId] = {
             name: projectName,
-            hours,
+            duration: entry.duration,
             amount: earning,
             currency,
           };
@@ -173,7 +174,7 @@ export function TotalEarnings({ selectedView }: Props) {
                       </div>
                     </div>
                     <div className="text-[9px] text-muted-foreground">
-                      {project.hours.toFixed(1)}h
+                      {secondsToHoursAndMinutes(project.duration)}
                     </div>
                   </div>
                 ))}

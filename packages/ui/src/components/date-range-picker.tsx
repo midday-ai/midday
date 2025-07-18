@@ -43,6 +43,7 @@ export function DateRangePicker({
             selected={range}
             onSelect={onSelect}
             numberOfMonths={2}
+            timeZone="UTC"
           />
         </PopoverContent>
       </Popover>

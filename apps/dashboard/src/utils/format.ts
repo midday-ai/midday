@@ -57,7 +57,7 @@ export function secondsToHoursAndMinutes(seconds: number) {
   const minutes = Math.floor((seconds % 3600) / 60);
 
   if (hours && minutes) {
-    return `${hours}:${minutes.toString().padStart(2, "0")}h`;
+    return `${hours}h ${minutes}m`;
   }
 
   if (hours) {
