@@ -222,6 +222,7 @@ export function TrackerSchedule() {
     range,
     projectId: urlProjectId,
     eventId,
+    setParams,
   } = useTrackerParams();
   const { latestProjectId } = useLatestProjectId();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -383,6 +384,11 @@ export function TrackerSchedule() {
       setIsDragging(true);
       setDragStartSlot(slot);
 
+      // Clear eventId when creating a new event
+      if (eventId) {
+        setParams({ eventId: null });
+      }
+
       const newEvent = createNewEvent(
         slot,
         selectedProjectId,
@@ -399,6 +405,8 @@ export function TrackerSchedule() {
       selectedDate,
       selectEvent,
       projectsData,
+      eventId,
+      setParams,
     ],
   );
 
@@ -579,6 +587,12 @@ export function TrackerSchedule() {
 
         if (isValid(startTime)) {
           const endTime = addMinutes(startTime, 15);
+
+          // Clear eventId when creating a new event
+          if (eventId) {
+            setParams({ eventId: null });
+          }
+
           const newEvent = createNewEvent(
             getSlotFromDate(startTime),
             selectedProjectId,
@@ -679,6 +693,8 @@ export function TrackerSchedule() {
       setData,
       selectEvent,
       projectsData,
+      eventId,
+      setParams,
     ],
   );
 
