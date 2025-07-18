@@ -1,8 +1,17 @@
-import type { RouterOutputs } from "@api/trpc/routers/_app";
+// Define a generic customer interface to avoid circular dependencies
+interface CustomerData {
+  name?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  zip?: string | null;
+  country?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  website?: string | null;
+}
 
-export const transformCustomerToContent = (
-  customer?: RouterOutputs["customers"]["getById"],
-) => {
+export const transformCustomerToContent = (customer?: CustomerData | null) => {
   if (!customer) return null;
 
   const content = [];
@@ -23,6 +32,13 @@ export const transformCustomerToContent = (
     content.push({
       type: "paragraph",
       content: [{ text: customer.addressLine1, type: "text" }],
+    });
+  }
+
+  if (customer.addressLine2) {
+    content.push({
+      type: "paragraph",
+      content: [{ text: customer.addressLine2, type: "text" }],
     });
   }
 
