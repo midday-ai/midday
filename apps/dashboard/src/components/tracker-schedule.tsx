@@ -250,6 +250,24 @@ export function TrackerSchedule() {
       const eventToSelect = data.find((event) => event.id === eventId);
       if (eventToSelect) {
         selectEvent(eventToSelect);
+
+        // Auto-scroll to the event position
+        if (scrollRef.current) {
+          const startSlot = safeGetSlot(eventToSelect.start);
+          const scrollPosition = startSlot * SLOT_HEIGHT;
+
+          // Add some padding to center the event better
+          const containerHeight = scrollRef.current.clientHeight;
+          const adjustedScrollPosition = Math.max(
+            0,
+            scrollPosition - containerHeight / 3,
+          );
+
+          scrollRef.current.scrollTo({
+            top: adjustedScrollPosition,
+            behavior: "smooth",
+          });
+        }
       }
     }
   }, [eventId, data, selectEvent]);
