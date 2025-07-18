@@ -19,7 +19,8 @@
     "./calculate": "./src/utils/calculate.ts",
     "./format-to-html": "./src/templates/html/format.tsx",
     "./content": "./src/utils/content.ts",
-    "./types": "./src/types.ts"
+    "./types": "./src/types.ts",
+    "./utils": "./src/utils/transform.ts"
   },
   "dependencies": {
     "@midday/ui": "workspace:*",

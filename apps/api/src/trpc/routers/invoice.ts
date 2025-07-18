@@ -37,6 +37,7 @@ import {
 import { parseInputValue } from "@api/utils/parse";
 import { UTCDate } from "@date-fns/utc";
 import { verify } from "@midday/invoice/token";
+import { transformCustomerToContent } from "@midday/invoice/utils";
 import type {
   GenerateInvoicePayload,
   SendInvoiceReminderPayload,
@@ -265,114 +266,10 @@ export const invoiceRouter = createTRPCRouter({
         issueDate: new Date().toISOString(),
         dueDate: addMonths(new Date(), 1).toISOString(),
         template: templateData,
-        fromDetails: template?.fromDetails || null,
-        paymentDetails: template?.paymentDetails || null,
+        fromDetails: (template?.fromDetails || null) as string | null,
+        paymentDetails: (template?.paymentDetails || null) as string | null,
         customerDetails: fullCustomer
-          ? {
-              type: "doc",
-              content: [
-                {
-                  type: "paragraph",
-                  content: [
-                    {
-                      text: fullCustomer.name,
-                      type: "text",
-                    },
-                  ],
-                },
-                ...(fullCustomer.addressLine1
-                  ? [
-                      {
-                        type: "paragraph",
-                        content: [
-                          {
-                            text: fullCustomer.addressLine1,
-                            type: "text",
-                          },
-                        ],
-                      },
-                    ]
-                  : []),
-                ...(fullCustomer.addressLine2
-                  ? [
-                      {
-                        type: "paragraph",
-                        content: [
-                          {
-                            text: fullCustomer.addressLine2,
-                            type: "text",
-                          },
-                        ],
-                      },
-                    ]
-                  : []),
-                ...(fullCustomer.zip || fullCustomer.city
-                  ? [
-                      {
-                        type: "paragraph",
-                        content: [
-                          {
-                            text: `${fullCustomer.zip || ""} ${fullCustomer.city || ""}`.trim(),
-                            type: "text",
-                          },
-                        ],
-                      },
-                    ]
-                  : []),
-                ...(fullCustomer.country
-                  ? [
-                      {
-                        type: "paragraph",
-                        content: [
-                          {
-                            text: fullCustomer.country,
-                            type: "text",
-                          },
-                        ],
-                      },
-                    ]
-                  : []),
-                ...(fullCustomer.email
-                  ? [
-                      {
-                        type: "paragraph",
-                        content: [
-                          {
-                            text: fullCustomer.email,
-                            type: "text",
-                          },
-                        ],
-                      },
-                    ]
-                  : []),
-                ...(fullCustomer.phone
-                  ? [
-                      {
-                        type: "paragraph",
-                        content: [
-                          {
-                            text: fullCustomer.phone,
-                            type: "text",
-                          },
-                        ],
-                      },
-                    ]
-                  : []),
-                ...(fullCustomer.website
-                  ? [
-                      {
-                        type: "paragraph",
-                        content: [
-                          {
-                            text: fullCustomer.website,
-                            type: "text",
-                          },
-                        ],
-                      },
-                    ]
-                  : []),
-              ],
-            }
+          ? JSON.stringify(transformCustomerToContent(fullCustomer))
           : null,
         noteDetails: null,
         topBlock: null,
