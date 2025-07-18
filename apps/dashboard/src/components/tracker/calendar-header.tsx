@@ -17,10 +17,24 @@ export function CalendarHeader({
     <div className="flex items-center justify-between mb-6">
       <div className="space-y-1 select-text">
         <h1 className="text-4xl font-mono">
-          <NumberFlow
-            value={totalDuration ? Math.round(totalDuration / 3600) : 0}
-          />
-          <span className="relative">h</span>
+          {totalDuration ? (
+            <>
+              <NumberFlow value={Math.floor(totalDuration / 3600)} />
+              :
+              <NumberFlow
+                value={Math.floor((totalDuration % 3600) / 60)}
+                format={{ minimumIntegerDigits: 2 }}
+              />
+              <span className="relative">h</span>
+            </>
+          ) : (
+            <>
+              <NumberFlow value={0} />
+              :
+              <NumberFlow value={0} format={{ minimumIntegerDigits: 2 }} />
+              <span className="relative">h</span>
+            </>
+          )}
         </h1>
         <TotalEarnings selectedView={selectedView} />
       </div>

@@ -133,7 +133,14 @@ export function CalendarWeekView({
                 const startDate = createSafeDate(event.start);
                 const endDate = createSafeDate(event.stop);
                 const startSlot = getSlotFromDate(startDate);
-                const endSlot = getSlotFromDate(endDate);
+                let endSlot = getSlotFromDate(endDate);
+
+                // Handle midnight crossing - if end slot is before start slot,
+                // it means the entry crosses midnight, so extend to end of day
+                if (endSlot < startSlot) {
+                  endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+                }
+
                 const top = startSlot * SLOT_HEIGHT;
                 const height = Math.max(
                   (endSlot - startSlot) * SLOT_HEIGHT,

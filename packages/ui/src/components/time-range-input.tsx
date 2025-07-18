@@ -27,7 +27,13 @@ export function TimeRangeInput({
     }
 
     const start = parse(startTime, "HH:mm", new Date());
-    const stop = parse(stopTime, "HH:mm", new Date());
+    let stop = parse(stopTime, "HH:mm", new Date());
+
+    // If stop time is before start time, assume it's on the next day
+    if (stop < start) {
+      stop = new Date(stop.getTime() + 24 * 60 * 60 * 1000); // Add 24 hours
+    }
+
     const diff = differenceInMinutes(stop, start);
     const hours = Math.floor(diff / 60);
     const minutes = diff % 60;
