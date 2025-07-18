@@ -243,6 +243,7 @@ export function TrackerSchedule() {
   } = useTrackerData(selectedDate);
 
   const { selectedEvent, selectEvent, clearNewEvent } = useSelectedEvent();
+  const hasScrolledForEventId = useRef<string | null>(null);
 
   // Auto-select event when eventId is present in URL
   useEffect(() => {
@@ -251,8 +252,8 @@ export function TrackerSchedule() {
       if (eventToSelect) {
         selectEvent(eventToSelect);
 
-        // Auto-scroll to the event position
-        if (scrollRef.current) {
+        // Auto-scroll to the event position only once per eventId
+        if (scrollRef.current && hasScrolledForEventId.current !== eventId) {
           const startSlot = safeGetSlot(eventToSelect.start);
           const scrollPosition = startSlot * SLOT_HEIGHT;
 
@@ -267,10 +268,20 @@ export function TrackerSchedule() {
             top: adjustedScrollPosition,
             behavior: "smooth",
           });
+
+          // Mark that we've scrolled for this eventId
+          hasScrolledForEventId.current = eventId;
         }
       }
     }
   }, [eventId, data, selectEvent]);
+
+  // Reset scroll tracking when eventId changes
+  useEffect(() => {
+    if (!eventId) {
+      hasScrolledForEventId.current = null;
+    }
+  }, [eventId]);
 
   // Interaction state
   const [isDragging, setIsDragging] = useState(false);
