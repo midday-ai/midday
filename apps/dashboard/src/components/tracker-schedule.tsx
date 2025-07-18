@@ -49,6 +49,13 @@ type TrackerRecord = NonNullable<
   RouterOutputs["trackerEntries"]["byDate"]["data"]
 >[number];
 
+type ProcessedScheduleEntry = TrackerRecord & {
+  isFirstPart: boolean;
+  originalDuration: number;
+  displayStart: string;
+  displayStop: string;
+};
+
 const ROW_HEIGHT = 36;
 const SLOT_HEIGHT = 9;
 
@@ -210,7 +217,12 @@ const useSelectedEvent = () => {
 
 export function TrackerSchedule() {
   const { data: user } = useUserQuery();
-  const { selectedDate, range, projectId: urlProjectId } = useTrackerParams();
+  const {
+    selectedDate,
+    range,
+    projectId: urlProjectId,
+    eventId,
+  } = useTrackerParams();
   const { latestProjectId } = useLatestProjectId();
   const scrollRef = useRef<HTMLDivElement>(null);
   const trpc = useTRPC();
@@ -231,6 +243,16 @@ export function TrackerSchedule() {
   } = useTrackerData(selectedDate);
 
   const { selectedEvent, selectEvent, clearNewEvent } = useSelectedEvent();
+
+  // Auto-select event when eventId is present in URL
+  useEffect(() => {
+    if (eventId && data.length > 0) {
+      const eventToSelect = data.find((event) => event.id === eventId);
+      if (eventToSelect) {
+        selectEvent(eventToSelect);
+      }
+    }
+  }, [eventId, data, selectEvent]);
 
   // Interaction state
   const [isDragging, setIsDragging] = useState(false);
@@ -675,6 +697,144 @@ export function TrackerSchedule() {
     [data, selectedEvent, setData, selectEvent, handleCreateEvent],
   );
 
+  const renderScheduleEntries = () => {
+    // Process events to handle midnight spanning
+    const processedEntries: ProcessedScheduleEntry[] = [];
+
+    if (data) {
+      for (const event of data) {
+        const startDate = createSafeDate(event.start);
+        const endDate = createSafeDate(event.stop);
+
+        // Check if this entry spans midnight by comparing dates
+        const startDateStr = format(startDate, "yyyy-MM-dd");
+        const endDateStr = format(endDate, "yyyy-MM-dd");
+        const spansMidnight = startDateStr !== endDateStr;
+
+        if (spansMidnight) {
+          // This is a split entry - only show the first part (with → arrow)
+          const currentSelectedDate =
+            selectedDate || format(new Date(), "yyyy-MM-dd");
+
+          if (startDateStr === currentSelectedDate) {
+            // This is the first part of the entry (ends at midnight)
+            const endOfDay = new Date(startDate);
+            endOfDay.setHours(23, 59, 59, 999);
+            const firstPartDuration =
+              Math.floor((endOfDay.getTime() - startDate.getTime()) / 1000) + 1;
+
+            processedEntries.push({
+              ...event,
+              duration: firstPartDuration,
+              isFirstPart: true,
+              originalDuration: event.duration,
+              displayStart: event.start,
+              displayStop: endOfDay.toISOString(),
+            });
+          }
+          // Skip the continuation part for the next day
+        } else {
+          // Normal entry that doesn't span midnight
+          processedEntries.push({
+            ...event,
+            isFirstPart: false,
+            originalDuration: event.duration,
+            displayStart: event.start,
+            displayStop: event.stop,
+          });
+        }
+      }
+    }
+
+    return processedEntries.map((event) => {
+      const startSlot = safeGetSlot(event.displayStart);
+      let endSlot: number;
+
+      // For midnight-spanning entries, extend to end of day
+      if (event.isFirstPart) {
+        endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+      } else {
+        endSlot = safeGetSlot(event.displayStop);
+        // Handle midnight crossing - if end slot is before start slot,
+        // it means the entry crosses midnight, so extend to end of day
+        if (endSlot < startSlot) {
+          endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+        }
+      }
+
+      const height = (endSlot - startSlot) * SLOT_HEIGHT;
+
+      return (
+        <ContextMenu
+          key={`${event.id}-${event.isFirstPart ? "first" : "normal"}`}
+          onOpenChange={(open) => {
+            if (!open) {
+              setTimeout(() => setIsContextMenuOpen(false), 50);
+            } else {
+              setIsContextMenuOpen(true);
+            }
+          }}
+        >
+          <ContextMenuTrigger>
+            <div
+              onClick={() => handleEventClick(event)}
+              className={cn(
+                "absolute w-full bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
+                selectedEvent?.id === event.id && "!text-primary",
+                event.id !== NEW_EVENT_ID && "cursor-move",
+              )}
+              style={{
+                top: `${startSlot * SLOT_HEIGHT}px`,
+                height: `${height}px`,
+              }}
+              onMouseDown={(e) =>
+                event.id !== NEW_EVENT_ID && handleEventMoveStart(e, event)
+              }
+            >
+              <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
+                <span>
+                  {event.trackerProject?.name || "No Project"}
+                  {event.isFirstPart && " →"}
+                  {" ("}
+                  {secondsToHoursAndMinutes(event.duration ?? 0)}
+                  {")"}
+                </span>
+                {event?.trackerProject?.customer && (
+                  <span>{event.trackerProject.customer.name}</span>
+                )}
+                <span>{event.description}</span>
+              </div>
+              {event.id !== NEW_EVENT_ID && (
+                <>
+                  <div
+                    className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize"
+                    onMouseDown={(e) => handleEventResizeStart(e, event, "top")}
+                  />
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
+                    onMouseDown={(e) =>
+                      handleEventResizeStart(e, event, "bottom")
+                    }
+                  />
+                </>
+              )}
+            </div>
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteEvent(event.id);
+              }}
+            >
+              Delete <ContextMenuShortcut>⌫</ContextMenuShortcut>
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      );
+    });
+  };
+
   // Find the event to pass to the form
   const formEvent =
     data.find((event) => event.id === NEW_EVENT_ID) || selectedEvent;
@@ -723,148 +883,7 @@ export function TrackerSchedule() {
                 />
               </React.Fragment>
             ))}
-            {(() => {
-              // Process events to handle midnight spanning
-              const processedEntries = [];
-
-              if (data) {
-                for (const event of data) {
-                  const startDate = createSafeDate(event.start);
-                  const endDate = createSafeDate(event.stop);
-
-                  // Check if this entry spans midnight by comparing dates
-                  const startDateStr = format(startDate, "yyyy-MM-dd");
-                  const endDateStr = format(endDate, "yyyy-MM-dd");
-                  const spansMidnight = startDateStr !== endDateStr;
-
-                  if (spansMidnight) {
-                    // This is a split entry - only show the first part (with → arrow)
-                    const currentSelectedDate =
-                      selectedDate || format(new Date(), "yyyy-MM-dd");
-
-                    if (startDateStr === currentSelectedDate) {
-                      // This is the first part of the entry (ends at midnight)
-                      const endOfDay = new Date(startDate);
-                      endOfDay.setHours(23, 59, 59, 999);
-                      const firstPartDuration =
-                        Math.floor(
-                          (endOfDay.getTime() - startDate.getTime()) / 1000,
-                        ) + 1;
-
-                      processedEntries.push({
-                        ...event,
-                        duration: firstPartDuration,
-                        isFirstPart: true,
-                        originalDuration: event.duration,
-                        displayStart: event.start,
-                        displayStop: endOfDay.toISOString(),
-                      });
-                    }
-                    // Skip the continuation part for the next day
-                  } else {
-                    // Normal entry that doesn't span midnight
-                    processedEntries.push({
-                      ...event,
-                      isFirstPart: false,
-                      originalDuration: event.duration,
-                      displayStart: event.start,
-                      displayStop: event.stop,
-                    });
-                  }
-                }
-              }
-
-              return processedEntries.map((event) => {
-                const startSlot = safeGetSlot(event.displayStart);
-                let endSlot: number;
-
-                // For midnight-spanning entries, extend to end of day
-                if (event.isFirstPart) {
-                  endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
-                } else {
-                  endSlot = safeGetSlot(event.displayStop);
-                  // Handle midnight crossing - if end slot is before start slot,
-                  // it means the entry crosses midnight, so extend to end of day
-                  if (endSlot < startSlot) {
-                    endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
-                  }
-                }
-
-                const height = (endSlot - startSlot) * SLOT_HEIGHT;
-
-                return (
-                  <ContextMenu
-                    key={`${event.id}-${event.isFirstPart ? "first" : "normal"}`}
-                    onOpenChange={(open) => {
-                      if (!open) {
-                        setTimeout(() => setIsContextMenuOpen(false), 50);
-                      } else {
-                        setIsContextMenuOpen(true);
-                      }
-                    }}
-                  >
-                    <ContextMenuTrigger>
-                      <div
-                        onClick={() => handleEventClick(event)}
-                        className={cn(
-                          "absolute w-full bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
-                          selectedEvent?.id === event.id && "!text-primary",
-                          event.id !== NEW_EVENT_ID && "cursor-move",
-                        )}
-                        style={{
-                          top: `${startSlot * SLOT_HEIGHT}px`,
-                          height: `${height}px`,
-                        }}
-                        onMouseDown={(e) =>
-                          event.id !== NEW_EVENT_ID &&
-                          handleEventMoveStart(e, event)
-                        }
-                      >
-                        <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
-                          <span>
-                            {event.trackerProject?.name || "No Project"}
-                            {event.isFirstPart && " →"}
-                            {" ("}
-                            {secondsToHoursAndMinutes(event.duration ?? 0)}
-                            {")"}
-                          </span>
-                          {event?.trackerProject?.customer && (
-                            <span>{event.trackerProject.customer.name}</span>
-                          )}
-                          <span>{event.description}</span>
-                        </div>
-                        {event.id !== NEW_EVENT_ID && (
-                          <>
-                            <div
-                              className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize"
-                              onMouseDown={(e) =>
-                                handleEventResizeStart(e, event, "top")
-                              }
-                            />
-                            <div
-                              className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
-                              onMouseDown={(e) =>
-                                handleEventResizeStart(e, event, "bottom")
-                              }
-                            />
-                          </>
-                        )}
-                      </div>
-                    </ContextMenuTrigger>
-                    <ContextMenuContent>
-                      <ContextMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteEvent(event.id);
-                        }}
-                      >
-                        Delete <ContextMenuShortcut>⌫</ContextMenuShortcut>
-                      </ContextMenuItem>
-                    </ContextMenuContent>
-                  </ContextMenu>
-                );
-              });
-            })()}
+            {renderScheduleEntries()}
           </div>
         </div>
       </ScrollArea>

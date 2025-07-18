@@ -158,11 +158,24 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
       const formattedStart = formatISO(start, { representation: "date" });
       const formattedEnd = formatISO(end, { representation: "date" });
 
-      setParams({ range: [formattedStart, formattedEnd], selectedDate: null });
+      setParams({
+        range: [formattedStart, formattedEnd],
+        selectedDate: null,
+        eventId: null,
+      });
     } else if (localRange[0]) {
-      setParams({ selectedDate: localRange[0], range: null });
+      setParams({ selectedDate: localRange[0], range: null, eventId: null });
     }
     setLocalRange([null, null]);
+  };
+
+  const handleEventClick = (eventId: string, date: TZDate) => {
+    const formattedDate = formatISO(date, { representation: "date" });
+    setParams({
+      selectedDate: formattedDate,
+      eventId: eventId,
+      range: null,
+    });
   };
 
   const validRange: [string, string] | null =
@@ -189,6 +202,7 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
             handleMouseDown={handleMouseDown}
             handleMouseEnter={handleMouseEnter}
             handleMouseUp={handleMouseUp}
+            onEventClick={handleEventClick}
           />
         ) : (
           <CalendarWeekView
@@ -203,6 +217,7 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
             handleMouseDown={handleMouseDown}
             handleMouseEnter={handleMouseEnter}
             handleMouseUp={handleMouseUp}
+            onEventClick={handleEventClick}
           />
         )}
       </div>
