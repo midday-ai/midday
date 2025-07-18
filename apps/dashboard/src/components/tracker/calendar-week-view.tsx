@@ -4,7 +4,7 @@ import { useUserQuery } from "@/hooks/use-user";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { createSafeDate, formatHour, getSlotFromDate } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
-import type { TZDate } from "@date-fns/tz";
+import { TZDate } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
 import { format } from "date-fns";
 
@@ -129,47 +129,132 @@ export function CalendarWeekView({
               })}
 
               {/* Events for this day */}
-              {dayData.map((event, eventIndex) => {
-                const startDate = createSafeDate(event.start);
-                const endDate = createSafeDate(event.stop);
-                const startSlot = getSlotFromDate(startDate);
-                let endSlot = getSlotFromDate(endDate);
+              {(() => {
+                const currentDayStr = format(day, "yyyy-MM-dd");
+                const allEntries = [];
 
-                // Handle midnight crossing - if end slot is before start slot,
-                // it means the entry crosses midnight, so extend to end of day
-                if (endSlot < startSlot) {
-                  endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
-                }
+                // Add entries for current day
+                dayData.forEach((event, eventIndex) => {
+                  const startDate = createSafeDate(event.start);
+                  const endDate = createSafeDate(event.stop);
+                  const startSlot = getSlotFromDate(startDate);
+                  const originalEndSlot = getSlotFromDate(endDate);
 
-                const top = startSlot * SLOT_HEIGHT;
-                const height = Math.max(
-                  (endSlot - startSlot) * SLOT_HEIGHT,
-                  20,
-                );
+                  // Check if this entry spans midnight by comparing actual dates
+                  const startDateStr = format(startDate, "yyyy-MM-dd");
+                  const endDateStr = format(endDate, "yyyy-MM-dd");
+                  const spansMidnight = startDateStr !== endDateStr;
 
-                return (
-                  <div
-                    key={`${event.id}-${eventIndex}`}
-                    className="absolute left-0 right-0 text-xs bg-[#F0F0F0] dark:bg-[#1D1D1D] text-[#606060] dark:text-[#878787] p-2 z-10 overflow-hidden cursor-pointer hover:bg-[#E8E8E8] dark:hover:bg-[#252525] transition-colors"
-                    style={{
-                      top: `${top}px`,
-                      height: `${height}px`,
-                    }}
-                    onMouseDown={() => handleMouseDown(day)}
-                    onMouseEnter={() => handleMouseEnter(day)}
-                    onMouseUp={handleMouseUp}
-                  >
-                    <div className="font-medium truncate leading-tight">
-                      {event.trackerProject?.name || "No Project"}
-                    </div>
-                    {height > 24 && (
-                      <div className="truncate">
-                        ({secondsToHoursAndMinutes(event.duration || 0)})
+                  const displayStartSlot = startSlot;
+                  let displayEndSlot = originalEndSlot;
+                  const isContinuation = false;
+
+                  if (spansMidnight) {
+                    if (startDateStr === currentDayStr) {
+                      // This is the first part of the entry (ends at midnight)
+                      displayEndSlot = 96; // End of day
+                    } else {
+                      // Skip entries that don't belong to this day
+                      return;
+                    }
+                  } else if (originalEndSlot < startSlot) {
+                    // Fallback for entries that cross midnight but are on the same date
+                    displayEndSlot = 96;
+                  }
+
+                  allEntries.push({
+                    event,
+                    eventIndex,
+                    displayStartSlot,
+                    displayEndSlot,
+                    isContinuation,
+                    spansMidnight,
+                    isFromCurrentDay: true,
+                  });
+                });
+
+                // Check previous day for entries that continue into current day
+                const previousDay = new Date(day);
+                previousDay.setDate(previousDay.getDate() - 1);
+                const previousDayStr = format(previousDay, "yyyy-MM-dd");
+                const previousDayData = data?.[previousDayStr] || [];
+
+                previousDayData.forEach((event, eventIndex) => {
+                  const startDate = createSafeDate(event.start);
+                  const endDate = createSafeDate(event.stop);
+                  const startDateStr = format(startDate, "yyyy-MM-dd");
+                  const endDateStr = format(endDate, "yyyy-MM-dd");
+                  const spansMidnight = startDateStr !== endDateStr;
+
+                  // If this entry from previous day ends on current day
+                  if (spansMidnight && endDateStr === currentDayStr) {
+                    const originalEndSlot = getSlotFromDate(endDate);
+
+                    allEntries.push({
+                      event,
+                      eventIndex: `prev-${eventIndex}`,
+                      displayStartSlot: 0, // Start of day
+                      displayEndSlot: originalEndSlot,
+                      isContinuation: true,
+                      spansMidnight,
+                      isFromCurrentDay: false,
+                    });
+                  }
+                });
+
+                return allEntries.map((entry) => {
+                  const top = entry.displayStartSlot * SLOT_HEIGHT;
+                  const height = Math.max(
+                    (entry.displayEndSlot - entry.displayStartSlot) *
+                      SLOT_HEIGHT,
+                    20,
+                  );
+
+                  const handleEventClick = () => {
+                    if (entry.isContinuation) {
+                      // If this is a continuation entry, select the previous day (original day)
+                      const previousDay = new Date(day);
+                      previousDay.setDate(previousDay.getDate() - 1);
+                      const previousDayTZ = new TZDate(previousDay, "UTC");
+                      handleMouseDown(previousDayTZ);
+                    } else {
+                      // Normal event click behavior
+                      handleMouseDown(day);
+                    }
+                  };
+
+                  return (
+                    <div
+                      key={`${entry.event.id}-${entry.eventIndex}`}
+                      className="absolute left-0 right-0 text-xs bg-[#F0F0F0] dark:bg-[#1D1D1D] text-[#606060] dark:text-[#878787] p-2 z-10 overflow-hidden cursor-pointer hover:bg-[#E8E8E8] dark:hover:bg-[#252525] transition-colors"
+                      style={{
+                        top: `${top}px`,
+                        height: `${height}px`,
+                      }}
+                      onMouseDown={handleEventClick}
+                      onMouseEnter={() => handleMouseEnter(day)}
+                      onMouseUp={handleMouseUp}
+                    >
+                      <div className="font-medium truncate leading-tight">
+                        {entry.event.trackerProject?.name || "No Project"}
+                        {entry.spansMidnight && entry.isFromCurrentDay && " →"}
+                        {entry.isContinuation && " ←"}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
+                      {height > 24 && (
+                        <div className="truncate">
+                          (
+                          {secondsToHoursAndMinutes(
+                            (entry.displayEndSlot - entry.displayStartSlot) *
+                              15 *
+                              60, // 15 minutes per slot
+                          )}
+                          )
+                        </div>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
             </div>
           );
         })}

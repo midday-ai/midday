@@ -48,6 +48,7 @@ export function CalendarMonthView({
           currentDate={currentDate}
           selectedDate={selectedDate}
           dayData={data?.[format(date, "yyyy-MM-dd")]}
+          allData={data}
           range={range}
           localRange={localRange}
           isDragging={isDragging}
