@@ -27,6 +27,7 @@ import {
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  addDays,
   addMinutes,
   differenceInSeconds,
   endOfDay,
@@ -112,7 +113,7 @@ const updateEventTime = (
     ...event,
     start: start.toISOString(),
     stop: stop.toISOString(),
-    duration: Math.max(0, differenceInSeconds(stop, start)),
+    duration: calculateDuration(start, stop),
   };
 };
 
@@ -296,13 +297,14 @@ export function TrackerSchedule() {
       const baseDate = getBaseDate();
 
       const startDate = parse(formValues.start, "HH:mm", baseDate);
-      const stopDate = parse(formValues.stop, "HH:mm", baseDate);
+      let stopDate = parse(formValues.stop, "HH:mm", baseDate);
 
-      if (
-        !isValid(startDate) ||
-        !isValid(stopDate) ||
-        isAfter(startDate, stopDate)
-      ) {
+      // If stop time is before start time, assume it's on the next day
+      if (stopDate < startDate) {
+        stopDate = addDays(stopDate, 1);
+      }
+
+      if (!isValid(startDate) || !isValid(stopDate)) {
         return;
       }
 
@@ -593,9 +595,13 @@ export function TrackerSchedule() {
           if (
             (startChanged || endChanged) &&
             isValid(newStart) &&
-            isValid(newEnd) &&
-            isAfter(newEnd, newStart)
+            isValid(newEnd)
           ) {
+            // If end time is before start time, assume it's on the next day
+            if (newEnd < newStart) {
+              newEnd = addDays(newEnd, 1);
+            }
+
             const updatedEvent = updateEventTime(
               currentEvent,
               newStart,
@@ -719,7 +725,14 @@ export function TrackerSchedule() {
             ))}
             {data?.map((event) => {
               const startSlot = safeGetSlot(event.start);
-              const endSlot = safeGetSlot(event.stop);
+              let endSlot = safeGetSlot(event.stop);
+
+              // Handle midnight crossing - if end slot is before start slot,
+              // it means the entry crosses midnight, so extend to end of day
+              if (endSlot < startSlot) {
+                endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+              }
+
               const height = (endSlot - startSlot) * SLOT_HEIGHT;
 
               return (

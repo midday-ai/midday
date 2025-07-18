@@ -1,11 +1,13 @@
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
+  addDays,
   addMinutes,
   addSeconds,
   differenceInSeconds,
   eachDayOfInterval,
   format,
   isValid,
+  parse,
   parseISO,
   setHours,
   setMinutes,
@@ -58,6 +60,25 @@ export const formatTimeFromDate = (date: Date | string | null): string => {
   return format(safeDate, "HH:mm");
 };
 
+// Helper function to parse time strings and handle midnight crossings
+export const parseTimeWithMidnightCrossing = (
+  startTime: string,
+  stopTime: string,
+  baseDate: Date,
+): { start: Date; stop: Date; duration: number } => {
+  const startDate = parse(startTime, "HH:mm", baseDate);
+  let stopDate = parse(stopTime, "HH:mm", baseDate);
+
+  // If stop time is before start time, assume it's on the next day
+  if (stopDate < startDate) {
+    stopDate = addDays(stopDate, 1);
+  }
+
+  const duration = differenceInSeconds(stopDate, startDate);
+
+  return { start: startDate, stop: stopDate, duration };
+};
+
 export const getSlotFromDate = (date: Date | string | null): number => {
   const safeDate = createSafeDate(date);
   return safeDate.getHours() * 4 + Math.floor(safeDate.getMinutes() / 15);
@@ -69,7 +90,14 @@ export const calculateDuration = (
 ): number => {
   const startDate = createSafeDate(start);
   const stopDate = createSafeDate(stop);
-  return Math.max(0, differenceInSeconds(stopDate, startDate));
+
+  // If stop is before start, assume stop is on the next day
+  if (stopDate < startDate) {
+    const nextDayStop = addDays(stopDate, 1);
+    return differenceInSeconds(nextDayStop, startDate);
+  }
+
+  return differenceInSeconds(stopDate, startDate);
 };
 
 // Tracker record transformation
@@ -238,12 +266,11 @@ export const convertFromFormData = (
   description: string | null;
   duration: number;
 } => {
-  const startDate = parseISO(
-    `${format(baseDate, "yyyy-MM-dd")}T${formData.start}:00`,
-  );
-  const stopDate = parseISO(
-    `${format(baseDate, "yyyy-MM-dd")}T${formData.stop}:00`,
-  );
+  const {
+    start: startDate,
+    stop: stopDate,
+    duration,
+  } = parseTimeWithMidnightCrossing(formData.start, formData.stop, baseDate);
 
   return {
     id: formData.id === NEW_EVENT_ID ? undefined : formData.id,
@@ -253,6 +280,6 @@ export const convertFromFormData = (
     assignedId: formData.assignedId || null,
     projectId: formData.projectId,
     description: formData.description || null,
-    duration: formData.duration,
+    duration: duration,
   };
 };
