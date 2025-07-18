@@ -44,7 +44,7 @@ import type {
 } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
-import { addMonths } from "date-fns";
+import { addMonths, format, parseISO } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
@@ -205,7 +205,7 @@ export const invoiceRouter = createTRPCRouter({
       }
 
       // Get default invoice settings and customer details
-      const [nextInvoiceNumber, template, team, fullCustomer] =
+      const [nextInvoiceNumber, template, team, fullCustomer, user] =
         await Promise.all([
           getNextInvoiceNumber(db, teamId!),
           getInvoiceTemplate(db, teamId!),
@@ -216,11 +216,22 @@ export const invoiceRouter = createTRPCRouter({
                 teamId: teamId!,
               })
             : null,
+          getUserById(db, session?.user.id!),
         ]);
 
       const invoiceId = uuidv4();
       const currency = projectData.currency || team?.baseCurrency || "USD";
       const amount = totalHours * Number(projectData.rate);
+
+      // Get user's preferred date format
+      const userDateFormat =
+        template?.dateFormat ?? user?.dateFormat ?? defaultTemplate.dateFormat;
+
+      // Format the date range for the line item description
+      // Use parseISO to avoid timezone shifts when parsing date strings
+      const formattedDateFrom = format(parseISO(dateFrom), userDateFormat);
+      const formattedDateTo = format(parseISO(dateTo), userDateFormat);
+      const dateRangeDescription = `${projectData.name} (${formattedDateFrom} - ${formattedDateTo})`;
 
       // Create draft invoice with tracker data
       const templateData = {
@@ -257,7 +268,7 @@ export const invoiceRouter = createTRPCRouter({
         amount,
         lineItems: [
           {
-            name: projectData.name,
+            name: dateRangeDescription,
             quantity: totalHours,
             price: Number(projectData.rate),
             vat: 0,
