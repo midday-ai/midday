@@ -1,8 +1,10 @@
 "use client";
+import { useUserQuery } from "@/hooks/use-user";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { createSafeDate } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
-import type { TZDate } from "@date-fns/tz";
+import { TZDate } from "@date-fns/tz";
+import type { TZDate as TZDateType } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
 import { format } from "date-fns";
 
@@ -27,6 +29,8 @@ export function TrackerEvents({
   hasContinuationEvents,
   onEventClick,
 }: Props) {
+  const { data: user } = useUserQuery();
+
   // Process entries to handle midnight spanning
   const processedEntries = (() => {
     const currentDayStr = format(currentDate, "yyyy-MM-dd");
@@ -38,9 +42,27 @@ export function TrackerEvents({
         const startDate = createSafeDate(event.start);
         const endDate = createSafeDate(event.stop);
 
-        // Check if this entry spans midnight by comparing actual dates
-        const startDateStr = format(startDate, "yyyy-MM-dd");
-        const endDateStr = format(endDate, "yyyy-MM-dd");
+        // Check if this entry spans midnight by comparing actual dates in user timezone
+        const userTimezone = user?.timezone || "UTC";
+        let startDateStr: string;
+        let endDateStr: string;
+
+        if (userTimezone !== "UTC") {
+          try {
+            const startInUserTz = new TZDate(startDate, userTimezone);
+            const endInUserTz = new TZDate(endDate, userTimezone);
+            startDateStr = format(startInUserTz, "yyyy-MM-dd");
+            endDateStr = format(endInUserTz, "yyyy-MM-dd");
+          } catch {
+            // Fallback to UTC if timezone conversion fails
+            startDateStr = format(startDate, "yyyy-MM-dd");
+            endDateStr = format(endDate, "yyyy-MM-dd");
+          }
+        } else {
+          startDateStr = format(startDate, "yyyy-MM-dd");
+          endDateStr = format(endDate, "yyyy-MM-dd");
+        }
+
         const spansMidnight = startDateStr !== endDateStr;
 
         if (spansMidnight) {
@@ -84,8 +106,28 @@ export function TrackerEvents({
       for (const event of previousDayData) {
         const startDate = createSafeDate(event.start);
         const endDate = createSafeDate(event.stop);
-        const startDateStr = format(startDate, "yyyy-MM-dd");
-        const endDateStr = format(endDate, "yyyy-MM-dd");
+
+        // Convert to user timezone to check if it spans midnight in their local time
+        const userTimezone = user?.timezone || "UTC";
+        let startDateStr: string;
+        let endDateStr: string;
+
+        if (userTimezone !== "UTC") {
+          try {
+            const startInUserTz = new TZDate(startDate, userTimezone);
+            const endInUserTz = new TZDate(endDate, userTimezone);
+            startDateStr = format(startInUserTz, "yyyy-MM-dd");
+            endDateStr = format(endInUserTz, "yyyy-MM-dd");
+          } catch {
+            // Fallback to UTC if timezone conversion fails
+            startDateStr = format(startDate, "yyyy-MM-dd");
+            endDateStr = format(endDate, "yyyy-MM-dd");
+          }
+        } else {
+          startDateStr = format(startDate, "yyyy-MM-dd");
+          endDateStr = format(endDate, "yyyy-MM-dd");
+        }
+
         const spansMidnight = startDateStr !== endDateStr;
 
         // If this entry from previous day ends on current day

@@ -1,3 +1,4 @@
+import { useUserQuery } from "@/hooks/use-user";
 import { createSafeDate } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { TZDate } from "@date-fns/tz";
@@ -43,6 +44,7 @@ export function CalendarDay({
   handleMouseUp,
   onEventClick,
 }: CalendarDayProps) {
+  const { data: user } = useUserQuery();
   const isCurrentMonth = date.getMonth() === currentDate.getMonth();
   const formattedDate = formatISO(date, { representation: "date" });
 
@@ -77,13 +79,33 @@ export function CalendarDay({
     return previousDayData.some((event) => {
       const startDate = createSafeDate(event.start);
       const endDate = createSafeDate(event.stop);
-      const startDateStr = format(startDate, "yyyy-MM-dd");
-      const endDateStr = format(endDate, "yyyy-MM-dd");
+
+      // Convert to user timezone to check if it spans midnight in their local time
+      const userTimezone = user?.timezone || "UTC";
+      let startDateStr: string;
+      let endDateStr: string;
+
+      if (userTimezone !== "UTC") {
+        try {
+          const startInUserTz = new TZDate(startDate, userTimezone);
+          const endInUserTz = new TZDate(endDate, userTimezone);
+          startDateStr = format(startInUserTz, "yyyy-MM-dd");
+          endDateStr = format(endInUserTz, "yyyy-MM-dd");
+        } catch {
+          // Fallback to UTC if timezone conversion fails
+          startDateStr = format(startDate, "yyyy-MM-dd");
+          endDateStr = format(endDate, "yyyy-MM-dd");
+        }
+      } else {
+        startDateStr = format(startDate, "yyyy-MM-dd");
+        endDateStr = format(endDate, "yyyy-MM-dd");
+      }
+
       const spansMidnight = startDateStr !== endDateStr;
 
       return spansMidnight && endDateStr === currentDayStr;
     });
-  }, [allData, date]);
+  }, [allData, date, user?.timezone]);
 
   const handleDayClick = (event: React.MouseEvent) => {
     // Check if the click target is a continuation event
