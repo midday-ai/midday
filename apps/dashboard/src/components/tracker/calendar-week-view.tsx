@@ -60,12 +60,50 @@ export function CalendarWeekView({
     dayData.forEach((event, eventIndex) => {
       const startDate = createSafeDate(event.start);
       const endDate = createSafeDate(event.stop);
-      const startSlot = getSlotFromDate(startDate);
-      const originalEndSlot = getSlotFromDate(endDate);
 
-      // Check if this entry spans midnight by comparing actual dates
-      const startDateStr = format(startDate, "yyyy-MM-dd");
-      const endDateStr = format(endDate, "yyyy-MM-dd");
+      // Convert UTC times to user timezone for display slot calculation
+      const displayTimezone = user?.timezone || "UTC";
+      let startSlot: number;
+      let originalEndSlot: number;
+
+      if (displayTimezone !== "UTC") {
+        try {
+          const startInUserTz = new TZDate(startDate, displayTimezone);
+          const endInUserTz = new TZDate(endDate, displayTimezone);
+          startSlot = getSlotFromDate(startInUserTz);
+          originalEndSlot = getSlotFromDate(endInUserTz);
+        } catch {
+          // Fallback to UTC if timezone conversion fails
+          startSlot = getSlotFromDate(startDate);
+          originalEndSlot = getSlotFromDate(endDate);
+        }
+      } else {
+        startSlot = getSlotFromDate(startDate);
+        originalEndSlot = getSlotFromDate(endDate);
+      }
+
+      // Check if this entry spans midnight by comparing actual dates in user timezone
+      let startDateStr: string;
+      let endDateStr: string;
+
+      if (displayTimezone !== "UTC") {
+        try {
+          // Convert UTC times to user timezone for proper midnight detection
+          const startInUserTz = new TZDate(startDate, displayTimezone);
+          const endInUserTz = new TZDate(endDate, displayTimezone);
+
+          startDateStr = format(startInUserTz, "yyyy-MM-dd");
+          endDateStr = format(endInUserTz, "yyyy-MM-dd");
+        } catch {
+          // Fallback to UTC if timezone conversion fails
+          startDateStr = format(startDate, "yyyy-MM-dd");
+          endDateStr = format(endDate, "yyyy-MM-dd");
+        }
+      } else {
+        startDateStr = format(startDate, "yyyy-MM-dd");
+        endDateStr = format(endDate, "yyyy-MM-dd");
+      }
+
       const spansMidnight = startDateStr !== endDateStr;
 
       const displayStartSlot = startSlot;
@@ -97,21 +135,57 @@ export function CalendarWeekView({
     });
 
     // Check previous day for entries that continue into current day
-    const previousDay = new Date(day);
-    previousDay.setDate(previousDay.getDate() - 1);
-    const previousDayStr = format(previousDay, "yyyy-MM-dd");
-    const previousDayData = data?.[previousDayStr] || [];
+    const currentDayDate = new Date(day);
+    const previousDay = new Date(
+      currentDayDate.getTime() - 24 * 60 * 60 * 1000,
+    );
+    const previousDayStr = previousDay.toISOString().split("T")[0]; // Extract YYYY-MM-DD from ISO string
+
+    const previousDayData =
+      (data && previousDayStr && data[previousDayStr]) || [];
 
     previousDayData.forEach((event, eventIndex) => {
       const startDate = createSafeDate(event.start);
       const endDate = createSafeDate(event.stop);
-      const startDateStr = format(startDate, "yyyy-MM-dd");
-      const endDateStr = format(endDate, "yyyy-MM-dd");
+
+      // Convert to user timezone to check if it spans midnight in their local time
+      const userTimezone = user?.timezone || "UTC";
+      let startDateStr: string;
+      let endDateStr: string;
+
+      if (userTimezone !== "UTC") {
+        try {
+          const startInUserTz = new TZDate(startDate, userTimezone);
+          const endInUserTz = new TZDate(endDate, userTimezone);
+
+          startDateStr = format(startInUserTz, "yyyy-MM-dd");
+          endDateStr = format(endInUserTz, "yyyy-MM-dd");
+        } catch {
+          // Fallback to UTC if timezone conversion fails
+          startDateStr = format(startDate, "yyyy-MM-dd");
+          endDateStr = format(endDate, "yyyy-MM-dd");
+        }
+      } else {
+        startDateStr = format(startDate, "yyyy-MM-dd");
+        endDateStr = format(endDate, "yyyy-MM-dd");
+      }
+
       const spansMidnight = startDateStr !== endDateStr;
 
       // If this entry from previous day ends on current day
       if (spansMidnight && endDateStr === currentDayStr) {
-        const originalEndSlot = getSlotFromDate(endDate);
+        // Convert UTC to user timezone for continuation slot calculation
+        let originalEndSlot: number;
+        if (userTimezone !== "UTC") {
+          try {
+            const endInUserTz = new TZDate(endDate, userTimezone);
+            originalEndSlot = getSlotFromDate(endInUserTz);
+          } catch {
+            originalEndSlot = getSlotFromDate(endDate);
+          }
+        } else {
+          originalEndSlot = getSlotFromDate(endDate);
+        }
 
         allEntries.push({
           event,
