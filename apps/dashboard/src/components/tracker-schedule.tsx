@@ -16,6 +16,7 @@ import {
   isValidTimeSlot,
 } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { TZDate } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
 import {
   ContextMenu,
@@ -34,10 +35,8 @@ import {
   format,
   isAfter,
   isValid,
-  parse,
   parseISO,
   setHours,
-  setMinutes,
   startOfDay,
 } from "date-fns";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -45,20 +44,109 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { TrackerEntriesForm } from "./forms/tracker-entries-form";
 import { TrackerDaySelect } from "./tracker-day-select";
 
+// =============================================================================
+// TIMEZONE UTILITIES - Using only @date-fns/tz
+// =============================================================================
+
+/**
+ * Creates a UTC-stored date from user input in their timezone
+ * @param dateStr - Date like "2026-02-25"
+ * @param timeStr - Time like "00:00"
+ * @param timezone - User timezone like "Europe/London"
+ * @returns Regular Date with correct UTC timestamp
+ */
+const userTimeToUTC = (
+  dateStr: string,
+  timeStr: string,
+  timezone: string,
+): Date => {
+  // Use TZDate to properly handle timezone conversion
+  try {
+    const tzDate = new TZDate(`${dateStr}T${timeStr}:00`, timezone);
+    return new Date(tzDate.getTime());
+  } catch (error) {
+    console.warn("TZDate conversion failed:", error);
+    return new Date(`${dateStr}T${timeStr}:00Z`);
+  }
+};
+
+/**
+ * Displays UTC time in user's timezone
+ * @param utcDate - UTC Date from database
+ * @param timezone - User timezone like "Europe/London"
+ * @returns Formatted time like "00:00"
+ */
+const displayInUserTimezone = (utcDate: Date, timezone: string): string => {
+  return utcDate.toLocaleString("en-US", {
+    timeZone: timezone,
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+/**
+ * Gets user timezone with UTC fallback
+ */
+const getUserTimezone = (user?: { timezone?: string | null }): string => {
+  return user?.timezone || "UTC";
+};
+
+// =============================================================================
+// REST OF COMPONENT CODE...
+// =============================================================================
+
 type TrackerRecord = NonNullable<
   RouterOutputs["trackerEntries"]["byDate"]["data"]
 >[number];
+
+type ProcessedScheduleEntry = TrackerRecord & {
+  isFirstPart: boolean;
+  originalDuration: number | null;
+  displayStart: string | null;
+  displayStop: string | null;
+};
 
 const ROW_HEIGHT = 36;
 const SLOT_HEIGHT = 9;
 
 // Safe utilities for working with potentially null date strings
-const safeGetSlot = (dateStr: string | null): number => {
-  return getSlotFromDate(createSafeDate(dateStr));
+const safeGetSlot = (dateStr: string | null, userTimezone?: string): number => {
+  const parsedDate = createSafeDate(dateStr);
+
+  // Calculate slot in user timezone, not browser timezone
+  const timezone = userTimezone || "UTC";
+  const userTimeStr = parsedDate.toLocaleString("en-US", {
+    timeZone: timezone,
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const [hourStr, minuteStr] = userTimeStr.split(":");
+  const hour = Number(hourStr) || 0;
+  const minute = Number(minuteStr) || 0;
+  return hour * 4 + Math.floor(minute / 15);
 };
 
-const safeFormatTime = (dateStr: string | null): string => {
-  return formatTimeFromDate(createSafeDate(dateStr));
+/**
+ * Safely formats a UTC datetime string for display in user's timezone
+ */
+const safeFormatTime = (
+  dateStr: string | null,
+  userTimezone?: string,
+  isNewEvent?: boolean,
+): string => {
+  if (!dateStr) return "";
+
+  try {
+    const utcDate = createSafeDate(dateStr);
+    const timezone = userTimezone || "UTC";
+    return displayInUserTimezone(utcDate, timezone);
+  } catch (error) {
+    console.warn("Time display formatting failed:", error);
+    return format(createSafeDate(dateStr), "HH:mm");
+  }
 };
 
 const safeCalculateDuration = (
@@ -68,25 +156,41 @@ const safeCalculateDuration = (
   return calculateDuration(createSafeDate(start), createSafeDate(stop));
 };
 
+/**
+ * Creates a new tracker event from a drag/click interaction
+ */
 const createNewEvent = (
   slot: number,
   selectedProjectId: string | null,
   selectedDate?: string | null,
   projects?: RouterOutputs["trackerProjects"]["get"]["data"],
+  user?: { timezone?: string | null },
 ): TrackerRecord => {
   const baseDate = selectedDate ? parseISO(selectedDate) : new Date();
-  const startDate = setMinutes(
-    setHours(baseDate, Math.floor(slot / 4)),
-    (slot % 4) * 15,
-  );
-  const endDate = addMinutes(startDate, 15);
+  const dateStr = format(baseDate, "yyyy-MM-dd");
+  const timezone = getUserTimezone(user);
+
+  // Calculate start time from slot (each slot = 15 minutes)
+  const hour = Math.floor(slot / 4);
+  const minute = (slot % 4) * 15;
+  const startTimeStr = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+
+  // Calculate end time (15 minutes later)
+  const endMinute = minute + 15;
+  const endHour = endMinute >= 60 ? hour + 1 : hour;
+  const finalEndMinute = endMinute >= 60 ? endMinute - 60 : endMinute;
+  const endTimeStr = `${String(endHour).padStart(2, "0")}:${String(finalEndMinute).padStart(2, "0")}`;
+
+  // Convert user timezone times to UTC for storage
+  const startDate = userTimeToUTC(dateStr, startTimeStr, timezone);
+  const endDate = userTimeToUTC(dateStr, endTimeStr, timezone);
 
   // Find the project name from projects data
   const selectedProject = projects?.find((p) => p.id === selectedProjectId);
 
   return {
     id: NEW_EVENT_ID,
-    date: format(startDate, "yyyy-MM-dd"),
+    date: format(baseDate, "yyyy-MM-dd"),
     description: null,
     duration: 15 * 60,
     start: startDate.toISOString(),
@@ -210,7 +314,13 @@ const useSelectedEvent = () => {
 
 export function TrackerSchedule() {
   const { data: user } = useUserQuery();
-  const { selectedDate, range, projectId: urlProjectId } = useTrackerParams();
+  const {
+    selectedDate,
+    range,
+    projectId: urlProjectId,
+    eventId,
+    setParams,
+  } = useTrackerParams();
   const { latestProjectId } = useLatestProjectId();
   const scrollRef = useRef<HTMLDivElement>(null);
   const trpc = useTRPC();
@@ -231,6 +341,46 @@ export function TrackerSchedule() {
   } = useTrackerData(selectedDate);
 
   const { selectedEvent, selectEvent, clearNewEvent } = useSelectedEvent();
+  const hasScrolledForEventId = useRef<string | null>(null);
+
+  // Auto-select event when eventId is present in URL
+  useEffect(() => {
+    if (eventId && data.length > 0) {
+      const eventToSelect = data.find((event) => event.id === eventId);
+      if (eventToSelect) {
+        selectEvent(eventToSelect);
+
+        // Auto-scroll to the event position only once per eventId
+        if (scrollRef.current && hasScrolledForEventId.current !== eventId) {
+          const userTimezone = getUserTimezone(user);
+          const startSlot = safeGetSlot(eventToSelect.start, userTimezone);
+          const scrollPosition = startSlot * SLOT_HEIGHT;
+
+          // Add some padding to center the event better
+          const containerHeight = scrollRef.current.clientHeight;
+          const adjustedScrollPosition = Math.max(
+            0,
+            scrollPosition - containerHeight / 3,
+          );
+
+          scrollRef.current.scrollTo({
+            top: adjustedScrollPosition,
+            behavior: "smooth",
+          });
+
+          // Mark that we've scrolled for this eventId
+          hasScrolledForEventId.current = eventId;
+        }
+      }
+    }
+  }, [eventId, data, selectEvent]);
+
+  // Reset scroll tracking when eventId changes
+  useEffect(() => {
+    if (!eventId) {
+      hasScrolledForEventId.current = null;
+    }
+  }, [eventId]);
 
   // Interaction state
   const [isDragging, setIsDragging] = useState(false);
@@ -295,16 +445,30 @@ export function TrackerSchedule() {
     }) => {
       const dates = getDates(selectedDate, sortedRange ?? null);
       const baseDate = getBaseDate();
+      const dateStr = format(baseDate, "yyyy-MM-dd");
+      const timezone = getUserTimezone(user);
 
-      const startDate = parse(formValues.start, "HH:mm", baseDate);
-      let stopDate = parse(formValues.stop, "HH:mm", baseDate);
+      // Handle next day stop time (e.g., 23:00-01:00)
+      const startHour = Number.parseInt(
+        formValues.start.split(":")[0] || "0",
+        10,
+      );
+      const stopHour = Number.parseInt(
+        formValues.stop.split(":")[0] || "0",
+        10,
+      );
+      const isNextDay = stopHour < startHour;
 
-      // If stop time is before start time, assume it's on the next day
-      if (stopDate < startDate) {
-        stopDate = addDays(stopDate, 1);
-      }
+      const stopDateStr = isNextDay
+        ? format(addDays(baseDate, 1), "yyyy-MM-dd")
+        : dateStr;
+
+      // Convert user timezone input to UTC for storage
+      const startDate = userTimeToUTC(dateStr, formValues.start, timezone);
+      const stopDate = userTimeToUTC(stopDateStr, formValues.stop, timezone);
 
       if (!isValid(startDate) || !isValid(stopDate)) {
+        console.warn("Invalid dates created:", { startDate, stopDate });
         return;
       }
 
@@ -321,7 +485,13 @@ export function TrackerSchedule() {
 
       upsertTrackerEntry.mutate(apiData);
     },
-    [selectedDate, sortedRange, getBaseDate, upsertTrackerEntry],
+    [
+      selectedDate,
+      sortedRange,
+      getBaseDate,
+      upsertTrackerEntry,
+      user?.timezone,
+    ],
   );
 
   const handleMouseDown = useCallback(
@@ -332,11 +502,17 @@ export function TrackerSchedule() {
       setIsDragging(true);
       setDragStartSlot(slot);
 
+      // Clear eventId when creating a new event
+      if (eventId) {
+        setParams({ eventId: null });
+      }
+
       const newEvent = createNewEvent(
         slot,
         selectedProjectId,
         selectedDate,
         projectsData?.data,
+        user,
       );
       setData((prevData) => [...prevData, newEvent]);
       selectEvent(newEvent);
@@ -348,6 +524,9 @@ export function TrackerSchedule() {
       selectedDate,
       selectEvent,
       projectsData,
+      eventId,
+      setParams,
+      user?.timezone,
     ],
   );
 
@@ -360,11 +539,18 @@ export function TrackerSchedule() {
       if (isDragging && dragStartSlot !== null && selectedEvent) {
         const start = Math.min(dragStartSlot, slot);
         const end = Math.max(dragStartSlot, slot);
-        const startDate = setMinutes(
-          setHours(getBaseDate(), Math.floor(start / 4)),
-          (start % 4) * 15,
+
+        // Use timezone-aware time creation instead of browser timezone
+        const dateStr = format(getBaseDate(), "yyyy-MM-dd");
+        const timezone = getUserTimezone(user);
+        const startHour = Math.floor(start / 4);
+        const startMinute = (start % 4) * 15;
+        const startTimeStr = `${String(startHour).padStart(2, "0")}:${String(startMinute).padStart(2, "0")}`;
+
+        const startDate = userTimeToUTC(dateStr, startTimeStr, timezone);
+        const endDate = new Date(
+          startDate.getTime() + (end - start + 1) * 15 * 60 * 1000,
         );
-        const endDate = addMinutes(startDate, (end - start + 1) * 15);
 
         const updatedEvent = updateEventTime(selectedEvent, startDate, endDate);
         setData((prevData) =>
@@ -524,15 +710,29 @@ export function TrackerSchedule() {
           formattedStartTimeStr = `${start.substring(0, 2)}:${start.substring(2)}`;
         }
 
-        const startTime = parse(formattedStartTimeStr, "HH:mm", baseDate);
+        // Use timezone-aware parsing instead of browser timezone
+        const dateStr = format(baseDate, "yyyy-MM-dd");
+        const timezone = getUserTimezone(user);
+        const startTime = userTimeToUTC(
+          dateStr,
+          formattedStartTimeStr,
+          timezone,
+        );
 
         if (isValid(startTime)) {
-          const endTime = addMinutes(startTime, 15);
+          const endTime = new Date(startTime.getTime() + 15 * 60 * 1000);
+
+          // Clear eventId when creating a new event
+          if (eventId) {
+            setParams({ eventId: null });
+          }
+
           const newEvent = createNewEvent(
             getSlotFromDate(startTime),
             selectedProjectId,
             selectedDate,
             projectsData?.data,
+            user,
           );
 
           if (newEvent) {
@@ -559,7 +759,15 @@ export function TrackerSchedule() {
               if (/^\d{4}$/.test(start))
                 formattedStart = `${start.substring(0, 2)}:${start.substring(2)}`;
 
-              const parsedStart = parse(formattedStart, "HH:mm", baseDate);
+              // Use timezone-aware parsing instead of browser timezone
+              const dateStr = format(baseDate, "yyyy-MM-dd");
+              const timezone = getUserTimezone(user);
+              const parsedStart = userTimeToUTC(
+                dateStr,
+                formattedStart,
+                timezone,
+              );
+
               if (
                 isValid(parsedStart) &&
                 parsedStart.getTime() !== newStart.getTime()
@@ -581,7 +789,11 @@ export function TrackerSchedule() {
               if (/^\d{4}$/.test(end))
                 formattedEnd = `${end.substring(0, 2)}:${end.substring(2)}`;
 
-              const parsedEnd = parse(formattedEnd, "HH:mm", baseDate);
+              // Use timezone-aware parsing instead of browser timezone
+              const dateStr = format(baseDate, "yyyy-MM-dd");
+              const timezone = getUserTimezone(user);
+              const parsedEnd = userTimeToUTC(dateStr, formattedEnd, timezone);
+
               if (
                 isValid(parsedEnd) &&
                 parsedEnd.getTime() !== newEnd.getTime()
@@ -628,6 +840,9 @@ export function TrackerSchedule() {
       setData,
       selectEvent,
       projectsData,
+      eventId,
+      setParams,
+      user?.timezone,
     ],
   );
 
@@ -663,8 +878,16 @@ export function TrackerSchedule() {
           );
           handleCreateEvent({
             id: eventToUpdate.id,
-            start: safeFormatTime(eventToUpdate.start),
-            stop: safeFormatTime(eventToUpdate.stop),
+            start: safeFormatTime(
+              eventToUpdate.start,
+              user?.timezone ? user.timezone : undefined,
+              false,
+            ),
+            stop: safeFormatTime(
+              eventToUpdate.stop,
+              user?.timezone ? user.timezone : undefined,
+              false,
+            ),
             projectId: project.id,
             description: eventToUpdate.description ?? undefined,
             duration: duration,
@@ -672,8 +895,176 @@ export function TrackerSchedule() {
         }
       }
     },
-    [data, selectedEvent, setData, selectEvent, handleCreateEvent],
+    [
+      data,
+      selectedEvent,
+      setData,
+      selectEvent,
+      handleCreateEvent,
+      user?.timezone,
+    ],
   );
+
+  const renderScheduleEntries = () => {
+    // Process events to handle midnight spanning
+    const processedEntries: ProcessedScheduleEntry[] = [];
+
+    if (data) {
+      for (const event of data) {
+        const startDate = createSafeDate(event.start);
+        const endDate = createSafeDate(event.stop);
+
+        // Check if this entry spans midnight by comparing dates in user timezone
+        const timezone = getUserTimezone(user);
+
+        // Use toLocaleString for reliable timezone conversion instead of TZDate
+        const startDateStr = startDate.toLocaleString("en-CA", {
+          timeZone: timezone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
+        const endDateStr = endDate.toLocaleString("en-CA", {
+          timeZone: timezone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
+
+        const spansMidnight = startDateStr !== endDateStr;
+
+        if (spansMidnight) {
+          // This is a split entry - only show the first part (with → arrow)
+          const currentSelectedDate =
+            selectedDate || format(new Date(), "yyyy-MM-dd");
+
+          if (startDateStr === currentSelectedDate) {
+            // This is the first part of the entry (ends at midnight in user timezone)
+            // Calculate end of day in user timezone, then convert back to UTC
+            const timezone = getUserTimezone(user);
+            const endOfDayUserTz = `${currentSelectedDate}T23:59:59`;
+            const endOfDayUtc = userTimeToUTC(
+              currentSelectedDate,
+              "23:59",
+              timezone,
+            );
+
+            const firstPartDuration =
+              Math.floor((endOfDayUtc.getTime() - startDate.getTime()) / 1000) +
+              1;
+
+            processedEntries.push({
+              ...event,
+              duration: firstPartDuration,
+              isFirstPart: true,
+              originalDuration: event.duration ?? null,
+              displayStart: event.start ?? null,
+              displayStop: endOfDayUtc.toISOString() ?? null,
+            });
+          }
+          // Skip the continuation part for the next day
+        } else {
+          // Normal entry that doesn't span midnight
+          processedEntries.push({
+            ...event,
+            isFirstPart: false,
+            originalDuration: event.duration ?? null,
+            displayStart: event.start ?? null,
+            displayStop: event.stop ?? null,
+          });
+        }
+      }
+    }
+
+    return processedEntries.map((event) => {
+      const userTimezone = getUserTimezone(user);
+      const startSlot = safeGetSlot(event.displayStart, userTimezone);
+      let endSlot: number;
+
+      // For midnight-spanning entries, extend to end of day
+      if (event.isFirstPart) {
+        endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+      } else {
+        endSlot = safeGetSlot(event.displayStop, userTimezone);
+        // Handle midnight crossing - if end slot is before start slot,
+        // it means the entry crosses midnight, so extend to end of day
+        if (endSlot < startSlot) {
+          endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+        }
+      }
+
+      const height = (endSlot - startSlot) * SLOT_HEIGHT;
+
+      return (
+        <ContextMenu
+          key={`${event.id}-${event.isFirstPart ? "first" : "normal"}`}
+          onOpenChange={(open) => {
+            if (!open) {
+              setTimeout(() => setIsContextMenuOpen(false), 50);
+            } else {
+              setIsContextMenuOpen(true);
+            }
+          }}
+        >
+          <ContextMenuTrigger>
+            <div
+              onClick={() => handleEventClick(event)}
+              className={cn(
+                "absolute w-full bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
+                selectedEvent?.id === event.id && "!text-primary",
+                event.id !== NEW_EVENT_ID && "cursor-move",
+              )}
+              style={{
+                top: `${startSlot * SLOT_HEIGHT}px`,
+                height: `${height}px`,
+              }}
+              onMouseDown={(e) =>
+                event.id !== NEW_EVENT_ID && handleEventMoveStart(e, event)
+              }
+            >
+              <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
+                <span>
+                  {event.trackerProject?.name || "No Project"}
+                  {event.isFirstPart && " →"}
+                  {" ("}
+                  {secondsToHoursAndMinutes((endSlot - startSlot) * 15 * 60)}
+                  {")"}
+                </span>
+                {event?.trackerProject?.customer && (
+                  <span>{event.trackerProject.customer.name}</span>
+                )}
+                <span>{event.description}</span>
+              </div>
+              {event.id !== NEW_EVENT_ID && (
+                <>
+                  <div
+                    className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize"
+                    onMouseDown={(e) => handleEventResizeStart(e, event, "top")}
+                  />
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
+                    onMouseDown={(e) =>
+                      handleEventResizeStart(e, event, "bottom")
+                    }
+                  />
+                </>
+              )}
+            </div>
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteEvent(event.id);
+              }}
+            >
+              Delete <ContextMenuShortcut>⌫</ContextMenuShortcut>
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      );
+    });
+  };
 
   // Find the event to pass to the form
   const formEvent =
@@ -723,90 +1114,7 @@ export function TrackerSchedule() {
                 />
               </React.Fragment>
             ))}
-            {data?.map((event) => {
-              const startSlot = safeGetSlot(event.start);
-              let endSlot = safeGetSlot(event.stop);
-
-              // Handle midnight crossing - if end slot is before start slot,
-              // it means the entry crosses midnight, so extend to end of day
-              if (endSlot < startSlot) {
-                endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
-              }
-
-              const height = (endSlot - startSlot) * SLOT_HEIGHT;
-
-              return (
-                <ContextMenu
-                  key={event.id}
-                  onOpenChange={(open) => {
-                    if (!open) {
-                      setTimeout(() => setIsContextMenuOpen(false), 50);
-                    } else {
-                      setIsContextMenuOpen(true);
-                    }
-                  }}
-                >
-                  <ContextMenuTrigger>
-                    <div
-                      onClick={() => handleEventClick(event)}
-                      className={cn(
-                        "absolute w-full bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
-                        selectedEvent?.id === event.id && "!text-primary",
-                        event.id !== NEW_EVENT_ID && "cursor-move",
-                      )}
-                      style={{
-                        top: `${startSlot * SLOT_HEIGHT}px`,
-                        height: `${height}px`,
-                      }}
-                      onMouseDown={(e) =>
-                        event.id !== NEW_EVENT_ID &&
-                        handleEventMoveStart(e, event)
-                      }
-                    >
-                      <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
-                        <span>
-                          {event.trackerProject?.name || "No Project"} (
-                          {secondsToHoursAndMinutes(
-                            safeCalculateDuration(event.start, event.stop),
-                          )}
-                          )
-                        </span>
-                        {event?.trackerProject?.customer && (
-                          <span>{event.trackerProject.customer.name}</span>
-                        )}
-                        <span>{event.description}</span>
-                      </div>
-                      {event.id !== NEW_EVENT_ID && (
-                        <>
-                          <div
-                            className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize"
-                            onMouseDown={(e) =>
-                              handleEventResizeStart(e, event, "top")
-                            }
-                          />
-                          <div
-                            className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
-                            onMouseDown={(e) =>
-                              handleEventResizeStart(e, event, "bottom")
-                            }
-                          />
-                        </>
-                      )}
-                    </div>
-                  </ContextMenuTrigger>
-                  <ContextMenuContent>
-                    <ContextMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteEvent(event.id);
-                      }}
-                    >
-                      Delete <ContextMenuShortcut>⌫</ContextMenuShortcut>
-                    </ContextMenuItem>
-                  </ContextMenuContent>
-                </ContextMenu>
-              );
-            })}
+            {renderScheduleEntries()}
           </div>
         </div>
       </ScrollArea>
@@ -820,8 +1128,24 @@ export function TrackerSchedule() {
         teamId={user?.teamId || ""}
         projectId={formEvent?.trackerProject?.id ?? selectedProjectId}
         description={formEvent?.description ?? undefined}
-        start={formEvent?.start ? safeFormatTime(formEvent.start) : undefined}
-        stop={formEvent?.stop ? safeFormatTime(formEvent.stop) : undefined}
+        start={
+          formEvent?.start
+            ? safeFormatTime(
+                formEvent.start,
+                user?.timezone ? user.timezone : undefined,
+                formEvent.id === NEW_EVENT_ID,
+              )
+            : undefined
+        }
+        stop={
+          formEvent?.stop
+            ? safeFormatTime(
+                formEvent.stop,
+                user?.timezone ? user.timezone : undefined,
+                formEvent.id === NEW_EVENT_ID,
+              )
+            : undefined
+        }
         onSelectProject={handleSelectProject}
         onTimeChange={handleTimeChange}
       />

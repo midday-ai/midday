@@ -1,7 +1,10 @@
+import { useUserQuery } from "@/hooks/use-user";
+import { createSafeDate } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
-import type { TZDate } from "@date-fns/tz";
+import { TZDate } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
 import { format, formatISO, isToday } from "date-fns";
+import type React from "react";
 import { useCallback } from "react";
 import { TrackerEvents } from "./events";
 import {
@@ -17,12 +20,14 @@ type CalendarDayProps = {
   dayData:
     | RouterOutputs["trackerEntries"]["byRange"]["result"][string]
     | undefined;
+  allData?: RouterOutputs["trackerEntries"]["byRange"]["result"];
   range: [string, string] | null;
   localRange: [string | null, string | null];
   isDragging: boolean;
   handleMouseDown: (date: TZDate) => void;
   handleMouseEnter: (date: TZDate) => void;
   handleMouseUp: () => void;
+  onEventClick?: (eventId: string, date: TZDate) => void;
 };
 
 export function CalendarDay({
@@ -30,13 +35,16 @@ export function CalendarDay({
   currentDate,
   selectedDate,
   dayData,
+  allData,
   range,
   localRange,
   isDragging,
   handleMouseDown,
   handleMouseEnter,
   handleMouseUp,
+  onEventClick,
 }: CalendarDayProps) {
+  const { data: user } = useUserQuery();
   const isCurrentMonth = date.getMonth() === currentDate.getMonth();
   const formattedDate = formatISO(date, { representation: "date" });
 
@@ -57,9 +65,81 @@ export function CalendarDay({
     [isDragging, localRange, range],
   );
 
+  // Check if this day has continuation events that need special click handling
+  const hasContinuationEvents = useCallback(() => {
+    if (!allData) return false;
+
+    const currentDayStr = format(date, "yyyy-MM-dd");
+    const previousDay = new Date(date);
+    previousDay.setDate(previousDay.getDate() - 1);
+    const previousDayStr = format(previousDay, "yyyy-MM-dd");
+    const previousDayData = allData[previousDayStr] || [];
+
+    // Check if there's a continuation from previous day
+    return previousDayData.some((event) => {
+      const startDate = createSafeDate(event.start);
+      const endDate = createSafeDate(event.stop);
+
+      // Convert to user timezone to check if it spans midnight in their local time
+      const userTimezone = user?.timezone || "UTC";
+      let startDateStr: string;
+      let endDateStr: string;
+
+      if (userTimezone !== "UTC") {
+        try {
+          const startInUserTz = new TZDate(startDate, userTimezone);
+          const endInUserTz = new TZDate(endDate, userTimezone);
+          startDateStr = format(startInUserTz, "yyyy-MM-dd");
+          endDateStr = format(endInUserTz, "yyyy-MM-dd");
+        } catch {
+          // Fallback to UTC if timezone conversion fails
+          startDateStr = format(startDate, "yyyy-MM-dd");
+          endDateStr = format(endDate, "yyyy-MM-dd");
+        }
+      } else {
+        startDateStr = format(startDate, "yyyy-MM-dd");
+        endDateStr = format(endDate, "yyyy-MM-dd");
+      }
+
+      const spansMidnight = startDateStr !== endDateStr;
+
+      return spansMidnight && endDateStr === currentDayStr;
+    });
+  }, [allData, date, user?.timezone]);
+
+  const handleDayClick = (event: React.MouseEvent) => {
+    // Check if the click target is a continuation event
+    const target = event.target as HTMLElement;
+    const isContinuation = target.closest('[data-is-continuation="true"]');
+    const isShowAllEvents = target.closest('[data-show-all-events="true"]');
+    const eventTarget = target.closest("[data-event-id]");
+
+    if (isContinuation) {
+      // If this is a continuation event, select the previous day
+      event.preventDefault();
+      event.stopPropagation();
+      const previousDay = new Date(date);
+      previousDay.setDate(previousDay.getDate() - 1);
+      const previousDayTZ = new TZDate(previousDay, "UTC");
+      handleMouseDown(previousDayTZ);
+    } else if (eventTarget && onEventClick) {
+      // Handle event click on current day
+      const eventId = eventTarget.getAttribute("data-event-id");
+      if (eventId) {
+        event.preventDefault();
+        event.stopPropagation();
+        onEventClick(eventId, date);
+        return;
+      }
+    } else {
+      // Normal behavior - select current day (including for "show all events" clicks)
+      handleMouseDown(date);
+    }
+  };
+
   return (
     <div
-      onMouseDown={() => handleMouseDown(date)}
+      onMouseDown={handleDayClick}
       onMouseEnter={() => handleMouseEnter(date)}
       onMouseUp={handleMouseUp}
       className={cn(
@@ -76,7 +156,15 @@ export function CalendarDay({
       )}
     >
       <div>{format(date, "d")}</div>
-      <TrackerEvents data={dayData} isToday={isToday(date)} />
+      <TrackerEvents
+        data={dayData}
+        isToday={isToday(date)}
+        allData={allData}
+        currentDate={new Date(date)}
+        currentTZDate={date}
+        hasContinuationEvents={hasContinuationEvents()}
+        onEventClick={onEventClick}
+      />
     </div>
   );
 }

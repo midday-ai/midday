@@ -51,8 +51,19 @@ export const createSafeDate = (
 ): Date => {
   if (!dateInput) return fallback || new Date();
 
-  const date = typeof dateInput === "string" ? parseISO(dateInput) : dateInput;
-  return isValid(date) ? date : fallback || new Date();
+  if (typeof dateInput === "string") {
+    // Handle PostgreSQL timestamp format: "2026-02-25 17:15:00+00"
+    // Convert to ISO format: "2026-02-25T17:15:00.000Z"
+    let isoString = dateInput;
+    if (dateInput.includes(" ") && dateInput.includes("+")) {
+      isoString = dateInput.replace(" ", "T").replace("+00", ".000Z");
+    }
+
+    const date = parseISO(isoString);
+    return isValid(date) ? date : fallback || new Date();
+  }
+
+  return isValid(dateInput) ? dateInput : fallback || new Date();
 };
 
 export const formatTimeFromDate = (date: Date | string | null): string => {
