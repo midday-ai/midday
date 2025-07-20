@@ -56,22 +56,23 @@ export const createSafeDate = (
   if (!dateInput) return fallback || new UTCDate();
 
   if (typeof dateInput === "string") {
-    // Handle PostgreSQL timestamp format: "2026-02-25 17:15:00+00"
-    // Convert to ISO format: "2026-02-25T17:15:00.000Z"
-    let isoString = dateInput;
-    if (dateInput.includes(" ") && dateInput.includes("+")) {
-      isoString = dateInput.replace(" ", "T").replace("+00", ".000Z");
+    // Try parseISO first (handles ISO 8601 formats)
+    const date = parseISO(dateInput);
+    if (isValid(date)) {
+      return date;
     }
 
+    // Try UTCDate constructor as final fallback
     try {
-      // Use UTCDate for consistent UTC parsing
-      const utcDate = utc(isoString);
-      return new Date(utcDate.getTime());
+      const utcDate = utc(dateInput);
+      if (isValid(utcDate)) {
+        return new Date(utcDate.getTime());
+      }
     } catch (error) {
-      // Fallback to regular parseISO
-      const date = parseISO(isoString);
-      return isValid(date) ? date : fallback || new UTCDate();
+      console.warn("Date parsing failed:", error);
     }
+
+    return fallback || new UTCDate();
   }
 
   return isValid(dateInput) ? dateInput : fallback || new UTCDate();
