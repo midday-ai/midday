@@ -203,19 +203,8 @@ export const formatHour = (
   timeFormat?: number | null,
   timezone?: string,
 ) => {
-  const date = new UTCDate();
-  date.setUTCHours(hour, 0, 0, 0);
-
-  if (timezone && timezone !== "UTC") {
-    try {
-      const createTZDate = tz(timezone);
-      const tzDate = createTZDate(date);
-      return format(tzDate, timeFormat === 12 ? "hh:mm a" : "HH:mm");
-    } catch (error) {
-      console.warn("Timezone hour formatting failed:", error);
-    }
-  }
-
+  // Create a simple date with the hour - no timezone conversion needed for labels
+  const date = new Date(2024, 0, 1, hour, 0, 0, 0); // Use arbitrary date, just set the hour
   return format(date, timeFormat === 12 ? "hh:mm a" : "HH:mm");
 };
 

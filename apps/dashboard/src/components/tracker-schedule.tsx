@@ -53,14 +53,20 @@ const userTimeToUTC = (
   timezone: string,
 ): Date => {
   try {
-    // Create TZDate factory for the timezone
+    // Use tz() function to create timezone factory (same approach as safeGetSlot)
     const createTZDate = tz(timezone);
 
-    // Parse user input as local time in their timezone
-    const localDateTime = `${dateStr} ${timeStr}`;
-    const tzDate = createTZDate(localDateTime);
+    // Create a base UTC date for the day, then set time in user timezone
+    const baseUtcDate = new Date(`${dateStr}T00:00:00.000Z`);
+    const tzDate = createTZDate(baseUtcDate);
 
-    // Convert to regular Date (in UTC)
+    // Parse the time components
+    const [hour, minute] = timeStr.split(":").map(Number);
+
+    // Set the time in the timezone-aware date
+    tzDate.setHours(hour || 0, minute || 0, 0, 0);
+
+    // Convert back to UTC Date
     return new Date(tzDate.getTime());
   } catch (error) {
     console.warn("Timezone conversion failed, falling back to UTC:", {
@@ -120,8 +126,9 @@ const safeGetSlot = (dateStr: string | null, userTimezone?: string): number => {
 
     const hour = tzDate.getHours();
     const minute = tzDate.getMinutes();
+    const slot = hour * 4 + Math.floor(minute / 15);
 
-    return hour * 4 + Math.floor(minute / 15);
+    return slot;
   } catch (error) {
     console.warn("Slot calculation failed, using native API:", {
       timezone,
