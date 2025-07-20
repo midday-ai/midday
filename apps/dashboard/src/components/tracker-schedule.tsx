@@ -16,7 +16,8 @@ import {
   isValidTimeSlot,
 } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
-import { TZDate } from "@date-fns/tz";
+import { TZDate, tz, tzOffset } from "@date-fns/tz";
+import { UTCDate, utc } from "@date-fns/utc";
 import { cn } from "@midday/ui/cn";
 import {
   ContextMenu,
@@ -30,13 +31,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDays,
   addMinutes,
-  differenceInSeconds,
   endOfDay,
   format,
-  isAfter,
   isValid,
   parseISO,
-  setHours,
   startOfDay,
 } from "date-fns";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -44,57 +42,162 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { TrackerEntriesForm } from "./forms/tracker-entries-form";
 import { TrackerDaySelect } from "./tracker-day-select";
 
-// =============================================================================
-// TIMEZONE UTILITIES - Using only @date-fns/tz
-// =============================================================================
-
 /**
- * Creates a UTC-stored date from user input in their timezone
- * @param dateStr - Date like "2026-02-25"
- * @param timeStr - Time like "00:00"
- * @param timezone - User timezone like "Europe/London"
- * @returns Regular Date with correct UTC timestamp
+ * Converts user input time to UTC using library functions
+ * @param dateStr - Date in YYYY-MM-DD format
+ * @param timeStr - Time in HH:MM format
+ * @param timezone - IANA timezone identifier
+ * @returns UTC Date object for database storage
  */
 const userTimeToUTC = (
   dateStr: string,
   timeStr: string,
   timezone: string,
 ): Date => {
-  // Use TZDate to properly handle timezone conversion
   try {
-    const tzDate = new TZDate(`${dateStr}T${timeStr}:00`, timezone);
+    // Create TZDate factory for the timezone
+    const createTZDate = tz(timezone);
+
+    // Parse user input as local time in their timezone
+    const localDateTime = `${dateStr} ${timeStr}`;
+    const tzDate = createTZDate(localDateTime);
+
+    // Convert to regular Date (in UTC)
     return new Date(tzDate.getTime());
   } catch (error) {
-    console.warn("TZDate conversion failed:", error);
+    console.warn("Timezone conversion failed, falling back to UTC:", {
+      dateStr,
+      timeStr,
+      timezone,
+      error,
+    });
+    // Safe fallback: treat input as UTC
     return new Date(`${dateStr}T${timeStr}:00Z`);
   }
 };
 
 /**
- * Displays UTC time in user's timezone
+ * Displays UTC timestamp in user's preferred timezone using native APIs
  * @param utcDate - UTC Date from database
- * @param timezone - User timezone like "Europe/London"
- * @returns Formatted time like "00:00"
+ * @param timezone - IANA timezone identifier
+ * @returns Formatted time string (HH:MM)
  */
 const displayInUserTimezone = (utcDate: Date, timezone: string): string => {
-  return utcDate.toLocaleString("en-US", {
-    timeZone: timezone,
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  try {
+    // Use native Intl API for reliable timezone conversion
+    return utcDate.toLocaleString("en-US", {
+      timeZone: timezone,
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch (error) {
+    console.warn("Timezone display failed, using UTC:", { timezone, error });
+    // Fallback to UTC formatting
+    return utcDate.toLocaleString("en-US", {
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "UTC",
+    });
+  }
 };
 
 /**
- * Gets user timezone with UTC fallback
+ * Converts UTC timestamp to visual slot position using tz() function
+ * @param dateStr - UTC timestamp string or null
+ * @param userTimezone - User's timezone for display
+ * @returns Slot index (0 = midnight, 95 = 23:45)
+ */
+const safeGetSlot = (dateStr: string | null, userTimezone?: string): number => {
+  if (!dateStr) return 0;
+
+  const utcDate = createSafeDate(dateStr);
+  const timezone = userTimezone || "UTC";
+
+  try {
+    // Use tz() function to create timezone-aware date
+    const createTZDate = tz(timezone);
+    const tzDate = createTZDate(utcDate);
+
+    const hour = tzDate.getHours();
+    const minute = tzDate.getMinutes();
+
+    return hour * 4 + Math.floor(minute / 15);
+  } catch (error) {
+    console.warn("Slot calculation failed, using native API:", {
+      timezone,
+      error,
+    });
+    // Fallback to native toLocaleString
+    const userTimeStr = utcDate.toLocaleString("en-US", {
+      timeZone: timezone,
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const [hourStr, minuteStr] = userTimeStr.split(":");
+    const hour = Number(hourStr) || 0;
+    const minute = Number(minuteStr) || 0;
+
+    return hour * 4 + Math.floor(minute / 15);
+  }
+};
+
+/**
+ * Gets user's timezone with safe fallback
+ * @param user - User object with timezone property
+ * @returns IANA timezone string
  */
 const getUserTimezone = (user?: { timezone?: string | null }): string => {
   return user?.timezone || "UTC";
 };
 
-// =============================================================================
-// REST OF COMPONENT CODE...
-// =============================================================================
+/**
+ * Safely formats UTC timestamp for display using library functions
+ * @param dateStr - UTC timestamp string
+ * @param userTimezone - User's display timezone
+ * @returns Formatted time string
+ */
+const safeFormatTime = (
+  dateStr: string | null,
+  userTimezone?: string,
+): string => {
+  if (!dateStr) return "";
+
+  try {
+    const utcDate = createSafeDate(dateStr);
+    const timezone = userTimezone || "UTC";
+
+    // Try using tz() function first
+    const createTZDate = tz(timezone);
+    const tzDate = createTZDate(utcDate);
+
+    return format(tzDate, "HH:mm");
+  } catch (error) {
+    console.warn("Time formatting with tz() failed, using native API:", error);
+    // Fallback to displayInUserTimezone
+    return displayInUserTimezone(
+      createSafeDate(dateStr),
+      userTimezone || "UTC",
+    );
+  }
+};
+
+/**
+ * Safely calculates duration between timestamps
+ * @param start - Start timestamp string
+ * @param stop - Stop timestamp string
+ * @returns Duration in seconds
+ */
+const safeCalculateDuration = (
+  start: string | null,
+  stop: string | null,
+): number => {
+  if (!start || !stop) return 0;
+  return calculateDuration(createSafeDate(start), createSafeDate(stop));
+};
 
 type TrackerRecord = NonNullable<
   RouterOutputs["trackerEntries"]["byDate"]["data"]
@@ -110,54 +213,14 @@ type ProcessedScheduleEntry = TrackerRecord & {
 const ROW_HEIGHT = 36;
 const SLOT_HEIGHT = 9;
 
-// Safe utilities for working with potentially null date strings
-const safeGetSlot = (dateStr: string | null, userTimezone?: string): number => {
-  const parsedDate = createSafeDate(dateStr);
-
-  // Calculate slot in user timezone, not browser timezone
-  const timezone = userTimezone || "UTC";
-  const userTimeStr = parsedDate.toLocaleString("en-US", {
-    timeZone: timezone,
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  const [hourStr, minuteStr] = userTimeStr.split(":");
-  const hour = Number(hourStr) || 0;
-  const minute = Number(minuteStr) || 0;
-  return hour * 4 + Math.floor(minute / 15);
-};
-
 /**
- * Safely formats a UTC datetime string for display in user's timezone
- */
-const safeFormatTime = (
-  dateStr: string | null,
-  userTimezone?: string,
-  isNewEvent?: boolean,
-): string => {
-  if (!dateStr) return "";
-
-  try {
-    const utcDate = createSafeDate(dateStr);
-    const timezone = userTimezone || "UTC";
-    return displayInUserTimezone(utcDate, timezone);
-  } catch (error) {
-    console.warn("Time display formatting failed:", error);
-    return format(createSafeDate(dateStr), "HH:mm");
-  }
-};
-
-const safeCalculateDuration = (
-  start: string | null,
-  stop: string | null,
-): number => {
-  return calculateDuration(createSafeDate(start), createSafeDate(stop));
-};
-
-/**
- * Creates a new tracker event from a drag/click interaction
+ * Creates new tracker event from user interaction
+ * @param slot - Visual slot position (0-95)
+ * @param selectedProjectId - Project ID or null
+ * @param selectedDate - Date string or null
+ * @param projects - Available projects data
+ * @param user - User object with timezone
+ * @returns New TrackerRecord
  */
 const createNewEvent = (
   slot: number,
@@ -166,26 +229,40 @@ const createNewEvent = (
   projects?: RouterOutputs["trackerProjects"]["get"]["data"],
   user?: { timezone?: string | null },
 ): TrackerRecord => {
-  const baseDate = selectedDate ? parseISO(selectedDate) : new Date();
+  // Get base date for event
+  let baseDate: Date;
+  if (selectedDate) {
+    baseDate = parseISO(selectedDate);
+  } else {
+    const timezone = getUserTimezone(user);
+    try {
+      const now = new Date();
+      const userTzDate = new TZDate(now, timezone);
+      baseDate = startOfDay(userTzDate);
+    } catch (error) {
+      console.warn("Today calculation failed, using system date:", error);
+      baseDate = new Date();
+    }
+  }
   const dateStr = format(baseDate, "yyyy-MM-dd");
   const timezone = getUserTimezone(user);
 
-  // Calculate start time from slot (each slot = 15 minutes)
+  // Convert slot to time
   const hour = Math.floor(slot / 4);
   const minute = (slot % 4) * 15;
   const startTimeStr = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 
-  // Calculate end time (15 minutes later)
+  // 15-minute default duration
   const endMinute = minute + 15;
   const endHour = endMinute >= 60 ? hour + 1 : hour;
   const finalEndMinute = endMinute >= 60 ? endMinute - 60 : endMinute;
   const endTimeStr = `${String(endHour).padStart(2, "0")}:${String(finalEndMinute).padStart(2, "0")}`;
 
-  // Convert user timezone times to UTC for storage
+  // Convert to UTC for storage
   const startDate = userTimeToUTC(dateStr, startTimeStr, timezone);
   const endDate = userTimeToUTC(dateStr, endTimeStr, timezone);
 
-  // Find the project name from projects data
+  // Find project details
   const selectedProject = projects?.find((p) => p.id === selectedProjectId);
 
   return {
@@ -405,17 +482,27 @@ export function TrackerSchedule() {
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const sortedRange = range?.sort((a, b) => a.localeCompare(b));
 
-  // Scroll to appropriate time on mount
+  // Scroll to appropriate time on mount (using user timezone)
   useEffect(() => {
     if (scrollRef.current) {
-      const currentHour = new Date().getHours();
+      let currentHour: number;
+      try {
+        const timezone = getUserTimezone(user);
+        const now = new Date();
+        const userTzDate = new TZDate(now, timezone);
+        currentHour = userTzDate.getHours();
+      } catch (error) {
+        console.warn("TZDate current hour calculation failed:", error);
+        currentHour = new Date().getHours();
+      }
+
       if (currentHour >= 12) {
         scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight });
       } else {
         scrollRef.current.scrollTo({ top: ROW_HEIGHT * 6 });
       }
     }
-  }, []);
+  }, [user]);
 
   // Event handlers
   const handleDeleteEvent = useCallback(
@@ -430,8 +517,21 @@ export function TrackerSchedule() {
   );
 
   const getBaseDate = useCallback(() => {
-    return selectedDate ? parseISO(selectedDate) : startOfDay(new Date());
-  }, [selectedDate]);
+    if (selectedDate) {
+      return parseISO(selectedDate);
+    }
+
+    // Get "today" in user's timezone, not browser timezone
+    const userTimezone = getUserTimezone(user);
+    try {
+      const now = new Date();
+      const userTzDate = new TZDate(now, userTimezone);
+      return startOfDay(userTzDate);
+    } catch (error) {
+      console.warn("TZDate today calculation failed:", error);
+      return startOfDay(new Date());
+    }
+  }, [selectedDate, user]);
 
   const handleCreateEvent = useCallback(
     (formValues: {
@@ -727,8 +827,9 @@ export function TrackerSchedule() {
             setParams({ eventId: null });
           }
 
+          const timezone = getUserTimezone(user);
           const newEvent = createNewEvent(
-            getSlotFromDate(startTime),
+            getSlotFromDate(startTime, timezone),
             selectedProjectId,
             selectedDate,
             projectsData?.data,
@@ -881,12 +982,10 @@ export function TrackerSchedule() {
             start: safeFormatTime(
               eventToUpdate.start,
               user?.timezone ? user.timezone : undefined,
-              false,
             ),
             stop: safeFormatTime(
               eventToUpdate.stop,
               user?.timezone ? user.timezone : undefined,
-              false,
             ),
             projectId: project.id,
             description: eventToUpdate.description ?? undefined,
@@ -917,26 +1016,52 @@ export function TrackerSchedule() {
         // Check if this entry spans midnight by comparing dates in user timezone
         const timezone = getUserTimezone(user);
 
-        // Use toLocaleString for reliable timezone conversion instead of TZDate
-        const startDateStr = startDate.toLocaleString("en-CA", {
-          timeZone: timezone,
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        });
-        const endDateStr = endDate.toLocaleString("en-CA", {
-          timeZone: timezone,
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        });
+        // Use TZDate for reliable timezone conversion
+        let spansMidnight: boolean;
+        let startDateStr: string;
+        try {
+          const startTzDate = new TZDate(startDate, timezone);
+          const endTzDate = new TZDate(endDate, timezone);
+          // Use date-fns format with timezone-aware dates
+          startDateStr = format(startTzDate, "yyyy-MM-dd");
+          const endDateStr = format(endTzDate, "yyyy-MM-dd");
 
-        const spansMidnight = startDateStr !== endDateStr;
+          spansMidnight = startDateStr !== endDateStr;
+        } catch (error) {
+          console.warn("TZDate midnight detection failed:", error);
+          // Fallback to toLocaleString
+          startDateStr = startDate.toLocaleString("en-CA", {
+            timeZone: timezone,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          });
+          const endDateStr = endDate.toLocaleString("en-CA", {
+            timeZone: timezone,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          });
+          spansMidnight = startDateStr !== endDateStr;
+        }
 
         if (spansMidnight) {
           // This is a split entry - only show the first part (with → arrow)
-          const currentSelectedDate =
-            selectedDate || format(new Date(), "yyyy-MM-dd");
+          // Get current date in user timezone for midnight-spanning comparison
+          let currentSelectedDate: string;
+          if (selectedDate) {
+            currentSelectedDate = selectedDate;
+          } else {
+            const timezone = getUserTimezone(user);
+            try {
+              const now = new Date();
+              const userTzDate = new TZDate(now, timezone);
+              currentSelectedDate = format(userTzDate, "yyyy-MM-dd");
+            } catch (error) {
+              console.warn("TZDate today formatting failed:", error);
+              currentSelectedDate = format(new Date(), "yyyy-MM-dd");
+            }
+          }
 
           if (startDateStr === currentSelectedDate) {
             // This is the first part of the entry (ends at midnight in user timezone)
@@ -1089,7 +1214,7 @@ export function TrackerSchedule() {
                 className="pr-4 flex font-mono flex-col"
                 style={{ height: `${ROW_HEIGHT}px` }}
               >
-                {formatHour(hour, user?.timeFormat)}
+                {formatHour(hour, user?.timeFormat, getUserTimezone(user))}
               </div>
             ))}
           </div>
@@ -1133,7 +1258,6 @@ export function TrackerSchedule() {
             ? safeFormatTime(
                 formEvent.start,
                 user?.timezone ? user.timezone : undefined,
-                formEvent.id === NEW_EVENT_ID,
               )
             : undefined
         }
@@ -1142,7 +1266,6 @@ export function TrackerSchedule() {
             ? safeFormatTime(
                 formEvent.stop,
                 user?.timezone ? user.timezone : undefined,
-                formEvent.id === NEW_EVENT_ID,
               )
             : undefined
         }

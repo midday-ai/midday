@@ -48,7 +48,6 @@
     "ai": "^4.3.16",
     "change-case": "^5.4.4",
     "date-fns": "^4.1.0",
-    "datezone": "^1.0.7",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.18.1",
     "geist": "^1.4.2",

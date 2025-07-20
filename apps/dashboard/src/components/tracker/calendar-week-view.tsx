@@ -73,13 +73,13 @@ export function CalendarWeekView({
           startSlot = getSlotFromDate(startInUserTz);
           originalEndSlot = getSlotFromDate(endInUserTz);
         } catch {
-          // Fallback to UTC if timezone conversion fails
-          startSlot = getSlotFromDate(startDate);
-          originalEndSlot = getSlotFromDate(endDate);
+          // Fallback with timezone parameter if timezone conversion fails
+          startSlot = getSlotFromDate(startDate, displayTimezone);
+          originalEndSlot = getSlotFromDate(endDate, displayTimezone);
         }
       } else {
-        startSlot = getSlotFromDate(startDate);
-        originalEndSlot = getSlotFromDate(endDate);
+        startSlot = getSlotFromDate(startDate, displayTimezone);
+        originalEndSlot = getSlotFromDate(endDate, displayTimezone);
       }
 
       // Check if this entry spans midnight by comparing actual dates in user timezone
@@ -181,10 +181,10 @@ export function CalendarWeekView({
             const endInUserTz = new TZDate(endDate, userTimezone);
             originalEndSlot = getSlotFromDate(endInUserTz);
           } catch {
-            originalEndSlot = getSlotFromDate(endDate);
+            originalEndSlot = getSlotFromDate(endDate, userTimezone);
           }
         } else {
-          originalEndSlot = getSlotFromDate(endDate);
+          originalEndSlot = getSlotFromDate(endDate, userTimezone);
         }
 
         allEntries.push({

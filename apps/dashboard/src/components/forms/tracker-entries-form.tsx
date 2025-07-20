@@ -2,13 +2,15 @@
 
 import { useLatestProjectId } from "@/hooks/use-latest-project-id";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { NEW_EVENT_ID } from "@/utils/tracker";
+import { useUserQuery } from "@/hooks/use-user";
+import { NEW_EVENT_ID, parseTimeWithMidnightCrossing } from "@/utils/tracker";
+import { TZDate } from "@date-fns/tz";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { TimeRangeInput } from "@midday/ui/time-range-input";
-import { addDays, differenceInSeconds, parse } from "date-fns";
+import { startOfDay } from "date-fns";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -53,6 +55,10 @@ export function TrackerEntriesForm({
 }: Props) {
   const { projectId: selectedProjectId } = useTrackerParams();
   const { latestProjectId } = useLatestProjectId();
+  const { data: user } = useUserQuery();
+
+  // Helper to get user timezone with fallback
+  const getUserTimezone = () => user?.timezone || "UTC";
 
   const isUpdate = eventId && eventId !== NEW_EVENT_ID;
 
@@ -93,18 +99,30 @@ export function TrackerEntriesForm({
     }
 
     if (start && stop) {
-      const startDate = parse(start, "HH:mm", new Date());
-      let endDate = parse(stop, "HH:mm", new Date());
+      // Use timezone-aware time parsing instead of manual conversion
+      const timezone = getUserTimezone();
+      let baseDate: Date;
 
-      // If stop time is before start time, assume it's on the next day
-      if (endDate < startDate) {
-        endDate = addDays(endDate, 1);
+      try {
+        // Get "today" in user's timezone as reference date for parsing
+        const now = new Date();
+        const userTzDate = new TZDate(now, timezone);
+        baseDate = startOfDay(userTzDate);
+      } catch (error) {
+        console.warn("TZDate failed in form, using browser date:", error);
+        baseDate = startOfDay(new Date());
       }
 
-      const durationInSeconds = differenceInSeconds(endDate, startDate);
+      // Use the enhanced parseTimeWithMidnightCrossing function
+      const { duration } = parseTimeWithMidnightCrossing(
+        start,
+        stop,
+        baseDate,
+        timezone,
+      );
 
-      if (durationInSeconds) {
-        form.setValue("duration", durationInSeconds, { shouldValidate: true });
+      if (duration) {
+        form.setValue("duration", duration, { shouldValidate: true });
       }
     }
   }, [start, stop, projectId, description, eventId]);
