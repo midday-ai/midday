@@ -4,7 +4,6 @@ import { secondsToHoursAndMinutes } from "@/utils/format";
 import { createSafeDate } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { TZDate } from "@date-fns/tz";
-import type { TZDate as TZDateType } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
 import { format } from "date-fns";
 
@@ -15,8 +14,6 @@ type Props = {
   isToday: boolean;
   allData?: RouterOutputs["trackerEntries"]["byRange"]["result"];
   currentDate: Date;
-  currentTZDate?: TZDate;
-  hasContinuationEvents?: boolean;
   onEventClick?: (eventId: string, date: TZDate) => void;
 };
 
@@ -25,8 +22,6 @@ export function TrackerEvents({
   isToday,
   allData,
   currentDate,
-  currentTZDate,
-  hasContinuationEvents,
   onEventClick,
 }: Props) {
   const { data: user } = useUserQuery();
@@ -68,11 +63,31 @@ export function TrackerEvents({
         if (spansMidnight) {
           if (startDateStr === currentDayStr) {
             // This is the first part of the entry (ends at midnight)
-            // Calculate duration from start time to midnight
-            const endOfDay = new Date(startDate);
-            endOfDay.setHours(23, 59, 59, 999);
-            const firstPartDuration =
-              Math.floor((endOfDay.getTime() - startDate.getTime()) / 1000) + 1;
+            // Calculate duration from start time to end of day in user's timezone
+            const userTimezone = user?.timezone || "UTC";
+            let endOfDay: Date;
+
+            if (userTimezone !== "UTC") {
+              try {
+                // Create end of day in user's timezone
+                const endOfDayInUserTz = new TZDate(startDate, userTimezone);
+                endOfDayInUserTz.setHours(23, 59, 59, 999);
+                endOfDay = endOfDayInUserTz;
+              } catch {
+                // Fallback to UTC if timezone conversion fails
+                const endOfDayUTC = new Date(startDate);
+                endOfDayUTC.setHours(23, 59, 59, 999);
+                endOfDay = endOfDayUTC;
+              }
+            } else {
+              const endOfDayUTC = new Date(startDate);
+              endOfDayUTC.setHours(23, 59, 59, 999);
+              endOfDay = endOfDayUTC;
+            }
+
+            const firstPartDuration = Math.floor(
+              (endOfDay.getTime() - startDate.getTime()) / 1000,
+            );
 
             allEntries.push({
               ...event,
@@ -132,9 +147,28 @@ export function TrackerEvents({
 
         // If this entry from previous day ends on current day
         if (spansMidnight && endDateStr === currentDayStr) {
-          // Calculate duration from start of day to end time
-          const startOfDay = new Date(endDate);
-          startOfDay.setHours(0, 0, 0, 0);
+          // Calculate duration from start of day to end time in user's timezone
+          const userTimezone = user?.timezone || "UTC";
+          let startOfDay: Date;
+
+          if (userTimezone !== "UTC") {
+            try {
+              // Create start of day in user's timezone
+              const startOfDayInUserTz = new TZDate(endDate, userTimezone);
+              startOfDayInUserTz.setHours(0, 0, 0, 0);
+              startOfDay = startOfDayInUserTz;
+            } catch {
+              // Fallback to UTC if timezone conversion fails
+              const startOfDayUTC = new Date(endDate);
+              startOfDayUTC.setHours(0, 0, 0, 0);
+              startOfDay = startOfDayUTC;
+            }
+          } else {
+            const startOfDayUTC = new Date(endDate);
+            startOfDayUTC.setHours(0, 0, 0, 0);
+            startOfDay = startOfDayUTC;
+          }
+
           const secondPartDuration = Math.floor(
             (endDate.getTime() - startOfDay.getTime()) / 1000,
           );

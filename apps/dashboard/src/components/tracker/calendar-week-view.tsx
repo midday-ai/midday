@@ -279,11 +279,24 @@ export function CalendarWeekView({
     });
 
     // Check previous day for entries that continue into current day
-    const currentDayDate = new Date(day);
-    const previousDay = new Date(
-      currentDayDate.getTime() - 24 * 60 * 60 * 1000,
-    );
-    const previousDayStr = previousDay.toISOString().split("T")[0]; // Extract YYYY-MM-DD from ISO string
+    // Use timezone-aware date calculation to handle DST transitions properly
+    const userTimezone = user?.timezone || "UTC";
+    let previousDayStr: string;
+
+    try {
+      // Create timezone-aware date and subtract 1 day (handles DST properly)
+      const currentDayInUserTz = new TZDate(day, userTimezone);
+      const previousDayInUserTz = new TZDate(currentDayInUserTz);
+      previousDayInUserTz.setDate(previousDayInUserTz.getDate() - 1);
+
+      // Format in user's timezone instead of UTC
+      previousDayStr = format(previousDayInUserTz, "yyyy-MM-dd");
+    } catch {
+      // Fallback for timezone conversion errors
+      const previousDay = new Date(day);
+      previousDay.setDate(previousDay.getDate() - 1);
+      previousDayStr = format(previousDay, "yyyy-MM-dd");
+    }
 
     const previousDayData =
       (data && previousDayStr && data[previousDayStr]) || [];
@@ -293,7 +306,7 @@ export function CalendarWeekView({
       const endDate = createSafeDate(event.stop);
 
       // Convert to user timezone to check if it spans midnight in their local time
-      const userTimezone = user?.timezone || "UTC";
+      // userTimezone already declared above
       let startDateStr: string;
       let endDateStr: string;
 

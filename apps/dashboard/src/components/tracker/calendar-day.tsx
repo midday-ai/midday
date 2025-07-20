@@ -1,5 +1,3 @@
-import { useUserQuery } from "@/hooks/use-user";
-import { createSafeDate } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { TZDate } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
@@ -44,7 +42,6 @@ export function CalendarDay({
   handleMouseUp,
   onEventClick,
 }: CalendarDayProps) {
-  const { data: user } = useUserQuery();
   const isCurrentMonth = date.getMonth() === currentDate.getMonth();
   const formattedDate = formatISO(date, { representation: "date" });
 
@@ -65,53 +62,10 @@ export function CalendarDay({
     [isDragging, localRange, range],
   );
 
-  // Check if this day has continuation events that need special click handling
-  const hasContinuationEvents = useCallback(() => {
-    if (!allData) return false;
-
-    const currentDayStr = format(date, "yyyy-MM-dd");
-    const previousDay = new Date(date);
-    previousDay.setDate(previousDay.getDate() - 1);
-    const previousDayStr = format(previousDay, "yyyy-MM-dd");
-    const previousDayData = allData[previousDayStr] || [];
-
-    // Check if there's a continuation from previous day
-    return previousDayData.some((event) => {
-      const startDate = createSafeDate(event.start);
-      const endDate = createSafeDate(event.stop);
-
-      // Convert to user timezone to check if it spans midnight in their local time
-      const userTimezone = user?.timezone || "UTC";
-      let startDateStr: string;
-      let endDateStr: string;
-
-      if (userTimezone !== "UTC") {
-        try {
-          const startInUserTz = new TZDate(startDate, userTimezone);
-          const endInUserTz = new TZDate(endDate, userTimezone);
-          startDateStr = format(startInUserTz, "yyyy-MM-dd");
-          endDateStr = format(endInUserTz, "yyyy-MM-dd");
-        } catch {
-          // Fallback to UTC if timezone conversion fails
-          startDateStr = format(startDate, "yyyy-MM-dd");
-          endDateStr = format(endDate, "yyyy-MM-dd");
-        }
-      } else {
-        startDateStr = format(startDate, "yyyy-MM-dd");
-        endDateStr = format(endDate, "yyyy-MM-dd");
-      }
-
-      const spansMidnight = startDateStr !== endDateStr;
-
-      return spansMidnight && endDateStr === currentDayStr;
-    });
-  }, [allData, date, user?.timezone]);
-
   const handleDayClick = (event: React.MouseEvent) => {
     // Check if the click target is a continuation event
     const target = event.target as HTMLElement;
     const isContinuation = target.closest('[data-is-continuation="true"]');
-    const isShowAllEvents = target.closest('[data-show-all-events="true"]');
     const eventTarget = target.closest("[data-event-id]");
 
     if (isContinuation) {
@@ -161,8 +115,6 @@ export function CalendarDay({
         isToday={isToday(date)}
         allData={allData}
         currentDate={new Date(date)}
-        currentTZDate={date}
-        hasContinuationEvents={hasContinuationEvents()}
         onEventClick={onEventClick}
       />
     </div>

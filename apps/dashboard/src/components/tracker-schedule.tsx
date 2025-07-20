@@ -10,14 +10,12 @@ import {
   calculateDuration,
   createSafeDate,
   formatHour,
-  formatTimeFromDate,
   getDates,
   getSlotFromDate,
   isValidTimeSlot,
 } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
-import { TZDate, tz, tzOffset } from "@date-fns/tz";
-import { UTCDate, utc } from "@date-fns/utc";
+import { TZDate, tz } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
 import {
   ContextMenu,
@@ -758,13 +756,7 @@ export function TrackerSchedule() {
 
       upsertTrackerEntry.mutate(apiData);
     },
-    [
-      selectedDate,
-      sortedRange,
-      getBaseDate,
-      upsertTrackerEntry,
-      user?.timezone,
-    ],
+    [selectedDate, sortedRange, getBaseDate, upsertTrackerEntry, user],
   );
 
   const handleMouseDown = useCallback(
@@ -1240,16 +1232,15 @@ export function TrackerSchedule() {
             // This is the first part of the entry (ends at midnight in user timezone)
             // Calculate end of day in user timezone, then convert back to UTC
             const timezone = getUserTimezone(user);
-            const endOfDayUserTz = `${currentSelectedDate}T23:59:59`;
             const endOfDayUtc = userTimeToUTC(
               currentSelectedDate,
               "23:59",
               timezone,
             );
 
-            const firstPartDuration =
-              Math.floor((endOfDayUtc.getTime() - startDate.getTime()) / 1000) +
-              1;
+            const firstPartDuration = Math.floor(
+              (endOfDayUtc.getTime() - startDate.getTime()) / 1000,
+            );
 
             processedEntries.push({
               ...event,
