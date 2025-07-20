@@ -297,21 +297,10 @@ export function CalendarWeekView({
       // Format in user's timezone instead of UTC
       previousDayStr = format(previousDayInUserTz, "yyyy-MM-dd");
     } catch {
-      // Fallback with timezone-aware calculation
-      try {
-        const currentDayAsDate = new Date(day.getTime());
-        const previousDayDate = new Date(currentDayAsDate);
-        previousDayDate.setDate(previousDayDate.getDate() - 1);
-
-        // Use timezone-aware previous day calculation in fallback
-        const previousDayInUserTz = new TZDate(previousDayDate, userTimezone);
-        previousDayStr = format(previousDayInUserTz, "yyyy-MM-dd");
-      } catch {
-        // Final fallback to UTC calculation
-        const previousDay = new Date(day);
-        previousDay.setDate(previousDay.getDate() - 1);
-        previousDayStr = format(previousDay, "yyyy-MM-dd");
-      }
+      // Fallback to UTC calculation
+      const previousDay = new Date(day);
+      previousDay.setDate(previousDay.getDate() - 1);
+      previousDayStr = format(previousDay, "yyyy-MM-dd");
     }
 
     const previousDayData =
