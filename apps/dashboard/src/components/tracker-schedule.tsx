@@ -13,9 +13,11 @@ import {
   getDates,
   getSlotFromDate,
   isValidTimeSlot,
+  parseTimeWithMidnightCrossing,
 } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { TZDate, tz } from "@date-fns/tz";
+import { UTCDate } from "@date-fns/utc";
 import { cn } from "@midday/ui/cn";
 import {
   ContextMenu,
@@ -41,7 +43,7 @@ import { TrackerEntriesForm } from "./forms/tracker-entries-form";
 import { TrackerDaySelect } from "./tracker-day-select";
 
 /**
- * Converts user input time to UTC using library functions
+ * Converts user input time to UTC using @date-fns/utc
  * @param dateStr - Date in YYYY-MM-DD format
  * @param timeStr - Time in HH:MM format
  * @param timezone - IANA timezone identifier
@@ -53,21 +55,19 @@ const userTimeToUTC = (
   timezone: string,
 ): Date => {
   try {
-    // Use tz() function to create timezone factory (same approach as safeGetSlot)
-    const createTZDate = tz(timezone);
+    // Create a UTC base date to avoid browser timezone interference
+    const baseDate = new UTCDate(`${dateStr}T00:00:00.000Z`);
 
-    // Create a base UTC date for the day, then set time in user timezone
-    const baseUtcDate = new Date(`${dateStr}T00:00:00.000Z`);
-    const tzDate = createTZDate(baseUtcDate);
+    // Use the existing timezone-aware parsing utility
+    // This properly handles timezone conversions using @date-fns/utc internally
+    const { start } = parseTimeWithMidnightCrossing(
+      timeStr,
+      timeStr, // Same time for start and end to get just the start time
+      baseDate,
+      timezone,
+    );
 
-    // Parse the time components
-    const [hour, minute] = timeStr.split(":").map(Number);
-
-    // Set the time in the timezone-aware date
-    tzDate.setHours(hour || 0, minute || 0, 0, 0);
-
-    // Convert back to UTC Date
-    return new Date(tzDate.getTime());
+    return start;
   } catch (error) {
     console.warn("Timezone conversion failed, falling back to UTC:", {
       dateStr,
@@ -75,8 +75,8 @@ const userTimeToUTC = (
       timezone,
       error,
     });
-    // Safe fallback: treat input as UTC
-    return new Date(`${dateStr}T${timeStr}:00Z`);
+    // Safe fallback: treat input as UTC using UTCDate
+    return new UTCDate(`${dateStr}T${timeStr}:00Z`);
   }
 };
 
