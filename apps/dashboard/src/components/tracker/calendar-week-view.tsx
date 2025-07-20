@@ -284,18 +284,34 @@ export function CalendarWeekView({
     let previousDayStr: string;
 
     try {
-      // Create timezone-aware date and subtract 1 day (handles DST properly)
-      const currentDayInUserTz = new TZDate(day, userTimezone);
-      const previousDayInUserTz = new TZDate(currentDayInUserTz);
-      previousDayInUserTz.setDate(previousDayInUserTz.getDate() - 1);
+      // Convert the TZDate to a regular Date object for arithmetic
+      const currentDayAsDate = new Date(day.getTime());
+
+      // Create a new Date object for the previous day calculation
+      const previousDayDate = new Date(currentDayAsDate);
+      previousDayDate.setDate(previousDayDate.getDate() - 1);
+
+      // Create timezone-aware previous day date
+      const previousDayInUserTz = new TZDate(previousDayDate, userTimezone);
 
       // Format in user's timezone instead of UTC
       previousDayStr = format(previousDayInUserTz, "yyyy-MM-dd");
     } catch {
-      // Fallback for timezone conversion errors
-      const previousDay = new Date(day);
-      previousDay.setDate(previousDay.getDate() - 1);
-      previousDayStr = format(previousDay, "yyyy-MM-dd");
+      // Fallback with timezone-aware calculation
+      try {
+        const currentDayAsDate = new Date(day.getTime());
+        const previousDayDate = new Date(currentDayAsDate);
+        previousDayDate.setDate(previousDayDate.getDate() - 1);
+
+        // Use timezone-aware previous day calculation in fallback
+        const previousDayInUserTz = new TZDate(previousDayDate, userTimezone);
+        previousDayStr = format(previousDayInUserTz, "yyyy-MM-dd");
+      } catch {
+        // Final fallback to UTC calculation
+        const previousDay = new Date(day);
+        previousDay.setDate(previousDay.getDate() - 1);
+        previousDayStr = format(previousDay, "yyyy-MM-dd");
+      }
     }
 
     const previousDayData =
