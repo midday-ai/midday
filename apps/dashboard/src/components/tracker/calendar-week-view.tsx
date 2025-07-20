@@ -39,6 +39,150 @@ type ProcessedEntry = {
   isFromCurrentDay: boolean;
 };
 
+type PositionedEntry = ProcessedEntry & {
+  column: number;
+  totalColumns: number;
+  width: number;
+  left: number;
+  leftPx?: number; // For pixel-based left positioning in cascading layout
+};
+
+/**
+ * Detect if two events overlap in time
+ */
+const eventsOverlap = (
+  event1: ProcessedEntry,
+  event2: ProcessedEntry,
+): boolean => {
+  return (
+    event1.displayStartSlot < event2.displayEndSlot &&
+    event2.displayStartSlot < event1.displayEndSlot
+  );
+};
+
+/**
+ * Group overlapping events and calculate positioning
+ */
+const calculateEventPositions = (
+  entries: ProcessedEntry[],
+): PositionedEntry[] => {
+  if (entries.length === 0) return [];
+
+  // Sort events by start time, then by duration (longer events first)
+  const sortedEntries = [...entries].sort((a, b) => {
+    if (a.displayStartSlot !== b.displayStartSlot) {
+      return a.displayStartSlot - b.displayStartSlot;
+    }
+    // If start times are the same, put longer events first
+    return (
+      b.displayEndSlot -
+      b.displayStartSlot -
+      (a.displayEndSlot - a.displayStartSlot)
+    );
+  });
+
+  // Build overlap groups using a more robust algorithm
+  const overlapGroups: ProcessedEntry[][] = [];
+  const processed = new Set<ProcessedEntry>();
+
+  for (const entry of sortedEntries) {
+    if (processed.has(entry)) continue;
+
+    // Start a new group with this entry
+    const currentGroup: ProcessedEntry[] = [entry];
+    processed.add(entry);
+
+    // Keep expanding the group until no more overlaps are found
+    let foundNewOverlap = true;
+    while (foundNewOverlap) {
+      foundNewOverlap = false;
+
+      for (const candidate of sortedEntries) {
+        if (processed.has(candidate)) continue;
+
+        // Check if this candidate overlaps with ANY event in the current group
+        const overlapsWithGroup = currentGroup.some((groupEntry) =>
+          eventsOverlap(candidate, groupEntry),
+        );
+
+        if (overlapsWithGroup) {
+          currentGroup.push(candidate);
+          processed.add(candidate);
+          foundNewOverlap = true;
+          // Don't break here - keep checking other candidates in this iteration
+        }
+      }
+    }
+
+    overlapGroups.push(currentGroup);
+  }
+
+  const positionedEntries: PositionedEntry[] = [];
+
+  // Process each overlap group separately
+  for (const group of overlapGroups) {
+    if (group.length === 1) {
+      // Single event - no overlap, use full width
+      const entry = group[0];
+      if (entry) {
+        positionedEntries.push({
+          ...entry,
+          column: 0,
+          totalColumns: 1,
+          width: 100,
+          left: 0,
+        });
+      }
+    } else {
+      // Multiple overlapping events - use cascading/staggered layout
+
+      // Sort group by start time for proper stacking order
+      const sortedGroup = [...group].sort((a, b) => {
+        if (a.displayStartSlot !== b.displayStartSlot) {
+          return a.displayStartSlot - b.displayStartSlot;
+        }
+        return (
+          b.displayEndSlot -
+          b.displayStartSlot -
+          (a.displayEndSlot - a.displayStartSlot)
+        );
+      });
+
+      sortedGroup.forEach((entry, index) => {
+        // Cascading layout parameters
+        const offsetStep = 8; // Pixels to offset each event
+        const baseWidth = 80; // Width for overlapping events (not the base)
+        const widthReduction = 3; // How much to reduce width for each subsequent event
+
+        // Calculate cascading properties
+        const totalEvents = sortedGroup.length;
+
+        // First event (index 0) gets full width, others get progressively smaller
+        const width =
+          index === 0
+            ? 100
+            : Math.max(60, baseWidth - (index - 1) * widthReduction);
+
+        // Each event is offset to the right (except the first one)
+        const leftOffset = index * offsetStep;
+        const left = leftOffset;
+
+        positionedEntries.push({
+          ...entry,
+          column: index,
+          totalColumns: totalEvents,
+          width,
+          left,
+          // Add a custom property for pixel-based left positioning
+          leftPx: leftOffset,
+        });
+      });
+    }
+  }
+
+  return positionedEntries;
+};
+
 export function CalendarWeekView({
   weekDays,
   currentDate,
@@ -199,7 +343,10 @@ export function CalendarWeekView({
       }
     });
 
-    return allEntries.map((entry) => {
+    // Calculate positions for overlapping events
+    const positionedEntries = calculateEventPositions(allEntries);
+
+    return positionedEntries.map((entry) => {
       const top = entry.displayStartSlot * SLOT_HEIGHT;
       const height = Math.max(
         (entry.displayEndSlot - entry.displayStartSlot) * SLOT_HEIGHT,
@@ -228,10 +375,23 @@ export function CalendarWeekView({
       return (
         <div
           key={`${entry.event.id}-${entry.eventIndex}`}
-          className="absolute left-0 right-0 text-xs bg-[#F0F0F0] dark:bg-[#1D1D1D] text-[#606060] dark:text-[#878787] p-2 z-10 overflow-hidden cursor-pointer hover:bg-[#E8E8E8] dark:hover:bg-[#252525] transition-colors"
+          className={`absolute text-xs bg-[#F0F0F0] dark:bg-[#1D1D1D] text-[#606060] dark:text-[#878787] p-2 overflow-hidden cursor-pointer hover:bg-[#E8E8E8] dark:hover:bg-[#252525] transition-colors ${
+            entry.totalColumns > 1 && entry.column > 0
+              ? "border border-border"
+              : ""
+          }`}
           style={{
             top: `${top}px`,
             height: `${height}px`,
+            left:
+              entry.leftPx !== undefined
+                ? `${entry.leftPx}px`
+                : `${entry.left}%`,
+            width:
+              entry.leftPx !== undefined
+                ? `calc(${entry.width}% - ${entry.leftPx}px)`
+                : `${entry.width}%`,
+            zIndex: entry.totalColumns > 1 ? 20 + entry.column : 10,
           }}
           onMouseDown={handleEventClick}
           onMouseEnter={() => {
