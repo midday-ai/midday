@@ -3,6 +3,12 @@
 import { useTRPC } from "@/trpc/client";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import NumberFlow from "@number-flow/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,6 +31,12 @@ export function TrackerTimer({
   const [localElapsedSeconds, setLocalElapsedSeconds] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+
+  // Hold-to-stop state
+  const [isHolding, setIsHolding] = useState(false);
+  const [holdProgress, setHoldProgress] = useState(0);
+  const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const holdProgressRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get current timer status
   const { data: timerStatus } = useQuery({
@@ -129,6 +141,42 @@ export function TrackerTimer({
   const totalElapsedSeconds =
     (timerStatus?.elapsedTime || 0) + localElapsedSeconds;
 
+  // Hold-to-stop handlers
+  const startHolding = () => {
+    if (!isThisProjectRunning) return;
+
+    setIsHolding(true);
+    setHoldProgress(0);
+
+    // Start progress animation
+    let progress = 0;
+    holdProgressRef.current = setInterval(() => {
+      progress += 100 / 15; // 15 steps over 1.5 seconds = 100ms intervals
+      setHoldProgress(Math.min(progress, 100));
+    }, 100);
+
+    // Execute stop after 1.5 seconds
+    holdTimerRef.current = setTimeout(() => {
+      stopTimerMutation.mutate({});
+      resetHold();
+    }, 1500);
+  };
+
+  const resetHold = () => {
+    setIsHolding(false);
+    setHoldProgress(0);
+
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+
+    if (holdProgressRef.current) {
+      clearInterval(holdProgressRef.current);
+      holdProgressRef.current = null;
+    }
+  };
+
   // Manage local timer interval
   useEffect(() => {
     if (isThisProjectRunning) {
@@ -164,6 +212,13 @@ export function TrackerTimer({
     }
   }, [timerStatus?.elapsedTime, projectId]);
 
+  // Cleanup hold timers on unmount
+  useEffect(() => {
+    return () => {
+      resetHold();
+    };
+  }, []);
+
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -177,38 +232,110 @@ export function TrackerTimer({
     return { showHours: true, hours, minutes, seconds: secs };
   };
 
-  const toggleTimer = () => {
-    if (isThisProjectRunning) {
-      // Stop the current timer
-      stopTimerMutation.mutate({});
-    } else {
+  const handleButtonClick = () => {
+    if (!isThisProjectRunning) {
       // Start timer for this project
       startTimerMutation.mutate({
         projectId,
       });
     }
+    // For stop, we only use hold-to-stop, so no immediate action
   };
 
   return (
     <div className="flex items-center">
-      <button
-        type="button"
-        className={`p-1 h-6 rounded transition-all text-[#666] duration-200 ease-in-out hover:bg-accent flex items-center justify-center overflow-hidden ${
-          isThisProjectRunning
-            ? "w-6 mr-1 opacity-100 scale-100"
-            : "w-0 mr-0 opacity-0 scale-75 group-hover:w-6 group-hover:mr-1 group-hover:opacity-100 group-hover:scale-100"
-        }`}
-        onClick={(e) => {
-          e.stopPropagation();
-          toggleTimer();
-        }}
-      >
-        {isThisProjectRunning ? (
-          <Icons.StopOutline size={18} />
-        ) : (
-          <Icons.PlayOutline size={18} />
+      <div className="relative">
+        <TooltipProvider delayDuration={20}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className={`p-1 h-6 rounded transition-all text-[#666] duration-200 ease-in-out hover:bg-accent flex items-center justify-center overflow-hidden ${
+                  isThisProjectRunning
+                    ? "w-6 mr-1 opacity-100 scale-100"
+                    : "w-0 mr-0 opacity-0 scale-75 group-hover:w-6 group-hover:mr-1 group-hover:opacity-100 group-hover:scale-100"
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleButtonClick();
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  if (isThisProjectRunning) {
+                    startHolding();
+                  }
+                }}
+                onMouseUp={(e) => {
+                  e.stopPropagation();
+                  resetHold();
+                }}
+                onMouseLeave={(e) => {
+                  e.stopPropagation();
+                  resetHold();
+                }}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  if (isThisProjectRunning) {
+                    startHolding();
+                  }
+                }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  resetHold();
+                }}
+              >
+                {isThisProjectRunning ? (
+                  <Icons.StopOutline size={18} />
+                ) : (
+                  <Icons.PlayOutline size={18} />
+                )}
+              </button>
+            </TooltipTrigger>
+            {isThisProjectRunning && (
+              <TooltipContent
+                side="top"
+                sideOffset={5}
+                className="text-xs px-2 py-1 text-[#878787]"
+              >
+                <p>Hold down to stop</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+
+        {/* Circular Progress Bar */}
+        {isHolding && isThisProjectRunning && (
+          <svg
+            className="absolute inset-0 w-6 h-6 -rotate-90 pointer-events-none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="text-primary opacity-30"
+            />
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              className="text-primary"
+              style={{
+                strokeDasharray: "62.83", // 2 * π * 10
+                strokeDashoffset: 62.83 * (1 - holdProgress / 100),
+                transition: "stroke-dashoffset 100ms linear",
+              }}
+            />
+          </svg>
         )}
-      </button>
+      </div>
 
       <div className="cursor-pointer flex-1" onClick={onClick}>
         <div className="flex items-center gap-2">
