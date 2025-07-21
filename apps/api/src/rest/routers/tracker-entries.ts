@@ -286,7 +286,7 @@ app.openapi(
     operationId: "startTimer",
     "x-speakeasy-name-override": "startTimer",
     description: "Start a new timer or continue from a paused entry.",
-    tags: ["Timer"],
+    tags: ["Tracker Timer"],
     request: {
       body: {
         content: {
@@ -335,7 +335,7 @@ app.openapi(
     operationId: "stopTimer",
     "x-speakeasy-name-override": "stopTimer",
     description: "Stop the current running timer or a specific timer entry.",
-    tags: ["Timer"],
+    tags: ["Tracker Timer"],
     request: {
       body: {
         content: {
@@ -381,7 +381,7 @@ app.openapi(
     operationId: "getCurrentTimer",
     "x-speakeasy-name-override": "getCurrentTimer",
     description: "Get the currently running timer for the authenticated user.",
-    tags: ["Timer"],
+    tags: ["Tracker Timer"],
     request: {
       query: getCurrentTimerSchema,
     },
@@ -423,7 +423,7 @@ app.openapi(
     "x-speakeasy-name-override": "getTimerStatus",
     description:
       "Get timer status including elapsed time for the authenticated user.",
-    tags: ["Timer"],
+    tags: ["Tracker Timer"],
     request: {
       query: getCurrentTimerSchema,
     },
