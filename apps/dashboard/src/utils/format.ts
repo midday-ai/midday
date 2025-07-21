@@ -68,7 +68,8 @@ export function secondsToHoursAndMinutes(seconds: number) {
     return `${minutes}m`;
   }
 
-  return "0h";
+  // For very short durations (< 1 minute), show as "1m" minimum
+  return "1m";
 }
 
 type BurnRateData = {

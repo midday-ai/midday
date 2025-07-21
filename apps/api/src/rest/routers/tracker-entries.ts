@@ -1,7 +1,11 @@
 import {
   bulkCreateTrackerEntries,
   deleteTrackerEntry,
+  getCurrentTimer,
+  getTimerStatus,
   getTrackerRecordsByRange,
+  startTimer,
+  stopTimer,
   upsertTrackerEntries,
 } from "@api/db/queries/tracker-entries";
 import type { Context } from "@api/rest/types";
@@ -9,7 +13,14 @@ import {
   bulkCreateTrackerEntriesSchema,
   createTrackerEntriesResponseSchema,
   deleteTrackerEntrySchema,
+  getCurrentTimerResponseSchema,
+  getCurrentTimerSchema,
+  getTimerStatusResponseSchema,
   getTrackerRecordsByRangeSchema,
+  startTimerResponseSchema,
+  startTimerSchema,
+  stopTimerResponseSchema,
+  stopTimerSchema,
   trackerEntriesResponseSchema,
   upsertTrackerEntriesSchema,
 } from "@api/schemas/tracker-entries";
@@ -263,6 +274,185 @@ app.openapi(
     const result = await deleteTrackerEntry(db, { teamId, id });
 
     return c.json(validateResponse(result, deleteTrackerEntrySchema));
+  },
+);
+
+// Timer endpoints
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/timer/start",
+    summary: "Start a timer",
+    operationId: "startTimer",
+    "x-speakeasy-name-override": "startTimer",
+    description: "Start a new timer or continue from a paused entry.",
+    tags: ["Timer"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: startTimerSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      201: {
+        description: "Timer started successfully.",
+        content: {
+          "application/json": {
+            schema: startTimerResponseSchema,
+          },
+        },
+      },
+    },
+    middleware: [withRequiredScope("tracker-entries.write")],
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const session = c.get("session");
+    const { assignedId, ...rest } = c.req.valid("json");
+
+    const result = await startTimer(db, {
+      teamId,
+      assignedId: assignedId ?? session.user.id,
+      ...rest,
+    });
+
+    return c.json(
+      validateResponse({ data: result }, startTimerResponseSchema),
+      201,
+    );
+  },
+);
+
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/timer/stop",
+    summary: "Stop a timer",
+    operationId: "stopTimer",
+    "x-speakeasy-name-override": "stopTimer",
+    description: "Stop the current running timer or a specific timer entry.",
+    tags: ["Timer"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: stopTimerSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: "Timer stopped successfully.",
+        content: {
+          "application/json": {
+            schema: stopTimerResponseSchema,
+          },
+        },
+      },
+    },
+    middleware: [withRequiredScope("tracker-entries.write")],
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const session = c.get("session");
+    const { assignedId, ...rest } = c.req.valid("json");
+
+    const result = await stopTimer(db, {
+      teamId,
+      assignedId: assignedId ?? session.user.id,
+      ...rest,
+    });
+
+    return c.json(validateResponse({ data: result }, stopTimerResponseSchema));
+  },
+);
+
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/timer/current",
+    summary: "Get current timer",
+    operationId: "getCurrentTimer",
+    "x-speakeasy-name-override": "getCurrentTimer",
+    description: "Get the currently running timer for the authenticated user.",
+    tags: ["Timer"],
+    request: {
+      query: getCurrentTimerSchema,
+    },
+    responses: {
+      200: {
+        description: "Current timer retrieved successfully.",
+        content: {
+          "application/json": {
+            schema: getCurrentTimerResponseSchema,
+          },
+        },
+      },
+    },
+    middleware: [withRequiredScope("tracker-entries.read")],
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const session = c.get("session");
+    const { assignedId } = c.req.valid("query");
+
+    const result = await getCurrentTimer(db, {
+      teamId,
+      assignedId: assignedId ?? session.user.id,
+    });
+
+    return c.json(
+      validateResponse({ data: result }, getCurrentTimerResponseSchema),
+    );
+  },
+);
+
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/timer/status",
+    summary: "Get timer status",
+    operationId: "getTimerStatus",
+    "x-speakeasy-name-override": "getTimerStatus",
+    description:
+      "Get timer status including elapsed time for the authenticated user.",
+    tags: ["Timer"],
+    request: {
+      query: getCurrentTimerSchema,
+    },
+    responses: {
+      200: {
+        description: "Timer status retrieved successfully.",
+        content: {
+          "application/json": {
+            schema: getTimerStatusResponseSchema,
+          },
+        },
+      },
+    },
+    middleware: [withRequiredScope("tracker-entries.read")],
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const session = c.get("session");
+    const { assignedId } = c.req.valid("query");
+
+    const result = await getTimerStatus(db, {
+      teamId,
+      assignedId: assignedId ?? session.user.id,
+    });
+
+    return c.json(
+      validateResponse({ data: result }, getTimerStatusResponseSchema),
+    );
   },
 );
 

@@ -1292,7 +1292,10 @@ export function TrackerSchedule() {
         }
       }
 
-      const height = (endSlot - startSlot) * SLOT_HEIGHT;
+      // Calculate actual height but enforce minimum for usability
+      const actualHeight = (endSlot - startSlot) * SLOT_HEIGHT;
+      const minHeight = 24; // Minimum height for interaction (resize handles + content)
+      const height = Math.max(actualHeight, minHeight);
 
       return (
         <ContextMenu
@@ -1349,11 +1352,11 @@ export function TrackerSchedule() {
               {event.id !== NEW_EVENT_ID && (
                 <>
                   <div
-                    className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize"
+                    className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize hover:bg-primary/10 transition-colors"
                     onMouseDown={(e) => handleEventResizeStart(e, event, "top")}
                   />
                   <div
-                    className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
+                    className="absolute bottom-0 left-0 right-0 h-3 cursor-ns-resize hover:bg-primary/10 transition-colors"
                     onMouseDown={(e) =>
                       handleEventResizeStart(e, event, "bottom")
                     }

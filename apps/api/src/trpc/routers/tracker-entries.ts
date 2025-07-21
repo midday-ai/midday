@@ -1,13 +1,20 @@
 import {
   deleteTrackerEntry,
+  getCurrentTimer,
+  getTimerStatus,
   getTrackerRecordsByDate,
   getTrackerRecordsByRange,
+  startTimer,
+  stopTimer,
   upsertTrackerEntries,
 } from "@api/db/queries/tracker-entries";
 import {
   deleteTrackerEntrySchema,
+  getCurrentTimerSchema,
   getTrackerRecordsByDateSchema,
   getTrackerRecordsByRangeSchema,
+  startTimerSchema,
+  stopTimerSchema,
   upsertTrackerEntriesSchema,
 } from "@api/schemas/tracker-entries";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
@@ -47,6 +54,45 @@ export const trackerEntriesRouter = createTRPCRouter({
       return deleteTrackerEntry(db, {
         teamId: teamId!,
         id: input.id,
+      });
+    }),
+
+  // Timer procedures
+  startTimer: protectedProcedure
+    .input(startTimerSchema)
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
+      return startTimer(db, {
+        teamId: teamId!,
+        assignedId: input.assignedId ?? session.user.id,
+        ...input,
+      });
+    }),
+
+  stopTimer: protectedProcedure
+    .input(stopTimerSchema)
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
+      return stopTimer(db, {
+        teamId: teamId!,
+        assignedId: input.assignedId ?? session.user.id,
+        ...input,
+      });
+    }),
+
+  getCurrentTimer: protectedProcedure
+    .input(getCurrentTimerSchema.optional())
+    .query(async ({ ctx: { db, teamId, session }, input }) => {
+      return getCurrentTimer(db, {
+        teamId: teamId!,
+        assignedId: input?.assignedId ?? session.user.id,
+      });
+    }),
+
+  getTimerStatus: protectedProcedure
+    .input(getCurrentTimerSchema.optional())
+    .query(async ({ ctx: { db, teamId, session }, input }) => {
+      return getTimerStatus(db, {
+        teamId: teamId!,
+        assignedId: input?.assignedId ?? session.user.id,
       });
     }),
 });

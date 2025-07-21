@@ -1,6 +1,6 @@
 import type { Database } from "@api/db";
 import { trackerEntries } from "@api/db/schema";
-import { and, eq, gte, inArray, lte } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lte } from "drizzle-orm";
 
 type GetTrackerRecordsByDateParams = {
   teamId: string;
@@ -360,4 +360,373 @@ export async function deleteTrackerEntry(
     });
 
   return result;
+}
+
+// Timer-related types and functions
+export type StartTimerParams = {
+  teamId: string;
+  projectId: string;
+  assignedId?: string | null;
+  description?: string | null;
+  start?: string;
+  continueFromEntry?: string;
+};
+
+export type StopTimerParams = {
+  teamId: string;
+  entryId?: string;
+  assignedId?: string | null;
+  stop?: string;
+};
+
+export type GetCurrentTimerParams = {
+  teamId: string;
+  assignedId?: string | null;
+};
+
+export type GetTimerStatusParams = {
+  teamId: string;
+  assignedId?: string | null;
+};
+
+/**
+ * Start a new timer or continue from a paused entry
+ */
+export async function startTimer(db: Database, params: StartTimerParams) {
+  const {
+    teamId,
+    projectId,
+    assignedId,
+    description,
+    start,
+    continueFromEntry,
+  } = params;
+
+  const startTime = start || new Date().toISOString();
+  const currentDate = new Date(startTime).toISOString().split("T")[0];
+
+  // First, stop any currently running timer for this user
+  if (assignedId) {
+    await stopCurrentRunningTimer(db, { teamId, assignedId });
+  }
+
+  let entryId: string;
+
+  if (continueFromEntry) {
+    // Continue from a paused entry
+    const existingEntry = await db.query.trackerEntries.findFirst({
+      where: and(
+        eq(trackerEntries.id, continueFromEntry),
+        eq(trackerEntries.teamId, teamId),
+        assignedId ? eq(trackerEntries.assignedId, assignedId) : undefined,
+      ),
+    });
+
+    if (!existingEntry) {
+      throw new Error("Entry to continue from not found");
+    }
+
+    // Update the existing entry to mark it as running
+    await db
+      .update(trackerEntries)
+      .set({
+        start: startTime,
+        stop: null,
+        duration: null, // null indicates running
+      })
+      .where(eq(trackerEntries.id, continueFromEntry));
+
+    entryId = continueFromEntry;
+  } else {
+    // Create a new running entry
+    const [newEntry] = await db
+      .insert(trackerEntries)
+      .values({
+        teamId,
+        projectId,
+        assignedId,
+        description,
+        start: startTime,
+        stop: null,
+        duration: null, // null indicates running
+        date: currentDate,
+      })
+      .returning({ id: trackerEntries.id });
+
+    if (!newEntry) {
+      throw new Error("Failed to create timer entry");
+    }
+
+    entryId = newEntry.id;
+  }
+
+  // Fetch the complete entry with related data
+  const result = await db.query.trackerEntries.findFirst({
+    where: eq(trackerEntries.id, entryId),
+    with: {
+      user: {
+        columns: {
+          id: true,
+          fullName: true,
+          avatarUrl: true,
+        },
+      },
+      trackerProject: {
+        with: {
+          customer: {
+            columns: {
+              id: true,
+              name: true,
+              website: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!result) {
+    throw new Error("Failed to fetch created timer entry");
+  }
+
+  return {
+    ...result,
+    project: result.trackerProject,
+  };
+}
+
+/**
+ * Stop the current running timer
+ */
+export async function stopTimer(db: Database, params: StopTimerParams) {
+  const { teamId, entryId, assignedId, stop } = params;
+
+  const stopTime = stop || new Date().toISOString();
+
+  let targetEntryId = entryId;
+
+  if (!targetEntryId) {
+    // Find the current running timer for the user
+    const runningTimer = await getCurrentRunningTimer(db, {
+      teamId,
+      assignedId,
+    });
+
+    if (!runningTimer) {
+      throw new Error("No running timer found to stop");
+    }
+
+    targetEntryId = runningTimer.id;
+  }
+
+  // Get the entry to calculate duration
+  const entry = await db.query.trackerEntries.findFirst({
+    where: and(
+      eq(trackerEntries.id, targetEntryId),
+      eq(trackerEntries.teamId, teamId),
+      assignedId ? eq(trackerEntries.assignedId, assignedId) : undefined,
+    ),
+  });
+
+  if (!entry) {
+    throw new Error("Timer entry not found");
+  }
+
+  if (entry.stop) {
+    throw new Error("Timer is already stopped");
+  }
+
+  if (!entry.start) {
+    throw new Error("Timer has no start time");
+  }
+
+  // Calculate duration in seconds
+  const startTime = new Date(entry.start).getTime();
+  const stopTime_ms = new Date(stopTime).getTime();
+  const duration = Math.floor((stopTime_ms - startTime) / 1000);
+
+  // Update the entry with stop time and duration
+  await db
+    .update(trackerEntries)
+    .set({
+      stop: stopTime,
+      duration,
+    })
+    .where(eq(trackerEntries.id, targetEntryId));
+
+  // Fetch the updated entry with related data
+  const result = await db.query.trackerEntries.findFirst({
+    where: eq(trackerEntries.id, targetEntryId),
+    with: {
+      user: {
+        columns: {
+          id: true,
+          fullName: true,
+          avatarUrl: true,
+        },
+      },
+      trackerProject: {
+        with: {
+          customer: {
+            columns: {
+              id: true,
+              name: true,
+              website: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!result) {
+    throw new Error("Failed to fetch updated timer entry");
+  }
+
+  return {
+    ...result,
+    project: result.trackerProject,
+  };
+}
+
+/**
+ * Get the current running timer for a user
+ */
+export async function getCurrentTimer(
+  db: Database,
+  params: GetCurrentTimerParams,
+) {
+  const { teamId, assignedId } = params;
+
+  const whereConditions = [
+    eq(trackerEntries.teamId, teamId),
+    // stop is null means it's running
+    isNull(trackerEntries.stop),
+  ];
+
+  if (assignedId) {
+    whereConditions.push(eq(trackerEntries.assignedId, assignedId));
+  }
+
+  const result = await db.query.trackerEntries.findFirst({
+    where: and(...whereConditions),
+    with: {
+      user: {
+        columns: {
+          id: true,
+          fullName: true,
+          avatarUrl: true,
+        },
+      },
+      trackerProject: {
+        with: {
+          customer: {
+            columns: {
+              id: true,
+              name: true,
+              website: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!result) {
+    return null;
+  }
+
+  return {
+    ...result,
+    project: result.trackerProject,
+  };
+}
+
+/**
+ * Get timer status including elapsed time
+ */
+export async function getTimerStatus(
+  db: Database,
+  params: GetTimerStatusParams,
+) {
+  const currentTimer = await getCurrentTimer(db, params);
+
+  if (!currentTimer) {
+    return {
+      isRunning: false,
+      currentEntry: null,
+      elapsedTime: 0,
+    };
+  }
+
+  // Calculate elapsed time
+  let elapsedTime = 0;
+  if (currentTimer.start) {
+    const startTime = new Date(currentTimer.start).getTime();
+    const currentTime = Date.now();
+    elapsedTime = Math.floor((currentTime - startTime) / 1000);
+  }
+
+  return {
+    isRunning: true,
+    currentEntry: {
+      id: currentTimer.id,
+      start: currentTimer.start,
+      description: currentTimer.description,
+      projectId: currentTimer.projectId ?? "",
+      trackerProject: {
+        id: currentTimer.trackerProject?.id ?? "",
+        name: currentTimer.trackerProject?.name ?? "",
+      },
+    },
+    elapsedTime,
+  };
+}
+
+/**
+ * Helper function to get the current running timer (internal use)
+ */
+async function getCurrentRunningTimer(
+  db: Database,
+  params: GetCurrentTimerParams,
+) {
+  const { teamId, assignedId } = params;
+
+  const whereConditions = [
+    eq(trackerEntries.teamId, teamId),
+    isNull(trackerEntries.stop),
+  ];
+
+  if (assignedId) {
+    whereConditions.push(eq(trackerEntries.assignedId, assignedId));
+  }
+
+  return db.query.trackerEntries.findFirst({
+    where: and(...whereConditions),
+  });
+}
+
+/**
+ * Helper function to stop any currently running timer for a user
+ */
+async function stopCurrentRunningTimer(
+  db: Database,
+  params: { teamId: string; assignedId: string },
+) {
+  const runningTimer = await getCurrentRunningTimer(db, params);
+
+  if (runningTimer?.start) {
+    const stopTime = new Date().toISOString();
+    const startTime = new Date(runningTimer.start).getTime();
+    const stopTime_ms = new Date(stopTime).getTime();
+    const duration = Math.floor((stopTime_ms - startTime) / 1000);
+
+    await db
+      .update(trackerEntries)
+      .set({
+        stop: stopTime,
+        duration,
+      })
+      .where(eq(trackerEntries.id, runningTimer.id));
+  }
 }
