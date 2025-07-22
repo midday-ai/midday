@@ -114,7 +114,7 @@ export function CalendarDay({
         data={dayData}
         isToday={isToday(date)}
         allData={allData}
-        currentDate={new Date(date)}
+        currentDate={date}
         onEventClick={onEventClick}
       />
     </div>

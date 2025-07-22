@@ -13,7 +13,7 @@ type Props = {
     | undefined;
   isToday: boolean;
   allData?: RouterOutputs["trackerEntries"]["byRange"]["result"];
-  currentDate: Date;
+  currentDate: TZDate;
   onEventClick?: (eventId: string, date: TZDate) => void;
 };
 
@@ -26,131 +26,114 @@ export function TrackerEvents({
 }: Props) {
   const { data: user } = useUserQuery();
 
-  // Process entries to handle midnight spanning
+  // Process entries to handle midnight spanning - EXACTLY like weekly calendar
   const processedEntries = (() => {
+    // currentDate is already a TZDate in user timezone (like weekly calendar)
     const currentDayStr = format(currentDate, "yyyy-MM-dd");
+    const userTimezone = user?.timezone || "UTC";
     const allEntries = [];
 
-    // Process all available entries to find those that belong to the current day
-    if (allData) {
-      // Iterate through all days' entries to find ones that belong to or continue onto the current day
-      for (const dayEntries of Object.values(allData)) {
-        if (!dayEntries) continue;
+    // FIRST LOOP: Process current day data (exactly like weekly calendar)
+    const currentDayData = allData?.[currentDayStr] || [];
 
-        for (const event of dayEntries) {
-          const startDate = createSafeDate(event.start);
-          const endDate = createSafeDate(event.stop);
+    for (const event of currentDayData) {
+      const startDate = createSafeDate(event.start);
+      const endDate = createSafeDate(event.stop);
 
-          // Check if this entry spans midnight by comparing actual dates in user timezone
-          const userTimezone = user?.timezone || "UTC";
-          let startDateStr: string;
-          let endDateStr: string;
+      // Check if this entry spans midnight - EXACT same logic as weekly calendar
+      let startDateStr: string;
+      let endDateStr: string;
 
-          if (userTimezone !== "UTC") {
-            try {
-              const startInUserTz = new TZDate(startDate, userTimezone);
-              const endInUserTz = new TZDate(endDate, userTimezone);
-              startDateStr = format(startInUserTz, "yyyy-MM-dd");
-              endDateStr = format(endInUserTz, "yyyy-MM-dd");
-            } catch {
-              // Fallback to UTC if timezone conversion fails
-              startDateStr = format(startDate, "yyyy-MM-dd");
-              endDateStr = format(endDate, "yyyy-MM-dd");
-            }
-          } else {
-            startDateStr = format(startDate, "yyyy-MM-dd");
-            endDateStr = format(endDate, "yyyy-MM-dd");
-          }
-
-          const spansMidnight = startDateStr !== endDateStr;
-
-          // Always show entries stored under the current date (like weekly view does)
-          if (event.date === currentDayStr) {
-            // This entry was created on this date - show it as the primary display
-            if (spansMidnight) {
-              // For midnight-spanning entries, show first part with arrow
-              const userTimezone = user?.timezone || "UTC";
-              let endOfDay: Date;
-
-              if (userTimezone !== "UTC") {
-                try {
-                  // Create end of day in user's timezone
-                  const endOfDayInUserTz = new TZDate(startDate, userTimezone);
-                  endOfDayInUserTz.setHours(23, 59, 59, 999);
-                  endOfDay = endOfDayInUserTz;
-                } catch {
-                  // Fallback to UTC if timezone conversion fails
-                  const endOfDayUTC = new Date(startDate);
-                  endOfDayUTC.setHours(23, 59, 59, 999);
-                  endOfDay = endOfDayUTC;
-                }
-              } else {
-                const endOfDayUTC = new Date(startDate);
-                endOfDayUTC.setHours(23, 59, 59, 999);
-                endOfDay = endOfDayUTC;
-              }
-
-              const firstPartDuration = Math.floor(
-                (endOfDay.getTime() - startDate.getTime()) / 1000,
-              );
-
-              allEntries.push({
-                ...event,
-                duration: firstPartDuration,
-                isFirstPart: true,
-                isContinuation: false,
-                originalDuration: event.duration,
-                sortKey: `${event.date}-${event.start}`, // Use event.date for sorting
-              });
-            } else {
-              // Normal entry that doesn't span midnight
-              allEntries.push({
-                ...event,
-                isFirstPart: false,
-                isContinuation: false,
-                originalDuration: event.duration,
-                sortKey: `${event.date}-${event.start}`, // Use event.date for sorting
-              });
-            }
-          } else if (spansMidnight && endDateStr === currentDayStr) {
-            // This is a continuation from a previous day (entry.date != currentDayStr but ends today)
-            // Calculate duration from start of day to end time in user's timezone
-            const userTimezone = user?.timezone || "UTC";
-            let startOfDay: Date;
-
-            if (userTimezone !== "UTC") {
-              try {
-                // Create start of day in user's timezone
-                const startOfDayInUserTz = new TZDate(endDate, userTimezone);
-                startOfDayInUserTz.setHours(0, 0, 0, 0);
-                startOfDay = startOfDayInUserTz;
-              } catch {
-                // Fallback to UTC if timezone conversion fails
-                const startOfDayUTC = new Date(endDate);
-                startOfDayUTC.setHours(0, 0, 0, 0);
-                startOfDay = startOfDayUTC;
-              }
-            } else {
-              const startOfDayUTC = new Date(endDate);
-              startOfDayUTC.setHours(0, 0, 0, 0);
-              startOfDay = startOfDayUTC;
-            }
-
-            const secondPartDuration = Math.floor(
-              (endDate.getTime() - startOfDay.getTime()) / 1000,
-            );
-
-            allEntries.push({
-              ...event,
-              duration: secondPartDuration,
-              isFirstPart: false,
-              isContinuation: true,
-              originalDuration: event.duration,
-              sortKey: `${event.date}-${event.start}`, // Use event.date for sorting
-            });
-          }
-          // If entry doesn't belong to this day (entry.date != currentDayStr and doesn't end today), skip it
+      if (userTimezone !== "UTC") {
+        try {
+          const startInUserTz = new TZDate(startDate, userTimezone);
+          const endInUserTz = new TZDate(endDate, userTimezone);
+          startDateStr = format(startInUserTz, "yyyy-MM-dd");
+          endDateStr = format(endInUserTz, "yyyy-MM-dd");
+        } catch {
+          // Fallback to UTC if timezone conversion fails
+          startDateStr = format(startDate, "yyyy-MM-dd");
+          endDateStr = format(endDate, "yyyy-MM-dd");
         }
+      } else {
+        startDateStr = format(startDate, "yyyy-MM-dd");
+        endDateStr = format(endDate, "yyyy-MM-dd");
+      }
+
+      const spansMidnight = startDateStr !== endDateStr;
+
+      // Always show entries stored under the current date
+      if (event.date === currentDayStr) {
+        // This entry was created on this date - show it as the primary display
+        allEntries.push({
+          ...event,
+          isFirstPart: spansMidnight, // Show arrow if spans midnight
+          isContinuation: false,
+          originalDuration: event.duration,
+          sortKey: `${event.date}-${event.start}`,
+        });
+      } else if (spansMidnight && endDateStr === currentDayStr) {
+        // This is a continuation from a previous day
+        // Show the continuation part (from midnight to end time)
+        allEntries.push({
+          ...event,
+          isFirstPart: false,
+          isContinuation: true,
+          originalDuration: event.duration,
+          sortKey: `${event.date}-${event.start}`,
+        });
+      }
+      // If entry doesn't belong to this day, skip it (same as weekly calendar)
+    }
+
+    // SECOND LOOP: Check previous day for entries that continue into current day (exactly like weekly calendar)
+    // Simple previous day calculation using the date string directly (same as weekly)
+    const parts = currentDayStr.split("-").map(Number);
+    const year = parts[0]!;
+    const month = parts[1]!;
+    const dayNum = parts[2]!;
+    const previousDateObj = new Date(year, month - 1, dayNum - 1); // month is 0-indexed in JS Date
+    const previousDayStr = format(previousDateObj, "yyyy-MM-dd");
+
+    const previousDayData =
+      (allData && previousDayStr && allData[previousDayStr]) || [];
+
+    for (const event of previousDayData) {
+      const startDate = createSafeDate(event.start);
+      const endDate = createSafeDate(event.stop);
+
+      // Convert to user timezone to check if it spans midnight in their local time
+      let startDateStr: string;
+      let endDateStr: string;
+
+      if (userTimezone !== "UTC") {
+        try {
+          const startInUserTz = new TZDate(startDate, userTimezone);
+          const endInUserTz = new TZDate(endDate, userTimezone);
+
+          startDateStr = format(startInUserTz, "yyyy-MM-dd");
+          endDateStr = format(endInUserTz, "yyyy-MM-dd");
+        } catch {
+          // Fallback to UTC if timezone conversion fails
+          startDateStr = format(startDate, "yyyy-MM-dd");
+          endDateStr = format(endDate, "yyyy-MM-dd");
+        }
+      } else {
+        startDateStr = format(startDate, "yyyy-MM-dd");
+        endDateStr = format(endDate, "yyyy-MM-dd");
+      }
+
+      const spansMidnight = startDateStr !== endDateStr;
+
+      // If this entry from previous day ends on current day
+      if (spansMidnight && endDateStr === currentDayStr) {
+        allEntries.push({
+          ...event,
+          isFirstPart: false,
+          isContinuation: true,
+          originalDuration: event.duration,
+          sortKey: `${event.date}-${event.start}`,
+        });
       }
     }
 
