@@ -433,9 +433,18 @@ export function CalendarWeekView({
             {entry.event.trackerProject?.name || "No Project"}
             {entry.spansMidnight && entry.isFromCurrentDay && " →"}
             {entry.isContinuation && " ←"}
+            {height <= 40 && height > 16 && (
+              <span className="font-normal text-[#878787] dark:text-[#606060]">
+                {" ("}
+                {secondsToHoursAndMinutes(
+                  (entry.displayEndSlot - entry.displayStartSlot) * 15 * 60, // 15 minutes per slot
+                )}
+                {")"}
+              </span>
+            )}
           </div>
-          {height > 24 && (
-            <div className="truncate">
+          {height > 40 && (
+            <div className="truncate text-[#878787] dark:text-[#606060]">
               (
               {secondsToHoursAndMinutes(
                 (entry.displayEndSlot - entry.displayStartSlot) * 15 * 60, // 15 minutes per slot
