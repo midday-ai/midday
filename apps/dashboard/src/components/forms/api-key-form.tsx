@@ -3,6 +3,7 @@
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTokenModalStore } from "@/store/token-modal";
 import { useTRPC } from "@/trpc/client";
+import { RESOURCES } from "@/utils/scopes";
 import {
   SCOPES,
   type Scope,
@@ -20,13 +21,12 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-import { RadioGroup, RadioGroupItem } from "@midday/ui/radio-group";
-import { ScrollArea } from "@midday/ui/scroll-area";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod";
+import { ScopeSelector } from "../scope-selector";
 
 const formSchema = z.object({
   id: z.string().optional(),
@@ -35,121 +35,6 @@ const formSchema = z.object({
   }),
   scopes: z.array(z.enum(SCOPES)).default(["apis.all"]),
 });
-
-// Create a structure for resources and their scopes
-const RESOURCES = [
-  {
-    key: "bank-accounts",
-    name: "Bank Accounts",
-    description: "Access to bank account data",
-    scopes: [
-      { scope: "bank-accounts.read", type: "read", label: "Read" },
-      { scope: "bank-accounts.write", type: "write", label: "Write" },
-    ],
-  },
-  {
-    key: "customers",
-    name: "Customers",
-    description: "Access to customer data",
-    scopes: [
-      { scope: "customers.read", type: "read", label: "Read" },
-      { scope: "customers.write", type: "write", label: "Write" },
-    ],
-  },
-  {
-    key: "documents",
-    name: "Documents",
-    description: "Access to document data",
-    scopes: [
-      { scope: "documents.read", type: "read", label: "Read" },
-      { scope: "documents.write", type: "write", label: "Write" },
-    ],
-  },
-  {
-    key: "inbox",
-    name: "Inbox",
-    description: "Access to inbox data",
-    scopes: [
-      { scope: "inbox.read", type: "read", label: "Read" },
-      { scope: "inbox.write", type: "write", label: "Write" },
-    ],
-  },
-  {
-    key: "invoices",
-    name: "Invoices",
-    description: "Access to invoice data",
-    scopes: [
-      { scope: "invoices.read", type: "read", label: "Read" },
-      { scope: "invoices.write", type: "write", label: "Write" },
-    ],
-  },
-  {
-    key: "transactions",
-    name: "Transactions",
-    description: "Access to transaction data",
-    scopes: [
-      { scope: "transactions.read", type: "read", label: "Read" },
-      { scope: "transactions.write", type: "write", label: "Write" },
-    ],
-  },
-  {
-    key: "teams",
-    name: "Teams",
-    description: "Access to team data",
-    scopes: [
-      { scope: "teams.read", type: "read", label: "Read" },
-      { scope: "teams.write", type: "write", label: "Write" },
-    ],
-  },
-  {
-    key: "users",
-    name: "Users",
-    description: "Access to user data",
-    scopes: [
-      { scope: "users.read", type: "read", label: "Read" },
-      { scope: "users.write", type: "write", label: "Write" },
-    ],
-  },
-  {
-    key: "tracker-entries",
-    name: "Tracker Entries",
-    description: "Access to tracker entry data",
-    scopes: [
-      { scope: "tracker-entries.read", type: "read", label: "Read" },
-      { scope: "tracker-entries.write", type: "write", label: "Write" },
-    ],
-  },
-  {
-    key: "tracker-projects",
-    name: "Tracker Projects",
-    description: "Access to tracker project data",
-    scopes: [
-      { scope: "tracker-projects.read", type: "read", label: "Read" },
-      { scope: "tracker-projects.write", type: "write", label: "Write" },
-    ],
-  },
-  {
-    key: "tags",
-    name: "Tags",
-    description: "Access to tag data",
-    scopes: [
-      { scope: "tags.read", type: "read", label: "Read" },
-      { scope: "tags.write", type: "write", label: "Write" },
-    ],
-  },
-  {
-    key: "metrics",
-    name: "Metrics",
-    description: "Access to metrics data",
-    scopes: [{ scope: "metrics.read", type: "read", label: "Read" }],
-  },
-  {
-    key: "search",
-    name: "Search",
-    description: "Access to search functionality",
-    scopes: [{ scope: "search.read", type: "read", label: "Read" }],
-  },
-] as const;
 
 type Props = {
   onSuccess: (key: string | null) => void;
@@ -186,21 +71,6 @@ export function ApiKeyForm({ onSuccess }: Props) {
     },
   });
 
-  // Helper function to get the selected scope for a resource from form state
-  const getResourceScope = (resourceKey: string): string => {
-    const currentScopes = form.watch("scopes");
-    const resource = RESOURCES.find((r) => r.key === resourceKey);
-    if (!resource) return "";
-
-    // Find which scope from this resource is currently selected
-    for (const scope of resource.scopes) {
-      if (currentScopes.includes(scope.scope as Scope)) {
-        return scope.scope;
-      }
-    }
-    return "";
-  };
-
   // Effect to ensure proper initialization when editing existing API key
   useEffect(() => {
     if (data?.scopes) {
@@ -228,10 +98,13 @@ export function ApiKeyForm({ onSuccess }: Props) {
       case "restricted": {
         // Keep existing scopes when switching to restricted mode
         const currentScopes = form.getValues("scopes");
-        newScopes = currentScopes.filter((scope) =>
-          RESOURCES.some((resource) =>
-            resource.scopes.some((s) => s.scope === scope),
-          ),
+        // Get all valid scopes from RESOURCES
+        const validScopes = RESOURCES.flatMap((resource) =>
+          resource.scopes.map((scope) => scope.scope),
+        );
+        // Only keep scopes that are defined in RESOURCES
+        newScopes = currentScopes.filter((scope): scope is Scope =>
+          validScopes.some((validScope) => validScope === scope),
         );
         break;
       }
@@ -328,56 +201,12 @@ export function ApiKeyForm({ onSuccess }: Props) {
 
         <AnimatedSizeContainer height className="mt-4">
           {preset === "restricted" && (
-            <ScrollArea className="flex flex-col text-sm max-h-[300px]">
-              {RESOURCES.map((resource) => (
-                <div
-                  className="flex items-center justify-between py-4 border-b"
-                  key={resource.key}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-medium text-[#878787]">
-                      {resource.name}
-                    </span>
-                  </div>
-                  <div>
-                    <RadioGroup
-                      value={getResourceScope(resource.key)}
-                      className="flex gap-4"
-                      onValueChange={(value) =>
-                        handleResourceScopeChange(resource.key, value)
-                      }
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="" id={`${resource.key}-none`} />
-                        <label
-                          htmlFor={`${resource.key}-none`}
-                          className="text-sm"
-                        >
-                          None
-                        </label>
-                      </div>
-                      {resource.scopes.map((scope) => (
-                        <div
-                          className="flex items-center space-x-2"
-                          key={scope.scope}
-                        >
-                          <RadioGroupItem
-                            value={scope.scope}
-                            id={`${resource.key}-${scope.type}`}
-                          />
-                          <label
-                            htmlFor={`${resource.key}-${scope.type}`}
-                            className="text-sm font-normal capitalize text-[#878787]"
-                          >
-                            {scope.label}
-                          </label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
-                </div>
-              ))}
-            </ScrollArea>
+            <ScopeSelector
+              selectedScopes={form.watch("scopes")}
+              onResourceScopeChange={handleResourceScopeChange}
+              description="Select which scopes this API key can access."
+              height="max-h-[300px]"
+            />
           )}
         </AnimatedSizeContainer>
 

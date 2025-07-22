@@ -1,6 +1,6 @@
 import type { Database } from "@api/db";
 import { bankAccounts, bankConnections } from "@api/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 export type GetBankConnectionsParams = {
   teamId: string;
@@ -126,7 +126,7 @@ export const createBankConnection = async (
       enrollmentId,
       referenceId,
       expiresAt: account.expiresAt,
-      lastAccessed: new Date().toISOString(),
+      lastAccessed: sql`NOW()`,
     })
     .onConflictDoUpdate({
       target: [bankConnections.institutionId, bankConnections.teamId],
@@ -137,7 +137,7 @@ export const createBankConnection = async (
         enrollmentId,
         referenceId,
         expiresAt: account.expiresAt,
-        lastAccessed: new Date().toISOString(),
+        lastAccessed: sql`NOW()`,
       },
     })
     .returning();

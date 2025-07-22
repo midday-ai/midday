@@ -278,6 +278,130 @@ export const trackerEntriesResponseSchema = z.object({
   }),
 });
 
+// Timer schemas (improved naming and functionality)
+export const startTimerSchema = z.object({
+  projectId: z.string().uuid().openapi({
+    description: "Unique identifier of the project to track time for",
+    example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
+  }),
+  assignedId: z.string().uuid().optional().nullable().openapi({
+    description:
+      "Unique identifier of the user to assign the timer to. If not provided, will use the authenticated user",
+    example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  }),
+  description: z.string().optional().nullable().openapi({
+    description: "Optional description for the timer session",
+    example: "Working on implementing timer feature",
+  }),
+  start: z.string().datetime().optional().openapi({
+    description:
+      "Start time in ISO 8601 format. If not provided, will use current time",
+    example: "2024-04-15T09:00:00.000Z",
+  }),
+  continueFromEntry: z.string().uuid().optional().openapi({
+    description: "Continue from a specific paused entry ID",
+    example: "c4d5e6f7-2a3b-4c5d-8e9f-3a4b5c6d7e8f",
+  }),
+});
+
+export const stopTimerSchema = z.object({
+  entryId: z.string().uuid().optional().openapi({
+    description:
+      "Unique identifier of the specific timer entry to stop. If not provided, will stop the current running timer for the user",
+    example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
+  }),
+  assignedId: z.string().uuid().optional().nullable().openapi({
+    description:
+      "Unique identifier of the user whose timer should be stopped. If not provided, will use the authenticated user",
+    example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  }),
+  stop: z.string().datetime().optional().openapi({
+    description:
+      "Stop time in ISO 8601 format. If not provided, will use current time",
+    example: "2024-04-15T17:00:00.000Z",
+  }),
+});
+
+export const pauseTimerSchema = z.object({
+  entryId: z.string().uuid().optional().openapi({
+    description:
+      "Unique identifier of the specific timer entry to pause. If not provided, will pause the current running timer for the user",
+    example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
+  }),
+  assignedId: z.string().uuid().optional().nullable().openapi({
+    description:
+      "Unique identifier of the user whose timer should be paused. If not provided, will use the authenticated user",
+    example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  }),
+  pause: z.string().datetime().optional().openapi({
+    description:
+      "Pause time in ISO 8601 format. If not provided, will use current time",
+    example: "2024-04-15T12:00:00.000Z",
+  }),
+});
+
+export const getCurrentTimerSchema = z.object({
+  assignedId: z.string().uuid().optional().nullable().openapi({
+    description:
+      "Unique identifier of the user whose current timer should be retrieved. If not provided, will use the authenticated user",
+    example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  }),
+});
+
+// Reuse existing trackerEntryResponseSchema but make duration nullable for running entries
+export const timerResponseSchema = trackerEntryResponseSchema.extend({
+  duration: z.number().nullable().openapi({
+    description:
+      "Duration of the timer entry in seconds. -1 indicates running, null for paused, positive number for completed",
+    example: -1,
+  }),
+});
+
+export const timerStatusSchema = z.object({
+  isRunning: z.boolean().openapi({
+    description: "Whether there is currently a running timer",
+    example: true,
+  }),
+  currentEntry: z
+    .object({
+      id: z.string().uuid(),
+      start: z.string().nullable(),
+      description: z.string().nullable(),
+      projectId: z.string().uuid(),
+      trackerProject: z.object({
+        id: z.string().uuid(),
+        name: z.string(),
+      }),
+    })
+    .nullable()
+    .openapi({
+      description: "Current running timer details, null if not running",
+    }),
+  elapsedTime: z.number().openapi({
+    description: "Elapsed time in seconds for the current running timer",
+    example: 1800,
+  }),
+});
+
+export const pausedEntriesSchema = z
+  .array(
+    z.object({
+      id: z.string().uuid(),
+      start: z.string().nullable(),
+      stop: z.string().nullable(),
+      duration: z.number().nullable(),
+      description: z.string().nullable(),
+      projectId: z.string().uuid(),
+      trackerProject: z.object({
+        id: z.string().uuid(),
+        name: z.string(),
+      }),
+    }),
+  )
+  .openapi({
+    description: "List of paused timer entries that can be resumed",
+  });
+
 export const createTrackerEntriesResponseSchema = z
   .object({
     data: z.array(trackerEntryResponseSchema).openapi({
