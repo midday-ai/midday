@@ -37,7 +37,7 @@ export function TimezoneDetector() {
     }
 
     // Skip if no valid timezone was detected
-    if (!detectedTimezone || detectedTimezone === "UTC") {
+    if (!detectedTimezone) {
       hasAttemptedDetection.current = true;
       return;
     }
