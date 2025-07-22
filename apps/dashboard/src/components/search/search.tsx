@@ -705,6 +705,18 @@ export function Search() {
       groups[groupKey].push(actionItem);
     }
 
+    // Sort tracker projects to put the running project first
+    const trackerProjectKey = "tracker_project";
+    if (groups[trackerProjectKey] && timerStatus?.currentEntry?.projectId) {
+      const runningProjectId = timerStatus.currentEntry.projectId;
+      groups[trackerProjectKey] = groups[trackerProjectKey].sort((a, b) => {
+        // Put the running project first
+        if (a.id === runningProjectId && b.id !== runningProjectId) return -1;
+        if (b.id === runningProjectId && a.id !== runningProjectId) return 1;
+        return 0; // Keep original order for non-running projects
+      });
+    }
+
     // Prioritize tracker projects when timer is running
     const definedGroupOrder = timerStatus?.isRunning
       ? [
@@ -750,7 +762,12 @@ export function Search() {
       }
     }
     return orderedGroups;
-  }, [combinedData, debouncedSearch, timerStatus?.isRunning]);
+  }, [
+    combinedData,
+    debouncedSearch,
+    timerStatus?.isRunning,
+    timerStatus?.currentEntry?.projectId,
+  ]);
 
   useEffect(() => {
     if (height.current && ref.current && !isDesktopApp()) {
