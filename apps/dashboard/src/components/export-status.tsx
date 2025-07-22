@@ -35,7 +35,7 @@ const options = [
 
 type ShareOptions = {
   expireIn: number;
-  fullPath: string;
+  filePath: string;
 };
 
 type ExportData = {
@@ -55,7 +55,7 @@ export function ExportStatus() {
   const [, copy] = useCopyToClipboard();
 
   const shareFileMutation = useMutation(
-    trpc.shortLinks.createForFile.mutationOptions({
+    trpc.shortLinks.createForDocument.mutationOptions({
       onError: () => {
         toast({
           duration: 2500,
@@ -81,8 +81,8 @@ export function ExportStatus() {
     }
   };
 
-  const handleOnShare = ({ expireIn, fullPath }: ShareOptions) => {
-    shareFileMutation.mutate({ expireIn, fullPath });
+  const handleOnShare = ({ expireIn, filePath }: ShareOptions) => {
+    shareFileMutation.mutate({ expireIn, filePath });
 
     if (toastId) {
       dismiss(toastId);
@@ -157,7 +157,7 @@ export function ExportStatus() {
                     onClick={() =>
                       handleOnShare({
                         expireIn: option.expireIn,
-                        fullPath: result.fullPath,
+                        filePath: result.fullPath,
                       })
                     }
                   >

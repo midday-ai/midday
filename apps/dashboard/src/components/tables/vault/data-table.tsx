@@ -111,11 +111,11 @@ export function DataTable() {
     }),
   );
 
-  const signedUrlMutation = useMutation(
-    trpc.documents.signedUrl.mutationOptions({
+  const shortLinkMutation = useMutation(
+    trpc.shortLinks.createForDocument.mutationOptions({
       onSuccess: (data) => {
-        if (data?.signedUrl) {
-          copy(data.signedUrl);
+        if (data?.shortUrl) {
+          copy(data.shortUrl);
         }
       },
     }),
@@ -128,7 +128,7 @@ export function DataTable() {
   };
 
   const handleShare = (filePath: string[]) => {
-    signedUrlMutation.mutate({
+    shortLinkMutation.mutate({
       filePath: filePath?.join("/") ?? "",
       expireIn: 60 * 60 * 24 * 30, // 30 days
     });

@@ -7,16 +7,25 @@ export const createShortLinkSchema = z.object({
   }),
 });
 
-export const createShortLinkForFileSchema = z.object({
-  fullPath: z.string().openapi({
-    description: "The full path to the file in storage",
-    example: "team_123/documents/document.pdf",
-  }),
-  expireIn: z.number().default(3600).openapi({
-    description: "Expiration time in seconds for the signed URL",
-    example: 3600,
-  }),
-});
+export const createShortLinkForDocumentSchema = z
+  .object({
+    documentId: z.string().optional().openapi({
+      description: "The ID of the document",
+      example: "doc_1234567890",
+    }),
+    filePath: z.string().optional().openapi({
+      description: "The path to the file in storage",
+      example: "team_123/documents/document.pdf",
+    }),
+    expireIn: z.number().default(3600).openapi({
+      description: "Expiration time in seconds for the signed URL",
+      example: 3600,
+    }),
+  })
+  .refine((data) => data.documentId || data.filePath, {
+    message: "At least one of documentId or filePath must be provided",
+    path: ["documentId", "filePath"],
+  });
 
 export const getShortLinkSchema = z.object({
   shortId: z.string().openapi({
