@@ -144,7 +144,7 @@ export function TrackerEvents({
   if (!processedEntries.length) return null;
 
   return (
-    <div className="flex flex-col space-y-2 font-sans w-full">
+    <div className="flex flex-col space-y-2 font-sans w-full overflow-hidden">
       {processedEntries.map((entry, index) => {
         if (index === 0) {
           // Show the first event (chronologically)
@@ -152,19 +152,21 @@ export function TrackerEvents({
             <div
               key={entry.id}
               className={cn(
-                "text-xs bg-[#F0F0F0] dark:bg-[#1D1D1D] text-[#606060] dark:text-[#878787] p-1 w-full text-left line-clamp-1 min-h-[23px]",
+                "text-xs bg-[#F0F0F0] dark:bg-[#1D1D1D] text-[#606060] dark:text-[#878787] p-1 w-full text-left min-h-[23px] flex items-center overflow-hidden",
                 (entry.isContinuation || onEventClick) && "cursor-pointer", // Show cursor for continuation events or when event click is enabled
                 isToday && "!bg-background",
               )}
               data-is-continuation={entry.isContinuation}
               data-event-id={entry.id}
             >
-              {entry.trackerProject?.name || "No Project"}
-              {entry.isFirstPart && " →"}
-              {entry.isContinuation && " ←"}
-              {" ("}
-              {secondsToHoursAndMinutes(entry.duration ?? 0)}
-              {")"}
+              <div className="truncate w-full">
+                {entry.trackerProject?.name || "No Project"}
+                {entry.isFirstPart && " →"}
+                {entry.isContinuation && " ←"}
+                {" ("}
+                {secondsToHoursAndMinutes(entry.duration ?? 0)}
+                {")"}
+              </div>
             </div>
           );
         }
@@ -172,10 +174,10 @@ export function TrackerEvents({
       })}
       {processedEntries.length > 1 && (
         <div
-          className="text-xs text-primary p-1 w-full text-left cursor-pointer"
+          className="text-xs text-primary p-1 w-full text-left cursor-pointer overflow-hidden"
           data-show-all-events="true"
         >
-          +{processedEntries.length - 1} more
+          <div className="truncate">+{processedEntries.length - 1} more</div>
         </div>
       )}
     </div>
