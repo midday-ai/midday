@@ -673,10 +673,10 @@ export async function getTimerStatus(
       id: currentTimer.id,
       start: currentTimer.start,
       description: currentTimer.description,
-      projectId: currentTimer.projectId ?? "",
+      projectId: currentTimer.projectId ?? null,
       trackerProject: {
-        id: currentTimer.trackerProject?.id ?? "",
-        name: currentTimer.trackerProject?.name ?? "",
+        id: currentTimer.trackerProject?.id ?? null,
+        name: currentTimer.trackerProject?.name ?? null,
       },
     },
     elapsedTime,
