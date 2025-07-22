@@ -76,10 +76,10 @@ export function ChangeTimezone() {
         {/* Auto-sync toggle */}
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label htmlFor="auto-sync">Auto-sync with browser</Label>
+            <Label htmlFor="auto-sync">Use device timezone</Label>
             <div className="text-[0.8rem] text-muted-foreground">
-              Automatically update timezone when your browser timezone changes
-              <div>Timezone: {currentBrowserTimezone}</div>
+              Automatically use your device's current timezone
+              <div>Current: {currentBrowserTimezone}</div>
             </div>
           </div>
           <Switch
