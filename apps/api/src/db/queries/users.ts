@@ -42,6 +42,7 @@ export type UpdateUserParams = {
   timeFormat?: number | null;
   dateFormat?: string | null;
   weekStartsOnMonday?: boolean | null;
+  timezone?: string | null;
 };
 
 export const updateUser = async (db: Database, data: UpdateUserParams) => {

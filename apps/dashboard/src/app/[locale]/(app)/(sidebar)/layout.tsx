@@ -3,6 +3,7 @@ import { GlobalTimerProvider } from "@/components/global-timer-provider";
 import { Header } from "@/components/header";
 import { GlobalSheets } from "@/components/sheets/global-sheets";
 import { Sidebar } from "@/components/sidebar";
+import { TimezoneDetector } from "@/components/timezone-detector";
 import {
   HydrateClient,
   batchPrefetch,
@@ -65,6 +66,7 @@ export default async function Layout({
         </Suspense>
 
         <GlobalTimerProvider />
+        <TimezoneDetector />
       </div>
     </HydrateClient>
   );
