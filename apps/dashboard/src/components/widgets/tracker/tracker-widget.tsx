@@ -32,12 +32,23 @@ export function TrackerWidget() {
 
   const trpc = useTRPC();
 
+  // Extend the range to include buffer days for midnight-spanning entries
+  const monthStart = startOfMonth(new Date(currentDate));
+  const monthEnd = endOfMonth(new Date(currentDate));
+
+  // Add 1 day buffer before and after to handle midnight-spanning entries
+  const extendedStart = new Date(monthStart);
+  extendedStart.setDate(extendedStart.getDate() - 1);
+
+  const extendedEnd = new Date(monthEnd);
+  extendedEnd.setDate(extendedEnd.getDate() + 1);
+
   const { data } = useQuery(
     trpc.trackerEntries.byRange.queryOptions({
-      from: formatISO(startOfMonth(new Date(currentDate)), {
+      from: formatISO(extendedStart, {
         representation: "date",
       }),
-      to: formatISO(endOfMonth(new Date(currentDate)), {
+      to: formatISO(extendedEnd, {
         representation: "date",
       }),
     }),
@@ -47,9 +58,6 @@ export function TrackerWidget() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<string | null>(null);
   const [dragEnd, setDragEnd] = useState<string | null>(null);
-
-  const monthStart = startOfMonth(new Date(currentDate));
-  const monthEnd = endOfMonth(new Date(currentDate));
   const calendarStart = startOfWeek(monthStart, {
     weekStartsOn: user?.weekStartsOnMonday ? 1 : 0,
   });

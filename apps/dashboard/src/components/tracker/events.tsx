@@ -31,156 +31,125 @@ export function TrackerEvents({
     const currentDayStr = format(currentDate, "yyyy-MM-dd");
     const allEntries = [];
 
-    // Add entries for current day
-    if (data) {
-      for (const event of data) {
-        const startDate = createSafeDate(event.start);
-        const endDate = createSafeDate(event.stop);
+    // Process all available entries to find those that belong to the current day
+    if (allData) {
+      // Iterate through all days' entries to find ones that belong to or continue onto the current day
+      for (const dayEntries of Object.values(allData)) {
+        if (!dayEntries) continue;
 
-        // Check if this entry spans midnight by comparing actual dates in user timezone
-        const userTimezone = user?.timezone || "UTC";
-        let startDateStr: string;
-        let endDateStr: string;
+        for (const event of dayEntries) {
+          const startDate = createSafeDate(event.start);
+          const endDate = createSafeDate(event.stop);
 
-        if (userTimezone !== "UTC") {
-          try {
-            const startInUserTz = new TZDate(startDate, userTimezone);
-            const endInUserTz = new TZDate(endDate, userTimezone);
-            startDateStr = format(startInUserTz, "yyyy-MM-dd");
-            endDateStr = format(endInUserTz, "yyyy-MM-dd");
-          } catch {
-            // Fallback to UTC if timezone conversion fails
+          // Check if this entry spans midnight by comparing actual dates in user timezone
+          const userTimezone = user?.timezone || "UTC";
+          let startDateStr: string;
+          let endDateStr: string;
+
+          if (userTimezone !== "UTC") {
+            try {
+              const startInUserTz = new TZDate(startDate, userTimezone);
+              const endInUserTz = new TZDate(endDate, userTimezone);
+              startDateStr = format(startInUserTz, "yyyy-MM-dd");
+              endDateStr = format(endInUserTz, "yyyy-MM-dd");
+            } catch {
+              // Fallback to UTC if timezone conversion fails
+              startDateStr = format(startDate, "yyyy-MM-dd");
+              endDateStr = format(endDate, "yyyy-MM-dd");
+            }
+          } else {
             startDateStr = format(startDate, "yyyy-MM-dd");
             endDateStr = format(endDate, "yyyy-MM-dd");
           }
-        } else {
-          startDateStr = format(startDate, "yyyy-MM-dd");
-          endDateStr = format(endDate, "yyyy-MM-dd");
-        }
 
-        const spansMidnight = startDateStr !== endDateStr;
+          const spansMidnight = startDateStr !== endDateStr;
 
-        if (spansMidnight) {
-          if (startDateStr === currentDayStr) {
-            // This is the first part of the entry (ends at midnight)
-            // Calculate duration from start time to end of day in user's timezone
-            const userTimezone = user?.timezone || "UTC";
-            let endOfDay: Date;
+          // Always show entries stored under the current date (like weekly view does)
+          if (event.date === currentDayStr) {
+            // This entry was created on this date - show it as the primary display
+            if (spansMidnight) {
+              // For midnight-spanning entries, show first part with arrow
+              const userTimezone = user?.timezone || "UTC";
+              let endOfDay: Date;
 
-            if (userTimezone !== "UTC") {
-              try {
-                // Create end of day in user's timezone
-                const endOfDayInUserTz = new TZDate(startDate, userTimezone);
-                endOfDayInUserTz.setHours(23, 59, 59, 999);
-                endOfDay = endOfDayInUserTz;
-              } catch {
-                // Fallback to UTC if timezone conversion fails
+              if (userTimezone !== "UTC") {
+                try {
+                  // Create end of day in user's timezone
+                  const endOfDayInUserTz = new TZDate(startDate, userTimezone);
+                  endOfDayInUserTz.setHours(23, 59, 59, 999);
+                  endOfDay = endOfDayInUserTz;
+                } catch {
+                  // Fallback to UTC if timezone conversion fails
+                  const endOfDayUTC = new Date(startDate);
+                  endOfDayUTC.setHours(23, 59, 59, 999);
+                  endOfDay = endOfDayUTC;
+                }
+              } else {
                 const endOfDayUTC = new Date(startDate);
                 endOfDayUTC.setHours(23, 59, 59, 999);
                 endOfDay = endOfDayUTC;
               }
+
+              const firstPartDuration = Math.floor(
+                (endOfDay.getTime() - startDate.getTime()) / 1000,
+              );
+
+              allEntries.push({
+                ...event,
+                duration: firstPartDuration,
+                isFirstPart: true,
+                isContinuation: false,
+                originalDuration: event.duration,
+                sortKey: `${event.date}-${event.start}`, // Use event.date for sorting
+              });
             } else {
-              const endOfDayUTC = new Date(startDate);
-              endOfDayUTC.setHours(23, 59, 59, 999);
-              endOfDay = endOfDayUTC;
+              // Normal entry that doesn't span midnight
+              allEntries.push({
+                ...event,
+                isFirstPart: false,
+                isContinuation: false,
+                originalDuration: event.duration,
+                sortKey: `${event.date}-${event.start}`, // Use event.date for sorting
+              });
             }
+          } else if (spansMidnight && endDateStr === currentDayStr) {
+            // This is a continuation from a previous day (entry.date != currentDayStr but ends today)
+            // Calculate duration from start of day to end time in user's timezone
+            const userTimezone = user?.timezone || "UTC";
+            let startOfDay: Date;
 
-            const firstPartDuration = Math.floor(
-              (endOfDay.getTime() - startDate.getTime()) / 1000,
-            );
-
-            allEntries.push({
-              ...event,
-              duration: firstPartDuration,
-              isFirstPart: true,
-              isContinuation: false,
-              originalDuration: event.duration,
-              sortKey: `${startDateStr}-${event.start}`, // For sorting
-            });
-          }
-        } else {
-          // Normal entry that doesn't span midnight
-          allEntries.push({
-            ...event,
-            isFirstPart: false,
-            isContinuation: false,
-            originalDuration: event.duration,
-            sortKey: `${startDateStr}-${event.start}`, // For sorting
-          });
-        }
-      }
-    }
-
-    // Check previous day for entries that continue into current day
-    if (allData) {
-      const previousDay = new Date(currentDate);
-      previousDay.setDate(previousDay.getDate() - 1);
-      const previousDayStr = format(previousDay, "yyyy-MM-dd");
-      const previousDayData = allData[previousDayStr] || [];
-
-      for (const event of previousDayData) {
-        const startDate = createSafeDate(event.start);
-        const endDate = createSafeDate(event.stop);
-
-        // Convert to user timezone to check if it spans midnight in their local time
-        const userTimezone = user?.timezone || "UTC";
-        let startDateStr: string;
-        let endDateStr: string;
-
-        if (userTimezone !== "UTC") {
-          try {
-            const startInUserTz = new TZDate(startDate, userTimezone);
-            const endInUserTz = new TZDate(endDate, userTimezone);
-            startDateStr = format(startInUserTz, "yyyy-MM-dd");
-            endDateStr = format(endInUserTz, "yyyy-MM-dd");
-          } catch {
-            // Fallback to UTC if timezone conversion fails
-            startDateStr = format(startDate, "yyyy-MM-dd");
-            endDateStr = format(endDate, "yyyy-MM-dd");
-          }
-        } else {
-          startDateStr = format(startDate, "yyyy-MM-dd");
-          endDateStr = format(endDate, "yyyy-MM-dd");
-        }
-
-        const spansMidnight = startDateStr !== endDateStr;
-
-        // If this entry from previous day ends on current day
-        if (spansMidnight && endDateStr === currentDayStr) {
-          // Calculate duration from start of day to end time in user's timezone
-          const userTimezone = user?.timezone || "UTC";
-          let startOfDay: Date;
-
-          if (userTimezone !== "UTC") {
-            try {
-              // Create start of day in user's timezone
-              const startOfDayInUserTz = new TZDate(endDate, userTimezone);
-              startOfDayInUserTz.setHours(0, 0, 0, 0);
-              startOfDay = startOfDayInUserTz;
-            } catch {
-              // Fallback to UTC if timezone conversion fails
+            if (userTimezone !== "UTC") {
+              try {
+                // Create start of day in user's timezone
+                const startOfDayInUserTz = new TZDate(endDate, userTimezone);
+                startOfDayInUserTz.setHours(0, 0, 0, 0);
+                startOfDay = startOfDayInUserTz;
+              } catch {
+                // Fallback to UTC if timezone conversion fails
+                const startOfDayUTC = new Date(endDate);
+                startOfDayUTC.setHours(0, 0, 0, 0);
+                startOfDay = startOfDayUTC;
+              }
+            } else {
               const startOfDayUTC = new Date(endDate);
               startOfDayUTC.setHours(0, 0, 0, 0);
               startOfDay = startOfDayUTC;
             }
-          } else {
-            const startOfDayUTC = new Date(endDate);
-            startOfDayUTC.setHours(0, 0, 0, 0);
-            startOfDay = startOfDayUTC;
+
+            const secondPartDuration = Math.floor(
+              (endDate.getTime() - startOfDay.getTime()) / 1000,
+            );
+
+            allEntries.push({
+              ...event,
+              duration: secondPartDuration,
+              isFirstPart: false,
+              isContinuation: true,
+              originalDuration: event.duration,
+              sortKey: `${event.date}-${event.start}`, // Use event.date for sorting
+            });
           }
-
-          const secondPartDuration = Math.floor(
-            (endDate.getTime() - startOfDay.getTime()) / 1000,
-          );
-
-          allEntries.push({
-            ...event,
-            duration: secondPartDuration,
-            isFirstPart: false,
-            isContinuation: true,
-            originalDuration: event.duration,
-            sortKey: `${previousDayStr}-${event.start}`, // For sorting
-          });
+          // If entry doesn't belong to this day (entry.date != currentDayStr and doesn't end today), skip it
         }
       }
     }

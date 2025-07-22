@@ -88,9 +88,20 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
         to: formatISO(weekEnd, { representation: "date" }),
       };
     }
+    // For monthly view, extend the range to include buffer days for midnight-spanning entries
+    const monthStart = startOfMonth(currentTZDate);
+    const monthEnd = endOfMonth(currentTZDate);
+
+    // Add 1 day buffer before and after to handle midnight-spanning entries
+    const extendedStart = new Date(monthStart);
+    extendedStart.setDate(extendedStart.getDate() - 1);
+
+    const extendedEnd = new Date(monthEnd);
+    extendedEnd.setDate(extendedEnd.getDate() + 1);
+
     return {
-      from: formatISO(startOfMonth(currentTZDate), { representation: "date" }),
-      to: formatISO(endOfMonth(currentTZDate), { representation: "date" }),
+      from: formatISO(extendedStart, { representation: "date" }),
+      to: formatISO(extendedEnd, { representation: "date" }),
     };
   };
 
