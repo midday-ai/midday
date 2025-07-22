@@ -1537,6 +1537,7 @@ export const users = pgTable(
     locale: text().default("en"),
     weekStartsOnMonday: boolean("week_starts_on_monday").default(false),
     timezone: text(),
+    timezoneAutoSync: boolean("timezone_auto_sync").default(true),
     timeFormat: numericCasted("time_format").default(24),
     dateFormat: text("date_format"),
   },

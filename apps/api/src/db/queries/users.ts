@@ -14,6 +14,7 @@ export const getUserById = async (db: Database, id: string) => {
       dateFormat: users.dateFormat,
       weekStartsOnMonday: users.weekStartsOnMonday,
       timezone: users.timezone,
+      timezoneAutoSync: users.timezoneAutoSync,
       teamId: users.teamId,
       team: {
         id: teams.id,
@@ -43,6 +44,7 @@ export type UpdateUserParams = {
   dateFormat?: string | null;
   weekStartsOnMonday?: boolean | null;
   timezone?: string | null;
+  timezoneAutoSync?: boolean | null;
 };
 
 export const updateUser = async (db: Database, data: UpdateUserParams) => {
@@ -62,6 +64,7 @@ export const updateUser = async (db: Database, data: UpdateUserParams) => {
       dateFormat: users.dateFormat,
       weekStartsOnMonday: users.weekStartsOnMonday,
       timezone: users.timezone,
+      timezoneAutoSync: users.timezoneAutoSync,
       teamId: users.teamId,
     });
 

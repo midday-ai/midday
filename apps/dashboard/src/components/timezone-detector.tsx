@@ -45,8 +45,8 @@ export function TimezoneDetector() {
     const shouldUpdate =
       // Update if user has no timezone set (null/undefined)
       !user.timezone ||
-      // Update if detected timezone differs from current
-      user.timezone !== detectedTimezone;
+      // Update if auto-sync is enabled (default true) AND detected timezone differs
+      (user.timezoneAutoSync !== false && user.timezone !== detectedTimezone);
 
     if (shouldUpdate) {
       // Mark as attempted before making the request
