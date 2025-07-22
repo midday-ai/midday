@@ -67,7 +67,7 @@ export default async function Page({ params }: Props) {
             <div className="border-b-[1px] border-border mb-4 pb-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground truncate">
-                  {shortLink.fileName}
+                  {shortLink.fileName?.split("/").pop() ?? "File"}
                 </p>
                 <p className="text-xs text-muted-foreground font-mono">
                   {shortLink.size && formatSize(shortLink.size)}
