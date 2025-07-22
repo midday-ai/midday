@@ -1357,11 +1357,11 @@ export function TrackerSchedule() {
               {event.id !== NEW_EVENT_ID && (
                 <>
                   <div
-                    className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize hover:bg-primary/10 transition-colors"
+                    className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize"
                     onMouseDown={(e) => handleEventResizeStart(e, event, "top")}
                   />
                   <div
-                    className="absolute bottom-0 left-0 right-0 h-3 cursor-ns-resize hover:bg-primary/10 transition-colors"
+                    className="absolute bottom-0 left-0 right-0 h-3 cursor-ns-resize"
                     onMouseDown={(e) =>
                       handleEventResizeStart(e, event, "bottom")
                     }
