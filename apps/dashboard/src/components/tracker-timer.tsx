@@ -19,12 +19,14 @@ interface TrackerTimerProps {
   projectName: string;
   initialDuration?: number;
   onClick?: () => void;
+  alwaysShowButton?: boolean;
 }
 
 export function TrackerTimer({
   projectId,
   projectName,
   onClick,
+  alwaysShowButton = false,
 }: TrackerTimerProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -253,7 +255,9 @@ export function TrackerTimer({
                 className={`p-1 h-6 rounded transition-all text-[#666] duration-200 ease-in-out hover:bg-accent flex items-center justify-center overflow-hidden ${
                   isThisProjectRunning
                     ? "w-6 mr-1 opacity-100 scale-100"
-                    : "w-0 mr-0 opacity-0 scale-75 group-hover:w-6 group-hover:mr-1 group-hover:opacity-100 group-hover:scale-100"
+                    : alwaysShowButton
+                      ? "w-6 mr-1 opacity-100 scale-100"
+                      : "w-0 mr-0 opacity-0 scale-75 group-hover:w-6 group-hover:mr-1 group-hover:opacity-100 group-hover:scale-100"
                 }`}
                 onClick={(e) => {
                   e.stopPropagation();
