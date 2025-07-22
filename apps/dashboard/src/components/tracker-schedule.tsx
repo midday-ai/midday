@@ -1346,7 +1346,7 @@ export function TrackerSchedule() {
                   {event.trackerProject?.name || "No Project"}
                   {event.isFirstPart && " →"}
                   {" ("}
-                  {secondsToHoursAndMinutes((endSlot - startSlot) * 15 * 60)}
+                  {secondsToHoursAndMinutes(event.duration ?? 0)}
                   {")"}
                 </span>
                 {event?.trackerProject?.customer && (
