@@ -250,21 +250,28 @@ export function CalendarWeekView({
 
       const spansMidnight = startDateStr !== endDateStr;
 
-      const displayStartSlot = startSlot;
+      let displayStartSlot = startSlot;
       let displayEndSlot = originalEndSlot;
-      const isContinuation = false;
+      let isContinuation = false;
 
-      if (spansMidnight) {
-        if (startDateStr === currentDayStr) {
-          // This is the first part of the entry (ends at midnight)
-          displayEndSlot = 96; // End of day
-        } else {
-          // Skip entries that don't belong to this day
-          return;
+      // Always show entries stored under the current date
+      if (event.date === currentDayStr) {
+        // This entry was created on this date - show it as the primary display
+        if (spansMidnight || originalEndSlot < startSlot) {
+          // For midnight-spanning entries or entries that wrap around, extend to end of day
+          displayEndSlot = 96; // End of day (extends to midnight)
         }
-      } else if (originalEndSlot < startSlot) {
-        // Fallback for entries that cross midnight but are on the same date
-        displayEndSlot = 96;
+        // Keep the original start slot even if it appears to be from "yesterday" due to timezone
+        // This ensures the entry is visible on the day it was created
+      } else if (spansMidnight && endDateStr === currentDayStr) {
+        // This is a continuation from a previous day
+        // Show the continuation part (from midnight to end time)
+        displayStartSlot = 0; // Start of day (midnight)
+        displayEndSlot = originalEndSlot; // Original end time converted to user timezone
+        isContinuation = true;
+      } else {
+        // This entry doesn't belong to this day - skip it
+        return;
       }
 
       allEntries.push({
@@ -279,34 +286,20 @@ export function CalendarWeekView({
     });
 
     // Check previous day for entries that continue into current day
-    // Use timezone-aware date calculation to handle DST transitions properly
     const userTimezone = user?.timezone || "UTC";
-    let previousDayStr: string;
 
-    try {
-      // Convert the TZDate to a regular Date object for arithmetic
-      const currentDayAsDate = new Date(day.getTime());
-
-      // Create a new Date object for the previous day calculation
-      const previousDayDate = new Date(currentDayAsDate);
-      previousDayDate.setDate(previousDayDate.getDate() - 1);
-
-      // Create timezone-aware previous day date
-      const previousDayInUserTz = new TZDate(previousDayDate, userTimezone);
-
-      // Format in user's timezone instead of UTC
-      previousDayStr = format(previousDayInUserTz, "yyyy-MM-dd");
-    } catch {
-      // Fallback to UTC calculation
-      const previousDay = new Date(day);
-      previousDay.setDate(previousDay.getDate() - 1);
-      previousDayStr = format(previousDay, "yyyy-MM-dd");
-    }
+    // Simple previous day calculation using the date string directly
+    const parts = currentDayStr.split("-").map(Number);
+    const year = parts[0]!;
+    const month = parts[1]!;
+    const dayNum = parts[2]!;
+    const previousDateObj = new Date(year, month - 1, dayNum - 1); // month is 0-indexed in JS Date
+    const previousDayStr = format(previousDateObj, "yyyy-MM-dd");
 
     const previousDayData =
       (data && previousDayStr && data[previousDayStr]) || [];
 
-    previousDayData.forEach((event, eventIndex) => {
+    previousDayData.forEach((event: any, eventIndex: number) => {
       const startDate = createSafeDate(event.start);
       const endDate = createSafeDate(event.stop);
 

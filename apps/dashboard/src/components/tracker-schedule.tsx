@@ -55,19 +55,12 @@ const userTimeToUTC = (
   timezone: string,
 ): Date => {
   try {
-    // Create a UTC base date to avoid browser timezone interference
-    const baseDate = new UTCDate(`${dateStr}T00:00:00.000Z`);
+    // Create a date in the user's timezone
+    const tzDate = tz(timezone);
+    const userDate = tzDate(`${dateStr} ${timeStr}`);
 
-    // Use the existing timezone-aware parsing utility
-    // This properly handles timezone conversions using @date-fns/utc internally
-    const { start } = parseTimeWithMidnightCrossing(
-      timeStr,
-      timeStr, // Same time for start and end to get just the start time
-      baseDate,
-      timezone,
-    );
-
-    return start;
+    // Return as a regular Date object (which is in UTC)
+    return new Date(userDate.getTime());
   } catch (error) {
     console.warn("Timezone conversion failed, falling back to UTC:", {
       dateStr,
@@ -721,7 +714,6 @@ export function TrackerSchedule() {
       assignedId?: string;
       description?: string;
     }) => {
-      const dates = getDates(selectedDate, sortedRange ?? null);
       const baseDate = getBaseDate();
       const dateStr = format(baseDate, "yyyy-MM-dd");
       const timezone = getUserTimezone(user);
@@ -748,6 +740,19 @@ export function TrackerSchedule() {
       if (!isValid(startDate) || !isValid(stopDate)) {
         console.warn("Invalid dates created:", { startDate, stopDate });
         return;
+      }
+
+      // Calculate dates array based on where the user expects to see the entry
+      // Store entries under the date where they visually start from the user's perspective
+      let dates: string[];
+
+      if (sortedRange && sortedRange.length > 0) {
+        // For range selections, use the original range logic
+        dates = getDates(selectedDate, sortedRange);
+      } else {
+        // For single date entries, store under the date the user selected
+        // The UI will handle displaying the split correctly
+        dates = [dateStr];
       }
 
       const apiData = {
