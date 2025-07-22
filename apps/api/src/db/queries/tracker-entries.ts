@@ -369,7 +369,6 @@ export type StartTimerParams = {
   assignedId?: string | null;
   description?: string | null;
   start?: string;
-  continueFromEntry?: string;
 };
 
 export type StopTimerParams = {
@@ -390,17 +389,10 @@ export type GetTimerStatusParams = {
 };
 
 /**
- * Start a new timer or continue from a paused entry
+ * Start a new timer
  */
 export async function startTimer(db: Database, params: StartTimerParams) {
-  const {
-    teamId,
-    projectId,
-    assignedId,
-    description,
-    start,
-    continueFromEntry,
-  } = params;
+  const { teamId, projectId, assignedId, description, start } = params;
 
   const startTime = start || new Date().toISOString();
   const currentDate = new Date(startTime).toISOString().split("T")[0];
@@ -410,55 +402,26 @@ export async function startTimer(db: Database, params: StartTimerParams) {
     await stopCurrentRunningTimer(db, { teamId, assignedId });
   }
 
-  let entryId: string;
+  // Create a new running entry
+  const [newEntry] = await db
+    .insert(trackerEntries)
+    .values({
+      teamId,
+      projectId,
+      assignedId,
+      description,
+      start: startTime,
+      stop: null,
+      duration: null, // null indicates running
+      date: currentDate,
+    })
+    .returning({ id: trackerEntries.id });
 
-  if (continueFromEntry) {
-    // Continue from a paused entry
-    const existingEntry = await db.query.trackerEntries.findFirst({
-      where: and(
-        eq(trackerEntries.id, continueFromEntry),
-        eq(trackerEntries.teamId, teamId),
-        assignedId ? eq(trackerEntries.assignedId, assignedId) : undefined,
-      ),
-    });
-
-    if (!existingEntry) {
-      throw new Error("Entry to continue from not found");
-    }
-
-    // Update the existing entry to mark it as running
-    await db
-      .update(trackerEntries)
-      .set({
-        start: startTime,
-        stop: null,
-        duration: null, // null indicates running
-      })
-      .where(eq(trackerEntries.id, continueFromEntry));
-
-    entryId = continueFromEntry;
-  } else {
-    // Create a new running entry
-    const [newEntry] = await db
-      .insert(trackerEntries)
-      .values({
-        teamId,
-        projectId,
-        assignedId,
-        description,
-        start: startTime,
-        stop: null,
-        duration: null, // null indicates running
-        date: currentDate,
-      })
-      .returning({ id: trackerEntries.id });
-
-    if (!newEntry) {
-      throw new Error("Failed to create timer entry");
-    }
-
-    entryId = newEntry.id;
+  if (!newEntry) {
+    throw new Error("Failed to create timer entry");
   }
+
+  const entryId = newEntry.id;
 
   // Fetch the complete entry with related data
   const result = await db.query.trackerEntries.findFirst({
@@ -520,12 +483,17 @@ export async function stopTimer(db: Database, params: StopTimerParams) {
   }
 
   // Get the entry to calculate duration
+  const whereConditions = [
+    eq(trackerEntries.id, targetEntryId),
+    eq(trackerEntries.teamId, teamId),
+  ];
+
+  if (assignedId) {
+    whereConditions.push(eq(trackerEntries.assignedId, assignedId));
+  }
+
   const entry = await db.query.trackerEntries.findFirst({
-    where: and(
-      eq(trackerEntries.id, targetEntryId),
-      eq(trackerEntries.teamId, teamId),
-      assignedId ? eq(trackerEntries.assignedId, assignedId) : undefined,
-    ),
+    where: and(...whereConditions),
   });
 
   if (!entry) {
