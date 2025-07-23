@@ -13,7 +13,6 @@ import {
   getDates,
   getSlotFromDate,
   isValidTimeSlot,
-  parseTimeWithMidnightCrossing,
 } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { TZDate, tz } from "@date-fns/tz";
@@ -472,6 +471,7 @@ const updateEventTime = (
 // Hook for managing tracker data
 const useTrackerData = (selectedDate: string | null) => {
   const trpc = useTRPC();
+  const { setParams: setTrackerParams } = useTrackerParams();
   const queryClient = useQueryClient();
   const [data, setData] = useState<TrackerRecord[]>([]);
   const [totalDuration, setTotalDuration] = useState(0);
@@ -509,6 +509,9 @@ const useTrackerData = (selectedDate: string | null) => {
           queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
         });
         refetch();
+
+        // Close the tracker project form
+        setTrackerParams(null);
       },
     }),
   );
@@ -589,6 +592,25 @@ export function TrackerSchedule() {
   } = useTrackerData(selectedDate);
 
   const { selectedEvent, selectEvent, clearNewEvent } = useSelectedEvent();
+
+  // State to force re-render for running timers
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update current time every 5 seconds for running timers
+  useEffect(() => {
+    // Check if any running timers exist (no stop time)
+    const hasRunningTimers = data.some(
+      (event) => !event.stop || event.stop === null,
+    );
+
+    if (hasRunningTimers) {
+      const interval = setInterval(() => {
+        setCurrentTime(new Date());
+      }, 5000); // Update every 5 seconds for better visual feedback
+
+      return () => clearInterval(interval);
+    }
+  }, [data]);
   const hasScrolledForEventId = useRef<string | null>(null);
 
   // Auto-select event when eventId is present in URL
@@ -1284,16 +1306,29 @@ export function TrackerSchedule() {
       const userTimezone = getUserTimezone(user);
       const startSlot = safeGetSlot(event.displayStart, userTimezone);
       let endSlot: number;
+      let isRunningTimer = false;
 
-      // For midnight-spanning entries, extend to end of day
-      if (event.isFirstPart) {
-        endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+      // Check if this is a running timer (no stop time)
+      if (!event.displayStop || event.stop === null) {
+        isRunningTimer = true;
+        // Calculate current time slot for running timer using state
+        const currentSlot = safeGetSlot(
+          currentTime.toISOString(),
+          userTimezone,
+        );
+        // Ensure running timer doesn't extend beyond current time
+        endSlot = Math.max(startSlot + 1, currentSlot); // At least 1 slot minimum
       } else {
-        endSlot = safeGetSlot(event.displayStop, userTimezone);
-        // Handle midnight crossing - if end slot is before start slot,
-        // it means the entry crosses midnight, so extend to end of day
-        if (endSlot < startSlot) {
+        // For midnight-spanning entries, extend to end of day
+        if (event.isFirstPart) {
           endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+        } else {
+          endSlot = safeGetSlot(event.displayStop, userTimezone);
+          // Handle midnight crossing - if end slot is before start slot,
+          // it means the entry crosses midnight, so extend to end of day
+          if (endSlot < startSlot) {
+            endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+          }
         }
       }
 
@@ -1317,7 +1352,9 @@ export function TrackerSchedule() {
             <div
               onClick={() => handleEventClick(event)}
               className={cn(
-                "absolute bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border transition-colors",
+                "absolute transition-colors",
+                // Same styling for all events
+                "bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
                 selectedEvent?.id === event.id && "!text-primary",
                 event.id !== NEW_EVENT_ID && "cursor-move",
                 event.totalColumns > 1 && event.column > 0
@@ -1342,19 +1379,30 @@ export function TrackerSchedule() {
               }
             >
               <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
-                <span>
-                  {event.trackerProject?.name || "No Project"}
-                  {event.isFirstPart && " →"}
-                  {" ("}
-                  {secondsToHoursAndMinutes(event.duration ?? 0)}
-                  {")"}
-                </span>
+                <div className="flex items-center gap-2">
+                  {/* Subtle green dot indicator for running timers */}
+                  {isRunningTimer && (
+                    <div className="flex items-center">
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                      </span>
+                    </div>
+                  )}
+                  <span>
+                    {event.trackerProject?.name || "No Project"}
+                    {event.isFirstPart && " →"}
+                    {isRunningTimer
+                      ? ` (${secondsToHoursAndMinutes(Math.max(0, Math.floor((currentTime.getTime() - createSafeDate(event.start).getTime()) / 1000)))})`
+                      : ` (${secondsToHoursAndMinutes(event.duration ?? 0)})`}
+                  </span>
+                </div>
                 {event?.trackerProject?.customer && (
                   <span>{event.trackerProject.customer.name}</span>
                 )}
                 <span>{event.description}</span>
               </div>
-              {event.id !== NEW_EVENT_ID && (
+              {event.id !== NEW_EVENT_ID && !isRunningTimer && (
                 <>
                   <div
                     className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize"

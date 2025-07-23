@@ -58,6 +58,28 @@ export function TrackerWidget() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<string | null>(null);
   const [dragEnd, setDragEnd] = useState<string | null>(null);
+
+  // State to force re-render for running timers
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update current time every 5 seconds for running timers
+  useEffect(() => {
+    // Check if any running timers exist across all days
+    const hasRunningTimers =
+      data?.result &&
+      Object.values(data.result).some((dayData) =>
+        dayData.some((event) => !event.stop || event.stop === null),
+      );
+
+    if (hasRunningTimers) {
+      const interval = setInterval(() => {
+        setCurrentTime(new Date());
+      }, 5000); // Update every 5 seconds for better visual feedback
+
+      return () => clearInterval(interval);
+    }
+  }, [data?.result]);
+
   const calendarStart = startOfWeek(monthStart, {
     weekStartsOn: user?.weekStartsOnMonday ? 1 : 0,
   });
@@ -71,67 +93,56 @@ export function TrackerWidget() {
     end: calendarEnd,
   });
 
-  const sortedDates = sortDates(range ?? []);
-
-  const firstWeek = eachDayOfInterval({
-    start: calendarStart,
-    end: endOfWeek(calendarStart, {
-      weekStartsOn: user?.weekStartsOnMonday ? 1 : 0,
-    }),
-  });
-
-  // @ts-expect-error
-  useOnClickOutside(ref, () => {
-    if (range?.length === 1) {
-      setParams({ range: null });
-    }
-  });
-
-  const getEventCount = (date: Date) => {
-    const formattedDate = formatISO(date, { representation: "date" });
-    const result = data?.result ?? {};
-    return result[formattedDate]?.length ?? 0;
-  };
+  const firstWeek = calendarDays.slice(0, 7);
 
   const handleMouseDown = (date: Date) => {
-    setIsDragging(true);
-    const dateStr = formatISO(date, { representation: "date" });
-    setDragStart(dateStr);
-    setDragEnd(null);
-    setParams({ range: [dateStr] });
+    if (!range) {
+      setIsDragging(true);
+      const dateStr = formatISO(date, { representation: "date" });
+      setDragStart(dateStr);
+      setDragEnd(dateStr);
+    }
   };
 
   const handleMouseEnter = (date: Date) => {
-    if (isDragging) {
-      setDragEnd(formatISO(date, { representation: "date" }));
+    if (isDragging && dragStart) {
+      const dateStr = formatISO(date, { representation: "date" });
+      setDragEnd(dateStr);
     }
   };
 
   const handleMouseUp = () => {
-    setIsDragging(false);
-    if (dragStart && dragEnd) {
+    if (isDragging && dragStart && dragEnd) {
+      const startDate = new Date(dragStart);
+      const endDate = new Date(dragEnd);
+      const sortedDates = [startDate, endDate].sort(
+        (a, b) => a.getTime() - b.getTime(),
+      );
+
       setParams({
-        range: [dragStart, dragEnd].sort(),
+        range: [
+          formatISO(sortedDates[0]!, { representation: "date" }),
+          formatISO(sortedDates[1]!, { representation: "date" }),
+        ],
       });
-    } else if (dragStart) {
-      setParams({ selectedDate: dragStart, range: null });
     }
+    setIsDragging(false);
     setDragStart(null);
     setDragEnd(null);
   };
 
-  useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      if (isDragging) {
-        handleMouseUp();
-      }
-    };
+  useOnClickOutside(ref, () => {
+    if (range) {
+      setParams({ range: null });
+    }
+  });
 
-    document.addEventListener("mouseup", handleGlobalMouseUp);
-    return () => {
-      document.removeEventListener("mouseup", handleGlobalMouseUp);
-    };
-  }, [isDragging, dragStart, dragEnd]);
+  const sortedDates = range ? sortDates(range) : [];
+
+  const getEventCount = (date: Date) => {
+    const dateStr = formatISO(date, { representation: "date" });
+    return data?.result?.[dateStr]?.length || 0;
+  };
 
   return (
     <div ref={ref}>

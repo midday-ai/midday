@@ -1,5 +1,6 @@
 "use client";
 
+import { useGlobalTimerStatus } from "@/hooks/use-global-timer-status";
 import { useTRPC } from "@/trpc/client";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
@@ -12,7 +13,7 @@ import {
 import { useToast } from "@midday/ui/use-toast";
 import NumberFlow from "@number-flow/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface TrackerTimerProps {
   projectId: string;
@@ -30,9 +31,11 @@ export function TrackerTimer({
 }: TrackerTimerProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const [localElapsedSeconds, setLocalElapsedSeconds] = useState(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+
+  // Use global timer status to avoid duplicate intervals
+  const { isRunning: globalIsRunning, elapsedTime: globalElapsedTime } =
+    useGlobalTimerStatus();
 
   // Hold-to-stop state
   const [isHolding, setIsHolding] = useState(false);
@@ -40,19 +43,39 @@ export function TrackerTimer({
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
   const holdProgressRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Get current timer status
+  // Get current timer status - reduced refetch frequency
   const { data: timerStatus } = useQuery({
     ...trpc.trackerEntries.getTimerStatus.queryOptions(),
     refetchInterval: (query) => {
-      // Only refetch if there's a running timer
-      return query.state.data?.isRunning ? 30000 : false; // Sync every 30 seconds when running
+      // Only refetch if there's a running timer, and less frequently
+      return query.state.data?.isRunning ? 60000 : false; // Sync every 60 seconds when running
     },
+    staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
   // Check if this specific project is the one running
-  const isThisProjectRunning =
-    timerStatus?.isRunning &&
-    timerStatus?.currentEntry?.projectId === projectId;
+  const isThisProjectRunning = useMemo(
+    () =>
+      timerStatus?.isRunning &&
+      timerStatus?.currentEntry?.projectId === projectId,
+    [timerStatus?.isRunning, timerStatus?.currentEntry?.projectId, projectId],
+  );
+
+  // Check if there's a different timer running
+  const isDifferentTimerRunning = useMemo(
+    () =>
+      timerStatus?.isRunning &&
+      timerStatus?.currentEntry?.projectId !== projectId,
+    [timerStatus?.isRunning, timerStatus?.currentEntry?.projectId, projectId],
+  );
+
+  // Use global elapsed time when this project is running
+  const totalElapsedSeconds = useMemo(() => {
+    if (isThisProjectRunning && globalIsRunning) {
+      return globalElapsedTime;
+    }
+    return 0;
+  }, [isThisProjectRunning, globalIsRunning, globalElapsedTime]);
 
   // Start timer mutation
   const startTimerMutation = useMutation(
@@ -139,12 +162,8 @@ export function TrackerTimer({
     }),
   );
 
-  // Calculate total elapsed time (server elapsed + local increment)
-  const totalElapsedSeconds =
-    (timerStatus?.elapsedTime || 0) + localElapsedSeconds;
-
   // Hold-to-stop handlers
-  const startHolding = () => {
+  const startHolding = useCallback(() => {
     if (!isThisProjectRunning) return;
 
     setIsHolding(true);
@@ -162,9 +181,9 @@ export function TrackerTimer({
       stopTimerMutation.mutate({});
       resetHold();
     }, 1500);
-  };
+  }, [isThisProjectRunning, stopTimerMutation]);
 
-  const resetHold = () => {
+  const resetHold = useCallback(() => {
     setIsHolding(false);
     setHoldProgress(0);
 
@@ -177,51 +196,16 @@ export function TrackerTimer({
       clearInterval(holdProgressRef.current);
       holdProgressRef.current = null;
     }
-  };
-
-  // Manage local timer interval
-  useEffect(() => {
-    if (isThisProjectRunning) {
-      // Reset local counter when starting
-      setLocalElapsedSeconds(0);
-
-      // Start local interval to increment every second
-      intervalRef.current = setInterval(() => {
-        setLocalElapsedSeconds((prev) => prev + 1);
-      }, 1000);
-    } else {
-      // Clear interval and reset local counter when not running
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      setLocalElapsedSeconds(0);
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [isThisProjectRunning]);
-
-  // Reset local elapsed when timer status changes
-  useEffect(() => {
-    if (
-      timerStatus?.isRunning &&
-      timerStatus?.currentEntry?.projectId === projectId
-    ) {
-      setLocalElapsedSeconds(0);
-    }
-  }, [timerStatus?.elapsedTime, projectId]);
+  }, []);
 
   // Cleanup hold timers on unmount
   useEffect(() => {
     return () => {
       resetHold();
     };
-  }, []);
+  }, [resetHold]);
 
-  const formatTime = (seconds: number) => {
+  const formatTime = useCallback((seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
@@ -232,17 +216,41 @@ export function TrackerTimer({
     }
 
     return { showHours: true, hours, minutes, seconds: secs };
-  };
+  }, []);
 
-  const handleButtonClick = () => {
+  const handleButtonClick = useCallback(() => {
     if (!isThisProjectRunning) {
+      // Check if there's a different timer running
+      if (isDifferentTimerRunning) {
+        const currentProjectName =
+          timerStatus?.currentEntry?.trackerProject?.name || "Unknown Project";
+        toast({
+          title: "Timer already running",
+          description: `You have a timer running for "${currentProjectName}". Please stop it first before starting a new timer.`,
+        });
+        return;
+      }
+
       // Start timer for this project
       startTimerMutation.mutate({
         projectId,
       });
     }
     // For stop, we only use hold-to-stop, so no immediate action
-  };
+  }, [
+    isThisProjectRunning,
+    isDifferentTimerRunning,
+    startTimerMutation,
+    projectId,
+    timerStatus?.currentEntry?.trackerProject?.name,
+    toast,
+  ]);
+
+  // Memoize formatted time
+  const formattedTime = useMemo(() => {
+    if (!isThisProjectRunning) return null;
+    return formatTime(totalElapsedSeconds);
+  }, [isThisProjectRunning, totalElapsedSeconds, formatTime]);
 
   return (
     <div className="flex items-center">
@@ -351,7 +359,7 @@ export function TrackerTimer({
                 : "opacity-0 translate-y-2"
             }`}
           >
-            {isThisProjectRunning && (
+            {isThisProjectRunning && formattedTime && (
               <>
                 <div className="flex items-center mr-[5px]">
                   <span className="relative flex h-[5px] w-[5px]">
@@ -360,17 +368,17 @@ export function TrackerTimer({
                   </span>
                 </div>
                 <NumberFlow
-                  value={formatTime(totalElapsedSeconds).hours ?? 0}
+                  value={formattedTime.hours ?? 0}
                   format={{ minimumIntegerDigits: 2 }}
                 />
                 <span>:</span>
                 <NumberFlow
-                  value={formatTime(totalElapsedSeconds).minutes}
+                  value={formattedTime.minutes}
                   format={{ minimumIntegerDigits: 2 }}
                 />
                 <span>:</span>
                 <NumberFlow
-                  value={formatTime(totalElapsedSeconds).seconds}
+                  value={formattedTime.seconds}
                   format={{ minimumIntegerDigits: 2 }}
                 />
               </>
