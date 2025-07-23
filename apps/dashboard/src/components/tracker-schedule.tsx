@@ -511,7 +511,7 @@ const useTrackerData = (selectedDate: string | null) => {
         refetch();
 
         // Close the tracker project form
-        setTrackerParams(null);
+        setTrackerParams({ selectedDate: null });
       },
     }),
   );

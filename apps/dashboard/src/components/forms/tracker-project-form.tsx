@@ -83,7 +83,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
         });
 
         // Close the tracker project form
-        setTrackerParams(null);
+        setTrackerParams({ create: null });
       },
     }),
   );

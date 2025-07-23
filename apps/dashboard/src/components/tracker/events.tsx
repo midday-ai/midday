@@ -1,5 +1,6 @@
 "use client";
 
+import { useUserQuery } from "@/hooks/use-user";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { createSafeDate } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -18,6 +19,8 @@ type Props = {
 
 export const TrackerEvents = memo(
   ({ data, isToday, allData, currentDate, onEventClick }: Props) => {
+    const { data: user } = useUserQuery();
+
     // State to force re-render for running timers
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -25,7 +28,7 @@ export const TrackerEvents = memo(
     const processedEntries = useMemo(() => {
       // currentDate is already a TZDate in user timezone (like weekly calendar)
       const currentDayStr = format(currentDate, "yyyy-MM-dd");
-      const userTimezone = "UTC"; // Default timezone, should get from user context
+      const userTimezone = user?.timezone || "UTC";
       const allEntries = [];
 
       // FIRST LOOP: Process current day data (exactly like weekly calendar)
@@ -136,7 +139,7 @@ export const TrackerEvents = memo(
       allEntries.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
 
       return allEntries;
-    }, [allData, currentDate, currentTime]);
+    }, [allData, currentDate, currentTime, user?.timezone]);
 
     // Update current time every 5 seconds for running timers
     useEffect(() => {
