@@ -161,7 +161,7 @@ export function TrackerWidget() {
                     ? "bg-[#f0f0f0] dark:bg-[#202020]"
                     : "bg-background",
                   !isCurrentMonth &&
-                    "bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)]",
+                    "bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)] text-[#878787]",
                   selectedDate === dateStr && "ring-1 ring-primary",
                   (range?.includes(dateStr) ||
                     (sortedDates.length === 2 &&

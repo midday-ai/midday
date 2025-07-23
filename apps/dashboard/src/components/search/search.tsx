@@ -33,6 +33,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { useDebounceValue } from "usehooks-ts";
 import { useCopyToClipboard } from "usehooks-ts";
 import { FilePreviewIcon } from "../file-preview-icon";
+import { TrackerTimer } from "../tracker-timer";
 
 interface SearchItem {
   id: string;
@@ -133,7 +134,7 @@ const formatGroupName = (name: string): string | null => {
     case "invoice":
       return "Invoices";
     case "tracker_project":
-      return "Tracker Projects";
+      return "Tracker";
     case "transaction":
       return "Transactions";
     case "inbox":
@@ -447,17 +448,18 @@ const SearchResultItemDisplay = ({
         onSelect = () =>
           nav.navigateToTracker({ projectId: item.id, update: true });
 
-        icon = (
-          <Icons.Tracker className="size-4 dark:text-[#666] text-primary" />
-        );
+        icon = null; // TrackerTimer will handle its own icon
         resultDisplay = (
           <div className="flex items-center w-full">
-            <div className="flex-grow truncate flex gap-2 items-center">
-              <span>{item.data.name as string}</span>
-            </div>
-            <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
-              <CopyButton path={`?projectId=${item.id}&update=true`} />
-              <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
+            <div className="flex-grow min-w-0 -ml-[6px]">
+              <TrackerTimer
+                projectId={item.id}
+                projectName={item.data.name as string}
+                onClick={() =>
+                  nav.navigateToTracker({ projectId: item.id, update: true })
+                }
+                alwaysShowButton={true}
+              />
             </div>
           </div>
         );
@@ -528,6 +530,14 @@ export function Search() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const height = useRef<HTMLDivElement>(null);
   const nav = useSearchNavigation();
+  const trpc = useTRPC();
+
+  // Get current timer status to prioritize tracker section
+  const { data: timerStatus, refetch: refetchTimerStatus } = useQuery({
+    ...trpc.trackerEntries.getTimerStatus.queryOptions(),
+    refetchInterval: false,
+    staleTime: 5 * 60 * 1000,
+  });
 
   useHotkeys(
     "esc",
@@ -548,6 +558,9 @@ export function Search() {
     const unlistenPromise = listen("search-window-open", (event) => {
       const isOpen = event.payload as boolean;
       if (isOpen) {
+        // Refetch timer status to get the most up-to-date information
+        refetchTimerStatus();
+
         // Focus the search input field when window opens
         setTimeout(() => {
           searchInputRef.current?.focus();
@@ -559,13 +572,17 @@ export function Search() {
     return () => {
       unlistenPromise.then((unlisten) => unlisten());
     };
-  }, []);
+  }, [refetchTimerStatus]);
+
+  // Refetch timer status when search component mounts (for both desktop and web)
+  useEffect(() => {
+    refetchTimerStatus();
+  }, [refetchTimerStatus]);
 
   const [debouncedSearch, setDebouncedSearch] = useDebounceValue(
     "",
     debounceDelay,
   );
-  const trpc = useTRPC();
 
   const sectionActions: SearchItem[] = [
     {
@@ -688,14 +705,36 @@ export function Search() {
       groups[groupKey].push(actionItem);
     }
 
-    const definedGroupOrder = [
-      "vault",
-      "customer",
-      "invoice",
-      "transaction",
-      "tracker_project",
-      "inbox",
-    ];
+    // Sort tracker projects to put the running project first
+    const trackerProjectKey = "tracker_project";
+    if (groups[trackerProjectKey] && timerStatus?.currentEntry?.projectId) {
+      const runningProjectId = timerStatus.currentEntry.projectId;
+      groups[trackerProjectKey] = groups[trackerProjectKey].sort((a, b) => {
+        // Put the running project first
+        if (a.id === runningProjectId && b.id !== runningProjectId) return -1;
+        if (b.id === runningProjectId && a.id !== runningProjectId) return 1;
+        return 0; // Keep original order for non-running projects
+      });
+    }
+
+    // Prioritize tracker projects when timer is running
+    const definedGroupOrder = timerStatus?.isRunning
+      ? [
+          "tracker_project",
+          "vault",
+          "customer",
+          "invoice",
+          "transaction",
+          "inbox",
+        ]
+      : [
+          "vault",
+          "customer",
+          "invoice",
+          "transaction",
+          "tracker_project",
+          "inbox",
+        ];
 
     const allGroupKeysInOrder: string[] = [];
     const addedKeys = new Set<string>();
@@ -723,7 +762,12 @@ export function Search() {
       }
     }
     return orderedGroups;
-  }, [combinedData, debouncedSearch]);
+  }, [
+    combinedData,
+    debouncedSearch,
+    timerStatus?.isRunning,
+    timerStatus?.currentEntry?.projectId,
+  ]);
 
   useEffect(() => {
     if (height.current && ref.current && !isDesktopApp()) {

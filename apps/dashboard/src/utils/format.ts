@@ -68,7 +68,7 @@ export function secondsToHoursAndMinutes(seconds: number) {
     return `${minutes}m`;
   }
 
-  return "0h";
+  return "0m";
 }
 
 type BurnRateData = {

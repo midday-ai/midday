@@ -39,6 +39,10 @@ export const updateUserSchema = z.object({
     description: "User's timezone identifier in IANA Time Zone Database format",
     example: "America/New_York",
   }),
+  timezoneAutoSync: z.boolean().optional().openapi({
+    description: "Whether to automatically sync timezone with browser timezone",
+    example: true,
+  }),
   timeFormat: z.number().optional().openapi({
     description:
       "User's preferred time format: 12 for 12-hour format, 24 for 24-hour format",
@@ -90,6 +94,10 @@ export const userSchema = z.object({
   timezone: z.string().nullable().openapi({
     description: "User's timezone identifier in IANA Time Zone Database format",
     example: "America/New_York",
+  }),
+  timezoneAutoSync: z.boolean().nullable().openapi({
+    description: "Whether to automatically sync timezone with browser timezone",
+    example: true,
   }),
   timeFormat: z.number().nullable().openapi({
     description:

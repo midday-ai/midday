@@ -3,6 +3,7 @@
 import { TrackerCreateInvoice } from "@/components/tracker-create-invoice";
 import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
+import { TrackerTimer } from "@/components/tracker-timer";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
@@ -83,11 +84,12 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
     <AlertDialog>
       <DropdownMenu>
         <Row>
-          <DataTableCell
-            onClick={onClick}
-            className="w-[240px] min-w-[240px] cursor-pointer md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-secondary z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]"
-          >
-            {row.name}
+          <DataTableCell className="w-[420px] min-w-[420px] md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-secondary z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]">
+            <TrackerTimer
+              projectId={row.id}
+              projectName={row.name}
+              onClick={onClick}
+            />
           </DataTableCell>
           <DataTableCell onClick={onClick} className="cursor-pointer">
             {row.customer ? (

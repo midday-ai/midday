@@ -20,6 +20,7 @@ export function useTrackerParams({ initialDate }: Props = {}) {
     projectId: parseAsString,
     update: parseAsBoolean,
     selectedDate: parseAsString,
+    eventId: parseAsString,
     range: parseAsArrayOf(parseAsString),
     statuses: parseAsArrayOf(
       parseAsStringLiteral(["completed", "in_progress"]),

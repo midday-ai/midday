@@ -10,12 +10,13 @@ import {
   calculateDuration,
   createSafeDate,
   formatHour,
-  formatTimeFromDate,
   getDates,
   getSlotFromDate,
   isValidTimeSlot,
 } from "@/utils/tracker";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { TZDate, tz } from "@date-fns/tz";
+import { UTCDate } from "@date-fns/utc";
 import { cn } from "@midday/ui/cn";
 import {
   ContextMenu,
@@ -29,15 +30,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDays,
   addMinutes,
-  differenceInSeconds,
   endOfDay,
   format,
-  isAfter,
   isValid,
-  parse,
   parseISO,
-  setHours,
-  setMinutes,
   startOfDay,
 } from "date-fns";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -45,48 +41,403 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { TrackerEntriesForm } from "./forms/tracker-entries-form";
 import { TrackerDaySelect } from "./tracker-day-select";
 
-type TrackerRecord = NonNullable<
-  RouterOutputs["trackerEntries"]["byDate"]["data"]
->[number];
+/**
+ * Converts user input time to UTC using @date-fns/utc
+ * @param dateStr - Date in YYYY-MM-DD format
+ * @param timeStr - Time in HH:MM format
+ * @param timezone - IANA timezone identifier
+ * @returns UTC Date object for database storage
+ */
+const userTimeToUTC = (
+  dateStr: string,
+  timeStr: string,
+  timezone: string,
+): Date => {
+  try {
+    // Create a date in the user's timezone
+    const tzDate = tz(timezone);
+    const userDate = tzDate(`${dateStr} ${timeStr}`);
 
-const ROW_HEIGHT = 36;
-const SLOT_HEIGHT = 9;
-
-// Safe utilities for working with potentially null date strings
-const safeGetSlot = (dateStr: string | null): number => {
-  return getSlotFromDate(createSafeDate(dateStr));
+    // Return as a regular Date object (which is in UTC)
+    return new Date(userDate.getTime());
+  } catch (error) {
+    console.warn("Timezone conversion failed, falling back to UTC:", {
+      dateStr,
+      timeStr,
+      timezone,
+      error,
+    });
+    // Safe fallback: treat input as UTC using UTCDate
+    return new UTCDate(`${dateStr}T${timeStr}:00Z`);
+  }
 };
 
-const safeFormatTime = (dateStr: string | null): string => {
-  return formatTimeFromDate(createSafeDate(dateStr));
+/**
+ * Displays UTC timestamp in user's preferred timezone using native APIs
+ * @param utcDate - UTC Date from database
+ * @param timezone - IANA timezone identifier
+ * @returns Formatted time string (HH:MM)
+ */
+const displayInUserTimezone = (utcDate: Date, timezone: string): string => {
+  try {
+    // Use native Intl API for reliable timezone conversion
+    return utcDate.toLocaleString("en-US", {
+      timeZone: timezone,
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch (error) {
+    console.warn("Timezone display failed, using UTC:", { timezone, error });
+    // Fallback to UTC formatting
+    return utcDate.toLocaleString("en-US", {
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "UTC",
+    });
+  }
 };
 
+/**
+ * Converts UTC timestamp to visual slot position using tz() function
+ * @param dateStr - UTC timestamp string or null
+ * @param userTimezone - User's timezone for display
+ * @returns Slot index (0 = midnight, 95 = 23:45)
+ */
+const safeGetSlot = (dateStr: string | null, userTimezone?: string): number => {
+  if (!dateStr) return 0;
+
+  const utcDate = createSafeDate(dateStr);
+  const timezone = userTimezone || "UTC";
+
+  try {
+    // Use tz() function to create timezone-aware date
+    const createTZDate = tz(timezone);
+    const tzDate = createTZDate(utcDate);
+
+    const hour = tzDate.getHours();
+    const minute = tzDate.getMinutes();
+    const slot = hour * 4 + Math.floor(minute / 15);
+
+    return slot;
+  } catch (error) {
+    console.warn("Slot calculation failed, using native API:", {
+      timezone,
+      error,
+    });
+    // Fallback to native toLocaleString
+    const userTimeStr = utcDate.toLocaleString("en-US", {
+      timeZone: timezone,
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const [hourStr, minuteStr] = userTimeStr.split(":");
+    const hour = Number(hourStr) || 0;
+    const minute = Number(minuteStr) || 0;
+
+    return hour * 4 + Math.floor(minute / 15);
+  }
+};
+
+/**
+ * Gets user's timezone with safe fallback
+ * @param user - User object with timezone property
+ * @returns IANA timezone string
+ */
+const getUserTimezone = (user?: { timezone?: string | null }): string => {
+  return user?.timezone || "UTC";
+};
+
+/**
+ * Safely formats UTC timestamp for display using library functions
+ * @param dateStr - UTC timestamp string
+ * @param userTimezone - User's display timezone
+ * @returns Formatted time string
+ */
+const safeFormatTime = (
+  dateStr: string | null,
+  userTimezone?: string,
+): string => {
+  if (!dateStr) return "";
+
+  try {
+    const utcDate = createSafeDate(dateStr);
+    const timezone = userTimezone || "UTC";
+
+    // Try using tz() function first
+    const createTZDate = tz(timezone);
+    const tzDate = createTZDate(utcDate);
+
+    return format(tzDate, "HH:mm");
+  } catch (error) {
+    console.warn("Time formatting with tz() failed, using native API:", error);
+    // Fallback to displayInUserTimezone
+    return displayInUserTimezone(
+      createSafeDate(dateStr),
+      userTimezone || "UTC",
+    );
+  }
+};
+
+/**
+ * Safely calculates duration between timestamps
+ * @param start - Start timestamp string
+ * @param stop - Stop timestamp string
+ * @returns Duration in seconds
+ */
 const safeCalculateDuration = (
   start: string | null,
   stop: string | null,
 ): number => {
+  if (!start || !stop) return 0;
   return calculateDuration(createSafeDate(start), createSafeDate(stop));
 };
 
+type TrackerRecord = NonNullable<
+  RouterOutputs["trackerEntries"]["byDate"]["data"]
+>[number];
+
+type ProcessedScheduleEntry = TrackerRecord & {
+  isFirstPart: boolean;
+  originalDuration: number | null;
+  displayStart: string | null;
+  displayStop: string | null;
+};
+
+type PositionedScheduleEntry = ProcessedScheduleEntry & {
+  column: number;
+  totalColumns: number;
+  width: number;
+  left: number;
+  leftPx?: number; // For pixel-based left positioning in cascading layout
+};
+
+/**
+ * Detect if two events overlap in time
+ */
+const eventsOverlap = (
+  event1: ProcessedScheduleEntry,
+  event2: ProcessedScheduleEntry,
+): boolean => {
+  if (
+    !event1.displayStart ||
+    !event1.displayStop ||
+    !event2.displayStart ||
+    !event2.displayStop
+  ) {
+    return false;
+  }
+
+  const event1Start = new Date(event1.displayStart).getTime();
+  const event1End = new Date(event1.displayStop).getTime();
+  const event2Start = new Date(event2.displayStart).getTime();
+  const event2End = new Date(event2.displayStop).getTime();
+
+  return event1Start < event2End && event2Start < event1End;
+};
+
+/**
+ * Group overlapping events and calculate positioning
+ */
+const calculateScheduleEventPositions = (
+  entries: ProcessedScheduleEntry[],
+): PositionedScheduleEntry[] => {
+  if (entries.length === 0) return [];
+
+  // Sort events by start time, then by duration (longer events first)
+  const sortedEntries = [...entries].sort((a, b) => {
+    if (a.displayStart && b.displayStart) {
+      const aStart = new Date(a.displayStart).getTime();
+      const bStart = new Date(b.displayStart).getTime();
+      if (aStart !== bStart) {
+        return aStart - bStart;
+      }
+    }
+    // If start times are the same, put longer events first
+    const aDuration =
+      a.displayStart && a.displayStop
+        ? new Date(a.displayStop).getTime() - new Date(a.displayStart).getTime()
+        : 0;
+    const bDuration =
+      b.displayStart && b.displayStop
+        ? new Date(b.displayStop).getTime() - new Date(b.displayStart).getTime()
+        : 0;
+    return bDuration - aDuration;
+  });
+
+  // Build overlap groups using a more robust algorithm
+  const overlapGroups: ProcessedScheduleEntry[][] = [];
+  const processed = new Set<ProcessedScheduleEntry>();
+
+  for (const entry of sortedEntries) {
+    if (processed.has(entry)) continue;
+
+    // Start a new group with this entry
+    const currentGroup: ProcessedScheduleEntry[] = [entry];
+    processed.add(entry);
+
+    // Keep expanding the group until no more overlaps are found
+    let foundNewOverlap = true;
+    while (foundNewOverlap) {
+      foundNewOverlap = false;
+
+      for (const candidate of sortedEntries) {
+        if (processed.has(candidate)) continue;
+
+        // Check if this candidate overlaps with ANY event in the current group
+        const overlapsWithGroup = currentGroup.some((groupEntry) =>
+          eventsOverlap(candidate, groupEntry),
+        );
+
+        if (overlapsWithGroup) {
+          currentGroup.push(candidate);
+          processed.add(candidate);
+          foundNewOverlap = true;
+          // Don't break here - keep checking other candidates in this iteration
+        }
+      }
+    }
+
+    overlapGroups.push(currentGroup);
+  }
+
+  const positionedEntries: PositionedScheduleEntry[] = [];
+
+  // Process each overlap group separately
+  for (const group of overlapGroups) {
+    if (group.length === 1) {
+      // Single event - no overlap, use full width
+      const entry = group[0];
+      if (entry) {
+        positionedEntries.push({
+          ...entry,
+          column: 0,
+          totalColumns: 1,
+          width: 100,
+          left: 0,
+        });
+      }
+    } else {
+      // Multiple overlapping events - use cascading/staggered layout
+
+      // Sort group by start time for proper stacking order
+      const sortedGroup = [...group].sort((a, b) => {
+        if (a.displayStart && b.displayStart) {
+          const aStart = new Date(a.displayStart).getTime();
+          const bStart = new Date(b.displayStart).getTime();
+          if (aStart !== bStart) {
+            return aStart - bStart;
+          }
+        }
+        const aDuration =
+          a.displayStart && a.displayStop
+            ? new Date(a.displayStop).getTime() -
+              new Date(a.displayStart).getTime()
+            : 0;
+        const bDuration =
+          b.displayStart && b.displayStop
+            ? new Date(b.displayStop).getTime() -
+              new Date(b.displayStart).getTime()
+            : 0;
+        return bDuration - aDuration;
+      });
+
+      sortedGroup.forEach((entry, index) => {
+        // Cascading layout parameters
+        const offsetStep = 8; // Pixels to offset each event
+        const baseWidth = 80; // Width for overlapping events (not the base)
+        const widthReduction = 3; // How much to reduce width for each subsequent event
+
+        // Calculate cascading properties
+        const totalEvents = sortedGroup.length;
+
+        // First event (index 0) gets full width, others get progressively smaller
+        const width =
+          index === 0
+            ? 100
+            : Math.max(60, baseWidth - (index - 1) * widthReduction);
+
+        // Each event is offset to the right (except the first one)
+        const leftOffset = index * offsetStep;
+        const left = leftOffset;
+
+        positionedEntries.push({
+          ...entry,
+          column: index,
+          totalColumns: totalEvents,
+          width,
+          left,
+          // Add a custom property for pixel-based left positioning
+          leftPx: leftOffset,
+        });
+      });
+    }
+  }
+
+  return positionedEntries;
+};
+
+const ROW_HEIGHT = 36;
+const SLOT_HEIGHT = 9;
+
+/**
+ * Creates new tracker event from user interaction
+ * @param slot - Visual slot position (0-95)
+ * @param selectedProjectId - Project ID or null
+ * @param selectedDate - Date string or null
+ * @param projects - Available projects data
+ * @param user - User object with timezone
+ * @returns New TrackerRecord
+ */
 const createNewEvent = (
   slot: number,
   selectedProjectId: string | null,
   selectedDate?: string | null,
   projects?: RouterOutputs["trackerProjects"]["get"]["data"],
+  user?: { timezone?: string | null },
 ): TrackerRecord => {
-  const baseDate = selectedDate ? parseISO(selectedDate) : new Date();
-  const startDate = setMinutes(
-    setHours(baseDate, Math.floor(slot / 4)),
-    (slot % 4) * 15,
-  );
-  const endDate = addMinutes(startDate, 15);
+  // Get base date for event
+  let baseDate: Date;
+  if (selectedDate) {
+    baseDate = parseISO(selectedDate);
+  } else {
+    const timezone = getUserTimezone(user);
+    try {
+      const now = new Date();
+      const userTzDate = new TZDate(now, timezone);
+      baseDate = startOfDay(userTzDate);
+    } catch (error) {
+      console.warn("Today calculation failed, using system date:", error);
+      baseDate = new Date();
+    }
+  }
+  const dateStr = format(baseDate, "yyyy-MM-dd");
+  const timezone = getUserTimezone(user);
 
-  // Find the project name from projects data
+  // Convert slot to time
+  const hour = Math.floor(slot / 4);
+  const minute = (slot % 4) * 15;
+  const startTimeStr = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+
+  // 15-minute default duration
+  const endMinute = minute + 15;
+  const endHour = endMinute >= 60 ? hour + 1 : hour;
+  const finalEndMinute = endMinute >= 60 ? endMinute - 60 : endMinute;
+  const endTimeStr = `${String(endHour).padStart(2, "0")}:${String(finalEndMinute).padStart(2, "0")}`;
+
+  // Convert to UTC for storage
+  const startDate = userTimeToUTC(dateStr, startTimeStr, timezone);
+  const endDate = userTimeToUTC(dateStr, endTimeStr, timezone);
+
+  // Find project details
   const selectedProject = projects?.find((p) => p.id === selectedProjectId);
 
   return {
     id: NEW_EVENT_ID,
-    date: format(startDate, "yyyy-MM-dd"),
+    date: format(baseDate, "yyyy-MM-dd"),
     description: null,
     duration: 15 * 60,
     start: startDate.toISOString(),
@@ -120,6 +471,7 @@ const updateEventTime = (
 // Hook for managing tracker data
 const useTrackerData = (selectedDate: string | null) => {
   const trpc = useTRPC();
+  const { setParams: setTrackerParams } = useTrackerParams();
   const queryClient = useQueryClient();
   const [data, setData] = useState<TrackerRecord[]>([]);
   const [totalDuration, setTotalDuration] = useState(0);
@@ -157,6 +509,9 @@ const useTrackerData = (selectedDate: string | null) => {
           queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
         });
         refetch();
+
+        // Close the tracker project form
+        setTrackerParams({ selectedDate: null });
       },
     }),
   );
@@ -210,7 +565,13 @@ const useSelectedEvent = () => {
 
 export function TrackerSchedule() {
   const { data: user } = useUserQuery();
-  const { selectedDate, range, projectId: urlProjectId } = useTrackerParams();
+  const {
+    selectedDate,
+    range,
+    projectId: urlProjectId,
+    eventId,
+    setParams,
+  } = useTrackerParams();
   const { latestProjectId } = useLatestProjectId();
   const scrollRef = useRef<HTMLDivElement>(null);
   const trpc = useTRPC();
@@ -231,6 +592,65 @@ export function TrackerSchedule() {
   } = useTrackerData(selectedDate);
 
   const { selectedEvent, selectEvent, clearNewEvent } = useSelectedEvent();
+
+  // State to force re-render for running timers
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update current time every 5 seconds for running timers
+  useEffect(() => {
+    // Check if any running timers exist (no stop time)
+    const hasRunningTimers = data.some(
+      (event) => !event.stop || event.stop === null,
+    );
+
+    if (hasRunningTimers) {
+      const interval = setInterval(() => {
+        setCurrentTime(new Date());
+      }, 5000); // Update every 5 seconds for better visual feedback
+
+      return () => clearInterval(interval);
+    }
+  }, [data]);
+  const hasScrolledForEventId = useRef<string | null>(null);
+
+  // Auto-select event when eventId is present in URL
+  useEffect(() => {
+    if (eventId && data.length > 0) {
+      const eventToSelect = data.find((event) => event.id === eventId);
+      if (eventToSelect) {
+        selectEvent(eventToSelect);
+
+        // Auto-scroll to the event position only once per eventId
+        if (scrollRef.current && hasScrolledForEventId.current !== eventId) {
+          const userTimezone = getUserTimezone(user);
+          const startSlot = safeGetSlot(eventToSelect.start, userTimezone);
+          const scrollPosition = startSlot * SLOT_HEIGHT;
+
+          // Add some padding to center the event better
+          const containerHeight = scrollRef.current.clientHeight;
+          const adjustedScrollPosition = Math.max(
+            0,
+            scrollPosition - containerHeight / 3,
+          );
+
+          scrollRef.current.scrollTo({
+            top: adjustedScrollPosition,
+            behavior: "smooth",
+          });
+
+          // Mark that we've scrolled for this eventId
+          hasScrolledForEventId.current = eventId;
+        }
+      }
+    }
+  }, [eventId, data, selectEvent]);
+
+  // Reset scroll tracking when eventId changes
+  useEffect(() => {
+    if (!eventId) {
+      hasScrolledForEventId.current = null;
+    }
+  }, [eventId]);
 
   // Interaction state
   const [isDragging, setIsDragging] = useState(false);
@@ -255,17 +675,27 @@ export function TrackerSchedule() {
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const sortedRange = range?.sort((a, b) => a.localeCompare(b));
 
-  // Scroll to appropriate time on mount
+  // Scroll to appropriate time on mount (using user timezone)
   useEffect(() => {
     if (scrollRef.current) {
-      const currentHour = new Date().getHours();
+      let currentHour: number;
+      try {
+        const timezone = getUserTimezone(user);
+        const now = new Date();
+        const userTzDate = new TZDate(now, timezone);
+        currentHour = userTzDate.getHours();
+      } catch (error) {
+        console.warn("TZDate current hour calculation failed:", error);
+        currentHour = new Date().getHours();
+      }
+
       if (currentHour >= 12) {
         scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight });
       } else {
         scrollRef.current.scrollTo({ top: ROW_HEIGHT * 6 });
       }
     }
-  }, []);
+  }, [user]);
 
   // Event handlers
   const handleDeleteEvent = useCallback(
@@ -280,8 +710,21 @@ export function TrackerSchedule() {
   );
 
   const getBaseDate = useCallback(() => {
-    return selectedDate ? parseISO(selectedDate) : startOfDay(new Date());
-  }, [selectedDate]);
+    if (selectedDate) {
+      return parseISO(selectedDate);
+    }
+
+    // Get "today" in user's timezone, not browser timezone
+    const userTimezone = getUserTimezone(user);
+    try {
+      const now = new Date();
+      const userTzDate = new TZDate(now, userTimezone);
+      return startOfDay(userTzDate);
+    } catch (error) {
+      console.warn("TZDate today calculation failed:", error);
+      return startOfDay(new Date());
+    }
+  }, [selectedDate, user]);
 
   const handleCreateEvent = useCallback(
     (formValues: {
@@ -293,19 +736,45 @@ export function TrackerSchedule() {
       assignedId?: string;
       description?: string;
     }) => {
-      const dates = getDates(selectedDate, sortedRange ?? null);
       const baseDate = getBaseDate();
+      const dateStr = format(baseDate, "yyyy-MM-dd");
+      const timezone = getUserTimezone(user);
 
-      const startDate = parse(formValues.start, "HH:mm", baseDate);
-      let stopDate = parse(formValues.stop, "HH:mm", baseDate);
+      // Handle next day stop time (e.g., 23:00-01:00)
+      const startHour = Number.parseInt(
+        formValues.start.split(":")[0] || "0",
+        10,
+      );
+      const stopHour = Number.parseInt(
+        formValues.stop.split(":")[0] || "0",
+        10,
+      );
+      const isNextDay = stopHour < startHour;
 
-      // If stop time is before start time, assume it's on the next day
-      if (stopDate < startDate) {
-        stopDate = addDays(stopDate, 1);
-      }
+      const stopDateStr = isNextDay
+        ? format(addDays(baseDate, 1), "yyyy-MM-dd")
+        : dateStr;
+
+      // Convert user timezone input to UTC for storage
+      const startDate = userTimeToUTC(dateStr, formValues.start, timezone);
+      const stopDate = userTimeToUTC(stopDateStr, formValues.stop, timezone);
 
       if (!isValid(startDate) || !isValid(stopDate)) {
+        console.warn("Invalid dates created:", { startDate, stopDate });
         return;
+      }
+
+      // Calculate dates array based on where the user expects to see the entry
+      // Store entries under the date where they visually start from the user's perspective
+      let dates: string[];
+
+      if (sortedRange && sortedRange.length > 0) {
+        // For range selections, use the original range logic
+        dates = getDates(selectedDate, sortedRange);
+      } else {
+        // For single date entries, store under the date the user selected
+        // The UI will handle displaying the split correctly
+        dates = [dateStr];
       }
 
       const apiData = {
@@ -321,7 +790,7 @@ export function TrackerSchedule() {
 
       upsertTrackerEntry.mutate(apiData);
     },
-    [selectedDate, sortedRange, getBaseDate, upsertTrackerEntry],
+    [selectedDate, sortedRange, getBaseDate, upsertTrackerEntry, user],
   );
 
   const handleMouseDown = useCallback(
@@ -332,11 +801,17 @@ export function TrackerSchedule() {
       setIsDragging(true);
       setDragStartSlot(slot);
 
+      // Clear eventId when creating a new event
+      if (eventId) {
+        setParams({ eventId: null });
+      }
+
       const newEvent = createNewEvent(
         slot,
         selectedProjectId,
         selectedDate,
         projectsData?.data,
+        user,
       );
       setData((prevData) => [...prevData, newEvent]);
       selectEvent(newEvent);
@@ -348,6 +823,9 @@ export function TrackerSchedule() {
       selectedDate,
       selectEvent,
       projectsData,
+      eventId,
+      setParams,
+      user?.timezone,
     ],
   );
 
@@ -360,11 +838,18 @@ export function TrackerSchedule() {
       if (isDragging && dragStartSlot !== null && selectedEvent) {
         const start = Math.min(dragStartSlot, slot);
         const end = Math.max(dragStartSlot, slot);
-        const startDate = setMinutes(
-          setHours(getBaseDate(), Math.floor(start / 4)),
-          (start % 4) * 15,
+
+        // Use timezone-aware time creation instead of browser timezone
+        const dateStr = format(getBaseDate(), "yyyy-MM-dd");
+        const timezone = getUserTimezone(user);
+        const startHour = Math.floor(start / 4);
+        const startMinute = (start % 4) * 15;
+        const startTimeStr = `${String(startHour).padStart(2, "0")}:${String(startMinute).padStart(2, "0")}`;
+
+        const startDate = userTimeToUTC(dateStr, startTimeStr, timezone);
+        const endDate = new Date(
+          startDate.getTime() + (end - start + 1) * 15 * 60 * 1000,
         );
-        const endDate = addMinutes(startDate, (end - start + 1) * 15);
 
         const updatedEvent = updateEventTime(selectedEvent, startDate, endDate);
         setData((prevData) =>
@@ -524,15 +1009,30 @@ export function TrackerSchedule() {
           formattedStartTimeStr = `${start.substring(0, 2)}:${start.substring(2)}`;
         }
 
-        const startTime = parse(formattedStartTimeStr, "HH:mm", baseDate);
+        // Use timezone-aware parsing instead of browser timezone
+        const dateStr = format(baseDate, "yyyy-MM-dd");
+        const timezone = getUserTimezone(user);
+        const startTime = userTimeToUTC(
+          dateStr,
+          formattedStartTimeStr,
+          timezone,
+        );
 
         if (isValid(startTime)) {
-          const endTime = addMinutes(startTime, 15);
+          const endTime = new Date(startTime.getTime() + 15 * 60 * 1000);
+
+          // Clear eventId when creating a new event
+          if (eventId) {
+            setParams({ eventId: null });
+          }
+
+          const timezone = getUserTimezone(user);
           const newEvent = createNewEvent(
-            getSlotFromDate(startTime),
+            getSlotFromDate(startTime, timezone),
             selectedProjectId,
             selectedDate,
             projectsData?.data,
+            user,
           );
 
           if (newEvent) {
@@ -559,7 +1059,15 @@ export function TrackerSchedule() {
               if (/^\d{4}$/.test(start))
                 formattedStart = `${start.substring(0, 2)}:${start.substring(2)}`;
 
-              const parsedStart = parse(formattedStart, "HH:mm", baseDate);
+              // Use timezone-aware parsing instead of browser timezone
+              const dateStr = format(baseDate, "yyyy-MM-dd");
+              const timezone = getUserTimezone(user);
+              const parsedStart = userTimeToUTC(
+                dateStr,
+                formattedStart,
+                timezone,
+              );
+
               if (
                 isValid(parsedStart) &&
                 parsedStart.getTime() !== newStart.getTime()
@@ -581,7 +1089,11 @@ export function TrackerSchedule() {
               if (/^\d{4}$/.test(end))
                 formattedEnd = `${end.substring(0, 2)}:${end.substring(2)}`;
 
-              const parsedEnd = parse(formattedEnd, "HH:mm", baseDate);
+              // Use timezone-aware parsing instead of browser timezone
+              const dateStr = format(baseDate, "yyyy-MM-dd");
+              const timezone = getUserTimezone(user);
+              const parsedEnd = userTimeToUTC(dateStr, formattedEnd, timezone);
+
               if (
                 isValid(parsedEnd) &&
                 parsedEnd.getTime() !== newEnd.getTime()
@@ -628,6 +1140,9 @@ export function TrackerSchedule() {
       setData,
       selectEvent,
       projectsData,
+      eventId,
+      setParams,
+      user?.timezone,
     ],
   );
 
@@ -663,8 +1178,14 @@ export function TrackerSchedule() {
           );
           handleCreateEvent({
             id: eventToUpdate.id,
-            start: safeFormatTime(eventToUpdate.start),
-            stop: safeFormatTime(eventToUpdate.stop),
+            start: safeFormatTime(
+              eventToUpdate.start,
+              user?.timezone ? user.timezone : undefined,
+            ),
+            stop: safeFormatTime(
+              eventToUpdate.stop,
+              user?.timezone ? user.timezone : undefined,
+            ),
             projectId: project.id,
             description: eventToUpdate.description ?? undefined,
             duration: duration,
@@ -672,8 +1193,245 @@ export function TrackerSchedule() {
         }
       }
     },
-    [data, selectedEvent, setData, selectEvent, handleCreateEvent],
+    [
+      data,
+      selectedEvent,
+      setData,
+      selectEvent,
+      handleCreateEvent,
+      user?.timezone,
+    ],
   );
+
+  const renderScheduleEntries = () => {
+    // Process events to handle midnight spanning
+    const processedEntries: ProcessedScheduleEntry[] = [];
+
+    if (data) {
+      for (const event of data) {
+        const startDate = createSafeDate(event.start);
+        const endDate = createSafeDate(event.stop);
+
+        // Check if this entry spans midnight by comparing dates in user timezone
+        const timezone = getUserTimezone(user);
+
+        // Use TZDate for reliable timezone conversion
+        let spansMidnight: boolean;
+        let startDateStr: string;
+        try {
+          const startTzDate = new TZDate(startDate, timezone);
+          const endTzDate = new TZDate(endDate, timezone);
+          // Use date-fns format with timezone-aware dates
+          startDateStr = format(startTzDate, "yyyy-MM-dd");
+          const endDateStr = format(endTzDate, "yyyy-MM-dd");
+
+          spansMidnight = startDateStr !== endDateStr;
+        } catch (error) {
+          console.warn("TZDate midnight detection failed:", error);
+          // Fallback to toLocaleString
+          startDateStr = startDate.toLocaleString("en-CA", {
+            timeZone: timezone,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          });
+          const endDateStr = endDate.toLocaleString("en-CA", {
+            timeZone: timezone,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          });
+          spansMidnight = startDateStr !== endDateStr;
+        }
+
+        if (spansMidnight) {
+          // This is a split entry - only show the first part (with → arrow)
+          // Get current date in user timezone for midnight-spanning comparison
+          let currentSelectedDate: string;
+          if (selectedDate) {
+            currentSelectedDate = selectedDate;
+          } else {
+            const timezone = getUserTimezone(user);
+            try {
+              const now = new Date();
+              const userTzDate = new TZDate(now, timezone);
+              currentSelectedDate = format(userTzDate, "yyyy-MM-dd");
+            } catch (error) {
+              console.warn("TZDate today formatting failed:", error);
+              currentSelectedDate = format(new Date(), "yyyy-MM-dd");
+            }
+          }
+
+          if (startDateStr === currentSelectedDate) {
+            // This is the first part of the entry (ends at midnight in user timezone)
+            // Calculate end of day in user timezone, then convert back to UTC
+            const timezone = getUserTimezone(user);
+            const endOfDayUtc = userTimeToUTC(
+              currentSelectedDate,
+              "23:59",
+              timezone,
+            );
+
+            const firstPartDuration = Math.floor(
+              (endOfDayUtc.getTime() - startDate.getTime()) / 1000,
+            );
+
+            processedEntries.push({
+              ...event,
+              duration: firstPartDuration,
+              isFirstPart: true,
+              originalDuration: event.duration ?? null,
+              displayStart: event.start ?? null,
+              displayStop: endOfDayUtc.toISOString() ?? null,
+            });
+          }
+          // Skip the continuation part for the next day
+        } else {
+          // Normal entry that doesn't span midnight
+          processedEntries.push({
+            ...event,
+            isFirstPart: false,
+            originalDuration: event.duration ?? null,
+            displayStart: event.start ?? null,
+            displayStop: event.stop ?? null,
+          });
+        }
+      }
+    }
+
+    // Calculate positions for overlapping events
+    const positionedEntries = calculateScheduleEventPositions(processedEntries);
+
+    return positionedEntries.map((event) => {
+      const userTimezone = getUserTimezone(user);
+      const startSlot = safeGetSlot(event.displayStart, userTimezone);
+      let endSlot: number;
+      let isRunningTimer = false;
+
+      // Check if this is a running timer (no stop time)
+      if (!event.displayStop || event.stop === null) {
+        isRunningTimer = true;
+        // Calculate current time slot for running timer using state
+        const currentSlot = safeGetSlot(
+          currentTime.toISOString(),
+          userTimezone,
+        );
+        // Ensure running timer doesn't extend beyond current time
+        endSlot = Math.max(startSlot + 1, currentSlot); // At least 1 slot minimum
+      } else {
+        // For midnight-spanning entries, extend to end of day
+        if (event.isFirstPart) {
+          endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+        } else {
+          endSlot = safeGetSlot(event.displayStop, userTimezone);
+          // Handle midnight crossing - if end slot is before start slot,
+          // it means the entry crosses midnight, so extend to end of day
+          if (endSlot < startSlot) {
+            endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
+          }
+        }
+      }
+
+      // Calculate actual height but enforce minimum for usability
+      const actualHeight = (endSlot - startSlot) * SLOT_HEIGHT;
+      const minHeight = 24; // Minimum height for interaction (resize handles + content)
+      const height = Math.max(actualHeight, minHeight);
+
+      return (
+        <ContextMenu
+          key={`${event.id}-${event.isFirstPart ? "first" : "normal"}`}
+          onOpenChange={(open) => {
+            if (!open) {
+              setTimeout(() => setIsContextMenuOpen(false), 50);
+            } else {
+              setIsContextMenuOpen(true);
+            }
+          }}
+        >
+          <ContextMenuTrigger>
+            <div
+              onClick={() => handleEventClick(event)}
+              className={cn(
+                "absolute transition-colors",
+                // Same styling for all events
+                "bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
+                selectedEvent?.id === event.id && "!text-primary",
+                event.id !== NEW_EVENT_ID && "cursor-move",
+                event.totalColumns > 1 && event.column > 0
+                  ? "border border-border"
+                  : "",
+              )}
+              style={{
+                top: `${startSlot * SLOT_HEIGHT}px`,
+                height: `${height}px`,
+                left:
+                  event.leftPx !== undefined
+                    ? `${event.leftPx}px`
+                    : `${event.left}%`,
+                width:
+                  event.leftPx !== undefined
+                    ? `calc(${event.width}% - ${event.leftPx}px)`
+                    : `${event.width}%`,
+                zIndex: event.totalColumns > 1 ? 20 + event.column : 10,
+              }}
+              onMouseDown={(e) =>
+                event.id !== NEW_EVENT_ID && handleEventMoveStart(e, event)
+              }
+            >
+              <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
+                <div className="flex items-center gap-2">
+                  {/* Subtle green dot indicator for running timers */}
+                  {isRunningTimer && (
+                    <div className="flex items-center">
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                      </span>
+                    </div>
+                  )}
+                  <span>
+                    {event.trackerProject?.name || "No Project"}
+                    {event.isFirstPart && " →"}
+                    {isRunningTimer
+                      ? ` (${secondsToHoursAndMinutes(Math.max(0, Math.floor((currentTime.getTime() - createSafeDate(event.start).getTime()) / 1000)))})`
+                      : ` (${secondsToHoursAndMinutes(event.duration ?? 0)})`}
+                  </span>
+                </div>
+                {event?.trackerProject?.customer && (
+                  <span>{event.trackerProject.customer.name}</span>
+                )}
+                <span>{event.description}</span>
+              </div>
+              {event.id !== NEW_EVENT_ID && !isRunningTimer && (
+                <>
+                  <div
+                    className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize"
+                    onMouseDown={(e) => handleEventResizeStart(e, event, "top")}
+                  />
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-3 cursor-ns-resize"
+                    onMouseDown={(e) =>
+                      handleEventResizeStart(e, event, "bottom")
+                    }
+                  />
+                </>
+              )}
+            </div>
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteEvent(event.id);
+              }}
+            >
+              Delete <ContextMenuShortcut>⌫</ContextMenuShortcut>
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      );
+    });
+  };
 
   // Find the event to pass to the form
   const formEvent =
@@ -698,7 +1456,7 @@ export function TrackerSchedule() {
                 className="pr-4 flex font-mono flex-col"
                 style={{ height: `${ROW_HEIGHT}px` }}
               >
-                {formatHour(hour, user?.timeFormat)}
+                {formatHour(hour, user?.timeFormat, getUserTimezone(user))}
               </div>
             ))}
           </div>
@@ -723,90 +1481,7 @@ export function TrackerSchedule() {
                 />
               </React.Fragment>
             ))}
-            {data?.map((event) => {
-              const startSlot = safeGetSlot(event.start);
-              let endSlot = safeGetSlot(event.stop);
-
-              // Handle midnight crossing - if end slot is before start slot,
-              // it means the entry crosses midnight, so extend to end of day
-              if (endSlot < startSlot) {
-                endSlot = 96; // 24 hours * 4 slots = 96 (end of day)
-              }
-
-              const height = (endSlot - startSlot) * SLOT_HEIGHT;
-
-              return (
-                <ContextMenu
-                  key={event.id}
-                  onOpenChange={(open) => {
-                    if (!open) {
-                      setTimeout(() => setIsContextMenuOpen(false), 50);
-                    } else {
-                      setIsContextMenuOpen(true);
-                    }
-                  }}
-                >
-                  <ContextMenuTrigger>
-                    <div
-                      onClick={() => handleEventClick(event)}
-                      className={cn(
-                        "absolute w-full bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
-                        selectedEvent?.id === event.id && "!text-primary",
-                        event.id !== NEW_EVENT_ID && "cursor-move",
-                      )}
-                      style={{
-                        top: `${startSlot * SLOT_HEIGHT}px`,
-                        height: `${height}px`,
-                      }}
-                      onMouseDown={(e) =>
-                        event.id !== NEW_EVENT_ID &&
-                        handleEventMoveStart(e, event)
-                      }
-                    >
-                      <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
-                        <span>
-                          {event.trackerProject?.name || "No Project"} (
-                          {secondsToHoursAndMinutes(
-                            safeCalculateDuration(event.start, event.stop),
-                          )}
-                          )
-                        </span>
-                        {event?.trackerProject?.customer && (
-                          <span>{event.trackerProject.customer.name}</span>
-                        )}
-                        <span>{event.description}</span>
-                      </div>
-                      {event.id !== NEW_EVENT_ID && (
-                        <>
-                          <div
-                            className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize"
-                            onMouseDown={(e) =>
-                              handleEventResizeStart(e, event, "top")
-                            }
-                          />
-                          <div
-                            className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
-                            onMouseDown={(e) =>
-                              handleEventResizeStart(e, event, "bottom")
-                            }
-                          />
-                        </>
-                      )}
-                    </div>
-                  </ContextMenuTrigger>
-                  <ContextMenuContent>
-                    <ContextMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteEvent(event.id);
-                      }}
-                    >
-                      Delete <ContextMenuShortcut>⌫</ContextMenuShortcut>
-                    </ContextMenuItem>
-                  </ContextMenuContent>
-                </ContextMenu>
-              );
-            })}
+            {renderScheduleEntries()}
           </div>
         </div>
       </ScrollArea>
@@ -820,8 +1495,22 @@ export function TrackerSchedule() {
         teamId={user?.teamId || ""}
         projectId={formEvent?.trackerProject?.id ?? selectedProjectId}
         description={formEvent?.description ?? undefined}
-        start={formEvent?.start ? safeFormatTime(formEvent.start) : undefined}
-        stop={formEvent?.stop ? safeFormatTime(formEvent.stop) : undefined}
+        start={
+          formEvent?.start
+            ? safeFormatTime(
+                formEvent.start,
+                user?.timezone ? user.timezone : undefined,
+              )
+            : undefined
+        }
+        stop={
+          formEvent?.stop
+            ? safeFormatTime(
+                formEvent.stop,
+                user?.timezone ? user.timezone : undefined,
+              )
+            : undefined
+        }
         onSelectProject={handleSelectProject}
         onTimeChange={handleTimeChange}
       />

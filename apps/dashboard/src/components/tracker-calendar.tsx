@@ -88,9 +88,20 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
         to: formatISO(weekEnd, { representation: "date" }),
       };
     }
+    // For monthly view, extend the range to include buffer days for midnight-spanning entries
+    const monthStart = startOfMonth(currentTZDate);
+    const monthEnd = endOfMonth(currentTZDate);
+
+    // Add 1 day buffer before and after to handle midnight-spanning entries
+    const extendedStart = new Date(monthStart);
+    extendedStart.setDate(extendedStart.getDate() - 1);
+
+    const extendedEnd = new Date(monthEnd);
+    extendedEnd.setDate(extendedEnd.getDate() + 1);
+
     return {
-      from: formatISO(startOfMonth(currentTZDate), { representation: "date" }),
-      to: formatISO(endOfMonth(currentTZDate), { representation: "date" }),
+      from: formatISO(extendedStart, { representation: "date" }),
+      to: formatISO(extendedEnd, { representation: "date" }),
     };
   };
 
@@ -158,11 +169,24 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
       const formattedStart = formatISO(start, { representation: "date" });
       const formattedEnd = formatISO(end, { representation: "date" });
 
-      setParams({ range: [formattedStart, formattedEnd], selectedDate: null });
+      setParams({
+        range: [formattedStart, formattedEnd],
+        selectedDate: null,
+        eventId: null,
+      });
     } else if (localRange[0]) {
-      setParams({ selectedDate: localRange[0], range: null });
+      setParams({ selectedDate: localRange[0], range: null, eventId: null });
     }
     setLocalRange([null, null]);
+  };
+
+  const handleEventClick = (eventId: string, date: TZDate) => {
+    const formattedDate = formatISO(date, { representation: "date" });
+    setParams({
+      selectedDate: formattedDate,
+      eventId: eventId,
+      range: null,
+    });
   };
 
   const validRange: [string, string] | null =
@@ -189,6 +213,7 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
             handleMouseDown={handleMouseDown}
             handleMouseEnter={handleMouseEnter}
             handleMouseUp={handleMouseUp}
+            onEventClick={handleEventClick}
           />
         ) : (
           <CalendarWeekView
@@ -203,6 +228,7 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
             handleMouseDown={handleMouseDown}
             handleMouseEnter={handleMouseEnter}
             handleMouseUp={handleMouseUp}
+            onEventClick={handleEventClick}
           />
         )}
       </div>
