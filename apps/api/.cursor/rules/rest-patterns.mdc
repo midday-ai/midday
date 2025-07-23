@@ -1,0 +1,124 @@
+---
+globs: src/rest/**/*.ts
+description: REST API patterns and conventions
+---
+
+# REST API Patterns and Conventions
+
+## Router Structure
+- **Main Router**: [src/rest/routers/index.ts](mdc:src/rest/routers/index.ts) - Combines all REST routers
+- **Feature Routers**: [src/rest/routers/](mdc:src/rest/routers/) - Individual routers per feature
+- **Middleware**: [src/rest/middleware/](mdc:src/rest/middleware/) - Authentication, rate limiting, etc.
+- **Types**: [src/rest/types.ts](mdc:src/rest/types.ts) - Shared types and context
+
+## Router Conventions
+```typescript
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import type { Context } from "@api/rest/types";
+import { withRequiredScope } from "../middleware";
+
+const app = new OpenAPIHono<Context>();
+
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/",
+    summary: "Get entities",
+    operationId: "getEntities",
+    "x-speakeasy-name-override": "getEntities",
+    description: "Retrieve a list of entities",
+    tags: ["Entities"],
+    request: {
+      query: getEntitiesSchema,
+    },
+    responses: {
+      200: {
+        description: "List of entities",
+        content: {
+          "application/json": {
+            schema: entitiesResponseSchema,
+          },
+        },
+      },
+    },
+    middleware: [withRequiredScope("entities.read")],
+  }),
+  async (c) => {
+    const { db, teamId } = c.var;
+    const query = c.req.valid("query");
+    
+    const result = await getEntities(db, { teamId, ...query });
+    return c.json(result);
+  },
+);
+```
+
+## OpenAPI Route Configuration
+- **method**: HTTP method (get, post, put, delete)
+- **path**: Route path with parameters
+- **summary**: Brief description
+- **operationId**: Unique identifier for the operation
+- **x-speakeasy-name-override**: Override for SDK generation
+- **description**: Detailed description
+- **tags**: Grouping for documentation
+- **request**: Input validation (query, body, params)
+- **responses**: Response schemas
+- **middleware**: Applied middleware functions
+
+## Middleware Usage
+- **publicMiddleware**: Database connection only
+- **protectedMiddleware**: Authentication, rate limiting, database
+- **withRequiredScope**: Check specific API key permissions
+- Apply middleware in the `middleware` array
+
+## Request/Response Handling
+```typescript
+// Access validated data
+const query = c.req.valid("query");
+const body = c.req.valid("json");
+const params = c.req.valid("param");
+
+// Access context variables
+const { db, teamId, session } = c.var;
+
+// Return responses
+return c.json(result);
+return c.json({ error: "Not found" }, 404);
+```
+
+## Error Handling
+```typescript
+import { HTTPException } from "hono/http-exception";
+
+// Throw HTTP exceptions
+throw new HTTPException(404, { message: "Entity not found" });
+throw new HTTPException(400, { message: "Invalid input" });
+throw new HTTPException(401, { message: "Unauthorized" });
+throw new HTTPException(403, { message: "Forbidden" });
+```
+
+## Schema Validation
+- Use Zod schemas from [src/schemas/](mdc:src/schemas/)
+- Request validation: `query`, `json`, `param`
+- Response validation: Define response schemas
+- OpenAPI metadata: Include descriptions and examples
+
+## Authentication & Authorization
+- **API Key Authentication**: Required for all protected endpoints
+- **Scope-based Permissions**: Use `withRequiredScope` middleware
+- **Team-based Multi-tenancy**: Access via `teamId` in context
+- **Rate Limiting**: Automatic rate limiting on protected endpoints
+
+## Context Access
+Available in all route handlers:
+- `db`: Database instance
+- `teamId`: Current team ID
+- `session`: User session data
+- `scopes`: API key scopes
+
+## Documentation
+- Automatically generated OpenAPI documentation
+- Available at `/reference` endpoint
+- Use descriptive summaries and descriptions
+- Include proper response schemas
+- Tag routes for organization

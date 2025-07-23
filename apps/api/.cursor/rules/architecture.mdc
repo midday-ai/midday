@@ -1,0 +1,57 @@
+---
+alwaysApply: true
+description: API architecture and structure guide
+---
+
+# API Architecture Overview
+
+The API follows a hybrid architecture with both tRPC and REST endpoints:
+
+## Main Entry Point
+- [src/index.ts](mdc:src/index.ts) - Main application entry point using Hono framework
+- Serves both tRPC endpoints (`/trpc/*`) and REST API endpoints
+- Includes OpenAPI documentation with Scalar UI
+
+## Architecture Components
+
+### Database Layer
+- Uses Drizzle ORM with PostgreSQL
+- Primary database with read replicas for performance
+- Database connection management in [src/db/index.ts](mdc:src/db/index.ts)
+- Schema definitions in [src/db/schema.ts](mdc:src/db/schema.ts)
+- Query functions organized in [src/db/queries/](mdc:src/db/queries/)
+
+### tRPC Layer
+- Main router in [src/trpc/routers/_app.ts](mdc:src/trpc/routers/_app.ts)
+- Individual feature routers in [src/trpc/routers/](mdc:src/trpc/routers/)
+- Context creation and middleware in [src/trpc/init.ts](mdc:src/trpc/init.ts)
+- Type-safe end-to-end with input validation using Zod
+
+### REST Layer
+- REST routers in [src/rest/routers/](mdc:src/rest/routers/)
+- OpenAPI-compliant endpoints using Hono + Zod OpenAPI
+- Middleware for authentication, rate limiting, and database connections
+- Main router configuration in [src/rest/routers/index.ts](mdc:src/rest/routers/index.ts)
+
+### Authentication & Security
+- API key-based authentication with scoped permissions
+- JWT token verification for session-based auth
+- Rate limiting and request validation
+- Middleware in [src/rest/middleware/](mdc:src/rest/middleware/)
+
+### Schema Validation
+- Input/output validation schemas in [src/schemas/](mdc:src/schemas/)
+- Zod schemas with OpenAPI metadata
+- Consistent naming: `createXSchema`, `updateXSchema`, `getXSchema`
+
+### Services & Utilities
+- External service integrations in [src/services/](mdc:src/services/)
+- Utility functions in [src/utils/](mdc:src/utils/)
+- Caching, logging, and helper functions
+
+## Key Patterns
+- Team-based multi-tenancy with `teamId` scoping
+- Read-after-write consistency handling for database replicas
+- Scope-based API key permissions
+- Consistent error handling and validation
+- Type safety throughout the application stack
