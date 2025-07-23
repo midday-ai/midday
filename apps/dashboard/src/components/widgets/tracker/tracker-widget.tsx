@@ -32,23 +32,12 @@ export function TrackerWidget() {
 
   const trpc = useTRPC();
 
-  // Extend the range to include buffer days for midnight-spanning entries
-  const monthStart = startOfMonth(new Date(currentDate));
-  const monthEnd = endOfMonth(new Date(currentDate));
-
-  // Add 1 day buffer before and after to handle midnight-spanning entries
-  const extendedStart = new Date(monthStart);
-  extendedStart.setDate(extendedStart.getDate() - 1);
-
-  const extendedEnd = new Date(monthEnd);
-  extendedEnd.setDate(extendedEnd.getDate() + 1);
-
   const { data } = useQuery(
     trpc.trackerEntries.byRange.queryOptions({
-      from: formatISO(extendedStart, {
+      from: formatISO(startOfMonth(new Date(currentDate)), {
         representation: "date",
       }),
-      to: formatISO(extendedEnd, {
+      to: formatISO(endOfMonth(new Date(currentDate)), {
         representation: "date",
       }),
     }),
@@ -59,27 +48,8 @@ export function TrackerWidget() {
   const [dragStart, setDragStart] = useState<string | null>(null);
   const [dragEnd, setDragEnd] = useState<string | null>(null);
 
-  // State to force re-render for running timers
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  // Update current time every 5 seconds for running timers
-  useEffect(() => {
-    // Check if any running timers exist across all days
-    const hasRunningTimers =
-      data?.result &&
-      Object.values(data.result).some((dayData) =>
-        dayData.some((event) => !event.stop || event.stop === null),
-      );
-
-    if (hasRunningTimers) {
-      const interval = setInterval(() => {
-        setCurrentTime(new Date());
-      }, 5000); // Update every 5 seconds for better visual feedback
-
-      return () => clearInterval(interval);
-    }
-  }, [data?.result]);
-
+  const monthStart = startOfMonth(new Date(currentDate));
+  const monthEnd = endOfMonth(new Date(currentDate));
   const calendarStart = startOfWeek(monthStart, {
     weekStartsOn: user?.weekStartsOnMonday ? 1 : 0,
   });
@@ -93,56 +63,67 @@ export function TrackerWidget() {
     end: calendarEnd,
   });
 
-  const firstWeek = calendarDays.slice(0, 7);
+  const sortedDates = sortDates(range ?? []);
 
-  const handleMouseDown = (date: Date) => {
-    if (!range) {
-      setIsDragging(true);
-      const dateStr = formatISO(date, { representation: "date" });
-      setDragStart(dateStr);
-      setDragEnd(dateStr);
-    }
-  };
+  const firstWeek = eachDayOfInterval({
+    start: calendarStart,
+    end: endOfWeek(calendarStart, {
+      weekStartsOn: user?.weekStartsOnMonday ? 1 : 0,
+    }),
+  });
 
-  const handleMouseEnter = (date: Date) => {
-    if (isDragging && dragStart) {
-      const dateStr = formatISO(date, { representation: "date" });
-      setDragEnd(dateStr);
-    }
-  };
-
-  const handleMouseUp = () => {
-    if (isDragging && dragStart && dragEnd) {
-      const startDate = new Date(dragStart);
-      const endDate = new Date(dragEnd);
-      const sortedDates = [startDate, endDate].sort(
-        (a, b) => a.getTime() - b.getTime(),
-      );
-
-      setParams({
-        range: [
-          formatISO(sortedDates[0]!, { representation: "date" }),
-          formatISO(sortedDates[1]!, { representation: "date" }),
-        ],
-      });
-    }
-    setIsDragging(false);
-    setDragStart(null);
-    setDragEnd(null);
-  };
-
+  // @ts-expect-error
   useOnClickOutside(ref, () => {
-    if (range) {
+    if (range?.length === 1) {
       setParams({ range: null });
     }
   });
 
-  const sortedDates = range ? sortDates(range) : [];
-
   const getEventCount = (date: Date) => {
-    const dateStr = formatISO(date, { representation: "date" });
-    return data?.result?.[dateStr]?.length || 0;
+    const formattedDate = formatISO(date, { representation: "date" });
+    const result = data?.result ?? {};
+    return result[formattedDate]?.length ?? 0;
   };
+
+  const handleMouseDown = (date: Date) => {
+    setIsDragging(true);
+    const dateStr = formatISO(date, { representation: "date" });
+    setDragStart(dateStr);
+    setDragEnd(null);
+    setParams({ range: [dateStr] });
+  };
+
+  const handleMouseEnter = (date: Date) => {
+    if (isDragging) {
+      setDragEnd(formatISO(date, { representation: "date" }));
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    if (dragStart && dragEnd) {
+      setParams({
+        range: [dragStart, dragEnd].sort(),
+      });
+    } else if (dragStart) {
+      setParams({ selectedDate: dragStart, range: null });
+    }
+    setDragStart(null);
+    setDragEnd(null);
+  };
+
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDragging) {
+        handleMouseUp();
+      }
+    };
+
+    document.addEventListener("mouseup", handleGlobalMouseUp);
+    return () => {
+      document.removeEventListener("mouseup", handleGlobalMouseUp);
+    };
+  }, [isDragging, dragStart, dragEnd]);
 
   return (
     <div ref={ref}>
@@ -180,7 +161,7 @@ export function TrackerWidget() {
                     ? "bg-[#f0f0f0] dark:bg-[#202020]"
                     : "bg-background",
                   !isCurrentMonth &&
-                    "bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)]",
+                    "bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)] text-[#878787]",
                   selectedDate === dateStr && "ring-1 ring-primary",
                   (range?.includes(dateStr) ||
                     (sortedDates.length === 2 &&
