@@ -11,8 +11,7 @@ export const createOAuthApplicationSchema = z.object({
     example: "A Raycast extension for managing transactions",
   }),
   overview: z.string().optional().openapi({
-    description:
-      "Detailed overview of the OAuth application (supports markdown)",
+    description: "Detailed overview of the OAuth application",
     example:
       "This application provides advanced transaction management features including:\n- Real-time sync\n- Advanced filtering",
   }),
@@ -75,8 +74,7 @@ export const updateOAuthApplicationSchema = z.object({
     example: "An updated Raycast extension for managing transactions",
   }),
   overview: z.string().optional().openapi({
-    description:
-      "Detailed overview of the OAuth application (supports markdown)",
+    description: "Detailed overview of the OAuth application",
     example:
       "This updated application now includes:\n- Enhanced security\n- Better performance",
   }),
@@ -180,8 +178,7 @@ export const oauthApplicationResponseSchema = z.object({
     example: "A Raycast extension for managing transactions",
   }),
   overview: z.string().nullable().openapi({
-    description:
-      "Detailed overview of the OAuth application (supports markdown)",
+    description: "Detailed overview of the OAuth application",
     example:
       "This application provides advanced transaction management features including:\n- Real-time sync\n- Advanced filtering",
   }),

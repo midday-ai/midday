@@ -511,12 +511,12 @@ export function OAuthApplicationForm({ data }: Props) {
                         <FormControl>
                           <Textarea
                             {...field}
-                            placeholder="Detailed overview of your application (supports markdown)"
+                            placeholder="Detailed overview of your application"
                             rows={5}
                           />
                         </FormControl>
                         <FormDescription>
-                          Detailed overview that supports markdown formatting
+                          Detailed overview of your application
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

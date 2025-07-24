@@ -204,7 +204,7 @@ export const oauthApplicationInfoSchema = z.object({
     example: "A Raycast extension for managing transactions",
   }),
   overview: z.string().nullable().openapi({
-    description: "Application overview (supports markdown)",
+    description: "Application overview",
     example:
       "This application provides advanced transaction management features including:\n- Real-time sync\n- Advanced filtering",
   }),
