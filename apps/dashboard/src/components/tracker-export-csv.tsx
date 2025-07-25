@@ -100,7 +100,6 @@ export function TrackerExportCSV({ name, projectId }: Props) {
               disabled={(date) => date > new Date()}
               defaultMonth={date?.from}
               weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
-              timeZone="UTC"
             />
 
             <div className="p-4 space-y-4">

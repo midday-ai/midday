@@ -271,7 +271,6 @@ export function TransactionCreateForm() {
                       }}
                       initialFocus
                       toDate={new Date()}
-                      timeZone="UTC"
                     />
                   </PopoverContent>
                 </Popover>
