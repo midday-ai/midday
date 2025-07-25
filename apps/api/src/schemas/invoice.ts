@@ -35,7 +35,7 @@ export const upsertInvoiceTemplateSchema = z.object({
   taxRate: z.number().min(0).max(100).optional(),
   vatRate: z.number().min(0).max(100).optional(),
   size: z.enum(["a4", "letter"]).optional(),
-  deliveryType: z.enum(["create", "create_and_send"]).optional(),
+  deliveryType: z.enum(["create", "create_and_send", "scheduled"]).optional(),
   locale: z.string().optional(),
 });
 
@@ -131,6 +131,14 @@ export const draftInvoiceSchema = z
       description:
         "Unique token for the draft invoice (for sharing or public access)",
       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    }),
+    scheduledAt: z.string().nullable().optional().openapi({
+      description: "Scheduled date of the invoice in ISO 8601 format",
+      example: "2024-06-30T23:59:59.000Z",
+    }),
+    scheduledJobId: z.string().nullable().optional().openapi({
+      description: "Scheduled job ID of the invoice",
+      example: "1234567890",
     }),
   })
   .openapi({
@@ -247,7 +255,7 @@ export const invoiceTemplateSchema = z.object({
   taxRate: z.number().min(0).max(100).optional(),
   vatRate: z.number().min(0).max(100).optional(),
   dateFormat: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"]),
-  deliveryType: z.enum(["create", "create_and_send"]),
+  deliveryType: z.enum(["create", "create_and_send", "scheduled"]),
   locale: z.string().optional(),
   timezone: z.string().optional(),
 });
@@ -368,7 +376,9 @@ export const updateInvoiceSchema = z.object({
       name: "id",
     },
   }),
-  status: z.enum(["paid", "canceled", "unpaid"]).optional(),
+  status: z
+    .enum(["paid", "canceled", "unpaid", "scheduled", "draft"])
+    .optional(),
   paidAt: z.string().nullable().optional(),
   internalNote: z.string().nullable().optional(),
 });
@@ -384,7 +394,8 @@ export const deleteInvoiceSchema = z.object({
 
 export const createInvoiceSchema = z.object({
   id: z.string().uuid(),
-  deliveryType: z.enum(["create", "create_and_send"]),
+  deliveryType: z.enum(["create", "create_and_send", "scheduled"]),
+  scheduledAt: z.string().datetime().optional(),
 });
 
 export const remindInvoiceSchema = z.object({
@@ -398,6 +409,20 @@ export const remindInvoiceSchema = z.object({
       },
     }),
   date: z.string(),
+});
+
+export const scheduleInvoiceSchema = z.object({
+  id: z.string().uuid(),
+  scheduledAt: z.string().datetime(),
+});
+
+export const updateScheduledInvoiceSchema = z.object({
+  id: z.string().uuid(),
+  scheduledAt: z.string().datetime(),
+});
+
+export const cancelScheduledInvoiceSchema = z.object({
+  id: z.string().uuid(),
 });
 
 export const duplicateInvoiceSchema = z.object({
@@ -422,10 +447,12 @@ export const invoiceResponseSchema = z
       description: "Unique identifier for the invoice",
       example: "b3b7e6e2-8c2a-4e2a-9b1a-2e4b5c6d7f8a",
     }),
-    status: z.enum(["draft", "overdue", "paid", "unpaid", "canceled"]).openapi({
-      description: "Current status of the invoice",
-      example: "paid",
-    }),
+    status: z
+      .enum(["draft", "overdue", "paid", "unpaid", "canceled", "scheduled"])
+      .openapi({
+        description: "Current status of the invoice",
+        example: "paid",
+      }),
     dueDate: z.string().openapi({
       description: "Due date of the invoice in ISO 8601 format",
       example: "2024-06-30T23:59:59.000Z",

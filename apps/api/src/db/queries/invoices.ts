@@ -160,6 +160,8 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       subtotal: invoices.subtotal,
       topBlock: invoices.topBlock,
       bottomBlock: invoices.bottomBlock,
+      scheduledAt: invoices.scheduledAt,
+      scheduledJobId: invoices.scheduledJobId,
       customer: {
         id: customers.id,
         name: customers.name,
@@ -274,6 +276,8 @@ export async function getInvoiceById(
       subtotal: invoices.subtotal,
       topBlock: invoices.topBlock,
       bottomBlock: invoices.bottomBlock,
+      scheduledAt: invoices.scheduledAt,
+      scheduledJobId: invoices.scheduledJobId,
       customer: {
         id: customers.id,
         name: customers.name,
@@ -429,7 +433,7 @@ type DraftInvoiceTemplateParams = {
   taxRate?: number;
   vatRate?: number;
   size?: "a4" | "letter";
-  deliveryType?: "create" | "create_and_send";
+  deliveryType?: "create" | "create_and_send" | "scheduled";
   locale?: string;
 };
 
@@ -645,10 +649,12 @@ export async function duplicateInvoice(
 
 export type UpdateInvoiceParams = {
   id: string;
-  status?: "paid" | "canceled" | "unpaid";
+  status?: "paid" | "canceled" | "unpaid" | "scheduled" | "draft";
   paidAt?: string | null;
   internalNote?: string | null;
   reminderSentAt?: string | null;
+  scheduledAt?: string | null;
+  scheduledJobId?: string | null;
   teamId: string;
 };
 

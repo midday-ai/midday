@@ -215,7 +215,6 @@ export function TrackerCreateInvoice({ projectId }: Props) {
                 disabled={(date) => date > new Date()}
                 defaultMonth={date?.from}
                 weekStartsOn={weekStartsOnMonday ? 1 : 0}
-                timeZone="UTC"
               />
 
               <SubmitButton

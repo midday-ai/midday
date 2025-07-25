@@ -51,7 +51,6 @@ export function DueDate() {
             selected={dueDate ? new TZDate(dueDate, "UTC") : undefined}
             onSelect={handleSelect}
             initialFocus
-            timeZone="UTC"
           />
         </PopoverContent>
       </Popover>

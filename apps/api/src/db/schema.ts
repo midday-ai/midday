@@ -105,6 +105,7 @@ export const invoiceStatusEnum = pgEnum("invoice_status", [
   "paid",
   "unpaid",
   "canceled",
+  "scheduled",
 ]);
 
 export const plansEnum = pgEnum("plans", ["trial", "starter", "pro"]);
