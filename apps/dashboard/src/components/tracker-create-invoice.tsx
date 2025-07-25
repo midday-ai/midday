@@ -3,6 +3,7 @@
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { TZDate } from "@date-fns/tz";
 import { Calendar } from "@midday/ui/calendar";
 import {
   DropdownMenuGroup,
@@ -32,7 +33,6 @@ import {
   subWeeks,
 } from "date-fns";
 import React, { useState } from "react";
-import { TZDate } from "react-day-picker";
 import type { DateRange } from "react-day-picker";
 
 type Props = {

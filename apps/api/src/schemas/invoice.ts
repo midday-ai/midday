@@ -411,11 +411,6 @@ export const remindInvoiceSchema = z.object({
   date: z.string(),
 });
 
-export const scheduleInvoiceSchema = z.object({
-  id: z.string().uuid(),
-  scheduledAt: z.string().datetime(),
-});
-
 export const updateScheduledInvoiceSchema = z.object({
   id: z.string().uuid(),
   scheduledAt: z.string().datetime(),

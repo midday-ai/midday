@@ -27,7 +27,6 @@ import {
   getInvoicesSchema,
   invoiceSummarySchema,
   remindInvoiceSchema,
-  scheduleInvoiceSchema,
   searchInvoiceNumberSchema,
   updateInvoiceSchema,
   updateScheduledInvoiceSchema,
@@ -516,29 +515,6 @@ export const invoiceRouter = createTRPCRouter({
         invoiceNumber: nextInvoiceNumber!,
         teamId: teamId!,
       });
-    }),
-
-  schedule: protectedProcedure
-    .input(scheduleInvoiceSchema)
-    .mutation(async ({ input, ctx: { db, teamId } }) => {
-      // Update the invoice to scheduled status first
-      const data = await updateInvoice(db, {
-        id: input.id,
-        status: "scheduled",
-        teamId: teamId!,
-      });
-
-      if (!data) {
-        throw new TRPCError("Invoice not found");
-      }
-
-      // Trigger the scheduling job
-      await tasks.trigger("schedule-invoice-job", {
-        invoiceId: data.id,
-        scheduledAt: input.scheduledAt,
-      } satisfies ScheduleInvoiceJobPayload);
-
-      return data;
     }),
 
   updateSchedule: protectedProcedure
