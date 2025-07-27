@@ -96,6 +96,35 @@ export function ActionsMenu({ row }: Props) {
     }),
   );
 
+  const cancelScheduleMutation = useMutation(
+    trpc.invoice.cancelSchedule.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        // Widget uses regular query
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.getById.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.invoiceSummary.queryKey(),
+        });
+
+        toast({
+          duration: 4000,
+          title: "Schedule canceled successfully.",
+          variant: "success",
+        });
+      },
+    }),
+  );
+
   const handleCopyLink = async () => {
     copy(`${getUrl()}/i/${row.token}`);
 
@@ -155,6 +184,15 @@ export function ActionsMenu({ row }: Props) {
           >
             Duplicate
           </DropdownMenuItem>
+
+          {row.status === "scheduled" && (
+            <DropdownMenuItem
+              onClick={() => cancelScheduleMutation.mutate({ id: row.id })}
+              className="text-[#FF3638]"
+            >
+              Cancel schedule
+            </DropdownMenuItem>
+          )}
 
           {row.status === "paid" && (
             <DropdownMenuItem

@@ -3,8 +3,8 @@ import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { generateInvoice } from "../operations/generate-invoice";
 
-export const sendScheduledInvoice = schemaTask({
-  id: "send-scheduled-invoice",
+export const scheduleInvoiceJob = schemaTask({
+  id: "schedule-invoice",
   schema: scheduleInvoiceJobSchema,
   maxDuration: 60,
   queue: {

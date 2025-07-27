@@ -2,19 +2,20 @@
 
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
-import { formatDate } from "@/utils/format";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
-import { Label } from "@midday/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { SubmitButton as BaseSubmitButton } from "@midday/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
@@ -25,53 +26,35 @@ type Props = {
   disabled?: boolean;
 };
 
-// Placeholder component for schedule inputs
-function ScheduleInputs() {
-  const [open, setOpen] = React.useState(false);
-  const [date, setDate] = React.useState<Date | undefined>(undefined);
-  const { data: user } = useUserQuery();
-
-  return (
-    <div className="flex gap-2 mr-2">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            id="date-picker"
-            className="w-32 justify-between font-normal"
-          >
-            {date
-              ? formatDate(date.toISOString(), user?.dateFormat)
-              : "Select date"}
-            <Icons.ChevronDown />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={(date) => {
-              setDate(date);
-              setOpen(false);
-            }}
-            disabled={(date) => date < new Date()}
-          />
-        </PopoverContent>
-      </Popover>
-
-      <Input
-        type="time"
-        id="time-picker"
-        step="1"
-        defaultValue="10:30:00"
-        className="bg-background max-w-[90px] appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-      />
-    </div>
-  );
-}
-
 export function SubmitButton({ isSubmitting, disabled }: Props) {
   const { watch, setValue, formState } = useFormContext();
+  const { data: user } = useUserQuery();
+
+  // Get current date/time rounded to nearest hour
+  const getDefaultScheduleDateTime = () => {
+    const now = new Date();
+    const roundedHour =
+      now.getMinutes() >= 30 ? now.getHours() + 1 : now.getHours();
+    const roundedDate = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      roundedHour,
+      0,
+      0,
+      0,
+    );
+    return roundedDate;
+  };
+
+  const [scheduleDate, setScheduleDate] = React.useState<Date | undefined>(
+    getDefaultScheduleDateTime(),
+  );
+
+  const [scheduleTime, setScheduleTime] = React.useState<string>(() => {
+    const defaultDateTime = getDefaultScheduleDateTime();
+    return defaultDateTime.toTimeString().slice(0, 5); // Format as HH:MM
+  });
 
   const selectedOption = watch("template.deliveryType");
   const canUpdate = watch("status") !== "draft";
@@ -83,16 +66,49 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     trpc.invoiceTemplate.upsert.mutationOptions(),
   );
 
-  const handleOptionChange = (value: string) => {
-    const deliveryType = value as "create" | "create_and_send" | "schedule";
+  const cancelScheduleMutation = useMutation(
+    trpc.invoice.cancelSchedule.mutationOptions(),
+  );
 
-    updateTemplateMutation.mutate({
-      deliveryType,
-    });
+  const handleOptionChange = (value: string) => {
+    const deliveryType = value as "create" | "create_and_send" | "scheduled";
+    const currentDeliveryType = watch("template.deliveryType");
+    const invoiceId = watch("id");
+
+    // Only save create and create_and_send to template, not scheduled
+    if (deliveryType !== "scheduled") {
+      updateTemplateMutation.mutate({
+        deliveryType,
+      });
+
+      // If changing from scheduled to another type, cancel the scheduled job
+      if (currentDeliveryType === "scheduled" && invoiceId) {
+        cancelScheduleMutation.mutate({ id: invoiceId });
+      }
+    }
 
     setValue("template.deliveryType", deliveryType, {
       shouldValidate: true,
     });
+
+    // Handle scheduledAt based on delivery type
+    if (deliveryType === "scheduled" && scheduleDate && scheduleTime) {
+      // Set scheduledAt for scheduled delivery
+      const timeParts = scheduleTime.split(":").map(Number);
+      const hours = timeParts[0] ?? 0;
+      const minutes = timeParts[1] ?? 0;
+      const scheduledDateTime = new Date(scheduleDate);
+      scheduledDateTime.setHours(hours, minutes, 0, 0);
+
+      setValue("scheduledAt", scheduledDateTime.toISOString(), {
+        shouldValidate: true,
+      });
+    } else {
+      // Clear scheduledAt for non-scheduled delivery types
+      setValue("scheduledAt", null, {
+        shouldValidate: true,
+      });
+    }
   };
 
   const isValid = formState.isValid && invoiceNumberValid;
@@ -103,19 +119,18 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
       value: "create",
     },
     {
-      label: canUpdate ? "Update" : "Schedule",
-      value: "schedule",
-    },
-    {
       label: canUpdate ? "Update & Send" : "Create & Send",
       value: "create_and_send",
+    },
+    {
+      label: canUpdate ? "Update" : "Schedule",
+      value: "scheduled",
     },
   ];
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex divide-x">
-        <div>{selectedOption === "schedule" && <ScheduleInputs />}</div>
         <BaseSubmitButton
           isSubmitting={isSubmitting}
           disabled={!isValid || disabled}
@@ -133,15 +148,70 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={10}>
-            {options.map((option) => (
-              <DropdownMenuCheckboxItem
-                key={option.value}
-                checked={selectedOption === option.value}
-                onCheckedChange={() => handleOptionChange(option.value)}
-              >
-                {option.label}
-              </DropdownMenuCheckboxItem>
-            ))}
+            {options.map((option) => {
+              if (option.value === "scheduled") {
+                return (
+                  <DropdownMenuSub key={option.value}>
+                    <DropdownMenuSubTrigger>
+                      <div className="flex items-center">
+                        <div className="flex items-center">
+                          {selectedOption === option.value && (
+                            <Icons.Check className="size-4 mr-2" />
+                          )}
+                          {option.label}
+                        </div>
+                      </div>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent className="p-4 space-y-4 min-w-[230px]">
+                        <div className="space-y-2">
+                          <Calendar
+                            mode="single"
+                            weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
+                            selected={scheduleDate}
+                            onSelect={setScheduleDate}
+                            disabled={(date) => {
+                              const today = new Date();
+                              today.setHours(0, 0, 0, 0);
+                              return date < today;
+                            }}
+                            className="!p-0"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Input
+                            type="time"
+                            id="schedule-time"
+                            value={scheduleTime}
+                            onChange={(e) => setScheduleTime(e.target.value)}
+                            className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                          />
+                        </div>
+
+                        <Button
+                          onClick={() => handleOptionChange(option.value)}
+                          className="w-full"
+                          size="sm"
+                        >
+                          Set Schedule
+                        </Button>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
+                );
+              }
+
+              return (
+                <DropdownMenuCheckboxItem
+                  key={option.value}
+                  checked={selectedOption === option.value}
+                  onCheckedChange={() => handleOptionChange(option.value)}
+                >
+                  {option.label}
+                </DropdownMenuCheckboxItem>
+              );
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

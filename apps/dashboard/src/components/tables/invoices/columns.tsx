@@ -32,7 +32,32 @@ export const columns: ColumnDef<Invoice>[] = [
   {
     header: "Status",
     accessorKey: "status",
-    cell: ({ row }) => <InvoiceStatus status={row.getValue("status")} />,
+    cell: ({ row, table }) => {
+      const status = row.getValue("status") as string;
+      const scheduledAt = row.original.scheduledAt;
+
+      if (status === "scheduled" && scheduledAt) {
+        return (
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger>
+                <InvoiceStatus status={status as any} />
+              </TooltipTrigger>
+              <TooltipContent
+                className="text-xs py-1 px-2"
+                side="right"
+                sideOffset={5}
+              >
+                Scheduled to send:{" "}
+                {formatDate(scheduledAt, table.options.meta?.dateFormat)}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      }
+
+      return <InvoiceStatus status={status as any} />;
+    },
   },
   {
     header: "Due date",

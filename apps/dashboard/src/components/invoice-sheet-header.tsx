@@ -1,24 +1,28 @@
 "use client";
 
+import { useTRPC } from "@/trpc/client";
 import { SheetHeader } from "@midday/ui/sheet";
+import { useQuery } from "@tanstack/react-query";
 
 type Props = {
-  type: "created" | "created_and_sent";
+  invoiceId: string;
 };
 
-export function InvoiceSheetHeader({ type }: Props) {
-  if (type === "created") {
-    return (
-      <SheetHeader className="mb-6 flex flex-col">
-        <h2 className="text-xl">Created</h2>
-        <p className="text-sm text-[#808080]">
-          Your invoice was created successfully
-        </p>
-      </SheetHeader>
-    );
-  }
+export function InvoiceSheetHeader({ invoiceId }: Props) {
+  const trpc = useTRPC();
 
-  if (type === "created_and_sent") {
+  const { data: invoice } = useQuery(
+    trpc.invoice.getById.queryOptions(
+      {
+        id: invoiceId,
+      },
+      {
+        enabled: Boolean(invoiceId),
+      },
+    ),
+  );
+
+  if (invoice?.template?.deliveryType === "create_and_send") {
     return (
       <SheetHeader className="mb-6 flex flex-col">
         <h2 className="text-xl">Created & Sent</h2>
@@ -29,5 +33,24 @@ export function InvoiceSheetHeader({ type }: Props) {
     );
   }
 
-  return null;
+  if (invoice?.template?.deliveryType === "scheduled") {
+    return (
+      <SheetHeader className="mb-6 flex flex-col">
+        <h2 className="text-xl">Scheduled</h2>
+        <p className="text-sm text-[#808080]">
+          Your invoice was scheduled successfully
+        </p>
+      </SheetHeader>
+    );
+  }
+
+  // Default: created
+  return (
+    <SheetHeader className="mb-6 flex flex-col">
+      <h2 className="text-xl">Created</h2>
+      <p className="text-sm text-[#808080]">
+        Your invoice was created successfully
+      </p>
+    </SheetHeader>
+  );
 }

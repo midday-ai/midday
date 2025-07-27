@@ -36,13 +36,7 @@ export function InvoiceSuccess() {
 
   return (
     <>
-      <InvoiceSheetHeader
-        type={
-          invoice?.template?.deliveryType === "create_and_send"
-            ? "created_and_sent"
-            : "created"
-        }
-      />
+      <InvoiceSheetHeader invoiceId={invoiceId!} />
 
       <div className="flex flex-col justify-center h-[calc(100vh-260px)]">
         <div className="bg-[#F2F2F2] dark:bg-background p-6 relative">

@@ -64,6 +64,7 @@ export function InvoiceDetails() {
     sentAt,
     sentTo,
     customerName,
+    scheduledAt,
   } = data;
 
   return (
@@ -158,6 +159,17 @@ export function InvoiceDetails() {
               <span>{issueDate && format(new Date(issueDate), "MMM dd")}</span>
             </span>
           </div>
+
+          {scheduledAt && status === "scheduled" && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#606060]">Scheduled at</span>
+              <span className="text-sm">
+                <span>
+                  {scheduledAt && format(new Date(scheduledAt), "MMM dd")}
+                </span>
+              </span>
+            </div>
+          )}
 
           {sentAt && (
             <div className="flex justify-between items-center">

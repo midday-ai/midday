@@ -42,7 +42,6 @@ import { verify } from "@midday/invoice/token";
 import { transformCustomerToContent } from "@midday/invoice/utils";
 import type {
   GenerateInvoicePayload,
-  ScheduleInvoiceJobPayload,
   SendInvoiceReminderPayload,
 } from "@midday/jobs/schema";
 import { runs, tasks } from "@trigger.dev/sdk/v3";
@@ -448,25 +447,39 @@ export const invoiceRouter = createTRPCRouter({
       // Handle different delivery types
       if (input.deliveryType === "scheduled") {
         if (!input.scheduledAt) {
-          throw new TRPCError("scheduledAt is required for scheduled delivery");
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "scheduledAt is required for scheduled delivery",
+          });
         }
 
-        // Update the invoice status to scheduled
+        // Trigger the scheduled job with the specific datetime
+        const scheduledRun = await tasks.trigger(
+          "schedule-invoice",
+          {
+            invoiceId: input.id,
+            scheduledAt: input.scheduledAt,
+          },
+          {
+            delay: input.scheduledAt,
+          },
+        );
+
+        // Update the invoice with scheduling information
         const data = await updateInvoice(db, {
           id: input.id,
           status: "scheduled",
+          scheduledAt: input.scheduledAt,
+          scheduledJobId: scheduledRun.id,
           teamId: teamId!,
         });
 
         if (!data) {
-          throw new TRPCError("Invoice not found");
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Invoice not found",
+          });
         }
-
-        // Trigger the scheduling job
-        await tasks.trigger("schedule-invoice-job", {
-          invoiceId: data.id,
-          scheduledAt: input.scheduledAt,
-        } satisfies ScheduleInvoiceJobPayload);
 
         return data;
       }
@@ -479,7 +492,10 @@ export const invoiceRouter = createTRPCRouter({
       });
 
       if (!data) {
-        throw new TRPCError("Invoice not found");
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invoice not found",
+        });
       }
 
       await tasks.trigger("generate-invoice", {
@@ -527,7 +543,10 @@ export const invoiceRouter = createTRPCRouter({
       });
 
       if (!invoice || !invoice.scheduledJobId) {
-        throw new TRPCError("Scheduled invoice not found");
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Scheduled invoice not found",
+        });
       }
 
       // Reschedule the existing job with the new date
@@ -555,7 +574,10 @@ export const invoiceRouter = createTRPCRouter({
       });
 
       if (!invoice || !invoice.scheduledJobId) {
-        throw new TRPCError("Scheduled invoice not found");
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Scheduled invoice not found",
+        });
       }
 
       // Cancel the scheduled job

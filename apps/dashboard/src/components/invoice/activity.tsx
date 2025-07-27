@@ -84,6 +84,14 @@ export function InvoiceActivity({ data }: Props) {
           timeFormat={user?.timeFormat}
         />
       )}
+      {data?.scheduledAt && data?.status === "scheduled" && (
+        <ActivityItem
+          label="Scheduled"
+          date={data?.scheduledAt}
+          completed={data?.sentAt}
+          timeFormat={user?.timeFormat}
+        />
+      )}
       {data?.viewedAt && (
         <ActivityItem
           label="Viewed"
