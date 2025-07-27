@@ -18,6 +18,7 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { SubmitButton as BaseSubmitButton } from "@midday/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
+import { format } from "date-fns";
 import * as React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -55,6 +56,22 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     const defaultDateTime = getDefaultScheduleDateTime();
     return defaultDateTime.toTimeString().slice(0, 5); // Format as HH:MM
   });
+
+  // Handler to set date and automatically switch to scheduled
+  const handleDateChange = (date: Date | undefined) => {
+    setScheduleDate(date);
+    if (date) {
+      handleOptionChange("scheduled");
+    }
+  };
+
+  // Handler to set time and automatically switch to scheduled
+  const handleTimeChange = (time: string) => {
+    setScheduleTime(time);
+    if (scheduleDate) {
+      handleOptionChange("scheduled");
+    }
+  };
 
   const selectedOption = watch("template.deliveryType");
   const canUpdate = watch("status") !== "draft";
@@ -135,7 +152,9 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
           isSubmitting={isSubmitting}
           disabled={!isValid || disabled}
         >
-          {options.find((o) => o.value === selectedOption)?.label}
+          {selectedOption === "scheduled" && scheduleDate && scheduleTime
+            ? `Schedule (${format(scheduleDate, "MMM d")} ${scheduleTime})`
+            : options.find((o) => o.value === selectedOption)?.label}
         </BaseSubmitButton>
 
         <DropdownMenu>
@@ -153,23 +172,18 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
                 return (
                   <DropdownMenuSub key={option.value}>
                     <DropdownMenuSubTrigger>
-                      <div className="flex items-center">
-                        <div className="flex items-center">
-                          {selectedOption === option.value && (
-                            <Icons.Check className="size-4 mr-2" />
-                          )}
-                          {option.label}
-                        </div>
+                      <div className="flex items-center pl-2">
+                        {option.label}
                       </div>
                     </DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
-                      <DropdownMenuSubContent className="p-4 space-y-4 min-w-[230px]">
+                      <DropdownMenuSubContent className="p-4 space-y-4 min-w-[230px] mb-2">
                         <div className="space-y-2">
                           <Calendar
                             mode="single"
                             weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
                             selected={scheduleDate}
-                            onSelect={setScheduleDate}
+                            onSelect={handleDateChange}
                             disabled={(date) => {
                               const today = new Date();
                               today.setHours(0, 0, 0, 0);
@@ -184,18 +198,10 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
                             type="time"
                             id="schedule-time"
                             value={scheduleTime}
-                            onChange={(e) => setScheduleTime(e.target.value)}
+                            onChange={(e) => handleTimeChange(e.target.value)}
                             className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                           />
                         </div>
-
-                        <Button
-                          onClick={() => handleOptionChange(option.value)}
-                          className="w-full"
-                          size="sm"
-                        >
-                          Set Schedule
-                        </Button>
                       </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
