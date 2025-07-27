@@ -34,13 +34,11 @@ export const scheduleInvoiceJob = schemaTask({
       return;
     }
 
-    // Update invoice status to unpaid and clear scheduling fields
+    // Update invoice status to unpaid
     await supabase
       .from("invoices")
       .update({
         status: "unpaid",
-        scheduled_job_id: null,
-        sent_at: new Date().toISOString(),
       })
       .eq("id", invoiceId);
 

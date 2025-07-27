@@ -138,7 +138,7 @@ export function Form() {
     createInvoiceMutation.mutate({
       id: values.id,
       deliveryType: values.template.deliveryType ?? "create",
-      scheduledAt: values.scheduledAt,
+      scheduledAt: values.scheduledAt || undefined,
     });
   };
 

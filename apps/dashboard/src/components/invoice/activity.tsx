@@ -88,7 +88,7 @@ export function InvoiceActivity({ data }: Props) {
         <ActivityItem
           label="Scheduled"
           date={data?.scheduledAt}
-          completed={data?.sentAt}
+          completed={!!data?.sentAt}
           timeFormat={user?.timeFormat}
         />
       )}
