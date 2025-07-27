@@ -57,11 +57,26 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     return defaultDateTime.toTimeString().slice(0, 5); // Format as HH:MM
   });
 
+  // Helper function to update scheduledAt with provided date and time
+  const updateScheduledAt = (date: Date, time: string) => {
+    const timeParts = time.split(":").map(Number);
+    const hours = timeParts[0] ?? 0;
+    const minutes = timeParts[1] ?? 0;
+    const scheduledDateTime = new Date(date);
+    scheduledDateTime.setHours(hours, minutes, 0, 0);
+
+    setValue("scheduledAt", scheduledDateTime.toISOString(), {
+      shouldValidate: true,
+    });
+  };
+
   // Handler to set date and automatically switch to scheduled
   const handleDateChange = (date: Date | undefined) => {
     setScheduleDate(date);
     if (date) {
       handleOptionChange("scheduled");
+      // Update scheduledAt immediately with the new date
+      updateScheduledAt(date, scheduleTime);
     }
   };
 
@@ -70,6 +85,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     setScheduleTime(time);
     if (scheduleDate) {
       handleOptionChange("scheduled");
+      // Update scheduledAt immediately with the new time
+      updateScheduledAt(scheduleDate, time);
     }
   };
 
@@ -110,16 +127,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
 
     // Handle scheduledAt based on delivery type
     if (deliveryType === "scheduled" && scheduleDate && scheduleTime) {
-      // Set scheduledAt for scheduled delivery
-      const timeParts = scheduleTime.split(":").map(Number);
-      const hours = timeParts[0] ?? 0;
-      const minutes = timeParts[1] ?? 0;
-      const scheduledDateTime = new Date(scheduleDate);
-      scheduledDateTime.setHours(hours, minutes, 0, 0);
-
-      setValue("scheduledAt", scheduledDateTime.toISOString(), {
-        shouldValidate: true,
-      });
+      // Update scheduledAt for scheduled delivery
+      updateScheduledAt(scheduleDate, scheduleTime);
     } else {
       // Clear scheduledAt for non-scheduled delivery types
       setValue("scheduledAt", null, {
