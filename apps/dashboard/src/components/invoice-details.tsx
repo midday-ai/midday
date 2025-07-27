@@ -1,6 +1,7 @@
 "use client";
 
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
@@ -29,6 +30,7 @@ import { OpenURL } from "./open-url";
 export function InvoiceDetails() {
   const trpc = useTRPC();
   const { invoiceId } = useInvoiceParams();
+  const { data: user } = useUserQuery();
 
   const isOpen = invoiceId !== null;
 
@@ -165,7 +167,10 @@ export function InvoiceDetails() {
               <span className="text-sm text-[#606060]">Scheduled at</span>
               <span className="text-sm">
                 <span>
-                  {scheduledAt && format(new Date(scheduledAt), "MMM dd")}
+                  {format(
+                    scheduledAt,
+                    `MMM d, ${user?.timeFormat === 24 ? "HH:mm" : "h:mm a"}`,
+                  )}
                 </span>
               </span>
             </div>

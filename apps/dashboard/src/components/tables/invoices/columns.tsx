@@ -11,7 +11,7 @@ import { Icons } from "@midday/ui/icons";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { TooltipProvider } from "@midday/ui/tooltip";
 import type { ColumnDef } from "@tanstack/react-table";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import * as React from "react";
 import { ActionsMenu } from "./actions-menu";
 
@@ -49,7 +49,10 @@ export const columns: ColumnDef<Invoice>[] = [
                 sideOffset={5}
               >
                 Scheduled to send:{" "}
-                {formatDate(scheduledAt, table.options.meta?.dateFormat)}
+                {format(
+                  scheduledAt,
+                  `MMM d, ${table.options.meta?.timeFormat === 24 ? "HH:mm" : "h:mm a"}`,
+                )}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
