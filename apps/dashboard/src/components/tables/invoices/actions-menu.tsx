@@ -115,12 +115,6 @@ export function ActionsMenu({ row }: Props) {
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.invoiceSummary.queryKey(),
         });
-
-        toast({
-          duration: 4000,
-          title: "Schedule canceled successfully.",
-          variant: "success",
-        });
       },
     }),
   );
