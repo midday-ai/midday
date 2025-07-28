@@ -36,7 +36,7 @@ type DraftInvoiceTemplateParams = {
   taxRate?: number;
   vatRate?: number;
   size?: "a4" | "letter";
-  deliveryType?: "create" | "create_and_send";
+  deliveryType?: "create" | "create_and_send" | "scheduled";
   locale?: string;
 };
 

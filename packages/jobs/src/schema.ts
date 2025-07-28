@@ -10,7 +10,7 @@ export type SendInvoiceReminderPayload = z.infer<
 
 export const generateInvoiceSchema = z.object({
   invoiceId: z.string().uuid(),
-  deliveryType: z.enum(["create", "create_and_send"]),
+  deliveryType: z.enum(["create", "create_and_send", "scheduled"]),
 });
 
 export type GenerateInvoicePayload = z.infer<typeof generateInvoiceSchema>;
@@ -170,4 +170,13 @@ export const processTransactionAttachmentSchema = z.object({
 
 export type ProcessTransactionAttachmentPayload = z.infer<
   typeof processTransactionAttachmentSchema
+>;
+
+export const scheduleInvoiceJobSchema = z.object({
+  invoiceId: z.string().uuid(),
+  scheduledAt: z.string().datetime(),
+});
+
+export type ScheduleInvoiceJobPayload = z.infer<
+  typeof scheduleInvoiceJobSchema
 >;

@@ -30,6 +30,7 @@ export const invoiceFormSchema = z.object({
   amount: z.number(),
   lineItems: z.array(lineItemSchema).min(1),
   token: z.string().optional(),
+  scheduledAt: z.string().nullable().optional(),
 });
 
 export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;

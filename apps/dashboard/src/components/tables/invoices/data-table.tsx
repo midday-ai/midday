@@ -91,6 +91,7 @@ export function DataTable({
     },
     meta: {
       dateFormat: user?.dateFormat,
+      timeFormat: user?.timeFormat,
     },
   });
 

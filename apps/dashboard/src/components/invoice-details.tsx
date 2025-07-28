@@ -1,6 +1,7 @@
 "use client";
 
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
@@ -29,6 +30,7 @@ import { OpenURL } from "./open-url";
 export function InvoiceDetails() {
   const trpc = useTRPC();
   const { invoiceId } = useInvoiceParams();
+  const { data: user } = useUserQuery();
 
   const isOpen = invoiceId !== null;
 
@@ -64,6 +66,7 @@ export function InvoiceDetails() {
     sentAt,
     sentTo,
     customerName,
+    scheduledAt,
   } = data;
 
   return (
@@ -158,6 +161,20 @@ export function InvoiceDetails() {
               <span>{issueDate && format(new Date(issueDate), "MMM dd")}</span>
             </span>
           </div>
+
+          {scheduledAt && status === "scheduled" && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#606060]">Scheduled at</span>
+              <span className="text-sm">
+                <span>
+                  {format(
+                    new Date(scheduledAt),
+                    `MMM d, ${user?.timeFormat === 24 ? "HH:mm" : "h:mm a"}`,
+                  )}
+                </span>
+              </span>
+            </div>
+          )}
 
           {sentAt && (
             <div className="flex justify-between items-center">

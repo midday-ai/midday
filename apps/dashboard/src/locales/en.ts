@@ -192,6 +192,7 @@ export default {
     paid: "Paid",
     unpaid: "Unpaid",
     canceled: "Canceled",
+    scheduled: "Scheduled",
   },
   payment_status: {
     none: "Unknown",

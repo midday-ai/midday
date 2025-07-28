@@ -4,6 +4,7 @@ declare module "@tanstack/table-core" {
   interface TableMeta<TData extends RowData> {
     // Transaction table meta
     dateFormat?: string | null;
+    timeFormat?: number | null;
     hasSorting?: boolean;
     setOpen?: (id: string) => void;
     copyUrl?: (id: string) => void;

@@ -54,6 +54,7 @@ const items = [
       { path: "/invoices?statuses=unpaid", name: "Unpaid" },
       { path: "/invoices?statuses=overdue", name: "Overdue" },
       { path: "/invoices?statuses=draft", name: "Draft" },
+      { path: "/invoices?statuses=scheduled", name: "Scheduled" },
       { path: "/invoices?type=create", name: "Create new" },
     ],
   },

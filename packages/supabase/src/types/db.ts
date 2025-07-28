@@ -3230,7 +3230,13 @@ export type Database = {
       inbox_type: "invoice" | "expense";
       invoice_delivery_type: "create" | "create_and_send" | "scheduled";
       invoice_size: "a4" | "letter";
-      invoice_status: "draft" | "overdue" | "paid" | "unpaid" | "canceled";
+      invoice_status:
+        | "draft"
+        | "overdue"
+        | "paid"
+        | "unpaid"
+        | "canceled"
+        | "scheduled";
       plans: "trial" | "starter" | "pro";
       reportTypes: "profit" | "revenue" | "burn_rate" | "expense";
       teamRoles: "owner" | "member";
@@ -3446,7 +3452,14 @@ export const Constants = {
       inbox_type: ["invoice", "expense"],
       invoice_delivery_type: ["create", "create_and_send", "scheduled"],
       invoice_size: ["a4", "letter"],
-      invoice_status: ["draft", "overdue", "paid", "unpaid", "canceled"],
+      invoice_status: [
+        "draft",
+        "overdue",
+        "paid",
+        "unpaid",
+        "canceled",
+        "scheduled",
+      ],
       plans: ["trial", "starter", "pro"],
       reportTypes: ["profit", "revenue", "burn_rate", "expense"],
       teamRoles: ["owner", "member"],

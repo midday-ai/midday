@@ -17,6 +17,7 @@ import { getTrackerRecordsByRange } from "@api/db/queries/tracker-entries";
 import { getTrackerProjectById } from "@api/db/queries/tracker-projects";
 import { getUserById } from "@api/db/queries/users";
 import {
+  cancelScheduledInvoiceSchema,
   createInvoiceSchema,
   deleteInvoiceSchema,
   draftInvoiceSchema,
@@ -28,6 +29,7 @@ import {
   remindInvoiceSchema,
   searchInvoiceNumberSchema,
   updateInvoiceSchema,
+  updateScheduledInvoiceSchema,
 } from "@api/schemas/invoice";
 import {
   createTRPCRouter,
@@ -42,7 +44,7 @@ import type {
   GenerateInvoicePayload,
   SendInvoiceReminderPayload,
 } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { runs, tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 import { addMonths, format, parseISO } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
@@ -442,7 +444,76 @@ export const invoiceRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createInvoiceSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
-      // Update the invoice status to unpaid
+      // Handle different delivery types
+      if (input.deliveryType === "scheduled") {
+        if (!input.scheduledAt) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "scheduledAt is required for scheduled delivery",
+          });
+        }
+
+        // Convert to Date object and validate it's in the future
+        const scheduledDate = new Date(input.scheduledAt);
+        const now = new Date();
+
+        if (scheduledDate <= now) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "scheduledAt must be in the future",
+          });
+        }
+
+        // Check if this is an existing scheduled invoice
+        const existingInvoice = await getInvoiceById(db, {
+          id: input.id,
+          teamId: teamId!,
+        });
+
+        let scheduledJobId: string;
+
+        if (existingInvoice?.scheduledJobId) {
+          // Reschedule the existing job instead of creating a new one
+          await runs.reschedule(existingInvoice.scheduledJobId, {
+            delay: scheduledDate,
+          });
+          scheduledJobId = existingInvoice.scheduledJobId;
+        } else {
+          // Create a new scheduled job
+          const scheduledRun = await tasks.trigger(
+            "schedule-invoice",
+            {
+              invoiceId: input.id,
+              scheduledAt: input.scheduledAt,
+            },
+            {
+              delay: scheduledDate,
+            },
+          );
+
+          scheduledJobId = scheduledRun.id;
+        }
+
+        // Update the invoice with scheduling information
+        const data = await updateInvoice(db, {
+          id: input.id,
+          status: "scheduled",
+          scheduledAt: input.scheduledAt,
+          scheduledJobId,
+          teamId: teamId!,
+        });
+
+        if (!data) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Invoice not found",
+          });
+        }
+
+        return data;
+      }
+
+      // Update the invoice status to unpaid for immediate delivery
       const data = await updateInvoice(db, {
         id: input.id,
         status: "unpaid",
@@ -450,7 +521,10 @@ export const invoiceRouter = createTRPCRouter({
       });
 
       if (!data) {
-        throw new Error("Invoice not found");
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invoice not found",
+        });
       }
 
       await tasks.trigger("generate-invoice", {
@@ -486,5 +560,78 @@ export const invoiceRouter = createTRPCRouter({
         invoiceNumber: nextInvoiceNumber!,
         teamId: teamId!,
       });
+    }),
+
+  updateSchedule: protectedProcedure
+    .input(updateScheduledInvoiceSchema)
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      // Get the current invoice to find the old scheduled job ID
+      const invoice = await getInvoiceById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
+
+      if (!invoice || !invoice.scheduledJobId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Scheduled invoice not found",
+        });
+      }
+
+      // Convert to Date object and validate it's in the future
+      const scheduledDate = new Date(input.scheduledAt);
+      const now = new Date();
+
+      if (scheduledDate <= now) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "scheduledAt must be in the future",
+        });
+      }
+
+      // Reschedule the existing job with the new date
+      await runs.reschedule(invoice.scheduledJobId, {
+        delay: scheduledDate,
+      });
+
+      // Update the scheduled date in the database
+      const updatedInvoice = await updateInvoice(db, {
+        id: input.id,
+        scheduledAt: input.scheduledAt,
+        teamId: teamId!,
+      });
+
+      return updatedInvoice;
+    }),
+
+  cancelSchedule: protectedProcedure
+    .input(cancelScheduledInvoiceSchema)
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      // Get the current invoice to find the scheduled job ID
+      const invoice = await getInvoiceById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
+
+      if (!invoice || !invoice.scheduledJobId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Scheduled invoice not found",
+        });
+      }
+
+      // Cancel the scheduled job
+      await runs.cancel(invoice.scheduledJobId);
+
+      // Update the invoice status back to draft and clear scheduling fields
+      const updatedInvoice = await updateInvoice(db, {
+        id: input.id,
+        status: "draft",
+        scheduledAt: null,
+        scheduledJobId: null,
+        teamId: teamId!,
+      });
+
+      return updatedInvoice;
     }),
 });

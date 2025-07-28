@@ -99,6 +99,7 @@ export function Form() {
       "invoiceNumber",
       "topBlock",
       "bottomBlock",
+      "scheduledAt",
     ],
   });
 
@@ -137,6 +138,7 @@ export function Form() {
     createInvoiceMutation.mutate({
       id: values.id,
       deliveryType: values.template.deliveryType ?? "create",
+      scheduledAt: values.scheduledAt || undefined,
     });
   };
 

@@ -27,7 +27,14 @@ import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
 
-const allowedStatuses = ["draft", "overdue", "paid", "unpaid", "canceled"];
+const allowedStatuses = [
+  "draft",
+  "overdue",
+  "paid",
+  "unpaid",
+  "canceled",
+  "scheduled",
+];
 
 export function InvoiceSearchFilter() {
   const [prompt, setPrompt] = useState("");

@@ -484,14 +484,20 @@ const DayEntries = memo(
                       ? secondsToHoursAndMinutes(
                           Math.max(
                             0,
-                            Math.floor(
+                            Math.round(
                               (currentTime.getTime() -
                                 createSafeDate(entry.event.start).getTime()) /
                                 1000,
                             ),
                           ),
                         )
-                      : secondsToHoursAndMinutes(entry.event.duration ?? 0)}
+                      : secondsToHoursAndMinutes(
+                          entry.spansMidnight || entry.isContinuation
+                            ? (entry.displayEndSlot - entry.displayStartSlot) *
+                                15 *
+                                60 // Use slot-based calculation for split events
+                            : (entry.event.duration ?? 0), // Use original duration for normal events
+                        )}
                     {")"}
                   </span>
                 )}
@@ -503,7 +509,7 @@ const DayEntries = memo(
                     ? secondsToHoursAndMinutes(
                         Math.max(
                           0,
-                          Math.floor(
+                          Math.round(
                             (currentTime.getTime() -
                               createSafeDate(entry.event.start).getTime()) /
                               1000,
@@ -511,9 +517,11 @@ const DayEntries = memo(
                         ),
                       )
                     : secondsToHoursAndMinutes(
-                        (entry.displayEndSlot - entry.displayStartSlot) *
-                          15 *
-                          60, // 15 minutes per slot
+                        entry.spansMidnight || entry.isContinuation
+                          ? (entry.displayEndSlot - entry.displayStartSlot) *
+                              15 *
+                              60 // Use slot-based calculation for split events
+                          : (entry.event.duration ?? 0), // Use original duration for normal events
                       )}
                   )
                 </div>

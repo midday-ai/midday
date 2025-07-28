@@ -115,7 +115,6 @@ export function ChartPeriod({ disabled }: Props) {
             toDate={new Date()}
             onSelect={handleCalendarSelect}
             weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
-            timeZone="UTC"
           />
         </PopoverContent>
       </Popover>
