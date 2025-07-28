@@ -2,7 +2,7 @@ import type { Database } from "@api/db";
 import { oauthApplications, users } from "@api/db/schema";
 import { hash } from "@midday/encryption";
 import slugify from "@sindresorhus/slugify";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 async function generateUniqueSlug(db: Database, name: string): Promise<string> {
@@ -331,7 +331,7 @@ export async function updateOAuthApplication(
     .set({
       ...updateData,
       ...(slug && { slug }),
-      updatedAt: sql`NOW()`,
+      updatedAt: new Date().toISOString(),
     })
     .where(
       and(eq(oauthApplications.id, id), eq(oauthApplications.teamId, teamId)),
@@ -377,7 +377,7 @@ export async function updateOAuthApplicationstatus(
     .update(oauthApplications)
     .set({
       status,
-      updatedAt: sql`NOW()`,
+      updatedAt: new Date().toISOString(),
     })
     .where(
       and(eq(oauthApplications.id, id), eq(oauthApplications.teamId, teamId)),
@@ -424,7 +424,7 @@ export async function regenerateClientSecret(
     .update(oauthApplications)
     .set({
       clientSecret: clientSecretHash, // Store hashed secret
-      updatedAt: sql`NOW()`,
+      updatedAt: new Date().toISOString(),
     })
     .where(
       and(eq(oauthApplications.id, id), eq(oauthApplications.teamId, teamId)),

@@ -72,7 +72,7 @@ function CarouselWithDots({
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {images.map((image, index) => (
           <button
-            key={`dot-${image}-${index}`}
+            key={`dot-${image}-${index.toString()}`}
             type="button"
             className={`w-2 h-2 rounded-full transition-all ${
               index === current

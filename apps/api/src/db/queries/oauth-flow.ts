@@ -6,7 +6,8 @@ import {
   oauthAuthorizationCodes,
   users,
 } from "@api/db/schema";
-import { and, desc, eq, gt, sql } from "drizzle-orm";
+import { hash } from "@midday/encryption";
+import { and, desc, eq, gt } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 export type CreateAuthorizationCodeParams = {
@@ -166,11 +167,15 @@ export async function createAccessToken(
     Date.now() + refreshTokenExpiresInSeconds * 1000,
   );
 
+  // Hash tokens before storing in database
+  const tokenHash = hash(token);
+  const refreshTokenHash = hash(refreshToken);
+
   const [result] = await db
     .insert(oauthAccessTokens)
     .values({
-      token,
-      refreshToken,
+      token: tokenHash,
+      refreshToken: refreshTokenHash,
       applicationId: params.applicationId,
       userId: params.userId,
       teamId: params.teamId,
@@ -192,8 +197,8 @@ export async function createAccessToken(
   }
 
   return {
-    accessToken: result.token,
-    refreshToken: result.refreshToken,
+    accessToken: token,
+    refreshToken: refreshToken,
     expiresIn: expiresInSeconds,
     refreshTokenExpiresIn: refreshTokenExpiresInSeconds,
     scopes: result.scopes,
@@ -203,6 +208,9 @@ export async function createAccessToken(
 
 // Validate access token
 export async function validateAccessToken(db: Database, token: string) {
+  // Hash the incoming token to compare with stored hash
+  const tokenHash = hash(token);
+
   const [result] = await db
     .select({
       id: oauthAccessTokens.id,
@@ -234,7 +242,7 @@ export async function validateAccessToken(db: Database, token: string) {
     )
     .where(
       and(
-        eq(oauthAccessTokens.token, token),
+        eq(oauthAccessTokens.token, tokenHash), // Compare with hashed token
         eq(oauthAccessTokens.revoked, false),
         gt(oauthAccessTokens.expiresAt, new Date().toISOString()),
       ),
@@ -252,7 +260,7 @@ export async function validateAccessToken(db: Database, token: string) {
   // Update last used timestamp
   await db
     .update(oauthAccessTokens)
-    .set({ lastUsedAt: sql`NOW()` })
+    .set({ lastUsedAt: new Date().toISOString() })
     .where(eq(oauthAccessTokens.id, result.id));
 
   return result;
@@ -264,6 +272,9 @@ export async function refreshAccessToken(
   params: RefreshAccessTokenParams,
 ) {
   const { refreshToken, applicationId, scopes } = params;
+
+  // Hash the incoming refresh token to compare with stored hash
+  const refreshTokenHash = hash(refreshToken);
 
   // Get the existing token
   const [existingToken] = await db
@@ -278,7 +289,7 @@ export async function refreshAccessToken(
     .from(oauthAccessTokens)
     .where(
       and(
-        eq(oauthAccessTokens.refreshToken, refreshToken),
+        eq(oauthAccessTokens.refreshToken, refreshTokenHash), // Compare with hashed refresh token
         eq(oauthAccessTokens.applicationId, applicationId),
         eq(oauthAccessTokens.revoked, false),
       ),
@@ -324,7 +335,7 @@ export async function refreshAccessToken(
     .update(oauthAccessTokens)
     .set({
       revoked: true,
-      revokedAt: sql`NOW()`,
+      revokedAt: new Date().toISOString(),
     })
     .where(eq(oauthAccessTokens.id, existingToken.id));
 
@@ -346,8 +357,11 @@ export async function revokeAccessToken(
 ) {
   const { token, applicationId } = params;
 
+  // Hash the incoming token to compare with stored hash
+  const tokenHash = hash(token);
+
   const whereConditions = [
-    eq(oauthAccessTokens.token, token),
+    eq(oauthAccessTokens.token, tokenHash), // Compare with hashed token
     eq(oauthAccessTokens.revoked, false),
   ];
 
@@ -359,7 +373,7 @@ export async function revokeAccessToken(
     .update(oauthAccessTokens)
     .set({
       revoked: true,
-      revokedAt: sql`NOW()`,
+      revokedAt: new Date().toISOString(),
     })
     .where(and(...whereConditions))
     .returning({
@@ -419,7 +433,7 @@ export async function revokeUserApplicationTokens(
     .update(oauthAccessTokens)
     .set({
       revoked: true,
-      revokedAt: sql`NOW()`,
+      revokedAt: new Date().toISOString(),
     })
     .where(
       and(
