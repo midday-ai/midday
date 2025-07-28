@@ -54,7 +54,7 @@ export function ExportBar() {
   return (
     <AnimatePresence>
       <motion.div
-        className="h-12 fixed left-[50%] bottom-2 w-[400px] -ml-[200px]"
+        className="h-12 fixed left-[50%] bottom-2 w-[400px] -ml-[200px] z-50"
         animate={{ y: isOpen ? 0 : 100 }}
         initial={{ y: 100 }}
       >
