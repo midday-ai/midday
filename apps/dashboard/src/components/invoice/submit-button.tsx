@@ -60,8 +60,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   // Helper function to update scheduledAt with provided date and time
   const updateScheduledAt = (date: Date, time: string) => {
     const timeParts = time.split(":").map(Number);
-    const hours = timeParts[0] ?? 0;
-    const minutes = timeParts[1] ?? 0;
+    const hours = timeParts[0] || 0;
+    const minutes = timeParts[1] || 0;
     const scheduledDateTime = new Date(date);
     scheduledDateTime.setHours(hours, minutes, 0, 0);
 

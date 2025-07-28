@@ -168,7 +168,7 @@ export function InvoiceDetails() {
               <span className="text-sm">
                 <span>
                   {format(
-                    scheduledAt,
+                    new Date(scheduledAt),
                     `MMM d, ${user?.timeFormat === 24 ? "HH:mm" : "h:mm a"}`,
                   )}
                 </span>

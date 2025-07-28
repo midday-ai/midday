@@ -453,6 +453,17 @@ export const invoiceRouter = createTRPCRouter({
           });
         }
 
+        // Convert to Date object and validate it's in the future
+        const scheduledDate = new Date(input.scheduledAt);
+        const now = new Date();
+
+        if (scheduledDate <= now) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "scheduledAt must be in the future",
+          });
+        }
+
         // Trigger the scheduled job with the specific datetime
         const scheduledRun = await tasks.trigger(
           "schedule-invoice",
@@ -461,7 +472,7 @@ export const invoiceRouter = createTRPCRouter({
             scheduledAt: input.scheduledAt,
           },
           {
-            delay: input.scheduledAt,
+            delay: scheduledDate,
           },
         );
 
@@ -549,9 +560,20 @@ export const invoiceRouter = createTRPCRouter({
         });
       }
 
+      // Convert to Date object and validate it's in the future
+      const scheduledDate = new Date(input.scheduledAt);
+      const now = new Date();
+
+      if (scheduledDate <= now) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "scheduledAt must be in the future",
+        });
+      }
+
       // Reschedule the existing job with the new date
       await runs.reschedule(invoice.scheduledJobId, {
-        delay: new Date(input.scheduledAt),
+        delay: scheduledDate,
       });
 
       // Update the scheduled date in the database
