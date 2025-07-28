@@ -48,14 +48,41 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     return roundedDate;
   };
 
+  // Initialize with existing scheduledAt value if available, otherwise use default
+  const getInitialScheduleDateTime = () => {
+    const existingScheduledAt = watch("scheduledAt");
+    if (existingScheduledAt) {
+      return new Date(existingScheduledAt);
+    }
+    return getDefaultScheduleDateTime();
+  };
+
   const [scheduleDate, setScheduleDate] = React.useState<Date | undefined>(
-    getDefaultScheduleDateTime(),
+    () => {
+      const existingScheduledAt = watch("scheduledAt");
+      return existingScheduledAt
+        ? new Date(existingScheduledAt)
+        : getDefaultScheduleDateTime();
+    },
   );
 
   const [scheduleTime, setScheduleTime] = React.useState<string>(() => {
-    const defaultDateTime = getDefaultScheduleDateTime();
-    return defaultDateTime.toTimeString().slice(0, 5); // Format as HH:MM
+    const existingScheduledAt = watch("scheduledAt");
+    const initialDateTime = existingScheduledAt
+      ? new Date(existingScheduledAt)
+      : getDefaultScheduleDateTime();
+    return initialDateTime.toTimeString().slice(0, 5); // Format as HH:MM
   });
+
+  // Sync with form scheduledAt changes (for when invoice data is loaded)
+  React.useEffect(() => {
+    const currentScheduledAt = watch("scheduledAt");
+    if (currentScheduledAt) {
+      const scheduledDateTime = new Date(currentScheduledAt);
+      setScheduleDate(scheduledDateTime);
+      setScheduleTime(scheduledDateTime.toTimeString().slice(0, 5));
+    }
+  }, [watch("scheduledAt")]);
 
   // Helper function to update scheduledAt with provided date and time
   const updateScheduledAt = (date: Date, time: string) => {
@@ -166,69 +193,114 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
             : options.find((o) => o.value === selectedOption)?.label}
         </BaseSubmitButton>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              disabled={!isValid || isSubmitting || disabled}
-              className="size-9 p-0 [&[data-state=open]>svg]:rotate-180"
-            >
-              <Icons.ChevronDown className="size-4 transition-transform duration-200" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" sideOffset={10}>
-            {options.map((option) => {
-              if (option.value === "scheduled") {
+        {selectedOption === "scheduled" && canUpdate ? (
+          // Show calendar and time input directly when invoice is already scheduled and can be updated
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                disabled={!isValid || isSubmitting || disabled}
+                className="size-9 p-0 [&[data-state=open]>svg]:rotate-180"
+              >
+                <Icons.ChevronDown className="size-4 transition-transform duration-200" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" sideOffset={10}>
+              <div className="p-4 space-y-4 min-w-[230px]">
+                <div className="space-y-2">
+                  <Calendar
+                    mode="single"
+                    weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
+                    selected={scheduleDate}
+                    defaultMonth={scheduleDate}
+                    onSelect={handleDateChange}
+                    disabled={(date) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      return date < today;
+                    }}
+                    className="!p-0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Input
+                    type="time"
+                    id="schedule-time"
+                    value={scheduleTime}
+                    onChange={(e) => handleTimeChange(e.target.value)}
+                    className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                  />
+                </div>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          // Show normal dropdown with all options when not scheduled or when creating new
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                disabled={!isValid || isSubmitting || disabled}
+                className="size-9 p-0 [&[data-state=open]>svg]:rotate-180"
+              >
+                <Icons.ChevronDown className="size-4 transition-transform duration-200" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" sideOffset={10}>
+              {options.map((option) => {
+                if (option.value === "scheduled") {
+                  return (
+                    <DropdownMenuSub key={option.value}>
+                      <DropdownMenuSubTrigger>
+                        <div className="flex items-center pl-2">
+                          {option.label}
+                        </div>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent className="p-4 space-y-4 min-w-[230px] mb-2">
+                          <div className="space-y-2">
+                            <Calendar
+                              mode="single"
+                              weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
+                              selected={scheduleDate}
+                              defaultMonth={scheduleDate}
+                              onSelect={handleDateChange}
+                              disabled={(date) => {
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
+                                return date < today;
+                              }}
+                              className="!p-0"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Input
+                              type="time"
+                              id="schedule-time"
+                              value={scheduleTime}
+                              onChange={(e) => handleTimeChange(e.target.value)}
+                              className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                            />
+                          </div>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                  );
+                }
+
                 return (
-                  <DropdownMenuSub key={option.value}>
-                    <DropdownMenuSubTrigger>
-                      <div className="flex items-center pl-2">
-                        {option.label}
-                      </div>
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuPortal>
-                      <DropdownMenuSubContent className="p-4 space-y-4 min-w-[230px] mb-2">
-                        <div className="space-y-2">
-                          <Calendar
-                            mode="single"
-                            weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
-                            selected={scheduleDate}
-                            onSelect={handleDateChange}
-                            disabled={(date) => {
-                              const today = new Date();
-                              today.setHours(0, 0, 0, 0);
-                              return date < today;
-                            }}
-                            className="!p-0"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Input
-                            type="time"
-                            id="schedule-time"
-                            value={scheduleTime}
-                            onChange={(e) => handleTimeChange(e.target.value)}
-                            className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-                          />
-                        </div>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuPortal>
-                  </DropdownMenuSub>
+                  <DropdownMenuCheckboxItem
+                    key={option.value}
+                    checked={selectedOption === option.value}
+                    onCheckedChange={() => handleOptionChange(option.value)}
+                  >
+                    {option.label}
+                  </DropdownMenuCheckboxItem>
                 );
-              }
-
-              return (
-                <DropdownMenuCheckboxItem
-                  key={option.value}
-                  checked={selectedOption === option.value}
-                  onCheckedChange={() => handleOptionChange(option.value)}
-                >
-                  {option.label}
-                </DropdownMenuCheckboxItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </div>
   );

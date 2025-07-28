@@ -464,24 +464,42 @@ export const invoiceRouter = createTRPCRouter({
           });
         }
 
-        // Trigger the scheduled job with the specific datetime
-        const scheduledRun = await tasks.trigger(
-          "schedule-invoice",
-          {
-            invoiceId: input.id,
-            scheduledAt: input.scheduledAt,
-          },
-          {
+        // Check if this is an existing scheduled invoice
+        const existingInvoice = await getInvoiceById(db, {
+          id: input.id,
+          teamId: teamId!,
+        });
+
+        let scheduledJobId: string;
+
+        if (existingInvoice?.scheduledJobId) {
+          // Reschedule the existing job instead of creating a new one
+          await runs.reschedule(existingInvoice.scheduledJobId, {
             delay: scheduledDate,
-          },
-        );
+          });
+          scheduledJobId = existingInvoice.scheduledJobId;
+        } else {
+          // Create a new scheduled job
+          const scheduledRun = await tasks.trigger(
+            "schedule-invoice",
+            {
+              invoiceId: input.id,
+              scheduledAt: input.scheduledAt,
+            },
+            {
+              delay: scheduledDate,
+            },
+          );
+
+          scheduledJobId = scheduledRun.id;
+        }
 
         // Update the invoice with scheduling information
         const data = await updateInvoice(db, {
           id: input.id,
           status: "scheduled",
           scheduledAt: input.scheduledAt,
-          scheduledJobId: scheduledRun.id,
+          scheduledJobId,
           teamId: teamId!,
         });
 
