@@ -1266,13 +1266,13 @@ export function TrackerSchedule() {
             // This is the first part of the entry (ends at midnight in user timezone)
             // Calculate end of day in user timezone, then convert back to UTC
             const timezone = getUserTimezone(user);
-            const endOfDayUtc = userTimeToUTC(
-              currentSelectedDate,
-              "23:59",
-              timezone,
+            const nextDay = format(
+              addDays(parseISO(currentSelectedDate), 1),
+              "yyyy-MM-dd",
             );
+            const endOfDayUtc = userTimeToUTC(nextDay, "00:00", timezone);
 
-            const firstPartDuration = Math.floor(
+            const firstPartDuration = Math.round(
               (endOfDayUtc.getTime() - startDate.getTime()) / 1000,
             );
 
@@ -1393,7 +1393,7 @@ export function TrackerSchedule() {
                     {event.trackerProject?.name || "No Project"}
                     {event.isFirstPart && " →"}
                     {isRunningTimer
-                      ? ` (${secondsToHoursAndMinutes(Math.max(0, Math.floor((currentTime.getTime() - createSafeDate(event.start).getTime()) / 1000)))})`
+                      ? ` (${secondsToHoursAndMinutes(Math.max(0, Math.round((currentTime.getTime() - createSafeDate(event.start).getTime()) / 1000)))})`
                       : ` (${secondsToHoursAndMinutes(event.duration ?? 0)})`}
                   </span>
                 </div>

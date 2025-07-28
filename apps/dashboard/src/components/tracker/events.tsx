@@ -168,7 +168,7 @@ export const TrackerEvents = memo(
             const displayDuration = isRunningTimer
               ? Math.max(
                   0,
-                  Math.floor(
+                  Math.round(
                     (currentTime.getTime() -
                       createSafeDate(entry.start).getTime()) /
                       1000,
