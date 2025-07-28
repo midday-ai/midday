@@ -41,7 +41,7 @@ export const columns: ColumnDef<OAuthApplication>[] = [
             <img
               src={row.original.logoUrl}
               alt={row.original.name}
-              className="h-6 w-6 rounded"
+              className="h-6 w-6"
             />
           )}
           <span className="font-medium">{row.original.name}</span>

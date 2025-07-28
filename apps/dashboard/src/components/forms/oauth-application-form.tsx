@@ -40,6 +40,7 @@ import { Textarea } from "@midday/ui/textarea";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useFieldArray } from "react-hook-form";
@@ -309,7 +310,6 @@ export function OAuthApplicationForm({ data }: Props) {
       toast({
         title: "Invalid file type",
         description: "Please upload only image files",
-        variant: "destructive",
       });
       return;
     }
@@ -321,7 +321,6 @@ export function OAuthApplicationForm({ data }: Props) {
       toast({
         title: "Too many screenshots",
         description: "You can only upload up to 4 screenshots",
-        variant: "destructive",
       });
       return;
     }
@@ -329,29 +328,28 @@ export function OAuthApplicationForm({ data }: Props) {
     try {
       const uploadedUrls = await Promise.all(
         imageFiles.map(async (file) => {
-          const filename = stripSpecialCharacters(file.name);
-          const { path } = await uploadFile({
+          const originalFilename = file.name ?? "";
+          const extension = originalFilename.split(".").pop() || "";
+          const filename = extension ? `${nanoid()}.${extension}` : nanoid();
+
+          const { url } = await uploadFile({
             bucket: "apps",
             path: ["screenshots", filename],
             file,
           });
 
-          return path.join("/");
+          return url;
         }),
       );
 
       // Add uploaded URLs to the form
-      form.setValue("screenshots", [...currentScreenshots, ...uploadedUrls]);
-
-      toast({
-        title: "Screenshots uploaded",
-        description: `Successfully uploaded ${uploadedUrls.length} screenshot(s)`,
+      form.setValue("screenshots", [...currentScreenshots, ...uploadedUrls], {
+        shouldDirty: true,
       });
     } catch (error) {
       toast({
         title: "Upload failed",
         description: "Failed to upload screenshots. Please try again.",
-        variant: "destructive",
       });
     }
   };
@@ -364,14 +362,12 @@ export function OAuthApplicationForm({ data }: Props) {
           toast({
             title: "File too large",
             description: "Screenshots must be smaller than 3MB",
-            variant: "destructive",
           });
         }
         if (rejection.errors.find(({ code }) => code === "file-invalid-type")) {
           toast({
             title: "Invalid file type",
             description: "Please upload only image files",
-            variant: "destructive",
           });
         }
       }
@@ -396,7 +392,7 @@ export function OAuthApplicationForm({ data }: Props) {
   const removeScreenshot = (index: number) => {
     const currentScreenshots = form.getValues("screenshots");
     const newScreenshots = currentScreenshots.filter((_, i) => i !== index);
-    form.setValue("screenshots", newScreenshots);
+    form.setValue("screenshots", newScreenshots, { shouldDirty: true });
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;
@@ -750,16 +746,13 @@ export function OAuthApplicationForm({ data }: Props) {
                   {/* Display uploaded screenshots */}
                   {form.watch("screenshots").length > 0 && (
                     <div className="space-y-2">
-                      <h4 className="text-sm font-medium">
-                        Uploaded Screenshots
-                      </h4>
                       <div className="grid grid-cols-2 gap-4">
                         {form.watch("screenshots").map((screenshot, index) => (
                           <div
                             key={`screenshot-${index}-${screenshot}`}
                             className="relative group"
                           >
-                            <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+                            <div className="aspect-video bg-muted overflow-hidden">
                               <img
                                 src={screenshot}
                                 alt={`Screenshot ${index + 1}`}
@@ -850,7 +843,7 @@ export function OAuthApplicationForm({ data }: Props) {
           </Accordion>
         </div>
 
-        <div className="sticky bottom-0 bg-background border-t p-3 mt-4">
+        <div className="sticky bottom-0 bg-[#FAFAF9] dark:bg-[#121212] border-t pt-3 mt-4">
           <SubmitButton
             type="submit"
             className="w-full"

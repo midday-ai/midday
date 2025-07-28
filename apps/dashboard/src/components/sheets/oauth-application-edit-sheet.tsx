@@ -61,7 +61,6 @@ export function OAuthApplicationEditSheet() {
         toast({
           title: "Error",
           description: error.message || "Failed to submit for review",
-          variant: "destructive",
         });
       },
     }),
@@ -87,7 +86,6 @@ export function OAuthApplicationEditSheet() {
         toast({
           title: "Error",
           description: error.message || "Failed to move to draft",
-          variant: "destructive",
         });
       },
     }),
