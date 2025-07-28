@@ -7,7 +7,7 @@ import {
   users,
 } from "@api/db/schema";
 import { hash } from "@midday/encryption";
-import { and, desc, eq, gt } from "drizzle-orm";
+import { and, desc, eq, gt, gte, lte } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 export type CreateAuthorizationCodeParams = {
@@ -90,6 +90,7 @@ export async function exchangeAuthorizationCode(
       used: oauthAuthorizationCodes.used,
       codeChallenge: oauthAuthorizationCodes.codeChallenge,
       codeChallengeMethod: oauthAuthorizationCodes.codeChallengeMethod,
+      createdAt: oauthAuthorizationCodes.createdAt,
     })
     .from(oauthAuthorizationCodes)
     .where(eq(oauthAuthorizationCodes.code, code))
@@ -104,8 +105,25 @@ export async function exchangeAuthorizationCode(
     throw new Error("Authorization code does not belong to this application");
   }
 
+  // SECURITY CRITICAL: Check for authorization code reuse
   if (authCode.used) {
-    throw new Error("Authorization code already used");
+    // RFC 6819: When an authorization code is used more than once,
+    // all tokens issued for that authorization code MUST be revoked
+    const revokedTokens = await revokeTokensByAuthorizationCode(db, {
+      applicationId: authCode.applicationId,
+      userId: authCode.userId,
+      teamId: authCode.teamId,
+      createdAt: authCode.createdAt,
+    });
+
+    console.warn(
+      `[SECURITY] Authorization code reuse detected for application ${authCode.applicationId}. ` +
+        `Revoked ${revokedTokens.length} potentially related tokens.`,
+    );
+
+    throw new Error(
+      "Authorization code already used - all related tokens have been revoked for security",
+    );
   }
 
   if (new Date() > new Date(authCode.expiresAt)) {
@@ -442,4 +460,50 @@ export async function revokeUserApplicationTokens(
         eq(oauthAccessTokens.revoked, false),
       ),
     );
+}
+
+// SECURITY: Revoke tokens potentially related to an authorization code
+// This is used when authorization code reuse is detected
+export async function revokeTokensByAuthorizationCode(
+  db: Database,
+  authCode: {
+    applicationId: string;
+    userId: string;
+    teamId: string;
+    createdAt?: string;
+  },
+) {
+  // Calculate time window for potential related tokens (within 10 minutes of auth code creation)
+  const authCodeTime = authCode.createdAt
+    ? new Date(authCode.createdAt)
+    : new Date();
+  const timeWindowStart = new Date(authCodeTime.getTime() - 10 * 60 * 1000); // 10 minutes before
+  const timeWindowEnd = new Date(authCodeTime.getTime() + 10 * 60 * 1000); // 10 minutes after
+
+  // Revoke tokens that match the authorization code context and were created around the same time
+  const revokedTokens = await db
+    .update(oauthAccessTokens)
+    .set({
+      revoked: true,
+      revokedAt: new Date().toISOString(),
+    })
+    .where(
+      and(
+        eq(oauthAccessTokens.applicationId, authCode.applicationId),
+        eq(oauthAccessTokens.userId, authCode.userId),
+        eq(oauthAccessTokens.teamId, authCode.teamId),
+        eq(oauthAccessTokens.revoked, false),
+        gte(oauthAccessTokens.createdAt, timeWindowStart.toISOString()),
+        // Only include end time filter if we have the auth code creation time
+        ...(authCode.createdAt
+          ? [lte(oauthAccessTokens.createdAt, timeWindowEnd.toISOString())]
+          : []),
+      ),
+    )
+    .returning({
+      id: oauthAccessTokens.id,
+      token: oauthAccessTokens.token,
+    });
+
+  return revokedTokens;
 }

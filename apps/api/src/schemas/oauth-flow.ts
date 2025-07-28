@@ -19,10 +19,20 @@ export const oauthAuthorizationRequestSchema = z.object({
     description: "Space-separated list of requested scopes",
     example: "transactions.read invoices.read",
   }),
-  state: z.string().min(1).openapi({
-    description: "State parameter for CSRF protection (required)",
-    example: "random_state_123",
-  }),
+  // SECURITY: Enhanced state parameter validation for CSRF protection
+  state: z
+    .string()
+    .min(32, "State parameter must be at least 32 characters for security")
+    .max(512, "State parameter must not exceed 512 characters")
+    .regex(
+      /^[A-Za-z0-9_.-]+$/,
+      "State parameter must contain only alphanumeric characters, underscores, dots, and hyphens",
+    )
+    .openapi({
+      description:
+        "State parameter for CSRF protection (min 32 chars, alphanumeric + _.-)",
+      example: "abc123xyz789_secure-random-state-value-with-sufficient-entropy",
+    }),
   code_challenge: z.string().optional().openapi({
     description: "Code challenge for PKCE",
     example: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
@@ -151,10 +161,21 @@ export const oauthErrorResponseSchema = z.object({
     description: "URI to a human-readable error page",
     example: "https://docs.midday.ai/errors/invalid_request",
   }),
-  state: z.string().optional().openapi({
-    description: "State parameter from the original request",
-    example: "random_state_123",
-  }),
+  // SECURITY: Enhanced state parameter validation (optional for error responses)
+  state: z
+    .string()
+    .min(32, "State parameter must be at least 32 characters for security")
+    .max(512, "State parameter must not exceed 512 characters")
+    .regex(
+      /^[A-Za-z0-9_.-]+$/,
+      "State parameter must contain only alphanumeric characters, underscores, dots, and hyphens",
+    )
+    .optional()
+    .openapi({
+      description:
+        "State parameter from the original request (min 32 chars, alphanumeric + _.-)",
+      example: "abc123xyz789_secure-random-state-value-with-sufficient-entropy",
+    }),
 });
 
 // OAuth Authorization Decision Schema (for consent flow)
@@ -175,10 +196,20 @@ export const oauthAuthorizationDecisionSchema = z.object({
     description: "Redirect URI for OAuth callback",
     example: "https://myapp.com/callback",
   }),
-  state: z.string().min(1).openapi({
-    description: "State parameter for CSRF protection (required)",
-    example: "random_state_123",
-  }),
+  // SECURITY: Enhanced state parameter validation for CSRF protection
+  state: z
+    .string()
+    .min(32, "State parameter must be at least 32 characters for security")
+    .max(512, "State parameter must not exceed 512 characters")
+    .regex(
+      /^[A-Za-z0-9_.-]+$/,
+      "State parameter must contain only alphanumeric characters, underscores, dots, and hyphens",
+    )
+    .openapi({
+      description:
+        "State parameter for CSRF protection (min 32 chars, alphanumeric + _.-)",
+      example: "abc123xyz789_secure-random-state-value-with-sufficient-entropy",
+    }),
   code_challenge: z.string().optional().openapi({
     description: "Code challenge for PKCE (S256 method assumed)",
     example: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
@@ -243,10 +274,20 @@ export const oauthApplicationInfoSchema = z.object({
     description: "Redirect URI",
     example: "https://myapp.com/callback",
   }),
-  state: z.string().optional().openapi({
-    description: "State parameter",
-    example: "random_state_123",
-  }),
+  // SECURITY: Enhanced state parameter validation (optional for consent screen)
+  state: z
+    .string()
+    .min(32, "State parameter must be at least 32 characters for security")
+    .max(512, "State parameter must not exceed 512 characters")
+    .regex(
+      /^[A-Za-z0-9_.-]+$/,
+      "State parameter must contain only alphanumeric characters, underscores, dots, and hyphens",
+    )
+    .optional()
+    .openapi({
+      description: "State parameter (min 32 chars, alphanumeric + _.-)",
+      example: "abc123xyz789_secure-random-state-value-with-sufficient-entropy",
+    }),
   status: z.enum(["draft", "pending", "approved", "rejected"]).openapi({
     description: "Application verification status",
     example: "approved",
