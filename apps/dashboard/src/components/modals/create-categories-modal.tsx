@@ -20,6 +20,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { Switch } from "@midday/ui/switch";
 import { getTaxTypeForCountry, taxTypes } from "@midday/utils/tax";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -39,6 +40,8 @@ interface CategoryFormValues {
   color?: string;
   taxRate?: number;
   taxType?: string;
+  taxReportingCode?: string;
+  excluded?: boolean;
 }
 
 interface CreateCategoriesFormValues {
@@ -53,6 +56,8 @@ const formSchema = z.object({
       color: z.string().optional(),
       taxRate: z.number().optional(),
       taxType: z.string().optional(),
+      taxReportingCode: z.string().optional(),
+      excluded: z.boolean().optional(),
     }),
   ),
 });
@@ -80,6 +85,8 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
     color: undefined,
     taxType: getTaxTypeForCountry(user?.team?.countryCode ?? "").value,
     taxRate: undefined,
+    taxReportingCode: "",
+    excluded: false,
   };
 
   const form = useZodForm(formSchema, {
@@ -115,7 +122,7 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex flex-col space-y-6 max-h-[400px] overflow-auto">
+            <div className="flex flex-col space-y-6 max-h-[420px] overflow-auto">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex flex-col space-y-2">
                   <FormField
@@ -157,6 +164,25 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                             {...field}
                             autoFocus={false}
                             placeholder="Description"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name={`categories.${index}.taxReportingCode`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1 space-y-1">
+                        <FormLabel className="text-xs text-[#878787] font-normal">
+                          Report Code
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            autoFocus={false}
+                            placeholder="Report Code"
                           />
                         </FormControl>
                       </FormItem>
@@ -215,15 +241,45 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                     />
                   </div>
 
-                  <span className="text-xs text-muted-foreground">
-                    {
-                      taxTypes.find(
-                        (taxType) =>
-                          taxType.value ===
-                          form.watch(`categories.${index}.taxType`),
-                      )?.description
-                    }
-                  </span>
+                  <div className="flex relative gap-2">
+                    <span className="text-xs text-muted-foreground flex-1">
+                      {
+                        taxTypes.find(
+                          (taxType) =>
+                            taxType.value ===
+                            form.watch(`categories.${index}.taxType`),
+                        )?.description
+                      }
+                    </span>
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name={`categories.${index}.excluded`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1 space-y-1">
+                        <div className="border border-border p-3 mt-2">
+                          <div className="flex items-center justify-between space-x-2">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-xs text-[#878787] font-normal">
+                                Exclude from Reports
+                              </FormLabel>
+                              <div className="text-xs text-muted-foreground">
+                                Transactions in this category won't appear in
+                                financial reports
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value ?? false}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </div>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
                 </div>
               ))}
             </div>

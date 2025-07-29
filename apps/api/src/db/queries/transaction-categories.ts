@@ -24,7 +24,9 @@ export const getCategories = async (
       system: transactionCategories.system,
       taxRate: transactionCategories.taxRate,
       taxType: transactionCategories.taxType,
+      taxReportingCode: transactionCategories.taxReportingCode,
       parentId: transactionCategories.parentId,
+      excluded: transactionCategories.excluded,
     })
     .from(transactionCategories)
     .where(
@@ -50,7 +52,9 @@ export const getCategories = async (
       system: transactionCategories.system,
       taxRate: transactionCategories.taxRate,
       taxType: transactionCategories.taxType,
+      taxReportingCode: transactionCategories.taxReportingCode,
       parentId: transactionCategories.parentId,
+      excluded: transactionCategories.excluded,
     })
     .from(transactionCategories)
     .where(
@@ -86,15 +90,26 @@ export type CreateTransactionCategoryParams = {
   description?: string | null;
   taxRate?: number | null;
   taxType?: string | null;
+  taxReportingCode?: string | null;
   parentId?: string | null;
+  excluded?: boolean;
 };
 
 export const createTransactionCategory = async (
   db: Database,
   params: CreateTransactionCategoryParams,
 ) => {
-  const { teamId, name, color, description, taxRate, taxType, parentId } =
-    params;
+  const {
+    teamId,
+    name,
+    color,
+    description,
+    taxRate,
+    taxType,
+    taxReportingCode,
+    parentId,
+    excluded,
+  } = params;
 
   const [result] = await db
     .insert(transactionCategories)
@@ -105,7 +120,9 @@ export const createTransactionCategory = async (
       description,
       taxRate,
       taxType,
+      taxReportingCode,
       parentId,
+      excluded,
     })
     .returning();
 
@@ -120,7 +137,9 @@ export type CreateTransactionCategoriesParams = {
     description?: string | null;
     taxRate?: number | null;
     taxType?: string | null;
+    taxReportingCode?: string | null;
     parentId?: string | null;
+    excluded?: boolean;
   }[];
 };
 
@@ -153,7 +172,9 @@ export type UpdateTransactionCategoryParams = {
   description?: string | null;
   taxRate?: number | null;
   taxType?: string | null;
+  taxReportingCode?: string | null;
   parentId?: string | null;
+  excluded?: boolean;
 };
 
 export const updateTransactionCategory = async (
@@ -518,6 +539,7 @@ export async function createSystemCategories(
           color: parentCategory.color,
           system: true,
           parentId: null, // Parent categories have no parent
+          excluded: false, // System categories are included by default
         })
         .returning({
           id: transactionCategories.id,
@@ -542,6 +564,7 @@ export async function createSystemCategories(
             color: child.color || parentCategory.color, // Use child's color if specified, otherwise inherit parent color
             system: true,
             parentId, // Link to parent
+            excluded: false, // System categories are included by default
           });
         }
       }
