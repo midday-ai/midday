@@ -75,8 +75,9 @@ app.doc("/openapi", {
   ],
   security: [
     {
-      token: [],
+      oauth2: [],
     },
+    { token: [] },
   ],
 });
 
