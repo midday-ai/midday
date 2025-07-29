@@ -14,7 +14,7 @@ const app = new OpenAPIHono<Context>();
 app.use(secureHeaders());
 
 app.use(
-  "/trpc/*",
+  "*",
   cors({
     origin: process.env.ALLOWED_API_ORIGINS?.split(",") ?? [],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],

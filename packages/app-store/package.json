@@ -23,6 +23,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
+    "./types": "./src/types.ts",
     "./slack": "./src/slack/index.ts",
     "./slack-notifications": "./src/slack/lib/notifications/transactions.ts",
     "./slack-client": "./src/slack/lib/client.ts",

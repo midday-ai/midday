@@ -6,6 +6,7 @@ import { documentsRouter } from "./documents";
 import { inboxRouter } from "./inbox";
 import { invoicesRouter } from "./invoices";
 import { metricsRouter } from "./metrics";
+import oauthRouter from "./oauth";
 import { searchRouter } from "./search";
 import { tagsRouter } from "./tags";
 import { teamsRouter } from "./teams";
@@ -16,8 +17,13 @@ import { usersRouter } from "./users";
 
 const routers = new OpenAPIHono();
 
+// Mount OAuth routes first (publicly accessible)
+routers.route("/oauth", oauthRouter);
+
+// Apply protected middleware to all subsequent routes
 routers.use(...protectedMiddleware);
 
+// Mount protected routes
 routers.route("/transactions", transactionsRouter);
 routers.route("/teams", teamsRouter);
 routers.route("/users", usersRouter);

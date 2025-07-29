@@ -2118,6 +2118,187 @@ export const apiKeys = pgTable(
 );
 
 // Relations
+// OAuth Applications
+export const oauthApplications = pgTable(
+  "oauth_applications",
+  {
+    id: uuid("id").notNull().defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    slug: text("slug").notNull().unique(),
+    description: text("description"),
+    overview: text("overview"),
+    developerName: text("developer_name"),
+    logoUrl: text("logo_url"),
+    website: text("website"),
+    installUrl: text("install_url"),
+    screenshots: text("screenshots").array().default(sql`'{}'::text[]`),
+    redirectUris: text("redirect_uris").array().notNull(),
+    clientId: text("client_id").notNull().unique(),
+    clientSecret: text("client_secret").notNull(),
+    scopes: text("scopes").array().notNull().default(sql`'{}'::text[]`),
+    teamId: uuid("team_id").notNull(),
+    createdBy: uuid("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+    isPublic: boolean("is_public").default(false),
+    active: boolean("active").default(true),
+    status: text("status", {
+      enum: ["draft", "pending", "approved", "rejected"],
+    }).default("draft"),
+  },
+  (table) => [
+    index("oauth_applications_team_id_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("oauth_applications_client_id_idx").using(
+      "btree",
+      table.clientId.asc().nullsLast().op("text_ops"),
+    ),
+    index("oauth_applications_slug_idx").using(
+      "btree",
+      table.slug.asc().nullsLast().op("text_ops"),
+    ),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "oauth_applications_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.createdBy],
+      foreignColumns: [users.id],
+      name: "oauth_applications_created_by_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("OAuth applications can be managed by team members", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+// OAuth Authorization Codes
+export const oauthAuthorizationCodes = pgTable(
+  "oauth_authorization_codes",
+  {
+    id: uuid("id").notNull().defaultRandom().primaryKey(),
+    code: text("code").notNull().unique(),
+    applicationId: uuid("application_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    scopes: text("scopes").array().notNull(),
+    redirectUri: text("redirect_uri").notNull(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+    used: boolean("used").default(false),
+    codeChallenge: text("code_challenge"),
+    codeChallengeMethod: text("code_challenge_method"),
+  },
+  (table) => [
+    index("oauth_authorization_codes_code_idx").using(
+      "btree",
+      table.code.asc().nullsLast().op("text_ops"),
+    ),
+    index("oauth_authorization_codes_application_id_idx").using(
+      "btree",
+      table.applicationId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("oauth_authorization_codes_user_id_idx").using(
+      "btree",
+      table.userId.asc().nullsLast().op("uuid_ops"),
+    ),
+    foreignKey({
+      columns: [table.applicationId],
+      foreignColumns: [oauthApplications.id],
+      name: "oauth_authorization_codes_application_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "oauth_authorization_codes_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "oauth_authorization_codes_team_id_fkey",
+    }).onDelete("cascade"),
+  ],
+);
+
+// OAuth Access Tokens
+export const oauthAccessTokens = pgTable(
+  "oauth_access_tokens",
+  {
+    id: uuid("id").notNull().defaultRandom().primaryKey(),
+    token: text("token").notNull().unique(),
+    refreshToken: text("refresh_token").unique(),
+    applicationId: uuid("application_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    scopes: text("scopes").array().notNull(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+    lastUsedAt: timestamp("last_used_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    revoked: boolean("revoked").default(false),
+    revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "string" }),
+  },
+  (table) => [
+    index("oauth_access_tokens_token_idx").using(
+      "btree",
+      table.token.asc().nullsLast().op("text_ops"),
+    ),
+    index("oauth_access_tokens_refresh_token_idx").using(
+      "btree",
+      table.refreshToken.asc().nullsLast().op("text_ops"),
+    ),
+    index("oauth_access_tokens_application_id_idx").using(
+      "btree",
+      table.applicationId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("oauth_access_tokens_user_id_idx").using(
+      "btree",
+      table.userId.asc().nullsLast().op("uuid_ops"),
+    ),
+    foreignKey({
+      columns: [table.applicationId],
+      foreignColumns: [oauthApplications.id],
+      name: "oauth_access_tokens_application_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "oauth_access_tokens_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "oauth_access_tokens_team_id_fkey",
+    }).onDelete("cascade"),
+  ],
+);
+
 export const transactionsRelations = relations(
   transactions,
   ({ one, many }) => ({
@@ -2155,6 +2336,9 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   apps: many(apps),
   apiKeys: many(apiKeys),
   shortLinks: many(shortLinks),
+  oauthApplications: many(oauthApplications),
+  oauthAuthorizationCodes: many(oauthAuthorizationCodes),
+  oauthAccessTokens: many(oauthAccessTokens),
   usersInAuth: one(usersInAuth, {
     fields: [users.id],
     references: [usersInAuth.id],
@@ -2551,3 +2735,56 @@ export const usersOnTeamRelations = relations(usersOnTeam, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+// OAuth Relations
+export const oauthApplicationsRelations = relations(
+  oauthApplications,
+  ({ one, many }) => ({
+    team: one(teams, {
+      fields: [oauthApplications.teamId],
+      references: [teams.id],
+    }),
+    createdBy: one(users, {
+      fields: [oauthApplications.createdBy],
+      references: [users.id],
+    }),
+    authorizationCodes: many(oauthAuthorizationCodes),
+    accessTokens: many(oauthAccessTokens),
+  }),
+);
+
+export const oauthAuthorizationCodesRelations = relations(
+  oauthAuthorizationCodes,
+  ({ one }) => ({
+    application: one(oauthApplications, {
+      fields: [oauthAuthorizationCodes.applicationId],
+      references: [oauthApplications.id],
+    }),
+    user: one(users, {
+      fields: [oauthAuthorizationCodes.userId],
+      references: [users.id],
+    }),
+    team: one(teams, {
+      fields: [oauthAuthorizationCodes.teamId],
+      references: [teams.id],
+    }),
+  }),
+);
+
+export const oauthAccessTokensRelations = relations(
+  oauthAccessTokens,
+  ({ one }) => ({
+    application: one(oauthApplications, {
+      fields: [oauthAccessTokens.applicationId],
+      references: [oauthApplications.id],
+    }),
+    user: one(users, {
+      fields: [oauthAccessTokens.userId],
+      references: [users.id],
+    }),
+    team: one(teams, {
+      fields: [oauthAccessTokens.teamId],
+      references: [teams.id],
+    }),
+  }),
+);
