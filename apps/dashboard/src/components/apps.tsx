@@ -35,21 +35,30 @@ export function Apps() {
   const transformedOfficialApps: UnifiedApp[] = appStoreApps.map((app) => ({
     id: app.id,
     name: app.name,
-    category: app.category,
+    category: "category" in app ? app.category : "Integration",
     active: app.active,
     logo: app.logo,
     short_description: app.short_description,
-    description: app.description,
+    description: app.description || undefined,
     images: app.images || [],
     installed:
       installedOfficialApps?.some((installed) => installed.app_id === app.id) ??
       false,
     type: "official" as const,
-    onInitialize: app.onInitialize,
-    settings: app.settings,
-    userSettings: installedOfficialApps?.find(
-      (installed) => installed.app_id === app.id,
-    )?.settings,
+    onInitialize:
+      "onInitialize" in app && typeof app.onInitialize === "function"
+        ? async () => {
+            const result = app.onInitialize();
+            return result instanceof Promise ? result : Promise.resolve(result);
+          }
+        : undefined,
+    settings:
+      "settings" in app && Array.isArray(app.settings)
+        ? app.settings
+        : undefined,
+    userSettings:
+      (installedOfficialApps?.find((installed) => installed.app_id === app.id)
+        ?.settings as Record<string, any>) || undefined,
   }));
 
   // Transform external apps (only approved ones)
@@ -60,28 +69,29 @@ export function Apps() {
       id: app.id,
       name: app.name,
       category: "Integration",
-      active: app.active,
-      logo: app.logoUrl,
-      short_description: app.description,
-      description: app.overview || app.description,
+      active: app.active ?? false, // Convert null to boolean
+      logo: app.logoUrl || undefined, // Convert null to undefined
+      short_description: app.description || undefined, // Convert null to undefined
+      description: app.overview || app.description || undefined, // Convert null to undefined
       images: app.screenshots || [],
       installed:
         authorizedExternalApps?.data?.some(
           (authorized) => authorized.id === app.id,
         ) ?? false,
       type: "external" as const,
-      clientId: app.clientId,
-      scopes: app.scopes,
-      developerName: app.developerName,
-      website: app.website,
-      installUrl: app.installUrl,
-      screenshots: app.screenshots,
-      overview: app.overview,
-      createdAt: app.createdAt,
-      status: app.status,
-      lastUsedAt: authorizedExternalApps?.data?.find(
-        (authorized) => authorized.id === app.id,
-      )?.lastUsedAt,
+      clientId: app.clientId || undefined, // Convert null to undefined
+      scopes: app.scopes || undefined, // Convert null to undefined
+      developerName: app.developerName || undefined, // Convert null to undefined
+      website: app.website || undefined, // Convert null to undefined
+      installUrl: app.installUrl || undefined, // Convert null to undefined
+      screenshots: app.screenshots || undefined, // Convert null to undefined
+      overview: app.overview || undefined, // Convert null to undefined
+      createdAt: app.createdAt || undefined, // Convert null to undefined
+      status: app.status || undefined, // Convert null to undefined
+      lastUsedAt:
+        authorizedExternalApps?.data?.find(
+          (authorized) => authorized.id === app.id,
+        )?.lastUsedAt || undefined, // Convert null to undefined
     }),
   );
 
@@ -98,7 +108,11 @@ export function Apps() {
   return (
     <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 mx-auto mt-8">
       {filteredApps.map((app) => (
-        <UnifiedAppComponent key={app.id} app={app} userEmail={user?.email} />
+        <UnifiedAppComponent
+          key={app.id}
+          app={app}
+          userEmail={user?.email || undefined}
+        />
       ))}
 
       {!search && !filteredApps.length && (

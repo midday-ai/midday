@@ -224,7 +224,7 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
               <div className="mb-4">
                 {app.images.length === 1 ? (
                   <Image
-                    src={app.images[0]}
+                    src={app.images[0] as string}
                     alt={app.name}
                     width={465}
                     height={290}
@@ -333,6 +333,10 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
 
                               return {
                                 ...setting,
+                                type: setting.type as
+                                  | "switch"
+                                  | "text"
+                                  | "select",
                                 value: userSetting?.value ?? setting.value,
                               };
                             })}
