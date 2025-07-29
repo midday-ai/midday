@@ -4,7 +4,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import * as React from "react";
 import "@tanstack/react-table";
 import { useOAuthApplicationParams } from "@/hooks/use-oauth-application-params";
-import { useTRPC } from "@/trpc/client";
 import { scopesToName } from "@api/utils/scopes";
 import { Badge } from "@midday/ui/badge";
 import {

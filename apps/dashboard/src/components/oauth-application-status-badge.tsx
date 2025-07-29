@@ -1,15 +1,19 @@
 import { cn } from "@midday/ui/cn";
 
-interface OAuthApplicationStatusBadgeProps {
-  status: string;
-  className?: string;
-}
+type OAuthApplicationStatus =
+  | "approved"
+  | "rejected"
+  | "pending"
+  | "draft"
+  | null;
 
-export function OAuthApplicationStatusBadge({
-  status,
-  className,
-}: OAuthApplicationStatusBadgeProps) {
-  const getStatusColor = (status: string) => {
+type Props = {
+  status: OAuthApplicationStatus;
+  className?: string;
+};
+
+export function OAuthApplicationStatusBadge({ status, className }: Props) {
+  const getStatusColor = (status: OAuthApplicationStatus) => {
     switch (status) {
       case "approved":
         return "dark:bg-green-900 dark:text-green-300 text-green-600 bg-green-100";
