@@ -677,6 +677,15 @@ export const searchTransactionMatchSchema = z.object({
         in: "query",
       },
     }),
+  includeAlreadyMatched: z
+    .boolean()
+    .optional()
+    .openapi({
+      description: "Whether to include already matched transactions.",
+      param: {
+        in: "query",
+      },
+    }),
 });
 
 export const createTransactionSchema = z.object({

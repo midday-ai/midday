@@ -376,10 +376,23 @@ export async function unmatchTransaction(
     })
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)));
 
-  // Delete transaction attachment if exists
-  if (result?.transactionId) {
+  // Delete only the specific transaction attachment for this inbox item
+  if (result?.attachmentId) {
     await db
       .delete(transactionAttachments)
+      .where(
+        and(
+          eq(transactionAttachments.id, result.attachmentId),
+          eq(transactionAttachments.teamId, teamId),
+        ),
+      );
+  }
+
+  // Check if this transaction still has other attachments before resetting tax info
+  if (result?.transactionId) {
+    const remainingAttachments = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(transactionAttachments)
       .where(
         and(
           eq(transactionAttachments.transactionId, result.transactionId),
@@ -387,14 +400,16 @@ export async function unmatchTransaction(
         ),
       );
 
-    // Reset tax rate and type
-    await db
-      .update(transactions)
-      .set({
-        taxRate: null,
-        taxType: null,
-      })
-      .where(eq(transactions.id, result.transactionId));
+    // Only reset tax rate and type if no more attachments exist for this transaction
+    if (remainingAttachments[0]?.count === 0) {
+      await db
+        .update(transactions)
+        .set({
+          taxRate: null,
+          taxType: null,
+        })
+        .where(eq(transactions.id, result.transactionId));
+    }
   }
 
   // Return updated inbox with transaction data

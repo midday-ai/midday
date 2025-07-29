@@ -1,9 +1,19 @@
 "use client";
 
 import { useInboxParams } from "@/hooks/use-inbox-params";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { Combobox } from "@midday/ui/combobox";
+import { Icons } from "@midday/ui/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
@@ -18,6 +28,10 @@ export function MatchTransaction() {
 
   const [debouncedValue, setValue] = useDebounceValue("", 200);
   const [isOpen, onOpenChange] = useState(false);
+  const [includeAlreadyMatched, setIncludeAlreadyMatched] = useLocalStorage(
+    "inbox-include-already-matched",
+    true,
+  );
 
   const id = params.inboxId;
 
@@ -34,7 +48,8 @@ export function MatchTransaction() {
     trpc.transactions.searchTransactionMatch.queryOptions({
       query: debouncedValue,
       inboxId: id ?? undefined,
-      maxResults: debouncedValue.length > 0 ? 5 : 3,
+      maxResults: debouncedValue.length > 0 ? 200 : 3,
+      includeAlreadyMatched,
     }),
   );
 
@@ -50,6 +65,8 @@ export function MatchTransaction() {
         dateFormat={user?.dateFormat}
         amount={transaction.transaction_amount}
         currency={transaction.transaction_currency}
+        isAlreadyMatched={transaction.is_already_matched}
+        matchedAttachmentFilename={transaction.matched_attachment_filename}
         showBestMatch={
           index === 0 && transactionMatch?.length > 1 && !debouncedValue.length
         }
@@ -73,6 +90,10 @@ export function MatchTransaction() {
     if (options && options.length > 0) {
       onOpenChange(true);
     }
+  };
+
+  const toggleIncludeAlreadyMatched = () => {
+    setIncludeAlreadyMatched(!includeAlreadyMatched);
   };
 
   const matchTransactionMutation = useMutation(
@@ -121,6 +142,10 @@ export function MatchTransaction() {
         queryClient.invalidateQueries({
           queryKey: trpc.inbox.get.infiniteQueryKey(),
         });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.searchTransactionMatch.queryKey(),
+        });
       },
     }),
   );
@@ -145,12 +170,12 @@ export function MatchTransaction() {
   }
 
   return (
-    <div className="bg-background h-12">
+    <div className="bg-background h-12 relative">
       <Combobox
         key={data?.transaction?.id}
         placeholder="Select a transaction"
         className="w-full bg-transparent px-12 h-12 border border-border dark:border-none"
-        classNameList="bottom-[50px] border border-border dark:border-none"
+        classNameList="bottom-[50px] border border-border dark:border-none max-h-[270px]"
         onValueChange={handleChange}
         value={selectedValue}
         options={options ?? []}
@@ -160,6 +185,31 @@ export function MatchTransaction() {
         onFocus={handleFocus}
         onSelect={handleSelect}
       />
+
+      <TooltipProvider delayDuration={100}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleIncludeAlreadyMatched}
+              className={cn(
+                "absolute right-3 top-1/2 transform -translate-y-1/2 z-10 h-6 w-6",
+                includeAlreadyMatched
+                  ? "text-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-muted-foreground",
+              )}
+            >
+              <Icons.Filter className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="text-xs px-3 py-1.5">
+            {includeAlreadyMatched
+              ? "Hide already matched transactions"
+              : "Show already matched transactions"}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }
