@@ -28,6 +28,7 @@ const columns = [
   { label: "From / To", key: "counterpartyName" },
   { label: "Category", key: "category" },
   { label: "Category description", key: "categoryDescription" },
+  { label: "Tax Reporting Code", key: "taxReportingCode" },
   { label: "Status", key: "status" },
   { label: "Attachments", key: "attachments" },
   { label: "Balance", key: "balance" },

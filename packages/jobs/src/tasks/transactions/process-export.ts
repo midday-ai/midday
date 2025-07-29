@@ -41,7 +41,7 @@ export const processExport = schemaTask({
         tax_type,
         tax_rate,
         attachments:transaction_attachments(*),
-        category:transaction_categories(id, name, description, tax_rate, tax_type),
+        category:transaction_categories(id, name, description, tax_rate, tax_type, tax_reporting_code),
         bank_account:bank_accounts(id, name),
         tags:transaction_tags(id, tag:tags(id, name)),
         status
@@ -120,6 +120,7 @@ export const processExport = schemaTask({
           transaction?.counterparty_name ?? "",
           transaction?.category?.name ?? "",
           transaction?.category?.description ?? "",
+          transaction?.category?.tax_reporting_code ?? "",
           transaction?.attachments?.length > 0 ||
           transaction?.status === "completed"
             ? "Completed"

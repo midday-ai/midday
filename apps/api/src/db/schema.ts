@@ -1866,6 +1866,7 @@ export const transactionCategories = pgTable(
     taxRate: numericCasted("tax_rate", { precision: 10, scale: 2 }),
     taxType: text("tax_type"),
     description: text(),
+    taxReportingCode: text("tax_reporting_code"),
     embedding: vector({ dimensions: 384 }),
     parentId: uuid("parent_id"),
   },
