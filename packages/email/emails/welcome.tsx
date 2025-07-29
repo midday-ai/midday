@@ -67,9 +67,9 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: Props) => {
             <br />
             <br />
             We built Midday from over 10 years of running our own businesses,
-            knowing firsthand the challenges that come with it. Midday is
-            self-funded and built together with our customers, and it's
-            important to us that you know we're here when you need us.
+            knowing firsthand the challenges that come with it. Midday is built
+            together with our customers, and it's important to us that you know
+            we're here when you need us.
             <br />
             <br />
             Take your time to explore Midday at your own pace. If you ever want

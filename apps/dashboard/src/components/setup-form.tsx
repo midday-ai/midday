@@ -1,8 +1,8 @@
 "use client";
 
+import { useUserMutation } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
-import { Button } from "@midday/ui/button";
 import {
   Form,
   FormControl,
@@ -14,9 +14,9 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { z } from "zod";
 import { AvatarUpload } from "./avatar-upload";
 
@@ -27,9 +27,13 @@ const formSchema = z.object({
 export function SetupForm() {
   const router = useRouter();
   const uploadRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const trpc = useTRPC();
   const { data: user } = useSuspenseQuery(trpc.user.me.queryOptions());
+
+  const updateUserMutation = useUserMutation();
 
   const form = useZodForm(formSchema, {
     defaultValues: {
@@ -37,16 +41,19 @@ export function SetupForm() {
     },
   });
 
-  const updateUserMutation = useMutation(
-    trpc.user.update.mutationOptions({
-      onSuccess: () => {
-        router.push("/");
-      },
-    }),
-  );
-
   function handleSubmit(data: z.infer<typeof formSchema>) {
-    updateUserMutation.mutate(data);
+    updateUserMutation.mutate(data, {
+      onSuccess: async () => {
+        setIsRedirecting(true);
+        // Invalidate all queries to ensure fresh data
+        await queryClient.invalidateQueries();
+        // Redirect directly to teams page
+        router.push("/teams");
+      },
+      onError: () => {
+        setIsRedirecting(false);
+      },
+    });
   }
 
   return (
@@ -81,7 +88,7 @@ export function SetupForm() {
         <SubmitButton
           type="submit"
           className="w-full"
-          isSubmitting={updateUserMutation.isPending}
+          isSubmitting={updateUserMutation.isPending || isRedirecting}
         >
           Save
         </SubmitButton>
