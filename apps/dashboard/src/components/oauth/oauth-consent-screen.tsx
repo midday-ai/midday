@@ -106,7 +106,7 @@ export function OAuthConsentScreen() {
   };
 
   const handleDecline = async () => {
-    if (!clientId || !redirectUri) return;
+    if (!clientId || !redirectUri || !selectedTeamId) return;
 
     authorizeMutation.mutate({
       clientId,
@@ -115,7 +115,7 @@ export function OAuthConsentScreen() {
       redirectUri,
       state: state || undefined,
       codeChallenge: codeChallenge || undefined,
-      teamId: selectedTeamId || "",
+      teamId: selectedTeamId,
     });
   };
 
