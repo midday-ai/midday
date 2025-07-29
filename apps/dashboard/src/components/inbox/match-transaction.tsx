@@ -96,8 +96,6 @@ export function MatchTransaction() {
     setIncludeAlreadyMatched(!includeAlreadyMatched);
   };
 
-  console.log(includeAlreadyMatched);
-
   const matchTransactionMutation = useMutation(
     trpc.inbox.matchTransaction.mutationOptions({
       onMutate: async (variables) => {
