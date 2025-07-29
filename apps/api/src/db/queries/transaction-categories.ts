@@ -174,7 +174,7 @@ export type UpdateTransactionCategoryParams = {
   taxType?: string | null;
   taxReportingCode?: string | null;
   parentId?: string | null;
-  excluded?: boolean;
+  excluded?: boolean | null;
 };
 
 export const updateTransactionCategory = async (
