@@ -110,6 +110,7 @@ export const transactionsRouter = createTRPCRouter({
         inboxId: input.inboxId,
         maxResults: input.maxResults,
         minConfidenceScore: input.minConfidenceScore,
+        includeAlreadyMatched: input.includeAlreadyMatched,
       });
     }),
 
