@@ -5,6 +5,7 @@ import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { Combobox } from "@midday/ui/combobox";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -94,6 +95,8 @@ export function MatchTransaction() {
   const toggleIncludeAlreadyMatched = () => {
     setIncludeAlreadyMatched(!includeAlreadyMatched);
   };
+
+  console.log(includeAlreadyMatched);
 
   const matchTransactionMutation = useMutation(
     trpc.inbox.matchTransaction.mutationOptions({
@@ -192,11 +195,12 @@ export function MatchTransaction() {
               variant="ghost"
               size="icon"
               onClick={toggleIncludeAlreadyMatched}
-              className={`absolute right-3 top-1/2 transform -translate-y-1/2 z-10 h-6 w-6 ${
+              className={cn(
+                "absolute right-3 top-1/2 transform -translate-y-1/2 z-10 h-6 w-6",
                 includeAlreadyMatched
-                  ? "text-foreground"
-                  : "text-muted-foreground"
-              }`}
+                  ? "text-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-muted-foreground",
+              )}
             >
               <Icons.Filter className="h-4 w-4" />
             </Button>
