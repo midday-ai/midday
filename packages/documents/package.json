@@ -28,7 +28,7 @@
     "mammoth": "^1.9.1",
     "officeparser": "^5.2.0",
     "unpdf": "^1.1.0",
-    "zod": "4.0.14"
+    "zod": "3.25.64"
   },
   "devDependencies": {
     "@types/bun": "^1.2.19"
