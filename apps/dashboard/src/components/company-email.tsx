@@ -30,8 +30,6 @@ export function CompanyEmail() {
   const { data } = useTeamQuery();
   const updateTeamMutation = useTeamMutation();
 
-  console.log(data);
-
   const form = useZodForm(formSchema, {
     defaultValues: {
       email: data?.email ?? "",
