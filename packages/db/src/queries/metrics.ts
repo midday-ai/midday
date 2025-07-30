@@ -1,4 +1,4 @@
-import type { Database } from "@midday/db/client";
+import type { Database } from "@db/client";
 import { endOfMonth, parseISO, startOfMonth, subYears } from "date-fns";
 import { sql } from "drizzle-orm";
 

@@ -5,7 +5,7 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "typecheck": "tsc --build",
+    "typecheck": "NODE_OPTIONS='--max-old-space-size=8192' tsc --noEmit",
     "test": "bun test",
     "test:watch": "bun test --watch"
   },
@@ -13,11 +13,11 @@
     "./trpc/routers/_app": "./src/trpc/routers/_app.ts"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^1.3.23",
-    "@date-fns/utc": "^2.1.1",
-    "@hono/trpc-server": "^0.4.0",
-    "@hono/zod-openapi": "^1.0.2",
-    "@hono/zod-validator": "^0.7.2",
+    "@ai-sdk/openai": "^1.3.22",
+    "@date-fns/utc": "^2.1.0",
+    "@hono/trpc-server": "^0.3.4",
+    "@hono/zod-openapi": "^0.19.8",
+    "@hono/zod-validator": "^0.7.0",
     "@midday/documents": "workspace:*",
     "@midday/cache": "workspace:*",
     "@midday/db": "workspace:*",
@@ -29,28 +29,29 @@
     "@midday/jobs": "workspace:*",
     "@midday/location": "workspace:*",
     "@midday/supabase": "workspace:*",
-    "@scalar/hono-api-reference": "^0.9.13",
+    "@scalar/hono-api-reference": "^0.9.4",
     "@sindresorhus/slugify": "^2.2.1",
     "@trigger.dev/sdk": "3.3.17",
-    "@trpc/server": "^11.4.3",
-    "ai": "^4.3.19",
+    "@trpc/server": "^11.4.1",
+    "ai": "^4.3.16",
     "camelcase-keys": "^9.1.3",
     "date-fns": "^4.1.0",
-    "hono": "^4.8.10",
+    "hono": "^4.7.11",
     "hono-rate-limiter": "^0.4.2",
-    "jose": "^6.0.12",
+    "jose": "^6.0.11",
     "lru-cache": "^11.1.0",
     "nanoid": "^5.1.5",
     "pino": "^9.7.0",
     "postgres": "^3.4.7",
-    "resend": "^4.7.0",
-    "snakecase-keys": "^9.0.2",
+    "resend": "^4.6.0",
+    "snakecase-keys": "^8.0.1",
     "superjson": "^2.2.2",
     "uuid": "^11.1.0",
-    "zod": "3.25.64",
-    "zod-openapi": "^5.3.0"
+    "zod": "^3.25.64",
+    "zod-openapi": "^4.2.4",
+    "drizzle-orm": "^0.44.2"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.19"
+    "@types/bun": "^1.2.16"
   }
 }

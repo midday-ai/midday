@@ -2,8 +2,7 @@ import { logger } from "@api/utils/logger";
 import { replicationCache } from "@midday/cache/replication-cache";
 import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
 import type { DatabaseWithPrimary } from "@midday/db/client";
-import { users } from "@midday/db/schema";
-import { eq } from "drizzle-orm";
+import { getUserTeamId } from "@midday/db/queries";
 import type { MiddlewareHandler } from "hono";
 
 /**
@@ -32,14 +31,11 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
     if (!teamId && session.user.id) {
       try {
         // Get user's current team
-        const result = await db.query.users.findFirst({
-          columns: { teamId: true },
-          where: eq(users.id, session.user.id),
-        });
+        const userTeamId = await getUserTeamId(db, session.user.id);
 
-        if (result?.teamId) {
-          teamId = result.teamId;
-          teamPermissionsCache.set(cacheKey, result.teamId);
+        if (userTeamId) {
+          teamId = userTeamId;
+          teamPermissionsCache.set(cacheKey, userTeamId);
         }
       } catch (error) {
         logger.warn({

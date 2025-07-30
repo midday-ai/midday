@@ -71,6 +71,15 @@ export const updateUser = async (db: Database, data: UpdateUserParams) => {
   return result;
 };
 
+export const getUserTeamId = async (db: Database, userId: string) => {
+  const result = await db.query.users.findFirst({
+    columns: { teamId: true },
+    where: eq(users.id, userId),
+  });
+
+  return result?.teamId || null;
+};
+
 export const deleteUser = async (db: Database, id: string) => {
   // Find teams where this user is a member
   const teamsWithUser = await db

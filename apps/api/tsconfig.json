@@ -22,11 +22,11 @@
     "paths": {
       "@api/*": ["src/*"],
       "@engine/*": ["../engine/src/*"],
-      "@jobs/*": ["../../packages/jobs/src/*"]
+      "@jobs/*": ["../../packages/jobs/src/*"],
+      "@db/*": ["../../packages/db/src/*"]
     },
     "types": ["bun-types"]
   },
-  "references": [{ "path": "../../packages/db" }],
   "exclude": ["node_modules"],
   "include": ["src/**/*.ts"]
 }
