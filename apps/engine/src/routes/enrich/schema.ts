@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { z as zod } from "zod";
 
 export const EnrichBodySchema = z.object({
   data: z
@@ -73,5 +74,27 @@ export const OutputSchema = z
       .default(false),
   })
   .openapi("OutputSchema");
+
+// AI SDK compatible schema (using regular zod)
+export const OutputSchemaForAI = zod.object({
+  category: zod
+    .enum([
+      "travel",
+      "office_supplies",
+      "meals",
+      "software",
+      "rent",
+      "equipment",
+      "internet_and_telephone",
+      "facilities_expenses",
+      "activity",
+      "taxes",
+      "fees",
+    ])
+    .nullable(),
+  company: zod.string().nullable(),
+  website: zod.string().nullable(),
+  subscription: zod.boolean().default(false),
+});
 
 export type EnrichBody = z.infer<typeof EnrichBodySchema>;
