@@ -1,6 +1,10 @@
 {
   "name": "@midday/db",
   "private": true,
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit"
+  },
   "exports": {
     "./client": "./src/client.ts",
     "./queries": "./src/queries/index.ts",

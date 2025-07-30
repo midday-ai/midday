@@ -5,7 +5,7 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --build",
     "test": "bun test",
     "test:watch": "bun test --watch"
   },

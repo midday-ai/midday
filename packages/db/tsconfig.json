@@ -3,6 +3,12 @@
   "include": ["src"],
   "exclude": ["node_modules"],
   "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
       "@db/*": ["./src/*"]

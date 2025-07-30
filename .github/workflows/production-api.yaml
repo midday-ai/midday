@@ -24,11 +24,13 @@ jobs:
         run: bun install
       - name: 🏗 Build @midday/engine
         run: bunx turbo run build --filter=@midday/engine...
+      - name: 🏗 Build @midday/db
+        run: bunx turbo run build --filter=@midday/db
       - name: 🔦 Run linter
         run: bun run lint
         working-directory: ./apps/api
       - name: 🪐 Check TypeScript
-        run: NODE_OPTIONS="--max-old-space-size=8192" bun run typecheck
+        run: bun run typecheck
         working-directory: ./apps/api
       # - name: 🧪 Run unit tests
       #   run: bun run test

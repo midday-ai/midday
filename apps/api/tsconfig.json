@@ -27,6 +27,7 @@
     },
     "types": ["bun-types"]
   },
+  "references": [{ "path": "../../packages/db" }],
   "exclude": ["node_modules"],
   "include": ["src/**/*.ts"]
 }
