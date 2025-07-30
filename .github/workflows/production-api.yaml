@@ -28,7 +28,7 @@ jobs:
         run: bun run lint
         working-directory: ./apps/api
       - name: 🪐 Check TypeScript
-        run: bun run typecheck
+        run: NODE_OPTIONS="--max-old-space-size=8192" bun run typecheck
         working-directory: ./apps/api
       # - name: 🧪 Run unit tests
       #   run: bun run test
