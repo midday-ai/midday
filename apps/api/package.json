@@ -31,7 +31,7 @@
     "@midday/supabase": "workspace:*",
     "@scalar/hono-api-reference": "^0.9.4",
     "@sindresorhus/slugify": "^2.2.1",
-    "@trigger.dev/sdk": "3.3.17",
+    "@trigger.dev/sdk": "4.0.0-v4-beta.25",
     "@trpc/server": "^11.4.1",
     "ai": "^4.3.16",
     "camelcase-keys": "^9.1.3",

@@ -24,6 +24,7 @@
     "@midday/utils": "workspace:*",
     "@mistralai/mistralai": "^1.7.2",
     "ai": "4.3.16",
+    "canvas": "^2.11.2",
     "mammoth": "^1.9.1",
     "officeparser": "^5.1.1",
     "unpdf": "^1.0.6",
