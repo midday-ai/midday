@@ -8,6 +8,7 @@ import {
 import { revokeUserApplicationAccessSchema } from "@api/schemas/oauth-flow";
 import { resend } from "@api/services/resend";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { z } from "@hono/zod-openapi";
 import {
   createAuthorizationCode,
   createOAuthApplication,
@@ -25,7 +26,6 @@ import {
 import { AppInstalledEmail } from "@midday/email/emails/app-installed";
 import { AppReviewRequestEmail } from "@midday/email/emails/app-review-request";
 import { render } from "@midday/email/render";
-import { z } from "zod";
 
 export const oauthApplicationsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -246,7 +246,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
 
       const application = await updateOAuthApplication(db, {
         ...updateData,
-        id: id as string,
+        id,
         teamId: teamId!,
       });
 
