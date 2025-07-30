@@ -2,7 +2,7 @@ import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
 import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx";
 import { Mistral } from "@mistralai/mistralai";
 import { TextLoader } from "langchain/document_loaders/fs/text";
-import { parseOfficeAsync } from "officeparser";
+// import { parseOfficeAsync } from "officeparser";
 import { extractText, getDocumentProxy } from "unpdf";
 import { cleanText, extractTextFromRtf } from "../utils";
 
@@ -61,20 +61,20 @@ export async function loadDocument({
       break;
     }
 
-    case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-    case "application/vnd.oasis.opendocument.text":
-    case "application/vnd.oasis.opendocument.spreadsheet":
-    case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-    case "application/msword":
-    case "application/vnd.ms-excel":
-    case "application/vnd.oasis.opendocument.presentation":
-    case "application/docx": {
-      const arrayBuffer = await content.arrayBuffer();
-      const result = await parseOfficeAsync(Buffer.from(arrayBuffer));
+    // case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+    // case "application/vnd.oasis.opendocument.text":
+    // case "application/vnd.oasis.opendocument.spreadsheet":
+    // case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    // case "application/msword":
+    // case "application/vnd.ms-excel":
+    // case "application/vnd.oasis.opendocument.presentation":
+    // case "application/docx": {
+    //   const arrayBuffer = await content.arrayBuffer();
+    //   const result = await parseOfficeAsync(Buffer.from(arrayBuffer));
 
-      document = result;
-      break;
-    }
+    //   document = result;
+    //   break;
+    // }
 
     case "text/markdown":
     case "text/plain": {

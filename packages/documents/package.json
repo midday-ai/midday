@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "@ai-sdk/mistral": "^1.2.8",
-    "@langchain/community": "^0.3.49",
-    "@langchain/core": "^0.3.66",
+    "@langchain/community": "0.3.46",
+    "@langchain/core": "0.3.58",
     "@midday/utils": "workspace:*",
     "@mistralai/mistralai": "^1.7.5",
     "ai": "4.3.19",
