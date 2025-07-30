@@ -78,7 +78,7 @@
     "tus-js-client": "4.3.1",
     "use-places-autocomplete": "^4.0.1",
     "usehooks-ts": "^3.1.1",
-    "zod": "^3.25.64",
+    "zod": "3.25.64",
     "zustand": "^5.0.5"
   },
   "devDependencies": {

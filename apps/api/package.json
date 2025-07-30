@@ -47,7 +47,7 @@
     "snakecase-keys": "^8.0.1",
     "superjson": "^2.2.2",
     "uuid": "^11.1.0",
-    "zod": "^3.25.64",
+    "zod": "3.25.64",
     "zod-openapi": "^4.2.4"
   },
   "devDependencies": {
