@@ -1,10 +1,3 @@
-import {
-  getBurnRate,
-  getExpenses,
-  getMetrics,
-  getRunway,
-  getSpending,
-} from "@api/db/queries/metrics";
 import type { Context } from "@api/rest/types";
 import {
   getBurnRateResponseSchema,
@@ -22,6 +15,13 @@ import {
 } from "@api/schemas/metrics";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import {
+  getBurnRate,
+  getExpenses,
+  getMetrics,
+  getRunway,
+  getSpending,
+} from "@midday/db/queries";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();

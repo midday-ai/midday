@@ -1,9 +1,10 @@
-import { createDocumentTagEmbedding } from "@api/db/queries/document-tag-embedings";
 import {
   createDocumentTag,
+  createDocumentTagEmbedding,
   deleteDocumentTag,
   getDocumentTags,
-} from "@api/db/queries/document-tags";
+} from "@midday/db/queries";
+
 import {
   createDocumentTagSchema,
   deleteDocumentTagSchema,

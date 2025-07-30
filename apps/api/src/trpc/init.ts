@@ -1,9 +1,9 @@
-import { connectDb } from "@api/db";
-import type { Database } from "@api/db";
 import { createClient } from "@api/services/supabase";
 import { verifyAccessToken } from "@api/utils/auth";
 import type { Session } from "@api/utils/auth";
 import { getGeoContext } from "@api/utils/geo";
+import type { Database } from "@midday/db/client";
+import { connectDb } from "@midday/db/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";

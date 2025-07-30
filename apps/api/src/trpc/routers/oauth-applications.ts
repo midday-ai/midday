@@ -1,20 +1,4 @@
 import {
-  createOAuthApplication,
-  deleteOAuthApplication,
-  getOAuthApplicationByClientId,
-  getOAuthApplicationById,
-  getOAuthApplicationsByTeam,
-  regenerateClientSecret,
-  updateOAuthApplication,
-  updateOAuthApplicationstatus,
-} from "@api/db/queries/oauth-applications";
-import {
-  createAuthorizationCode,
-  getUserAuthorizedApplications,
-  revokeUserApplicationTokens,
-} from "@api/db/queries/oauth-flow";
-import { getTeamsByUserId } from "@api/db/queries/users-on-team";
-import {
   createOAuthApplicationSchema,
   deleteOAuthApplicationSchema,
   getOAuthApplicationSchema,
@@ -24,6 +8,20 @@ import {
 import { revokeUserApplicationAccessSchema } from "@api/schemas/oauth-flow";
 import { resend } from "@api/services/resend";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  createAuthorizationCode,
+  createOAuthApplication,
+  deleteOAuthApplication,
+  getOAuthApplicationByClientId,
+  getOAuthApplicationById,
+  getOAuthApplicationsByTeam,
+  getTeamsByUserId,
+  getUserAuthorizedApplications,
+  regenerateClientSecret,
+  revokeUserApplicationTokens,
+  updateOAuthApplication,
+  updateOAuthApplicationstatus,
+} from "@midday/db/queries";
 import { AppInstalledEmail } from "@midday/email/emails/app-installed";
 import { AppReviewRequestEmail } from "@midday/email/emails/app-review-request";
 import { render } from "@midday/email/render";

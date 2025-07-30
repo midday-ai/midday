@@ -1,12 +1,12 @@
 import {
-  createDocumentTagAssignment,
-  deleteDocumentTagAssignment,
-} from "@api/db/queries/document-tag-assignments";
-import {
   createDocumentTagAssignmentSchema,
   deleteDocumentTagAssignmentSchema,
 } from "@api/schemas/document-tag-assignments";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  createDocumentTagAssignment,
+  deleteDocumentTagAssignment,
+} from "@midday/db/queries";
 
 export const documentTagAssignmentsRouter = createTRPCRouter({
   create: protectedProcedure

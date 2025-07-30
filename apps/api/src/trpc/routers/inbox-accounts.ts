@@ -1,12 +1,9 @@
 import {
-  deleteInboxAccount,
-  getInboxAccounts,
-} from "@api/db/queries/inbox-accounts";
-import {
   connectInboxAccountSchema,
   deleteInboxAccountSchema,
 } from "@api/schemas/inbox-accounts";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { deleteInboxAccount, getInboxAccounts } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
 import { schedules } from "@trigger.dev/sdk/v3";
 

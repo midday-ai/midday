@@ -1,14 +1,11 @@
 import {
-  createAttachments,
-  deleteAttachment,
-} from "@api/db/queries/transaction-attachments";
-import {
   createAttachmentsSchema,
   deleteAttachmentSchema,
   processTransactionAttachmentSchema,
 } from "@api/schemas/transaction-attachments";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import type { ProcessTransactionAttachmentPayload } from "@jobs/schema";
+import { createAttachments, deleteAttachment } from "@midday/db/queries";
 import { allowedMimeTypes } from "@midday/documents/utils";
 import { tasks } from "@trigger.dev/sdk/v3";
 
