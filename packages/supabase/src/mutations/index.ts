@@ -114,7 +114,7 @@ type UpsertInboxAccountParams = {
   refreshToken: string;
   email: string;
   lastAccessed: string;
-  provider: "gmail" | "outlook";
+  provider: "gmail";
   externalId: string;
   expiryDate: string;
 };

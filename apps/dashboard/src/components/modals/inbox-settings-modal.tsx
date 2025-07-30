@@ -14,7 +14,6 @@ import { Icons } from "@midday/ui/icons";
 import { useState } from "react";
 import { CopyInput } from "../copy-input";
 // import { ConnectGmail } from "../inbox/connect-gmail";
-// import { ConnectOutlook } from "../inbox/connect-outlook";
 // import { InboxConnectedAccounts } from "../inbox/inbox-connected-accounts";
 
 export function InboxSettingsModal() {
@@ -54,7 +53,6 @@ export function InboxSettingsModal() {
 
           <div className="flex flex-col gap-2 mt-6">
             {/* <ConnectGmail /> */}
-            {/* <ConnectOutlook /> */}
           </div>
         </div>
       </DialogContent>

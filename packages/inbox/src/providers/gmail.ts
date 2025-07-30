@@ -100,16 +100,40 @@ export class GmailProvider implements OAuthProviderInterface {
       throw new Error("Access token is required.");
     }
 
-    const googleCredentials: Credentials = {
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token,
-      expiry_date: tokens.expiry_date,
-      scope: tokens.scope,
-      token_type: tokens.token_type as Credentials["token_type"],
-    };
+    // Validate token format - should be a non-empty string
+    if (
+      typeof tokens.access_token !== "string" ||
+      tokens.access_token.trim() === ""
+    ) {
+      throw new Error("Invalid access token format.");
+    }
 
-    this.#oauth2Client.setCredentials(googleCredentials);
-    this.#gmail = google.gmail({ version: "v1", auth: this.#oauth2Client });
+    // Validate refresh token if provided
+    if (
+      tokens.refresh_token &&
+      (typeof tokens.refresh_token !== "string" ||
+        tokens.refresh_token.trim() === "")
+    ) {
+      throw new Error("Invalid refresh token format.");
+    }
+
+    try {
+      const googleCredentials: Credentials = {
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expiry_date: tokens.expiry_date,
+        scope: tokens.scope,
+        token_type: tokens.token_type as Credentials["token_type"],
+      };
+
+      this.#oauth2Client.setCredentials(googleCredentials);
+      this.#gmail = google.gmail({ version: "v1", auth: this.#oauth2Client });
+    } catch (error) {
+      console.error("Failed to set Gmail credentials:", error);
+      throw new Error(
+        "Failed to configure Gmail authentication - please reconnect your account",
+      );
+    }
   }
 
   async getUserInfo(): Promise<UserInfo | undefined> {

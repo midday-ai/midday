@@ -26,6 +26,11 @@ const items = [
   {
     path: "/inbox",
     name: "Inbox",
+    children: [
+      { path: "/inbox/connections", name: "Connections" },
+      { path: "/inbox/import", name: "Import" },
+      { path: "/inbox/settings", name: "Settings" },
+    ],
   },
   {
     path: "/transactions",

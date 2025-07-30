@@ -18,9 +18,14 @@ export const inboxAccountsRouter = createTRPCRouter({
   connect: protectedProcedure
     .input(connectInboxAccountSchema)
     .mutation(async ({ input }) => {
-      const connector = new InboxConnector(input.provider);
+      try {
+        const connector = new InboxConnector(input.provider);
 
-      return await connector.connect();
+        return await connector.connect();
+      } catch (error) {
+        console.error(error);
+        return null;
+      }
     }),
 
   delete: protectedProcedure

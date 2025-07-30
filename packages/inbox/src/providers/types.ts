@@ -61,7 +61,7 @@ export interface UserInfo {
   name?: string;
 }
 
-export type OAuthProvider = "gmail" | "outlook";
+export type OAuthProvider = "gmail";
 
 export interface OAuthProviderInterface {
   /**

@@ -4,7 +4,6 @@ import { upsertInboxAccount } from "@midday/supabase/mutations";
 import { getInboxAccountByIdQuery } from "@midday/supabase/queries";
 import type { Client } from "@midday/supabase/types";
 import { GmailProvider } from "./providers/gmail";
-import { OutlookProvider } from "./providers/outlook";
 import {
   type Account,
   type Attachment,
@@ -29,10 +28,6 @@ export class InboxConnector extends Connector {
       case "gmail":
         this.#provider = new GmailProvider();
         this.#providerName = "gmail";
-        break;
-      case "outlook":
-        this.#provider = new OutlookProvider();
-        this.#providerName = "outlook";
         break;
       default:
         throw new Error(`Unsupported provider: ${provider}`);
@@ -71,14 +66,32 @@ export class InboxConnector extends Connector {
       throw new Error("Account not found");
     }
 
+    // Validate that required tokens exist
+    if (!account.data.access_token || !account.data.refresh_token) {
+      throw new Error(
+        "Account tokens are missing - please reconnect your Gmail account",
+      );
+    }
+
     // Set the account ID
     this.#provider.setAccountId(account.data.id);
 
-    // Set tokens to configure provider auth client
-    this.#provider.setTokens({
-      access_token: decrypt(account.data.access_token),
-      refresh_token: decrypt(account.data.refresh_token),
-    });
+    try {
+      // Safely decrypt tokens with error handling
+      const decryptedAccessToken = decrypt(account.data.access_token);
+      const decryptedRefreshToken = decrypt(account.data.refresh_token);
+
+      // Set tokens to configure provider auth client
+      this.#provider.setTokens({
+        access_token: decryptedAccessToken,
+        refresh_token: decryptedRefreshToken,
+      });
+    } catch (decryptError) {
+      console.error("Failed to decrypt tokens:", decryptError);
+      throw new Error(
+        "Failed to decrypt account tokens - please reconnect your Gmail account",
+      );
+    }
 
     try {
       return this.#provider.getAttachments({
@@ -86,7 +99,10 @@ export class InboxConnector extends Connector {
         maxResults: options.maxResults,
       });
     } catch (error) {
-      throw new Error("Failed to fetch attachments.");
+      console.error("Failed to fetch attachments:", error);
+      throw new Error(
+        "Failed to fetch attachments - please check your Gmail connection",
+      );
     }
   }
 
