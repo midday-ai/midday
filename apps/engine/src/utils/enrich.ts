@@ -1,5 +1,8 @@
 import type { Bindings } from "@engine/common/bindings";
-import { type EnrichBody, OutputSchemaForAI } from "@engine/routes/enrich/schema";
+import {
+  type EnrichBody,
+  OutputSchemaForAI,
+} from "@engine/routes/enrich/schema";
 import {
   type LanguageModelV1,
   type Experimental_LanguageModelV1Middleware as LanguageModelV1Middleware,
