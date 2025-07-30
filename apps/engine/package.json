@@ -21,7 +21,7 @@
     "typesense": "^2.0.3",
     "workers-ai-provider": "^0.7.2",
     "xior": "^0.7.8",
-    "zod": "^4.0.14"
+    "zod": "3.25.64"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250730.0",

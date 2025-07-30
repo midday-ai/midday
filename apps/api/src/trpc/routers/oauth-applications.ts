@@ -246,7 +246,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
 
       const application = await updateOAuthApplication(db, {
         ...updateData,
-        id,
+        id: id as string,
         teamId: teamId!,
       });
 
