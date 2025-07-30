@@ -20,7 +20,6 @@
     "jose": "^6.0.12",
     "plaid": "^37.0.0",
     "typesense": "^2.0.3",
-    "workers-ai-provider": "^0.7.2",
     "xior": "^0.7.8",
     "zod": "3.25.64"
   },
