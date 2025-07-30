@@ -22,8 +22,7 @@
     "paths": {
       "@api/*": ["src/*"],
       "@engine/*": ["../engine/src/*"],
-      "@jobs/*": ["../../packages/jobs/src/*"],
-      "@db/*": ["../../packages/db/src/*"]
+      "@jobs/*": ["../../packages/jobs/src/*"]
     },
     "types": ["bun-types"]
   },

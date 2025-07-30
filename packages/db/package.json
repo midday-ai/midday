@@ -6,13 +6,13 @@
     "typecheck": "tsc --noEmit"
   },
   "exports": {
-    "./client": "./src/client.ts",
-    "./queries": "./src/queries/index.ts",
-    "./schema": "./src/schema.ts",
-    "./utils/api-keys": "./src/utils/api-keys.ts",
-    "./utils/search-query": "./src/utils/search-query.ts",
-    "./utils/health": "./src/utils/health.ts",
-    "./utils/currency": "./src/utils/currency.ts"
+    "./client": "./dist/client.js",
+    "./queries": "./dist/queries/index.js",
+    "./schema": "./dist/schema.js",
+    "./utils/api-keys": "./dist/utils/api-keys.js",
+    "./utils/search-query": "./dist/utils/search-query.js",
+    "./utils/health": "./dist/utils/health.js",
+    "./utils/currency": "./dist/utils/currency.js"
   },
   "dependencies": {
     "@midday/cache": "workspace:*",
