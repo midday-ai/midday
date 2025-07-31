@@ -1230,6 +1230,7 @@ export const teams = pgTable(
     baseCurrency: text("base_currency"),
     countryCode: text("country_code"),
     documentClassification: boolean("document_classification").default(false),
+    scheduleId: text("schedule_id"),
     flags: text().array(),
     canceledAt: timestamp("canceled_at", {
       withTimezone: true,
