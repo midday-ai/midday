@@ -1557,7 +1557,6 @@ export type Database = {
           logo_url: string | null
           name: string | null
           plan: Database["public"]["Enums"]["plans"]
-          schedule_id: string | null
         }
         Insert: {
           base_currency?: string | null
@@ -1574,7 +1573,6 @@ export type Database = {
           logo_url?: string | null
           name?: string | null
           plan?: Database["public"]["Enums"]["plans"]
-          schedule_id?: string | null
         }
         Update: {
           base_currency?: string | null
@@ -1591,7 +1589,6 @@ export type Database = {
           logo_url?: string | null
           name?: string | null
           plan?: Database["public"]["Enums"]["plans"]
-          schedule_id?: string | null
         }
         Relationships: []
       }
