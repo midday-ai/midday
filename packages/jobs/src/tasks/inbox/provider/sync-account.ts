@@ -2,7 +2,7 @@ import { processBatch } from "@jobs/utils/process-batch";
 import { InboxConnector } from "@midday/inbox/connector";
 import { createClient } from "@midday/supabase/job";
 import { getExistingInboxAttachmentsQuery } from "@midday/supabase/queries";
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { processAttachment } from "../process-attachment";
 

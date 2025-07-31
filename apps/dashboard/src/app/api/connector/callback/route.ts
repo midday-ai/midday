@@ -1,7 +1,7 @@
 import { getQueryClient, trpc } from "@/trpc/server";
 import { InboxConnector } from "@midday/inbox/connector";
 import type { InitialInboxSetupPayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {

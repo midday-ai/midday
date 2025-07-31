@@ -1,6 +1,6 @@
 import { initialBankSetupSchema } from "@jobs/schema";
 import { generateCronTag } from "@jobs/utils/generate-cron-tag";
-import { schedules, schemaTask } from "@trigger.dev/sdk/v3";
+import { schedules, schemaTask } from "@trigger.dev/sdk";
 import { bankSyncScheduler } from "../scheduler/bank-scheduler";
 import { syncConnection } from "../sync/connection";
 

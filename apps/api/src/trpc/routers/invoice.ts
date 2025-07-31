@@ -44,7 +44,7 @@ import type {
   GenerateInvoicePayload,
   SendInvoiceReminderPayload,
 } from "@midday/jobs/schema";
-import { runs, tasks } from "@trigger.dev/sdk/v3";
+import { runs, tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 import { addMonths, format, parseISO } from "date-fns";
 import { v4 as uuidv4 } from "uuid";

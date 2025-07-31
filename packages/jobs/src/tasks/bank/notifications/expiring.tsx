@@ -1,7 +1,7 @@
 import { resend } from "@jobs/utils/resend";
 import ConnectionExpireEmail from "@midday/email/emails/connection-expire";
 import { render } from "@react-email/components";
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
 export const expiringNotifications = schemaTask({

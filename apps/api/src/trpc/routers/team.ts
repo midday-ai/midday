@@ -37,7 +37,7 @@ import type {
   InviteTeamMembersPayload,
   UpdateBaseCurrencyPayload,
 } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 export const teamRouter = createTRPCRouter({

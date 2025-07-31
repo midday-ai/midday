@@ -18,7 +18,7 @@ import {
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
 import type { ProcessDocumentPayload } from "@midday/jobs/schema";
 import { remove, signedUrl } from "@midday/supabase/storage";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 export const documentsRouter = createTRPCRouter({

@@ -5,7 +5,7 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { deleteInboxAccount, getInboxAccounts } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
-import { schedules } from "@trigger.dev/sdk/v3";
+import { schedules } from "@trigger.dev/sdk";
 
 export const inboxAccountsRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {

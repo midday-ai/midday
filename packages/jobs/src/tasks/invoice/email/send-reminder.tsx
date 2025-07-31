@@ -5,7 +5,7 @@ import { render } from "@midday/email/render";
 import { encrypt } from "@midday/encryption";
 import { createClient } from "@midday/supabase/job";
 import { getAppUrl } from "@midday/utils/envs";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import { nanoid } from "nanoid";
 
 export const sendInvoiceReminder = schemaTask({

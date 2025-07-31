@@ -8,7 +8,7 @@ import {
   triggerBulk,
 } from "@midday/notification";
 import { getAppUrl } from "@midday/utils/envs";
-import { logger } from "@trigger.dev/sdk/v3";
+import { logger } from "@trigger.dev/sdk";
 
 export async function handlePaidInvoiceNotifications({
   user,

@@ -19,7 +19,7 @@ import {
   updateInbox,
 } from "@midday/db/queries";
 import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 
 export const inboxRouter = createTRPCRouter({
   get: protectedProcedure

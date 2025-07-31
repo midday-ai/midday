@@ -2,7 +2,7 @@ import { initialInboxSetupSchema } from "@jobs/schema";
 import { generateQuarterDailyCronTag } from "@jobs/utils/generate-cron-tag";
 import { createClient } from "@midday/supabase/job";
 import { updateInboxAccount } from "@midday/supabase/mutations";
-import { schedules, schemaTask } from "@trigger.dev/sdk/v3";
+import { schedules, schemaTask } from "@trigger.dev/sdk";
 import { inboxSyncScheduler } from "./sheduler";
 import { syncInboxAccount } from "./sync-account";
 

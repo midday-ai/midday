@@ -4,7 +4,7 @@ import { mapTransactions } from "@midday/import/mappings";
 import { transform } from "@midday/import/transform";
 import { validateTransactions } from "@midday/import/validate";
 import { createClient } from "@midday/supabase/job";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import Papa from "papaparse";
 
 const BATCH_SIZE = 500;

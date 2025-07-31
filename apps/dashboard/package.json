@@ -41,7 +41,7 @@
     "@tanstack/react-query-devtools": "^5.80.7",
     "@tanstack/react-table": "^8.21.3",
     "@team-plain/typescript-sdk": "^5.9.0",
-    "@trigger.dev/react-hooks": "3.3.17",
+    "@trigger.dev/react-hooks": "4.0.0-v4-beta.25",
     "@trigger.dev/sdk": "4.0.0-v4-beta.25",
     "@trpc/client": "^11.4.1",
     "@trpc/tanstack-react-query": "^11.4.1",
