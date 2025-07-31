@@ -441,3 +441,130 @@ export async function unmatchTransaction(
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
 }
+
+export type GetInboxByFilePathParams = {
+  filePath: string[];
+  teamId: string;
+};
+
+export async function getInboxByFilePath(
+  db: Database,
+  params: GetInboxByFilePathParams,
+) {
+  const { filePath, teamId } = params;
+
+  const [result] = await db
+    .select({
+      id: inbox.id,
+    })
+    .from(inbox)
+    .where(and(eq(inbox.filePath, filePath), eq(inbox.teamId, teamId)))
+    .limit(1);
+
+  return result;
+}
+
+export type CreateInboxParams = {
+  displayName: string;
+  teamId: string;
+  filePath: string[];
+  fileName: string;
+  contentType: string;
+  size: number;
+  referenceId?: string;
+  website?: string;
+};
+
+export async function createInbox(db: Database, params: CreateInboxParams) {
+  const {
+    displayName,
+    teamId,
+    filePath,
+    fileName,
+    contentType,
+    size,
+    referenceId,
+    website,
+  } = params;
+
+  const [result] = await db
+    .insert(inbox)
+    .values({
+      displayName,
+      teamId,
+      filePath,
+      fileName,
+      contentType,
+      size,
+      referenceId,
+      website,
+    })
+    .returning({
+      id: inbox.id,
+      fileName: inbox.fileName,
+      filePath: inbox.filePath,
+      displayName: inbox.displayName,
+      transactionId: inbox.transactionId,
+      amount: inbox.amount,
+      currency: inbox.currency,
+      contentType: inbox.contentType,
+      date: inbox.date,
+      status: inbox.status,
+      createdAt: inbox.createdAt,
+      website: inbox.website,
+      description: inbox.description,
+      referenceId: inbox.referenceId,
+      size: inbox.size,
+    });
+
+  return result;
+}
+
+export type UpdateInboxWithProcessedDataParams = {
+  id: string;
+  amount?: number;
+  currency?: string;
+  displayName?: string;
+  website?: string;
+  date?: string;
+  taxAmount?: number;
+  taxRate?: number;
+  taxType?: string;
+  type?: "invoice" | "expense" | null;
+  status?: "pending" | "new" | "archived" | "processing" | "done" | "deleted";
+};
+
+export async function updateInboxWithProcessedData(
+  db: Database,
+  params: UpdateInboxWithProcessedDataParams,
+) {
+  const { id, ...updateData } = params;
+
+  const [result] = await db
+    .update(inbox)
+    .set(updateData)
+    .where(eq(inbox.id, id))
+    .returning({
+      id: inbox.id,
+      fileName: inbox.fileName,
+      filePath: inbox.filePath,
+      displayName: inbox.displayName,
+      transactionId: inbox.transactionId,
+      amount: inbox.amount,
+      currency: inbox.currency,
+      contentType: inbox.contentType,
+      date: inbox.date,
+      status: inbox.status,
+      createdAt: inbox.createdAt,
+      website: inbox.website,
+      description: inbox.description,
+      referenceId: inbox.referenceId,
+      size: inbox.size,
+      taxAmount: inbox.taxAmount,
+      taxRate: inbox.taxRate,
+      taxType: inbox.taxType,
+      type: inbox.type,
+    });
+
+  return result;
+}

@@ -1,4 +1,11 @@
+import { getDb } from "@jobs/init";
 import { processAttachmentSchema } from "@jobs/schema";
+import {
+  createInbox,
+  getInboxByFilePath,
+  updateInbox,
+  updateInboxWithProcessedData,
+} from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
@@ -21,6 +28,7 @@ export const processAttachment = schemaTask({
   },
   run: async ({ teamId, mimetype, size, filePath, referenceId, website }) => {
     const supabase = createClient();
+    const db = getDb();
 
     // If the file is a HEIC we need to convert it to a JPG
     if (mimetype === "image/heic") {
@@ -32,37 +40,24 @@ export const processAttachment = schemaTask({
     const filename = filePath.at(-1);
 
     // Check if inbox item already exists (for retry scenarios)
-    let inboxData = null;
-
-    const { data: existingInbox } = await supabase
-      .from("inbox")
-      .select("id")
-      .contains("file_path", filePath)
-      .eq("team_id", teamId)
-      .single();
-
-    inboxData = existingInbox;
+    let inboxData = await getInboxByFilePath(db, {
+      filePath,
+      teamId,
+    });
 
     // Only create new inbox item if it doesn't exist
     if (!inboxData) {
-      const { data: newInboxData } = await supabase
-        .from("inbox")
-        .insert({
-          // NOTE: If we can't parse the name using OCR this will be the fallback name
-          display_name: filename,
-          team_id: teamId,
-          file_path: filePath,
-          file_name: filename,
-          content_type: mimetype,
-          size,
-          reference_id: referenceId,
-          website,
-        })
-        .select("*")
-        .single()
-        .throwOnError();
-
-      inboxData = newInboxData;
+      inboxData = await createInbox(db, {
+        // NOTE: If we can't parse the name using OCR this will be the fallback name
+        displayName: filename ?? "Unknown",
+        teamId,
+        filePath,
+        fileName: filename ?? "Unknown",
+        contentType: mimetype,
+        size,
+        referenceId,
+        website,
+      });
     }
 
     if (!inboxData) {
@@ -97,23 +92,19 @@ export const processAttachment = schemaTask({
         hasAmount: !!result.amount,
       });
 
-      await supabase
-        .from("inbox")
-        .update({
-          amount: result.amount,
-          currency: result.currency,
-          display_name: result.name ?? undefined,
-          website: result.website ?? undefined,
-          date: result.date,
-          tax_amount: result.tax_amount,
-          tax_rate: result.tax_rate,
-          tax_type: result.tax_type,
-          type: result.type as "invoice" | "expense" | null | undefined,
-          status: "pending",
-        })
-        .eq("id", inboxData.id)
-        .select()
-        .single();
+      await updateInboxWithProcessedData(db, {
+        id: inboxData.id,
+        amount: result.amount || undefined,
+        currency: result.currency || undefined,
+        displayName: result.name || undefined,
+        website: result.website || undefined,
+        date: result.date || undefined,
+        taxAmount: result.tax_amount || undefined,
+        taxRate: result.tax_rate || undefined,
+        taxType: result.tax_type || undefined,
+        type: result.type as "invoice" | "expense" | null | undefined,
+        status: "pending",
+      });
 
       // NOTE: Process documents and images for classification
       await processDocument.trigger({
@@ -154,10 +145,11 @@ export const processAttachment = schemaTask({
         },
       );
 
-      await supabase
-        .from("inbox")
-        .update({ status: "pending" })
-        .eq("id", inboxData.id);
+      await updateInbox(db, {
+        id: inboxData.id,
+        teamId,
+        status: "pending",
+      });
     }
   },
 });

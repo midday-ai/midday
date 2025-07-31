@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@fast-csv/format": "5.0.2",
+    "@midday/db": "workspace:*",
     "@midday/email": "workspace:*",
     "@midday/engine": "workspace:*",
     "@midday/engine-client": "workspace:*",
