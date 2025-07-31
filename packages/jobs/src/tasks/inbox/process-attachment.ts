@@ -8,7 +8,7 @@ import {
 } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
 import { createClient } from "@midday/supabase/job";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import { convertHeic } from "../document/convert-heic";
 import { processDocument } from "../document/process-document";
 

@@ -3,6 +3,7 @@
   "private": true,
   "exports": {
     "./client": "./src/client.ts",
+    "./job-client": "./src/job-client.ts",
     "./queries": "./src/queries/index.ts",
     "./schema": "./src/schema.ts",
     "./utils/api-keys": "./src/utils/api-keys.ts",

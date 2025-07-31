@@ -256,3 +256,127 @@ export async function updateDocuments(
     .where(and(eq(documents.teamId, teamId), inArray(documents.name, ids)))
     .returning();
 }
+
+export type UpdateDocumentByPathParams = {
+  pathTokens: string[];
+  teamId: string;
+  title?: string;
+  summary?: string;
+  content?: string;
+  body?: string;
+  tag?: string;
+  date?: string;
+  language?: string;
+  processingStatus?: "pending" | "processing" | "completed" | "failed";
+  metadata?: Record<string, unknown>;
+};
+
+export async function updateDocumentByPath(
+  db: Database,
+  params: UpdateDocumentByPathParams,
+) {
+  const {
+    pathTokens,
+    teamId,
+    title,
+    summary,
+    content,
+    body,
+    tag,
+    date,
+    language,
+    processingStatus,
+    metadata,
+  } = params;
+
+  if (!pathTokens || pathTokens.length === 0) {
+    return null;
+  }
+
+  return db
+    .update(documents)
+    .set({
+      title,
+      summary,
+      content,
+      body,
+      tag,
+      date,
+      language,
+      processingStatus,
+      metadata,
+    })
+    .where(
+      and(eq(documents.teamId, teamId), eq(documents.pathTokens, pathTokens)),
+    )
+    .returning();
+}
+
+export type UpdateDocumentByFileNameParams = {
+  fileName: string;
+  teamId: string;
+  title?: string;
+  summary?: string;
+  content?: string;
+  body?: string;
+  tag?: string;
+  date?: string;
+  language?: string;
+  processingStatus?: "pending" | "processing" | "completed" | "failed";
+  metadata?: Record<string, unknown>;
+};
+
+export async function updateDocumentByFileName(
+  db: Database,
+  params: UpdateDocumentByFileNameParams,
+) {
+  const {
+    fileName,
+    teamId,
+    title,
+    summary,
+    content,
+    body,
+    tag,
+    date,
+    language,
+    processingStatus,
+    metadata,
+  } = params;
+
+  const [result] = await db
+    .update(documents)
+    .set({
+      title,
+      summary,
+      content,
+      body,
+      tag,
+      date,
+      language,
+      processingStatus,
+      metadata,
+    })
+    .where(and(eq(documents.teamId, teamId), eq(documents.name, fileName)))
+    .returning({ id: documents.id });
+
+  return result;
+}
+
+export type UpdateDocumentProcessingStatusParams = {
+  id: string;
+  processingStatus: "pending" | "processing" | "completed" | "failed";
+};
+
+export async function updateDocumentProcessingStatus(
+  db: Database,
+  params: UpdateDocumentProcessingStatusParams,
+) {
+  const { id, processingStatus } = params;
+
+  return db
+    .update(documents)
+    .set({ processingStatus })
+    .where(eq(documents.id, id))
+    .returning({ id: documents.id });
+}

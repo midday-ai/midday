@@ -59,3 +59,32 @@ export const deleteDocumentTag = async (
 
   return result;
 };
+
+export type UpsertDocumentTagParams = {
+  name: string;
+  slug: string;
+  teamId: string;
+};
+
+export const upsertDocumentTags = async (
+  db: Database,
+  params: UpsertDocumentTagParams[],
+) => {
+  if (params.length === 0) {
+    return [];
+  }
+
+  return db
+    .insert(documentTags)
+    .values(params)
+    .onConflictDoUpdate({
+      target: [documentTags.slug, documentTags.teamId],
+      set: {
+        name: sql`excluded.name`,
+      },
+    })
+    .returning({
+      id: documentTags.id,
+      slug: documentTags.slug,
+    });
+};

@@ -47,3 +47,26 @@ export const deleteDocumentTagAssignment = async (
 
   return result;
 };
+
+export type UpsertDocumentTagAssignmentParams = {
+  documentId: string;
+  tagId: string;
+  teamId: string;
+};
+
+export const upsertDocumentTagAssignments = async (
+  db: Database,
+  params: UpsertDocumentTagAssignmentParams[],
+) => {
+  if (params.length === 0) {
+    return [];
+  }
+
+  return db
+    .insert(documentTagAssignments)
+    .values(params)
+    .onConflictDoNothing({
+      target: [documentTagAssignments.documentId, documentTagAssignments.tagId],
+    })
+    .returning();
+};

@@ -1,8 +1,10 @@
+import { getDb } from "@jobs/init";
 import { processDocumentSchema } from "@jobs/schema";
+import { updateDocumentByPath } from "@midday/db/queries";
 import { loadDocument } from "@midday/documents/loader";
 import { getContentSample } from "@midday/documents/utils";
 import { createClient } from "@midday/supabase/job";
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { schemaTask } from "@trigger.dev/sdk";
 import { classifyDocument } from "./classify-document";
 import { classifyImage } from "./classify-image";
 import { convertHeic } from "./convert-heic";
@@ -17,6 +19,7 @@ export const processDocument = schemaTask({
   },
   run: async ({ mimetype, filePath, teamId }) => {
     const supabase = createClient();
+    const db = getDb();
 
     try {
       // If the file is a HEIC we need to convert it to a JPG
@@ -63,12 +66,11 @@ export const processDocument = schemaTask({
     } catch (error) {
       console.error(error);
 
-      await supabase
-        .from("documents")
-        .update({
-          processing_status: "failed",
-        })
-        .eq("id", filePath.join("/"));
+      await updateDocumentByPath(db, {
+        pathTokens: filePath,
+        teamId,
+        processingStatus: "failed",
+      });
     }
   },
 });
