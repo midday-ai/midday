@@ -26,7 +26,15 @@ export const processAttachment = schemaTask({
   queue: {
     concurrencyLimit: 100,
   },
-  run: async ({ teamId, mimetype, size, filePath, referenceId, website }) => {
+  run: async ({
+    teamId,
+    mimetype,
+    size,
+    filePath,
+    referenceId,
+    website,
+    inboxAccountId,
+  }) => {
     const supabase = createClient();
     const db = getDb();
 
@@ -57,6 +65,7 @@ export const processAttachment = schemaTask({
         size,
         referenceId,
         website,
+        inboxAccountId,
       });
     }
 

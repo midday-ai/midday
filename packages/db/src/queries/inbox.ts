@@ -1,5 +1,10 @@
 import type { Database } from "@db/client";
-import { inbox, transactionAttachments, transactions } from "@db/schema";
+import {
+  inbox,
+  inboxAccounts,
+  transactionAttachments,
+  transactions,
+} from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { and, asc, desc, eq, ne, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
@@ -56,6 +61,12 @@ export async function getInbox(db: Database, params: GetInboxParams) {
       createdAt: inbox.createdAt,
       website: inbox.website,
       description: inbox.description,
+      inboxAccountId: inbox.inboxAccountId,
+      inboxAccount: {
+        id: inboxAccounts.id,
+        email: inboxAccounts.email,
+        provider: inboxAccounts.provider,
+      },
       transaction: {
         id: transactions.id,
         amount: transactions.amount,
@@ -66,6 +77,7 @@ export async function getInbox(db: Database, params: GetInboxParams) {
     })
     .from(inbox)
     .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
+    .leftJoin(inboxAccounts, eq(inbox.inboxAccountId, inboxAccounts.id))
     .where(and(...whereConditions));
 
   // Apply sorting
@@ -121,6 +133,12 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
       createdAt: inbox.createdAt,
       website: inbox.website,
       description: inbox.description,
+      inboxAccountId: inbox.inboxAccountId,
+      inboxAccount: {
+        id: inboxAccounts.id,
+        email: inboxAccounts.email,
+        provider: inboxAccounts.provider,
+      },
       transaction: {
         id: transactions.id,
         amount: transactions.amount,
@@ -131,6 +149,7 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
     })
     .from(inbox)
     .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
+    .leftJoin(inboxAccounts, eq(inbox.inboxAccountId, inboxAccounts.id))
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
 
@@ -145,7 +164,8 @@ export type DeleteInboxParams = {
 export async function deleteInbox(db: Database, params: DeleteInboxParams) {
   const { id, teamId } = params;
   return db
-    .delete(inbox)
+    .update(inbox)
+    .set({ status: "deleted" })
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .returning();
 }
@@ -473,6 +493,7 @@ export type CreateInboxParams = {
   size: number;
   referenceId?: string;
   website?: string;
+  inboxAccountId?: string;
 };
 
 export async function createInbox(db: Database, params: CreateInboxParams) {
@@ -485,6 +506,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
     size,
     referenceId,
     website,
+    inboxAccountId,
   } = params;
 
   const [result] = await db
@@ -498,6 +520,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
       size,
       referenceId,
       website,
+      inboxAccountId,
     })
     .returning({
       id: inbox.id,

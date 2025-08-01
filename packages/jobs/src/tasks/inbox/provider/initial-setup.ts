@@ -1,6 +1,6 @@
 import { getDb } from "@jobs/init";
 import { initialInboxSetupSchema } from "@jobs/schema";
-import { generateQuarterDailyCronTag } from "@jobs/utils/generate-cron-tag";
+import { generateCronTag } from "@jobs/utils/generate-cron-tag";
 import { updateInboxAccount } from "@midday/db/queries";
 import { schedules, schemaTask } from "@trigger.dev/sdk";
 import { inboxSyncScheduler } from "./sheduler";
@@ -18,12 +18,12 @@ export const initialInboxSetup = schemaTask({
 
     const db = getDb();
 
-    // Schedule the inbox sync task to run every 6 hours at a random time to distribute load
+    // Schedule the inbox sync task to run every 24 hours at a random time to distribute load
     // Use a deduplication key to prevent duplicate schedules for the same team
     // Add inbox account id as externalId to use it in the inboxSyncScheduler task
     const schedule = await schedules.create({
       task: inboxSyncScheduler.id,
-      cron: generateQuarterDailyCronTag(id),
+      cron: generateCronTag(id),
       timezone: "UTC",
       externalId: id,
       deduplicationKey: `${id}-${inboxSyncScheduler.id}`,

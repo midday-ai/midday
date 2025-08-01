@@ -82,6 +82,7 @@ export const syncInboxAccount = schemaTask({
                 website: item.website,
                 referenceId: item.referenceId,
                 teamId: accountRow.teamId,
+                inboxAccountId: id,
               },
             });
           }
