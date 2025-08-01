@@ -75,6 +75,7 @@ export type UpdateInboxAccountParams = {
   accessToken?: string;
   expiryDate?: string;
   scheduleId?: string;
+  lastAccessed?: string;
 };
 
 export async function updateInboxAccount(
@@ -88,6 +89,7 @@ export async function updateInboxAccount(
       accessToken: params.accessToken,
       expiryDate: params.expiryDate,
       scheduleId: params.scheduleId,
+      lastAccessed: params.lastAccessed,
     })
     .where(eq(inboxAccounts.id, params.id));
 }

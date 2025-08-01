@@ -1,59 +1,216 @@
 "use client";
 
+import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@midday/ui/card";
 import { Icons } from "@midday/ui/icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useToast } from "@midday/ui/use-toast";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Suspense } from "react";
+import { DeleteInboxAccount } from "./delete-inbox-account";
+import { InboxAccountsListSkeleton } from "./inbox-connected-accounts-skeleton";
+import { SyncInboxAccount } from "./sync-inbox-account";
 
-export function InboxConnectedAccounts() {
+type InboxAccount = NonNullable<RouterOutputs["inboxAccounts"]["get"]>[number];
+
+function InboxAccountItem({ account }: { account: InboxAccount }) {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const [runId, setRunId] = useState<string | undefined>();
+  const [accessToken, setAccessToken] = useState<string | undefined>();
+  const [isSyncing, setSyncing] = useState(false);
+  const { toast, dismiss } = useToast();
 
-  const { data, refetch } = useQuery(trpc.inboxAccounts.get.queryOptions());
+  const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
-  const deleteInboxAccountMutation = useMutation(
-    trpc.inboxAccounts.delete.mutationOptions({
-      onSuccess: () => {
-        refetch();
+  const syncInboxAccountMutation = useMutation(
+    trpc.inboxAccounts.sync.mutationOptions({
+      onMutate: () => {
+        setSyncing(true);
+      },
+      onSuccess: (data) => {
+        if (data) {
+          setRunId(data.id);
+          setAccessToken(data.publicAccessToken);
+        }
+      },
+      onError: () => {
+        setSyncing(false);
+        setRunId(undefined);
+        setStatus("FAILED");
+
+        toast({
+          duration: 3500,
+          title: "Something went wrong please try again.",
+        });
       },
     }),
   );
 
-  if (!data?.length) return null;
+  useEffect(() => {
+    if (isSyncing) {
+      toast({
+        title: "Syncing...",
+        description: "We're fetching your latest emails, please wait.",
+        duration: Number.POSITIVE_INFINITY,
+        variant: "spinner",
+      });
+    }
+  }, [isSyncing]);
+
+  useEffect(() => {
+    if (status === "COMPLETED") {
+      dismiss();
+      setRunId(undefined);
+      setSyncing(false);
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.inboxAccounts.get.queryKey(),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.inbox.get.queryKey(),
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
+  useEffect(() => {
+    if (status === "FAILED") {
+      setSyncing(false);
+      setRunId(undefined);
+
+      queryClient.invalidateQueries({
+        queryKey: trpc.inboxAccounts.get.queryKey(),
+      });
+
+      toast({
+        duration: 3500,
+        title: "Inbox sync failed, please try again.",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
+  const handleManualSync = () => {
+    syncInboxAccountMutation.mutate({
+      id: account.id,
+    });
+  };
 
   return (
-    <div>
-      <div className="flex flex-col gap-2 mt-6">
-        <span className="text-sm font-medium">Connected accounts</span>
+    <div className="flex items-center justify-between py-4">
+      <div className="flex items-center space-x-4">
+        <Avatar className="size-[34px]">
+          <AvatarFallback className="bg-white border border-border">
+            <Icons.Gmail className="size-5" />
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          <span className="text-sm font-medium">{account.email}</span>
+          <span className="text-muted-foreground text-xs">
+            {isSyncing ? (
+              "Syncing..."
+            ) : (
+              <>
+                Last accessed{" "}
+                {formatDistanceToNow(new Date(account.lastAccessed))} ago
+              </>
+            )}
+          </span>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2 mb-6 divide-y divide-border border-b-[1px]">
-        {data?.map((account) => (
-          <div
-            key={account.id}
-            className="flex items-center justify-between py-0.5"
-          >
-            <div className="flex flex-col justify-between w-full pr-4">
-              <div className="text-sm flex justify-between">
-                <span className="flex-2 text-sm">{account.email}</span>
-                <span className="text-muted-foreground text-xs">
-                  {formatDistanceToNow(new Date(account.lastAccessed))} ago
-                </span>
-              </div>
-            </div>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() =>
-                deleteInboxAccountMutation.mutate({ id: account.id })
-              }
-            >
-              <Icons.Delete />
-            </Button>
-          </div>
-        ))}
+      <div className="flex space-x-2 items-center">
+        <SyncInboxAccount
+          disabled={isSyncing || syncInboxAccountMutation.isPending}
+          onClick={handleManualSync}
+        />
+        <DeleteInboxAccount accountId={account.id} />
       </div>
     </div>
+  );
+}
+
+function InboxAccountsList() {
+  const trpc = useTRPC();
+  const { data } = useSuspenseQuery(trpc.inboxAccounts.get.queryOptions());
+
+  if (!data?.length) {
+    return (
+      <div className="px-6 py-8 text-center">
+        <p className="text-muted-foreground text-sm">
+          No inbox connections found.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-6 divide-y">
+      {data.map((account) => (
+        <InboxAccountItem key={account.id} account={account} />
+      ))}
+    </div>
+  );
+}
+
+export function InboxConnectedAccounts() {
+  const trpc = useTRPC();
+  const router = useRouter();
+
+  const connectMutation = useMutation(
+    trpc.inboxAccounts.connect.mutationOptions({
+      onSuccess: (authUrl: string | null) => {
+        if (authUrl) {
+          router.push(authUrl);
+        }
+      },
+    }),
+  );
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Email Connections</CardTitle>
+        <CardDescription>
+          Manage your connected email accounts or connect a new one.
+        </CardDescription>
+      </CardHeader>
+
+      <Suspense fallback={<InboxAccountsListSkeleton />}>
+        <InboxAccountsList />
+      </Suspense>
+
+      <CardFooter className="flex justify-between">
+        <div />
+
+        <Button
+          onClick={() => connectMutation.mutate({ provider: "gmail" })}
+          disabled={connectMutation.isPending}
+          data-event="Connect email"
+          data-channel="email"
+        >
+          Connect email
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }

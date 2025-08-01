@@ -1,6 +1,6 @@
 import { getDb } from "@jobs/init";
 import { processBatch } from "@jobs/utils/process-batch";
-import { getInboxAccountInfo } from "@midday/db/queries";
+import { getInboxAccountInfo, updateInboxAccount } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
 import { createClient } from "@midday/supabase/job";
 import { getExistingInboxAttachmentsQuery } from "@midday/supabase/queries";
@@ -94,5 +94,10 @@ export const syncInboxAccount = schemaTask({
     if (uploadedAttachments.length > 0) {
       await processAttachment.batchTriggerAndWait(uploadedAttachments);
     }
+
+    await updateInboxAccount(db, {
+      id,
+      lastAccessed: new Date().toISOString(),
+    });
   },
 });

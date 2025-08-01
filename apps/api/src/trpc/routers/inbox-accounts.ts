@@ -2,11 +2,12 @@ import {
   connectInboxAccountSchema,
   deleteInboxAccountSchema,
   exchangeCodeForAccountSchema,
+  syncInboxAccountSchema,
 } from "@api/schemas/inbox-accounts";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { deleteInboxAccount, getInboxAccounts } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
-import { schedules } from "@trigger.dev/sdk";
+import { schedules, tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 export const inboxAccountsRouter = createTRPCRouter({
@@ -64,5 +65,15 @@ export const inboxAccountsRouter = createTRPCRouter({
       }
 
       return data;
+    }),
+
+  sync: protectedProcedure
+    .input(syncInboxAccountSchema)
+    .mutation(async ({ input }) => {
+      const event = await tasks.trigger("sync-inbox-account", {
+        id: input.id,
+      });
+
+      return event;
     }),
 });

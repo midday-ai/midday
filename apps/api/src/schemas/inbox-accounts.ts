@@ -10,3 +10,5 @@ export const exchangeCodeForAccountSchema = z.object({
 });
 
 export const deleteInboxAccountSchema = z.object({ id: z.string() });
+
+export const syncInboxAccountSchema = z.object({ id: z.string() });
