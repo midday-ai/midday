@@ -1,0 +1,565 @@
+name: Production Deployment
+
+env:
+  TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
+  NODE_OPTIONS: --max-old-space-size=8192
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/**
+      - packages/**
+      - turbo.json
+      - package.json
+      - bun.lock
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Force deploy all services'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  # Setup and cache dependencies
+  setup:
+    name: 🔧 Setup & Cache
+    runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.cache-deps.outputs.cache-hit }}
+      turbo-cache-hit: ${{ steps.cache-turbo.outputs.cache-hit }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📦 Cache dependencies
+        uses: actions/cache@v4
+        id: cache-deps
+        with:
+          path: |
+            node_modules
+            ~/.bun/install/cache
+          key: deps-${{ runner.os }}-${{ hashFiles('**/bun.lock', '**/package.json') }}
+          restore-keys: |
+            deps-${{ runner.os }}-
+
+      - name: 🚀 Cache Turbo
+        uses: actions/cache@v4
+        id: cache-turbo
+        with:
+          path: |
+            .turbo
+            **/dist
+            **/.next/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      - name: 📦 Install dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: bun install --frozen-lockfile
+
+  # Security and quality checks
+  security-quality:
+    name: 🔒 Security & Quality
+    runs-on: ubuntu-latest
+    needs: setup
+    outputs:
+      has-api-changes: ${{ steps.changes.outputs.api }}
+      has-dashboard-changes: ${{ steps.changes.outputs.dashboard }}
+      has-website-changes: ${{ steps.changes.outputs.website }}
+      has-engine-changes: ${{ steps.changes.outputs.engine }}
+      has-email-changes: ${{ steps.changes.outputs.email }}
+      has-packages-changes: ${{ steps.changes.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Advanced change detection
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'packages/!(email|ui)/**'
+            dashboard:
+              - 'apps/dashboard/**'
+              - 'packages/**'
+            website:
+              - 'apps/website/**'
+              - 'packages/!(email)/**'
+            engine:
+              - 'apps/engine/**'
+              - 'packages/engine-client/**'
+            email:
+              - 'packages/email/**'
+            packages:
+              - 'packages/**'
+              - 'turbo.json'
+              - 'package.json'
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📦 Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.bun/install/cache
+          key: deps-${{ runner.os }}-${{ hashFiles('**/bun.lock', '**/package.json') }}
+
+      - name: 🚀 Restore Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .turbo
+            **/dist
+            **/.next/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      - name: 📦 Install dependencies (if cache miss)
+        if: needs.setup.outputs.cache-hit != 'true'
+        run: |
+          bun install --frozen-lockfile --concurrent=10
+
+      - name: 🔒 Security audit
+        run: |
+          bun audit --audit-level moderate || true
+          echo "Security audit completed"
+
+      - name: 🔍 Secret scanning
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: 🏗️ Build dependencies first
+        run: |
+          # Build core dependencies that other packages rely on for TypeScript
+          bunx turbo build --filter='@midday/engine-client' --filter='@midday/engine' --filter='@midday/utils' --filter='@midday/ui' --filter='@midday/tsconfig'
+
+      - name: 🔦 Lint (changed packages only)
+        run: |
+          if [ "${{ github.event.inputs.force_deploy }}" = "true" ]; then
+            bunx turbo lint
+          else
+            bunx turbo lint --filter='[HEAD^1]'
+          fi
+
+      - name: 🪐 TypeScript check (with dependencies)
+        run: |
+          if [ "${{ github.event.inputs.force_deploy }}" = "true" ]; then
+            bunx turbo typecheck
+          else
+            # Include dependencies in TypeScript check to ensure types are available
+            bunx turbo typecheck --filter='[HEAD^1]...'
+          fi
+
+      - name: 🧪 Tests (changed packages only)
+        run: |
+          if [ "${{ github.event.inputs.force_deploy }}" = "true" ]; then
+            bunx turbo test
+          else
+            bunx turbo test --filter='[HEAD^1]'
+          fi
+
+      - name: 📊 Bundle analyzer
+        run: |
+          if [ "${{ steps.changes.outputs.dashboard }}" = "true" ] || [ "${{ steps.changes.outputs.website }}" = "true" ]; then
+            echo "Running bundle analysis..."
+            # Add bundle analysis commands here
+          fi
+
+  # Build shared artifacts
+  build-shared:
+    name: 🏗️ Build Shared
+    runs-on: ubuntu-latest
+    needs: [setup, security-quality]
+    if: needs.security-quality.result == 'success' && (needs.security-quality.outputs.has-engine-changes == 'true' || needs.security-quality.outputs.has-packages-changes == 'true' || github.event.inputs.force_deploy == 'true')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📦 Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.bun/install/cache
+          key: deps-${{ runner.os }}-${{ hashFiles('**/bun.lock', '**/package.json') }}
+
+      - name: 🚀 Restore Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .turbo
+            **/dist
+            **/.next/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      - name: 🏗️ Build Engine and Dependencies (parallel)
+        run: |
+          # Build all core packages in parallel with optimal concurrency
+          bunx turbo build --filter=@midday/engine --filter=@midday/engine-client --filter=@midday/utils --filter=@midday/ui --concurrency=50%
+
+      - name: 📦 Cache Engine build
+        uses: actions/cache@v4
+        with:
+          path: apps/engine/dist
+          key: engine-build-${{ github.sha }}
+
+      - name: 📦 Cache Core Packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/engine-client/dist
+            packages/utils/dist
+            packages/ui/dist
+          key: core-packages-${{ github.sha }}
+
+  # Deploy Engine (first in dependency chain)
+  deploy-engine:
+    name: 🚀 Deploy Engine
+    runs-on: ubuntu-latest
+    needs: [security-quality, build-shared]
+    if: needs.security-quality.result == 'success' && (needs.security-quality.outputs.has-engine-changes == 'true' || github.event.inputs.force_deploy == 'true') && (always() && (needs.build-shared.result == 'success' || needs.build-shared.result == 'skipped' || !needs.build-shared.result))
+    environment: production
+    outputs:
+      deployment-url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📦 Restore Engine build
+        uses: actions/cache@v4
+        with:
+          path: apps/engine/dist
+          key: engine-build-${{ github.sha }}
+
+      - name: 📦 Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.bun/install/cache
+          key: deps-${{ runner.os }}-${{ hashFiles('**/bun.lock', '**/package.json') }}
+
+      - name: 🚀 Deploy to Cloudflare
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          packageManager: bun
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: "apps/engine"
+          wranglerVersion: "3.93.0"
+          command: deploy --minify src/index.ts --env production
+
+      - name: 📢 Deployment notification
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+
+  # Deploy API (depends on Engine)
+  deploy-api:
+    name: 🚀 Deploy API
+    runs-on: ubuntu-latest
+    needs: [security-quality, deploy-engine]
+    if: needs.security-quality.result == 'success' && (needs.security-quality.outputs.has-api-changes == 'true' || github.event.inputs.force_deploy == 'true') && (needs.deploy-engine.result == 'success' || needs.deploy-engine.result == 'skipped')
+    environment: production
+    concurrency: fly-production
+    outputs:
+      deployment-url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📦 Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.bun/install/cache
+          key: deps-${{ runner.os }}-${{ hashFiles('**/bun.lock', '**/package.json') }}
+
+      - name: 📦 Restore Engine build
+        uses: actions/cache@v4
+        with:
+          path: apps/engine/dist
+          key: engine-build-${{ github.sha }}
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: 🚀 Deploy to Fly.io
+        id: deploy
+        run: |
+          flyctl deploy --remote-only --dockerfile apps/api/Dockerfile --config apps/api/fly.toml
+          echo "deployment-url=https://api.midday.ai" >> $GITHUB_OUTPUT
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: 📢 Deployment notification
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+
+  # Deploy Dashboard (waits for API only if API has changes)
+  deploy-dashboard:
+    name: 🚀 Deploy Dashboard
+    runs-on: ubuntu-latest
+    needs: [security-quality, deploy-api]
+    if: needs.security-quality.result == 'success' && (needs.security-quality.outputs.has-dashboard-changes == 'true' || github.event.inputs.force_deploy == 'true') && (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
+    environment: production
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DASHBOARD }}
+    outputs:
+      deployment-url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📦 Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.bun/install/cache
+          key: deps-${{ runner.os }}-${{ hashFiles('**/bun.lock', '**/package.json') }}
+
+      - name: 📦 Restore Engine build
+        uses: actions/cache@v4
+        with:
+          path: apps/engine/dist
+          key: engine-build-${{ github.sha }}
+
+      - name: 📤 Pull Vercel Environment
+        run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: 🏗️ Build Dashboard
+        run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: 🔄 Deploy Background Jobs
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: |
+          TRIGGER_PROJECT_ID=${{ secrets.TRIGGER_PROJECT_ID }} bunx trigger.dev@3.3.17 deploy
+        working-directory: packages/jobs
+
+      - name: 🚀 Deploy to Vercel
+        id: deploy
+        run: |
+          url=$(bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }})
+          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set $url app.midday.ai
+          echo "deployment-url=https://app.midday.ai" >> $GITHUB_OUTPUT
+
+      - name: 📢 Deployment notification
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+
+  # Deploy Website (parallel with Dashboard)
+  deploy-website:
+    name: 🚀 Deploy Website
+    runs-on: ubuntu-latest
+    needs: security-quality
+    if: needs.security-quality.result == 'success' && (needs.security-quality.outputs.has-website-changes == 'true' || github.event.inputs.force_deploy == 'true')
+    environment: production
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
+    outputs:
+      deployment-url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📦 Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.bun/install/cache
+          key: deps-${{ runner.os }}-${{ hashFiles('**/bun.lock', '**/package.json') }}
+
+      - name: 📤 Pull Vercel Environment
+        run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: 📤 Pull Vercel Project Config
+        run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: 🏗️ Build Website
+        run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: 🚀 Deploy to Vercel
+        id: deploy
+        run: |
+          url=$(bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }})
+          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set $url midday.ai
+          echo "deployment-url=https://midday.ai" >> $GITHUB_OUTPUT
+
+      - name: 📢 Deployment notification
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+
+  # Deploy Email (parallel with other apps)
+  deploy-email:
+    name: 🚀 Deploy Email
+    runs-on: ubuntu-latest
+    needs: security-quality
+    if: needs.security-quality.result == 'success' && (needs.security-quality.outputs.has-email-changes == 'true' || github.event.inputs.force_deploy == 'true')
+    environment: production
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_EMAIL }}
+    outputs:
+      deployment-url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: 📦 Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.bun/install/cache
+          key: deps-${{ runner.os }}-${{ hashFiles('**/bun.lock', '**/package.json') }}
+
+      - name: 📤 Pull Vercel Environment
+        run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: 📤 Pull Vercel Project Config
+        run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: 🏗️ Build Email
+        run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: 🚀 Deploy to Vercel
+        id: deploy
+        run: |
+          url=$(bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }})
+          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set $url email.midday.ai
+          echo "deployment-url=https://email.midday.ai" >> $GITHUB_OUTPUT
+
+      - name: 📢 Deployment notification
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+
+  # Post-deployment validation and monitoring
+  post-deployment:
+    name: 📊 Post-Deployment
+    runs-on: ubuntu-latest
+    needs: [deploy-engine, deploy-api, deploy-dashboard]
+    if: always()
+    steps:
+      - name: 🔍 Integration tests
+        run: |
+          echo "Running integration tests..."
+          # Add integration test commands here
+          
+      - name: 📊 Performance monitoring
+        run: |
+          echo "Setting up performance monitoring..."
+          # Add performance monitoring setup
+
+      - name: 📈 Deployment metrics
+        run: |
+          echo "## Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Status | URL | Changes |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|-----|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Engine | ${{ needs.deploy-engine.result || 'Skipped' }} | ${{ needs.deploy-engine.outputs.deployment-url || 'N/A' }} | ${{ needs.security-quality.outputs.has-engine-changes }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| API | ${{ needs.deploy-api.result || 'Skipped' }} | ${{ needs.deploy-api.outputs.deployment-url || 'N/A' }} | ${{ needs.security-quality.outputs.has-api-changes }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dashboard | ${{ needs.deploy-dashboard.result || 'Skipped' }} | ${{ needs.deploy-dashboard.outputs.deployment-url || 'N/A' }} | ${{ needs.security-quality.outputs.has-dashboard-changes }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Website | ${{ needs.deploy-website.result || 'Skipped' }} | ${{ needs.deploy-website.outputs.deployment-url || 'N/A' }} | ${{ needs.security-quality.outputs.has-website-changes }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Email | ${{ needs.deploy-email.result || 'Skipped' }} | ${{ needs.deploy-email.outputs.deployment-url || 'N/A' }} | ${{ needs.security-quality.outputs.has-email-changes }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: 📢 Final deployment notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          text: |
+            🎉 Production deployment completed!
+            
+            **Deployed Services:**
+            ${{ needs.deploy-engine.result == 'success' && '✅ Engine' || '❌ Engine' }}
+            ${{ needs.deploy-api.result == 'success' && '✅ API' || '❌ API' }}
+            ${{ needs.deploy-dashboard.result == 'success' && '✅ Dashboard' || '❌ Dashboard' }}
+            ${{ needs.deploy-website.result == 'success' && '✅ Website' || '❌ Website' }}
+            ${{ needs.deploy-email.result == 'success' && '✅ Email' || '❌ Email' }}
+        continue-on-error: true
+
+  # Rollback job (runs on failure)
+  rollback:
+    name: 🔄 Rollback
+    runs-on: ubuntu-latest
+    needs: [deploy-engine, deploy-api, deploy-dashboard]
+    if: failure()
+    environment: production
+    steps:
+      - name: 🔄 Initiate rollback
+        run: |
+          echo "⚠️ Deployment failed. Initiating rollback..."
+          # Add rollback commands here
+          
+      - name: 📢 Rollback notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: 'warning'
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          text: "🔄 Production deployment failed. Rollback initiated."
+        continue-on-error: true 

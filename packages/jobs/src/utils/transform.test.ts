@@ -43,6 +43,8 @@ test("transformTransaction should correctly transform transaction data", () => {
     is_fulfilled: null,
     amount_text: null,
     calculated_vat: null,
+    tax_rate: null,
+    tax_type: null,
   };
 
   const teamId = "team123";
@@ -68,6 +70,8 @@ test("transformTransaction should correctly transform transaction data", () => {
     balance: 100.5,
     team_id: "team123",
     status: "posted",
+    tax_rate: null,
+    tax_type: null,
   });
 });
 
@@ -113,6 +117,8 @@ test("transformTransaction should handle null values correctly", () => {
     is_fulfilled: null,
     amount_text: null,
     calculated_vat: null,
+    tax_rate: null,
+    tax_type: null,
   };
 
   const teamId = "team456";
@@ -138,5 +144,7 @@ test("transformTransaction should handle null values correctly", () => {
     balance: null,
     team_id: "team456",
     status: "posted",
+    tax_rate: null,
+    tax_type: null,
   });
 });
