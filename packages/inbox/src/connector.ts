@@ -91,6 +91,7 @@ export class InboxConnector extends Connector {
     try {
       return this.#provider.getAttachments({
         id: account.id,
+        teamId: options.teamId,
         maxResults: options.maxResults,
       });
     } catch (error) {
