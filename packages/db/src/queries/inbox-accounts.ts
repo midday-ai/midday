@@ -91,3 +91,69 @@ export async function updateInboxAccount(
     })
     .where(eq(inboxAccounts.id, params.id));
 }
+
+export type UpsertInboxAccountParams = {
+  teamId: string;
+  provider: string;
+  accessToken: string;
+  refreshToken: string;
+  email: string;
+  lastAccessed: string;
+  externalId: string;
+  expiryDate: string;
+};
+
+export async function upsertInboxAccount(
+  db: Database,
+  params: UpsertInboxAccountParams,
+) {
+  const [result] = await db
+    .insert(inboxAccounts)
+    .values({
+      teamId: params.teamId,
+      provider: params.provider as any,
+      accessToken: params.accessToken,
+      refreshToken: params.refreshToken,
+      email: params.email,
+      lastAccessed: params.lastAccessed,
+      externalId: params.externalId,
+      expiryDate: params.expiryDate,
+    })
+    .onConflictDoUpdate({
+      target: inboxAccounts.externalId,
+      set: {
+        accessToken: params.accessToken,
+        refreshToken: params.refreshToken,
+        lastAccessed: params.lastAccessed,
+        expiryDate: params.expiryDate,
+      },
+    })
+    .returning({
+      id: inboxAccounts.id,
+      provider: inboxAccounts.provider,
+      external_id: inboxAccounts.externalId,
+    });
+
+  return result;
+}
+
+type GetInboxAccountInfoParams = {
+  id: string;
+};
+
+export async function getInboxAccountInfo(
+  db: Database,
+  params: GetInboxAccountInfoParams,
+) {
+  const [result] = await db
+    .select({
+      id: inboxAccounts.id,
+      provider: inboxAccounts.provider,
+      teamId: inboxAccounts.teamId,
+    })
+    .from(inboxAccounts)
+    .where(eq(inboxAccounts.id, params.id))
+    .limit(1);
+
+  return result;
+}

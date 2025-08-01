@@ -776,7 +776,9 @@ export type Database = {
           external_id: string
           id: string
           last_accessed: string
-          provider: Database["public"]["Enums"]["inbox_account_providers"]
+          provider:
+            | Database["public"]["Enums"]["inbox_account_providers"]
+            | null
           refresh_token: string
           schedule_id: string | null
           team_id: string
@@ -789,7 +791,9 @@ export type Database = {
           external_id: string
           id?: string
           last_accessed: string
-          provider: Database["public"]["Enums"]["inbox_account_providers"]
+          provider?:
+            | Database["public"]["Enums"]["inbox_account_providers"]
+            | null
           refresh_token: string
           schedule_id?: string | null
           team_id: string
@@ -802,7 +806,9 @@ export type Database = {
           external_id?: string
           id?: string
           last_accessed?: string
-          provider?: Database["public"]["Enums"]["inbox_account_providers"]
+          provider?:
+            | Database["public"]["Enums"]["inbox_account_providers"]
+            | null
           refresh_token?: string
           schedule_id?: string | null
           team_id?: string
@@ -3217,7 +3223,7 @@ export type Database = {
         | "processing"
         | "completed"
         | "failed"
-      inbox_account_providers: "gmail" | "outlook"
+      inbox_account_providers: "gmail"
       inbox_status:
         | "processing"
         | "pending"
@@ -3435,7 +3441,7 @@ export const Constants = {
         "completed",
         "failed",
       ],
-      inbox_account_providers: ["gmail", "outlook"],
+      inbox_account_providers: ["gmail"],
       inbox_status: [
         "processing",
         "pending",

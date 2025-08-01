@@ -1,10 +1,7 @@
+import type { Database } from "@midday/db/client";
+import { getInboxAccountById, upsertInboxAccount } from "@midday/db/queries";
 import { decrypt, encrypt } from "@midday/encryption";
-import { createClient } from "@midday/supabase/job";
-import { upsertInboxAccount } from "@midday/supabase/mutations";
-import { getInboxAccountByIdQuery } from "@midday/supabase/queries";
-import type { Client } from "@midday/supabase/types";
 import { GmailProvider } from "./providers/gmail";
-import { OutlookProvider } from "./providers/outlook";
 import {
   type Account,
   type Attachment,
@@ -16,23 +13,19 @@ import {
 } from "./providers/types";
 
 export class InboxConnector extends Connector {
-  #supabase: Client;
+  #db: Database;
   #provider: OAuthProviderInterface;
   #providerName: OAuthProvider;
 
-  constructor(provider: OAuthProvider) {
+  constructor(provider: OAuthProvider, db: Database) {
     super();
 
-    this.#supabase = createClient();
+    this.#db = db;
 
     switch (provider) {
       case "gmail":
-        this.#provider = new GmailProvider();
+        this.#provider = new GmailProvider(this.#db);
         this.#providerName = "gmail";
-        break;
-      case "outlook":
-        this.#provider = new OutlookProvider();
-        this.#providerName = "outlook";
         break;
       default:
         throw new Error(`Unsupported provider: ${provider}`);
@@ -61,28 +54,43 @@ export class InboxConnector extends Connector {
       expiryDate: new Date(tokens.expiry_date!).toISOString(),
     });
 
-    return account;
+    if (!account) {
+      throw new Error("Failed to save account");
+    }
+
+    return {
+      id: account.id,
+      provider: account.provider as OAuthProvider,
+      external_id: account.external_id,
+    };
   }
 
   async getAttachments(options: GetAttachmentsOptions): Promise<Attachment[]> {
-    const account = await getInboxAccountByIdQuery(this.#supabase, options.id);
+    const account = await getInboxAccountById(this.#db, {
+      id: options.id,
+      teamId: options.teamId,
+    });
 
-    if (!account.data) {
+    if (!account) {
       throw new Error("Account not found");
     }
 
+    if (!account.accessToken || !account.refreshToken) {
+      throw new Error("Account tokens not found or invalid");
+    }
+
     // Set the account ID
-    this.#provider.setAccountId(account.data.id);
+    this.#provider.setAccountId(account.id);
 
     // Set tokens to configure provider auth client
     this.#provider.setTokens({
-      access_token: decrypt(account.data.access_token),
-      refresh_token: decrypt(account.data.refresh_token),
+      access_token: decrypt(account.accessToken),
+      refresh_token: decrypt(account.refreshToken),
     });
 
     try {
       return this.#provider.getAttachments({
-        id: account.data.id,
+        id: account.id,
         maxResults: options.maxResults,
       });
     } catch (error) {
@@ -106,7 +114,7 @@ export class InboxConnector extends Connector {
       throw new Error("User info does not contain an email address.");
     }
 
-    const { data } = await upsertInboxAccount(this.#supabase, {
+    const data = await upsertInboxAccount(this.#db, {
       teamId: params.teamId,
       provider: this.#providerName,
       accessToken: encrypt(params.accessToken),

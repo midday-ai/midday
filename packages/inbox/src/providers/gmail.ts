@@ -1,8 +1,10 @@
+import type { Database } from "@midday/db/client";
+import { updateInboxAccount } from "@midday/db/queries";
+import { encrypt } from "@midday/encryption";
 import type { Credentials } from "google-auth-library";
 import { type Auth, type gmail_v1, google } from "googleapis";
 import { decodeBase64Url, ensurePdfExtension } from "../attachments";
 import { generateDeterministicId } from "../generate-id";
-import { updateAccessToken, updateRefreshToken } from "../tokens";
 import type {
   Attachment,
   EmailAttachment,
@@ -16,13 +18,16 @@ export class GmailProvider implements OAuthProviderInterface {
   #oauth2Client: Auth.OAuth2Client;
   #gmail: gmail_v1.Gmail | null = null;
   #accountId: string | null = null;
+  #db: Database;
 
   #scopes = [
     "https://www.googleapis.com/auth/gmail.readonly",
     "https://www.googleapis.com/auth/userinfo.email",
   ];
 
-  constructor() {
+  constructor(db: Database) {
+    this.#db = db;
+
     const clientId = process.env.GMAIL_CLIENT_ID;
     const clientSecret = process.env.GMAIL_CLIENT_SECRET;
     const redirectUri = process.env.GMAIL_REDIRECT_URI;
@@ -41,16 +46,16 @@ export class GmailProvider implements OAuthProviderInterface {
         }
 
         if (tokens?.refresh_token) {
-          await updateRefreshToken({
-            accountId: this.#accountId,
-            refreshToken: tokens.refresh_token,
+          await updateInboxAccount(this.#db, {
+            id: this.#accountId,
+            refreshToken: encrypt(tokens.refresh_token),
           });
         }
 
         if (tokens?.access_token) {
-          await updateAccessToken({
-            accountId: this.#accountId,
-            accessToken: tokens.access_token,
+          await updateInboxAccount(this.#db, {
+            id: this.#accountId,
+            accessToken: encrypt(tokens.access_token),
             expiryDate: new Date(tokens.expiry_date!).toISOString(),
           });
         }

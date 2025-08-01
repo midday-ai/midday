@@ -1,4 +1,6 @@
+import { getDb } from "@jobs/init";
 import { processBatch } from "@jobs/utils/process-batch";
+import { getInboxAccountInfo } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
 import { createClient } from "@midday/supabase/job";
 import { getExistingInboxAttachmentsQuery } from "@midday/supabase/queries";
@@ -23,26 +25,25 @@ export const syncInboxAccount = schemaTask({
   run: async (payload) => {
     const { id } = payload;
 
+    const db = getDb();
     const supabase = createClient();
 
     if (!id) {
       throw new Error("id is required");
     }
 
-    const { data } = await supabase
-      .from("inbox_accounts")
-      .select("id, provider, team_id")
-      .eq("id", id)
-      .single();
+    // Get the account info to access provider and teamId
+    const accountRow = await getInboxAccountInfo(db, { id });
 
-    if (!data) {
+    if (!accountRow) {
       throw new Error("Account not found");
     }
 
-    const connector = new InboxConnector(data.provider);
+    const connector = new InboxConnector(accountRow.provider, db);
 
     const attachments = await connector.getAttachments({
       id,
+      teamId: accountRow.teamId,
       maxResults: MAX_ATTACHMENTS,
     });
 
@@ -67,7 +68,7 @@ export const syncInboxAccount = schemaTask({
         for (const item of batch) {
           const { data: uploadData } = await supabase.storage
             .from("vault")
-            .upload(`${data.team_id}/inbox/${item.filename}`, item.data, {
+            .upload(`${accountRow.teamId}/inbox/${item.filename}`, item.data, {
               contentType: item.mimeType,
               upsert: true,
             });
@@ -80,7 +81,7 @@ export const syncInboxAccount = schemaTask({
                 mimetype: item.mimeType,
                 website: item.website,
                 referenceId: item.referenceId,
-                teamId: data.team_id,
+                teamId: accountRow.teamId,
               },
             });
           }
