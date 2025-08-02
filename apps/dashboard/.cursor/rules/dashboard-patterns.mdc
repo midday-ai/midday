@@ -1,0 +1,55 @@
+---
+alwaysApply: true
+description: Dashboard frontend patterns and conventions
+---
+
+# Dashboard Frontend Patterns
+
+## Architecture Overview
+The dashboard is a Next.js application with the following structure:
+
+- **App Router**: Using Next.js 13+ app directory structure
+- **UI Components**: Custom components with shadcn/ui
+- **State Management**: Zustand for client state
+- **Data Fetching**: tRPC for type-safe API calls
+- **Styling**: Tailwind CSS with component variants
+
+## Directory Structure
+- **Components**: [src/components/](mdc:src/components/) - Reusable UI components
+- **Pages**: [src/app/](mdc:src/app/) - App router pages and layouts
+- **Actions**: [src/actions/](mdc:src/actions/) - Server actions and mutations
+- **Hooks**: [src/hooks/](mdc:src/hooks/) - Custom React hooks
+- **Store**: [src/store/](mdc:src/store/) - Zustand state management
+- **Utils**: [src/utils/](mdc:src/utils/) - Utility functions
+- **Styles**: [src/styles/](mdc:src/styles/) - Global styles
+
+## Component Patterns
+- Use TypeScript for all components
+- Follow compound component patterns for complex UI
+- Use forwardRef for components that need ref access
+- Export types alongside components
+- Use memo for performance optimization when needed
+
+## State Management
+- Use Zustand for global state
+- Keep state close to where it's used
+- Use React Query/tRPC for server state
+- Avoid prop drilling with context when appropriate
+
+## Data Fetching
+- Use tRPC for type-safe API calls
+- Implement proper loading and error states
+- Use React Query features (caching, background updates)
+- Handle optimistic updates for better UX
+
+## Styling Conventions
+- Use Tailwind CSS utility classes
+- Create component variants with class-variance-authority
+- Follow consistent spacing and typography scales
+- Use CSS variables for theme customization
+
+## File Organization
+- Group related components in directories
+- Co-locate tests with components
+- Use index.ts for clean imports
+- Keep components focused and single-purpose

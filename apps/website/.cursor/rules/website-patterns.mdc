@@ -1,0 +1,344 @@
+---
+alwaysApply: true
+description: Website app patterns and conventions (Next.js + React + TypeScript)
+---
+
+# Website App Patterns
+
+## Technology Stack
+The website is built with:
+- **Next.js 15**: React framework with App Router
+- **React 19**: Frontend framework with latest features
+- **TypeScript**: Type-safe JavaScript
+- **Tailwind CSS**: Utility-first CSS framework
+- **MDX**: Markdown with React components
+
+## Architecture Overview
+- **Marketing Site**: Company website with content management
+- **Blog**: Technical blog posts and updates
+- **Components**: Reusable UI components and demos
+- **Static Generation**: Pre-built pages for optimal performance
+- **Dynamic Content**: Server-side rendering for interactive features
+
+## Directory Structure
+- **App**: [src/app/](mdc:src/app/) - Next.js App Router pages
+- **Components**: [src/components/](mdc:src/components/) - Reusable UI components
+- **Actions**: [src/actions/](mdc:src/actions/) - Server actions
+- **Lib**: [src/lib/](mdc:src/lib/) - Utility functions and configuration
+- **Styles**: [src/styles/](mdc:src/styles/) - Global styles and Tailwind config
+- **Public**: [public/](mdc:public/) - Static assets and images
+
+## Page Patterns
+```typescript
+// Page component structure
+import type { Metadata } from "next";
+import { ComponentExample } from "@/components/component-example";
+
+export const metadata: Metadata = {
+  title: "Page Title",
+  description: "Page description for SEO",
+};
+
+export default function Page() {
+  return (
+    <div className="container max-w-[1050px]">
+      <h1 className="mt-24 font-medium text-center text-5xl mb-8">
+        Page Title
+      </h1>
+      
+      <p className="text-[#878787] font-sm text-center max-w-[550px] m-auto">
+        Page description content
+      </p>
+      
+      <ComponentExample />
+    </div>
+  );
+}
+```
+
+## Component Patterns
+```typescript
+// Component with proper typing
+import { cn } from "@midday/ui/cn";
+import type { ComponentProps } from "react";
+
+interface ComponentProps extends ComponentProps<"div"> {
+  variant?: "default" | "highlighted";
+  children: React.ReactNode;
+}
+
+export function Component({ 
+  variant = "default", 
+  className, 
+  children, 
+  ...props 
+}: ComponentProps) {
+  return (
+    <div 
+      className={cn(
+        "base-styles",
+        variant === "highlighted" && "highlighted-styles",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+```
+
+## MDX Content Patterns
+```mdx
+---
+title: "Blog Post Title"
+publishedAt: "2024-01-01"
+summary: "Brief summary of the post content"
+image: "/images/post-image.jpg"
+tag: "Updates"
+---
+
+# Blog Post Title
+
+This is the blog post content with **markdown** formatting.
+
+<br />
+
+You can use React components inside MDX:
+
+```typescript
+// Code example
+const example = "Hello World";
+```
+
+<br />
+
+## Subheading
+
+More content here with proper spacing.
+```
+
+## Server Actions
+```typescript
+// Server action pattern
+"use server";
+
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+
+export async function subscribeAction(email: string) {
+  const client = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookies().get(name)?.value;
+        },
+        set(name: string, value: string, options: any) {
+          cookies().set(name, value, options);
+        },
+        remove(name: string, options: any) {
+          cookies().delete(name);
+        },
+      },
+    },
+  );
+
+  try {
+    const { error } = await client
+      .from("subscribers")
+      .insert({ email });
+
+    if (error) throw error;
+    
+    return { success: true };
+  } catch (error) {
+    return { error: "Failed to subscribe" };
+  }
+}
+```
+
+## Styling Conventions
+```typescript
+// Tailwind class patterns
+const styles = {
+  // Typography
+  heading: "text-5xl font-medium text-center mb-8",
+  subheading: "text-2xl font-medium mb-4",
+  body: "text-[#878787] font-sm",
+  
+  // Layout
+  container: "container max-w-[1050px]",
+  section: "mt-24 mb-16",
+  
+  // Components
+  button: "px-6 py-3 rounded-lg font-medium transition-colors",
+  card: "p-6 rounded-lg border bg-white dark:bg-gray-900",
+  
+  // Responsive
+  grid: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+};
+```
+
+## Image Optimization
+```typescript
+// Image loader configuration
+import type { ImageLoaderProps } from "next/image";
+
+export function imageLoader({ src, width, quality }: ImageLoaderProps) {
+  const params = new URLSearchParams({
+    url: src,
+    w: width.toString(),
+    q: (quality || 75).toString(),
+  });
+  
+  return `https://cdn.midday.ai/optimize?${params}`;
+}
+
+// Usage in components
+import Image from "next/image";
+
+<Image
+  src="/images/example.jpg"
+  alt="Example image"
+  width={800}
+  height={600}
+  quality={90}
+  className="rounded-lg"
+/>
+```
+
+## Data Fetching
+```typescript
+// Server-side data fetching
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+
+export async function getData() {
+  const client = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookies().get(name)?.value;
+        },
+      },
+    },
+  );
+
+  const { data, error } = await client
+    .from("table_name")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data;
+}
+```
+
+## SEO & Metadata
+```typescript
+// Metadata configuration
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Midday | Run your business smarter",
+    template: "%s | Midday",
+  },
+  description: "Comprehensive business management platform",
+  keywords: ["business", "finance", "automation"],
+  authors: [{ name: "Midday Team" }],
+  creator: "Midday",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://midday.ai",
+    title: "Midday | Run your business smarter",
+    description: "Comprehensive business management platform",
+    siteName: "Midday",
+    images: [
+      {
+        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Midday",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Midday | Run your business smarter",
+    description: "Comprehensive business management platform",
+    images: ["https://cdn.midday.ai/twitter-image.jpg"],
+  },
+};
+```
+
+## Animation Patterns
+```typescript
+// Framer Motion usage
+import { motion } from "framer-motion";
+
+export function AnimatedComponent() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="component-styles"
+    >
+      Content here
+    </motion.div>
+  );
+}
+```
+
+## Content Management
+- **Blog Posts**: MDX files with frontmatter metadata
+- **Static Pages**: React components with TypeScript
+- **Dynamic Content**: Server-side rendered with Next.js
+- **Images**: Optimized with custom image loader
+- **SEO**: Comprehensive metadata and Open Graph tags
+
+## Performance Optimization
+- **Static Generation**: Pre-build pages at build time
+- **Image Optimization**: Custom loader with CDN
+- **Bundle Optimization**: Tree shaking and code splitting
+- **Caching**: Appropriate cache headers for static assets
+- **Lazy Loading**: Defer non-critical content loading
+
+## Development Guidelines
+- **TypeScript**: Use strict typing for all components
+- **Accessibility**: Follow WCAG guidelines for inclusive design
+- **Performance**: Optimize images, fonts, and bundle size
+- **SEO**: Include proper metadata and structured data
+- **Responsive**: Mobile-first design approach
+- **Testing**: Component testing and integration tests
+
+## Build Configuration
+```javascript
+// next.config.mjs
+const config = {
+  poweredByHeader: false,
+  reactStrictMode: true,
+  trailingSlash: true,
+  transpilePackages: ["@midday/ui"],
+  experimental: {
+    inlineCss: true,
+  },
+  images: {
+    loader: "custom",
+    loaderFile: "./image-loader.ts",
+  },
+};
+```
+
+## Deployment
+- **Vercel**: Optimized for Next.js deployment
+- **Environment Variables**: Secure configuration management
+- **Analytics**: Integrated analytics and monitoring
+- **CDN**: Global content delivery network
+- **SSL**: Automatic HTTPS certificate management
