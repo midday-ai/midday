@@ -100,7 +100,7 @@ export const syncConnection = schemaTask({
           // @ts-expect-error - TODO: Fix types
           await triggerSequenceAndWait(bankAccounts, syncAccount, {
             tags: ctx.run.tags,
-            delayMinutes: manualSync ? 0 : 1,
+            delaySeconds: manualSync ? 30 : 60, // 30-second delay for manual sync, 60-second for background sync
           });
         }
 
