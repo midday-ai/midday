@@ -42,8 +42,19 @@ export class GmailProvider implements OAuthProviderInterface {
       "tokens",
       async (tokens: Credentials | null | undefined) => {
         if (!this.#accountId) {
+          console.warn("Token refresh event received but no account ID set");
           return;
         }
+
+        console.log("Token refresh event received", {
+          accountId: this.#accountId,
+          hasAccessToken: !!tokens?.access_token,
+          hasRefreshToken: !!tokens?.refresh_token,
+          expiryDate: tokens?.expiry_date
+            ? new Date(tokens.expiry_date).toISOString()
+            : null,
+          timestamp: new Date().toISOString(),
+        });
 
         if (tokens?.refresh_token) {
           await updateInboxAccount(this.#db, {
@@ -104,6 +115,18 @@ export class GmailProvider implements OAuthProviderInterface {
     if (!tokens.access_token) {
       throw new Error("Access token is required.");
     }
+
+    // Log token setting for debugging
+    console.log("Setting Gmail tokens", {
+      accountId: this.#accountId,
+      hasAccessToken: !!tokens.access_token,
+      hasRefreshToken: !!tokens.refresh_token,
+      expiryDate: tokens.expiry_date
+        ? new Date(tokens.expiry_date).toISOString()
+        : null,
+      isExpired: tokens.expiry_date ? Date.now() > tokens.expiry_date : false,
+      timestamp: new Date().toISOString(),
+    });
 
     const googleCredentials: Credentials = {
       access_token: tokens.access_token,
@@ -236,6 +259,36 @@ export class GmailProvider implements OAuthProviderInterface {
       return flattenedAttachments;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unknown error";
+
+      // Log the full error for debugging
+      console.error("Gmail API error:", {
+        error: message,
+        accountId: this.#accountId,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Check if it's a specific Gmail API error and provide more context
+      if (message.includes("invalid_request")) {
+        throw new Error(
+          "invalid_request - This is typically caused by expired or invalid OAuth tokens. Token refresh may be needed.",
+        );
+      }
+      if (message.includes("unauthorized") || message.includes("401")) {
+        throw new Error(
+          "unauthorized - Access token is invalid or expired. Authentication required.",
+        );
+      }
+      if (message.includes("invalid_grant")) {
+        throw new Error(
+          "invalid_grant - Refresh token is invalid or expired. Re-authentication required.",
+        );
+      }
+      if (message.includes("forbidden") || message.includes("403")) {
+        throw new Error(
+          "forbidden - Insufficient permissions or quota exceeded.",
+        );
+      }
+
       throw new Error(`Failed to fetch attachments: ${message}`);
     }
   }

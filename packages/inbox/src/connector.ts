@@ -41,10 +41,11 @@ export class InboxConnector extends Connector {
   ): Promise<Account | null> {
     const tokens = await this.#provider.exchangeCodeForTokens(params.code);
 
-    // Set tokens to configure provider auth client
+    // Set tokens to configure provider auth client with expiry date
     this.#provider.setTokens({
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token ?? "",
+      expiry_date: tokens.expiry_date,
     });
 
     const account = await this.#saveAccount({
@@ -82,21 +83,117 @@ export class InboxConnector extends Connector {
     // Set the account ID
     this.#provider.setAccountId(account.id);
 
-    // Set tokens to configure provider auth client
+    // Set tokens to configure provider auth client with expiry date
+    const expiryDate = account.expiryDate
+      ? new Date(account.expiryDate).getTime()
+      : undefined;
     this.#provider.setTokens({
       access_token: decrypt(account.accessToken),
       refresh_token: decrypt(account.refreshToken),
+      expiry_date: expiryDate,
     });
 
     try {
-      return this.#provider.getAttachments({
+      return await this.#provider.getAttachments({
         id: account.id,
         teamId: options.teamId,
         maxResults: options.maxResults,
+        lastAccessed: account.lastAccessed,
       });
     } catch (error) {
-      throw new Error("Failed to fetch attachments.");
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
+      // Check if it's an authentication error that might be resolved by token refresh
+      if (this.#isAuthError(errorMessage)) {
+        console.log(
+          "Authentication error detected, attempting token refresh and retry",
+        );
+        try {
+          return await this.#retryWithTokenRefresh(options, account);
+        } catch (retryError) {
+          const retryMessage =
+            retryError instanceof Error
+              ? retryError.message
+              : "Unknown retry error";
+          throw new Error(
+            `Failed to fetch attachments after token refresh: ${retryMessage}`,
+          );
+        }
+      }
+
+      throw new Error(`Failed to fetch attachments: ${errorMessage}`);
     }
+  }
+
+  #isAuthError(errorMessage: string): boolean {
+    const authErrorPatterns = [
+      "invalid_request",
+      "unauthorized",
+      "invalid_grant",
+      "invalid_token",
+      "token_expired",
+      "access_denied",
+      "forbidden",
+    ];
+
+    return authErrorPatterns.some((pattern) =>
+      errorMessage.toLowerCase().includes(pattern),
+    );
+  }
+
+  async #retryWithTokenRefresh(
+    options: GetAttachmentsOptions,
+    account: any,
+  ): Promise<Attachment[]> {
+    console.log("Attempting token refresh for account", {
+      accountId: account.id,
+    });
+
+    // Force token refresh by setting tokens again with expired date
+    // This will trigger the Google OAuth2 client to refresh automatically
+    this.#provider.setTokens({
+      access_token: decrypt(account.accessToken),
+      refresh_token: decrypt(account.refreshToken),
+      expiry_date: Date.now() - 1000, // Set as expired to force refresh
+    });
+
+    // Use exponential backoff to wait for token refresh to complete
+    // Google OAuth2 client refresh + database update should complete quickly
+    const maxRetries = 3;
+    const baseDelay = 200; // Start with 200ms
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Token refresh retry attempt ${attempt}/${maxRetries}`);
+
+        // Try the request - if tokens were refreshed, this should work
+        return await this.#provider.getAttachments({
+          id: account.id,
+          teamId: options.teamId,
+          maxResults: options.maxResults,
+          lastAccessed: account.lastAccessed,
+        });
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+
+        // If it's still an auth error and we have retries left, wait and try again
+        if (this.#isAuthError(errorMessage) && attempt < maxRetries) {
+          const delay = baseDelay * 2 ** (attempt - 1); // Exponential backoff: 200ms, 400ms, 800ms
+          console.log(
+            `Token refresh attempt ${attempt} failed, waiting ${delay}ms before retry`,
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+
+        // If it's not an auth error, or we're out of retries, throw
+        throw error;
+      }
+    }
+
+    throw new Error("Token refresh failed after all retry attempts");
   }
 
   async #saveAccount(params: {
