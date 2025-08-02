@@ -30,9 +30,8 @@ Midday is an all-in-one tool designed to help freelancers, contractors, consulta
 **Assistant**: Provides tailored insights into financial situations, helping users understand spending patterns, cut costs, and find documents.<br/>
 
 
-<p align="center">
+
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
-<p/>
 
 
 ## Get started
