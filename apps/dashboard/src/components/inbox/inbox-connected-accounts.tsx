@@ -16,7 +16,6 @@ import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
 import {
   useMutation,
-  useQuery,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
@@ -38,7 +37,7 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
 
-  const { status, setStatus } = useSyncStatus({ runId, accessToken });
+  const { status, setStatus, result } = useSyncStatus({ runId, accessToken });
 
   const syncInboxAccountMutation = useMutation(
     trpc.inboxAccounts.sync.mutationOptions({
@@ -58,6 +57,7 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
 
         toast({
           duration: 3500,
+          variant: "error",
           title: "Something went wrong please try again.",
         });
       },
@@ -68,7 +68,8 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
     if (isSyncing) {
       toast({
         title: "Syncing...",
-        description: "We're fetching your latest emails, please wait.",
+        description:
+          "We're scanning for PDF attachments and receipts, please wait.",
         duration: Number.POSITIVE_INFINITY,
         variant: "spinner",
       });
@@ -81,6 +82,20 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
       setRunId(undefined);
       setSyncing(false);
 
+      // Show success toast with attachment count
+      const attachmentCount = result?.attachmentsProcessed || 0;
+      const description =
+        attachmentCount > 0
+          ? `Found ${attachmentCount} new ${attachmentCount === 1 ? "attachment" : "attachments"}.`
+          : "No new attachments found.";
+
+      toast({
+        title: "Sync completed successfully",
+        description,
+        variant: "success",
+        duration: 3500,
+      });
+
       queryClient.invalidateQueries({
         queryKey: trpc.inboxAccounts.get.queryKey(),
       });
@@ -89,7 +104,6 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
         queryKey: trpc.inbox.get.queryKey(),
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   useEffect(() => {
@@ -103,10 +117,10 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
 
       toast({
         duration: 3500,
+        variant: "error",
         title: "Inbox sync failed, please try again.",
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   const handleManualSync = () => {

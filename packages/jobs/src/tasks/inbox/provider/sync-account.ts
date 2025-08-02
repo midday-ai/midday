@@ -75,19 +75,24 @@ export const syncInboxAccount = schemaTask({
       provider: accountRow.provider,
     });
 
-    // Filter out attachments that are already saved in the database
+    // Filter out attachments that are already processed
     const existingAttachments = await getExistingInboxAttachmentsQuery(
       supabase,
       attachments.map((attachment) => attachment.referenceId),
     );
 
     const filteredAttachments = attachments.filter((attachment) => {
-      // Skip if already exists
+      // Skip if already exists in database
       if (
         existingAttachments.data?.some(
           (existing) => existing.reference_id === attachment.referenceId,
         )
       ) {
+        logger.info("Skipping attachment - already processed", {
+          filename: attachment.filename,
+          referenceId: attachment.referenceId,
+          accountId: id,
+        });
         return false;
       }
 
@@ -103,6 +108,13 @@ export const syncInboxAccount = schemaTask({
       }
 
       return true;
+    });
+
+    logger.info("Attachment filtering summary", {
+      accountId: id,
+      totalFound: attachments.length,
+      afterFiltering: filteredAttachments.length,
+      skipped: attachments.length - filteredAttachments.length,
     });
 
     const uploadedAttachments = await processBatch(
@@ -162,5 +174,12 @@ export const syncInboxAccount = schemaTask({
       accountId: id,
       processedAttachments: uploadedAttachments.length,
     });
+
+    // Return the attachment count for the frontend
+    return {
+      accountId: id,
+      attachmentsProcessed: uploadedAttachments.length,
+      syncedAt: new Date().toISOString(),
+    };
   },
 });

@@ -43,5 +43,6 @@ export function useSyncStatus({
   return {
     status,
     setStatus,
+    result: run?.output,
   };
 }
