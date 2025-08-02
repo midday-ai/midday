@@ -18,10 +18,7 @@ export async function triggerSequenceAndWait<T>(
     payload: item,
     options: {
       ...restOptions,
-      delay:
-        delaySeconds >= 60
-          ? `${Math.round((i * delaySeconds) / 60)}min` // Use minutes for delays >= 60 seconds
-          : `${i * delaySeconds}s`, // Use seconds for delays < 60 seconds
+      delay: `${i * delaySeconds}s`, // Use seconds for precise timing
     },
   }));
 
