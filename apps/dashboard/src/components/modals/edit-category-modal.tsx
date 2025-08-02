@@ -17,8 +17,9 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { Switch } from "@midday/ui/switch";
+import { taxTypes } from "@midday/utils/tax";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { InputColor } from "../input-color";
 import { SelectTaxType } from "../select-tax-type";
@@ -34,6 +35,8 @@ type Props = {
     description?: string | null;
     taxRate?: number | null;
     taxType?: string | null;
+    taxReportingCode?: string | null;
+    excluded?: boolean | null;
   };
 };
 
@@ -44,6 +47,8 @@ const formSchema = z.object({
   color: z.string().optional().nullable(),
   taxRate: z.number().optional().nullable(),
   taxType: z.string().optional().nullable(),
+  taxReportingCode: z.string().optional().nullable(),
+  excluded: z.boolean().optional().nullable(),
 });
 
 type UpdateCategoriesFormValues = z.infer<typeof formSchema>;
@@ -76,6 +81,8 @@ export function EditCategoryModal({
       description: defaultValue.description ?? undefined,
       taxRate: defaultValue?.taxRate ? Number(defaultValue.taxRate) : undefined,
       taxType: defaultValue?.taxType ?? undefined,
+      taxReportingCode: defaultValue?.taxReportingCode ?? undefined,
+      excluded: defaultValue?.excluded ?? false,
     },
   });
 
@@ -90,6 +97,8 @@ export function EditCategoryModal({
         : null,
       taxType: values.taxType ?? null,
       color: values.color ?? null,
+      taxReportingCode: values.taxReportingCode ?? null,
+      excluded: values.excluded ?? false,
     });
   }
 
@@ -150,6 +159,26 @@ export function EditCategoryModal({
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="taxReportingCode"
+                  render={({ field }) => (
+                    <FormItem className="flex-1 space-y-1">
+                      <FormLabel className="text-xs text-[#878787] font-normal">
+                        Report Code
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          autoFocus={false}
+                          placeholder="Report Code"
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
                 <div className="flex relative gap-2">
                   <FormField
                     control={form.control}
@@ -197,6 +226,44 @@ export function EditCategoryModal({
                     )}
                   />
                 </div>
+
+                <div className="flex relative gap-2">
+                  <span className="text-xs text-muted-foreground flex-1">
+                    {
+                      taxTypes.find(
+                        (taxType) => taxType.value === form.watch("taxType"),
+                      )?.description
+                    }
+                  </span>
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="excluded"
+                  render={({ field }) => (
+                    <FormItem className="flex-1 space-y-1">
+                      <div className="border border-border p-3 mt-4">
+                        <div className="flex items-center justify-between space-x-2">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Exclude from Reports
+                            </FormLabel>
+                            <div className="text-xs text-muted-foreground">
+                              Transactions in this category won't appear in
+                              financial reports
+                            </div>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value ?? false}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </div>
+                      </div>
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <DialogFooter className="mt-8 w-full">

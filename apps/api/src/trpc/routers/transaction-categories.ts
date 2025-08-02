@@ -35,6 +35,8 @@ export const transactionCategoriesRouter = createTRPCRouter({
           taxRate: 0,
           taxType: "unknown",
           parentId: null,
+          taxReportingCode: null,
+          excluded: false,
         },
       ];
     }),

@@ -1,6 +1,7 @@
 import type { Database } from "@api/db";
 import { bankConnections, teams, users, usersOnTeam } from "@api/db/schema";
 import { and, eq } from "drizzle-orm";
+import { createSystemCategories } from "./transaction-categories";
 
 export const getTeamById = async (db: Database, id: string) => {
   const [result] = await db
@@ -88,6 +89,9 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
       .update(users)
       .set({ teamId: newTeam.id })
       .where(eq(users.id, params.userId));
+
+    // Create system categories for the new team
+    await createSystemCategories(tx, newTeam.id);
 
     return newTeam.id;
   });

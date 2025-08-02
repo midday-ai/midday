@@ -107,7 +107,16 @@ export const columns: ColumnDef<any>[] = [
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="cursor-default">{row.getValue("name")}</span>
+                <span
+                  className={cn(
+                    hasChildren && !isChild
+                      ? "cursor-pointer"
+                      : "cursor-default",
+                  )}
+                  onClick={hasChildren && !isChild ? toggleExpanded : undefined}
+                >
+                  {row.getValue("name")}
+                </span>
               </TooltipTrigger>
               {row.original?.description && (
                 <TooltipContent
@@ -145,6 +154,11 @@ export const columns: ColumnDef<any>[] = [
       row.getValue("taxRate") ? `${row.getValue("taxRate")}%` : "-",
   },
   {
+    header: () => <span className="whitespace-nowrap">Report Code</span>,
+    accessorKey: "taxReportingCode",
+    cell: ({ row }) => row.getValue("taxReportingCode") || "-",
+  },
+  {
     id: "actions",
     cell: ({ row, table }) => {
       const [isEditOpen, setIsEditOpen] = React.useState(false);
@@ -160,16 +174,18 @@ export const columns: ColumnDef<any>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
+                Edit
+              </DropdownMenuItem>
+
               {!row.original.isChild && (
                 <DropdownMenuItem
                   onClick={() => setIsCreateSubcategoryOpen(true)}
                 >
-                  Create Subcategory
+                  Add Subcategory
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
-                Edit
-              </DropdownMenuItem>
+
               {!row.original.system && (
                 <DropdownMenuItem
                   onClick={() =>
@@ -196,6 +212,8 @@ export const columns: ColumnDef<any>[] = [
             defaultTaxRate={row.original.taxRate}
             defaultTaxType={row.original.taxType}
             defaultColor={row.original.color}
+            defaultTaxReportingCode={row.original.taxReportingCode}
+            defaultExcluded={row.original.excluded}
           />
         </div>
       );
