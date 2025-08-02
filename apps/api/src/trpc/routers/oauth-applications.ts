@@ -1,14 +1,16 @@
 import {
+  authorizeOAuthApplicationSchema,
   createOAuthApplicationSchema,
   deleteOAuthApplicationSchema,
+  getApplicationInfoSchema,
   getOAuthApplicationSchema,
   regenerateClientSecretSchema,
+  updateApprovalStatusSchema,
   updateOAuthApplicationSchema,
 } from "@api/schemas/oauth-applications";
 import { revokeUserApplicationAccessSchema } from "@api/schemas/oauth-flow";
 import { resend } from "@api/services/resend";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { z } from "@hono/zod-openapi";
 import {
   createAuthorizationCode,
   createOAuthApplication,
@@ -39,14 +41,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
   }),
 
   getApplicationInfo: protectedProcedure
-    .input(
-      z.object({
-        clientId: z.string(),
-        redirectUri: z.string().url(),
-        scope: z.string(),
-        state: z.string().optional(),
-      }),
-    )
+    .input(getApplicationInfoSchema)
     .query(async ({ ctx, input }) => {
       const { db } = ctx;
       const { clientId, redirectUri, scope, state } = input;
@@ -92,17 +87,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
     }),
 
   authorize: protectedProcedure
-    .input(
-      z.object({
-        clientId: z.string(),
-        decision: z.enum(["allow", "deny"]),
-        scopes: z.array(z.string()),
-        redirectUri: z.string().url(),
-        state: z.string().optional(),
-        codeChallenge: z.string().optional(),
-        teamId: z.string().uuid(),
-      }),
-    )
+    .input(authorizeOAuthApplicationSchema)
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
       const {
@@ -239,7 +224,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
     }),
 
   update: protectedProcedure
-    .input(updateOAuthApplicationSchema.extend({ id: z.string().uuid() }))
+    .input(updateOAuthApplicationSchema)
     .mutation(async ({ ctx, input }) => {
       const { db, teamId } = ctx;
       const { id, ...updateData } = input;
@@ -317,12 +302,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
     }),
 
   updateApprovalStatus: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().uuid(),
-        status: z.enum(["draft", "pending"]),
-      }),
-    )
+    .input(updateApprovalStatusSchema)
     .mutation(async ({ ctx, input }) => {
       const { db, teamId, session } = ctx;
 

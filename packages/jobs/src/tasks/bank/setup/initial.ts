@@ -11,7 +11,7 @@ export const initialBankSetup = schemaTask({
   schema: initialBankSetupSchema,
   maxDuration: 120,
   queue: {
-    concurrencyLimit: 50,
+    concurrencyLimit: 25,
   },
   run: async (payload) => {
     const { teamId, connectionId } = payload;

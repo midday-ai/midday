@@ -32,7 +32,7 @@ export const deleteTeam = schemaTask({
 
     await Promise.all(connectionPromises);
 
-    // Unregister sync scheduler by deduplication key
+    // Unregister bank sync scheduler by deduplication key
     await schedules.del(`${teamId}-${bankSyncScheduler.id}`);
   },
 });

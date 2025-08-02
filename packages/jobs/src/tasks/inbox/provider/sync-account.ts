@@ -43,6 +43,7 @@ export const syncInboxAccount = schemaTask({
     const accountRow = await getInboxAccountInfo(getDb(), { id });
 
     if (!accountRow) {
+      // TODO: Unregister inbox account scheduler by deduplication key?
       throw new Error("Account not found");
     }
 

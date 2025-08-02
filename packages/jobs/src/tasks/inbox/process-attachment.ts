@@ -24,7 +24,7 @@ export const processAttachment = schemaTask({
     randomize: true,
   },
   queue: {
-    concurrencyLimit: 100,
+    concurrencyLimit: 50,
   },
   run: async ({
     teamId,

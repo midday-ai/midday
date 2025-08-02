@@ -15,7 +15,7 @@ export const processDocument = schemaTask({
   schema: processDocumentSchema,
   maxDuration: 60,
   queue: {
-    concurrencyLimit: 100,
+    concurrencyLimit: 50,
   },
   run: async ({ mimetype, filePath, teamId }) => {
     const supabase = createClient();

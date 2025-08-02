@@ -65,6 +65,10 @@ export const createOAuthApplicationSchema = z.object({
 
 // Update OAuth Application Schema
 export const updateOAuthApplicationSchema = z.object({
+  id: z.string().uuid().openapi({
+    description: "The unique identifier of the OAuth application",
+    example: "123e4567-e89b-12d3-a456-426614174000",
+  }),
   name: z.string().min(1).max(255).optional().openapi({
     description: "The name of the OAuth application",
     example: "My Updated Raycast Extension",
@@ -249,3 +253,39 @@ export const clientSecretResponseSchema = z.object({
     example: "mid_secret_abcdef123456789",
   }),
 });
+
+export const authorizeOAuthApplicationSchema = z.object({
+  clientId: z.string(),
+  decision: z.enum(["allow", "deny"]),
+  scopes: z.array(z.string()),
+  redirectUri: z.string().url(),
+  state: z.string().optional(),
+  codeChallenge: z.string().optional(),
+  teamId: z.string().uuid(),
+});
+
+export const getApplicationInfoSchema = z.object({
+  clientId: z.string(),
+  redirectUri: z.string().url(),
+  scope: z.string(),
+  state: z.string().optional(),
+});
+
+export const updateApprovalStatusSchema = z
+  .object({
+    id: z.string().uuid().openapi({
+      description: "The unique identifier of the OAuth application",
+      example: "123e4567-e89b-12d3-a456-426614174000",
+    }),
+    status: z.enum(["draft", "pending"]).openapi({
+      description: "The approval status of the OAuth application",
+      example: "pending",
+    }),
+  })
+  .openapi({
+    description: "Update the approval status of an OAuth application",
+    example: {
+      id: "123e4567-e89b-12d3-a456-426614174000",
+      status: "pending",
+    },
+  });

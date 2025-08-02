@@ -11,7 +11,7 @@ export const generateInvoice = schemaTask({
   schema: generateInvoiceSchema,
   maxDuration: 60,
   queue: {
-    concurrencyLimit: 50,
+    concurrencyLimit: 10,
   },
   machine: {
     preset: "large-1x",
