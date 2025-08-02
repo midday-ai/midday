@@ -152,6 +152,7 @@ export async function getInboxAccountInfo(
       id: inboxAccounts.id,
       provider: inboxAccounts.provider,
       teamId: inboxAccounts.teamId,
+      lastAccessed: inboxAccounts.lastAccessed,
     })
     .from(inboxAccounts)
     .where(eq(inboxAccounts.id, params.id))

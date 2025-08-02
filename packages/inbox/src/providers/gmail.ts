@@ -142,16 +142,55 @@ export class GmailProvider implements OAuthProviderInterface {
       throw new Error("Gmail client not initialized. Set tokens first.");
     }
 
-    const { maxResults = 10 } = options;
+    const { maxResults = 50, lastAccessed } = options;
+
+    // Build date filter based on lastAccessed or default to last 30 days for new accounts
+    let dateFilter = "";
+    if (lastAccessed) {
+      // For existing accounts, sync from last access date
+      const lastAccessDate = new Date(lastAccessed);
+      const formattedDate = lastAccessDate.toISOString().split("T")[0]; // YYYY-MM-DD format
+      dateFilter = `after:${formattedDate}`;
+    } else {
+      // For new accounts, fetch last 30 days to capture recent business documents
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const formattedDate = thirtyDaysAgo.toISOString().split("T")[0];
+      dateFilter = `after:${formattedDate}`;
+    }
 
     try {
-      const listResponse = await this.#gmail.users.messages.list({
-        userId: "me",
-        maxResults: maxResults,
-        q: "-from:me has:attachment filename:pdf",
-      });
+      // Fetch messages with pagination to handle high-volume days
+      const allMessages: gmail_v1.Schema$Message[] = [];
+      let nextPageToken: string | undefined;
+      const maxPagesToFetch = 3; // Limit to prevent infinite loops
+      let pagesFetched = 0;
 
-      const messages = listResponse.data.messages;
+      do {
+        const listResponse = await this.#gmail.users.messages.list({
+          userId: "me",
+          maxResults: Math.min(maxResults, 50), // Gmail API max per request
+          q: `-from:me has:attachment filename:pdf ${dateFilter}`,
+          pageToken: nextPageToken,
+        });
+
+        if (listResponse.data.messages) {
+          allMessages.push(...listResponse.data.messages);
+        }
+
+        nextPageToken = listResponse.data.nextPageToken ?? undefined;
+        pagesFetched++;
+
+        // Stop if we have enough messages or hit our page limit
+      } while (
+        nextPageToken &&
+        allMessages.length < maxResults &&
+        pagesFetched < maxPagesToFetch
+      );
+
+      // Limit to maxResults to respect our system limits
+      const messages = allMessages.slice(0, maxResults);
+
       if (!messages || messages.length === 0) {
         console.log(
           "No emails found with PDF attachments matching the criteria.",
