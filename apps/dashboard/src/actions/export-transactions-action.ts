@@ -2,7 +2,7 @@
 
 import { LogEvents } from "@midday/events/events";
 import type { ExportTransactionsPayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { authActionClient } from "./safe-action";
 

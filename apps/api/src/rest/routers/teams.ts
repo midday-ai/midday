@@ -1,9 +1,3 @@
-import {
-  getTeamById,
-  getTeamMembers,
-  updateTeamById,
-} from "@api/db/queries/teams";
-import { getTeamsByUserId } from "@api/db/queries/users-on-team";
 import type { Context } from "@api/rest/types";
 import {
   getTeamByIdSchema,
@@ -14,6 +8,12 @@ import {
 } from "@api/schemas/team";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import {
+  getTeamById,
+  getTeamMembers,
+  getTeamsByUserId,
+  updateTeamById,
+} from "@midday/db/queries";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();

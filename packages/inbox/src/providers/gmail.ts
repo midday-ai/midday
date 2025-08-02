@@ -1,8 +1,10 @@
+import type { Database } from "@midday/db/client";
+import { updateInboxAccount } from "@midday/db/queries";
+import { encrypt } from "@midday/encryption";
 import type { Credentials } from "google-auth-library";
 import { type Auth, type gmail_v1, google } from "googleapis";
 import { decodeBase64Url, ensurePdfExtension } from "../attachments";
 import { generateDeterministicId } from "../generate-id";
-import { updateAccessToken, updateRefreshToken } from "../tokens";
 import type {
   Attachment,
   EmailAttachment,
@@ -16,13 +18,16 @@ export class GmailProvider implements OAuthProviderInterface {
   #oauth2Client: Auth.OAuth2Client;
   #gmail: gmail_v1.Gmail | null = null;
   #accountId: string | null = null;
+  #db: Database;
 
   #scopes = [
     "https://www.googleapis.com/auth/gmail.readonly",
     "https://www.googleapis.com/auth/userinfo.email",
   ];
 
-  constructor() {
+  constructor(db: Database) {
+    this.#db = db;
+
     const clientId = process.env.GMAIL_CLIENT_ID;
     const clientSecret = process.env.GMAIL_CLIENT_SECRET;
     const redirectUri = process.env.GMAIL_REDIRECT_URI;
@@ -41,16 +46,16 @@ export class GmailProvider implements OAuthProviderInterface {
         }
 
         if (tokens?.refresh_token) {
-          await updateRefreshToken({
-            accountId: this.#accountId,
-            refreshToken: tokens.refresh_token,
+          await updateInboxAccount(this.#db, {
+            id: this.#accountId,
+            refreshToken: encrypt(tokens.refresh_token),
           });
         }
 
         if (tokens?.access_token) {
-          await updateAccessToken({
-            accountId: this.#accountId,
-            accessToken: tokens.access_token,
+          await updateInboxAccount(this.#db, {
+            id: this.#accountId,
+            accessToken: encrypt(tokens.access_token),
             expiryDate: new Date(tokens.expiry_date!).toISOString(),
           });
         }
@@ -137,16 +142,55 @@ export class GmailProvider implements OAuthProviderInterface {
       throw new Error("Gmail client not initialized. Set tokens first.");
     }
 
-    const { maxResults = 10 } = options;
+    const { maxResults = 50, lastAccessed } = options;
+
+    // Build date filter based on lastAccessed or default to last 30 days for new accounts
+    let dateFilter = "";
+    if (lastAccessed) {
+      // For existing accounts, sync from last access date
+      const lastAccessDate = new Date(lastAccessed);
+      const formattedDate = lastAccessDate.toISOString().split("T")[0]; // YYYY-MM-DD format
+      dateFilter = `after:${formattedDate}`;
+    } else {
+      // For new accounts, fetch last 30 days to capture recent business documents
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const formattedDate = thirtyDaysAgo.toISOString().split("T")[0];
+      dateFilter = `after:${formattedDate}`;
+    }
 
     try {
-      const listResponse = await this.#gmail.users.messages.list({
-        userId: "me",
-        maxResults: maxResults,
-        q: "-from:me has:attachment filename:pdf",
-      });
+      // Fetch messages with pagination to handle high-volume days
+      const allMessages: gmail_v1.Schema$Message[] = [];
+      let nextPageToken: string | undefined;
+      const maxPagesToFetch = 3; // Limit to prevent infinite loops
+      let pagesFetched = 0;
 
-      const messages = listResponse.data.messages;
+      do {
+        const listResponse = await this.#gmail.users.messages.list({
+          userId: "me",
+          maxResults: Math.min(maxResults, 50), // Gmail API max per request
+          q: `-from:me has:attachment filename:pdf ${dateFilter}`,
+          pageToken: nextPageToken,
+        });
+
+        if (listResponse.data.messages) {
+          allMessages.push(...listResponse.data.messages);
+        }
+
+        nextPageToken = listResponse.data.nextPageToken ?? undefined;
+        pagesFetched++;
+
+        // Stop if we have enough messages or hit our page limit
+      } while (
+        nextPageToken &&
+        allMessages.length < maxResults &&
+        pagesFetched < maxPagesToFetch
+      );
+
+      // Limit to maxResults to respect our system limits
+      const messages = allMessages.slice(0, maxResults);
+
       if (!messages || messages.length === 0) {
         console.log(
           "No emails found with PDF attachments matching the criteria.",

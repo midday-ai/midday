@@ -1,5 +1,5 @@
 import { createClient } from "@midday/supabase/job";
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { schemaTask } from "@trigger.dev/sdk";
 import convert from "heic-convert";
 import sharp from "sharp";
 import { z } from "zod";

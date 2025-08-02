@@ -1,14 +1,14 @@
 import {
-  deleteInboxAccount,
-  getInboxAccounts,
-} from "@api/db/queries/inbox-accounts";
-import {
   connectInboxAccountSchema,
   deleteInboxAccountSchema,
+  exchangeCodeForAccountSchema,
+  syncInboxAccountSchema,
 } from "@api/schemas/inbox-accounts";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { deleteInboxAccount, getInboxAccounts } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
-import { schedules } from "@trigger.dev/sdk/v3";
+import { schedules, tasks } from "@trigger.dev/sdk";
+import { TRPCError } from "@trpc/server";
 
 export const inboxAccountsRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -17,10 +17,39 @@ export const inboxAccountsRouter = createTRPCRouter({
 
   connect: protectedProcedure
     .input(connectInboxAccountSchema)
-    .mutation(async ({ input }) => {
-      const connector = new InboxConnector(input.provider);
+    .mutation(async ({ ctx: { db }, input }) => {
+      try {
+        const connector = new InboxConnector(input.provider, db);
 
-      return await connector.connect();
+        return connector.connect();
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to connect to inbox account",
+        });
+      }
+    }),
+
+  exchangeCodeForAccount: protectedProcedure
+    .input(exchangeCodeForAccountSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      try {
+        const connector = new InboxConnector(input.provider, db);
+
+        const account = await connector.exchangeCodeForAccount({
+          code: input.code,
+          teamId: teamId!,
+        });
+
+        return account;
+      } catch (error) {
+        console.error(error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to exchange code for account",
+        });
+      }
     }),
 
   delete: protectedProcedure
@@ -36,5 +65,15 @@ export const inboxAccountsRouter = createTRPCRouter({
       }
 
       return data;
+    }),
+
+  sync: protectedProcedure
+    .input(syncInboxAccountSchema)
+    .mutation(async ({ input }) => {
+      const event = await tasks.trigger("sync-inbox-account", {
+        id: input.id,
+      });
+
+      return event;
     }),
 });

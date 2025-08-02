@@ -1,6 +1,6 @@
 import { transformTransaction } from "@jobs/utils/transform";
 import { createClient } from "@midday/supabase/job";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
 const transactionSchema = z.object({

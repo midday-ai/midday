@@ -2,7 +2,7 @@ import { reconnectConnectionSchema } from "@jobs/schema";
 import { syncConnection } from "@jobs/tasks/bank/sync/connection";
 import { client } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 
 export const reconnectConnection = schemaTask({
   id: "reconnect-connection",

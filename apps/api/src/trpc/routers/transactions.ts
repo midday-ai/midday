@@ -1,17 +1,4 @@
 import {
-  createTransaction,
-  deleteTransactions,
-  getSimilarTransactions,
-  getTransactionById,
-  getTransactions,
-  getTransactionsAmountFullRangeData,
-  searchTransactionMatch,
-  updateSimilarTransactionsCategory,
-  updateSimilarTransactionsRecurring,
-  updateTransaction,
-  updateTransactions,
-} from "@api/db/queries/transactions";
-import {
   createTransactionSchema,
   deleteTransactionsSchema,
   getSimilarTransactionsSchema,
@@ -24,6 +11,19 @@ import {
   updateTransactionsSchema,
 } from "@api/schemas/transactions";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  createTransaction,
+  deleteTransactions,
+  getSimilarTransactions,
+  getTransactionById,
+  getTransactions,
+  getTransactionsAmountFullRangeData,
+  searchTransactionMatch,
+  updateSimilarTransactionsCategory,
+  updateSimilarTransactionsRecurring,
+  updateTransaction,
+  updateTransactions,
+} from "@midday/db/queries";
 
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure

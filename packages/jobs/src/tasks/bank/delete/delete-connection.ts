@@ -1,6 +1,6 @@
 import { client } from "@midday/engine-client";
 import { deleteConnectionSchema } from "@midday/jobs/schema";
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { schemaTask } from "@trigger.dev/sdk";
 
 export const deleteConnection = schemaTask({
   id: "delete-connection",

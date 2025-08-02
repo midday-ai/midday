@@ -1,4 +1,4 @@
-import type { BatchRunHandle } from "@trigger.dev/sdk/v3";
+import type { BatchRunHandle } from "@trigger.dev/sdk";
 
 interface TriggerTask<T> {
   batchTriggerAndWait: (

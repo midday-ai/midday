@@ -2,7 +2,7 @@ import * as crypto from "node:crypto";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import type { OnboardTeamPayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 

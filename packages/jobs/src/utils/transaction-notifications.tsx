@@ -9,7 +9,7 @@ import {
   triggerBulk,
 } from "@midday/notification";
 import { createClient } from "@midday/supabase/job";
-import { logger } from "@trigger.dev/sdk/v3";
+import { logger } from "@trigger.dev/sdk";
 
 interface User {
   id: string;

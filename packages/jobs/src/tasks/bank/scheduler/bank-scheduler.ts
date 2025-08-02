@@ -1,5 +1,5 @@
 import { createClient } from "@midday/supabase/job";
-import { logger, schedules } from "@trigger.dev/sdk/v3";
+import { logger, schedules } from "@trigger.dev/sdk";
 import { syncConnection } from "../sync/connection";
 
 // This is a fan-out pattern. We want to trigger a job for each bank connection

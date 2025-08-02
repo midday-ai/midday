@@ -2,7 +2,7 @@ import { generateInvoiceSchema } from "@jobs/schema";
 import { processDocument } from "@jobs/tasks/document/process-document";
 import { PdfTemplate, renderToBuffer } from "@midday/invoice";
 import { createClient } from "@midday/supabase/job";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import camelcaseKeys from "camelcase-keys";
 import { sendInvoiceEmail } from "../email/send-email";
 

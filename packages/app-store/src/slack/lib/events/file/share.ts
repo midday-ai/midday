@@ -1,6 +1,6 @@
 import type { InboxSlackUploadPayload } from "@midday/jobs/schema";
 import type { FileShareMessageEvent } from "@slack/web-api";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 
 export async function fileShare(
   event: FileShareMessageEvent,

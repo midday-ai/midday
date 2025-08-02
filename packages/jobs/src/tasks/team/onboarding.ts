@@ -7,7 +7,7 @@ import { TrialExpiringEmail } from "@midday/email/emails/trial-expiring";
 import { WelcomeEmail } from "@midday/email/emails/welcome";
 import { render } from "@midday/email/render";
 import { createClient } from "@midday/supabase/job";
-import { schemaTask, wait } from "@trigger.dev/sdk/v3";
+import { schemaTask, wait } from "@trigger.dev/sdk";
 
 export const onboardTeam = schemaTask({
   id: "onboard-team",

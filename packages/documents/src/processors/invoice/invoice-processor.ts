@@ -28,7 +28,7 @@ export class InvoiceProcessor {
       const result = await generateObject({
         model: mistral("mistral-medium-latest"),
         schema: invoiceSchema,
-        abortSignal: AbortSignal.timeout(45000),
+        abortSignal: AbortSignal.timeout(25000),
         messages: [
           {
             role: "system",

@@ -3,7 +3,7 @@ import { InviteEmail } from "@midday/email/emails/invite";
 import { getI18n } from "@midday/email/locales";
 import { render } from "@midday/email/render";
 import { inviteTeamMembersSchema } from "@midday/jobs/schema";
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { schemaTask } from "@trigger.dev/sdk";
 import { nanoid } from "nanoid";
 
 export const inviteTeamMembers = schemaTask({

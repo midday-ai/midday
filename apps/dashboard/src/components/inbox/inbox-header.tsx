@@ -4,7 +4,6 @@ import { InboxOrdering } from "@/components/inbox/inbox-ordering";
 import { InboxSearch } from "@/components/inbox/inbox-search";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { InboxSettingsModal } from "../modals/inbox-settings-modal";
 
 export function InboxHeader() {
   return (
@@ -13,7 +12,6 @@ export function InboxHeader() {
 
       <div className="flex space-x-2">
         <InboxOrdering />
-        <InboxSettingsModal />
 
         <Button
           variant="outline"
