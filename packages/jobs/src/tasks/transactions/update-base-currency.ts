@@ -38,7 +38,7 @@ export const updateBaseCurrency = schemaTask({
         formattedAccounts,
         updateAccountBaseCurrency,
         {
-          delayMinutes: 0,
+          delaySeconds: 0,
         },
       );
     }
