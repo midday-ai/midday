@@ -3,7 +3,6 @@ import {
   Body,
   Container,
   Heading,
-  Link,
   Preview,
   Section,
   Text,
@@ -16,28 +15,20 @@ import {
   getEmailInlineStyles,
   getEmailThemeClasses,
 } from "../components/theme";
-import { getI18n } from "../locales";
 
 interface Props {
   email?: string;
-  invitedByName?: string;
   teamName?: string;
   appName?: string;
-  ip?: string;
-  locale: string;
 }
 
 const baseAppUrl = getAppUrl();
 
 export const AppInstalledEmail = ({
-  invitedByName = "Pontus Abrahamsson",
   email = "pontus@lostisland.co",
   teamName = "Midday Labs AB",
   appName = "Raycast",
-  ip = "204.13.186.218",
-  locale = "en",
 }: Props) => {
-  const { t } = getI18n({ locale });
   const appLink = `${baseAppUrl}/apps`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
