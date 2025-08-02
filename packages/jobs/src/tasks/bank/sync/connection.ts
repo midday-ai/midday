@@ -107,11 +107,11 @@ export const syncConnection = schemaTask({
         logger.info("Synced bank accounts completed");
 
         // Trigger a notification for new transactions if it's an background sync
-        // We delay it by 1 minutes to allow for more transactions to be notified
+        // We delay it by 10 minutes to allow for more transactions to be notified
         if (!manualSync) {
           await transactionNotifications.trigger(
             { teamId: data.team_id },
-            { delay: "1m" },
+            { delay: "10m" },
           );
         }
 

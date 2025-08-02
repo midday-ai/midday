@@ -212,7 +212,7 @@ export function InboxDetails() {
                     <Icons.Gmail className="w-4 h-4" />
                   </TooltipTrigger>
                   <TooltipContent className="text-xs px-3 py-1.5">
-                    From {data.inboxAccount.email}
+                    {data.inboxAccount.email}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
