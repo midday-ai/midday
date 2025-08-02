@@ -15,7 +15,7 @@ import { processDocument } from "../document/process-document";
 export const processAttachment = schemaTask({
   id: "process-attachment",
   schema: processAttachmentSchema,
-  maxDuration: 60,
+  maxDuration: 120,
   retry: {
     maxAttempts: 3,
     minTimeoutInMs: 5000,

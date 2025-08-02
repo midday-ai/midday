@@ -8,7 +8,6 @@ import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { processAttachment } from "../process-attachment";
 
-const MAX_ATTACHMENTS = 50; // Handle high-volume days (e.g., bulk invoices)
 const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10MB
 const BATCH_SIZE = 5;
 
@@ -17,7 +16,14 @@ export const syncInboxAccount = schemaTask({
   schema: z.object({
     id: z.string(),
   }),
-  maxDuration: 60,
+  maxDuration: 120,
+  retry: {
+    maxAttempts: 3,
+    minTimeoutInMs: 5000,
+    maxTimeoutInMs: 60000,
+    factor: 2,
+    randomize: true,
+  },
   queue: {
     concurrencyLimit: 10,
   },
