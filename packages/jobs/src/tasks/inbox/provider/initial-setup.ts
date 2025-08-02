@@ -16,8 +16,6 @@ export const initialInboxSetup = schemaTask({
   run: async (payload) => {
     const { id } = payload;
 
-    const db = getDb();
-
     // Schedule the inbox sync task to run every 24 hours at a random time to distribute load
     // Use a deduplication key to prevent duplicate schedules for the same team
     // Add inbox account id as externalId to use it in the inboxSyncScheduler task
@@ -29,7 +27,7 @@ export const initialInboxSetup = schemaTask({
       deduplicationKey: `${id}-${inboxSyncScheduler.id}`,
     });
 
-    await updateInboxAccount(db, {
+    await updateInboxAccount(getDb(), {
       id,
       scheduleId: schedule.id,
     });

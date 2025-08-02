@@ -36,7 +36,6 @@ export const processAttachment = schemaTask({
     inboxAccountId,
   }) => {
     const supabase = createClient();
-    const db = getDb();
 
     // If the file is a HEIC we need to convert it to a JPG
     if (mimetype === "image/heic") {
@@ -48,14 +47,14 @@ export const processAttachment = schemaTask({
     const filename = filePath.at(-1);
 
     // Check if inbox item already exists (for retry scenarios)
-    let inboxData = await getInboxByFilePath(db, {
+    let inboxData = await getInboxByFilePath(getDb(), {
       filePath,
       teamId,
     });
 
     // Only create new inbox item if it doesn't exist
     if (!inboxData) {
-      inboxData = await createInbox(db, {
+      inboxData = await createInbox(getDb(), {
         // NOTE: If we can't parse the name using OCR this will be the fallback name
         displayName: filename ?? "Unknown",
         teamId,
@@ -101,7 +100,7 @@ export const processAttachment = schemaTask({
         hasAmount: !!result.amount,
       });
 
-      await updateInboxWithProcessedData(db, {
+      await updateInboxWithProcessedData(getDb(), {
         id: inboxData.id,
         amount: result.amount || undefined,
         currency: result.currency || undefined,
@@ -154,7 +153,7 @@ export const processAttachment = schemaTask({
         },
       );
 
-      await updateInbox(db, {
+      await updateInbox(getDb(), {
         id: inboxData.id,
         teamId,
         status: "pending",

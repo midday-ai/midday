@@ -19,7 +19,6 @@ export const processDocument = schemaTask({
   },
   run: async ({ mimetype, filePath, teamId }) => {
     const supabase = createClient();
-    const db = getDb();
 
     try {
       // If the file is a HEIC we need to convert it to a JPG
@@ -66,7 +65,7 @@ export const processDocument = schemaTask({
     } catch (error) {
       console.error(error);
 
-      await updateDocumentByPath(db, {
+      await updateDocumentByPath(getDb(), {
         pathTokens: filePath,
         teamId,
         processingStatus: "failed",

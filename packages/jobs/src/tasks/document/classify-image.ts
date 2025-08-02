@@ -14,7 +14,6 @@ export const classifyImage = schemaTask({
     fileName: z.string(),
   }),
   run: async ({ teamId, fileName }) => {
-    const db = getDb();
     const supabase = createClient();
     const classifier = new DocumentClassifier();
 
@@ -30,7 +29,7 @@ export const classifyImage = schemaTask({
 
     const result = await classifier.classifyImage({ content });
 
-    const data = await updateDocumentByFileName(db, {
+    const data = await updateDocumentByFileName(getDb(), {
       fileName,
       teamId,
       title: result.title || undefined,

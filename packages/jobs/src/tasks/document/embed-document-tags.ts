@@ -22,7 +22,6 @@ export const embedDocumentTags = schemaTask({
     concurrencyLimit: 25,
   },
   run: async ({ documentId, tags, teamId }) => {
-    const db = getDb();
     const embed = new Embed();
 
     // 1. Generate slugs for all incoming tags
@@ -34,7 +33,7 @@ export const embedDocumentTags = schemaTask({
     const slugs = tagsWithSlugs.map((t) => t.slug);
 
     // 2. Check existing embeddings in document_tag_embeddings
-    const existingEmbeddingsData = await getDocumentTagEmbeddings(db, {
+    const existingEmbeddingsData = await getDocumentTagEmbeddings(getDb(), {
       slugs,
     });
 
@@ -69,7 +68,7 @@ export const embedDocumentTags = schemaTask({
       }));
 
       // Upsert embeddings to handle potential race conditions or duplicates
-      await upsertDocumentTagEmbeddings(db, newEmbeddingsToInsert);
+      await upsertDocumentTagEmbeddings(getDb(), newEmbeddingsToInsert);
 
       console.log(
         `Successfully inserted/updated ${newEmbeddingsToInsert.length} embeddings.`,
@@ -85,7 +84,7 @@ export const embedDocumentTags = schemaTask({
       teamId: teamId,
     }));
 
-    const upsertedTagsData = await upsertDocumentTags(db, tagsToUpsert);
+    const upsertedTagsData = await upsertDocumentTags(getDb(), tagsToUpsert);
 
     if (!upsertedTagsData || upsertedTagsData.length === 0) {
       console.error("Upsert operation returned no data for document tags.");
@@ -104,10 +103,10 @@ export const embedDocumentTags = schemaTask({
         teamId: teamId,
       }));
 
-      await upsertDocumentTagAssignments(db, assignmentsToInsert);
+      await upsertDocumentTagAssignments(getDb(), assignmentsToInsert);
 
       // Update the document processing status to completed
-      await updateDocumentProcessingStatus(db, {
+      await updateDocumentProcessingStatus(getDb(), {
         id: documentId,
         processingStatus: "completed",
       });

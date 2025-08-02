@@ -14,11 +14,10 @@ export const classifyDocument = schemaTask({
     teamId: z.string(),
   }),
   run: async ({ content, fileName, teamId }) => {
-    const db = getDb();
     const classifier = new DocumentClassifier();
     const result = await classifier.classifyDocument({ content });
 
-    const data = await updateDocumentByFileName(db, {
+    const data = await updateDocumentByFileName(getDb(), {
       fileName,
       teamId,
       title: result.title || undefined,

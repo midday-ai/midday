@@ -25,7 +25,6 @@ export const syncInboxAccount = schemaTask({
   run: async (payload) => {
     const { id } = payload;
 
-    const db = getDb();
     const supabase = createClient();
 
     if (!id) {
@@ -33,13 +32,13 @@ export const syncInboxAccount = schemaTask({
     }
 
     // Get the account info to access provider and teamId
-    const accountRow = await getInboxAccountInfo(db, { id });
+    const accountRow = await getInboxAccountInfo(getDb(), { id });
 
     if (!accountRow) {
       throw new Error("Account not found");
     }
 
-    const connector = new InboxConnector(accountRow.provider, db);
+    const connector = new InboxConnector(accountRow.provider, getDb());
 
     const attachments = await connector.getAttachments({
       id,
@@ -96,7 +95,7 @@ export const syncInboxAccount = schemaTask({
       await processAttachment.batchTriggerAndWait(uploadedAttachments);
     }
 
-    await updateInboxAccount(db, {
+    await updateInboxAccount(getDb(), {
       id,
       lastAccessed: new Date().toISOString(),
     });
