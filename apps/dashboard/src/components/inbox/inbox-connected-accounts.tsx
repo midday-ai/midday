@@ -43,6 +43,7 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
   const [accessToken, setAccessToken] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
+  const router = useRouter();
 
   const { status, setStatus, result } = useSyncStatus({ runId, accessToken });
 
@@ -140,7 +141,7 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
     trpc.inboxAccounts.connect.mutationOptions({
       onSuccess: (authUrl) => {
         if (authUrl) {
-          window.open(authUrl, "_blank");
+          router.push(authUrl);
         }
       },
     }),
