@@ -190,7 +190,7 @@ export const syncInboxAccount = schemaTask({
         processedAttachments: uploadedAttachments.length,
       });
 
-      Return the attachment count for the frontend
+      // Return the attachment count for the frontend
       return {
         accountId: id,
         attachmentsProcessed: uploadedAttachments.length,
