@@ -16,9 +16,9 @@ async function getEligibleTeamIds() {
   const { db, disconnect } = createJobDb();
 
   try {
-    // Calculate date 14 days ago
+    // Calculate date 15 days ago
     const fourteenDaysAgo = new Date();
-    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 15);
 
     // Step 1: Get all teams with their bank connections and accounts in one query
     const allTeamsWithConnections = await db.query.teams.findMany({
@@ -50,7 +50,7 @@ async function getEligibleTeamIds() {
       if (team.plan === "pro" || team.plan === "starter") {
         return true;
       }
-      // Trial teams created in past 14 days (will need bank connection check)
+      // Trial teams created in past 15 days (will need bank connection check)
       if (
         team.plan === "trial" &&
         new Date(team.createdAt) >= fourteenDaysAgo
@@ -103,7 +103,7 @@ async function getEligibleTeamIds() {
         continue;
       }
 
-      // Criteria 2: Trial teams registered in past 14 days AND have bank connections
+      // Criteria 2: Trial teams registered in past 15 days AND have bank connections
       if (
         team.plan === "trial" &&
         new Date(team.createdAt) >= fourteenDaysAgo &&
@@ -148,7 +148,7 @@ async function getEligibleTeamIds() {
 
     if (trialTeams.length > 0) {
       console.log(
-        "Trial teams registered in past 14 days with bank connections:",
+        "Trial teams registered in past 15 days with bank connections:",
       );
       for (const team of trialTeams) {
         const daysAgo = Math.floor(
@@ -203,7 +203,7 @@ async function getEligibleTeamIds() {
       `Pro/Starter teams with bank connections: ${proStarterTeams.length}`,
     );
     console.log(
-      `Trial teams registered in past 14 days with bank connections: ${trialTeams.length}`,
+      `Trial teams registered in past 15 days with bank connections: ${trialTeams.length}`,
     );
     console.log(`Total eligible teams: ${eligibleTeams.length}`);
     console.log(`Total bank connections: ${totalBankConnections}`);

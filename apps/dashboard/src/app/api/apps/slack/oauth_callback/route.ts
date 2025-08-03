@@ -2,7 +2,7 @@ import { createApp } from "@midday/app-store/db";
 import {
   config,
   createSlackApp,
-  slackInstaller,
+  getSlackInstaller,
 } from "@midday/app-store/slack";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid params" }, { status: 400 });
   }
 
-  const veryfiedState = await slackInstaller.stateStore?.verifyStateParam(
+  const veryfiedState = await getSlackInstaller().stateStore?.verifyStateParam(
     new Date(),
     parsedParams.data.state,
   );

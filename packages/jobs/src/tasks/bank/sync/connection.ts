@@ -111,7 +111,7 @@ export const syncConnection = schemaTask({
         if (!manualSync) {
           await transactionNotifications.trigger(
             { teamId: data.team_id },
-            { delay: "10m" },
+            { delay: "5m" },
           );
         }
 
