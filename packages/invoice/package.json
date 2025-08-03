@@ -27,7 +27,7 @@
     "@midday/utils": "workspace:*",
     "@react-pdf/renderer": "^4.3.0",
     "date-fns": "^4.1.0",
-    "jose": "^6.0.11",
+    "jose": "^6.0.12",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {

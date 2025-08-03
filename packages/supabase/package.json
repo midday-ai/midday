@@ -13,13 +13,13 @@
     "@supabase/postgrest-js": "^1.19.4",
     "@supabase/ssr": "^0.6.1",
     "date-fns": "^4.1.0",
-    "react": "19.1.0",
+    "react": "19.1.1",
     "server-only": "^0.0.1",
     "supabase": "^2.24.3"
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2.50.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   },
   "exports": {
     "./server": "./src/client/server.ts",

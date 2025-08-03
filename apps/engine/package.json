@@ -13,13 +13,12 @@
     "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "@hono/zod-openapi": "^0.19.8",
-    "@hono/zod-validator": "^0.7.0",
+    "@hono/zod-openapi": "^1.0.2",
+    "@hono/zod-validator": "^0.7.2",
     "hono": "^4.8.12",
-    "jose": "^6.0.11",
-    "plaid": "^36.0.0",
+    "jose": "^6.0.12",
+    "plaid": "^37.0.0",
     "typesense": "^2.0.3",
-    "workers-ai-provider": "^0.6.1",
     "xior": "^0.7.8",
     "zod": "3.25.64"
   },

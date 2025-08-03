@@ -18,21 +18,21 @@
   "dependencies": {
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-deep-link": "~2",
-    "@tauri-apps/plugin-dialog": "^2.2.2",
+    "@tauri-apps/plugin-dialog": "^2.3.2",
     "@tauri-apps/plugin-global-shortcut": "~2",
     "@tauri-apps/plugin-opener": "^2",
-    "@tauri-apps/plugin-process": "^2.2.1",
-    "@tauri-apps/plugin-updater": "^2.7.1",
+    "@tauri-apps/plugin-process": "^2.3.0",
+    "@tauri-apps/plugin-updater": "^2.9.0",
     "@tauri-apps/plugin-upload": "~2",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.5.2",
-    "typescript": "~5.8.3",
-    "vite": "^6.3.5",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "~5.9.2",
+    "vite": "^7.0.6",
     "@tauri-apps/cli": "^2"
   }
 }

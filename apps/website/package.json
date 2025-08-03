@@ -16,26 +16,26 @@
     "@midday/ui": "workspace:*",
     "@openpanel/nextjs": "^1.0.8",
     "@openstatus/react": "^0.0.3",
-    "@team-plain/typescript-sdk": "5.9.0",
+    "@team-plain/typescript-sdk": "5.10.3",
     "@uidotdev/usehooks": "^2.4.1",
     "date-fns": "^4.1.0",
-    "framer-motion": "^12.15.0",
+    "framer-motion": "^12.23.12",
     "geist": "^1.4.2",
-    "next": "15.3.3",
+    "next": "15.4.5",
     "next-mdx-remote": "^5.0.0",
     "next-safe-action": "^7.10.8",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
     "react-hls-player": "^3.0.7",
     "react-use-draggable-scroll": "^0.4.7",
-    "resend": "^4.5.1",
+    "resend": "^4.7.0",
     "server-only": "^0.0.1",
     "sharp": "0.34.1",
     "sugar-high": "^0.9.3"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^22.15.29",
-    "@types/react": "19.1.6"
+    "@types/node": "^24.1.0",
+    "@types/react": "19.1.9"
   }
 }

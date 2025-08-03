@@ -30,7 +30,7 @@ export class ProviderError extends Error {
       case "enrollment.disconnected.user_action.insufficient_permissions":
       case "enrollment.disconnected.user_action.captcha_required":
       case "enrollment.disconnected.user_action.web_login_required":
-      // // Plaid
+      // Plaid
       case "ITEM_LOGIN_REQUIRED":
       case "ITEM_LOCKED":
       case "ITEM_CONCURRENTLY_DELETED":
