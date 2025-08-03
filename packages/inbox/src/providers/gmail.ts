@@ -30,6 +30,7 @@ export class GmailProvider implements OAuthProviderInterface {
 
     const clientId = process.env.GMAIL_CLIENT_ID;
     const clientSecret = process.env.GMAIL_CLIENT_SECRET;
+    const redirectUri = process.env.GMAIL_REDIRECT_URI;
 
     if (!clientId || !clientSecret) {
       throw new Error(
@@ -37,7 +38,11 @@ export class GmailProvider implements OAuthProviderInterface {
       );
     }
 
-    this.#oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
+    this.#oauth2Client = new google.auth.OAuth2(
+      clientId,
+      clientSecret,
+      redirectUri,
+    );
 
     this.#oauth2Client.on(
       "tokens",

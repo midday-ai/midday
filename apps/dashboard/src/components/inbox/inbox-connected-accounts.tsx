@@ -4,6 +4,7 @@ import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
+import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import {
   Card,
@@ -13,6 +14,12 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { Icons } from "@midday/ui/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import {
   useMutation,
@@ -201,30 +208,63 @@ export function InboxConnectedAccounts() {
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Email Connections</CardTitle>
-        <CardDescription>
-          Manage your connected email accounts or connect a new one.
-        </CardDescription>
-      </CardHeader>
+    <TooltipProvider>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <span>Email Connections</span>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Badge variant="tag-rounded" className="cursor-default">
+                  Beta
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[300px]">
+                <p>
+                  We are currently in Google's verification review process. This
+                  is a standard procedure for all apps requesting Gmail access.
+                  You may see a warning screen - this is normal. Simply click{" "}
+                  <strong>Advanced</strong> →{" "}
+                  <strong>Go to midday.ai (unsafe)</strong> to safely proceed.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </CardTitle>
+          <CardDescription>
+            Manage your connected email accounts or connect a new one.
+          </CardDescription>
+        </CardHeader>
 
-      <Suspense fallback={<InboxAccountsListSkeleton />}>
-        <InboxAccountsList />
-      </Suspense>
+        <Suspense fallback={<InboxAccountsListSkeleton />}>
+          <InboxAccountsList />
+        </Suspense>
 
-      <CardFooter className="flex justify-between">
-        <div />
+        <CardFooter className="flex justify-between">
+          <div />
 
-        <Button
-          onClick={() => connectMutation.mutate({ provider: "gmail" })}
-          disabled={connectMutation.isPending}
-          data-event="Connect email"
-          data-channel="email"
-        >
-          Connect email
-        </Button>
-      </CardFooter>
-    </Card>
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => connectMutation.mutate({ provider: "gmail" })}
+                disabled={connectMutation.isPending}
+                data-event="Connect email"
+                data-channel="email"
+              >
+                Connect email
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[300px]">
+              <p>
+                We are currently in Google's verification review process. This
+                is a standard procedure for all apps requesting Gmail access.
+                You may see a warning screen - this is normal. Simply click{" "}
+                <strong>Advanced</strong> →{" "}
+                <strong>Go to midday.ai (unsafe)</strong> to safely proceed.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </CardFooter>
+      </Card>
+    </TooltipProvider>
   );
 }
