@@ -36,6 +36,7 @@ export class ProviderError extends Error {
       case "ITEM_LOCKED":
       case "ITEM_CONCURRENTLY_DELETED":
       case "ACCESS_NOT_GRANTED":
+        return "disconnected";
 
       // EnableBanking
       case "ALREADY_AUTHORIZED":

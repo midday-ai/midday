@@ -51,9 +51,6 @@ export const syncInboxAccount = schemaTask({
 
     const connector = new InboxConnector(accountRow.provider, getDb());
 
-    const isInitialSync = !accountRow.lastAccessed;
-    const fullSync = isInitialSync || manualSync;
-
     logger.info("Starting inbox sync", {
       accountId: id,
       teamId: accountRow.teamId,
@@ -74,7 +71,7 @@ export const syncInboxAccount = schemaTask({
         teamId: accountRow.teamId,
         maxResults,
         lastAccessed: accountRow.lastAccessed,
-        fullSync,
+        fullSync: manualSync,
       });
 
       logger.info("Fetched attachments from provider", {
