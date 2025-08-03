@@ -102,14 +102,14 @@ export const processAttachment = schemaTask({
 
       await updateInboxWithProcessedData(getDb(), {
         id: inboxData.id,
-        amount: result.amount || undefined,
-        currency: result.currency || undefined,
-        displayName: result.name || undefined,
-        website: result.website || undefined,
-        date: result.date || undefined,
-        taxAmount: result.tax_amount || undefined,
-        taxRate: result.tax_rate || undefined,
-        taxType: result.tax_type || undefined,
+        amount: result.amount,
+        currency: result.currency,
+        displayName: result.name,
+        website: result.website,
+        date: result.date,
+        taxAmount: result.tax_amount,
+        taxRate: result.tax_rate,
+        taxType: result.tax_type,
         type: result.type as "invoice" | "expense" | null | undefined,
         status: "pending",
       });

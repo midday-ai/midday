@@ -20,11 +20,11 @@ export const classifyDocument = schemaTask({
     const data = await updateDocumentByFileName(getDb(), {
       fileName,
       teamId,
-      title: result.title || undefined,
-      summary: result.summary || undefined,
+      title: result.title,
+      summary: result.summary,
       content: limitWords(content, 10000),
-      date: result.date || undefined,
-      language: result.language || undefined,
+      date: result.date,
+      language: result.language,
       // If the document has no tags, we consider it as processed
       processingStatus:
         !result.tags || result.tags.length === 0 ? "completed" : undefined,
