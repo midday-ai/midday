@@ -136,6 +136,18 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
     });
   };
 
+  const connectMutation = useMutation(
+    trpc.inboxAccounts.connect.mutationOptions({
+      onSuccess: (authUrl) => {
+        if (authUrl) {
+          window.open(authUrl, "_blank");
+        }
+      },
+    }),
+  );
+
+  const isDisconnected = account.status === "disconnected";
+
   return (
     <div className="flex items-center justify-between py-4">
       <div className="flex items-center space-x-4">
@@ -145,7 +157,25 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
           </AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
-          <span className="text-sm font-medium">{account.email}</span>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium">{account.email}</span>
+            {isDisconnected && (
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Badge variant="tag-rounded" className="text-xs cursor-help">
+                    Disconnected
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[300px] text-xs">
+                  <p>
+                    Account access has expired. Google typically expires access
+                    tokens after 6 months as part of their security practices.
+                    Simply reconnect to restore functionality.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
           <span className="text-muted-foreground text-xs">
             {isSyncing ? (
               "Syncing..."
@@ -160,10 +190,21 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
       </div>
 
       <div className="flex space-x-2 items-center">
-        <SyncInboxAccount
-          disabled={isSyncing || syncInboxAccountMutation.isPending}
-          onClick={handleManualSync}
-        />
+        {isDisconnected ? (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => connectMutation.mutate({ provider: "gmail" })}
+            className="text-xs"
+          >
+            Reconnect
+          </Button>
+        ) : (
+          <SyncInboxAccount
+            disabled={isSyncing || syncInboxAccountMutation.isPending}
+            onClick={handleManualSync}
+          />
+        )}
         <DeleteInboxAccount accountId={account.id} />
       </div>
     </div>
@@ -215,7 +256,7 @@ export function InboxConnectedAccounts() {
             <span>Email Connections</span>
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
-                <div className="rounded-full text-[#878787] text-[9px] font-normal border px-2 py-1 font-mono cursor-default">
+                <div className="rounded-full text-[#878787] text-[9px] font-normal border px-2 py-1 font-mono cursor-help">
                   Beta
                 </div>
               </TooltipTrigger>

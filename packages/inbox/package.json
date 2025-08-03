@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./connector": "./src/connector.ts"
+    "./connector": "./src/connector.ts",
+    "./utils": "./src/utils.ts"
   },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",

@@ -11,6 +11,7 @@ import {
   type OAuthProvider,
   type OAuthProviderInterface,
 } from "./providers/types";
+import { isAuthenticationError } from "./utils";
 
 export class InboxConnector extends Connector {
   #db: Database;
@@ -106,7 +107,7 @@ export class InboxConnector extends Connector {
         error instanceof Error ? error.message : "Unknown error";
 
       // Check if it's an authentication error that might be resolved by token refresh
-      if (this.#isAuthError(errorMessage)) {
+      if (isAuthenticationError(errorMessage)) {
         try {
           return await this.#retryWithTokenRefresh(options, account);
         } catch (retryError) {
@@ -122,22 +123,6 @@ export class InboxConnector extends Connector {
 
       throw new Error(`Failed to fetch attachments: ${errorMessage}`);
     }
-  }
-
-  #isAuthError(errorMessage: string): boolean {
-    const authErrorPatterns = [
-      "invalid_request",
-      "unauthorized",
-      "invalid_grant",
-      "invalid_token",
-      "token_expired",
-      "access_denied",
-      "forbidden",
-    ];
-
-    return authErrorPatterns.some((pattern) =>
-      errorMessage.toLowerCase().includes(pattern),
-    );
   }
 
   async #retryWithTokenRefresh(
