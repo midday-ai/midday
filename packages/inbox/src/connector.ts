@@ -150,8 +150,7 @@ export class InboxConnector extends Connector {
       accountId: account.id,
     });
 
-    // Set tokens with actual expiry date to allow proper refresh handling
-    // The Google OAuth2 client will automatically refresh if the token is expired
+    // Set tokens with actual expiry date
     const expiryDate = account.expiryDate
       ? new Date(account.expiryDate).getTime()
       : undefined;
@@ -162,61 +161,44 @@ export class InboxConnector extends Connector {
       expiry_date: expiryDate,
     });
 
-    // Use exponential backoff to wait for token refresh to complete
-    // Google OAuth2 client refresh + database update should complete quickly
-    const maxRetries = 3;
-    const baseDelay = 200; // Start with 200ms
+    try {
+      // Explicitly refresh the tokens
+      await this.#provider.refreshTokens();
+      console.log("Token refresh completed successfully");
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        console.log(`Token refresh retry attempt ${attempt}/${maxRetries}`);
+      // After successful refresh, try the request immediately
+      return await this.#provider.getAttachments({
+        id: account.id,
+        teamId: options.teamId,
+        maxResults: options.maxResults,
+        lastAccessed: account.lastAccessed,
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
 
-        // Try the request - if tokens were refreshed, this should work
-        return await this.#provider.getAttachments({
-          id: account.id,
-          teamId: options.teamId,
-          maxResults: options.maxResults,
-          lastAccessed: account.lastAccessed,
-        });
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error";
+      console.log("Token refresh failed with error:", {
+        error: errorMessage,
+        accountId: account.id,
+        timestamp: new Date().toISOString(),
+      });
 
-        console.log(`Token refresh attempt ${attempt} failed with error:`, {
-          error: errorMessage,
-          accountId: account.id,
-          timestamp: new Date().toISOString(),
-        });
-
-        // Check for invalid_grant which indicates refresh token is invalid
-        if (errorMessage.includes("invalid_grant")) {
-          console.error(
-            "Refresh token is invalid or expired, re-authentication required",
-            {
-              accountId: account.id,
-            },
-          );
-          throw new Error(
-            "Refresh token is invalid or expired. The user needs to re-authenticate their Gmail account.",
-          );
-        }
-
-        // If it's still an auth error and we have retries left, wait and try again
-        if (this.#isAuthError(errorMessage) && attempt < maxRetries) {
-          const delay = baseDelay * 2 ** (attempt - 1); // Exponential backoff: 200ms, 400ms, 800ms
-          console.log(
-            `Token refresh attempt ${attempt} failed, waiting ${delay}ms before retry`,
-          );
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          continue;
-        }
-
-        // If it's not an auth error, or we're out of retries, throw
-        throw error;
+      // Check for invalid_grant which indicates refresh token is invalid
+      if (errorMessage.includes("invalid_grant")) {
+        console.error(
+          "Refresh token is invalid or expired, re-authentication required",
+          {
+            accountId: account.id,
+          },
+        );
+        throw new Error(
+          "Refresh token is invalid or expired. The user needs to re-authenticate their Gmail account.",
+        );
       }
-    }
 
-    throw new Error("Token refresh failed after all retry attempts");
+      // For other errors, throw them as well
+      throw new Error(`Token refresh failed: ${errorMessage}`);
+    }
   }
 
   async #saveAccount(params: {

@@ -100,4 +100,9 @@ export interface OAuthProviderInterface {
    * @param accountId - The account ID.
    */
   setAccountId(accountId: string): void;
+
+  /**
+   * Explicitly refreshes the access token using the refresh token.
+   */
+  refreshTokens(): Promise<void>;
 }

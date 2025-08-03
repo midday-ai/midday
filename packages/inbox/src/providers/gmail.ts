@@ -140,6 +140,57 @@ export class GmailProvider implements OAuthProviderInterface {
     this.#gmail = google.gmail({ version: "v1", auth: this.#oauth2Client });
   }
 
+  async refreshTokens(): Promise<void> {
+    if (!this.#accountId) {
+      throw new Error("Account ID is required for token refresh");
+    }
+
+    console.log("Explicitly refreshing tokens for account", {
+      accountId: this.#accountId,
+      timestamp: new Date().toISOString(),
+    });
+
+    try {
+      // Use Google's built-in refreshAccessToken method
+      const response = await this.#oauth2Client.refreshAccessToken();
+
+      console.log("Token refresh successful", {
+        accountId: this.#accountId,
+        hasAccessToken: !!response.credentials.access_token,
+        hasRefreshToken: !!response.credentials.refresh_token,
+        expiryDate: response.credentials.expiry_date
+          ? new Date(response.credentials.expiry_date).toISOString()
+          : null,
+        timestamp: new Date().toISOString(),
+      });
+
+      // The OAuth2Client automatically updates its credentials and emits the 'tokens' event
+      // which our event handler (lines 41-74) will catch and update the database
+      // No need to manually reinitialize the Gmail client - it uses the same auth instance
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      console.error("Token refresh failed", {
+        accountId: this.#accountId,
+        error: message,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Check for specific Google OAuth errors
+      if (message.includes("invalid_grant")) {
+        throw new Error(
+          "Refresh token is invalid or expired. Re-authentication required.",
+        );
+      }
+      if (message.includes("invalid_request")) {
+        throw new Error(
+          "Invalid refresh token request. Check token format and permissions.",
+        );
+      }
+
+      throw new Error(`Token refresh failed: ${message}`);
+    }
+  }
+
   async getUserInfo(): Promise<UserInfo | undefined> {
     try {
       const oauth2 = google.oauth2({
