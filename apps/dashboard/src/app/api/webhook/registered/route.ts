@@ -54,7 +54,7 @@ export async function POST(req: Request) {
       userId,
     } satisfies OnboardTeamPayload,
     {
-      delay: "5m",
+      delay: "10m",
     },
   );
 
