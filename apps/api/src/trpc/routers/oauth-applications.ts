@@ -170,7 +170,6 @@ export const oauthApplicationsRouter = createTRPCRouter({
               email: session.user.email,
               teamName: userTeam.name!,
               appName: application.name,
-              locale: "en",
             }),
           );
 
