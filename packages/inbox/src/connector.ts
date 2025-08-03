@@ -150,12 +150,16 @@ export class InboxConnector extends Connector {
       accountId: account.id,
     });
 
-    // Force token refresh by setting tokens again with expired date
-    // This will trigger the Google OAuth2 client to refresh automatically
+    // Set tokens with actual expiry date to allow proper refresh handling
+    // The Google OAuth2 client will automatically refresh if the token is expired
+    const expiryDate = account.expiryDate
+      ? new Date(account.expiryDate).getTime()
+      : undefined;
+
     this.#provider.setTokens({
       access_token: decrypt(account.accessToken),
       refresh_token: decrypt(account.refreshToken),
-      expiry_date: Date.now() - 1000, // Set as expired to force refresh
+      expiry_date: expiryDate,
     });
 
     // Use exponential backoff to wait for token refresh to complete
@@ -177,6 +181,25 @@ export class InboxConnector extends Connector {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
+
+        console.log(`Token refresh attempt ${attempt} failed with error:`, {
+          error: errorMessage,
+          accountId: account.id,
+          timestamp: new Date().toISOString(),
+        });
+
+        // Check for invalid_grant which indicates refresh token is invalid
+        if (errorMessage.includes("invalid_grant")) {
+          console.error(
+            "Refresh token is invalid or expired, re-authentication required",
+            {
+              accountId: account.id,
+            },
+          );
+          throw new Error(
+            "Refresh token is invalid or expired. The user needs to re-authenticate their Gmail account.",
+          );
+        }
 
         // If it's still an auth error and we have retries left, wait and try again
         if (this.#isAuthError(errorMessage) && attempt < maxRetries) {
