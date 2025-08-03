@@ -13,8 +13,8 @@
     "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "@hono/zod-openapi": "^1.0.2",
-    "@hono/zod-validator": "^0.7.2",
+    "@hono/zod-openapi": "0.19.8",
+    "@hono/zod-validator": "0.7.0",
     "hono": "^4.8.12",
     "jose": "^6.0.12",
     "plaid": "^37.0.0",
