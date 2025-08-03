@@ -261,7 +261,7 @@ export function InboxConnectedAccounts() {
                   Beta
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="max-w-[300px]">
+              <TooltipContent className="max-w-[300px] text-xs">
                 <p>
                   We are currently in Google's verification review process. This
                   is a standard procedure for all apps requesting Gmail access.
@@ -295,7 +295,7 @@ export function InboxConnectedAccounts() {
                 Connect email
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="max-w-[300px]">
+            <TooltipContent className="max-w-[300px] text-xs">
               <p>
                 We are currently in Google's verification review process. This
                 is a standard procedure for all apps requesting Gmail access.

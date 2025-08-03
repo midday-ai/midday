@@ -42,7 +42,7 @@ export function ConnectGmail() {
             </div>
           </SubmitButton>
         </TooltipTrigger>
-        <TooltipContent className="max-w-[300px]" sideOffset={10}>
+        <TooltipContent className="max-w-[300px] text-xs" sideOffset={10}>
           <p>
             We are currently in Google's verification review process. This is a
             standard procedure for all apps requesting Gmail access. You may see
