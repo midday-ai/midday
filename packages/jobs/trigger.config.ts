@@ -5,6 +5,7 @@ export default defineConfig({
   runtime: "node",
   logLevel: "log",
   maxDuration: 60,
+  experimental_processKeepAlive: true,
   retries: {
     enabledInDev: false,
     default: {
