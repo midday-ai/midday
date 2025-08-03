@@ -4,7 +4,7 @@ import {
 } from "@jobs/utils/base-currency";
 import { processBatch } from "@jobs/utils/process-batch";
 import { createClient } from "@midday/supabase/job";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
 const BATCH_LIMIT = 500;

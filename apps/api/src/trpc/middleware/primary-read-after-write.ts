@@ -1,19 +1,6 @@
-import type { Database, DatabaseWithPrimary } from "@api/db";
 import type { Session } from "@api/utils/auth";
-import { logger } from "@api/utils/logger";
-import { LRUCache } from "lru-cache";
-
-// In-memory map to track teams who recently performed mutations.
-// Note: This map is per server instance, and we typically run 1 instance per region.
-// Otherwise, we would need to share this state with Redis or a similar external store.
-// Key: teamId, Value: timestamp when they should be able to use replicas again
-const cache = new LRUCache<string, number>({
-  max: 5_000, // up to 5k entries
-  ttl: 10000, // 10 seconds in milliseconds
-});
-
-// The window time in milliseconds to handle replication lag (10 seconds)
-const REPLICATION_LAG_WINDOW = 10000;
+import { replicationCache } from "@midday/cache/replication-cache";
+import type { Database, DatabaseWithPrimary } from "@midday/db/client";
 
 // Database middleware that handles replication lag based on mutation operations
 // For mutations: always use primary DB
@@ -39,16 +26,7 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
   if (teamId) {
     // For mutations, always use primary DB and update the team's timestamp
     if (type === "mutation") {
-      // Set the timestamp when the team can use replicas again
-      const expiryTime = Date.now() + REPLICATION_LAG_WINDOW;
-      cache.set(teamId, expiryTime);
-
-      logger.info({
-        msg: "Using primary DB for mutation",
-        teamId,
-        operationType: type,
-        replicaBlockUntil: new Date(expiryTime).toISOString(),
-      });
+      replicationCache.set(teamId);
 
       // Use primary-only mode to maintain interface consistency
       const dbWithPrimary = ctx.db as DatabaseWithPrimary;
@@ -59,41 +37,20 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
     }
     // For queries, check if the team recently performed a mutation
     else {
-      const timestamp = cache.get(teamId);
+      const timestamp = replicationCache.get(teamId);
       const now = Date.now();
 
       // If the timestamp exists and hasn't expired, use primary DB
       if (timestamp && now < timestamp) {
-        const remainingMs = timestamp - now;
-        logger.info({
-          msg: "Using primary DB for query after recent mutation",
-          teamId,
-          operationType: type,
-          replicaBlockRemainingMs: remainingMs,
-          replicaBlockUntil: new Date(timestamp).toISOString(),
-        });
-
         // Use primary-only mode to maintain interface consistency
         const dbWithPrimary = ctx.db as DatabaseWithPrimary;
         if (dbWithPrimary.usePrimaryOnly) {
           ctx.db = dbWithPrimary.usePrimaryOnly();
         }
         // If usePrimaryOnly doesn't exist, we're already using the primary DB
-      } else {
-        logger.debug({
-          msg: "Using replica DB for query",
-          teamId,
-          operationType: type,
-          recentMutation: !!timestamp,
-        });
       }
     }
   } else {
-    logger.debug({
-      msg: "No team ID in context, using primary DB",
-      operationType: type,
-    });
-
     // When no team ID is present, always use primary DB
     const dbWithPrimary = ctx.db as DatabaseWithPrimary;
     if (dbWithPrimary.usePrimaryOnly) {
@@ -102,18 +59,7 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
     // If usePrimaryOnly doesn't exist, we're already using the primary DB
   }
 
-  const start = performance.now();
   const result = await next({ ctx });
-  const duration = performance.now() - start;
-
-  if (duration > 500) {
-    logger.warn({
-      msg: "Slow DB operation detected",
-      teamId,
-      operationType: type,
-      durationMs: Math.round(duration),
-    });
-  }
 
   return result;
 };

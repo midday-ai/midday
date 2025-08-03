@@ -1,27 +1,9 @@
-import type { DatabaseWithPrimary } from "@api/db";
-import { users } from "@api/db/schema";
 import { logger } from "@api/utils/logger";
-import { eq } from "drizzle-orm";
+import { replicationCache } from "@midday/cache/replication-cache";
+import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
+import type { DatabaseWithPrimary } from "@midday/db/client";
+import { getUserTeamId } from "@midday/db/queries";
 import type { MiddlewareHandler } from "hono";
-import { LRUCache } from "lru-cache";
-
-// In-memory map to track teams who recently performed mutations.
-// Note: This map is per server instance, and we typically run 1 instance per region.
-// Otherwise, we would need to share this state with Redis or a similar external store.
-// Key: teamId, Value: timestamp when they should be able to use replicas again
-const cache = new LRUCache<string, number>({
-  max: 5_000, // up to 5k entries
-  ttl: 10000, // 10 seconds in milliseconds
-});
-
-// The window time in milliseconds to handle replication lag (10 seconds)
-const REPLICATION_LAG_WINDOW = 10000;
-
-// Cache for team permissions to avoid repeated database queries
-const teamPermissionCache = new LRUCache<string, string>({
-  max: 5_000, // up to 5k entries
-  ttl: 1000 * 60 * 30, // 30 minutes in milliseconds
-});
 
 /**
  * Database middleware that handles replication lag based on mutation operations
@@ -44,19 +26,16 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
   // Try to get teamId from session/user context
   if (session?.user?.id) {
     const cacheKey = `user:${session.user.id}:team`;
-    teamId = teamPermissionCache.get(cacheKey) || null;
+    teamId = teamPermissionsCache.get(cacheKey) || null;
 
-    if (!teamId) {
+    if (!teamId && session.user.id) {
       try {
         // Get user's current team
-        const result = await db.query.users.findFirst({
-          columns: { teamId: true },
-          where: eq(users.id, session.user.id),
-        });
+        const userTeamId = await getUserTeamId(db, session.user.id);
 
-        if (result?.teamId) {
-          teamId = result.teamId;
-          teamPermissionCache.set(cacheKey, result.teamId);
+        if (userTeamId) {
+          teamId = userTeamId;
+          teamPermissionsCache.set(cacheKey, userTeamId);
         }
       } catch (error) {
         logger.warn({
@@ -73,18 +52,7 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
   if (teamId) {
     // For mutations, always use primary DB and update the team's timestamp
     if (operationType === "mutation") {
-      // Set the timestamp when the team can use replicas again
-      const expiryTime = Date.now() + REPLICATION_LAG_WINDOW;
-      cache.set(teamId, expiryTime);
-
-      logger.info({
-        msg: "Using primary DB for mutation",
-        teamId,
-        operationType,
-        method,
-        path: c.req.path,
-        replicaBlockUntil: new Date(expiryTime).toISOString(),
-      });
+      replicationCache.set(teamId);
 
       // Use primary-only mode to maintain interface consistency
       const dbWithPrimary = db as DatabaseWithPrimary;
@@ -95,47 +63,18 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
     }
     // For queries, check if the team recently performed a mutation
     else {
-      const timestamp = cache.get(teamId);
+      const timestamp = replicationCache.get(teamId);
       const now = Date.now();
 
       // If the timestamp exists and hasn't expired, use primary DB
       if (timestamp && now < timestamp) {
-        const remainingMs = timestamp - now;
-        logger.info({
-          msg: "Using primary DB for query after recent mutation",
-          teamId,
-          operationType,
-          method,
-          path: c.req.path,
-          replicaBlockRemainingMs: remainingMs,
-          replicaBlockUntil: new Date(timestamp).toISOString(),
-        });
-
         // Use primary-only mode to maintain interface consistency
         const dbWithPrimary = db as DatabaseWithPrimary;
         if (dbWithPrimary.usePrimaryOnly) {
           finalDb = dbWithPrimary.usePrimaryOnly();
         }
-        // If usePrimaryOnly doesn't exist, we're already using the primary DB
-      } else {
-        logger.debug({
-          msg: "Using replica DB for query",
-          teamId,
-          operationType,
-          method,
-          path: c.req.path,
-          recentMutation: !!timestamp,
-        });
       }
     }
-  } else {
-    logger.debug({
-      msg: "No team ID in context, using default DB routing",
-      operationType,
-      method,
-      path: c.req.path,
-      hasSession: !!session,
-    });
   }
 
   // Set database and context in Hono context
@@ -143,18 +82,5 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
   c.set("session", session);
   c.set("teamId", teamId);
 
-  const start = performance.now();
   await next();
-  const duration = performance.now() - start;
-
-  if (duration > 500) {
-    logger.warn({
-      msg: "Slow DB operation detected",
-      teamId,
-      operationType,
-      method,
-      path: c.req.path,
-      durationMs: Math.round(duration),
-    });
-  }
 };

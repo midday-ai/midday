@@ -23,7 +23,9 @@ export interface Account {
 
 export interface GetAttachmentsOptions {
   id: string;
+  teamId: string;
   maxResults?: number;
+  lastAccessed?: string;
 }
 
 export abstract class Connector {
@@ -61,7 +63,7 @@ export interface UserInfo {
   name?: string;
 }
 
-export type OAuthProvider = "gmail" | "outlook";
+export type OAuthProvider = "gmail";
 
 export interface OAuthProviderInterface {
   /**
@@ -98,4 +100,9 @@ export interface OAuthProviderInterface {
    * @param accountId - The account ID.
    */
   setAccountId(accountId: string): void;
+
+  /**
+   * Explicitly refreshes the access token using the refresh token.
+   */
+  refreshTokens(): Promise<void>;
 }

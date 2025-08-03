@@ -1,26 +1,3 @@
-import { getBankConnections } from "@api/db/queries/bank-connections";
-import {
-  createTeam,
-  deleteTeam,
-  deleteTeamMember,
-  getAvailablePlans,
-  getTeamById,
-  leaveTeam,
-  updateTeamById,
-  updateTeamMember,
-} from "@api/db/queries/teams";
-import {
-  acceptTeamInvite,
-  createTeamInvites,
-  declineTeamInvite,
-  deleteTeamInvite,
-  getInvitesByEmail,
-  getTeamInvites,
-} from "@api/db/queries/user-invites";
-import {
-  getTeamMembers,
-  getTeamsByUserId,
-} from "@api/db/queries/users-on-team";
 import {
   acceptTeamInviteSchema,
   createTeamSchema,
@@ -35,12 +12,32 @@ import {
   updateTeamMemberSchema,
 } from "@api/schemas/team";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  acceptTeamInvite,
+  createTeam,
+  createTeamInvites,
+  declineTeamInvite,
+  deleteTeam,
+  deleteTeamInvite,
+  deleteTeamMember,
+  getAvailablePlans,
+  getBankConnections,
+  getInvitesByEmail,
+  getTeamById,
+  getTeamInvites,
+  getTeamMembers,
+  getTeamMembersByTeamId,
+  getTeamsByUserId,
+  leaveTeam,
+  updateTeamById,
+  updateTeamMember,
+} from "@midday/db/queries";
 import type {
   DeleteTeamPayload,
   InviteTeamMembersPayload,
   UpdateBaseCurrencyPayload,
 } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 export const teamRouter = createTRPCRouter({
@@ -58,7 +55,7 @@ export const teamRouter = createTRPCRouter({
     }),
 
   members: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
-    return getTeamMembers(db, teamId!);
+    return getTeamMembersByTeamId(db, teamId!);
   }),
 
   list: protectedProcedure.query(async ({ ctx: { db, session } }) => {
@@ -78,7 +75,7 @@ export const teamRouter = createTRPCRouter({
   leave: protectedProcedure
     .input(leaveTeamSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
-      const teamMembersData = await getTeamMembers(db, input.teamId);
+      const teamMembersData = await getTeamMembersByTeamId(db, input.teamId);
 
       const currentUser = teamMembersData?.find(
         (member) => member.user?.id === session.user.id,

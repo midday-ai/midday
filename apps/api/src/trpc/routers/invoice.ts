@@ -1,21 +1,3 @@
-import { getCustomerById } from "@api/db/queries/customers";
-import { getInvoiceTemplate } from "@api/db/queries/invoice-templates";
-import {
-  deleteInvoice,
-  draftInvoice,
-  duplicateInvoice,
-  getInvoiceById,
-  getInvoiceSummary,
-  getInvoices,
-  getNextInvoiceNumber,
-  getPaymentStatus,
-  searchInvoiceNumber,
-  updateInvoice,
-} from "@api/db/queries/invoices";
-import { getTeamById } from "@api/db/queries/teams";
-import { getTrackerRecordsByRange } from "@api/db/queries/tracker-entries";
-import { getTrackerProjectById } from "@api/db/queries/tracker-projects";
-import { getUserById } from "@api/db/queries/users";
 import {
   cancelScheduledInvoiceSchema,
   createInvoiceSchema,
@@ -38,13 +20,31 @@ import {
 } from "@api/trpc/init";
 import { parseInputValue } from "@api/utils/parse";
 import { UTCDate } from "@date-fns/utc";
+import {
+  deleteInvoice,
+  draftInvoice,
+  duplicateInvoice,
+  getCustomerById,
+  getInvoiceById,
+  getInvoiceSummary,
+  getInvoiceTemplate,
+  getInvoices,
+  getNextInvoiceNumber,
+  getPaymentStatus,
+  getTeamById,
+  getTrackerProjectById,
+  getTrackerRecordsByRange,
+  getUserById,
+  searchInvoiceNumber,
+  updateInvoice,
+} from "@midday/db/queries";
 import { verify } from "@midday/invoice/token";
 import { transformCustomerToContent } from "@midday/invoice/utils";
 import type {
   GenerateInvoicePayload,
   SendInvoiceReminderPayload,
 } from "@midday/jobs/schema";
-import { runs, tasks } from "@trigger.dev/sdk/v3";
+import { runs, tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 import { addMonths, format, parseISO } from "date-fns";
 import { v4 as uuidv4 } from "uuid";

@@ -1,11 +1,4 @@
 import {
-  deleteDocument,
-  getDocumentById,
-  getDocuments,
-  getRelatedDocuments,
-  updateDocuments,
-} from "@api/db/queries/documents";
-import {
   deleteDocumentSchema,
   getDocumentSchema,
   getDocumentsSchema,
@@ -15,10 +8,17 @@ import {
   signedUrlsSchema,
 } from "@api/schemas/documents";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  deleteDocument,
+  getDocumentById,
+  getDocuments,
+  getRelatedDocuments,
+  updateDocuments,
+} from "@midday/db/queries";
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
 import type { ProcessDocumentPayload } from "@midday/jobs/schema";
 import { remove, signedUrl } from "@midday/supabase/storage";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 export const documentsRouter = createTRPCRouter({

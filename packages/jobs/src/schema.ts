@@ -45,6 +45,7 @@ export const processAttachmentSchema = z.object({
   filePath: z.array(z.string()),
   referenceId: z.string().optional(),
   website: z.string().optional(),
+  inboxAccountId: z.string().uuid().optional(),
 });
 
 export type ProcessAttachmentPayload = z.infer<typeof processAttachmentSchema>;
@@ -162,7 +163,7 @@ export const inboxSlackUploadSchema = z.object({
 export type InboxSlackUploadPayload = z.infer<typeof inboxSlackUploadSchema>;
 
 export const processTransactionAttachmentSchema = z.object({
-  transactionId: z.string().uuid(),
+  transactionId: z.string(),
   mimetype: z.string(),
   filePath: z.array(z.string()),
   teamId: z.string().uuid(),

@@ -1,9 +1,3 @@
-import {
-  deleteInbox,
-  getInbox,
-  getInboxById,
-  updateInbox,
-} from "@api/db/queries/inbox";
 import type { Context } from "@api/rest/types";
 import {
   deleteInboxResponseSchema,
@@ -16,6 +10,12 @@ import {
 } from "@api/schemas/inbox";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import {
+  deleteInbox,
+  getInbox,
+  getInboxById,
+  updateInbox,
+} from "@midday/db/queries";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();

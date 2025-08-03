@@ -41,8 +41,8 @@
     "@tanstack/react-query-devtools": "^5.80.7",
     "@tanstack/react-table": "^8.21.3",
     "@team-plain/typescript-sdk": "^5.9.0",
-    "@trigger.dev/react-hooks": "3.3.17",
-    "@trigger.dev/sdk": "3.3.17",
+    "@trigger.dev/react-hooks": "4.0.0-v4-beta.26",
+    "@trigger.dev/sdk": "4.0.0-v4-beta.26",
     "@trpc/client": "^11.4.1",
     "@trpc/tanstack-react-query": "^11.4.1",
     "ai": "^4.3.16",
@@ -78,7 +78,7 @@
     "tus-js-client": "4.3.1",
     "use-places-autocomplete": "^4.0.1",
     "usehooks-ts": "^3.1.1",
-    "zod": "^3.25.64",
+    "zod": "3.25.64",
     "zustand": "^5.0.5"
   },
   "devDependencies": {

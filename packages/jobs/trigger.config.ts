@@ -1,10 +1,11 @@
-import { defineConfig } from "@trigger.dev/sdk/v3";
+import { defineConfig } from "@trigger.dev/sdk";
 
 export default defineConfig({
   project: process.env.TRIGGER_PROJECT_ID!,
   runtime: "node",
   logLevel: "log",
   maxDuration: 60,
+  experimental_processKeepAlive: true,
   retries: {
     enabledInDev: false,
     default: {

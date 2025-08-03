@@ -6,6 +6,7 @@ import { invoicePrompt } from "../../prompt";
 import { invoiceSchema } from "../../schema";
 import type { GetDocumentRequest } from "../../types";
 import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
+import { retryCall } from "../../utils/retry";
 
 export class InvoiceProcessor {
   // Check if the extracted data meets minimum quality standards
@@ -25,32 +26,34 @@ export class InvoiceProcessor {
     }
 
     try {
-      const result = await generateObject({
-        model: mistral("mistral-medium-latest"),
-        schema: invoiceSchema,
-        abortSignal: AbortSignal.timeout(45000),
-        messages: [
-          {
-            role: "system",
-            content: invoicePrompt,
+      const result = await retryCall(() =>
+        generateObject({
+          model: mistral("mistral-medium-latest"),
+          schema: invoiceSchema,
+          abortSignal: AbortSignal.timeout(20000), // 20s
+          messages: [
+            {
+              role: "system",
+              content: invoicePrompt,
+            },
+            {
+              role: "user",
+              content: [
+                {
+                  type: "file",
+                  data: documentUrl,
+                  mimeType: "application/pdf",
+                },
+              ],
+            },
+          ],
+          providerOptions: {
+            mistral: {
+              documentPageLimit: 10,
+            },
           },
-          {
-            role: "user",
-            content: [
-              {
-                type: "file",
-                data: documentUrl,
-                mimeType: "application/pdf",
-              },
-            ],
-          },
-        ],
-        providerOptions: {
-          mistral: {
-            documentPageLimit: 10,
-          },
-        },
-      });
+        }),
+      );
 
       // Check data quality and merge with fallback if poor
       if (this.#isDataQualityPoor(result.object)) {
@@ -130,26 +133,28 @@ export class InvoiceProcessor {
     // Unsupported Unicode escape sequence
     const cleanedText = text.replaceAll("\u0000", "");
 
-    const result = await generateObject({
-      model: mistral("mistral-medium-latest"),
-      schema: invoiceSchema,
-      abortSignal: AbortSignal.timeout(45000),
-      messages: [
-        {
-          role: "system",
-          content: invoicePrompt,
-        },
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: cleanedText,
-            },
-          ],
-        },
-      ],
-    });
+    const result = await retryCall(() =>
+      generateObject({
+        model: mistral("mistral-medium-latest"),
+        schema: invoiceSchema,
+        abortSignal: AbortSignal.timeout(20000), // 20s
+        messages: [
+          {
+            role: "system",
+            content: invoicePrompt,
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: cleanedText,
+              },
+            ],
+          },
+        ],
+      }),
+    );
 
     return result.object;
   }

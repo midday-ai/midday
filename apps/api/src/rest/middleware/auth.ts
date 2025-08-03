@@ -1,13 +1,13 @@
+import { expandScopes } from "@api/utils/scopes";
+import { isValidApiKeyFormat } from "@db/utils/api-keys";
+import { apiKeyCache } from "@midday/cache/api-key-cache";
+import { userCache } from "@midday/cache/user-cache";
 import {
   getApiKeyByToken,
+  getUserById,
   updateApiKeyLastUsedAt,
-} from "@api/db/queries/api-keys";
-import { validateAccessToken } from "@api/db/queries/oauth-flow";
-import { getUserById } from "@api/db/queries/users";
-import { isValidApiKeyFormat } from "@api/utils/api-keys";
-import { apiKeyCache } from "@api/utils/cache/api-key-cache";
-import { userCache } from "@api/utils/cache/user-cache";
-import { expandScopes } from "@api/utils/scopes";
+  validateAccessToken,
+} from "@midday/db/queries";
 import { hash } from "@midday/encryption";
 import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";

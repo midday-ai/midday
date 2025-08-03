@@ -3,7 +3,7 @@
 import { LogEvents } from "@midday/events/events";
 import { formatAmountValue } from "@midday/import";
 import type { ImportTransactionsPayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
 

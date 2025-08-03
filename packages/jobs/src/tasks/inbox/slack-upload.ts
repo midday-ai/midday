@@ -5,7 +5,7 @@ import {
 import { DocumentClient } from "@midday/documents";
 import { inboxSlackUploadSchema } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/job";
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { schemaTask } from "@trigger.dev/sdk";
 import { format } from "date-fns";
 
 export const inboxSlackUpload = schemaTask({

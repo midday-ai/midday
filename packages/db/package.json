@@ -1,0 +1,26 @@
+{
+  "name": "@midday/db",
+  "private": true,
+  "exports": {
+    "./client": "./src/client.ts",
+    "./job-client": "./src/job-client.ts",
+    "./queries": "./src/queries/index.ts",
+    "./schema": "./src/schema.ts",
+    "./utils/api-keys": "./src/utils/api-keys.ts",
+    "./utils/search-query": "./src/utils/search-query.ts",
+    "./utils/health": "./src/utils/health.ts",
+    "./utils/currency": "./src/utils/currency.ts"
+  },
+  "dependencies": {
+    "@midday/cache": "workspace:*",
+    "@midday/invoice": "workspace:*",
+    "@midday/encryption": "workspace:*",
+    "drizzle-orm": "^0.44.2",
+    "postgres": "^3.4.7",
+    "snakecase-keys": "^8.0.1",
+    "camelcase-keys": "^9.1.3"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.1"
+  }
+}
