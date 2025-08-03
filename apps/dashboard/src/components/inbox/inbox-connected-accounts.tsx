@@ -134,6 +134,7 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
   const handleManualSync = () => {
     syncInboxAccountMutation.mutate({
       id: account.id,
+      manualSync: true,
     });
   };
 

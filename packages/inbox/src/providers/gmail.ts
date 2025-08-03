@@ -180,24 +180,28 @@ export class GmailProvider implements OAuthProviderInterface {
       throw new Error("Gmail client not initialized. Set tokens first.");
     }
 
-    const { maxResults = 50, lastAccessed } = options;
+    const { maxResults = 50, lastAccessed, fullSync = false } = options;
 
-    // Build date filter based on lastAccessed or default to last 30 days for new accounts
+    // Build date filter based on sync type and lastAccessed
     let dateFilter = "";
-    if (lastAccessed) {
-      // For existing accounts, sync from last access date
-      const lastAccessDate = new Date(lastAccessed);
-      const formattedDate = lastAccessDate.toISOString().split("T")[0]; // YYYY-MM-DD format
-      dateFilter = `after:${formattedDate}`;
-    } else {
-      // For new accounts, fetch last 30 days to capture recent business documents
+    if (fullSync || !lastAccessed) {
+      // For full syncs (initial or manual) or accounts without lastAccessed, fetch last 30 days to capture recent business documents
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const formattedDate = thirtyDaysAgo.toISOString().split("T")[0];
       dateFilter = `after:${formattedDate}`;
+    } else {
+      // For subsequent syncs, sync from last access date
+      // Subtract 1 day to make it inclusive since Gmail's "after:" is exclusive
+      const lastAccessDate = new Date(lastAccessed);
+      lastAccessDate.setDate(lastAccessDate.getDate() - 1);
+      const formattedDate = lastAccessDate.toISOString().split("T")[0]; // YYYY-MM-DD format
+      dateFilter = `after:${formattedDate}`;
     }
 
     try {
+      const query = `-from:me has:attachment filename:pdf ${dateFilter}`;
+
       // Fetch messages with pagination to handle high-volume days
       const allMessages: gmail_v1.Schema$Message[] = [];
       let nextPageToken: string | undefined;
@@ -208,7 +212,7 @@ export class GmailProvider implements OAuthProviderInterface {
         const listResponse = await this.#gmail.users.messages.list({
           userId: "me",
           maxResults: Math.min(maxResults, 50), // Gmail API max per request
-          q: `-from:me has:attachment filename:pdf ${dateFilter}`,
+          q: query,
           pageToken: nextPageToken,
         });
 

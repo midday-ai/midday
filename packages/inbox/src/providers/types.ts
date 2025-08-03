@@ -26,6 +26,7 @@ export interface GetAttachmentsOptions {
   teamId: string;
   maxResults?: number;
   lastAccessed?: string;
+  fullSync?: boolean;
 }
 
 export abstract class Connector {

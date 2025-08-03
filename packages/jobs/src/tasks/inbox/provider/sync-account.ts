@@ -16,6 +16,7 @@ export const syncInboxAccount = schemaTask({
   id: "sync-inbox-account",
   schema: z.object({
     id: z.string(),
+    manualSync: z.boolean().optional(),
   }),
   maxDuration: 120,
   retry: {
@@ -32,7 +33,7 @@ export const syncInboxAccount = schemaTask({
     preset: "medium-1x",
   },
   run: async (payload) => {
-    const { id } = payload;
+    const { id, manualSync = false } = payload;
 
     const supabase = createClient();
 
@@ -50,18 +51,22 @@ export const syncInboxAccount = schemaTask({
 
     const connector = new InboxConnector(accountRow.provider, getDb());
 
+    const isInitialSync = !accountRow.lastAccessed;
+    const fullSync = isInitialSync || manualSync;
+
     logger.info("Starting inbox sync", {
       accountId: id,
       teamId: accountRow.teamId,
       provider: accountRow.provider,
       lastAccessed: accountRow.lastAccessed,
-      isInitialSync: !accountRow.lastAccessed,
+      isInitialSync,
+      manualSync,
+      fullSync,
       maxResults: 50,
     });
 
     try {
       // Use same limit for both initial and ongoing sync to ensure consistent behavior
-      const isInitialSync = !accountRow.lastAccessed;
       const maxResults = 50; // Same limit for both initial and ongoing sync
 
       const attachments = await connector.getAttachments({
@@ -69,6 +74,7 @@ export const syncInboxAccount = schemaTask({
         teamId: accountRow.teamId,
         maxResults,
         lastAccessed: accountRow.lastAccessed,
+        fullSync,
       });
 
       logger.info("Fetched attachments from provider", {
@@ -184,7 +190,7 @@ export const syncInboxAccount = schemaTask({
         processedAttachments: uploadedAttachments.length,
       });
 
-      // Return the attachment count for the frontend
+      Return the attachment count for the frontend
       return {
         accountId: id,
         attachmentsProcessed: uploadedAttachments.length,

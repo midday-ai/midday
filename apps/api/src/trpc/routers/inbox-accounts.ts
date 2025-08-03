@@ -72,6 +72,7 @@ export const inboxAccountsRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const event = await tasks.trigger("sync-inbox-account", {
         id: input.id,
+        manualSync: input.manualSync || false,
       });
 
       return event;

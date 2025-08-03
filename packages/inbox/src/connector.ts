@@ -101,6 +101,7 @@ export class InboxConnector extends Connector {
         teamId: options.teamId,
         maxResults: options.maxResults,
         lastAccessed: account.lastAccessed,
+        fullSync: options.fullSync,
       });
     } catch (error) {
       const errorMessage =
@@ -150,6 +151,7 @@ export class InboxConnector extends Connector {
         teamId: options.teamId,
         maxResults: options.maxResults,
         lastAccessed: account.lastAccessed,
+        fullSync: options.fullSync,
       });
     } catch (error) {
       const errorMessage =
