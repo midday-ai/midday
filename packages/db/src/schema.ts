@@ -82,6 +82,11 @@ export const inboxAccountProvidersEnum = pgEnum("inbox_account_providers", [
   "outlook",
 ]);
 
+export const inboxAccountStatusEnum = pgEnum("inbox_account_status", [
+  "connected",
+  "disconnected",
+]);
+
 export const inboxStatusEnum = pgEnum("inbox_status", [
   "processing",
   "pending",
@@ -475,6 +480,8 @@ export const inboxAccounts = pgTable(
       mode: "string",
     }).notNull(),
     scheduleId: text("schedule_id"),
+    status: inboxAccountStatusEnum().default("connected").notNull(),
+    errorMessage: text("error_message"),
   },
   (table) => [
     foreignKey({

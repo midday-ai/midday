@@ -9,6 +9,8 @@ export async function getInboxAccounts(db: Database, teamId: string) {
       email: inboxAccounts.email,
       provider: inboxAccounts.provider,
       lastAccessed: inboxAccounts.lastAccessed,
+      status: inboxAccounts.status,
+      errorMessage: inboxAccounts.errorMessage,
     })
     .from(inboxAccounts)
     .where(eq(inboxAccounts.teamId, teamId));
@@ -76,6 +78,8 @@ export type UpdateInboxAccountParams = {
   expiryDate?: string;
   scheduleId?: string;
   lastAccessed?: string;
+  status?: "connected" | "disconnected";
+  errorMessage?: string | null;
 };
 
 export async function updateInboxAccount(
@@ -90,6 +94,8 @@ export async function updateInboxAccount(
       expiryDate: params.expiryDate,
       scheduleId: params.scheduleId,
       lastAccessed: params.lastAccessed,
+      status: params.status as any,
+      errorMessage: params.errorMessage,
     })
     .where(eq(inboxAccounts.id, params.id));
 }
@@ -128,6 +134,8 @@ export async function upsertInboxAccount(
         refreshToken: params.refreshToken,
         lastAccessed: params.lastAccessed,
         expiryDate: params.expiryDate,
+        status: "connected",
+        errorMessage: null,
       },
     })
     .returning({
