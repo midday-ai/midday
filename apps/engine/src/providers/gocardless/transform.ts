@@ -232,7 +232,7 @@ export const transformInstitution = (
   id: institution.id,
   name: institution.name,
   logo: getLogoURL(institution.id, getFileExtension(institution.logo)),
-  provider: Providers.Enum.gocardless,
+  provider: Providers.enum.gocardless,
 });
 
 export const transformConnectionStatus = (

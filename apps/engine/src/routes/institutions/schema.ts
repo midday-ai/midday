@@ -51,7 +51,7 @@ export const InstitutionSchema = z
       })
       .optional(),
     provider: Providers.openapi({
-      example: Providers.Enum.teller,
+      example: Providers.enum.teller,
     }).optional(),
   })
   .openapi("InstitutionSchema");

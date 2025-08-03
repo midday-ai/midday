@@ -189,7 +189,7 @@ export const transformAccount = ({
       id: institution.id,
       name: institution.name,
       logo: getLogoURL(institution.id),
-      provider: Providers.Enum.plaid,
+      provider: Providers.enum.plaid,
     },
     resource_id: null,
     expires_at: null,
@@ -210,5 +210,5 @@ export const transformInstitution = (institution: TransformInstitution) => ({
   id: institution.institution_id,
   name: institution.name,
   logo: getLogoURL(institution.institution_id),
-  provider: Providers.Enum.plaid,
+  provider: Providers.enum.plaid,
 });
