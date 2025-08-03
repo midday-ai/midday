@@ -34,6 +34,7 @@ export const initialInboxSetup = schemaTask({
 
     await syncInboxAccount.trigger({
       id,
+      manualSync: true,
     });
   },
 });
