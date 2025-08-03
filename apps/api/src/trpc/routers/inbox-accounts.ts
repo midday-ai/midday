@@ -61,7 +61,7 @@ export const inboxAccountsRouter = createTRPCRouter({
       });
 
       if (data?.scheduleId) {
-        await schedules.deactivate(data.scheduleId);
+        await schedules.del(data.scheduleId);
       }
 
       return data;

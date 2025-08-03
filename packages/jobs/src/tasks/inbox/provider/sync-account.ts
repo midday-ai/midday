@@ -55,12 +55,12 @@ export const syncInboxAccount = schemaTask({
       provider: accountRow.provider,
       lastAccessed: accountRow.lastAccessed,
       isInitialSync: !accountRow.lastAccessed,
-      maxResults: !accountRow.lastAccessed ? 10 : 50,
+      maxResults: 50,
     });
 
-    // Use different limits for initial vs ongoing sync
+    // Use same limit for both initial and ongoing sync to ensure consistent behavior
     const isInitialSync = !accountRow.lastAccessed;
-    const maxResults = isInitialSync ? 10 : 50; // Light initial, higher for daily sync
+    const maxResults = 50; // Same limit for both initial and ongoing sync
 
     const attachments = await connector.getAttachments({
       id,
