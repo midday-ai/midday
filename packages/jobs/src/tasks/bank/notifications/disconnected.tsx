@@ -37,7 +37,7 @@ export const disconnectedNotifications = schemaTask({
       return {
         from: "Middaybot <middaybot@midday.ai>",
         to: [user.email],
-        subject: "Bank Connection Expiring Soon",
+        subject: "Bank Connection Disconnected",
         html,
       };
     });
