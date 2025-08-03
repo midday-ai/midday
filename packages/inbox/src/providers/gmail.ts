@@ -30,45 +30,39 @@ export class GmailProvider implements OAuthProviderInterface {
 
     const clientId = process.env.GMAIL_CLIENT_ID;
     const clientSecret = process.env.GMAIL_CLIENT_SECRET;
-    const redirectUri = process.env.GMAIL_REDIRECT_URI;
 
-    this.#oauth2Client = new google.auth.OAuth2(
-      clientId,
-      clientSecret,
-      redirectUri,
-    );
+    if (!clientId || !clientSecret) {
+      throw new Error(
+        "Missing required Gmail OAuth2 credentials: GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET must be set",
+      );
+    }
+
+    this.#oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
 
     this.#oauth2Client.on(
       "tokens",
       async (tokens: Credentials | null | undefined) => {
         if (!this.#accountId) {
-          console.warn("Token refresh event received but no account ID set");
           return;
         }
 
-        console.log("Token refresh event received", {
-          accountId: this.#accountId,
-          hasAccessToken: !!tokens?.access_token,
-          hasRefreshToken: !!tokens?.refresh_token,
-          expiryDate: tokens?.expiry_date
-            ? new Date(tokens.expiry_date).toISOString()
-            : null,
-          timestamp: new Date().toISOString(),
-        });
+        try {
+          if (tokens?.refresh_token) {
+            await updateInboxAccount(this.#db, {
+              id: this.#accountId,
+              refreshToken: encrypt(tokens.refresh_token),
+            });
+          }
 
-        if (tokens?.refresh_token) {
-          await updateInboxAccount(this.#db, {
-            id: this.#accountId,
-            refreshToken: encrypt(tokens.refresh_token),
-          });
-        }
-
-        if (tokens?.access_token) {
-          await updateInboxAccount(this.#db, {
-            id: this.#accountId,
-            accessToken: encrypt(tokens.access_token),
-            expiryDate: new Date(tokens.expiry_date!).toISOString(),
-          });
+          if (tokens?.access_token) {
+            await updateInboxAccount(this.#db, {
+              id: this.#accountId,
+              accessToken: encrypt(tokens.access_token),
+              expiryDate: new Date(tokens.expiry_date!).toISOString(),
+            });
+          }
+        } catch (error) {
+          console.error("Failed to update tokens in database:", error);
         }
       },
     );
@@ -113,20 +107,8 @@ export class GmailProvider implements OAuthProviderInterface {
 
   setTokens(tokens: Tokens): void {
     if (!tokens.access_token) {
-      throw new Error("Access token is required.");
+      throw new Error("Access token is required");
     }
-
-    // Log token setting for debugging
-    console.log("Setting Gmail tokens", {
-      accountId: this.#accountId,
-      hasAccessToken: !!tokens.access_token,
-      hasRefreshToken: !!tokens.refresh_token,
-      expiryDate: tokens.expiry_date
-        ? new Date(tokens.expiry_date).toISOString()
-        : null,
-      isExpired: tokens.expiry_date ? Date.now() > tokens.expiry_date : false,
-      timestamp: new Date().toISOString(),
-    });
 
     const googleCredentials: Credentials = {
       access_token: tokens.access_token,
@@ -145,35 +127,12 @@ export class GmailProvider implements OAuthProviderInterface {
       throw new Error("Account ID is required for token refresh");
     }
 
-    console.log("Explicitly refreshing tokens for account", {
-      accountId: this.#accountId,
-      timestamp: new Date().toISOString(),
-    });
-
     try {
-      // Use Google's built-in refreshAccessToken method
-      const response = await this.#oauth2Client.refreshAccessToken();
-
-      console.log("Token refresh successful", {
-        accountId: this.#accountId,
-        hasAccessToken: !!response.credentials.access_token,
-        hasRefreshToken: !!response.credentials.refresh_token,
-        expiryDate: response.credentials.expiry_date
-          ? new Date(response.credentials.expiry_date).toISOString()
-          : null,
-        timestamp: new Date().toISOString(),
-      });
-
+      await this.#oauth2Client.refreshAccessToken();
       // The OAuth2Client automatically updates its credentials and emits the 'tokens' event
-      // which our event handler (lines 41-74) will catch and update the database
-      // No need to manually reinitialize the Gmail client - it uses the same auth instance
+      // which our event handler will catch and update the database
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unknown error";
-      console.error("Token refresh failed", {
-        accountId: this.#accountId,
-        error: message,
-        timestamp: new Date().toISOString(),
-      });
 
       // Check for specific Google OAuth errors
       if (message.includes("invalid_grant")) {
@@ -183,7 +142,7 @@ export class GmailProvider implements OAuthProviderInterface {
       }
       if (message.includes("invalid_request")) {
         throw new Error(
-          "Invalid refresh token request. Check token format and permissions.",
+          "Invalid refresh token request. Check OAuth2 client configuration.",
         );
       }
 

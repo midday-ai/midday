@@ -87,6 +87,7 @@ export class InboxConnector extends Connector {
     const expiryDate = account.expiryDate
       ? new Date(account.expiryDate).getTime()
       : undefined;
+
     this.#provider.setTokens({
       access_token: decrypt(account.accessToken),
       refresh_token: decrypt(account.refreshToken),
@@ -106,9 +107,6 @@ export class InboxConnector extends Connector {
 
       // Check if it's an authentication error that might be resolved by token refresh
       if (this.#isAuthError(errorMessage)) {
-        console.log(
-          "Authentication error detected, attempting token refresh and retry",
-        );
         try {
           return await this.#retryWithTokenRefresh(options, account);
         } catch (retryError) {
@@ -146,10 +144,6 @@ export class InboxConnector extends Connector {
     options: GetAttachmentsOptions,
     account: any,
   ): Promise<Attachment[]> {
-    console.log("Attempting token refresh for account", {
-      accountId: account.id,
-    });
-
     // Set tokens with actual expiry date
     const expiryDate = account.expiryDate
       ? new Date(account.expiryDate).getTime()
@@ -164,7 +158,6 @@ export class InboxConnector extends Connector {
     try {
       // Explicitly refresh the tokens
       await this.#provider.refreshTokens();
-      console.log("Token refresh completed successfully");
 
       // After successful refresh, try the request immediately
       return await this.#provider.getAttachments({
@@ -177,26 +170,13 @@ export class InboxConnector extends Connector {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
 
-      console.log("Token refresh failed with error:", {
-        error: errorMessage,
-        accountId: account.id,
-        timestamp: new Date().toISOString(),
-      });
-
       // Check for invalid_grant which indicates refresh token is invalid
       if (errorMessage.includes("invalid_grant")) {
-        console.error(
-          "Refresh token is invalid or expired, re-authentication required",
-          {
-            accountId: account.id,
-          },
-        );
         throw new Error(
           "Refresh token is invalid or expired. The user needs to re-authenticate their Gmail account.",
         );
       }
 
-      // For other errors, throw them as well
       throw new Error(`Token refresh failed: ${errorMessage}`);
     }
   }
