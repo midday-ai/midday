@@ -1,8 +1,9 @@
+import { getDb } from "@jobs/init";
 import {
   handleOverdueInvoiceNotifications,
   handlePaidInvoiceNotifications,
 } from "@jobs/utils/invoice-notifications";
-import { createClient } from "@midday/supabase/job";
+import { getTeamOwnersByTeamId } from "@midday/db/queries";
 import { schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
@@ -16,20 +17,13 @@ export const sendInvoiceNotifications = schemaTask({
     customerName: z.string(),
   }),
   run: async ({ invoiceId, invoiceNumber, status, teamId, customerName }) => {
-    const supabase = createClient();
+    const db = getDb();
 
-    const { data: user } = await supabase
-      .from("users_on_team")
-      .select(
-        "id, team_id, user:users(id, full_name, avatar_url, email, locale)",
-      )
-      .eq("team_id", teamId)
-      .eq("role", "owner");
+    const user = await getTeamOwnersByTeamId(db, teamId);
 
     switch (status) {
       case "paid":
         await handlePaidInvoiceNotifications({
-          // @ts-expect-error - TODO: Fix types with drizzle
           user,
           invoiceId,
           invoiceNumber,
@@ -37,7 +31,6 @@ export const sendInvoiceNotifications = schemaTask({
         break;
       case "overdue":
         await handleOverdueInvoiceNotifications({
-          // @ts-expect-error - TODO: Fix types with drizzle
           user,
           invoiceId,
           invoiceNumber,

@@ -1,9 +1,15 @@
+import { getDb } from "@jobs/init";
 import {
   getAccountBalance,
   getTransactionAmount,
 } from "@jobs/utils/base-currency";
 import { processBatch } from "@jobs/utils/process-batch";
-import { createClient } from "@midday/supabase/job";
+import {
+  getExchangeRate,
+  getTransactionsByAccount,
+  updateBankAccount,
+  upsertTransactions,
+} from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
@@ -22,14 +28,12 @@ export const updateAccountBaseCurrency = schemaTask({
     concurrencyLimit: 10,
   },
   run: async ({ accountId, currency, balance, baseCurrency }) => {
-    const supabase = createClient();
+    const db = getDb();
 
-    const { data: exchangeRate } = await supabase
-      .from("exchange_rates")
-      .select("rate")
-      .eq("base", currency)
-      .eq("target", baseCurrency)
-      .single();
+    const exchangeRate = await getExchangeRate(db, {
+      base: currency,
+      target: baseCurrency,
+    });
 
     if (!exchangeRate) {
       logger.info("No exchange rate found", {
@@ -42,51 +46,54 @@ export const updateAccountBaseCurrency = schemaTask({
 
     // Update account base balance and base currency
     // based on the new currency exchange rate
-    await supabase
-      .from("bank_accounts")
-      .update({
-        base_balance: getAccountBalance({
-          currency: currency,
-          balance,
-          baseCurrency,
-          rate: exchangeRate.rate,
-        }),
-        base_currency: baseCurrency,
-      })
-      .eq("id", accountId);
+    await updateBankAccount(db, {
+      id: accountId,
+      // No teamId needed in trusted job context
+      baseBalance: getAccountBalance({
+        currency: currency,
+        balance,
+        baseCurrency,
+        rate: exchangeRate.rate,
+      }),
+      baseCurrency: baseCurrency,
+    });
 
-    const { data: transactionsData } = await supabase.rpc(
-      "get_all_transactions_by_account",
-      {
-        account_id: accountId,
-      },
-    );
+    const transactionsData = await getTransactionsByAccount(db, {
+      accountId,
+    });
 
     const formattedTransactions = transactionsData?.map(
       // Exclude fts_vector from the transaction object because it's a generated column
-      ({ fts_vector, ...transaction }) => ({
-        ...transaction,
-        base_amount: getTransactionAmount({
+      ({ ftsVector, ...transaction }) => ({
+        name: transaction.name,
+        internalId: transaction.internalId,
+        categorySlug: transaction.categorySlug,
+        bankAccountId: transaction.bankAccountId,
+        description: transaction.description,
+        balance: transaction.balance,
+        currency: transaction.currency,
+        method: transaction.method,
+        amount: transaction.amount,
+        teamId: transaction.teamId,
+        date: transaction.date,
+        status: transaction.status,
+        notified: transaction.notified,
+        counterpartyName: transaction.counterpartyName,
+        baseAmount: getTransactionAmount({
           amount: transaction.amount,
           currency: transaction.currency,
           baseCurrency,
           rate: exchangeRate?.rate,
         }),
-        base_currency: baseCurrency,
+        baseCurrency: baseCurrency,
       }),
     );
 
-    await processBatch(
-      formattedTransactions ?? [],
-      BATCH_LIMIT,
-      async (batch) => {
-        await supabase.from("transactions").upsert(batch, {
-          onConflict: "internal_id",
-          ignoreDuplicates: false,
-        });
-
-        return batch;
-      },
-    );
+    if (formattedTransactions && formattedTransactions.length > 0) {
+      await upsertTransactions(db, {
+        transactions: formattedTransactions,
+        batchSize: BATCH_LIMIT,
+      });
+    }
   },
 });

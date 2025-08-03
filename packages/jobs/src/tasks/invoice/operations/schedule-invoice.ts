@@ -1,5 +1,6 @@
+import { getDb } from "@jobs/init";
 import { scheduleInvoiceJobSchema } from "@jobs/schema";
-import { createClient } from "@midday/supabase/job";
+import { getInvoiceById, updateInvoice } from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { generateInvoice } from "../operations/generate-invoice";
 
@@ -12,14 +13,10 @@ export const scheduleInvoiceJob = schemaTask({
   },
   run: async (payload) => {
     const { invoiceId } = payload;
-    const supabase = createClient();
 
-    // Get the invoice to verify it's still scheduled
-    const { data: invoice } = await supabase
-      .from("invoices")
-      .select("id, status, scheduled_job_id")
-      .eq("id", invoiceId)
-      .single();
+    const invoice = await getInvoiceById(getDb(), {
+      id: invoiceId,
+    });
 
     if (!invoice) {
       logger.error("Invoice not found", { invoiceId });
@@ -35,12 +32,11 @@ export const scheduleInvoiceJob = schemaTask({
     }
 
     // Update invoice status to unpaid
-    await supabase
-      .from("invoices")
-      .update({
-        status: "unpaid",
-      })
-      .eq("id", invoiceId);
+    await updateInvoice(getDb(), {
+      id: invoiceId,
+      teamId: invoice.teamId, // Use the teamId from the invoice we retrieved
+      status: "unpaid",
+    });
 
     // Generate and send the invoice
     await generateInvoice.trigger({

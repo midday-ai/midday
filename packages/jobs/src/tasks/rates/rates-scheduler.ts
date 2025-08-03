@@ -1,6 +1,6 @@
-import { processBatch } from "@jobs/utils/process-batch";
+import { getDb } from "@jobs/init";
+import { upsertExchangeRates } from "@midday/db/queries";
 import { client } from "@midday/engine-client";
-import { createClient } from "@midday/supabase/job";
 import { logger, schedules } from "@trigger.dev/sdk";
 
 export const ratesScheduler = schedules.task({
@@ -10,7 +10,7 @@ export const ratesScheduler = schedules.task({
     // Only run in production (Set in Trigger.dev)
     if (process.env.TRIGGER_ENVIRONMENT !== "production") return;
 
-    const supabase = createClient();
+    const db = getDb();
 
     const ratesResponse = await client.rates.$get();
 
@@ -26,17 +26,13 @@ export const ratesScheduler = schedules.task({
         base: rate.source,
         target: target,
         rate: value,
-        updated_at: rate.date,
+        updatedAt: rate.date,
       }));
     });
 
-    await processBatch(data, 500, async (batch) => {
-      await supabase.from("exchange_rates").upsert(batch, {
-        onConflict: "base, target",
-        ignoreDuplicates: false,
-      });
-
-      return batch;
+    await upsertExchangeRates(db, {
+      rates: data,
+      batchSize: 500,
     });
   },
 });

@@ -1,5 +1,7 @@
+import { getDb } from "@jobs/init";
 import { blobToSerializable } from "@jobs/utils/blob";
 import { processBatch } from "@jobs/utils/process-batch";
+import { getTransactionsForExport } from "@midday/db/queries";
 import { createClient } from "@midday/supabase/job";
 import { download } from "@midday/supabase/storage";
 import { getTaxTypeLabel } from "@midday/utils/tax";
@@ -24,30 +26,10 @@ export const processExport = schemaTask({
     preset: "large-1x",
   },
   run: async ({ ids, locale, dateFormat }) => {
-    const supabase = createClient();
+    const db = getDb();
+    const supabase = createClient(); // Still needed for storage operations
 
-    const { data: transactionsData } = await supabase
-      .from("transactions")
-      .select(`
-        id,
-        date,
-        name,
-        description,
-        amount,
-        note,
-        balance,
-        currency,
-        counterparty_name,
-        tax_type,
-        tax_rate,
-        attachments:transaction_attachments(*),
-        category:transaction_categories(id, name, description, tax_rate, tax_type),
-        bank_account:bank_accounts(id, name),
-        tags:transaction_tags(id, tag:tags(id, name)),
-        status
-      `)
-      .in("id", ids)
-      .throwOnError();
+    const transactionsData = await getTransactionsForExport(db, { ids });
 
     const attachments = await processBatch(
       transactionsData ?? [],

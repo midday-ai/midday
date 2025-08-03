@@ -1,7 +1,9 @@
+import { getDb } from "@jobs/init";
 import { reconnectConnectionSchema } from "@jobs/schema";
 import { syncConnection } from "@jobs/tasks/bank/sync/connection";
+import { updateBankConnection } from "@midday/db/queries";
+import { updateBankAccountByReference } from "@midday/db/queries";
 import { client } from "@midday/engine-client";
-import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 
 export const reconnectConnection = schemaTask({
@@ -12,7 +14,7 @@ export const reconnectConnection = schemaTask({
   },
   schema: reconnectConnectionSchema,
   run: async ({ teamId, connectionId, provider }) => {
-    const supabase = createClient();
+    const db = getDb();
 
     if (provider === "gocardless") {
       // We need to update the reference of the connection
@@ -32,12 +34,10 @@ export const reconnectConnection = schemaTask({
       if (referenceId) {
         logger.info("Updating reference_id of the new connection");
 
-        await supabase
-          .from("bank_connections")
-          .update({
-            reference_id: referenceId,
-          })
-          .eq("id", connectionId);
+        await updateBankConnection(db, {
+          id: connectionId,
+          referenceId: referenceId,
+        });
       }
 
       // The account_ids can be different between the old and new connection
@@ -57,12 +57,10 @@ export const reconnectConnection = schemaTask({
 
       await Promise.all(
         accountsResponse.data.map(async (account) => {
-          await supabase
-            .from("bank_accounts")
-            .update({
-              account_id: account.id,
-            })
-            .eq("account_reference", account.resource_id!);
+          await updateBankAccountByReference(db, {
+            accountReference: account.resource_id!,
+            accountId: account.id,
+          });
         }),
       );
     }

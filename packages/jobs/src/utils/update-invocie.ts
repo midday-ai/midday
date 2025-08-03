@@ -1,5 +1,6 @@
+import { getDb } from "@jobs/init";
 import { sendInvoiceNotifications } from "@jobs/tasks/invoice/notifications/send-notifications";
-import { createClient } from "@midday/supabase/job";
+import { updateInvoice } from "@midday/db/queries";
 import { logger } from "@trigger.dev/sdk";
 
 export async function updateInvoiceStatus({
@@ -11,19 +12,19 @@ export async function updateInvoiceStatus({
   status: "overdue" | "paid";
   paid_at?: string;
 }): Promise<void> {
-  const supabase = createClient();
+  const db = getDb();
 
-  const { data: updatedInvoice } = await supabase
-    .from("invoices")
-    .update({ status, paid_at })
-    .eq("id", invoiceId)
-    .select("id, invoice_number, status, team_id, customer_name")
-    .single();
+  const updatedInvoice = await updateInvoice(db, {
+    id: invoiceId,
+    // No teamId needed in trusted job context
+    status,
+    paidAt: paid_at,
+  });
 
   if (
-    !updatedInvoice?.invoice_number ||
-    !updatedInvoice?.team_id ||
-    !updatedInvoice?.customer_name
+    !updatedInvoice?.invoiceNumber ||
+    !updatedInvoice?.teamId ||
+    !updatedInvoice?.customerName
   ) {
     logger.error("Invoice data is missing");
     return;
@@ -33,9 +34,9 @@ export async function updateInvoiceStatus({
 
   await sendInvoiceNotifications.trigger({
     invoiceId,
-    invoiceNumber: updatedInvoice.invoice_number,
+    invoiceNumber: updatedInvoice.invoiceNumber,
     status: updatedInvoice.status as "paid" | "overdue",
-    teamId: updatedInvoice.team_id,
-    customerName: updatedInvoice.customer_name,
+    teamId: updatedInvoice.teamId,
+    customerName: updatedInvoice.customerName,
   });
 }

@@ -1,7 +1,8 @@
+import { getDb } from "@jobs/init";
+import { getTeamOwnersByTeamId } from "@midday/db/queries";
 import { NotificationTypes } from "@midday/notification";
 import { triggerBulk } from "@midday/notification";
 import { TriggerEvents } from "@midday/notification";
-import { createClient } from "@midday/supabase/job";
 
 export async function handleInboxNotifications({
   inboxId,
@@ -12,15 +13,10 @@ export async function handleInboxNotifications({
   description: string;
   teamId: string;
 }) {
-  const supabase = createClient();
+  const db = getDb();
 
   // Get all users on team
-  const { data: usersData } = await supabase
-    .from("users_on_team")
-    .select("user:users(id, full_name, avatar_url, email, locale)")
-    .eq("team_id", teamId)
-    .eq("role", "owner")
-    .throwOnError();
+  const usersData = await getTeamOwnersByTeamId(db, teamId);
 
   if (!usersData?.length) {
     return;
@@ -42,8 +38,8 @@ export async function handleInboxNotifications({
             subscriberId: user.id,
             teamId,
             email: user.email,
-            fullName: user.full_name,
-            avatarUrl: user.avatar_url,
+            fullName: user.fullName,
+            avatarUrl: user.avatarUrl,
           },
         },
       ];
@@ -51,7 +47,6 @@ export async function handleInboxNotifications({
   );
 
   if (notificationEvents.length) {
-    // @ts-expect-error - TODO: Fix types with drizzle
     triggerBulk(notificationEvents?.flat());
   }
 }

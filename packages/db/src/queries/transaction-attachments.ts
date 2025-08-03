@@ -32,6 +32,27 @@ export async function createAttachments(
     .returning();
 }
 
+type CreateTransactionAttachmentParams = {
+  type: string;
+  name: string;
+  size: number;
+  path: string[];
+  transactionId: string;
+  teamId: string;
+};
+
+export async function createTransactionAttachment(
+  db: Database,
+  params: CreateTransactionAttachmentParams,
+) {
+  const [result] = await db
+    .insert(transactionAttachments)
+    .values(params)
+    .returning();
+
+  return result;
+}
+
 type DeleteAttachmentParams = {
   id: string;
   teamId: string;

@@ -1,5 +1,6 @@
+import { getDb } from "@jobs/init";
 import { transformTransaction } from "@jobs/utils/transform";
-import { createClient } from "@midday/supabase/job";
+import { upsertTransactions as upsertTransactionsDb } from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
@@ -30,30 +31,42 @@ export const upsertTransactions = schemaTask({
     transactions: z.array(transactionSchema),
   }),
   run: async ({ transactions, teamId, bankAccountId, manualSync }) => {
-    const supabase = createClient();
+    const db = getDb();
 
     try {
       // Transform transactions to match our DB schema
       const formattedTransactions = transactions.map((transaction) => {
-        return transformTransaction({
+        const transformed = transformTransaction({
           // @ts-expect-error - TODO: Fix types with drizzle
           transaction,
           teamId,
           bankAccountId,
           notified: manualSync,
         });
+
+        // Map the transformed transaction to our upsert format
+        return {
+          name: transformed.name,
+          internalId: transformed.internal_id,
+          categorySlug: transformed.category_slug,
+          bankAccountId: transformed.bank_account_id,
+          description: transformed.description,
+          balance: transformed.balance,
+          currency: transformed.currency,
+          method: (transformed.method as any) || "other",
+          amount: transformed.amount,
+          teamId: transformed.team_id,
+          date: transformed.date,
+          status: transformed.status,
+          notified: transformed.notified,
+          counterpartyName: transformed.counterparty_name,
+        };
       });
 
-      // Upsert transactions into the transactions table, skipping duplicates based on internal_id
-      await supabase
-        .from("transactions")
-        // @ts-expect-error - TODO: Fix types with drizzle
-        .upsert(formattedTransactions, {
-          onConflict: "internal_id",
-          ignoreDuplicates: true,
-        })
-        .select()
-        .throwOnError();
+      // Insert transactions, ignoring duplicates based on internalId
+      await upsertTransactionsDb(db, {
+        transactions: formattedTransactions,
+      });
     } catch (error) {
       logger.error("Failed to upsert transactions", { error });
 

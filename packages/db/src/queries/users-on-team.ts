@@ -1,6 +1,6 @@
 import type { Database } from "@db/client";
 import { teams, users, usersOnTeam } from "@db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export async function getTeamMembersByTeamId(db: Database, teamId: string) {
   return db
@@ -54,4 +54,45 @@ export async function getTeamsByUserId(db: Database, userId: string) {
     updatedAt: row?.team?.createdAt,
     logoUrl: row?.team?.logoUrl,
   }));
+}
+
+export async function getTeamOwnersByTeamId(db: Database, teamId: string) {
+  return db
+    .select({
+      id: usersOnTeam.id,
+      teamId: usersOnTeam.teamId,
+      user: {
+        id: users.id,
+        fullName: users.fullName,
+        avatarUrl: users.avatarUrl,
+        email: users.email,
+        locale: users.locale,
+      },
+    })
+    .from(usersOnTeam)
+    .leftJoin(users, eq(usersOnTeam.userId, users.id))
+    .where(and(eq(usersOnTeam.teamId, teamId), eq(usersOnTeam.role, "owner")));
+}
+
+export async function getTeamOwnersWithTeamData(db: Database, teamId: string) {
+  return db
+    .select({
+      id: usersOnTeam.id,
+      teamId: usersOnTeam.teamId,
+      team: {
+        inboxId: teams.inboxId,
+        name: teams.name,
+      },
+      user: {
+        id: users.id,
+        fullName: users.fullName,
+        avatarUrl: users.avatarUrl,
+        email: users.email,
+        locale: users.locale,
+      },
+    })
+    .from(usersOnTeam)
+    .leftJoin(users, eq(usersOnTeam.userId, users.id))
+    .leftJoin(teams, eq(teams.id, usersOnTeam.teamId))
+    .where(and(eq(usersOnTeam.teamId, teamId), eq(usersOnTeam.role, "owner")));
 }

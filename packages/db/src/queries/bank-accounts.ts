@@ -52,12 +52,16 @@ export async function deleteBankAccount(
 
 export type UpdateBankAccountParams = {
   id: string;
-  teamId: string;
+  teamId?: string; // Optional for trusted contexts like jobs
   name?: string;
   type?: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
   balance?: number;
   enabled?: boolean;
   currency?: string;
+  baseBalance?: number;
+  baseCurrency?: string;
+  errorDetails?: string | null;
+  errorRetries?: number | null;
 };
 
 export async function updateBankAccount(
@@ -66,10 +70,44 @@ export async function updateBankAccount(
 ) {
   const { id, teamId, ...data } = params;
 
+  // If teamId is provided, use it for security. Otherwise, update by ID only (trusted contexts like jobs)
+  const whereCondition = teamId
+    ? and(eq(bankAccounts.id, id), eq(bankAccounts.teamId, teamId))
+    : eq(bankAccounts.id, id);
+
   const [result] = await db
     .update(bankAccounts)
     .set(data)
-    .where(and(eq(bankAccounts.id, id), eq(bankAccounts.teamId, teamId)))
+    .where(whereCondition)
+    .returning();
+
+  return result;
+}
+
+export type UpdateBankAccountByReferenceParams = {
+  accountReference: string;
+  accountId: string;
+  teamId?: string; // Optional for trusted contexts like jobs
+};
+
+export async function updateBankAccountByReference(
+  db: Database,
+  params: UpdateBankAccountByReferenceParams,
+) {
+  const { accountReference, accountId, teamId } = params;
+
+  // If teamId is provided, use it for security. Otherwise, update by accountReference only (trusted contexts like jobs)
+  const whereCondition = teamId
+    ? and(
+        eq(bankAccounts.accountReference, accountReference),
+        eq(bankAccounts.teamId, teamId),
+      )
+    : eq(bankAccounts.accountReference, accountReference);
+
+  const [result] = await db
+    .update(bankAccounts)
+    .set({ accountId })
+    .where(whereCondition)
     .returning();
 
   return result;

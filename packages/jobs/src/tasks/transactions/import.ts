@@ -1,5 +1,6 @@
+import { getDb } from "@jobs/init";
 import { importTransactionsSchema } from "@jobs/schema";
-import { processBatch } from "@jobs/utils/process-batch";
+import { upsertTransactions } from "@midday/db/queries";
 import { mapTransactions } from "@midday/import/mappings";
 import { transform } from "@midday/import/transform";
 import { validateTransactions } from "@midday/import/validate";
@@ -25,7 +26,8 @@ export const importTransactions = schemaTask({
     inverted,
     table,
   }) => {
-    const supabase = createClient();
+    const db = getDb();
+    const supabase = createClient(); // Still needed for storage operations
 
     if (!filePath) {
       throw new Error("File path is required");
@@ -85,13 +87,26 @@ export const importTransactions = schemaTask({
             });
           }
 
-          // @ts-expect-error
-          await processBatch(validTransactions, BATCH_SIZE, async (batch) => {
-            // @ts-expect-error
-            return supabase.from("transactions").upsert(batch, {
-              onConflict: "internal_id",
-              ignoreDuplicates: true,
-            });
+          // Map the transactions to match UpsertTransactionData format
+          const formattedTransactions = validTransactions.map(
+            (transaction: any) => ({
+              date: transaction.date,
+              name: transaction.name,
+              method: transaction.method,
+              amount: transaction.amount,
+              currency: transaction.currency,
+              teamId: transaction.team_id,
+              bankAccountId: transaction.bank_account_id,
+              internalId: transaction.internal_id,
+              status: transaction.status,
+              categorySlug: transaction.category_slug,
+              manual: transaction.manual,
+            }),
+          );
+
+          await upsertTransactions(db, {
+            transactions: formattedTransactions,
+            batchSize: BATCH_SIZE,
           });
 
           parser.resume();

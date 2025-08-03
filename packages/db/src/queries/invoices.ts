@@ -649,22 +649,27 @@ export async function duplicateInvoice(
 
 export type UpdateInvoiceParams = {
   id: string;
-  status?: "paid" | "canceled" | "unpaid" | "scheduled" | "draft";
+  status?: "paid" | "canceled" | "unpaid" | "scheduled" | "draft" | "overdue";
   paidAt?: string | null;
   internalNote?: string | null;
   reminderSentAt?: string | null;
   scheduledAt?: string | null;
   scheduledJobId?: string | null;
-  teamId: string;
+  teamId?: string; // Optional for trusted contexts like jobs
 };
 
 export async function updateInvoice(db: Database, params: UpdateInvoiceParams) {
   const { id, teamId, ...rest } = params;
 
+  // If teamId is provided, use it for security. Otherwise, update by ID only (trusted contexts like jobs)
+  const whereCondition = teamId
+    ? and(eq(invoices.id, id), eq(invoices.teamId, teamId))
+    : eq(invoices.id, id);
+
   const [result] = await db
     .update(invoices)
     .set(rest)
-    .where(and(eq(invoices.id, id), eq(invoices.teamId, teamId)))
+    .where(whereCondition)
     .returning();
 
   return result;

@@ -380,3 +380,27 @@ export async function updateDocumentProcessingStatus(
     .where(eq(documents.id, id))
     .returning({ id: documents.id });
 }
+
+export type UpdateDocumentProcessingStatusByNameParams = {
+  name: string;
+  processingStatus: "pending" | "processing" | "completed" | "failed";
+  teamId?: string; // Optional for trusted contexts like jobs
+};
+
+export async function updateDocumentProcessingStatusByName(
+  db: Database,
+  params: UpdateDocumentProcessingStatusByNameParams,
+) {
+  const { name, processingStatus, teamId } = params;
+
+  // If teamId is provided, use it for security. Otherwise, update by name only (trusted contexts like jobs)
+  const whereCondition = teamId
+    ? and(eq(documents.name, name), eq(documents.teamId, teamId))
+    : eq(documents.name, name);
+
+  return db
+    .update(documents)
+    .set({ processingStatus })
+    .where(whereCondition)
+    .returning({ id: documents.id });
+}

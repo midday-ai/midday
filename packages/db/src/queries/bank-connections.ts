@@ -1,6 +1,6 @@
 import type { Database } from "@db/client";
 import { bankAccounts, bankConnections } from "@db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull, lt, or } from "drizzle-orm";
 
 export type GetBankConnectionsParams = {
   teamId: string;
@@ -164,4 +164,102 @@ export const createBankConnection = async (
   );
 
   return bankConnection;
+};
+
+export type GetBankConnectionByIdParams = {
+  id: string;
+};
+
+export const getBankConnectionById = async (
+  db: Database,
+  params: GetBankConnectionByIdParams,
+) => {
+  const { id } = params;
+
+  return db.query.bankConnections.findFirst({
+    where: eq(bankConnections.id, id),
+    columns: {
+      id: true,
+      provider: true,
+      accessToken: true,
+      referenceId: true,
+      teamId: true,
+      status: true,
+    },
+  });
+};
+
+export type UpdateBankConnectionParams = {
+  id: string;
+  status?: "connected" | "disconnected" | "expired";
+  lastAccessed?: string;
+};
+
+export const updateBankConnection = async (
+  db: Database,
+  params: UpdateBankConnectionParams,
+) => {
+  const { id, ...updates } = params;
+
+  const [result] = await db
+    .update(bankConnections)
+    .set(updates)
+    .where(eq(bankConnections.id, id))
+    .returning();
+
+  return result;
+};
+
+export type GetBankAccountsByConnectionParams = {
+  connectionId: string;
+  enabled?: boolean;
+  manual?: boolean;
+  maxErrorRetries?: number;
+};
+
+export const getBankAccountsByConnection = async (
+  db: Database,
+  params: GetBankAccountsByConnectionParams,
+) => {
+  const { connectionId, enabled, manual, maxErrorRetries } = params;
+
+  const conditions = [eq(bankAccounts.bankConnectionId, connectionId)];
+
+  if (enabled !== undefined) {
+    conditions.push(eq(bankAccounts.enabled, enabled));
+  }
+
+  if (manual !== undefined) {
+    conditions.push(eq(bankAccounts.manual, manual));
+  }
+
+  if (maxErrorRetries !== undefined) {
+    conditions.push(
+      or(
+        lt(bankAccounts.errorRetries, maxErrorRetries),
+        isNull(bankAccounts.errorRetries),
+      ),
+    );
+  }
+
+  return db.query.bankAccounts.findMany({
+    where: and(...conditions),
+    columns: {
+      id: true,
+      teamId: true,
+      accountId: true,
+      type: true,
+      errorRetries: true,
+    },
+    with: {
+      bankConnection: {
+        columns: {
+          id: true,
+          provider: true,
+          accessToken: true,
+          status: true,
+        },
+      },
+    },
+  });
 };

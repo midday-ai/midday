@@ -17,12 +17,14 @@ import {
   asc,
   desc,
   eq,
+  exists,
   gte,
   inArray,
   isNull,
   lt,
   lte,
   ne,
+  notExists,
   or,
   sql,
 } from "drizzle-orm";
@@ -1269,4 +1271,314 @@ export async function createTransactions(
 
   // Filter out any null results
   return fullTransactions.filter((transaction) => transaction !== null);
+}
+
+export type UpsertTransactionData = {
+  name: string;
+  internalId: string;
+  categorySlug?: string | null;
+  bankAccountId: string;
+  description?: string | null;
+  balance?: number | null;
+  currency: string;
+  method:
+    | "payment"
+    | "card_purchase"
+    | "card_atm"
+    | "transfer"
+    | "other"
+    | "unknown"
+    | "ach"
+    | "interest"
+    | "deposit"
+    | "wire"
+    | "fee";
+  amount: number;
+  teamId: string;
+  date: string;
+  status?: "posted" | "pending";
+  notified?: boolean;
+  counterpartyName?: string | null;
+  baseAmount?: number | null;
+  baseCurrency?: string | null;
+};
+
+export type UpsertTransactionsParams = {
+  transactions: UpsertTransactionData[];
+  batchSize?: number;
+};
+
+export async function upsertTransactions(
+  db: Database,
+  params: UpsertTransactionsParams,
+) {
+  const { transactions: transactionData, batchSize = 500 } = params;
+
+  if (transactionData.length === 0) {
+    return { totalProcessed: 0, batchesProcessed: 0 };
+  }
+
+  let totalProcessed = 0;
+  let batchesProcessed = 0;
+
+  // Smaller batches for better performance with PostgreSQL
+  for (let i = 0; i < transactionData.length; i += batchSize) {
+    const batch = transactionData.slice(i, i + batchSize);
+
+    await db.transaction(async (tx) => {
+      // Simply ignore duplicates based on internalId - no updates needed
+      await tx
+        .insert(transactions)
+        .values(batch)
+        .onConflictDoNothing({ target: transactions.internalId });
+    });
+
+    totalProcessed += batch.length;
+    batchesProcessed += 1;
+  }
+
+  return {
+    totalProcessed,
+    batchesProcessed,
+  };
+}
+
+export type GetTransactionsByAccountParams = {
+  accountId: string;
+};
+
+export async function getTransactionsByAccount(
+  db: Database,
+  params: GetTransactionsByAccountParams,
+) {
+  const { accountId } = params;
+
+  return db
+    .select()
+    .from(transactions)
+    .where(eq(transactions.bankAccountId, accountId));
+}
+
+export type GetTransactionsByFiltersParams = {
+  teamId: string;
+  amount: number;
+  currency: string;
+  fromDate: string;
+  isFulfilled?: boolean;
+};
+
+export async function getTransactionsByFilters(
+  db: Database,
+  params: GetTransactionsByFiltersParams,
+) {
+  const { teamId, amount, currency, fromDate, isFulfilled = false } = params;
+
+  // isFulfilled logic: transaction has attachments OR status is 'completed'
+  const isFullfilledCondition = isFulfilled
+    ? or(
+        exists(
+          db
+            .select()
+            .from(transactionAttachments)
+            .where(
+              and(
+                eq(transactionAttachments.transactionId, transactions.id),
+                eq(transactionAttachments.teamId, teamId),
+              ),
+            ),
+        ),
+        eq(transactions.status, "completed"),
+      )
+    : and(
+        notExists(
+          db
+            .select()
+            .from(transactionAttachments)
+            .where(
+              and(
+                eq(transactionAttachments.transactionId, transactions.id),
+                eq(transactionAttachments.teamId, teamId),
+              ),
+            ),
+        ),
+        ne(transactions.status, "completed"),
+      );
+
+  return db
+    .select({
+      id: transactions.id,
+    })
+    .from(transactions)
+    .where(
+      and(
+        eq(transactions.teamId, teamId),
+        eq(transactions.amount, amount),
+        eq(transactions.currency, currency.toUpperCase()),
+        gte(transactions.date, fromDate),
+        isFullfilledCondition,
+      ),
+    );
+}
+
+export type GetTransactionsForExportParams = {
+  ids: string[];
+};
+
+export async function getTransactionsForExport(
+  db: Database,
+  params: GetTransactionsForExportParams,
+) {
+  const { ids } = params;
+
+  return db
+    .select({
+      id: transactions.id,
+      date: transactions.date,
+      name: transactions.name,
+      description: transactions.description,
+      amount: transactions.amount,
+      note: transactions.note,
+      balance: transactions.balance,
+      currency: transactions.currency,
+      counterpartyName: transactions.counterpartyName,
+      taxType: transactions.taxType,
+      taxRate: transactions.taxRate,
+      status: transactions.status,
+      attachments: sql<
+        Array<{
+          id: string;
+          name: string | null;
+          path: string[] | null;
+          type: string;
+          size: number;
+        }>
+      >`COALESCE(
+        json_agg(
+          DISTINCT jsonb_build_object(
+            'id', ${transactionAttachments.id}, 
+            'name', ${transactionAttachments.name}, 
+            'path', ${transactionAttachments.path}, 
+            'type', ${transactionAttachments.type}, 
+            'size', ${transactionAttachments.size}
+          )
+        ) FILTER (WHERE ${transactionAttachments.id} IS NOT NULL), 
+        '[]'::json
+      )`.as("attachments"),
+      category: sql<{
+        id: string;
+        name: string;
+        description: string | null;
+        taxRate: number | null;
+        taxType: string | null;
+      } | null>`
+        CASE 
+          WHEN ${transactionCategories.id} IS NOT NULL THEN 
+            jsonb_build_object(
+              'id', ${transactionCategories.id},
+              'name', ${transactionCategories.name},
+              'description', ${transactionCategories.description},
+              'tax_rate', ${transactionCategories.taxRate},
+              'tax_type', ${transactionCategories.taxType}
+            )
+          ELSE NULL
+        END
+      `.as("category"),
+      bankAccount: sql<{
+        id: string;
+        name: string;
+      } | null>`
+        CASE 
+          WHEN ${bankAccounts.id} IS NOT NULL THEN 
+            jsonb_build_object(
+              'id', ${bankAccounts.id},
+              'name', ${bankAccounts.name}
+            )
+          ELSE NULL
+        END
+      `.as("bankAccount"),
+      tags: sql<
+        Array<{
+          id: string;
+          tag: {
+            id: string;
+            name: string;
+          };
+        }>
+      >`COALESCE(
+        json_agg(
+          DISTINCT jsonb_build_object(
+            'id', ${transactionTags.id},
+            'tag', jsonb_build_object(
+              'id', ${tags.id},
+              'name', ${tags.name}
+            )
+          )
+        ) FILTER (WHERE ${transactionTags.id} IS NOT NULL), 
+        '[]'::json
+      )`.as("tags"),
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionAttachments,
+      eq(transactionAttachments.transactionId, transactions.id),
+    )
+    .leftJoin(
+      transactionCategories,
+      eq(transactionCategories.slug, transactions.categorySlug),
+    )
+    .leftJoin(bankAccounts, eq(bankAccounts.id, transactions.bankAccountId))
+    .leftJoin(
+      transactionTags,
+      eq(transactionTags.transactionId, transactions.id),
+    )
+    .leftJoin(tags, eq(tags.id, transactionTags.tagId))
+    .where(inArray(transactions.id, ids))
+    .groupBy(
+      transactions.id,
+      transactions.date,
+      transactions.name,
+      transactions.description,
+      transactions.amount,
+      transactions.note,
+      transactions.balance,
+      transactions.currency,
+      transactions.counterpartyName,
+      transactions.taxType,
+      transactions.taxRate,
+      transactions.status,
+      transactionCategories.id,
+      transactionCategories.name,
+      transactionCategories.description,
+      transactionCategories.taxRate,
+      transactionCategories.taxType,
+      bankAccounts.id,
+      bankAccounts.name,
+    );
+}
+
+export type UpdateTransactionsAsNotifiedParams = {
+  teamId: string;
+};
+
+export async function updateTransactionsAsNotified(
+  db: Database,
+  params: UpdateTransactionsAsNotifiedParams,
+) {
+  const { teamId } = params;
+
+  return db
+    .update(transactions)
+    .set({ notified: true })
+    .where(
+      and(eq(transactions.teamId, teamId), eq(transactions.notified, false)),
+    )
+    .returning({
+      id: transactions.id,
+      date: transactions.date,
+      amount: transactions.amount,
+      name: transactions.name,
+      currency: transactions.currency,
+      category: transactions.category,
+      status: transactions.status,
+    });
 }

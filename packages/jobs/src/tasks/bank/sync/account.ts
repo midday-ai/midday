@@ -1,7 +1,8 @@
+import { getDb } from "@jobs/init";
 import { parseAPIError } from "@jobs/utils/parse-error";
 import { getClassification } from "@jobs/utils/transform";
+import { updateBankAccount } from "@midday/db/queries";
 import { client } from "@midday/engine-client";
-import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { upsertTransactions } from "../transactions/upsert";
@@ -40,7 +41,7 @@ export const syncAccount = schemaTask({
     provider,
     manualSync,
   }) => {
-    const supabase = createClient();
+    const db = getDb();
     const classification = getClassification(accountType);
 
     // Get the balance
@@ -64,23 +65,21 @@ export const syncAccount = schemaTask({
 
       if (balance > 0) {
         // Reset error details and retries if we successfully got the balance
-        await supabase
-          .from("bank_accounts")
-          .update({
-            balance,
-            error_details: null,
-            error_retries: null,
-          })
-          .eq("id", id);
+        await updateBankAccount(db, {
+          id,
+          // No teamId needed in trusted job context
+          balance,
+          errorDetails: null,
+          errorRetries: null,
+        });
       } else {
         // Reset error details and retries if we successfully got the balance
-        await supabase
-          .from("bank_accounts")
-          .update({
-            error_details: null,
-            error_retries: null,
-          })
-          .eq("id", id);
+        await updateBankAccount(db, {
+          id,
+          // No teamId needed in trusted job context
+          errorDetails: null,
+          errorRetries: null,
+        });
       }
     } catch (error) {
       const parsedError = parseAPIError(error);
@@ -91,13 +90,12 @@ export const syncAccount = schemaTask({
         const retries = errorRetries ? errorRetries + 1 : 1;
 
         // Update the account with the error details and retries
-        await supabase
-          .from("bank_accounts")
-          .update({
-            error_details: parsedError.message,
-            error_retries: retries,
-          })
-          .eq("id", id);
+        await updateBankAccount(db, {
+          id,
+          // No teamId needed in trusted job context
+          errorDetails: parsedError.message,
+          errorRetries: retries,
+        });
 
         throw error;
       }
@@ -121,13 +119,12 @@ export const syncAccount = schemaTask({
       }
 
       // Reset error details and retries if we successfully got the transactions
-      await supabase
-        .from("bank_accounts")
-        .update({
-          error_details: null,
-          error_retries: null,
-        })
-        .eq("id", id);
+      await updateBankAccount(db, {
+        id,
+        // No teamId needed in trusted job context
+        errorDetails: null,
+        errorRetries: null,
+      });
 
       const { data: transactionsData } = await transactionsResponse.json();
 

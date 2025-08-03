@@ -1,9 +1,11 @@
+import { getDb } from "@jobs/init";
 import {
   handleTransactionEmails,
   handleTransactionSlackNotifications,
 } from "@jobs/utils/transaction-notifications";
 import { handleTransactionNotifications } from "@jobs/utils/transaction-notifications";
-import { createClient } from "@midday/supabase/job";
+import { updateTransactionsAsNotified } from "@midday/db/queries";
+import { getTeamOwnersWithTeamData } from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
@@ -14,38 +16,23 @@ export const transactionNotifications = schemaTask({
     teamId: z.string(),
   }),
   run: async ({ teamId }) => {
-    const supabase = createClient();
+    const db = getDb();
 
     try {
       // Mark all transactions as notified and get the ones that need to be notified about
-      const { data: transactionsData } = await supabase
-        .from("transactions")
-        .update({ notified: true })
-        .eq("team_id", teamId)
-        .eq("notified", false)
-        .select("id, date, amount, name, currency, category, status")
-        .order("date", { ascending: false })
-        .throwOnError();
+      const transactionsData = await updateTransactionsAsNotified(db, {
+        teamId,
+      });
 
-      const { data: usersData } = await supabase
-        .from("users_on_team")
-        .select(
-          "id, team_id, team:teams(inbox_id, name), user:users(id, full_name, avatar_url, email, locale)",
-        )
-        .eq("team_id", teamId)
-        .eq("role", "owner")
-        .throwOnError();
+      const usersData = await getTeamOwnersWithTeamData(db, teamId);
 
-      const sortedTransactions = transactionsData?.sort((a, b) => {
+      const sortedTransactions = transactionsData?.sort((a: any, b: any) => {
         return new Date(b.date).getTime() - new Date(a.date).getTime();
       });
 
       if (sortedTransactions && sortedTransactions.length > 0) {
-        // @ts-expect-error - TODO: Fix types
         await handleTransactionNotifications(usersData, sortedTransactions);
-        // @ts-expect-error - TODO: Fix types
         await handleTransactionEmails(usersData, sortedTransactions);
-        // @ts-expect-error - TODO: Fix types
         await handleTransactionSlackNotifications(teamId, sortedTransactions);
       }
     } catch (error) {

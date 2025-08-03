@@ -1,6 +1,8 @@
 import { writeToString } from "@fast-csv/format";
+import { getDb } from "@jobs/init";
 import { exportTransactionsSchema } from "@jobs/schema";
 import { serializableToBlob } from "@jobs/utils/blob";
+import { updateDocumentProcessingStatusByName } from "@midday/db/queries";
 import { createClient } from "@midday/supabase/job";
 import { metadata, schemaTask } from "@trigger.dev/sdk";
 import {
@@ -50,7 +52,8 @@ export const exportTransactions = schemaTask({
     preset: "large-1x",
   },
   run: async ({ teamId, locale, transactionIds, dateFormat }) => {
-    const supabase = createClient();
+    const db = getDb();
+    const supabase = createClient(); // Still needed for storage operations
 
     const filePath = `export-${format(new Date(), dateFormat ?? "yyyy-MM-dd")}`;
     const path = `${teamId}/exports`;
@@ -145,12 +148,11 @@ export const exportTransactions = schemaTask({
     metadata.set("progress", 100);
 
     // Update the documents to completed (it's a zip file)
-    await supabase
-      .from("documents")
-      .update({
-        processing_status: "completed",
-      })
-      .eq("name", fullPath);
+    await updateDocumentProcessingStatusByName(db, {
+      name: fullPath,
+      processingStatus: "completed",
+      // No teamId needed in trusted job context
+    });
 
     return {
       filePath,

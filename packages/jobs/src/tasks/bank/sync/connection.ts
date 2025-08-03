@@ -1,7 +1,12 @@
+import { getDb } from "@jobs/init";
 import { syncConnectionSchema } from "@jobs/schema";
 import { triggerSequenceAndWait } from "@jobs/utils/trigger-sequence";
+import {
+  getBankAccountsByConnection,
+  getBankConnectionById,
+  updateBankConnection,
+} from "@midday/db/queries";
 import { client } from "@midday/engine-client";
-import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { transactionNotifications } from "../notifications/transactions";
 import { syncAccount } from "./account";
@@ -15,15 +20,12 @@ export const syncConnection = schemaTask({
   },
   schema: syncConnectionSchema,
   run: async ({ connectionId, manualSync }, { ctx }) => {
-    const supabase = createClient();
+    const db = getDb();
 
     try {
-      const { data } = await supabase
-        .from("bank_connections")
-        .select("provider, access_token, reference_id, team_id")
-        .eq("id", connectionId)
-        .single()
-        .throwOnError();
+      const data = await getBankConnectionById(db, {
+        id: connectionId,
+      });
 
       if (!data) {
         logger.error("Connection not found");
@@ -32,13 +34,13 @@ export const syncConnection = schemaTask({
 
       const connectionResponse = await client.connections.status.$get({
         query: {
-          id: data.reference_id!,
+          id: data.referenceId!,
           provider: data.provider as
             | "gocardless"
             | "plaid"
             | "teller"
             | "enablebanking", // Pluggy not supported yet
-          accessToken: data.access_token ?? undefined,
+          accessToken: data.accessToken ?? undefined,
         },
       });
 
@@ -52,43 +54,33 @@ export const syncConnection = schemaTask({
       const { data: connectionData } = await connectionResponse.json();
 
       if (connectionData.status === "connected") {
-        await supabase
-          .from("bank_connections")
-          .update({
-            status: "connected",
-            last_accessed: new Date().toISOString(),
-          })
-          .eq("id", connectionId);
+        await updateBankConnection(db, {
+          id: connectionId,
+          status: "connected",
+          lastAccessed: new Date().toISOString(),
+        });
 
-        const query = supabase
-          .from("bank_accounts")
-          .select(
-            "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, status)",
-          )
-          .eq("bank_connection_id", connectionId)
-          .eq("enabled", true)
-          .eq("manual", false);
-
-        // Skip accounts with more than 3 error retries during background sync
-        // Allow all accounts during manual sync to clear errors after reconnect
-        if (!manualSync) {
-          query.or("error_retries.lt.4,error_retries.is.null");
-        }
-
-        const { data: bankAccountsData } = await query.throwOnError();
+        const bankAccountsData = await getBankAccountsByConnection(db, {
+          connectionId,
+          enabled: true,
+          manual: false,
+          // Skip accounts with more than 3 error retries during background sync
+          // Allow all accounts during manual sync to clear errors after reconnect
+          maxErrorRetries: manualSync ? undefined : 4,
+        });
 
         if (!bankAccountsData) {
           logger.info("No bank accounts found");
           return;
         }
 
-        const bankAccounts = bankAccountsData.map((account) => ({
+        const bankAccounts = bankAccountsData.map((account: any) => ({
           id: account.id,
-          accountId: account.account_id,
-          accessToken: account.bank_connection?.access_token ?? undefined,
-          provider: account.bank_connection?.provider,
-          connectionId: account.bank_connection?.id,
-          teamId: account.team_id,
+          accountId: account.accountId,
+          accessToken: account.bankConnection?.accessToken ?? undefined,
+          provider: account.bankConnection?.provider,
+          connectionId: account.bankConnection?.id,
+          teamId: account.teamId,
           accountType: account.type ?? "depository",
           manualSync,
         }));
@@ -110,7 +102,7 @@ export const syncConnection = schemaTask({
         // We delay it by 10 minutes to allow for more transactions to be notified
         if (!manualSync) {
           await transactionNotifications.trigger(
-            { teamId: data.team_id },
+            { teamId: data.teamId },
             { delay: "5m" },
           );
         }
@@ -119,27 +111,25 @@ export const syncConnection = schemaTask({
         // If all accounts have 3+ error retries, disconnect the connection
         // So the user will get a notification and can reconnect the bank
         try {
-          const { data: bankAccountsData } = await supabase
-            .from("bank_accounts")
-            .select("id, error_retries")
-            .eq("bank_connection_id", connectionId)
-            .eq("manual", false)
-            .eq("enabled", true)
-            .throwOnError();
+          const bankAccountsData = await getBankAccountsByConnection(db, {
+            connectionId,
+            manual: false,
+            enabled: true,
+          });
 
           if (
             bankAccountsData?.every(
-              (account) => (account.error_retries ?? 0) >= 3,
+              (account: any) => (account.errorRetries ?? 0) >= 3,
             )
           ) {
             logger.info(
               "All bank accounts have 3+ error retries, disconnecting connection",
             );
 
-            await supabase
-              .from("bank_connections")
-              .update({ status: "disconnected" })
-              .eq("id", connectionId);
+            await updateBankConnection(db, {
+              id: connectionId,
+              status: "disconnected",
+            });
           }
         } catch (error) {
           logger.error("Failed to check connection status by accounts", {
@@ -151,10 +141,10 @@ export const syncConnection = schemaTask({
       if (connectionData.status === "disconnected") {
         logger.info("Connection disconnected");
 
-        await supabase
-          .from("bank_connections")
-          .update({ status: "disconnected" })
-          .eq("id", connectionId);
+        await updateBankConnection(db, {
+          id: connectionId,
+          status: "disconnected",
+        });
       }
     } catch (error) {
       logger.error("Failed to sync connection", { error });

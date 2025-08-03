@@ -1,6 +1,7 @@
+import { getDb } from "@jobs/init";
 import { triggerSequenceAndWait } from "@jobs/utils/trigger-sequence";
+import { getBankAccounts } from "@midday/db/queries";
 import { updateBaseCurrencySchema } from "@midday/jobs/schema";
-import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk";
 import { updateAccountBaseCurrency } from "./update-account-base-currency";
 
@@ -12,16 +13,15 @@ export const updateBaseCurrency = schemaTask({
     concurrencyLimit: 10,
   },
   run: async ({ teamId, baseCurrency }) => {
-    const supabase = createClient();
+    const db = getDb();
 
     // Get all enabled accounts
-    const { data: accountsData } = await supabase
-      .from("bank_accounts")
-      .select("id, currency, balance")
-      .eq("team_id", teamId)
-      .eq("enabled", true);
+    const accountsData = await getBankAccounts(db, {
+      teamId,
+      enabled: true,
+    });
 
-    if (!accountsData) {
+    if (!accountsData || accountsData.length === 0) {
       return;
     }
 
