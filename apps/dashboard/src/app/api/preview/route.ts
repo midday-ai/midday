@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
     const pdfBuffer = await pdfBlob.arrayBuffer();
     const document = await getPdfImage(pdfBuffer);
 
+    // @ts-expect-error
     return new Response(document, {
       headers: {
         "Content-Type": "image/png",
