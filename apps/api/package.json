@@ -15,7 +15,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^1.3.22",
     "@date-fns/utc": "^2.1.0",
-    "@hono/trpc-server": "^0.3.4",
+    "@hono/trpc-server": "^0.4.0",
     "@hono/zod-openapi": "^0.19.8",
     "@hono/zod-validator": "^0.7.0",
     "@midday/documents": "workspace:*",
@@ -32,7 +32,7 @@
     "@scalar/hono-api-reference": "^0.9.4",
     "@sindresorhus/slugify": "^2.2.1",
     "@trigger.dev/sdk": "4.0.0-v4-beta.26",
-    "@trpc/server": "^11.4.1",
+    "@trpc/server": "^11.4.3",
     "ai": "^4.3.16",
     "camelcase-keys": "^9.1.3",
     "date-fns": "^4.1.0",
