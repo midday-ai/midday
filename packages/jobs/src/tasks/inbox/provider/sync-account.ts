@@ -57,7 +57,7 @@ export const syncInboxAccount = schemaTask({
       provider: accountRow.provider,
       lastAccessed: accountRow.lastAccessed,
       manualSync,
-      fullSync,
+      fullSync: manualSync,
       maxResults: 50,
     });
 
