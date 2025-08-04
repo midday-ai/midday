@@ -23,6 +23,7 @@ export * from "./tracker-projects";
 export * from "./transaction-attachments";
 export * from "./transaction-categories";
 export * from "./transaction-embeddings";
+export * from "./transaction-enrichment";
 export * from "./transaction-tags";
 export * from "./transactions";
 export * from "./user-invites";

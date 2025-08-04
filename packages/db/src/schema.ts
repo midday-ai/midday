@@ -230,6 +230,7 @@ export const transactions = pgTable(
     taxType: text("tax_type"),
     recurring: boolean(),
     frequency: transactionFrequencyEnum(),
+    merchantName: text("merchant_name"),
     ftsVector: tsvector("fts_vector")
       .notNull()
       .generatedAlwaysAs(

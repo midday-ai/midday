@@ -12,6 +12,7 @@ export type TransactionForEmbedding = {
   name: string;
   counterpartyName: string | null;
   description: string | null;
+  merchantName: string | null;
 };
 
 export async function getTransactionsForEmbedding(
@@ -28,6 +29,7 @@ export async function getTransactionsForEmbedding(
       name: transactions.name,
       counterpartyName: transactions.counterpartyName,
       description: transactions.description,
+      merchantName: transactions.merchantName,
     })
     .from(transactions)
     .leftJoin(

@@ -9,6 +9,7 @@ import {
 } from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
+import { enrichTransactions } from "./enrich-transaction";
 
 const BATCH_SIZE = 50;
 
@@ -24,9 +25,15 @@ export const embedTransaction = schemaTask({
     concurrencyLimit: 3,
   },
   run: async ({ transactionIds, teamId }) => {
+    // Step 1: Enrich transactions first
+    await enrichTransactions.triggerAndWait({
+      transactionIds,
+      teamId,
+    });
+
     const db = getDb();
 
-    // Get transactions that need embedding
+    // Step 2: Get transactions that need embedding
     const transactionsToEmbed = await getTransactionsForEmbedding(db, {
       transactionIds,
       teamId,

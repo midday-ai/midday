@@ -2,8 +2,13 @@ export function prepareTransactionText(transaction: {
   name: string;
   counterpartyName?: string | null;
   description?: string | null;
+  merchantName?: string | null;
 }): string {
-  const primaryText = transaction.counterpartyName || transaction.name;
+  // Prioritize enriched merchant name if available
+  const primaryText =
+    transaction.merchantName ||
+    transaction.counterpartyName ||
+    transaction.name;
   const parts = [primaryText];
 
   // Only include description if it's different from the primary text
