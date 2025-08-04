@@ -1,5 +1,6 @@
 import { getDb } from "@jobs/init";
 import { generateEmbeddings } from "@jobs/utils/embeddings";
+import { processBatch } from "@jobs/utils/process-batch";
 import { prepareTransactionText } from "@jobs/utils/text-preparation";
 import {
   type CreateTransactionEmbeddingParams,
@@ -11,12 +12,7 @@ import { z } from "zod";
 
 const BATCH_SIZE = 50;
 
-type TransactionForEmbedding = {
-  id: string;
-  name: string;
-  counterpartyName: string | null;
-  description: string | null;
-};
+// Type is imported from the query file - no more manual definitions needed!
 
 export const embedTransaction = schemaTask({
   id: "embed-transaction",
@@ -52,61 +48,61 @@ export const embedTransaction = schemaTask({
       requestedCount: transactionIds.length,
     });
 
-    // Process in batches
-    for (let i = 0; i < transactionsToEmbed.length; i += BATCH_SIZE) {
-      const batch = transactionsToEmbed.slice(i, i + BATCH_SIZE);
+    // Process in batches using utility
+    await processBatch(transactionsToEmbed, BATCH_SIZE, async (batch) => {
+      const validItems = [];
 
-      try {
-        // Prepare text content
-        const contents = batch.map((tx: TransactionForEmbedding) =>
-          prepareTransactionText(tx),
-        );
-
-        // Filter out empty texts
-        const validContents = contents.filter(
-          (text: string) => text.trim().length > 0,
-        );
-        const validTransactions = batch.filter(
-          (tx: TransactionForEmbedding, index: number) =>
-            contents[index].trim().length > 0,
-        );
-
-        if (validContents.length === 0) {
-          logger.warn("No valid text content in batch", {
-            batchSize: batch.length,
-            teamId,
-          });
-          continue;
+      for (const tx of batch) {
+        const text = prepareTransactionText(tx);
+        if (text.trim().length > 0) {
+          validItems.push({ transaction: tx, text });
         }
+      }
 
-        const { embeddings, model } = await generateEmbeddings(validContents);
-
-        const embeddingsToInsert: CreateTransactionEmbeddingParams[] =
-          validTransactions.map(
-            (tx: TransactionForEmbedding, index: number) => ({
-              transactionId: tx.id,
-              teamId,
-              embedding: embeddings[index],
-              model,
-            }),
-          );
-
-        // Insert embeddings
-        await createTransactionEmbeddings(db, embeddingsToInsert);
-
-        logger.info("Transaction embeddings batch created", {
-          batchSize: embeddingsToInsert.length,
-          teamId,
-        });
-      } catch (error) {
-        logger.error("Transaction embedding batch failed", {
-          error: error instanceof Error ? error.message : "Unknown error",
+      if (validItems.length === 0) {
+        logger.warn("No valid text content in batch", {
           batchSize: batch.length,
           teamId,
         });
-        throw error;
+        return [];
       }
-    }
+
+      // Extract texts and generate embeddings
+      const texts = validItems.map((item) => item.text);
+      const { embeddings, model } = await generateEmbeddings(texts);
+
+      // Validate embeddings array length
+      if (embeddings.length !== validItems.length) {
+        throw new Error(
+          `Embeddings count mismatch: expected ${validItems.length}, got ${embeddings.length}`,
+        );
+      }
+
+      // Create embedding records
+      const embeddingsToInsert: CreateTransactionEmbeddingParams[] =
+        validItems.map((item, index: number) => {
+          const embedding = embeddings[index];
+          if (!embedding) {
+            throw new Error(`Missing embedding at index ${index}`);
+          }
+          return {
+            transactionId: item.transaction.id,
+            teamId,
+            embedding,
+            model,
+          };
+        });
+
+      // Insert embeddings
+      const result = await createTransactionEmbeddings(db, embeddingsToInsert);
+
+      logger.info("Transaction embeddings batch created", {
+        batchSize: embeddingsToInsert.length,
+        teamId,
+      });
+
+      return result;
+    });
 
     logger.info("All transaction embeddings created", {
       totalCount: transactionsToEmbed.length,

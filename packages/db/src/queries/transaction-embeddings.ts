@@ -7,10 +7,17 @@ export type GetTransactionsForEmbeddingParams = {
   teamId: string;
 };
 
+export type TransactionForEmbedding = {
+  id: string;
+  name: string;
+  counterpartyName: string | null;
+  description: string | null;
+};
+
 export async function getTransactionsForEmbedding(
   db: Database,
   params: GetTransactionsForEmbeddingParams,
-) {
+): Promise<TransactionForEmbedding[]> {
   if (params.transactionIds.length === 0) {
     return [];
   }
