@@ -11,6 +11,7 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   deleteInbox,
+  deleteInboxEmbedding,
   getInbox,
   getInboxById,
   getInboxSearch,
@@ -43,10 +44,16 @@ export const inboxRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(deleteInboxSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
-      return deleteInbox(db, {
-        id: input.id,
-        teamId: teamId!,
-      });
+      await Promise.all([
+        deleteInboxEmbedding(db, {
+          inboxId: input.id,
+          teamId: teamId!,
+        }),
+        deleteInbox(db, {
+          id: input.id,
+          teamId: teamId!,
+        }),
+      ]);
     }),
 
   processAttachments: protectedProcedure

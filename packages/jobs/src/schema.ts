@@ -173,6 +173,13 @@ export type ProcessTransactionAttachmentPayload = z.infer<
   typeof processTransactionAttachmentSchema
 >;
 
+export const embedTransactionSchema = z.object({
+  transactionIds: z.array(z.string().uuid()),
+  teamId: z.string().uuid(),
+});
+
+export type EmbedTransactionPayload = z.infer<typeof embedTransactionSchema>;
+
 export const scheduleInvoiceJobSchema = z.object({
   invoiceId: z.string().uuid(),
   scheduledAt: z.string().datetime(),
