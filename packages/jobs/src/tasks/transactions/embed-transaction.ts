@@ -89,6 +89,7 @@ export const embedTransaction = schemaTask({
             transactionId: item.transaction.id,
             teamId,
             embedding,
+            sourceText: item.text,
             model,
           };
         });

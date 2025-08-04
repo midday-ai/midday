@@ -1,6 +1,6 @@
 import type { Database } from "@db/client";
 import { inbox, inboxEmbeddings } from "@db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export type GetInboxForEmbeddingParams = {
   inboxId: string;
@@ -26,6 +26,7 @@ export type CreateInboxEmbeddingParams = {
   inboxId: string;
   teamId: string;
   embedding: number[];
+  sourceText: string;
   model: string;
 };
 
@@ -54,4 +55,29 @@ export async function checkInboxEmbeddingExists(
     .limit(1);
 
   return result.length > 0;
+}
+
+export type DeleteInboxEmbeddingParams = {
+  inboxId: string;
+  teamId: string;
+};
+
+export async function deleteInboxEmbedding(
+  db: Database,
+  params: DeleteInboxEmbeddingParams,
+) {
+  const [result] = await db
+    .delete(inboxEmbeddings)
+    .where(
+      and(
+        eq(inboxEmbeddings.inboxId, params.inboxId),
+        eq(inboxEmbeddings.teamId, params.teamId),
+      ),
+    )
+    .returning({
+      id: inboxEmbeddings.id,
+      inboxId: inboxEmbeddings.inboxId,
+    });
+
+  return result;
 }

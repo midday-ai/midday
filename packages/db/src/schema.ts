@@ -1768,6 +1768,7 @@ export const transactionEmbeddings = pgTable(
     transactionId: uuid("transaction_id").notNull(),
     teamId: uuid("team_id").notNull(),
     embedding: vector("embedding", { dimensions: 768 }),
+    sourceText: text("source_text").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .defaultNow()
       .notNull(),
@@ -1808,6 +1809,7 @@ export const inboxEmbeddings = pgTable(
     inboxId: uuid("inbox_id").notNull(),
     teamId: uuid("team_id").notNull(),
     embedding: vector("embedding", { dimensions: 768 }),
+    sourceText: text("source_text").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .defaultNow()
       .notNull(),

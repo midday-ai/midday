@@ -47,6 +47,7 @@ export type CreateTransactionEmbeddingParams = {
   transactionId: string;
   teamId: string;
   embedding: number[];
+  sourceText: string;
   model: string;
 };
 

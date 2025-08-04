@@ -63,6 +63,7 @@ export const embedInbox = schemaTask({
         inboxId,
         teamId,
         embedding,
+        sourceText: text,
         model,
       });
 

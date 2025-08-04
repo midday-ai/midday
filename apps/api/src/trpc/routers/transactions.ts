@@ -24,6 +24,8 @@ import {
   updateTransaction,
   updateTransactions,
 } from "@midday/db/queries";
+import type { EmbedTransactionPayload } from "@midday/jobs/schema";
+import { tasks } from "@trigger.dev/sdk";
 
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -117,9 +119,19 @@ export const transactionsRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createTransactionSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
-      return createTransaction(db, {
+      const transaction = await createTransaction(db, {
         ...input,
         teamId: teamId!,
       });
+
+      // Trigger embedding for the newly created manual transaction
+      if (transaction?.id) {
+        tasks.trigger("embed-transaction", {
+          transactionIds: [transaction.id],
+          teamId: teamId!,
+        } satisfies EmbedTransactionPayload);
+      }
+
+      return transaction;
     }),
 });
