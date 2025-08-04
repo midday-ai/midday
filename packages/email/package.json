@@ -28,6 +28,6 @@
     "responsive-react-email": "^0.0.5"
   },
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   }
 }
