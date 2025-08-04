@@ -1,6 +1,6 @@
 import type { Database } from "@db/client";
 import { transactions } from "@db/schema";
-import { type SQL, and, eq, inArray, isNull, sql } from "drizzle-orm";
+import { type SQL, and, eq, inArray, sql } from "drizzle-orm";
 
 export type GetTransactionsForEnrichmentParams = {
   transactionIds: string[];
@@ -12,7 +12,7 @@ export type TransactionForEnrichment = {
   name: string;
   counterpartyName: string | null;
   description: string | null;
-  amount: string;
+  amount: number;
   currency: string;
   categorySlug: string | null;
 };

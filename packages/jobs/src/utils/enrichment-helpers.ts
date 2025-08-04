@@ -39,7 +39,7 @@ export function prepareTransactionData(
     return {
       index: index + 1,
       description: description + (tx.description ? ` - ${tx.description}` : ""),
-      amount: tx.amount,
+      amount: tx.amount.toString(),
       currency: tx.currency,
     };
   });

@@ -25,11 +25,22 @@ export const embedTransaction = schemaTask({
     concurrencyLimit: 3,
   },
   run: async ({ transactionIds, teamId }) => {
-    // Step 1: Enrich transactions first
-    await enrichTransactions.triggerAndWait({
-      transactionIds,
-      teamId,
-    });
+    // Step 1: Attempt to enrich transactions first (non-blocking)
+    try {
+      await enrichTransactions.triggerAndWait({
+        transactionIds,
+        teamId,
+      });
+      logger.info("Transaction enrichment completed successfully", { teamId });
+    } catch (error) {
+      logger.warn(
+        "Transaction enrichment failed, proceeding with embedding anyway",
+        {
+          teamId,
+          error: error instanceof Error ? error.message : "Unknown error",
+        },
+      );
+    }
 
     const db = getDb();
 

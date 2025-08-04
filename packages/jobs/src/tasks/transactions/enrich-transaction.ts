@@ -72,22 +72,42 @@ export const enrichTransactions = schemaTask({
         // Prepare updates for batch processing
         const updates: UpdateTransactionEnrichmentParams[] = [];
         let categoriesUpdated = 0;
+        let invalidIndices = 0;
 
         for (const result of object.results) {
-          const transaction = batch[result.index - 1];
-          if (transaction) {
-            const updateData = prepareUpdateData(transaction, result);
-
-            // Track if category was updated
-            if (updateData.categorySlug) {
-              categoriesUpdated++;
-            }
-
-            updates.push({
-              transactionId: transaction.id,
-              data: updateData,
+          // Validate index bounds
+          if (result.index < 1 || result.index > batch.length) {
+            logger.warn("Invalid transaction index from LLM", {
+              index: result.index,
+              batchSize: batch.length,
+              merchant: result.merchant,
+              teamId,
             });
+            invalidIndices++;
+            continue;
           }
+
+          const transaction = batch[result.index - 1];
+          if (!transaction) {
+            logger.error("Transaction not found despite valid index", {
+              index: result.index,
+              batchSize: batch.length,
+              teamId,
+            });
+            continue;
+          }
+
+          const updateData = prepareUpdateData(transaction, result);
+
+          // Track if category was updated
+          if (updateData.categorySlug) {
+            categoriesUpdated++;
+          }
+
+          updates.push({
+            transactionId: transaction.id,
+            data: updateData,
+          });
         }
 
         // Execute all updates
@@ -100,6 +120,7 @@ export const enrichTransactions = schemaTask({
             enrichedCount: updates.length,
             merchantNamesUpdated: updates.length,
             categoriesUpdated,
+            invalidIndices,
             teamId,
           });
         }
