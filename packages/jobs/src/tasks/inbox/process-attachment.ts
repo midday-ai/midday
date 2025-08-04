@@ -11,6 +11,7 @@ import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { convertHeic } from "../document/convert-heic";
 import { processDocument } from "../document/process-document";
+import { embedInbox } from "./embed-inbox";
 
 export const processAttachment = schemaTask({
   id: "process-attachment",
@@ -118,6 +119,17 @@ export const processAttachment = schemaTask({
       await processDocument.trigger({
         mimetype,
         filePath,
+        teamId,
+      });
+
+      // Trigger embedding creation for the inbox item
+      await embedInbox.trigger({
+        inboxId: inboxData.id,
+        teamId,
+      });
+
+      logger.info("Triggered inbox embedding", {
+        inboxId: inboxData.id,
         teamId,
       });
     } catch (error) {

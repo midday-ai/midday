@@ -1761,6 +1761,86 @@ export const inbox = pgTable(
   ],
 );
 
+export const transactionEmbeddings = pgTable(
+  "transaction_embeddings",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    transactionId: uuid("transaction_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    embedding: vector("embedding", { dimensions: 768 }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    model: text("model").notNull().default("gemini-embedding-001"),
+  },
+  (table) => [
+    index("transaction_embeddings_transaction_id_idx").using(
+      "btree",
+      table.transactionId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("transaction_embeddings_team_id_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+    ),
+    // Vector similarity index for fast cosine similarity searches
+    index("transaction_embeddings_vector_idx").using(
+      "hnsw",
+      table.embedding.op("vector_cosine_ops"),
+    ),
+    foreignKey({
+      columns: [table.transactionId],
+      foreignColumns: [transactions.id],
+      name: "transaction_embeddings_transaction_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "transaction_embeddings_team_id_fkey",
+    }).onDelete("cascade"),
+    unique("transaction_embeddings_unique").on(table.transactionId),
+  ],
+);
+
+export const inboxEmbeddings = pgTable(
+  "inbox_embeddings",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    inboxId: uuid("inbox_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    embedding: vector("embedding", { dimensions: 768 }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    model: text("model").notNull().default("gemini-embedding-001"),
+  },
+  (table) => [
+    index("inbox_embeddings_inbox_id_idx").using(
+      "btree",
+      table.inboxId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("inbox_embeddings_team_id_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+    ),
+    // Vector similarity index for fast cosine similarity searches
+    index("inbox_embeddings_vector_idx").using(
+      "hnsw",
+      table.embedding.op("vector_cosine_ops"),
+    ),
+    foreignKey({
+      columns: [table.inboxId],
+      foreignColumns: [inbox.id],
+      name: "inbox_embeddings_inbox_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "inbox_embeddings_team_id_fkey",
+    }).onDelete("cascade"),
+    unique("inbox_embeddings_unique").on(table.inboxId),
+  ],
+);
+
 export const documentTagAssignments = pgTable(
   "document_tag_assignments",
   {
