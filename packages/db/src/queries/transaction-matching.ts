@@ -90,15 +90,14 @@ export async function findMatches(
 ): Promise<MatchResult | null> {
   const { teamId, inboxId, includeAlreadyMatched = false } = params;
 
-  // Use optimized static weights - embeddings handle semantic matching
+  // Optimized weights - keep it simple and effective
   const teamWeights = {
-    embeddingWeight: 0.35, // Increased - embeddings are excellent for company name matching
-    amountWeight: 0.4, // Still primary - financial accuracy is key
-    currencyWeight: 0.15, // Important but embeddings + amount matter more
+    embeddingWeight: 0.35, // Embeddings already capture counterpartyName, website, description
+    amountWeight: 0.4, // Primary for financial accuracy
+    currencyWeight: 0.15, // Important for financial validation
     dateWeight: 0.1, // Reasonable time window
-    nameWeight: 0.0, // Removed - embeddings handle this better
     autoMatchThreshold: 0.95,
-    suggestedMatchThreshold: 0.7, // Slightly higher since embeddings are more reliable
+    suggestedMatchThreshold: 0.7, // Proven threshold
   };
 
   // Get inbox item with embedding
@@ -148,6 +147,7 @@ export async function findMatches(
       date: transactions.date,
       counterpartyName: transactions.counterpartyName,
       description: transactions.description,
+
       embeddingScore: sql<number>`0.1`.as("embedding_score"), // Perfect match gets best embedding score
       isAlreadyMatched: sql<boolean>`
         (EXISTS (SELECT 1 FROM ${transactionAttachments} 
@@ -161,8 +161,20 @@ export async function findMatches(
         eq(transactions.teamId, teamId),
         eq(transactions.status, "posted"),
 
-        // Exact financial match
-        eq(transactions.amount, inboxItem.amount || 0),
+        // Exact financial match OR common fee-adjusted amounts
+        sql`(
+          ${transactions.amount} = ${inboxItem.amount || 0}
+          OR 
+          -- Check for common processing fees (2.5-3%)
+          ABS(${transactions.amount} - ${inboxItem.amount || 0} * 1.025) < 0.01
+          OR 
+          ABS(${transactions.amount} - ${inboxItem.amount || 0} * 1.03) < 0.01
+          OR
+          -- Check for amount MINUS fees (merchant receives less)
+          ABS(${transactions.amount} - ${inboxItem.amount || 0} * 0.975) < 0.01
+          OR
+          ABS(${transactions.amount} - ${inboxItem.amount || 0} * 0.97) < 0.01
+        )`,
         eq(transactions.currency, inboxItem.currency || ""),
 
         // Reasonable date range for exact matches (30 days back, 7 days forward)
@@ -197,6 +209,7 @@ export async function findMatches(
         date: transactions.date,
         counterpartyName: transactions.counterpartyName,
         description: transactions.description,
+
         embeddingScore: sql<number>`
           (${inboxEmbeddings.embedding} <=> ${transactionEmbeddings.embedding})::DOUBLE PRECISION
         `.as("embedding_score"),
@@ -262,7 +275,8 @@ export async function findMatches(
       teamBaseCurrency,
     );
     const dateScore = calculateDateScore(inboxItem.date, candidate.date);
-    // Calculate confidence score - embeddings handle semantic matching
+
+    // Calculate confidence score using core signals
     let confidenceScore =
       embeddingScore * teamWeights.embeddingWeight +
       amountScore * teamWeights.amountWeight +
@@ -281,9 +295,43 @@ export async function findMatches(
     const isStrongSemanticMatch = embeddingScore > 0.85;
     const isStrongFinancialMatch = amountScore > 0.9 && currencyScore > 0.9;
 
+    // Check for payment terms match (Net 30, etc.)
+    const isPaymentTermMatch = dateScore >= 0.88 && dateScore <= 0.95;
+
+    // Check for likely fee-adjusted or partial payment match
+    const isFeeAdjustedMatch = amountScore >= 0.9 && amountScore <= 0.92;
+    const isPartialPaymentMatch = amountScore >= 0.78 && amountScore <= 0.85;
+
     // Perfect match: exact amount, currency, and close date
     if (isExactCurrencyAndAmount && dateScore > 0.7) {
       confidenceScore = Math.max(confidenceScore, 0.95);
+    }
+
+    // Payment terms match (Net 30, etc.) with matching currency
+    else if (
+      isPaymentTermMatch &&
+      inboxItem.currency === candidate.currency &&
+      amountScore > 0.85
+    ) {
+      confidenceScore = Math.max(confidenceScore, 0.92);
+    }
+
+    // Likely fee-adjusted match with strong semantics
+    else if (
+      isFeeAdjustedMatch &&
+      isStrongSemanticMatch &&
+      inboxItem.currency === candidate.currency
+    ) {
+      confidenceScore = Math.max(confidenceScore, 0.9);
+    }
+
+    // Partial payment with excellent semantic match
+    else if (
+      isPartialPaymentMatch &&
+      embeddingScore > 0.9 &&
+      inboxItem.currency === candidate.currency
+    ) {
+      confidenceScore = Math.max(confidenceScore, 0.85);
     }
 
     // Very good match: close amount, same currency, reasonable date
@@ -407,15 +455,14 @@ export async function findInboxMatches(
     .where(eq(teams.id, teamId))
     .limit(1);
 
-  // Use optimized static weights - embeddings handle semantic matching
+  // Optimized weights - keep it simple and effective
   const teamWeights = {
-    embeddingWeight: 0.35, // Increased - embeddings are excellent for company name matching
-    amountWeight: 0.4, // Still primary - financial accuracy is key
-    currencyWeight: 0.15, // Important but embeddings + amount matter more
+    embeddingWeight: 0.35, // Embeddings already capture counterpartyName, website, description
+    amountWeight: 0.4, // Primary for financial accuracy
+    currencyWeight: 0.15, // Important for financial validation
     dateWeight: 0.1, // Reasonable time window
-    nameWeight: 0.0, // Removed - embeddings handle this better
     autoMatchThreshold: 0.95,
-    suggestedMatchThreshold: 0.7, // Slightly higher since embeddings are more reliable
+    suggestedMatchThreshold: 0.7, // Proven threshold
   };
 
   const teamBaseCurrency = teamData[0]?.baseCurrency;
@@ -431,7 +478,6 @@ export async function findInboxMatches(
       baseCurrency: inbox.baseCurrency,
       date: sql<string>`COALESCE(${inbox.date}, ${inbox.createdAt}::date)`,
       website: inbox.website,
-      description: inbox.description,
       embeddingScore: sql<number>`0.1`.as("embedding_score"), // Perfect match gets best embedding score
       isAlreadyMatched: sql<boolean>`${inbox.transactionId} IS NOT NULL`,
     })
@@ -440,8 +486,20 @@ export async function findInboxMatches(
       and(
         eq(inbox.teamId, teamId),
 
-        // Exact financial match
-        eq(inbox.amount, transactionItem.amount),
+        // Exact financial match OR common fee-adjusted amounts
+        sql`(
+          ${inbox.amount} = ${transactionItem.amount}
+          OR 
+          -- Check for common processing fees (2.5-3%)
+          ABS(${inbox.amount} - ${transactionItem.amount} * 1.025) < 0.01
+          OR 
+          ABS(${inbox.amount} - ${transactionItem.amount} * 1.03) < 0.01
+          OR
+          -- Check for amount MINUS fees (invoice shows full amount, transaction is less)
+          ABS(${inbox.amount} - ${transactionItem.amount} * 0.975) < 0.01
+          OR
+          ABS(${inbox.amount} - ${transactionItem.amount} * 0.97) < 0.01
+        )`,
         eq(inbox.currency, transactionItem.currency),
 
         // Reasonable date range for exact matches (30 days back, 7 days forward)
@@ -528,17 +586,47 @@ export async function findInboxMatches(
       currencyScore * teamWeights.currencyWeight +
       dateScore * teamWeights.dateWeight;
 
-    // Apply same override logic as forward matching
-    if (
-      candidate.currency === transactionItem.currency &&
+    // Enhanced matching patterns
+    const isExactMatch =
       candidate.amount &&
       Math.abs(candidate.amount - transactionItem.amount) < 0.01 &&
-      dateScore > 0.8
-    ) {
+      candidate.currency === transactionItem.currency;
+
+    const isPaymentTermMatch = dateScore >= 0.88 && dateScore <= 0.95;
+    const isFeeAdjustedMatch = amountScore >= 0.9 && amountScore <= 0.92;
+    const isPartialPaymentMatch = amountScore >= 0.78 && amountScore <= 0.85;
+
+    // Apply same override logic as forward matching
+    if (isExactMatch && dateScore > 0.8) {
       confidenceScore = Math.max(confidenceScore, 0.92);
     }
 
-    if (
+    // Payment terms match
+    else if (
+      isPaymentTermMatch &&
+      candidate.currency === transactionItem.currency &&
+      amountScore > 0.85
+    ) {
+      confidenceScore = Math.max(confidenceScore, 0.9);
+    }
+
+    // Fee-adjusted match
+    else if (
+      isFeeAdjustedMatch &&
+      embeddingScore > 0.85 &&
+      candidate.currency === transactionItem.currency
+    ) {
+      confidenceScore = Math.max(confidenceScore, 0.88);
+    }
+
+    // Partial payment match
+    else if (
+      isPartialPaymentMatch &&
+      embeddingScore > 0.9 &&
+      candidate.currency === transactionItem.currency
+    ) {
+      confidenceScore = Math.max(confidenceScore, 0.83);
+    } else if (
       candidate.currency === transactionItem.currency &&
       amountScore > 0.9 &&
       dateScore > 0.6
@@ -704,6 +792,12 @@ function calculateAmountDifferenceScore(
   } else if (percentageDiff <= 0.02) {
     // 2% tolerance
     baseScore = 0.95;
+  } else if (percentageDiff <= 0.025) {
+    // 2.5% - Common credit card processing fee
+    baseScore = 0.92;
+  } else if (percentageDiff <= 0.03) {
+    // 3% - Stripe/PayPal fees
+    baseScore = 0.9;
   } else if (percentageDiff <= 0.05) {
     // 5% tolerance
     baseScore = 0.85;
@@ -715,6 +809,27 @@ function calculateAmountDifferenceScore(
     baseScore = 0.3;
   } else {
     baseScore = 0;
+  }
+
+  // Check for common partial payment patterns
+  const ratio = amount2 / amount1;
+
+  // Common partial payment ratios
+  if (matchType === "exact_currency") {
+    // 50% payment (half now, half later)
+    if (Math.abs(ratio - 0.5) < 0.01) return 0.85;
+    // 25% deposit
+    if (Math.abs(ratio - 0.25) < 0.01) return 0.82;
+    // 20% deposit
+    if (Math.abs(ratio - 0.2) < 0.01) return 0.8;
+    // 10% deposit
+    if (Math.abs(ratio - 0.1) < 0.01) return 0.78;
+    // 30% deposit
+    if (Math.abs(ratio - 0.3) < 0.01) return 0.81;
+    // Two thirds payment
+    if (Math.abs(ratio - 0.667) < 0.01) return 0.83;
+    // Three quarters payment
+    if (Math.abs(ratio - 0.75) < 0.01) return 0.84;
   }
 
   // Apply bonuses/penalties based on match type
@@ -774,7 +889,26 @@ function calculateDateScore(date1: string, date2: string): number {
     (date1Obj.getTime() - date2Obj.getTime()) / (1000 * 60 * 60 * 24),
   );
 
-  // Same day = 1.0, linear decay over 30 days
+  // For invoice matching, check if this could be a payment term match
+  // date1 is typically invoice date, date2 is transaction date
+  const signedDiffDays =
+    (date2Obj.getTime() - date1Obj.getTime()) / (1000 * 60 * 60 * 24);
+
+  // Check for common payment terms (payment comes AFTER invoice)
+  if (signedDiffDays > 0) {
+    // Net 30 (+/- 3 days tolerance)
+    if (signedDiffDays >= 27 && signedDiffDays <= 33) return 0.95;
+    // Net 15 (+/- 2 days tolerance)
+    if (signedDiffDays >= 13 && signedDiffDays <= 17) return 0.93;
+    // Net 7 (+/- 1 day tolerance)
+    if (signedDiffDays >= 6 && signedDiffDays <= 8) return 0.92;
+    // Net 45 (+/- 3 days tolerance)
+    if (signedDiffDays >= 42 && signedDiffDays <= 48) return 0.9;
+    // Net 60 (+/- 3 days tolerance)
+    if (signedDiffDays >= 57 && signedDiffDays <= 63) return 0.88;
+  }
+
+  // Standard proximity scoring
   if (diffDays === 0) return 1.0;
   if (diffDays <= 1) return 0.95;
   if (diffDays <= 3) return 0.85;
