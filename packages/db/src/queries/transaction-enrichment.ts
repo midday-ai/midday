@@ -53,7 +53,7 @@ export async function getTransactionsForEnrichment(
       and(
         eq(transactions.teamId, params.teamId),
         inArray(transactions.id, params.transactionIds),
-        isNull(transactions.merchantName), // Only unenriched transactions
+        eq(transactions.enrichmentCompleted, false), // Only non-enriched transactions
       ),
     );
 }
@@ -122,7 +122,10 @@ export async function updateTransactionEnrichments(
 
       await db
         .update(transactions)
-        .set({ merchantName: merchantSql })
+        .set({
+          merchantName: merchantSql,
+          enrichmentCompleted: true,
+        })
         .where(inArray(transactions.id, ids));
     }
 
@@ -143,6 +146,7 @@ export async function updateTransactionEnrichments(
         .set({
           merchantName: merchantSql,
           categorySlug: categorySql,
+          enrichmentCompleted: true,
         })
         .where(inArray(transactions.id, ids));
     }
