@@ -12,8 +12,6 @@ import { z } from "zod";
 
 const BATCH_SIZE = 50;
 
-// Type is imported from the query file - no more manual definitions needed!
-
 export const embedTransaction = schemaTask({
   id: "embed-transaction",
   schema: z.object({
