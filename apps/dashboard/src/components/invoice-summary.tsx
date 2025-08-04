@@ -18,13 +18,13 @@ type Props = {
 export function InvoiceSummarySkeleton() {
   return (
     <Card>
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-3">
         <CardTitle>
-          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-[30px] w-32" />
         </CardTitle>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="pb-[34px]">
         <div className="flex flex-col gap-2">
           <Skeleton className="h-5 w-16" />
           <Skeleton className="h-4 w-24" />
