@@ -19,8 +19,15 @@ import {
   unmatchTransaction,
   updateInbox,
 } from "@midday/db/queries";
+import {
+  confirmSuggestedMatch,
+  declineSuggestedMatch,
+  getInboxByStatus,
+  getInboxSuggestion,
+} from "@midday/db/queries/inbox-matching";
 import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk";
+import { z } from "zod";
 
 export const inboxRouter = createTRPCRouter({
   get: protectedProcedure
@@ -112,6 +119,81 @@ export const inboxRouter = createTRPCRouter({
       return unmatchTransaction(db, {
         id: input.id,
         teamId: teamId!,
+      });
+    }),
+
+  // Get inbox items by status
+  getByStatus: protectedProcedure
+    .input(
+      z.object({
+        status: z
+          .enum([
+            "processing",
+            "pending",
+            "archived",
+            "new",
+            "analyzing",
+            "suggested_match",
+            "no_match",
+            "done",
+            "deleted",
+          ])
+          .optional(),
+      }),
+    )
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getInboxByStatus(db, {
+        teamId: teamId!,
+        status: input.status,
+      });
+    }),
+
+  // Get suggestion for a specific inbox item
+  getSuggestion: protectedProcedure
+    .input(
+      z.object({
+        inboxId: z.string().uuid(),
+      }),
+    )
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getInboxSuggestion(db, {
+        teamId: teamId!,
+        inboxId: input.inboxId,
+      });
+    }),
+
+  // Confirm a match suggestion
+  confirmMatch: protectedProcedure
+    .input(
+      z.object({
+        suggestionId: z.string().uuid(),
+        inboxId: z.string().uuid(),
+        transactionId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
+      return confirmSuggestedMatch(db, {
+        teamId: teamId!,
+        suggestionId: input.suggestionId,
+        inboxId: input.inboxId,
+        transactionId: input.transactionId,
+        userId: session.user.id,
+      });
+    }),
+
+  // Decline a match suggestion
+  declineMatch: protectedProcedure
+    .input(
+      z.object({
+        suggestionId: z.string().uuid(),
+        inboxId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx: { db, session }, input }) => {
+      return declineSuggestedMatch(db, {
+        suggestionId: input.suggestionId,
+        inboxId: input.inboxId,
+        userId: session.user.id,
       });
     }),
 });
