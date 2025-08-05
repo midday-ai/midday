@@ -1,6 +1,6 @@
 import type { Database } from "@db/client";
 import { transactions } from "@db/schema";
-import { type SQL, and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 export type GetTransactionsForEnrichmentParams = {
   transactionIds: string[];
@@ -61,7 +61,7 @@ export async function getTransactionsForEnrichment(
 }
 
 /**
- * Update multiple transactions with enrichment data using Drizzle's bulk update
+ * Update multiple transactions with enrichment data using individual updates
  *
  * @param db - Database connection
  * @param updates - Array of updates to apply (max 1000 for safety)
@@ -102,89 +102,28 @@ export async function updateTransactionEnrichments(
     }
   }
 
-  // Helper function to build CASE statement
-  const buildCaseStatement = (
-    updates: UpdateTransactionEnrichmentParams[],
-    getValue: (update: UpdateTransactionEnrichmentParams) => string,
-  ): SQL => {
-    const sqlChunks: SQL[] = [sql`(case`];
-
-    for (const update of updates) {
-      sqlChunks.push(
-        sql`when ${transactions.id} = ${update.transactionId} then ${getValue(update)}`,
-      );
-    }
-
-    sqlChunks.push(sql`end)`);
-    return sql.join(sqlChunks, sql.raw(" "));
-  };
-
   try {
-    // Group updates by what fields need updating
-    const merchantOnlyUpdates = updates.filter(
-      (u) => u.data.merchantName && !u.data.categorySlug,
-    );
-    const categoryOnlyUpdates = updates.filter(
-      (u) => !u.data.merchantName && u.data.categorySlug,
-    );
-    const fullUpdates = updates.filter(
-      (u) => u.data.merchantName && u.data.categorySlug,
-    );
+    for (const update of updates) {
+      const updateData: {
+        merchantName?: string;
+        categorySlug?: string;
+        enrichmentCompleted: boolean;
+      } = {
+        enrichmentCompleted: true,
+      };
 
-    // Update merchant names only (atomic operation)
-    if (merchantOnlyUpdates.length > 0) {
-      const merchantSql = buildCaseStatement(
-        merchantOnlyUpdates,
-        (u) => u.data.merchantName!,
-      );
-      const ids = merchantOnlyUpdates.map((u) => u.transactionId);
+      // Only include fields that have values
+      if (update.data.merchantName) {
+        updateData.merchantName = update.data.merchantName;
+      }
+      if (update.data.categorySlug) {
+        updateData.categorySlug = update.data.categorySlug;
+      }
 
       await db
         .update(transactions)
-        .set({
-          merchantName: merchantSql,
-          enrichmentCompleted: true,
-        })
-        .where(inArray(transactions.id, ids));
-    }
-
-    // Update category only (atomic operation)
-    if (categoryOnlyUpdates.length > 0) {
-      const categorySql = buildCaseStatement(
-        categoryOnlyUpdates,
-        (u) => u.data.categorySlug!,
-      );
-      const ids = categoryOnlyUpdates.map((u) => u.transactionId);
-
-      await db
-        .update(transactions)
-        .set({
-          categorySlug: categorySql,
-          enrichmentCompleted: true,
-        })
-        .where(inArray(transactions.id, ids));
-    }
-
-    // Update both merchant name and category (atomic operation)
-    if (fullUpdates.length > 0) {
-      const merchantSql = buildCaseStatement(
-        fullUpdates,
-        (u) => u.data.merchantName!,
-      );
-      const categorySql = buildCaseStatement(
-        fullUpdates,
-        (u) => u.data.categorySlug!,
-      );
-      const ids = fullUpdates.map((u) => u.transactionId);
-
-      await db
-        .update(transactions)
-        .set({
-          merchantName: merchantSql,
-          categorySlug: categorySql,
-          enrichmentCompleted: true,
-        })
-        .where(inArray(transactions.id, ids));
+        .set(updateData)
+        .where(eq(transactions.id, update.transactionId));
     }
   } catch (error) {
     throw new Error(
