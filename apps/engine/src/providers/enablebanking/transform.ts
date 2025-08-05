@@ -224,6 +224,7 @@ export const transformTransaction = (
       : null,
     category: transformTransactionCategory(transaction),
     counterparty_name: transformCounterpartyName(transaction),
+    merchant_name: null,
     method: transformTransactionMethod(transaction),
     name,
     description,

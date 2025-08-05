@@ -134,6 +134,7 @@ export const transformTransaction = ({
     counterparty_name: transaction?.details?.counterparty?.name
       ? capitalCase(transaction.details.counterparty.name)
       : null,
+    merchant_name: null,
     status: transaction?.status === "posted" ? "posted" : "pending",
   };
 };
@@ -171,5 +172,5 @@ export const transformInstitution = (institution: TransformInstitution) => ({
   id: institution.id,
   name: institution.name,
   logo: getLogoURL(institution.id),
-  provider: Providers.Enum.teller,
+  provider: Providers.enum.teller,
 });

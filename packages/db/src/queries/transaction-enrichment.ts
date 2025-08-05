@@ -11,6 +11,7 @@ export type TransactionForEnrichment = {
   id: string;
   name: string;
   counterpartyName: string | null;
+  merchantName: string | null;
   description: string | null;
   amount: number;
   currency: string;
@@ -18,7 +19,7 @@ export type TransactionForEnrichment = {
 };
 
 export type EnrichmentUpdateData = {
-  merchantName: string;
+  merchantName?: string;
   categorySlug?: string;
 };
 
@@ -43,6 +44,7 @@ export async function getTransactionsForEnrichment(
       id: transactions.id,
       name: transactions.name,
       counterpartyName: transactions.counterpartyName,
+      merchantName: transactions.merchantName,
       description: transactions.description,
       amount: transactions.amount,
       currency: transactions.currency,
@@ -85,8 +87,18 @@ export async function updateTransactionEnrichments(
     if (!update.transactionId?.trim()) {
       throw new Error("Invalid transactionId: cannot be empty");
     }
-    if (!update.data.merchantName?.trim()) {
-      throw new Error("Invalid merchantName: cannot be empty");
+    // At least one field must be provided for update
+    if (!update.data.merchantName && !update.data.categorySlug) {
+      throw new Error(
+        "At least one of merchantName or categorySlug must be provided",
+      );
+    }
+    // If merchantName is provided, it cannot be empty
+    if (
+      update.data.merchantName !== undefined &&
+      !update.data.merchantName?.trim()
+    ) {
+      throw new Error("Invalid merchantName: cannot be empty when provided");
     }
   }
 
@@ -108,15 +120,22 @@ export async function updateTransactionEnrichments(
   };
 
   try {
-    // Group updates by whether categorySlug needs updating
-    const merchantOnlyUpdates = updates.filter((u) => !u.data.categorySlug);
-    const fullUpdates = updates.filter((u) => u.data.categorySlug);
+    // Group updates by what fields need updating
+    const merchantOnlyUpdates = updates.filter(
+      (u) => u.data.merchantName && !u.data.categorySlug,
+    );
+    const categoryOnlyUpdates = updates.filter(
+      (u) => !u.data.merchantName && u.data.categorySlug,
+    );
+    const fullUpdates = updates.filter(
+      (u) => u.data.merchantName && u.data.categorySlug,
+    );
 
     // Update merchant names only (atomic operation)
     if (merchantOnlyUpdates.length > 0) {
       const merchantSql = buildCaseStatement(
         merchantOnlyUpdates,
-        (u) => u.data.merchantName,
+        (u) => u.data.merchantName!,
       );
       const ids = merchantOnlyUpdates.map((u) => u.transactionId);
 
@@ -129,11 +148,28 @@ export async function updateTransactionEnrichments(
         .where(inArray(transactions.id, ids));
     }
 
+    // Update category only (atomic operation)
+    if (categoryOnlyUpdates.length > 0) {
+      const categorySql = buildCaseStatement(
+        categoryOnlyUpdates,
+        (u) => u.data.categorySlug!,
+      );
+      const ids = categoryOnlyUpdates.map((u) => u.transactionId);
+
+      await db
+        .update(transactions)
+        .set({
+          categorySlug: categorySql,
+          enrichmentCompleted: true,
+        })
+        .where(inArray(transactions.id, ids));
+    }
+
     // Update both merchant name and category (atomic operation)
     if (fullUpdates.length > 0) {
       const merchantSql = buildCaseStatement(
         fullUpdates,
-        (u) => u.data.merchantName,
+        (u) => u.data.merchantName!,
       );
       const categorySql = buildCaseStatement(
         fullUpdates,

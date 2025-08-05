@@ -59,12 +59,13 @@ export const enrichTransactions = schemaTask({
     await processBatch(transactionsToEnrich, BATCH_SIZE, async (batch) => {
       // Prepare transactions for LLM
       const transactionData = prepareTransactionData(batch);
-      const prompt = generateEnrichmentPrompt(transactionData);
+      const prompt = generateEnrichmentPrompt(transactionData, batch);
 
       try {
         const { object } = await generateObject({
           model: google("gemini-2.5-flash-lite"),
           prompt,
+          output: "array",
           schema: enrichmentSchema,
           temperature: 0.1, // Low temperature for consistency
         });

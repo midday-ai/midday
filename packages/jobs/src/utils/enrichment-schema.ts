@@ -37,6 +37,6 @@ export type TransactionData = {
 export type EnrichmentResult = z.infer<typeof enrichmentSchema>;
 
 export type UpdateData = {
-  merchantName: string;
+  merchantName?: string;
   categorySlug?: string;
 };
