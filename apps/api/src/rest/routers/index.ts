@@ -1,5 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { protectedMiddleware } from "../middleware";
+import { activitiesRouter } from "./activities";
 import { bankAccountsRouter } from "./bank-accounts";
 import { customersRouter } from "./customers";
 import { documentsRouter } from "./documents";
@@ -24,6 +25,7 @@ routers.route("/oauth", oauthRouter);
 routers.use(...protectedMiddleware);
 
 // Mount protected routes
+routers.route("/activities", activitiesRouter);
 routers.route("/transactions", transactionsRouter);
 routers.route("/teams", teamsRouter);
 routers.route("/users", usersRouter);

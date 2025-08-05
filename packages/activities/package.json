@@ -1,9 +1,11 @@
 {
   "name": "@midday/activities",
   "version": "1.0.0",
-  "main": "src/index.ts",
   "private": true,
   "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
