@@ -14,45 +14,53 @@ export function generateEnrichmentPrompt(
       const transaction = batch[index];
       const hasExistingMerchant = transaction?.merchantName;
 
-      return `${index + 1}. Description: "${tx.description}", Amount: ${tx.amount}, Currency: ${tx.currency}${hasExistingMerchant ? ` (Merchant: ${transaction.merchantName})` : ""}`;
+      return `${index + 1}. Description: "${tx.description}", Amount: ${tx.amount}, Currency: ${tx.currency}${hasExistingMerchant ? ` (Current Merchant: ${transaction.merchantName})` : ""}`;
     })
     .join("\n");
 
-  const needsMerchantNames = batch.some((tx) => !tx.merchantName);
   const needsCategories = batch.some((tx) => !tx.categorySlug);
 
   let returnInstructions = "Return:\n";
 
-  if (needsMerchantNames) {
-    returnInstructions +=
-      "1. For transactions WITHOUT existing merchant names: The formal legal business name including proper entity suffixes (Inc, LLC, Corp, Ltd, Co, etc.) when identifiable. Use proper capitalization. If you cannot identify the formal legal name, return a cleaned and properly capitalized version of the merchant name.\n";
-  }
-
   if (needsCategories) {
-    returnInstructions += `${needsMerchantNames ? "2" : "1"}. The best-fit category from the allowed categories based on the transaction's content and context.\n`;
-  }
-
-  if (!needsMerchantNames) {
     returnInstructions +=
-      "Note: For transactions that already have merchant names, only provide the category - DO NOT change the existing merchant name.\n";
+      "1. Legal entity name: Apply the transformation rules above\n";
+    returnInstructions +=
+      "2. Category: Select the best-fit category from the allowed list\n";
+  } else {
+    returnInstructions +=
+      "Legal entity name: Apply the transformation rules above\n";
   }
 
-  return `You are a financial transaction enrichment function for business expense management.
+  return `You are a legal entity identification system for business expense transactions.
 
-Process each transaction with its description, amount, and currency. The description may contain multiple data fields:
-- "Counterparty": Bank-parsed merchant name (usually cleaner)
-- "Raw": Original transaction description (may contain codes, locations, store numbers)
-- "Description": Additional transaction details
-- "Merchant": Already identified merchant name (when available - DO NOT override)
+TASK: For EVERY transaction, identify the formal legal business entity name with proper entity suffixes (Inc, LLC, Corp, Ltd, Co, etc.).
 
-For merchant names, prefer formal business names with proper legal entity suffixes:
-- Apple Inc. (not "apple" or "Apple")
-- Google LLC (not "google" or "Google")
-- Microsoft Corporation (not "microsoft" or "Microsoft")
-- Amazon.com Inc. (not "amazon" or "Amazon")
+INPUT HIERARCHY (use in this priority order):
+1. "Current Merchant": Existing name from provider → enhance to legal entity
+2. "Counterparty": Bank-parsed name → identify legal entity
+3. "Raw": Transaction description → extract legal entity
+4. "Description": Additional context → supplement identification
 
-CATEGORIES & PRIORITY RULES:
-Focus on core merchant name, ignore location/store codes.
+TRANSFORMATION EXAMPLES:
+✓ "Anthropic" → "Anthropic Inc"
+✓ "Google Pay" → "Google LLC" 
+✓ "AMZN MKTP" → "Amazon.com Inc"
+✓ "Starbucks #1234" → "Starbucks Corporation"
+✓ "MSFT*Office365" → "Microsoft Corporation"
+✓ "Apple Store" → "Apple Inc"
+
+REQUIREMENTS:
+- Use official legal entity suffixes: Inc, LLC, Corp, Corporation, Ltd, Co, etc.
+- Prefer the parent company's legal entity (Google LLC, not Google Pay LLC)
+- Ignore location codes, store numbers, and transaction details
+- If genuinely unknown, provide best cleaned/capitalized version available
+
+${
+  needsCategories
+    ? `
+CATEGORY RULES:
+Categorize based on the core business entity, not location/transaction details.
 
 • software - Google, Microsoft, Adobe, AWS, Stripe, Slack, any SaaS/tech service
 • travel - Airlines, hotels, Uber/Lyft, rental cars, parking
@@ -65,16 +73,17 @@ Focus on core merchant name, ignore location/store codes.
 • activity - Conferences, training, team events, workshops
 • fees - Bank fees, legal, accounting, payment processing
 • transfer - Transfers between accounts, wire transfers, ACH transfers
-
-CRITICAL: Google/Microsoft/Adobe/AWS = software regardless of additional text
+`
+    : ""
+}
 
 ${returnInstructions}
 
 Transactions to process:
 ${transactionList}
 
-Return exactly ${batch.length} results in order. Focus on merchant name, ignore location codes. 
-Example: "Google Gsuite Lostisla" = software`;
+Return exactly ${batch.length} results in order. Apply the transformation rules consistently.
+`;
 }
 
 /**
@@ -124,7 +133,7 @@ function isValidCategory(category: string): boolean {
 }
 
 /**
- * Prepares update data, respecting existing merchant names and category classifications
+ * Prepares update data, enhancing merchant names to legal entity names and category classifications
  */
 export function prepareUpdateData(
   transaction: {
@@ -136,9 +145,9 @@ export function prepareUpdateData(
 ): UpdateData {
   const updateData: UpdateData = {};
 
-  // Only update merchantName if it's currently null (no provider merchant name)
-  // and if the result has a valid merchant name
-  if (!transaction.merchantName && result.merchant) {
+  // Always update merchantName if the LLM provides one
+  // This allows enhancement of existing simplified names to formal legal entity names
+  if (result.merchant) {
     updateData.merchantName = result.merchant;
   }
 
