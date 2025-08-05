@@ -36,10 +36,8 @@ export const enrichTransactions = schemaTask({
     concurrencyLimit: 2, // Lower to manage API costs
   },
   run: async ({ transactionIds, teamId }) => {
-    const db = getDb();
-
     // Get transactions that need enrichment
-    const transactionsToEnrich = await getTransactionsForEnrichment(db, {
+    const transactionsToEnrich = await getTransactionsForEnrichment(getDb(), {
       transactionIds,
       teamId,
     });
@@ -127,13 +125,13 @@ export const enrichTransactions = schemaTask({
 
           // Execute all updates
           if (updates.length > 0) {
-            await updateTransactionEnrichments(db, updates);
+            await updateTransactionEnrichments(getDb(), updates);
             totalEnriched += updates.length;
           }
 
           // Mark transactions that don't need updates as enriched
           if (noUpdateNeeded.length > 0) {
-            await markTransactionsAsEnriched(db, noUpdateNeeded);
+            await markTransactionsAsEnriched(getDb(), noUpdateNeeded);
             totalEnriched += noUpdateNeeded.length;
           }
 
