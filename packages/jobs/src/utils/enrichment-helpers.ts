@@ -127,7 +127,11 @@ function isValidCategory(category: string): boolean {
  * Prepares update data, respecting existing merchant names and category classifications
  */
 export function prepareUpdateData(
-  transaction: { categorySlug: string | null; merchantName: string | null },
+  transaction: {
+    categorySlug: string | null;
+    merchantName: string | null;
+    amount: number;
+  },
   result: { merchant: string | null; category: string },
 ): UpdateData {
   const updateData: UpdateData = {};
@@ -140,8 +144,9 @@ export function prepareUpdateData(
 
   const validCategory = isValidCategory(result.category);
 
-  // Only update categorySlug if it's currently null
-  if (!transaction.categorySlug && validCategory) {
+  // Only update categorySlug if it's currently null AND amount is not positive
+  // Positive amounts are typically income and shouldn't be categorized as business expenses
+  if (!transaction.categorySlug && validCategory && transaction.amount <= 0) {
     updateData.categorySlug = result.category;
   }
 
