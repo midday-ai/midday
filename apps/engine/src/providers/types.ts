@@ -27,6 +27,7 @@ export type Transaction = {
   balance: number | null;
   category: string | null;
   counterparty_name: string | null;
+  merchant_name: string | null;
   method: string;
   name: string;
   description: string | null;

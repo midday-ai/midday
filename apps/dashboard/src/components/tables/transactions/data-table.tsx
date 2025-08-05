@@ -103,6 +103,35 @@ export function DataTable({
     return tableData.map((row) => row?.id);
   }, [tableData]);
 
+  // Only poll if the first transaction needs enrichment
+  const shouldPollForEnrichment = useMemo(() => {
+    if (tableData.length === 0) return false;
+    // Focus on the first transaction (most recent) since table is sorted by date desc
+    return !tableData.at(0)?.enrichmentCompleted;
+  }, [tableData]);
+
+  // Poll for enrichment completion when needed
+  useEffect(() => {
+    if (!shouldPollForEnrichment) return;
+
+    const pollInterval = setInterval(() => {
+      refetch();
+    }, 3000); // Poll every 3 seconds
+
+    // Cleanup after 1 minute to avoid infinite polling
+    const timeoutId = setTimeout(
+      () => {
+        clearInterval(pollInterval);
+      },
+      1 * 60 * 1000,
+    );
+
+    return () => {
+      clearInterval(pollInterval);
+      clearTimeout(timeoutId);
+    };
+  }, [shouldPollForEnrichment, refetch]);
+
   const table = useReactTable({
     getRowId: (row) => row?.id,
     data: tableData,

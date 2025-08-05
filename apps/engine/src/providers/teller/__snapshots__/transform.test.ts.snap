@@ -1,4 +1,4 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`Transform pending transaction 1`] = `
 {
@@ -12,6 +12,7 @@ exports[`Transform pending transaction 1`] = `
   "date": "2024-03-05",
   "description": "Bank Of Many",
   "id": "txn_os41r5u90e29shubl2000",
+  "merchant_name": null,
   "method": "other",
   "name": "Online Check Deposit",
   "status": "pending",
@@ -30,6 +31,7 @@ exports[`Transform pending transaction 2`] = `
   "date": "2024-03-05",
   "description": "Bank Of Many",
   "id": "txn_os41r5u90e29shubl2000",
+  "merchant_name": null,
   "method": "other",
   "name": "Technology",
   "status": "pending",
@@ -48,6 +50,7 @@ exports[`Transform card payment transaction 1`] = `
   "date": "2024-03-01",
   "description": null,
   "id": "txn_os41r5u90e29shubl2005",
+  "merchant_name": null,
   "method": "card_purchase",
   "name": "Nordstrom",
   "status": "posted",
@@ -66,6 +69,7 @@ exports[`Transform income transaction 1`] = `
   "date": "2024-03-03",
   "description": null,
   "id": "txn_os41r5u90e29shubl2002",
+  "merchant_name": null,
   "method": "card_purchase",
   "name": "Exxon Mobil",
   "status": "posted",
@@ -84,6 +88,7 @@ exports[`Transform type transfer 1`] = `
   "date": "2024-01-27",
   "description": "Yourself",
   "id": "txn_os41r5ua0e29shubl2001",
+  "merchant_name": null,
   "method": "transfer",
   "name": "Recurring Transfer To Savings",
   "status": "posted",
