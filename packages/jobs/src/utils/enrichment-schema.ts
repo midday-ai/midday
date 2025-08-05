@@ -11,7 +11,6 @@ export const transactionCategories = [
   "internet_and_telephone",
   "facilities_expenses",
   "activity",
-  "taxes",
   "fees",
 ] as const;
 
