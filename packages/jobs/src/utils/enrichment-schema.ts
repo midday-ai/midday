@@ -12,6 +12,7 @@ export const transactionCategories = [
   "facilities_expenses",
   "activity",
   "fees",
+  "transfer",
 ] as const;
 
 // Structured output schema for LLM response (for use with output: "array")

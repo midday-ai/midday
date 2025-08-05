@@ -64,6 +64,7 @@ Focus on core merchant name, ignore location/store codes.
 • facilities_expenses - Utilities, maintenance, security, cleaning
 • activity - Conferences, training, team events, workshops
 • fees - Bank fees, legal, accounting, payment processing
+• transfer - Transfers between accounts, wire transfers, ACH transfers
 
 CRITICAL: Google/Microsoft/Adobe/AWS = software regardless of additional text
 
