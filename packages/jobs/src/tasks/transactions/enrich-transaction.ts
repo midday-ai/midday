@@ -119,7 +119,9 @@ export const enrichTransactions = schemaTask({
           logger.info("Enriched transaction batch", {
             batchSize: batch.length,
             enrichedCount: updates.length,
-            merchantNamesUpdated: updates.length,
+            merchantNamesUpdated: updates.filter(
+              (update) => update.data.merchantName,
+            ).length,
             categoriesUpdated,
             invalidIndices,
             teamId,

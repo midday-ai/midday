@@ -1,4 +1,4 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`Transform income transaction 1`] = `
 {
@@ -12,6 +12,7 @@ exports[`Transform income transaction 1`] = `
   "date": "2024-04-04",
   "description": null,
   "id": "rtrhrth",
+  "merchant_name": null,
   "method": "payment",
   "name": "Överf Saldo",
   "status": "posted",
@@ -30,6 +31,7 @@ exports[`Transform expense transaction 1`] = `
   "date": "2024-04-04",
   "description": null,
   "id": "rtrhrth",
+  "merchant_name": null,
   "method": "payment",
   "name": "Överf Saldo",
   "status": "posted",
