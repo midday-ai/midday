@@ -13,7 +13,7 @@ export function generateEnrichmentPrompt(
       const transaction = batch[index];
       const hasExistingMerchant = transaction?.merchantName;
 
-      return `${tx.index}. Description: "${tx.description}", Amount: ${tx.amount}, Currency: ${tx.currency}${hasExistingMerchant ? ` (Merchant: ${transaction.merchantName})` : ""}`;
+      return `${index + 1}. Description: "${tx.description}", Amount: ${tx.amount}, Currency: ${tx.currency}${hasExistingMerchant ? ` (Merchant: ${transaction.merchantName})` : ""}`;
     })
     .join("\n");
 
@@ -24,7 +24,7 @@ export function generateEnrichmentPrompt(
 
   if (needsMerchantNames) {
     returnInstructions +=
-      "1. For transactions WITHOUT existing merchant names: The most likely legal merchant or company name. If you cannot confidently identify the legal name, return a cleaned and lowercase version of the merchant string, suitable for use in embeddings.\n";
+      "1. For transactions WITHOUT existing merchant names: The formal legal business name including proper entity suffixes (Inc, LLC, Corp, Ltd, Co, etc.) when identifiable. Use proper capitalization. If you cannot identify the formal legal name, return a cleaned and properly capitalized version of the merchant name.\n";
   }
 
   if (needsCategories) {
@@ -44,6 +44,12 @@ Process each transaction with its description, amount, and currency. The descrip
 - "Description": Additional transaction details
 - "Merchant": Already identified merchant name (when available - DO NOT override)
 
+For merchant names, prefer formal business names with proper legal entity suffixes:
+- Apple Inc. (not "apple" or "Apple")
+- Google LLC (not "google" or "Google")
+- Microsoft Corporation (not "microsoft" or "Microsoft")
+- Amazon.com Inc. (not "amazon" or "Amazon")
+
 Use ALL available information to make the best identification.
 
 ${returnInstructions}
@@ -51,7 +57,7 @@ ${returnInstructions}
 Transactions to process:
 ${transactionList}
 
-Respond with structured data for each transaction.`;
+IMPORTANT: You must respond with results for each transaction in the exact same order as listed above. Return exactly ${batch.length} results, one for each transaction.`;
 }
 
 /**
@@ -60,7 +66,7 @@ Respond with structured data for each transaction.`;
 export function prepareTransactionData(
   batch: TransactionForEnrichment[],
 ): TransactionData[] {
-  return batch.map((tx, index) => {
+  return batch.map((tx) => {
     // Build a comprehensive description with all available information
     const parts: string[] = [];
 
@@ -84,7 +90,6 @@ export function prepareTransactionData(
     const description = parts.length > 0 ? parts.join(" | ") : tx.name;
 
     return {
-      index: index + 1,
       description,
       amount: tx.amount.toString(),
       currency: tx.currency,
@@ -97,12 +102,13 @@ export function prepareTransactionData(
  */
 export function prepareUpdateData(
   transaction: { categorySlug: string | null; merchantName: string | null },
-  result: { merchant: string; category: string },
+  result: { merchant: string | null; category: string },
 ): UpdateData {
   const updateData: UpdateData = {};
 
   // Only update merchantName if it's currently null (no provider merchant name)
-  if (!transaction.merchantName) {
+  // and if the result has a valid merchant name
+  if (!transaction.merchantName && result.merchant) {
     updateData.merchantName = result.merchant;
   }
 

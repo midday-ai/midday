@@ -14,20 +14,16 @@ export const transactionCategories = [
   "fees",
 ] as const;
 
-// Structured output schema for LLM response
+// Structured output schema for LLM response (for use with output: "array")
 export const enrichmentSchema = z.object({
-  results: z.array(
-    z.object({
-      index: z.number(),
-      merchant: z.string(),
-      category: z.enum(transactionCategories),
-    }),
-  ),
+  merchant: z.string().nullable().describe("The merchant name"),
+  category: z
+    .enum(transactionCategories)
+    .describe("The category of the transaction"),
 });
 
 // Types
 export type TransactionData = {
-  index: number;
   description: string;
   amount: string;
   currency: string;

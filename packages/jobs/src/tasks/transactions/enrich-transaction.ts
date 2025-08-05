@@ -56,86 +56,95 @@ export const enrichTransactions = schemaTask({
     let totalEnriched = 0;
 
     // Process in batches of 50
-    await processBatch(transactionsToEnrich, BATCH_SIZE, async (batch) => {
-      // Prepare transactions for LLM
-      const transactionData = prepareTransactionData(batch);
-      const prompt = generateEnrichmentPrompt(transactionData, batch);
+    await processBatch(
+      transactionsToEnrich,
+      BATCH_SIZE,
+      async (batch): Promise<string[]> => {
+        // Prepare transactions for LLM
+        const transactionData = prepareTransactionData(batch);
+        const prompt = generateEnrichmentPrompt(transactionData, batch);
 
-      try {
-        const { object } = await generateObject({
-          model: google("gemini-2.5-flash-lite"),
-          prompt,
-          output: "array",
-          schema: enrichmentSchema,
-          temperature: 0.1, // Low temperature for consistency
-        });
-
-        // Prepare updates for batch processing
-        const updates: UpdateTransactionEnrichmentParams[] = [];
-        let categoriesUpdated = 0;
-        let invalidIndices = 0;
-
-        for (const result of object.results) {
-          // Validate index bounds
-          if (result.index < 1 || result.index > batch.length) {
-            logger.warn("Invalid transaction index from LLM", {
-              index: result.index,
-              batchSize: batch.length,
-              merchant: result.merchant,
-              teamId,
-            });
-            invalidIndices++;
-            continue;
-          }
-
-          const transaction = batch[result.index - 1];
-          if (!transaction) {
-            logger.error("Transaction not found despite valid index", {
-              index: result.index,
-              batchSize: batch.length,
-              teamId,
-            });
-            continue;
-          }
-
-          const updateData = prepareUpdateData(transaction, result);
-
-          // Track if category was updated
-          if (updateData.categorySlug) {
-            categoriesUpdated++;
-          }
-
-          updates.push({
-            transactionId: transaction.id,
-            data: updateData,
+        try {
+          const { object } = await generateObject({
+            model: google("gemini-2.5-flash-lite"),
+            prompt,
+            output: "array",
+            schema: enrichmentSchema,
+            temperature: 0.1, // Low temperature for consistency
           });
-        }
 
-        // Execute all updates
-        if (updates.length > 0) {
-          await updateTransactionEnrichments(db, updates);
-          totalEnriched += updates.length;
+          // Prepare updates for batch processing
+          const updates: UpdateTransactionEnrichmentParams[] = [];
+          let categoriesUpdated = 0;
+          let skippedResults = 0;
 
-          logger.info("Enriched transaction batch", {
+          // With output: "array", object is the array directly
+          const results = object;
+          const resultsToProcess = Math.min(results.length, batch.length);
+
+          for (let i = 0; i < resultsToProcess; i++) {
+            const result = results[i];
+            const transaction = batch[i];
+
+            if (!result || !transaction) {
+              skippedResults++;
+              continue;
+            }
+
+            const updateData = prepareUpdateData(transaction, result);
+
+            // Track if category was updated
+            if (updateData.categorySlug) {
+              categoriesUpdated++;
+            }
+
+            updates.push({
+              transactionId: transaction.id,
+              data: updateData,
+            });
+          }
+
+          // Log if we have mismatched result counts
+          if (results.length !== batch.length) {
+            logger.warn(
+              "LLM returned different number of results than expected",
+              {
+                expectedCount: batch.length,
+                actualCount: results.length,
+                teamId,
+              },
+            );
+          }
+
+          // Execute all updates
+          if (updates.length > 0) {
+            await updateTransactionEnrichments(db, updates);
+            totalEnriched += updates.length;
+
+            logger.info("Enriched transaction batch", {
+              batchSize: batch.length,
+              enrichedCount: updates.length,
+              merchantNamesUpdated: updates.filter(
+                (update) => update.data.merchantName,
+              ).length,
+              categoriesUpdated,
+              skippedResults,
+              teamId,
+            });
+          }
+
+          // Return transaction IDs that were updated
+          return updates.map((update) => update.transactionId);
+        } catch (error) {
+          logger.error("Failed to enrich transaction batch", {
+            error: error instanceof Error ? error.message : "Unknown error",
             batchSize: batch.length,
-            enrichedCount: updates.length,
-            merchantNamesUpdated: updates.filter(
-              (update) => update.data.merchantName,
-            ).length,
-            categoriesUpdated,
-            invalidIndices,
             teamId,
           });
+          throw error;
         }
-      } catch (error) {
-        logger.error("Failed to enrich transaction batch", {
-          error: error instanceof Error ? error.message : "Unknown error",
-          batchSize: batch.length,
-          teamId,
-        });
-        throw error;
-      }
-    });
+      },
+    );
 
     logger.info("Transaction enrichment completed", {
       totalEnriched,
