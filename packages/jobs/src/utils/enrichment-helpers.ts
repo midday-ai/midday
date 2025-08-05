@@ -60,19 +60,81 @@ ${
   needsCategories
     ? `
 CATEGORY RULES:
-Categorize based on the core business entity, not location/transaction details.
+Categorize based on the primary business purpose and nature of the expense. Consider amount, merchant type, and business context.
 
-• software - Google, Microsoft, Adobe, AWS, Stripe, Slack, any SaaS/tech service
-• travel - Airlines, hotels, Uber/Lyft, rental cars, parking
-• meals - Restaurants, cafes, Starbucks, food/beverage only
-• office-supplies - Staples, Office Depot, paper, pens, small supplies
-• equipment - Apple hardware, computers, phones, machinery >$500  
-• internet-and-telephone - Verizon, AT&T, ISPs, phone/internet bills
-• rent - Office/warehouse rent, WeWork, coworking spaces
-• facilities-expenses - Utilities, maintenance, security, cleaning
-• activity - Conferences, training, team events, workshops
-• fees - Bank fees, legal, accounting, payment processing
-• transfer - Transfers between accounts, wire transfers, ACH transfers
+• software - Digital tools and services for business operations
+  ✓ SaaS platforms: Google Workspace, Microsoft 365, Adobe Creative Cloud, Slack, Zoom, Figma
+  ✓ Development tools: GitHub, AWS, Azure, Vercel, Stripe, payment processors
+  ✓ Business software: CRM systems, accounting software, project management tools
+  ✓ Domain/hosting: GoDaddy, Cloudflare, hosting services, SSL certificates
+  ✗ NOT: Physical hardware, mobile/internet service bills, app store purchases for games
+
+• travel - Transportation and accommodation for business trips
+  ✓ Transportation: Airlines, trains, buses, ride-sharing (Uber/Lyft), rental cars, gas during trips
+  ✓ Accommodation: Hotels, Airbnb, business lodging
+  ✓ Trip-related: Parking fees during travel, tolls, airport services
+  ✗ NOT: Daily commute expenses, local parking, personal vehicle maintenance
+
+• meals - Food and beverages for business purposes
+  ✓ Business meals: Client dinners, team lunches, conference catering
+  ✓ Business travel meals: Restaurant meals during business trips
+  ✓ Office provisions: Catered meetings, employee meals, coffee/snacks for office
+  ✗ NOT: Personal groceries, alcohol not for business entertainment, daily employee lunches
+
+• office-supplies - Physical materials and small office items
+  ✓ Stationery: Paper, pens, folders, notebooks, printing supplies
+  ✓ Office materials: Staplers, scissors, calendars, whiteboards, basic storage
+  ✓ Consumables: Ink cartridges, batteries, cleaning supplies for office use
+  ✗ NOT: Expensive equipment >$500, furniture, technology devices
+
+• equipment - Durable business assets and technology hardware
+  ✓ Computing: Computers, laptops, tablets, monitors, keyboards, mice
+  ✓ Communication: Phones, headsets, webcams, conferencing equipment
+  ✓ Office equipment: Printers, scanners, shredders, furniture >$500
+  ✓ Specialized tools: Industry-specific machinery, professional instruments
+  ✗ NOT: Small supplies <$100, consumables, software licenses
+
+• internet-and-telephone - Communication and connectivity services
+  ✓ Internet services: Business internet, Wi-Fi plans, ISP bills
+  ✓ Phone services: Business phone lines, mobile plans, VoIP services
+  ✓ Communication tools: Video conferencing services, business messaging platforms
+  ✗ NOT: Software subscriptions, streaming services, personal phone bills
+
+• rent - Property and workspace costs
+  ✓ Office space: Commercial rent, co-working memberships (WeWork, etc.)
+  ✓ Storage: Warehouse rent, storage units for business
+  ✓ Parking: Monthly parking fees, dedicated business parking spots
+  ✗ NOT: Utilities (use facilities-expenses), equipment leasing, vehicle rentals
+
+• facilities-expenses - Building operations and maintenance
+  ✓ Utilities: Electricity, gas, water, waste management, heating/cooling
+  ✓ Maintenance: Cleaning services, repairs, security systems, landscaping
+  ✓ Building services: Elevator maintenance, HVAC servicing, pest control
+  ✗ NOT: Rent payments, office supplies, equipment purchases
+
+• activity - Professional development and business events
+  ✓ Education: Conferences, workshops, training courses, certifications
+  ✓ Networking: Business events, trade shows, professional association fees
+  ✓ Team building: Corporate retreats, employee training sessions
+  ✗ NOT: Personal education, entertainment not business-related, regular meals
+
+• fees - Professional services and administrative costs
+  ✓ Professional services: Legal fees, accounting, consulting, tax preparation
+  ✓ Financial fees: Bank charges, payment processing, credit card fees, wire fees
+  ✓ Business fees: License renewals, permits, registration fees, compliance costs
+  ✗ NOT: Investment fees, personal banking charges, late payment penalties
+
+• transfer - Movement of funds between accounts
+  ✓ Internal transfers: Between business accounts, owner draws, capital contributions
+  ✓ Payment transfers: Wire transfers, ACH transfers, loan payments
+  ✓ Investment moves: Transfers to investment accounts, escrow payments
+  ✗ NOT: Purchase transactions, refunds, fee payments
+
+PRIORITIZATION RULES:
+1. Choose the most specific category that fits (software over fees for SaaS)
+2. Consider primary business purpose (Uber for client meeting = travel, not activity)
+3. Amount context matters (small tech purchase = office-supplies, large = equipment)
+4. When uncertain between categories, prefer the more specific business function
 `
     : ""
 }
