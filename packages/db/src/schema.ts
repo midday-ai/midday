@@ -226,6 +226,12 @@ export const activitySourceEnum = pgEnum("activity_source", [
   "user", // Direct user actions
 ]);
 
+export const activityStatusEnum = pgEnum("activity_status", [
+  "unread",
+  "read",
+  "archived",
+]);
+
 export const documentTagEmbeddings = pgTable(
   "document_tag_embeddings",
   {
@@ -2960,7 +2966,7 @@ export const activities = pgTable(
     metadata: jsonb().notNull(),
 
     // Simple lifecycle (only for notifications)
-    readAt: timestamp("read_at", { withTimezone: true, mode: "string" }),
+    status: activityStatusEnum().default("unread").notNull(),
 
     // Timestamp of last system use (e.g. insight generation, digest inclusion)
     lastUsedAt: timestamp("last_used_at", {
@@ -2974,7 +2980,7 @@ export const activities = pgTable(
       "btree",
       table.teamId,
       table.priority,
-      table.readAt,
+      table.status,
       table.createdAt.desc(),
     ),
     index("activities_insights_idx").using(
