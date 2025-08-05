@@ -57,11 +57,11 @@ Focus on core merchant name, ignore location/store codes.
 • software - Google, Microsoft, Adobe, AWS, Stripe, Slack, any SaaS/tech service
 • travel - Airlines, hotels, Uber/Lyft, rental cars, parking
 • meals - Restaurants, cafes, Starbucks, food/beverage only
-• office_supplies - Staples, Office Depot, paper, pens, small supplies
+• office-supplies - Staples, Office Depot, paper, pens, small supplies
 • equipment - Apple hardware, computers, phones, machinery >$500  
-• internet_and_telephone - Verizon, AT&T, ISPs, phone/internet bills
+• internet-and-telephone - Verizon, AT&T, ISPs, phone/internet bills
 • rent - Office/warehouse rent, WeWork, coworking spaces
-• facilities_expenses - Utilities, maintenance, security, cleaning
+• facilities-expenses - Utilities, maintenance, security, cleaning
 • activity - Conferences, training, team events, workshops
 • fees - Bank fees, legal, accounting, payment processing
 • transfer - Transfers between accounts, wire transfers, ACH transfers

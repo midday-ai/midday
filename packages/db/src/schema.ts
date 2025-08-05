@@ -129,15 +129,15 @@ export const trackerStatusEnum = pgEnum("trackerStatus", [
 
 export const transactionCategoriesEnum = pgEnum("transactionCategories", [
   "travel",
-  "office_supplies",
+  "office-supplies",
   "meals",
   "software",
   "rent",
   "income",
   "equipment",
   "transfer",
-  "internet_and_telephone",
-  "facilities_expenses",
+  "internet-and-telephone",
+  "facilities-expenses",
   "activity",
   "uncategorized",
   "taxes",
