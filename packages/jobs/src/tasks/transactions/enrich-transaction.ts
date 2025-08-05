@@ -10,6 +10,7 @@ import { processBatch } from "@jobs/utils/process-batch";
 import {
   type UpdateTransactionEnrichmentParams,
   getTransactionsForEnrichment,
+  markTransactionsAsEnriched,
   updateTransactionEnrichments,
 } from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
@@ -75,6 +76,7 @@ export const enrichTransactions = schemaTask({
 
           // Prepare updates for batch processing
           const updates: UpdateTransactionEnrichmentParams[] = [];
+          const noUpdateNeeded: string[] = [];
           let categoriesUpdated = 0;
           let skippedResults = 0;
 
@@ -92,6 +94,13 @@ export const enrichTransactions = schemaTask({
             }
 
             const updateData = prepareUpdateData(transaction, result);
+
+            // Check if any updates are needed
+            if (!updateData.merchantName && !updateData.categorySlug) {
+              // No updates needed - mark as enriched separately
+              noUpdateNeeded.push(transaction.id);
+              continue;
+            }
 
             // Track if category was updated
             if (updateData.categorySlug) {
@@ -120,10 +129,21 @@ export const enrichTransactions = schemaTask({
           if (updates.length > 0) {
             await updateTransactionEnrichments(db, updates);
             totalEnriched += updates.length;
+          }
 
+          // Mark transactions that don't need updates as enriched
+          if (noUpdateNeeded.length > 0) {
+            await markTransactionsAsEnriched(db, noUpdateNeeded);
+            totalEnriched += noUpdateNeeded.length;
+          }
+
+          const totalProcessed = updates.length + noUpdateNeeded.length;
+          if (totalProcessed > 0) {
             logger.info("Enriched transaction batch", {
               batchSize: batch.length,
-              enrichedCount: updates.length,
+              enrichedCount: totalProcessed,
+              updatesApplied: updates.length,
+              noUpdateNeeded: noUpdateNeeded.length,
               merchantNamesUpdated: updates.filter(
                 (update) => update.data.merchantName,
               ).length,
@@ -133,8 +153,11 @@ export const enrichTransactions = schemaTask({
             });
           }
 
-          // Return transaction IDs that were updated
-          return updates.map((update) => update.transactionId);
+          // Return transaction IDs that were processed (updated or marked as enriched)
+          return [
+            ...updates.map((update) => update.transactionId),
+            ...noUpdateNeeded,
+          ];
         } catch (error) {
           logger.error("Failed to enrich transaction batch", {
             error: error instanceof Error ? error.message : "Unknown error",

@@ -192,3 +192,44 @@ export async function updateTransactionEnrichments(
     );
   }
 }
+
+/**
+ * Mark transactions as enrichment completed without updating any other fields
+ * Used for transactions that don't need merchant/category updates but should be marked as processed
+ *
+ * @param db - Database connection
+ * @param transactionIds - Array of transaction IDs to mark as enriched
+ */
+export async function markTransactionsAsEnriched(
+  db: Database,
+  transactionIds: string[],
+): Promise<void> {
+  if (transactionIds.length === 0) {
+    return;
+  }
+
+  // Safety: Limit batch size to prevent query size issues
+  if (transactionIds.length > 1000) {
+    throw new Error(
+      `Batch size too large: ${transactionIds.length}. Maximum allowed: 1000`,
+    );
+  }
+
+  // Safety: Validate input data
+  for (const id of transactionIds) {
+    if (!id?.trim()) {
+      throw new Error("Invalid transactionId: cannot be empty");
+    }
+  }
+
+  try {
+    await db
+      .update(transactions)
+      .set({ enrichmentCompleted: true })
+      .where(inArray(transactions.id, transactionIds));
+  } catch (error) {
+    throw new Error(
+      `Failed to mark transactions as enriched: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
+}
