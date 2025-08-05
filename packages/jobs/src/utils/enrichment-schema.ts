@@ -3,13 +3,13 @@ import { z } from "zod";
 // Transaction categories that the LLM can assign
 export const transactionCategories = [
   "travel",
-  "office_supplies",
+  "office-supplies",
   "meals",
   "software",
   "rent",
   "equipment",
-  "internet_and_telephone",
-  "facilities_expenses",
+  "internet-and-telephone",
+  "facilities-expenses",
   "activity",
   "fees",
   "transfer",
