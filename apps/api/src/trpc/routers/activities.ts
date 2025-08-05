@@ -1,13 +1,13 @@
 import {
   getActivitiesSchema,
-  markActivityAsReadSchema,
-  markAllActivitiesAsReadSchema,
+  updateActivityStatusSchema,
+  updateAllActivitiesStatusSchema,
 } from "@api/schemas/activities";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   getActivities,
-  markActivityAsRead,
-  markAllActivitiesAsRead,
+  updateActivityStatus,
+  updateAllActivitiesStatus,
 } from "@midday/db/queries";
 
 export const activitiesRouter = createTRPCRouter({
@@ -20,15 +20,17 @@ export const activitiesRouter = createTRPCRouter({
       });
     }),
 
-  markAsRead: protectedProcedure
-    .input(markActivityAsReadSchema)
+  updateStatus: protectedProcedure
+    .input(updateActivityStatusSchema)
     .mutation(async ({ ctx: { db }, input }) => {
-      return markActivityAsRead(db, input.activityId);
+      return updateActivityStatus(db, input.activityId, input.status);
     }),
 
-  markAllAsRead: protectedProcedure
-    .input(markAllActivitiesAsReadSchema.optional())
+  updateAllStatus: protectedProcedure
+    .input(updateAllActivitiesStatusSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
-      return markAllActivitiesAsRead(db, teamId!, input);
+      return updateAllActivitiesStatus(db, teamId!, input.status, {
+        userId: input.userId,
+      });
     }),
 });

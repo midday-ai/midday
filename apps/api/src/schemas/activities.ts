@@ -26,14 +26,16 @@ export const getActivitiesSchema = z
           in: "query",
         },
       }),
-    archived: z.coerce
-      .boolean()
-      .nullable()
+    status: z
+      .union([
+        z.enum(["unread", "read", "archived"]),
+        z.array(z.enum(["unread", "read", "archived"])),
+      ])
       .optional()
       .openapi({
         description:
-          "Filter by archived status. true = archived (read), false = unarchived (unread), null/undefined = all",
-        example: false,
+          "Filter by activity status. Can be a single status or array of statuses. unread = new notifications, read = viewed but not dismissed, archived = dismissed from view",
+        example: ["unread", "read"],
         param: {
           in: "query",
         },
@@ -68,24 +70,32 @@ export const getActivitiesSchema = z
   })
   .openapi("GetActivitiesSchema");
 
-export const markActivityAsReadSchema = z
+export const updateActivityStatusSchema = z
   .object({
     activityId: z.string().uuid().openapi({
-      description: "The ID of the activity to mark as read",
+      description: "The ID of the activity to update",
       example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
     }),
+    status: z.enum(["unread", "read", "archived"]).openapi({
+      description: "The new status for the activity",
+      example: "read",
+    }),
   })
-  .openapi("MarkActivityAsReadSchema");
+  .openapi("UpdateActivityStatusSchema");
 
-export const markAllActivitiesAsReadSchema = z
+export const updateAllActivitiesStatusSchema = z
   .object({
+    status: z.enum(["unread", "read", "archived"]).openapi({
+      description: "The new status for all activities",
+      example: "read",
+    }),
     userId: z.string().uuid().optional().openapi({
       description:
         "Optional user ID to limit the operation to activities for a specific user",
       example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     }),
   })
-  .openapi("MarkAllActivitiesAsReadSchema");
+  .openapi("UpdateAllActivitiesStatusSchema");
 
 // Response schemas for REST API
 export const activitySchema = z
@@ -118,14 +128,13 @@ export const activitySchema = z
       description: "Source of the activity",
       example: "system",
     }),
+    status: z.enum(["unread", "read", "archived"]).openapi({
+      description: "Current status of the activity",
+      example: "unread",
+    }),
     metadata: z.record(z.any()).openapi({
       description: "Additional metadata for the activity",
       example: { transactionCount: 5, enrichedCount: 3 },
-    }),
-    readAt: z.string().nullable().openapi({
-      description:
-        "ISO timestamp when the activity was marked as read (null if unread)",
-      example: "2024-04-15T10:30:00.000Z",
     }),
     lastUsedAt: z.string().nullable().openapi({
       description:
@@ -169,10 +178,10 @@ export const activityResponseSchema = z
   })
   .openapi("ActivityResponseSchema");
 
-export const markAllActivitiesAsReadResponseSchema = z
+export const updateAllActivitiesStatusResponseSchema = z
   .object({
     data: z.array(activitySchema).openapi({
-      description: "Array of activities that were marked as read",
+      description: "Array of activities that were updated",
     }),
   })
-  .openapi("MarkAllActivitiesAsReadResponseSchema");
+  .openapi("UpdateAllActivitiesStatusResponseSchema");

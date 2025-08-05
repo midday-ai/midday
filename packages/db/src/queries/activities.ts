@@ -1,7 +1,7 @@
 import type { Database } from "@db/client";
 import { activities } from "@db/schema";
-import type { activityTypeEnum } from "@db/schema";
-import { and, desc, eq, isNotNull, isNull } from "drizzle-orm";
+import type { activityStatusEnum, activityTypeEnum } from "@db/schema";
+import { and, desc, eq, inArray, ne } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 
 type CreateActivityParams = {
@@ -32,22 +32,31 @@ export async function createActivity(
   return result;
 }
 
-export async function markActivityAsRead(db: Database, activityId: string) {
+export async function updateActivityStatus(
+  db: Database,
+  activityId: string,
+  status: (typeof activityStatusEnum.enumValues)[number],
+) {
   const [result] = await db
     .update(activities)
-    .set({ readAt: new Date().toISOString() })
+    .set({ status })
     .where(eq(activities.id, activityId))
     .returning();
 
   return result;
 }
 
-export async function markAllActivitiesAsRead(
+export async function updateAllActivitiesStatus(
   db: Database,
   teamId: string,
+  status: (typeof activityStatusEnum.enumValues)[number],
   options?: { userId?: string },
 ) {
-  const conditions = [eq(activities.teamId, teamId)];
+  const conditions = [
+    eq(activities.teamId, teamId),
+    // Only update activities that don't already have the target status
+    ne(activities.status, status),
+  ];
 
   if (options?.userId) {
     conditions.push(eq(activities.userId, options.userId));
@@ -55,7 +64,7 @@ export async function markAllActivitiesAsRead(
 
   const result = await db
     .update(activities)
-    .set({ readAt: new Date().toISOString() })
+    .set({ status })
     .where(and(...conditions))
     .returning();
 
@@ -66,13 +75,16 @@ export type GetActivitiesParams = {
   teamId: string;
   cursor?: string | null;
   pageSize?: number;
-  archived?: boolean | null; // null = all, true = archived (read), false = unarchived (unread)
+  status?:
+    | (typeof activityStatusEnum.enumValues)[number][]
+    | (typeof activityStatusEnum.enumValues)[number]
+    | null;
   userId?: string | null;
   priority?: number | null;
 };
 
 export async function getActivities(db: Database, params: GetActivitiesParams) {
-  const { teamId, cursor, pageSize = 20, archived, userId, priority } = params;
+  const { teamId, cursor, pageSize = 20, status, userId, priority } = params;
 
   // Convert cursor to offset
   const offset = cursor ? Number.parseInt(cursor, 10) : 0;
@@ -80,15 +92,14 @@ export async function getActivities(db: Database, params: GetActivitiesParams) {
   // Base conditions for the WHERE clause
   const whereConditions: SQL[] = [eq(activities.teamId, teamId)];
 
-  // Filter by archived status (readAt field)
-  if (archived === true) {
-    // Show only read activities (archived)
-    whereConditions.push(isNotNull(activities.readAt));
-  } else if (archived === false) {
-    // Show only unread activities (not archived)
-    whereConditions.push(isNull(activities.readAt));
+  // Filter by status - support both single status and array of statuses
+  if (status) {
+    if (Array.isArray(status)) {
+      whereConditions.push(inArray(activities.status, status));
+    } else {
+      whereConditions.push(eq(activities.status, status));
+    }
   }
-  // If archived is null, show all activities
 
   // Filter by user if specified
   if (userId) {

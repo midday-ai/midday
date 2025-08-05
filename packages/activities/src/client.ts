@@ -1,8 +1,8 @@
 import type { Database } from "@midday/db/client";
 import {
   createActivity,
-  markActivityAsRead,
-  markAllActivitiesAsRead,
+  updateActivityStatus,
+  updateAllActivitiesStatus,
 } from "@midday/db/queries";
 import { type CreateActivityInput, createActivitySchema } from "./schemas";
 
@@ -16,16 +16,23 @@ export class Activities {
   }
 
   /**
-   * Mark a specific activity as read
+   * Update the status of a specific activity
    */
-  async markAsRead(activityId: string) {
-    return markActivityAsRead(this.db, activityId);
+  async updateStatus(
+    activityId: string,
+    status: "unread" | "read" | "archived",
+  ) {
+    return updateActivityStatus(this.db, activityId, status);
   }
 
   /**
-   * Mark all activities as read for a team
+   * Update the status of all activities for a team
    */
-  async markAllAsRead(teamId: string, options?: { userId?: string }) {
-    return markAllActivitiesAsRead(this.db, teamId, options);
+  async updateAllStatus(
+    teamId: string,
+    status: "unread" | "read" | "archived",
+    options?: { userId?: string },
+  ) {
+    return updateAllActivitiesStatus(this.db, teamId, status, options);
   }
 }
