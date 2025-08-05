@@ -14,67 +14,138 @@ export function generateEnrichmentPrompt(
       const transaction = batch[index];
       const hasExistingMerchant = transaction?.merchantName;
 
-      return `${index + 1}. Description: "${tx.description}", Amount: ${tx.amount}, Currency: ${tx.currency}${hasExistingMerchant ? ` (Merchant: ${transaction.merchantName})` : ""}`;
+      return `${index + 1}. Description: "${tx.description}", Amount: ${tx.amount}, Currency: ${tx.currency}${hasExistingMerchant ? ` (Current Merchant: ${transaction.merchantName})` : ""}`;
     })
     .join("\n");
 
-  const needsMerchantNames = batch.some((tx) => !tx.merchantName);
   const needsCategories = batch.some((tx) => !tx.categorySlug);
 
   let returnInstructions = "Return:\n";
 
-  if (needsMerchantNames) {
-    returnInstructions +=
-      "1. For transactions WITHOUT existing merchant names: The formal legal business name including proper entity suffixes (Inc, LLC, Corp, Ltd, Co, etc.) when identifiable. Use proper capitalization. If you cannot identify the formal legal name, return a cleaned and properly capitalized version of the merchant name.\n";
-  }
-
   if (needsCategories) {
-    returnInstructions += `${needsMerchantNames ? "2" : "1"}. The best-fit category from the allowed categories based on the transaction's content and context.\n`;
-  }
-
-  if (!needsMerchantNames) {
     returnInstructions +=
-      "Note: For transactions that already have merchant names, only provide the category - DO NOT change the existing merchant name.\n";
+      "1. Legal entity name: Apply the transformation rules above\n";
+    returnInstructions +=
+      "2. Category: Select the best-fit category from the allowed list\n";
+  } else {
+    returnInstructions +=
+      "Legal entity name: Apply the transformation rules above\n";
   }
 
-  return `You are a financial transaction enrichment function for business expense management.
+  return `You are a legal entity identification system for business expense transactions.
 
-Process each transaction with its description, amount, and currency. The description may contain multiple data fields:
-- "Counterparty": Bank-parsed merchant name (usually cleaner)
-- "Raw": Original transaction description (may contain codes, locations, store numbers)
-- "Description": Additional transaction details
-- "Merchant": Already identified merchant name (when available - DO NOT override)
+TASK: For EVERY transaction, identify the formal legal business entity name with proper entity suffixes (Inc, LLC, Corp, Ltd, Co, etc.).
 
-For merchant names, prefer formal business names with proper legal entity suffixes:
-- Apple Inc. (not "apple" or "Apple")
-- Google LLC (not "google" or "Google")
-- Microsoft Corporation (not "microsoft" or "Microsoft")
-- Amazon.com Inc. (not "amazon" or "Amazon")
+INPUT HIERARCHY (use in this priority order):
+1. "Current Merchant": Existing name from provider → enhance to legal entity
+2. "Counterparty": Bank-parsed name → identify legal entity
+3. "Raw": Transaction description → extract legal entity
+4. "Description": Additional context → supplement identification
 
-CATEGORIES & PRIORITY RULES:
-Focus on core merchant name, ignore location/store codes.
+TRANSFORMATION EXAMPLES:
+✓ "Anthropic" → "Anthropic Inc"
+✓ "Google Pay" → "Google LLC" 
+✓ "AMZN MKTP" → "Amazon.com Inc"
+✓ "Starbucks #1234" → "Starbucks Corporation"
+✓ "MSFT*Office365" → "Microsoft Corporation"
+✓ "Apple Store" → "Apple Inc"
 
-• software - Google, Microsoft, Adobe, AWS, Stripe, Slack, any SaaS/tech service
-• travel - Airlines, hotels, Uber/Lyft, rental cars, parking
-• meals - Restaurants, cafes, Starbucks, food/beverage only
-• office-supplies - Staples, Office Depot, paper, pens, small supplies
-• equipment - Apple hardware, computers, phones, machinery >$500  
-• internet-and-telephone - Verizon, AT&T, ISPs, phone/internet bills
-• rent - Office/warehouse rent, WeWork, coworking spaces
-• facilities-expenses - Utilities, maintenance, security, cleaning
-• activity - Conferences, training, team events, workshops
-• fees - Bank fees, legal, accounting, payment processing
-• transfer - Transfers between accounts, wire transfers, ACH transfers
+REQUIREMENTS:
+- Use official legal entity suffixes: Inc, LLC, Corp, Corporation, Ltd, Co, etc.
+- Prefer the parent company's legal entity (Google LLC, not Google Pay LLC)
+- Ignore location codes, store numbers, and transaction details
+- If genuinely unknown, provide best cleaned/capitalized version available
 
-CRITICAL: Google/Microsoft/Adobe/AWS = software regardless of additional text
+${
+  needsCategories
+    ? `
+CATEGORY RULES:
+Categorize based on the primary business purpose and nature of the expense. Consider amount, merchant type, and business context.
+
+• software - Digital tools and services for business operations
+  ✓ SaaS platforms: Google Workspace, Microsoft 365, Adobe Creative Cloud, Slack, Zoom, Figma
+  ✓ Development tools: GitHub, AWS, Azure, Vercel, Stripe, payment processors
+  ✓ Business software: CRM systems, accounting software, project management tools
+  ✓ Domain/hosting: GoDaddy, Cloudflare, hosting services, SSL certificates
+  ✗ NOT: Physical hardware, mobile/internet service bills, app store purchases for games
+
+• travel - Transportation and accommodation for business trips
+  ✓ Transportation: Airlines, trains, buses, ride-sharing (Uber/Lyft), rental cars, gas during trips
+  ✓ Accommodation: Hotels, Airbnb, business lodging
+  ✓ Trip-related: Parking fees during travel, tolls, airport services
+  ✗ NOT: Daily commute expenses, local parking, personal vehicle maintenance
+
+• meals - Food and beverages for business purposes
+  ✓ Business meals: Client dinners, team lunches, conference catering
+  ✓ Business travel meals: Restaurant meals during business trips
+  ✓ Office provisions: Catered meetings, employee meals, coffee/snacks for office
+  ✗ NOT: Personal groceries, alcohol not for business entertainment, daily employee lunches
+
+• office-supplies - Physical materials and small office items
+  ✓ Stationery: Paper, pens, folders, notebooks, printing supplies
+  ✓ Office materials: Staplers, scissors, calendars, whiteboards, basic storage
+  ✓ Consumables: Ink cartridges, batteries, cleaning supplies for office use
+  ✗ NOT: Expensive equipment >$500, furniture, technology devices
+
+• equipment - Durable business assets and technology hardware
+  ✓ Computing: Computers, laptops, tablets, monitors, keyboards, mice
+  ✓ Communication: Phones, headsets, webcams, conferencing equipment
+  ✓ Office equipment: Printers, scanners, shredders, furniture >$500
+  ✓ Specialized tools: Industry-specific machinery, professional instruments
+  ✗ NOT: Small supplies <$100, consumables, software licenses
+
+• internet-and-telephone - Communication and connectivity services
+  ✓ Internet services: Business internet, Wi-Fi plans, ISP bills
+  ✓ Phone services: Business phone lines, mobile plans, VoIP services
+  ✓ Communication tools: Video conferencing services, business messaging platforms
+  ✗ NOT: Software subscriptions, streaming services, personal phone bills
+
+• rent - Property and workspace costs
+  ✓ Office space: Commercial rent, co-working memberships (WeWork, etc.)
+  ✓ Storage: Warehouse rent, storage units for business
+  ✓ Parking: Monthly parking fees, dedicated business parking spots
+  ✗ NOT: Utilities (use facilities-expenses), equipment leasing, vehicle rentals
+
+• facilities-expenses - Building operations and maintenance
+  ✓ Utilities: Electricity, gas, water, waste management, heating/cooling
+  ✓ Maintenance: Cleaning services, repairs, security systems, landscaping
+  ✓ Building services: Elevator maintenance, HVAC servicing, pest control
+  ✗ NOT: Rent payments, office supplies, equipment purchases
+
+• activity - Professional development and business events
+  ✓ Education: Conferences, workshops, training courses, certifications
+  ✓ Networking: Business events, trade shows, professional association fees
+  ✓ Team building: Corporate retreats, employee training sessions
+  ✗ NOT: Personal education, entertainment not business-related, regular meals
+
+• fees - Professional services and administrative costs
+  ✓ Professional services: Legal fees, accounting, consulting, tax preparation
+  ✓ Financial fees: Bank charges, payment processing, credit card fees, wire fees
+  ✓ Business fees: License renewals, permits, registration fees, compliance costs
+  ✗ NOT: Investment fees, personal banking charges, late payment penalties
+
+• transfer - Movement of funds between accounts
+  ✓ Internal transfers: Between business accounts, owner draws, capital contributions
+  ✓ Payment transfers: Wire transfers, ACH transfers, loan payments
+  ✓ Investment moves: Transfers to investment accounts, escrow payments
+  ✗ NOT: Purchase transactions, refunds, fee payments
+
+PRIORITIZATION RULES:
+1. Choose the most specific category that fits (software over fees for SaaS)
+2. Consider primary business purpose (Uber for client meeting = travel, not activity)
+3. Amount context matters (small tech purchase = office-supplies, large = equipment)
+4. When uncertain between categories, prefer the more specific business function
+`
+    : ""
+}
 
 ${returnInstructions}
 
 Transactions to process:
 ${transactionList}
 
-Return exactly ${batch.length} results in order. Focus on merchant name, ignore location codes. 
-Example: "Google Gsuite Lostisla" = software`;
+Return exactly ${batch.length} results in order. Apply the transformation rules consistently.
+`;
 }
 
 /**
@@ -124,7 +195,7 @@ function isValidCategory(category: string): boolean {
 }
 
 /**
- * Prepares update data, respecting existing merchant names and category classifications
+ * Prepares update data, enhancing merchant names to legal entity names and category classifications
  */
 export function prepareUpdateData(
   transaction: {
@@ -136,9 +207,9 @@ export function prepareUpdateData(
 ): UpdateData {
   const updateData: UpdateData = {};
 
-  // Only update merchantName if it's currently null (no provider merchant name)
-  // and if the result has a valid merchant name
-  if (!transaction.merchantName && result.merchant) {
+  // Always update merchantName if the LLM provides one
+  // This allows enhancement of existing simplified names to formal legal entity names
+  if (result.merchant) {
     updateData.merchantName = result.merchant;
   }
 

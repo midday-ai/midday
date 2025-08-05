@@ -17,7 +17,10 @@ export const transactionCategories = [
 
 // Structured output schema for LLM response (for use with output: "array")
 export const enrichmentSchema = z.object({
-  merchant: z.string().nullable().describe("The merchant name"),
+  merchant: z
+    .string()
+    .nullable()
+    .describe("The formal legal business entity name"),
   category: z
     .enum(transactionCategories)
     .describe("The category of the transaction"),
