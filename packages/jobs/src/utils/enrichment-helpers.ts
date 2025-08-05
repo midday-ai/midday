@@ -1,5 +1,6 @@
 import type { TransactionForEnrichment } from "@midday/db/queries";
 import type { TransactionData, UpdateData } from "./enrichment-schema";
+import { transactionCategories } from "./enrichment-schema";
 
 /**
  * Generates the enrichment prompt for the LLM
@@ -36,7 +37,7 @@ export function generateEnrichmentPrompt(
       "Note: For transactions that already have merchant names, only provide the category - DO NOT change the existing merchant name.\n";
   }
 
-  return `You are a financial transaction enrichment function.
+  return `You are a financial transaction enrichment function for business expense management.
 
 Process each transaction with its description, amount, and currency. The description may contain multiple data fields:
 - "Counterparty": Bank-parsed merchant name (usually cleaner)
@@ -50,14 +51,29 @@ For merchant names, prefer formal business names with proper legal entity suffix
 - Microsoft Corporation (not "microsoft" or "Microsoft")
 - Amazon.com Inc. (not "amazon" or "Amazon")
 
-Use ALL available information to make the best identification.
+CATEGORIES & PRIORITY RULES:
+Focus on core merchant name, ignore location/store codes.
+
+• software - Google, Microsoft, Adobe, AWS, Stripe, Slack, any SaaS/tech service
+• travel - Airlines, hotels, Uber/Lyft, rental cars, parking
+• meals - Restaurants, cafes, Starbucks, food/beverage only
+• office_supplies - Staples, Office Depot, paper, pens, small supplies
+• equipment - Apple hardware, computers, phones, machinery >$500  
+• internet_and_telephone - Verizon, AT&T, ISPs, phone/internet bills
+• rent - Office/warehouse rent, WeWork, coworking spaces
+• facilities_expenses - Utilities, maintenance, security, cleaning
+• activity - Conferences, training, team events, workshops
+• fees - Bank fees, legal, accounting, payment processing
+
+CRITICAL: Google/Microsoft/Adobe/AWS = software regardless of additional text
 
 ${returnInstructions}
 
 Transactions to process:
 ${transactionList}
 
-IMPORTANT: You must respond with results for each transaction in the exact same order as listed above. Return exactly ${batch.length} results, one for each transaction.`;
+Return exactly ${batch.length} results in order. Focus on merchant name, ignore location codes. 
+Example: "Google Gsuite Lostisla" = software`;
 }
 
 /**
@@ -98,6 +114,15 @@ export function prepareTransactionData(
 }
 
 /**
+ * Validates if a category is in the allowed list
+ */
+function isValidCategory(category: string): boolean {
+  return transactionCategories.includes(
+    category as (typeof transactionCategories)[number],
+  );
+}
+
+/**
  * Prepares update data, respecting existing merchant names and category classifications
  */
 export function prepareUpdateData(
@@ -112,8 +137,10 @@ export function prepareUpdateData(
     updateData.merchantName = result.merchant;
   }
 
+  const validCategory = isValidCategory(result.category);
+
   // Only update categorySlug if it's currently null
-  if (!transaction.categorySlug) {
+  if (!transaction.categorySlug && validCategory) {
     updateData.categorySlug = result.category;
   }
 

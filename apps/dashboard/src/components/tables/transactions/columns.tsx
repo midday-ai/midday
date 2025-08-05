@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import { Spinner } from "@midday/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import type { ColumnDef } from "@tanstack/react-table";
 import { memo, useCallback } from "react";
@@ -301,12 +302,35 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "category",
     header: "Category",
-    cell: ({ row }) => (
-      <Category
-        name={row.original?.category?.name ?? ""}
-        color={row.original?.category?.color ?? ""}
-      />
-    ),
+    cell: ({ row }) => {
+      // Show analyzing state when enrichment is not completed
+      if (!row.original.enrichmentCompleted) {
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center space-x-2 cursor-help">
+                <Spinner size={14} className="stroke-primary" />
+                <span className="text-[#878787] text-sm">Analyzing</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent
+              className="px-3 py-1.5 text-xs max-w-[280px]"
+              side="top"
+              sideOffset={5}
+            >
+              Analyzing transaction details to determine the best category.
+            </TooltipContent>
+          </Tooltip>
+        );
+      }
+
+      return (
+        <Category
+          name={row.original?.category?.name ?? ""}
+          color={row.original?.category?.color ?? ""}
+        />
+      );
+    },
   },
   {
     accessorKey: "counterparty",
