@@ -118,6 +118,12 @@ export const RESOURCES = [
     description: "Access to search functionality",
     scopes: [{ scope: "search.read", type: "read", label: "Read" }],
   },
+  {
+    key: "activities",
+    name: "Activities",
+    description: "Access to activities data",
+    scopes: [{ scope: "activities.read", type: "read", label: "Read" }],
+  },
 ] as const;
 
 export const getScopeDescription = (scope: string) => {

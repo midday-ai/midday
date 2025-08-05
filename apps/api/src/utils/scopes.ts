@@ -23,6 +23,8 @@ export const SCOPES = [
   "transactions.write",
   "users.read",
   "users.write",
+  "activities.read",
+  "activities.write",
   "apis.all", // All API scopes
   "apis.read", // All read scopes
 ] as const;
