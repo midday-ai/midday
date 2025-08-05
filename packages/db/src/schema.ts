@@ -187,6 +187,45 @@ export const transactionFrequencyEnum = pgEnum("transaction_frequency", [
   "unknown",
 ]);
 
+export const activityTypeEnum = pgEnum("activity_type", [
+  // System-generated activities
+  "transactions_enriched",
+  "transactions_created",
+  // "inbox_matched_items",
+  // "inbox_matched_suggestions",
+  // "inbox_manual_sync_completed",
+  // "bank_sync_completed",
+  // "bank_connection_expired",
+  // "bank_connection_expiring",
+  // "transactions_imported",
+  // "invoice_overdue",
+  // "invoice_payment_received",
+  // "invoice_reminder_sent",
+  // "documents_processed",
+
+  // User actions
+  // "invoice_created",
+  // "invoice_created_and_sent",
+  // "invoice_duplicated",
+  // "customer_created",
+  // "transaction_created",
+  // "transaction_updated",
+  // "transaction_categorized",
+  // "transactions_exported",
+  // "document_uploaded",
+  // "inbox_item_matched",
+  // "tracker_entry_created",
+  // "tracker_project_created",
+  // "tracker_timer_started",
+  // "tracker_timer_stopped",
+  // "bank_connection_created",
+]);
+
+export const activitySourceEnum = pgEnum("activity_source", [
+  "system", // Automated system processes
+  "user", // Direct user actions
+]);
+
 export const documentTagEmbeddings = pgTable(
   "document_tag_embeddings",
   {
@@ -2898,4 +2937,65 @@ export const oauthAccessTokensRelations = relations(
       references: [teams.id],
     }),
   }),
+);
+
+export const activities = pgTable(
+  "activities",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    // Core fields
+    teamId: uuid("team_id").notNull(),
+    userId: uuid("user_id"),
+    type: activityTypeEnum().notNull(),
+    priority: smallint().default(5), // 1-3 = notifications, 4-10 = insights only
+
+    // Source of the activity
+    source: activitySourceEnum().notNull(),
+
+    // All the data
+    metadata: jsonb().notNull(),
+
+    // Simple lifecycle (only for notifications)
+    readAt: timestamp("read_at", { withTimezone: true, mode: "string" }),
+
+    // Timestamp of last system use (e.g. insight generation, digest inclusion)
+    lastUsedAt: timestamp("last_used_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+  },
+  (table) => [
+    // Optimized indexes
+    index("activities_notifications_idx").using(
+      "btree",
+      table.teamId,
+      table.priority,
+      table.readAt,
+      table.createdAt.desc(),
+    ),
+    index("activities_insights_idx").using(
+      "btree",
+      table.teamId,
+      table.type,
+      table.source,
+      table.createdAt.desc(),
+    ),
+    index("activities_metadata_gin_idx").using("gin", table.metadata),
+
+    // Foreign keys
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "activities_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "activities_user_id_fkey",
+    }).onDelete("set null"),
+  ],
 );
