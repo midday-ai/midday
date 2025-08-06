@@ -214,6 +214,18 @@
         "@types/react": "19.1.6",
       },
     },
+    "packages/activities": {
+      "name": "@midday/activities",
+      "version": "1.0.0",
+      "dependencies": {
+        "@midday/db": "workspace:*",
+        "zod": "3.25.64",
+      },
+      "devDependencies": {
+        "@midday/tsconfig": "workspace:*",
+        "typescript": "^5.9.2",
+      },
+    },
     "packages/app-store": {
       "name": "@midday/app-store",
       "version": "1.0.0",
@@ -853,6 +865,8 @@
     "@mdx-js/react": ["@mdx-js/react@3.1.0", "", { "dependencies": { "@types/mdx": "^2.0.0" }, "peerDependencies": { "@types/react": ">=16", "react": ">=16" } }, "sha512-QjHtSaoameoalGnKDT3FoIl4+9RwyTmo9ZJGBdLOks/YOiWHoRDI3PUwEzOE7kEmGcV3AFcp9K6dYu9rEuKLAQ=="],
 
     "@microsoft/microsoft-graph-client": ["@microsoft/microsoft-graph-client@3.0.7", "", { "dependencies": { "@babel/runtime": "^7.12.5", "tslib": "^2.2.0" } }, "sha512-/AazAV/F+HK4LIywF9C+NYHcJo038zEnWkteilcxC1FM/uK/4NVGDKGrxx7nNq1ybspAroRKT4I1FHfxQzxkUw=="],
+
+    "@midday/activities": ["@midday/activities@workspace:packages/activities"],
 
     "@midday/api": ["@midday/api@workspace:apps/api"],
 

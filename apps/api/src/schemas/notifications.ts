@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 
-export const getActivitiesSchema = z
+export const getNotificationsSchema = z
   .object({
     cursor: z
       .string()
@@ -20,7 +20,7 @@ export const getActivitiesSchema = z
       .max(100)
       .optional()
       .openapi({
-        description: "Number of activities to return per page (1-100)",
+        description: "Number of notifications to return per page (1-100)",
         example: 20,
         param: {
           in: "query",
@@ -34,7 +34,7 @@ export const getActivitiesSchema = z
       .optional()
       .openapi({
         description:
-          "Filter by activity status. Can be a single status or array of statuses. unread = new notifications, read = viewed but not dismissed, archived = dismissed from view",
+          "Filter by notification status. Can be a single status or array of statuses. unread = new notifications, read = viewed but not dismissed, archived = dismissed from view",
         example: ["unread", "read"],
         param: {
           in: "query",
@@ -46,13 +46,12 @@ export const getActivitiesSchema = z
       .nullable()
       .optional()
       .openapi({
-        description: "Filter activities by specific user ID",
+        description: "Filter notifications by specific user ID",
         example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
         param: {
           in: "query",
         },
       }),
-
     priority: z.coerce
       .number()
       .int()
@@ -61,7 +60,7 @@ export const getActivitiesSchema = z
       .nullable()
       .optional()
       .openapi({
-        description: "Filter activities by priority level (1-10)",
+        description: "Filter notifications by priority level (1-10)",
         example: 5,
         param: {
           in: "query",
@@ -76,51 +75,50 @@ export const getActivitiesSchema = z
       .optional()
       .openapi({
         description:
-          "Filter activities by maximum priority level (priority <= maxPriority). Use 3 for notifications only.",
+          "Filter notifications by maximum priority level (priority <= maxPriority). Use 3 for user-facing notifications only.",
         example: 3,
         param: {
           in: "query",
         },
       }),
   })
-  .openapi("GetActivitiesSchema");
+  .openapi("GetNotificationsSchema");
 
-export const updateActivityStatusSchema = z
+export const updateNotificationStatusSchema = z
   .object({
     activityId: z.string().uuid().openapi({
-      description: "The ID of the activity to update",
+      description: "The ID of the notification to update",
       example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
     }),
     status: z.enum(["unread", "read", "archived"]).openapi({
-      description: "The new status for the activity",
+      description: "The new status for the notification",
       example: "read",
     }),
   })
-  .openapi("UpdateActivityStatusSchema");
+  .openapi("UpdateNotificationStatusSchema");
 
-export const updateAllActivitiesStatusSchema = z
+export const updateAllNotificationsStatusSchema = z
   .object({
     status: z.enum(["unread", "read", "archived"]).openapi({
-      description: "The new status for all activities",
+      description: "The new status to apply to all notifications",
       example: "read",
     }),
-    userId: z.string().uuid().optional().openapi({
-      description:
-        "Optional user ID to limit the operation to activities for a specific user",
+    userId: z.string().uuid().nullable().optional().openapi({
+      description: "Optional user ID to filter notifications by specific user",
       example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     }),
   })
-  .openapi("UpdateAllActivitiesStatusSchema");
+  .openapi("UpdateAllNotificationsStatusSchema");
 
 // Response schemas for REST API
-export const activitySchema = z
+export const notificationSchema = z
   .object({
     id: z.string().uuid().openapi({
-      description: "Unique identifier of the activity",
+      description: "Unique identifier of the notification",
       example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
     }),
     createdAt: z.string().openapi({
-      description: "ISO timestamp when the activity was created",
+      description: "ISO timestamp when the notification was created",
       example: "2024-04-15T09:00:00.000Z",
     }),
     teamId: z.string().uuid().openapi({
@@ -132,37 +130,41 @@ export const activitySchema = z
       example: "c2d3e4f5-a6b7-8901-bcde-f23456789012",
     }),
     type: z.string().openapi({
-      description: "Type of activity",
+      description: "Type of notification",
       example: "transactions_created",
     }),
     priority: z.number().int().min(1).max(10).openapi({
-      description: "Priority level of the activity (1-10)",
-      example: 5,
+      description:
+        "Priority level of the notification (1-3 = user notifications, 4-10 = insights)",
+      example: 3,
     }),
     source: z.enum(["system", "user"]).openapi({
-      description: "Source of the activity",
+      description: "Source of the notification",
       example: "system",
     }),
     status: z.enum(["unread", "read", "archived"]).openapi({
-      description: "Current status of the activity",
+      description: "Current status of the notification",
       example: "unread",
     }),
     metadata: z.record(z.any()).openapi({
-      description: "Additional metadata for the activity",
-      example: { transactionCount: 5, enrichedCount: 3 },
+      description: "Additional metadata for the notification",
+      example: {
+        transactionCount: 5,
+        dateRange: { from: "2024-04-01", to: "2024-04-15" },
+      },
     }),
     lastUsedAt: z.string().nullable().openapi({
       description:
-        "ISO timestamp when the activity was last used by the system",
+        "ISO timestamp when the notification was last used by the system",
       example: "2024-04-15T11:00:00.000Z",
     }),
   })
-  .openapi("ActivitySchema");
+  .openapi("NotificationSchema");
 
-export const activitiesResponseSchema = z
+export const notificationsResponseSchema = z
   .object({
-    data: z.array(activitySchema).openapi({
-      description: "Array of activities",
+    data: z.array(notificationSchema).openapi({
+      description: "Array of notifications",
     }),
     meta: z
       .object({
@@ -183,20 +185,20 @@ export const activitiesResponseSchema = z
         description: "Pagination metadata",
       }),
   })
-  .openapi("ActivitiesResponseSchema");
+  .openapi("NotificationsResponseSchema");
 
-export const activityResponseSchema = z
+export const notificationResponseSchema = z
   .object({
-    data: activitySchema.openapi({
-      description: "The updated activity",
+    data: notificationSchema.openapi({
+      description: "The updated notification",
     }),
   })
-  .openapi("ActivityResponseSchema");
+  .openapi("NotificationResponseSchema");
 
-export const updateAllActivitiesStatusResponseSchema = z
+export const updateAllNotificationsStatusResponseSchema = z
   .object({
-    data: z.array(activitySchema).openapi({
-      description: "Array of activities that were updated",
+    data: z.array(notificationSchema).openapi({
+      description: "Array of updated notifications",
     }),
   })
-  .openapi("UpdateAllActivitiesStatusResponseSchema");
+  .openapi("UpdateAllNotificationsStatusResponseSchema");

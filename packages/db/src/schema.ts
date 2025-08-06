@@ -191,6 +191,7 @@ export const activityTypeEnum = pgEnum("activity_type", [
   // System-generated activities
   "transactions_enriched",
   "transactions_created",
+  "invoice_paid",
   // "inbox_matched_items",
   // "inbox_matched_suggestions",
   // "inbox_manual_sync_completed",

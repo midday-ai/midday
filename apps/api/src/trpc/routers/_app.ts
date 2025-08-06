@@ -1,6 +1,5 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { createTRPCRouter } from "../init";
-import { activitiesRouter } from "./activities";
 import { apiKeysRouter } from "./api-keys";
 import { appsRouter } from "./apps";
 import { bankAccountsRouter } from "./bank-accounts";
@@ -16,6 +15,7 @@ import { institutionsRouter } from "./institutions";
 import { invoiceRouter } from "./invoice";
 import { invoiceTemplateRouter } from "./invoice-template";
 import { metricsRouter } from "./metrics";
+import { notificationsRouter } from "./notifications";
 import { oauthApplicationsRouter } from "./oauth-applications";
 import { searchRouter } from "./search";
 import { shortLinksRouter } from "./short-links";
@@ -30,7 +30,7 @@ import { transactionsRouter } from "./transactions";
 import { userRouter } from "./user";
 
 export const appRouter = createTRPCRouter({
-  activities: activitiesRouter,
+  notifications: notificationsRouter,
   apps: appsRouter,
   bankAccounts: bankAccountsRouter,
   bankConnections: bankConnectionsRouter,

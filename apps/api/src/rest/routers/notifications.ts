@@ -1,12 +1,12 @@
 import { withRequiredScope } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import {
-  activitiesResponseSchema,
-  activityResponseSchema,
-  getActivitiesSchema,
-  updateAllActivitiesStatusResponseSchema,
-  updateAllActivitiesStatusSchema,
-} from "@api/schemas/activities";
+  getNotificationsSchema,
+  notificationResponseSchema,
+  notificationsResponseSchema,
+  updateAllNotificationsStatusResponseSchema,
+  updateAllNotificationsStatusSchema,
+} from "@api/schemas/notifications";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import {
@@ -21,26 +21,26 @@ app.openapi(
   createRoute({
     method: "get",
     path: "/",
-    summary: "List all activities",
-    operationId: "listActivities",
+    summary: "List all notifications",
+    operationId: "listNotifications",
     "x-speakeasy-name-override": "list",
-    description: "Retrieve a list of activities for the authenticated team.",
-    tags: ["Activities"],
+    description: "Retrieve a list of notifications for the authenticated team.",
+    tags: ["Notifications"],
     request: {
-      query: getActivitiesSchema,
+      query: getNotificationsSchema,
     },
     responses: {
       200: {
         description:
-          "Retrieve a list of activities for the authenticated team.",
+          "Retrieve a list of notifications for the authenticated team.",
         content: {
           "application/json": {
-            schema: activitiesResponseSchema,
+            schema: notificationsResponseSchema,
           },
         },
       },
     },
-    middleware: [withRequiredScope("activities.read")],
+    middleware: [withRequiredScope("notifications.read")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -52,26 +52,26 @@ app.openapi(
       ...query,
     });
 
-    return c.json(validateResponse(result, activitiesResponseSchema));
+    return c.json(validateResponse(result, notificationsResponseSchema));
   },
 );
 
 app.openapi(
   createRoute({
     method: "patch",
-    path: "/{activityId}/status",
-    summary: "Update activity status",
-    operationId: "updateActivityStatus",
+    path: "/{notificationId}/status",
+    summary: "Update notification status",
+    operationId: "updateNotificationStatus",
     "x-speakeasy-name-override": "updateStatus",
-    description: "Update the status of a specific activity.",
-    tags: ["Activities"],
+    description: "Update the status of a specific notification.",
+    tags: ["Notifications"],
     request: {
       params: z.object({
-        activityId: z
+        notificationId: z
           .string()
           .uuid()
           .openapi({
-            description: "The ID of the activity to update",
+            description: "The ID of the notification to update",
             example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
             param: {
               in: "path",
@@ -83,7 +83,7 @@ app.openapi(
           "application/json": {
             schema: z.object({
               status: z.enum(["unread", "read", "archived"]).openapi({
-                description: "The new status for the activity",
+                description: "The new status for the notification",
                 example: "read",
               }),
             }),
@@ -93,24 +93,26 @@ app.openapi(
     },
     responses: {
       200: {
-        description: "Activity status updated successfully.",
+        description: "Notification status updated successfully.",
         content: {
           "application/json": {
-            schema: activityResponseSchema,
+            schema: notificationResponseSchema,
           },
         },
       },
     },
-    middleware: [withRequiredScope("activities.write")],
+    middleware: [withRequiredScope("notifications.write")],
   }),
   async (c) => {
     const db = c.get("db");
-    const { activityId } = c.req.valid("param");
+    const { notificationId } = c.req.valid("param");
     const { status } = c.req.valid("json");
 
-    const result = await updateActivityStatus(db, activityId, status);
+    const result = await updateActivityStatus(db, notificationId, status);
 
-    return c.json(validateResponse({ data: result }, activityResponseSchema));
+    return c.json(
+      validateResponse({ data: result }, notificationResponseSchema),
+    );
   },
 );
 
@@ -118,32 +120,32 @@ app.openapi(
   createRoute({
     method: "post",
     path: "/update-all-status",
-    summary: "Update status of all activities",
-    operationId: "updateAllActivitiesStatus",
+    summary: "Update status of all notifications",
+    operationId: "updateAllNotificationsStatus",
     "x-speakeasy-name-override": "updateAllStatus",
     description:
-      "Update the status of all activities for the authenticated team.",
-    tags: ["Activities"],
+      "Update the status of all notifications for the authenticated team.",
+    tags: ["Notifications"],
     request: {
       body: {
         content: {
           "application/json": {
-            schema: updateAllActivitiesStatusSchema,
+            schema: updateAllNotificationsStatusSchema,
           },
         },
       },
     },
     responses: {
       200: {
-        description: "All activities status updated successfully.",
+        description: "All notifications status updated successfully.",
         content: {
           "application/json": {
-            schema: updateAllActivitiesStatusResponseSchema,
+            schema: updateAllNotificationsStatusResponseSchema,
           },
         },
       },
     },
-    middleware: [withRequiredScope("activities.write")],
+    middleware: [withRequiredScope("notifications.write")],
   }),
   async (c) => {
     const db = c.get("db");
@@ -157,10 +159,10 @@ app.openapi(
     return c.json(
       validateResponse(
         { data: result },
-        updateAllActivitiesStatusResponseSchema,
+        updateAllNotificationsStatusResponseSchema,
       ),
     );
   },
 );
 
-export { app as activitiesRouter };
+export { app as notificationsRouter };
