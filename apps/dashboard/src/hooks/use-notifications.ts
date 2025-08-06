@@ -8,13 +8,13 @@ export function useNotifications() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  // Fetch activities with priority 1-3 (notifications only)
+  // Fetch notifications with priority 1-3 (notifications only)
   const {
     data: activitiesData,
     isLoading,
     error,
   } = useQuery(
-    trpc.activities.list.queryOptions({
+    trpc.notifications.list.queryOptions({
       maxPriority: 3, // Only fetch notifications (priority <= 3)
       pageSize: 20,
     }),
@@ -22,22 +22,22 @@ export function useNotifications() {
 
   // Mutations
   const updateStatusMutation = useMutation(
-    trpc.activities.updateStatus.mutationOptions({
+    trpc.notifications.updateStatus.mutationOptions({
       onSuccess: () => {
-        // Invalidate and refetch activities after successful update
+        // Invalidate and refetch notifications after successful update
         queryClient.invalidateQueries({
-          queryKey: trpc.activities.list.queryKey(),
+          queryKey: trpc.notifications.list.queryKey(),
         });
       },
     }),
   );
 
   const updateAllStatusMutation = useMutation(
-    trpc.activities.updateAllStatus.mutationOptions({
+    trpc.notifications.updateAllStatus.mutationOptions({
       onSuccess: () => {
-        // Invalidate and refetch activities after successful update
+        // Invalidate and refetch notifications after successful update
         queryClient.invalidateQueries({
-          queryKey: trpc.activities.list.queryKey(),
+          queryKey: trpc.notifications.list.queryKey(),
         });
       },
     }),
