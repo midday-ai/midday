@@ -122,7 +122,10 @@ export const RESOURCES = [
     key: "activities",
     name: "Activities",
     description: "Access to activities data",
-    scopes: [{ scope: "activities.read", type: "read", label: "Read" }],
+    scopes: [
+      { scope: "activities.read", type: "read", label: "Read" },
+      { scope: "activities.write", type: "write", label: "Write" },
+    ],
   },
 ] as const;
 

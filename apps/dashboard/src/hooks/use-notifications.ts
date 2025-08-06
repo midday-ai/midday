@@ -1,131 +1,91 @@
-// @ts-nocheck - will be removed soon
-import { useUserQuery } from "@/hooks/use-user";
-import { HeadlessService } from "@novu/headless";
-import { useCallback, useEffect, useRef, useState } from "react";
+"use client";
+
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
 
 export function useNotifications() {
-  const [isLoading, setLoading] = useState(true);
-  const [notifications, setNotifications] = useState([]);
-  const headlessServiceRef = useRef<HeadlessService>();
-  const { data: user } = useUserQuery();
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
-  const markAllMessagesAsRead = () => {
-    const headlessService = headlessServiceRef.current;
+  // Fetch activities with priority 1-3 (notifications only)
+  const {
+    data: activitiesData,
+    isLoading,
+    error,
+  } = useQuery(
+    trpc.activities.list.queryOptions({
+      maxPriority: 3, // Only fetch notifications (priority <= 3)
+      pageSize: 20,
+    }),
+  );
 
-    if (headlessService) {
-      setNotifications((prevNotifications: typeof notifications) =>
-        prevNotifications.map(
-          (notification: (typeof notifications)[number]) => ({
-            ...notification,
-            read: true,
-          }),
-        ),
-      );
+  // Mutations
+  const updateStatusMutation = useMutation(
+    trpc.activities.updateStatus.mutationOptions({
+      onSuccess: () => {
+        // Invalidate and refetch activities after successful update
+        queryClient.invalidateQueries({
+          queryKey: trpc.activities.list.queryKey(),
+        });
+      },
+    }),
+  );
 
-      headlessService.markAllMessagesAsRead({
-        listener: () => {},
-        onError: () => {},
+  const updateAllStatusMutation = useMutation(
+    trpc.activities.updateAllStatus.mutationOptions({
+      onSuccess: () => {
+        // Invalidate and refetch activities after successful update
+        queryClient.invalidateQueries({
+          queryKey: trpc.activities.list.queryKey(),
+        });
+      },
+    }),
+  );
+
+  // Return notification activities directly without transformation
+  const notifications = activitiesData?.data || [];
+
+  // Mark a single message as read (archived)
+  const markMessageAsRead = useCallback(
+    (messageId: string) => {
+      updateStatusMutation.mutate({
+        activityId: messageId,
+        status: "archived",
       });
-    }
-  };
+    },
+    [updateStatusMutation],
+  );
 
-  const markMessageAsRead = (messageId: string) => {
-    const headlessService = headlessServiceRef.current;
+  // Mark all messages as read (archived)
+  const markAllMessagesAsRead = useCallback(() => {
+    updateAllStatusMutation.mutate({
+      status: "archived",
+    });
+  }, [updateAllStatusMutation]);
 
-    if (headlessService) {
-      setNotifications((prevNotifications) =>
-        prevNotifications.map((notification) => {
-          if (notification.id === messageId) {
-            return {
-              ...notification,
-              read: true,
-            };
-          }
+  // Mark all messages as seen (read)
+  const markAllMessagesAsSeen = useCallback(() => {
+    updateAllStatusMutation.mutate({
+      status: "read",
+    });
+  }, [updateAllStatusMutation]);
 
-          return notification;
-        }),
-      );
-
-      headlessService.markNotificationsAsRead({
-        messageId: [messageId],
-        listener: (result) => {},
-        onError: (error) => {},
-      });
-    }
-  };
-
-  const fetchNotifications = useCallback(() => {
-    const headlessService = headlessServiceRef.current;
-
-    if (headlessService) {
-      headlessService.fetchNotifications({
-        listener: () => {},
-        onSuccess: (response) => {
-          setLoading(false);
-          setNotifications(response.data);
-        },
-      });
-    }
-  }, []);
-
-  const markAllMessagesAsSeen = () => {
-    const headlessService = headlessServiceRef.current;
-
-    if (headlessService) {
-      setNotifications((prevNotifications) =>
-        prevNotifications.map((notification) => ({
-          ...notification,
-          seen: true,
-        })),
-      );
-      headlessService.markAllMessagesAsSeen({
-        listener: () => {},
-        onError: () => {},
-      });
-    }
-  };
-
-  useEffect(() => {
-    const headlessService = headlessServiceRef.current;
-
-    if (headlessService) {
-      headlessService.listenNotificationReceive({
-        listener: () => {
-          fetchNotifications();
-        },
-      });
-    }
-  }, [headlessServiceRef.current]);
-
-  useEffect(() => {
-    const subscriberId = `${user?.teamId}_${user?.id}`;
-
-    if (subscriberId && !headlessServiceRef.current) {
-      const headlessService = new HeadlessService({
-        applicationIdentifier:
-          process.env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER!,
-        subscriberId,
-      });
-
-      headlessService.initializeSession({
-        listener: () => {},
-        onSuccess: () => {
-          headlessServiceRef.current = headlessService;
-          fetchNotifications();
-        },
-        onError: () => {},
-      });
-    }
-  }, [fetchNotifications, user]);
+  const hasUnseenNotifications = useMemo(
+    () =>
+      notifications.some(
+        (notification: any) => notification.status === "unread",
+      ),
+    [notifications],
+  );
 
   return {
     isLoading,
-    markAllMessagesAsRead,
-    markMessageAsRead,
-    markAllMessagesAsSeen,
-    hasUnseenNotifications: notifications.some(
-      (notification) => !notification.seen,
-    ),
+    error,
     notifications,
+    hasUnseenNotifications,
+    markMessageAsRead,
+    markAllMessagesAsRead,
+    markAllMessagesAsSeen,
   };
 }

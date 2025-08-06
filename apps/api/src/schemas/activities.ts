@@ -67,6 +67,21 @@ export const getActivitiesSchema = z
           in: "query",
         },
       }),
+    maxPriority: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(10)
+      .nullable()
+      .optional()
+      .openapi({
+        description:
+          "Filter activities by maximum priority level (priority <= maxPriority). Use 3 for notifications only.",
+        example: 3,
+        param: {
+          in: "query",
+        },
+      }),
   })
   .openapi("GetActivitiesSchema");
 

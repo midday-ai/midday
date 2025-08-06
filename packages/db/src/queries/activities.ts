@@ -1,7 +1,7 @@
 import type { Database } from "@db/client";
 import { activities } from "@db/schema";
 import type { activityStatusEnum, activityTypeEnum } from "@db/schema";
-import { and, desc, eq, inArray, ne } from "drizzle-orm";
+import { and, desc, eq, inArray, lte, ne } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 
 type CreateActivityParams = {
@@ -81,10 +81,19 @@ export type GetActivitiesParams = {
     | null;
   userId?: string | null;
   priority?: number | null;
+  maxPriority?: number | null; // For filtering notifications (priority <= 3)
 };
 
 export async function getActivities(db: Database, params: GetActivitiesParams) {
-  const { teamId, cursor, pageSize = 20, status, userId, priority } = params;
+  const {
+    teamId,
+    cursor,
+    pageSize = 20,
+    status,
+    userId,
+    priority,
+    maxPriority,
+  } = params;
 
   // Convert cursor to offset
   const offset = cursor ? Number.parseInt(cursor, 10) : 0;
@@ -109,6 +118,11 @@ export async function getActivities(db: Database, params: GetActivitiesParams) {
   // Filter by priority if specified
   if (priority) {
     whereConditions.push(eq(activities.priority, priority));
+  }
+
+  // Filter by max priority if specified (for notifications: priority <= 3)
+  if (maxPriority) {
+    whereConditions.push(lte(activities.priority, maxPriority));
   }
 
   // Execute the query with proper ordering and pagination
