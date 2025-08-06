@@ -2,13 +2,13 @@
 
 import { formatDate } from "@/utils/format";
 import { Badge } from "@midday/ui/badge";
+import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { Check } from "lucide-react";
 import { FormatAmount } from "../format-amount";
 
 type Props = {
@@ -48,7 +48,7 @@ export function TransactionMatchItem({
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center">
-                  <Check className="size-3.5" />
+                  <Icons.Link className="size-3.5" />
                 </div>
               </TooltipTrigger>
               <TooltipContent className="text-xs px-3 py-1.5">

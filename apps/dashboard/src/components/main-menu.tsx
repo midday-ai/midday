@@ -229,8 +229,8 @@ const Item = ({
                   type="button"
                   onClick={handleChevronClick}
                   className={cn(
-                    "w-6 h-6 flex items-center justify-center transition-all duration-200 ml-auto mr-4",
-                    "text-[#888] hover:text-primary/60 pointer-events-auto rounded",
+                    "w-8 h-8 flex items-center justify-center transition-all duration-200 ml-auto mr-3",
+                    "text-[#888] hover:text-primary pointer-events-auto",
                     isActive && "text-primary/60",
                     shouldShowChildren && "rotate-180",
                   )}
