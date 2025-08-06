@@ -28,6 +28,7 @@ export function ManageSubscription() {
             href={`/api/portal?id=${user?.team?.id}`}
             className="text-sm text-muted-foreground hover:text-primary"
             onClick={() => setIsLoading(true)}
+            prefetch={false}
           >
             <SubmitButton
               variant="secondary"
