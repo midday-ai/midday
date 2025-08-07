@@ -153,7 +153,7 @@ app.openapi(
     const body = c.req.valid("json");
 
     const result = await updateAllActivitiesStatus(db, teamId, body.status, {
-      userId: body.userId,
+      userId: body.userId ?? undefined,
     });
 
     return c.json(

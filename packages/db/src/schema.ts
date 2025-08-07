@@ -2960,6 +2960,9 @@ export const activities = pgTable(
     type: activityTypeEnum().notNull(),
     priority: smallint().default(5), // 1-3 = notifications, 4-10 = insights only
 
+    // Group related activities together (e.g., same business event across multiple users)
+    groupId: uuid("group_id"),
+
     // Source of the activity
     source: activitySourceEnum().notNull(),
 
@@ -2992,6 +2995,14 @@ export const activities = pgTable(
       table.createdAt.desc(),
     ),
     index("activities_metadata_gin_idx").using("gin", table.metadata),
+    index("activities_group_id_idx").on(table.groupId),
+    index("activities_insights_group_idx").using(
+      "btree",
+      table.teamId,
+      table.groupId,
+      table.type,
+      table.createdAt.desc(),
+    ),
 
     // Foreign keys
     foreignKey({

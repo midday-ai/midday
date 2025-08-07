@@ -42,6 +42,9 @@ export class Notifications {
       // Validate input data with the handler's schema
       const validatedData = handler.schema.parse(data);
 
+      // Generate a single group ID for all related activities
+      const groupId = crypto.randomUUID();
+
       // ALWAYS create activities (guaranteed to happen)
       const activities = await Promise.all(
         validatedData.users.map((user) => {
@@ -49,10 +52,14 @@ export class Notifications {
             validatedData,
             user,
           );
+
           // Apply runtime priority override if provided
           if (options?.priority !== undefined) {
             activityInput.priority = options.priority;
           }
+
+          // Add the group ID to link related activities
+          activityInput.groupId = groupId;
 
           // Validate with Zod schema
           const validatedActivity = createActivitySchema.parse(activityInput);

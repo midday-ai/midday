@@ -203,7 +203,7 @@
         "react-dom": "19.1.0",
         "react-hls-player": "^3.0.7",
         "react-use-draggable-scroll": "^0.4.7",
-        "resend": "^4.5.1",
+        "resend": "^4.6.0",
         "server-only": "^0.0.1",
         "sharp": "0.34.1",
         "sugar-high": "^0.9.3",
@@ -212,18 +212,6 @@
         "@midday/tsconfig": "workspace:*",
         "@types/node": "^22.15.29",
         "@types/react": "19.1.6",
-      },
-    },
-    "packages/activities": {
-      "name": "@midday/activities",
-      "version": "1.0.0",
-      "dependencies": {
-        "@midday/db": "workspace:*",
-        "zod": "3.25.64",
-      },
-      "devDependencies": {
-        "@midday/tsconfig": "workspace:*",
-        "typescript": "^5.9.2",
       },
     },
     "packages/app-store": {
@@ -407,6 +395,22 @@
         "nanoid": "^5.1.5",
       },
       "devDependencies": {
+        "typescript": "^5.9.2",
+      },
+    },
+    "packages/notifications-v2": {
+      "name": "@midday/notifications-v2",
+      "version": "0.1.0",
+      "dependencies": {
+        "@midday/db": "workspace:*",
+        "@midday/email": "workspace:*",
+        "@midday/inbox": "workspace:*",
+        "nanoid": "^5.1.5",
+        "resend": "^4.6.0",
+        "zod": "3.25.64",
+      },
+      "devDependencies": {
+        "@midday/tsconfig": "workspace:*",
         "typescript": "^5.9.2",
       },
     },
@@ -866,8 +870,6 @@
 
     "@microsoft/microsoft-graph-client": ["@microsoft/microsoft-graph-client@3.0.7", "", { "dependencies": { "@babel/runtime": "^7.12.5", "tslib": "^2.2.0" } }, "sha512-/AazAV/F+HK4LIywF9C+NYHcJo038zEnWkteilcxC1FM/uK/4NVGDKGrxx7nNq1ybspAroRKT4I1FHfxQzxkUw=="],
 
-    "@midday/activities": ["@midday/activities@workspace:packages/activities"],
-
     "@midday/api": ["@midday/api@workspace:apps/api"],
 
     "@midday/app-store": ["@midday/app-store@workspace:packages/app-store"],
@@ -907,6 +909,8 @@
     "@midday/location": ["@midday/location@workspace:packages/location"],
 
     "@midday/notification": ["@midday/notification@workspace:packages/notification"],
+
+    "@midday/notifications-v2": ["@midday/notifications-v2@workspace:packages/notifications-v2"],
 
     "@midday/supabase": ["@midday/supabase@workspace:packages/supabase"],
 
