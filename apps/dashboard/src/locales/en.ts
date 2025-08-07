@@ -83,13 +83,27 @@ export default {
     completed: "Completed",
   },
   notifications: {
-    inbox: "Receive notifications about new items in your inbox.",
-    match: "Receive notifications about matches.",
-    transaction: "Receive notifications about a new transaction.",
-    transactions: "Receive notifications about new transactions.",
-    "invoice.paid": "Receive notifications about paid invoices.",
-    "invoice.overdue": "Receive notifications about overdue invoices.",
-    "inbox.match": "Receive notifications about new matches in your inbox.",
+    transactions_created: {
+      name: "New Transactions",
+      description: "Get notified when new transactions are imported",
+    },
+    transactions_enriched: {
+      name: "Transaction Updates",
+      description:
+        "Get notified when transactions are enriched with additional data",
+    },
+    invoice_paid: {
+      name: "Invoice Payments",
+      description: "Get notified when invoices are paid",
+    },
+    invoice_overdue: {
+      name: "Overdue Invoices",
+      description: "Get notified when invoices become overdue",
+    },
+    inbox_new: {
+      name: "New Inbox Items",
+      description: "Get notified when new items arrive in your inbox",
+    },
   },
   widgets: {
     insights: "Assistant",

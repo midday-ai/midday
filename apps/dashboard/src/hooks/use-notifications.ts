@@ -29,7 +29,6 @@ export function useNotifications() {
     table: "activities",
     filter: `user_id=eq.${user?.id}`,
     onEvent: () => {
-      alert("test");
       // Invalidate and refetch notifications when activities change
       queryClient.invalidateQueries({
         queryKey: trpc.notifications.list.queryKey(),
