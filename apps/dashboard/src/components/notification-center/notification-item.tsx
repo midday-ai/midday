@@ -1,3 +1,4 @@
+import { useI18n } from "@/locales/client";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -17,11 +18,14 @@ export function NotificationItem({
   activity,
   markMessageAsRead,
 }: NotificationItemProps) {
+  const t = useI18n();
+
   const getNotificationType = (activityType: string): string => {
     switch (activityType) {
       case "transactions_created":
-      case "transactions_enriched":
         return "transactions";
+      case "inbox_new":
+        return "inbox";
       default:
         return "default";
     }
@@ -33,16 +37,34 @@ export function NotificationItem({
   ): string => {
     switch (activityType) {
       case "transactions_created": {
-        const count = metadata?.transactionCount || 1;
-        return `${count} new transaction${count > 1 ? "s" : ""} created`;
+        const count = metadata?.count || metadata?.transactionCount || 1;
+        if (count <= 5) {
+          return t("notifications.transactions_created.title", { count });
+        }
+        return t("notifications.transactions_created.title_many", { count });
       }
-      case "transactions_enriched": {
-        const enrichedCount = metadata?.enrichedCount || 1;
-        const totalCount = metadata?.transactionCount || enrichedCount;
-        return `${enrichedCount} of ${totalCount} transactions enriched`;
+      case "inbox_new": {
+        // Access the data directly from metadata
+        const count = metadata?.totalCount || 1;
+        const provider = metadata?.provider;
+        const syncType = metadata?.syncType;
+
+        // Determine which translation key to use based on context
+        let translationKey: string;
+        if (provider && syncType === "automatic") {
+          translationKey = "notifications.inbox_new.connected_auto";
+        } else if (provider) {
+          translationKey = "notifications.inbox_new.provider_manual";
+        } else if (syncType === "automatic") {
+          translationKey = "notifications.inbox_new.connected_generic";
+        } else {
+          translationKey = "notifications.inbox_new.fallback";
+        }
+
+        return t(translationKey, { count, provider });
       }
       default:
-        return "New activity";
+        return t("notifications.default.title");
     }
   };
 
@@ -110,13 +132,13 @@ export function NotificationItem({
           <Link
             className="flex items-between justify-between space-x-4 "
             onClick={() => setOpen(false)}
-            href={`/inbox?id=${recordId}`}
+            href="/inbox"
           >
             <div>
               <div
                 className={`h-9 w-9 flex items-center justify-center space-y-0 border rounded-full ${activity.status === "unread" ? "border-blue-200 dark:border-blue-800" : ""}`}
               >
-                <Icons.Email />
+                <Icons.Inbox2 />
               </div>
             </div>
             <div>

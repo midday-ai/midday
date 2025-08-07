@@ -18,21 +18,27 @@ import { Notifications } from "@midday/notifications-v2";
 
 const notifications = new Notifications(db);
 
-// Send transaction notification (activity + email)
-await notifications.send('transactions_created', {
-  users: usersData,
-  transactions: newTransactions,
-  priority: 3,
-  skipEmail: false,
+// Create inbox notification for all team members - just the item data directly!
+await notifications.create("inbox_new", teamId, {
+  id: "inbox-123",
+  displayName: "Invoice.pdf",
+  fileName: "invoice.pdf", 
+  contentType: "application/pdf",
+  createdAt: "2024-01-15T10:00:00Z",
 });
 
-// Send enrichment notification (activity only)
-await notifications.send('transactions_enriched', {
-  users: usersData,
-  transactions: enrichedTransactions,
-  priority: 6, // Lower priority
-});
+// Create transaction notification for all team members with priority override
+await notifications.create("transactions_created", teamId, {
+  transactions: newTransactions,
+}, { priority: 3 });
 ```
+
+### How it works
+
+1. **Always creates activities** for all team members (for tracking/audit)
+2. **Respects in-app preferences** - sets low priority if user disabled in-app notifications
+3. **Conditionally sends emails** - only to users who have email notifications enabled
+4. **Automatic user management** - fetches team members and transforms data internally
 
 ## Adding New Notification Types
 
@@ -89,3 +95,15 @@ export const invoicePaid: NotificationHandler<z.infer<typeof schema>> = {
 - **1-3**: High priority notifications (show in notification center)
 - **4-6**: Medium priority (insights and less urgent notifications)  
 - **7-10**: Low priority (background activities, analytics only)
+
+### Automatic Priority Adjustment
+
+The system automatically adjusts notification priority and email delivery based on user preferences:
+
+- **In-app enabled**: Activity created with normal priority (visible in notification center)
+- **In-app disabled**: Activity created with low priority (7-10 range, not visible in notification center)
+- **Email enabled**: Email delivered to user
+- **Email disabled**: No email delivered to that user
+- **Runtime priority override**: Always takes precedence over automatic adjustment
+
+Note: Activities are always created for audit/tracking purposes, but their visibility is controlled by priority levels.

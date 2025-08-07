@@ -1,6 +1,5 @@
 import type { NotificationChannel } from "@midday/db/queries";
 
-// Backend notification type definition - only contains logic, no text
 export interface NotificationType {
   type: string;
   channels: NotificationChannel[];
@@ -11,11 +10,6 @@ export const allNotificationTypes: NotificationType[] = [
   {
     type: "transactions_created",
     channels: ["in_app", "email"],
-    showInSettings: true,
-  },
-  {
-    type: "transactions_enriched",
-    channels: ["in_app"],
     showInSettings: true,
   },
   {

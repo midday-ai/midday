@@ -86,23 +86,40 @@ export default {
     transactions_created: {
       name: "New Transactions",
       description: "Get notified when new transactions are imported",
-    },
-    transactions_enriched: {
-      name: "Transaction Updates",
-      description:
-        "Get notified when transactions are enriched with additional data",
+      "title#one": "New transaction detected",
+      "title#other": "{count} new transactions added",
+      "title_many#other": "{count} transactions imported",
     },
     invoice_paid: {
       name: "Invoice Payments",
       description: "Get notified when invoices are paid",
+      title: "Invoice payment received",
+      subtitle: "Your invoice has been paid",
     },
     invoice_overdue: {
       name: "Overdue Invoices",
       description: "Get notified when invoices become overdue",
+      title: "Invoice is overdue",
+      subtitle: "Payment is past due date",
     },
     inbox_new: {
       name: "New Inbox Items",
       description: "Get notified when new items arrive in your inbox",
+      "connected_auto#one":
+        "We found a new document from your connected {provider}",
+      "connected_auto#other":
+        "We found {count} new documents from your connected {provider}",
+      "provider_manual#one": "We found a new document from {provider}",
+      "provider_manual#other": "We found {count} new documents from {provider}",
+      "connected_generic#one":
+        "We found a new document from your connected email",
+      "connected_generic#other":
+        "We found {count} new documents from your connected email",
+      "fallback#one": "We found a new document in your inbox",
+      "fallback#other": "We found {count} new documents in your inbox",
+    },
+    default: {
+      title: "New activity detected",
     },
   },
   widgets: {

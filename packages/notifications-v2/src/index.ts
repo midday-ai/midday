@@ -1,23 +1,20 @@
 import type { Database } from "@midday/db/client";
-import { createActivity, shouldSendNotification } from "@midday/db/queries";
-import type { NotificationOptions, NotificationResult } from "./base";
 import {
-  getAllNotificationTypes,
-  getNotificationTypeByType,
-  getUserSettingsNotificationTypes,
-  shouldShowInSettings,
-} from "./notification-types";
+  createActivity,
+  getTeamById,
+  getTeamMembers,
+  shouldSendNotification,
+} from "@midday/db/queries";
+import type { NotificationOptions, NotificationResult, UserData } from "./base";
 import { createActivitySchema } from "./schemas";
 import { EmailService } from "./services/email-service";
 
-// Import all notification type handlers
+import { inboxNew } from "./types/inbox-new";
 import { transactionsCreated } from "./types/transactions-created";
-import { transactionsEnriched } from "./types/transactions-enriched";
-// Add more imports as you create new notification types
 
 const handlers = {
   transactions_created: transactionsCreated,
-  transactions_enriched: transactionsEnriched,
+  inbox_new: inboxNew,
 } as const;
 
 // Auto-generated type map for full type safety
@@ -34,12 +31,80 @@ export class Notifications {
     this.emailService = new EmailService(db);
   }
 
-  async send<T extends keyof NotificationTypes>(
+  private transformTeamMembersToUsers(
+    teamMembers: Array<{
+      id: string;
+      fullName: string | null;
+      avatarUrl: string | null;
+      email: string;
+    }>,
+    teamId: string,
+    teamInfo: {
+      name: string;
+      inboxId: string;
+    },
+  ): UserData[] {
+    return teamMembers.map((member) => ({
+      team_id: teamId,
+      user: {
+        id: member.id,
+        full_name: member.fullName || "Unknown",
+        avatar_url: member.avatarUrl || undefined,
+        email: member.email,
+        locale: "en", // Could be enhanced to get actual user locale
+      },
+      team: {
+        name: teamInfo.name,
+        inbox_id: teamInfo.inboxId,
+      },
+    }));
+  }
+
+  async create<T extends keyof NotificationTypes>(
+    type: T,
+    teamId: string,
+    payload: Omit<NotificationTypes[T], "users">,
+    options?: NotificationOptions,
+  ): Promise<NotificationResult> {
+    const [teamMembers, teamInfo] = await Promise.all([
+      getTeamMembers(this.db, teamId),
+      getTeamById(this.db, teamId),
+    ]);
+
+    if (!teamInfo) {
+      throw new Error(`Team not found: ${teamId}`);
+    }
+
+    if (teamMembers.length === 0) {
+      return {
+        type: type as string,
+        activities: 0,
+        emails: { sent: 0, skipped: 0, failed: 0 },
+      };
+    }
+
+    // Transform team members to UserData format
+    const users = this.transformTeamMembersToUsers(teamMembers, teamId, {
+      name: teamInfo.name,
+      inboxId: teamInfo.inboxId,
+    });
+
+    // Build the full notification data
+    const data = { ...payload, users } as NotificationTypes[T];
+
+    return this.#createInternal(type, data, options);
+  }
+
+  /**
+   * Internal method that handles the actual notification creation and delivery logic
+   */
+  async #createInternal<T extends keyof NotificationTypes>(
     type: T,
     data: NotificationTypes[T],
     options?: NotificationOptions,
   ): Promise<NotificationResult> {
     const handler = handlers[type];
+
     if (!handler) {
       throw new Error(`Unknown notification type: ${type}`);
     }
@@ -51,11 +116,16 @@ export class Notifications {
       // Generate a single group ID for all related activities
       const groupId = crypto.randomUUID();
 
-      // Create activities based on in-app preferences
+      // Create activities - always create them but adjust priority based on in-app preferences
       const activityPromises = await Promise.all(
         validatedData.users.map(async (user) => {
+          const activityInput = (handler as any).createActivity(
+            validatedData,
+            user,
+          );
+
           // Check if user wants in-app notifications for this type
-          const shouldCreateActivity = await shouldSendNotification(
+          const inAppEnabled = await shouldSendNotification(
             this.db,
             user.user.id,
             user.team_id,
@@ -63,19 +133,20 @@ export class Notifications {
             "in_app",
           );
 
-          if (!shouldCreateActivity) {
-            return null;
-          }
+          // Apply priority logic based on notification preferences
+          let finalPriority = activityInput.priority;
 
-          const activityInput = (handler as any).createActivity(
-            validatedData,
-            user,
-          );
-
-          // Apply runtime priority override if provided
+          // Runtime priority override takes precedence
           if (options?.priority !== undefined) {
-            activityInput.priority = options.priority;
+            finalPriority = options.priority;
+          } else if (!inAppEnabled) {
+            // If in-app notifications are disabled, set to low priority (7-10 range)
+            // so it's not visible in the notification center
+            finalPriority = Math.max(7, activityInput.priority + 4);
+            finalPriority = Math.min(10, finalPriority); // Cap at 10
           }
+
+          activityInput.priority = finalPriority;
 
           // Add the group ID to link related activities
           activityInput.groupId = groupId;
@@ -92,16 +163,17 @@ export class Notifications {
 
       // CONDITIONALLY send emails
       let emails = { sent: 0, skipped: validatedData.users.length, failed: 0 };
+
       const skipEmail = options?.skipEmail ?? false;
 
       if (handler.email && !skipEmail) {
         const emailInputs = validatedData.users.map((user) => {
-          const baseEmailInput: any = {
+          const baseEmailInput = {
             template: handler.email!.template,
             subject: handler.email!.subject,
             user,
             data: handler.createEmail
-              ? (handler as any).createEmail(validatedData, user).data
+              ? handler.createEmail(validatedData, user).data
               : validatedData,
           };
 
@@ -132,14 +204,10 @@ export class Notifications {
 
           // If handler has createEmail, it can override these settings
           if (handler.createEmail) {
-            const customEmail = (handler as any).createEmail(
-              validatedData,
-              user,
-            );
+            const customEmail = handler.createEmail(validatedData, user);
             return {
               ...baseEmailInput,
               ...customEmail,
-              // But runtime options still take precedence
               ...(options?.from && { from: options.from }),
               ...(options?.replyTo && { replyTo: options.replyTo }),
               ...(options?.headers && {
@@ -176,6 +244,8 @@ export type {
 } from "./base";
 export { userSchema, transactionSchema, invoiceSchema } from "./base";
 
+// Export schemas and types
+
 // Export notification type definitions and utilities
 export {
   getAllNotificationTypes,
@@ -185,6 +255,3 @@ export {
   allNotificationTypes,
 } from "./notification-types";
 export type { NotificationType } from "./notification-types";
-
-// Export the main class as default
-export default Notifications;

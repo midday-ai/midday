@@ -100,12 +100,9 @@ export const updateNotificationStatusSchema = z
 export const updateAllNotificationsStatusSchema = z
   .object({
     status: z.enum(["unread", "read", "archived"]).openapi({
-      description: "The new status to apply to all notifications",
+      description:
+        "The new status to apply to all notifications for the authenticated user",
       example: "read",
-    }),
-    userId: z.string().uuid().nullable().optional().openapi({
-      description: "Optional user ID to filter notifications by specific user",
-      example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     }),
   })
   .openapi("UpdateAllNotificationsStatusSchema");
