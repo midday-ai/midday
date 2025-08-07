@@ -20,7 +20,7 @@ export const transactionsCreated: NotificationHandler<TransactionsCreatedInput> 
       userId: user.user.id,
       type: "transactions_created",
       source: "system",
-      priority: 3, // Default priority, can be overridden at runtime
+      priority: 3,
       metadata: {
         transactions: data.transactions.map((t) => ({
           id: t.id,

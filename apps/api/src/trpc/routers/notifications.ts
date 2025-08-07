@@ -13,9 +13,10 @@ import {
 export const notificationsRouter = createTRPCRouter({
   list: protectedProcedure
     .input(getNotificationsSchema.optional())
-    .query(async ({ ctx: { teamId, db }, input }) => {
+    .query(async ({ ctx: { teamId, db, session }, input }) => {
       return getActivities(db, {
         teamId: teamId!,
+        userId: session.user.id,
         ...input,
       });
     }),
@@ -28,9 +29,9 @@ export const notificationsRouter = createTRPCRouter({
 
   updateAllStatus: protectedProcedure
     .input(updateAllNotificationsStatusSchema)
-    .mutation(async ({ ctx: { db, teamId }, input }) => {
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
       return updateAllActivitiesStatus(db, teamId!, input.status, {
-        userId: input.userId,
+        userId: session.user.id,
       });
     }),
 });

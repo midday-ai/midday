@@ -28,6 +28,7 @@ export class EmailService {
           notificationType,
           "email",
         );
+
         return shouldSend ? email : null;
       }),
     );
@@ -78,29 +79,31 @@ export class EmailService {
     });
 
     try {
-      let sent = 0;
-      let failed = 0;
+      const sent = 0;
+      const failed = 0;
+
+      console.log(resendEmails);
 
       // Send emails using Resend batch API
-      if (resendEmails.length === 1) {
-        // Single email
-        const response = await this.resend.emails.send(resendEmails[0]!);
-        if (response.error) {
-          console.error("Failed to send email:", response.error);
-          failed = 1;
-        } else {
-          sent = 1;
-        }
-      } else {
-        // Batch emails
-        const response = await this.resend.batch.send(resendEmails);
-        if (response.error) {
-          console.error("Failed to send batch emails:", response.error);
-          failed = resendEmails.length;
-        } else {
-          sent = resendEmails.length;
-        }
-      }
+      // if (resendEmails.length === 1) {
+      //   // Single email
+      //   const response = await this.resend.emails.send(resendEmails[0]!);
+      //   if (response.error) {
+      //     console.error("Failed to send email:", response.error);
+      //     failed = 1;
+      //   } else {
+      //     sent = 1;
+      //   }
+      // } else {
+      //   // Batch emails
+      //   const response = await this.resend.batch.send(resendEmails);
+      //   if (response.error) {
+      //     console.error("Failed to send batch emails:", response.error);
+      //     failed = resendEmails.length;
+      //   } else {
+      //     sent = resendEmails.length;
+      //   }
+      // }
 
       return {
         sent,

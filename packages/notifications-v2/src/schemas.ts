@@ -1,13 +1,9 @@
 import { z } from "zod";
 
-// =============================================================================
-// ACTIVITY SCHEMAS
-// =============================================================================
-
 export const createActivitySchema = z.object({
   teamId: z.string().uuid(),
   userId: z.string().uuid().optional(),
-  type: z.enum(["transactions_created", "transactions_enriched"]),
+  type: z.enum(["transactions_created", "transactions_enriched", "inbox_new"]),
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
   groupId: z.string().uuid().optional(), // Links related activities together
@@ -15,10 +11,6 @@ export const createActivitySchema = z.object({
 });
 
 export type CreateActivityInput = z.infer<typeof createActivitySchema>;
-
-// =============================================================================
-// COMMON DATA SCHEMAS
-// =============================================================================
 
 export const userSchema = z.object({
   user: z.object({
@@ -54,23 +46,23 @@ export const invoiceSchema = z.object({
   status: z.string(),
 });
 
-// =============================================================================
-// NOTIFICATION INPUT SCHEMAS
-// =============================================================================
-
 export const transactionsCreatedSchema = z.object({
   users: z.array(userSchema),
   transactions: z.array(transactionSchema),
 });
 
-export const transactionsEnrichedSchema = z.object({
-  users: z.array(userSchema),
-  transactions: z.array(transactionSchema),
+export const inboxItemSchema = z.object({
+  totalCount: z.number(),
+  syncType: z.enum(["manual", "automatic"]),
+  provider: z.string(),
 });
 
-// =============================================================================
-// TYPES
-// =============================================================================
+export const inboxNewSchema = z.object({
+  users: z.array(userSchema),
+  totalCount: z.number(),
+  syncType: z.enum(["manual", "automatic"]),
+  provider: z.string(),
+});
 
 export type UserData = z.infer<typeof userSchema>;
 export type TransactionData = z.infer<typeof transactionSchema>;
@@ -78,6 +70,6 @@ export type InvoiceData = z.infer<typeof invoiceSchema>;
 export type TransactionsCreatedInput = z.infer<
   typeof transactionsCreatedSchema
 >;
-export type TransactionsEnrichedInput = z.infer<
-  typeof transactionsEnrichedSchema
->;
+
+export type InboxItemData = z.infer<typeof inboxItemSchema>;
+export type InboxNewInput = z.infer<typeof inboxNewSchema>;

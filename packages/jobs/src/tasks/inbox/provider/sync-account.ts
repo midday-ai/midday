@@ -3,6 +3,7 @@ import { processBatch } from "@jobs/utils/process-batch";
 import { getInboxAccountInfo, updateInboxAccount } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
 import { isAuthenticationError } from "@midday/inbox/utils";
+import { Notifications } from "@midday/notifications-v2";
 import { createClient } from "@midday/supabase/job";
 import { getExistingInboxAttachmentsQuery } from "@midday/supabase/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
@@ -170,7 +171,17 @@ export const syncInboxAccount = schemaTask({
           accountId: id,
           attachmentCount: uploadedAttachments.length,
         });
+
         await processAttachment.batchTriggerAndWait(uploadedAttachments);
+
+        const notifications = new Notifications(getDb());
+
+        // Send notification for new inbox items
+        await notifications.create("inbox_new", accountRow.teamId, {
+          totalCount: uploadedAttachments.length,
+          syncType: manualSync ? "manual" : "automatic",
+          provider: accountRow.provider,
+        });
       }
 
       // Update account with successful sync - mark as connected and clear errors
