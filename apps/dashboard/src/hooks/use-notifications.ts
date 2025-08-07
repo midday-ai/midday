@@ -1,5 +1,7 @@
 "use client";
 
+import { useRealtime } from "@/hooks/use-realtime";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
@@ -7,8 +9,8 @@ import { useCallback, useMemo } from "react";
 export function useNotifications() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { data: user } = useUserQuery();
 
-  // Fetch notifications with priority 1-3 (notifications only)
   const {
     data: activitiesData,
     isLoading,
@@ -19,6 +21,21 @@ export function useNotifications() {
       pageSize: 20,
     }),
   );
+
+  // Real-time subscription for activities filtered by user_id
+  useRealtime({
+    channelName: "user-notifications",
+    event: "INSERT",
+    table: "activities",
+    filter: `user_id=eq.${user?.id}`,
+    onEvent: () => {
+      alert("test");
+      // Invalidate and refetch notifications when activities change
+      queryClient.invalidateQueries({
+        queryKey: trpc.notifications.list.queryKey(),
+      });
+    },
+  });
 
   // Mutations
   const updateStatusMutation = useMutation(
@@ -43,12 +60,12 @@ export function useNotifications() {
             maxPriority: 3,
             pageSize: 20,
           }),
-          (old: any) => {
+          (old) => {
             if (!old?.data) return old;
 
             return {
               ...old,
-              data: old.data.map((notification: any) =>
+              data: old.data.map((notification) =>
                 notification.id === variables.activityId
                   ? { ...notification, status: variables.status }
                   : notification,
@@ -60,7 +77,7 @@ export function useNotifications() {
         // Return a context object with the snapshotted value
         return { previousData };
       },
-      onError: (err, variables, context) => {
+      onError: (_, __, context) => {
         // If the mutation fails, use the context returned from onMutate to roll back
         if (context?.previousData) {
           queryClient.setQueryData(
@@ -103,12 +120,12 @@ export function useNotifications() {
             maxPriority: 3,
             pageSize: 20,
           }),
-          (old: any) => {
+          (old) => {
             if (!old?.data) return old;
 
             return {
               ...old,
-              data: old.data.map((notification: any) => ({
+              data: old.data.map((notification) => ({
                 ...notification,
                 status: variables.status,
               })),
@@ -119,7 +136,7 @@ export function useNotifications() {
         // Return a context object with the snapshotted value
         return { previousData };
       },
-      onError: (err, variables, context) => {
+      onError: (_, __, context) => {
         // If the mutation fails, use the context returned from onMutate to roll back
         if (context?.previousData) {
           queryClient.setQueryData(
@@ -170,9 +187,7 @@ export function useNotifications() {
 
   const hasUnseenNotifications = useMemo(
     () =>
-      notifications.some(
-        (notification: any) => notification.status === "unread",
-      ),
+      notifications.some((notification) => notification.status === "unread"),
     [notifications],
   );
 
