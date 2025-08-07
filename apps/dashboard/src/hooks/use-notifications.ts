@@ -23,8 +23,57 @@ export function useNotifications() {
   // Mutations
   const updateStatusMutation = useMutation(
     trpc.notifications.updateStatus.mutationOptions({
-      onSuccess: () => {
-        // Invalidate and refetch notifications after successful update
+      onMutate: async (variables) => {
+        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+        await queryClient.cancelQueries({
+          queryKey: trpc.notifications.list.queryKey(),
+        });
+
+        // Snapshot the previous value
+        const previousData = queryClient.getQueryData(
+          trpc.notifications.list.queryKey({
+            maxPriority: 3,
+            pageSize: 20,
+          }),
+        );
+
+        // Optimistically update the cache
+        queryClient.setQueryData(
+          trpc.notifications.list.queryKey({
+            maxPriority: 3,
+            pageSize: 20,
+          }),
+          (old: any) => {
+            if (!old?.data) return old;
+
+            return {
+              ...old,
+              data: old.data.map((notification: any) =>
+                notification.id === variables.activityId
+                  ? { ...notification, status: variables.status }
+                  : notification,
+              ),
+            };
+          },
+        );
+
+        // Return a context object with the snapshotted value
+        return { previousData };
+      },
+      onError: (err, variables, context) => {
+        // If the mutation fails, use the context returned from onMutate to roll back
+        if (context?.previousData) {
+          queryClient.setQueryData(
+            trpc.notifications.list.queryKey({
+              maxPriority: 3,
+              pageSize: 20,
+            }),
+            context.previousData,
+          );
+        }
+      },
+      onSettled: () => {
+        // Always refetch after error or success to ensure we have the latest data
         queryClient.invalidateQueries({
           queryKey: trpc.notifications.list.queryKey(),
         });
@@ -34,8 +83,56 @@ export function useNotifications() {
 
   const updateAllStatusMutation = useMutation(
     trpc.notifications.updateAllStatus.mutationOptions({
-      onSuccess: () => {
-        // Invalidate and refetch notifications after successful update
+      onMutate: async (variables) => {
+        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+        await queryClient.cancelQueries({
+          queryKey: trpc.notifications.list.queryKey(),
+        });
+
+        // Snapshot the previous value
+        const previousData = queryClient.getQueryData(
+          trpc.notifications.list.queryKey({
+            maxPriority: 3,
+            pageSize: 20,
+          }),
+        );
+
+        // Optimistically update the cache - update all notifications to the new status
+        queryClient.setQueryData(
+          trpc.notifications.list.queryKey({
+            maxPriority: 3,
+            pageSize: 20,
+          }),
+          (old: any) => {
+            if (!old?.data) return old;
+
+            return {
+              ...old,
+              data: old.data.map((notification: any) => ({
+                ...notification,
+                status: variables.status,
+              })),
+            };
+          },
+        );
+
+        // Return a context object with the snapshotted value
+        return { previousData };
+      },
+      onError: (err, variables, context) => {
+        // If the mutation fails, use the context returned from onMutate to roll back
+        if (context?.previousData) {
+          queryClient.setQueryData(
+            trpc.notifications.list.queryKey({
+              maxPriority: 3,
+              pageSize: 20,
+            }),
+            context.previousData,
+          );
+        }
+      },
+      onSettled: () => {
+        // Always refetch after error or success to ensure we have the latest data
         queryClient.invalidateQueries({
           queryKey: trpc.notifications.list.queryKey(),
         });

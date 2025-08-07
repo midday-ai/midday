@@ -10,6 +10,7 @@ type CreateActivityParams = {
   type: (typeof activityTypeEnum.enumValues)[number];
   source: "system" | "user";
   priority?: number;
+  groupId?: string;
   metadata: Record<string, any>;
 };
 
@@ -25,6 +26,7 @@ export async function createActivity(
       type: params.type,
       source: params.source,
       priority: params.priority ?? 5,
+      groupId: params.groupId,
       metadata: params.metadata,
     })
     .returning();
@@ -54,7 +56,6 @@ export async function updateAllActivitiesStatus(
 ) {
   const conditions = [
     eq(activities.teamId, teamId),
-    // Only update activities that don't already have the target status
     ne(activities.status, status),
   ];
 
