@@ -3017,3 +3017,50 @@ export const activities = pgTable(
     }).onDelete("set null"),
   ],
 );
+
+export const notificationSettings = pgTable(
+  "notification_settings",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    userId: uuid("user_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    notificationType: text("notification_type").notNull(),
+    channel: text("channel").notNull(), // 'in_app', 'email', 'push'
+    enabled: boolean().default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("notification_settings_user_team_type_channel_key").on(
+      table.userId,
+      table.teamId,
+      table.notificationType,
+      table.channel,
+    ),
+    index("notification_settings_user_team_idx").on(table.userId, table.teamId),
+    index("notification_settings_type_channel_idx").on(
+      table.notificationType,
+      table.channel,
+    ),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "notification_settings_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "notification_settings_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Users can manage their own notification settings", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(user_id = auth.uid())`,
+    }),
+  ],
+);

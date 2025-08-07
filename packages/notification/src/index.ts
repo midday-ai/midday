@@ -3,8 +3,6 @@ import { nanoid } from "nanoid";
 
 const novu = new Novu(process.env.NOVU_API_KEY!);
 
-const API_ENDPOINT = "https://api.novu.co/v1";
-
 export enum TriggerEvents {
   TransactionNewInApp = "transaction_new_in_app",
   TransactionsNewInApp = "transactions_new_in_app",
@@ -91,61 +89,4 @@ export async function triggerBulk(events: TriggerPayload[]) {
   } catch (error) {
     console.log(error);
   }
-}
-
-type GetSubscriberPreferencesParams = {
-  teamId: string;
-  subscriberId: string;
-};
-
-export async function getSubscriberPreferences({
-  subscriberId,
-  teamId,
-}: GetSubscriberPreferencesParams) {
-  const response = await fetch(
-    `${API_ENDPOINT}/subscribers/${teamId}_${subscriberId}/preferences?includeInactiveChannels=false`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `ApiKey ${process.env.NOVU_API_KEY!}`,
-      },
-    },
-  );
-
-  return response.json();
-}
-
-type UpdateSubscriberPreferenceParams = {
-  subscriberId: string;
-  teamId: string;
-  templateId: string;
-  type: string;
-  enabled: boolean;
-};
-
-export async function updateSubscriberPreference({
-  subscriberId,
-  teamId,
-  templateId,
-  type,
-  enabled,
-}: UpdateSubscriberPreferenceParams) {
-  const response = await fetch(
-    `${API_ENDPOINT}/subscribers/${teamId}_${subscriberId}/preferences/${templateId}`,
-    {
-      method: "PATCH",
-      headers: {
-        Authorization: `ApiKey ${process.env.NOVU_API_KEY!}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        channel: {
-          type,
-          enabled,
-        },
-      }),
-    },
-  );
-
-  return response.json();
 }

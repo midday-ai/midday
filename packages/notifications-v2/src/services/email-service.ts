@@ -1,4 +1,5 @@
 import type { Database } from "@midday/db/client";
+import { shouldSendNotification } from "@midday/db/queries";
 import { getI18n } from "@midday/email/locales";
 import { render } from "@midday/email/render";
 import { nanoid } from "nanoid";
@@ -12,15 +13,28 @@ export class EmailService {
     this.resend = new Resend(process.env.RESEND_API_KEY!);
   }
 
-  async sendBulk(emails: EmailInput[]) {
+  async sendBulk(emails: EmailInput[], notificationType: string) {
     if (emails.length === 0) {
       return { sent: 0, skipped: 0, failed: 0 };
     }
 
-    // TODO: Filter users based on email preferences
-    const eligibleEmails = emails;
+    // Filter users based on email preferences
+    const eligibleEmails = await Promise.all(
+      emails.map(async (email) => {
+        const shouldSend = await shouldSendNotification(
+          this.db,
+          email.user.user.id,
+          email.user.team_id,
+          notificationType,
+          "email",
+        );
+        return shouldSend ? email : null;
+      }),
+    );
 
-    if (eligibleEmails.length === 0) {
+    const filteredEmails = eligibleEmails.filter(Boolean) as EmailInput[];
+
+    if (filteredEmails.length === 0) {
       return {
         sent: 0,
         skipped: emails.length,
@@ -29,7 +43,7 @@ export class EmailService {
     }
 
     // Prepare emails for Resend batch sending
-    const resendEmails = eligibleEmails.map((email) => {
+    const resendEmails = filteredEmails.map((email) => {
       const { t } = getI18n({ locale: email.user.user.locale ?? "en" });
 
       // Dynamically import the email template

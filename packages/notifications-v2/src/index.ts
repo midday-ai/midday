@@ -1,6 +1,12 @@
 import type { Database } from "@midday/db/client";
-import { createActivity } from "@midday/db/queries";
+import { createActivity, shouldSendNotification } from "@midday/db/queries";
 import type { NotificationOptions, NotificationResult } from "./base";
+import {
+  getAllNotificationTypes,
+  getNotificationTypeByType,
+  getUserSettingsNotificationTypes,
+  shouldShowInSettings,
+} from "./notification-types";
 import { createActivitySchema } from "./schemas";
 import { EmailService } from "./services/email-service";
 
@@ -45,9 +51,22 @@ export class Notifications {
       // Generate a single group ID for all related activities
       const groupId = crypto.randomUUID();
 
-      // ALWAYS create activities (guaranteed to happen)
-      const activities = await Promise.all(
-        validatedData.users.map((user) => {
+      // Create activities based on in-app preferences
+      const activityPromises = await Promise.all(
+        validatedData.users.map(async (user) => {
+          // Check if user wants in-app notifications for this type
+          const shouldCreateActivity = await shouldSendNotification(
+            this.db,
+            user.user.id,
+            user.team_id,
+            type as string,
+            "in_app",
+          );
+
+          if (!shouldCreateActivity) {
+            return null;
+          }
+
           const activityInput = (handler as any).createActivity(
             validatedData,
             user,
@@ -68,6 +87,8 @@ export class Notifications {
           return createActivity(this.db, validatedActivity);
         }),
       );
+
+      const activities = activityPromises.filter(Boolean);
 
       // CONDITIONALLY send emails
       let emails = { sent: 0, skipped: validatedData.users.length, failed: 0 };
@@ -130,7 +151,7 @@ export class Notifications {
           return baseEmailInput;
         });
 
-        emails = await this.emailService.sendBulk(emailInputs);
+        emails = await this.emailService.sendBulk(emailInputs, type as string);
       }
 
       return {
@@ -154,6 +175,16 @@ export type {
   NotificationResult,
 } from "./base";
 export { userSchema, transactionSchema, invoiceSchema } from "./base";
+
+// Export notification type definitions and utilities
+export {
+  getAllNotificationTypes,
+  getUserSettingsNotificationTypes,
+  getNotificationTypeByType,
+  shouldShowInSettings,
+  allNotificationTypes,
+} from "./notification-types";
+export type { NotificationType } from "./notification-types";
 
 // Export the main class as default
 export default Notifications;
