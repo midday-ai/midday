@@ -14,6 +14,70 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          created_at: string
+          group_id: string | null
+          id: string
+          last_used_at: string | null
+          metadata: Json
+          priority: number | null
+          source: Database["public"]["Enums"]["activity_source"]
+          status: Database["public"]["Enums"]["activity_status"]
+          team_id: string
+          type: Database["public"]["Enums"]["activity_type"]
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          last_used_at?: string | null
+          metadata: Json
+          priority?: number | null
+          source: Database["public"]["Enums"]["activity_source"]
+          status?: Database["public"]["Enums"]["activity_status"]
+          team_id: string
+          type: Database["public"]["Enums"]["activity_type"]
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          last_used_at?: string | null
+          metadata?: Json
+          priority?: number | null
+          source?: Database["public"]["Enums"]["activity_source"]
+          status?: Database["public"]["Enums"]["activity_status"]
+          team_id?: string
+          type?: Database["public"]["Enums"]["activity_type"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "activities_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_keys: {
         Row: {
           created_at: string
@@ -667,6 +731,7 @@ export type Database = {
           forwarded_to: string | null
           fts: unknown | null
           id: string
+          inbox_account_id: string | null
           meta: Json | null
           reference_id: string | null
           size: number | null
@@ -696,6 +761,7 @@ export type Database = {
           forwarded_to?: string | null
           fts?: unknown | null
           id?: string
+          inbox_account_id?: string | null
           meta?: Json | null
           reference_id?: string | null
           size?: number | null
@@ -724,6 +790,7 @@ export type Database = {
           forwarded_to?: string | null
           fts?: unknown | null
           id?: string
+          inbox_account_id?: string | null
           meta?: Json | null
           reference_id?: string | null
           size?: number | null
@@ -742,6 +809,13 @@ export type Database = {
             columns: ["attachment_id"]
             isOneToOne: false
             referencedRelation: "transaction_attachments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_inbox_account_id_fkey"
+            columns: ["inbox_account_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_accounts"
             referencedColumns: ["id"]
           },
           {
@@ -772,6 +846,7 @@ export type Database = {
           access_token: string
           created_at: string
           email: string
+          error_message: string | null
           expiry_date: string
           external_id: string
           id: string
@@ -781,12 +856,14 @@ export type Database = {
             | null
           refresh_token: string
           schedule_id: string | null
+          status: Database["public"]["Enums"]["inbox_account_status"]
           team_id: string
         }
         Insert: {
           access_token: string
           created_at?: string
           email: string
+          error_message?: string | null
           expiry_date: string
           external_id: string
           id?: string
@@ -796,12 +873,14 @@ export type Database = {
             | null
           refresh_token: string
           schedule_id?: string | null
+          status?: Database["public"]["Enums"]["inbox_account_status"]
           team_id: string
         }
         Update: {
           access_token?: string
           created_at?: string
           email?: string
+          error_message?: string | null
           expiry_date?: string
           external_id?: string
           id?: string
@@ -811,6 +890,7 @@ export type Database = {
             | null
           refresh_token?: string
           schedule_id?: string | null
+          status?: Database["public"]["Enums"]["inbox_account_status"]
           team_id?: string
         }
         Relationships: [
@@ -823,6 +903,58 @@ export type Database = {
           },
           {
             foreignKeyName: "inbox_accounts_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inbox_embeddings: {
+        Row: {
+          created_at: string
+          embedding: string | null
+          id: string
+          inbox_id: string
+          model: string
+          source_text: string
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          inbox_id: string
+          model?: string
+          source_text: string
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          inbox_id?: string
+          model?: string
+          source_text?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_embeddings_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: true
+            referencedRelation: "inbox"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_embeddings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "inbox_embeddings_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -1990,6 +2122,58 @@ export type Database = {
           },
         ]
       }
+      transaction_embeddings: {
+        Row: {
+          created_at: string
+          embedding: string | null
+          id: string
+          model: string
+          source_text: string
+          team_id: string
+          transaction_id: string
+        }
+        Insert: {
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          model?: string
+          source_text: string
+          team_id: string
+          transaction_id: string
+        }
+        Update: {
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          model?: string
+          source_text?: string
+          team_id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_embeddings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "transaction_embeddings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_embeddings_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: true
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transaction_enrichments: {
         Row: {
           category_slug: string | null
@@ -2107,12 +2291,14 @@ export type Database = {
           currency: string
           date: string
           description: string | null
+          enrichment_completed: boolean
           frequency: Database["public"]["Enums"]["transaction_frequency"] | null
           fts_vector: unknown | null
           id: string
           internal: boolean | null
           internal_id: string
           manual: boolean | null
+          merchant_name: string | null
           method: Database["public"]["Enums"]["transactionMethods"]
           name: string
           note: string | null
@@ -2140,6 +2326,7 @@ export type Database = {
           currency: string
           date: string
           description?: string | null
+          enrichment_completed?: boolean
           frequency?:
             | Database["public"]["Enums"]["transaction_frequency"]
             | null
@@ -2148,6 +2335,7 @@ export type Database = {
           internal?: boolean | null
           internal_id: string
           manual?: boolean | null
+          merchant_name?: string | null
           method: Database["public"]["Enums"]["transactionMethods"]
           name: string
           note?: string | null
@@ -2172,6 +2360,7 @@ export type Database = {
           currency?: string
           date?: string
           description?: string | null
+          enrichment_completed?: boolean
           frequency?:
             | Database["public"]["Enums"]["transaction_frequency"]
             | null
@@ -2180,6 +2369,7 @@ export type Database = {
           internal?: boolean | null
           internal_id?: string
           manual?: boolean | null
+          merchant_name?: string | null
           method?: Database["public"]["Enums"]["transactionMethods"]
           name?: string
           note?: string | null
@@ -2569,12 +2759,14 @@ export type Database = {
           currency: string
           date: string
           description: string | null
+          enrichment_completed: boolean
           frequency: Database["public"]["Enums"]["transaction_frequency"] | null
           fts_vector: unknown | null
           id: string
           internal: boolean | null
           internal_id: string
           manual: boolean | null
+          merchant_name: string | null
           method: Database["public"]["Enums"]["transactionMethods"]
           name: string
           note: string | null
@@ -3209,6 +3401,9 @@ export type Database = {
         | "other_asset"
         | "loan"
         | "other_liability"
+      activity_source: "system" | "user"
+      activity_status: "unread" | "read" | "archived"
+      activity_type: "transactions_enriched" | "transactions_created"
       approval_status: "draft" | "pending" | "approved" | "rejected"
       bank_providers:
         | "gocardless"
@@ -3224,6 +3419,7 @@ export type Database = {
         | "completed"
         | "failed"
       inbox_account_providers: "gmail"
+      inbox_account_status: "connected" | "disconnected"
       inbox_status:
         | "processing"
         | "pending"
@@ -3425,6 +3621,9 @@ export const Constants = {
         "loan",
         "other_liability",
       ],
+      activity_source: ["system", "user"],
+      activity_status: ["unread", "read", "archived"],
+      activity_type: ["transactions_enriched", "transactions_created"],
       approval_status: ["draft", "pending", "approved", "rejected"],
       bank_providers: [
         "gocardless",
@@ -3442,6 +3641,7 @@ export const Constants = {
         "failed",
       ],
       inbox_account_providers: ["gmail"],
+      inbox_account_status: ["connected", "disconnected"],
       inbox_status: [
         "processing",
         "pending",

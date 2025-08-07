@@ -52,7 +52,7 @@ export async function updateAllActivitiesStatus(
   db: Database,
   teamId: string,
   status: (typeof activityStatusEnum.enumValues)[number],
-  options?: { userId?: string },
+  options?: { userId?: string | null },
 ) {
   const conditions = [
     eq(activities.teamId, teamId),

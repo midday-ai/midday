@@ -15,7 +15,7 @@ type TableName = keyof Tables;
 
 interface UseRealtimeProps<TN extends TableName> {
   channelName: string;
-  event?: RealtimePostgresChangesFilter<"*">["event"];
+  event?: "INSERT" | "UPDATE" | "DELETE" | "*";
   table: TN;
   filter?: string;
   onEvent: (payload: RealtimePostgresChangesPayload<Tables[TN]["Row"]>) => void;
@@ -32,7 +32,7 @@ export function useRealtime<TN extends TableName>({
 
   useEffect(() => {
     const filterConfig: RealtimePostgresChangesFilter<"*"> = {
-      event,
+      event: event as RealtimePostgresChangesFilter<"*">["event"],
       schema: "public",
       table,
       filter,
