@@ -180,7 +180,8 @@ export async function POST(req: Request) {
     );
 
     // Send notification for new inbox items
-    await tasks.trigger("inbox-notification", {
+    await tasks.trigger("notification", {
+      type: "inbox_new",
       teamId: teamId!,
       totalCount: insertData.length,
       source: "email",

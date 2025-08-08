@@ -198,3 +198,44 @@ export const inboxNotificationSchema = z.object({
 });
 
 export type InboxNotificationPayload = z.infer<typeof inboxNotificationSchema>;
+
+export const notificationSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("transactions_created"),
+    teamId: z.string().uuid(),
+    transactions: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        amount: z.number(),
+        currency: z.string(),
+        date: z.string(),
+        category: z.string().optional(),
+        status: z.string().optional(),
+      }),
+    ),
+  }),
+  z.object({
+    type: z.literal("inbox_new"),
+    teamId: z.string().uuid(),
+    totalCount: z.number(),
+    source: z.enum(["email", "sync", "slack", "upload"]),
+    provider: z.string().optional(),
+    syncType: z.enum(["manual", "automatic"]).optional(),
+  }),
+  z.object({
+    type: z.literal("invoice_paid"),
+    teamId: z.string().uuid(),
+    invoiceId: z.string().uuid(),
+    invoiceNumber: z.string(),
+  }),
+  z.object({
+    type: z.literal("invoice_overdue"),
+    teamId: z.string().uuid(),
+    invoiceId: z.string().uuid(),
+    invoiceNumber: z.string(),
+    customerName: z.string(),
+  }),
+]);
+
+export type NotificationPayload = z.infer<typeof notificationSchema>;
