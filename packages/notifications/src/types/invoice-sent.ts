@@ -1,8 +1,7 @@
-import { getAppUrl } from "@midday/utils/envs";
 import type { NotificationHandler } from "../base";
-import { type InvoiceSentInput, invoiceSentSchema } from "../schemas";
+import { invoiceSentSchema } from "../schemas";
 
-export const invoiceSent: NotificationHandler<InvoiceSentInput> = {
+export const invoiceSent: NotificationHandler = {
   schema: invoiceSentSchema,
   activityType: "invoice_sent",
   defaultPriority: 3,
@@ -14,12 +13,10 @@ export const invoiceSent: NotificationHandler<InvoiceSentInput> = {
     source: "system",
     priority: 3,
     metadata: {
-      recordId: data.invoiceId,
       invoiceId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
       customerName: data.customerName,
       customerEmail: data.customerEmail,
-      link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&type=details`,
       userName: user.user.full_name,
       teamName: user.team.name,
     },

@@ -1,3 +1,14 @@
+import {
+  inboxNewSchema,
+  invoiceCancelledSchema,
+  invoiceCreatedSchema,
+  invoiceOverdueSchema,
+  invoicePaidSchema,
+  invoiceReminderSentSchema,
+  invoiceScheduledSchema,
+  invoiceSentSchema,
+  transactionsCreatedSchema,
+} from "@midday/notifications";
 import { z } from "zod";
 
 export const sendInvoiceReminderSchema = z.object({
@@ -189,91 +200,65 @@ export type ScheduleInvoiceJobPayload = z.infer<
   typeof scheduleInvoiceJobSchema
 >;
 
-const baseNotificationSchema = z.object({
+const baseJobSchema = z.object({
+  teamId: z.string().uuid(),
   sendEmail: z.boolean().optional().default(false),
 });
 
 export const notificationSchema = z.discriminatedUnion("type", [
-  baseNotificationSchema.extend({
-    type: z.literal("transactions_created"),
-    teamId: z.string().uuid(),
-    transactions: z.array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        amount: z.number(),
-        currency: z.string(),
-        date: z.string(),
-        category: z.string().optional(),
-        status: z.string().optional(),
-      }),
-    ),
-  }),
-  baseNotificationSchema.extend({
-    type: z.literal("inbox_new"),
-    teamId: z.string().uuid(),
-    totalCount: z.number(),
-    source: z.enum(["email", "sync", "slack", "upload"]),
-    provider: z.string().optional(),
-    syncType: z.enum(["manual", "automatic"]).optional(),
-  }),
-  baseNotificationSchema.extend({
-    type: z.literal("invoice_paid"),
-    teamId: z.string().uuid(),
-    invoiceId: z.string().uuid(),
-    invoiceNumber: z.string(),
-    customerName: z.string().optional(),
-    paidAt: z.string().optional(),
-    source: z.enum(["automatic", "manual"]).default("automatic"),
-  }),
-  baseNotificationSchema.extend({
-    type: z.literal("invoice_overdue"),
-    teamId: z.string().uuid(),
-    invoiceId: z.string().uuid(),
-    invoiceNumber: z.string(),
-    customerName: z.string(),
-  }),
-  baseNotificationSchema.extend({
-    type: z.literal("invoice_scheduled"),
-    teamId: z.string().uuid(),
-    invoiceId: z.string().uuid(),
-    invoiceNumber: z.string(),
-    scheduledAt: z.string(),
-    customerName: z.string().optional(),
-  }),
-  baseNotificationSchema.extend({
-    type: z.literal("invoice_sent"),
-    teamId: z.string().uuid(),
-    invoiceId: z.string().uuid(),
-    invoiceNumber: z.string(),
-    customerName: z.string(),
-    customerEmail: z.string().email().optional(),
-  }),
-  baseNotificationSchema.extend({
-    type: z.literal("invoice_reminder_sent"),
-    teamId: z.string().uuid(),
-    invoiceId: z.string().uuid(),
-    invoiceNumber: z.string(),
-    customerName: z.string(),
-    customerEmail: z.string().email().optional(),
-  }),
+  baseJobSchema
+    .extend({
+      type: z.literal("transactions_created"),
+    })
+    .merge(transactionsCreatedSchema.omit({ users: true })),
 
-  baseNotificationSchema.extend({
-    type: z.literal("invoice_cancelled"),
-    teamId: z.string().uuid(),
-    invoiceId: z.string().uuid(),
-    invoiceNumber: z.string(),
-    customerName: z.string().optional(),
-  }),
-  baseNotificationSchema.extend({
-    type: z.literal("invoice_created"),
-    teamId: z.string().uuid(),
-    invoiceId: z.string().uuid(),
-    invoiceNumber: z.string(),
-    customerName: z.string().optional(),
-    amount: z.number().optional(),
-    currency: z.string().optional(),
-  }),
+  baseJobSchema
+    .extend({
+      type: z.literal("inbox_new"),
+    })
+    .merge(inboxNewSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_paid"),
+    })
+    .merge(invoicePaidSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_overdue"),
+    })
+    .merge(invoiceOverdueSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_scheduled"),
+    })
+    .merge(invoiceScheduledSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_sent"),
+    })
+    .merge(invoiceSentSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_reminder_sent"),
+    })
+    .merge(invoiceReminderSentSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_cancelled"),
+    })
+    .merge(invoiceCancelledSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_created"),
+    })
+    .merge(invoiceCreatedSchema.omit({ users: true })),
 ]);
 
 export type NotificationPayload = z.infer<typeof notificationSchema>;
