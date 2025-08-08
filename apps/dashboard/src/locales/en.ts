@@ -102,6 +102,31 @@ export default {
       title: "Invoice is overdue",
       subtitle: "Payment is past due date",
     },
+    invoice_scheduled: {
+      name: "Invoice Scheduled",
+      description: "Get notified when invoices are scheduled for sending",
+      title: "Invoice scheduled",
+      subtitle: "Invoice has been scheduled for automatic delivery",
+    },
+    invoice_sent: {
+      name: "Invoice Sent",
+      description: "Get notified when invoices are successfully sent",
+      title: "Invoice sent",
+      subtitle: "Invoice has been delivered to customer",
+    },
+    invoice_reminder_sent: {
+      name: "Invoice Reminder Sent",
+      description: "Get notified when invoice reminders are sent",
+      title: "Invoice reminder sent",
+      subtitle: "Payment reminder has been sent to customer",
+    },
+
+    invoice_cancelled: {
+      name: "Invoice Cancelled",
+      description: "Get notified when invoices are cancelled",
+      title: "Invoice cancelled",
+      subtitle: "Invoice has been cancelled",
+    },
     inbox_new: {
       name: "New Inbox Items",
       description: "Get notified when new items arrive in your inbox",

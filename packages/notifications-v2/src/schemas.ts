@@ -3,7 +3,17 @@ import { z } from "zod";
 export const createActivitySchema = z.object({
   teamId: z.string().uuid(),
   userId: z.string().uuid().optional(),
-  type: z.enum(["transactions_created", "transactions_enriched", "inbox_new"]),
+  type: z.enum([
+    "transactions_created",
+    "transactions_enriched",
+    "inbox_new",
+    "invoice_paid",
+    "invoice_overdue",
+    "invoice_scheduled",
+    "invoice_sent",
+    "invoice_reminder_sent",
+    "invoice_cancelled",
+  ]),
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
   groupId: z.string().uuid().optional(), // Links related activities together
@@ -65,6 +75,53 @@ export const inboxNewSchema = z.object({
   provider: z.string().optional(),
 });
 
+export const invoicePaidSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string(),
+  customerName: z.string().optional(),
+  paidAt: z.string().optional(),
+  source: z.enum(["automatic", "manual"]).default("automatic"),
+});
+
+export const invoiceOverdueSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string(),
+  customerName: z.string(),
+});
+
+export const invoiceScheduledSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string(),
+  scheduledAt: z.string(),
+  customerName: z.string().optional(),
+});
+
+export const invoiceSentSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string(),
+  customerName: z.string(),
+  customerEmail: z.string().email().optional(),
+});
+
+export const invoiceReminderSentSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string(),
+  customerName: z.string(),
+  customerEmail: z.string().email().optional(),
+});
+
+export const invoiceCancelledSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string(),
+  customerName: z.string().optional(),
+});
+
 export type UserData = z.infer<typeof userSchema>;
 export type TransactionData = z.infer<typeof transactionSchema>;
 export type InvoiceData = z.infer<typeof invoiceSchema>;
@@ -74,3 +131,11 @@ export type TransactionsCreatedInput = z.infer<
 
 export type InboxItemData = z.infer<typeof inboxItemSchema>;
 export type InboxNewInput = z.infer<typeof inboxNewSchema>;
+export type InvoicePaidInput = z.infer<typeof invoicePaidSchema>;
+export type InvoiceOverdueInput = z.infer<typeof invoiceOverdueSchema>;
+export type InvoiceScheduledInput = z.infer<typeof invoiceScheduledSchema>;
+export type InvoiceSentInput = z.infer<typeof invoiceSentSchema>;
+export type InvoiceReminderSentInput = z.infer<
+  typeof invoiceReminderSentSchema
+>;
+export type InvoiceCancelledInput = z.infer<typeof invoiceCancelledSchema>;

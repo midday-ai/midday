@@ -7,7 +7,7 @@ import { inboxSlackUploadSchema } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk";
 import { format } from "date-fns";
-import { inboxNotification } from "./inbox-notification";
+import { notification } from "../notifications/notification";
 
 export const inboxSlackUpload = schemaTask({
   id: "inbox-slack-upload",
@@ -154,7 +154,8 @@ export const inboxSlackUpload = schemaTask({
         }
 
         // Send notification for Slack upload
-        await inboxNotification.trigger({
+        await notification.trigger({
+          type: "inbox_new",
           teamId,
           totalCount: 1,
           source: "slack",

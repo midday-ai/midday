@@ -1,0 +1,42 @@
+import { getAppUrl } from "@midday/utils/envs";
+import type { NotificationHandler } from "../base";
+import { type InvoicePaidInput, invoicePaidSchema } from "../schemas";
+
+export const invoicePaid: NotificationHandler<InvoicePaidInput> = {
+  schema: invoicePaidSchema,
+  activityType: "invoice_paid",
+  defaultPriority: 3,
+  email: {
+    template: "invoice-paid",
+    subject: "invoice.paid.subject",
+  },
+
+  createActivity: (data, user) => ({
+    teamId: user.team_id,
+    userId: user.user.id,
+    type: "invoice_paid",
+    source: data.source === "manual" ? "user" : "system",
+    priority: 3,
+    metadata: {
+      recordId: data.invoiceId,
+      invoiceId: data.invoiceId,
+      invoiceNumber: data.invoiceNumber,
+      customerName: data.customerName,
+      paidAt: data.paidAt,
+      source: data.source,
+      link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&type=details`,
+      userName: user.user.full_name,
+      teamName: user.team.name,
+    },
+  }),
+
+  createEmail: (data, user) => ({
+    template: "invoice-paid",
+    subject: "invoice.paid.subject",
+    user,
+    data: {
+      invoiceNumber: data.invoiceNumber,
+      link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&type=details`,
+    },
+  }),
+};

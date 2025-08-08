@@ -1,8 +1,9 @@
+import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 
 interface NotificationItemProps {
@@ -19,6 +20,7 @@ export function NotificationItem({
   markMessageAsRead,
 }: NotificationItemProps) {
   const t = useI18n();
+  const { data: user } = useUserQuery();
 
   const getNotificationType = (activityType: string): string => {
     switch (activityType) {
@@ -26,6 +28,12 @@ export function NotificationItem({
         return "transactions";
       case "inbox_new":
         return "inbox";
+      case "invoice_paid":
+      case "invoice_overdue":
+      case "invoice_scheduled":
+      case "invoice_sent":
+      case "invoice_reminder_sent":
+        return "invoice";
       default:
         return "default";
     }
@@ -71,6 +79,95 @@ export function NotificationItem({
         }
 
         return baseTitle;
+      }
+      case "invoice_paid": {
+        const invoiceNumber = metadata?.invoiceNumber;
+        const customerName = metadata?.customerName;
+        const source = metadata?.source;
+        const paidAt = metadata?.paidAt;
+
+        if (invoiceNumber && source === "manual" && paidAt) {
+          const userDateFormat = user?.dateFormat || "dd/MM/yyyy";
+          const paidDate = new Date(paidAt);
+          const formattedDate = format(paidDate, userDateFormat);
+
+          if (customerName) {
+            return `Invoice ${invoiceNumber} from ${customerName} marked as paid on ${formattedDate}`;
+          }
+          return `Invoice ${invoiceNumber} marked as paid on ${formattedDate}`;
+        }
+
+        if (invoiceNumber && source === "manual") {
+          return customerName
+            ? `Invoice ${invoiceNumber} from ${customerName} marked as paid`
+            : `Invoice ${invoiceNumber} marked as paid`;
+        }
+
+        return invoiceNumber
+          ? `Payment received for invoice ${invoiceNumber}`
+          : t("notifications.invoice_paid.title");
+      }
+      case "invoice_overdue": {
+        const invoiceNumber = metadata?.invoiceNumber;
+        return invoiceNumber
+          ? `Invoice ${invoiceNumber} is now overdue`
+          : t("notifications.invoice_overdue.title");
+      }
+      case "invoice_scheduled": {
+        const invoiceNumber = metadata?.invoiceNumber;
+        const scheduledAt = metadata?.scheduledAt;
+        const customerName = metadata?.customerName;
+
+        if (invoiceNumber && scheduledAt) {
+          const scheduledDate = new Date(scheduledAt);
+          const userDateFormat = user?.dateFormat || "dd/MM/yyyy";
+          const formattedDate = format(scheduledDate, userDateFormat);
+          const formattedTime = format(scheduledDate, "HH:mm");
+
+          if (customerName) {
+            return `Invoice ${invoiceNumber} scheduled to be sent to ${customerName} on ${formattedDate} at ${formattedTime}`;
+          }
+          return `Invoice ${invoiceNumber} scheduled for ${formattedDate} at ${formattedTime}`;
+        }
+        if (invoiceNumber) {
+          return `Invoice ${invoiceNumber} has been scheduled`;
+        }
+        return t("notifications.invoice_scheduled.title");
+      }
+      case "invoice_sent": {
+        const invoiceNumber = metadata?.invoiceNumber;
+        const customerName = metadata?.customerName;
+        if (invoiceNumber && customerName) {
+          return `Invoice ${invoiceNumber} sent to ${customerName}`;
+        }
+        if (invoiceNumber) {
+          return `Invoice ${invoiceNumber} has been sent`;
+        }
+        return t("notifications.invoice_sent.title");
+      }
+      case "invoice_reminder_sent": {
+        const invoiceNumber = metadata?.invoiceNumber;
+        const customerName = metadata?.customerName;
+        if (invoiceNumber && customerName) {
+          return `Payment reminder sent to ${customerName} for invoice ${invoiceNumber}`;
+        }
+        if (invoiceNumber) {
+          return `Payment reminder sent for invoice ${invoiceNumber}`;
+        }
+        return t("notifications.invoice_reminder_sent.title");
+      }
+
+      case "invoice_cancelled": {
+        const invoiceNumber = metadata?.invoiceNumber;
+        const customerName = metadata?.customerName;
+
+        if (invoiceNumber && customerName) {
+          return `Invoice ${invoiceNumber} for ${customerName} has been cancelled`;
+        }
+        if (invoiceNumber) {
+          return `Invoice ${invoiceNumber} has been cancelled`;
+        }
+        return t("notifications.invoice_cancelled.title");
       }
       default:
         return t("notifications.default.title");

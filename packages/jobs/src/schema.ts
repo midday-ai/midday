@@ -189,18 +189,12 @@ export type ScheduleInvoiceJobPayload = z.infer<
   typeof scheduleInvoiceJobSchema
 >;
 
-export const inboxNotificationSchema = z.object({
-  teamId: z.string().uuid(),
-  totalCount: z.number(),
-  source: z.enum(["email", "sync", "slack", "upload"]),
-  provider: z.string().optional(), // Only for "sync" source
-  syncType: z.enum(["manual", "automatic"]).optional(), // Only for "sync" source
+const baseNotificationSchema = z.object({
+  sendEmail: z.boolean().optional().default(false),
 });
 
-export type InboxNotificationPayload = z.infer<typeof inboxNotificationSchema>;
-
 export const notificationSchema = z.discriminatedUnion("type", [
-  z.object({
+  baseNotificationSchema.extend({
     type: z.literal("transactions_created"),
     teamId: z.string().uuid(),
     transactions: z.array(
@@ -215,7 +209,7 @@ export const notificationSchema = z.discriminatedUnion("type", [
       }),
     ),
   }),
-  z.object({
+  baseNotificationSchema.extend({
     type: z.literal("inbox_new"),
     teamId: z.string().uuid(),
     totalCount: z.number(),
@@ -223,18 +217,53 @@ export const notificationSchema = z.discriminatedUnion("type", [
     provider: z.string().optional(),
     syncType: z.enum(["manual", "automatic"]).optional(),
   }),
-  z.object({
+  baseNotificationSchema.extend({
     type: z.literal("invoice_paid"),
     teamId: z.string().uuid(),
     invoiceId: z.string().uuid(),
     invoiceNumber: z.string(),
+    customerName: z.string().optional(),
+    paidAt: z.string().optional(),
+    source: z.enum(["automatic", "manual"]).default("automatic"),
   }),
-  z.object({
+  baseNotificationSchema.extend({
     type: z.literal("invoice_overdue"),
     teamId: z.string().uuid(),
     invoiceId: z.string().uuid(),
     invoiceNumber: z.string(),
     customerName: z.string(),
+  }),
+  baseNotificationSchema.extend({
+    type: z.literal("invoice_scheduled"),
+    teamId: z.string().uuid(),
+    invoiceId: z.string().uuid(),
+    invoiceNumber: z.string(),
+    scheduledAt: z.string(),
+    customerName: z.string().optional(),
+  }),
+  baseNotificationSchema.extend({
+    type: z.literal("invoice_sent"),
+    teamId: z.string().uuid(),
+    invoiceId: z.string().uuid(),
+    invoiceNumber: z.string(),
+    customerName: z.string(),
+    customerEmail: z.string().email().optional(),
+  }),
+  baseNotificationSchema.extend({
+    type: z.literal("invoice_reminder_sent"),
+    teamId: z.string().uuid(),
+    invoiceId: z.string().uuid(),
+    invoiceNumber: z.string(),
+    customerName: z.string(),
+    customerEmail: z.string().email().optional(),
+  }),
+
+  baseNotificationSchema.extend({
+    type: z.literal("invoice_cancelled"),
+    teamId: z.string().uuid(),
+    invoiceId: z.string().uuid(),
+    invoiceNumber: z.string(),
+    customerName: z.string().optional(),
   }),
 ]);
 
