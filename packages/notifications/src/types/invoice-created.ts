@@ -8,7 +8,7 @@ export const invoiceCreated: NotificationHandler = {
 
   createActivity: (data, user) => ({
     teamId: user.team_id,
-    userId: user.user.id,
+    userId: user.id,
     type: "invoice_created",
     source: "user",
     priority: 3,
@@ -18,8 +18,8 @@ export const invoiceCreated: NotificationHandler = {
       customerName: data.customerName,
       amount: data.amount,
       currency: data.currency,
-      userName: user.user.full_name,
-      teamName: user.team.name,
+      userName: user.full_name,
+      teamName: user.team_name,
     },
   }),
 };

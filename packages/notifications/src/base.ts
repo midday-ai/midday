@@ -16,18 +16,14 @@ export interface NotificationHandler<T = any> {
 }
 
 export interface UserData {
-  user: {
-    id: string;
-    full_name: string;
-    email: string;
-    locale?: string;
-    avatar_url?: string;
-  };
+  id: string;
+  full_name: string;
+  email: string;
+  locale?: string;
+  avatar_url?: string;
   team_id: string;
-  team: {
-    name: string;
-    inbox_id: string;
-  };
+  team_name: string;
+  team_inbox_id: string;
 }
 
 export interface EmailInput {
@@ -60,18 +56,14 @@ export interface NotificationResult {
 
 // Common schemas
 export const userSchema = z.object({
-  user: z.object({
-    id: z.string().uuid(),
-    full_name: z.string(),
-    email: z.string().email(),
-    locale: z.string().optional(),
-    avatar_url: z.string().optional(),
-  }),
+  id: z.string().uuid(),
+  full_name: z.string(),
+  email: z.string().email(),
+  locale: z.string().optional(),
+  avatar_url: z.string().optional(),
   team_id: z.string().uuid(),
-  team: z.object({
-    name: z.string(),
-    inbox_id: z.string(),
-  }),
+  team_name: z.string(),
+  team_inbox_id: z.string(),
 });
 
 export const transactionSchema = z.object({

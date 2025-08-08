@@ -59,18 +59,14 @@ export class Notifications {
     },
   ): UserData[] {
     return teamMembers.map((member) => ({
+      id: member.id,
+      full_name: member.fullName || "Unknown",
+      avatar_url: member.avatarUrl || undefined,
+      email: member.email,
+      locale: "en", // Could be enhanced to get actual user locale
       team_id: teamId,
-      user: {
-        id: member.id,
-        full_name: member.fullName || "Unknown",
-        avatar_url: member.avatarUrl || undefined,
-        email: member.email,
-        locale: "en", // Could be enhanced to get actual user locale
-      },
-      team: {
-        name: teamInfo.name,
-        inbox_id: teamInfo.inboxId,
-      },
+      team_name: teamInfo.name,
+      team_inbox_id: teamInfo.inboxId,
     }));
   }
 
@@ -141,7 +137,7 @@ export class Notifications {
           // Check if user wants in-app notifications for this type
           const inAppEnabled = await shouldSendNotification(
             this.db,
-            user.user.id,
+            user.id,
             user.team_id,
             type as string,
             "in_app",
