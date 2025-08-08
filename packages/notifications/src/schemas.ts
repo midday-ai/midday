@@ -146,3 +146,16 @@ export type InvoiceReminderSentInput = z.infer<
 >;
 export type InvoiceCancelledInput = z.infer<typeof invoiceCancelledSchema>;
 export type InvoiceCreatedInput = z.infer<typeof invoiceCreatedSchema>;
+
+// Notification types map - all available notification types with their data structures
+export type NotificationTypes = {
+  transactions_created: TransactionsCreatedInput;
+  inbox_new: InboxNewInput;
+  invoice_paid: InvoicePaidInput;
+  invoice_overdue: InvoiceOverdueInput;
+  invoice_scheduled: InvoiceScheduledInput;
+  invoice_sent: InvoiceSentInput;
+  invoice_reminder_sent: InvoiceReminderSentInput;
+  invoice_cancelled: InvoiceCancelledInput;
+  invoice_created: InvoiceCreatedInput;
+};
