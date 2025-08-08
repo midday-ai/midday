@@ -60,8 +60,8 @@ export class Notifications {
       email: member.email ?? "",
       locale: member.locale ?? "en",
       team_id: teamId,
-      team_name: team.name,
-      team_inbox_id: team.inboxId,
+      team_name: team.name ?? "Team",
+      team_inbox_id: team.inboxId ?? "",
     }));
   }
 
