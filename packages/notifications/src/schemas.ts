@@ -24,18 +24,14 @@ export const createActivitySchema = z.object({
 export type CreateActivityInput = z.infer<typeof createActivitySchema>;
 
 export const userSchema = z.object({
-  user: z.object({
-    id: z.string().uuid(),
-    full_name: z.string(),
-    email: z.string().email(),
-    locale: z.string().optional(),
-    avatar_url: z.string().optional(),
-  }),
+  id: z.string().uuid(),
+  full_name: z.string(),
+  email: z.string().email(),
+  locale: z.string().optional(),
+  avatar_url: z.string().optional(),
   team_id: z.string().uuid(),
-  team: z.object({
-    name: z.string(),
-    inbox_id: z.string(),
-  }),
+  team_name: z.string(),
+  team_inbox_id: z.string(),
 });
 
 export const transactionSchema = z.object({

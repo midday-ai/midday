@@ -150,10 +150,11 @@ app.openapi(
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
+    const session = c.get("session");
     const body = c.req.valid("json");
 
     const result = await updateAllActivitiesStatus(db, teamId, body.status, {
-      userId: body.userId,
+      userId: session.user.id,
     });
 
     return c.json(

@@ -17,7 +17,7 @@ export const transactionsCreated: NotificationHandler = {
 
     return {
       teamId: user.team_id,
-      userId: user.user.id,
+      userId: user.id,
       type: "transactions_created",
       source: "system",
       priority: 3,
@@ -45,10 +45,10 @@ export const transactionsCreated: NotificationHandler = {
     template: "transactions",
     subject: "transactions.subject",
     user,
-    replyTo: getInboxEmail(user.team.inbox_id),
+    replyTo: getInboxEmail(user.team_inbox_id),
     data: {
       transactions: data.transactions,
-      teamName: user.team.name,
+      teamName: user.team_name,
     },
   }),
 };

@@ -8,7 +8,7 @@ export const inboxNew: NotificationHandler = {
 
   createActivity: (data, user) => ({
     teamId: user.team_id,
-    userId: user.user.id,
+    userId: user.id,
     type: "inbox_new",
     source: "system",
     priority: 3,

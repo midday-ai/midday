@@ -13,7 +13,7 @@ export const invoiceOverdue: NotificationHandler = {
 
   createActivity: (data, user) => ({
     teamId: user.team_id,
-    userId: user.user.id,
+    userId: user.id,
     type: "invoice_overdue",
     source: "system",
     priority: 3,
@@ -21,8 +21,8 @@ export const invoiceOverdue: NotificationHandler = {
       invoiceId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
       customerName: data.customerName,
-      userName: user.user.full_name,
-      teamName: user.team.name,
+      userName: user.full_name,
+      teamName: user.team_name,
     },
   }),
 
