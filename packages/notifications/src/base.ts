@@ -17,7 +17,7 @@ export interface NotificationHandler<T = any> {
 
 export interface UserData {
   id: string;
-  full_name?: string;
+  full_name: string;
   email: string;
   locale?: string;
   avatar_url?: string;
