@@ -19,9 +19,9 @@ interface Props {
   fullName: string;
 }
 
-export const TrialEndedEmail = ({ fullName = "Viktor Hofte" }: Props) => {
-  const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, Your Midday trial has now ended, which means you have read-only access to your data.`;
+export const TrialEndedEmail = ({ fullName = "" }: Props) => {
+  const firstName = fullName ? fullName.split(" ").at(0) : "";
+  const text = `${firstName ? `Hi ${firstName}, ` : ""}Your Midday trial has now ended, which means you have read-only access to your data.`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -53,7 +53,7 @@ export const TrialEndedEmail = ({ fullName = "Viktor Hofte" }: Props) => {
             className={`font-medium ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            Hi {firstName},
+            {firstName ? `Hi ${firstName},` : "Hello,"}
           </span>
           <Text
             className={themeClasses.text}

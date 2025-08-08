@@ -262,6 +262,17 @@ export type {
 export { userSchema, transactionSchema, invoiceSchema } from "./base";
 
 // Export schemas and types
+export {
+  transactionsCreatedSchema,
+  inboxNewSchema,
+  invoicePaidSchema,
+  invoiceOverdueSchema,
+  invoiceScheduledSchema,
+  invoiceSentSchema,
+  invoiceReminderSentSchema,
+  invoiceCancelledSchema,
+  invoiceCreatedSchema,
+} from "./schemas";
 
 // Export notification type definitions and utilities
 export {

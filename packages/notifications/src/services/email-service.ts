@@ -18,7 +18,6 @@ export class EmailService {
       return { sent: 0, skipped: 0, failed: 0 };
     }
 
-    // Filter users based on email preferences
     const eligibleEmails = await Promise.all(
       emails.map(async (email) => {
         const shouldSend = await shouldSendNotification(
@@ -81,8 +80,6 @@ export class EmailService {
     try {
       const sent = 0;
       const failed = 0;
-
-      console.log(resendEmails);
 
       // Send emails using Resend batch API
       // if (resendEmails.length === 1) {
