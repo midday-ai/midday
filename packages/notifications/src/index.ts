@@ -51,7 +51,7 @@ export class Notifications {
       locale?: string | null;
     }>,
     teamId: string,
-    team: { name: string; inboxId: string },
+    team: { name: string | null; inboxId: string | null },
   ): UserData[] {
     return teamMembers.map((member) => ({
       id: member.id,
