@@ -417,14 +417,14 @@ export const invoiceRouter = createTRPCRouter({
         teamId: teamId!,
       });
 
-      if (updatedInvoice.status) {
+      if (updatedInvoice?.status) {
         if (input.status === "paid") {
           tasks.trigger("notification", {
             type: "invoice_paid",
             teamId: teamId!,
             invoiceId: input.id,
             invoiceNumber: updatedInvoice.invoiceNumber,
-            customerName: updatedInvoice.customer?.name,
+            customerName: updatedInvoice.customerName,
             paidAt: input.paidAt || new Date().toISOString(),
             source: "manual",
             sendEmail: false,
@@ -435,7 +435,7 @@ export const invoiceRouter = createTRPCRouter({
             teamId: teamId!,
             invoiceId: input.id,
             invoiceNumber: updatedInvoice.invoiceNumber,
-            customerName: updatedInvoice.customer?.name,
+            customerName: updatedInvoice.customerName,
             sendEmail: false,
           });
         }
@@ -542,7 +542,7 @@ export const invoiceRouter = createTRPCRouter({
           invoiceId: input.id,
           invoiceNumber: data.invoiceNumber,
           scheduledAt: input.scheduledAt,
-          customerName: data.customer?.name,
+          customerName: data.customerName,
         });
 
         return data;
@@ -573,7 +573,7 @@ export const invoiceRouter = createTRPCRouter({
           teamId: teamId!,
           invoiceId: data.id,
           invoiceNumber: data.invoiceNumber,
-          customerName: data.customer?.name,
+          customerName: data.customerName,
           amount: data.amount,
           currency: data.currency,
           sendEmail: false,

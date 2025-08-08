@@ -5,10 +5,14 @@ import {
   getTeamMembers,
   shouldSendNotification,
 } from "@midday/db/queries";
-import type { NotificationOptions, NotificationResult, UserData } from "./base";
-import { createActivitySchema } from "./schemas";
+import type {
+  EmailInput,
+  NotificationOptions,
+  NotificationResult,
+  UserData,
+} from "./base";
+import { type NotificationTypes, createActivitySchema } from "./schemas";
 import { EmailService } from "./services/email-service";
-
 import { inboxNew } from "./types/inbox-new";
 import { invoiceCancelled } from "./types/invoice-cancelled";
 import { invoiceCreated } from "./types/invoice-created";
@@ -31,42 +35,32 @@ const handlers = {
   invoice_created: invoiceCreated,
 } as const;
 
-// Auto-generated type map for full type safety
-export type NotificationTypes = {
-  [K in keyof typeof handlers]: Parameters<
-    (typeof handlers)[K]["schema"]["parse"]
-  >[0];
-};
-
 export class Notifications {
-  private emailService: EmailService;
+  #emailService: EmailService;
 
   constructor(private db: Database) {
-    this.emailService = new EmailService(db);
+    this.#emailService = new EmailService(db);
   }
 
-  private transformTeamMembersToUsers(
+  #toUserData(
     teamMembers: Array<{
       id: string;
-      fullName: string | null;
-      avatarUrl: string | null;
+      fullName?: string;
+      avatarUrl?: string;
       email: string;
     }>,
     teamId: string,
-    teamInfo: {
-      name: string;
-      inboxId: string;
-    },
+    team: { name: string; inboxId: string },
   ): UserData[] {
     return teamMembers.map((member) => ({
       id: member.id,
-      full_name: member.fullName || "Unknown",
-      avatar_url: member.avatarUrl || undefined,
+      full_name: member.fullName,
+      avatar_url: member.avatarUrl,
       email: member.email,
-      locale: "en", // Could be enhanced to get actual user locale
+      locale: "en",
       team_id: teamId,
-      team_name: teamInfo.name,
-      team_inbox_id: teamInfo.inboxId,
+      team_name: team.name,
+      team_inbox_id: team.inboxId,
     }));
   }
 
@@ -94,7 +88,7 @@ export class Notifications {
     }
 
     // Transform team members to UserData format
-    const users = this.transformTeamMembersToUsers(teamMembers, teamId, {
+    const users = this.#toUserData(teamMembers, teamId, {
       name: teamInfo.name,
       inboxId: teamInfo.inboxId,
     });
@@ -128,11 +122,8 @@ export class Notifications {
 
       // Create activities - always create them but adjust priority based on in-app preferences
       const activityPromises = await Promise.all(
-        validatedData.users.map(async (user) => {
-          const activityInput = (handler as any).createActivity(
-            validatedData,
-            user,
-          );
+        validatedData.users.map(async (user: UserData) => {
+          const activityInput = handler.createActivity(validatedData, user);
 
           // Check if user wants in-app notifications for this type
           const inAppEnabled = await shouldSendNotification(
@@ -177,13 +168,13 @@ export class Notifications {
       const sendEmail = options?.sendEmail ?? false;
 
       if (handler.email && sendEmail) {
-        const emailInputs = validatedData.users.map((user) => {
-          const baseEmailInput: any = {
+        const emailInputs = validatedData.users.map((user: UserData) => {
+          const baseEmailInput: EmailInput = {
             template: handler.email!.template,
             subject: handler.email!.subject,
             user,
             data: handler.createEmail
-              ? (handler.createEmail as any)(validatedData, user).data
+              ? handler.createEmail(validatedData, user).data
               : validatedData,
           };
 
@@ -214,10 +205,7 @@ export class Notifications {
 
           // If handler has createEmail, it can override these settings
           if (handler.createEmail) {
-            const customEmail = (handler.createEmail as any)(
-              validatedData,
-              user,
-            );
+            const customEmail = handler.createEmail(validatedData, user);
             return {
               ...baseEmailInput,
               ...customEmail,
@@ -232,7 +220,7 @@ export class Notifications {
           return baseEmailInput;
         });
 
-        emails = await this.emailService.sendBulk(emailInputs, type as string);
+        emails = await this.#emailService.sendBulk(emailInputs, type as string);
       }
 
       return {
@@ -269,6 +257,7 @@ export {
   invoiceCancelledSchema,
   invoiceCreatedSchema,
 } from "./schemas";
+export type { NotificationTypes } from "./schemas";
 
 // Export notification type definitions and utilities
 export {
