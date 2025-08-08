@@ -15,6 +15,7 @@
     "@midday/cache": "workspace:*",
     "@midday/invoice": "workspace:*",
     "@midday/encryption": "workspace:*",
+    "@midday/notifications": "workspace:*",
     "drizzle-orm": "^0.44.2",
     "postgres": "^3.4.7",
     "snakecase-keys": "^8.0.1",
