@@ -28,6 +28,7 @@
     "@midday/invoice": "workspace:*",
     "@midday/jobs": "workspace:*",
     "@midday/location": "workspace:*",
+    "@midday/notifications": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@scalar/hono-api-reference": "^0.9.4",
     "@sindresorhus/slugify": "^2.2.1",
