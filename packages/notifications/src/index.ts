@@ -45,19 +45,20 @@ export class Notifications {
   #toUserData(
     teamMembers: Array<{
       id: string;
-      fullName?: string;
-      avatarUrl?: string;
-      email: string;
+      fullName: string | null;
+      avatarUrl: string | null;
+      email: string | null;
+      locale: string | null;
     }>,
     teamId: string,
     team: { name: string; inboxId: string },
   ): UserData[] {
     return teamMembers.map((member) => ({
       id: member.id,
-      full_name: member.fullName ?? "",
+      full_name: member.fullName!,
       avatar_url: member.avatarUrl ?? undefined,
-      email: member.email,
-      locale: "en",
+      email: member.email!,
+      locale: member.locale ?? "en",
       team_id: teamId,
       team_name: team.name,
       team_inbox_id: team.inboxId,
