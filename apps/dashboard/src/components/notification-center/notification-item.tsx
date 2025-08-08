@@ -33,6 +33,8 @@ export function NotificationItem({
       case "invoice_scheduled":
       case "invoice_sent":
       case "invoice_reminder_sent":
+      case "invoice_cancelled":
+      case "invoice_created":
         return "invoice";
       default:
         return "default";
@@ -168,6 +170,27 @@ export function NotificationItem({
           return `Invoice ${invoiceNumber} has been cancelled`;
         }
         return t("notifications.invoice_cancelled.title");
+      }
+      case "invoice_created": {
+        const invoiceNumber = metadata?.invoiceNumber;
+        const customerName = metadata?.customerName;
+        const amount = metadata?.amount;
+        const currency = metadata?.currency;
+
+        if (invoiceNumber && customerName && amount && currency) {
+          const formattedAmount = new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: currency,
+          }).format(amount);
+          return `Invoice ${invoiceNumber} created for ${customerName} - ${formattedAmount}`;
+        }
+        if (invoiceNumber && customerName) {
+          return `Invoice ${invoiceNumber} created for ${customerName}`;
+        }
+        if (invoiceNumber) {
+          return `Invoice ${invoiceNumber} has been created`;
+        }
+        return t("notifications.invoice_created.title");
       }
       default:
         return t("notifications.default.title");

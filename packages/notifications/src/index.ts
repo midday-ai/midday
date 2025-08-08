@@ -11,6 +11,7 @@ import { EmailService } from "./services/email-service";
 
 import { inboxNew } from "./types/inbox-new";
 import { invoiceCancelled } from "./types/invoice-cancelled";
+import { invoiceCreated } from "./types/invoice-created";
 import { invoiceOverdue } from "./types/invoice-overdue";
 import { invoicePaid } from "./types/invoice-paid";
 import { invoiceReminderSent } from "./types/invoice-reminder-sent";
@@ -27,6 +28,7 @@ const handlers = {
   invoice_sent: invoiceSent,
   invoice_reminder_sent: invoiceReminderSent,
   invoice_cancelled: invoiceCancelled,
+  invoice_created: invoiceCreated,
 } as const;
 
 // Auto-generated type map for full type safety

@@ -418,30 +418,26 @@ export const invoiceRouter = createTRPCRouter({
       });
 
       if (updatedInvoice.status) {
-        try {
-          if (input.status === "paid") {
-            tasks.trigger("notification", {
-              type: "invoice_paid",
-              teamId: teamId!,
-              invoiceId: input.id,
-              invoiceNumber: updatedInvoice.invoiceNumber,
-              customerName: updatedInvoice.customer?.name,
-              paidAt: input.paidAt || new Date().toISOString(),
-              source: "manual",
-              sendEmail: false,
-            });
-          } else if (input.status === "canceled") {
-            tasks.trigger("notification", {
-              type: "invoice_cancelled",
-              teamId: teamId!,
-              invoiceId: input.id,
-              invoiceNumber: updatedInvoice.invoiceNumber,
-              customerName: updatedInvoice.customer?.name,
-              sendEmail: false,
-            });
-          }
-        } catch (error) {
-          console.error("Failed to send notification", { error });
+        if (input.status === "paid") {
+          tasks.trigger("notification", {
+            type: "invoice_paid",
+            teamId: teamId!,
+            invoiceId: input.id,
+            invoiceNumber: updatedInvoice.invoiceNumber,
+            customerName: updatedInvoice.customer?.name,
+            paidAt: input.paidAt || new Date().toISOString(),
+            source: "manual",
+            sendEmail: false,
+          });
+        } else if (input.status === "canceled") {
+          tasks.trigger("notification", {
+            type: "invoice_cancelled",
+            teamId: teamId!,
+            invoiceId: input.id,
+            invoiceNumber: updatedInvoice.invoiceNumber,
+            customerName: updatedInvoice.customer?.name,
+            sendEmail: false,
+          });
         }
       }
 
@@ -540,18 +536,14 @@ export const invoiceRouter = createTRPCRouter({
           });
         }
 
-        try {
-          await tasks.trigger("notification", {
-            type: "invoice_scheduled",
-            teamId: teamId!,
-            invoiceId: input.id,
-            invoiceNumber: data.invoiceNumber,
-            scheduledAt: input.scheduledAt,
-            customerName: data.customer?.name,
-          });
-        } catch (error) {
-          console.error(error);
-        }
+        tasks.trigger("notification", {
+          type: "invoice_scheduled",
+          teamId: teamId!,
+          invoiceId: input.id,
+          invoiceNumber: data.invoiceNumber,
+          scheduledAt: input.scheduledAt,
+          customerName: data.customer?.name,
+        });
 
         return data;
       }
@@ -574,6 +566,21 @@ export const invoiceRouter = createTRPCRouter({
         invoiceId: data.id,
         deliveryType: input.deliveryType,
       } satisfies GenerateInvoicePayload);
+
+      try {
+        tasks.trigger("notification", {
+          type: "invoice_created",
+          teamId: teamId!,
+          invoiceId: data.id,
+          invoiceNumber: data.invoiceNumber,
+          customerName: data.customer?.name,
+          amount: data.amount,
+          currency: data.currency,
+          sendEmail: false,
+        });
+      } catch (error) {
+        console.error("Failed to send invoice_created notification", { error });
+      }
 
       return data;
     }),

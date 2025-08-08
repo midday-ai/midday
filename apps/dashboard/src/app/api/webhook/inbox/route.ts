@@ -179,8 +179,7 @@ export async function POST(req: Request) {
       })),
     );
 
-    // Send notification for new inbox items
-    await tasks.trigger("notification", {
+    tasks.trigger("notification", {
       type: "inbox_new",
       teamId: teamId!,
       totalCount: insertData.length,

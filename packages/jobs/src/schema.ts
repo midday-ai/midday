@@ -265,6 +265,15 @@ export const notificationSchema = z.discriminatedUnion("type", [
     invoiceNumber: z.string(),
     customerName: z.string().optional(),
   }),
+  baseNotificationSchema.extend({
+    type: z.literal("invoice_created"),
+    teamId: z.string().uuid(),
+    invoiceId: z.string().uuid(),
+    invoiceNumber: z.string(),
+    customerName: z.string().optional(),
+    amount: z.number().optional(),
+    currency: z.string().optional(),
+  }),
 ]);
 
 export type NotificationPayload = z.infer<typeof notificationSchema>;

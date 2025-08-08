@@ -13,6 +13,7 @@ export const createActivitySchema = z.object({
     "invoice_sent",
     "invoice_reminder_sent",
     "invoice_cancelled",
+    "invoice_created",
   ]),
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
@@ -122,6 +123,15 @@ export const invoiceCancelledSchema = z.object({
   customerName: z.string().optional(),
 });
 
+export const invoiceCreatedSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string(),
+  customerName: z.string().optional(),
+  amount: z.number().optional(),
+  currency: z.string().optional(),
+});
+
 export type UserData = z.infer<typeof userSchema>;
 export type TransactionData = z.infer<typeof transactionSchema>;
 export type InvoiceData = z.infer<typeof invoiceSchema>;
@@ -139,3 +149,4 @@ export type InvoiceReminderSentInput = z.infer<
   typeof invoiceReminderSentSchema
 >;
 export type InvoiceCancelledInput = z.infer<typeof invoiceCancelledSchema>;
+export type InvoiceCreatedInput = z.infer<typeof invoiceCreatedSchema>;

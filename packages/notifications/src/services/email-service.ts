@@ -48,7 +48,7 @@ export class EmailService {
       const { t } = getI18n({ locale: email.user.user.locale ?? "en" });
 
       // Dynamically import the email template
-      const EmailTemplate = this.getEmailTemplate(email.template);
+      const EmailTemplate = this.#getTemplates(email.template);
 
       const html = render(
         EmailTemplate({
@@ -116,7 +116,7 @@ export class EmailService {
     }
   }
 
-  private getEmailTemplate(template: string) {
+  #getTemplates(template: string) {
     const templates = {
       transactions: require("@midday/email/emails/transactions").default,
       "invoice-paid": require("@midday/email/emails/invoice-paid").default,
