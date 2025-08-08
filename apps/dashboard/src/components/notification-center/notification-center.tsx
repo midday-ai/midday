@@ -6,6 +6,7 @@ import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { EmptyState } from "./empty-state";
 import { NotificationItem } from "./notification-item";
@@ -56,13 +57,24 @@ export function NotificationCenter() {
         sideOffset={10}
       >
         <Tabs defaultValue="inbox">
-          <TabsList className="w-full justify-start bg-transparent border-b-[1px] rounded-none py-6">
-            <TabsTrigger value="inbox" className="font-normal">
-              Inbox
-            </TabsTrigger>
-            <TabsTrigger value="archive" className="font-normal">
-              Archive
-            </TabsTrigger>
+          <TabsList className="w-full justify-between bg-transparent border-b-[1px] rounded-none py-6">
+            <div className="flex">
+              <TabsTrigger value="inbox" className="font-normal">
+                Inbox
+              </TabsTrigger>
+              <TabsTrigger value="archive" className="font-normal">
+                Archive
+              </TabsTrigger>
+            </div>
+            <Link href="/settings/notifications" onClick={() => setOpen(false)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="items-center justify-center transition-colors h-9 w-9 rounded-full bg-ransparent hover:bg-accent mr-2"
+              >
+                <Icons.Settings size={16} />
+              </Button>
+            </Link>
           </TabsList>
 
           <TabsContent value="inbox" className="relative mt-0">

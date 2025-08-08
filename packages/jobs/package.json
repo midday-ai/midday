@@ -17,6 +17,7 @@
     "@midday/email": "workspace:*",
     "@midday/engine": "workspace:*",
     "@midday/engine-client": "workspace:*",
+    "@midday/notifications": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@sindresorhus/slugify": "^2.2.1",
     "@zip.js/zip.js": "^2.7.62",
