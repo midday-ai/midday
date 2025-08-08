@@ -55,7 +55,7 @@ export class Notifications {
   ): UserData[] {
     return teamMembers.map((member) => ({
       id: member.id,
-      full_name: member.fullName ?? "",
+      full_name: member.fullName ?? undefined,
       avatar_url: member.avatarUrl ?? undefined,
       email: member.email ?? "",
       locale: member.locale ?? "en",
