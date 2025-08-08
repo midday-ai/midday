@@ -105,18 +105,15 @@ export default {
     inbox_new: {
       name: "New Inbox Items",
       description: "Get notified when new items arrive in your inbox",
-      "connected_auto#one":
-        "We found a new document from your connected {provider}",
-      "connected_auto#other":
-        "We found {count} new documents from your connected {provider}",
-      "provider_manual#one": "We found a new document from {provider}",
-      "provider_manual#other": "We found {count} new documents from {provider}",
-      "connected_generic#one":
-        "We found a new document from your connected email",
-      "connected_generic#other":
-        "We found {count} new documents from your connected email",
-      "fallback#one": "We found a new document in your inbox",
-      "fallback#other": "We found {count} new documents in your inbox",
+      "title#one": "We found a new document in your inbox",
+      "title#other": "We found {count} new documents in your inbox",
+      source: {
+        email: "via team inbox email",
+        sync: "from {provider}",
+        slack: "via Slack",
+      },
+      "upload_title#one": "A new document was uploaded to your inbox",
+      "upload_title#other": "{count} new documents were uploaded to your inbox",
     },
     default: {
       title: "New activity detected",

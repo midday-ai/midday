@@ -15,9 +15,10 @@ export const inboxNew: NotificationHandler<InboxNewInput> = {
       priority: 3,
       metadata: {
         totalCount: data.totalCount,
+        source: data.source,
         syncType: data.syncType,
         provider: data.provider,
-      }, // Only the pure data: { totalCount, syncType, provider }
+      },
     };
   },
 };
