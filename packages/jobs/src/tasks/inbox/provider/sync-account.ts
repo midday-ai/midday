@@ -3,11 +3,11 @@ import { processBatch } from "@jobs/utils/process-batch";
 import { getInboxAccountInfo, updateInboxAccount } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
 import { isAuthenticationError } from "@midday/inbox/utils";
-import { Notifications } from "@midday/notifications-v2";
 import { createClient } from "@midday/supabase/job";
 import { getExistingInboxAttachmentsQuery } from "@midday/supabase/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
+import { inboxNotification } from "../inbox-notification";
 import { processAttachment } from "../process-attachment";
 
 const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10MB
@@ -174,11 +174,11 @@ export const syncInboxAccount = schemaTask({
 
         await processAttachment.batchTriggerAndWait(uploadedAttachments);
 
-        const notifications = new Notifications(getDb());
-
         // Send notification for new inbox items
-        await notifications.create("inbox_new", accountRow.teamId, {
+        await inboxNotification.trigger({
+          teamId: accountRow.teamId,
           totalCount: uploadedAttachments.length,
+          source: "sync",
           syncType: manualSync ? "manual" : "automatic",
           provider: accountRow.provider,
         });

@@ -188,3 +188,13 @@ export const scheduleInvoiceJobSchema = z.object({
 export type ScheduleInvoiceJobPayload = z.infer<
   typeof scheduleInvoiceJobSchema
 >;
+
+export const inboxNotificationSchema = z.object({
+  teamId: z.string().uuid(),
+  totalCount: z.number(),
+  source: z.enum(["email", "sync", "slack", "upload"]),
+  provider: z.string().optional(), // Only for "sync" source
+  syncType: z.enum(["manual", "automatic"]).optional(), // Only for "sync" source
+});
+
+export type InboxNotificationPayload = z.infer<typeof inboxNotificationSchema>;

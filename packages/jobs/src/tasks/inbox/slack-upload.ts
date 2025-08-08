@@ -7,6 +7,7 @@ import { inboxSlackUploadSchema } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk";
 import { format } from "date-fns";
+import { inboxNotification } from "./inbox-notification";
 
 export const inboxSlackUpload = schemaTask({
   id: "inbox-slack-upload",
@@ -152,7 +153,12 @@ export const inboxSlackUpload = schemaTask({
           console.error(err);
         }
 
-        // TODO: Send event to match inbox
+        // Send notification for Slack upload
+        await inboxNotification.trigger({
+          teamId,
+          totalCount: 1,
+          source: "slack",
+        });
       }
     } catch {
       // If we end up here we could not parse the document

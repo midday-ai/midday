@@ -59,7 +59,7 @@ export const inboxRouter = createTRPCRouter({
   processAttachments: protectedProcedure
     .input(processAttachmentsSchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
-      return tasks.batchTrigger(
+      const batchResult = await tasks.batchTrigger(
         "process-attachment",
         input.map((item) => ({
           payload: {
@@ -70,6 +70,15 @@ export const inboxRouter = createTRPCRouter({
           },
         })) as { payload: ProcessAttachmentPayload }[],
       );
+
+      // Send notification for manually uploaded items
+      await tasks.trigger("inbox-notification", {
+        teamId: teamId!,
+        totalCount: input.length,
+        source: "upload",
+      });
+
+      return batchResult;
     }),
 
   search: protectedProcedure

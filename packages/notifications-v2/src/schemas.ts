@@ -60,8 +60,9 @@ export const inboxItemSchema = z.object({
 export const inboxNewSchema = z.object({
   users: z.array(userSchema),
   totalCount: z.number(),
-  syncType: z.enum(["manual", "automatic"]),
-  provider: z.string(),
+  source: z.enum(["email", "sync", "slack", "upload"]),
+  syncType: z.enum(["manual", "automatic"]).optional(),
+  provider: z.string().optional(),
 });
 
 export type UserData = z.infer<typeof userSchema>;
