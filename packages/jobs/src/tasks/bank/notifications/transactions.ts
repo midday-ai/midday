@@ -44,8 +44,8 @@ export const transactionNotifications = schemaTask({
         });
 
         // Keep Slack notifications for now (can be migrated later)
-        // @ts-expect-error - TODO: Fix types
-        // await handleTransactionSlackNotifications(teamId, sortedTransactions);
+        // @ts-expect-error
+        await handleTransactionSlackNotifications(teamId, sortedTransactions);
       }
     } catch (error) {
       await logger.error("Transactions notification", { error });
