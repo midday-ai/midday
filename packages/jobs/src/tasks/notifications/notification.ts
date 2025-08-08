@@ -6,6 +6,7 @@ import { schemaTask } from "@trigger.dev/sdk";
 export const notification = schemaTask({
   id: "notification",
   schema: notificationSchema,
+  machine: "micro",
   maxDuration: 60,
   queue: {
     concurrencyLimit: 5,
@@ -13,17 +14,10 @@ export const notification = schemaTask({
   run: async (payload) => {
     const notifications = new Notifications(getDb());
 
-    const { type, teamId, ...notificationData } = payload;
+    const { type, teamId, sendEmail = false, ...notificationData } = payload;
 
-    // Check if notification type is supported in notifications-v2
-    if (type === "invoice_paid" || type === "invoice_overdue") {
-      console.error(
-        `${type} notifications not yet migrated to notifications-v2`,
-      );
-
-      return;
-    }
-
-    return notifications.create(type, teamId, notificationData);
+    return notifications.create(type, teamId, notificationData, {
+      sendEmail,
+    });
   },
 });

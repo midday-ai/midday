@@ -7,6 +7,7 @@ import { getAppUrl } from "@midday/utils/envs";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { nanoid } from "nanoid";
 import { z } from "zod";
+import { notification } from "../../notifications/notification";
 
 export const sendInvoiceEmail = schemaTask({
   id: "send-invoice-email",
@@ -25,7 +26,7 @@ export const sendInvoiceEmail = schemaTask({
     const { data: invoice } = await supabase
       .from("invoices")
       .select(
-        "id, token, template, customer:customer_id(name, website, email, billing_email), team:team_id(name, email), user:user_id(email)",
+        "id, token, template, invoice_number, team_id, customer:customer_id(name, website, email, billing_email), team:team_id(name, email), user:user_id(email)",
       )
       .eq("id", invoiceId)
       .single();
@@ -113,5 +114,19 @@ export const sendInvoiceEmail = schemaTask({
         sent_at: new Date().toISOString(),
       })
       .eq("id", invoiceId);
+
+    // Send notification that invoice was sent
+    try {
+      await notification.trigger({
+        type: "invoice_sent",
+        teamId: invoice.team_id,
+        invoiceId,
+        invoiceNumber: invoice.invoice_number || "Unknown",
+        customerName: invoice.customer?.name || "Unknown Customer",
+        customerEmail,
+      });
+    } catch (error) {
+      logger.error("Failed to send invoice_sent notification", { error });
+    }
   },
 });

@@ -42,8 +42,7 @@ export interface EmailInput {
 
 export interface NotificationOptions {
   priority?: number;
-  skipEmail?: boolean;
-  // Runtime email overrides
+  sendEmail?: boolean;
   from?: string;
   replyTo?: string;
   headers?: Record<string, string>;

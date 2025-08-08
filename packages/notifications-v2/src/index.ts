@@ -10,11 +10,23 @@ import { createActivitySchema } from "./schemas";
 import { EmailService } from "./services/email-service";
 
 import { inboxNew } from "./types/inbox-new";
+import { invoiceCancelled } from "./types/invoice-cancelled";
+import { invoiceOverdue } from "./types/invoice-overdue";
+import { invoicePaid } from "./types/invoice-paid";
+import { invoiceReminderSent } from "./types/invoice-reminder-sent";
+import { invoiceScheduled } from "./types/invoice-scheduled";
+import { invoiceSent } from "./types/invoice-sent";
 import { transactionsCreated } from "./types/transactions-created";
 
 const handlers = {
   transactions_created: transactionsCreated,
   inbox_new: inboxNew,
+  invoice_paid: invoicePaid,
+  invoice_overdue: invoiceOverdue,
+  invoice_scheduled: invoiceScheduled,
+  invoice_sent: invoiceSent,
+  invoice_reminder_sent: invoiceReminderSent,
+  invoice_cancelled: invoiceCancelled,
 } as const;
 
 // Auto-generated type map for full type safety
@@ -164,16 +176,16 @@ export class Notifications {
       // CONDITIONALLY send emails
       let emails = { sent: 0, skipped: validatedData.users.length, failed: 0 };
 
-      const skipEmail = options?.skipEmail ?? false;
+      const sendEmail = options?.sendEmail ?? false;
 
-      if (handler.email && !skipEmail) {
+      if (handler.email && sendEmail) {
         const emailInputs = validatedData.users.map((user) => {
-          const baseEmailInput = {
+          const baseEmailInput: any = {
             template: handler.email!.template,
             subject: handler.email!.subject,
             user,
             data: handler.createEmail
-              ? handler.createEmail(validatedData, user).data
+              ? (handler.createEmail as any)(validatedData, user).data
               : validatedData,
           };
 
@@ -204,7 +216,10 @@ export class Notifications {
 
           // If handler has createEmail, it can override these settings
           if (handler.createEmail) {
-            const customEmail = handler.createEmail(validatedData, user);
+            const customEmail = (handler.createEmail as any)(
+              validatedData,
+              user,
+            );
             return {
               ...baseEmailInput,
               ...customEmail,

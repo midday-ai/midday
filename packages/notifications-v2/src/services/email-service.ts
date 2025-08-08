@@ -119,6 +119,9 @@ export class EmailService {
   private getEmailTemplate(template: string) {
     const templates = {
       transactions: require("@midday/email/emails/transactions").default,
+      "invoice-paid": require("@midday/email/emails/invoice-paid").default,
+      "invoice-overdue": require("@midday/email/emails/invoice-overdue")
+        .default,
     };
 
     return templates[template as keyof typeof templates];

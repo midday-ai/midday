@@ -412,10 +412,40 @@ export const invoiceRouter = createTRPCRouter({
   update: protectedProcedure
     .input(updateInvoiceSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
-      return updateInvoice(db, {
+      const updatedInvoice = await updateInvoice(db, {
         ...input,
         teamId: teamId!,
       });
+
+      if (updatedInvoice.status) {
+        try {
+          if (input.status === "paid") {
+            tasks.trigger("notification", {
+              type: "invoice_paid",
+              teamId: teamId!,
+              invoiceId: input.id,
+              invoiceNumber: updatedInvoice.invoiceNumber,
+              customerName: updatedInvoice.customer?.name,
+              paidAt: input.paidAt || new Date().toISOString(),
+              source: "manual",
+              sendEmail: false,
+            });
+          } else if (input.status === "canceled") {
+            tasks.trigger("notification", {
+              type: "invoice_cancelled",
+              teamId: teamId!,
+              invoiceId: input.id,
+              invoiceNumber: updatedInvoice.invoiceNumber,
+              customerName: updatedInvoice.customer?.name,
+              sendEmail: false,
+            });
+          }
+        } catch (error) {
+          console.error("Failed to send notification", { error });
+        }
+      }
+
+      return updatedInvoice;
     }),
 
   delete: protectedProcedure
@@ -508,6 +538,19 @@ export const invoiceRouter = createTRPCRouter({
             code: "NOT_FOUND",
             message: "Invoice not found",
           });
+        }
+
+        try {
+          await tasks.trigger("notification", {
+            type: "invoice_scheduled",
+            teamId: teamId!,
+            invoiceId: input.id,
+            invoiceNumber: data.invoiceNumber,
+            scheduledAt: input.scheduledAt,
+            customerName: data.customer?.name,
+          });
+        } catch (error) {
+          console.error(error);
         }
 
         return data;

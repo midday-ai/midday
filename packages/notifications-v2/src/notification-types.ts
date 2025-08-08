@@ -27,6 +27,27 @@ export const allNotificationTypes: NotificationType[] = [
     channels: ["in_app"],
     showInSettings: true,
   },
+  {
+    type: "invoice_scheduled",
+    channels: ["in_app"],
+    showInSettings: true,
+  },
+  {
+    type: "invoice_sent",
+    channels: ["in_app"],
+    showInSettings: true,
+  },
+  {
+    type: "invoice_reminder_sent",
+    channels: ["in_app"],
+    showInSettings: true,
+  },
+
+  {
+    type: "invoice_cancelled",
+    channels: ["in_app"],
+    showInSettings: true,
+  },
 ];
 
 // Get all notification types (including hidden ones)
