@@ -19,7 +19,6 @@ export const invoiceCreated: NotificationHandler = {
       amount: data.amount,
       currency: data.currency,
       userName: user.full_name,
-      teamName: user.team_name,
     },
   }),
 };

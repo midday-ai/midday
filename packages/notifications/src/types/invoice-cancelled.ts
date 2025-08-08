@@ -17,7 +17,6 @@ export const invoiceCancelled: NotificationHandler = {
       invoiceNumber: data.invoiceNumber,
       customerName: data.customerName,
       userName: user.full_name,
-      teamName: user.team_name,
     },
   }),
 };

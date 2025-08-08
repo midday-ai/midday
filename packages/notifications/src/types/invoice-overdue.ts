@@ -21,8 +21,6 @@ export const invoiceOverdue: NotificationHandler = {
       invoiceId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
       customerName: data.customerName,
-      userName: user.full_name,
-      teamName: user.team_name,
     },
   }),
 

@@ -17,8 +17,6 @@ export const invoiceScheduled: NotificationHandler = {
       invoiceNumber: data.invoiceNumber,
       customerName: data.customerName,
       scheduledAt: data.scheduledAt,
-      userName: user.full_name,
-      teamName: user.team_name,
     },
   }),
 };
