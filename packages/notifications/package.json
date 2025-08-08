@@ -1,5 +1,5 @@
 {
-  "name": "@midday/notifications-v2",
+  "name": "@midday/notifications",
   "version": "0.1.0",
   "private": true,
   "main": "src/index.ts",

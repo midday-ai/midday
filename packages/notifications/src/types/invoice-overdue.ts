@@ -1,29 +1,27 @@
 import { getAppUrl } from "@midday/utils/envs";
 import type { NotificationHandler } from "../base";
-import { type InvoicePaidInput, invoicePaidSchema } from "../schemas";
+import { type InvoiceOverdueInput, invoiceOverdueSchema } from "../schemas";
 
-export const invoicePaid: NotificationHandler<InvoicePaidInput> = {
-  schema: invoicePaidSchema,
-  activityType: "invoice_paid",
-  defaultPriority: 3,
+export const invoiceOverdue: NotificationHandler<InvoiceOverdueInput> = {
+  schema: invoiceOverdueSchema,
+  activityType: "invoice_overdue",
+  defaultPriority: 2,
   email: {
-    template: "invoice-paid",
-    subject: "invoice.paid.subject",
+    template: "invoice-overdue",
+    subject: "invoice.overdue.subject",
   },
 
   createActivity: (data, user) => ({
     teamId: user.team_id,
     userId: user.user.id,
-    type: "invoice_paid",
-    source: data.source === "manual" ? "user" : "system",
+    type: "invoice_overdue",
+    source: "system",
     priority: 3,
     metadata: {
       recordId: data.invoiceId,
       invoiceId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
       customerName: data.customerName,
-      paidAt: data.paidAt,
-      source: data.source,
       link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&type=details`,
       userName: user.user.full_name,
       teamName: user.team.name,
@@ -31,11 +29,12 @@ export const invoicePaid: NotificationHandler<InvoicePaidInput> = {
   }),
 
   createEmail: (data, user) => ({
-    template: "invoice-paid",
-    subject: "invoice.paid.subject",
+    template: "invoice-overdue",
+    subject: "invoice.overdue.subject",
     user,
     data: {
       invoiceNumber: data.invoiceNumber,
+      customerName: data.customerName,
       link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&type=details`,
     },
   }),

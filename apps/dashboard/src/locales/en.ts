@@ -127,6 +127,12 @@ export default {
       title: "Invoice cancelled",
       subtitle: "Invoice has been cancelled",
     },
+    invoice_created: {
+      name: "Invoice Created",
+      description: "Get notified when new invoices are created",
+      title: "Invoice created",
+      subtitle: "A new invoice has been created",
+    },
     inbox_new: {
       name: "New Inbox Items",
       description: "Get notified when new items arrive in your inbox",

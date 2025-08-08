@@ -71,8 +71,7 @@ export const inboxRouter = createTRPCRouter({
         })) as { payload: ProcessAttachmentPayload }[],
       );
 
-      // Send notification for manually uploaded items
-      await tasks.trigger("notification", {
+      tasks.trigger("notification", {
         type: "inbox_new",
         teamId: teamId!,
         totalCount: input.length,
