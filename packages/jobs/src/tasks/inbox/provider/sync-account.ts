@@ -7,7 +7,7 @@ import { createClient } from "@midday/supabase/job";
 import { getExistingInboxAttachmentsQuery } from "@midday/supabase/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
-import { inboxNotification } from "../inbox-notification";
+import { notification } from "../../notifications/notification";
 import { processAttachment } from "../process-attachment";
 
 const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10MB
@@ -175,7 +175,8 @@ export const syncInboxAccount = schemaTask({
         await processAttachment.batchTriggerAndWait(uploadedAttachments);
 
         // Send notification for new inbox items
-        await inboxNotification.trigger({
+        await notification.trigger({
+          type: "inbox_new",
           teamId: accountRow.teamId,
           totalCount: uploadedAttachments.length,
           source: "sync",
