@@ -48,7 +48,7 @@ export class Notifications {
       fullName: string | null;
       avatarUrl: string | null;
       email: string | null;
-      locale: string | null;
+      locale?: string | null;
     }>,
     teamId: string,
     team: { name: string; inboxId: string },
