@@ -6,7 +6,9 @@ import {
   createInboxEmbedding,
   getInboxForEmbedding,
 } from "@midday/db/queries";
-import { logger, schemaTask } from "@trigger.dev/sdk";
+import { inbox } from "@midday/db/schema";
+import { logger, schemaTask, tasks } from "@trigger.dev/sdk";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 export const embedInbox = schemaTask({
@@ -23,11 +25,31 @@ export const embedInbox = schemaTask({
   run: async ({ inboxId, teamId }) => {
     const db = getDb();
 
+    // Set status to analyzing when we start processing
+    await db
+      .update(inbox)
+      .set({ status: "analyzing" })
+      .where(eq(inbox.id, inboxId));
+
+    logger.info("Starting inbox analysis", { inboxId, teamId });
+
     // Check if embedding already exists
     const embeddingExists = await checkInboxEmbeddingExists(db, { inboxId });
 
     if (embeddingExists) {
-      logger.info("Inbox embedding already exists", { inboxId, teamId });
+      logger.info(
+        "Inbox embedding already exists, skipping to match calculation",
+        {
+          inboxId,
+          teamId,
+        },
+      );
+
+      // Skip to match calculation if embedding exists
+      await tasks.trigger("calculate-suggestions", {
+        teamId,
+        inboxId,
+      });
       return;
     }
 
@@ -35,6 +57,11 @@ export const embedInbox = schemaTask({
     const inboxData = await getInboxForEmbedding(db, { inboxId });
 
     if (inboxData.length === 0) {
+      // Set back to pending if we can't process
+      await db
+        .update(inbox)
+        .set({ status: "pending" })
+        .where(eq(inbox.id, inboxId));
       throw new Error(`Inbox not found: ${inboxId}`);
     }
 
@@ -47,11 +74,17 @@ export const embedInbox = schemaTask({
         teamId,
         displayName: inboxItem.displayName,
       });
+
+      // Set back to pending if no text to process
+      await db
+        .update(inbox)
+        .set({ status: "pending" })
+        .where(eq(inbox.id, inboxId));
       return;
     }
 
     try {
-      logger.info("Starting inbox embedding", {
+      logger.info("Generating embedding for inbox item", {
         inboxId,
         teamId,
         textLength: text.length,
@@ -67,17 +100,30 @@ export const embedInbox = schemaTask({
         model,
       });
 
-      logger.info("Inbox embedding created", {
+      logger.info("Inbox embedding created successfully", {
         inboxId,
         teamId,
         embeddingDimensions: embedding.length,
       });
+
+      // After embedding is created, calculate suggestions
+      await tasks.trigger("calculate-suggestions", {
+        teamId,
+        inboxId,
+      });
     } catch (error) {
-      logger.error("Inbox embedding failed", {
-        error: error instanceof Error ? error.message : "Unknown error",
+      logger.error("Failed to create inbox embedding", {
         inboxId,
         teamId,
+        error: error instanceof Error ? error.message : "Unknown error",
       });
+
+      // Set back to pending on error
+      await db
+        .update(inbox)
+        .set({ status: "pending" })
+        .where(eq(inbox.id, inboxId));
+
       throw error;
     }
   },
