@@ -17,8 +17,6 @@ export const invoiceReminderSent: NotificationHandler = {
       invoiceNumber: data.invoiceNumber,
       customerName: data.customerName,
       customerEmail: data.customerEmail,
-      userName: user.full_name,
-      teamName: user.team_name,
     },
   }),
 };

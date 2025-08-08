@@ -23,8 +23,6 @@ export const invoicePaid: NotificationHandler = {
       customerName: data.customerName,
       paidAt: data.paidAt,
       source: data.source,
-      userName: user.full_name,
-      teamName: user.team_name,
     },
   }),
 
