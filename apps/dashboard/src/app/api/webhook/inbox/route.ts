@@ -178,6 +178,13 @@ export async function POST(req: Request) {
         } satisfies ProcessAttachmentPayload,
       })),
     );
+
+    tasks.trigger("notification", {
+      type: "inbox_new",
+      teamId: teamId!,
+      totalCount: insertData.length,
+      source: "email",
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
 

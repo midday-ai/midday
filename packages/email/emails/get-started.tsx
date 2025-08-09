@@ -18,9 +18,9 @@ interface Props {
   fullName: string;
 }
 
-export const GetStartedEmail = ({ fullName = "Viktor Hofte" }: Props) => {
-  const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, Just checking in to help you get started. Here are a few things you can try today.`;
+export const GetStartedEmail = ({ fullName = "" }: Props) => {
+  const firstName = fullName ? fullName.split(" ").at(0) : "";
+  const text = `${firstName ? `Hi ${firstName}, ` : ""}Just checking in to help you get started. Here are a few things you can try today.`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -52,7 +52,7 @@ export const GetStartedEmail = ({ fullName = "Viktor Hofte" }: Props) => {
             className={`font-medium ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            Hi {firstName},
+            {firstName ? `Hi ${firstName},` : "Hello,"}
           </span>
 
           <Text

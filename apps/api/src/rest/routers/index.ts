@@ -6,6 +6,7 @@ import { documentsRouter } from "./documents";
 import { inboxRouter } from "./inbox";
 import { invoicesRouter } from "./invoices";
 import { metricsRouter } from "./metrics";
+import { notificationsRouter } from "./notifications";
 import oauthRouter from "./oauth";
 import { searchRouter } from "./search";
 import { tagsRouter } from "./tags";
@@ -24,6 +25,7 @@ routers.route("/oauth", oauthRouter);
 routers.use(...protectedMiddleware);
 
 // Mount protected routes
+routers.route("/notifications", notificationsRouter);
 routers.route("/transactions", transactionsRouter);
 routers.route("/teams", teamsRouter);
 routers.route("/users", usersRouter);

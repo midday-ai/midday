@@ -412,10 +412,36 @@ export const invoiceRouter = createTRPCRouter({
   update: protectedProcedure
     .input(updateInvoiceSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
-      return updateInvoice(db, {
+      const updatedInvoice = await updateInvoice(db, {
         ...input,
         teamId: teamId!,
       });
+
+      if (updatedInvoice?.status) {
+        if (input.status === "paid") {
+          tasks.trigger("notification", {
+            type: "invoice_paid",
+            teamId: teamId!,
+            invoiceId: input.id,
+            invoiceNumber: updatedInvoice.invoiceNumber,
+            customerName: updatedInvoice.customerName,
+            paidAt: input.paidAt || new Date().toISOString(),
+            source: "manual",
+            sendEmail: false,
+          });
+        } else if (input.status === "canceled") {
+          tasks.trigger("notification", {
+            type: "invoice_cancelled",
+            teamId: teamId!,
+            invoiceId: input.id,
+            invoiceNumber: updatedInvoice.invoiceNumber,
+            customerName: updatedInvoice.customerName,
+            sendEmail: false,
+          });
+        }
+      }
+
+      return updatedInvoice;
     }),
 
   delete: protectedProcedure
@@ -510,6 +536,15 @@ export const invoiceRouter = createTRPCRouter({
           });
         }
 
+        tasks.trigger("notification", {
+          type: "invoice_scheduled",
+          teamId: teamId!,
+          invoiceId: input.id,
+          invoiceNumber: data.invoiceNumber,
+          scheduledAt: input.scheduledAt,
+          customerName: data.customerName,
+        });
+
         return data;
       }
 
@@ -531,6 +566,21 @@ export const invoiceRouter = createTRPCRouter({
         invoiceId: data.id,
         deliveryType: input.deliveryType,
       } satisfies GenerateInvoicePayload);
+
+      try {
+        tasks.trigger("notification", {
+          type: "invoice_created",
+          teamId: teamId!,
+          invoiceId: data.id,
+          invoiceNumber: data.invoiceNumber,
+          customerName: data.customerName,
+          amount: data.amount,
+          currency: data.currency,
+          sendEmail: false,
+        });
+      } catch (error) {
+        console.error("Failed to send invoice_created notification", { error });
+      }
 
       return data;
     }),

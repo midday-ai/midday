@@ -1,13 +1,11 @@
-import {
-  handleOverdueInvoiceNotifications,
-  handlePaidInvoiceNotifications,
-} from "@jobs/utils/invoice-notifications";
-import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
+import { notification } from "../../notifications/notification";
 
 export const sendInvoiceNotifications = schemaTask({
   id: "invoice-notifications",
+  machine: "micro",
+  maxDuration: 60,
   schema: z.object({
     invoiceId: z.string().uuid(),
     invoiceNumber: z.string(),
@@ -16,34 +14,30 @@ export const sendInvoiceNotifications = schemaTask({
     customerName: z.string(),
   }),
   run: async ({ invoiceId, invoiceNumber, status, teamId, customerName }) => {
-    const supabase = createClient();
-
-    const { data: user } = await supabase
-      .from("users_on_team")
-      .select(
-        "id, team_id, user:users(id, full_name, avatar_url, email, locale)",
-      )
-      .eq("team_id", teamId)
-      .eq("role", "owner");
-
     switch (status) {
-      case "paid":
-        await handlePaidInvoiceNotifications({
-          // @ts-expect-error - TODO: Fix types with drizzle
-          user,
+      case "paid": {
+        await notification.trigger({
+          type: "invoice_paid",
+          teamId,
           invoiceId,
           invoiceNumber,
+          source: "automatic",
+          sendEmail: true,
         });
         break;
-      case "overdue":
-        await handleOverdueInvoiceNotifications({
-          // @ts-expect-error - TODO: Fix types with drizzle
-          user,
+      }
+      case "overdue": {
+        await notification.trigger({
+          type: "invoice_overdue",
+          teamId,
           invoiceId,
           invoiceNumber,
           customerName,
+          source: "automatic",
+          sendEmail: true,
         });
         break;
+      }
     }
   },
 });

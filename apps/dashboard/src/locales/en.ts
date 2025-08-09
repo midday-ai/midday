@@ -83,13 +83,101 @@ export default {
     completed: "Completed",
   },
   notifications: {
-    inbox: "Receive notifications about new items in your inbox.",
-    match: "Receive notifications about matches.",
-    transaction: "Receive notifications about a new transaction.",
-    transactions: "Receive notifications about new transactions.",
-    "invoice.paid": "Receive notifications about paid invoices.",
-    "invoice.overdue": "Receive notifications about overdue invoices.",
-    "inbox.match": "Receive notifications about new matches in your inbox.",
+    transactions_created: {
+      name: "New Transactions",
+      description: "Get notified when new transactions are imported",
+      "title#one": "New transaction detected",
+      "title#other": "{count} new transactions added",
+      "title_many#other": "{count} transactions imported",
+      single_transaction: "New transaction from {name} {amount} on {date}",
+    },
+    invoice_paid: {
+      name: "Invoice Payments",
+      description: "Get notified when invoices are paid",
+      title: "Invoice payment received",
+      subtitle: "Your invoice has been paid",
+      manual_with_date:
+        "Invoice {invoiceNumber} from {customerName} marked as paid on {date}",
+      manual_with_date_no_customer:
+        "Invoice {invoiceNumber} marked as paid on {date}",
+      manual: "Invoice {invoiceNumber} from {customerName} marked as paid",
+      manual_no_customer: "Invoice {invoiceNumber} marked as paid",
+      automatic: "Payment received for invoice {invoiceNumber}",
+    },
+    invoice_overdue: {
+      name: "Overdue Invoices",
+      description: "Get notified when invoices become overdue",
+      title: "Invoice is overdue",
+      subtitle: "Payment is past due date",
+      with_number: "Invoice {invoiceNumber} is now overdue",
+    },
+    invoice_scheduled: {
+      name: "Invoice Scheduled",
+      description: "Get notified when invoices are scheduled for sending",
+      title: "Invoice scheduled",
+      subtitle: "Invoice has been scheduled for automatic delivery",
+      with_customer:
+        "Invoice {invoiceNumber} scheduled to be sent to {customerName} on {date} at {time}",
+      without_customer:
+        "Invoice {invoiceNumber} scheduled for {date} at {time}",
+      simple: "Invoice {invoiceNumber} has been scheduled",
+    },
+    invoice_sent: {
+      name: "Invoice Sent",
+      description: "Get notified when invoices are successfully sent",
+      title: "Invoice sent",
+      subtitle: "Invoice has been delivered to customer",
+      with_customer: "Invoice {invoiceNumber} sent to {customerName}",
+      without_customer: "Invoice {invoiceNumber} has been sent",
+    },
+    invoice_reminder_sent: {
+      name: "Invoice Reminder Sent",
+      description: "Get notified when invoice reminders are sent",
+      title: "Invoice reminder sent",
+      subtitle: "Payment reminder has been sent to customer",
+      with_customer:
+        "Payment reminder sent to {customerName} for invoice {invoiceNumber}",
+      without_customer: "Payment reminder sent for invoice {invoiceNumber}",
+    },
+
+    invoice_cancelled: {
+      name: "Invoice Cancelled",
+      description: "Get notified when invoices are cancelled",
+      title: "Invoice cancelled",
+      subtitle: "Invoice has been cancelled",
+      with_customer:
+        "Invoice {invoiceNumber} for {customerName} has been cancelled",
+      without_customer: "Invoice {invoiceNumber} has been cancelled",
+    },
+    invoice_created: {
+      name: "Invoice Created",
+      description: "Get notified when new invoices are created",
+      title: "Invoice created",
+      subtitle: "A new invoice has been created",
+      with_customer_and_amount:
+        "Invoice {invoiceNumber} created for {customerName} - {amount}",
+      with_customer: "Invoice {invoiceNumber} created for {customerName}",
+      without_customer: "Invoice {invoiceNumber} has been created",
+    },
+    inbox_new: {
+      name: "New Inbox Items",
+      description: "Get notified when new items arrive in your inbox",
+      "title#one": "We found a new document in your inbox",
+      "title#other": "We found {count} new documents in your inbox",
+      source: {
+        email: "via team inbox email",
+        sync: "from {provider}",
+        slack: "via Slack",
+        upload: "via upload",
+      },
+      "upload_title#one": "A new document was uploaded to your inbox",
+      "upload_title#other": "{count} new documents were uploaded to your inbox",
+    },
+    default: {
+      title: "New activity detected",
+    },
+    archive_button: "Archive notification",
+    time_ago: "{time} ago",
   },
   widgets: {
     insights: "Assistant",

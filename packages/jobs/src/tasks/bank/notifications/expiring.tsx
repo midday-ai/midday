@@ -6,7 +6,8 @@ import { z } from "zod";
 
 export const expiringNotifications = schemaTask({
   id: "expiring-notifications",
-  maxDuration: 300,
+  machine: "micro",
+  maxDuration: 60,
   queue: {
     concurrencyLimit: 1,
   },

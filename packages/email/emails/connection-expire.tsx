@@ -24,13 +24,13 @@ interface Props {
 }
 
 export const ConnectionExpireEmail = ({
-  fullName = "Viktor Hofte",
+  fullName = "",
   expiresAt = addDays(new Date(), 4).toISOString(),
   bankName = "Revolut",
   teamName = "Midday",
 }: Props) => {
-  const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, We wanted to inform you that our connection to your bank ${bankName} for your team ${teamName} will expire in ${formatDistance(new Date(expiresAt), new Date())}.`;
+  const firstName = fullName ? fullName.split(" ").at(0) : "";
+  const text = `${firstName ? `Hi ${firstName}, ` : ""}We wanted to inform you that our connection to your bank ${bankName} for your team ${teamName} will expire in ${formatDistance(new Date(expiresAt), new Date())}.`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -62,7 +62,7 @@ export const ConnectionExpireEmail = ({
             className={`font-medium ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            Hi {firstName},
+            {firstName ? `Hi ${firstName},` : "Hello,"}
           </span>
           <Text
             className={themeClasses.text}
