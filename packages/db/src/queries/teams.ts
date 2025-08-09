@@ -11,6 +11,7 @@ export const getTeamById = async (db: Database, id: string) => {
       email: teams.email,
       inboxId: teams.inboxId,
       plan: teams.plan,
+      // subscriptionStatus: teams.subscriptionStatus,
       baseCurrency: teams.baseCurrency,
       countryCode: teams.countryCode,
     })
@@ -42,6 +43,7 @@ export const updateTeamById = async (
       email: teams.email,
       inboxId: teams.inboxId,
       plan: teams.plan,
+      // subscriptionStatus: teams.subscriptionStatus,
       baseCurrency: teams.baseCurrency,
       countryCode: teams.countryCode,
     });

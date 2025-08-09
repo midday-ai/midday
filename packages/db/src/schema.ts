@@ -114,6 +114,15 @@ export const invoiceStatusEnum = pgEnum("invoice_status", [
 ]);
 
 export const plansEnum = pgEnum("plans", ["trial", "starter", "pro"]);
+export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "active",
+  "canceled",
+  "past_due",
+  "unpaid",
+  "trialing",
+  "incomplete",
+  "incomplete_expired",
+]);
 export const reportTypesEnum = pgEnum("reportTypes", [
   "profit",
   "revenue",
@@ -1245,6 +1254,7 @@ export const teams = pgTable(
       mode: "string",
     }),
     plan: plansEnum().default("trial").notNull(),
+    subscriptionStatus: subscriptionStatusEnum("subscription_status"),
   },
   (table) => [
     unique("teams_inbox_id_key").on(table.inboxId),

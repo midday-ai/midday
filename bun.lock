@@ -29,6 +29,7 @@
         "@midday/jobs": "workspace:*",
         "@midday/location": "workspace:*",
         "@midday/supabase": "workspace:*",
+        "@polar-sh/sdk": "^0.34.9",
         "@scalar/hono-api-reference": "^0.9.4",
         "@sindresorhus/slugify": "^2.2.1",
         "@trigger.dev/sdk": "4.0.0-v4-beta.26",
@@ -1031,7 +1032,7 @@
 
     "@polar-sh/nextjs": ["@polar-sh/nextjs@0.4.4", "", { "dependencies": { "@polar-sh/adapter-utils": "0.2.3", "@polar-sh/sdk": "^0.34.8" }, "peerDependencies": { "next": "^15.0.0 || ^15.2.0-canary.*" } }, "sha512-rjpGmR1/z7vGzLRzDNhjRP50dfh9xXW/zedRDL93tmFRl2QJSaZig0TPePe3wTTK0iOX0euLHPAF6AhyjfMcaw=="],
 
-    "@polar-sh/sdk": ["@polar-sh/sdk@0.33.2", "", { "dependencies": { "standardwebhooks": "^1.0.0" }, "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0", "zod": ">= 3" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-k/YDcwuPKlQdgJXEQkRBQY2ZFxzJHdSNE+Pqz3FMiWTC9hWk7eyfTI6fzJeYfMuhQnY801oujiOg3ZbYHxW8nw=="],
+    "@polar-sh/sdk": ["@polar-sh/sdk@0.34.9", "", { "dependencies": { "standardwebhooks": "^1.0.0", "zod": "^3.25.76" }, "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-+kzQ3IlO67+/eSC4kmbZbmqdPjmvAr8zjTsavyx/u5lqwrerutvhpDzCCBQMlFnEVgeXArF+Rf6FQKkqKrgpxA=="],
 
     "@popperjs/core": ["@popperjs/core@2.11.8", "", {}, "sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A=="],
 
@@ -4075,6 +4076,8 @@
 
     "@mdx-js/mdx/source-map": ["source-map@0.7.6", "", {}, "sha512-i5uvt8C3ikiWeNZSVZNWcfZPItFQOsYTUAOkcUPGd8DqDy1uOUikjt5dG+uRlwyvR108Fb9DOd4GvXfT0N2/uQ=="],
 
+    "@midday/dashboard/@polar-sh/sdk": ["@polar-sh/sdk@0.33.2", "", { "dependencies": { "standardwebhooks": "^1.0.0" }, "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0", "zod": ">= 3" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-k/YDcwuPKlQdgJXEQkRBQY2ZFxzJHdSNE+Pqz3FMiWTC9hWk7eyfTI6fzJeYfMuhQnY801oujiOg3ZbYHxW8nw=="],
+
     "@midday/jobs/ai": ["ai@5.0.2", "", { "dependencies": { "@ai-sdk/gateway": "1.0.0", "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.0", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4" } }, "sha512-Uk4lmwlr2b/4G9DUYCWYKcWz93xQ6p6AEeRZN+/AO9NbOyCm9axrDru26c83Ax8OB8IHUvoseA3CqaZkg9Z0Kg=="],
 
     "@midday/website/@team-plain/typescript-sdk": ["@team-plain/typescript-sdk@5.9.0", "", { "dependencies": { "@graphql-typed-document-node/core": "^3.2.0", "ajv": "^8.12.0", "ajv-formats": "^2.1.1", "graphql": "^16.6.0", "lodash.get": "^4.4.2", "zod": "3.22.4" } }, "sha512-AHSXyt1kDt74m9YKZBCRCd6cQjB8QjUNr9cehtR2QHzZ/8yXJPzawPJDqOQ3ms5KvwuYrBx2qT3e6C/zrQ5UtA=="],
@@ -4162,6 +4165,8 @@
     "@polar-sh/adapter-utils/@polar-sh/sdk": ["@polar-sh/sdk@0.34.8", "", { "dependencies": { "standardwebhooks": "^1.0.0", "zod": "^3.25.76" }, "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-9GVBaB0XlSxS/0GTPThPkWWb31vPOZr67onMC772dKjzRd7o9WJ9WTXY1d2btmFFoxqdxJutGxXptI3mmFl0aw=="],
 
     "@polar-sh/nextjs/@polar-sh/sdk": ["@polar-sh/sdk@0.34.8", "", { "dependencies": { "standardwebhooks": "^1.0.0", "zod": "^3.25.76" }, "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-9GVBaB0XlSxS/0GTPThPkWWb31vPOZr67onMC772dKjzRd7o9WJ9WTXY1d2btmFFoxqdxJutGxXptI3mmFl0aw=="],
+
+    "@polar-sh/sdk/zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
 
     "@poppinss/dumper/@sindresorhus/is": ["@sindresorhus/is@7.0.2", "", {}, "sha512-d9xRovfKNz1SKieM0qJdO+PQonjnnIfSNWfHYnBSJ9hkjm0ZPw6HlxscDXYstp3z+7V2GOFHc+J0CYrYTjqCJw=="],
 

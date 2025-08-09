@@ -1,4 +1,5 @@
 import { ManageSubscription } from "@/components/manage-subscription";
+import { Orders } from "@/components/orders";
 import { Plans } from "@/components/plans";
 import { trpc } from "@/trpc/server";
 import { getQueryClient } from "@/trpc/server";
@@ -27,6 +28,8 @@ export default async function Billing() {
           <Plans />
         </div>
       )}
+
+      <Orders />
     </div>
   );
 }
