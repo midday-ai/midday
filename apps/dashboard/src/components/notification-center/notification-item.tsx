@@ -103,25 +103,14 @@ export function NotificationItem({
 
     case "inbox":
       return (
-        <div
-          className={cn(
-            "flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary",
-            activity.status === "unread" && "bg-blue-50/50 dark:bg-blue-950/20",
-          )}
-        >
+        <div className="flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary">
           <Link
             className="flex items-between justify-between space-x-4 "
             onClick={() => setOpen(false)}
             href="/inbox"
           >
             <div>
-              <div
-                className={cn(
-                  "h-9 w-9 flex items-center justify-center space-y-0 border rounded-full",
-                  activity.status === "unread" &&
-                    "border-blue-200 dark:border-blue-800",
-                )}
-              >
+              <div className="h-9 w-9 flex items-center justify-center space-y-0 border rounded-full">
                 <Icons.Inbox2 />
               </div>
             </div>

@@ -86,7 +86,7 @@ export default {
     transactions_created: {
       name: "New Transactions",
       description: "Get notified when new transactions are imported",
-      "title#one": "New transaction detected",
+      "title#one": "New transaction from {name} {amount} on {date}",
       "title#other": "{count} new transactions added",
       "title_many#other": "{count} transactions imported",
       single_transaction: "New transaction from {name} {amount} on {date}",
