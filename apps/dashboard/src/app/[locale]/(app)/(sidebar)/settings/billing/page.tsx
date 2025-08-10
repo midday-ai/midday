@@ -35,7 +35,7 @@ export default async function Billing() {
         </div>
       )}
 
-      <Orders />
+      {(team?.plan !== "trial" || team?.canceledAt !== null) && <Orders />}
     </div>
   );
 }

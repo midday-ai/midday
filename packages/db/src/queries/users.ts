@@ -24,6 +24,7 @@ export const getUserById = async (db: Database, id: string) => {
         inboxId: teams.inboxId,
         createdAt: teams.createdAt,
         countryCode: teams.countryCode,
+        canceledAt: teams.canceledAt,
       },
     })
     .from(users)
