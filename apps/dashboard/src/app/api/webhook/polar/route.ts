@@ -15,7 +15,6 @@ export const POST = Webhooks({
           email: payload.data.customer.email ?? undefined,
           plan: getPlanByProductId(payload.data.productId) as "starter" | "pro",
           canceled_at: null,
-          subscription_status: "active",
         });
 
         break;
@@ -39,20 +38,10 @@ export const POST = Webhooks({
           break;
         }
 
-        // If the subscription is canceled, we need to update the team plan to trial
-        if (payload.data.status === "canceled") {
-          await updateTeamPlan(supabase, {
-            id: payload.data.metadata.teamId as string,
-            plan: "trial",
-          });
-
-          return;
-        }
-
-        // Subscription status: incomplete, incomplete_expired, trialing, active, past_due, canceled, unpaid
         await updateTeamPlan(supabase, {
           id: payload.data.metadata.teamId as string,
-          subscription_status: payload.data.status,
+          plan: "trial",
+          canceled_at: new Date().toISOString(),
         });
 
         break;
