@@ -36,6 +36,15 @@ type UpdateTeamPlanData = {
   plan?: "trial" | "starter" | "pro";
   email?: string | null;
   canceled_at?: string | null;
+  subscription_status?:
+    | "active"
+    | "canceled"
+    | "past_due"
+    | "unpaid"
+    | "trialing"
+    | "incomplete"
+    | "incomplete_expired"
+    | null;
 };
 
 export async function updateTeamPlan(

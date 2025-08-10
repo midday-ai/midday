@@ -4,6 +4,7 @@ import { apiKeysRouter } from "./api-keys";
 import { appsRouter } from "./apps";
 import { bankAccountsRouter } from "./bank-accounts";
 import { bankConnectionsRouter } from "./bank-connections";
+import { billingRouter } from "./billing";
 import { customersRouter } from "./customers";
 import { documentTagAssignmentsRouter } from "./document-tag-assignments";
 import { documentTagsRouter } from "./document-tags";
@@ -42,6 +43,7 @@ export const appRouter = createTRPCRouter({
   invoiceTemplate: invoiceTemplateRouter,
   metrics: metricsRouter,
   oauthApplications: oauthApplicationsRouter,
+  billing: billingRouter,
   tags: tagsRouter,
   team: teamRouter,
   trackerEntries: trackerEntriesRouter,
