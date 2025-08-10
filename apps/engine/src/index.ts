@@ -7,6 +7,7 @@ import {
 import accountRoutes from "./routes/accounts";
 import authRoutes from "./routes/auth";
 import connectionRoutes from "./routes/connections";
+import documentsRoutes from "./routes/documents";
 import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
 import ratesRoutes from "./routes/rates";
@@ -34,6 +35,7 @@ export const appRoutes = app
   .route("/institutions", institutionRoutes)
   .route("/auth", authRoutes)
   .route("/connections", connectionRoutes)
+  .route("/documents", documentsRoutes)
   .route("/health", healthRoutes)
   .route("/rates", ratesRoutes);
 
