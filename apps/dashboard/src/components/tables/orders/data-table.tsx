@@ -2,8 +2,11 @@
 
 import { useTRPC } from "@/trpc/client";
 import { formatDate } from "@/utils/format";
+import { Button } from "@midday/ui/button";
+import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { FormatAmount } from "../../format-amount";
 import { OrderStatus } from "../../order-status";
 import { ActionsMenu } from "./actions-menu";
@@ -12,27 +15,35 @@ import { OrdersTableHeader } from "./table-header";
 export function OrdersDataTable() {
   const trpc = useTRPC();
 
-  const { data } = useSuspenseQuery(
-    trpc.billing.orders.queryOptions({
-      pageSize: 12,
-    }),
+  const infiniteQueryOptions = trpc.billing.orders.infiniteQueryOptions(
+    {
+      pageSize: 15,
+    },
+    {
+      getNextPageParam: ({ meta }) => meta?.cursor,
+    },
   );
 
-  const orders = data?.data || [];
+  const { data, fetchNextPage, hasNextPage, isFetching } =
+    useSuspenseInfiniteQuery(infiniteQueryOptions);
+
+  const tableData = useMemo(() => {
+    return data?.pages.flatMap((page) => page?.data ?? []) ?? [];
+  }, [data]);
 
   return (
     <div className="w-full">
       <Table>
         <OrdersTableHeader />
         <TableBody>
-          {orders.length === 0 ? (
+          {tableData.length === 0 ? (
             <TableRow>
               <TableCell colSpan={5} className="h-32 text-center">
                 <p className="text-muted-foreground">No orders found</p>
               </TableCell>
             </TableRow>
           ) : (
-            orders.map((order) => (
+            tableData.map((order) => (
               <TableRow key={order.id} className="h-[45px]">
                 <TableCell className="w-[120px] text-sm text-muted-foreground">
                   {formatDate(
@@ -61,6 +72,18 @@ export function OrdersDataTable() {
           )}
         </TableBody>
       </Table>
+
+      {hasNextPage && (
+        <div className="flex items-center justify-center mt-6">
+          <Button
+            onClick={() => fetchNextPage()}
+            variant="outline"
+            className="w-full"
+          >
+            {isFetching ? <Spinner /> : "Load more"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

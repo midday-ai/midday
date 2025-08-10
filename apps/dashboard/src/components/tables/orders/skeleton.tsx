@@ -1,5 +1,6 @@
 import { Skeleton } from "@midday/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { OrdersTableHeader } from "./table-header";
 
 export function OrdersSkeleton() {
@@ -22,9 +23,7 @@ export function OrdersSkeleton() {
               <TableCell className="w-[140px] text-sm">
                 <Skeleton className="h-4 w-20" />
               </TableCell>
-              <TableCell className="w-[100px] text-right">
-                <Skeleton className="h-8 w-8 ml-auto" />
-              </TableCell>
+              <TableCell className="w-[100px] text-right" />
             </TableRow>
           ))}
         </TableBody>
