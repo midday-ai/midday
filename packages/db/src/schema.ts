@@ -1254,7 +1254,7 @@ export const teams = pgTable(
       mode: "string",
     }),
     plan: plansEnum().default("trial").notNull(),
-    subscriptionStatus: subscriptionStatusEnum("subscription_status"),
+    // subscriptionStatus: subscriptionStatusEnum("subscription_status"),
   },
   (table) => [
     unique("teams_inbox_id_key").on(table.inboxId),
