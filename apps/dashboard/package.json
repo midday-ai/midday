@@ -51,6 +51,7 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^12.18.1",
     "geist": "^1.4.2",
+    "jszip": "^3.10.1",
     "little-date": "^1.0.0",
     "lottie-react": "^2.4.1",
     "next": "15.4.5",

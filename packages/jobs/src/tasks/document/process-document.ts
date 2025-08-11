@@ -1,7 +1,7 @@
 import { getDb } from "@jobs/init";
 import { processDocumentSchema } from "@jobs/schema";
-import { convertToMarkdown } from "@jobs/utils/convert-to-markdown";
 import { updateDocumentByPath } from "@midday/db/queries";
+import { loadDocument } from "@midday/documents/loader";
 import { getContentSample } from "@midday/documents/utils";
 import { createClient } from "@midday/supabase/job";
 import { schemaTask } from "@trigger.dev/sdk";
@@ -46,10 +46,13 @@ export const processDocument = schemaTask({
         throw new Error("File not found");
       }
 
-      const document = await convertToMarkdown(fileData, filePath.join("/"));
+      const document = await loadDocument({
+        content: fileData,
+        metadata: { mimetype },
+      });
 
       if (!document) {
-        throw new Error("Document conversion failed");
+        throw new Error("Document not found");
       }
 
       const sample = getContentSample(document);

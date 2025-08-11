@@ -12,7 +12,7 @@ export async function convertToMarkdown(
     const file = new File([fileData], fileName, { type: fileData.type });
     formData.append("files", file);
 
-    const response = await client.documents["markdown-conversion"].$post({
+    const response = await client.documents["markdown"].$post({
       form: formData,
     });
 
