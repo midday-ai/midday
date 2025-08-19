@@ -88,6 +88,10 @@ export const enrichTransactions = schemaTask({
 
             if (!result || !transaction) {
               skippedResults++;
+              // Still mark the transaction as processed even if LLM result is invalid
+              if (transaction) {
+                noUpdateNeeded.push(transaction.id);
+              }
               continue;
             }
 
@@ -151,18 +155,80 @@ export const enrichTransactions = schemaTask({
             });
           }
 
-          // Return transaction IDs that were processed (updated or marked as enriched)
-          return [
-            ...updates.map((update) => update.transactionId),
+          // Ensure ALL transactions in the batch are marked as enrichment completed
+          // This is critical for UI loading states - enrichment_completed indicates the process finished, not success
+          const processedIds = new Set([
+            ...updates.map((u) => u.transactionId),
             ...noUpdateNeeded,
-          ];
+          ]);
+
+          const unprocessedTransactions = batch.filter(
+            (tx) => !processedIds.has(tx.id),
+          );
+
+          // Mark ANY remaining unprocessed transactions as enriched (process completed, even if no data found)
+          if (unprocessedTransactions.length > 0) {
+            await markTransactionsAsEnriched(
+              getDb(),
+              unprocessedTransactions.map((tx) => tx.id),
+            );
+            totalEnriched += unprocessedTransactions.length;
+
+            logger.info(
+              "Marked remaining unprocessed transactions as completed",
+              {
+                count: unprocessedTransactions.length,
+                reason: "enrichment_process_finished",
+                teamId,
+              },
+            );
+          }
+
+          // Return ALL transaction IDs from the batch (all should now be marked as enriched)
+          return batch.map((tx) => tx.id);
         } catch (error) {
           logger.error("Failed to enrich transaction batch", {
             error: error instanceof Error ? error.message : "Unknown error",
             batchSize: batch.length,
             teamId,
           });
-          throw error;
+
+          // Even if enrichment fails, mark all transactions as completed to prevent infinite loading
+          // The enrichment_completed field indicates process completion, not success
+          try {
+            await markTransactionsAsEnriched(
+              getDb(),
+              batch.map((tx) => tx.id),
+            );
+            totalEnriched += batch.length;
+
+            logger.info(
+              "Marked failed batch transactions as completed to prevent infinite loading",
+              {
+                count: batch.length,
+                reason: "enrichment_process_failed_but_completed",
+                teamId,
+              },
+            );
+
+            // Return the transaction IDs even though enrichment failed
+            return batch.map((tx) => tx.id);
+          } catch (markError) {
+            logger.error(
+              "Failed to mark transactions as completed after enrichment error",
+              {
+                markError:
+                  markError instanceof Error
+                    ? markError.message
+                    : "Unknown error",
+                originalError:
+                  error instanceof Error ? error.message : "Unknown error",
+                batchSize: batch.length,
+                teamId,
+              },
+            );
+            throw error; // Re-throw original error
+          }
         }
       },
     );
