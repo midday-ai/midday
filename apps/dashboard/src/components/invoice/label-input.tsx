@@ -25,7 +25,7 @@ export function LabelInput({ name, className, onSave }: Props) {
       suppressContentEditableWarning
       onBlur={(e) => {
         const newValue = e.currentTarget.textContent || "";
-        setValue(name, newValue, { shouldValidate: true });
+        setValue(name, newValue, { shouldValidate: true, shouldDirty: true });
 
         // Only call onSave if the value has changed
         if (newValue !== value) {

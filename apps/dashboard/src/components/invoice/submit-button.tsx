@@ -18,7 +18,7 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { SubmitButton as BaseSubmitButton } from "@midday/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, setHours, startOfTomorrow } from "date-fns";
 import * as React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -31,30 +31,14 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   const { watch, setValue, formState } = useFormContext();
   const { data: user } = useUserQuery();
 
-  // Get current date/time rounded to nearest hour
+  // Get next day date/time rounded to nearest hour
   const getDefaultScheduleDateTime = () => {
     const now = new Date();
     const roundedHour =
       now.getMinutes() >= 30 ? now.getHours() + 1 : now.getHours();
-    const roundedDate = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      roundedHour,
-      0,
-      0,
-      0,
-    );
-    return roundedDate;
-  };
 
-  // Initialize with existing scheduledAt value if available, otherwise use default
-  const getInitialScheduleDateTime = () => {
-    const existingScheduledAt = watch("scheduledAt");
-    if (existingScheduledAt) {
-      return new Date(existingScheduledAt);
-    }
-    return getDefaultScheduleDateTime();
+    // Start with tomorrow at midnight, then set the rounded hour
+    return setHours(startOfTomorrow(), roundedHour);
   };
 
   const [scheduleDate, setScheduleDate] = React.useState<Date | undefined>(
@@ -150,6 +134,7 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
 
     setValue("template.deliveryType", deliveryType, {
       shouldValidate: true,
+      shouldDirty: true,
     });
 
     // Handle scheduledAt based on delivery type
@@ -160,6 +145,7 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
       // Clear scheduledAt for non-scheduled delivery types
       setValue("scheduledAt", null, {
         shouldValidate: true,
+        shouldDirty: true,
       });
     }
   };
