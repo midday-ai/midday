@@ -23,8 +23,8 @@ export const notificationsRouter = createTRPCRouter({
 
   updateStatus: protectedProcedure
     .input(updateNotificationStatusSchema)
-    .mutation(async ({ ctx: { db }, input }) => {
-      return updateActivityStatus(db, input.activityId, input.status);
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return updateActivityStatus(db, input.activityId, input.status, teamId!);
     }),
 
   updateAllStatus: protectedProcedure

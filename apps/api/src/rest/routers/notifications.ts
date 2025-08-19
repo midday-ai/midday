@@ -105,10 +105,16 @@ app.openapi(
   }),
   async (c) => {
     const db = c.get("db");
+    const teamId = c.get("teamId");
     const { notificationId } = c.req.valid("param");
     const { status } = c.req.valid("json");
 
-    const result = await updateActivityStatus(db, notificationId, status);
+    const result = await updateActivityStatus(
+      db,
+      notificationId,
+      status,
+      teamId,
+    );
 
     return c.json(
       validateResponse({ data: result }, notificationResponseSchema),

@@ -38,11 +38,12 @@ export async function updateActivityStatus(
   db: Database,
   activityId: string,
   status: (typeof activityStatusEnum.enumValues)[number],
+  teamId: string,
 ) {
   const [result] = await db
     .update(activities)
     .set({ status })
-    .where(eq(activities.id, activityId))
+    .where(and(eq(activities.id, activityId), eq(activities.teamId, teamId)))
     .returning();
 
   return result;
