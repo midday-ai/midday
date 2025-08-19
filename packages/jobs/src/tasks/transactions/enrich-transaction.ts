@@ -127,16 +127,19 @@ export const enrichTransactions = schemaTask({
             );
           }
 
+          // Track transactions enriched in this batch to avoid double counting
+          let batchEnrichedCount = 0;
+
           // Execute all updates
           if (updates.length > 0) {
             await updateTransactionEnrichments(getDb(), updates);
-            totalEnriched += updates.length;
+            batchEnrichedCount += updates.length;
           }
 
           // Mark transactions that don't need updates as enriched
           if (noUpdateNeeded.length > 0) {
             await markTransactionsAsEnriched(getDb(), noUpdateNeeded);
-            totalEnriched += noUpdateNeeded.length;
+            batchEnrichedCount += noUpdateNeeded.length;
           }
 
           const totalProcessed = updates.length + noUpdateNeeded.length;
@@ -172,7 +175,7 @@ export const enrichTransactions = schemaTask({
               getDb(),
               unprocessedTransactions.map((tx) => tx.id),
             );
-            totalEnriched += unprocessedTransactions.length;
+            batchEnrichedCount += unprocessedTransactions.length;
 
             logger.info(
               "Marked remaining unprocessed transactions as completed",
@@ -183,6 +186,9 @@ export const enrichTransactions = schemaTask({
               },
             );
           }
+
+          // Add the actual count of enriched transactions from this batch
+          totalEnriched += batchEnrichedCount;
 
           // Return ALL transaction IDs from the batch (all should now be marked as enriched)
           return batch.map((tx) => tx.id);
@@ -200,16 +206,21 @@ export const enrichTransactions = schemaTask({
               getDb(),
               batch.map((tx) => tx.id),
             );
-            totalEnriched += batch.length;
+            // Count only the batch size, but don't add to totalEnriched here to avoid double-counting
+            // The batchEnrichedCount already tracks transactions processed in this batch
+            const errorBatchEnrichedCount = batch.length;
 
             logger.info(
               "Marked failed batch transactions as completed to prevent infinite loading",
               {
-                count: batch.length,
+                count: errorBatchEnrichedCount,
                 reason: "enrichment_process_failed_but_completed",
                 teamId,
               },
             );
+
+            // Add to totalEnriched only now, avoiding double-counting
+            totalEnriched += errorBatchEnrichedCount;
 
             // Return the transaction IDs even though enrichment failed
             return batch.map((tx) => tx.id);
