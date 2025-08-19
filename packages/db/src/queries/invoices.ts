@@ -19,6 +19,7 @@ import {
 } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 import { v4 as uuidv4 } from "uuid";
+import { logActivity } from "../utils/log-activity";
 
 export type Template = {
   customerLabel: string;
@@ -613,7 +614,7 @@ export async function duplicateInvoice(
   const draftId = uuidv4();
   const token = await generateToken(draftId);
 
-  return draftInvoice(db, {
+  const result = await draftInvoice(db, {
     id: draftId,
     token,
     userId,
@@ -645,6 +646,21 @@ export async function duplicateInvoice(
     // @ts-expect-error - JSONB
     lineItems: invoice.lineItems,
   });
+
+  logActivity({
+    db,
+    teamId,
+    userId,
+    type: "invoice_duplicated",
+    metadata: {
+      originalInvoiceId: id,
+      newInvoiceId: result?.id,
+      newInvoiceNumber: result?.invoiceNumber,
+      originalInvoiceNumber: invoice.invoiceNumber,
+    },
+  });
+
+  return result;
 }
 
 export type UpdateInvoiceParams = {
@@ -656,16 +672,48 @@ export type UpdateInvoiceParams = {
   scheduledAt?: string | null;
   scheduledJobId?: string | null;
   teamId: string;
+  userId?: string;
 };
 
 export async function updateInvoice(db: Database, params: UpdateInvoiceParams) {
-  const { id, teamId, ...rest } = params;
+  const { id, teamId, userId, ...rest } = params;
 
   const [result] = await db
     .update(invoices)
     .set(rest)
     .where(and(eq(invoices.id, id), eq(invoices.teamId, teamId)))
     .returning();
+
+  // Log activity if not draft
+  if (rest.status !== "draft") {
+    let activityType: string | null = null;
+    let priority: number | null = null;
+
+    if (rest.status === "paid") {
+      activityType = "invoice_paid";
+      priority = 3;
+    } else if (rest.status === "canceled") {
+      activityType = "invoice_cancelled";
+      priority = 3;
+    }
+
+    if (activityType) {
+      logActivity({
+        db,
+        teamId,
+        type: activityType,
+        priority,
+        userId,
+        metadata: {
+          recordId: id,
+          invoiceNumber: result?.invoiceNumber,
+          customerName: result?.customerName,
+          newStatus: rest.status,
+          paidAt: rest.paidAt,
+        },
+      });
+    }
+  }
 
   return result;
 }

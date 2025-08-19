@@ -14,6 +14,8 @@ export const createActivitySchema = z.object({
     "invoice_reminder_sent",
     "invoice_cancelled",
     "invoice_created",
+    "document_uploaded",
+    "invoice_duplicated",
   ]),
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
