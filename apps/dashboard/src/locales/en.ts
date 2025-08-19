@@ -83,6 +83,11 @@ export default {
     completed: "Completed",
   },
   notifications: {
+    categories: {
+      transactions: "Transactions",
+      invoices: "Invoices",
+      inbox: "Inbox",
+    },
     transactions_created: {
       name: "New Transactions",
       description: "Get notified when new transactions are imported",
@@ -92,7 +97,7 @@ export default {
       single_transaction: "New transaction from {name} {amount} on {date}",
     },
     invoice_paid: {
-      name: "Invoice Payments",
+      name: "Paid",
       description: "Get notified when invoices are paid",
       title: "Invoice payment received",
       subtitle: "Your invoice has been paid",
@@ -105,14 +110,14 @@ export default {
       automatic: "Payment received for invoice {invoiceNumber}",
     },
     invoice_overdue: {
-      name: "Overdue Invoices",
+      name: "Overdue",
       description: "Get notified when invoices become overdue",
       title: "Invoice is overdue",
       subtitle: "Payment is past due date",
       with_number: "Invoice {invoiceNumber} is now overdue",
     },
     invoice_scheduled: {
-      name: "Invoice Scheduled",
+      name: "Scheduled",
       description: "Get notified when invoices are scheduled for sending",
       title: "Invoice scheduled",
       subtitle: "Invoice has been scheduled for automatic delivery",
@@ -123,7 +128,7 @@ export default {
       simple: "Invoice {invoiceNumber} has been scheduled",
     },
     invoice_sent: {
-      name: "Invoice Sent",
+      name: "Sent",
       description: "Get notified when invoices are successfully sent",
       title: "Invoice sent",
       subtitle: "Invoice has been delivered to customer",
@@ -131,7 +136,7 @@ export default {
       without_customer: "Invoice {invoiceNumber} has been sent",
     },
     invoice_reminder_sent: {
-      name: "Invoice Reminder Sent",
+      name: "Reminder Sent",
       description: "Get notified when invoice reminders are sent",
       title: "Invoice reminder sent",
       subtitle: "Payment reminder has been sent to customer",
@@ -141,7 +146,7 @@ export default {
     },
 
     invoice_cancelled: {
-      name: "Invoice Cancelled",
+      name: "Cancelled",
       description: "Get notified when invoices are cancelled",
       title: "Invoice cancelled",
       subtitle: "Invoice has been cancelled",
@@ -150,7 +155,7 @@ export default {
       without_customer: "Invoice {invoiceNumber} has been cancelled",
     },
     invoice_created: {
-      name: "Invoice Created",
+      name: "Created",
       description: "Get notified when new invoices are created",
       title: "Invoice created",
       subtitle: "A new invoice has been created",

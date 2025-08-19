@@ -242,7 +242,6 @@
         "@midday/cache": "workspace:*",
         "@midday/encryption": "workspace:*",
         "@midday/invoice": "workspace:*",
-        "@midday/notifications": "workspace:*",
         "camelcase-keys": "^9.1.3",
         "drizzle-orm": "^0.44.2",
         "postgres": "^3.4.7",

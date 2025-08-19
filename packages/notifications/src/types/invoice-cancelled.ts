@@ -13,7 +13,7 @@ export const invoiceCancelled: NotificationHandler = {
     source: "user",
     priority: 3,
     metadata: {
-      invoiceId: data.invoiceId,
+      recordId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
       customerName: data.customerName,
       userName: user.full_name,

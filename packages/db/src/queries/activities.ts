@@ -57,8 +57,21 @@ export async function updateAllActivitiesStatus(
   const conditions = [
     eq(activities.teamId, teamId),
     eq(activities.userId, options.userId),
-    ne(activities.status, status),
   ];
+
+  // Only update specific statuses based on the target status
+  if (status === "archived") {
+    // When archiving, update unread and read notifications
+    conditions.push(inArray(activities.status, ["unread", "read"]));
+  } else if (status === "read") {
+    // When marking as read, only update unread notifications (never archived)
+    conditions.push(eq(activities.status, "unread"));
+  } else {
+    // For other statuses, use the original logic but exclude archived
+    conditions.push(
+      and(ne(activities.status, status), ne(activities.status, "archived")),
+    );
+  }
 
   const result = await db
     .update(activities)

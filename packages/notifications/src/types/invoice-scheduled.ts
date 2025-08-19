@@ -13,7 +13,7 @@ export const invoiceScheduled: NotificationHandler = {
     source: "system",
     priority: 3,
     metadata: {
-      invoiceId: data.invoiceId,
+      recordId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
       customerName: data.customerName,
       scheduledAt: data.scheduledAt,

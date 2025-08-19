@@ -19,8 +19,19 @@ export function useNotifications() {
     trpc.notifications.list.queryOptions({
       maxPriority: 3, // Only fetch notifications (priority <= 3)
       pageSize: 20,
+      status: ["unread", "read"], // Exclude archived notifications from query
     }),
   );
+
+  // Separate query for archived notifications
+  const { data: archivedActivitiesData, isLoading: archivedIsLoading } =
+    useQuery(
+      trpc.notifications.list.queryOptions({
+        maxPriority: 3,
+        pageSize: 20,
+        status: "archived", // Only archived notifications
+      }),
+    );
 
   // Real-time subscription for activities filtered by user_id
   useRealtime({
@@ -28,11 +39,15 @@ export function useNotifications() {
     event: "INSERT",
     table: "activities",
     filter: `user_id=eq.${user?.id}`,
-    onEvent: () => {
-      // Invalidate and refetch notifications when activities change
-      queryClient.invalidateQueries({
-        queryKey: trpc.notifications.list.queryKey(),
-      });
+    onEvent: (payload) => {
+      // Only handle new notifications (priority <= 3), not archived updates
+      const newRecord = payload?.new as any;
+      if (newRecord?.priority <= 3) {
+        // Invalidate both inbox and archived queries
+        queryClient.invalidateQueries({
+          queryKey: trpc.notifications.list.queryKey(),
+        });
+      }
     },
   });
 
@@ -45,21 +60,52 @@ export function useNotifications() {
           queryKey: trpc.notifications.list.queryKey(),
         });
 
-        // Snapshot the previous value
-        const previousData = queryClient.getQueryData(
-          trpc.notifications.list.queryKey({
-            maxPriority: 3,
-            pageSize: 20,
-          }),
-        );
+        // Define query keys for both inbox and archived
+        const inboxQueryKey = trpc.notifications.list.queryKey({
+          maxPriority: 3,
+          pageSize: 20,
+          status: ["unread", "read"],
+        });
 
-        // Optimistically update the cache
-        queryClient.setQueryData(
-          trpc.notifications.list.queryKey({
-            maxPriority: 3,
-            pageSize: 20,
-          }),
-          (old) => {
+        const archivedQueryKey = trpc.notifications.list.queryKey({
+          maxPriority: 3,
+          pageSize: 20,
+          status: "archived",
+        });
+
+        // Snapshot both query states
+        const previousInboxData = queryClient.getQueryData(inboxQueryKey);
+        const previousArchivedData = queryClient.getQueryData(archivedQueryKey);
+
+        if (variables.status === "archived") {
+          // Moving from inbox to archived
+          let notificationToMove: any = null;
+
+          // Remove from inbox
+          queryClient.setQueryData(inboxQueryKey, (old) => {
+            if (!old?.data) return old;
+
+            const filteredData = old.data.filter((notification) => {
+              if (notification.id === variables.activityId) {
+                notificationToMove = { ...notification, status: "archived" };
+                return false;
+              }
+              return true;
+            });
+
+            return { ...old, data: filteredData };
+          });
+
+          // Add to archived (if we found the notification)
+          if (notificationToMove) {
+            queryClient.setQueryData(archivedQueryKey, (old) => {
+              if (!old?.data) return { data: [notificationToMove] };
+              return { ...old, data: [notificationToMove, ...old.data] };
+            });
+          }
+        } else {
+          // For other status changes (like unread -> read), just update the inbox
+          queryClient.setQueryData(inboxQueryKey, (old) => {
             if (!old?.data) return old;
 
             return {
@@ -70,29 +116,31 @@ export function useNotifications() {
                   : notification,
               ),
             };
-          },
-        );
+          });
+        }
 
-        // Return a context object with the snapshotted value
-        return { previousData };
+        // Return context for rollback
+        return {
+          previousInboxData,
+          previousArchivedData,
+          inboxQueryKey,
+          archivedQueryKey,
+        };
       },
       onError: (_, __, context) => {
-        // If the mutation fails, use the context returned from onMutate to roll back
-        if (context?.previousData) {
+        // Rollback both queries if mutation fails
+        if (context?.previousInboxData) {
           queryClient.setQueryData(
-            trpc.notifications.list.queryKey({
-              maxPriority: 3,
-              pageSize: 20,
-            }),
-            context.previousData,
+            context.inboxQueryKey,
+            context.previousInboxData,
           );
         }
-      },
-      onSettled: () => {
-        // Always refetch after error or success to ensure we have the latest data
-        queryClient.invalidateQueries({
-          queryKey: trpc.notifications.list.queryKey(),
-        });
+        if (context?.previousArchivedData) {
+          queryClient.setQueryData(
+            context.archivedQueryKey,
+            context.previousArchivedData,
+          );
+        }
       },
     }),
   );
@@ -105,21 +153,49 @@ export function useNotifications() {
           queryKey: trpc.notifications.list.queryKey(),
         });
 
-        // Snapshot the previous value
-        const previousData = queryClient.getQueryData(
-          trpc.notifications.list.queryKey({
-            maxPriority: 3,
-            pageSize: 20,
-          }),
-        );
+        // Define query keys for both inbox and archived
+        const inboxQueryKey = trpc.notifications.list.queryKey({
+          maxPriority: 3,
+          pageSize: 20,
+          status: ["unread", "read"],
+        });
 
-        // Optimistically update the cache - update all notifications to the new status
-        queryClient.setQueryData(
-          trpc.notifications.list.queryKey({
-            maxPriority: 3,
-            pageSize: 20,
-          }),
-          (old) => {
+        const archivedQueryKey = trpc.notifications.list.queryKey({
+          maxPriority: 3,
+          pageSize: 20,
+          status: "archived",
+        });
+
+        // Snapshot both query states
+        const previousInboxData = queryClient.getQueryData(inboxQueryKey);
+        const previousArchivedData = queryClient.getQueryData(archivedQueryKey);
+
+        if (variables.status === "archived") {
+          // Moving all inbox notifications to archived
+          let notificationsToMove: any[] = [];
+
+          // Clear inbox and collect notifications to move
+          queryClient.setQueryData(inboxQueryKey, (old) => {
+            if (!old?.data) return old;
+
+            notificationsToMove = old.data.map((notification) => ({
+              ...notification,
+              status: "archived",
+            }));
+
+            return { ...old, data: [] };
+          });
+
+          // Add all to archived
+          if (notificationsToMove.length > 0) {
+            queryClient.setQueryData(archivedQueryKey, (old) => {
+              if (!old?.data) return { data: notificationsToMove };
+              return { ...old, data: [...notificationsToMove, ...old.data] };
+            });
+          }
+        } else if (variables.status === "read") {
+          // Update all unread to read in inbox (don't move between queries)
+          queryClient.setQueryData(inboxQueryKey, (old) => {
             if (!old?.data) return old;
 
             return {
@@ -129,35 +205,38 @@ export function useNotifications() {
                 status: variables.status,
               })),
             };
-          },
-        );
+          });
+        }
 
-        // Return a context object with the snapshotted value
-        return { previousData };
+        // Return context for rollback
+        return {
+          previousInboxData,
+          previousArchivedData,
+          inboxQueryKey,
+          archivedQueryKey,
+        };
       },
       onError: (_, __, context) => {
-        // If the mutation fails, use the context returned from onMutate to roll back
-        if (context?.previousData) {
+        // Rollback both queries if mutation fails
+        if (context?.previousInboxData) {
           queryClient.setQueryData(
-            trpc.notifications.list.queryKey({
-              maxPriority: 3,
-              pageSize: 20,
-            }),
-            context.previousData,
+            context.inboxQueryKey,
+            context.previousInboxData,
           );
         }
-      },
-      onSettled: () => {
-        // Always refetch after error or success to ensure we have the latest data
-        queryClient.invalidateQueries({
-          queryKey: trpc.notifications.list.queryKey(),
-        });
+        if (context?.previousArchivedData) {
+          queryClient.setQueryData(
+            context.archivedQueryKey,
+            context.previousArchivedData,
+          );
+        }
       },
     }),
   );
 
   // Return notification activities directly without transformation
   const notifications = activitiesData?.data || [];
+  const archivedNotifications = archivedActivitiesData?.data || [];
 
   // Mark a single message as read (archived)
   const markMessageAsRead = useCallback(
@@ -191,9 +270,10 @@ export function useNotifications() {
   );
 
   return {
-    isLoading,
+    isLoading: isLoading || archivedIsLoading,
     error,
-    notifications,
+    notifications, // Main notifications (unread/read) - already filtered by query
+    archived: archivedNotifications, // Archived notifications from separate query
     hasUnseenNotifications,
     markMessageAsRead,
     markAllMessagesAsRead,

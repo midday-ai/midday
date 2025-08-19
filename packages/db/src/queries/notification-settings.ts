@@ -136,6 +136,8 @@ export async function getUserNotificationPreferences(
     type: string;
     channels: NotificationChannel[];
     settings: { channel: NotificationChannel; enabled: boolean }[];
+    category?: string;
+    order?: number;
   }[]
 > {
   const userSettings = await getNotificationSettings(db, { userId, teamId });
@@ -146,6 +148,8 @@ export async function getUserNotificationPreferences(
   return notificationTypes.map((notificationType) => ({
     type: notificationType.type,
     channels: notificationType.channels,
+    category: notificationType.category,
+    order: notificationType.order,
     settings: notificationType.channels.map((channel) => {
       const setting = userSettings.find(
         (s) =>

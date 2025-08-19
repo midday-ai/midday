@@ -18,7 +18,7 @@ export const invoicePaid: NotificationHandler = {
     source: data.source === "manual" ? "user" : "system",
     priority: 3,
     metadata: {
-      invoiceId: data.invoiceId,
+      recordId: data.invoiceId,
       invoiceNumber: data.invoiceNumber,
       customerName: data.customerName,
       paidAt: data.paidAt,

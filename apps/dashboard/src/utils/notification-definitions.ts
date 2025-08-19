@@ -57,3 +57,30 @@ export function getNotificationDisplayInfoWithFallback(
     description: `Notifications for ${type.replace(/_/g, " ")}`,
   };
 }
+
+// Helper function to get category display title from i18n
+export function getCategoryDisplayTitle(
+  category: string,
+  t: ReturnType<typeof useI18n>,
+): string {
+  try {
+    // @ts-expect-error - next-international typing might be strict
+    const categoryTitle = t(`notifications.categories.${category}`);
+
+    // If the translation key doesn't exist, t() will return the key itself
+    // Check if we got actual translation or just the key back
+    if (categoryTitle.includes("notifications.categories.")) {
+      // Fallback: capitalize first letter and replace underscores with spaces
+      return (
+        category.charAt(0).toUpperCase() + category.slice(1).replace(/_/g, " ")
+      );
+    }
+
+    return categoryTitle;
+  } catch {
+    // Fallback for unknown categories
+    return (
+      category.charAt(0).toUpperCase() + category.slice(1).replace(/_/g, " ")
+    );
+  }
+}
