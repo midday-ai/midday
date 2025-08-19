@@ -150,6 +150,7 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
 
     setValue("template.deliveryType", deliveryType, {
       shouldValidate: true,
+      shouldDirty: true,
     });
 
     // Handle scheduledAt based on delivery type
@@ -160,6 +161,7 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
       // Clear scheduledAt for non-scheduled delivery types
       setValue("scheduledAt", null, {
         shouldValidate: true,
+        shouldDirty: true,
       });
     }
   };
