@@ -63,6 +63,9 @@ export const enrichTransactions = schemaTask({
         const transactionData = prepareTransactionData(batch);
         const prompt = generateEnrichmentPrompt(transactionData, batch);
 
+        // Track transactions enriched in this batch to avoid double counting
+        let batchEnrichedCount = 0;
+
         try {
           const { object } = await generateObject({
             model: google("gemini-2.5-flash-lite"),
@@ -88,6 +91,10 @@ export const enrichTransactions = schemaTask({
 
             if (!result || !transaction) {
               skippedResults++;
+              // Still mark the transaction as processed even if LLM result is invalid
+              if (transaction) {
+                noUpdateNeeded.push(transaction.id);
+              }
               continue;
             }
 
@@ -126,13 +133,13 @@ export const enrichTransactions = schemaTask({
           // Execute all updates
           if (updates.length > 0) {
             await updateTransactionEnrichments(getDb(), updates);
-            totalEnriched += updates.length;
+            batchEnrichedCount += updates.length;
           }
 
           // Mark transactions that don't need updates as enriched
           if (noUpdateNeeded.length > 0) {
             await markTransactionsAsEnriched(getDb(), noUpdateNeeded);
-            totalEnriched += noUpdateNeeded.length;
+            batchEnrichedCount += noUpdateNeeded.length;
           }
 
           const totalProcessed = updates.length + noUpdateNeeded.length;
@@ -151,18 +158,93 @@ export const enrichTransactions = schemaTask({
             });
           }
 
-          // Return transaction IDs that were processed (updated or marked as enriched)
-          return [
-            ...updates.map((update) => update.transactionId),
+          // Ensure ALL transactions in the batch are marked as enrichment completed
+          // This is critical for UI loading states - enrichment_completed indicates the process finished, not success
+          const processedIds = new Set([
+            ...updates.map((u) => u.transactionId),
             ...noUpdateNeeded,
-          ];
+          ]);
+
+          const unprocessedTransactions = batch.filter(
+            (tx) => !processedIds.has(tx.id),
+          );
+
+          // Mark ANY remaining unprocessed transactions as enriched (process completed, even if no data found)
+          if (unprocessedTransactions.length > 0) {
+            await markTransactionsAsEnriched(
+              getDb(),
+              unprocessedTransactions.map((tx) => tx.id),
+            );
+            batchEnrichedCount += unprocessedTransactions.length;
+
+            logger.info(
+              "Marked remaining unprocessed transactions as completed",
+              {
+                count: unprocessedTransactions.length,
+                reason: "enrichment_process_finished",
+                teamId,
+              },
+            );
+          }
+
+          // Add the actual count of enriched transactions from this batch
+          totalEnriched += batchEnrichedCount;
+
+          // Return ALL transaction IDs from the batch (all should now be marked as enriched)
+          // Defensive handling for potentially falsy transactions
+          return batch.filter((tx) => tx?.id).map((tx) => tx.id);
         } catch (error) {
           logger.error("Failed to enrich transaction batch", {
             error: error instanceof Error ? error.message : "Unknown error",
             batchSize: batch.length,
             teamId,
           });
-          throw error;
+
+          // Even if enrichment fails, mark all transactions as completed to prevent infinite loading
+          // The enrichment_completed field indicates process completion, not success
+          try {
+            // Defensive handling for potentially falsy transactions
+            const validTransactionIds = batch
+              .filter((tx) => tx?.id)
+              .map((tx) => tx.id);
+
+            await markTransactionsAsEnriched(getDb(), validTransactionIds);
+
+            logger.info(
+              "Marked failed batch transactions as completed to prevent infinite loading",
+              {
+                count: validTransactionIds.length,
+                reason: "enrichment_process_failed_but_completed",
+                teamId,
+              },
+            );
+
+            // Only add transactions that weren't already counted in batchEnrichedCount
+            // If batchEnrichedCount > 0, some transactions were already processed and counted
+            const uncountedTransactions =
+              validTransactionIds.length - batchEnrichedCount;
+            if (uncountedTransactions > 0) {
+              totalEnriched += uncountedTransactions;
+            }
+
+            // Return the valid transaction IDs even though enrichment failed
+            return validTransactionIds;
+          } catch (markError) {
+            logger.error(
+              "Failed to mark transactions as completed after enrichment error",
+              {
+                markError:
+                  markError instanceof Error
+                    ? markError.message
+                    : "Unknown error",
+                originalError:
+                  error instanceof Error ? error.message : "Unknown error",
+                batchSize: batch.length,
+                teamId,
+              },
+            );
+            throw error; // Re-throw original error
+          }
         }
       },
     );
