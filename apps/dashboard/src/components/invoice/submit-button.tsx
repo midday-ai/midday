@@ -18,7 +18,7 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { SubmitButton as BaseSubmitButton } from "@midday/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, setHours, startOfTomorrow } from "date-fns";
 import * as React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -36,16 +36,9 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     const now = new Date();
     const roundedHour =
       now.getMinutes() >= 30 ? now.getHours() + 1 : now.getHours();
-    const roundedDate = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() + 1, // Set to next day
-      roundedHour,
-      0,
-      0,
-      0,
-    );
-    return roundedDate;
+
+    // Start with tomorrow at midnight, then set the rounded hour
+    return setHours(startOfTomorrow(), roundedHour);
   };
 
   const [scheduleDate, setScheduleDate] = React.useState<Date | undefined>(
