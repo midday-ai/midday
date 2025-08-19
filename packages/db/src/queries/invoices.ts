@@ -1,5 +1,11 @@
 import type { Database } from "@db/client";
-import { customers, invoiceStatusEnum, invoices, teams } from "@db/schema";
+import {
+  type activityTypeEnum,
+  customers,
+  invoiceStatusEnum,
+  invoices,
+  teams,
+} from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { generateToken } from "@midday/invoice/token";
 import type { EditorDoc, LineItem } from "@midday/invoice/types";
@@ -656,7 +662,6 @@ export async function duplicateInvoice(
       originalInvoiceId: id,
       newInvoiceId: result?.id,
       newInvoiceNumber: result?.invoiceNumber,
-      originalInvoiceNumber: invoice.invoiceNumber,
     },
   });
 
@@ -672,7 +677,7 @@ export type UpdateInvoiceParams = {
   scheduledAt?: string | null;
   scheduledJobId?: string | null;
   teamId: string;
-  userId?: string;
+  userId: string;
 };
 
 export async function updateInvoice(db: Database, params: UpdateInvoiceParams) {
@@ -686,8 +691,9 @@ export async function updateInvoice(db: Database, params: UpdateInvoiceParams) {
 
   // Log activity if not draft
   if (rest.status !== "draft") {
-    let activityType: string | null = null;
-    let priority: number | null = null;
+    let activityType: (typeof activityTypeEnum.enumValues)[number] | null =
+      null;
+    let priority: number | undefined = undefined;
 
     if (rest.status === "paid") {
       activityType = "invoice_paid";
@@ -701,9 +707,9 @@ export async function updateInvoice(db: Database, params: UpdateInvoiceParams) {
       logActivity({
         db,
         teamId,
+        userId,
         type: activityType,
         priority,
-        userId,
         metadata: {
           recordId: id,
           invoiceNumber: result?.invoiceNumber,
