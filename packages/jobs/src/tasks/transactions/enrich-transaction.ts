@@ -63,6 +63,9 @@ export const enrichTransactions = schemaTask({
         const transactionData = prepareTransactionData(batch);
         const prompt = generateEnrichmentPrompt(transactionData, batch);
 
+        // Track transactions enriched in this batch to avoid double counting
+        let batchEnrichedCount = 0;
+
         try {
           const { object } = await generateObject({
             model: google("gemini-2.5-flash-lite"),
@@ -126,9 +129,6 @@ export const enrichTransactions = schemaTask({
               },
             );
           }
-
-          // Track transactions enriched in this batch to avoid double counting
-          let batchEnrichedCount = 0;
 
           // Execute all updates
           if (updates.length > 0) {
@@ -204,8 +204,10 @@ export const enrichTransactions = schemaTask({
           // The enrichment_completed field indicates process completion, not success
           try {
             // Defensive handling for potentially falsy transactions
-            const validTransactionIds = batch.filter((tx) => tx?.id).map((tx) => tx.id);
-            
+            const validTransactionIds = batch
+              .filter((tx) => tx?.id)
+              .map((tx) => tx.id);
+
             await markTransactionsAsEnriched(getDb(), validTransactionIds);
 
             logger.info(
@@ -219,7 +221,8 @@ export const enrichTransactions = schemaTask({
 
             // Only add transactions that weren't already counted in batchEnrichedCount
             // If batchEnrichedCount > 0, some transactions were already processed and counted
-            const uncountedTransactions = validTransactionIds.length - batchEnrichedCount;
+            const uncountedTransactions =
+              validTransactionIds.length - batchEnrichedCount;
             if (uncountedTransactions > 0) {
               totalEnriched += uncountedTransactions;
             }
