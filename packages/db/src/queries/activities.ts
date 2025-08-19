@@ -9,6 +9,7 @@ type CreateActivityParams = {
   userId?: string;
   type: (typeof activityTypeEnum.enumValues)[number];
   source: "system" | "user";
+  status?: (typeof activityStatusEnum.enumValues)[number];
   priority?: number;
   groupId?: string;
   metadata: Record<string, any>;
@@ -25,6 +26,7 @@ export async function createActivity(
       userId: params.userId,
       type: params.type,
       source: params.source,
+      status: params.status,
       priority: params.priority ?? 5,
       groupId: params.groupId,
       metadata: params.metadata,

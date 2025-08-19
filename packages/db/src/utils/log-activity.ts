@@ -11,24 +11,25 @@ interface LogActivityOptions {
   type: ActivityType;
   metadata: Record<string, any>;
   priority?: number;
-  status?: "unread" | "read" | "archived";
   source?: "user" | "system";
 }
 
-// Simple activity logging with sensible defaults
 export function logActivity(options: LogActivityOptions) {
   try {
-    // Don't await - fire and forget
     createActivity(options.db, {
       teamId: options.teamId,
       userId: options.userId,
       type: options.type,
       source: options.source ?? "user",
-      status: options.status ?? "read",
+      status: "read",
       priority: options.priority ?? 7,
       metadata: options.metadata,
-    }).catch(() => {
-      // Silent fail - never break main operations
+    }).catch((error) => {
+      console.warn("Activity logging failed", {
+        error,
+        teamId: options.teamId,
+        type: options.type,
+      });
     });
   } catch {
     // Even if the call itself throws, ignore it
