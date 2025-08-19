@@ -191,7 +191,8 @@ export const enrichTransactions = schemaTask({
           totalEnriched += batchEnrichedCount;
 
           // Return ALL transaction IDs from the batch (all should now be marked as enriched)
-          return batch.map((tx) => tx.id);
+          // Defensive handling for potentially falsy transactions
+          return batch.filter((tx) => tx?.id).map((tx) => tx.id);
         } catch (error) {
           logger.error("Failed to enrich transaction batch", {
             error: error instanceof Error ? error.message : "Unknown error",
@@ -202,28 +203,29 @@ export const enrichTransactions = schemaTask({
           // Even if enrichment fails, mark all transactions as completed to prevent infinite loading
           // The enrichment_completed field indicates process completion, not success
           try {
-            await markTransactionsAsEnriched(
-              getDb(),
-              batch.map((tx) => tx.id),
-            );
-            // Count only the batch size, but don't add to totalEnriched here to avoid double-counting
-            // The batchEnrichedCount already tracks transactions processed in this batch
-            const errorBatchEnrichedCount = batch.length;
+            // Defensive handling for potentially falsy transactions
+            const validTransactionIds = batch.filter((tx) => tx?.id).map((tx) => tx.id);
+            
+            await markTransactionsAsEnriched(getDb(), validTransactionIds);
 
             logger.info(
               "Marked failed batch transactions as completed to prevent infinite loading",
               {
-                count: errorBatchEnrichedCount,
+                count: validTransactionIds.length,
                 reason: "enrichment_process_failed_but_completed",
                 teamId,
               },
             );
 
-            // Add to totalEnriched only now, avoiding double-counting
-            totalEnriched += errorBatchEnrichedCount;
+            // Only add transactions that weren't already counted in batchEnrichedCount
+            // If batchEnrichedCount > 0, some transactions were already processed and counted
+            const uncountedTransactions = validTransactionIds.length - batchEnrichedCount;
+            if (uncountedTransactions > 0) {
+              totalEnriched += uncountedTransactions;
+            }
 
-            // Return the transaction IDs even though enrichment failed
-            return batch.map((tx) => tx.id);
+            // Return the valid transaction IDs even though enrichment failed
+            return validTransactionIds;
           } catch (markError) {
             logger.error(
               "Failed to mark transactions as completed after enrichment error",
