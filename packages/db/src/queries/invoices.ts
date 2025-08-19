@@ -677,7 +677,7 @@ export type UpdateInvoiceParams = {
   scheduledAt?: string | null;
   scheduledJobId?: string | null;
   teamId: string;
-  userId: string;
+  userId?: string;
 };
 
 export async function updateInvoice(db: Database, params: UpdateInvoiceParams) {
@@ -690,7 +690,7 @@ export async function updateInvoice(db: Database, params: UpdateInvoiceParams) {
     .returning();
 
   // Log activity if not draft
-  if (rest.status !== "draft") {
+  if (rest.status !== "draft" && userId) {
     let activityType: (typeof activityTypeEnum.enumValues)[number] | null =
       null;
     let priority: number | undefined = undefined;
