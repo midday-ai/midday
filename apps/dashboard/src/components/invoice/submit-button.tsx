@@ -31,7 +31,7 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   const { watch, setValue, formState } = useFormContext();
   const { data: user } = useUserQuery();
 
-  // Get current date/time rounded to nearest hour
+  // Get next day date/time rounded to nearest hour
   const getDefaultScheduleDateTime = () => {
     const now = new Date();
     const roundedHour =
@@ -39,22 +39,13 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     const roundedDate = new Date(
       now.getFullYear(),
       now.getMonth(),
-      now.getDate(),
+      now.getDate() + 1, // Set to next day
       roundedHour,
       0,
       0,
       0,
     );
     return roundedDate;
-  };
-
-  // Initialize with existing scheduledAt value if available, otherwise use default
-  const getInitialScheduleDateTime = () => {
-    const existingScheduledAt = watch("scheduledAt");
-    if (existingScheduledAt) {
-      return new Date(existingScheduledAt);
-    }
-    return getDefaultScheduleDateTime();
   };
 
   const [scheduleDate, setScheduleDate] = React.useState<Date | undefined>(
