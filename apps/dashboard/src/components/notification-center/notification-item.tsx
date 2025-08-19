@@ -1,3 +1,8 @@
+import {
+  type Activity,
+  getMetadata,
+  getMetadataProperty,
+} from "@/hooks/use-notifications";
 import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
 import {
@@ -14,7 +19,7 @@ import { getNotificationDescription } from "./notification-descriptions";
 interface NotificationItemProps {
   id: string;
   setOpen: (open: boolean) => void;
-  activity: any;
+  activity: Activity;
   markMessageAsRead?: (id: string) => void;
 }
 
@@ -27,17 +32,18 @@ export function NotificationItem({
   const t = useI18n();
   const { data: user } = useUserQuery();
 
-  const recordId = activity.metadata?.recordId;
+  const recordId = getMetadataProperty(activity, "recordId");
+  const metadata = getMetadata(activity);
   const notificationLink = getNotificationLink(
     activity.type,
     recordId,
-    activity.metadata,
+    metadata,
   );
 
   const isClickable = isNotificationClickable(
     activity.type,
     recordId,
-    activity.metadata,
+    metadata,
   );
 
   const getNotificationIcon = (activityType: string) => {
@@ -45,12 +51,12 @@ export function NotificationItem({
     if (activityType.startsWith("transaction")) return <Icons.Transactions />;
     if (activityType === "inbox_new") return <Icons.Inbox2 />;
     if (activityType === "match") return <Icons.Match />;
-    return <Icons.Bell />; // Default icon
+    return <Icons.Notifications />;
   };
 
   const description = getNotificationDescription(
     activity.type,
-    activity.metadata,
+    metadata,
     user,
     t,
   );

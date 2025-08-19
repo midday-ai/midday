@@ -3,8 +3,32 @@
 import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { useCallback, useMemo } from "react";
+
+// Infer types from tRPC router
+type RouterOutputs = inferRouterOutputs<AppRouter>;
+type RouterInputs = inferRouterInputs<AppRouter>;
+type NotificationsList = RouterOutputs["notifications"]["list"];
+type NotificationsData = NotificationsList["data"];
+
+// Use the natural tRPC types without modification
+export type Activity = NotificationsData[number];
+
+type UpdateStatusInput = RouterInputs["notifications"]["updateStatus"];
+type UpdateAllStatusInput = RouterInputs["notifications"]["updateAllStatus"];
+
+// Utility functions to safely handle metadata without excessive casting
+export function getMetadata(activity: Activity): Record<string, any> {
+  return (activity.metadata as Record<string, any>) || {};
+}
+
+export function getMetadataProperty(activity: Activity, key: string): any {
+  const metadata = getMetadata(activity);
+  return metadata[key];
+}
 
 export function useNotifications() {
   const trpc = useTRPC();
@@ -41,8 +65,8 @@ export function useNotifications() {
     filter: `user_id=eq.${user?.id}`,
     onEvent: (payload) => {
       // Only handle new notifications (priority <= 3), not archived updates
-      const newRecord = payload?.new as any;
-      if (newRecord?.priority <= 3) {
+      const newRecord = payload?.new as any; // Supabase payload type
+      if (newRecord?.priority && newRecord.priority <= 3) {
         // Invalidate both inbox and archived queries
         queryClient.invalidateQueries({
           queryKey: trpc.notifications.list.queryKey(),
@@ -54,7 +78,7 @@ export function useNotifications() {
   // Mutations
   const updateStatusMutation = useMutation(
     trpc.notifications.updateStatus.mutationOptions({
-      onMutate: async (variables) => {
+      onMutate: async (variables: UpdateStatusInput) => {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
         await queryClient.cancelQueries({
           queryKey: trpc.notifications.list.queryKey(),
@@ -74,15 +98,17 @@ export function useNotifications() {
         });
 
         // Snapshot both query states
-        const previousInboxData = queryClient.getQueryData(inboxQueryKey);
-        const previousArchivedData = queryClient.getQueryData(archivedQueryKey);
+        const previousInboxData =
+          queryClient.getQueryData<NotificationsList>(inboxQueryKey);
+        const previousArchivedData =
+          queryClient.getQueryData<NotificationsList>(archivedQueryKey);
 
         if (variables.status === "archived") {
           // Moving from inbox to archived
-          let notificationToMove: any = null;
+          let notificationToMove: Activity | null = null;
 
           // Remove from inbox
-          queryClient.setQueryData(inboxQueryKey, (old) => {
+          queryClient.setQueryData<NotificationsList>(inboxQueryKey, (old) => {
             if (!old?.data) return old;
 
             const filteredData = old.data.filter((notification) => {
@@ -98,14 +124,25 @@ export function useNotifications() {
 
           // Add to archived (if we found the notification)
           if (notificationToMove) {
-            queryClient.setQueryData(archivedQueryKey, (old) => {
-              if (!old?.data) return { data: [notificationToMove] };
-              return { ...old, data: [notificationToMove, ...old.data] };
-            });
+            queryClient.setQueryData<NotificationsList>(
+              archivedQueryKey,
+              (old) => {
+                if (!old?.data)
+                  return {
+                    data: [notificationToMove!],
+                    meta: old?.meta || {
+                      cursor: null,
+                      hasPreviousPage: false,
+                      hasNextPage: false,
+                    },
+                  };
+                return { ...old, data: [notificationToMove!, ...old.data] };
+              },
+            );
           }
         } else {
           // For other status changes (like unread -> read), just update the inbox
-          queryClient.setQueryData(inboxQueryKey, (old) => {
+          queryClient.setQueryData<NotificationsList>(inboxQueryKey, (old) => {
             if (!old?.data) return old;
 
             return {
@@ -147,7 +184,7 @@ export function useNotifications() {
 
   const updateAllStatusMutation = useMutation(
     trpc.notifications.updateAllStatus.mutationOptions({
-      onMutate: async (variables) => {
+      onMutate: async (variables: UpdateAllStatusInput) => {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
         await queryClient.cancelQueries({
           queryKey: trpc.notifications.list.queryKey(),
@@ -167,20 +204,22 @@ export function useNotifications() {
         });
 
         // Snapshot both query states
-        const previousInboxData = queryClient.getQueryData(inboxQueryKey);
-        const previousArchivedData = queryClient.getQueryData(archivedQueryKey);
+        const previousInboxData =
+          queryClient.getQueryData<NotificationsList>(inboxQueryKey);
+        const previousArchivedData =
+          queryClient.getQueryData<NotificationsList>(archivedQueryKey);
 
         if (variables.status === "archived") {
           // Moving all inbox notifications to archived
-          let notificationsToMove: any[] = [];
+          let notificationsToMove: Activity[] = [];
 
           // Clear inbox and collect notifications to move
-          queryClient.setQueryData(inboxQueryKey, (old) => {
+          queryClient.setQueryData<NotificationsList>(inboxQueryKey, (old) => {
             if (!old?.data) return old;
 
             notificationsToMove = old.data.map((notification) => ({
               ...notification,
-              status: "archived",
+              status: "archived" as const,
             }));
 
             return { ...old, data: [] };
@@ -188,14 +227,25 @@ export function useNotifications() {
 
           // Add all to archived
           if (notificationsToMove.length > 0) {
-            queryClient.setQueryData(archivedQueryKey, (old) => {
-              if (!old?.data) return { data: notificationsToMove };
-              return { ...old, data: [...notificationsToMove, ...old.data] };
-            });
+            queryClient.setQueryData<NotificationsList>(
+              archivedQueryKey,
+              (old) => {
+                if (!old?.data)
+                  return {
+                    data: notificationsToMove,
+                    meta: old?.meta || {
+                      cursor: null,
+                      hasPreviousPage: false,
+                      hasNextPage: false,
+                    },
+                  };
+                return { ...old, data: [...notificationsToMove, ...old.data] };
+              },
+            );
           }
         } else if (variables.status === "read") {
           // Update all unread to read in inbox (don't move between queries)
-          queryClient.setQueryData(inboxQueryKey, (old) => {
+          queryClient.setQueryData<NotificationsList>(inboxQueryKey, (old) => {
             if (!old?.data) return old;
 
             return {

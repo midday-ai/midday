@@ -68,9 +68,8 @@ export async function updateAllActivitiesStatus(
     conditions.push(eq(activities.status, "unread"));
   } else {
     // For other statuses, use the original logic but exclude archived
-    conditions.push(
-      and(ne(activities.status, status), ne(activities.status, "archived")),
-    );
+    conditions.push(ne(activities.status, status));
+    conditions.push(ne(activities.status, "archived"));
   }
 
   const result = await db
