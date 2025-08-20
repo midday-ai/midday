@@ -4,12 +4,6 @@ import { invoicePaidSchema } from "../schemas";
 
 export const invoicePaid: NotificationHandler = {
   schema: invoicePaidSchema,
-  activityType: "invoice_paid",
-  defaultPriority: 2,
-  email: {
-    template: "invoice-paid",
-    subject: "invoice.paid.subject",
-  },
 
   createActivity: (data, user) => ({
     teamId: user.team_id,
@@ -28,6 +22,7 @@ export const invoicePaid: NotificationHandler = {
 
   createEmail: (data, user) => ({
     template: "invoice-paid",
+    emailType: "team",
     subject: "invoice.paid.subject",
     user,
     data: {

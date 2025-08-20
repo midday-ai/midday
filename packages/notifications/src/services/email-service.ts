@@ -1,21 +1,10 @@
 import type { Database } from "@midday/db/client";
 import { shouldSendNotification } from "@midday/db/queries";
-import ApiKeyCreatedEmail from "@midday/email/emails/api-key-created";
-import AppInstalledEmail from "@midday/email/emails/app-installed";
-import AppReviewRequestEmail from "@midday/email/emails/app-review-request";
-import ConnectionExpireEmail from "@midday/email/emails/connection-expire";
-import ConnectionIssueEmail from "@midday/email/emails/connection-issue";
-import GetStartedEmail from "@midday/email/emails/get-started";
-import InviteEmail from "@midday/email/emails/invite";
-import InvoiceEmail from "@midday/email/emails/invoice";
-import InvoiceOverdueEmail from "@midday/email/emails/invoice-overdue";
-import InvoicePaidEmail from "@midday/email/emails/invoice-paid";
+// import InvoiceEmail from "@midday/email/emails/invoice";
+// import InvoiceOverdueEmail from "@midday/email/emails/invoice-overdue";
+// import InvoicePaidEmail from "@midday/email/emails/invoice-paid";
 import InvoiceReminderEmail from "@midday/email/emails/invoice-reminder";
 import TransactionsEmail from "@midday/email/emails/transactions";
-import TrialEndedEmail from "@midday/email/emails/trial-ended";
-import TrialExpiringEmail from "@midday/email/emails/trial-expiring";
-import WelcomeEmail from "@midday/email/emails/welcome";
-import { getI18n } from "@midday/email/locales";
 import { render } from "@midday/email/render";
 import { nanoid } from "nanoid";
 import { type CreateEmailOptions, Resend } from "resend";
@@ -84,6 +73,12 @@ export class EmailService {
   async #filterEligibleEmails(emails: EmailInput[], notificationType: string) {
     const eligibleEmails = await Promise.all(
       emails.map(async (email) => {
+        // For customer emails (with explicit 'to' field), always send - decision made at notification level
+        if (email.to && email.to.length > 0) {
+          return email;
+        }
+
+        // For team emails (no 'to' field), check user's notification settings
         const shouldSend = await shouldSendNotification(
           this.db,
           email.user.id,
@@ -100,21 +95,25 @@ export class EmailService {
   }
 
   #buildEmailPayload(email: EmailInput): CreateEmailOptions {
-    const { t } = getI18n({ locale: email.user.locale ?? "en" });
-    const template = this.#getTemplate(email.template);
+    let html: string;
+    if (email.template) {
+      const template = this.#getTemplate(email.template as string);
+      html = render(template(email.data as any));
+    } else {
+      throw new Error(`No template found for email: ${email.template}`);
+    }
 
-    const html = render(
-      template({
-        ...email.data,
-        locale: email.user.locale ?? "en",
-        fullName: email.user.full_name,
-      }),
-    );
+    if (!email.subject) {
+      throw new Error(`No subject found for email: ${email.template}`);
+    }
+
+    // Use explicit 'to' field if provided, otherwise default to user email
+    const recipients = email.to || [email.user.email];
 
     const payload: CreateEmailOptions = {
       from: email.from || "Midday <middaybot@midday.ai>",
-      to: [email.user.email],
-      subject: t(email.subject),
+      to: recipients,
+      subject: email.subject,
       html,
       headers: {
         "X-Entity-Ref-ID": nanoid(),
@@ -122,30 +121,24 @@ export class EmailService {
       },
     };
 
-    if (email.replyTo) {
-      payload.replyTo = email.replyTo;
-    }
+    // Add optional fields if present
+    if (email.replyTo) payload.replyTo = email.replyTo;
+    if (email.cc) payload.cc = email.cc;
+    if (email.bcc) payload.bcc = email.bcc;
+    if (email.attachments) payload.attachments = email.attachments;
+    if (email.tags) payload.tags = email.tags;
+    if (email.text) payload.text = email.text;
 
     return payload;
   }
 
   #getTemplate(templateName: string) {
     const templates = {
-      "api-key-created": ApiKeyCreatedEmail,
-      "app-installed": AppInstalledEmail,
-      "app-review-request": AppReviewRequestEmail,
-      "connection-expire": ConnectionExpireEmail,
-      "connection-issue": ConnectionIssueEmail,
-      "get-started": GetStartedEmail,
-      invite: InviteEmail,
-      invoice: InvoiceEmail,
-      "invoice-overdue": InvoiceOverdueEmail,
-      "invoice-paid": InvoicePaidEmail,
+      // invoice: InvoiceEmail,
+      // "invoice-overdue": InvoiceOverdueEmail,
+      // "invoice-paid": InvoicePaidEmail,
       "invoice-reminder": InvoiceReminderEmail,
       transactions: TransactionsEmail,
-      "trial-ended": TrialEndedEmail,
-      "trial-expiring": TrialExpiringEmail,
-      welcome: WelcomeEmail,
     };
 
     const template = templates[templateName as keyof typeof templates];

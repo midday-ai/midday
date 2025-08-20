@@ -4,12 +4,6 @@ import { invoiceOverdueSchema } from "../schemas";
 
 export const invoiceOverdue: NotificationHandler = {
   schema: invoiceOverdueSchema,
-  activityType: "invoice_overdue",
-  defaultPriority: 2,
-  email: {
-    template: "invoice-overdue",
-    subject: "invoice.overdue.subject",
-  },
 
   createActivity: (data, user) => ({
     teamId: user.team_id,
@@ -26,6 +20,7 @@ export const invoiceOverdue: NotificationHandler = {
 
   createEmail: (data, user) => ({
     template: "invoice-overdue",
+    emailType: "team",
     subject: "invoice.overdue.subject",
     user,
     data: {

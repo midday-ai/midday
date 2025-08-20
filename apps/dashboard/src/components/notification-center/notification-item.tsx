@@ -104,7 +104,7 @@ export function NotificationItem({
     return (
       <div className="flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary">
         <Link
-          className="flex items-between justify-between space-x-4 flex-1"
+          className="flex items-between space-x-4 flex-1"
           onClick={() => setOpen(false)}
           href={notificationLink.href}
         >
@@ -117,7 +117,7 @@ export function NotificationItem({
 
   // Non-clickable notification
   return (
-    <div className="flex items-between justify-between space-x-4 px-3 py-3">
+    <div className="flex items-between space-x-4 px-3 py-3">
       <div className="flex items-between justify-between space-x-4 flex-1">
         {notificationContent}
       </div>

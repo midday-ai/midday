@@ -1,13 +1,8 @@
-import { resend } from "@jobs/utils/resend";
-import InvoiceEmail from "@midday/email/emails/invoice";
-import { render } from "@midday/email/render";
-import { encrypt } from "@midday/encryption";
+import { getDb } from "@jobs/init";
+import { Notifications } from "@midday/notifications";
 import { createClient } from "@midday/supabase/job";
-import { getAppUrl } from "@midday/utils/envs";
 import { logger, schemaTask } from "@trigger.dev/sdk";
-import { nanoid } from "nanoid";
 import { z } from "zod";
-import { notification } from "../../notifications/notification";
 
 export const sendInvoiceEmail = schemaTask({
   id: "send-invoice-email",
@@ -22,6 +17,7 @@ export const sendInvoiceEmail = schemaTask({
   },
   run: async ({ invoiceId, filename, fullPath }) => {
     const supabase = createClient();
+    const notifications = new Notifications(getDb());
 
     const { data: invoice } = await supabase
       .from("invoices")
@@ -74,34 +70,30 @@ export const sendInvoiceEmail = schemaTask({
       return;
     }
 
-    const response = await resend.emails.send({
-      from: "Midday <middaybot@midday.ai>",
-      to: customerEmail,
-      bcc,
-      replyTo: invoice?.team.email ?? undefined,
-      subject: `${invoice?.team.name} sent you an invoice`,
-      headers: {
-        "X-Entity-Ref-ID": nanoid(),
-      },
-      attachments,
-      html: render(
-        <InvoiceEmail
-          customerName={invoice?.customer?.name!}
-          teamName={invoice?.team.name!}
-          link={`${getAppUrl()}/i/${encodeURIComponent(
-            invoice?.token,
-          )}?viewer=${encodeURIComponent(encrypt(customerEmail))}`}
-        />,
-      ),
-    });
+    if (invoice.invoice_number && invoice.customer?.name) {
+      try {
+        await notifications.create(
+          "invoice_sent",
+          invoice.team_id,
+          {
+            invoiceId,
+            invoiceNumber: invoice.invoice_number,
+            customerName: invoice.customer?.name,
+            customerEmail,
+            token: invoice.token,
+          },
+          {
+            sendEmail: true,
+            bcc,
+            attachments,
+            replyTo: invoice?.team.email ?? undefined,
+          },
+        );
+      } catch (error) {
+        logger.error("Failed to send invoice_sent notification", { error });
 
-    if (response.error) {
-      logger.error("Invoice email failed to send", {
-        invoiceId,
-        error: response.error,
-      });
-
-      throw new Error("Invoice email failed to send");
+        throw new Error("Invoice email failed to send");
+      }
     }
 
     logger.info("Invoice email sent");
@@ -114,19 +106,5 @@ export const sendInvoiceEmail = schemaTask({
         sent_at: new Date().toISOString(),
       })
       .eq("id", invoiceId);
-
-    // Send notification that invoice was sent
-    try {
-      await notification.trigger({
-        type: "invoice_sent",
-        teamId: invoice.team_id,
-        invoiceId,
-        invoiceNumber: invoice.invoice_number || "Unknown",
-        customerName: invoice.customer?.name || "Unknown Customer",
-        customerEmail,
-      });
-    } catch (error) {
-      logger.error("Failed to send invoice_sent notification", { error });
-    }
   },
 });

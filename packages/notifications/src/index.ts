@@ -51,7 +51,7 @@ export class Notifications {
       locale?: string | null;
     }>,
     teamId: string,
-    team: { name: string | null; inboxId: string | null },
+    teamInfo: { name: string | null; inboxId: string | null },
   ): UserData[] {
     return teamMembers.map((member) => ({
       id: member.id,
@@ -60,9 +60,79 @@ export class Notifications {
       email: member.email ?? "",
       locale: member.locale ?? "en",
       team_id: teamId,
-      team_name: team.name ?? "Team",
-      team_inbox_id: team.inboxId ?? "",
     }));
+  }
+
+  async #createActivities<T extends keyof NotificationTypes>(
+    handler: any,
+    validatedData: NotificationTypes[T],
+    groupId: string,
+    notificationType: string,
+    options?: NotificationOptions,
+  ) {
+    const activityPromises = await Promise.all(
+      validatedData.users.map(async (user: UserData) => {
+        const activityInput = handler.createActivity(validatedData, user);
+
+        // Check if user wants in-app notifications for this type
+        const inAppEnabled = await shouldSendNotification(
+          this.db,
+          user.id,
+          user.team_id,
+          notificationType,
+          "in_app",
+        );
+
+        // Apply priority logic based on notification preferences
+        let finalPriority = activityInput.priority;
+
+        // Runtime priority override takes precedence
+        if (options?.priority !== undefined) {
+          finalPriority = options.priority;
+        } else if (!inAppEnabled) {
+          // If in-app notifications are disabled, set to low priority (7-10 range)
+          // so it's not visible in the notification center
+          finalPriority = Math.max(7, activityInput.priority + 4);
+          finalPriority = Math.min(10, finalPriority); // Cap at 10
+        }
+
+        activityInput.priority = finalPriority;
+        activityInput.groupId = groupId;
+
+        // Validate with Zod schema
+        const validatedActivity = createActivitySchema.parse(activityInput);
+
+        // Create activity directly using DB query
+        return createActivity(this.db, validatedActivity);
+      }),
+    );
+
+    return activityPromises.filter(Boolean);
+  }
+
+  #createEmailInput<T extends keyof NotificationTypes>(
+    handler: any,
+    validatedData: NotificationTypes[T],
+    user: UserData,
+    teamContext: { id: string; name: string; inboxId: string },
+    options?: NotificationOptions,
+  ): EmailInput {
+    // Create email input using handler's createEmail function
+    const customEmail = handler.createEmail(validatedData, user, teamContext);
+
+    const baseEmailInput: EmailInput = {
+      user,
+      ...customEmail,
+    };
+
+    // Apply runtime options (highest priority)
+    // Extract non-email options first
+    const { priority, sendEmail, ...resendOptions } = options || {};
+    if (Object.keys(resendOptions).length > 0) {
+      Object.assign(baseEmailInput, resendOptions);
+    }
+
+    return baseEmailInput;
   }
 
   async create<T extends keyof NotificationTypes>(
@@ -89,15 +159,12 @@ export class Notifications {
     }
 
     // Transform team members to UserData format
-    const users = this.#toUserData(teamMembers, teamId, {
-      name: teamInfo.name,
-      inboxId: teamInfo.inboxId,
-    });
+    const users = this.#toUserData(teamMembers, teamId, teamInfo);
 
     // Build the full notification data
     const data = { ...payload, users } as NotificationTypes[T];
 
-    return this.#createInternal(type, data, options);
+    return this.#createInternal(type, data, options, teamInfo);
   }
 
   /**
@@ -107,6 +174,7 @@ export class Notifications {
     type: T,
     data: NotificationTypes[T],
     options?: NotificationOptions,
+    teamInfo?: { id: string; name: string | null; inboxId: string | null },
   ): Promise<NotificationResult> {
     const handler = handlers[type];
 
@@ -121,107 +189,77 @@ export class Notifications {
       // Generate a single group ID for all related activities
       const groupId = crypto.randomUUID();
 
-      // Create activities - always create them but adjust priority based on in-app preferences
-      const activityPromises = await Promise.all(
-        validatedData.users.map(async (user: UserData) => {
-          const activityInput = handler.createActivity(validatedData, user);
-
-          // Check if user wants in-app notifications for this type
-          const inAppEnabled = await shouldSendNotification(
-            this.db,
-            user.id,
-            user.team_id,
-            type as string,
-            "in_app",
-          );
-
-          // Apply priority logic based on notification preferences
-          let finalPriority = activityInput.priority;
-
-          // Runtime priority override takes precedence
-          if (options?.priority !== undefined) {
-            finalPriority = options.priority;
-          } else if (!inAppEnabled) {
-            // If in-app notifications are disabled, set to low priority (7-10 range)
-            // so it's not visible in the notification center
-            finalPriority = Math.max(7, activityInput.priority + 4);
-            finalPriority = Math.min(10, finalPriority); // Cap at 10
-          }
-
-          activityInput.priority = finalPriority;
-
-          // Add the group ID to link related activities
-          activityInput.groupId = groupId;
-
-          // Validate with Zod schema
-          const validatedActivity = createActivitySchema.parse(activityInput);
-
-          // Create activity directly using DB query
-          return createActivity(this.db, validatedActivity);
-        }),
+      // Create activities for each user
+      const activities = await this.#createActivities(
+        handler,
+        validatedData,
+        groupId,
+        type as string,
+        options,
       );
 
-      const activities = activityPromises.filter(Boolean);
-
       // CONDITIONALLY send emails
-      let emails = { sent: 0, skipped: validatedData.users.length, failed: 0 };
+      let emails = {
+        sent: 0,
+        skipped: validatedData.users.length,
+        failed: 0,
+      };
 
       const sendEmail = options?.sendEmail ?? false;
 
-      if (handler.email && sendEmail) {
-        const emailInputs = validatedData.users.map((user: UserData) => {
-          const baseEmailInput: EmailInput = {
-            template: handler.email!.template,
-            subject: handler.email!.subject,
-            user,
-            data: handler.createEmail
-              ? handler.createEmail(validatedData, user).data
-              : validatedData,
-          };
+      // Send emails if requested and handler supports email
+      if (sendEmail && handler.createEmail) {
+        const firstUser = validatedData.users[0];
+        if (!firstUser) {
+          throw new Error("No team members available for email context");
+        }
 
-          // Add handler-level email options
-          if (handler.email!.from) {
-            baseEmailInput.from = handler.email!.from;
-          }
+        // Check the email type to determine behavior
+        const teamContext = {
+          id: teamInfo?.id || "",
+          name: teamInfo?.name || "Team",
+          inboxId: teamInfo?.inboxId || "",
+        };
+        const sampleEmail = handler.createEmail(
+          validatedData,
+          firstUser,
+          teamContext,
+        );
+        const isCustomerEmail = sampleEmail.emailType === "customer";
 
-          if (handler.email!.replyTo) {
-            baseEmailInput.replyTo = handler.email!.replyTo;
-          }
+        if (isCustomerEmail) {
+          // Customer-facing email: send regardless of team preferences
+          const emailInputs = [
+            this.#createEmailInput(
+              handler,
+              validatedData,
+              firstUser,
+              teamContext,
+              options,
+            ),
+          ];
 
-          // Apply runtime options (highest priority)
-          if (options?.from) {
-            baseEmailInput.from = options.from;
-          }
+          emails = await this.#emailService.sendBulk(
+            emailInputs,
+            type as string,
+          );
+        } else {
+          // Team-facing email: send to each team member based on their preferences
+          const emailInputs = validatedData.users.map((user: UserData) =>
+            this.#createEmailInput(
+              handler,
+              validatedData,
+              user,
+              teamContext,
+              options,
+            ),
+          );
 
-          if (options?.replyTo) {
-            baseEmailInput.replyTo = options.replyTo;
-          }
-
-          if (options?.headers) {
-            baseEmailInput.headers = {
-              ...baseEmailInput.headers,
-              ...options.headers,
-            };
-          }
-
-          // If handler has createEmail, it can override these settings
-          if (handler.createEmail) {
-            const customEmail = handler.createEmail(validatedData, user);
-            return {
-              ...baseEmailInput,
-              ...customEmail,
-              ...(options?.from && { from: options.from }),
-              ...(options?.replyTo && { replyTo: options.replyTo }),
-              ...(options?.headers && {
-                headers: { ...customEmail.headers, ...options.headers },
-              }),
-            };
-          }
-
-          return baseEmailInput;
-        });
-
-        emails = await this.#emailService.sendBulk(emailInputs, type as string);
+          emails = await this.#emailService.sendBulk(
+            emailInputs,
+            type as string,
+          );
+        }
       }
 
       return {

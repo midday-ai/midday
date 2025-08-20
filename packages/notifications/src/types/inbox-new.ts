@@ -3,8 +3,6 @@ import { inboxNewSchema } from "../schemas";
 
 export const inboxNew: NotificationHandler = {
   schema: inboxNewSchema,
-  activityType: "inbox_new",
-  defaultPriority: 3,
 
   createActivity: (data, user) => ({
     teamId: user.team_id,

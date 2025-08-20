@@ -1,10 +1,15 @@
+import type { CreateEmailOptions } from "resend";
 import { z } from "zod";
 import type { CreateActivityInput } from "./schemas";
 
+export interface TeamContext {
+  id: string;
+  name: string;
+  inboxId: string;
+}
+
 export interface NotificationHandler<T = any> {
   schema: z.ZodSchema<T>;
-  activityType: string;
-  defaultPriority: number;
   email?: {
     template: string;
     subject: string;
@@ -12,7 +17,15 @@ export interface NotificationHandler<T = any> {
     replyTo?: string;
   };
   createActivity: (data: T, user: UserData) => CreateActivityInput;
-  createEmail?: (data: T, user: UserData) => EmailInput;
+  createEmail?: (
+    data: T,
+    user: UserData,
+    team: TeamContext,
+  ) => Partial<CreateEmailOptions> & {
+    data: Record<string, any>;
+    template?: string;
+    emailType: "customer" | "team"; // Explicit: customer emails go to external recipients, team emails go to team members
+  };
 }
 
 export interface UserData {
@@ -22,27 +35,20 @@ export interface UserData {
   locale?: string;
   avatar_url?: string;
   team_id: string;
-  team_name: string;
-  team_inbox_id: string;
 }
 
-export interface EmailInput {
-  template: string;
-  subject: string;
+// Combine template data with all Resend options using intersection type
+export type EmailInput = {
+  template?: string;
   user: UserData;
   data: Record<string, any>;
-  from?: string;
-  replyTo?: string;
-  headers?: Record<string, string>;
-}
+} & Partial<CreateEmailOptions>;
 
-export interface NotificationOptions {
+// Use intersection type to combine our options with Resend's CreateEmailOptions
+export type NotificationOptions = {
   priority?: number;
   sendEmail?: boolean;
-  from?: string;
-  replyTo?: string;
-  headers?: Record<string, string>;
-}
+} & Partial<CreateEmailOptions>;
 
 export interface NotificationResult {
   type: string;
@@ -62,8 +68,6 @@ export const userSchema = z.object({
   locale: z.string().optional(),
   avatar_url: z.string().optional(),
   team_id: z.string().uuid(),
-  team_name: z.string(),
-  team_inbox_id: z.string(),
 });
 
 export const transactionSchema = z.object({

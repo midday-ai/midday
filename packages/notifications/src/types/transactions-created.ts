@@ -4,12 +4,6 @@ import { transactionsCreatedSchema } from "../schemas";
 
 export const transactionsCreated: NotificationHandler = {
   schema: transactionsCreatedSchema,
-  activityType: "transactions_created",
-  defaultPriority: 3,
-  email: {
-    template: "transactions",
-    subject: "transactions.subject",
-  },
 
   createActivity: (data, user) => {
     const firstTransaction = data.transactions[0];
@@ -41,14 +35,15 @@ export const transactionsCreated: NotificationHandler = {
     };
   },
 
-  createEmail: (data, user) => ({
+  createEmail: (data, user, team) => ({
     template: "transactions",
+    emailType: "team",
     subject: "transactions.subject",
     user,
-    replyTo: getInboxEmail(user.team_inbox_id),
+    replyTo: getInboxEmail(team.inboxId),
     data: {
       transactions: data.transactions,
-      teamName: user.team_name,
+      teamName: team.name,
     },
   }),
 };

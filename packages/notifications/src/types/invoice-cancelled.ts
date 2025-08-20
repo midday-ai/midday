@@ -3,8 +3,6 @@ import { invoiceCancelledSchema } from "../schemas";
 
 export const invoiceCancelled: NotificationHandler = {
   schema: invoiceCancelledSchema,
-  activityType: "invoice_cancelled",
-  defaultPriority: 3,
 
   createActivity: (data, user) => ({
     teamId: user.team_id,

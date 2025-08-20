@@ -32,8 +32,6 @@ export const userSchema = z.object({
   locale: z.string().optional(),
   avatar_url: z.string().optional(),
   team_id: z.string().uuid(),
-  team_name: z.string(),
-  team_inbox_id: z.string(),
 });
 
 export const transactionSchema = z.object({
@@ -101,6 +99,7 @@ export const invoiceScheduledSchema = z.object({
 export const invoiceSentSchema = z.object({
   users: z.array(userSchema),
   invoiceId: z.string().uuid(),
+  token: z.string(),
   invoiceNumber: z.string(),
   customerName: z.string(),
   customerEmail: z.string().email().optional(),
@@ -109,6 +108,7 @@ export const invoiceSentSchema = z.object({
 export const invoiceReminderSentSchema = z.object({
   users: z.array(userSchema),
   invoiceId: z.string().uuid(),
+  token: z.string(),
   invoiceNumber: z.string(),
   customerName: z.string(),
   customerEmail: z.string().email().optional(),

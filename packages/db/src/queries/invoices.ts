@@ -691,9 +691,9 @@ export async function updateInvoice(db: Database, params: UpdateInvoiceParams) {
 
   // Log activity if not draft
   if (rest.status !== "draft" && userId) {
+    let priority: number | undefined = undefined;
     let activityType: (typeof activityTypeEnum.enumValues)[number] | null =
       null;
-    let priority: number | undefined = undefined;
 
     if (rest.status === "paid") {
       activityType = "invoice_paid";
