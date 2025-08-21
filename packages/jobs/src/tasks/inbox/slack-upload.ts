@@ -5,9 +5,8 @@ import {
 import { DocumentClient } from "@midday/documents";
 import { inboxSlackUploadSchema } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/job";
-import { schemaTask } from "@trigger.dev/sdk";
+import { schemaTask, tasks } from "@trigger.dev/sdk";
 import { format } from "date-fns";
-// import { notification } from "../notifications/notification";
 
 export const inboxSlackUpload = schemaTask({
   id: "inbox-slack-upload",
@@ -154,12 +153,12 @@ export const inboxSlackUpload = schemaTask({
         }
 
         // Send notification for Slack upload
-        // await notification.trigger({
-        //   type: "inbox_new",
-        //   teamId,
-        //   totalCount: 1,
-        //   source: "slack",
-        // });
+        await tasks.trigger("notification", {
+          type: "inbox_new",
+          teamId,
+          totalCount: 1,
+          inboxType: "slack",
+        });
       }
     } catch {
       // If we end up here we could not parse the document

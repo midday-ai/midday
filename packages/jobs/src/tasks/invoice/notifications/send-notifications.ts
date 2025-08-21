@@ -1,6 +1,7 @@
+import { getDb } from "@jobs/init";
+import { Notifications } from "@midday/notifications";
 import { schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
-// import { notification } from "../../notifications/notification";
 
 export const sendInvoiceNotifications = schemaTask({
   id: "invoice-notifications",
@@ -14,30 +15,40 @@ export const sendInvoiceNotifications = schemaTask({
     customerName: z.string(),
   }),
   run: async ({ invoiceId, invoiceNumber, status, teamId, customerName }) => {
-    // switch (status) {
-    //   case "paid": {
-    //     await notification.trigger({
-    //       type: "invoice_paid",
-    //       teamId,
-    //       invoiceId,
-    //       invoiceNumber,
-    //       source: "automatic",
-    //       sendEmail: true,
-    //     });
-    //     break;
-    //   }
-    //   case "overdue": {
-    //     await notification.trigger({
-    //       type: "invoice_overdue",
-    //       teamId,
-    //       invoiceId,
-    //       invoiceNumber,
-    //       customerName,
-    //       source: "automatic",
-    //       sendEmail: true,
-    //     });
-    //     break;
-    //   }
-    // }
+    const notifications = new Notifications(getDb());
+
+    switch (status) {
+      case "paid": {
+        await notifications.create(
+          "invoice_paid",
+          teamId,
+          {
+            invoiceId,
+            invoiceNumber,
+            source: "system",
+          },
+          {
+            sendEmail: true,
+          },
+        );
+        break;
+      }
+      case "overdue": {
+        await notifications.create(
+          "invoice_overdue",
+          teamId,
+          {
+            invoiceId,
+            invoiceNumber,
+            customerName,
+            source: "system",
+          },
+          {
+            sendEmail: true,
+          },
+        );
+        break;
+      }
+    }
   },
 });

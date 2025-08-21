@@ -71,11 +71,12 @@ export const inboxRouter = createTRPCRouter({
         })) as { payload: ProcessAttachmentPayload }[],
       );
 
-      tasks.trigger("notification", {
+      // Send notification for user uploads
+      await tasks.trigger("notification", {
         type: "inbox_new",
         teamId: teamId!,
         totalCount: input.length,
-        source: "upload",
+        inboxType: "upload",
       });
 
       return batchResult;

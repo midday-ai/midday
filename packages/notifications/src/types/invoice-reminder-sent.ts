@@ -1,3 +1,4 @@
+import { getI18n } from "@midday/email/locales";
 import { encrypt } from "@midday/encryption";
 import { getAppUrl } from "@midday/utils/envs";
 import type { NotificationHandler } from "../base";
@@ -20,19 +21,25 @@ export const invoiceReminderSent: NotificationHandler = {
     },
   }),
 
-  createEmail: (data, _, team) => ({
-    template: "invoice-reminder",
-    emailType: "customer",
-    to: [data.customerEmail],
-    subject: `Reminder: Payment for ${data.invoiceNumber}`,
-    from: `${team.name} <middaybot@midday.ai>`,
-    data: {
-      companyName: data.customerName,
-      teamName: team.name,
-      invoiceNumber: data.invoiceNumber,
-      link: `${getAppUrl()}/i/${encodeURIComponent(
-        data.token,
-      )}?viewer=${encodeURIComponent(encrypt(data.customerEmail))}`,
-    },
-  }),
+  createEmail: (data, user, team) => {
+    const { t } = getI18n({ locale: user?.locale ?? "en" });
+
+    return {
+      template: "invoice-reminder",
+      emailType: "customer",
+      to: [data.customerEmail],
+      subject: t("invoice.reminder.subject", {
+        invoiceNumber: data.invoiceNumber,
+      }),
+      from: `${team.name} <middaybot@midday.ai>`,
+      data: {
+        companyName: data.customerName,
+        teamName: team.name,
+        invoiceNumber: data.invoiceNumber,
+        link: `${getAppUrl()}/i/${encodeURIComponent(
+          data.token,
+        )}?viewer=${encodeURIComponent(encrypt(data.customerEmail))}`,
+      },
+    };
+  },
 };

@@ -13,7 +13,7 @@ export const inboxNew: NotificationHandler = {
     metadata: {
       totalCount: data.totalCount,
       source: data.source,
-      syncType: data.syncType,
+      type: data.inboxType,
       provider: data.provider,
     },
   }),

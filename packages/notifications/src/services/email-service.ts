@@ -1,8 +1,8 @@
 import type { Database } from "@midday/db/client";
 import { shouldSendNotification } from "@midday/db/queries";
-// import InvoiceEmail from "@midday/email/emails/invoice";
-// import InvoiceOverdueEmail from "@midday/email/emails/invoice-overdue";
-// import InvoicePaidEmail from "@midday/email/emails/invoice-paid";
+import InvoiceEmail from "@midday/email/emails/invoice";
+import InvoiceOverdueEmail from "@midday/email/emails/invoice-overdue";
+import InvoicePaidEmail from "@midday/email/emails/invoice-paid";
 import InvoiceReminderEmail from "@midday/email/emails/invoice-reminder";
 import TransactionsEmail from "@midday/email/emails/transactions";
 import { render } from "@midday/email/render";
@@ -43,28 +43,53 @@ export class EmailService {
       this.#buildEmailPayload(email),
     );
 
-    try {
-      const response = await this.client.batch.send(emailPayloads);
+    // Check if any emails have attachments - batch send doesn't support attachments
+    const hasAttachments = emailPayloads.some(
+      (payload) => payload.attachments && payload.attachments.length > 0,
+    );
 
-      if (response.error) {
-        console.error("Failed to send emails:", response.error);
-        return {
-          sent: 0,
-          skipped: emails.length - eligibleEmails.length,
-          failed: eligibleEmails.length,
-        };
+    try {
+      let sent = 0;
+      let failed = 0;
+
+      if (hasAttachments) {
+        // Send emails individually when attachments are present
+        for (const payload of emailPayloads) {
+          try {
+            const response = await this.client.emails.send(payload);
+            if (response.error) {
+              console.error("Failed to send email:", response.error);
+              failed++;
+            } else {
+              sent++;
+            }
+          } catch (error) {
+            console.error("Failed to send email:", error);
+            failed++;
+          }
+        }
+      } else {
+        // Use batch send when no attachments
+        const response = await this.client.batch.send(emailPayloads);
+
+        if (response.error) {
+          console.error("Failed to send emails:", response.error);
+          failed = eligibleEmails.length;
+        } else {
+          sent = eligibleEmails.length;
+        }
       }
 
       return {
-        sent: eligibleEmails.length,
+        sent,
         skipped: emails.length - eligibleEmails.length,
-        failed: 0,
+        failed,
       };
     } catch (error) {
       console.error("Failed to send emails:", error);
       return {
         sent: 0,
-        skipped: 0,
+        skipped: emails.length - eligibleEmails.length,
         failed: eligibleEmails.length,
       };
     }
@@ -134,9 +159,9 @@ export class EmailService {
 
   #getTemplate(templateName: string) {
     const templates = {
-      // invoice: InvoiceEmail,
-      // "invoice-overdue": InvoiceOverdueEmail,
-      // "invoice-paid": InvoicePaidEmail,
+      "invoice-overdue": InvoiceOverdueEmail,
+      "invoice-paid": InvoicePaidEmail,
+      invoice: InvoiceEmail,
       "invoice-reminder": InvoiceReminderEmail,
       transactions: TransactionsEmail,
     };

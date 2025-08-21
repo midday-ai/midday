@@ -1,3 +1,4 @@
+import { getI18n } from "@midday/email/locales";
 import { getAppUrl } from "@midday/utils/envs";
 import type { NotificationHandler } from "../base";
 import { invoiceOverdueSchema } from "../schemas";
@@ -18,15 +19,21 @@ export const invoiceOverdue: NotificationHandler = {
     },
   }),
 
-  createEmail: (data, user) => ({
-    template: "invoice-overdue",
-    emailType: "team",
-    subject: "invoice.overdue.subject",
-    user,
-    data: {
-      invoiceNumber: data.invoiceNumber,
-      customerName: data.customerName,
-      link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&type=details`,
-    },
-  }),
+  createEmail: (data, user) => {
+    const { t } = getI18n({ locale: user?.locale ?? "en" });
+
+    return {
+      template: "invoice-overdue",
+      emailType: "owners",
+      subject: t("invoice.overdue.subject", {
+        invoiceNumber: data.invoiceNumber,
+      }),
+      user,
+      data: {
+        invoiceNumber: data.invoiceNumber,
+        customerName: data.customerName,
+        link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&type=details`,
+      },
+    };
+  },
 };

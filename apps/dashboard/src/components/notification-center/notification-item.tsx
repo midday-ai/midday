@@ -1,3 +1,5 @@
+"use client";
+
 import {
   type Activity,
   getMetadata,
@@ -5,16 +7,12 @@ import {
 } from "@/hooks/use-notifications";
 import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
-import {
-  getNotificationLink,
-  isNotificationClickable,
-} from "@/utils/notification-links";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { formatDistanceToNow } from "date-fns";
-import Link from "next/link";
 import { getNotificationDescription } from "./notification-descriptions";
+import { NotificationLink } from "./notification-link";
 
 interface NotificationItemProps {
   id: string;
@@ -34,24 +32,16 @@ export function NotificationItem({
 
   const recordId = getMetadataProperty(activity, "recordId");
   const metadata = getMetadata(activity);
-  const notificationLink = getNotificationLink(
-    activity.type,
-    recordId,
-    metadata,
-  );
-
-  const isClickable = isNotificationClickable(
-    activity.type,
-    recordId,
-    metadata,
-  );
 
   const getNotificationIcon = (activityType: string) => {
-    if (activityType.startsWith("invoice_")) return <Icons.Invoice />;
-    if (activityType.startsWith("transaction")) return <Icons.Transactions />;
-    if (activityType === "inbox_new") return <Icons.Inbox2 />;
-    if (activityType === "match") return <Icons.Match />;
-    return <Icons.Notifications />;
+    if (activityType.startsWith("invoice_"))
+      return <Icons.Invoice className="size-4" />;
+    if (activityType.startsWith("transaction"))
+      return <Icons.Transactions className="size-4" />;
+    if (activityType === "inbox_new")
+      return <Icons.Inbox2 className="size-4" />;
+    if (activityType === "match") return <Icons.Match className="size-4" />;
+    return <Icons.Notifications className="size-4" />;
   };
 
   const description = getNotificationDescription(
@@ -100,28 +90,16 @@ export function NotificationItem({
     </div>
   );
 
-  if (isClickable && notificationLink) {
-    return (
-      <div className="flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary">
-        <Link
-          className="flex items-between space-x-4 flex-1"
-          onClick={() => setOpen(false)}
-          href={notificationLink.href}
-        >
-          {notificationContent}
-        </Link>
-        {actionButton}
-      </div>
-    );
-  }
-
-  // Non-clickable notification
   return (
-    <div className="flex items-between space-x-4 px-3 py-3">
-      <div className="flex items-between justify-between space-x-4 flex-1">
-        {notificationContent}
-      </div>
-      {actionButton}
-    </div>
+    <NotificationLink
+      activityType={activity.type}
+      recordId={recordId}
+      metadata={metadata}
+      onNavigate={() => setOpen(false)}
+      className="flex items-between space-x-4 flex-1 text-left"
+      actionButton={actionButton}
+    >
+      {notificationContent}
+    </NotificationLink>
   );
 }

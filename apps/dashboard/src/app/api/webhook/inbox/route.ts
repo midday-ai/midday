@@ -179,11 +179,12 @@ export async function POST(req: Request) {
       })),
     );
 
+    // Send notification for email attachments
     tasks.trigger("notification", {
       type: "inbox_new",
       teamId: teamId!,
       totalCount: insertData.length,
-      source: "email",
+      inboxType: "email",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

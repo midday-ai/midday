@@ -24,7 +24,7 @@ export interface NotificationHandler<T = any> {
   ) => Partial<CreateEmailOptions> & {
     data: Record<string, any>;
     template?: string;
-    emailType: "customer" | "team"; // Explicit: customer emails go to external recipients, team emails go to team members
+    emailType: "customer" | "team" | "owners"; // Explicit: customer emails go to external recipients, team emails go to all team members, owners emails go to team owners only
   };
 }
 
@@ -35,6 +35,7 @@ export interface UserData {
   locale?: string;
   avatar_url?: string;
   team_id: string;
+  role?: "owner" | "member";
 }
 
 // Combine template data with all Resend options using intersection type
@@ -68,6 +69,7 @@ export const userSchema = z.object({
   locale: z.string().optional(),
   avatar_url: z.string().optional(),
   team_id: z.string().uuid(),
+  role: z.enum(["owner", "member"]).optional(),
 });
 
 export const transactionSchema = z.object({

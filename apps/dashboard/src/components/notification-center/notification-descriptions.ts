@@ -55,32 +55,26 @@ const handleTransactionsCreated: NotificationDescriptionHandler = (
 
 const handleInboxNew: NotificationDescriptionHandler = (metadata, user, t) => {
   const count = metadata?.totalCount || 1;
-  const source = metadata?.source;
+  const type = metadata?.type;
   const provider = metadata?.provider;
 
-  // Use special title for uploads
-  if (source === "upload") {
-    return t("notifications.inbox_new.upload_title", { count });
-  }
-
-  const baseTitle = t("notifications.inbox_new.title", { count });
-
-  if (source) {
-    let sourceText = "";
-    if (source === "email") {
-      sourceText = t("notifications.inbox_new.source.email");
-    } else if (source === "sync") {
-      sourceText = t("notifications.inbox_new.source.sync", { provider });
-    } else if (source === "slack") {
-      sourceText = t("notifications.inbox_new.source.slack");
-    } else if (source === "upload") {
-      sourceText = t("notifications.inbox_new.source.upload");
+  if (type) {
+    if (type === "email") {
+      return t("notifications.inbox_new.type.email", { count });
     }
-
-    return `${baseTitle} ${sourceText}`.trim();
+    if (type === "sync") {
+      return t("notifications.inbox_new.type.sync", { count, provider });
+    }
+    if (type === "slack") {
+      return t("notifications.inbox_new.type.slack", { count });
+    }
+    if (type === "upload") {
+      return t("notifications.inbox_new.type.upload", { count });
+    }
   }
 
-  return baseTitle;
+  // Fallback to generic message
+  return t("notifications.inbox_new.title", { count });
 };
 
 const handleInvoicePaid: NotificationDescriptionHandler = (

@@ -45,6 +45,7 @@ export class Notifications {
   #toUserData(
     teamMembers: Array<{
       id: string;
+      role: "owner" | "member" | null;
       fullName: string | null;
       avatarUrl: string | null;
       email: string | null;
@@ -60,6 +61,7 @@ export class Notifications {
       email: member.email ?? "",
       locale: member.locale ?? "en",
       team_id: teamId,
+      role: member.role ?? "member",
     }));
   }
 
@@ -225,9 +227,8 @@ export class Notifications {
           firstUser,
           teamContext,
         );
-        const isCustomerEmail = sampleEmail.emailType === "customer";
 
-        if (isCustomerEmail) {
+        if (sampleEmail.emailType === "customer") {
           // Customer-facing email: send regardless of team preferences
           const emailInputs = [
             this.#createEmailInput(
@@ -243,8 +244,30 @@ export class Notifications {
             emailInputs,
             type as string,
           );
+        } else if (sampleEmail.emailType === "owners") {
+          // Owners-only email: send to team owners only
+          const ownerUsers = validatedData.users.filter(
+            (user: UserData) => user.role === "owner",
+          );
+
+          const emailInputs = ownerUsers.map((user: UserData) =>
+            this.#createEmailInput(
+              handler,
+              validatedData,
+              user,
+              teamContext,
+              options,
+            ),
+          );
+
+          console.log("📨 Email inputs for owners:", emailInputs.length);
+
+          emails = await this.#emailService.sendBulk(
+            emailInputs,
+            type as string,
+          );
         } else {
-          // Team-facing email: send to each team member based on their preferences
+          // Team-facing email: send to all team members
           const emailInputs = validatedData.users.map((user: UserData) =>
             this.#createEmailInput(
               handler,

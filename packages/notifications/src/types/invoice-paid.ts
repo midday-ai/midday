@@ -1,3 +1,4 @@
+import { getI18n } from "@midday/email/locales";
 import { getAppUrl } from "@midday/utils/envs";
 import type { NotificationHandler } from "../base";
 import { invoicePaidSchema } from "../schemas";
@@ -20,14 +21,20 @@ export const invoicePaid: NotificationHandler = {
     },
   }),
 
-  createEmail: (data, user) => ({
-    template: "invoice-paid",
-    emailType: "team",
-    subject: "invoice.paid.subject",
-    user,
-    data: {
-      invoiceNumber: data.invoiceNumber,
-      link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&type=details`,
-    },
-  }),
+  createEmail: (data, user) => {
+    const { t } = getI18n({ locale: user?.locale ?? "en" });
+
+    return {
+      template: "invoice-paid",
+      emailType: "owners",
+      subject: t("invoice.paid.subject", {
+        invoiceNumber: data.invoiceNumber,
+      }),
+      user,
+      data: {
+        invoiceNumber: data.invoiceNumber,
+        link: `${getAppUrl()}/invoices?invoiceId=${data.invoiceId}&type=details`,
+      },
+    };
+  },
 };

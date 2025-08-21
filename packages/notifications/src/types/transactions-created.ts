@@ -1,3 +1,4 @@
+import { getI18n } from "@midday/email/locales";
 import { getInboxEmail } from "@midday/inbox";
 import type { NotificationHandler } from "../base";
 import { transactionsCreatedSchema } from "../schemas";
@@ -35,15 +36,19 @@ export const transactionsCreated: NotificationHandler = {
     };
   },
 
-  createEmail: (data, user, team) => ({
-    template: "transactions",
-    emailType: "team",
-    subject: "transactions.subject",
-    user,
-    replyTo: getInboxEmail(team.inboxId),
-    data: {
-      transactions: data.transactions,
-      teamName: team.name,
-    },
-  }),
+  createEmail: (data, user, team) => {
+    const { t } = getI18n({ locale: user?.locale ?? "en" });
+
+    return {
+      template: "transactions",
+      emailType: "owners",
+      subject: t("transactions.subject"),
+      user,
+      replyTo: getInboxEmail(team.inboxId),
+      data: {
+        transactions: data.transactions,
+        teamName: team.name,
+      },
+    };
+  },
 };

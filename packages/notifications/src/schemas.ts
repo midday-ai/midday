@@ -32,6 +32,7 @@ export const userSchema = z.object({
   locale: z.string().optional(),
   avatar_url: z.string().optional(),
   team_id: z.string().uuid(),
+  role: z.enum(["owner", "member"]).optional(),
 });
 
 export const transactionSchema = z.object({
@@ -60,15 +61,15 @@ export const transactionsCreatedSchema = z.object({
 
 export const inboxItemSchema = z.object({
   totalCount: z.number(),
-  syncType: z.enum(["manual", "automatic"]),
+  source: z.enum(["user", "system"]).default("system"),
   provider: z.string(),
 });
 
 export const inboxNewSchema = z.object({
   users: z.array(userSchema),
   totalCount: z.number(),
-  source: z.enum(["email", "sync", "slack", "upload"]),
-  syncType: z.enum(["manual", "automatic"]).optional(),
+  inboxType: z.enum(["email", "sync", "slack", "upload"]),
+  source: z.enum(["user", "system"]).default("system"),
   provider: z.string().optional(),
 });
 
@@ -78,7 +79,7 @@ export const invoicePaidSchema = z.object({
   invoiceNumber: z.string(),
   customerName: z.string().optional(),
   paidAt: z.string().optional(),
-  source: z.enum(["automatic", "manual"]).default("automatic"),
+  source: z.enum(["user", "system"]).default("system"),
 });
 
 export const invoiceOverdueSchema = z.object({
@@ -86,6 +87,7 @@ export const invoiceOverdueSchema = z.object({
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
   customerName: z.string(),
+  source: z.enum(["user", "system"]).default("system"),
 });
 
 export const invoiceScheduledSchema = z.object({
