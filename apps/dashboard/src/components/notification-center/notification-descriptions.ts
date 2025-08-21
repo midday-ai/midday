@@ -56,12 +56,13 @@ const handleTransactionsCreated: NotificationDescriptionHandler = (
 const handleInboxNew: NotificationDescriptionHandler = (metadata, user, t) => {
   const count = metadata?.totalCount || 1;
   const type = metadata?.type;
+  const provider = metadata?.provider ?? "";
 
   switch (type) {
     case "email":
       return t("notifications.inbox_new.type.email", { count });
     case "sync":
-      return t("notifications.inbox_new.type.sync", { count });
+      return t("notifications.inbox_new.type.sync", { count, provider });
     case "slack":
       return t("notifications.inbox_new.type.slack", { count });
     case "upload":
