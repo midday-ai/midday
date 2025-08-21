@@ -244,6 +244,12 @@ export class Notifications {
             emailInputs,
             type as string,
           );
+
+          console.log("📨 Email result for customer:", {
+            sent: emails.sent,
+            skipped: emails.skipped,
+            failed: emails.failed || 0,
+          });
         } else if (sampleEmail.emailType === "owners") {
           // Owners-only email: send to team owners only
           const ownerUsers = validatedData.users.filter(
@@ -266,6 +272,12 @@ export class Notifications {
             emailInputs,
             type as string,
           );
+
+          console.log("📨 Email result for owners:", {
+            sent: emails.sent,
+            skipped: emails.skipped,
+            failed: emails.failed || 0,
+          });
         } else {
           // Team-facing email: send to all team members
           const emailInputs = validatedData.users.map((user: UserData) =>
@@ -278,10 +290,18 @@ export class Notifications {
             ),
           );
 
+          console.log("📨 Email inputs for team:", emailInputs.length);
+
           emails = await this.#emailService.sendBulk(
             emailInputs,
             type as string,
           );
+
+          console.log("📨 Email result for team:", {
+            sent: emails.sent,
+            skipped: emails.skipped,
+            failed: emails.failed || 0,
+          });
         }
       }
 
