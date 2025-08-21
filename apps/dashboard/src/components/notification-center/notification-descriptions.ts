@@ -56,25 +56,19 @@ const handleTransactionsCreated: NotificationDescriptionHandler = (
 const handleInboxNew: NotificationDescriptionHandler = (metadata, user, t) => {
   const count = metadata?.totalCount || 1;
   const type = metadata?.type;
-  const provider = metadata?.provider;
 
-  if (type) {
-    if (type === "email") {
+  switch (type) {
+    case "email":
       return t("notifications.inbox_new.type.email", { count });
-    }
-    if (type === "sync") {
-      return t("notifications.inbox_new.type.sync", { count, provider });
-    }
-    if (type === "slack") {
+    case "sync":
+      return t("notifications.inbox_new.type.sync", { count });
+    case "slack":
       return t("notifications.inbox_new.type.slack", { count });
-    }
-    if (type === "upload") {
+    case "upload":
       return t("notifications.inbox_new.type.upload", { count });
-    }
+    default:
+      return t("notifications.inbox_new.title", { count });
   }
-
-  // Fallback to generic message
-  return t("notifications.inbox_new.title", { count });
 };
 
 const handleInvoicePaid: NotificationDescriptionHandler = (
