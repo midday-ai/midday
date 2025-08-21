@@ -17,7 +17,7 @@ export const transactionNotifications = schemaTask({
     const notifications = new Notifications(getDb());
 
     try {
-      // Mark all transactions as notified and get the ones that need to be notified about
+      // Update all unnotified transactions for the team as notified and return those transactions
       const { data: transactionsData } = await supabase
         .from("transactions")
         .update({ notified: true })

@@ -25,6 +25,7 @@ export const transactionsCreated: NotificationHandler = {
         // For single transactions, store the transaction details for richer notifications
         ...(data.transactions.length === 1 &&
           firstTransaction && {
+            recordId: firstTransaction.id,
             transaction: {
               name: firstTransaction.name,
               amount: firstTransaction.amount,
@@ -48,6 +49,7 @@ export const transactionsCreated: NotificationHandler = {
       data: {
         transactions: data.transactions,
         teamName: team.name,
+        fullName: user.full_name,
       },
     };
   },

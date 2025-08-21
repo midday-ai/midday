@@ -1,6 +1,7 @@
 "use client";
 
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -14,7 +15,6 @@ const SUPPORTED_NOTIFICATION_TYPES = [
   "invoice_cancelled",
   "transactions_created",
   "inbox_new",
-  "match",
 ];
 
 export function isNotificationClickable(activityType: string): boolean {
@@ -41,6 +41,7 @@ export function NotificationLink({
   actionButton,
 }: NotificationLinkProps) {
   const { setParams: setInvoiceParams } = useInvoiceParams();
+  const { setParams: setTransactionParams } = useTransactionParams();
   const router = useRouter();
 
   const isClickable = isNotificationClickable(activityType);
@@ -48,45 +49,37 @@ export function NotificationLink({
   const handleClick = () => {
     onNavigate?.();
 
-    const linkBuilders: Record<
-      string,
-      (recordId: string, metadata?: Record<string, any>) => void
-    > = {
-      invoice_paid: (recordId) =>
-        setInvoiceParams({ invoiceId: recordId, type: "details" }),
-      invoice_overdue: (recordId) =>
-        setInvoiceParams({ invoiceId: recordId, type: "details" }),
-      invoice_created: (recordId) =>
-        setInvoiceParams({ invoiceId: recordId, type: "details" }),
-      invoice_sent: (recordId) =>
-        setInvoiceParams({ invoiceId: recordId, type: "details" }),
-      invoice_scheduled: (recordId) =>
-        setInvoiceParams({ invoiceId: recordId, type: "details" }),
-      invoice_reminder_sent: (recordId) =>
-        setInvoiceParams({ invoiceId: recordId, type: "details" }),
-      invoice_cancelled: (recordId) =>
-        setInvoiceParams({ invoiceId: recordId, type: "details" }),
-      transactions_created: (recordId, metadata) => {
-        if (metadata?.from && metadata?.to) {
-          router.push(
-            `/transactions?start=${metadata.from}&end=${metadata.to}`,
-          );
-        } else {
-          router.push(`/transactions?id=${recordId}`);
-        }
-      },
-      inbox_new: () => router.push("/inbox"),
-      match: (recordId) => router.push(`/transactions?id=${recordId}`),
-    };
+    try {
+      switch (activityType) {
+        case "invoice_paid":
+        case "invoice_overdue":
+        case "invoice_created":
+        case "invoice_sent":
+        case "invoice_scheduled":
+        case "invoice_reminder_sent":
+        case "invoice_cancelled":
+          setInvoiceParams({ invoiceId: recordId!, type: "details" });
+          break;
 
-    const builder = linkBuilders[activityType];
+        case "transactions_created":
+          if (metadata?.recordId) {
+            setTransactionParams({ transactionId: recordId! });
+          } else if (metadata?.dateRange) {
+            router.push(
+              `/transactions?start=${metadata.dateRange.from}&end=${metadata.dateRange.to}`,
+            );
+          }
+          break;
 
-    if (builder) {
-      try {
-        builder(recordId || "", metadata);
-      } catch (error) {
-        console.error(`Error navigating for ${activityType}:`, error);
+        case "inbox_new":
+          router.push("/inbox");
+          break;
+
+        default:
+          console.warn(`Unhandled notification type: ${activityType}`);
       }
+    } catch (error) {
+      console.error(`Error navigating for ${activityType}:`, error);
     }
   };
 
