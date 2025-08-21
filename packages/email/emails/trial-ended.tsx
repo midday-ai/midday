@@ -21,7 +21,7 @@ interface Props {
 
 export const TrialEndedEmail = ({ fullName = "" }: Props) => {
   const firstName = fullName ? fullName.split(" ").at(0) : "";
-  const text = `${firstName ? `Hi ${firstName}, ` : ""}Your Midday trial has now ended, which means you have read-only access to your data.`;
+  const text = `${firstName ? `Hi ${firstName}, ` : ""}Your Midday trial has now ended, which means you have read-only access.`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -60,7 +60,7 @@ export const TrialEndedEmail = ({ fullName = "" }: Props) => {
             style={{ color: lightStyles.text.color }}
           >
             Your Midday trial has now ended, which means you have read-only
-            access to your data.
+            access.
           </Text>
           <Text
             className={`text-[14px] ${themeClasses.text}`}
