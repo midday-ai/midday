@@ -62,6 +62,7 @@ const handleInboxNew: NotificationDescriptionHandler = (metadata, user, t) => {
     case "email":
       return t("notifications.inbox_new.type.email", { count });
     case "sync":
+      // @ts-expect-error
       return t("notifications.inbox_new.type.sync", { count, provider });
     case "slack":
       return t("notifications.inbox_new.type.slack", { count });

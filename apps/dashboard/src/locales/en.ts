@@ -167,17 +167,15 @@ export default {
     inbox_new: {
       name: "New Inbox Items",
       description: "Get notified when new items arrive in your inbox",
-      type: {
-        "email#one": "New document received via team inbox email",
-        "email#other": "{count} new documents received via team inbox email",
-        "sync#one": "New document synced from your {provider} account",
-        "sync#other":
-          "{count} new documents synced from your {provider} account",
-        "slack#one": "New document shared via Slack",
-        "slack#other": "{count} new documents shared via Slack",
-        "upload#one": "New document uploaded to your inbox",
-        "upload#other": "{count} new documents uploaded to your inbox",
-      },
+      "type.email#one": "New document received via team inbox email",
+      "type.email#other": "{count} new documents received via team inbox email",
+      "type.sync#one": "New document synced from your {provider} account",
+      "type.sync#other":
+        "{count} new documents synced from your {provider} account",
+      "type.slack#one": "New document shared via Slack",
+      "type.slack#other": "{count} new documents shared via Slack",
+      "type.upload#one": "New document uploaded to your inbox",
+      "type.upload#other": "{count} new documents uploaded to your inbox",
       // Fallback titles (shouldn't be used with new implementation)
       "title#one": "We found a new document in your inbox",
       "title#other": "We found {count} new documents in your inbox",
