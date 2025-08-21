@@ -24,11 +24,11 @@
     "ai": "5.0.2",
     "camelcase-keys": "^9.1.3",
     "heic-convert": "1.2.4",
+    "trigger.dev": "4.0.0",
     "node-xlsx": "^0.24.0",
     "sharp": "0.34.1"
   },
   "devDependencies": {
-    "trigger.dev": "3.3.17",
     "@types/heic-convert": "2.1.0"
   }
 }
