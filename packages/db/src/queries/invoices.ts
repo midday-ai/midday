@@ -5,6 +5,8 @@ import {
   invoiceStatusEnum,
   invoices,
   teams,
+  trackerEntries,
+  trackerProjects,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { generateToken } from "@midday/invoice/token";
@@ -19,6 +21,7 @@ import {
   gte,
   ilike,
   inArray,
+  isNotNull,
   lte,
   or,
   sql,
@@ -720,6 +723,168 @@ export async function updateInvoice(db: Database, params: UpdateInvoiceParams) {
       });
     }
   }
+
+  return result;
+}
+
+export type GetMostActiveClientParams = {
+  teamId: string;
+};
+
+export async function getMostActiveClient(
+  db: Database,
+  params: GetMostActiveClientParams,
+) {
+  const { teamId } = params;
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const result = await db
+    .select({
+      customerId: customers.id,
+      customerName: customers.name,
+      invoiceCount: sql<number>`COUNT(DISTINCT ${invoices.id})::int`,
+      totalTrackerTime: sql<number>`COALESCE(SUM(${trackerEntries.duration}), 0)::int`,
+    })
+    .from(customers)
+    .leftJoin(
+      invoices,
+      and(
+        eq(invoices.customerId, customers.id),
+        gte(invoices.createdAt, thirtyDaysAgo.toISOString()),
+      ),
+    )
+    .leftJoin(trackerProjects, eq(trackerProjects.customerId, customers.id))
+    .leftJoin(
+      trackerEntries,
+      and(
+        eq(trackerEntries.projectId, trackerProjects.id),
+        gte(trackerEntries.date, thirtyDaysAgo.toISOString().split("T")[0]),
+      ),
+    )
+    .where(eq(customers.teamId, teamId))
+    .groupBy(customers.id, customers.name)
+    .having(
+      sql`COUNT(DISTINCT ${invoices.id}) > 0 OR COALESCE(SUM(${trackerEntries.duration}), 0) > 0`,
+    )
+    .orderBy(
+      sql`(COUNT(DISTINCT ${invoices.id}) + COALESCE(SUM(${trackerEntries.duration}) / 3600, 0)) DESC`,
+    )
+    .limit(1);
+
+  return result[0] || null;
+}
+
+export type GetInactiveClientsCountParams = {
+  teamId: string;
+};
+
+export async function getInactiveClientsCount(
+  db: Database,
+  params: GetInactiveClientsCountParams,
+) {
+  const { teamId } = params;
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  // Use a subquery to properly count inactive clients
+  const [result] = await db
+    .select({
+      count: sql<number>`COUNT(*)::int`,
+    })
+    .from(
+      db
+        .select({
+          customerId: customers.id,
+        })
+        .from(customers)
+        .leftJoin(
+          invoices,
+          and(
+            eq(invoices.customerId, customers.id),
+            gte(invoices.createdAt, thirtyDaysAgo.toISOString()),
+          ),
+        )
+        .leftJoin(trackerProjects, eq(trackerProjects.customerId, customers.id))
+        .leftJoin(
+          trackerEntries,
+          and(
+            eq(trackerEntries.projectId, trackerProjects.id),
+            gte(trackerEntries.date, thirtyDaysAgo.toISOString().split("T")[0]),
+          ),
+        )
+        .where(eq(customers.teamId, teamId))
+        .groupBy(customers.id)
+        .having(
+          sql`COUNT(DISTINCT ${invoices.id}) = 0 AND COALESCE(SUM(${trackerEntries.duration}), 0) = 0`,
+        )
+        .as("inactive_customers"),
+    );
+
+  return result?.count || 0;
+}
+
+export type GetAverageDaysToPaymentParams = {
+  teamId: string;
+};
+
+export async function getAverageDaysToPayment(
+  db: Database,
+  params: GetAverageDaysToPaymentParams,
+) {
+  const { teamId } = params;
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const [result] = await db
+    .select({
+      averageDays: sql<number>`ROUND(AVG(DATE_PART('day', ${invoices.paidAt}::timestamp - ${invoices.sentAt}::timestamp)))::int`,
+    })
+    .from(invoices)
+    .where(
+      and(
+        eq(invoices.teamId, teamId),
+        eq(invoices.status, "paid"),
+        isNotNull(invoices.paidAt),
+        isNotNull(invoices.sentAt),
+        gte(invoices.paidAt, thirtyDaysAgo.toISOString()),
+      ),
+    );
+
+  return result?.averageDays || 0;
+}
+
+export type GetAverageInvoiceSizeParams = {
+  teamId: string;
+};
+
+export async function getAverageInvoiceSize(
+  db: Database,
+  params: GetAverageInvoiceSizeParams,
+) {
+  const { teamId } = params;
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const result = await db
+    .select({
+      currency: invoices.currency,
+      averageAmount: sql<number>`ROUND(AVG(${invoices.amount}), 2)::float`,
+      invoiceCount: sql<number>`COUNT(*)::int`,
+    })
+    .from(invoices)
+    .where(
+      and(
+        eq(invoices.teamId, teamId),
+        gte(invoices.sentAt, thirtyDaysAgo.toISOString()),
+        isNotNull(invoices.sentAt),
+      ),
+    )
+    .groupBy(invoices.currency);
 
   return result;
 }

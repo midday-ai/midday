@@ -24,14 +24,20 @@ import {
   deleteInvoice,
   draftInvoice,
   duplicateInvoice,
+  getAverageDaysToPayment,
+  getAverageInvoiceSize,
   getCustomerById,
+  getInactiveClientsCount,
   getInvoiceById,
   getInvoiceSummary,
   getInvoiceTemplate,
   getInvoices,
+  getMostActiveClient,
+  getNewCustomersCount,
   getNextInvoiceNumber,
   getPaymentStatus,
   getTeamById,
+  getTopRevenueClient,
   getTrackerProjectById,
   getTrackerRecordsByRange,
   getUserById,
@@ -644,4 +650,40 @@ export const invoiceRouter = createTRPCRouter({
 
       return updatedInvoice;
     }),
+
+  mostActiveClient: protectedProcedure.query(
+    async ({ ctx: { db, teamId } }) => {
+      return getMostActiveClient(db, { teamId: teamId! });
+    },
+  ),
+
+  inactiveClientsCount: protectedProcedure.query(
+    async ({ ctx: { db, teamId } }) => {
+      return getInactiveClientsCount(db, { teamId: teamId! });
+    },
+  ),
+
+  averageDaysToPayment: protectedProcedure.query(
+    async ({ ctx: { db, teamId } }) => {
+      return getAverageDaysToPayment(db, { teamId: teamId! });
+    },
+  ),
+
+  averageInvoiceSize: protectedProcedure.query(
+    async ({ ctx: { db, teamId } }) => {
+      return getAverageInvoiceSize(db, { teamId: teamId! });
+    },
+  ),
+
+  topRevenueClient: protectedProcedure.query(
+    async ({ ctx: { db, teamId } }) => {
+      return getTopRevenueClient(db, { teamId: teamId! });
+    },
+  ),
+
+  newCustomersCount: protectedProcedure.query(
+    async ({ ctx: { db, teamId } }) => {
+      return getNewCustomersCount(db, { teamId: teamId! });
+    },
+  ),
 });
