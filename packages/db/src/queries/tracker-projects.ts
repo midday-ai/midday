@@ -274,7 +274,7 @@ export type UpsertTrackerProjectParams = {
   currency?: string | null;
   customerId?: string | null;
   teamId: string;
-  userId?: string | null;
+  userId?: string;
   tags?: { id: string; value: string }[] | null;
 };
 

@@ -175,7 +175,7 @@ app.openapi(
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
-    const userId = c.get("userId");
+    const userId = c.get("session").user.id;
     const { id } = c.req.valid("param");
     const params = c.req.valid("json");
 
@@ -224,7 +224,7 @@ app.openapi(
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
-    const userId = c.get("userId");
+    const userId = c.get("session").user.id;
     const params = c.req.valid("json");
 
     const result = await updateTransactions(db, {
