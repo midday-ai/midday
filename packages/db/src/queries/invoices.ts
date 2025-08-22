@@ -760,7 +760,10 @@ export async function getMostActiveClient(
       trackerEntries,
       and(
         eq(trackerEntries.projectId, trackerProjects.id),
-        gte(trackerEntries.date, thirtyDaysAgo.toISOString().split("T")[0]),
+        gte(
+          trackerEntries.date,
+          thirtyDaysAgo.toISOString().split("T")[0] ?? "",
+        ),
       ),
     )
     .where(eq(customers.teamId, teamId))
@@ -812,7 +815,10 @@ export async function getInactiveClientsCount(
           trackerEntries,
           and(
             eq(trackerEntries.projectId, trackerProjects.id),
-            gte(trackerEntries.date, thirtyDaysAgo.toISOString().split("T")[0]),
+            gte(
+              trackerEntries.date,
+              thirtyDaysAgo.toISOString().split("T")[0] ?? "",
+            ),
           ),
         )
         .where(eq(customers.teamId, teamId))

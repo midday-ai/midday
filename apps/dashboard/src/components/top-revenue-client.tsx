@@ -1,6 +1,7 @@
 "use client";
 
 import { useTeamQuery } from "@/hooks/use-team";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -9,6 +10,7 @@ import { FormatAmount } from "./format-amount";
 export function TopRevenueClient() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
+  const { data: user } = useUserQuery();
   const { data } = useSuspenseQuery(
     trpc.invoice.topRevenueClient.queryOptions(),
   );
@@ -48,8 +50,8 @@ export function TopRevenueClient() {
           <div className="text-sm text-muted-foreground">
             <FormatAmount
               amount={data.totalRevenue}
-              currency={data.currency}
-              locale={team?.locale}
+              currency={data.currency || team?.baseCurrency || "USD"}
+              locale={user?.locale ?? undefined}
             />{" "}
             from {data.invoiceCount} invoice{data.invoiceCount !== 1 ? "s" : ""}{" "}
             past 30 days

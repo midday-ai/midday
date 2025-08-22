@@ -1,15 +1,16 @@
 "use client";
 
 import { useTeamQuery } from "@/hooks/use-team";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { AnimatedNumber } from "./animated-number";
 import { FormatAmount } from "./format-amount";
 
 export function AverageInvoiceSize() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
+  const { data: user } = useUserQuery();
   const { data } = useSuspenseQuery(
     trpc.invoice.averageInvoiceSize.queryOptions(),
   );
@@ -41,9 +42,9 @@ export function AverageInvoiceSize() {
       <CardHeader className="pb-3">
         <CardTitle className="font-mono font-medium text-2xl">
           <FormatAmount
-            amount={primaryData.averageAmount}
-            currency={primaryData.currency}
-            locale={team?.locale}
+            amount={primaryData?.averageAmount ?? 0}
+            currency={primaryData?.currency || team?.baseCurrency || "USD"}
+            locale={user?.locale ?? undefined}
           />
         </CardTitle>
       </CardHeader>
