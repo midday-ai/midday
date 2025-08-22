@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2.50.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   },
   "exports": {
     "./server": "./src/client/server.ts",

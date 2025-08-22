@@ -51,6 +51,7 @@ import {
   MdOutlineGridView,
   MdOutlineInventory2,
   MdOutlineLaunch,
+  MdOutlineLink,
   MdOutlineMoreTime,
   MdOutlineMoreVert,
   MdOutlineNotificationsNone,
@@ -450,55 +451,6 @@ export const Icons = {
       />
     </svg>
   ),
-  Outlook: (props: any) => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={24}
-      height={24}
-      viewBox="0 0 48 48"
-      {...props}
-    >
-      <path
-        fill="#1a237e"
-        d="m43.607 23.752-7.162-4.172v11.594H44v-6.738a.793.793 0 0 0-.393-.684z"
-      />
-      <path
-        fill="#0c4999"
-        d="M33.919 8.84h9.046V7.732c0-.957-.775-1.732-1.731-1.732H17.667c-.956 0-1.732.775-1.732 1.732V8.84h17.984z"
-      />
-      <path
-        fill="#0f73d9"
-        d="M33.919 33.522h7.314c.956 0 1.732-.775 1.732-1.732v-6.827h-9.046v8.559z"
-      />
-      <path
-        fill="#0f439d"
-        d="M15.936 24.964v6.827c0 .956.775 1.732 1.732 1.732h7.273v-8.558h-9.005z"
-      />
-      <path fill="#2ecdfd" d="M33.919 8.84h9.046v8.027h-9.046z" />
-      <path fill="#1c5fb0" d="M15.936 8.84h9.005v8.027h-9.005z" />
-      <path fill="#1467c7" d="M24.94 24.964h8.979v8.558H24.94z" />
-      <path fill="#1690d5" d="M24.94 8.84h8.979v8.027H24.94z" />
-      <path fill="#1bb4ff" d="M33.919 16.867h9.046v8.096h-9.046z" />
-      <path fill="#074daf" d="M15.936 16.867h9.005v8.096h-9.005z" />
-      <path fill="#2076d4" d="M24.94 16.867h8.979v8.096H24.94z" />
-      <path
-        fill="#2ed0ff"
-        d="M15.441 42h26.87c.933 0 1.689-.756 1.689-1.689V24.438s-.03.658-1.751 1.617c-1.3.724-27.505 15.511-27.505 15.511s.234.434.697.434z"
-      />
-      <path
-        fill="#139fe2"
-        d="M42.279 41.997 15.689 42A1.689 1.689 0 0 1 14 40.311V25.067l29.363 16.562c-.245.196-.556.368-1.084.368z"
-      />
-      <path
-        fill="#00488d"
-        d="M22.319 34H5.681A1.682 1.682 0 0 1 4 32.319V15.681C4 14.753 4.753 14 5.681 14h16.638c.928 0 1.681.753 1.681 1.681v16.638c0 .928-.753 1.681-1.681 1.681z"
-      />
-      <path
-        fill="#fff"
-        d="M13.914 18.734c-3.131 0-5.017 2.392-5.017 5.343s1.879 5.342 5.017 5.342c3.139 0 5.017-2.392 5.017-5.342 0-2.951-1.886-5.343-5.017-5.343zm0 8.882c-1.776 0-2.838-1.584-2.838-3.539s1.067-3.539 2.838-3.539c1.771 0 2.839 1.585 2.839 3.539s-1.064 3.539-2.839 3.539z"
-      />
-    </svg>
-  ),
   CreateTransaction: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -607,6 +559,7 @@ export const Icons = {
   OpenInNew: MdOutlineOpenInNew,
   DragIndicator: MdDragIndicator,
   ExternalLink: MdOutlineLaunch,
+  Link: MdOutlineLink,
   CropFree: MdOutlineCropFree,
   DateFormat: MdOutlineFactCheck,
   Tax: MdOutlineAssuredWorkload,

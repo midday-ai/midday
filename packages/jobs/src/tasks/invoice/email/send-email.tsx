@@ -4,7 +4,7 @@ import { render } from "@midday/email/render";
 import { encrypt } from "@midday/encryption";
 import { createClient } from "@midday/supabase/job";
 import { getAppUrl } from "@midday/utils/envs";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
@@ -38,7 +38,7 @@ export const sendInvoiceEmail = schemaTask({
     let attachments: { content: string; filename: string }[] | undefined;
 
     // @ts-expect-error template is a jsonb field
-    if (invoice.template.include_pdf) {
+    if (invoice.template.includePdf) {
       const { data: attachmentData } = await supabase.storage
         .from("vault")
         .download(fullPath);

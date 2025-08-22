@@ -6,7 +6,7 @@ CREATE TYPE "public"."bankProviders" AS ENUM('gocardless', 'plaid', 'teller');--
 CREATE TYPE "public"."bank_providers" AS ENUM('gocardless', 'plaid', 'teller', 'enablebanking', 'pluggy');--> statement-breakpoint
 CREATE TYPE "public"."connection_status" AS ENUM('disconnected', 'connected', 'unknown');--> statement-breakpoint
 CREATE TYPE "public"."document_processing_status" AS ENUM('pending', 'processing', 'completed', 'failed');--> statement-breakpoint
-CREATE TYPE "public"."inbox_account_providers" AS ENUM('gmail', 'outlook');--> statement-breakpoint
+CREATE TYPE "public"."inbox_account_providers" AS ENUM('gmail');--> statement-breakpoint
 CREATE TYPE "public"."inbox_status" AS ENUM('processing', 'pending', 'archived', 'new', 'deleted', 'done');--> statement-breakpoint
 CREATE TYPE "public"."inbox_type" AS ENUM('invoice', 'expense');--> statement-breakpoint
 CREATE TYPE "public"."invoice_delivery_type" AS ENUM('create', 'create_and_send', 'scheduled');--> statement-breakpoint

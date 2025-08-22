@@ -1,15 +1,7 @@
-import type { Database } from "@api/db";
 import type { Session } from "@api/utils/auth";
+import { teamCache } from "@midday/cache/team-cache";
+import type { Database } from "@midday/db/client";
 import { TRPCError } from "@trpc/server";
-import { LRUCache } from "lru-cache";
-
-// In-memory cache to check if a user has access to a team
-// Note: This cache is per server instance, and we typically run 1 instance per region.
-// Otherwise, we would need to share this state with Redis or a similar external store.
-const cache = new LRUCache<string, boolean>({
-  max: 5_000, // up to 5k entries (adjust based on memory)
-  ttl: 1000 * 60 * 30, // 30 minutes in milliseconds
-});
 
 export const withTeamPermission = async <TReturn>(opts: {
   ctx: {
@@ -59,14 +51,14 @@ export const withTeamPermission = async <TReturn>(opts: {
   // If teamId is null, user has no team assigned but this is now allowed
   if (teamId !== null) {
     const cacheKey = `user:${userId}:team:${teamId}`;
-    let hasAccess = cache.get(cacheKey);
+    let hasAccess = teamCache.get(cacheKey);
 
     if (hasAccess === undefined) {
       hasAccess = result.usersOnTeams.some(
         (membership) => membership.teamId === teamId,
       );
 
-      cache.set(cacheKey, hasAccess);
+      teamCache.set(cacheKey, hasAccess);
     }
 
     if (!hasAccess) {

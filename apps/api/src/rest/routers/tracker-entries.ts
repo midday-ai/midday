@@ -1,13 +1,3 @@
-import {
-  bulkCreateTrackerEntries,
-  deleteTrackerEntry,
-  getCurrentTimer,
-  getTimerStatus,
-  getTrackerRecordsByRange,
-  startTimer,
-  stopTimer,
-  upsertTrackerEntries,
-} from "@api/db/queries/tracker-entries";
 import type { Context } from "@api/rest/types";
 import {
   bulkCreateTrackerEntriesSchema,
@@ -26,6 +16,16 @@ import {
 } from "@api/schemas/tracker-entries";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import {
+  bulkCreateTrackerEntries,
+  deleteTrackerEntry,
+  getCurrentTimer,
+  getTimerStatus,
+  getTrackerRecordsByRange,
+  startTimer,
+  stopTimer,
+  upsertTrackerEntries,
+} from "@midday/db/queries";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();

@@ -18,6 +18,10 @@ export function TrialEndedModal() {
   const { data: user } = useUserQuery();
   const pathname = usePathname();
 
+  if (!user?.team?.createdAt) {
+    return null;
+  }
+
   // Parse dates using UTCDate for consistent timezone handling
   const rawCreatedAt = parseISO(user?.team?.createdAt!);
   const today = new UTCDate();

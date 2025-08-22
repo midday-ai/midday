@@ -1,7 +1,8 @@
+import { isTeamEligibleForSync } from "@/utils/check-team-eligibility";
 import { logger } from "@/utils/logger";
 import type { SyncConnectionPayload } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/server";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { isAfter, subDays } from "date-fns";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
 
   const { data: connectionData } = await supabase
     .from("bank_connections")
-    .select("id, created_at")
+    .select("id, created_at, team:teams(id, plan, created_at)")
     .eq("reference_id", result.data.item_id)
     .single();
 
@@ -78,6 +79,22 @@ export async function POST(req: NextRequest) {
       { error: "Connection not found" },
       { status: 404 },
     );
+  }
+
+  // Check if team is eligible for sync operations
+  if (
+    !isTeamEligibleForSync({
+      plan: connectionData.team.plan,
+      created_at: connectionData.team.created_at,
+    })
+  ) {
+    logger("Team not eligible for sync", {
+      teamId: connectionData.team.id,
+      plan: connectionData.team.plan,
+      createdAt: connectionData.team.created_at,
+    });
+
+    return NextResponse.json({ success: true });
   }
 
   if (result.data.webhook_type === "TRANSACTIONS") {

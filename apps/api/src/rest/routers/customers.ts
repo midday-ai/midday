@@ -1,9 +1,3 @@
-import {
-  deleteCustomer,
-  getCustomerById,
-  getCustomers,
-  upsertCustomer,
-} from "@api/db/queries/customers";
 import { withRequiredScope } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import {
@@ -15,6 +9,12 @@ import {
 } from "@api/schemas/customers";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import {
+  deleteCustomer,
+  getCustomerById,
+  getCustomers,
+  upsertCustomer,
+} from "@midday/db/queries";
 
 const app = new OpenAPIHono<Context>();
 

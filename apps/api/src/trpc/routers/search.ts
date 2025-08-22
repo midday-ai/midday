@@ -1,10 +1,10 @@
-import {
-  globalSearchQuery,
-  globalSemanticSearchQuery,
-} from "@api/db/queries/search";
 import { globalSearchSchema } from "@api/schemas/search";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { generateLLMFilters } from "@api/utils/search-filters";
+import {
+  globalSearchQuery,
+  globalSemanticSearchQuery,
+} from "@midday/db/queries";
 
 export const searchRouter = createTRPCRouter({
   global: protectedProcedure

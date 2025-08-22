@@ -7,7 +7,7 @@ import { TrialExpiringEmail } from "@midday/email/emails/trial-expiring";
 import { WelcomeEmail } from "@midday/email/emails/welcome";
 import { render } from "@midday/email/render";
 import { createClient } from "@midday/supabase/job";
-import { schemaTask, wait } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask, wait } from "@trigger.dev/sdk";
 
 export const onboardTeam = schemaTask({
   id: "onboard-team",
@@ -26,7 +26,7 @@ export const onboardTeam = schemaTask({
       throw new Error(error.message);
     }
 
-    if (!user.full_name || !user.email || !user.team_id) {
+    if (!user.full_name || !user.email) {
       throw new Error("User data is missing");
     }
 
@@ -40,17 +40,20 @@ export const onboardTeam = schemaTask({
       audienceId: process.env.RESEND_AUDIENCE_ID!,
     });
 
-    if (await shouldSendEmail(user.team_id)) {
-      await resend.emails.send({
-        to: user.email,
-        subject: "Welcome to Midday",
-        from: "Pontus from Midday <pontus@midday.ai>",
-        html: render(
-          WelcomeEmail({
-            fullName: user.full_name,
-          }),
-        ),
-      });
+    await resend.emails.send({
+      to: user.email,
+      subject: "Welcome to Midday",
+      from: "Pontus from Midday <pontus@midday.ai>",
+      html: render(
+        WelcomeEmail({
+          fullName: user.full_name,
+        }),
+      ),
+    });
+
+    if (!user.team_id) {
+      logger.info("User has no team, skipping onboarding");
+      return;
     }
 
     await wait.for({ days: 3 });

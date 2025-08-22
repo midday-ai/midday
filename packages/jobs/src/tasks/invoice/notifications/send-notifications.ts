@@ -3,7 +3,7 @@ import {
   handlePaidInvoiceNotifications,
 } from "@jobs/utils/invoice-notifications";
 import { createClient } from "@midday/supabase/job";
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
 export const sendInvoiceNotifications = schemaTask({

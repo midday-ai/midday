@@ -163,6 +163,7 @@ export const transformTransaction = ({
     counterparty_name: transaction?.counterparties?.[0]?.name
       ? capitalCase(transaction.counterparties[0].name)
       : null,
+    merchant_name: transaction?.merchant_name || null,
     balance: null,
     status: transaction.pending ? "pending" : "posted",
   };
@@ -189,7 +190,7 @@ export const transformAccount = ({
       id: institution.id,
       name: institution.name,
       logo: getLogoURL(institution.id),
-      provider: Providers.Enum.plaid,
+      provider: Providers.enum.plaid,
     },
     resource_id: null,
     expires_at: null,
@@ -210,5 +211,5 @@ export const transformInstitution = (institution: TransformInstitution) => ({
   id: institution.institution_id,
   name: institution.name,
   logo: getLogoURL(institution.institution_id),
-  provider: Providers.Enum.plaid,
+  provider: Providers.enum.plaid,
 });

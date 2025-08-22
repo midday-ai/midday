@@ -2,7 +2,7 @@ import { syncConnectionSchema } from "@jobs/schema";
 import { triggerSequenceAndWait } from "@jobs/utils/trigger-sequence";
 import { client } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import { transactionNotifications } from "../notifications/transactions";
 import { syncAccount } from "./account";
 
@@ -100,18 +100,18 @@ export const syncConnection = schemaTask({
           // @ts-expect-error - TODO: Fix types
           await triggerSequenceAndWait(bankAccounts, syncAccount, {
             tags: ctx.run.tags,
-            delayMinutes: manualSync ? 0 : 1,
+            delaySeconds: manualSync ? 30 : 60, // 30-second delay for manual sync, 60-second for background sync
           });
         }
 
         logger.info("Synced bank accounts completed");
 
         // Trigger a notification for new transactions if it's an background sync
-        // We delay it by 1 minutes to allow for more transactions to be notified
+        // We delay it by 10 minutes to allow for more transactions to be notified
         if (!manualSync) {
           await transactionNotifications.trigger(
             { teamId: data.team_id },
-            { delay: "1m" },
+            { delay: "5m" },
           );
         }
 

@@ -1,33 +1,33 @@
 import {
-  createOAuthApplication,
-  deleteOAuthApplication,
-  getOAuthApplicationByClientId,
-  getOAuthApplicationById,
-  getOAuthApplicationsByTeam,
-  regenerateClientSecret,
-  updateOAuthApplication,
-  updateOAuthApplicationstatus,
-} from "@api/db/queries/oauth-applications";
-import {
-  createAuthorizationCode,
-  getUserAuthorizedApplications,
-  revokeUserApplicationTokens,
-} from "@api/db/queries/oauth-flow";
-import { getTeamsByUserId } from "@api/db/queries/users-on-team";
-import {
+  authorizeOAuthApplicationSchema,
   createOAuthApplicationSchema,
   deleteOAuthApplicationSchema,
+  getApplicationInfoSchema,
   getOAuthApplicationSchema,
   regenerateClientSecretSchema,
+  updateApprovalStatusSchema,
   updateOAuthApplicationSchema,
 } from "@api/schemas/oauth-applications";
 import { revokeUserApplicationAccessSchema } from "@api/schemas/oauth-flow";
 import { resend } from "@api/services/resend";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  createAuthorizationCode,
+  createOAuthApplication,
+  deleteOAuthApplication,
+  getOAuthApplicationByClientId,
+  getOAuthApplicationById,
+  getOAuthApplicationsByTeam,
+  getTeamsByUserId,
+  getUserAuthorizedApplications,
+  regenerateClientSecret,
+  revokeUserApplicationTokens,
+  updateOAuthApplication,
+  updateOAuthApplicationstatus,
+} from "@midday/db/queries";
 import { AppInstalledEmail } from "@midday/email/emails/app-installed";
 import { AppReviewRequestEmail } from "@midday/email/emails/app-review-request";
 import { render } from "@midday/email/render";
-import { z } from "zod";
 
 export const oauthApplicationsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -41,14 +41,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
   }),
 
   getApplicationInfo: protectedProcedure
-    .input(
-      z.object({
-        clientId: z.string(),
-        redirectUri: z.string().url(),
-        scope: z.string(),
-        state: z.string().optional(),
-      }),
-    )
+    .input(getApplicationInfoSchema)
     .query(async ({ ctx, input }) => {
       const { db } = ctx;
       const { clientId, redirectUri, scope, state } = input;
@@ -94,17 +87,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
     }),
 
   authorize: protectedProcedure
-    .input(
-      z.object({
-        clientId: z.string(),
-        decision: z.enum(["allow", "deny"]),
-        scopes: z.array(z.string()),
-        redirectUri: z.string().url(),
-        state: z.string().optional(),
-        codeChallenge: z.string().optional(),
-        teamId: z.string().uuid(),
-      }),
-    )
+    .input(authorizeOAuthApplicationSchema)
     .mutation(async ({ ctx, input }) => {
       const { db, session } = ctx;
       const {
@@ -187,7 +170,6 @@ export const oauthApplicationsRouter = createTRPCRouter({
               email: session.user.email,
               teamName: userTeam.name!,
               appName: application.name,
-              locale: "en",
             }),
           );
 
@@ -241,7 +223,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
     }),
 
   update: protectedProcedure
-    .input(updateOAuthApplicationSchema.extend({ id: z.string().uuid() }))
+    .input(updateOAuthApplicationSchema)
     .mutation(async ({ ctx, input }) => {
       const { db, teamId } = ctx;
       const { id, ...updateData } = input;
@@ -319,12 +301,7 @@ export const oauthApplicationsRouter = createTRPCRouter({
     }),
 
   updateApprovalStatus: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().uuid(),
-        status: z.enum(["draft", "pending"]),
-      }),
-    )
+    .input(updateApprovalStatusSchema)
     .mutation(async ({ ctx, input }) => {
       const { db, teamId, session } = ctx;
 

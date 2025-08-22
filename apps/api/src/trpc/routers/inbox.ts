@@ -1,13 +1,4 @@
 import {
-  deleteInbox,
-  getInbox,
-  getInboxById,
-  getInboxSearch,
-  matchTransaction,
-  unmatchTransaction,
-  updateInbox,
-} from "@api/db/queries/inbox";
-import {
   deleteInboxSchema,
   getInboxByIdSchema,
   getInboxSchema,
@@ -18,8 +9,18 @@ import {
   updateInboxSchema,
 } from "@api/schemas/inbox";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  deleteInbox,
+  deleteInboxEmbedding,
+  getInbox,
+  getInboxById,
+  getInboxSearch,
+  matchTransaction,
+  unmatchTransaction,
+  updateInbox,
+} from "@midday/db/queries";
 import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 
 export const inboxRouter = createTRPCRouter({
   get: protectedProcedure
@@ -43,10 +44,16 @@ export const inboxRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(deleteInboxSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
-      return deleteInbox(db, {
-        id: input.id,
-        teamId: teamId!,
-      });
+      await Promise.all([
+        deleteInboxEmbedding(db, {
+          inboxId: input.id,
+          teamId: teamId!,
+        }),
+        deleteInbox(db, {
+          id: input.id,
+          teamId: teamId!,
+        }),
+      ]);
     }),
 
   processAttachments: protectedProcedure

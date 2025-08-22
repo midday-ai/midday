@@ -9,12 +9,24 @@ const SLACK_OAUTH_REDIRECT_URL =
 const SLACK_STATE_SECRET = process.env.NEXT_PUBLIC_SLACK_STATE_SECRET;
 const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET;
 
-export const slackInstaller = new InstallProvider({
-  clientId: SLACK_CLIENT_ID!,
-  clientSecret: SLACK_CLIENT_SECRET!,
-  stateSecret: SLACK_STATE_SECRET,
-  logLevel: process.env.NODE_ENV === "development" ? LogLevel.DEBUG : undefined,
-});
+let slackInstaller: InstallProvider | null = null;
+
+export const getSlackInstaller = (): InstallProvider => {
+  if (!slackInstaller) {
+    if (!SLACK_CLIENT_ID || !SLACK_CLIENT_SECRET) {
+      throw new Error("Slack client credentials are required but not provided");
+    }
+
+    slackInstaller = new InstallProvider({
+      clientId: SLACK_CLIENT_ID,
+      clientSecret: SLACK_CLIENT_SECRET,
+      stateSecret: SLACK_STATE_SECRET,
+      logLevel:
+        process.env.NODE_ENV === "development" ? LogLevel.DEBUG : undefined,
+    });
+  }
+  return slackInstaller;
+};
 
 export const createSlackApp = ({
   token,
@@ -39,7 +51,7 @@ export const getInstallUrl = ({
   teamId,
   userId,
 }: { teamId: string; userId: string }) => {
-  return slackInstaller.generateInstallUrl({
+  return getSlackInstaller().generateInstallUrl({
     scopes: [
       "incoming-webhook",
       "chat:write",

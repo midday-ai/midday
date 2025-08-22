@@ -17,6 +17,21 @@ export const teamResponseSchema = z.object({
     description: "Current subscription plan of the team",
     example: "pro",
   }),
+  // subscriptionStatus: z
+  //   .enum([
+  //     "active",
+  //     "canceled",
+  //     "past_due",
+  //     "unpaid",
+  //     "trialing",
+  //     "incomplete",
+  //     "incomplete_expired",
+  //   ])
+  //   .nullable()
+  //   .openapi({
+  //     description: "Current subscription status of the team",
+  //     example: "active",
+  //   }),
 });
 
 export const teamsResponseSchema = z.object({

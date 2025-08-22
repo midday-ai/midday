@@ -1,10 +1,3 @@
-import {
-  createTag,
-  deleteTag,
-  getTagById,
-  getTags,
-  updateTag,
-} from "@api/db/queries/tags";
 import type { Context } from "@api/rest/types";
 import {
   createTagSchema,
@@ -15,6 +8,13 @@ import {
 } from "@api/schemas/tags";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import {
+  createTag,
+  deleteTag,
+  getTagById,
+  getTags,
+  updateTag,
+} from "@midday/db/queries";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();

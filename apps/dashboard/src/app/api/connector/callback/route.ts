@@ -1,17 +1,15 @@
 import { getQueryClient, trpc } from "@/trpc/server";
-import { InboxConnector } from "@midday/inbox/connector";
 import type { InitialInboxSetupPayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-  const state = searchParams.get("state") as "gmail" | "outlook";
+  const state = searchParams.get("state") as "gmail";
   const queryClient = getQueryClient();
-  const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
 
-  if (!code || !state || !user?.teamId) {
+  if (!code || !state) {
     return NextResponse.json(
       { error: "Missing required parameters" },
       { status: 400 },
@@ -19,11 +17,12 @@ export async function GET(request: Request) {
   }
 
   try {
-    const connector = new InboxConnector(state);
-    const account = await connector.exchangeCodeForAccount({
-      code,
-      teamId: user.teamId,
-    });
+    const account = await queryClient.fetchQuery(
+      trpc.inboxAccounts.exchangeCodeForAccount.queryOptions({
+        code,
+        provider: state,
+      }),
+    );
 
     if (!account) {
       return NextResponse.redirect(

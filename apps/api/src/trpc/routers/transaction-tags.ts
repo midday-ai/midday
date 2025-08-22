@@ -1,12 +1,9 @@
 import {
-  createTransactionTag,
-  deleteTransactionTag,
-} from "@api/db/queries/transaction-tags";
-import {
   createTransactionTagSchema,
   deleteTransactionTagSchema,
 } from "@api/schemas/transaction-tags";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { createTransactionTag, deleteTransactionTag } from "@midday/db/queries";
 
 export const transactionTagsRouter = createTRPCRouter({
   create: protectedProcedure

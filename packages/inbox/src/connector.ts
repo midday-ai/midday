@@ -1,10 +1,7 @@
+import type { Database } from "@midday/db/client";
+import { getInboxAccountById, upsertInboxAccount } from "@midday/db/queries";
 import { decrypt, encrypt } from "@midday/encryption";
-import { createClient } from "@midday/supabase/job";
-import { upsertInboxAccount } from "@midday/supabase/mutations";
-import { getInboxAccountByIdQuery } from "@midday/supabase/queries";
-import type { Client } from "@midday/supabase/types";
 import { GmailProvider } from "./providers/gmail";
-import { OutlookProvider } from "./providers/outlook";
 import {
   type Account,
   type Attachment,
@@ -14,25 +11,22 @@ import {
   type OAuthProvider,
   type OAuthProviderInterface,
 } from "./providers/types";
+import { isAuthenticationError } from "./utils";
 
 export class InboxConnector extends Connector {
-  #supabase: Client;
+  #db: Database;
   #provider: OAuthProviderInterface;
   #providerName: OAuthProvider;
 
-  constructor(provider: OAuthProvider) {
+  constructor(provider: OAuthProvider, db: Database) {
     super();
 
-    this.#supabase = createClient();
+    this.#db = db;
 
     switch (provider) {
       case "gmail":
-        this.#provider = new GmailProvider();
+        this.#provider = new GmailProvider(this.#db);
         this.#providerName = "gmail";
-        break;
-      case "outlook":
-        this.#provider = new OutlookProvider();
-        this.#providerName = "outlook";
         break;
       default:
         throw new Error(`Unsupported provider: ${provider}`);
@@ -48,10 +42,11 @@ export class InboxConnector extends Connector {
   ): Promise<Account | null> {
     const tokens = await this.#provider.exchangeCodeForTokens(params.code);
 
-    // Set tokens to configure provider auth client
+    // Set tokens to configure provider auth client with expiry date
     this.#provider.setTokens({
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token ?? "",
+      expiry_date: tokens.expiry_date,
     });
 
     const account = await this.#saveAccount({
@@ -61,32 +56,115 @@ export class InboxConnector extends Connector {
       expiryDate: new Date(tokens.expiry_date!).toISOString(),
     });
 
-    return account;
+    if (!account) {
+      throw new Error("Failed to save account");
+    }
+
+    return {
+      id: account.id,
+      provider: account.provider as OAuthProvider,
+      external_id: account.external_id,
+    };
   }
 
   async getAttachments(options: GetAttachmentsOptions): Promise<Attachment[]> {
-    const account = await getInboxAccountByIdQuery(this.#supabase, options.id);
+    const account = await getInboxAccountById(this.#db, {
+      id: options.id,
+      teamId: options.teamId,
+    });
 
-    if (!account.data) {
+    if (!account) {
       throw new Error("Account not found");
     }
 
-    // Set the account ID
-    this.#provider.setAccountId(account.data.id);
+    if (!account.accessToken || !account.refreshToken) {
+      throw new Error("Account tokens not found or invalid");
+    }
 
-    // Set tokens to configure provider auth client
+    // Set the account ID
+    this.#provider.setAccountId(account.id);
+
+    // Set tokens to configure provider auth client with expiry date
+    const expiryDate = account.expiryDate
+      ? new Date(account.expiryDate).getTime()
+      : undefined;
+
     this.#provider.setTokens({
-      access_token: decrypt(account.data.access_token),
-      refresh_token: decrypt(account.data.refresh_token),
+      access_token: decrypt(account.accessToken),
+      refresh_token: decrypt(account.refreshToken),
+      expiry_date: expiryDate,
     });
 
     try {
-      return this.#provider.getAttachments({
-        id: account.data.id,
+      return await this.#provider.getAttachments({
+        id: account.id,
+        teamId: options.teamId,
         maxResults: options.maxResults,
+        lastAccessed: account.lastAccessed,
+        fullSync: options.fullSync,
       });
     } catch (error) {
-      throw new Error("Failed to fetch attachments.");
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
+      // Check if it's an authentication error that might be resolved by token refresh
+      if (isAuthenticationError(errorMessage)) {
+        try {
+          return await this.#retryWithTokenRefresh(options, account);
+        } catch (retryError) {
+          const retryMessage =
+            retryError instanceof Error
+              ? retryError.message
+              : "Unknown retry error";
+          throw new Error(
+            `Failed to fetch attachments after token refresh: ${retryMessage}`,
+          );
+        }
+      }
+
+      throw new Error(`Failed to fetch attachments: ${errorMessage}`);
+    }
+  }
+
+  async #retryWithTokenRefresh(
+    options: GetAttachmentsOptions,
+    account: any,
+  ): Promise<Attachment[]> {
+    // Set tokens with actual expiry date
+    const expiryDate = account.expiryDate
+      ? new Date(account.expiryDate).getTime()
+      : undefined;
+
+    this.#provider.setTokens({
+      access_token: decrypt(account.accessToken),
+      refresh_token: decrypt(account.refreshToken),
+      expiry_date: expiryDate,
+    });
+
+    try {
+      // Explicitly refresh the tokens
+      await this.#provider.refreshTokens();
+
+      // After successful refresh, try the request immediately
+      return await this.#provider.getAttachments({
+        id: account.id,
+        teamId: options.teamId,
+        maxResults: options.maxResults,
+        lastAccessed: account.lastAccessed,
+        fullSync: options.fullSync,
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
+      // Check for invalid_grant which indicates refresh token is invalid
+      if (errorMessage.includes("invalid_grant")) {
+        throw new Error(
+          "Refresh token is invalid or expired. The user needs to re-authenticate their Gmail account.",
+        );
+      }
+
+      throw new Error(`Token refresh failed: ${errorMessage}`);
     }
   }
 
@@ -106,7 +184,7 @@ export class InboxConnector extends Connector {
       throw new Error("User info does not contain an email address.");
     }
 
-    const { data } = await upsertInboxAccount(this.#supabase, {
+    const data = await upsertInboxAccount(this.#db, {
       teamId: params.teamId,
       provider: this.#providerName,
       accessToken: encrypt(params.accessToken),

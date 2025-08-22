@@ -1,16 +1,16 @@
 import {
-  deleteTrackerProject,
-  getTrackerProjectById,
-  getTrackerProjects,
-  upsertTrackerProject,
-} from "@api/db/queries/tracker-projects";
-import {
   deleteTrackerProjectSchema,
   getTrackerProjectByIdSchema,
   getTrackerProjectsSchema,
   upsertTrackerProjectSchema,
 } from "@api/schemas/tracker-projects";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  deleteTrackerProject,
+  getTrackerProjectById,
+  getTrackerProjects,
+  upsertTrackerProject,
+} from "@midday/db/queries";
 
 export const trackerProjectsRouter = createTRPCRouter({
   get: protectedProcedure

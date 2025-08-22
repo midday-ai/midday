@@ -1,8 +1,3 @@
-import {
-  deleteDocument,
-  getDocumentById,
-  getDocuments,
-} from "@api/db/queries/documents";
 import type { Context } from "@api/rest/types";
 import {
   deleteDocumentResponseSchema,
@@ -14,6 +9,11 @@ import {
 } from "@api/schemas/documents";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import {
+  deleteDocument,
+  getDocumentById,
+  getDocuments,
+} from "@midday/db/queries";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();

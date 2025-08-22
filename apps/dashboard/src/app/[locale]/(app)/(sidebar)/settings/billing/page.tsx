@@ -1,6 +1,7 @@
 import { ManageSubscription } from "@/components/manage-subscription";
+import { Orders } from "@/components/orders";
 import { Plans } from "@/components/plans";
-import { trpc } from "@/trpc/server";
+import { prefetch, trpc } from "@/trpc/server";
 import { getQueryClient } from "@/trpc/server";
 import type { Metadata } from "next";
 
@@ -13,6 +14,12 @@ export default async function Billing() {
   const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
 
   const team = user?.team;
+
+  prefetch(
+    trpc.billing.orders.infiniteQueryOptions({
+      pageSize: 15,
+    }),
+  );
 
   return (
     <div className="space-y-12">
@@ -27,6 +34,8 @@ export default async function Billing() {
           <Plans />
         </div>
       )}
+
+      {(team?.plan !== "trial" || team?.canceledAt !== null) && <Orders />}
     </div>
   );
 }

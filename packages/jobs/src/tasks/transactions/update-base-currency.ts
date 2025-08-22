@@ -1,7 +1,7 @@
 import { triggerSequenceAndWait } from "@jobs/utils/trigger-sequence";
 import { updateBaseCurrencySchema } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/job";
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { schemaTask } from "@trigger.dev/sdk";
 import { updateAccountBaseCurrency } from "./update-account-base-currency";
 
 export const updateBaseCurrency = schemaTask({
@@ -38,7 +38,7 @@ export const updateBaseCurrency = schemaTask({
         formattedAccounts,
         updateAccountBaseCurrency,
         {
-          delayMinutes: 0,
+          delaySeconds: 0,
         },
       );
     }

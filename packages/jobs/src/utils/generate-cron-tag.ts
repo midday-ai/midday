@@ -21,10 +21,10 @@ export function generateQuarterDailyCronTag(teamId: string): string {
     0,
   );
 
-  // Generate minute (0-59) based on hash
+  // Generate minute (0-59) for consistency across all quarter-daily intervals
   const minute = hash % 60;
 
-  // Return cron expression that runs every 6 hours at the generated minute
-  // Format: minute 0,6,12,18 * * *
-  return `${minute} 0,6,12,18 * * *`;
+  // Return cron expression that runs every quarter day (6 hours) at the same minute
+  // Format: minute */6 * * * (runs at 00:XX, 06:XX, 12:XX, 18:XX)
+  return `${minute} */6 * * *`;
 }

@@ -19,8 +19,15 @@ import {
   DropdownMenuItem,
 } from "@midday/ui/dropdown-menu";
 import { DropdownMenu, DropdownMenuTrigger } from "@midday/ui/dropdown-menu";
+import { Icons } from "@midday/ui/icons";
 import { Separator } from "@midday/ui/separator";
 import { Skeleton } from "@midday/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreVertical, Trash2 } from "lucide-react";
@@ -196,7 +203,21 @@ export function InboxDetails() {
           </Button>
         </div>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center">
+          {data?.inboxAccount?.provider === "gmail" && (
+            <div className="border-r border-border pr-4">
+              <TooltipProvider delayDuration={100}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Icons.Gmail className="w-4 h-4" />
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs px-3 py-1.5">
+                    {data.inboxAccount.email}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          )}
           <EditInboxModal>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -253,30 +274,32 @@ export function InboxDetails() {
               {isProcessing ? (
                 <Skeleton className="h-[40px] w-[40px] rounded-full" />
               ) : (
-                <Avatar>
-                  {data.website && (
-                    <AvatarImageNext
-                      alt={data.website}
-                      width={40}
-                      height={40}
-                      className={cn(
-                        "rounded-full overflow-hidden",
-                        showFallback && "hidden",
-                      )}
-                      src={getWebsiteLogo(data.website)}
-                      quality={100}
-                      onError={() => {
-                        setShowFallback(true);
-                      }}
-                    />
-                  )}
+                <div className="relative">
+                  <Avatar>
+                    {data.website && (
+                      <AvatarImageNext
+                        alt={data.website}
+                        width={40}
+                        height={40}
+                        className={cn(
+                          "rounded-full overflow-hidden",
+                          showFallback && "hidden",
+                        )}
+                        src={getWebsiteLogo(data.website)}
+                        quality={100}
+                        onError={() => {
+                          setShowFallback(true);
+                        }}
+                      />
+                    )}
 
-                  {fallback && (
-                    <AvatarFallback>
-                      {getInitials(data?.displayName ?? "")}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
+                    {fallback && (
+                      <AvatarFallback>
+                        {getInitials(data?.displayName ?? "")}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                </div>
               )}
 
               <div className="grid gap-1 select-text">

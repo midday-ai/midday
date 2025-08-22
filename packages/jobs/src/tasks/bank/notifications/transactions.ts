@@ -4,7 +4,7 @@ import {
 } from "@jobs/utils/transaction-notifications";
 import { handleTransactionNotifications } from "@jobs/utils/transaction-notifications";
 import { createClient } from "@midday/supabase/job";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
 export const transactionNotifications = schemaTask({

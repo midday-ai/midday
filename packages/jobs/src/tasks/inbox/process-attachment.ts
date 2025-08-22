@@ -1,14 +1,22 @@
+import { getDb } from "@jobs/init";
 import { processAttachmentSchema } from "@jobs/schema";
+import {
+  createInbox,
+  getInboxByFilePath,
+  updateInbox,
+  updateInboxWithProcessedData,
+} from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
 import { createClient } from "@midday/supabase/job";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import { convertHeic } from "../document/convert-heic";
 import { processDocument } from "../document/process-document";
+import { embedInbox } from "./embed-inbox";
 
 export const processAttachment = schemaTask({
   id: "process-attachment",
   schema: processAttachmentSchema,
-  maxDuration: 60,
+  maxDuration: 120,
   retry: {
     maxAttempts: 3,
     minTimeoutInMs: 5000,
@@ -17,9 +25,17 @@ export const processAttachment = schemaTask({
     randomize: true,
   },
   queue: {
-    concurrencyLimit: 100,
+    concurrencyLimit: 50,
   },
-  run: async ({ teamId, mimetype, size, filePath, referenceId, website }) => {
+  run: async ({
+    teamId,
+    mimetype,
+    size,
+    filePath,
+    referenceId,
+    website,
+    inboxAccountId,
+  }) => {
     const supabase = createClient();
 
     // If the file is a HEIC we need to convert it to a JPG
@@ -32,37 +48,25 @@ export const processAttachment = schemaTask({
     const filename = filePath.at(-1);
 
     // Check if inbox item already exists (for retry scenarios)
-    let inboxData = null;
-
-    const { data: existingInbox } = await supabase
-      .from("inbox")
-      .select("id")
-      .contains("file_path", filePath)
-      .eq("team_id", teamId)
-      .single();
-
-    inboxData = existingInbox;
+    let inboxData = await getInboxByFilePath(getDb(), {
+      filePath,
+      teamId,
+    });
 
     // Only create new inbox item if it doesn't exist
     if (!inboxData) {
-      const { data: newInboxData } = await supabase
-        .from("inbox")
-        .insert({
-          // NOTE: If we can't parse the name using OCR this will be the fallback name
-          display_name: filename,
-          team_id: teamId,
-          file_path: filePath,
-          file_name: filename,
-          content_type: mimetype,
-          size,
-          reference_id: referenceId,
-          website,
-        })
-        .select("*")
-        .single()
-        .throwOnError();
-
-      inboxData = newInboxData;
+      inboxData = await createInbox(getDb(), {
+        // NOTE: If we can't parse the name using OCR this will be the fallback name
+        displayName: filename ?? "Unknown",
+        teamId,
+        filePath,
+        fileName: filename ?? "Unknown",
+        contentType: mimetype,
+        size,
+        referenceId,
+        website,
+        inboxAccountId,
+      });
     }
 
     if (!inboxData) {
@@ -97,28 +101,35 @@ export const processAttachment = schemaTask({
         hasAmount: !!result.amount,
       });
 
-      await supabase
-        .from("inbox")
-        .update({
-          amount: result.amount,
-          currency: result.currency,
-          display_name: result.name ?? undefined,
-          website: result.website ?? undefined,
-          date: result.date,
-          tax_amount: result.tax_amount,
-          tax_rate: result.tax_rate,
-          tax_type: result.tax_type,
-          type: result.type as "invoice" | "expense" | null | undefined,
-          status: "pending",
-        })
-        .eq("id", inboxData.id)
-        .select()
-        .single();
+      await updateInboxWithProcessedData(getDb(), {
+        id: inboxData.id,
+        amount: result.amount,
+        currency: result.currency,
+        displayName: result.name,
+        website: result.website,
+        date: result.date,
+        taxAmount: result.tax_amount,
+        taxRate: result.tax_rate,
+        taxType: result.tax_type,
+        type: result.type as "invoice" | "expense" | null | undefined,
+        status: "pending",
+      });
 
       // NOTE: Process documents and images for classification
       await processDocument.trigger({
         mimetype,
         filePath,
+        teamId,
+      });
+
+      // Trigger embedding creation for the inbox item
+      await embedInbox.trigger({
+        inboxId: inboxData.id,
+        teamId,
+      });
+
+      logger.info("Triggered inbox embedding", {
+        inboxId: inboxData.id,
         teamId,
       });
     } catch (error) {
@@ -154,10 +165,11 @@ export const processAttachment = schemaTask({
         },
       );
 
-      await supabase
-        .from("inbox")
-        .update({ status: "pending" })
-        .eq("id", inboxData.id);
+      await updateInbox(getDb(), {
+        id: inboxData.id,
+        teamId,
+        status: "pending",
+      });
     }
   },
 });

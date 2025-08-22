@@ -1,4 +1,4 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`Transform pending transaction 1`] = `
 {
@@ -12,6 +12,7 @@ exports[`Transform pending transaction 1`] = `
   "date": "2024-02-24",
   "description": "Uber",
   "id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "merchant_name": "Uber",
   "method": "other",
   "name": "Uber 063015 SF**POOL**",
   "status": "pending",
@@ -30,6 +31,7 @@ exports[`Transform income transaction 1`] = `
   "date": "2024-02-22",
   "description": null,
   "id": "5QKmMdaKWgtzkvKEPmqriLZR1mV3kMF5X9EeX",
+  "merchant_name": "United Airlines",
   "method": "other",
   "name": "United Airlines",
   "status": "posted",
@@ -48,6 +50,7 @@ exports[`Transform type transfer 1`] = `
   "date": "2024-02-24",
   "description": "Uber",
   "id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "merchant_name": "Uber",
   "method": "transfer",
   "name": "Uber 063015 SF**POOL**",
   "status": "pending",

@@ -4957,7 +4957,7 @@
     },
     "public.inbox_account_providers": {
       "name": "inbox_account_providers",
-      "values": ["gmail", "outlook"],
+      "values": ["gmail"],
       "schema": "public"
     },
     "public.inbox_status": {

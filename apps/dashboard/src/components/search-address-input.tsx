@@ -182,7 +182,7 @@ export function SearchAddressInput({
   });
 
   return (
-    <div ref={ref}>
+    <div ref={ref} className="relative">
       <CommandPrimitive onKeyDown={handleKeyDown}>
         <div className="relative">
           <CommandInput
@@ -203,9 +203,9 @@ export function SearchAddressInput({
         </div>
 
         {isOpen && (
-          <CommandList className="absolute left-6 right-6 w-auto z-10 mt-10 bg-background">
+          <CommandList className="absolute top-full left-0 right-0 z-10 mt-1 bg-background">
             {options.length > 0 ? (
-              <CommandGroup className="border border-border max-h-[165px] overflow-auto max-w-[528px]">
+              <CommandGroup className="border border-border max-h-[165px] overflow-auto">
                 {options.map((option) => {
                   const isSelected = selected?.value === option.value;
 
@@ -230,7 +230,6 @@ export function SearchAddressInput({
                 })}
               </CommandGroup>
             ) : null}
-
             {inputValue &&
             options.length === 0 &&
             !selected &&

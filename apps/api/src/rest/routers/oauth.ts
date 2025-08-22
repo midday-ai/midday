@@ -1,12 +1,3 @@
-import type { Database } from "@api/db";
-import { getOAuthApplicationByClientId } from "@api/db/queries/oauth-applications";
-import {
-  createAuthorizationCode,
-  exchangeAuthorizationCode,
-  refreshAccessToken,
-  revokeAccessToken,
-} from "@api/db/queries/oauth-flow";
-import { getTeamsByUserId } from "@api/db/queries/users-on-team";
 import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import {
@@ -24,6 +15,15 @@ import { verifyAccessToken } from "@api/utils/auth";
 import { validateClientCredentials } from "@api/utils/oauth";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import type { Database } from "@midday/db/client";
+import {
+  createAuthorizationCode,
+  exchangeAuthorizationCode,
+  getOAuthApplicationByClientId,
+  getTeamsByUserId,
+  refreshAccessToken,
+  revokeAccessToken,
+} from "@midday/db/queries";
 import { AppInstalledEmail } from "@midday/email/emails/app-installed";
 import { render } from "@midday/email/render";
 import { rateLimiter } from "hono-rate-limiter";
@@ -275,7 +275,6 @@ app.openapi(
             email: session.user.email,
             teamName: userTeam.name!,
             appName: application.name,
-            locale: "en",
           }),
         );
 

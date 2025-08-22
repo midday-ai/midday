@@ -72,6 +72,7 @@ export function OAuthConsentScreen() {
         toast({
           title: "Error",
           description: error.message || "Authorization failed",
+          variant: "error",
         });
       },
     }),
@@ -82,6 +83,7 @@ export function OAuthConsentScreen() {
       toast({
         title: "Error",
         description: "Please select a workspace",
+        variant: "error",
       });
       return;
     }
@@ -90,6 +92,7 @@ export function OAuthConsentScreen() {
       toast({
         title: "Error",
         description: "Application information not available",
+        variant: "error",
       });
       return;
     }

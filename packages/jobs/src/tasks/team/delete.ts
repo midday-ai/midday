@@ -1,6 +1,7 @@
 import { deleteTeamSchema } from "@jobs/schema";
 import { client } from "@midday/engine-client";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schedules, schemaTask } from "@trigger.dev/sdk";
+import { bankSyncScheduler } from "../bank/scheduler/bank-scheduler";
 
 export const deleteTeam = schemaTask({
   id: "delete-team",
@@ -10,9 +11,6 @@ export const deleteTeam = schemaTask({
     concurrencyLimit: 10,
   },
   run: async ({ teamId, connections }) => {
-    // Unregister sync scheduler (Not implemented yet in Trigger.dev)
-    // await schedules.del(teamId);
-
     // Delete connections in providers
     const connectionPromises = connections.map(async (connection) => {
       return client.connections.delete.$delete({
@@ -33,5 +31,8 @@ export const deleteTeam = schemaTask({
     });
 
     await Promise.all(connectionPromises);
+
+    // Unregister bank sync scheduler by deduplication key
+    await schedules.del(`${teamId}-${bankSyncScheduler.id}`);
   },
 });

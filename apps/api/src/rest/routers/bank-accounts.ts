@@ -1,10 +1,3 @@
-import {
-  createBankAccount,
-  deleteBankAccount,
-  getBankAccountById,
-  getBankAccounts,
-  updateBankAccount,
-} from "@api/db/queries/bank-accounts";
 import type { Context } from "@api/rest/types";
 import {
   bankAccountResponseSchema,
@@ -17,6 +10,13 @@ import {
 } from "@api/schemas/bank-accounts";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import {
+  createBankAccount,
+  deleteBankAccount,
+  getBankAccountById,
+  getBankAccounts,
+  updateBankAccount,
+} from "@midday/db/queries";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();

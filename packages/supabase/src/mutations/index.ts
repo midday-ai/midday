@@ -36,6 +36,15 @@ type UpdateTeamPlanData = {
   plan?: "trial" | "starter" | "pro";
   email?: string | null;
   canceled_at?: string | null;
+  subscription_status?:
+    | "active"
+    | "canceled"
+    | "past_due"
+    | "unpaid"
+    | "trialing"
+    | "incomplete"
+    | "incomplete_expired"
+    | null;
 };
 
 export async function updateTeamPlan(
@@ -82,65 +91,5 @@ export async function deleteBankConnection(
     .delete()
     .eq("id", params.id)
     .select("reference_id, provider, access_token")
-    .single();
-}
-
-type UpdateInboxAccountParams = {
-  id: string;
-  refreshToken?: string;
-  accessToken?: string;
-  expiryDate?: string;
-  scheduleId?: string;
-};
-
-export async function updateInboxAccount(
-  supabase: Client,
-  params: UpdateInboxAccountParams,
-) {
-  return supabase
-    .from("inbox_accounts")
-    .update({
-      refresh_token: params.refreshToken,
-      access_token: params.accessToken,
-      expiry_date: params.expiryDate,
-      schedule_id: params.scheduleId,
-    })
-    .eq("id", params.id);
-}
-
-type UpsertInboxAccountParams = {
-  teamId: string;
-  accessToken: string;
-  refreshToken: string;
-  email: string;
-  lastAccessed: string;
-  provider: "gmail" | "outlook";
-  externalId: string;
-  expiryDate: string;
-};
-
-export async function upsertInboxAccount(
-  supabase: Client,
-  params: UpsertInboxAccountParams,
-) {
-  return supabase
-    .from("inbox_accounts")
-    .upsert(
-      {
-        access_token: params.accessToken,
-        refresh_token: params.refreshToken,
-        last_accessed: params.lastAccessed,
-        team_id: params.teamId,
-        email: params.email,
-        provider: params.provider,
-        external_id: params.externalId,
-        expiry_date: params.expiryDate,
-      },
-      {
-        onConflict: "external_id",
-        ignoreDuplicates: false,
-      },
-    )
-    .select("id, provider, external_id")
     .single();
 }

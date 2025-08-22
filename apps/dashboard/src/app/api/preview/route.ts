@@ -30,9 +30,13 @@ export async function GET(request: NextRequest) {
 
   try {
     const pdfBuffer = await pdfBlob.arrayBuffer();
-    const document = await getPdfImage(pdfBuffer);
+    const imageBuffer = await getPdfImage(pdfBuffer);
 
-    return new Response(document, {
+    if (!imageBuffer) {
+      return new Response("Failed to convert PDF to image", { status: 500 });
+    }
+
+    return new Response(new Uint8Array(imageBuffer), {
       headers: {
         "Content-Type": "image/png",
         "Cache-Control": "public, max-age=31536000, immutable",

@@ -30,27 +30,24 @@ export class ProviderError extends Error {
       case "enrollment.disconnected.user_action.insufficient_permissions":
       case "enrollment.disconnected.user_action.captcha_required":
       case "enrollment.disconnected.user_action.web_login_required":
-
-      // Plaid
+      // // Plaid
       case "ITEM_LOGIN_REQUIRED":
       case "ITEM_LOCKED":
       case "ITEM_CONCURRENTLY_DELETED":
       case "ACCESS_NOT_GRANTED":
-
-      // EnableBanking
-      case "ALREADY_AUTHORIZED":
-        return "already_authorized";
-
       // GoCardLess
       case "AccessExpiredError":
       case "AccountInactiveError":
       case "Account suspended":
         logger("disconnected", this.message);
-
         return "disconnected";
+
+      // EnableBanking
+      case "ALREADY_AUTHORIZED":
+        return "already_authorized";
+
       default:
         logger("unknown", this.message);
-
         return "unknown";
     }
   }

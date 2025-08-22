@@ -3,6 +3,7 @@ import { ProviderError } from "@engine/utils/error";
 import { logger } from "@engine/utils/logger";
 import { paginate } from "@engine/utils/paginate";
 import { withRetry } from "@engine/utils/retry";
+import { formatISO, subDays } from "date-fns";
 import {
   Configuration,
   type CountryCode,
@@ -137,25 +138,34 @@ export class PlaidApi {
     accountId,
     latest,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse | undefined> {
-    let added: Array<Transaction> = [];
-    let cursor = undefined;
-    let hasMore = true;
     try {
+      let transactions: Array<Transaction> = [];
+
       if (latest) {
-        const { data } = await this.#client.transactionsSync({
+        // Get transactions from the last 5 days using /transactions/get
+        const { data } = await this.#client.transactionsGet({
           access_token: accessToken,
-          count: 100,
+          start_date: formatISO(subDays(new Date(), 5), {
+            representation: "date",
+          }),
+          end_date: formatISO(new Date(), {
+            representation: "date",
+          }),
         });
 
-        added = added.concat(data.added);
+        transactions = data.transactions;
       } else {
+        // Get all transactions using /transactions/sync
+        let cursor = undefined;
+        let hasMore = true;
+
         while (hasMore) {
           const { data } = await this.#client.transactionsSync({
             access_token: accessToken,
             cursor,
           });
 
-          added = added.concat(data.added);
+          transactions = transactions.concat(data.added);
           hasMore = data.has_more;
           cursor = data.next_cursor;
         }
@@ -163,7 +173,7 @@ export class PlaidApi {
 
       // NOTE: Plaid transactions for all accounts
       // we need to filter based on the provided accountId and pending status
-      return added
+      return transactions
         .filter((transaction) => transaction.account_id === accountId)
         .filter((transaction) => !transaction.pending);
     } catch (error) {

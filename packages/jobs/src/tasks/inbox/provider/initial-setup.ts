@@ -1,8 +1,8 @@
+import { getDb } from "@jobs/init";
 import { initialInboxSetupSchema } from "@jobs/schema";
 import { generateQuarterDailyCronTag } from "@jobs/utils/generate-cron-tag";
-import { createClient } from "@midday/supabase/job";
-import { updateInboxAccount } from "@midday/supabase/mutations";
-import { schedules, schemaTask } from "@trigger.dev/sdk/v3";
+import { updateInboxAccount } from "@midday/db/queries";
+import { schedules, schemaTask } from "@trigger.dev/sdk";
 import { inboxSyncScheduler } from "./sheduler";
 import { syncInboxAccount } from "./sync-account";
 
@@ -16,9 +16,7 @@ export const initialInboxSetup = schemaTask({
   run: async (payload) => {
     const { id } = payload;
 
-    const supabase = createClient();
-
-    // Schedule the inbox sync task to run every 6 hours at a random time to distribute load
+    // Schedule the inbox sync task to run quarter-daily (every 6 hours) at a random minute to distribute load
     // Use a deduplication key to prevent duplicate schedules for the same team
     // Add inbox account id as externalId to use it in the inboxSyncScheduler task
     const schedule = await schedules.create({
@@ -29,13 +27,14 @@ export const initialInboxSetup = schemaTask({
       deduplicationKey: `${id}-${inboxSyncScheduler.id}`,
     });
 
-    await updateInboxAccount(supabase, {
+    await updateInboxAccount(getDb(), {
       id,
       scheduleId: schedule.id,
     });
 
     await syncInboxAccount.trigger({
       id,
+      manualSync: true,
     });
   },
 });

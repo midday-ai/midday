@@ -1,11 +1,4 @@
 import {
-  createTransactionCategories,
-  createTransactionCategory,
-  deleteTransactionCategory,
-  getCategories,
-  updateTransactionCategory,
-} from "@api/db/queries/transaction-categories";
-import {
   createManyTransactionCategorySchema,
   createTransactionCategorySchema,
   deleteTransactionCategorySchema,
@@ -13,6 +6,13 @@ import {
   updateTransactionCategorySchema,
 } from "@api/schemas/transaction-categories";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  createTransactionCategories,
+  createTransactionCategory,
+  deleteTransactionCategory,
+  getCategories,
+  updateTransactionCategory,
+} from "@midday/db/queries";
 
 export const transactionCategoriesRouter = createTRPCRouter({
   get: protectedProcedure

@@ -2,7 +2,7 @@ import { writeToString } from "@fast-csv/format";
 import { exportTransactionsSchema } from "@jobs/schema";
 import { serializableToBlob } from "@jobs/utils/blob";
 import { createClient } from "@midday/supabase/job";
-import { metadata, schemaTask } from "@trigger.dev/sdk/v3";
+import { metadata, schemaTask } from "@trigger.dev/sdk";
 import {
   BlobReader,
   BlobWriter,

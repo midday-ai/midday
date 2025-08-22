@@ -1,4 +1,4 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`Transform income transaction 1`] = `
 {
@@ -12,6 +12,7 @@ exports[`Transform income transaction 1`] = `
   "date": "2024-02-23",
   "description": null,
   "id": "86b1bc36e6a6d2a5dee8ff7138920255",
+  "merchant_name": null,
   "method": "transfer",
   "name": "Lön 160434262327",
   "status": "posted",

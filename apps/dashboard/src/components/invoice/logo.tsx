@@ -32,7 +32,10 @@ export function Logo() {
           bucket: "avatars",
         });
 
-        setValue("template.logoUrl", url, { shouldValidate: true });
+        setValue("template.logoUrl", url, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
 
         updateTemplateMutation.mutate({ logoUrl: url });
       } catch (error) {
@@ -64,6 +67,7 @@ export function Logo() {
                 e.preventDefault();
                 setValue("template.logoUrl", undefined, {
                   shouldValidate: true,
+                  shouldDirty: true,
                 });
                 updateTemplateMutation.mutate({ logoUrl: null });
               }}

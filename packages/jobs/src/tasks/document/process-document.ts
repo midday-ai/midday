@@ -1,8 +1,10 @@
+import { getDb } from "@jobs/init";
 import { processDocumentSchema } from "@jobs/schema";
+import { updateDocumentByPath } from "@midday/db/queries";
 import { loadDocument } from "@midday/documents/loader";
 import { getContentSample } from "@midday/documents/utils";
 import { createClient } from "@midday/supabase/job";
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { schemaTask } from "@trigger.dev/sdk";
 import { classifyDocument } from "./classify-document";
 import { classifyImage } from "./classify-image";
 import { convertHeic } from "./convert-heic";
@@ -13,7 +15,7 @@ export const processDocument = schemaTask({
   schema: processDocumentSchema,
   maxDuration: 60,
   queue: {
-    concurrencyLimit: 100,
+    concurrencyLimit: 50,
   },
   run: async ({ mimetype, filePath, teamId }) => {
     const supabase = createClient();
@@ -63,12 +65,11 @@ export const processDocument = schemaTask({
     } catch (error) {
       console.error(error);
 
-      await supabase
-        .from("documents")
-        .update({
-          processing_status: "failed",
-        })
-        .eq("id", filePath.join("/"));
+      await updateDocumentByPath(getDb(), {
+        pathTokens: filePath,
+        teamId,
+        processingStatus: "failed",
+      });
     }
   },
 });

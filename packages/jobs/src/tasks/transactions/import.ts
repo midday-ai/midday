@@ -4,8 +4,9 @@ import { mapTransactions } from "@midday/import/mappings";
 import { transform } from "@midday/import/transform";
 import { validateTransactions } from "@midday/import/validate";
 import { createClient } from "@midday/supabase/job";
-import { logger, schemaTask } from "@trigger.dev/sdk/v3";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import Papa from "papaparse";
+import { embedTransaction } from "./embed-transaction";
 
 const BATCH_SIZE = 500;
 
@@ -85,14 +86,41 @@ export const importTransactions = schemaTask({
             });
           }
 
-          // @ts-expect-error
-          await processBatch(validTransactions, BATCH_SIZE, async (batch) => {
-            // @ts-expect-error
-            return supabase.from("transactions").upsert(batch, {
-              onConflict: "internal_id",
-              ignoreDuplicates: true,
+          const results = await processBatch(
+            validTransactions,
+            BATCH_SIZE,
+            async (batch) => {
+              const { data } = await supabase
+                .from("transactions")
+                // @ts-expect-error - TODO: Fix transaction type mapping
+                .upsert(batch, {
+                  onConflict: "internal_id",
+                  ignoreDuplicates: true,
+                })
+                .select("id")
+                .throwOnError();
+
+              return data || [];
+            },
+          );
+
+          // Collect all inserted transaction IDs and trigger embeddings
+          const allTransactionIds: string[] = results
+            .flat()
+            .map((tx) => tx.id)
+            .filter(Boolean);
+
+          if (allTransactionIds.length > 0) {
+            await embedTransaction.trigger({
+              transactionIds: allTransactionIds,
+              teamId,
             });
-          });
+
+            logger.info("Triggered embeddings for imported transactions", {
+              count: allTransactionIds.length,
+              teamId,
+            });
+          }
 
           parser.resume();
         },

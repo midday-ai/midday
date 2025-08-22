@@ -1,18 +1,18 @@
 import {
-  createBankAccount,
-  deleteBankAccount,
-  getBankAccounts,
-  getBankAccountsBalances,
-  getBankAccountsCurrencies,
-  updateBankAccount,
-} from "@api/db/queries/bank-accounts";
-import {
   createBankAccountSchema,
   deleteBankAccountSchema,
   getBankAccountsSchema,
   updateBankAccountSchema,
 } from "@api/schemas/bank-accounts";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  createBankAccount,
+  deleteBankAccount,
+  getBankAccounts,
+  getBankAccountsBalances,
+  getBankAccountsCurrencies,
+  updateBankAccount,
+} from "@midday/db/queries";
 
 export const bankAccountsRouter = createTRPCRouter({
   get: protectedProcedure

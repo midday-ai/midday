@@ -4,6 +4,7 @@ import { receiptPrompt } from "../../prompt";
 import { receiptSchema } from "../../schema";
 import type { GetDocumentRequest } from "../../types";
 import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
+import { retryCall } from "../../utils/retry";
 
 export class ReceiptProcessor {
   async #processDocument({ documentUrl }: GetDocumentRequest) {
@@ -11,31 +12,33 @@ export class ReceiptProcessor {
       throw new Error("Document URL is required");
     }
 
-    const result = await generateObject({
-      model: mistral("mistral-medium-latest"),
-      schema: receiptSchema,
-      abortSignal: AbortSignal.timeout(45000),
-      messages: [
-        {
-          role: "system",
-          content: receiptPrompt,
+    const result = await retryCall(() =>
+      generateObject({
+        model: mistral("mistral-medium-latest"),
+        schema: receiptSchema,
+        abortSignal: AbortSignal.timeout(20000), // 20s
+        messages: [
+          {
+            role: "system",
+            content: receiptPrompt,
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "image",
+                image: documentUrl,
+              },
+            ],
+          },
+        ],
+        providerOptions: {
+          mistral: {
+            documentImageLimit: 4,
+          },
         },
-        {
-          role: "user",
-          content: [
-            {
-              type: "image",
-              image: documentUrl,
-            },
-          ],
-        },
-      ],
-      providerOptions: {
-        mistral: {
-          documentImageLimit: 4,
-        },
-      },
-    });
+      }),
+    );
 
     return result.object;
   }

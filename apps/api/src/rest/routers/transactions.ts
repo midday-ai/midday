@@ -1,12 +1,3 @@
-import {
-  createTransaction,
-  createTransactions,
-  deleteTransactions,
-  getTransactionById,
-  getTransactions,
-  updateTransaction,
-  updateTransactions,
-} from "@api/db/queries/transactions";
 import type { Context } from "@api/rest/types";
 import {
   createTransactionSchema,
@@ -25,6 +16,15 @@ import {
 } from "@api/schemas/transactions";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import {
+  createTransaction,
+  createTransactions,
+  deleteTransactions,
+  getTransactionById,
+  getTransactions,
+  updateTransaction,
+  updateTransactions,
+} from "@midday/db/queries";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();

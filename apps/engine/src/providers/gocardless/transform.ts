@@ -167,6 +167,7 @@ export const transformTransaction = (
     currency_source: currencyExchange?.currency?.toUpperCase() || null,
     balance,
     counterparty_name: transformCounterpartyName(transaction),
+    merchant_name: null,
     description,
     status: "posted",
   };
@@ -232,7 +233,7 @@ export const transformInstitution = (
   id: institution.id,
   name: institution.name,
   logo: getLogoURL(institution.id, getFileExtension(institution.logo)),
-  provider: Providers.Enum.gocardless,
+  provider: Providers.enum.gocardless,
 });
 
 export const transformConnectionStatus = (
