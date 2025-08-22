@@ -10,6 +10,7 @@ import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { generateToken } from "@midday/invoice/token";
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
+import { createActivity } from "./activities";
 
 type GetCustomerByIdParams = {
   id: string;
@@ -222,6 +223,7 @@ export const getCustomers = async (
 export type UpsertCustomerParams = {
   id?: string;
   teamId: string;
+  userId?: string;
   name: string;
   email: string;
   billingEmail?: string | null;
@@ -244,9 +246,11 @@ export const upsertCustomer = async (
   db: Database,
   params: UpsertCustomerParams,
 ) => {
-  const { id, tags: inputTags, teamId, ...rest } = params;
+  const { id, tags: inputTags, teamId, userId, ...rest } = params;
 
   const token = id ? await generateToken(id) : undefined;
+
+  const isNewCustomer = !id;
 
   // Start a transaction
   return db.transaction(async (tx) => {
@@ -286,6 +290,25 @@ export const upsertCustomer = async (
     }
 
     const customerId = customer.id;
+
+    // Create activity for new customers only
+    if (isNewCustomer) {
+      createActivity(db, {
+        teamId,
+        userId,
+        type: "customer_created",
+        source: "user",
+        priority: 7,
+        metadata: {
+          customerId: customerId,
+          customerName: customer.name,
+          customerEmail: customer.email,
+          website: customer.website,
+          country: customer.country,
+          city: customer.city,
+        },
+      });
+    }
 
     // Get current tags for the customer
     const currentCustomerTags = await tx

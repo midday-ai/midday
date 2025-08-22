@@ -1,4 +1,6 @@
 import {
+  documentProcessedSchema,
+  documentUploadedSchema,
   inboxNewSchema,
   invoiceCancelledSchema,
   invoiceCreatedSchema,
@@ -266,6 +268,18 @@ export const notificationSchema = z.discriminatedUnion("type", [
       type: z.literal("transactions_exported"),
     })
     .merge(transactionsExportedSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("document_uploaded"),
+    })
+    .merge(documentUploadedSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("document_processed"),
+    })
+    .merge(documentProcessedSchema.omit({ users: true })),
 ]);
 
 export type NotificationPayload = z.infer<typeof notificationSchema>;

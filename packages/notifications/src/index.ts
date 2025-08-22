@@ -13,6 +13,8 @@ import type {
 } from "./base";
 import { type NotificationTypes, createActivitySchema } from "./schemas";
 import { EmailService } from "./services/email-service";
+import { documentProcessed } from "./types/document-processed";
+import { documentUploaded } from "./types/document-uploaded";
 import { inboxNew } from "./types/inbox-new";
 import { invoiceCancelled } from "./types/invoice-cancelled";
 import { invoiceCreated } from "./types/invoice-created";
@@ -27,6 +29,8 @@ import { transactionsExported } from "./types/transactions-exported";
 const handlers = {
   transactions_created: transactionsCreated,
   transactions_exported: transactionsExported,
+  document_uploaded: documentUploaded,
+  document_processed: documentProcessed,
   inbox_new: inboxNew,
   invoice_paid: invoicePaid,
   invoice_overdue: invoiceOverdue,
@@ -333,6 +337,8 @@ export { userSchema, transactionSchema, invoiceSchema } from "./base";
 export {
   transactionsCreatedSchema,
   transactionsExportedSchema,
+  documentUploadedSchema,
+  documentProcessedSchema,
   inboxNewSchema,
   invoicePaidSchema,
   invoiceOverdueSchema,

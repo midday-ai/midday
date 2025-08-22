@@ -4,7 +4,7 @@ import { updateDocumentByPath } from "@midday/db/queries";
 import { loadDocument } from "@midday/documents/loader";
 import { getContentSample } from "@midday/documents/utils";
 import { createClient } from "@midday/supabase/job";
-import { schemaTask } from "@trigger.dev/sdk";
+import { schemaTask, tasks } from "@trigger.dev/sdk";
 import { classifyDocument } from "./classify-document";
 import { classifyImage } from "./classify-image";
 import { convertHeic } from "./convert-heic";
@@ -19,6 +19,15 @@ export const processDocument = schemaTask({
   },
   run: async ({ mimetype, filePath, teamId }) => {
     const supabase = createClient();
+
+    // Create activity for document upload
+    await tasks.trigger("notification", {
+      type: "document_uploaded",
+      teamId,
+      fileName: filePath.join("/"),
+      filePath: filePath,
+      mimeType: mimetype,
+    });
 
     try {
       // If the file is a HEIC we need to convert it to a JPG
@@ -61,6 +70,17 @@ export const processDocument = schemaTask({
         content: sample,
         fileName: filePath.join("/"),
         teamId,
+      });
+
+      // Create activity for successful document processing
+      await tasks.trigger("notification", {
+        type: "document_processed",
+        teamId,
+        fileName: filePath.join("/"),
+        filePath: filePath,
+        mimeType: mimetype,
+        contentLength: document.length,
+        sampleLength: sample.length,
       });
     } catch (error) {
       console.error(error);

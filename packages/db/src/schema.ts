@@ -195,16 +195,10 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "inbox_new",
   "invoice_overdue",
   "invoice_sent",
-  // "inbox_matched_items",
-  // "inbox_matched_suggestions",
-  // "bank_connection_expired",
-  // "bank_connection_expiring",
-  // "transactions_imported",
-  // "invoice_payment_received",
-  // "documents_processed",
 
   // User actions
   "document_uploaded",
+  "document_processed",
   "invoice_duplicated",
   "invoice_scheduled",
   "invoice_reminder_sent",
@@ -218,13 +212,7 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "transaction_attachment_created",
   "transaction_category_created",
   "transactions_exported",
-  // "customer_created",
-  // "transaction_created",
-  // "transaction_updated",
-  // "inbox_item_matched",
-  // "tracker_timer_started",
-  // "tracker_timer_stopped",
-  // "bank_connection_created",
+  "customer_created",
 ]);
 
 export const activitySourceEnum = pgEnum("activity_source", [
