@@ -333,6 +333,21 @@ export type {
 } from "./base";
 export { userSchema, transactionSchema, invoiceSchema } from "./base";
 
+// Export event system
+export {
+  initializeEventSystem,
+  getEventEmitter,
+  emitEvent,
+  customerCreatedEventSchema,
+  transactionCategorizedEventSchema,
+  transactionAssignedEventSchema,
+  type ActivityEvents,
+  type ActivityEventName,
+  type EventListener,
+  type EventContext,
+  AppEventEmitter,
+} from "./events";
+
 // Export schemas and types
 export {
   transactionsCreatedSchema,

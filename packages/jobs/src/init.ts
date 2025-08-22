@@ -1,5 +1,6 @@
 import type { Database } from "@midday/db/client";
 import { createJobDb } from "@midday/db/job-client";
+import { initializeEventSystem } from "@midday/notifications";
 import { locals, tasks } from "@trigger.dev/sdk";
 
 // Store the database instance
@@ -28,6 +29,9 @@ tasks.middleware("db", async ({ next }) => {
   // This ensures consistent connection pooling with optimized settings for Supabase
   const dbObj = createJobDb();
   locals.set(DbLocal, dbObj);
+
+  // Initialize event system with database
+  initializeEventSystem(dbObj.db);
 
   await next();
 });

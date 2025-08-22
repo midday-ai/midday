@@ -4,6 +4,10 @@ import type { Session } from "@api/utils/auth";
 import { getGeoContext } from "@api/utils/geo";
 import type { Database } from "@midday/db/client";
 import { connectDb } from "@midday/db/client";
+import {
+  type AppEventEmitter,
+  initializeEventSystem,
+} from "@midday/notifications";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";
@@ -15,6 +19,7 @@ type TRPCContext = {
   session: Session | null;
   supabase: SupabaseClient;
   db: Database;
+  events: AppEventEmitter;
   geo: ReturnType<typeof getGeoContext>;
   teamId?: string;
 };
@@ -29,10 +34,14 @@ export const createTRPCContext = async (
   const db = await connectDb();
   const geo = getGeoContext(c.req);
 
+  // Initialize event system with database
+  const events = initializeEventSystem(db);
+
   return {
     session,
     supabase,
     db,
+    events,
     geo,
   };
 };

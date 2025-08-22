@@ -42,11 +42,28 @@ export const customersRouter = createTRPCRouter({
 
   upsert: protectedProcedure
     .input(upsertCustomerSchema)
-    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
-      return upsertCustomer(db, {
+    .mutation(async ({ ctx: { db, teamId, session, events }, input }) => {
+      const result = await upsertCustomer(db, {
         ...input,
         teamId: teamId!,
-        userId: session.user.id,
       });
+
+      // Emit event for new customers only
+      if (result.isNewCustomer) {
+        events.emitEvent("customer.created", {
+          teamId: teamId!,
+          userId: session.user.id,
+          customer: {
+            id: result.id,
+            name: result.name,
+            email: result.email,
+            website: result.website,
+            country: result.country,
+            city: result.city,
+          },
+        });
+      }
+
+      return result;
     }),
 });

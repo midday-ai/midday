@@ -89,13 +89,31 @@ app.openapi(
   }),
   async (c) => {
     const db = c.get("db");
+    const events = c.get("events");
     const teamId = c.get("teamId");
+    const session = c.get("session");
     const body = c.req.valid("json");
 
     const result = await upsertCustomer(db, {
       ...body,
       teamId,
     });
+
+    // Emit event for new customers only
+    if (result.isNewCustomer) {
+      events.emitEvent("customer.created", {
+        teamId,
+        userId: session.user.id,
+        customer: {
+          id: result.id,
+          name: result.name,
+          email: result.email,
+          website: result.website,
+          country: result.country,
+          city: result.city,
+        },
+      });
+    }
 
     return c.json(validateResponse(result, customerResponseSchema));
   },

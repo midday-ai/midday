@@ -10,7 +10,6 @@ export const transactionsExported: NotificationHandler = {
     source: "system",
     priority: 7,
     metadata: {
-      transactionIds: data.transactionIds,
       transactionCount: data.transactionCount,
       locale: data.locale,
       dateFormat: data.dateFormat,
