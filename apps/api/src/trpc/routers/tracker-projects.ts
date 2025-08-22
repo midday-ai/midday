@@ -24,10 +24,11 @@ export const trackerProjectsRouter = createTRPCRouter({
 
   upsert: protectedProcedure
     .input(upsertTrackerProjectSchema)
-    .mutation(async ({ input, ctx: { db, teamId } }) => {
+    .mutation(async ({ input, ctx: { db, teamId, session } }) => {
       return upsertTrackerProject(db, {
         ...input,
         teamId: teamId!,
+        userId: session.user.id,
       });
     }),
 

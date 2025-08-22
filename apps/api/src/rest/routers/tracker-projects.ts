@@ -98,9 +98,11 @@ app.openapi(
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
+    const userId = c.get("userId");
 
     const result = await upsertTrackerProject(db, {
       teamId,
+      userId,
       ...c.req.valid("json"),
     });
 
@@ -142,12 +144,13 @@ app.openapi(
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
-
+    const userId = c.get("userId");
     const { id } = c.req.valid("param");
 
     const result = await upsertTrackerProject(db, {
       teamId,
       id,
+      userId,
       ...c.req.valid("json"),
     });
 

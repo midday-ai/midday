@@ -9,6 +9,7 @@ import {
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
+import { createActivity } from "./activities";
 
 export type GetTrackerProjectsParams = {
   teamId: string;
@@ -273,6 +274,7 @@ export type UpsertTrackerProjectParams = {
   currency?: string | null;
   customerId?: string | null;
   teamId: string;
+  userId?: string | null;
   tags?: { id: string; value: string }[] | null;
 };
 
@@ -280,7 +282,7 @@ export async function upsertTrackerProject(
   db: Database,
   params: UpsertTrackerProjectParams,
 ) {
-  const { tags: projectTags, teamId, ...projectData } = params;
+  const { tags: projectTags, teamId, userId, ...projectData } = params;
 
   // Upsert project using a valid insert type
   const [result] = await db
@@ -317,6 +319,28 @@ export async function upsertTrackerProject(
   }
 
   const projectId = result.id;
+
+  // Create activity for new tracker projects (not updates)
+  // If no id was provided in params, this is a new project
+  if (!params.id) {
+    createActivity(db, {
+      teamId,
+      userId,
+      type: "tracker_project_created",
+      source: "user",
+      priority: 7,
+      metadata: {
+        projectId: projectId,
+        name: params.name,
+        description: params.description || null,
+        billable: params.billable || false,
+        rate: params.rate || null,
+        currency: params.currency || null,
+        customerId: params.customerId || null,
+        estimate: params.estimate || null,
+      },
+    });
+  }
 
   // If we have tags to process
   if (projectTags) {
