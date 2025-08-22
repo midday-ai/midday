@@ -187,6 +187,53 @@ export const transactionFrequencyEnum = pgEnum("transaction_frequency", [
   "unknown",
 ]);
 
+export const activityTypeEnum = pgEnum("activity_type", [
+  // System-generated activities
+  "transactions_enriched",
+  "transactions_created",
+  "invoice_paid",
+  "inbox_new",
+  "invoice_overdue",
+  "invoice_sent",
+  // "inbox_matched_items",
+  // "inbox_matched_suggestions",
+  // "bank_connection_expired",
+  // "bank_connection_expiring",
+  // "transactions_imported",
+  // "invoice_payment_received",
+  // "documents_processed",
+
+  // User actions
+  "document_uploaded",
+  "invoice_duplicated",
+  "invoice_scheduled",
+  "invoice_reminder_sent",
+  "invoice_cancelled",
+  "invoice_created",
+  // "customer_created",
+  // "transaction_created",
+  // "transaction_updated",
+  // "transaction_categorized",
+  // "transactions_exported",
+  // "inbox_item_matched",
+  // "tracker_entry_created",
+  // "tracker_project_created",
+  // "tracker_timer_started",
+  // "tracker_timer_stopped",
+  // "bank_connection_created",
+]);
+
+export const activitySourceEnum = pgEnum("activity_source", [
+  "system", // Automated system processes
+  "user", // Direct user actions
+]);
+
+export const activityStatusEnum = pgEnum("activity_status", [
+  "unread",
+  "read",
+  "archived",
+]);
+
 export const documentTagEmbeddings = pgTable(
   "document_tag_embeddings",
   {
@@ -2898,4 +2945,123 @@ export const oauthAccessTokensRelations = relations(
       references: [teams.id],
     }),
   }),
+);
+
+export const activities = pgTable(
+  "activities",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    // Core fields
+    teamId: uuid("team_id").notNull(),
+    userId: uuid("user_id"),
+    type: activityTypeEnum().notNull(),
+    priority: smallint().default(5), // 1-3 = notifications, 4-10 = insights only
+
+    // Group related activities together (e.g., same business event across multiple users)
+    groupId: uuid("group_id"),
+
+    // Source of the activity
+    source: activitySourceEnum().notNull(),
+
+    // All the data
+    metadata: jsonb().notNull(),
+
+    // Simple lifecycle (only for notifications)
+    status: activityStatusEnum().default("unread").notNull(),
+
+    // Timestamp of last system use (e.g. insight generation, digest inclusion)
+    lastUsedAt: timestamp("last_used_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+  },
+  (table) => [
+    // Optimized indexes
+    index("activities_notifications_idx").using(
+      "btree",
+      table.teamId,
+      table.priority,
+      table.status,
+      table.createdAt.desc(),
+    ),
+    index("activities_insights_idx").using(
+      "btree",
+      table.teamId,
+      table.type,
+      table.source,
+      table.createdAt.desc(),
+    ),
+    index("activities_metadata_gin_idx").using("gin", table.metadata),
+    index("activities_group_id_idx").on(table.groupId),
+    index("activities_insights_group_idx").using(
+      "btree",
+      table.teamId,
+      table.groupId,
+      table.type,
+      table.createdAt.desc(),
+    ),
+
+    // Foreign keys
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "activities_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "activities_user_id_fkey",
+    }).onDelete("set null"),
+  ],
+);
+
+export const notificationSettings = pgTable(
+  "notification_settings",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    userId: uuid("user_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    notificationType: text("notification_type").notNull(),
+    channel: text("channel").notNull(), // 'in_app', 'email', 'push'
+    enabled: boolean().default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("notification_settings_user_team_type_channel_key").on(
+      table.userId,
+      table.teamId,
+      table.notificationType,
+      table.channel,
+    ),
+    index("notification_settings_user_team_idx").on(table.userId, table.teamId),
+    index("notification_settings_type_channel_idx").on(
+      table.notificationType,
+      table.channel,
+    ),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "notification_settings_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "notification_settings_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Users can manage their own notification settings", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(user_id = auth.uid())`,
+    }),
+  ],
 );

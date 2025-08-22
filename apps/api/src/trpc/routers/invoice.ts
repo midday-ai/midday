@@ -411,10 +411,11 @@ export const invoiceRouter = createTRPCRouter({
 
   update: protectedProcedure
     .input(updateInvoiceSchema)
-    .mutation(async ({ input, ctx: { db, teamId } }) => {
+    .mutation(async ({ input, ctx: { db, teamId, session } }) => {
       return updateInvoice(db, {
         ...input,
         teamId: teamId!,
+        userId: session.user.id,
       });
     }),
 
@@ -443,7 +444,7 @@ export const invoiceRouter = createTRPCRouter({
 
   create: protectedProcedure
     .input(createInvoiceSchema)
-    .mutation(async ({ input, ctx: { db, teamId } }) => {
+    .mutation(async ({ input, ctx: { db, teamId, session } }) => {
       // Handle different delivery types
       if (input.deliveryType === "scheduled") {
         if (!input.scheduledAt) {
@@ -510,14 +511,23 @@ export const invoiceRouter = createTRPCRouter({
           });
         }
 
+        tasks.trigger("notification", {
+          type: "invoice_scheduled",
+          teamId: teamId!,
+          invoiceId: input.id,
+          invoiceNumber: data.invoiceNumber,
+          scheduledAt: input.scheduledAt,
+          customerName: data.customerName,
+        });
+
         return data;
       }
 
-      // Update the invoice status to unpaid for immediate delivery
       const data = await updateInvoice(db, {
         id: input.id,
         status: "unpaid",
         teamId: teamId!,
+        userId: session.user.id,
       });
 
       if (!data) {

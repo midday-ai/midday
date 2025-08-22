@@ -118,6 +118,15 @@ export const RESOURCES = [
     description: "Access to search functionality",
     scopes: [{ scope: "search.read", type: "read", label: "Read" }],
   },
+  {
+    key: "notifications",
+    name: "Notifications",
+    description: "Access to notifications data",
+    scopes: [
+      { scope: "notifications.read", type: "read", label: "Read" },
+      { scope: "notifications.write", type: "write", label: "Write" },
+    ],
+  },
 ] as const;
 
 export const getScopeDescription = (scope: string) => {

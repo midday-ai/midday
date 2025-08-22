@@ -23,9 +23,9 @@ interface Props {
 
 const baseUrl = getEmailUrl();
 
-export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: Props) => {
-  const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, Welcome to Midday! I'm Pontus, one of the founders. It's really important to us that you have a great experience ramping up.`;
+export const WelcomeEmail = ({ fullName = "" }: Props) => {
+  const firstName = fullName ? fullName.split(" ").at(0) : "";
+  const text = `${firstName ? `Hi ${firstName}, ` : ""}Welcome to Midday! I'm Pontus, one of the founders. It's really important to us that you have a great experience ramping up.`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -57,7 +57,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: Props) => {
             className={`font-medium ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            Hi {firstName},
+            {firstName ? `Hi ${firstName},` : "Hello,"}
           </span>
           <Text
             className={themeClasses.text}

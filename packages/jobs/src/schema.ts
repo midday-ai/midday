@@ -1,3 +1,14 @@
+import {
+  inboxNewSchema,
+  invoiceCancelledSchema,
+  invoiceCreatedSchema,
+  invoiceOverdueSchema,
+  invoicePaidSchema,
+  invoiceReminderSentSchema,
+  invoiceScheduledSchema,
+  invoiceSentSchema,
+  transactionsCreatedSchema,
+} from "@midday/notifications";
 import { z } from "zod";
 
 export const sendInvoiceReminderSchema = z.object({
@@ -188,3 +199,66 @@ export const scheduleInvoiceJobSchema = z.object({
 export type ScheduleInvoiceJobPayload = z.infer<
   typeof scheduleInvoiceJobSchema
 >;
+
+const baseJobSchema = z.object({
+  teamId: z.string().uuid(),
+  sendEmail: z.boolean().optional().default(false),
+});
+
+export const notificationSchema = z.discriminatedUnion("type", [
+  baseJobSchema
+    .extend({
+      type: z.literal("transactions_created"),
+    })
+    .merge(transactionsCreatedSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("inbox_new"),
+    })
+    .merge(inboxNewSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_paid"),
+    })
+    .merge(invoicePaidSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_overdue"),
+    })
+    .merge(invoiceOverdueSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_scheduled"),
+    })
+    .merge(invoiceScheduledSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_sent"),
+    })
+    .merge(invoiceSentSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_reminder_sent"),
+    })
+    .merge(invoiceReminderSentSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_cancelled"),
+    })
+    .merge(invoiceCancelledSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("invoice_created"),
+    })
+    .merge(invoiceCreatedSchema.omit({ users: true })),
+]);
+
+export type NotificationPayload = z.infer<typeof notificationSchema>;

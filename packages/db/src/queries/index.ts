@@ -1,3 +1,4 @@
+export * from "./activities";
 export * from "./api-keys";
 export * from "./apps";
 export * from "./bank-accounts";
@@ -31,3 +32,4 @@ export * from "./users";
 export * from "./users-on-team";
 export * from "./oauth-flow";
 export * from "./oauth-applications";
+export * from "./notification-settings";

@@ -27,7 +27,15 @@ export const columns: ColumnDef<Invoice>[] = [
       className:
         "w-[220px] min-w-[220px] md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-secondary z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]",
     },
-    cell: ({ row }) => row.getValue("invoiceNumber"),
+    cell: ({ row }) => (
+      <span
+        className={cn({
+          "line-through": row.original.status === "canceled",
+        })}
+      >
+        {row.getValue("invoiceNumber")}
+      </span>
+    ),
   },
   {
     header: "Status",
@@ -160,17 +168,33 @@ export const columns: ColumnDef<Invoice>[] = [
     cell: ({ row }) => {
       // @ts-expect-error template is a jsonb field
       const vatRate = row.original.template.vatRate as number | undefined;
-      return vatRate !== undefined && vatRate !== null ? `${vatRate}%` : "-";
+      const value =
+        vatRate !== undefined && vatRate !== null ? `${vatRate}%` : "-";
+      return (
+        <span
+          className={cn({
+            "line-through": row.original.status === "canceled",
+          })}
+        >
+          {value}
+        </span>
+      );
     },
   },
   {
     header: "VAT Amount",
     accessorKey: "vatAmount",
     cell: ({ row }) => (
-      <FormatAmount
-        amount={(row.original?.vat as number) ?? null}
-        currency={row.original.currency ?? "USD"}
-      />
+      <span
+        className={cn({
+          "line-through": row.original.status === "canceled",
+        })}
+      >
+        <FormatAmount
+          amount={(row.original?.vat as number) ?? null}
+          currency={row.original.currency ?? "USD"}
+        />
+      </span>
     ),
   },
   {
@@ -179,37 +203,69 @@ export const columns: ColumnDef<Invoice>[] = [
     cell: ({ row }) => {
       // @ts-expect-error template is a jsonb field
       const taxRate = row.original.template.taxRate as number | undefined;
-      return taxRate !== undefined && taxRate !== null ? `${taxRate}%` : "-";
+      const value =
+        taxRate !== undefined && taxRate !== null ? `${taxRate}%` : "-";
+      return (
+        <span
+          className={cn({
+            "line-through": row.original.status === "canceled",
+          })}
+        >
+          {value}
+        </span>
+      );
     },
   },
   {
     header: "Tax Amount",
     accessorKey: "taxAmount",
     cell: ({ row }) => (
-      <FormatAmount
-        amount={(row.original.tax as number) ?? null}
-        currency={row.original.currency ?? "USD"}
-      />
+      <span
+        className={cn({
+          "line-through": row.original.status === "canceled",
+        })}
+      >
+        <FormatAmount
+          amount={(row.original.tax as number) ?? null}
+          currency={row.original.currency ?? "USD"}
+        />
+      </span>
     ),
   },
   {
     header: "Excl. VAT",
     accessorKey: "exclVat",
     cell: ({ row }) => (
-      <FormatAmount
-        amount={(row.original.amount as number) - (row.original.vat as number)}
-        currency={row.original.currency ?? "USD"}
-      />
+      <span
+        className={cn({
+          "line-through": row.original.status === "canceled",
+        })}
+      >
+        <FormatAmount
+          amount={
+            (row.original.amount as number) - (row.original.vat as number)
+          }
+          currency={row.original.currency ?? "USD"}
+        />
+      </span>
     ),
   },
   {
     header: "Excl. Tax",
     accessorKey: "exclTax",
     cell: ({ row }) => (
-      <FormatAmount
-        amount={(row.original.amount as number) - (row.original.tax as number)}
-        currency={row.original.currency ?? "USD"}
-      />
+      <span
+        className={cn({
+          "line-through": row.original.status === "canceled",
+        })}
+      >
+        <FormatAmount
+          amount={
+            (row.original.amount as number) - (row.original.tax as number)
+          }
+          currency={row.original.currency ?? "USD"}
+        />
+      </span>
     ),
   },
   {
