@@ -483,7 +483,7 @@ export async function startTimer(db: Database, params: StartTimerParams) {
       userId: assignedId || undefined,
       type: "tracker_entry_created",
       source: "user",
-      priority: 6, // Higher than notifications (1-3), but tracked for insights
+      priority: 7,
       metadata: {
         entryId: entryId,
         projectId: projectId || null,
