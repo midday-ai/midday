@@ -14,8 +14,18 @@ export const createActivitySchema = z.object({
     "invoice_reminder_sent",
     "invoice_cancelled",
     "invoice_created",
+    "draft_invoice_created",
     "document_uploaded",
+    "document_processed",
     "invoice_duplicated",
+    "tracker_entry_created",
+    "tracker_project_created",
+    "transaction_categorized",
+    "transaction_assigned",
+    "transaction_attachment_created",
+    "transaction_category_created",
+    "transactions_exported",
+    "customer_created",
   ]),
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
@@ -57,6 +67,30 @@ export const invoiceSchema = z.object({
 export const transactionsCreatedSchema = z.object({
   users: z.array(userSchema),
   transactions: z.array(transactionSchema),
+});
+
+export const transactionsExportedSchema = z.object({
+  users: z.array(userSchema),
+  transactionCount: z.number(),
+  locale: z.string(),
+  dateFormat: z.string(),
+});
+
+export const documentUploadedSchema = z.object({
+  users: z.array(userSchema),
+  fileName: z.string(),
+  filePath: z.array(z.string()),
+  mimeType: z.string(),
+});
+
+export const documentProcessedSchema = z.object({
+  users: z.array(userSchema),
+  fileName: z.string(),
+  filePath: z.array(z.string()),
+  mimeType: z.string(),
+  contentLength: z.number().optional(),
+  sampleLength: z.number().optional(),
+  isImage: z.boolean().optional(),
 });
 
 export const inboxItemSchema = z.object({
@@ -138,6 +172,11 @@ export type InvoiceData = z.infer<typeof invoiceSchema>;
 export type TransactionsCreatedInput = z.infer<
   typeof transactionsCreatedSchema
 >;
+export type TransactionsExportedInput = z.infer<
+  typeof transactionsExportedSchema
+>;
+export type DocumentUploadedInput = z.infer<typeof documentUploadedSchema>;
+export type DocumentProcessedInput = z.infer<typeof documentProcessedSchema>;
 
 export type InboxItemData = z.infer<typeof inboxItemSchema>;
 export type InboxNewInput = z.infer<typeof inboxNewSchema>;
@@ -154,6 +193,9 @@ export type InvoiceCreatedInput = z.infer<typeof invoiceCreatedSchema>;
 // Notification types map - all available notification types with their data structures
 export type NotificationTypes = {
   transactions_created: TransactionsCreatedInput;
+  transactions_exported: TransactionsExportedInput;
+  document_uploaded: DocumentUploadedInput;
+  document_processed: DocumentProcessedInput;
   inbox_new: InboxNewInput;
   invoice_paid: InvoicePaidInput;
   invoice_overdue: InvoiceOverdueInput;

@@ -1,6 +1,7 @@
 import type { Database } from "@db/client";
 import { transactionCategories } from "@db/schema";
 import { and, asc, desc, eq, isNotNull, isNull } from "drizzle-orm";
+import { createActivity } from "./activities";
 
 export type GetCategoriesParams = {
   teamId: string;
@@ -81,6 +82,7 @@ export const getCategories = async (
 
 export type CreateTransactionCategoryParams = {
   teamId: string;
+  userId?: string;
   name: string;
   color?: string | null;
   description?: string | null;
@@ -93,8 +95,16 @@ export const createTransactionCategory = async (
   db: Database,
   params: CreateTransactionCategoryParams,
 ) => {
-  const { teamId, name, color, description, taxRate, taxType, parentId } =
-    params;
+  const {
+    teamId,
+    userId,
+    name,
+    color,
+    description,
+    taxRate,
+    taxType,
+    parentId,
+  } = params;
 
   const [result] = await db
     .insert(transactionCategories)
@@ -109,11 +119,32 @@ export const createTransactionCategory = async (
     })
     .returning();
 
+  // Create activity for transaction category creation
+  if (result) {
+    createActivity(db, {
+      teamId,
+      userId,
+      type: "transaction_category_created",
+      source: "user",
+      priority: 7,
+      metadata: {
+        categoryId: result.id,
+        categoryName: result.name,
+        categoryColor: result.color,
+        categoryDescription: result.description,
+        taxRate: result.taxRate,
+        taxType: result.taxType,
+        parentId: result.parentId,
+      },
+    });
+  }
+
   return result;
 };
 
 export type CreateTransactionCategoriesParams = {
   teamId: string;
+  userId?: string;
   categories: {
     name: string;
     color?: string | null;
@@ -128,13 +159,13 @@ export const createTransactionCategories = async (
   db: Database,
   params: CreateTransactionCategoriesParams,
 ) => {
-  const { teamId, categories } = params;
+  const { teamId, userId, categories } = params;
 
   if (categories.length === 0) {
     return [];
   }
 
-  return db
+  const result = await db
     .insert(transactionCategories)
     .values(
       categories.map((category) => ({
@@ -143,6 +174,28 @@ export const createTransactionCategories = async (
       })),
     )
     .returning();
+
+  // Create activity for each category created
+  for (const category of result) {
+    createActivity(db, {
+      teamId,
+      userId,
+      type: "transaction_category_created",
+      source: "user",
+      priority: 7,
+      metadata: {
+        categoryId: category.id,
+        categoryName: category.name,
+        categoryColor: category.color,
+        categoryDescription: category.description,
+        taxRate: category.taxRate,
+        taxType: category.taxType,
+        parentId: category.parentId,
+      },
+    });
+  }
+
+  return result;
 };
 
 export type UpdateTransactionCategoryParams = {

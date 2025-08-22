@@ -1,4 +1,6 @@
 import {
+  documentProcessedSchema,
+  documentUploadedSchema,
   inboxNewSchema,
   invoiceCancelledSchema,
   invoiceCreatedSchema,
@@ -8,6 +10,7 @@ import {
   invoiceScheduledSchema,
   invoiceSentSchema,
   transactionsCreatedSchema,
+  transactionsExportedSchema,
 } from "@midday/notifications";
 import { z } from "zod";
 
@@ -259,6 +262,24 @@ export const notificationSchema = z.discriminatedUnion("type", [
       type: z.literal("invoice_created"),
     })
     .merge(invoiceCreatedSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("transactions_exported"),
+    })
+    .merge(transactionsExportedSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("document_uploaded"),
+    })
+    .merge(documentUploadedSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("document_processed"),
+    })
+    .merge(documentProcessedSchema.omit({ users: true })),
 ]);
 
 export type NotificationPayload = z.infer<typeof notificationSchema>;
