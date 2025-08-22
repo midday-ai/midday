@@ -17,7 +17,7 @@ export function TopRevenueClient() {
 
   if (!data) {
     return (
-      <Card>
+      <Card className="hidden sm:block">
         <CardHeader className="pb-3">
           <CardTitle className="font-mono font-medium text-2xl">
             No Revenue Client
@@ -37,7 +37,7 @@ export function TopRevenueClient() {
   }
 
   return (
-    <Card>
+    <Card className="hidden sm:block">
       <CardHeader className="pb-3">
         <CardTitle className="font-mono font-medium text-2xl">
           {data.customerName}

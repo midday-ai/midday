@@ -12,7 +12,7 @@ export function NewCustomersThisMonth() {
   );
 
   return (
-    <Card>
+    <Card className="hidden sm:block">
       <CardHeader className="pb-3">
         <CardTitle className="font-mono font-medium text-2xl">
           <NumberFlow value={data} willChange />
