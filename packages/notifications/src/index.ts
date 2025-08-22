@@ -22,9 +22,11 @@ import { invoiceReminderSent } from "./types/invoice-reminder-sent";
 import { invoiceScheduled } from "./types/invoice-scheduled";
 import { invoiceSent } from "./types/invoice-sent";
 import { transactionsCreated } from "./types/transactions-created";
+import { transactionsExported } from "./types/transactions-exported";
 
 const handlers = {
   transactions_created: transactionsCreated,
+  transactions_exported: transactionsExported,
   inbox_new: inboxNew,
   invoice_paid: invoicePaid,
   invoice_overdue: invoiceOverdue,
@@ -330,6 +332,7 @@ export { userSchema, transactionSchema, invoiceSchema } from "./base";
 // Export schemas and types
 export {
   transactionsCreatedSchema,
+  transactionsExportedSchema,
   inboxNewSchema,
   invoicePaidSchema,
   invoiceOverdueSchema,

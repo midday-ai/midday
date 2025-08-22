@@ -12,9 +12,10 @@ import { tasks } from "@trigger.dev/sdk";
 export const transactionAttachmentsRouter = createTRPCRouter({
   createMany: protectedProcedure
     .input(createAttachmentsSchema)
-    .mutation(async ({ input, ctx: { db, teamId } }) => {
+    .mutation(async ({ input, ctx: { db, teamId, session } }) => {
       return createAttachments(db, {
         teamId: teamId!,
+        userId: session.user.id,
         attachments: input,
       });
     }),

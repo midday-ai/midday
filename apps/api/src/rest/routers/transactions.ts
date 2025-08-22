@@ -175,10 +175,16 @@ app.openapi(
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
+    const userId = c.get("userId");
     const { id } = c.req.valid("param");
     const params = c.req.valid("json");
 
-    const result = await updateTransaction(db, { teamId, id, ...params });
+    const result = await updateTransaction(db, {
+      teamId,
+      id,
+      userId,
+      ...params,
+    });
 
     return c.json(validateResponse(result, transactionResponseSchema));
   },
@@ -218,9 +224,14 @@ app.openapi(
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
+    const userId = c.get("userId");
     const params = c.req.valid("json");
 
-    const result = await updateTransactions(db, { teamId, ...params });
+    const result = await updateTransactions(db, {
+      teamId,
+      userId,
+      ...params,
+    });
 
     return c.json(validateResponse(result, transactionsResponseSchema));
   },

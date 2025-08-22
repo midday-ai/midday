@@ -2,7 +2,7 @@ import { writeToString } from "@fast-csv/format";
 import { exportTransactionsSchema } from "@jobs/schema";
 import { serializableToBlob } from "@jobs/utils/blob";
 import { createClient } from "@midday/supabase/job";
-import { metadata, schemaTask } from "@trigger.dev/sdk";
+import { metadata, schemaTask, tasks } from "@trigger.dev/sdk";
 import {
   BlobReader,
   BlobWriter,
@@ -151,6 +151,15 @@ export const exportTransactions = schemaTask({
         processing_status: "completed",
       })
       .eq("name", fullPath);
+
+    // Create activity for completed export
+    await tasks.trigger("notification", {
+      type: "transactions_exported",
+      teamId,
+      transactionCount: transactionIds.length,
+      locale: locale,
+      dateFormat: dateFormat || "yyyy-MM-dd",
+    });
 
     return {
       filePath,

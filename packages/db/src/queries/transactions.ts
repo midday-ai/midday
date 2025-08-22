@@ -28,6 +28,7 @@ import {
 } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 import { nanoid } from "nanoid";
+import { createActivity } from "./activities";
 import { type Attachment, createAttachments } from "./transaction-attachments";
 
 export type GetTransactionsParams = {
@@ -1085,6 +1086,7 @@ export async function updateSimilarTransactionsRecurring(
 type UpdateTransactionData = {
   id: string;
   teamId: string;
+  userId?: string;
   categorySlug?: string | null;
   status?: "pending" | "archived" | "completed" | "posted" | "excluded" | null;
   internal?: boolean;
@@ -1098,7 +1100,7 @@ export async function updateTransaction(
   db: Database,
   params: UpdateTransactionData,
 ) {
-  const { id, teamId, ...dataToUpdate } = params;
+  const { id, teamId, userId, ...dataToUpdate } = params;
 
   const [result] = await db
     .update(transactions)
@@ -1112,12 +1114,41 @@ export async function updateTransaction(
     return null;
   }
 
+  if (dataToUpdate.categorySlug) {
+    createActivity(db, {
+      teamId,
+      userId,
+      type: "transaction_categorized",
+      source: "user",
+      priority: 7,
+      metadata: {
+        transactionId: result.id,
+        categorySlug: dataToUpdate.categorySlug,
+      },
+    });
+  }
+
+  if (dataToUpdate.assignedId) {
+    createActivity(db, {
+      teamId,
+      userId,
+      type: "transaction_assigned",
+      source: "user",
+      priority: 7,
+      metadata: {
+        transactionId: result.id,
+        assignedUserId: dataToUpdate.assignedId,
+      },
+    });
+  }
+
   return getFullTransactionData(db, result.id, teamId);
 }
 
 type UpdateTransactionsData = {
   ids: string[];
   teamId: string;
+  userId?: string;
   categorySlug?: string | null;
   status?: "pending" | "archived" | "completed" | "posted" | "excluded" | null;
   internal?: boolean;
@@ -1132,7 +1163,7 @@ export async function updateTransactions(
   db: Database,
   data: UpdateTransactionsData,
 ) {
-  const { ids, tagId, teamId, ...input } = data;
+  const { ids, tagId, teamId, userId, ...input } = data;
 
   if (tagId) {
     await db
@@ -1163,6 +1194,45 @@ export async function updateTransactions(
   } else {
     // If no fields to update, just return the transaction IDs
     results = ids.map((id) => ({ id }));
+  }
+
+  // Create activities for transaction updates
+  if (results.length > 0) {
+    // Create activity for categorization
+    if (input.categorySlug) {
+      for (const result of results) {
+        createActivity(db, {
+          teamId,
+          userId,
+          type: "transaction_categorized",
+          source: "user",
+          priority: 7,
+          metadata: {
+            transactionId: result.id,
+            categorySlug: input.categorySlug,
+            transactionIds: ids,
+          },
+        });
+      }
+    }
+
+    // Create activity for assignment
+    if (input.assignedId) {
+      for (const result of results) {
+        createActivity(db, {
+          teamId,
+          userId,
+          type: "transaction_assigned",
+          source: "user",
+          priority: 7,
+          metadata: {
+            transactionId: result.id,
+            assignedUserId: input.assignedId,
+            transactionIds: ids,
+          },
+        });
+      }
+    }
   }
 
   // Get full transaction data for each updated transaction

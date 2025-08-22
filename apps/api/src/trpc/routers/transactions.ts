@@ -58,18 +58,20 @@ export const transactionsRouter = createTRPCRouter({
 
   update: protectedProcedure
     .input(updateTransactionSchema)
-    .mutation(async ({ input, ctx: { db, teamId } }) => {
+    .mutation(async ({ input, ctx: { db, teamId, session } }) => {
       return updateTransaction(db, {
         ...input,
+        userId: session.user.id,
         teamId: teamId!,
       });
     }),
 
   updateMany: protectedProcedure
     .input(updateTransactionsSchema)
-    .mutation(async ({ input, ctx: { db, teamId } }) => {
+    .mutation(async ({ input, ctx: { db, teamId, session } }) => {
       return updateTransactions(db, {
         ...input,
+        userId: session.user.id,
         teamId: teamId!,
       });
     }),

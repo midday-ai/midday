@@ -26,6 +26,7 @@ import {
 import type { SQL } from "drizzle-orm/sql/sql";
 import { v4 as uuidv4 } from "uuid";
 import { logActivity } from "../utils/log-activity";
+import { createActivity } from "./activities";
 
 export type Template = {
   customerLabel: string;
@@ -486,6 +487,15 @@ export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
 
   const useToken = token ?? (await generateToken(id));
 
+  // Check if this is a new draft by looking for existing invoice
+  const existingInvoice = await db
+    .select({ id: invoices.id })
+    .from(invoices)
+    .where(eq(invoices.id, id))
+    .limit(1);
+
+  const isNewDraft = existingInvoice.length === 0;
+
   const { paymentDetails: _, fromDetails: __, ...restTemplate } = template;
 
   const [result] = await db
@@ -519,6 +529,25 @@ export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
       },
     })
     .returning();
+
+  // Create activity for new draft invoices only
+  if (isNewDraft && result) {
+    createActivity(db, {
+      teamId,
+      userId,
+      type: "draft_invoice_created",
+      source: "user",
+      priority: 7,
+      metadata: {
+        invoiceId: result.id,
+        invoiceNumber: result.invoiceNumber,
+        customerName: result.customerName,
+        amount: result.amount,
+        currency: result.currency,
+        dueDate: result.dueDate,
+      },
+    });
+  }
 
   return result;
 }

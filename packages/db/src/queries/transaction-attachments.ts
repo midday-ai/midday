@@ -1,6 +1,7 @@
 import type { Database } from "@db/client";
 import { inbox, transactionAttachments, transactions } from "@db/schema";
 import { and, eq } from "drizzle-orm";
+import { createActivity } from "./activities";
 
 export type Attachment = {
   type: string;
@@ -13,15 +14,16 @@ export type Attachment = {
 type CreateAttachmentsParams = {
   attachments: Attachment[];
   teamId: string;
+  userId?: string;
 };
 
 export async function createAttachments(
   db: Database,
   params: CreateAttachmentsParams,
 ) {
-  const { attachments, teamId } = params;
+  const { attachments, teamId, userId } = params;
 
-  return db
+  const result = await db
     .insert(transactionAttachments)
     .values(
       attachments.map((attachment) => ({
@@ -30,6 +32,26 @@ export async function createAttachments(
       })),
     )
     .returning();
+
+  // Create activity for each attachment created
+  for (const attachment of result) {
+    createActivity(db, {
+      teamId,
+      userId,
+      type: "transaction_attachment_created",
+      source: "user",
+      priority: 7,
+      metadata: {
+        attachmentId: attachment.id,
+        transactionId: attachment.transactionId,
+        fileName: attachment.name,
+        fileSize: attachment.size,
+        fileType: attachment.type,
+      },
+    });
+  }
+
+  return result;
 }
 
 type DeleteAttachmentParams = {
