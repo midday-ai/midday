@@ -801,11 +801,8 @@ export async function getSimilarTransactions(
           );
         }
 
-        if (frequency) {
-          embeddingConditions.push(
-            eq(transactions.frequency, frequency as TransactionFrequency),
-          );
-        }
+        // Note: We don't filter by frequency here because we want to find similar transactions
+        // regardless of their current frequency so we can update them to the new frequency
 
         const finalEmbeddingConditions = embeddingConditions.filter(
           (c) => c !== undefined,
@@ -886,12 +883,6 @@ export async function getSimilarTransactions(
         isNull(transactions.categorySlug),
         ne(transactions.categorySlug, categorySlug),
       ),
-    );
-  }
-
-  if (frequency) {
-    ftsConditions.push(
-      eq(transactions.frequency, frequency as TransactionFrequency),
     );
   }
 
