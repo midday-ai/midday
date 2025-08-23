@@ -84,6 +84,7 @@ export const transactionsRouter = createTRPCRouter({
         categorySlug: input.categorySlug,
         frequency: input.frequency,
         teamId: teamId!,
+        transactionId: input.transactionId,
       });
     }),
 

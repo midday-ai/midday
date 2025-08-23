@@ -6,17 +6,21 @@ import {
   tags,
   transactionAttachments,
   transactionCategories,
+  transactionEmbeddings,
   type transactionFrequencyEnum,
   transactionTags,
   transactions,
   users,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
+import { logger } from "@midday/logger";
 import {
   and,
   asc,
+  cosineDistance,
   desc,
   eq,
+  gt,
   gte,
   inArray,
   isNull,
@@ -707,34 +711,182 @@ type GetSimilarTransactionsParams = {
   teamId: string;
   categorySlug?: string;
   frequency?: "weekly" | "monthly" | "annually" | "irregular";
+  transactionId?: string; // Optional: if we want to exclude the source transaction
+  limit?: number;
+  minSimilarityScore?: number; // Alternative to limit: quality-based filtering
 };
 
+/**
+ * Find similar transactions using hybrid search: combines embeddings AND FTS for comprehensive results
+ *
+ * @param db - Database connection
+ * @param params - Search parameters including optional embedding settings
+ * @returns Array of similar transactions, ordered by relevance (embedding matches first, then FTS matches)
+ */
 export async function getSimilarTransactions(
   db: Database,
   params: GetSimilarTransactionsParams,
 ) {
-  const { name, teamId, categorySlug, frequency } = params;
+  const {
+    name,
+    teamId,
+    categorySlug,
+    frequency,
+    transactionId,
+    minSimilarityScore = 0.8, // Default 80% similarity threshold
+  } = params;
 
-  const conditions: (SQL | undefined)[] = [eq(transactions.teamId, teamId)];
+  logger.info("Starting hybrid search for similar transactions", {
+    name,
+    teamId,
+    minSimilarityScore,
+    transactionId,
+    categorySlug,
+    frequency,
+  });
+
+  let embeddingResults: any[] = [];
+  let ftsResults: any[] = [];
+
+  // 1. EMBEDDING SEARCH (if transactionId provided)
+  if (transactionId) {
+    logger.info("Attempting embedding search", {
+      transactionId,
+      teamId,
+    });
+
+    try {
+      const sourceEmbedding = await db
+        .select({
+          embedding: transactionEmbeddings.embedding,
+          sourceText: transactionEmbeddings.sourceText,
+        })
+        .from(transactionEmbeddings)
+        .where(
+          and(
+            eq(transactionEmbeddings.transactionId, transactionId),
+            eq(transactionEmbeddings.teamId, teamId),
+          ),
+        )
+        .limit(1);
+
+      if (sourceEmbedding.length > 0 && sourceEmbedding[0]!.embedding) {
+        const sourceEmbeddingVector = sourceEmbedding[0]!.embedding;
+        const sourceText = sourceEmbedding[0]!.sourceText;
+
+        logger.info("Found embedding for transaction", {
+          transactionId,
+          sourceText,
+          embeddingExists: true,
+        });
+
+        // Calculate similarity using cosineDistance function from Drizzle
+        const similarity = sql<number>`1 - (${cosineDistance(transactionEmbeddings.embedding, sourceEmbeddingVector)})`;
+
+        const embeddingConditions: (SQL | undefined)[] = [
+          eq(transactions.teamId, teamId),
+          ne(transactions.id, transactionId), // Exclude the source transaction
+          gt(similarity, minSimilarityScore), // Use configurable similarity threshold
+        ];
+
+        if (categorySlug) {
+          embeddingConditions.push(ne(transactions.categorySlug, categorySlug));
+        }
+
+        if (frequency) {
+          embeddingConditions.push(
+            eq(transactions.frequency, frequency as TransactionFrequency),
+          );
+        }
+
+        const finalEmbeddingConditions = embeddingConditions.filter(
+          (c) => c !== undefined,
+        ) as SQL[];
+
+        embeddingResults = await db
+          .select({
+            id: transactions.id,
+            amount: transactions.amount,
+            teamId: transactions.teamId,
+            name: transactions.name,
+            date: transactions.date,
+            categorySlug: transactions.categorySlug,
+            frequency: transactions.frequency,
+            similarity,
+            source: sql<string>`'embedding'`.as("source"),
+          })
+          .from(transactions)
+          .innerJoin(
+            transactionEmbeddings,
+            eq(transactionEmbeddings.transactionId, transactions.id),
+          )
+          .where(and(...finalEmbeddingConditions))
+          .orderBy(desc(similarity)); // No limit - let similarity threshold determine results
+
+        logger.info("Embedding search completed", {
+          resultsFound: embeddingResults.length,
+          minSimilarityScore,
+          transactionId,
+        });
+      } else {
+        logger.warn("No embedding found for transaction", {
+          transactionId,
+          teamId,
+        });
+      }
+    } catch (error) {
+      logger.error("Embedding search failed", {
+        error: error instanceof Error ? error.message : String(error),
+        transactionId,
+        teamId,
+      });
+    }
+  }
+
+  // 2. FTS SEARCH (always run to complement embeddings)
+  logger.info("Running FTS search", {
+    name,
+    teamId,
+    hasEmbeddingResults: embeddingResults.length > 0,
+  });
+
+  const ftsConditions: (SQL | undefined)[] = [eq(transactions.teamId, teamId)];
+
+  if (transactionId) {
+    ftsConditions.push(ne(transactions.id, transactionId));
+  }
 
   const searchQuery = buildSearchQuery(name);
-  conditions.push(
+  ftsConditions.push(
     sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
   );
 
   if (categorySlug) {
-    conditions.push(ne(transactions.categorySlug, categorySlug));
+    ftsConditions.push(ne(transactions.categorySlug, categorySlug));
   }
 
   if (frequency) {
-    conditions.push(
+    ftsConditions.push(
       eq(transactions.frequency, frequency as TransactionFrequency),
     );
   }
 
-  const finalConditions = conditions.filter((c) => c !== undefined) as SQL[];
+  // Exclude transactions already found by embeddings
+  if (embeddingResults.length > 0) {
+    const embeddingIds = embeddingResults.map((r) => r.id);
+    ftsConditions.push(
+      sql`${transactions.id} NOT IN (${sql.join(
+        embeddingIds.map((id) => sql`${id}`),
+        sql`, `,
+      )})`,
+    );
+  }
 
-  return db
+  const finalFtsConditions = ftsConditions.filter(
+    (c) => c !== undefined,
+  ) as SQL[];
+
+  ftsResults = await db
     .select({
       id: transactions.id,
       amount: transactions.amount,
@@ -743,9 +895,54 @@ export async function getSimilarTransactions(
       date: transactions.date,
       categorySlug: transactions.categorySlug,
       frequency: transactions.frequency,
+      source: sql<string>`'fts'`.as("source"),
     })
     .from(transactions)
-    .where(and(...finalConditions));
+    .where(and(...finalFtsConditions)); // No limit - get all FTS matches
+
+  logger.info("FTS search completed", {
+    resultsFound: ftsResults.length,
+    name,
+    teamId,
+  });
+
+  // 3. COMBINE AND DEDUPLICATE RESULTS
+  const allResults = [
+    ...embeddingResults.map(({ similarity, source, ...rest }) => ({
+      ...rest,
+      matchType: source,
+    })),
+    ...ftsResults.map(({ source, ...rest }) => ({
+      ...rest,
+      matchType: source,
+    })),
+  ];
+
+  // Remove duplicates based on transaction ID (most accurate)
+  // If same ID appears in both embedding and FTS results, prioritize embedding
+  const uniqueResults = allResults.filter((transaction, index, array) => {
+    return index === array.findIndex((t) => t.id === transaction.id);
+  });
+
+  // Log final results with structured data
+  logger.info("Hybrid search completed", {
+    totalResults: allResults.length,
+    uniqueResults: uniqueResults.length,
+    embeddingMatches: embeddingResults.length,
+    ftsMatches: ftsResults.length,
+    name,
+    teamId,
+    minSimilarityScore,
+    results: uniqueResults.map((t, i) => ({
+      rank: i + 1,
+      name: t.name,
+      matchType: t.matchType,
+      id: t.id,
+    })),
+  });
+
+  // Remove matchType field and return all quality matches
+  return uniqueResults.map(({ matchType, ...rest }) => rest);
 }
 
 type SearchTransactionMatchParams = {

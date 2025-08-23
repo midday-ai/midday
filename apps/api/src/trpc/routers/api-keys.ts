@@ -1,13 +1,13 @@
 import { deleteApiKeySchema, upsertApiKeySchema } from "@api/schemas/api-keys";
 import { resend } from "@api/services/resend";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { logger } from "@api/utils/logger";
 import {
   deleteApiKey,
   getApiKeysByTeam,
   upsertApiKey,
 } from "@midday/db/queries";
 import { ApiKeyCreatedEmail } from "@midday/email/emails/api-key-created";
+import { logger } from "@midday/logger";
 
 export const apiKeysRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {

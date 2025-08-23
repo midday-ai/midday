@@ -476,27 +476,6 @@ export async function startTimer(db: Database, params: StartTimerParams) {
     throw new Error("Failed to fetch created timer entry");
   }
 
-  // Create activity for timer start
-  try {
-    await createActivity(db, {
-      teamId,
-      userId: assignedId || undefined,
-      type: "tracker_entry_created",
-      source: "user",
-      priority: 7,
-      metadata: {
-        entryId: entryId,
-        projectId: projectId || null,
-        isTimer: true,
-        startTime: startTime,
-        description: description || null,
-      },
-    });
-  } catch (error) {
-    // Log error but don't fail the main operation
-    console.error("Failed to create activity for timer start:", error);
-  }
-
   return {
     ...result,
     project: result.trackerProject,

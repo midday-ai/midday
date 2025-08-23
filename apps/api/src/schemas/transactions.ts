@@ -606,6 +606,22 @@ export const getSimilarTransactionsSchema = z.object({
         in: "query",
       },
     }),
+  transactionId: z.string().uuid().optional().openapi({
+    description: "Transaction ID to exclude from results.",
+  }),
+  minSimilarityScore: z
+    .number()
+    .min(0.1)
+    .max(1.0)
+    .optional()
+    .default(0.8)
+    .openapi({
+      description:
+        "Minimum similarity score (0.1-1.0) for transactions to be considered similar.",
+      param: {
+        in: "query",
+      },
+    }),
 });
 
 export const updateSimilarTransactionsCategorySchema = z.object({

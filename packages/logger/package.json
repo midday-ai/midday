@@ -1,0 +1,18 @@
+{
+  "name": "@midday/logger",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pino": "^9.7.0",
+    "pino-pretty": "^10.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
