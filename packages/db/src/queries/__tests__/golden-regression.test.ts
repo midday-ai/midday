@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, jest, mock, test } from "bun:test";
-import { findMatches, getTeamCalibration } from "../transaction-matching";
+import { findMatches } from "../transaction-matching";
 import {
   type GoldenMatch,
   getGoldenMatchesByType,
