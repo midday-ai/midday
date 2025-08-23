@@ -336,7 +336,7 @@ export function TransactionDetails() {
                           altText="Yes"
                           onClick={() => {
                             updateSimilarTransactionsCategoryMutation.mutate({
-                              name: data.name,
+                              transactionId: data.id,
                               categorySlug: category.slug,
                             });
                           }}
@@ -510,6 +510,7 @@ export function TransactionDetails() {
                             onClick={() => {
                               updateSimilarTransactionsCategoryMutation.mutate({
                                 name: data.name,
+                                transactionId: data.id,
                                 recurring: true,
                                 frequency: value as
                                   | "weekly"

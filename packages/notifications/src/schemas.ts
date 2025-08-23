@@ -20,8 +20,8 @@ export const createActivitySchema = z.object({
     "invoice_duplicated",
     "tracker_entry_created",
     "tracker_project_created",
-    "transaction_categorized",
-    "transaction_assigned",
+    "transactions_categorized",
+    "transactions_assigned",
     "transaction_attachment_created",
     "transaction_category_created",
     "transactions_exported",
@@ -166,6 +166,18 @@ export const invoiceCreatedSchema = z.object({
   currency: z.string().optional(),
 });
 
+export const transactionsCategorizedSchema = z.object({
+  users: z.array(userSchema),
+  categorySlug: z.string(),
+  transactionIds: z.array(z.string()),
+});
+
+export const transactionsAssignedSchema = z.object({
+  users: z.array(userSchema),
+  assignedUserId: z.string(),
+  transactionIds: z.array(z.string()),
+});
+
 export type UserData = z.infer<typeof userSchema>;
 export type TransactionData = z.infer<typeof transactionSchema>;
 export type InvoiceData = z.infer<typeof invoiceSchema>;
@@ -189,11 +201,19 @@ export type InvoiceReminderSentInput = z.infer<
 >;
 export type InvoiceCancelledInput = z.infer<typeof invoiceCancelledSchema>;
 export type InvoiceCreatedInput = z.infer<typeof invoiceCreatedSchema>;
+export type TransactionsCategorizedInput = z.infer<
+  typeof transactionsCategorizedSchema
+>;
+export type TransactionsAssignedInput = z.infer<
+  typeof transactionsAssignedSchema
+>;
 
 // Notification types map - all available notification types with their data structures
 export type NotificationTypes = {
   transactions_created: TransactionsCreatedInput;
   transactions_exported: TransactionsExportedInput;
+  transactions_categorized: TransactionsCategorizedInput;
+  transactions_assigned: TransactionsAssignedInput;
   document_uploaded: DocumentUploadedInput;
   document_processed: DocumentProcessedInput;
   inbox_new: InboxNewInput;

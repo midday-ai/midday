@@ -23,12 +23,16 @@ import { invoicePaid } from "./types/invoice-paid";
 import { invoiceReminderSent } from "./types/invoice-reminder-sent";
 import { invoiceScheduled } from "./types/invoice-scheduled";
 import { invoiceSent } from "./types/invoice-sent";
+import { transactionsAssigned } from "./types/transactions-assigned";
+import { transactionsCategorized } from "./types/transactions-categorized";
 import { transactionsCreated } from "./types/transactions-created";
 import { transactionsExported } from "./types/transactions-exported";
 
 const handlers = {
   transactions_created: transactionsCreated,
   transactions_exported: transactionsExported,
+  transactions_categorized: transactionsCategorized,
+  transactions_assigned: transactionsAssigned,
   document_uploaded: documentUploaded,
   document_processed: documentProcessed,
   inbox_new: inboxNew,

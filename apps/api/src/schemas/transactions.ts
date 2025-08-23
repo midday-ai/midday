@@ -625,8 +625,8 @@ export const getSimilarTransactionsSchema = z.object({
 });
 
 export const updateSimilarTransactionsCategorySchema = z.object({
-  name: z.string().openapi({
-    description: "Name of the transaction.",
+  transactionId: z.string().uuid().openapi({
+    description: "Source transaction ID to find similar transactions.",
   }),
   categorySlug: z.string().optional().openapi({
     description: "Category slug to update.",

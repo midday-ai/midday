@@ -90,9 +90,10 @@ export const transactionsRouter = createTRPCRouter({
 
   updateSimilarTransactionsCategory: protectedProcedure
     .input(updateSimilarTransactionsCategorySchema)
-    .mutation(async ({ input, ctx: { db, teamId } }) => {
+    .mutation(async ({ input, ctx: { db, teamId, session } }) => {
       return updateSimilarTransactionsCategory(db, {
         ...input,
+        userId: session.user.id,
         teamId: teamId!,
       });
     }),

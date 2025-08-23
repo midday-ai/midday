@@ -1219,9 +1219,11 @@ export async function searchTransactionMatch(
 
 type UpdateSimilarTransactionsCategoryParams = {
   teamId: string;
+  userId?: string;
   name: string;
-  categorySlug?: string | null;
   frequency?: "weekly" | "monthly" | "annually" | "irregular";
+  transactionId: string;
+  categorySlug?: string | null;
   recurring?: boolean;
 };
 
@@ -1229,8 +1231,40 @@ export async function updateSimilarTransactionsCategory(
   db: Database,
   params: UpdateSimilarTransactionsCategoryParams,
 ) {
-  const { name, teamId, categorySlug, frequency, recurring } = params;
+  const {
+    transactionId,
+    teamId,
+    userId,
+    name,
+    categorySlug,
+    recurring,
+    frequency,
+  } = params;
 
+  const similarTransactions = await getSimilarTransactions(db, {
+    transactionId,
+    teamId,
+    name,
+    categorySlug: categorySlug || undefined,
+  });
+
+  if (similarTransactions.length === 0) {
+    logger.info("No similar transactions found for update", {
+      transactionId,
+      teamId,
+      categorySlug,
+    });
+    return [];
+  }
+
+  logger.info("Found similar transactions for bulk update", {
+    transactionId,
+    teamId,
+    transactionCount: similarTransactions.length,
+    transactionIds: similarTransactions.map((t) => t.id),
+  });
+
+  // Step 2: Prepare update data
   const updateData: Partial<{
     categorySlug: string | null;
     recurring: boolean;
@@ -1246,31 +1280,17 @@ export async function updateSimilarTransactionsCategory(
   }
 
   if (frequency !== undefined) {
-    updateData.frequency = frequency as TransactionFrequency;
+    updateData.frequency = frequency;
   }
 
-  const searchQuery = buildSearchQuery(name);
+  const transactionIds = similarTransactions.map((t) => t.id);
 
-  const results = await db
-    .update(transactions)
-    .set(updateData)
-    .where(
-      and(
-        eq(transactions.teamId, teamId),
-        sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
-      ),
-    )
-    .returning({
-      id: transactions.id,
-    });
-
-  // Get full transaction data for each updated transaction
-  const fullTransactions = await Promise.all(
-    results.map((result) => getFullTransactionData(db, result.id, teamId)),
-  );
-
-  // Filter out any null results
-  return fullTransactions.filter((transaction) => transaction !== null);
+  return updateTransactions(db, {
+    ids: transactionIds,
+    teamId,
+    userId,
+    ...updateData,
+  });
 }
 
 type UpdateSimilarTransactionsRecurringParams = {
@@ -1363,12 +1383,13 @@ export async function updateTransaction(
     createActivity(db, {
       teamId,
       userId,
-      type: "transaction_categorized",
+      type: "transactions_categorized",
       source: "user",
       priority: 7,
       metadata: {
-        transactionId: result.id,
         categorySlug: dataToUpdate.categorySlug,
+        transactionIds: [result.id],
+        transactionCount: 1,
       },
     });
   }
@@ -1377,12 +1398,13 @@ export async function updateTransaction(
     createActivity(db, {
       teamId,
       userId,
-      type: "transaction_assigned",
+      type: "transactions_assigned",
       source: "user",
       priority: 7,
       metadata: {
-        transactionId: result.id,
         assignedUserId: dataToUpdate.assignedId,
+        transactionIds: [result.id],
+        transactionCount: 1,
       },
     });
   }
@@ -1443,40 +1465,36 @@ export async function updateTransactions(
 
   // Create activities for transaction updates
   if (results.length > 0) {
-    // Create activity for categorization
+    // Create bulk activity for categorization
     if (input.categorySlug) {
-      for (const result of results) {
-        createActivity(db, {
-          teamId,
-          userId,
-          type: "transaction_categorized",
-          source: "user",
-          priority: 7,
-          metadata: {
-            transactionId: result.id,
-            categorySlug: input.categorySlug,
-            transactionIds: ids,
-          },
-        });
-      }
+      createActivity(db, {
+        teamId,
+        userId,
+        type: "transactions_categorized",
+        source: "user",
+        priority: 7,
+        metadata: {
+          categorySlug: input.categorySlug,
+          transactionIds: results.map((r) => r.id),
+          transactionCount: results.length,
+        },
+      });
     }
 
-    // Create activity for assignment
+    // Create bulk activity for assignment
     if (input.assignedId) {
-      for (const result of results) {
-        createActivity(db, {
-          teamId,
-          userId,
-          type: "transaction_assigned",
-          source: "user",
-          priority: 7,
-          metadata: {
-            transactionId: result.id,
-            assignedUserId: input.assignedId,
-            transactionIds: ids,
-          },
-        });
-      }
+      createActivity(db, {
+        teamId,
+        userId,
+        type: "transactions_assigned",
+        source: "user",
+        priority: 7,
+        metadata: {
+          assignedUserId: input.assignedId,
+          transactionIds: results.map((r) => r.id),
+          transactionCount: results.length,
+        },
+      });
     }
   }
 
