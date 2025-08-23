@@ -53,7 +53,7 @@ graph
 
 ### 1. New Transaction Processing
 
-**Flow**: `upsert-transactions` → `embed-transaction` → `match-pending-inbox` → `calculate-suggestions`
+**Flow**: `upsert-transactions` → `embed-transaction` → `match-pending-inbox` → `process-inbox-matching`
 
 ```typescript
 // Entry Point: Bank sync creates new transactions
@@ -76,12 +76,12 @@ await tasks.trigger("match-pending-inbox", {
 })
   ↓
 // Step 3: Batch process matching for relevant inbox items
-await tasks.batchTrigger("calculate-suggestions", batchJobs)
+await tasks.batchTrigger("process-inbox-matching", batchJobs)
 ```
 
 ### 2. New Inbox Item Processing
 
-**Flow**: `process-attachment` → `embed-inbox` → `calculate-suggestions`
+**Flow**: `process-attachment` → `embed-inbox` → `process-inbox-matching`
 
 ```typescript
 // Entry Point: Gmail sync, email webhook, or manual upload
@@ -102,7 +102,7 @@ await embedInbox.triggerAndWait({
 })
   ↓
 // Step 3: Find matches against existing transactions
-await calculateSuggestions.trigger({
+await processInboxMatching.trigger({
   teamId,
   inboxId
 })
@@ -117,7 +117,7 @@ await calculateSuggestions.trigger({
 | `match-pending-inbox` | **Orchestrator** - Finds relevant inbox items to recheck | Medium |
 | `process-attachment` | **Orchestrator** - Manages entire inbox item pipeline | High |
 | `embed-inbox` | Creates inbox item embeddings | Low |
-| `calculate-suggestions` | Performs matching algorithm and creates suggestions | Low |
+| `process-inbox-matching` | Performs matching algorithm and creates suggestions | Low |
 
 ## Matching Algorithm
 

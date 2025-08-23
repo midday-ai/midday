@@ -7,7 +7,7 @@ import {
   getInboxForEmbedding,
 } from "@midday/db/queries";
 import { inbox } from "@midday/db/schema";
-import { logger, schemaTask, tasks } from "@trigger.dev/sdk";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -37,14 +37,6 @@ export const embedInbox = schemaTask({
     const embeddingExists = await checkInboxEmbeddingExists(db, { inboxId });
 
     if (embeddingExists) {
-      logger.info(
-        "Inbox embedding already exists, skipping to match calculation",
-        {
-          inboxId,
-          teamId,
-        },
-      );
-
       logger.info("Inbox embedding already exists, skipping creation", {
         inboxId,
         teamId,
@@ -97,12 +89,6 @@ export const embedInbox = schemaTask({
         embedding,
         sourceText: text,
         model,
-      });
-
-      logger.info("Inbox embedding created successfully", {
-        inboxId,
-        teamId,
-        embeddingDimensions: embedding.length,
       });
 
       logger.info("Inbox embedding created successfully", {

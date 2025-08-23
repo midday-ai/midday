@@ -42,9 +42,9 @@ export const matchPendingInbox = schemaTask({
         },
       }));
 
-      await tasks.batchTrigger("calculate-suggestions", batchJobs);
+      await tasks.batchTrigger("process-inbox-matching", batchJobs);
 
-      logger.info("Batch triggered calculate-suggestions jobs", {
+      logger.info("Batch triggered inbox matching jobs", {
         teamId,
         newTransactionCount: newTransactionIds.length,
         batchSize: batchJobs.length,

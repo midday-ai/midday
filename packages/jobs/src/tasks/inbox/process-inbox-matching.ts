@@ -3,8 +3,8 @@ import { calculateInboxSuggestions } from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
-export const calculateSuggestions = schemaTask({
-  id: "calculate-suggestions",
+export const processInboxMatching = schemaTask({
+  id: "process-inbox-matching",
   schema: z.object({
     teamId: z.string().uuid(),
     inboxId: z.string().uuid(),
@@ -15,7 +15,7 @@ export const calculateSuggestions = schemaTask({
   run: async ({ teamId, inboxId }) => {
     const db = getDb();
 
-    logger.info("Calculating match suggestions", { teamId, inboxId });
+    logger.info("Processing inbox matching", { teamId, inboxId });
 
     try {
       const result = await calculateInboxSuggestions(db, { teamId, inboxId });
@@ -50,7 +50,7 @@ export const calculateSuggestions = schemaTask({
 
       return result;
     } catch (error) {
-      logger.error("Failed to calculate suggestions", {
+      logger.error("Failed to process inbox matching", {
         teamId,
         inboxId,
         error: error instanceof Error ? error.message : "Unknown error",
