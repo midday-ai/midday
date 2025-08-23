@@ -733,7 +733,7 @@ export async function getSimilarTransactions(
     categorySlug,
     frequency,
     transactionId,
-    minSimilarityScore = 0.8, // Default 80% similarity threshold
+    minSimilarityScore = 0.9,
   } = params;
 
   logger.info({
@@ -1206,61 +1206,6 @@ export async function searchTransactionMatch(
   }
 
   return [];
-}
-
-type UpdateSimilarTransactionsRecurringParams = {
-  id: string;
-  teamId: string;
-};
-
-export async function updateSimilarTransactionsRecurring(
-  db: Database,
-  params: UpdateSimilarTransactionsRecurringParams,
-) {
-  const { id, teamId } = params;
-
-  const [result] = await db
-    .select({
-      name: transactions.name,
-      recurring: transactions.recurring,
-      frequency: transactions.frequency,
-    })
-    .from(transactions)
-    .where(and(eq(transactions.id, id), eq(transactions.teamId, teamId)))
-    .limit(1);
-
-  if (!result) {
-    return [];
-  }
-
-  const { name, recurring, frequency } = result;
-
-  const searchQuery = buildSearchQuery(name);
-
-  const results = await db
-    .update(transactions)
-    .set({
-      recurring: recurring,
-      frequency: frequency,
-    })
-    .where(
-      and(
-        eq(transactions.teamId, teamId),
-        sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
-        ne(transactions.id, id),
-      ),
-    )
-    .returning({
-      id: transactions.id,
-    });
-
-  // Get full transaction data for each updated transaction
-  const fullTransactions = await Promise.all(
-    results.map((result) => getFullTransactionData(db, result.id, teamId)),
-  );
-
-  // Filter out any null results
-  return fullTransactions.filter((transaction) => transaction !== null);
 }
 
 type UpdateTransactionData = {

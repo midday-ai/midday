@@ -624,19 +624,6 @@ export const getSimilarTransactionsSchema = z.object({
     }),
 });
 
-export const updateSimilarTransactionsRecurringSchema = z.object({
-  id: z
-    .string()
-    .uuid()
-    .openapi({
-      description: "Transaction ID (UUID) to update recurring status.",
-      param: {
-        in: "path",
-        name: "id",
-      },
-    }),
-});
-
 export const searchTransactionMatchSchema = z.object({
   query: z
     .string()
