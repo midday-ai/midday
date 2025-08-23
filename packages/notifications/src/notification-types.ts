@@ -38,6 +38,27 @@ export const allNotificationTypes: NotificationType[] = [
     order: 3,
   },
   {
+    type: "inbox_auto_matched",
+    channels: ["in_app"],
+    showInSettings: true,
+    category: "inbox",
+    order: 1,
+  },
+  {
+    type: "inbox_needs_review",
+    channels: ["in_app"],
+    showInSettings: true,
+    category: "inbox",
+    order: 2,
+  },
+  {
+    type: "inbox_cross_currency_matched",
+    channels: ["in_app"],
+    showInSettings: true,
+    category: "inbox",
+    order: 3,
+  },
+  {
     type: "invoice_scheduled",
     channels: ["in_app"],
     showInSettings: true,

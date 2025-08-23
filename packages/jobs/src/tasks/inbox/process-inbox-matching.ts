@@ -1,4 +1,5 @@
 import { getDb } from "@jobs/init";
+import { triggerMatchingNotification } from "@jobs/utils/inbox-matching-notifications";
 import { calculateInboxSuggestions } from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
@@ -19,6 +20,16 @@ export const processInboxMatching = schemaTask({
 
     try {
       const result = await calculateInboxSuggestions(db, { teamId, inboxId });
+
+      // Send notifications based on matching result
+      if (result.action !== "no_match_yet" && result.suggestion) {
+        await triggerMatchingNotification({
+          db,
+          teamId,
+          inboxId,
+          result,
+        });
+      }
 
       switch (result.action) {
         case "auto_matched":

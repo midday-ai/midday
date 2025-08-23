@@ -23,7 +23,6 @@ const generateEmbedding = (seed: string): number[] => {
 };
 
 export const additionalGoldenMatches: GoldenMatch[] = [
-  // CRITICAL MISSING: Invoice payment scenarios
   {
     id: "invoice-net30-payment",
     description: "Invoice with Net 30 payment terms (30 days later)",
@@ -64,8 +63,6 @@ export const additionalGoldenMatches: GoldenMatch[] = [
       expectedMatchType: "auto_matched",
     },
   },
-
-  // CRITICAL MISSING: Multiple currency scenarios
   {
     id: "exotic-currency-mismatch",
     description: "Exotic currencies without base amount conversion",
@@ -105,7 +102,6 @@ export const additionalGoldenMatches: GoldenMatch[] = [
     },
   },
 
-  // CRITICAL MISSING: Team calibration scenarios
   {
     id: "borderline-confidence-team-calibrated",
     description: "Match that depends on team-specific calibrated thresholds",
@@ -143,7 +139,6 @@ export const additionalGoldenMatches: GoldenMatch[] = [
     },
   },
 
-  // CRITICAL MISSING: Recurring transaction intelligence
   {
     id: "recurring-pattern-boost",
     description: "Transaction that should get recurring intelligence boost",
@@ -182,8 +177,6 @@ export const additionalGoldenMatches: GoldenMatch[] = [
       expectedMatchType: "auto_matched",
     },
   },
-
-  // CRITICAL MISSING: Semantic embedding edge cases
   {
     id: "weak-semantic-strong-financial",
     description: "Strong financial match but weak semantic similarity",
@@ -220,8 +213,6 @@ export const additionalGoldenMatches: GoldenMatch[] = [
       expectedMatchType: "suggested",
     },
   },
-
-  // CRITICAL MISSING: Amount tolerance edge cases
   {
     id: "amount-within-tolerance",
     description: "Amount difference within acceptable tolerance",
@@ -258,8 +249,6 @@ export const additionalGoldenMatches: GoldenMatch[] = [
       expectedMatchType: "auto_matched",
     },
   },
-
-  // CRITICAL MISSING: Date scoring for different types
   {
     id: "expense-receipt-after-transaction",
     description: "Expense receipt received after transaction (normal pattern)",
@@ -296,8 +285,6 @@ export const additionalGoldenMatches: GoldenMatch[] = [
       expectedMatchType: "auto_matched",
     },
   },
-
-  // CRITICAL MISSING: Team base currency scenarios
   {
     id: "team-base-currency-conversion",
     description:
