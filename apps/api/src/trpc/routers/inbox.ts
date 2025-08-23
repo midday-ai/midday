@@ -10,21 +10,18 @@ import {
 } from "@api/schemas/inbox";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
+  confirmSuggestedMatch,
+  declineSuggestedMatch,
   deleteInbox,
   deleteInboxEmbedding,
   getInbox,
   getInboxById,
+  getInboxByStatus,
   getInboxSearch,
   matchTransaction,
   unmatchTransaction,
   updateInbox,
 } from "@midday/db/queries";
-import {
-  confirmSuggestedMatch,
-  declineSuggestedMatch,
-  getInboxByStatus,
-  getInboxSuggestion,
-} from "@midday/db/queries/inbox-matching";
 import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk";
 import { z } from "zod";
@@ -145,20 +142,6 @@ export const inboxRouter = createTRPCRouter({
       return getInboxByStatus(db, {
         teamId: teamId!,
         status: input.status,
-      });
-    }),
-
-  // Get suggestion for a specific inbox item
-  getSuggestion: protectedProcedure
-    .input(
-      z.object({
-        inboxId: z.string().uuid(),
-      }),
-    )
-    .query(async ({ ctx: { db, teamId }, input }) => {
-      return getInboxSuggestion(db, {
-        teamId: teamId!,
-        inboxId: input.inboxId,
       });
     }),
 

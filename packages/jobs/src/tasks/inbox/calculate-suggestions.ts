@@ -1,5 +1,5 @@
 import { getDb } from "@jobs/init";
-import { calculateInboxSuggestions } from "@midday/db/queries/inbox-matching";
+import { calculateInboxSuggestions } from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 

@@ -1,12 +1,10 @@
 import type { Database } from "@db/client";
-import { inbox } from "@db/schema";
-import { and, eq } from "drizzle-orm";
+import { inbox, transactionMatchSuggestions } from "@db/schema";
+import { and, eq, sql } from "drizzle-orm";
 import { matchTransaction } from "./inbox";
 import {
-  type InboxMatchResult,
   type MatchResult,
   createMatchSuggestion,
-  findInboxMatches,
   findMatches,
 } from "./transaction-matching";
 
@@ -39,7 +37,7 @@ export async function calculateInboxSuggestions(
 
   if (shouldAutoMatch) {
     // Store the auto-match record for tracking
-    const suggestion = await createMatchSuggestion(db, {
+    await createMatchSuggestion(db, {
       teamId,
       inboxId,
       transactionId: bestMatch.transactionId,
@@ -113,91 +111,6 @@ export async function calculateInboxSuggestions(
   };
 }
 
-// Calculate and store suggestions for a transaction (reverse matching)
-export async function calculateTransactionSuggestions(
-  db: Database,
-  params: { teamId: string; transactionId: string },
-): Promise<{
-  action: "auto_matched" | "suggestion_created" | "no_match";
-  suggestion?: InboxMatchResult;
-}> {
-  const { teamId, transactionId } = params;
-
-  // Find the best inbox match for this transaction
-  const bestMatch = await findInboxMatches(db, { teamId, transactionId });
-
-  if (!bestMatch) {
-    return { action: "no_match" };
-  }
-
-  // Check if this should be auto-matched
-  const shouldAutoMatch = bestMatch.matchType === "auto_matched";
-
-  if (shouldAutoMatch) {
-    // Store the auto-match record
-    await createMatchSuggestion(db, {
-      teamId,
-      inboxId: bestMatch.inboxId,
-      transactionId,
-      confidenceScore: bestMatch.confidenceScore,
-      amountScore: bestMatch.amountScore,
-      currencyScore: bestMatch.currencyScore,
-      dateScore: bestMatch.dateScore,
-      embeddingScore: bestMatch.embeddingScore,
-      nameScore: bestMatch.nameScore,
-      matchType: "auto_matched",
-      status: "confirmed",
-      matchDetails: {
-        autoMatched: true,
-        trigger: "transaction_created",
-        calculatedAt: new Date().toISOString(),
-      },
-    });
-
-    // Perform the actual match
-    await matchTransaction(db, {
-      id: bestMatch.inboxId,
-      transactionId,
-      teamId,
-    });
-
-    return {
-      action: "auto_matched",
-      suggestion: bestMatch,
-    };
-  }
-
-  // Create suggestion and update inbox status
-  await createMatchSuggestion(db, {
-    teamId,
-    inboxId: bestMatch.inboxId,
-    transactionId,
-    confidenceScore: bestMatch.confidenceScore,
-    amountScore: bestMatch.amountScore,
-    currencyScore: bestMatch.currencyScore,
-    dateScore: bestMatch.dateScore,
-    embeddingScore: bestMatch.embeddingScore,
-    nameScore: bestMatch.nameScore,
-    matchType: bestMatch.matchType,
-    status: "pending",
-    matchDetails: {
-      trigger: "transaction_created",
-      calculatedAt: new Date().toISOString(),
-    },
-  });
-
-  // Update inbox status to suggest match
-  await db
-    .update(inbox)
-    .set({ status: "suggested_match" })
-    .where(eq(inbox.id, bestMatch.inboxId));
-
-  return {
-    action: "suggestion_created",
-    suggestion: bestMatch,
-  };
-}
-
 // Confirm a suggested match
 export async function confirmSuggestedMatch(
   db: Database,
@@ -211,15 +124,15 @@ export async function confirmSuggestedMatch(
 ) {
   const { teamId, suggestionId, inboxId, transactionId, userId } = params;
 
-  // Update suggestion status
+  // Update suggestion status in transactionMatchSuggestions table
   await db
-    .update(inbox)
+    .update(transactionMatchSuggestions)
     .set({
       status: "confirmed",
       userActionAt: new Date().toISOString(),
       userId,
     })
-    .where(eq(inbox.id, suggestionId));
+    .where(eq(transactionMatchSuggestions.id, suggestionId));
 
   // Perform the actual match (this will update inbox status to 'done')
   const result = await matchTransaction(db, {
@@ -242,15 +155,15 @@ export async function declineSuggestedMatch(
 ) {
   const { suggestionId, inboxId, userId } = params;
 
-  // Update suggestion status
+  // Update suggestion status in transactionMatchSuggestions table
   await db
-    .update(inbox)
+    .update(transactionMatchSuggestions)
     .set({
       status: "declined",
       userActionAt: new Date().toISOString(),
       userId,
     })
-    .where(eq(inbox.id, suggestionId));
+    .where(eq(transactionMatchSuggestions.id, suggestionId));
 
   // Update inbox status back to 'pending' since suggestion was declined
   await db
@@ -278,7 +191,7 @@ export async function getInboxByStatus(
 ) {
   const { teamId, status } = params;
 
-  const query = db
+  const baseQuery = db
     .select({
       id: inbox.id,
       displayName: inbox.displayName,
@@ -289,12 +202,54 @@ export async function getInboxByStatus(
       createdAt: inbox.createdAt,
       transactionId: inbox.transactionId,
     })
-    .from(inbox)
-    .where(eq(inbox.teamId, teamId));
+    .from(inbox);
 
   if (status) {
-    query.where(and(eq(inbox.teamId, teamId), eq(inbox.status, status)));
+    return baseQuery
+      .where(and(eq(inbox.teamId, teamId), eq(inbox.status, status)))
+      .orderBy(inbox.createdAt);
   }
 
-  return query.orderBy(inbox.createdAt);
+  return baseQuery.where(eq(inbox.teamId, teamId)).orderBy(inbox.createdAt);
+}
+
+// Type for pending inbox items available for matching
+export type PendingInboxItem = {
+  id: string;
+  amount: number | null;
+  date: string | null;
+  currency: string | null;
+  createdAt: string;
+};
+
+// Get pending inbox items that are available for matching
+export async function getPendingInboxForMatching(
+  db: Database,
+  params: {
+    teamId: string;
+    limit?: number;
+  },
+): Promise<PendingInboxItem[]> {
+  const { teamId, limit = 100 } = params;
+
+  return db
+    .select({
+      id: inbox.id,
+      amount: inbox.amount,
+      date: inbox.date,
+      currency: inbox.currency,
+      createdAt: inbox.createdAt,
+    })
+    .from(inbox)
+    .where(
+      and(
+        eq(inbox.teamId, teamId),
+        eq(inbox.status, "pending"), // Only pending items
+        // Only items that haven't been matched yet
+        // Using SQL for null check to be explicit about unmatched items
+        sql`${inbox.transactionId} IS NULL`,
+      ),
+    )
+    .orderBy(inbox.createdAt) // Oldest first - prioritize items waiting longest
+    .limit(limit);
 }

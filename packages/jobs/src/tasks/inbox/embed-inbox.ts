@@ -45,10 +45,9 @@ export const embedInbox = schemaTask({
         },
       );
 
-      // Skip to match calculation if embedding exists
-      await tasks.trigger("calculate-suggestions", {
-        teamId,
+      logger.info("Inbox embedding already exists, skipping creation", {
         inboxId,
+        teamId,
       });
       return;
     }
@@ -106,10 +105,10 @@ export const embedInbox = schemaTask({
         embeddingDimensions: embedding.length,
       });
 
-      // After embedding is created, calculate suggestions
-      await tasks.trigger("calculate-suggestions", {
-        teamId,
+      logger.info("Inbox embedding created successfully", {
         inboxId,
+        teamId,
+        embeddingDimensions: embedding.length,
       });
     } catch (error) {
       logger.error("Failed to create inbox embedding", {

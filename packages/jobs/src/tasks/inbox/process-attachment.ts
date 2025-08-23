@@ -11,6 +11,7 @@ import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { convertHeic } from "../document/convert-heic";
 import { processDocument } from "../document/process-document";
+import { calculateSuggestions } from "./calculate-suggestions";
 import { embedInbox } from "./embed-inbox";
 
 export const processAttachment = schemaTask({
@@ -122,13 +123,24 @@ export const processAttachment = schemaTask({
         teamId,
       });
 
-      // Trigger embedding creation for the inbox item
-      await embedInbox.trigger({
+      // Create embedding and wait for completion
+      await embedInbox.triggerAndWait({
         inboxId: inboxData.id,
         teamId,
       });
 
-      logger.info("Triggered inbox embedding", {
+      logger.info("Inbox embedding completed", {
+        inboxId: inboxData.id,
+        teamId,
+      });
+
+      // After embedding is complete, trigger matching
+      await calculateSuggestions.trigger({
+        teamId,
+        inboxId: inboxData.id,
+      });
+
+      logger.info("Triggered inbox matching", {
         inboxId: inboxData.id,
         teamId,
       });

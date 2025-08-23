@@ -127,40 +127,5 @@ export const embedTransaction = schemaTask({
       totalCount: transactionsToEmbed.length,
       teamId,
     });
-
-    // Trigger inbox matching for each newly embedded transaction
-    for (const transactionId of transactionIds) {
-      await tasks.trigger("calculate-inbox-matches", {
-        teamId,
-        transactionId,
-      });
-    }
-
-    // Also recalculate suggestions for pending inbox items
-    // since new transactions might match existing unmatched inbox items
-    const pendingInboxItems = await db
-      .select({ id: inbox.id })
-      .from(inbox)
-      .where(
-        and(
-          eq(inbox.teamId, teamId),
-          isNull(inbox.transactionId), // Not yet matched
-          eq(inbox.status, "pending"), // Only recalculate for pending items waiting for matches
-        ),
-      )
-      .limit(50); // Limit to prevent too many jobs
-
-    for (const inboxItem of pendingInboxItems) {
-      await tasks.trigger("calculate-suggestions", {
-        teamId,
-        inboxId: inboxItem.id,
-      });
-    }
-
-    logger.info("Triggered inbox matching jobs", {
-      transactionCount: transactionIds.length,
-      pendingInboxCount: pendingInboxItems.length,
-      teamId,
-    });
   },
 });
