@@ -196,9 +196,9 @@ export function TransactionDetails() {
     }),
   );
 
-  const updateSimilarTransactionsCategoryMutation = useMutation(
-    trpc.transactions.updateSimilarTransactionsCategory.mutationOptions({
-      onSuccess: () => {
+  const updateTransactionsMutation = useMutation(
+    trpc.transactions.updateMany.mutationOptions({
+      onSuccess: (_, data) => {
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
         });
@@ -312,6 +312,7 @@ export function TransactionDetails() {
 
                 const similarTransactions = await queryClient.fetchQuery(
                   trpc.transactions.getSimilarTransactions.queryOptions({
+                    transactionId: data?.id,
                     name: data.name,
                     categorySlug: category.slug,
                   }),
@@ -325,7 +326,7 @@ export function TransactionDetails() {
                     duration: 6000,
                     variant: "ai",
                     title: "Midday AI",
-                    description: `Do you want to mark ${similarTransactions?.length} similar transactions from ${data?.name} as ${category.name} too?`,
+                    description: `We found ${similarTransactions?.length} similar transactions to "${data?.name}". Mark them as ${category.name} too?`,
                     footer: (
                       <div className="flex space-x-2 mt-4">
                         <ToastAction altText="Cancel" className="pl-5 pr-5">
@@ -334,8 +335,11 @@ export function TransactionDetails() {
                         <ToastAction
                           altText="Yes"
                           onClick={() => {
-                            updateSimilarTransactionsCategoryMutation.mutate({
-                              name: data.name,
+                            // Use bulk update with the similar transaction IDs
+                            const similarTransactionIds =
+                              similarTransactions.map((t) => t.id);
+                            updateTransactionsMutation.mutate({
+                              ids: similarTransactionIds,
                               categorySlug: category.slug,
                             });
                           }}
@@ -480,6 +484,7 @@ export function TransactionDetails() {
 
                   const similarTransactions = await queryClient.fetchQuery(
                     trpc.transactions.getSimilarTransactions.queryOptions({
+                      transactionId: data?.id,
                       name: data.name,
                       frequency: value as
                         | "weekly"
@@ -497,7 +502,7 @@ export function TransactionDetails() {
                       duration: 6000,
                       variant: "ai",
                       title: "Midday AI",
-                      description: `Do you want to mark ${similarTransactions?.length} similar transactions from ${data?.name} as recurring (${value}) too?`,
+                      description: `We found ${similarTransactions?.length} similar transactions to "${data?.name}". Mark them as recurring (${value}) too?`,
                       footer: (
                         <div className="flex space-x-2 mt-4">
                           <ToastAction altText="Cancel" className="pl-5 pr-5">
@@ -506,8 +511,11 @@ export function TransactionDetails() {
                           <ToastAction
                             altText="Yes"
                             onClick={() => {
-                              updateSimilarTransactionsCategoryMutation.mutate({
-                                name: data.name,
+                              // Use bulk update with the similar transaction IDs
+                              const similarTransactionIds =
+                                similarTransactions.map((t) => t.id);
+                              updateTransactionsMutation.mutate({
+                                ids: similarTransactionIds,
                                 recurring: true,
                                 frequency: value as
                                   | "weekly"

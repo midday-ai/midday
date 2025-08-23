@@ -606,35 +606,20 @@ export const getSimilarTransactionsSchema = z.object({
         in: "query",
       },
     }),
-});
-
-export const updateSimilarTransactionsCategorySchema = z.object({
-  name: z.string().openapi({
-    description: "Name of the transaction.",
+  transactionId: z.string().uuid().optional().openapi({
+    description: "Transaction ID to exclude from results.",
   }),
-  categorySlug: z.string().optional().openapi({
-    description: "Category slug to update.",
-  }),
-  frequency: z
-    .enum(["weekly", "monthly", "annually", "irregular"])
+  minSimilarityScore: z
+    .number()
+    .min(0.1)
+    .max(1.0)
     .optional()
+    .default(0.8)
     .openapi({
-      description: "Recurring frequency to update.",
-    }),
-  recurring: z.boolean().optional().openapi({
-    description: "Whether the transaction is recurring.",
-  }),
-});
-
-export const updateSimilarTransactionsRecurringSchema = z.object({
-  id: z
-    .string()
-    .uuid()
-    .openapi({
-      description: "Transaction ID (UUID) to update recurring status.",
+      description:
+        "Minimum similarity score (0.1-1.0) for transactions to be considered similar.",
       param: {
-        in: "path",
-        name: "id",
+        in: "query",
       },
     }),
 });

@@ -2,7 +2,7 @@ import { parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
 
 export function useConnectParams(initialCountryCode?: string) {
   const [params, setParams] = useQueryStates({
-    step: parseAsStringLiteral(["connect", "account"]),
+    step: parseAsStringLiteral(["connect", "account", "import"]),
     countryCode: parseAsString.withDefault(initialCountryCode ?? ""),
     provider: parseAsStringLiteral([
       "teller",

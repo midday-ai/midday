@@ -5,8 +5,6 @@ import {
   getTransactionByIdSchema,
   getTransactionsSchema,
   searchTransactionMatchSchema,
-  updateSimilarTransactionsCategorySchema,
-  updateSimilarTransactionsRecurringSchema,
   updateTransactionSchema,
   updateTransactionsSchema,
 } from "@api/schemas/transactions";
@@ -19,8 +17,6 @@ import {
   getTransactions,
   getTransactionsAmountFullRangeData,
   searchTransactionMatch,
-  updateSimilarTransactionsCategory,
-  updateSimilarTransactionsRecurring,
   updateTransaction,
   updateTransactions,
 } from "@midday/db/queries";
@@ -84,24 +80,7 @@ export const transactionsRouter = createTRPCRouter({
         categorySlug: input.categorySlug,
         frequency: input.frequency,
         teamId: teamId!,
-      });
-    }),
-
-  updateSimilarTransactionsCategory: protectedProcedure
-    .input(updateSimilarTransactionsCategorySchema)
-    .mutation(async ({ input, ctx: { db, teamId } }) => {
-      return updateSimilarTransactionsCategory(db, {
-        ...input,
-        teamId: teamId!,
-      });
-    }),
-
-  updateSimilarTransactionsRecurring: protectedProcedure
-    .input(updateSimilarTransactionsRecurringSchema)
-    .mutation(async ({ input, ctx: { db, teamId } }) => {
-      return updateSimilarTransactionsRecurring(db, {
-        ...input,
-        teamId: teamId!,
+        transactionId: input.transactionId,
       });
     }),
 
