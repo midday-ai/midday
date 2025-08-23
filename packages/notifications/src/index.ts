@@ -15,6 +15,9 @@ import { type NotificationTypes, createActivitySchema } from "./schemas";
 import { EmailService } from "./services/email-service";
 import { documentProcessed } from "./types/document-processed";
 import { documentUploaded } from "./types/document-uploaded";
+import { inboxAutoMatched } from "./types/inbox-auto-matched";
+import { inboxCrossCurrencyMatched } from "./types/inbox-cross-currency-matched";
+import { inboxNeedsReview } from "./types/inbox-needs-review";
 import { inboxNew } from "./types/inbox-new";
 import { invoiceCancelled } from "./types/invoice-cancelled";
 import { invoiceCreated } from "./types/invoice-created";
@@ -36,6 +39,9 @@ const handlers = {
   document_uploaded: documentUploaded,
   document_processed: documentProcessed,
   inbox_new: inboxNew,
+  inbox_auto_matched: inboxAutoMatched,
+  inbox_needs_review: inboxNeedsReview,
+  inbox_cross_currency_matched: inboxCrossCurrencyMatched,
   invoice_paid: invoicePaid,
   invoice_overdue: invoiceOverdue,
   invoice_scheduled: invoiceScheduled,
@@ -344,6 +350,9 @@ export {
   documentUploadedSchema,
   documentProcessedSchema,
   inboxNewSchema,
+  inboxAutoMatchedSchema,
+  inboxNeedsReviewSchema,
+  inboxCrossCurrencyMatchedSchema,
   invoicePaidSchema,
   invoiceOverdueSchema,
   invoiceScheduledSchema,
