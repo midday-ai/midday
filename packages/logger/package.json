@@ -9,10 +9,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "pino": "^9.7.0",
-    "pino-pretty": "^10.3.1"
+    "pino": "^9.9.0",
+    "pino-pretty": "^13.1.1"
   },
   "devDependencies": {
-    "typescript": "^5.3.3"
+    "typescript": "^5.9.2"
   }
 }

@@ -736,7 +736,8 @@ export async function getSimilarTransactions(
     minSimilarityScore = 0.8, // Default 80% similarity threshold
   } = params;
 
-  logger.info("Starting hybrid search for similar transactions", {
+  logger.info({
+    msg: "Starting hybrid search for similar transactions",
     name,
     teamId,
     minSimilarityScore,
@@ -747,6 +748,7 @@ export async function getSimilarTransactions(
 
   let embeddingResults: any[] = [];
   let ftsResults: any[] = [];
+  let embeddingSourceText: string | null = null;
 
   // 1. EMBEDDING SEARCH (if transactionId provided)
   if (transactionId) {
@@ -773,6 +775,7 @@ export async function getSimilarTransactions(
       if (sourceEmbedding.length > 0 && sourceEmbedding[0]!.embedding) {
         const sourceEmbeddingVector = sourceEmbedding[0]!.embedding;
         const sourceText = sourceEmbedding[0]!.sourceText;
+        embeddingSourceText = sourceText; // Store for FTS search
 
         logger.info("Found embedding for transaction", {
           transactionId,
@@ -790,7 +793,12 @@ export async function getSimilarTransactions(
         ];
 
         if (categorySlug) {
-          embeddingConditions.push(ne(transactions.categorySlug, categorySlug));
+          embeddingConditions.push(
+            or(
+              isNull(transactions.categorySlug),
+              ne(transactions.categorySlug, categorySlug),
+            ),
+          );
         }
 
         if (frequency) {
@@ -856,13 +864,29 @@ export async function getSimilarTransactions(
     ftsConditions.push(ne(transactions.id, transactionId));
   }
 
-  const searchQuery = buildSearchQuery(name);
+  // Use embedding source text for FTS if available, otherwise use transaction name
+  const searchTerm = embeddingSourceText || name;
+  const searchQuery = buildSearchQuery(searchTerm);
   ftsConditions.push(
     sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
   );
 
+  logger.info({
+    msg: "FTS search using term",
+    searchTerm,
+    searchQuery,
+    usingEmbeddingSourceText: !!embeddingSourceText,
+    originalName: name,
+    embeddingSourceText,
+  });
+
   if (categorySlug) {
-    ftsConditions.push(ne(transactions.categorySlug, categorySlug));
+    ftsConditions.push(
+      or(
+        isNull(transactions.categorySlug),
+        ne(transactions.categorySlug, categorySlug),
+      ),
+    );
   }
 
   if (frequency) {
@@ -886,6 +910,24 @@ export async function getSimilarTransactions(
     (c) => c !== undefined,
   ) as SQL[];
 
+  logger.info({
+    msg: "FTS debug: basic search results",
+    searchTerm,
+    searchQuery,
+    teamId,
+  });
+
+  logger.info({
+    msg: "FTS search conditions",
+    searchTerm,
+    searchQuery,
+    conditionsCount: finalFtsConditions.length,
+    teamId,
+    transactionId,
+    categorySlug,
+    frequency,
+  });
+
   ftsResults = await db
     .select({
       id: transactions.id,
@@ -900,10 +942,16 @@ export async function getSimilarTransactions(
     .from(transactions)
     .where(and(...finalFtsConditions)); // No limit - get all FTS matches
 
-  logger.info("FTS search completed", {
+  logger.info({
+    msg: "FTS search completed",
     resultsFound: ftsResults.length,
-    name,
+    searchTerm,
+    searchQuery,
     teamId,
+    sampleResults: ftsResults.slice(0, 3).map((r) => ({
+      name: r.name,
+      id: r.id,
+    })),
   });
 
   // 3. COMBINE AND DEDUPLICATE RESULTS

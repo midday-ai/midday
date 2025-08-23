@@ -20,8 +20,5 @@
   },
   "devDependencies": {
     "typescript": "^5.9.2"
-  },
-  "dependencies": {
-    "pino-pretty": "^13.1.1"
   }
 }
