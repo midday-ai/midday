@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "trigger dev",
     "deploy": "trigger deploy",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "bun test src/tasks/**/*.test.ts",
+    "test:watch": "bun test --watch src/tasks/**/*.test.ts",
+    "test:integration": "bun test src/tasks/inbox/__tests__/matching-integration.test.ts"
   },
   "exports": {
     "./schema": "./src/schema.ts"
@@ -29,6 +32,7 @@
     "sharp": "0.34.1"
   },
   "devDependencies": {
-    "@types/heic-convert": "2.1.0"
+    "@types/heic-convert": "2.1.0",
+    "@types/bun": "latest"
   }
 }
