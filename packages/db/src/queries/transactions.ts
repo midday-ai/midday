@@ -777,7 +777,7 @@ export async function getSimilarTransactions(
         const sourceText = sourceEmbedding[0]!.sourceText;
         embeddingSourceText = sourceText; // Store for FTS search
 
-        logger.info("Found embedding for transaction", {
+        logger.info("✅ Found embedding for transaction", {
           transactionId,
           sourceText,
           embeddingExists: true,
@@ -834,10 +834,14 @@ export async function getSimilarTransactions(
           transactionId,
         });
       } else {
-        logger.warn("No embedding found for transaction", {
-          transactionId,
-          teamId,
-        });
+        logger.warn(
+          "❌ No embedding found for transaction - will rely on FTS only",
+          {
+            transactionId,
+            teamId,
+            transactionName: name,
+          },
+        );
       }
     } catch (error) {
       logger.error("Embedding search failed", {
@@ -853,6 +857,7 @@ export async function getSimilarTransactions(
     name,
     teamId,
     hasEmbeddingResults: embeddingResults.length > 0,
+    hasSourceEmbedding: !!embeddingSourceText,
   });
 
   const ftsConditions: (SQL | undefined)[] = [eq(transactions.teamId, teamId)];
@@ -861,8 +866,9 @@ export async function getSimilarTransactions(
     ftsConditions.push(ne(transactions.id, transactionId));
   }
 
-  // Use embedding source text for FTS if available, otherwise use transaction name
-  const searchTerm = embeddingSourceText || name;
+  // Always use the original transaction name for FTS search to ensure we find exact matches
+  // The embedding source text might be different from the actual transaction names
+  const searchTerm = name;
   const searchQuery = buildSearchQuery(searchTerm);
   ftsConditions.push(
     sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
@@ -872,9 +878,10 @@ export async function getSimilarTransactions(
     msg: "FTS search using term",
     searchTerm,
     searchQuery,
-    usingEmbeddingSourceText: !!embeddingSourceText,
+    usingEmbeddingSourceText: false, // Always false now - we use original name
     originalName: name,
-    embeddingSourceText,
+    embeddingSourceText: embeddingSourceText || "none",
+    reason: "Using original transaction name to find exact matches",
   });
 
   if (categorySlug) {
@@ -900,13 +907,6 @@ export async function getSimilarTransactions(
   const finalFtsConditions = ftsConditions.filter(
     (c) => c !== undefined,
   ) as SQL[];
-
-  logger.info({
-    msg: "FTS debug: basic search results",
-    searchTerm,
-    searchQuery,
-    teamId,
-  });
 
   logger.info({
     msg: "FTS search conditions",
