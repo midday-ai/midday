@@ -624,24 +624,6 @@ export const getSimilarTransactionsSchema = z.object({
     }),
 });
 
-export const updateSimilarTransactionsCategorySchema = z.object({
-  transactionId: z.string().uuid().openapi({
-    description: "Source transaction ID to find similar transactions.",
-  }),
-  categorySlug: z.string().optional().openapi({
-    description: "Category slug to update.",
-  }),
-  frequency: z
-    .enum(["weekly", "monthly", "annually", "irregular"])
-    .optional()
-    .openapi({
-      description: "Recurring frequency to update.",
-    }),
-  recurring: z.boolean().optional().openapi({
-    description: "Whether the transaction is recurring.",
-  }),
-});
-
 export const updateSimilarTransactionsRecurringSchema = z.object({
   id: z
     .string()

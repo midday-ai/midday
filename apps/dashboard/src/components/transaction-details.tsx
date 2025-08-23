@@ -196,9 +196,9 @@ export function TransactionDetails() {
     }),
   );
 
-  const updateSimilarTransactionsCategoryMutation = useMutation(
-    trpc.transactions.updateSimilarTransactionsCategory.mutationOptions({
-      onSuccess: () => {
+  const updateTransactionsMutation = useMutation(
+    trpc.transactions.updateMany.mutationOptions({
+      onSuccess: (_, data) => {
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
         });
@@ -335,8 +335,11 @@ export function TransactionDetails() {
                         <ToastAction
                           altText="Yes"
                           onClick={() => {
-                            updateSimilarTransactionsCategoryMutation.mutate({
-                              transactionId: data.id,
+                            // Use bulk update with the similar transaction IDs
+                            const similarTransactionIds =
+                              similarTransactions.map((t) => t.id);
+                            updateTransactionsMutation.mutate({
+                              ids: similarTransactionIds,
                               categorySlug: category.slug,
                             });
                           }}
@@ -508,9 +511,11 @@ export function TransactionDetails() {
                           <ToastAction
                             altText="Yes"
                             onClick={() => {
-                              updateSimilarTransactionsCategoryMutation.mutate({
-                                name: data.name,
-                                transactionId: data.id,
+                              // Use bulk update with the similar transaction IDs
+                              const similarTransactionIds =
+                                similarTransactions.map((t) => t.id);
+                              updateTransactionsMutation.mutate({
+                                ids: similarTransactionIds,
                                 recurring: true,
                                 frequency: value as
                                   | "weekly"

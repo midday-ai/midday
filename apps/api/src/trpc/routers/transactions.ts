@@ -5,7 +5,6 @@ import {
   getTransactionByIdSchema,
   getTransactionsSchema,
   searchTransactionMatchSchema,
-  updateSimilarTransactionsCategorySchema,
   updateSimilarTransactionsRecurringSchema,
   updateTransactionSchema,
   updateTransactionsSchema,
@@ -19,7 +18,6 @@ import {
   getTransactions,
   getTransactionsAmountFullRangeData,
   searchTransactionMatch,
-  updateSimilarTransactionsCategory,
   updateSimilarTransactionsRecurring,
   updateTransaction,
   updateTransactions,
@@ -85,16 +83,6 @@ export const transactionsRouter = createTRPCRouter({
         frequency: input.frequency,
         teamId: teamId!,
         transactionId: input.transactionId,
-      });
-    }),
-
-  updateSimilarTransactionsCategory: protectedProcedure
-    .input(updateSimilarTransactionsCategorySchema)
-    .mutation(async ({ input, ctx: { db, teamId, session } }) => {
-      return updateSimilarTransactionsCategory(db, {
-        ...input,
-        userId: session.user.id,
-        teamId: teamId!,
       });
     }),
 
