@@ -2278,6 +2278,102 @@ export type Database = {
           },
         ]
       }
+      transaction_match_suggestions: {
+        Row: {
+          amount_score: number | null
+          confidence_score: number
+          created_at: string
+          currency_score: number | null
+          date_score: number | null
+          embedding_score: number | null
+          id: string
+          inbox_id: string
+          match_details: Json | null
+          match_type: string
+          name_score: number | null
+          status: string
+          team_id: string
+          transaction_id: string
+          updated_at: string
+          user_action_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_score?: number | null
+          confidence_score: number
+          created_at?: string
+          currency_score?: number | null
+          date_score?: number | null
+          embedding_score?: number | null
+          id?: string
+          inbox_id: string
+          match_details?: Json | null
+          match_type: string
+          name_score?: number | null
+          status?: string
+          team_id: string
+          transaction_id: string
+          updated_at?: string
+          user_action_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_score?: number | null
+          confidence_score?: number
+          created_at?: string
+          currency_score?: number | null
+          date_score?: number | null
+          embedding_score?: number | null
+          id?: string
+          inbox_id?: string
+          match_details?: Json | null
+          match_type?: string
+          name_score?: number | null
+          status?: string
+          team_id?: string
+          transaction_id?: string
+          updated_at?: string
+          user_action_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_match_suggestions_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "inbox"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_match_suggestions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "transaction_match_suggestions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_match_suggestions_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_match_suggestions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transaction_tags: {
         Row: {
           created_at: string
@@ -3473,14 +3569,17 @@ export type Database = {
         | "invoice_duplicated"
         | "tracker_entry_created"
         | "tracker_project_created"
-        | "transaction_categorized"
-        | "transaction_assigned"
+        | "transactions_categorized"
+        | "transactions_assigned"
         | "transaction_attachment_created"
         | "transaction_category_created"
         | "transactions_exported"
         | "draft_invoice_created"
         | "document_processed"
         | "customer_created"
+        | "inbox_auto_matched"
+        | "inbox_needs_review"
+        | "inbox_cross_currency_matched"
       approval_status: "draft" | "pending" | "approved" | "rejected"
       bank_providers:
         | "gocardless"
@@ -3504,6 +3603,9 @@ export type Database = {
         | "new"
         | "deleted"
         | "done"
+        | "analyzing"
+        | "suggested_match"
+        | "no_match"
       inbox_type: "invoice" | "expense"
       invoice_delivery_type: "create" | "create_and_send" | "scheduled"
       invoice_size: "a4" | "letter"
@@ -3715,14 +3817,17 @@ export const Constants = {
         "invoice_duplicated",
         "tracker_entry_created",
         "tracker_project_created",
-        "transaction_categorized",
-        "transaction_assigned",
+        "transactions_categorized",
+        "transactions_assigned",
         "transaction_attachment_created",
         "transaction_category_created",
         "transactions_exported",
         "draft_invoice_created",
         "document_processed",
         "customer_created",
+        "inbox_auto_matched",
+        "inbox_needs_review",
+        "inbox_cross_currency_matched",
       ],
       approval_status: ["draft", "pending", "approved", "rejected"],
       bank_providers: [
@@ -3749,6 +3854,9 @@ export const Constants = {
         "new",
         "deleted",
         "done",
+        "analyzing",
+        "suggested_match",
+        "no_match",
       ],
       inbox_type: ["invoice", "expense"],
       invoice_delivery_type: ["create", "create_and_send", "scheduled"],

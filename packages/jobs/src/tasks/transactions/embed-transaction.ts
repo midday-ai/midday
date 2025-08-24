@@ -7,9 +7,7 @@ import {
   createTransactionEmbeddings,
   getTransactionsForEmbedding,
 } from "@midday/db/queries";
-import { inbox } from "@midday/db/schema";
-import { logger, schemaTask, tasks } from "@trigger.dev/sdk";
-import { and, eq, isNull } from "drizzle-orm";
+import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { enrichTransactions } from "./enrich-transaction";
 
@@ -44,10 +42,8 @@ export const embedTransaction = schemaTask({
       );
     }
 
-    const db = getDb();
-
     // Step 2: Get transactions that need embedding
-    const transactionsToEmbed = await getTransactionsForEmbedding(db, {
+    const transactionsToEmbed = await getTransactionsForEmbedding(getDb(), {
       transactionIds,
       teamId,
     });
@@ -113,7 +109,10 @@ export const embedTransaction = schemaTask({
         });
 
       // Insert embeddings
-      const result = await createTransactionEmbeddings(db, embeddingsToInsert);
+      const result = await createTransactionEmbeddings(
+        getDb(),
+        embeddingsToInsert,
+      );
 
       logger.info("Transaction embeddings batch created", {
         batchSize: embeddingsToInsert.length,

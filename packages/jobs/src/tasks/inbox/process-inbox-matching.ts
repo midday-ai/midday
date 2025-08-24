@@ -14,17 +14,20 @@ export const processInboxMatching = schemaTask({
   maxDuration: 30,
   queue: { concurrencyLimit: 20 },
   run: async ({ teamId, inboxId }) => {
-    const db = getDb();
-
     logger.info("Processing inbox matching", { teamId, inboxId });
 
     try {
-      const result = await calculateInboxSuggestions(db, { teamId, inboxId });
+      const result = await calculateInboxSuggestions(getDb(), {
+        teamId,
+        inboxId,
+      });
+
+      console.log("result", result);
 
       // Send notifications based on matching result
       if (result.action !== "no_match_yet" && result.suggestion) {
         await triggerMatchingNotification({
-          db,
+          db: getDb(),
           teamId,
           inboxId,
           result,
