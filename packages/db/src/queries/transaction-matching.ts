@@ -378,8 +378,21 @@ export async function findMatches(
         eq(transactions.status, "posted"),
         eq(inboxEmbeddings.inboxId, inboxId),
 
-        // Smart embedding similarity with financial context
-        sql`(${inboxEmbeddings.embedding} <=> ${transactionEmbeddings.embedding}) < 0.5`,
+        // Enhanced embedding similarity with financial context - tiered thresholds
+        sql`(
+          -- TIER 1: Perfect financial matches get relaxed semantic requirements
+          ((ABS(${transactions.amount} - ${inboxItem.amount || 0}) < 0.01 
+            AND ${transactions.currency} = ${inboxItem.currency || ""})
+           AND (${inboxEmbeddings.embedding} <=> ${transactionEmbeddings.embedding}) < 0.6)
+          OR
+          -- TIER 2: Strong semantic matches with moderate financial alignment
+          ((${inboxEmbeddings.embedding} <=> ${transactionEmbeddings.embedding}) < 0.35
+           AND ABS(${transactions.amount} - ${inboxItem.amount || 0}) < ${Math.max(50, (inboxItem.amount || 0) * 0.1)})
+          OR
+          -- TIER 3: Good semantic matches with loose financial alignment
+          ((${inboxEmbeddings.embedding} <=> ${transactionEmbeddings.embedding}) < 0.45
+           AND ABS(${transactions.amount} - ${inboxItem.amount || 0}) < ${Math.max(100, (inboxItem.amount || 0) * 0.2)})
+        )`,
 
         // Accounting-aware filtering: different logic for invoices vs expenses
         sql`(
@@ -551,20 +564,63 @@ export async function findMatches(
       const isBetterMatch = confidenceScore > highestConfidence + 0.001; // Small epsilon for floating point
 
       if (isBetterMatch) {
-        // Determine match type
+        // Determine match type with enhanced tiered auto-matching
         let matchType: "auto_matched" | "high_confidence" | "suggested";
+
+        // Enhanced auto-match criteria with multiple confidence tiers
+        const autoMatchTiers = {
+          perfect: 0.98, // Perfect matches - immediate auto-match
+          excellent: 0.95, // Excellent matches - auto-match with high confidence
+          highConfidence: 0.92, // High confidence - auto-match for recurring patterns
+          conservative: 0.88, // Conservative threshold for team calibration
+        };
+
         if (confidenceScore >= teamWeights.autoMatchThreshold) {
-          // Ultra-conservative auto-match criteria - must be nearly perfect
-          const shouldAutoMatch =
-            confidenceScore >= 0.97 &&
+          let shouldAutoMatch = false;
+
+          // TIER 1: Perfect financial matches - most reliable
+          if (
+            confidenceScore >= autoMatchTiers.perfect &&
+            (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
+            embeddingScore >= 0.75 &&
+            dateScore >= 0.6
+          ) {
+            shouldAutoMatch = true;
+          }
+          // TIER 2: Excellent matches with strong signals
+          else if (
+            confidenceScore >= autoMatchTiers.excellent &&
+            (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
+            embeddingScore >= 0.7 &&
+            dateScore >= 0.5
+          ) {
+            shouldAutoMatch = true;
+          }
+          // TIER 3: High confidence with recurring transaction intelligence
+          else if (
+            confidenceScore >= autoMatchTiers.highConfidence &&
+            candidate.recurring &&
+            isPerfectFinancialMatch &&
+            embeddingScore >= 0.65 &&
+            dateScore >= 0.4
+          ) {
+            shouldAutoMatch = true;
+          }
+          // TIER 4: Conservative auto-match for calibrated teams
+          else if (
+            confidenceScore >= autoMatchTiers.conservative &&
+            calibration.autoMatchAccuracy > 0.98 && // Team has excellent track record
+            calibration.totalSuggestions > 20 && // Sufficient data
             (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
             embeddingScore >= 0.8 &&
-            dateScore >= 0.7 &&
-            // Additional safety checks
-            (amountScore >= 0.98 || hasBaseAmountMatch) &&
-            (currencyScore >= 0.95 || isExcellentCrossCurrencyMatch);
+            dateScore >= 0.6
+          ) {
+            shouldAutoMatch = true;
+          }
+
           matchType = shouldAutoMatch ? "auto_matched" : "high_confidence";
-        } else if (confidenceScore >= 0.75) {
+        } else if (confidenceScore >= 0.72) {
+          // Lowered from 0.75 for better UX
           matchType = "high_confidence";
         } else {
           matchType = "suggested";
@@ -715,8 +771,21 @@ export async function findInboxMatches(
           eq(inbox.teamId, teamId),
           eq(transactionEmbeddings.transactionId, transactionId),
 
-          // Improved embedding similarity filter - tighter threshold for enriched data
-          sql`(${transactionEmbeddings.embedding} <=> ${inboxEmbeddings.embedding}) < 0.4`,
+          // Enhanced embedding similarity with financial context - same tiered approach
+          sql`(
+            -- TIER 1: Perfect financial matches get relaxed semantic requirements
+            ((ABS(${inbox.amount} - ${transactionItem.amount}) < 0.01 
+              AND ${inbox.currency} = ${transactionItem.currency})
+             AND (${transactionEmbeddings.embedding} <=> ${inboxEmbeddings.embedding}) < 0.6)
+            OR
+            -- TIER 2: Strong semantic matches with moderate financial alignment
+            ((${transactionEmbeddings.embedding} <=> ${inboxEmbeddings.embedding}) < 0.35
+             AND ABS(COALESCE(${inbox.amount}, 0) - ${transactionItem.amount}) < ${Math.max(50, transactionItem.amount * 0.1)})
+            OR
+            -- TIER 3: Good semantic matches with loose financial alignment
+            ((${transactionEmbeddings.embedding} <=> ${inboxEmbeddings.embedding}) < 0.45
+             AND ABS(COALESCE(${inbox.amount}, 0) - ${transactionItem.amount}) < ${Math.max(100, transactionItem.amount * 0.2)})
+          )`,
 
           // Wider date range for semantic search
           sql`COALESCE(${inbox.date}, ${inbox.createdAt}::date) BETWEEN ${transactionItem.date}::date - INTERVAL '90 days' 
@@ -831,20 +900,53 @@ export async function findInboxMatches(
     // Only consider if it meets minimum threshold
     if (confidenceScore >= teamWeights.suggestedMatchThreshold) {
       if (confidenceScore > highestConfidence) {
-        // Determine match type
+        // Determine match type with enhanced tiered auto-matching (same logic as forward matching)
         let matchType: "auto_matched" | "high_confidence" | "suggested";
+
+        // Enhanced auto-match criteria with multiple confidence tiers
+        const autoMatchTiers = {
+          perfect: 0.98, // Perfect matches - immediate auto-match
+          excellent: 0.95, // Excellent matches - auto-match with high confidence
+          highConfidence: 0.92, // High confidence - auto-match for recurring patterns
+          conservative: 0.88, // Conservative threshold for team calibration
+        };
+
         if (confidenceScore >= teamWeights.autoMatchThreshold) {
-          // Ultra-conservative auto-match criteria - must be nearly perfect
-          const shouldAutoMatch =
-            confidenceScore >= 0.97 &&
+          let shouldAutoMatch = false;
+
+          // TIER 1: Perfect financial matches - most reliable
+          if (
+            confidenceScore >= autoMatchTiers.perfect &&
+            (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
+            embeddingScore >= 0.75 &&
+            dateScore >= 0.6
+          ) {
+            shouldAutoMatch = true;
+          }
+          // TIER 2: Excellent matches with strong signals
+          else if (
+            confidenceScore >= autoMatchTiers.excellent &&
+            (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
+            embeddingScore >= 0.7 &&
+            dateScore >= 0.5
+          ) {
+            shouldAutoMatch = true;
+          }
+          // TIER 3: Conservative auto-match for calibrated teams (inbox matching doesn't have recurring info)
+          else if (
+            confidenceScore >= autoMatchTiers.conservative &&
+            calibration.autoMatchAccuracy > 0.98 && // Team has excellent track record
+            calibration.totalSuggestions > 20 && // Sufficient data
             (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
             embeddingScore >= 0.8 &&
-            dateScore >= 0.7 &&
-            // Additional safety checks
-            (amountScore >= 0.98 || hasBaseAmountMatch) &&
-            (currencyScore >= 0.95 || isExcellentCrossCurrencyMatch);
+            dateScore >= 0.6
+          ) {
+            shouldAutoMatch = true;
+          }
+
           matchType = shouldAutoMatch ? "auto_matched" : "high_confidence";
-        } else if (confidenceScore >= 0.75) {
+        } else if (confidenceScore >= 0.72) {
+          // Lowered from 0.75 for better UX
           matchType = "high_confidence";
         } else {
           matchType = "suggested";
@@ -991,27 +1093,6 @@ function calculateAmountDifferenceScore(
     baseScore = 0.3;
   } else {
     baseScore = 0;
-  }
-
-  // Check for common partial payment patterns
-  const ratio = amount2 / amount1;
-
-  // Common partial payment ratios
-  if (matchType === "exact_currency") {
-    // 50% payment (half now, half later)
-    if (Math.abs(ratio - 0.5) < 0.01) return 0.85;
-    // 25% deposit
-    if (Math.abs(ratio - 0.25) < 0.01) return 0.82;
-    // 20% deposit
-    if (Math.abs(ratio - 0.2) < 0.01) return 0.8;
-    // 10% deposit
-    if (Math.abs(ratio - 0.1) < 0.01) return 0.78;
-    // 30% deposit
-    if (Math.abs(ratio - 0.3) < 0.01) return 0.81;
-    // Two thirds payment
-    if (Math.abs(ratio - 0.667) < 0.01) return 0.83;
-    // Three quarters payment
-    if (Math.abs(ratio - 0.75) < 0.01) return 0.84;
   }
 
   // Apply bonuses/penalties based on match type
