@@ -11,6 +11,21 @@ import {
 import { logger } from "@midday/logger";
 import { and, desc, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 
+// Configuration constants
+const EMBEDDING_THRESHOLDS = {
+  PERFECT_MATCH: 0.15, // Very similar embeddings
+  STRONG_MATCH: 0.35, // Strong semantic similarity
+  GOOD_MATCH: 0.45, // Moderate similarity (original value)
+  WEAK_MATCH: 0.6, // Weak but possible match (original value)
+} as const;
+
+const CALIBRATION_LIMITS = {
+  MAX_ADJUSTMENT: 0.03, // Max 3% threshold adjustment per calibration
+  MIN_SAMPLES_AUTO: 3, // Minimum samples for auto-match calibration (lower threshold)
+  MIN_SAMPLES_SUGGESTED: 5, // Minimum samples for suggested-match calibration
+  MIN_SAMPLES_CONSERVATIVE: 8, // Higher threshold for aggressive adjustments
+} as const;
+
 // Type definitions
 export type FindMatchesParams = {
   teamId: string;
@@ -181,94 +196,97 @@ export async function getTeamCalibration(
   let calibratedAutoThreshold = defaultAutoThreshold;
   let calibratedSuggestedThreshold = defaultSuggestedThreshold;
 
-  // Auto-match threshold - more responsive adjustments
-  if (autoMatchAccuracy > 0.97 && confirmed.length > 5) {
-    // High accuracy with fewer samples - be more aggressive
-    calibratedAutoThreshold = Math.max(0.9, defaultAutoThreshold - 0.04);
-  } else if (autoMatchAccuracy > 0.99 && confirmed.length > 15) {
-    // Excellent accuracy - be very aggressive
-    calibratedAutoThreshold = Math.max(0.88, defaultAutoThreshold - 0.06);
-  } else if (autoMatchAccuracy < 0.95 && declined.length > 2) {
-    // Any auto-match failures - be more conservative quickly
-    calibratedAutoThreshold = Math.min(0.98, defaultAutoThreshold + 0.03);
+  // Auto-match threshold - responsive to performance with lower sample requirements
+  if (
+    autoMatchAccuracy > 0.95 &&
+    autoMatches.length >= CALIBRATION_LIMITS.MIN_SAMPLES_AUTO
+  ) {
+    // High auto-match accuracy - be more aggressive (lower sample requirement)
+    const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.02);
+    calibratedAutoThreshold = Math.max(0.92, defaultAutoThreshold - adjustment);
+  } else if (
+    autoMatchAccuracy < 0.9 &&
+    autoMatches.length >= CALIBRATION_LIMITS.MIN_SAMPLES_AUTO
+  ) {
+    // Auto-match failures - be more conservative
+    const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.02);
+    calibratedAutoThreshold = Math.min(0.98, defaultAutoThreshold + adjustment);
   }
 
-  // Suggested match threshold - much more responsive to user behavior
-  if (suggestedMatchAccuracy > 0.9 && confirmed.length > 8) {
-    // Excellent user acceptance - suggest much more aggressively
-    calibratedSuggestedThreshold = Math.max(
-      0.6,
-      defaultSuggestedThreshold - 0.08,
-    );
-  } else if (suggestedMatchAccuracy > 0.8 && confirmed.length > 5) {
-    // Good user acceptance - suggest more
-    calibratedSuggestedThreshold = Math.max(
-      0.62,
-      defaultSuggestedThreshold - 0.06,
-    );
-  } else if (suggestedMatchAccuracy > 0.7 && confirmed.length > 3) {
-    // Decent acceptance - slight improvement
+  // Suggested match threshold - responsive to user feedback with appropriate sample sizes
+  if (
+    suggestedMatchAccuracy > 0.9 &&
+    confirmed.length >= CALIBRATION_LIMITS.MIN_SAMPLES_CONSERVATIVE
+  ) {
+    // Excellent user acceptance - suggest more aggressively (requires more samples)
+    const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.03);
     calibratedSuggestedThreshold = Math.max(
       0.65,
-      defaultSuggestedThreshold - 0.04,
+      defaultSuggestedThreshold - adjustment,
     );
-  } else if (suggestedMatchAccuracy < 0.5 && declined.length > 4) {
-    // Poor acceptance - be much more selective
+  } else if (
+    suggestedMatchAccuracy > 0.8 &&
+    confirmed.length >= CALIBRATION_LIMITS.MIN_SAMPLES_SUGGESTED
+  ) {
+    // Good user acceptance - slight improvement
+    const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.02);
+    calibratedSuggestedThreshold = Math.max(
+      0.67,
+      defaultSuggestedThreshold - adjustment,
+    );
+  } else if (
+    suggestedMatchAccuracy < 0.3 &&
+    declined.length >= CALIBRATION_LIMITS.MIN_SAMPLES_SUGGESTED
+  ) {
+    // Poor acceptance - be more selective (lower threshold for being conservative)
+    const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.03);
     calibratedSuggestedThreshold = Math.min(
       0.85,
-      defaultSuggestedThreshold + 0.12,
-    );
-  } else if (suggestedMatchAccuracy < 0.65 && declined.length > 6) {
-    // Below average acceptance - be more selective
-    calibratedSuggestedThreshold = Math.min(
-      0.8,
-      defaultSuggestedThreshold + 0.08,
+      defaultSuggestedThreshold + adjustment,
     );
   }
 
-  // Confidence gap analysis - faster learning from score patterns
+  // Confidence gap analysis - conservative learning from score patterns
   if (
     avgConfidenceConfirmed > 0 &&
     avgConfidenceDeclined > 0 &&
-    confirmed.length > 3
+    confirmed.length >= CALIBRATION_LIMITS.MIN_SAMPLES_SUGGESTED
   ) {
     const confidenceGap = avgConfidenceConfirmed - avgConfidenceDeclined;
 
     if (confidenceGap > 0.2) {
-      // Very clear separation - be much more aggressive
+      // Very clear separation - be more aggressive but conservatively
+      const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.025);
       calibratedSuggestedThreshold = Math.max(
-        0.58,
-        calibratedSuggestedThreshold - 0.08,
+        0.65,
+        calibratedSuggestedThreshold - adjustment,
       );
-    } else if (confidenceGap > 0.12) {
-      // Good separation - be more aggressive
-      calibratedSuggestedThreshold = Math.max(
-        0.62,
-        calibratedSuggestedThreshold - 0.05,
-      );
-    } else if (confidenceGap < 0.05) {
-      // Poor separation - user can't tell good from bad matches
+    } else if (confidenceGap < 0.08) {
+      // Poor separation - user can't distinguish good from bad matches
+      const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.02);
       calibratedSuggestedThreshold = Math.min(
         0.82,
-        calibratedSuggestedThreshold + 0.06,
+        calibratedSuggestedThreshold + adjustment,
       );
     }
   }
 
-  // Volume-based adjustments - learn from user engagement patterns
-  if (confirmed.length > 20) {
-    // High engagement team - they're actively using the system
+  // Volume-based adjustments - conservative engagement-based tuning
+  if (confirmed.length > 25 && suggestedMatchAccuracy > 0.8) {
+    // High engagement team with good accuracy - slightly more aggressive
+    const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.015);
     calibratedSuggestedThreshold = Math.max(
-      0.62,
-      calibratedSuggestedThreshold - 0.03,
+      0.67,
+      calibratedSuggestedThreshold - adjustment,
     );
   }
 
-  if (declined.length > 15 && suggestedMatchAccuracy < 0.7) {
-    // High decline volume with poor accuracy - be much more conservative
+  if (declined.length > 20 && suggestedMatchAccuracy < 0.7) {
+    // High decline volume with poor accuracy - be more conservative
+    const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.025);
     calibratedSuggestedThreshold = Math.min(
       0.85,
-      calibratedSuggestedThreshold + 0.08,
+      calibratedSuggestedThreshold + adjustment,
     );
   }
 
@@ -296,6 +314,18 @@ export async function findMatches(
 
   // Get team-specific calibrated thresholds based on user feedback
   const calibration = await getTeamCalibration(db, teamId);
+
+  // Log calibration for debugging
+  logger.info("🔧 CALIBRATION DEBUG", {
+    teamId,
+    originalAutoThreshold: 0.95,
+    originalSuggestedThreshold: 0.7,
+    calibratedAutoThreshold: calibration.calibratedAutoThreshold,
+    calibratedSuggestedThreshold: calibration.calibratedSuggestedThreshold,
+    totalSuggestions: calibration.totalSuggestions,
+    autoMatchAccuracy: calibration.autoMatchAccuracy,
+    suggestedMatchAccuracy: calibration.suggestedMatchAccuracy,
+  });
 
   // Balanced production weights - embeddings handle semantic name matching
   const teamWeights = {
@@ -328,7 +358,12 @@ export async function findMatches(
     .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
     .limit(1);
 
-  if (!inboxData.length || !inboxData[0]!.embedding) {
+  if (!inboxData.length) {
+    logger.warn("❌ INBOX ITEM MISSING", {
+      inboxId,
+      teamId,
+      inboxDataLength: inboxData.length,
+    });
     return null;
   }
 
@@ -426,13 +461,13 @@ export async function findMatches(
           sql`(
             (ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < 0.01 
              AND ${transactions.currency} = ${inboxCurrency}
-             AND (${inboxEmbeddings.embedding} IS NULL OR (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.6))
+             AND (${inboxEmbeddings.embedding} IS NULL OR (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < ${EMBEDDING_THRESHOLDS.WEAK_MATCH}))
             OR
                          (ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ABS(${inboxBaseAmount})) < GREATEST(50, ABS(${inboxBaseAmount}) * 0.15)
               AND COALESCE(${transactions.baseCurrency}, '') = ${inboxBaseCurrency}
               AND ${transactions.baseCurrency} IS NOT NULL 
               AND ${inboxBaseCurrency} != ''
-              AND (${inboxEmbeddings.embedding} IS NULL OR (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.6))
+              AND (${inboxEmbeddings.embedding} IS NULL OR (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < ${EMBEDDING_THRESHOLDS.WEAK_MATCH}))
           )`,
           // Perfect match date ranges with document-type awareness and banking delays
           sql`(
@@ -451,10 +486,25 @@ export async function findMatches(
       .limit(5);
 
     candidateTransactions.push(...perfectMatches);
-    logger.info(
-      `🎯 Q1 PARAMS: ${inboxAmount} ${inboxCurrency} ${inboxItem.date}`,
-    );
-    logger.info(`🎯 Q1 RESULTS: Found ${perfectMatches.length} matches`);
+    logger.info("🎯 QUERY 1 - Perfect financial matches", {
+      inboxId,
+      params: {
+        inboxAmount,
+        inboxCurrency,
+        inboxDate: inboxItem.date,
+        inboxType,
+        embeddingThreshold: EMBEDDING_THRESHOLDS.WEAK_MATCH,
+      },
+      found: perfectMatches.length,
+      totalCandidates: candidateTransactions.length,
+      sampleResults: perfectMatches.slice(0, 2).map((t) => ({
+        id: t.transactionId,
+        name: t.name,
+        amount: t.amount,
+        currency: t.currency,
+        embeddingScore: t.embeddingScore,
+      })),
+    });
 
     // QUERY 2: Perfect base currency matches (if we need more and have base currency)
     if (
@@ -504,7 +554,7 @@ export async function findMatches(
             sql`ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ABS(${inboxBaseAmount})) < GREATEST(50, ABS(${inboxBaseAmount}) * 0.15)`,
             sql`COALESCE(${transactions.baseCurrency}, '') = ${inboxBaseCurrency}`,
             isNotNull(transactions.baseCurrency),
-            sql`(${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.6`,
+            sql`(${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < ${EMBEDDING_THRESHOLDS.WEAK_MATCH}`,
             // Perfect match date ranges
             sql`(
               (${inboxType} = 'expense' 
@@ -529,10 +579,22 @@ export async function findMatches(
         .limit(5);
 
       candidateTransactions.push(...baseMatches);
-      logger.info("🎯 Query 2 - Base currency matches", {
+      logger.info("🎯 QUERY 2 - Base currency matches", {
         inboxId,
+        params: {
+          inboxBaseAmount,
+          inboxBaseCurrency,
+          embeddingThreshold: EMBEDDING_THRESHOLDS.WEAK_MATCH,
+        },
         found: baseMatches.length,
         totalCandidates: candidateTransactions.length,
+        sampleResults: baseMatches.slice(0, 2).map((t) => ({
+          id: t.transactionId,
+          name: t.name,
+          baseAmount: t.baseAmount,
+          baseCurrency: t.baseCurrency,
+          embeddingScore: t.embeddingScore,
+        })),
       });
     }
 
@@ -577,7 +639,7 @@ export async function findMatches(
             eq(transactions.teamId, teamId),
             eq(transactions.status, "posted"),
             // Strong semantic similarity
-            sql`(${inboxEmbeddings.embedding} IS NULL OR (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.35)`,
+            sql`(${inboxEmbeddings.embedding} IS NULL OR (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < ${EMBEDDING_THRESHOLDS.STRONG_MATCH})`,
             // Moderate financial alignment
             sql`ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < ${tier2Tolerance}`,
             // Semantic match date ranges with document-type awareness and banking delays
@@ -604,10 +666,20 @@ export async function findMatches(
         .limit(10);
 
       candidateTransactions.push(...semanticMatches);
-      logger.info("🎯 Query 3 - Strong semantic matches", {
+      logger.info("🎯 QUERY 3 - Strong semantic matches", {
         inboxId,
+        params: {
+          embeddingThreshold: EMBEDDING_THRESHOLDS.STRONG_MATCH,
+          tier2Tolerance,
+        },
         found: semanticMatches.length,
         totalCandidates: candidateTransactions.length,
+        sampleResults: semanticMatches.slice(0, 2).map((t) => ({
+          id: t.transactionId,
+          name: t.name,
+          amount: t.amount,
+          embeddingScore: t.embeddingScore,
+        })),
       });
     }
 
@@ -652,7 +724,7 @@ export async function findMatches(
             eq(transactions.teamId, teamId),
             eq(transactions.status, "posted"),
             // Good semantic similarity
-            sql`(${inboxEmbeddings.embedding} IS NULL OR (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.45)`,
+            sql`(${inboxEmbeddings.embedding} IS NULL OR (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < ${EMBEDDING_THRESHOLDS.GOOD_MATCH})`,
             // Loose financial alignment
             sql`ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < ${tier3Tolerance}`,
             // Conservative date ranges with document-type awareness and banking delays
@@ -679,14 +751,24 @@ export async function findMatches(
         .limit(10);
 
       candidateTransactions.push(...goodMatches);
-      logger.info("🎯 Query 4 - Good semantic matches", {
+      logger.info("🎯 QUERY 4 - Good semantic matches", {
         inboxId,
+        params: {
+          embeddingThreshold: EMBEDDING_THRESHOLDS.GOOD_MATCH,
+          tier3Tolerance,
+        },
         found: goodMatches.length,
         totalCandidates: candidateTransactions.length,
+        sampleResults: goodMatches.slice(0, 2).map((t) => ({
+          id: t.transactionId,
+          name: t.name,
+          amount: t.amount,
+          embeddingScore: t.embeddingScore,
+        })),
       });
     }
   } catch (queryError) {
-    console.log("💥 QUERY EXECUTION FAILED:", {
+    logger.error("💥 QUERY EXECUTION FAILED:", {
       inboxId,
       teamId,
       error:
@@ -758,7 +840,13 @@ export async function findMatches(
     const isPerfectFinancialMatch = hasSameCurrency && hasExactAmount;
 
     // Excellent cross-currency match (different currencies but same base currency)
-    const isExcellentCrossCurrencyMatch =
+    const isExcellentCrossCurrencyMatch = isCrossCurrencyMatch(
+      inboxItem,
+      candidate,
+    );
+
+    // TEMPORARY: Also calculate with old logic for comparison
+    const oldCrossCurrencyMatch =
       !hasSameCurrency &&
       inboxItem.baseCurrency === candidate.baseCurrency &&
       inboxItem.baseCurrency && // Must have base currency
@@ -770,7 +858,19 @@ export async function findMatches(
         // Allow up to 15% difference or minimum 50 (for small amounts)
         const tolerance = Math.max(50, avgAmount * 0.15);
         return difference < tolerance;
-      })(); // Percentage-based base amount proximity
+      })();
+
+    if (isExcellentCrossCurrencyMatch !== oldCrossCurrencyMatch) {
+      logger.error("❌ CROSS-CURRENCY MISMATCH", {
+        transactionId: candidate.transactionId,
+        newResult: isExcellentCrossCurrencyMatch,
+        oldResult: oldCrossCurrencyMatch,
+        inboxCurrency: inboxItem.currency,
+        candidateCurrency: candidate.currency,
+        inboxBaseAmount: inboxItem.baseAmount,
+        candidateBaseAmount: candidate.baseAmount,
+      });
+    }
 
     // Strong financial match with good semantics
     const isStrongMatch =
@@ -936,7 +1036,6 @@ export async function findMatches(
           amountScore: Math.round(amountScore * 1000) / 1000,
           currencyScore: Math.round(currencyScore * 1000) / 1000,
           dateScore: Math.round(dateScore * 1000) / 1000,
-
           confidenceScore: Math.round(confidenceScore * 1000) / 1000,
           matchType,
           isAlreadyMatched: candidate.isAlreadyMatched,
@@ -949,11 +1048,16 @@ export async function findMatches(
 
   logger.info(`📊 ANALYSIS: ${candidateTransactions.length} candidates found`);
 
-  // Log top 3 scores for debugging
-  for (let i = 0; i < Math.min(3, scoringDetails.length); i++) {
-    const s = scoringDetails[i];
+  // Sort scoring details by confidence for proper ranking display
+  const sortedScoring = scoringDetails.sort(
+    (a, b) => b.finalConfidence - a.finalConfidence,
+  );
+
+  // Log top 3 scores for debugging (now correctly ranked)
+  for (let i = 0; i < Math.min(3, sortedScoring.length); i++) {
+    const s = sortedScoring[i];
     logger.info(
-      `🏆 #${i + 1}: ${s?.name} | Final: ${s?.finalConfidence.toFixed(3)} | Emb: ${s?.scores.embedding?.toFixed(3)} | Name: ${(s?.scores.name || 0).toFixed(3)} | Amt: ${s?.scores.amount?.toFixed(3)}`,
+      `🏆 #${i + 1}: ${s?.name} | Final: ${s?.finalConfidence.toFixed(3)} | Embedding: ${s?.scores.embedding?.toFixed(3)} | Amt: ${s?.scores.amount?.toFixed(3)} | Currency: ${s?.scores.currency?.toFixed(3)} | Date: ${s?.scores.date?.toFixed(3)} | Type: ${s?.scores.type?.toFixed(3)}`,
     );
   }
 
@@ -1233,10 +1337,10 @@ export async function findInboxMatches(
     const isPerfectFinancialMatch = hasSameCurrency && hasExactAmount;
 
     // Excellent cross-currency match (different currencies but exact base amounts)
-    const isExcellentCrossCurrencyMatch =
-      !hasSameCurrency &&
-      hasBaseAmountMatch &&
-      candidate.baseCurrency === transactionItem.baseCurrency;
+    const isExcellentCrossCurrencyMatch = isCrossCurrencyMatch(
+      candidate,
+      transactionItem,
+    );
 
     // Strong financial match with good semantics
     const isStrongMatch =
@@ -1364,6 +1468,80 @@ export async function findInboxMatches(
   }
 
   return bestMatch;
+}
+
+// Helper functions
+
+function isCrossCurrencyMatch(
+  item1: {
+    amount?: number | null;
+    currency?: string | null;
+    baseAmount?: number | null;
+    baseCurrency?: string | null;
+  },
+  item2: {
+    amount?: number | null;
+    currency?: string | null;
+    baseAmount?: number | null;
+    baseCurrency?: string | null;
+  },
+  tolerancePercent = 0.15,
+  minTolerance = 50,
+): boolean {
+  // Must have different currencies
+  if (!item1.currency || !item2.currency || item1.currency === item2.currency) {
+    return false;
+  }
+
+  // Must have same base currency
+  if (
+    !item1.baseCurrency ||
+    !item2.baseCurrency ||
+    item1.baseCurrency !== item2.baseCurrency
+  ) {
+    return false;
+  }
+
+  // Must have base amounts
+  if (!item1.baseAmount || !item2.baseAmount) {
+    return false;
+  }
+
+  const baseAmount1 = Math.abs(item1.baseAmount);
+  const baseAmount2 = Math.abs(item2.baseAmount);
+  const difference = Math.abs(baseAmount1 - baseAmount2);
+  const avgAmount = (baseAmount1 + baseAmount2) / 2;
+  const tolerance = Math.max(minTolerance, avgAmount * tolerancePercent);
+
+  const isMatch = difference < tolerance;
+
+  // Debug logging
+  logger.info("💱 CROSS-CURRENCY MATCH DEBUG", {
+    item1: {
+      currency: item1.currency,
+      amount: item1.amount,
+      baseCurrency: item1.baseCurrency,
+      baseAmount: item1.baseAmount,
+    },
+    item2: {
+      currency: item2.currency,
+      amount: item2.amount,
+      baseCurrency: item2.baseCurrency,
+      baseAmount: item2.baseAmount,
+    },
+    calculation: {
+      baseAmount1,
+      baseAmount2,
+      difference,
+      avgAmount,
+      tolerance,
+      tolerancePercent,
+      minTolerance,
+    },
+    result: isMatch,
+  });
+
+  return isMatch;
 }
 
 // Helper scoring functions

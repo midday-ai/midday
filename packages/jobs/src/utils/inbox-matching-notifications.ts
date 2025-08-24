@@ -37,35 +37,13 @@ export async function triggerMatchingNotification({
       inboxItem.displayName || inboxItem.fileName || "Document";
     const transactionName = transactionItem.name || "Transaction";
 
-    // Check if this is a cross-currency match
+    // Check if this is a cross-currency match (for context, not routing)
     const isCrossCurrency =
       inboxItem.currency &&
       transactionItem.currency &&
       inboxItem.currency !== transactionItem.currency;
 
-    if (isCrossCurrency) {
-      // Trigger cross-currency notification
-      await tasks.trigger("notification", {
-        type: "inbox_cross_currency_matched",
-        teamId,
-        inboxId,
-        transactionId: result.suggestion.transactionId,
-        documentName,
-        documentAmount: inboxItem.amount || 0,
-        documentCurrency: inboxItem.currency || "USD",
-        transactionAmount: transactionItem.amount,
-        transactionCurrency: transactionItem.currency || "USD",
-        transactionName,
-        confidenceScore: result.suggestion.confidenceScore,
-        matchType: result.suggestion.matchType,
-      });
-
-      logger.info("Triggered cross-currency match notification", {
-        teamId,
-        inboxId,
-        transactionId: result.suggestion.transactionId,
-      });
-    } else if (result.action === "auto_matched") {
+    if (result.action === "auto_matched") {
       // Trigger auto-matched notification
       await tasks.trigger("notification", {
         type: "inbox_auto_matched",
@@ -73,8 +51,10 @@ export async function triggerMatchingNotification({
         inboxId,
         transactionId: result.suggestion.transactionId,
         documentName,
-        amount: inboxItem.amount || 0,
-        currency: inboxItem.currency || transactionItem.currency || "USD",
+        documentAmount: inboxItem.amount || 0,
+        documentCurrency: inboxItem.currency || "USD",
+        transactionAmount: transactionItem.amount || 0,
+        transactionCurrency: transactionItem.currency || "USD",
         transactionName,
         confidenceScore: result.suggestion.confidenceScore,
         matchType: result.suggestion.matchType as "auto_matched",
@@ -85,17 +65,26 @@ export async function triggerMatchingNotification({
         teamId,
         inboxId,
         transactionId: result.suggestion.transactionId,
+        isCrossCurrency,
+        documentAmount: inboxItem.amount,
+        documentCurrency: inboxItem.currency,
+        transactionAmount: transactionItem.amount,
+        transactionCurrency: transactionItem.currency,
       });
     } else if (result.action === "suggestion_created") {
-      // Trigger needs review notification
+      // All suggestions use inbox_needs_review, but with different matchType for smart messaging
       await tasks.trigger("notification", {
         type: "inbox_needs_review",
         teamId,
         inboxId,
         transactionId: result.suggestion.transactionId,
         documentName,
-        amount: inboxItem.amount || 0,
-        currency: inboxItem.currency || transactionItem.currency || "USD",
+        documentAmount: inboxItem.amount || 0,
+        documentCurrency: inboxItem.currency || "USD",
+        transactionAmount: transactionItem.amount || 0,
+        transactionCurrency: transactionItem.currency || "USD",
+        amount: inboxItem.amount || 0, // Keep for backward compatibility
+        currency: inboxItem.currency || transactionItem.currency || "USD", // Keep for backward compatibility
         transactionName,
         confidenceScore: result.suggestion.confidenceScore,
         matchType: result.suggestion.matchType as
@@ -104,10 +93,12 @@ export async function triggerMatchingNotification({
         isCrossCurrency,
       });
 
-      logger.info("Triggered needs review notification", {
+      logger.info("Triggered inbox_needs_review notification", {
         teamId,
         inboxId,
         transactionId: result.suggestion.transactionId,
+        matchType: result.suggestion.matchType,
+        confidenceScore: result.suggestion.confidenceScore,
       });
     }
   } catch (error) {
