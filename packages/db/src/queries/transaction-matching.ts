@@ -8,6 +8,7 @@ import {
   transactionMatchSuggestions,
   transactions,
 } from "@db/schema";
+import { logger } from "@midday/logger";
 import { and, desc, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 
 // Type definitions
@@ -33,7 +34,7 @@ export type MatchResult = {
   amountScore: number;
   currencyScore: number;
   dateScore: number;
-  nameScore: number;
+
   confidenceScore: number;
   matchType: "auto_matched" | "high_confidence" | "suggested";
   isAlreadyMatched: boolean;
@@ -49,7 +50,7 @@ export type InboxMatchResult = {
   amountScore: number;
   currencyScore: number;
   dateScore: number;
-  nameScore: number;
+
   confidenceScore: number;
   matchType: "auto_matched" | "high_confidence" | "suggested";
   isAlreadyMatched: boolean;
@@ -64,7 +65,7 @@ export type CreateMatchSuggestionParams = {
   currencyScore: number;
   dateScore: number;
   embeddingScore: number;
-  nameScore: number;
+
   matchType: "auto_matched" | "high_confidence" | "suggested";
   matchDetails: Record<string, any>;
   status?: "pending" | "confirmed" | "declined";
@@ -296,11 +297,11 @@ export async function findMatches(
   // Get team-specific calibrated thresholds based on user feedback
   const calibration = await getTeamCalibration(db, teamId);
 
-  // Balanced weights - financial accuracy first, then enriched embeddings
+  // Balanced production weights - embeddings handle semantic name matching
   const teamWeights = {
-    embeddingWeight: 0.35, // Important but transaction names can be messy
-    amountWeight: 0.4, // Primary signal - most reliable data point
-    currencyWeight: 0.2, // Critical for cross-currency matching with base amounts
+    embeddingWeight: 0.45, // Trust AI embeddings for semantic similarity including names
+    amountWeight: 0.35, // Keep financial accuracy high - critical for correctness
+    currencyWeight: 0.15, // Supporting signal for cross-currency matching
     dateWeight: 0.05, // Supporting signal for temporal alignment
     autoMatchThreshold: calibration.calibratedAutoThreshold, // Learned from user feedback
     suggestedMatchThreshold: calibration.calibratedSuggestedThreshold, // Learned from user feedback
@@ -333,6 +334,11 @@ export async function findMatches(
 
   const inboxItem = inboxData[0]!;
 
+  // Log the matched inbox item details
+  logger.info(
+    `📋 INBOX: ${inboxItem.displayName} | ${inboxItem.amount} ${inboxItem.currency} | ${inboxItem.date} | ${inboxItem.type} | embedding: ${!!inboxItem.embedding}`,
+  );
+
   // Get team's base currency
   const teamData = await db
     .select({ baseCurrency: teams.baseCurrency })
@@ -354,7 +360,6 @@ export async function findMatches(
   const tier3Tolerance = Math.max(100, inboxAmount * 0.2);
 
   // Document-type aware date ranges with banking delays
-  const isExpense = inboxType === "expense";
 
   // Perfect match date ranges (account for 3-day banking delay)
   const perfectExpenseStart = "93 days";
@@ -372,125 +377,351 @@ export async function findMatches(
   const conservativeStart = "33 days";
   const conservativeEnd = "48 days";
 
-  // Embedding-first candidate discovery - leverages enriched merchant data
-  const candidateTransactions = await db
-    .select({
-      transactionId: transactions.id,
-      name: transactions.name,
-      amount: transactions.amount,
-      currency: transactions.currency,
-      baseAmount: transactions.baseAmount,
-      baseCurrency: transactions.baseCurrency,
-      date: transactions.date,
-      counterpartyName: transactions.counterpartyName,
-      merchantName: transactions.merchantName,
-      description: transactions.description,
-      recurring: transactions.recurring,
+  // FINAL SOLUTION: Split complex query into separate simple queries to avoid PostgreSQL limits
+  // This maintains all sophisticated matching logic while staying within PostgreSQL's capabilities
 
-      embeddingScore:
-        sql<number>`(${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding})`.as(
-          "embedding_score",
+  const candidateTransactions: any[] = [];
+
+  try {
+    // QUERY 1: Perfect financial matches (exact amount + currency)
+    const perfectMatches = await db
+      .select({
+        transactionId: transactions.id,
+        name: transactions.name,
+        amount: transactions.amount,
+        currency: transactions.currency,
+        baseAmount: transactions.baseAmount,
+        baseCurrency: transactions.baseCurrency,
+        date: transactions.date,
+        counterpartyName: transactions.counterpartyName,
+        merchantName: transactions.merchantName,
+        description: transactions.description,
+        recurring: transactions.recurring,
+        embeddingScore:
+          sql<number>`(${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding})`.as(
+            "embedding_score",
+          ),
+        isAlreadyMatched: sql<boolean>`false`,
+      })
+      .from(transactions)
+      .innerJoin(
+        transactionEmbeddings,
+        and(
+          eq(transactions.id, transactionEmbeddings.transactionId),
+          isNotNull(transactionEmbeddings.embedding),
         ),
-      isAlreadyMatched: sql<boolean>`false`,
-    })
-    .from(transactions)
-    .innerJoin(
-      transactionEmbeddings,
-      eq(transactions.id, transactionEmbeddings.transactionId),
-    )
-    .innerJoin(inboxEmbeddings, eq(inboxEmbeddings.inboxId, inboxId))
-    .where(
-      and(
-        eq(transactions.teamId, teamId),
-        eq(transactions.status, "posted"),
-        // Check embeddings exist
-        isNotNull(transactionEmbeddings.embedding),
-        isNotNull(inboxEmbeddings.embedding),
-        // Fixed sophisticated multi-tier matching logic with proper thresholds using cosine_distance
-        sql`(
-           -- TIER 1: Perfect financial matches (regular currency) with relaxed semantic requirements
-           (ABS(${transactions.amount} - ${inboxAmount}) < 0.01 
-            AND ${transactions.currency} = ${inboxCurrency}
-            AND (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.6)
-           OR
-           -- TIER 1B: Perfect base currency matches (absolute values, relaxed tolerance)
-           (ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ABS(${inboxBaseAmount})) < 10
-            AND COALESCE(${transactions.baseCurrency}, '') = ${inboxBaseCurrency}
-            AND ${transactions.baseCurrency} IS NOT NULL 
-            AND ${inboxBaseCurrency} != ''
-            AND (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.6)
-           OR
-           -- TIER 2: Strong semantic matches with moderate financial alignment  
-           ((${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.35
-            AND ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < ${tier2Tolerance})
-           OR
-           -- TIER 3: Good semantic matches with loose financial alignment
-           ((${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.45
-            AND ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < ${tier3Tolerance})
-         )`,
-        // Sophisticated date logic with banking delays and document-type awareness
-        sql`(
-          -- Perfect financial matches with accounting-aware date ranges
-          ((ABS(${transactions.amount} - ${inboxAmount}) < 0.01 AND ${transactions.currency} = ${inboxCurrency})
-           OR (ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ABS(${inboxBaseAmount})) < 10
-               AND COALESCE(${transactions.baseCurrency}, '') = ${inboxBaseCurrency} 
-               AND ${transactions.baseCurrency} IS NOT NULL AND ${inboxBaseCurrency} != ''))
-                     AND (
-             -- Expense receipts: transaction usually happens BEFORE receipt (with banking delay)
-             (${inboxType} = 'expense' 
-              AND ${transactions.date}::date BETWEEN ${sql.raw(`'${inboxItem.date}'::date`)} - INTERVAL '${sql.raw(perfectExpenseStart)}' 
-                  AND ${sql.raw(`'${inboxItem.date}'::date`)} + INTERVAL '${sql.raw(perfectExpenseEnd)}')
-             OR
-             -- Invoices: payment usually happens AFTER invoice (with banking delay)  
-             (${inboxType} = 'invoice'
-              AND ${transactions.date}::date BETWEEN ${sql.raw(`'${inboxItem.date}'::date`)} - INTERVAL '${sql.raw(perfectInvoiceStart)}'
-                  AND ${sql.raw(`'${inboxItem.date}'::date`)} + INTERVAL '${sql.raw(perfectInvoiceEnd)}')
-           )
-          OR
-                     -- Strong semantic matches with accounting logic
-           ((${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.3
-            AND ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < 5.0
-            AND (
-              -- Expense receipts: moderate backward range (with banking delay)
-              (${inboxType} = 'expense'
-               AND ${transactions.date}::date BETWEEN ${sql.raw(`'${inboxItem.date}'::date`)} - INTERVAL '${sql.raw(semanticExpenseStart)}'
-                   AND ${sql.raw(`'${inboxItem.date}'::date`)} + INTERVAL '${sql.raw(semanticExpenseEnd)}')
+      )
+      .innerJoin(
+        inboxEmbeddings,
+        and(
+          eq(inboxEmbeddings.inboxId, inboxId),
+          isNotNull(inboxEmbeddings.embedding),
+        ),
+      )
+      .where(
+        and(
+          eq(transactions.teamId, teamId),
+          eq(transactions.status, "posted"),
+          // Perfect financial matches with both regular and base currency options
+          sql`(
+            (ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < 0.01 
+             AND ${transactions.currency} = ${inboxCurrency}
+             AND (${inboxEmbeddings.embedding} IS NULL OR (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.6))
+            OR
+                         (ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ABS(${inboxBaseAmount})) < GREATEST(50, ABS(${inboxBaseAmount}) * 0.15)
+              AND COALESCE(${transactions.baseCurrency}, '') = ${inboxBaseCurrency}
+              AND ${transactions.baseCurrency} IS NOT NULL 
+              AND ${inboxBaseCurrency} != ''
+              AND (${inboxEmbeddings.embedding} IS NULL OR (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.6))
+          )`,
+          // Perfect match date ranges with document-type awareness and banking delays
+          sql`(
+            (${inboxType} = 'expense' 
+             AND ${transactions.date}::date BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(perfectExpenseStart)}' 
+                 AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(perfectExpenseEnd)}')
+            OR
+            (${inboxType} = 'invoice'
+             AND ${transactions.date}::date BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(perfectInvoiceStart)}'
+                 AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(perfectInvoiceEnd)}')
+          )`,
+          // Exclude already matched
+          sql`NOT EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${transactionAttachments.transactionId} = ${transactions.id} AND ${transactionAttachments.teamId} = ${teamId})`,
+        ),
+      )
+      .limit(5);
+
+    candidateTransactions.push(...perfectMatches);
+    logger.info(
+      `🎯 Q1 PARAMS: ${inboxAmount} ${inboxCurrency} ${inboxItem.date}`,
+    );
+    logger.info(`🎯 Q1 RESULTS: Found ${perfectMatches.length} matches`);
+
+    // QUERY 2: Perfect base currency matches (if we need more and have base currency)
+    if (
+      candidateTransactions.length < 5 &&
+      inboxBaseCurrency &&
+      inboxBaseCurrency !== ""
+    ) {
+      const baseMatches = await db
+        .select({
+          transactionId: transactions.id,
+          name: transactions.name,
+          amount: transactions.amount,
+          currency: transactions.currency,
+          baseAmount: transactions.baseAmount,
+          baseCurrency: transactions.baseCurrency,
+          date: transactions.date,
+          counterpartyName: transactions.counterpartyName,
+          merchantName: transactions.merchantName,
+          description: transactions.description,
+          recurring: transactions.recurring,
+          embeddingScore:
+            sql<number>`(${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding})`.as(
+              "embedding_score",
+            ),
+          isAlreadyMatched: sql<boolean>`false`,
+        })
+        .from(transactions)
+        .innerJoin(
+          transactionEmbeddings,
+          and(
+            eq(transactions.id, transactionEmbeddings.transactionId),
+            isNotNull(transactionEmbeddings.embedding),
+          ),
+        )
+        .innerJoin(
+          inboxEmbeddings,
+          and(
+            eq(inboxEmbeddings.inboxId, inboxId),
+            isNotNull(inboxEmbeddings.embedding),
+          ),
+        )
+        .where(
+          and(
+            eq(transactions.teamId, teamId),
+            eq(transactions.status, "posted"),
+            // Perfect base currency matches (percentage-based tolerance for currency conversion)
+            sql`ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ABS(${inboxBaseAmount})) < GREATEST(50, ABS(${inboxBaseAmount}) * 0.15)`,
+            sql`COALESCE(${transactions.baseCurrency}, '') = ${inboxBaseCurrency}`,
+            isNotNull(transactions.baseCurrency),
+            sql`(${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.6`,
+            // Perfect match date ranges
+            sql`(
+              (${inboxType} = 'expense' 
+               AND ${transactions.date}::date BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(perfectExpenseStart)}' 
+                   AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(perfectExpenseEnd)}')
               OR
-              -- Invoices: extended forward range for payment terms (with banking delay)
               (${inboxType} = 'invoice'
-               AND ${transactions.date}::date BETWEEN ${sql.raw(`'${inboxItem.date}'::date`)} - INTERVAL '${sql.raw(semanticInvoiceStart)}'
-                   AND ${sql.raw(`'${inboxItem.date}'::date`)} + INTERVAL '${sql.raw(semanticInvoiceEnd)}')
-            ))
-           OR
-           -- Decent matches: conservative ranges (with banking delay)
-           ((${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.4
-            AND ${transactions.date}::date BETWEEN ${sql.raw(`'${inboxItem.date}'::date`)} - INTERVAL '${sql.raw(conservativeStart)}'
-                AND ${sql.raw(`'${inboxItem.date}'::date`)} + INTERVAL '${sql.raw(conservativeEnd)}')
-        )`,
-        // Exclude transactions that already have attachments (are already matched)
-        sql`NOT EXISTS (SELECT 1 FROM ${transactionAttachments} 
-                WHERE ${transactionAttachments.transactionId} = ${transactions.id} 
-                AND ${transactionAttachments.teamId} = ${teamId})`,
-      ),
-    )
-    .orderBy(
-      // Multi-criteria ordering: amount accuracy, currency match, similarity, date proximity
-      sql`ABS(${transactions.amount} - COALESCE(${inboxItem.amount}, 0)) ASC`,
-      sql`CASE WHEN ${transactions.currency} = COALESCE(${inboxItem.currency}, '') THEN 0 ELSE 1 END ASC`,
-      sql`(${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding})`,
-      sql`ABS(${transactions.date}::date - ${sql.raw(`'${inboxItem.date}'::date`)}) ASC`,
-    )
-    .limit(20);
+               AND ${transactions.date}::date BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(perfectInvoiceStart)}'
+                   AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(perfectInvoiceEnd)}')
+            )`,
+            // Exclude already matched
+            sql`NOT EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${transactionAttachments.transactionId} = ${transactions.id} AND ${transactionAttachments.teamId} = ${teamId})`,
+            // Exclude already found transactions
+            candidateTransactions.length > 0
+              ? sql`${transactions.id} NOT IN (${sql.join(
+                  candidateTransactions.map((c) => sql`${c.transactionId}`),
+                  sql`, `,
+                )})`
+              : sql`1=1`,
+          ),
+        )
+        .limit(5);
+
+      candidateTransactions.push(...baseMatches);
+      logger.info("🎯 Query 2 - Base currency matches", {
+        inboxId,
+        found: baseMatches.length,
+        totalCandidates: candidateTransactions.length,
+      });
+    }
+
+    // QUERY 3: Strong semantic matches (if we need more)
+    if (candidateTransactions.length < 8) {
+      const semanticMatches = await db
+        .select({
+          transactionId: transactions.id,
+          name: transactions.name,
+          amount: transactions.amount,
+          currency: transactions.currency,
+          baseAmount: transactions.baseAmount,
+          baseCurrency: transactions.baseCurrency,
+          date: transactions.date,
+          counterpartyName: transactions.counterpartyName,
+          merchantName: transactions.merchantName,
+          description: transactions.description,
+          recurring: transactions.recurring,
+          embeddingScore:
+            sql<number>`(${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding})`.as(
+              "embedding_score",
+            ),
+          isAlreadyMatched: sql<boolean>`false`,
+        })
+        .from(transactions)
+        .innerJoin(
+          transactionEmbeddings,
+          and(
+            eq(transactions.id, transactionEmbeddings.transactionId),
+            isNotNull(transactionEmbeddings.embedding),
+          ),
+        )
+        .innerJoin(
+          inboxEmbeddings,
+          and(
+            eq(inboxEmbeddings.inboxId, inboxId),
+            isNotNull(inboxEmbeddings.embedding),
+          ),
+        )
+        .where(
+          and(
+            eq(transactions.teamId, teamId),
+            eq(transactions.status, "posted"),
+            // Strong semantic similarity
+            sql`(${inboxEmbeddings.embedding} IS NULL OR (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.35)`,
+            // Moderate financial alignment
+            sql`ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < ${tier2Tolerance}`,
+            // Semantic match date ranges with document-type awareness and banking delays
+            sql`(
+              (${inboxType} = 'expense'
+               AND ${transactions.date}::date BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(semanticExpenseStart)}'
+                   AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(semanticExpenseEnd)}')
+              OR
+              (${inboxType} = 'invoice'
+               AND ${transactions.date}::date BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(semanticInvoiceStart)}'
+                   AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(semanticInvoiceEnd)}')
+            )`,
+            // Exclude already matched
+            sql`NOT EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${transactionAttachments.transactionId} = ${transactions.id} AND ${transactionAttachments.teamId} = ${teamId})`,
+            // Exclude already found transactions
+            candidateTransactions.length > 0
+              ? sql`${transactions.id} NOT IN (${sql.join(
+                  candidateTransactions.map((c) => sql`${c.transactionId}`),
+                  sql`, `,
+                )})`
+              : sql`1=1`,
+          ),
+        )
+        .limit(10);
+
+      candidateTransactions.push(...semanticMatches);
+      logger.info("🎯 Query 3 - Strong semantic matches", {
+        inboxId,
+        found: semanticMatches.length,
+        totalCandidates: candidateTransactions.length,
+      });
+    }
+
+    // QUERY 4: Good semantic matches (if we still need more)
+    if (candidateTransactions.length < 15) {
+      const goodMatches = await db
+        .select({
+          transactionId: transactions.id,
+          name: transactions.name,
+          amount: transactions.amount,
+          currency: transactions.currency,
+          baseAmount: transactions.baseAmount,
+          baseCurrency: transactions.baseCurrency,
+          date: transactions.date,
+          counterpartyName: transactions.counterpartyName,
+          merchantName: transactions.merchantName,
+          description: transactions.description,
+          recurring: transactions.recurring,
+          embeddingScore:
+            sql<number>`(${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding})`.as(
+              "embedding_score",
+            ),
+          isAlreadyMatched: sql<boolean>`false`,
+        })
+        .from(transactions)
+        .innerJoin(
+          transactionEmbeddings,
+          and(
+            eq(transactions.id, transactionEmbeddings.transactionId),
+            isNotNull(transactionEmbeddings.embedding),
+          ),
+        )
+        .innerJoin(
+          inboxEmbeddings,
+          and(
+            eq(inboxEmbeddings.inboxId, inboxId),
+            isNotNull(inboxEmbeddings.embedding),
+          ),
+        )
+        .where(
+          and(
+            eq(transactions.teamId, teamId),
+            eq(transactions.status, "posted"),
+            // Good semantic similarity
+            sql`(${inboxEmbeddings.embedding} IS NULL OR (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.45)`,
+            // Loose financial alignment
+            sql`ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < ${tier3Tolerance}`,
+            // Conservative date ranges with document-type awareness and banking delays
+            sql`(
+              (${inboxType} = 'expense'
+               AND ${transactions.date}::date BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(conservativeStart)}'
+                   AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(conservativeEnd)}')
+              OR
+              (${inboxType} = 'invoice'
+               AND ${transactions.date}::date BETWEEN ${sql.param(inboxItem.date)}::date - INTERVAL '${sql.raw(conservativeStart)}'
+                   AND ${sql.param(inboxItem.date)}::date + INTERVAL '${sql.raw(conservativeEnd)}')
+            )`,
+            // Exclude already matched
+            sql`NOT EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${transactionAttachments.transactionId} = ${transactions.id} AND ${transactionAttachments.teamId} = ${teamId})`,
+            // Exclude already found transactions
+            candidateTransactions.length > 0
+              ? sql`${transactions.id} NOT IN (${sql.join(
+                  candidateTransactions.map((c) => sql`${c.transactionId}`),
+                  sql`, `,
+                )})`
+              : sql`1=1`,
+          ),
+        )
+        .limit(10);
+
+      candidateTransactions.push(...goodMatches);
+      logger.info("🎯 Query 4 - Good semantic matches", {
+        inboxId,
+        found: goodMatches.length,
+        totalCandidates: candidateTransactions.length,
+      });
+    }
+  } catch (queryError) {
+    console.log("💥 QUERY EXECUTION FAILED:", {
+      inboxId,
+      teamId,
+      error:
+        queryError instanceof Error ? queryError.message : String(queryError),
+      stack: queryError instanceof Error ? queryError.stack : undefined,
+      errorName:
+        queryError instanceof Error ? queryError.name : typeof queryError,
+    });
+
+    // Return null to prevent the whole process from crashing
+    return null;
+  }
+
+  // Candidate analysis logging moved to after scoring loop
 
   // Calculate scores and find the single best match
   let bestMatch: MatchResult | null = null;
   let highestConfidence = 0;
 
+  // Track all scoring details for debugging
+  const scoringDetails: Array<{
+    transactionId: string;
+    name: string;
+    scores: Record<string, number>;
+    finalConfidence: number;
+    meetsCriteria: boolean;
+  }> = [];
+
   for (const candidate of candidateTransactions) {
     // Convert PostgreSQL cosine distance to similarity score
-    // For TIER 1 (exact matches): embeddingScore = 0.1, so similarity = 0.9 (high but not perfect)
-    // For TIER 2 (semantic search): use actual cosine similarity from PostgreSQL
-    const embeddingScore = Math.max(0, 1 - candidate.embeddingScore);
+    // Handle cases where inbox embedding might be NULL (fallback scoring)
+    const embeddingScore =
+      candidate.embeddingScore !== null
+        ? Math.max(0, 1 - candidate.embeddingScore)
+        : 0.5; // Neutral score when no inbox embedding available
 
     const amountScore = calculateAmountScore(
       inboxItem,
@@ -507,8 +738,7 @@ export async function findMatches(
       candidate.date,
       inboxItem.type,
     );
-
-    // Calculate confidence score - embeddings now capture enriched merchant/legal entity data
+    // Calculate confidence score using embeddings for semantic name matching
     let confidenceScore =
       embeddingScore * teamWeights.embeddingWeight +
       amountScore * teamWeights.amountWeight +
@@ -527,11 +757,20 @@ export async function findMatches(
     // Perfect financial match (same currency + exact amount)
     const isPerfectFinancialMatch = hasSameCurrency && hasExactAmount;
 
-    // Excellent cross-currency match (different currencies but exact base amounts)
+    // Excellent cross-currency match (different currencies but same base currency)
     const isExcellentCrossCurrencyMatch =
       !hasSameCurrency &&
-      hasBaseAmountMatch &&
-      inboxItem.baseCurrency === candidate.baseCurrency;
+      inboxItem.baseCurrency === candidate.baseCurrency &&
+      inboxItem.baseCurrency && // Must have base currency
+      (() => {
+        const inboxBase = Math.abs(inboxItem.baseAmount || 0);
+        const candidateBase = Math.abs(candidate.baseAmount || 0);
+        const difference = Math.abs(inboxBase - candidateBase);
+        const avgAmount = (inboxBase + candidateBase) / 2;
+        // Allow up to 15% difference or minimum 50 (for small amounts)
+        const tolerance = Math.max(50, avgAmount * 0.15);
+        return difference < tolerance;
+      })(); // Percentage-based base amount proximity
 
     // Strong financial match with good semantics
     const isStrongMatch =
@@ -588,8 +827,39 @@ export async function findMatches(
       confidenceScore = Math.max(confidenceScore, 0.92); // High confidence for recurring patterns
     }
 
+    // Cross-currency boost for strong embedding matches
+    if (isExcellentCrossCurrencyMatch && embeddingScore > 0.75) {
+      confidenceScore = Math.max(confidenceScore, 0.85); // Boost for obvious cross-currency matches
+    }
+
+    // Record detailed scoring for this candidate
+    // Use standard threshold for all cases
+    const debugThreshold = teamWeights.suggestedMatchThreshold;
+
+    scoringDetails.push({
+      transactionId: candidate.transactionId,
+      name: candidate.name || "N/A",
+      scores: {
+        embedding: embeddingScore,
+        amount: amountScore,
+        currency: currencyScore,
+        date: dateScore,
+        weightedEmbedding: embeddingScore * teamWeights.embeddingWeight,
+        weightedAmount: amountScore * teamWeights.amountWeight,
+        weightedCurrency: currencyScore * teamWeights.currencyWeight,
+        weightedDate: dateScore * teamWeights.dateWeight,
+        isPerfectFinancialMatch: isPerfectFinancialMatch ? 1 : 0,
+        isExcellentCrossCurrencyMatch: isExcellentCrossCurrencyMatch ? 1 : 0,
+        isStrongMatch: isStrongMatch ? 1 : 0,
+        isGoodMatch: isGoodMatch ? 1 : 0,
+        isRecurringMatch: isRecurringMatch ? 1 : 0,
+      },
+      finalConfidence: confidenceScore,
+      meetsCriteria: confidenceScore >= debugThreshold,
+    });
+
     // Only consider if it meets minimum threshold
-    if (confidenceScore >= teamWeights.suggestedMatchThreshold) {
+    if (confidenceScore >= debugThreshold) {
       // Simple tie-breaking: confidence first, then let SQL ordering handle the rest
       const isBetterMatch = confidenceScore > highestConfidence + 0.001; // Small epsilon for floating point
 
@@ -666,7 +936,7 @@ export async function findMatches(
           amountScore: Math.round(amountScore * 1000) / 1000,
           currencyScore: Math.round(currencyScore * 1000) / 1000,
           dateScore: Math.round(dateScore * 1000) / 1000,
-          nameScore: Math.round(embeddingScore * 1000) / 1000, // Embeddings capture enriched merchant/legal entity data
+
           confidenceScore: Math.round(confidenceScore * 1000) / 1000,
           matchType,
           isAlreadyMatched: candidate.isAlreadyMatched,
@@ -675,6 +945,95 @@ export async function findMatches(
         highestConfidence = confidenceScore;
       }
     }
+  }
+
+  logger.info(`📊 ANALYSIS: ${candidateTransactions.length} candidates found`);
+
+  // Log top 3 scores for debugging
+  for (let i = 0; i < Math.min(3, scoringDetails.length); i++) {
+    const s = scoringDetails[i];
+    logger.info(
+      `🏆 #${i + 1}: ${s?.name} | Final: ${s?.finalConfidence.toFixed(3)} | Emb: ${s?.scores.embedding?.toFixed(3)} | Name: ${(s?.scores.name || 0).toFixed(3)} | Amt: ${s?.scores.amount?.toFixed(3)}`,
+    );
+  }
+
+  // Log comprehensive scoring analysis to debug wrong suggestions
+  logger.info("🔍 SCORING ANALYSIS - Why this suggestion?", {
+    inboxId,
+    teamId,
+    inboxItem: {
+      displayName: inboxItem.displayName,
+      amount: inboxItem.amount,
+      currency: inboxItem.currency,
+      type: inboxItem.type,
+      date: inboxItem.date,
+    },
+    teamWeights,
+    thresholds: {
+      suggested: teamWeights.suggestedMatchThreshold,
+      auto: teamWeights.autoMatchThreshold,
+    },
+    totalCandidatesEvaluated: candidateTransactions.length,
+    candidatesMeetingThreshold: scoringDetails.filter((s) => s.meetsCriteria)
+      .length,
+    allScoringDetails: scoringDetails.sort(
+      (a, b) => b.finalConfidence - a.finalConfidence,
+    ),
+    topRejectedCandidates: scoringDetails
+      .filter((s) => !s.meetsCriteria)
+      .sort((a, b) => b.finalConfidence - a.finalConfidence)
+      .slice(0, 5)
+      .map((s) => ({
+        transactionId: s.transactionId,
+        name: s.name,
+        confidence: s.finalConfidence,
+        threshold: teamWeights.suggestedMatchThreshold,
+        shortfall: teamWeights.suggestedMatchThreshold - s.finalConfidence,
+        scores: s.scores,
+      })),
+  });
+
+  // Log the final match result
+  if (bestMatch) {
+    logger.info("✅ FINAL MATCH SELECTED", {
+      inboxId,
+      teamId,
+      selectedMatch: {
+        transactionId: bestMatch.transactionId,
+        confidence: bestMatch.confidenceScore,
+        matchType: bestMatch.matchType,
+        scores: {
+          embedding: bestMatch.embeddingScore,
+          amount: bestMatch.amountScore,
+          currency: bestMatch.currencyScore,
+          date: bestMatch.dateScore,
+        },
+      },
+      whySelected: {
+        meetsThreshold:
+          bestMatch.confidenceScore >= teamWeights.suggestedMatchThreshold,
+        isHighestConfidence: true,
+        confidenceVsThreshold:
+          bestMatch.confidenceScore - teamWeights.suggestedMatchThreshold,
+      },
+    });
+  } else {
+    logger.info("❌ NO MATCH FOUND", {
+      inboxId,
+      teamId,
+      reason: "No candidates met minimum threshold",
+      threshold: teamWeights.suggestedMatchThreshold,
+      bestRejectedCandidate:
+        scoringDetails.length > 0
+          ? {
+              transactionId: scoringDetails[0]?.transactionId,
+              confidence: scoringDetails[0]?.finalConfidence,
+              shortfall:
+                teamWeights.suggestedMatchThreshold -
+                (scoringDetails[0]?.finalConfidence || 0),
+            }
+          : null,
+    });
   }
 
   return bestMatch;
@@ -727,11 +1086,11 @@ export async function findInboxMatches(
     getTeamCalibration(db, teamId),
   ]);
 
-  // Balanced weights - financial accuracy first, then enriched embeddings
+  // Balanced production weights - embeddings handle semantic name matching
   const teamWeights = {
-    embeddingWeight: 0.35, // Important but transaction names can be messy
-    amountWeight: 0.4, // Primary signal - most reliable data point
-    currencyWeight: 0.2, // Critical for cross-currency matching with base amounts
+    embeddingWeight: 0.45, // Trust AI embeddings for semantic similarity including names
+    amountWeight: 0.35, // Keep financial accuracy high - critical for correctness
+    currencyWeight: 0.15, // Supporting signal for cross-currency matching
     dateWeight: 0.05, // Supporting signal for temporal alignment
     autoMatchThreshold: calibration.calibratedAutoThreshold, // Learned from user feedback
     suggestedMatchThreshold: calibration.calibratedSuggestedThreshold, // Learned from user feedback
@@ -804,19 +1163,19 @@ export async function findInboxMatches(
 
           // Enhanced embedding similarity with financial context - same tiered approach
           sql`(
-             -- TIER 1: Perfect financial matches get relaxed semantic requirements
-             ((ABS(${inbox.amount} - ${transactionItem.amount}) < 0.01 
-               AND ${inbox.currency} = ${transactionItem.currency})
+            -- TIER 1: Perfect financial matches get relaxed semantic requirements
+            ((ABS(${inbox.amount} - ${transactionItem.amount}) < 0.01 
+              AND ${inbox.currency} = ${transactionItem.currency})
               AND (${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding}) < 0.6)
-             OR
-             -- TIER 2: Strong semantic matches with moderate financial alignment
+            OR
+            -- TIER 2: Strong semantic matches with moderate financial alignment
              ((${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding}) < 0.35
-              AND ABS(COALESCE(${inbox.amount}, 0) - ${transactionItem.amount}) < ${Math.max(50, transactionItem.amount * 0.1)})
-             OR
-             -- TIER 3: Good semantic matches with loose financial alignment
+             AND ABS(COALESCE(${inbox.amount}, 0) - ${transactionItem.amount}) < ${Math.max(50, transactionItem.amount * 0.1)})
+            OR
+            -- TIER 3: Good semantic matches with loose financial alignment
              ((${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding}) < 0.45
-              AND ABS(COALESCE(${inbox.amount}, 0) - ${transactionItem.amount}) < ${Math.max(100, transactionItem.amount * 0.2)})
-           )`,
+             AND ABS(COALESCE(${inbox.amount}, 0) - ${transactionItem.amount}) < ${Math.max(100, transactionItem.amount * 0.2)})
+          )`,
 
           // Wider date range for semantic search
           sql`COALESCE(${inbox.date}, ${inbox.createdAt}::date) BETWEEN ${transactionItem.date}::date - INTERVAL '90 days' 
@@ -853,7 +1212,7 @@ export async function findInboxMatches(
       teamBaseCurrency || undefined,
     );
     const dateScore = calculateDateScore(candidate.date, transactionItem.date);
-    // Calculate confidence score - embeddings handle semantic matching
+    // Calculate confidence score using embeddings for semantic name matching
     let confidenceScore =
       embeddingScore * teamWeights.embeddingWeight +
       amountScore * teamWeights.amountWeight +
@@ -993,7 +1352,7 @@ export async function findInboxMatches(
           amountScore: Math.round(amountScore * 1000) / 1000,
           currencyScore: Math.round(currencyScore * 1000) / 1000,
           dateScore: Math.round(dateScore * 1000) / 1000,
-          nameScore: Math.round(embeddingScore * 1000) / 1000, // Embeddings capture enriched merchant/legal entity data
+
           confidenceScore: Math.round(confidenceScore * 1000) / 1000,
           matchType,
           isAlreadyMatched: candidate.isAlreadyMatched,
@@ -1008,6 +1367,7 @@ export async function findInboxMatches(
 }
 
 // Helper scoring functions
+
 function calculateAmountScore(
   item1: any,
   item2: any,
@@ -1092,18 +1452,15 @@ function calculateAmountDifferenceScore(
   // Smart cross-perspective matching: only use absolute values for specific cases
   let useAbsoluteValues = false;
 
-  // Only use absolute value comparison for cross-currency base matching
-  // This handles invoice (positive) to payment (negative) scenarios
-  if (matchType === "cross_currency_base" || matchType === "base_currency") {
-    const sameSign =
-      (amount1 > 0 && amount2 > 0) || (amount1 < 0 && amount2 < 0);
-    const oppositeSigns =
-      (amount1 > 0 && amount2 < 0) || (amount1 < 0 && amount2 > 0);
+  // Handle invoice (positive) to payment (negative) scenarios
+  // This applies to all match types, not just cross-currency
+  const sameSign = (amount1 > 0 && amount2 > 0) || (amount1 < 0 && amount2 < 0);
+  const oppositeSigns =
+    (amount1 > 0 && amount2 < 0) || (amount1 < 0 && amount2 > 0);
 
-    // Use absolute values only for opposite signs (invoice vs payment scenario)
-    if (oppositeSigns) {
-      useAbsoluteValues = true;
-    }
+  // Use absolute values for opposite signs (invoice vs payment scenario)
+  if (oppositeSigns) {
+    useAbsoluteValues = true;
   }
 
   const compareAmount1 = useAbsoluteValues ? Math.abs(amount1) : amount1;
@@ -1302,7 +1659,6 @@ export async function createMatchSuggestion(
       currencyScore: params.currencyScore,
       dateScore: params.dateScore,
       embeddingScore: params.embeddingScore,
-      nameScore: params.nameScore,
       matchType: params.matchType,
       matchDetails: params.matchDetails,
       status: params.status || "pending",
@@ -1319,7 +1675,6 @@ export async function createMatchSuggestion(
         currencyScore: params.currencyScore,
         dateScore: params.dateScore,
         embeddingScore: params.embeddingScore,
-        nameScore: params.nameScore,
         matchType: params.matchType,
         matchDetails: params.matchDetails,
         status: params.status || "pending",

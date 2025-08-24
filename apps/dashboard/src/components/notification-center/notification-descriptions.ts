@@ -268,9 +268,148 @@ const handleInvoiceCreated: NotificationDescriptionHandler = (
   return t("notifications.invoice_created.title");
 };
 
+const handleInboxAutoMatched: NotificationDescriptionHandler = (
+  metadata,
+  user,
+  t,
+) => {
+  const documentName = metadata?.documentName;
+  const transactionName = metadata?.transactionName;
+  const amount = metadata?.amount;
+  const currency = metadata?.currency;
+
+  if (documentName && transactionName && amount && currency) {
+    const formattedAmount =
+      formatAmount({
+        currency: currency,
+        amount: amount,
+        locale: user?.locale || "en-US",
+      }) ||
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currency,
+      }).format(amount);
+    return t("notifications.inbox_auto_matched.with_details", {
+      documentName,
+      transactionName,
+      amount: formattedAmount,
+    });
+  }
+
+  if (documentName && transactionName) {
+    return t("notifications.inbox_auto_matched.with_names", {
+      documentName,
+      transactionName,
+    });
+  }
+
+  return t("notifications.inbox_auto_matched.title");
+};
+
+const handleInboxNeedsReview: NotificationDescriptionHandler = (
+  metadata,
+  user,
+  t,
+) => {
+  const documentName = metadata?.documentName;
+  const transactionName = metadata?.transactionName;
+  const amount = metadata?.amount;
+  const currency = metadata?.currency;
+
+  if (documentName && transactionName && amount && currency) {
+    const formattedAmount =
+      formatAmount({
+        currency: currency,
+        amount: amount,
+        locale: user?.locale || "en-US",
+      }) ||
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currency,
+      }).format(amount);
+    return t("notifications.inbox_needs_review.with_details", {
+      documentName,
+      transactionName,
+      amount: formattedAmount,
+    });
+  }
+
+  if (documentName && transactionName) {
+    return t("notifications.inbox_needs_review.with_names", {
+      documentName,
+      transactionName,
+    });
+  }
+
+  return t("notifications.inbox_needs_review.title");
+};
+
+const handleInboxCrossCurrencyMatched: NotificationDescriptionHandler = (
+  metadata,
+  user,
+  t,
+) => {
+  const documentName = metadata?.documentName;
+  const transactionName = metadata?.transactionName;
+  const documentAmount = metadata?.documentAmount;
+  const documentCurrency = metadata?.documentCurrency;
+  const transactionAmount = metadata?.transactionAmount;
+  const transactionCurrency = metadata?.transactionCurrency;
+
+  if (
+    documentName &&
+    transactionName &&
+    documentAmount &&
+    documentCurrency &&
+    transactionAmount &&
+    transactionCurrency
+  ) {
+    const formattedDocAmount =
+      formatAmount({
+        currency: documentCurrency,
+        amount: documentAmount,
+        locale: user?.locale || "en-US",
+      }) ||
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: documentCurrency,
+      }).format(documentAmount);
+
+    const formattedTxAmount =
+      formatAmount({
+        currency: transactionCurrency,
+        amount: transactionAmount,
+        locale: user?.locale || "en-US",
+      }) ||
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: transactionCurrency,
+      }).format(transactionAmount);
+
+    return t("notifications.inbox_cross_currency_matched.with_details", {
+      documentName,
+      transactionName,
+      documentAmount: formattedDocAmount,
+      transactionAmount: formattedTxAmount,
+    });
+  }
+
+  if (documentName && transactionName) {
+    return t("notifications.inbox_cross_currency_matched.with_names", {
+      documentName,
+      transactionName,
+    });
+  }
+
+  return t("notifications.inbox_cross_currency_matched.title");
+};
+
 const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   transactions_created: handleTransactionsCreated,
   inbox_new: handleInboxNew,
+  inbox_auto_matched: handleInboxAutoMatched,
+  inbox_needs_review: handleInboxNeedsReview,
+  inbox_cross_currency_matched: handleInboxCrossCurrencyMatched,
   invoice_paid: handleInvoicePaid,
   invoice_overdue: handleInvoiceOverdue,
   invoice_scheduled: handleInvoiceScheduled,

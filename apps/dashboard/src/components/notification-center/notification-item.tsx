@@ -40,6 +40,10 @@ export function NotificationItem({
       return <Icons.Transactions className="size-4" />;
     if (activityType === "inbox_new")
       return <Icons.Inbox2 className="size-4" />;
+    if (activityType.startsWith("inbox_") && activityType.includes("matched"))
+      return <Icons.Match className="size-4" />;
+    if (activityType === "inbox_needs_review")
+      return <Icons.AlertCircle className="size-4" />;
     if (activityType === "match") return <Icons.Match className="size-4" />;
     return <Icons.Notifications className="size-4" />;
   };
