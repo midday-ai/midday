@@ -115,8 +115,10 @@ export const inboxAutoMatchedSchema = z.object({
   inboxId: z.string().uuid(),
   transactionId: z.string().uuid(),
   documentName: z.string(),
-  amount: z.number(),
-  currency: z.string(),
+  documentAmount: z.number(),
+  documentCurrency: z.string(),
+  transactionAmount: z.number(),
+  transactionCurrency: z.string(),
   transactionName: z.string(),
   confidenceScore: z.number(),
   matchType: z.enum(["auto_matched"]),
@@ -128,8 +130,10 @@ export const inboxNeedsReviewSchema = z.object({
   inboxId: z.string().uuid(),
   transactionId: z.string().uuid(),
   documentName: z.string(),
-  amount: z.number(),
-  currency: z.string(),
+  documentAmount: z.number(),
+  documentCurrency: z.string(),
+  transactionAmount: z.number(),
+  transactionCurrency: z.string(),
   transactionName: z.string(),
   confidenceScore: z.number(),
   matchType: z.enum(["high_confidence", "suggested"]),
@@ -236,6 +240,7 @@ export type DocumentProcessedInput = z.infer<typeof documentProcessedSchema>;
 export type InboxItemData = z.infer<typeof inboxItemSchema>;
 export type InboxNewInput = z.infer<typeof inboxNewSchema>;
 export type InboxAutoMatchedInput = z.infer<typeof inboxAutoMatchedSchema>;
+
 export type InboxNeedsReviewInput = z.infer<typeof inboxNeedsReviewSchema>;
 export type InboxCrossCurrencyMatchedInput = z.infer<
   typeof inboxCrossCurrencyMatchedSchema
