@@ -13,8 +13,6 @@ export const matchPendingInbox = schemaTask({
   maxDuration: 30,
   queue: { concurrencyLimit: 10 },
   run: async ({ teamId, newTransactionIds }) => {
-    const db = getDb();
-
     logger.info("Starting pending inbox matching", {
       teamId,
       newTransactionCount: newTransactionIds.length,
@@ -22,7 +20,7 @@ export const matchPendingInbox = schemaTask({
 
     // Get pending inbox items that are available for matching
     // Since we have new transactions available, any pending item could potentially match
-    const relevantPendingItems = await getPendingInboxForMatching(db, {
+    const relevantPendingItems = await getPendingInboxForMatching(getDb(), {
       teamId,
       limit: 100, // Reasonable limit to prevent job overload
     });
