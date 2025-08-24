@@ -182,6 +182,33 @@ export const unmatchTransactionSchema = z.object({
   id: z.string().uuid(),
 });
 
+export const getInboxByStatusSchema = z.object({
+  status: z
+    .enum([
+      "processing",
+      "pending",
+      "archived",
+      "new",
+      "analyzing",
+      "suggested_match",
+      "no_match",
+      "done",
+      "deleted",
+    ])
+    .optional(),
+});
+
+export const confirmMatchSchema = z.object({
+  suggestionId: z.string().uuid(),
+  inboxId: z.string().uuid(),
+  transactionId: z.string().uuid(),
+});
+
+export const declineMatchSchema = z.object({
+  suggestionId: z.string().uuid(),
+  inboxId: z.string().uuid(),
+});
+
 export const deleteInboxResponseSchema = z
   .object({
     id: z.string().openapi({

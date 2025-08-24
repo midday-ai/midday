@@ -1,6 +1,9 @@
 import {
+  confirmMatchSchema,
+  declineMatchSchema,
   deleteInboxSchema,
   getInboxByIdSchema,
+  getInboxByStatusSchema,
   getInboxSchema,
   matchTransactionSchema,
   processAttachmentsSchema,
@@ -24,7 +27,6 @@ import {
 } from "@midday/db/queries";
 import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk";
-import { z } from "zod";
 
 export const inboxRouter = createTRPCRouter({
   get: protectedProcedure
@@ -121,23 +123,7 @@ export const inboxRouter = createTRPCRouter({
 
   // Get inbox items by status
   getByStatus: protectedProcedure
-    .input(
-      z.object({
-        status: z
-          .enum([
-            "processing",
-            "pending",
-            "archived",
-            "new",
-            "analyzing",
-            "suggested_match",
-            "no_match",
-            "done",
-            "deleted",
-          ])
-          .optional(),
-      }),
-    )
+    .input(getInboxByStatusSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
       return getInboxByStatus(db, {
         teamId: teamId!,
@@ -147,13 +133,7 @@ export const inboxRouter = createTRPCRouter({
 
   // Confirm a match suggestion
   confirmMatch: protectedProcedure
-    .input(
-      z.object({
-        suggestionId: z.string().uuid(),
-        inboxId: z.string().uuid(),
-        transactionId: z.string().uuid(),
-      }),
-    )
+    .input(confirmMatchSchema)
     .mutation(async ({ ctx: { db, teamId, session }, input }) => {
       return confirmSuggestedMatch(db, {
         teamId: teamId!,
@@ -166,12 +146,7 @@ export const inboxRouter = createTRPCRouter({
 
   // Decline a match suggestion
   declineMatch: protectedProcedure
-    .input(
-      z.object({
-        suggestionId: z.string().uuid(),
-        inboxId: z.string().uuid(),
-      }),
-    )
+    .input(declineMatchSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
       return declineSuggestedMatch(db, {
         suggestionId: input.suggestionId,
