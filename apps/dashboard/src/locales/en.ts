@@ -182,6 +182,36 @@ export default {
       "upload_title#one": "A new document was uploaded to your inbox",
       "upload_title#other": "{count} new documents were uploaded to your inbox",
     },
+    inbox_auto_matched: {
+      name: "Auto-matched",
+      description:
+        "Get notified when documents are automatically matched with transactions",
+      title: "Document automatically matched to transaction",
+      with_details:
+        'Automatically matched "{documentName}" to transaction "{transactionName}" ({amount})',
+      with_names:
+        'Automatically matched "{documentName}" to "{transactionName}"',
+    },
+    inbox_needs_review: {
+      name: "Needs Review",
+      description:
+        "Get notified when potential matches are found that need your review",
+      title: "Document needs review - potential match found",
+      with_details:
+        'Review needed: "{documentName}" might match "{transactionName}" ({amount})',
+      with_names:
+        'Review needed: "{documentName}" might match "{transactionName}"',
+    },
+    inbox_cross_currency_matched: {
+      name: "Cross-currency Match",
+      description:
+        "Get notified when documents are matched with transactions in different currencies",
+      title: "Cross-currency match found - amounts converted automatically",
+      with_details:
+        '"{documentName}" ({documentAmount}) matched with "{transactionName}" ({transactionAmount})',
+      with_names:
+        '"{documentName}" matched with "{transactionName}" (different currencies)',
+    },
     default: {
       title: "New activity detected",
     },
