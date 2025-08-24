@@ -46,7 +46,6 @@ export async function calculateInboxSuggestions(
       currencyScore: bestMatch.currencyScore,
       dateScore: bestMatch.dateScore,
       embeddingScore: bestMatch.embeddingScore,
-      nameScore: bestMatch.nameScore,
       matchType: "auto_matched",
       status: "confirmed", // Already confirmed by system
       matchDetails: {
@@ -84,7 +83,6 @@ export async function calculateInboxSuggestions(
     currencyScore: bestMatch.currencyScore,
     dateScore: bestMatch.dateScore,
     embeddingScore: bestMatch.embeddingScore,
-    nameScore: bestMatch.nameScore,
     matchType: bestMatch.matchType,
     status: "pending",
     matchDetails: {
@@ -94,7 +92,6 @@ export async function calculateInboxSuggestions(
         currency: bestMatch.currencyScore,
         date: bestMatch.dateScore,
         embedding: bestMatch.embeddingScore,
-        name: bestMatch.nameScore,
       },
     },
   });
