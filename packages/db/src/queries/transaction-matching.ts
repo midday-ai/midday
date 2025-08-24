@@ -1040,7 +1040,6 @@ function calculateCurrencyScore(
   currency2?: string,
   teamBaseCurrency?: string,
 ): number {
-  0;
   if (!currency1 || !currency2) return 0.5;
 
   // HIGHEST PRIORITY: Exact currency match

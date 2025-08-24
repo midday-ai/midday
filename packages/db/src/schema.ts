@@ -197,6 +197,9 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "transactions_created",
   "invoice_paid",
   "inbox_new",
+  "inbox_auto_matched",
+  "inbox_needs_review",
+  "inbox_cross_currency_matched",
   "invoice_overdue",
   "invoice_sent",
 
