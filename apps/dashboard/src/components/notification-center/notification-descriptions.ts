@@ -425,14 +425,13 @@ const handleInboxNeedsReview: NotificationDescriptionHandler = (
           transactionAmount: formattedTransAmount,
         },
       );
-    } else {
-      return t("notifications.inbox_needs_review.cross_currency_suggested", {
-        documentName,
-        transactionName,
-        documentAmount: formattedDocAmount,
-        transactionAmount: formattedTransAmount,
-      });
     }
+    return t("notifications.inbox_needs_review.cross_currency_suggested", {
+      documentName,
+      transactionName,
+      documentAmount: formattedDocAmount,
+      transactionAmount: formattedTransAmount,
+    });
   }
 
   // Handle same-currency matches
@@ -450,13 +449,12 @@ const handleInboxNeedsReview: NotificationDescriptionHandler = (
         transactionName,
         amount: formattedAmount,
       });
-    } else {
-      return t("notifications.inbox_needs_review.with_details", {
-        documentName,
-        transactionName,
-        amount: formattedAmount,
-      });
     }
+    return t("notifications.inbox_needs_review.with_details", {
+      documentName,
+      transactionName,
+      amount: formattedAmount,
+    });
   }
 
   if (documentName && transactionName) {
@@ -465,12 +463,11 @@ const handleInboxNeedsReview: NotificationDescriptionHandler = (
         documentName,
         transactionName,
       });
-    } else {
-      return t("notifications.inbox_needs_review.with_names", {
-        documentName,
-        transactionName,
-      });
     }
+    return t("notifications.inbox_needs_review.with_names", {
+      documentName,
+      transactionName,
+    });
   }
 
   return t("notifications.inbox_needs_review.title");
