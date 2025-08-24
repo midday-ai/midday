@@ -8,17 +8,7 @@ import {
   transactionMatchSuggestions,
   transactions,
 } from "@db/schema";
-import {
-  and,
-  cosineDistance,
-  desc,
-  eq,
-  inArray,
-  isNotNull,
-  isNull,
-  lt,
-  sql,
-} from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 
 // Type definitions
 export type FindMatchesParams = {
@@ -398,7 +388,7 @@ export async function findMatches(
       recurring: transactions.recurring,
 
       embeddingScore:
-        sql<number>`(${inboxEmbeddings.embedding} <=> ${transactionEmbeddings.embedding})`.as(
+        sql<number>`(${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding})`.as(
           "embedding_score",
         ),
       isAlreadyMatched: sql<boolean>`false`,
@@ -416,28 +406,28 @@ export async function findMatches(
         // Check embeddings exist
         isNotNull(transactionEmbeddings.embedding),
         isNotNull(inboxEmbeddings.embedding),
-        // Fixed sophisticated multi-tier matching logic with proper thresholds
+        // Fixed sophisticated multi-tier matching logic with proper thresholds using cosine_distance
         sql`(
-          -- TIER 1: Perfect financial matches (regular currency) with relaxed semantic requirements
-          (ABS(${transactions.amount} - ${inboxAmount}) < 0.01 
-           AND ${transactions.currency} = ${inboxCurrency}
-           AND (${inboxEmbeddings.embedding} <=> ${transactionEmbeddings.embedding}) < 0.6)
-          OR
-          -- TIER 1B: Perfect base currency matches (absolute values, relaxed tolerance)
-          (ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ABS(${inboxBaseAmount})) < 10
-           AND COALESCE(${transactions.baseCurrency}, '') = ${inboxBaseCurrency}
-           AND ${transactions.baseCurrency} IS NOT NULL 
-           AND ${inboxBaseCurrency} != ''
-           AND (${inboxEmbeddings.embedding} <=> ${transactionEmbeddings.embedding}) < 0.6)
-          OR
-          -- TIER 2: Strong semantic matches with moderate financial alignment  
-          ((${inboxEmbeddings.embedding} <=> ${transactionEmbeddings.embedding}) < 0.35
-           AND ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < ${tier2Tolerance})
-          OR
-          -- TIER 3: Good semantic matches with loose financial alignment
-          ((${inboxEmbeddings.embedding} <=> ${transactionEmbeddings.embedding}) < 0.45
-           AND ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < ${tier3Tolerance})
-        )`,
+           -- TIER 1: Perfect financial matches (regular currency) with relaxed semantic requirements
+           (ABS(${transactions.amount} - ${inboxAmount}) < 0.01 
+            AND ${transactions.currency} = ${inboxCurrency}
+            AND (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.6)
+           OR
+           -- TIER 1B: Perfect base currency matches (absolute values, relaxed tolerance)
+           (ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ABS(${inboxBaseAmount})) < 10
+            AND COALESCE(${transactions.baseCurrency}, '') = ${inboxBaseCurrency}
+            AND ${transactions.baseCurrency} IS NOT NULL 
+            AND ${inboxBaseCurrency} != ''
+            AND (${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.6)
+           OR
+           -- TIER 2: Strong semantic matches with moderate financial alignment  
+           ((${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.35
+            AND ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < ${tier2Tolerance})
+           OR
+           -- TIER 3: Good semantic matches with loose financial alignment
+           ((${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.45
+            AND ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < ${tier3Tolerance})
+         )`,
         // Sophisticated date logic with banking delays and document-type awareness
         sql`(
           -- Perfect financial matches with accounting-aware date ranges
@@ -445,37 +435,37 @@ export async function findMatches(
            OR (ABS(ABS(COALESCE(${transactions.baseAmount}, 0)) - ABS(${inboxBaseAmount})) < 10
                AND COALESCE(${transactions.baseCurrency}, '') = ${inboxBaseCurrency} 
                AND ${transactions.baseCurrency} IS NOT NULL AND ${inboxBaseCurrency} != ''))
-          AND (
-            -- Expense receipts: transaction usually happens BEFORE receipt (with banking delay)
-            (${inboxType} = 'expense' 
-             AND ${transactions.date} BETWEEN ${inboxItem.date}::date - INTERVAL '${sql.raw(perfectExpenseStart)}' 
-                 AND ${inboxItem.date}::date + INTERVAL '${sql.raw(perfectExpenseEnd)}')
-            OR
-            -- Invoices: payment usually happens AFTER invoice (with banking delay)  
-            (${inboxType} = 'invoice'
-             AND ${transactions.date} BETWEEN ${inboxItem.date}::date - INTERVAL '${sql.raw(perfectInvoiceStart)}'
-                 AND ${inboxItem.date}::date + INTERVAL '${sql.raw(perfectInvoiceEnd)}')
-          )
-          OR
-          -- Strong semantic matches with accounting logic
-          ((${inboxEmbeddings.embedding} <=> ${transactionEmbeddings.embedding}) < 0.3
-           AND ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < 5.0
-           AND (
-             -- Expense receipts: moderate backward range (with banking delay)
-             (${inboxType} = 'expense'
-              AND ${transactions.date} BETWEEN ${inboxItem.date}::date - INTERVAL '${sql.raw(semanticExpenseStart)}'
-                  AND ${inboxItem.date}::date + INTERVAL '${sql.raw(semanticExpenseEnd)}')
+                     AND (
+             -- Expense receipts: transaction usually happens BEFORE receipt (with banking delay)
+             (${inboxType} = 'expense' 
+              AND ${transactions.date}::date BETWEEN ${sql.raw(`'${inboxItem.date}'::date`)} - INTERVAL '${sql.raw(perfectExpenseStart)}' 
+                  AND ${sql.raw(`'${inboxItem.date}'::date`)} + INTERVAL '${sql.raw(perfectExpenseEnd)}')
              OR
-             -- Invoices: extended forward range for payment terms (with banking delay)
+             -- Invoices: payment usually happens AFTER invoice (with banking delay)  
              (${inboxType} = 'invoice'
-              AND ${transactions.date} BETWEEN ${inboxItem.date}::date - INTERVAL '${sql.raw(semanticInvoiceStart)}'
-                  AND ${inboxItem.date}::date + INTERVAL '${sql.raw(semanticInvoiceEnd)}')
-           ))
+              AND ${transactions.date}::date BETWEEN ${sql.raw(`'${inboxItem.date}'::date`)} - INTERVAL '${sql.raw(perfectInvoiceStart)}'
+                  AND ${sql.raw(`'${inboxItem.date}'::date`)} + INTERVAL '${sql.raw(perfectInvoiceEnd)}')
+           )
           OR
-          -- Decent matches: conservative ranges (with banking delay)
-          ((${inboxEmbeddings.embedding} <=> ${transactionEmbeddings.embedding}) < 0.4
-           AND ${transactions.date} BETWEEN ${inboxItem.date}::date - INTERVAL '${sql.raw(conservativeStart)}'
-               AND ${inboxItem.date}::date + INTERVAL '${sql.raw(conservativeEnd)}')
+                     -- Strong semantic matches with accounting logic
+           ((${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.3
+            AND ABS(ABS(${transactions.amount}) - ABS(${inboxAmount})) < 5.0
+            AND (
+              -- Expense receipts: moderate backward range (with banking delay)
+              (${inboxType} = 'expense'
+               AND ${transactions.date}::date BETWEEN ${sql.raw(`'${inboxItem.date}'::date`)} - INTERVAL '${sql.raw(semanticExpenseStart)}'
+                   AND ${sql.raw(`'${inboxItem.date}'::date`)} + INTERVAL '${sql.raw(semanticExpenseEnd)}')
+              OR
+              -- Invoices: extended forward range for payment terms (with banking delay)
+              (${inboxType} = 'invoice'
+               AND ${transactions.date}::date BETWEEN ${sql.raw(`'${inboxItem.date}'::date`)} - INTERVAL '${sql.raw(semanticInvoiceStart)}'
+                   AND ${sql.raw(`'${inboxItem.date}'::date`)} + INTERVAL '${sql.raw(semanticInvoiceEnd)}')
+            ))
+           OR
+           -- Decent matches: conservative ranges (with banking delay)
+           ((${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding}) < 0.4
+            AND ${transactions.date}::date BETWEEN ${sql.raw(`'${inboxItem.date}'::date`)} - INTERVAL '${sql.raw(conservativeStart)}'
+                AND ${sql.raw(`'${inboxItem.date}'::date`)} + INTERVAL '${sql.raw(conservativeEnd)}')
         )`,
         // Exclude transactions that already have attachments (are already matched)
         sql`NOT EXISTS (SELECT 1 FROM ${transactionAttachments} 
@@ -487,8 +477,8 @@ export async function findMatches(
       // Multi-criteria ordering: amount accuracy, currency match, similarity, date proximity
       sql`ABS(${transactions.amount} - COALESCE(${inboxItem.amount}, 0)) ASC`,
       sql`CASE WHEN ${transactions.currency} = COALESCE(${inboxItem.currency}, '') THEN 0 ELSE 1 END ASC`,
-      sql`(${inboxEmbeddings.embedding} <=> ${transactionEmbeddings.embedding})`,
-      sql`ABS(${transactions.date}::date - ${inboxItem.date}::date) ASC`,
+      sql`(${inboxEmbeddings.embedding} <-> ${transactionEmbeddings.embedding})`,
+      sql`ABS(${transactions.date}::date - ${sql.raw(`'${inboxItem.date}'::date`)}) ASC`,
     )
     .limit(20);
 
@@ -798,9 +788,10 @@ export async function findInboxMatches(
         date: sql<string>`COALESCE(${inbox.date}, ${inbox.createdAt}::date)`,
         website: inbox.website,
         description: inbox.description,
-        embeddingScore: sql<number>`
-          (${transactionEmbeddings.embedding} <=> ${inboxEmbeddings.embedding})::DOUBLE PRECISION
-        `.as("embedding_score"),
+        embeddingScore:
+          sql<number>`(${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding})`.as(
+            "embedding_score",
+          ),
         isAlreadyMatched: sql<boolean>`${inbox.transactionId} IS NOT NULL`,
       })
       .from(inbox)
@@ -813,19 +804,19 @@ export async function findInboxMatches(
 
           // Enhanced embedding similarity with financial context - same tiered approach
           sql`(
-            -- TIER 1: Perfect financial matches get relaxed semantic requirements
-            ((ABS(${inbox.amount} - ${transactionItem.amount}) < 0.01 
-              AND ${inbox.currency} = ${transactionItem.currency})
-             AND (${transactionEmbeddings.embedding} <=> ${inboxEmbeddings.embedding}) < 0.6)
-            OR
-            -- TIER 2: Strong semantic matches with moderate financial alignment
-            ((${transactionEmbeddings.embedding} <=> ${inboxEmbeddings.embedding}) < 0.35
-             AND ABS(COALESCE(${inbox.amount}, 0) - ${transactionItem.amount}) < ${Math.max(50, transactionItem.amount * 0.1)})
-            OR
-            -- TIER 3: Good semantic matches with loose financial alignment
-            ((${transactionEmbeddings.embedding} <=> ${inboxEmbeddings.embedding}) < 0.45
-             AND ABS(COALESCE(${inbox.amount}, 0) - ${transactionItem.amount}) < ${Math.max(100, transactionItem.amount * 0.2)})
-          )`,
+             -- TIER 1: Perfect financial matches get relaxed semantic requirements
+             ((ABS(${inbox.amount} - ${transactionItem.amount}) < 0.01 
+               AND ${inbox.currency} = ${transactionItem.currency})
+              AND (${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding}) < 0.6)
+             OR
+             -- TIER 2: Strong semantic matches with moderate financial alignment
+             ((${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding}) < 0.35
+              AND ABS(COALESCE(${inbox.amount}, 0) - ${transactionItem.amount}) < ${Math.max(50, transactionItem.amount * 0.1)})
+             OR
+             -- TIER 3: Good semantic matches with loose financial alignment
+             ((${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding}) < 0.45
+              AND ABS(COALESCE(${inbox.amount}, 0) - ${transactionItem.amount}) < ${Math.max(100, transactionItem.amount * 0.2)})
+           )`,
 
           // Wider date range for semantic search
           sql`COALESCE(${inbox.date}, ${inbox.createdAt}::date) BETWEEN ${transactionItem.date}::date - INTERVAL '90 days' 
@@ -836,7 +827,7 @@ export async function findInboxMatches(
         ),
       )
       .orderBy(
-        sql`(${transactionEmbeddings.embedding} <=> ${inboxEmbeddings.embedding}) ASC`,
+        sql`(${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding})`,
       )
       .limit(20);
   }
