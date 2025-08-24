@@ -1050,7 +1050,7 @@ export async function findMatches(
       logger.error("❌ CANDIDATE PROCESSING ERROR", {
         error: error instanceof Error ? error.message : String(error),
         transactionId: candidate?.transactionId,
-        inboxId: inboxItem.inboxId,
+        inboxId: inboxItem.id,
         candidateData: {
           name: candidate?.name,
           amount: candidate?.amount,
