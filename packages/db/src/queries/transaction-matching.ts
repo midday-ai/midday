@@ -20,9 +20,9 @@ const EMBEDDING_THRESHOLDS = {
 
 const CALIBRATION_LIMITS = {
   MAX_ADJUSTMENT: 0.03, // Max 3% threshold adjustment per calibration
-  MIN_SAMPLES_AUTO: 3, // Minimum samples for auto-match calibration (lower threshold)
-  MIN_SAMPLES_SUGGESTED: 5, // Minimum samples for suggested-match calibration
-  MIN_SAMPLES_CONSERVATIVE: 8, // Higher threshold for aggressive adjustments
+  MIN_SAMPLES_AUTO: 2, // Minimum samples for auto-match calibration (lower threshold)
+  MIN_SAMPLES_SUGGESTED: 3, // Minimum samples for suggested-match calibration
+  MIN_SAMPLES_CONSERVATIVE: 5, // Higher threshold for aggressive adjustments
 } as const;
 
 export type FindMatchesParams = {
@@ -118,7 +118,7 @@ export async function getTeamCalibration(
 ): Promise<TeamCalibrationData> {
   // Default weights for fallback
   const defaultAutoThreshold = 0.95;
-  const defaultSuggestedThreshold = 0.7;
+  const defaultSuggestedThreshold = 0.6;
 
   // Get historical performance data from last 90 days
   const performanceData = await db
@@ -312,17 +312,24 @@ export async function findMatches(
   // Get team-specific calibrated thresholds based on user feedback
   const calibration = await getTeamCalibration(db, teamId);
 
-  // Log calibration for debugging
-  logger.info("🔧 CALIBRATION DEBUG", {
-    teamId,
-    originalAutoThreshold: 0.95,
-    originalSuggestedThreshold: 0.7,
-    calibratedAutoThreshold: calibration.calibratedAutoThreshold,
-    calibratedSuggestedThreshold: calibration.calibratedSuggestedThreshold,
-    totalSuggestions: calibration.totalSuggestions,
-    autoMatchAccuracy: calibration.autoMatchAccuracy,
-    suggestedMatchAccuracy: calibration.suggestedMatchAccuracy,
-  });
+  // Log calibration for debugging - only when thresholds are adjusted
+  const thresholdAdjusted =
+    calibration.calibratedSuggestedThreshold !== 0.6 ||
+    calibration.calibratedAutoThreshold !== 0.95;
+
+  if (thresholdAdjusted) {
+    logger.info("🔧 CALIBRATION ACTIVE", {
+      teamId,
+      originalAutoThreshold: 0.95,
+      originalSuggestedThreshold: 0.6,
+      calibratedAutoThreshold: calibration.calibratedAutoThreshold,
+      calibratedSuggestedThreshold: calibration.calibratedSuggestedThreshold,
+      adjustmentReason: `Based on ${calibration.totalSuggestions} past suggestions (${calibration.confirmedSuggestions} confirmed, ${calibration.declinedSuggestions} declined). Accuracy: ${(calibration.suggestedMatchAccuracy * 100).toFixed(1)}%`,
+      totalSuggestions: calibration.totalSuggestions,
+      autoMatchAccuracy: calibration.autoMatchAccuracy,
+      suggestedMatchAccuracy: calibration.suggestedMatchAccuracy,
+    });
+  }
 
   // Balanced production weights - embeddings handle semantic name matching
   const teamWeights = {
@@ -795,10 +802,24 @@ export async function findMatches(
           : 0.5; // Neutral score when no inbox embedding available
 
       const amountScore = calculateAmountScore(inboxItem, candidate);
+
+      // Debug amount scoring for first candidate
+      if (candidate === candidateTransactions[0]) {
+        console.log(
+          `💰 AMOUNT DEBUG: inbox=${inboxItem.amount} ${inboxItem.currency}, candidate=${candidate.amount} ${candidate.currency}, score=${amountScore}`,
+        );
+      }
       const currencyScore = calculateCurrencyScore(
         inboxItem.currency || undefined,
         candidate.currency || undefined,
       );
+
+      // Debug currency scoring for first candidate
+      if (candidate === candidateTransactions[0]) {
+        console.log(
+          `💱 CURRENCY DEBUG: inbox="${inboxItem.currency}", candidate="${candidate.currency}", score=${currencyScore}`,
+        );
+      }
       const dateScore = calculateDateScore(
         inboxItem.date,
         candidate.date,
@@ -946,6 +967,13 @@ export async function findMatches(
         meetsCriteria: confidenceScore >= debugThreshold,
       });
 
+      // Debug the first candidate
+      if (candidate === candidateTransactions[0]) {
+        console.log(
+          `🔍 FIRST CANDIDATE: score=${confidenceScore}, debugThreshold=${debugThreshold}, meets=${confidenceScore >= debugThreshold}`,
+        );
+      }
+
       // Only consider if it meets minimum threshold
       if (confidenceScore >= debugThreshold) {
         // Simple tie-breaking: confidence first, then let SQL ordering handle the rest
@@ -1074,40 +1102,10 @@ export async function findMatches(
   }
 
   // Log comprehensive scoring analysis to debug wrong suggestions
-  logger.info("🔍 SCORING ANALYSIS - Why this suggestion?", {
-    inboxId,
-    teamId,
-    inboxItem: {
-      displayName: inboxItem.displayName,
-      amount: inboxItem.amount,
-      currency: inboxItem.currency,
-      type: inboxItem.type,
-      date: inboxItem.date,
-    },
-    teamWeights,
-    thresholds: {
-      suggested: teamWeights.suggestedMatchThreshold,
-      auto: teamWeights.autoMatchThreshold,
-    },
-    totalCandidatesEvaluated: candidateTransactions.length,
-    candidatesMeetingThreshold: scoringDetails.filter((s) => s.meetsCriteria)
-      .length,
-    allScoringDetails: scoringDetails.sort(
-      (a, b) => b.finalConfidence - a.finalConfidence,
-    ),
-    topRejectedCandidates: scoringDetails
-      .filter((s) => !s.meetsCriteria)
-      .sort((a, b) => b.finalConfidence - a.finalConfidence)
-      .slice(0, 5)
-      .map((s) => ({
-        transactionId: s.transactionId,
-        name: s.name,
-        confidence: s.finalConfidence,
-        threshold: teamWeights.suggestedMatchThreshold,
-        shortfall: teamWeights.suggestedMatchThreshold - s.finalConfidence,
-        scores: s.scores,
-      })),
-  });
+  logger.info("🔍 SCORING ANALYSIS - Why this suggestion?");
+  console.log(
+    `🎯 THRESHOLD DEBUG: bestMatch=${bestMatch?.confidenceScore}, threshold=${teamWeights.suggestedMatchThreshold}, meets=${bestMatch && bestMatch.confidenceScore >= teamWeights.suggestedMatchThreshold}`,
+  );
 
   // Log the final match result
   if (bestMatch) {

@@ -8,6 +8,7 @@ import {
   transactionCategories,
   transactionEmbeddings,
   type transactionFrequencyEnum,
+  transactionMatchSuggestions,
   transactionTags,
   transactions,
   users,

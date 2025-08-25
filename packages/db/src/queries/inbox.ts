@@ -3,6 +3,7 @@ import {
   inbox,
   inboxAccounts,
   transactionAttachments,
+  transactionMatchSuggestions,
   transactions,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
@@ -146,12 +147,49 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
         name: transactions.name,
         date: transactions.date,
       },
+      suggestion: {
+        id: transactionMatchSuggestions.id,
+        transactionId: transactionMatchSuggestions.transactionId,
+        confidenceScore: transactionMatchSuggestions.confidenceScore,
+        matchType: transactionMatchSuggestions.matchType,
+        status: transactionMatchSuggestions.status,
+      },
     })
     .from(inbox)
     .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
     .leftJoin(inboxAccounts, eq(inbox.inboxAccountId, inboxAccounts.id))
+    .leftJoin(
+      transactionMatchSuggestions,
+      and(
+        eq(transactionMatchSuggestions.inboxId, inbox.id),
+        eq(transactionMatchSuggestions.status, "pending"),
+      ),
+    )
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
+
+  // If there's a suggestion, get the suggested transaction details
+  if (result?.suggestion?.transactionId) {
+    const [suggestedTransaction] = await db
+      .select({
+        id: transactions.id,
+        name: transactions.name,
+        amount: transactions.amount,
+        currency: transactions.currency,
+        date: transactions.date,
+      })
+      .from(transactions)
+      .where(eq(transactions.id, result.suggestion.transactionId))
+      .limit(1);
+
+    return {
+      ...result,
+      suggestion: {
+        ...result.suggestion,
+        suggestedTransaction,
+      },
+    };
+  }
 
   return result;
 }

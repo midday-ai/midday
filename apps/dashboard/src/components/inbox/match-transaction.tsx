@@ -15,7 +15,8 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { TransactionMatchItem } from "./transaction-match-item";
 import { TransactionUnmatchItem } from "./transaction-unmatch-item";
@@ -32,6 +33,7 @@ export function MatchTransaction() {
     "inbox-include-already-matched",
     true,
   );
+  const previousStatusRef = useRef<string | null>(null);
 
   const id = params.inboxId;
 
@@ -165,12 +167,38 @@ export function MatchTransaction() {
     }
   }, [id]);
 
+  // Track status changes to detect transitions from suggested_match
+  useEffect(() => {
+    if (data?.status) {
+      previousStatusRef.current = data.status;
+    }
+  }, [data?.status]);
+
+  // Check if we're transitioning from suggested_match to show manual search
+  const isTransitioningFromSuggestion =
+    previousStatusRef.current === "suggested_match" &&
+    data?.status !== "suggested_match";
+
   if (data?.transactionId) {
     return <TransactionUnmatchItem />;
   }
 
   return (
-    <div className="bg-background h-12 relative">
+    <motion.div
+      key="match-transaction"
+      initial={
+        isTransitioningFromSuggestion
+          ? { opacity: 0.7, y: -20 }
+          : { opacity: 1, y: 0 }
+      }
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0.7, y: -20 }}
+      transition={{
+        duration: isTransitioningFromSuggestion ? 0.2 : 0,
+        ease: [0.4, 0.0, 0.2, 1],
+      }}
+      className="bg-background h-12 relative"
+    >
       <Combobox
         key={data?.transaction?.id}
         placeholder="Select a transaction"
@@ -210,6 +238,6 @@ export function MatchTransaction() {
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-    </div>
+    </motion.div>
   );
 }
