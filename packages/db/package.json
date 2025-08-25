@@ -1,14 +1,6 @@
 {
   "name": "@midday/db",
   "private": true,
-  "scripts": {
-    "test": "bun test src/queries/__tests__/*.test.ts",
-    "test:watch": "bun test --watch src/queries/__tests__/*.test.ts",
-    "test:golden": "bun test src/queries/__tests__/golden-regression.test.ts",
-    "test:unit": "bun test src/queries/__tests__/transaction-matching-fixed.test.ts",
-    "test:runner": "bun run src/queries/__tests__/run-tests.ts",
-    "test:coverage": "bun test --coverage"
-  },
   "exports": {
     "./client": "./src/client.ts",
     "./job-client": "./src/job-client.ts",
