@@ -147,11 +147,12 @@ export const inboxRouter = createTRPCRouter({
   // Decline a match suggestion
   declineMatch: protectedProcedure
     .input(declineMatchSchema)
-    .mutation(async ({ ctx: { db, session }, input }) => {
+    .mutation(async ({ ctx: { db, session, teamId }, input }) => {
       return declineSuggestedMatch(db, {
         suggestionId: input.suggestionId,
         inboxId: input.inboxId,
         userId: session.user.id,
+        teamId: teamId!,
       });
     }),
 });

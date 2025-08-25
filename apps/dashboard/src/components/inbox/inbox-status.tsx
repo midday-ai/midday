@@ -2,6 +2,7 @@
 
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Icons } from "@midday/ui/icons";
+import { Spinner } from "@midday/ui/spinner";
 import {
   Tooltip,
   TooltipContent,
@@ -16,18 +17,51 @@ type Props = {
 export function InboxStatus({ item }: Props) {
   if (item.status === "processing" || item.status === "new") {
     return (
-      <div className="flex space-x-1 items-center py-1 px-2 h-[26px]">
+      <div className="flex space-x-1 items-center px-1.5 py-0.5 h-[26px]">
         <span className="text-xs">Processing</span>
       </div>
     );
   }
 
-  if (item?.transactionId) {
+  if (item.status === "analyzing") {
     return (
-      <div className="flex space-x-1 items-center py-1 px-2 h-[26px]">
-        <Icons.Check />
-        <span className="text-xs">Done</span>
-      </div>
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex space-x-1 items-center p-1 text-[#878787] text-[10px] px-1.5 py-0.5 cursor-default font-mono border">
+              <Spinner size={14} className="stroke-primary" />
+              <span>Analyzing</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={20} className="text-xs">
+            <p>
+              We're reviewing the file and checking <br />
+              for a matching transaction
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  if (item.status === "suggested_match") {
+    return (
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex space-x-1.5 items-center px-1.5 py-0.5 text-[10px] cursor-default font-mono border">
+              <div className="w-1.5 h-1.5 bg-[#FFD02B] rounded-full" />
+              <span>Suggested match</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={20} className="text-xs">
+            <p>
+              We found a possible match — confirm <br />
+              or dismiss it
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   }
 
@@ -36,14 +70,14 @@ export function InboxStatus({ item }: Props) {
       <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="p-1 text-[#878787] bg-[#F2F1EF] text-[11px] dark:bg-[#1D1D1D] px-3 py-1 rounded-full cursor-default font-mono inline-block">
+            <div className="p-1 text-[10px] px-1.5 py-0.5 cursor-default font-mono inline-block border">
               <span>Pending</span>
             </div>
           </TooltipTrigger>
           <TooltipContent sideOffset={20} className="text-xs">
             <p>
-              We will try to match against incoming <br />
-              transactions for up to 45 days
+              We didn't find a match yet — we'll check <br />
+              again when new transactions arrive
             </p>
           </TooltipContent>
         </Tooltip>
@@ -51,12 +85,24 @@ export function InboxStatus({ item }: Props) {
     );
   }
 
-  if (item.status === "done") {
+  if (item.status === "done" || item?.transactionId) {
     return (
-      <div className="flex space-x-1 items-center py-1 px-2 h-[26px]">
-        <Icons.Check />
-        <span className="text-xs">Done</span>
-      </div>
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex space-x-1 items-center px-1.5 py-0.5 text-[10px] cursor-default font-mono border">
+              <Icons.Check className="size-3.5 mt-[1px]" />
+              <span>Matched</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={20} className="text-xs">
+            <p>
+              This file has been successfully <br />
+              matched to a transaction
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   }
 
@@ -64,16 +110,14 @@ export function InboxStatus({ item }: Props) {
     <TooltipProvider delayDuration={0}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="flex space-x-1 items-center">
-            <Icons.Error />
-            <span>Needs review</span>
+          <div className="flex space-x-1 items-center border px-1.5 py-0.5">
+            <span>No match</span>
           </div>
         </TooltipTrigger>
         <TooltipContent sideOffset={20} className="text-xs">
           <p>
-            We could not find a matching transaction
-            <br />
-            please select the transaction manually
+            We couldn't find a match — please <br />
+            select the transaction manually
           </p>
         </TooltipContent>
       </Tooltip>
