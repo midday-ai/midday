@@ -2,8 +2,7 @@
 
 import { FileViewer } from "@/components/file-viewer";
 import { FormatAmount } from "@/components/format-amount";
-import { MatchTransaction } from "@/components/inbox/match-transaction";
-import { SuggestedMatch } from "@/components/inbox/suggested-match";
+import { InboxActions } from "@/components/inbox/inbox-actions";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -129,16 +128,7 @@ export function InboxSheetDetails() {
         )}
 
         <div className="absolute bottom-4 z-10 left-4 right-4">
-          {data?.status === "suggested_match" && !data?.transactionId && (
-            <SuggestedMatch key="suggested-match" inboxId={params.inboxId!} />
-          )}
-
-          {!data?.suggestion && data?.status !== "done" && (
-            <MatchTransaction
-              key="match-transaction"
-              inboxId={params.inboxId!}
-            />
-          )}
+          <InboxActions data={data} />
         </div>
       </div>
 

@@ -95,14 +95,11 @@ export function SuggestedMatch() {
   return (
     <motion.div
       key="suggested-match"
-      initial={{ opacity: 0.7, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0.7, y: 20 }}
-      transition={{
-        duration: 0.2,
-        ease: [0.4, 0.0, 0.2, 1],
-      }}
-      className="backdrop-filter backdrop-blur-2xl bg-white/60 dark:bg-black/90 p-4 space-y-4 border dark:border-[#2C2C2C] border-[#DCDAD2]"
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 100, opacity: 0 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      className="bg-white/95 dark:bg-black/95 p-4 space-y-4 border dark:border-[#2C2C2C] border-[#DCDAD2] shadow-sm"
     >
       <div className="flex items-center justify-between gap-2 text-sm bg-muted/50">
         <div className="flex flex-col gap-2">
