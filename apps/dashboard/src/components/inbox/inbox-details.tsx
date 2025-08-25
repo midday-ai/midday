@@ -41,6 +41,7 @@ import { SuggestedMatch } from "./suggested-match";
 
 export function InboxDetails() {
   const { setParams, params } = useInboxParams();
+
   const { params: filterParams } = useInboxFilterParams();
   const trpc = useTRPC();
   const queryClient = useQueryClient();

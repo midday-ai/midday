@@ -6,6 +6,7 @@ import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import { Skeleton } from "@midday/ui/skeleton";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FilePreview } from "./file-preview";
@@ -16,15 +17,17 @@ type Suggestion = NonNullable<
 >["suggestion"];
 
 type SuggestedMatchProps = {
-  suggestion: Suggestion;
+  suggestion?: Suggestion;
   transactionId: string;
   className?: string;
+  isLoading?: boolean;
 };
 
 export function SuggestedMatch({
   suggestion,
   transactionId,
   className,
+  isLoading,
 }: SuggestedMatchProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -59,7 +62,7 @@ export function SuggestedMatch({
   );
 
   const handleConfirm = async () => {
-    if (!suggestion.suggestionId || !suggestion.inboxId) return;
+    if (!suggestion?.suggestionId || !suggestion?.inboxId) return;
 
     confirmMutation.mutate({
       suggestionId: suggestion.suggestionId,
@@ -69,7 +72,7 @@ export function SuggestedMatch({
   };
 
   const handleDecline = async () => {
-    if (!suggestion.suggestionId || !suggestion.inboxId) return;
+    if (!suggestion?.suggestionId || !suggestion?.inboxId) return;
 
     declineMutation.mutate({
       suggestionId: suggestion.suggestionId,
@@ -105,24 +108,57 @@ export function SuggestedMatch({
     }
   };
 
-  const documentName = suggestion.documentName || "Document";
-  const mimeType = getMimeType(suggestion.documentPath);
-  const filePath = suggestion.documentPath
+  const documentName = suggestion?.documentName || "Document";
+  const mimeType = getMimeType(suggestion?.documentPath || null);
+  const filePath = suggestion?.documentPath
     ? suggestion.documentPath.join("/")
     : null;
+
+  if (isLoading) {
+    return (
+      <div className={cn("space-y-4", className)}>
+        <div className="flex items-center space-x-2 text-sm">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-3 w-20" />
+        </div>
+
+        <div className="border border-border overflow-hidden">
+          {/* Document Preview Skeleton */}
+          <div className="relative bg-[#F6F6F3] dark:bg-[#1A1A1A] p-4 h-[300px] flex items-center justify-center">
+            <Skeleton className="w-full h-full max-w-[248px]" />
+          </div>
+
+          <div className="p-4 border-t border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <Skeleton className="h-4 w-32 mb-2" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+              <Skeleton className="h-4 w-16" />
+            </div>
+
+            <div className="flex gap-2 mt-4">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("space-y-4", className)}>
       <div className="flex items-center space-x-2 text-sm">
         <span>Suggested match</span>
         <span className="text-xs text-[#878787]">
-          ({Math.round((suggestion.confidenceScore || 0) * 100)}% confidence)
+          ({Math.round((suggestion?.confidenceScore || 0) * 100)}% confidence)
         </span>
       </div>
 
       <div className="border border-border overflow-hidden">
         {/* Document Preview */}
-        <div className="relative bg-[#F6F6F3] dark:bg-[#1A1A1A] p-4 min-h-[200px] flex items-center justify-center">
+        <div className="relative bg-[#F6F6F3] dark:bg-[#1A1A1A] p-4 h-[300px] flex items-center justify-center">
           {filePath && (
             <Button
               variant="ghost"
@@ -151,7 +187,7 @@ export function SuggestedMatch({
           <div className="flex items-center justify-between">
             <div>
               <h4 className="font-medium text-sm">{documentName}</h4>
-              {suggestion.documentAmount && suggestion.documentCurrency && (
+              {suggestion?.documentAmount && suggestion?.documentCurrency && (
                 <p className="text-[#606060] text-xs mt-1">
                   <FormatAmount
                     amount={suggestion.documentAmount}

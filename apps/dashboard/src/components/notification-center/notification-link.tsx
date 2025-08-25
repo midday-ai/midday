@@ -1,5 +1,6 @@
 "use client";
 
+import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useRouter } from "next/navigation";
@@ -15,6 +16,9 @@ const SUPPORTED_NOTIFICATION_TYPES = [
   "invoice_cancelled",
   "transactions_created",
   "inbox_new",
+  "inbox_needs_review",
+  "inbox_auto_matched",
+  "inbox_cross_currency_matched",
 ];
 
 export function isNotificationClickable(activityType: string): boolean {
@@ -42,6 +46,7 @@ export function NotificationLink({
 }: NotificationLinkProps) {
   const { setParams: setInvoiceParams } = useInvoiceParams();
   const { setParams: setTransactionParams } = useTransactionParams();
+  const { setParams: setInboxParams } = useInboxParams();
   const router = useRouter();
 
   const isClickable = isNotificationClickable(activityType);
@@ -73,6 +78,18 @@ export function NotificationLink({
 
         case "inbox_new":
           router.push("/inbox");
+          break;
+
+        case "inbox_needs_review":
+        case "inbox_auto_matched":
+        case "inbox_cross_currency_matched":
+          // Use the inboxId from metadata to open the inbox details sheet
+          if (metadata?.inboxId) {
+            setInboxParams({ inboxId: metadata.inboxId, type: "details" });
+          } else {
+            // Fallback to inbox page if no inboxId
+            router.push("/inbox");
+          }
           break;
 
         default:
