@@ -5,7 +5,7 @@ export const getInboxSchema = z.object({
   order: z.string().nullable().optional(),
   pageSize: z.coerce.number().min(1).max(100).optional(),
   q: z.string().nullable().optional(),
-  status: z.enum(["done", "pending"]).nullable().optional(),
+  status: z.enum(["done", "pending", "suggested_match"]).nullable().optional(),
 });
 
 export const inboxItemResponseSchema = z

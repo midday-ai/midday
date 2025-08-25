@@ -101,34 +101,33 @@ export function SuggestedMatch() {
       transition={{
         duration: 0.2,
         ease: [0.4, 0.0, 0.2, 1],
-        exit: { duration: 0.15, ease: [0.4, 0.0, 1, 1] },
       }}
       className="backdrop-filter backdrop-blur-2xl bg-white/60 dark:bg-black/90 p-4 space-y-4 border dark:border-[#2C2C2C] border-[#DCDAD2]"
     >
-      <div className="flex items-center">
-        <span className="text-sm font-medium">Suggested Match</span>
-        <div className="ml-auto text-xs text-muted-foreground">
-          {suggestion && Math.round(suggestion.confidenceScore * 100)}%
-          confidence
-        </div>
-      </div>
+      <div className="flex items-center justify-between gap-2 text-sm bg-muted/50">
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2 items-center">
+            <span className="truncate font-medium">
+              {hasSuggestedTransaction(suggestion)
+                ? suggestion.suggestedTransaction.name
+                : "Transaction"}
+            </span>
+            <span className="text-muted-foreground">
+              {hasSuggestedTransaction(suggestion) &&
+                formatDate(
+                  suggestion.suggestedTransaction.date,
+                  user?.dateFormat,
+                  true,
+                )}
+            </span>
+          </div>
 
-      <div className="flex items-center justify-between gap-2 text-sm bg-muted/50 rounded py-3">
-        <div className="flex gap-2 items-center">
-          <span className="truncate font-medium">
-            {hasSuggestedTransaction(suggestion)
-              ? suggestion.suggestedTransaction.name
-              : "Transaction"}
-          </span>
-          <span className="text-muted-foreground">
-            {hasSuggestedTransaction(suggestion) &&
-              formatDate(
-                suggestion.suggestedTransaction.date,
-                user?.dateFormat,
-                true,
-              )}
-          </span>
+          <div className="text-xs text-muted-foreground">
+            {suggestion && Math.round(suggestion.confidenceScore * 100)}%
+            confidence
+          </div>
         </div>
+
         <FormatAmount
           amount={
             hasSuggestedTransaction(suggestion)

@@ -1,7 +1,7 @@
 import type { Database } from "@db/client";
 import { inbox, transactionMatchSuggestions } from "@db/schema";
 import { and, eq, sql } from "drizzle-orm";
-import { matchTransaction } from "./inbox";
+import { matchTransaction, updateInbox } from "./inbox";
 import {
   type MatchResult,
   createMatchSuggestion,
@@ -18,16 +18,24 @@ export async function calculateInboxSuggestions(
 }> {
   const { teamId, inboxId } = params;
 
+  // Set status to analyzing while we process
+  await updateInbox(db, {
+    id: inboxId,
+    teamId,
+    status: "analyzing",
+  });
+
   // Find the best match using our matching algorithm
   const bestMatch = await findMatches(db, { teamId, inboxId });
 
   if (!bestMatch) {
     // Update inbox status to pending - we'll keep looking when new transactions arrive
     // The no_match status is only set by the scheduler after 90 days
-    await db
-      .update(inbox)
-      .set({ status: "pending" })
-      .where(eq(inbox.id, inboxId));
+    await updateInbox(db, {
+      id: inboxId,
+      teamId,
+      status: "pending",
+    });
 
     return { action: "no_match_yet" };
   }
@@ -97,10 +105,11 @@ export async function calculateInboxSuggestions(
   });
 
   // Update inbox status to indicate suggestion is available
-  await db
-    .update(inbox)
-    .set({ status: "suggested_match" })
-    .where(eq(inbox.id, inboxId));
+  await updateInbox(db, {
+    id: inboxId,
+    teamId,
+    status: "suggested_match",
+  });
 
   return {
     action: "suggestion_created",
@@ -148,9 +157,10 @@ export async function declineSuggestedMatch(
     suggestionId: string;
     inboxId: string;
     userId: string;
+    teamId: string;
   },
 ) {
-  const { suggestionId, inboxId, userId } = params;
+  const { suggestionId, inboxId, userId, teamId } = params;
 
   // Update suggestion status in transactionMatchSuggestions table
   await db
@@ -163,10 +173,11 @@ export async function declineSuggestedMatch(
     .where(eq(transactionMatchSuggestions.id, suggestionId));
 
   // Update inbox status back to 'pending' since suggestion was declined
-  await db
-    .update(inbox)
-    .set({ status: "pending" })
-    .where(eq(inbox.id, inboxId));
+  await updateInbox(db, {
+    id: inboxId,
+    teamId,
+    status: "pending",
+  });
 }
 
 // Get inbox items by status for easier querying

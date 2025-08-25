@@ -1,6 +1,6 @@
 import { getDb } from "@jobs/init";
 import { triggerMatchingNotification } from "@jobs/utils/inbox-matching-notifications";
-import { calculateInboxSuggestions } from "@midday/db/queries";
+import { calculateInboxSuggestions, updateInbox } from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
@@ -15,6 +15,13 @@ export const processInboxMatching = schemaTask({
   queue: { concurrencyLimit: 20 },
   run: async ({ teamId, inboxId }) => {
     logger.info("Processing inbox matching", { teamId, inboxId });
+
+    // Set status to analyzing at job level to ensure it's always set
+    await updateInbox(getDb(), {
+      id: inboxId,
+      teamId,
+      status: "analyzing",
+    });
 
     try {
       const result = await calculateInboxSuggestions(getDb(), {
@@ -69,6 +76,25 @@ export const processInboxMatching = schemaTask({
         inboxId,
         error: error instanceof Error ? error.message : "Unknown error",
       });
+
+      // Reset status to pending if matching fails
+      try {
+        await updateInbox(getDb(), {
+          id: inboxId,
+          teamId,
+          status: "pending",
+        });
+      } catch (statusError) {
+        logger.error("Failed to reset inbox status after error", {
+          teamId,
+          inboxId,
+          statusError:
+            statusError instanceof Error
+              ? statusError.message
+              : "Unknown error",
+        });
+      }
+
       throw error;
     }
   },
