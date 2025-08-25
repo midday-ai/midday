@@ -144,9 +144,19 @@ export function InboxDetails() {
     }),
   );
 
+  const retryMatchingMutation = useMutation(
+    trpc.inbox.retryMatching.mutationOptions(),
+  );
+
   const handleOnDelete = () => {
     if (data?.id) {
       deleteInboxMutation.mutate({ id: data.id });
+    }
+  };
+
+  const handleRetryMatching = () => {
+    if (data?.id) {
+      retryMatchingMutation.mutate({ id: data.id });
     }
   };
 
@@ -249,6 +259,14 @@ export function InboxDetails() {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleCopyLink}>
                   Copy Link
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleRetryMatching}
+                  disabled={retryMatchingMutation.isPending}
+                >
+                  {retryMatchingMutation.isPending
+                    ? "Processing..."
+                    : "Retry Matching"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
