@@ -16,7 +16,15 @@ export type GetInboxParams = {
   order?: string | null;
   pageSize?: number;
   q?: string | null;
-  status?: "new" | "archived" | "processing" | "done" | "pending" | null;
+  status?:
+    | "new"
+    | "archived"
+    | "processing"
+    | "done"
+    | "pending"
+    | "analyzing"
+    | "suggested_match"
+    | null;
 };
 
 export async function getInbox(db: Database, params: GetInboxParams) {
@@ -263,7 +271,15 @@ export async function getInboxSearch(
 export type UpdateInboxParams = {
   id: string;
   teamId: string;
-  status?: "deleted" | "new" | "archived" | "processing" | "done" | "pending";
+  status?:
+    | "deleted"
+    | "new"
+    | "archived"
+    | "processing"
+    | "done"
+    | "pending"
+    | "analyzing"
+    | "suggested_match";
 };
 
 export async function updateInbox(db: Database, params: UpdateInboxParams) {
