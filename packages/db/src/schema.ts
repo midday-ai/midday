@@ -1964,6 +1964,12 @@ export const transactionMatchSuggestions = pgTable(
       "btree",
       table.confidenceScore.desc().nullsLast(),
     ),
+    index("transaction_match_suggestions_lookup_idx").using(
+      "btree",
+      table.transactionId.asc().nullsLast().op("uuid_ops"),
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+      table.status.asc().nullsLast().op("text_ops"),
+    ),
     foreignKey({
       columns: [table.inboxId],
       foreignColumns: [inbox.id],

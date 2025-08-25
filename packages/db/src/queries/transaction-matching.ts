@@ -1097,7 +1097,7 @@ export async function findMatches(
   for (let i = 0; i < Math.min(3, sortedScoring.length); i++) {
     const s = sortedScoring[i];
     logger.info(
-      `🏆 #${i + 1}: ${s?.name} | Final: ${s?.finalConfidence.toFixed(3)} | Embedding: ${s?.scores.embedding?.toFixed(3)} | Amount: ${s?.scores.amount?.toFixed(3)} | Currency: ${s?.scores.currency?.toFixed(3)} | Date: ${s?.scores.date?.toFixed(3)} | Type: ${s?.scores.type?.toFixed(3)}`,
+      `🏆 #${i + 1}: ${s?.name} | Final: ${s?.finalConfidence.toFixed(3)} | Embedding: ${s?.scores.embedding?.toFixed(3)} | Amount: ${s?.scores.amount?.toFixed(3)} | Currency: ${s?.scores.currency?.toFixed(3)} | Date: ${s?.scores.date?.toFixed(3)}`,
     );
   }
 
