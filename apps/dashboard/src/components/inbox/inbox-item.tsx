@@ -19,6 +19,7 @@ export function InboxItem({ item, index }: Props) {
   const isSelected =
     params.inboxId === item.id || (!params.inboxId && index === 0);
   const isProcessing = item.status === "processing" || item.status === "new";
+  const isAnalyzing = item.status === "analyzing";
 
   return (
     <button

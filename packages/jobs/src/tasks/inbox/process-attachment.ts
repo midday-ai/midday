@@ -12,6 +12,7 @@ import { logger, schemaTask } from "@trigger.dev/sdk";
 import { convertHeic } from "../document/convert-heic";
 import { processDocument } from "../document/process-document";
 import { embedInbox } from "./embed-inbox";
+import { processInboxMatching } from "./process-inbox-matching";
 
 export const processAttachment = schemaTask({
   id: "process-attachment",
@@ -122,13 +123,24 @@ export const processAttachment = schemaTask({
         teamId,
       });
 
-      // Trigger embedding creation for the inbox item
-      await embedInbox.trigger({
+      // Create embedding and wait for completion
+      await embedInbox.triggerAndWait({
         inboxId: inboxData.id,
         teamId,
       });
 
-      logger.info("Triggered inbox embedding", {
+      logger.info("Inbox embedding completed", {
+        inboxId: inboxData.id,
+        teamId,
+      });
+
+      // After embedding is complete, trigger matching
+      await processInboxMatching.trigger({
+        teamId,
+        inboxId: inboxData.id,
+      });
+
+      logger.info("Triggered inbox matching", {
         inboxId: inboxData.id,
         teamId,
       });

@@ -29,6 +29,7 @@
     "sharp": "0.34.1"
   },
   "devDependencies": {
-    "@types/heic-convert": "2.1.0"
+    "@types/heic-convert": "2.1.0",
+    "@types/bun": "latest"
   }
 }

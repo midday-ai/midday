@@ -1,6 +1,9 @@
 import {
   documentProcessedSchema,
   documentUploadedSchema,
+  inboxAutoMatchedSchema,
+  inboxCrossCurrencyMatchedSchema,
+  inboxNeedsReviewSchema,
   inboxNewSchema,
   invoiceCancelledSchema,
   invoiceCreatedSchema,
@@ -280,6 +283,24 @@ export const notificationSchema = z.discriminatedUnion("type", [
       type: z.literal("document_processed"),
     })
     .merge(documentProcessedSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("inbox_auto_matched"),
+    })
+    .merge(inboxAutoMatchedSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("inbox_needs_review"),
+    })
+    .merge(inboxNeedsReviewSchema.omit({ users: true })),
+
+  baseJobSchema
+    .extend({
+      type: z.literal("inbox_cross_currency_matched"),
+    })
+    .merge(inboxCrossCurrencyMatchedSchema.omit({ users: true })),
 ]);
 
 export type NotificationPayload = z.infer<typeof notificationSchema>;

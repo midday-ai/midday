@@ -3,6 +3,7 @@ import {
   inbox,
   inboxAccounts,
   transactionAttachments,
+  transactionMatchSuggestions,
   transactions,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
@@ -15,7 +16,15 @@ export type GetInboxParams = {
   order?: string | null;
   pageSize?: number;
   q?: string | null;
-  status?: "new" | "archived" | "processing" | "done" | "pending" | null;
+  status?:
+    | "new"
+    | "archived"
+    | "processing"
+    | "done"
+    | "pending"
+    | "analyzing"
+    | "suggested_match"
+    | null;
 };
 
 export async function getInbox(db: Database, params: GetInboxParams) {
@@ -146,12 +155,49 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
         name: transactions.name,
         date: transactions.date,
       },
+      suggestion: {
+        id: transactionMatchSuggestions.id,
+        transactionId: transactionMatchSuggestions.transactionId,
+        confidenceScore: transactionMatchSuggestions.confidenceScore,
+        matchType: transactionMatchSuggestions.matchType,
+        status: transactionMatchSuggestions.status,
+      },
     })
     .from(inbox)
     .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
     .leftJoin(inboxAccounts, eq(inbox.inboxAccountId, inboxAccounts.id))
+    .leftJoin(
+      transactionMatchSuggestions,
+      and(
+        eq(transactionMatchSuggestions.inboxId, inbox.id),
+        eq(transactionMatchSuggestions.status, "pending"),
+      ),
+    )
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
+
+  // If there's a suggestion, get the suggested transaction details
+  if (result?.suggestion?.transactionId) {
+    const [suggestedTransaction] = await db
+      .select({
+        id: transactions.id,
+        name: transactions.name,
+        amount: transactions.amount,
+        currency: transactions.currency,
+        date: transactions.date,
+      })
+      .from(transactions)
+      .where(eq(transactions.id, result.suggestion.transactionId))
+      .limit(1);
+
+    return {
+      ...result,
+      suggestion: {
+        ...result.suggestion,
+        suggestedTransaction,
+      },
+    };
+  }
 
   return result;
 }
@@ -225,7 +271,15 @@ export async function getInboxSearch(
 export type UpdateInboxParams = {
   id: string;
   teamId: string;
-  status?: "deleted" | "new" | "archived" | "processing" | "done" | "pending";
+  status?:
+    | "deleted"
+    | "new"
+    | "archived"
+    | "processing"
+    | "done"
+    | "pending"
+    | "analyzing"
+    | "suggested_match";
 };
 
 export async function updateInbox(db: Database, params: UpdateInboxParams) {
@@ -335,7 +389,7 @@ export async function matchTransaction(
   }
 
   // Return updated inbox with transaction data
-  return db
+  const [data] = await db
     .select({
       id: inbox.id,
       fileName: inbox.fileName,
@@ -362,6 +416,8 @@ export async function matchTransaction(
     .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
+
+  return data;
 }
 
 export type UnmatchTransactionParams = {

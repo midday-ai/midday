@@ -37,7 +37,7 @@ export function translations(locale: string, params?: TranslationParams) {
             ? "new transactions"
             : "new transaction"
         }`,
-        "transactions.description4": `${params?.teamName ? `for your team ${params?.teamName}` : "for your account"}, we will try to match those against receipts in your inbox for up to 45 days. Additionally, you can simply reply to this email with the receipts.`,
+        "transactions.description4": `${params?.teamName ? `for your team ${params?.teamName}` : "for your account"}. We'll automatically match them against receipts in your inbox, or you can simply reply to this email with the receipts.`,
         "transactions.button": "View transactions",
         "transactions.settings": "Notification preferences",
         "transactions.amount": "Amount",
@@ -92,7 +92,7 @@ export function translations(locale: string, params?: TranslationParams) {
             ? "nya transaktioner"
             : "nya transaktion"
         }`,
-        "transactions.description4": `${params?.teamName ? `för ditt team ${params?.teamName}` : "på ditt konto"} som vi försöker matcha mot kvitton i din inkorg i upp till 45 dagar. Du kan också svara på detta email med dina kvitton.`,
+        "transactions.description4": `${params?.teamName ? `för ditt team ${params?.teamName}` : "på ditt konto"}. Vi matchar dem automatiskt mot kvitton i din inkorg, eller så kan du svara på detta email med dina kvitton.`,
         "transactions.button": "Visa transaktioner",
         "transactions.footer":
           " Nam imperdiet congue volutpat. Nulla quis facilisis lacus. Vivamus convallis sit amet lectus eget tincidunt. Vestibulum vehicula rutrum nisl, sed faucibus neque. Donec lacus mi, rhoncus at dictum eget, pulvinar at metus. Donec cursus tellus erat, a hendrerit elit rutrum ut. Fusce quis tristique ligula. Etiam sit amet enim vitae mauris auctor blandit id et nibh.",

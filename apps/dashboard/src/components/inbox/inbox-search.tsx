@@ -18,8 +18,10 @@ import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 const statusFilters = [
-  { id: "done", name: "Done" },
+  { id: "all", name: "All" },
+  { id: "done", name: "Matched" },
   { id: "pending", name: "Pending" },
+  { id: "suggested_match", name: "Suggested Match" },
 ];
 
 export function InboxSearch() {
@@ -99,13 +101,13 @@ export function InboxSearch() {
                 className="p-0"
               >
                 <DropdownMenuRadioGroup
-                  value={params.status ?? undefined}
+                  value={params.status ?? "all"}
                   onValueChange={(value) =>
                     setParams({
                       status:
-                        value === params.status
+                        value === "all"
                           ? null
-                          : (value as "done" | "pending" | null),
+                          : (value as "done" | "pending" | "suggested_match"),
                     })
                   }
                 >

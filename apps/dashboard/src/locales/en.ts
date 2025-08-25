@@ -182,6 +182,60 @@ export default {
       "upload_title#one": "A new document was uploaded to your inbox",
       "upload_title#other": "{count} new documents were uploaded to your inbox",
     },
+    inbox_auto_matched: {
+      name: "Auto-matched",
+      description:
+        "Get notified when documents are automatically matched with transactions",
+      title: "Document automatically matched",
+      with_details:
+        '"{documentName}" ({amount}) matched with "{transactionName}"',
+      with_names: '"{documentName}" matched with "{transactionName}"',
+      cross_currency_details:
+        '"{documentName}" ({documentAmount}) matched with "{transactionName}" ({transactionAmount})',
+    },
+    inbox_high_confidence: {
+      name: "High Confidence Match",
+      description:
+        "Get notified when high-confidence matches are found that likely need confirmation",
+      title: "Likely match found",
+      with_details:
+        '"{documentName}" ({amount}) likely matches "{transactionName}" • Confirm?',
+      with_names:
+        '"{documentName}" likely matches "{transactionName}" • Confirm?',
+      cross_currency_details:
+        '"{documentName}" ({documentAmount}) likely matches "{transactionName}" ({transactionAmount}) • Confirm?',
+    },
+    inbox_needs_review: {
+      name: "Needs Review",
+      description:
+        "Get notified when potential matches are found that need your review",
+      title: "Possible match found",
+      with_details:
+        '"{documentName}" ({amount}) might match "{transactionName}" • Review?',
+      with_names: '"{documentName}" might match "{transactionName}" • Review?',
+      high_confidence_details:
+        '"{documentName}" ({amount}) likely matches "{transactionName}" • Confirm?',
+      high_confidence_names:
+        '"{documentName}" likely matches "{transactionName}" • Confirm?',
+      cross_currency_high_confidence:
+        '"{documentName}" ({documentAmount}) likely matches "{transactionName}" ({transactionAmount}) • Confirm?',
+      cross_currency_suggested:
+        '"{documentName}" ({documentAmount}) might match "{transactionName}" ({transactionAmount}) • Review?',
+    },
+    inbox_cross_currency_matched: {
+      name: "Cross-currency Match",
+      description:
+        "Get notified when documents are matched with transactions in different currencies",
+      title: "Cross-currency match found",
+      with_details:
+        '"{documentName}" ({documentAmount}) might match "{transactionName}" ({transactionAmount}) • Review?',
+      with_names:
+        '"{documentName}" might match "{transactionName}" (different currencies) • Review?',
+      high_confidence_details:
+        '"{documentName}" ({documentAmount}) likely matches "{transactionName}" ({transactionAmount}) • Confirm?',
+      high_confidence_names:
+        '"{documentName}" likely matches "{transactionName}" (different currencies) • Confirm?',
+    },
     default: {
       title: "New activity detected",
     },

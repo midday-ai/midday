@@ -1,19 +1,26 @@
 import {
+  confirmMatchSchema,
+  declineMatchSchema,
   deleteInboxSchema,
   getInboxByIdSchema,
+  getInboxByStatusSchema,
   getInboxSchema,
   matchTransactionSchema,
   processAttachmentsSchema,
+  retryMatchingSchema,
   searchInboxSchema,
   unmatchTransactionSchema,
   updateInboxSchema,
 } from "@api/schemas/inbox";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
+  confirmSuggestedMatch,
+  declineSuggestedMatch,
   deleteInbox,
   deleteInboxEmbedding,
   getInbox,
   getInboxById,
+  getInboxByStatus,
   getInboxSearch,
   matchTransaction,
   unmatchTransaction,
@@ -113,5 +120,52 @@ export const inboxRouter = createTRPCRouter({
         id: input.id,
         teamId: teamId!,
       });
+    }),
+
+  // Get inbox items by status
+  getByStatus: protectedProcedure
+    .input(getInboxByStatusSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getInboxByStatus(db, {
+        teamId: teamId!,
+        status: input.status,
+      });
+    }),
+
+  // Confirm a match suggestion
+  confirmMatch: protectedProcedure
+    .input(confirmMatchSchema)
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
+      return confirmSuggestedMatch(db, {
+        teamId: teamId!,
+        suggestionId: input.suggestionId,
+        inboxId: input.inboxId,
+        transactionId: input.transactionId,
+        userId: session.user.id,
+      });
+    }),
+
+  // Decline a match suggestion
+  declineMatch: protectedProcedure
+    .input(declineMatchSchema)
+    .mutation(async ({ ctx: { db, session, teamId }, input }) => {
+      return declineSuggestedMatch(db, {
+        suggestionId: input.suggestionId,
+        inboxId: input.inboxId,
+        userId: session.user.id,
+        teamId: teamId!,
+      });
+    }),
+
+  // Retry matching for an inbox item
+  retryMatching: protectedProcedure
+    .input(retryMatchingSchema)
+    .mutation(async ({ ctx: { teamId }, input }) => {
+      const result = await tasks.trigger("process-inbox-matching", {
+        teamId: teamId!,
+        inboxId: input.id,
+      });
+
+      return { jobId: result.id };
     }),
 });

@@ -268,9 +268,273 @@ const handleInvoiceCreated: NotificationDescriptionHandler = (
   return t("notifications.invoice_created.title");
 };
 
+const handleInboxAutoMatched: NotificationDescriptionHandler = (
+  metadata,
+  user,
+  t,
+) => {
+  const documentName = metadata?.documentName;
+  const transactionName = metadata?.transactionName;
+  const documentAmount = metadata?.documentAmount;
+  const documentCurrency = metadata?.documentCurrency;
+  const transactionAmount = metadata?.transactionAmount;
+  const transactionCurrency = metadata?.transactionCurrency;
+  const amount = metadata?.amount; // Fallback
+  const currency = metadata?.currency; // Fallback
+
+  // Handle cross-currency auto-matches with both amounts
+  if (
+    documentName &&
+    transactionName &&
+    documentAmount &&
+    documentCurrency &&
+    transactionAmount &&
+    transactionCurrency &&
+    documentCurrency !== transactionCurrency
+  ) {
+    const formattedDocAmount =
+      formatAmount({
+        currency: documentCurrency,
+        amount: documentAmount,
+        locale: user?.locale || "en-US",
+      }) || `${documentAmount} ${documentCurrency}`;
+
+    const formattedTransAmount =
+      formatAmount({
+        currency: transactionCurrency,
+        amount: transactionAmount,
+        locale: user?.locale || "en-US",
+      }) || `${transactionAmount} ${transactionCurrency}`;
+
+    return t("notifications.inbox_auto_matched.cross_currency_details", {
+      documentName,
+      transactionName,
+      documentAmount: formattedDocAmount,
+      transactionAmount: formattedTransAmount,
+    });
+  }
+
+  // Handle same-currency or fallback to original logic
+  if (
+    documentName &&
+    transactionName &&
+    (documentAmount || amount) &&
+    (documentCurrency || currency)
+  ) {
+    const finalAmount = documentAmount || amount;
+    const finalCurrency = documentCurrency || currency;
+
+    const formattedAmount =
+      formatAmount({
+        currency: finalCurrency,
+        amount: finalAmount,
+        locale: user?.locale || "en-US",
+      }) ||
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: finalCurrency,
+      }).format(finalAmount);
+
+    return t("notifications.inbox_auto_matched.with_details", {
+      documentName,
+      transactionName,
+      amount: formattedAmount,
+    });
+  }
+
+  if (documentName && transactionName) {
+    return t("notifications.inbox_auto_matched.with_names", {
+      documentName,
+      transactionName,
+    });
+  }
+
+  return t("notifications.inbox_auto_matched.title");
+};
+
+const handleInboxNeedsReview: NotificationDescriptionHandler = (
+  metadata,
+  user,
+  t,
+) => {
+  const documentName = metadata?.documentName;
+  const transactionName = metadata?.transactionName;
+  const matchType = metadata?.matchType;
+  const documentAmount = metadata?.documentAmount;
+  const documentCurrency = metadata?.documentCurrency;
+  const transactionAmount = metadata?.transactionAmount;
+  const transactionCurrency = metadata?.transactionCurrency;
+
+  // Handle cross-currency matches (both high confidence and suggested)
+  if (
+    documentName &&
+    transactionName &&
+    documentAmount &&
+    documentCurrency &&
+    transactionAmount &&
+    transactionCurrency &&
+    documentCurrency !== transactionCurrency
+  ) {
+    const formattedDocAmount =
+      formatAmount({
+        currency: documentCurrency,
+        amount: documentAmount,
+        locale: user?.locale || "en-US",
+      }) || `${documentAmount} ${documentCurrency}`;
+
+    const formattedTransAmount =
+      formatAmount({
+        currency: transactionCurrency,
+        amount: transactionAmount,
+        locale: user?.locale || "en-US",
+      }) || `${transactionAmount} ${transactionCurrency}`;
+
+    if (matchType === "high_confidence") {
+      return t(
+        "notifications.inbox_needs_review.cross_currency_high_confidence",
+        {
+          documentName,
+          transactionName,
+          documentAmount: formattedDocAmount,
+          transactionAmount: formattedTransAmount,
+        },
+      );
+    }
+    return t("notifications.inbox_needs_review.cross_currency_suggested", {
+      documentName,
+      transactionName,
+      documentAmount: formattedDocAmount,
+      transactionAmount: formattedTransAmount,
+    });
+  }
+
+  // Handle same-currency matches
+  if (documentName && transactionName && documentAmount && documentCurrency) {
+    const formattedAmount =
+      formatAmount({
+        currency: documentCurrency,
+        amount: documentAmount,
+        locale: user?.locale || "en-US",
+      }) || `${documentAmount} ${documentCurrency}`;
+
+    if (matchType === "high_confidence") {
+      return t("notifications.inbox_needs_review.high_confidence_details", {
+        documentName,
+        transactionName,
+        amount: formattedAmount,
+      });
+    }
+    return t("notifications.inbox_needs_review.with_details", {
+      documentName,
+      transactionName,
+      amount: formattedAmount,
+    });
+  }
+
+  if (documentName && transactionName) {
+    if (matchType === "high_confidence") {
+      return t("notifications.inbox_needs_review.high_confidence_names", {
+        documentName,
+        transactionName,
+      });
+    }
+    return t("notifications.inbox_needs_review.with_names", {
+      documentName,
+      transactionName,
+    });
+  }
+
+  return t("notifications.inbox_needs_review.title");
+};
+
+const handleInboxCrossCurrencyMatched: NotificationDescriptionHandler = (
+  metadata,
+  user,
+  t,
+) => {
+  const documentName = metadata?.documentName;
+  const transactionName = metadata?.transactionName;
+  const documentAmount = metadata?.documentAmount;
+  const documentCurrency = metadata?.documentCurrency;
+  const transactionAmount = metadata?.transactionAmount;
+  const transactionCurrency = metadata?.transactionCurrency;
+  const matchType = metadata?.matchType;
+
+  if (
+    documentName &&
+    transactionName &&
+    documentAmount &&
+    documentCurrency &&
+    transactionAmount &&
+    transactionCurrency
+  ) {
+    const formattedDocAmount =
+      formatAmount({
+        currency: documentCurrency,
+        amount: documentAmount,
+        locale: user?.locale || "en-US",
+      }) ||
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: documentCurrency,
+      }).format(documentAmount);
+
+    const formattedTxAmount =
+      formatAmount({
+        currency: transactionCurrency,
+        amount: transactionAmount,
+        locale: user?.locale || "en-US",
+      }) ||
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: transactionCurrency,
+      }).format(transactionAmount);
+
+    // Use different messaging based on match confidence
+    if (matchType === "high_confidence") {
+      return t(
+        "notifications.inbox_cross_currency_matched.high_confidence_details",
+        {
+          documentName,
+          transactionName,
+          documentAmount: formattedDocAmount,
+          transactionAmount: formattedTxAmount,
+        },
+      );
+    }
+    return t("notifications.inbox_cross_currency_matched.with_details", {
+      documentName,
+      transactionName,
+      documentAmount: formattedDocAmount,
+      transactionAmount: formattedTxAmount,
+    });
+  }
+
+  if (documentName && transactionName) {
+    if (matchType === "high_confidence") {
+      return t(
+        "notifications.inbox_cross_currency_matched.high_confidence_names",
+        {
+          documentName,
+          transactionName,
+        },
+      );
+    }
+    return t("notifications.inbox_cross_currency_matched.with_names", {
+      documentName,
+      transactionName,
+    });
+  }
+
+  return t("notifications.inbox_cross_currency_matched.title");
+};
+
 const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   transactions_created: handleTransactionsCreated,
   inbox_new: handleInboxNew,
+  inbox_auto_matched: handleInboxAutoMatched,
+  inbox_needs_review: handleInboxNeedsReview,
+  inbox_cross_currency_matched: handleInboxCrossCurrencyMatched,
   invoice_paid: handleInvoicePaid,
   invoice_overdue: handleInvoiceOverdue,
   invoice_scheduled: handleInvoiceScheduled,

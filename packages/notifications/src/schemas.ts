@@ -7,6 +7,10 @@ export const createActivitySchema = z.object({
     "transactions_created",
     "transactions_enriched",
     "inbox_new",
+    "inbox_auto_matched",
+    "inbox_needs_review",
+    "inbox_cross_currency_matched",
+    "inbox_match_confirmed",
     "invoice_paid",
     "invoice_overdue",
     "invoice_scheduled",
@@ -107,6 +111,50 @@ export const inboxNewSchema = z.object({
   provider: z.string().optional(),
 });
 
+export const inboxAutoMatchedSchema = z.object({
+  users: z.array(userSchema),
+  inboxId: z.string().uuid(),
+  transactionId: z.string().uuid(),
+  documentName: z.string(),
+  documentAmount: z.number(),
+  documentCurrency: z.string(),
+  transactionAmount: z.number(),
+  transactionCurrency: z.string(),
+  transactionName: z.string(),
+  confidenceScore: z.number(),
+  matchType: z.enum(["auto_matched"]),
+  isCrossCurrency: z.boolean().optional(),
+});
+
+export const inboxNeedsReviewSchema = z.object({
+  users: z.array(userSchema),
+  inboxId: z.string().uuid(),
+  transactionId: z.string().uuid(),
+  documentName: z.string(),
+  documentAmount: z.number(),
+  documentCurrency: z.string(),
+  transactionAmount: z.number(),
+  transactionCurrency: z.string(),
+  transactionName: z.string(),
+  confidenceScore: z.number(),
+  matchType: z.enum(["high_confidence", "suggested"]),
+  isCrossCurrency: z.boolean().optional(),
+});
+
+export const inboxCrossCurrencyMatchedSchema = z.object({
+  users: z.array(userSchema),
+  inboxId: z.string().uuid(),
+  transactionId: z.string().uuid(),
+  documentName: z.string(),
+  documentAmount: z.number(),
+  documentCurrency: z.string(),
+  transactionAmount: z.number(),
+  transactionCurrency: z.string(),
+  transactionName: z.string(),
+  confidenceScore: z.number(),
+  matchType: z.enum(["auto_matched", "high_confidence", "suggested"]),
+});
+
 export const invoicePaidSchema = z.object({
   users: z.array(userSchema),
   invoiceId: z.string().uuid(),
@@ -192,6 +240,13 @@ export type DocumentProcessedInput = z.infer<typeof documentProcessedSchema>;
 
 export type InboxItemData = z.infer<typeof inboxItemSchema>;
 export type InboxNewInput = z.infer<typeof inboxNewSchema>;
+export type InboxAutoMatchedInput = z.infer<typeof inboxAutoMatchedSchema>;
+
+export type InboxNeedsReviewInput = z.infer<typeof inboxNeedsReviewSchema>;
+export type InboxCrossCurrencyMatchedInput = z.infer<
+  typeof inboxCrossCurrencyMatchedSchema
+>;
+
 export type InvoicePaidInput = z.infer<typeof invoicePaidSchema>;
 export type InvoiceOverdueInput = z.infer<typeof invoiceOverdueSchema>;
 export type InvoiceScheduledInput = z.infer<typeof invoiceScheduledSchema>;
@@ -217,6 +272,9 @@ export type NotificationTypes = {
   document_uploaded: DocumentUploadedInput;
   document_processed: DocumentProcessedInput;
   inbox_new: InboxNewInput;
+  inbox_auto_matched: InboxAutoMatchedInput;
+  inbox_needs_review: InboxNeedsReviewInput;
+  inbox_cross_currency_matched: InboxCrossCurrencyMatchedInput;
   invoice_paid: InvoicePaidInput;
   invoice_overdue: InvoiceOverdueInput;
   invoice_scheduled: InvoiceScheduledInput;

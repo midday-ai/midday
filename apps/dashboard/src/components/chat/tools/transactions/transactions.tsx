@@ -85,7 +85,10 @@ export function Transactions({ result }: Props) {
                   />
                 </TableCell>
                 <TableCell className="text-right font-normal">
-                  <TransactionStatus fullfilled={fullfilled} />
+                  <TransactionStatus
+                    fullfilled={fullfilled}
+                    hasPendingSuggestion={transaction.hasPendingSuggestion}
+                  />
                 </TableCell>
               </TableRow>
             );
