@@ -1,6 +1,7 @@
 import type { Database } from "@db/client";
 import { inbox, transactionMatchSuggestions } from "@db/schema";
 import { and, eq, sql } from "drizzle-orm";
+import { createActivity } from "./activities";
 import { matchTransaction, updateInbox } from "./inbox";
 import {
   type MatchResult,
@@ -131,20 +132,37 @@ export async function confirmSuggestedMatch(
   const { teamId, suggestionId, inboxId, transactionId, userId } = params;
 
   // Update suggestion status in transactionMatchSuggestions table
-  await db
+  const [suggestion] = await db
     .update(transactionMatchSuggestions)
     .set({
       status: "confirmed",
       userActionAt: new Date().toISOString(),
       userId,
     })
-    .where(eq(transactionMatchSuggestions.id, suggestionId));
+    .where(eq(transactionMatchSuggestions.id, suggestionId))
+    .returning();
 
   // Perform the actual match (this will update inbox status to 'done')
   const result = await matchTransaction(db, {
     id: inboxId,
     transactionId,
     teamId,
+  });
+
+  createActivity(db, {
+    teamId,
+    userId,
+    type: "inbox_match_confirmed",
+    source: "user",
+    priority: 7,
+    metadata: {
+      inboxId,
+      transactionId: result?.transactionId,
+      documentName: result?.displayName,
+      amount: inbox.amount,
+      currency: inbox.currency,
+      confidenceScore: Number(suggestion?.confidenceScore),
+    },
   });
 
   return result;

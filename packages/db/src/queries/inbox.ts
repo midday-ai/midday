@@ -389,7 +389,7 @@ export async function matchTransaction(
   }
 
   // Return updated inbox with transaction data
-  return db
+  const [data] = await db
     .select({
       id: inbox.id,
       fileName: inbox.fileName,
@@ -416,6 +416,8 @@ export async function matchTransaction(
     .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
+
+  return data;
 }
 
 export type UnmatchTransactionParams = {

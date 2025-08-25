@@ -17,7 +17,6 @@ import { documentProcessed } from "./types/document-processed";
 import { documentUploaded } from "./types/document-uploaded";
 import { inboxAutoMatched } from "./types/inbox-auto-matched";
 import { inboxCrossCurrencyMatched } from "./types/inbox-cross-currency-matched";
-
 import { inboxNeedsReview } from "./types/inbox-needs-review";
 import { inboxNew } from "./types/inbox-new";
 import { invoiceCancelled } from "./types/invoice-cancelled";
