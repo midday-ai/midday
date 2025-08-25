@@ -83,11 +83,14 @@ export async function deleteAttachment(
     throw new Error("Attachment not found");
   }
 
-  // Find inbox by transaction_id and set transaction_id to null if it exists
+  // Find inbox by transaction_id and set transaction_id to null and status to pending if it exists
   if (result.transactionId) {
     await db
       .update(inbox)
-      .set({ transactionId: null })
+      .set({
+        transactionId: null,
+        status: "pending",
+      })
       .where(eq(inbox.transactionId, result.transactionId));
   }
 

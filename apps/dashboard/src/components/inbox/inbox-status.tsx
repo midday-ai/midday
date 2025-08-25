@@ -33,7 +33,7 @@ export function InboxStatus({ item }: Props) {
               <span>Analyzing</span>
             </div>
           </TooltipTrigger>
-          <TooltipContent sideOffset={20} className="text-xs">
+          <TooltipContent sideOffset={10} className="text-xs">
             <p>
               We're reviewing the file and checking <br />
               for a matching transaction
@@ -54,7 +54,7 @@ export function InboxStatus({ item }: Props) {
               <span>Suggested match</span>
             </div>
           </TooltipTrigger>
-          <TooltipContent sideOffset={20} className="text-xs">
+          <TooltipContent sideOffset={10} className="text-xs">
             <p>
               We found a possible match — confirm <br />
               or dismiss it
@@ -74,7 +74,7 @@ export function InboxStatus({ item }: Props) {
               <span>Pending</span>
             </div>
           </TooltipTrigger>
-          <TooltipContent sideOffset={20} className="text-xs">
+          <TooltipContent sideOffset={10} className="text-xs">
             <p>
               We didn't find a match yet — we'll check <br />
               again when new transactions arrive
@@ -95,7 +95,7 @@ export function InboxStatus({ item }: Props) {
               <span>Matched</span>
             </div>
           </TooltipTrigger>
-          <TooltipContent sideOffset={20} className="text-xs">
+          <TooltipContent sideOffset={10} className="text-xs">
             <p>
               This file has been successfully <br />
               matched to a transaction
@@ -114,7 +114,7 @@ export function InboxStatus({ item }: Props) {
             <span>No match</span>
           </div>
         </TooltipTrigger>
-        <TooltipContent sideOffset={20} className="text-xs">
+        <TooltipContent sideOffset={10} className="text-xs">
           <p>
             We couldn't find a match — please <br />
             select the transaction manually
