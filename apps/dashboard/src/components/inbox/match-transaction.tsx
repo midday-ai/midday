@@ -180,23 +180,29 @@ export function MatchTransaction() {
     data?.status !== "suggested_match";
 
   if (data?.transactionId) {
-    return <TransactionUnmatchItem />;
+    return (
+      <motion.div
+        key="transaction-unmatch"
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 100, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      >
+        <TransactionUnmatchItem />
+      </motion.div>
+    );
   }
 
   return (
     <motion.div
       key="match-transaction"
-      initial={
-        isTransitioningFromSuggestion
-          ? { opacity: 0.7, y: -20 }
-          : { opacity: 1, y: 0 }
-      }
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0.7, y: -20 }}
-      transition={{
-        duration: isTransitioningFromSuggestion ? 0.2 : 0,
-        ease: [0.4, 0.0, 0.2, 1],
+      initial={{
+        y: isTransitioningFromSuggestion ? 100 : 0,
+        opacity: isTransitioningFromSuggestion ? 0 : 1,
       }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 100, opacity: 0 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className="bg-background h-12 relative"
     >
       <Combobox

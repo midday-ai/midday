@@ -29,15 +29,14 @@ import {
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence } from "framer-motion";
+
 import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useCopyToClipboard } from "usehooks-ts";
 import { EditInboxModal } from "../modals/edit-inbox-modal";
+import { InboxActions } from "./inbox-actions";
 import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
-import { MatchTransaction } from "./match-transaction";
-import { SuggestedMatch } from "./suggested-match";
 
 export function InboxDetails() {
   const { setParams, params } = useInboxParams();
@@ -327,15 +326,7 @@ export function InboxDetails() {
           <Separator />
 
           <div className="absolute bottom-4 left-4 right-4 z-50">
-            <AnimatePresence mode="wait">
-              {data?.status === "suggested_match" && !data?.transactionId && (
-                <SuggestedMatch key="suggested-match" />
-              )}
-
-              {!data?.suggestion && (
-                <MatchTransaction key="match-transaction" />
-              )}
-            </AnimatePresence>
+            <InboxActions data={data} />
           </div>
 
           {data?.filePath && (
