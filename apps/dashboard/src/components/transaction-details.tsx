@@ -413,12 +413,14 @@ export function TransactionDetails() {
         />
       </div>
 
-      {(data?.suggestion || isFetching) && (
+      {(data?.suggestion?.suggestionId || data?.hasPendingSuggestion) && (
         <div className="mt-6">
           <SuggestedMatch
             suggestion={data?.suggestion}
             transactionId={transactionId!}
-            isLoading={isFetching && !data?.suggestion}
+            isLoading={
+              data?.hasPendingSuggestion && !data?.suggestion?.suggestionId
+            }
           />
         </div>
       )}
