@@ -87,13 +87,13 @@ export function InboxView() {
   }, [tableData]);
 
   useEffect(() => {
-    if (!params.inboxId) {
+    if (!params.inboxId && tableData.length > 0) {
       setParams({
         ...params,
         inboxId: tableData.at(0)?.id,
       });
     }
-  }, [tableData]);
+  }, [tableData, params.inboxId, setParams]);
 
   // Arrow key navigation
   useHotkeys(

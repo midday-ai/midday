@@ -265,7 +265,7 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
         )}
 
         {isVisible("status") && (
-          <TableHead className="w-[140px] px-3 md:px-4 py-2">
+          <TableHead className="w-[150px] min-w-[150px] px-3 md:px-4 py-2">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
