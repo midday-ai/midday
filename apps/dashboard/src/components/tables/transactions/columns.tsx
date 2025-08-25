@@ -381,8 +381,14 @@ export const columns: ColumnDef<Transaction>[] = [
     cell: ({ row }) => {
       const fullfilled =
         row.original.status === "completed" || row.original.isFulfilled;
+      const hasPendingSuggestion = row.original.hasPendingSuggestion;
 
-      return <TransactionStatus fullfilled={fullfilled} />;
+      return (
+        <TransactionStatus
+          fullfilled={fullfilled}
+          hasPendingSuggestion={hasPendingSuggestion}
+        />
+      );
     },
   },
   {

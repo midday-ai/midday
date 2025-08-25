@@ -30,6 +30,7 @@ import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
 import { SelectTags } from "./select-tags";
+import { SuggestedMatch } from "./suggested-match";
 import { TransactionAttachments } from "./transaction-attachments";
 import { TransactionBankAccount } from "./transaction-bank-account";
 import { TransactionShortcuts } from "./transaction-shortcuts";
@@ -411,6 +412,15 @@ export function TransactionDetails() {
           }}
         />
       </div>
+
+      {data?.suggestion?.suggestionId && (
+        <div className="mt-6">
+          <SuggestedMatch
+            suggestion={data.suggestion}
+            transactionId={transactionId!}
+          />
+        </div>
+      )}
 
       <Accordion type="multiple" defaultValue={defaultValue}>
         <AccordionItem value="attachment">

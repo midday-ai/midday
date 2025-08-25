@@ -271,6 +271,10 @@ export async function getTransactions(
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`.as(
           "isFulfilled",
         ),
+      hasPendingSuggestion:
+        sql<boolean>`${transactionMatchSuggestions.id} IS NOT NULL`.as(
+          "hasPendingSuggestion",
+        ),
       attachments: sql<
         Array<{
           id: string;
@@ -352,6 +356,14 @@ export async function getTransactions(
         eq(transactionAttachments.teamId, teamId),
       ),
     )
+    .leftJoin(
+      transactionMatchSuggestions,
+      and(
+        eq(transactionMatchSuggestions.transactionId, transactions.id),
+        eq(transactionMatchSuggestions.teamId, teamId),
+        eq(transactionMatchSuggestions.status, "pending"),
+      ),
+    )
     .where(and(...finalWhereConditions))
     .groupBy(
       transactions.id,
@@ -383,6 +395,7 @@ export async function getTransactions(
       bankAccounts.currency,
       bankConnections.id,
       bankConnections.logoUrl,
+      transactionMatchSuggestions.id,
     );
 
   let query = queryBuilder.$dynamic();
@@ -553,6 +566,15 @@ export async function getTransactionById(
       >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transactionAttachments.id}, 'filename', ${transactionAttachments.name}, 'path', ${transactionAttachments.path}, 'type', ${transactionAttachments.type}, 'size', ${transactionAttachments.size})) FILTER (WHERE ${transactionAttachments.id} IS NOT NULL), '[]'::json)`.as(
         "attachments",
       ),
+      suggestion: {
+        suggestionId: transactionMatchSuggestions.id,
+        inboxId: transactionMatchSuggestions.inboxId,
+        documentName: inbox.displayName,
+        documentAmount: inbox.amount,
+        documentCurrency: inbox.currency,
+        documentPath: inbox.filePath,
+        confidenceScore: transactionMatchSuggestions.confidenceScore,
+      },
     })
     .from(transactions)
     .leftJoin(
@@ -601,6 +623,20 @@ export async function getTransactionById(
         eq(transactionAttachments.teamId, params.teamId),
       ),
     )
+    .leftJoin(
+      // For suggestions aggregation
+      transactionMatchSuggestions,
+      and(
+        eq(transactionMatchSuggestions.transactionId, transactions.id),
+        eq(transactionMatchSuggestions.teamId, params.teamId),
+        eq(transactionMatchSuggestions.status, "pending"),
+      ),
+    )
+    .leftJoin(
+      // For inbox details in suggestions
+      inbox,
+      eq(inbox.id, transactionMatchSuggestions.inboxId),
+    )
     .where(
       and(
         eq(transactions.id, params.id),
@@ -631,6 +667,13 @@ export async function getTransactionById(
       transactions.name,
       transactions.description,
       transactions.createdAt,
+      transactionMatchSuggestions.id,
+      transactionMatchSuggestions.inboxId,
+      transactionMatchSuggestions.confidenceScore,
+      inbox.displayName,
+      inbox.amount,
+      inbox.currency,
+      inbox.filePath,
     )
     .limit(1);
 
