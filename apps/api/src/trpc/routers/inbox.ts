@@ -7,6 +7,7 @@ import {
   getInboxSchema,
   matchTransactionSchema,
   processAttachmentsSchema,
+  retryMatchingSchema,
   searchInboxSchema,
   unmatchTransactionSchema,
   updateInboxSchema,
@@ -154,5 +155,17 @@ export const inboxRouter = createTRPCRouter({
         userId: session.user.id,
         teamId: teamId!,
       });
+    }),
+
+  // Retry matching for an inbox item
+  retryMatching: protectedProcedure
+    .input(retryMatchingSchema)
+    .mutation(async ({ ctx: { teamId }, input }) => {
+      const result = await tasks.trigger("process-inbox-matching", {
+        teamId: teamId!,
+        inboxId: input.id,
+      });
+
+      return { jobId: result.id };
     }),
 });
