@@ -159,8 +159,8 @@ export async function confirmSuggestedMatch(
       inboxId,
       transactionId: result?.transactionId,
       documentName: result?.displayName,
-      amount: inbox.amount,
-      currency: inbox.currency,
+      amount: result?.amount,
+      currency: result?.currency,
       confidenceScore: Number(suggestion?.confidenceScore),
     },
   });
