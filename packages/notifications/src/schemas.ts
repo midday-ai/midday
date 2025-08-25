@@ -10,6 +10,7 @@ export const createActivitySchema = z.object({
     "inbox_auto_matched",
     "inbox_needs_review",
     "inbox_cross_currency_matched",
+    "inbox_match_confirmed",
     "invoice_paid",
     "invoice_overdue",
     "invoice_scheduled",
@@ -245,6 +246,7 @@ export type InboxNeedsReviewInput = z.infer<typeof inboxNeedsReviewSchema>;
 export type InboxCrossCurrencyMatchedInput = z.infer<
   typeof inboxCrossCurrencyMatchedSchema
 >;
+
 export type InvoicePaidInput = z.infer<typeof invoicePaidSchema>;
 export type InvoiceOverdueInput = z.infer<typeof invoiceOverdueSchema>;
 export type InvoiceScheduledInput = z.infer<typeof invoiceScheduledSchema>;
