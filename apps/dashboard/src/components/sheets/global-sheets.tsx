@@ -9,6 +9,7 @@ import { SearchModal } from "@/components/search/search-modal";
 import { CustomerCreateSheet } from "@/components/sheets/customer-create-sheet";
 import { CustomerEditSheet } from "@/components/sheets/customer-edit-sheet";
 import { DocumentSheet } from "@/components/sheets/document-sheet";
+import { InboxDetailsSheet } from "@/components/sheets/inbox-details-sheet";
 import { InvoiceDetailsSheet } from "@/components/sheets/invoice-details-sheet";
 import { InvoiceSheet } from "@/components/sheets/invoice-sheet";
 import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
@@ -46,6 +47,7 @@ export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
       <SearchModal />
 
       <DocumentSheet />
+      <InboxDetailsSheet />
 
       <ImportModal currencies={uniqueCurrencies} defaultCurrency={currency} />
       <ConnectTransactionsModal countryCode={countryCode} />

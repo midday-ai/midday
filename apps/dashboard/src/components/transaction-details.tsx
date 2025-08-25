@@ -41,7 +41,7 @@ export function TransactionDetails() {
 
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     ...trpc.transactions.getById.queryOptions({ id: transactionId! }),
     enabled: Boolean(transactionId),
     staleTime: 0, // Always consider data stale so it always refetches
@@ -413,11 +413,12 @@ export function TransactionDetails() {
         />
       </div>
 
-      {data?.suggestion?.suggestionId && (
+      {(data?.suggestion || isFetching) && (
         <div className="mt-6">
           <SuggestedMatch
-            suggestion={data.suggestion}
+            suggestion={data?.suggestion}
             transactionId={transactionId!}
+            isLoading={isFetching && !data?.suggestion}
           />
         </div>
       )}

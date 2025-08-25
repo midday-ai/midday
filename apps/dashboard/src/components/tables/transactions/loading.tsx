@@ -27,55 +27,109 @@ export function Loading({ isEmpty }: { isEmpty?: boolean }) {
           <TableBody className="border-l-0 border-r-0 border-t-0 border-b-0">
             {data?.map((row) => (
               <TableRow key={row.id} className="h-[45px]">
-                <TableCell className="w-[50px]">
+                {/* Select column - always visible */}
+                <TableCell className="w-[50px] min-w-[50px]">
                   <Skeleton
                     className={cn("h-3.5 w-[15px]", isEmpty && "animate-none")}
                   />
                 </TableCell>
 
-                <TableCell className="w-[100px]">
+                {/* Date column - always visible */}
+                <TableCell className="w-[110px] min-w-[110px]">
                   <Skeleton
                     className={cn("h-3.5 w-[60%]", isEmpty && "animate-none")}
                   />
                 </TableCell>
-                <TableCell className="w-[430px]">
-                  <Skeleton
-                    className={cn("h-3.5 w-[50%]", isEmpty && "animate-none")}
-                  />
-                </TableCell>
-                <TableCell className="w-[200px]">
+
+                {/* Description column - always visible */}
+                <TableCell className="w-[320px] min-w-[320px]">
                   <Skeleton
                     className={cn("h-3.5 w-[50%]", isEmpty && "animate-none")}
                   />
                 </TableCell>
 
-                <TableCell className="w-[200px]">
+                {/* Amount column */}
+                <TableCell className="w-[170px] min-w-[170px]">
+                  <Skeleton
+                    className={cn("h-3.5 w-[50%]", isEmpty && "animate-none")}
+                  />
+                </TableCell>
+
+                {/* Tax Amount column */}
+                <TableCell className="w-[170px] min-w-[170px]">
                   <Skeleton
                     className={cn("h-3.5 w-[60%]", isEmpty && "animate-none")}
                   />
                 </TableCell>
-                <TableCell className="w-[150px]">
-                  <Skeleton
-                    className={cn("h-3.5 w-[80px]", isEmpty && "animate-none")}
-                  />
-                </TableCell>
-                <TableCell className="w-[200px]">
+
+                {/* Category column */}
+                <TableCell className="w-[250px] min-w-[250px]">
                   <div className="flex items-center space-x-2 w-[80%]">
-                    <Skeleton className="h-5 w-5 rounded-full" />
+                    <Skeleton className="h-5 w-5" />
                     <Skeleton
                       className={cn("h-3.5 w-[70%]", isEmpty && "animate-none")}
                     />
                   </div>
                 </TableCell>
-                <TableCell className="w-50px">
+
+                {/* Counterparty column */}
+                <TableCell className="w-[200px] min-w-[200px]">
+                  <Skeleton
+                    className={cn("h-3.5 w-[60%]", isEmpty && "animate-none")}
+                  />
+                </TableCell>
+
+                {/* Tags column */}
+                <TableCell className="w-[280px] max-w-[280px]">
+                  <div className="flex items-center space-x-1">
+                    <Skeleton className="h-5 w-12" />
+                    <Skeleton className="h-5 w-16" />
+                  </div>
+                </TableCell>
+
+                {/* Bank Account column */}
+                <TableCell className="w-[250px]">
+                  <div className="flex items-center space-x-2">
+                    <Skeleton className="h-6 w-6" />
+                    <Skeleton
+                      className={cn("h-3.5 w-[60%]", isEmpty && "animate-none")}
+                    />
+                  </div>
+                </TableCell>
+
+                {/* Method column */}
+                <TableCell className="w-[140px] min-w-[140px]">
+                  <Skeleton
+                    className={cn("h-3.5 w-[50%]", isEmpty && "animate-none")}
+                  />
+                </TableCell>
+
+                {/* Assigned column */}
+                <TableCell className="w-[220px] min-w-[220px]">
+                  <div className="flex items-center space-x-2">
+                    <Skeleton className="h-6 w-6" />
+                    <Skeleton
+                      className={cn("h-3.5 w-[50%]", isEmpty && "animate-none")}
+                    />
+                  </div>
+                </TableCell>
+
+                {/* Status column */}
+                <TableCell className="w-[140px]">
+                  <Skeleton
+                    className={cn("h-5 w-[80px]", isEmpty && "animate-none")}
+                  />
+                </TableCell>
+
+                {/* Actions column - always visible */}
+                <TableCell className="w-[100px]">
                   <Skeleton
                     className={cn(
-                      "h-[20px] w-[20px] rounded-full",
+                      "h-[20px] w-[20px]",
                       isEmpty && "animate-none",
                     )}
                   />
                 </TableCell>
-                <TableCell className="w-60px" />
               </TableRow>
             ))}
           </TableBody>
