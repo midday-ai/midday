@@ -314,32 +314,6 @@ const handleInboxAutoMatched: NotificationDescriptionHandler = (
     });
   }
 
-  // Handle cross-currency with old data format (fallback when isCrossCurrency is true)
-  if (
-    documentName &&
-    transactionName &&
-    metadata?.isCrossCurrency &&
-    amount &&
-    currency
-  ) {
-    const formattedAmount =
-      formatAmount({
-        currency: currency,
-        amount: amount,
-        locale: user?.locale || "en-US",
-      }) ||
-      new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: currency,
-      }).format(amount);
-
-    return t("notifications.inbox_auto_matched.cross_currency_fallback", {
-      documentName,
-      transactionName,
-      amount: formattedAmount,
-    });
-  }
-
   // Handle same-currency or fallback to original logic
   if (
     documentName &&
