@@ -62,10 +62,7 @@
       "group": "Open source",
       "pages": ["local-development", "self-hosting"]
     },
-    {
-      "group": "Technical Documentation",
-      "pages": ["inbox-matching"]
-    },
+
     {
       "group": "Engine API Reference",
       "pages": ["api-reference/engine/introduction"]

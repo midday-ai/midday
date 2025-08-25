@@ -2,14 +2,13 @@ import type { Database } from "@db/client";
 import {
   inbox,
   inboxEmbeddings,
-  teams,
   transactionAttachments,
   transactionEmbeddings,
   transactionMatchSuggestions,
   transactions,
 } from "@db/schema";
 import { logger } from "@midday/logger";
-import { and, desc, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 
 // Configuration constants
 const EMBEDDING_THRESHOLDS = {
@@ -26,7 +25,6 @@ const CALIBRATION_LIMITS = {
   MIN_SAMPLES_CONSERVATIVE: 8, // Higher threshold for aggressive adjustments
 } as const;
 
-// Type definitions
 export type FindMatchesParams = {
   teamId: string;
   inboxId: string;
@@ -49,7 +47,6 @@ export type MatchResult = {
   amountScore: number;
   currencyScore: number;
   dateScore: number;
-
   confidenceScore: number;
   matchType: "auto_matched" | "high_confidence" | "suggested";
   isAlreadyMatched: boolean;
@@ -1501,7 +1498,6 @@ export async function findInboxMatches(
 }
 
 // Helper functions
-
 function isCrossCurrencyMatch(
   item1: {
     amount?: number | null;
@@ -1574,9 +1570,18 @@ function isCrossCurrencyMatch(
   return isMatch;
 }
 
-// Helper scoring functions
+type AmountComparableItem = {
+  amount: number | null;
+  currency: string | null;
+  baseAmount?: number | null;
+  baseCurrency?: string | null;
+};
 
-function calculateAmountScore(item1: any, item2: any): number {
+// Helper scoring functions
+function calculateAmountScore(
+  item1: AmountComparableItem,
+  item2: AmountComparableItem,
+): number {
   const amount1 = item1.amount;
   const currency1 = item1.currency;
   const amount2 = item2.amount;
@@ -1810,15 +1815,12 @@ function calculateDateScore(
   return 0.1; // Very old = minimal score but not zero
 }
 
-// Note: Manual name matching removed - embeddings now handle merchant/legal entity matching
-// more effectively through enriched transaction data
-
 // Create a match suggestion record
 export async function createMatchSuggestion(
   db: Database,
   params: CreateMatchSuggestionParams,
 ) {
-  const suggestion = await db
+  const [result] = await db
     .insert(transactionMatchSuggestions)
     .values({
       teamId: params.teamId,
@@ -1853,62 +1855,5 @@ export async function createMatchSuggestion(
     })
     .returning();
 
-  return suggestion[0];
-}
-
-// Get the best suggestion for an inbox item
-export async function getInboxSuggestion(
-  db: Database,
-  params: { teamId: string; inboxId: string },
-): Promise<InboxSuggestion | null> {
-  const { teamId, inboxId } = params;
-
-  const result = await db
-    .select({
-      id: transactionMatchSuggestions.id,
-      transactionId: transactionMatchSuggestions.transactionId,
-      transactionName: transactions.name,
-      transactionAmount: transactions.amount,
-      transactionCurrency: transactions.currency,
-      transactionDate: transactions.date,
-      confidenceScore: transactionMatchSuggestions.confidenceScore,
-      matchType: transactionMatchSuggestions.matchType,
-      status: transactionMatchSuggestions.status,
-    })
-    .from(transactionMatchSuggestions)
-    .innerJoin(
-      transactions,
-      eq(transactionMatchSuggestions.transactionId, transactions.id),
-    )
-    .where(
-      and(
-        eq(transactionMatchSuggestions.teamId, teamId),
-        eq(transactionMatchSuggestions.inboxId, inboxId),
-        eq(transactionMatchSuggestions.status, "pending"), // Only pending suggestions
-      ),
-    )
-    .orderBy(desc(transactionMatchSuggestions.confidenceScore))
-    .limit(1);
-
-  if (!result[0]) return null;
-
-  const suggestion = result[0];
-  return {
-    id: suggestion.id,
-    transactionId: suggestion.transactionId,
-    transactionName: suggestion.transactionName,
-    transactionAmount: suggestion.transactionAmount,
-    transactionCurrency: suggestion.transactionCurrency,
-    transactionDate: suggestion.transactionDate,
-    confidenceScore: Number(suggestion.confidenceScore),
-    matchType: suggestion.matchType as
-      | "auto_matched"
-      | "high_confidence"
-      | "suggested",
-    status: suggestion.status as
-      | "pending"
-      | "confirmed"
-      | "declined"
-      | "expired",
-  };
+  return result;
 }
