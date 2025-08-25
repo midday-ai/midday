@@ -287,7 +287,7 @@ app.openapi(
 //   }),
 // );
 
-// NOTE: This endpoint needs to be registred before :id delete
+// NOTE: This endpoint needs to be registered before :id delete
 app.openapi(
   createRoute({
     method: "delete",
