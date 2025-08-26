@@ -563,10 +563,7 @@ export async function unmatchTransaction(
           eq(transactionMatchSuggestions.inboxId, id),
           eq(transactionMatchSuggestions.transactionId, result.transactionId),
           eq(transactionMatchSuggestions.teamId, teamId),
-          inArray(transactionMatchSuggestions.status, [
-            "confirmed",
-            "auto_matched",
-          ]),
+          eq(transactionMatchSuggestions.status, "confirmed"),
         ),
       )
       .orderBy(desc(transactionMatchSuggestions.createdAt))
