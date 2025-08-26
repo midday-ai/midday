@@ -1,5 +1,6 @@
 "use client";
 
+import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
@@ -26,8 +27,8 @@ export function TableRow({ row }: Props) {
       },
       onSuccess: async () => {
         await queryClient.invalidateQueries();
-        // Refresh server components to get fresh data, then navigate
-        router.refresh();
+        // Revalidate server-side paths to clear cached layout data
+        await revalidateAfterTeamChange();
         router.push("/");
       },
       onError: () => {

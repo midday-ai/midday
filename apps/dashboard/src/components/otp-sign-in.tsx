@@ -7,6 +7,7 @@ import { cn } from "@midday/ui/cn";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
+import { Spinner } from "@midday/ui/spinner";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useAction } from "next-safe-action/hooks";
 import { useSearchParams } from "next/navigation";
@@ -26,6 +27,7 @@ export function OTPSignIn({ className }: Props) {
   const verifyOtp = useAction(verifyOtpAction);
   const [isLoading, setLoading] = useState(false);
   const [isSent, setSent] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [email, setEmail] = useState<string>();
   const supabase = createClient();
   const searchParams = useSearchParams();
@@ -51,6 +53,8 @@ export function OTPSignIn({ className }: Props) {
   async function onComplete(token: string) {
     if (!email) return;
 
+    setIsVerifying(true);
+
     verifyOtp.execute({
       token,
       email,
@@ -61,23 +65,36 @@ export function OTPSignIn({ className }: Props) {
   if (isSent) {
     return (
       <div className={cn("flex flex-col space-y-4 items-center", className)}>
-        <InputOTP
-          maxLength={6}
-          autoFocus
-          onComplete={onComplete}
-          disabled={verifyOtp.status === "executing"}
-          render={({ slots }) => (
-            <InputOTPGroup>
-              {slots.map((slot, index) => (
-                <InputOTPSlot
-                  key={index.toString()}
-                  {...slot}
-                  className="w-[62px] h-[62px]"
-                />
-              ))}
-            </InputOTPGroup>
+        <div className="h-[62px] w-full">
+          {verifyOtp.isExecuting || isVerifying ? (
+            <div className="flex items-center justify-center h-full bg-background/95 border border-input">
+              <div className="flex items-center space-x-2 bg-background px-4 py-2 rounded-md shadow-sm">
+                <Spinner size={16} className="text-primary" />
+                <span className="text-sm text-foreground font-medium">
+                  Verifying...
+                </span>
+              </div>
+            </div>
+          ) : (
+            <InputOTP
+              maxLength={6}
+              autoFocus
+              onComplete={onComplete}
+              disabled={verifyOtp.isExecuting || isVerifying}
+              render={({ slots }) => (
+                <InputOTPGroup>
+                  {slots.map((slot, index) => (
+                    <InputOTPSlot
+                      key={index.toString()}
+                      {...slot}
+                      className="w-[62px] h-[62px]"
+                    />
+                  ))}
+                </InputOTPGroup>
+              )}
+            />
           )}
-        />
+        </div>
 
         <div className="flex space-x-2">
           <span className="text-sm text-[#878787]">
@@ -87,6 +104,7 @@ export function OTPSignIn({ className }: Props) {
             onClick={() => setSent(false)}
             type="button"
             className="text-sm text-primary underline font-medium"
+            disabled={verifyOtp.isExecuting || isVerifying}
           >
             Resend code
           </button>

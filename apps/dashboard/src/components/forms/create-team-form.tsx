@@ -1,5 +1,6 @@
 "use client";
 
+import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
 import { SelectCurrency } from "@/components/select-currency";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
@@ -51,8 +52,9 @@ export function CreateTeamForm({
         setIsRedirecting(true);
         // Invalidate all queries to ensure fresh data everywhere
         await queryClient.invalidateQueries();
-        // Refresh server components to get fresh data, then navigate
-        router.refresh();
+        // Revalidate server-side paths to clear cached layout data
+        await revalidateAfterTeamChange();
+        // Navigate to home
         router.push("/");
       },
       onError: () => {
