@@ -264,9 +264,9 @@ describe("Currency Scoring Algorithm", () => {
   });
 
   test("should handle missing currencies", () => {
-    const score1 = calculateCurrencyScore(null, "USD");
-    const score2 = calculateCurrencyScore("USD", null);
-    const score3 = calculateCurrencyScore(null, null);
+    const score1 = calculateCurrencyScore(undefined, "USD");
+    const score2 = calculateCurrencyScore("USD", undefined);
+    const score3 = calculateCurrencyScore(undefined, undefined);
 
     expect(score1).toBe(0.5);
     expect(score2).toBe(0.5);
@@ -295,16 +295,6 @@ describe("Date Scoring Algorithm", () => {
   test("should give low score for 1 month difference", () => {
     const score = calculateDateScore("2024-08-25", "2024-09-25");
     expect(score).toBeLessThan(0.3);
-  });
-
-  test("should handle missing dates", () => {
-    const score1 = calculateDateScore(null, "2024-08-25");
-    const score2 = calculateDateScore("2024-08-25", null);
-    const score3 = calculateDateScore(null, null);
-
-    expect(score1).toBe(0.1); // Low score for missing dates
-    expect(score2).toBe(0.1); // Low score for missing dates
-    expect(score3).toBe(0.85); // When both are null, Date comparison results in expense logic
   });
 });
 

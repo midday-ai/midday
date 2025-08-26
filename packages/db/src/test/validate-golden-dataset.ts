@@ -12,7 +12,7 @@ import {
   calculateCurrencyScore,
   calculateDateScore,
   isCrossCurrencyMatch,
-} from "../queries/transaction-matching";
+} from "../utils/transaction-matching";
 import {
   GOLDEN_DATASET,
   getDatasetStats,
@@ -25,7 +25,9 @@ console.log("🔍 Validating Golden Dataset...\n");
 const validation = validateGoldenDataset();
 if (!validation.valid) {
   console.error("❌ Dataset validation failed:");
-  validation.errors.forEach((error) => console.error(`   ${error}`));
+  for (const error of validation.errors) {
+    console.error(`   ${error}`);
+  }
   process.exit(1);
 }
 
@@ -35,19 +37,19 @@ console.log("✅ Dataset structure validation passed\n");
 const stats = getDatasetStats();
 console.log("📊 Dataset Statistics:");
 console.log(`   Total cases: ${stats.total}`);
-console.log(`   By feedback:`);
+console.log("   By feedback:");
 console.log(`     - Confirmed: ${stats.byFeedback.confirmed}`);
 console.log(`     - Declined: ${stats.byFeedback.declined}`);
 console.log(`     - Unmatched: ${stats.byFeedback.unmatched}`);
-console.log(`   By match type:`);
-Object.entries(stats.byMatchType).forEach(([type, count]) => {
+console.log("   By match type:");
+for (const [type, count] of Object.entries(stats.byMatchType)) {
   console.log(`     - ${type}: ${count}`);
-});
-console.log(`   By category:`);
-Object.entries(stats.byCategory).forEach(([category, count]) => {
+}
+console.log("   By category:");
+for (const [category, count] of Object.entries(stats.byCategory)) {
   console.log(`     - ${category}: ${count}`);
-});
-console.log(`   Average confidence:`);
+}
+console.log("   Average confidence:");
 console.log(
   `     - Confirmed: ${stats.avgConfidenceByFeedback.confirmed.toFixed(3)}`,
 );
@@ -140,7 +142,7 @@ const crossCurrencyCases = GOLDEN_DATASET.filter(
 );
 let crossCurrencyCorrect = 0;
 
-crossCurrencyCases.forEach((goldenCase) => {
+for (const goldenCase of crossCurrencyCases) {
   const { inbox, transaction, id, userFeedback } = goldenCase;
 
   const isCrossMatch = isCrossCurrencyMatch(inbox, transaction);
@@ -153,7 +155,7 @@ crossCurrencyCases.forEach((goldenCase) => {
       `   ⚠️  Cross-currency mismatch in ${id}: detected=${isCrossMatch}, should=${shouldMatch}`,
     );
   }
-});
+}
 
 const crossCurrencyAccuracy = crossCurrencyCorrect / crossCurrencyCases.length;
 console.log(
@@ -174,7 +176,7 @@ console.log("⚡ Performance Test:");
 const start = performance.now();
 
 // Run all scoring functions on all cases
-GOLDEN_DATASET.forEach((goldenCase) => {
+for (const goldenCase of GOLDEN_DATASET) {
   const { inbox, transaction } = goldenCase;
 
   calculateAmountScore(inbox, transaction);
@@ -184,7 +186,7 @@ GOLDEN_DATASET.forEach((goldenCase) => {
   if (inbox.baseAmount && transaction.baseAmount) {
     isCrossCurrencyMatch(inbox, transaction);
   }
-});
+}
 
 const duration = performance.now() - start;
 const avgDuration = duration / GOLDEN_DATASET.length;

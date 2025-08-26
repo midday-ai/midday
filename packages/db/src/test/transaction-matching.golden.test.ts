@@ -4,7 +4,7 @@ import {
   calculateCurrencyScore,
   calculateDateScore,
   isCrossCurrencyMatch,
-} from "../queries/transaction-matching";
+} from "../utils/transaction-matching";
 import {
   GOLDEN_DATASET,
   getDatasetStats,

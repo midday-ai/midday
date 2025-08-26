@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, test } from "bun:test";
-import { drizzle } from "drizzle-orm/postgres-js";
-import { findInboxMatches, findMatches } from "../queries/transaction-matching";
-
-// Mock database setup using Drizzle's mock functionality
-const mockDb = drizzle.mock();
+import {
+  calculateAmountScore,
+  calculateCurrencyScore,
+  calculateDateScore,
+  isCrossCurrencyMatch,
+} from "../utils/transaction-matching";
 
 // Real-world test scenarios based on your examples and common patterns
 const REAL_WORLD_SCENARIOS = {
@@ -473,11 +474,3 @@ describe("Performance Integration Tests", () => {
     console.log(`✅ Processed 100 items in ${duration.toFixed(2)}ms`);
   });
 });
-
-// Helper function to import scoring functions
-import {
-  calculateAmountScore,
-  calculateCurrencyScore,
-  calculateDateScore,
-  isCrossCurrencyMatch,
-} from "../queries/transaction-matching";
