@@ -389,9 +389,7 @@ export async function findMatches(
       currency: inbox.currency,
       baseAmount: inbox.baseAmount,
       baseCurrency: inbox.baseCurrency,
-      date: sql<string>`COALESCE(${inbox.date}, ${inbox.createdAt}::date)`.as(
-        "inbox_date",
-      ),
+      date: inbox.date,
       embedding: inboxEmbeddings.embedding,
       website: inbox.website,
       type: inbox.type,
@@ -415,6 +413,16 @@ export async function findMatches(
   // Require inbox embedding for quality matching
   if (!inboxItem.embedding) {
     logger.warn("❌ INBOX EMBEDDING MISSING - skipping match", {
+      inboxId,
+      teamId,
+      displayName: inboxItem.displayName,
+    });
+    return null;
+  }
+
+  // Require actual document date for meaningful matching
+  if (!inboxItem.date) {
+    logger.warn("❌ INBOX DATE MISSING - skipping match", {
       inboxId,
       teamId,
       displayName: inboxItem.displayName,
@@ -1339,7 +1347,7 @@ export async function findInboxMatches(
       currency: inbox.currency,
       baseAmount: inbox.baseAmount,
       baseCurrency: inbox.baseCurrency,
-      date: sql<string>`COALESCE(${inbox.date}, ${inbox.createdAt}::date)`,
+      date: inbox.date,
       website: inbox.website,
       embeddingScore: sql<number>`0.1`.as("embedding_score"), // Perfect match gets best embedding score
       isAlreadyMatched: sql<boolean>`${inbox.transactionId} IS NOT NULL`,
@@ -1353,17 +1361,17 @@ export async function findInboxMatches(
         sql`${inbox.amount} = ${sql.param(transactionItem.amount)}`,
         eq(inbox.currency, transactionItem.currency),
 
+        // Only match items that have an actual document date (not upload date)
+        isNotNull(inbox.date),
         // Reasonable date range for exact matches (30 days back, 7 days forward)
-        sql`COALESCE(${inbox.date}, ${inbox.createdAt}::date) BETWEEN ${sql.param(transactionItem.date)} - INTERVAL '30 days' 
-            AND ${sql.param(transactionItem.date)} + INTERVAL '7 days'`,
+        sql`${inbox.date} BETWEEN (${sql.param(transactionItem.date)}::date - INTERVAL '30 days') 
+            AND (${sql.param(transactionItem.date)}::date + INTERVAL '7 days')`,
 
         // Exclude already matched if requested
         ...(includeAlreadyMatched ? [] : [isNull(inbox.transactionId)]),
       ),
     )
-    .orderBy(
-      sql`ABS(EXTRACT(EPOCH FROM (COALESCE(${inbox.date}, ${inbox.createdAt}::date) - ${sql.param(transactionItem.date)})))`,
-    )
+    .orderBy(sql`ABS(${inbox.date} - ${sql.param(transactionItem.date)})`)
     .limit(5);
 
   // TIER 2: If no exact matches, fall back to embedding-based semantic search
@@ -1376,7 +1384,7 @@ export async function findInboxMatches(
         currency: inbox.currency,
         baseAmount: inbox.baseAmount,
         baseCurrency: inbox.baseCurrency,
-        date: sql<string>`COALESCE(${inbox.date}, ${inbox.createdAt}::date)`,
+        date: inbox.date,
         website: inbox.website,
         description: inbox.description,
         embeddingScore:
@@ -1409,9 +1417,10 @@ export async function findInboxMatches(
              AND ABS(COALESCE(${inbox.amount}, 0) - ${sql.param(transactionItem.amount)}) < ${sql.param(Math.max(100, transactionItem.amount * 0.2))})
           )`,
 
-          // Wider date range for semantic search
-          sql`COALESCE(${inbox.date}, ${inbox.createdAt}::date) BETWEEN ${sql.param(transactionItem.date)} - INTERVAL '90 days' 
-              AND ${sql.param(transactionItem.date)} + INTERVAL '90 days'`,
+          // Wider date range for semantic search - only use actual document dates
+          isNotNull(inbox.date),
+          sql`${inbox.date} BETWEEN (${sql.param(transactionItem.date)}::date - INTERVAL '90 days') 
+              AND (${sql.param(transactionItem.date)}::date + INTERVAL '90 days')`,
 
           // Exclude already matched if requested
           ...(includeAlreadyMatched ? [] : [isNull(inbox.transactionId)]),

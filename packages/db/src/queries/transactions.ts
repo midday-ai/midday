@@ -1097,9 +1097,7 @@ export async function searchTransactionMatch(
           displayName: inbox.displayName,
           amount: inbox.amount,
           currency: inbox.currency,
-          date: sql<string>`COALESCE(${inbox.date}, ${inbox.createdAt}::date)`.as(
-            "inbox_date",
-          ),
+          date: inbox.date,
           baseAmount: inbox.baseAmount,
           baseCurrency: inbox.baseCurrency,
         })
