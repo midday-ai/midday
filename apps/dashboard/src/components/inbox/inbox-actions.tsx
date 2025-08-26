@@ -12,7 +12,7 @@ type Props = {
 
 export function InboxActions({ data }: Props) {
   return (
-    <AnimatePresence mode="popLayout">
+    <AnimatePresence>
       {data?.status === "suggested_match" && !data?.transactionId && (
         <SuggestedMatch key="suggested-match" />
       )}
