@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { TableRow as BaseTableRow, TableCell } from "@midday/ui/table";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type Props = {
@@ -18,7 +17,6 @@ export function TableRow({ row }: Props) {
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const trpc = useTRPC();
-  const router = useRouter();
 
   const changeTeamMutation = useMutation(
     trpc.user.update.mutationOptions({
@@ -27,9 +25,8 @@ export function TableRow({ row }: Props) {
       },
       onSuccess: async () => {
         await queryClient.invalidateQueries();
-        // Revalidate server-side paths to clear cached layout data
+        // Revalidate server-side paths and redirect
         await revalidateAfterTeamChange();
-        router.push("/");
       },
       onError: () => {
         setIsLoading(false);

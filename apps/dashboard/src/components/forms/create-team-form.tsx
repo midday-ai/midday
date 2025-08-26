@@ -17,7 +17,6 @@ import {
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { use, useState } from "react";
 import { z } from "zod";
 import { CountrySelector } from "../country-selector";
@@ -43,7 +42,6 @@ export function CreateTeamForm({
   const countryCode = use(defaultCountryCodePromise);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const router = useRouter();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const createTeamMutation = useMutation(
@@ -52,10 +50,8 @@ export function CreateTeamForm({
         setIsRedirecting(true);
         // Invalidate all queries to ensure fresh data everywhere
         await queryClient.invalidateQueries();
-        // Revalidate server-side paths to clear cached layout data
+        // Revalidate server-side paths and redirect
         await revalidateAfterTeamChange();
-        // Navigate to home
-        router.push("/");
       },
       onError: () => {
         setIsRedirecting(false);
