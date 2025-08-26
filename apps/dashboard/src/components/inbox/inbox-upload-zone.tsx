@@ -6,7 +6,8 @@ import { resumableUpload } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { stripSpecialCharacters } from "@midday/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -30,6 +31,7 @@ export function UploadZone({ children, onUploadComplete }: Props) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const supabase = createClient();
+  const queryClient = useQueryClient();
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
   const [toastId, setToastId] = useState<string | undefined>(undefined);
@@ -37,6 +39,9 @@ export function UploadZone({ children, onUploadComplete }: Props) {
   const { toast, dismiss, update } = useToast();
   const processAttachmentsMutation = useMutation(
     trpc.inbox.processAttachments.mutationOptions(),
+  );
+  const createInboxItemMutation = useMutation(
+    trpc.inbox.create.mutationOptions(),
   );
 
   useEffect(() => {
@@ -75,6 +80,26 @@ export function UploadZone({ children, onUploadComplete }: Props) {
     const path = [user?.teamId, "inbox"] as string[];
 
     try {
+      // First, create inbox items immediately for instant feedback
+      const inboxItems = await Promise.all(
+        files.map(async (file: File) => {
+          // Use the same filename processing as resumableUpload
+          const processedFilename = stripSpecialCharacters(file.name);
+          const filePath = [...path, processedFilename];
+          return createInboxItemMutation.mutateAsync({
+            filename: processedFilename,
+            mimetype: file.type,
+            size: file.size,
+            filePath,
+          });
+        }),
+      );
+
+      // Invalidate inbox queries to show new items immediately
+      queryClient.invalidateQueries({
+        queryKey: trpc.inbox.get.queryKey(),
+      });
+
       const results = (await Promise.all(
         files.map(async (file: File, idx: number) =>
           resumableUpload(supabase, {
@@ -122,7 +147,16 @@ export function UploadZone({ children, onUploadComplete }: Props) {
       setToastId(undefined);
       dismiss(toastId);
       onUploadComplete?.();
-    } catch {
+    } catch (error) {
+      // Refresh inbox to show current state after error
+      queryClient.invalidateQueries({
+        queryKey: trpc.inbox.get.queryKey(),
+      });
+
+      setShowProgress(false);
+      setToastId(undefined);
+      dismiss(toastId);
+
       toast({
         duration: 2500,
         variant: "error",

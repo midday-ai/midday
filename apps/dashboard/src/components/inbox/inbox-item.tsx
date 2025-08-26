@@ -19,7 +19,6 @@ export function InboxItem({ item, index }: Props) {
   const isSelected =
     params.inboxId === item.id || (!params.inboxId && index === 0);
   const isProcessing = item.status === "processing" || item.status === "new";
-  const isAnalyzing = item.status === "analyzing";
 
   return (
     <button
@@ -71,7 +70,11 @@ export function InboxItem({ item, index }: Props) {
           </div>
 
           <div className="ml-auto">
-            <InboxStatus item={item} />
+            {isProcessing ? (
+              <Skeleton className="h-4 w-[60px]" />
+            ) : (
+              <InboxStatus item={item} />
+            )}
           </div>
         </div>
       </div>

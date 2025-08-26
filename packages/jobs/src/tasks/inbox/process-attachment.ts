@@ -47,14 +47,23 @@ export const processAttachment = schemaTask({
 
     const filename = filePath.at(-1);
 
-    // Check if inbox item already exists (for retry scenarios)
+    // Check if inbox item already exists (for retry scenarios or manual uploads)
     let inboxData = await getInboxByFilePath(getDb(), {
       filePath,
       teamId,
     });
 
-    // Only create new inbox item if it doesn't exist
+    logger.info("Processing attachment", {
+      filePath: filePath.join("/"),
+      existingItem: !!inboxData,
+      existingStatus: inboxData?.status,
+      teamId,
+    });
+
+    // Create inbox item if it doesn't exist (for non-manual uploads)
+    // or update existing item status if it was created manually
     if (!inboxData) {
+      logger.info("Creating new inbox item", { filePath: filePath.join("/") });
       inboxData = await createInbox(getDb(), {
         // NOTE: If we can't parse the name using OCR this will be the fallback name
         displayName: filename ?? "Unknown",
@@ -66,6 +75,18 @@ export const processAttachment = schemaTask({
         referenceId,
         website,
         inboxAccountId,
+        status: "processing", // Set as processing when created by job
+      });
+    } else if (inboxData.status === "processing") {
+      logger.info("Found existing inbox item already in processing status", {
+        inboxId: inboxData.id,
+        filePath: filePath.join("/"),
+      });
+    } else {
+      logger.info("Found existing inbox item with status", {
+        inboxId: inboxData.id,
+        status: inboxData.status,
+        filePath: filePath.join("/"),
       });
     }
 
@@ -112,7 +133,7 @@ export const processAttachment = schemaTask({
         taxRate: result.tax_rate,
         taxType: result.tax_type,
         type: result.type as "invoice" | "expense" | null | undefined,
-        status: "pending",
+        status: "analyzing", // Keep analyzing until matching is complete
       });
 
       // NOTE: Process documents and images for classification

@@ -1,5 +1,6 @@
 import {
   confirmMatchSchema,
+  createInboxItemSchema,
   declineMatchSchema,
   deleteInboxSchema,
   getInboxByIdSchema,
@@ -15,6 +16,7 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   confirmSuggestedMatch,
+  createInbox,
   declineSuggestedMatch,
   deleteInbox,
   deleteInboxEmbedding,
@@ -61,6 +63,20 @@ export const inboxRouter = createTRPCRouter({
           teamId: teamId!,
         }),
       ]);
+    }),
+
+  create: protectedProcedure
+    .input(createInboxItemSchema)
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return createInbox(db, {
+        displayName: input.filename,
+        teamId: teamId!,
+        filePath: input.filePath,
+        fileName: input.filename,
+        contentType: input.mimetype,
+        size: input.size,
+        status: "processing",
+      });
     }),
 
   processAttachments: protectedProcedure

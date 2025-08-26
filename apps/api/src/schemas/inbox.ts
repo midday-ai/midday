@@ -145,6 +145,13 @@ export const deleteInboxSchema = z
     description: "Schema for deleting an inbox item by its ID.",
   });
 
+export const createInboxItemSchema = z.object({
+  filename: z.string(),
+  mimetype: z.string(),
+  size: z.number(),
+  filePath: z.array(z.string()),
+});
+
 export const processAttachmentsSchema = z.array(
   z.object({
     mimetype: z.string(),

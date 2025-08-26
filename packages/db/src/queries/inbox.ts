@@ -687,9 +687,16 @@ export async function getInboxByFilePath(
   const [result] = await db
     .select({
       id: inbox.id,
+      status: inbox.status,
     })
     .from(inbox)
-    .where(and(eq(inbox.filePath, filePath), eq(inbox.teamId, teamId)))
+    .where(
+      and(
+        eq(inbox.filePath, filePath),
+        eq(inbox.teamId, teamId),
+        ne(inbox.status, "deleted"),
+      ),
+    )
     .limit(1);
 
   return result;
@@ -705,6 +712,14 @@ export type CreateInboxParams = {
   referenceId?: string;
   website?: string;
   inboxAccountId?: string;
+  status?:
+    | "new"
+    | "analyzing"
+    | "pending"
+    | "done"
+    | "processing"
+    | "archived"
+    | "deleted";
 };
 
 export async function createInbox(db: Database, params: CreateInboxParams) {
@@ -718,6 +733,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
     referenceId,
     website,
     inboxAccountId,
+    status = "new",
   } = params;
 
   const [result] = await db
@@ -732,6 +748,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
       referenceId,
       website,
       inboxAccountId,
+      status,
     })
     .returning({
       id: inbox.id,

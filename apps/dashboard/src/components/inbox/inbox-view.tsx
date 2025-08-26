@@ -54,6 +54,11 @@ export function InboxView() {
     queryClient.invalidateQueries({
       queryKey: trpc.inbox.getById.queryKey(),
     });
+
+    // Invalidate transactions list to show updated status (suggested/matched)
+    queryClient.invalidateQueries({
+      queryKey: trpc.transactions.get.infiniteQueryKey(),
+    });
   }, 50);
 
   useRealtime({

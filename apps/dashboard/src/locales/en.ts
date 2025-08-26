@@ -188,10 +188,10 @@ export default {
         "Get notified when documents are automatically matched with transactions",
       title: "Document automatically matched",
       with_details:
-        'I matched "{documentName}" ({amount}) with "{transactionName}"',
-      with_names: 'I matched "{documentName}" with "{transactionName}"',
+        '"{documentName}" ({amount}) was matched with "{transactionName}"',
+      with_names: '"{documentName}" was matched with "{transactionName}"',
       cross_currency_details:
-        'I matched "{documentName}" ({documentAmount}) with "{transactionName}" ({transactionAmount}) across currencies',
+        '"{documentName}" ({documentAmount}) was matched with "{transactionName}" ({transactionAmount}) across currencies',
     },
     inbox_high_confidence: {
       name: "High Confidence Match",
