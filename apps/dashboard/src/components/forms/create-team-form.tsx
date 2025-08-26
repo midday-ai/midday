@@ -47,9 +47,12 @@ export function CreateTeamForm({
 
   const createTeamMutation = useMutation(
     trpc.team.create.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
         setIsRedirecting(true);
-        queryClient.invalidateQueries();
+        // Invalidate all queries to ensure fresh data everywhere
+        await queryClient.invalidateQueries();
+        // Refresh server components to get fresh data, then navigate
+        router.refresh();
         router.push("/");
       },
       onError: () => {

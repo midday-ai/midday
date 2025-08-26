@@ -24,8 +24,10 @@ export function TableRow({ row }: Props) {
       onMutate: () => {
         setIsLoading(true);
       },
-      onSuccess: () => {
-        queryClient.invalidateQueries();
+      onSuccess: async () => {
+        await queryClient.invalidateQueries();
+        // Refresh server components to get fresh data, then navigate
+        router.refresh();
         router.push("/");
       },
       onError: () => {
