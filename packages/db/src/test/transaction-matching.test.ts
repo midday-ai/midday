@@ -4,7 +4,7 @@ import {
   calculateCurrencyScore,
   calculateDateScore,
   isCrossCurrencyMatch,
-} from "../queries/transaction-matching";
+} from "../utils/transaction-matching";
 
 describe("Cross-Currency Matching Algorithm", () => {
   describe("Tiered Tolerance System", () => {
