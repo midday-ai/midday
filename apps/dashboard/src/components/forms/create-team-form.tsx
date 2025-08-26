@@ -17,7 +17,7 @@ import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { use } from "react";
+import { use, useState } from "react";
 import { z } from "zod";
 import { CountrySelector } from "../country-selector";
 
@@ -43,22 +43,17 @@ export function CreateTeamForm({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const router = useRouter();
-
-  const changeTeamMutation = useMutation(
-    trpc.user.update.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries();
-        router.push("/");
-      },
-    }),
-  );
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const createTeamMutation = useMutation(
     trpc.team.create.mutationOptions({
-      onSuccess: (teamId) => {
-        changeTeamMutation.mutate({
-          teamId,
-        });
+      onSuccess: () => {
+        setIsRedirecting(true);
+        queryClient.invalidateQueries();
+        router.push("/");
+      },
+      onError: () => {
+        setIsRedirecting(false);
       },
     }),
   );
@@ -72,10 +67,15 @@ export function CreateTeamForm({
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    if (createTeamMutation.isPending || isRedirecting) {
+      return;
+    }
+
     createTeamMutation.mutate({
       name: values.name,
       baseCurrency: values.baseCurrency,
       countryCode: values.countryCode,
+      switchTeam: true, // Automatically switch to the new team
     });
   }
 
@@ -154,9 +154,7 @@ export function CreateTeamForm({
         <SubmitButton
           className="mt-6 w-full"
           type="submit"
-          isSubmitting={
-            changeTeamMutation.isPending || createTeamMutation.isPending
-          }
+          isSubmitting={createTeamMutation.isPending || isRedirecting}
         >
           Create
         </SubmitButton>
