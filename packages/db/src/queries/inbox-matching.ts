@@ -1,6 +1,6 @@
 import type { Database } from "@db/client";
 import { inbox, transactionMatchSuggestions } from "@db/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { createActivity } from "./activities";
 import { matchTransaction, updateInbox } from "./inbox";
 import {
@@ -233,10 +233,12 @@ export async function getInboxByStatus(
   if (status) {
     return baseQuery
       .where(and(eq(inbox.teamId, teamId), eq(inbox.status, status)))
-      .orderBy(inbox.createdAt);
+      .orderBy(desc(inbox.createdAt));
   }
 
-  return baseQuery.where(eq(inbox.teamId, teamId)).orderBy(inbox.createdAt);
+  return baseQuery
+    .where(eq(inbox.teamId, teamId))
+    .orderBy(desc(inbox.createdAt));
 }
 
 // Type for pending inbox items available for matching
@@ -272,10 +274,9 @@ export async function getPendingInboxForMatching(
         eq(inbox.teamId, teamId),
         eq(inbox.status, "pending"), // Only pending items
         // Only items that haven't been matched yet
-        // Using SQL for null check to be explicit about unmatched items
         sql`${inbox.transactionId} IS NULL`,
       ),
     )
-    .orderBy(inbox.createdAt) // Oldest first - prioritize items waiting longest
+    .orderBy(desc(inbox.createdAt)) // Newest first - prioritize recent items
     .limit(limit);
 }

@@ -161,9 +161,9 @@ export const inboxRouter = createTRPCRouter({
   retryMatching: protectedProcedure
     .input(retryMatchingSchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
-      const result = await tasks.trigger("process-inbox-matching", {
+      const result = await tasks.trigger("batch-process-matching", {
         teamId: teamId!,
-        inboxId: input.id,
+        inboxIds: [input.id],
       });
 
       return { jobId: result.id };

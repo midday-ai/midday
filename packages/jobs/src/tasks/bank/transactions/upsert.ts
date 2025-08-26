@@ -73,13 +73,13 @@ export const upsertTransactions = schemaTask({
           teamId,
         });
 
-        // Step 2: Match pending inbox items against the new transactions
-        await tasks.trigger("match-pending-inbox", {
+        // Step 2: Bidirectional matching
+        await tasks.trigger("match-transactions-bidirectional", {
           teamId,
           newTransactionIds: transactionIds,
         });
 
-        logger.info("Triggered pending inbox matching", {
+        logger.info("Triggered bidirectional transaction matching", {
           transactionCount: transactionIds.length,
           teamId,
         });

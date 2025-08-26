@@ -8,11 +8,10 @@ import {
 } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
 import { createClient } from "@midday/supabase/job";
-import { logger, schemaTask } from "@trigger.dev/sdk";
+import { logger, schemaTask, tasks } from "@trigger.dev/sdk";
 import { convertHeic } from "../document/convert-heic";
 import { processDocument } from "../document/process-document";
 import { embedInbox } from "./embed-inbox";
-import { processInboxMatching } from "./process-inbox-matching";
 
 export const processAttachment = schemaTask({
   id: "process-attachment",
@@ -134,13 +133,13 @@ export const processAttachment = schemaTask({
         teamId,
       });
 
-      // After embedding is complete, trigger matching
-      await processInboxMatching.trigger({
+      // After embedding is complete, trigger efficient matching
+      await tasks.trigger("batch-process-matching", {
         teamId,
-        inboxId: inboxData.id,
+        inboxIds: [inboxData.id],
       });
 
-      logger.info("Triggered inbox matching", {
+      logger.info("Triggered efficient inbox matching", {
         inboxId: inboxData.id,
         teamId,
       });

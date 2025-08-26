@@ -31,29 +31,31 @@ graph TD
     A[New Transaction] --> B[embed-transaction]
     C[New Inbox Item] --> D[process-attachment]
     
-    B --> E[match-pending-inbox]
+    B --> E[match-transactions-bidirectional]
     D --> F[embed-inbox]
-    F --> G[process-inbox-matching]
+    F --> G[batch-process-matching]
     
-    E --> H[Batch process-inbox-matching]
-    G --> I[Matching Algorithm]
-    H --> I
+    E --> H[Phase 1: Forward Matching]
+    E --> I[Phase 2: Reverse Matching]
+    G --> J[Matching Algorithm]
+    H --> J
+    I --> J
     
-    I --> J{Confidence Score}
-    J -->|≥0.95| K[Auto-match]
-    J -->|≥0.70| L[Suggestion]
-    J -->|<0.70| M[No Match]
+    J --> K{Confidence Score}
+    K -->|≥0.95| L[Auto-match]
+    K -->|≥0.70| M[Suggestion]
+    K -->|<0.70| N[No Match]
     
-    K --> N[Update Status: done]
-    L --> O[Update Status: suggested_match]
-    M --> P[Update Status: pending]
+    L --> O[Update Status: done]
+    M --> P[Update Status: suggested_match]
+    N --> Q[Update Status: pending]
 ```
 
 ## Task Flow Architecture
 
 ### 1. New Transaction Processing
 
-**Flow**: `upsert-transactions` → `embed-transaction` → `match-pending-inbox` → `process-inbox-matching`
+**Flow**: `upsert-transactions` → `embed-transaction` → `match-transactions-bidirectional`
 
 ```typescript
 // Entry Point: Bank sync creates new transactions
@@ -69,19 +71,16 @@ await embedTransaction.triggerAndWait({
   teamId
 })
   ↓
-// Step 2: Check pending inbox items against new transactions
-await tasks.trigger("match-pending-inbox", {
+// Step 2: Bidirectional matching in single efficient job
+await tasks.trigger("match-transactions-bidirectional", {
   teamId,
   newTransactionIds: transactionIds
 })
-  ↓
-// Step 3: Batch process matching for relevant inbox items
-await tasks.batchTrigger("process-inbox-matching", batchJobs)
 ```
 
 ### 2. New Inbox Item Processing
 
-**Flow**: `process-attachment` → `embed-inbox` → `process-inbox-matching`
+**Flow**: `process-attachment` → `embed-inbox` → `batch-process-matching`
 
 ```typescript
 // Entry Point: Gmail sync, email webhook, or manual upload
@@ -101,10 +100,10 @@ await embedInbox.triggerAndWait({
   teamId
 })
   ↓
-// Step 3: Find matches against existing transactions
-await processInboxMatching.trigger({
+// Step 3: Efficient batch matching
+await tasks.trigger("batch-process-matching", {
   teamId,
-  inboxId
+  inboxIds: [inboxId]
 })
 ```
 
@@ -113,11 +112,11 @@ await processInboxMatching.trigger({
 | Job | Responsibility | Orchestration Level |
 |-----|---------------|-------------------|
 | `upsert-transactions` | **Orchestrator** - Manages entire transaction pipeline | High |
+| `match-transactions-bidirectional` | **Core Engine** - Handles all bidirectional matching efficiently | High |
+| `batch-process-matching` | **Batch Processor** - Processes multiple inbox items efficiently | Medium |
 | `embed-transaction` | Creates transaction embeddings | Low |
-| `match-pending-inbox` | **Orchestrator** - Finds relevant inbox items to recheck | Medium |
 | `process-attachment` | **Orchestrator** - Manages entire inbox item pipeline | High |
 | `embed-inbox` | Creates inbox item embeddings | Low |
-| `process-inbox-matching` | Performs matching algorithm and creates suggestions | Low |
 
 ## Matching Algorithm
 
