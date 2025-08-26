@@ -70,7 +70,6 @@ export type InboxMatchResult = {
   amountScore: number;
   currencyScore: number;
   dateScore: number;
-
   confidenceScore: number;
   matchType: "auto_matched" | "high_confidence" | "suggested";
   isAlreadyMatched: boolean;
@@ -510,6 +509,8 @@ export async function findMatches(
         and(
           eq(transactions.teamId, teamId),
           eq(transactions.status, "posted"),
+          // Only match transactions that have an actual date
+          isNotNull(transactions.date),
           // Exclude transactions that already have pending suggestions
           notExists(
             db
@@ -619,6 +620,8 @@ export async function findMatches(
           and(
             eq(transactions.teamId, teamId),
             eq(transactions.status, "posted"),
+            // Only match transactions that have an actual date
+            isNotNull(transactions.date),
             // Exclude transactions that already have pending suggestions
             notExists(
               db
@@ -723,6 +726,8 @@ export async function findMatches(
           and(
             eq(transactions.teamId, teamId),
             eq(transactions.status, "posted"),
+            // Only match transactions that have an actual date
+            isNotNull(transactions.date),
             // Exclude transactions that already have pending suggestions
             notExists(
               db
@@ -824,6 +829,8 @@ export async function findMatches(
           and(
             eq(transactions.teamId, teamId),
             eq(transactions.status, "posted"),
+            // Only match transactions that have an actual date
+            isNotNull(transactions.date),
             // Exclude transactions that already have pending suggestions
             notExists(
               db
@@ -1447,7 +1454,7 @@ export async function findInboxMatches(
       candidate.currency || undefined,
       transactionItem.currency || undefined,
     );
-    const dateScore = calculateDateScore(candidate.date, transactionItem.date);
+    const dateScore = calculateDateScore(candidate.date!, transactionItem.date);
     // Calculate confidence score using embeddings for semantic name matching
     let confidenceScore =
       embeddingScore * teamWeights.embeddingWeight +
@@ -1626,7 +1633,7 @@ export async function findInboxMatches(
           displayName: candidate.displayName,
           amount: candidate.amount,
           currency: candidate.currency,
-          date: candidate.date,
+          date: candidate.date || "",
           embeddingScore: Math.round(embeddingScore * 1000) / 1000,
           amountScore: Math.round(amountScore * 1000) / 1000,
           currencyScore: Math.round(currencyScore * 1000) / 1000,
