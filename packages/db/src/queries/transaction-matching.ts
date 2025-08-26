@@ -28,9 +28,9 @@ const EMBEDDING_THRESHOLDS = {
 
 const CALIBRATION_LIMITS = {
   MAX_ADJUSTMENT: 0.03, // Max 3% threshold adjustment per calibration
-  MIN_SAMPLES_AUTO: 2, // Minimum samples for auto-match calibration (lower threshold)
-  MIN_SAMPLES_SUGGESTED: 3, // Minimum samples for suggested-match calibration
-  MIN_SAMPLES_CONSERVATIVE: 5, // Higher threshold for aggressive adjustments
+  MIN_SAMPLES_AUTO: 10, // Minimum samples for auto-match calibration (conservative - auto-match is high risk)
+  MIN_SAMPLES_SUGGESTED: 5, // Minimum samples for suggested-match calibration
+  MIN_SAMPLES_CONSERVATIVE: 15, // Higher threshold for aggressive adjustments
 } as const;
 
 export type FindMatchesParams = {
@@ -110,8 +110,10 @@ export type TeamCalibrationData = {
   totalSuggestions: number;
   confirmedSuggestions: number;
   declinedSuggestions: number;
+  unmatchedSuggestions: number; // New: post-match negative feedback
   avgConfidenceConfirmed: number;
   avgConfidenceDeclined: number;
+  avgConfidenceUnmatched: number; // New: confidence of unmatched pairs
   autoMatchAccuracy: number;
   suggestedMatchAccuracy: number;
   calibratedAutoThreshold: number;
@@ -140,7 +142,11 @@ export async function getTeamCalibration(
     .where(
       and(
         eq(transactionMatchSuggestions.teamId, teamId),
-        inArray(transactionMatchSuggestions.status, ["confirmed", "declined"]),
+        inArray(transactionMatchSuggestions.status, [
+          "confirmed",
+          "declined",
+          "unmatched",
+        ]),
         // Only look at last 90 days for relevance
         sql`${transactionMatchSuggestions.createdAt} > NOW() - INTERVAL '90 days'`,
       ),
@@ -153,8 +159,10 @@ export async function getTeamCalibration(
       totalSuggestions: performanceData.length,
       confirmedSuggestions: 0,
       declinedSuggestions: 0,
+      unmatchedSuggestions: 0,
       avgConfidenceConfirmed: 0,
       avgConfidenceDeclined: 0,
+      avgConfidenceUnmatched: 0,
       autoMatchAccuracy: 0,
       suggestedMatchAccuracy: 0,
       calibratedAutoThreshold: defaultAutoThreshold,
@@ -166,6 +174,7 @@ export async function getTeamCalibration(
   // Calculate performance metrics
   const confirmed = performanceData.filter((d) => d.status === "confirmed");
   const declined = performanceData.filter((d) => d.status === "declined");
+  const unmatched = performanceData.filter((d) => d.status === "unmatched"); // Post-match negative feedback
   const autoMatches = performanceData.filter(
     (d) => d.matchType === "auto_matched",
   );
@@ -184,6 +193,23 @@ export async function getTeamCalibration(
       ? declined.reduce((sum, d) => sum + Number(d.confidenceScore), 0) /
         declined.length
       : 0;
+
+  // Include unmatched feedback in confidence analysis (these were wrong matches)
+  const avgConfidenceUnmatched =
+    unmatched.length > 0
+      ? unmatched.reduce((sum, d) => sum + Number(d.confidenceScore), 0) /
+        unmatched.length
+      : 0;
+
+  // Treat "unmatched" as negative feedback (like declined)
+  const negativeOutcomes = [...declined, ...unmatched];
+  const avgConfidenceNegative =
+    negativeOutcomes.length > 0
+      ? negativeOutcomes.reduce(
+          (sum, d) => sum + Number(d.confidenceScore),
+          0,
+        ) / negativeOutcomes.length
+      : avgConfidenceDeclined; // Fallback to declined-only average
 
   const autoMatchAccuracy =
     autoMatches.length > 0
@@ -251,13 +277,13 @@ export async function getTeamCalibration(
     );
   }
 
-  // Confidence gap analysis - conservative learning from score patterns
+  // Confidence gap analysis - conservative learning from score patterns (including unmatch feedback)
   if (
     avgConfidenceConfirmed > 0 &&
-    avgConfidenceDeclined > 0 &&
+    avgConfidenceNegative > 0 &&
     confirmed.length >= CALIBRATION_LIMITS.MIN_SAMPLES_SUGGESTED
   ) {
-    const confidenceGap = avgConfidenceConfirmed - avgConfidenceDeclined;
+    const confidenceGap = avgConfidenceConfirmed - avgConfidenceNegative;
 
     if (confidenceGap > 0.2) {
       // Very clear separation - be more aggressive but conservatively
@@ -286,8 +312,8 @@ export async function getTeamCalibration(
     );
   }
 
-  if (declined.length > 20 && suggestedMatchAccuracy < 0.7) {
-    // High decline volume with poor accuracy - be more conservative
+  if (negativeOutcomes.length > 20 && suggestedMatchAccuracy < 0.7) {
+    // High negative feedback volume (declined + unmatched) with poor accuracy - be more conservative
     const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.025);
     calibratedSuggestedThreshold = Math.min(
       0.85,
@@ -300,8 +326,10 @@ export async function getTeamCalibration(
     totalSuggestions: performanceData.length,
     confirmedSuggestions: confirmed.length,
     declinedSuggestions: declined.length,
+    unmatchedSuggestions: unmatched.length, // New metric
     avgConfidenceConfirmed,
     avgConfidenceDeclined,
+    avgConfidenceUnmatched, // New metric
     autoMatchAccuracy,
     suggestedMatchAccuracy,
     calibratedAutoThreshold,
@@ -939,7 +967,7 @@ export async function findMatches(
         candidate,
       );
 
-      // TEMPORARY: Also calculate with old logic for comparison
+      // TEMPORARY: Also calculate with old logic for comparison (using old 15% tolerance)
       const oldCrossCurrencyMatch =
         !hasSameCurrency &&
         inboxItem.baseCurrency === candidate.baseCurrency &&
@@ -949,7 +977,7 @@ export async function findMatches(
           const candidateBase = Math.abs(candidate.baseAmount || 0);
           const difference = Math.abs(inboxBase - candidateBase);
           const avgAmount = (inboxBase + candidateBase) / 2;
-          // Allow up to 15% difference or minimum 50 (for small amounts)
+          // OLD LOGIC: 15% difference or minimum 50 (for comparison only)
           const tolerance = Math.max(50, avgAmount * 0.15);
           return difference < tolerance;
         })();
@@ -1623,7 +1651,7 @@ export async function findInboxMatches(
 }
 
 // Helper functions
-function isCrossCurrencyMatch(
+export function isCrossCurrencyMatch(
   item1: {
     amount?: number | null;
     currency?: string | null;
@@ -1636,8 +1664,8 @@ function isCrossCurrencyMatch(
     baseAmount?: number | null;
     baseCurrency?: string | null;
   },
-  tolerancePercent = 0.15,
-  minTolerance = 50,
+  tolerancePercent = 0.05,
+  minTolerance = 25,
 ): boolean {
   // Must have different currencies
   if (!item1.currency || !item2.currency || item1.currency === item2.currency) {
@@ -1662,11 +1690,33 @@ function isCrossCurrencyMatch(
   const baseAmount2 = Math.abs(item2.baseAmount);
   const difference = Math.abs(baseAmount1 - baseAmount2);
   const avgAmount = (baseAmount1 + baseAmount2) / 2;
-  const tolerance = Math.max(minTolerance, avgAmount * tolerancePercent);
 
-  const isMatch = difference < tolerance;
+  // Tiered tolerance based on amount size to balance accuracy and usability
+  let adjustedTolerance: number;
+  let toleranceCategory: string;
+  let effectiveTolerancePercent: number;
 
-  // Debug logging
+  if (avgAmount < 100) {
+    // Small amounts: More generous (rounding errors, fees, small transactions)
+    adjustedTolerance = Math.max(15, avgAmount * 0.08); // 8% for small amounts
+    toleranceCategory = "small";
+    effectiveTolerancePercent = 0.08;
+  } else if (avgAmount < 1000) {
+    // Medium amounts: Standard tolerance
+    adjustedTolerance = Math.max(25, avgAmount * 0.05); // 5% for medium amounts
+    toleranceCategory = "medium";
+    effectiveTolerancePercent = 0.05;
+  } else {
+    // Large amounts: Very strict (exchange rate should be stable)
+    adjustedTolerance = Math.max(50, avgAmount * 0.03); // 3% for large amounts
+    toleranceCategory = "large";
+    effectiveTolerancePercent = 0.03;
+  }
+
+  const isMatch = difference < adjustedTolerance;
+  const actualTolerancePercent = adjustedTolerance / avgAmount;
+
+  // Enhanced logging with risk assessment
   logger.info("💱 CROSS-CURRENCY MATCH DEBUG", {
     item1: {
       currency: item1.currency,
@@ -1685,9 +1735,25 @@ function isCrossCurrencyMatch(
       baseAmount2,
       difference,
       avgAmount,
-      tolerance,
-      tolerancePercent,
+      tolerance: adjustedTolerance,
+      originalTolerancePercent: tolerancePercent,
+      effectiveTolerancePercent,
+      actualTolerancePercent,
       minTolerance,
+    },
+    riskAssessment: {
+      amountCategory: toleranceCategory,
+      isHighRisk: actualTolerancePercent > 0.1, // Flag >10% effective tolerance
+      isConservative: actualTolerancePercent <= 0.05, // Flag ≤5% tolerance
+      toleranceSource:
+        adjustedTolerance ===
+        Math.max(15, avgAmount * effectiveTolerancePercent)
+          ? adjustedTolerance === 15 ||
+            adjustedTolerance === 25 ||
+            adjustedTolerance === 50
+            ? "minimum"
+            : "percentage"
+          : "percentage",
     },
     result: isMatch,
   });
@@ -1703,7 +1769,7 @@ type AmountComparableItem = {
 };
 
 // Helper scoring functions
-function calculateAmountScore(
+export function calculateAmountScore(
   item1: AmountComparableItem,
   item2: AmountComparableItem,
 ): number {
@@ -1869,7 +1935,7 @@ function calculateAmountDifferenceScore(
   }
 }
 
-function calculateCurrencyScore(
+export function calculateCurrencyScore(
   currency1?: string,
   currency2?: string,
 ): number {
@@ -1883,7 +1949,7 @@ function calculateCurrencyScore(
   return 0.3; // Reduced from 0.5 to be more conservative
 }
 
-function calculateDateScore(
+export function calculateDateScore(
   inboxDate: string,
   transactionDate: string,
   inboxType?: string | null,

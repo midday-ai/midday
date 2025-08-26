@@ -1937,7 +1937,7 @@ export const transactionMatchSuggestions = pgTable(
     matchDetails: jsonb("match_details"),
 
     // User interaction tracking
-    status: text("status").default("pending").notNull(), // 'pending', 'confirmed', 'declined', 'expired'
+    status: text("status").default("pending").notNull(), // 'pending', 'confirmed', 'declined', 'expired', 'unmatched'
     userActionAt: timestamp("user_action_at", {
       withTimezone: true,
       mode: "string",

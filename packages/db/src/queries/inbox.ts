@@ -7,7 +7,8 @@ import {
   transactions,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
-import { and, asc, desc, eq, ne, sql } from "drizzle-orm";
+import { logger } from "@midday/logger";
+import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 
 export type GetInboxParams = {
@@ -427,9 +428,9 @@ export type UnmatchTransactionParams = {
 
 export async function unmatchTransaction(
   db: Database,
-  params: UnmatchTransactionParams,
+  params: UnmatchTransactionParams & { userId?: string },
 ) {
-  const { id, teamId } = params;
+  const { id, teamId, userId } = params;
 
   // Get inbox data
   const [result] = await db
@@ -441,6 +442,56 @@ export async function unmatchTransaction(
     .from(inbox)
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
+
+  // LEARNING FEEDBACK: Find the original match suggestion to mark as incorrect
+  if (result?.transactionId) {
+    // Look for the match suggestion that led to this pairing
+    const [originalSuggestion] = await db
+      .select({
+        id: transactionMatchSuggestions.id,
+        status: transactionMatchSuggestions.status,
+        matchType: transactionMatchSuggestions.matchType,
+        confidenceScore: transactionMatchSuggestions.confidenceScore,
+      })
+      .from(transactionMatchSuggestions)
+      .where(
+        and(
+          eq(transactionMatchSuggestions.inboxId, id),
+          eq(transactionMatchSuggestions.transactionId, result.transactionId),
+          eq(transactionMatchSuggestions.teamId, teamId),
+          inArray(transactionMatchSuggestions.status, [
+            "confirmed",
+            "auto_matched",
+          ]),
+        ),
+      )
+      .orderBy(desc(transactionMatchSuggestions.createdAt))
+      .limit(1);
+
+    // Mark the suggestion as "unmatched" to provide negative feedback for learning
+    if (originalSuggestion) {
+      await db
+        .update(transactionMatchSuggestions)
+        .set({
+          status: "unmatched", // New status for post-match removal
+          userActionAt: new Date().toISOString(),
+          userId: userId || null,
+        })
+        .where(eq(transactionMatchSuggestions.id, originalSuggestion.id));
+
+      // Log for debugging/monitoring
+      logger.info("📚 UNMATCH LEARNING FEEDBACK", {
+        teamId,
+        inboxId: id,
+        transactionId: result.transactionId,
+        originalMatchType: originalSuggestion.matchType,
+        originalConfidence: Number(originalSuggestion.confidenceScore),
+        originalStatus: originalSuggestion.status,
+        message:
+          "User unmatched a previously confirmed/auto-matched pair - negative feedback for learning",
+      });
+    }
+  }
 
   // Update inbox record
   await db
