@@ -52,16 +52,14 @@ export async function acceptTeamInvite(
     throw new Error("Invite not found");
   }
 
-  await db.transaction(async (tx) => {
-    await tx.insert(usersOnTeam).values({
-      userId: params.userId,
-      role: inviteData.role,
-      teamId: inviteData.teamId!,
-    });
-
-    // Delete the invite
-    await tx.delete(userInvites).where(eq(userInvites.id, inviteData.id));
+  await db.insert(usersOnTeam).values({
+    userId: params.userId,
+    role: inviteData.role,
+    teamId: inviteData.teamId!,
   });
+
+  // Delete the invite
+  await db.delete(userInvites).where(eq(userInvites.id, inviteData.id));
 
   return inviteData;
 }
@@ -172,54 +170,52 @@ export async function createTeamInvites(
 ) {
   const { teamId, invites } = params;
 
-  return db.transaction(async (tx) => {
-    const results = await Promise.all(
-      invites.map(async (invite) => {
-        // Upsert invite
-        const [row] = await tx
-          .insert(userInvites)
-          .values({
-            email: invite.email,
+  const results = await Promise.all(
+    invites.map(async (invite) => {
+      // Upsert invite
+      const [row] = await db
+        .insert(userInvites)
+        .values({
+          email: invite.email,
+          role: invite.role,
+          invitedBy: invite.invitedBy,
+          teamId: teamId,
+        })
+        .onConflictDoUpdate({
+          target: [userInvites.email, userInvites.teamId],
+          set: {
             role: invite.role,
             invitedBy: invite.invitedBy,
-            teamId: teamId,
-          })
-          .onConflictDoUpdate({
-            target: [userInvites.email, userInvites.teamId],
-            set: {
-              role: invite.role,
-              invitedBy: invite.invitedBy,
-            },
-          })
-          .returning({
-            id: userInvites.id,
-            email: userInvites.email,
-            code: userInvites.code,
-            role: userInvites.role,
-            invitedBy: userInvites.invitedBy,
-            teamId: userInvites.teamId,
-          });
-
-        if (!row) return null;
-
-        // Fetch team
-        const team = await tx.query.teams.findFirst({
-          where: eq(teams.id, teamId),
-          columns: {
-            id: true,
-            name: true,
           },
+        })
+        .returning({
+          id: userInvites.id,
+          email: userInvites.email,
+          code: userInvites.code,
+          role: userInvites.role,
+          invitedBy: userInvites.invitedBy,
+          teamId: userInvites.teamId,
         });
 
-        return {
-          email: row.email,
-          code: row.code,
-          role: row.role,
-          team,
-        };
-      }),
-    );
+      if (!row) return null;
 
-    return results;
-  });
+      // Fetch team
+      const team = await db.query.teams.findFirst({
+        where: eq(teams.id, teamId),
+        columns: {
+          id: true,
+          name: true,
+        },
+      });
+
+      return {
+        email: row.email,
+        code: row.code,
+        role: row.role,
+        team,
+      };
+    }),
+  );
+
+  return results;
 }

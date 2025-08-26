@@ -110,6 +110,11 @@ export const createTeamSchema = z.object({
     description: "URL to the team's logo image",
     example: "https://cdn.midday.ai/logos/acme-corp.png",
   }),
+  switchTeam: z.boolean().optional().default(false).openapi({
+    description:
+      "Whether to automatically switch the user to the newly created team",
+    example: true,
+  }),
 });
 
 export const leaveTeamSchema = z.object({

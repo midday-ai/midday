@@ -42,6 +42,10 @@ import { TRPCError } from "@trpc/server";
 
 export const teamRouter = createTRPCRouter({
   current: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
+    if (!teamId) {
+      return null;
+    }
+
     return getTeamById(db, teamId!);
   }),
 

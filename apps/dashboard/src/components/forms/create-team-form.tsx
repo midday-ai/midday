@@ -1,5 +1,6 @@
 "use client";
 
+import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
 import { SelectCurrency } from "@/components/select-currency";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
@@ -16,8 +17,7 @@ import {
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { use } from "react";
+import { use, useState } from "react";
 import { z } from "zod";
 import { CountrySelector } from "../country-selector";
 
@@ -42,23 +42,19 @@ export function CreateTeamForm({
   const countryCode = use(defaultCountryCodePromise);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const router = useRouter();
-
-  const changeTeamMutation = useMutation(
-    trpc.user.update.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries();
-        router.push("/");
-      },
-    }),
-  );
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const createTeamMutation = useMutation(
     trpc.team.create.mutationOptions({
-      onSuccess: (teamId) => {
-        changeTeamMutation.mutate({
-          teamId,
-        });
+      onSuccess: async () => {
+        setIsRedirecting(true);
+        // Invalidate all queries to ensure fresh data everywhere
+        await queryClient.invalidateQueries();
+        // Revalidate server-side paths and redirect
+        await revalidateAfterTeamChange();
+      },
+      onError: () => {
+        setIsRedirecting(false);
       },
     }),
   );
@@ -72,10 +68,15 @@ export function CreateTeamForm({
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    if (createTeamMutation.isPending || isRedirecting) {
+      return;
+    }
+
     createTeamMutation.mutate({
       name: values.name,
       baseCurrency: values.baseCurrency,
       countryCode: values.countryCode,
+      switchTeam: true, // Automatically switch to the new team
     });
   }
 
@@ -154,9 +155,7 @@ export function CreateTeamForm({
         <SubmitButton
           className="mt-6 w-full"
           type="submit"
-          isSubmitting={
-            changeTeamMutation.isPending || createTeamMutation.isPending
-          }
+          isSubmitting={createTeamMutation.isPending || isRedirecting}
         >
           Create
         </SubmitButton>

@@ -26,27 +26,25 @@ export async function getMetrics(db: Database, params: GetMetricsParams) {
   const rpc = type === "profit" ? "get_profit_v3" : "get_revenue_v3";
 
   // Use sql.raw for function name to avoid parameterization of identifier
-  const [prevData, currentData] = await db.transaction(async (tx) => {
-    const rawPrev = (await tx.execute(
+  // Run both queries in parallel since they're independent
+  const [rawPrev, rawCurr] = (await Promise.all([
+    db.execute(
       sql`SELECT * FROM ${sql.raw(rpc)}(${teamId}, ${subYears(startOfMonth(parseISO(from)), 1).toISOString()}, ${subYears(endOfMonth(parseISO(to)), 1).toISOString()}, ${inputCurrency ?? null})`,
-    )) as unknown as MetricsResultItem[];
-
-    const prev = rawPrev.map((item) => ({
-      ...item,
-      value: Number.parseFloat(item.value),
-    }));
-
-    const rawCurr = (await tx.execute(
+    ),
+    db.execute(
       sql`SELECT * FROM ${sql.raw(rpc)}(${teamId}, ${startOfMonth(parseISO(from)).toISOString()}, ${endOfMonth(parseISO(to)).toISOString()}, ${inputCurrency ?? null})`,
-    )) as unknown as MetricsResultItem[];
+    ),
+  ])) as unknown as [MetricsResultItem[], MetricsResultItem[]];
 
-    const curr = rawCurr.map((item) => ({
-      ...item,
-      value: Number.parseFloat(item.value),
-    }));
+  const prevData = rawPrev.map((item) => ({
+    ...item,
+    value: Number.parseFloat(item.value),
+  }));
 
-    return [prev, curr];
-  });
+  const currentData = rawCurr.map((item) => ({
+    ...item,
+    value: Number.parseFloat(item.value),
+  }));
 
   const prevTotal = Number(
     (prevData?.reduce((value, item) => item.value + value, 0) ?? 0).toFixed(2),

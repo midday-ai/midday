@@ -1,10 +1,12 @@
 import { createClient } from "@midday/supabase/client";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
+import { Spinner } from "@midday/ui/spinner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export function VerifyMfa() {
   const [isValidating, setValidating] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState(false);
   const supabase = createClient();
   const router = useRouter();
@@ -61,6 +63,7 @@ export function VerifyMfa() {
         return;
       }
 
+      setIsRedirecting(true);
       router.push(
         `${window.location.origin}/${searchParams.get("return_to") || ""}`,
       );
@@ -79,20 +82,33 @@ export function VerifyMfa() {
       </div>
 
       <div className="flex w-full mb-6">
-        <InputOTP
-          onComplete={onComplete}
-          maxLength={6}
-          autoFocus
-          className={error ? "invalid" : undefined}
-          disabled={isValidating}
-          render={({ slots }) => (
-            <InputOTPGroup>
-              {slots.map((slot, index) => (
-                <InputOTPSlot key={index.toString()} {...slot} />
-              ))}
-            </InputOTPGroup>
+        <div className="w-full h-16">
+          {isValidating || isRedirecting ? (
+            <div className="flex items-center justify-center h-full bg-background/95 border border-input">
+              <div className="flex items-center space-x-2 bg-background px-4 py-2 rounded-md shadow-sm">
+                <Spinner size={16} className="text-primary" />
+                <span className="text-sm text-foreground font-medium">
+                  {isRedirecting ? "Redirecting..." : "Verifying..."}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <InputOTP
+              onComplete={onComplete}
+              maxLength={6}
+              autoFocus
+              className={error ? "invalid" : undefined}
+              disabled={isValidating || isRedirecting}
+              render={({ slots }) => (
+                <InputOTPGroup>
+                  {slots.map((slot, index) => (
+                    <InputOTPSlot key={index.toString()} {...slot} />
+                  ))}
+                </InputOTPGroup>
+              )}
+            />
           )}
-        />
+        </div>
       </div>
 
       <p className="text-xs text-[#878787] text-center font-mono">
