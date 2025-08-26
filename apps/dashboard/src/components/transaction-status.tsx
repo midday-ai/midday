@@ -18,8 +18,8 @@ export function TransactionStatus({ fullfilled, hasPendingSuggestion }: Props) {
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex space-x-1 items-center px-1.5 py-0.5 text-[10px] cursor-default font-mono border">
-                <Icons.Check className="size-3.5 mt-[1px]" />
+              <div className="flex space-x-1 items-center cursor-default">
+                <Icons.Check className="size-4.5 mt-[1px]" />
                 <span>Matched</span>
               </div>
             </TooltipTrigger>
@@ -41,7 +41,7 @@ export function TransactionStatus({ fullfilled, hasPendingSuggestion }: Props) {
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex space-x-1.5 items-center px-1.5 py-0.5 text-[10px] cursor-default font-mono border">
+              <div className="flex space-x-1.5 items-center cursor-default">
                 <div className="w-1.5 h-1.5 bg-[#FFD02B] rounded-full" />
                 <span>Suggested match</span>
               </div>
