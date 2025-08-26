@@ -139,7 +139,12 @@ export async function confirmSuggestedMatch(
       userActionAt: new Date().toISOString(),
       userId,
     })
-    .where(eq(transactionMatchSuggestions.id, suggestionId))
+    .where(
+      and(
+        eq(transactionMatchSuggestions.id, suggestionId),
+        eq(transactionMatchSuggestions.teamId, teamId),
+      ),
+    )
     .returning();
 
   // Perform the actual match (this will update inbox status to 'done')
@@ -188,7 +193,12 @@ export async function declineSuggestedMatch(
       userActionAt: new Date().toISOString(),
       userId,
     })
-    .where(eq(transactionMatchSuggestions.id, suggestionId));
+    .where(
+      and(
+        eq(transactionMatchSuggestions.id, suggestionId),
+        eq(transactionMatchSuggestions.teamId, teamId),
+      ),
+    );
 
   // Update inbox status back to 'pending' since suggestion was declined
   await updateInbox(db, {
