@@ -210,9 +210,65 @@ export type DeleteInboxParams = {
 
 export async function deleteInbox(db: Database, params: DeleteInboxParams) {
   const { id, teamId } = params;
+
+  // First get the inbox item to check if it has attachments
+  const [result] = await db
+    .select({
+      id: inbox.id,
+      transactionId: inbox.transactionId,
+      attachmentId: inbox.attachmentId,
+    })
+    .from(inbox)
+    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
+    .limit(1);
+
+  if (!result) {
+    throw new Error("Inbox item not found");
+  }
+
+  // Clean up transaction attachment if it exists (same logic as unmatchTransaction)
+  if (result.attachmentId && result.transactionId) {
+    // Delete the specific transaction attachment for this inbox item
+    await db
+      .delete(transactionAttachments)
+      .where(
+        and(
+          eq(transactionAttachments.id, result.attachmentId),
+          eq(transactionAttachments.teamId, teamId),
+        ),
+      );
+
+    // Check if this transaction still has other attachments before resetting tax info
+    const remainingAttachments = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(transactionAttachments)
+      .where(
+        and(
+          eq(transactionAttachments.transactionId, result.transactionId),
+          eq(transactionAttachments.teamId, teamId),
+        ),
+      );
+
+    // Only reset tax rate and type if no more attachments exist for this transaction
+    if (remainingAttachments[0]?.count === 0) {
+      await db
+        .update(transactions)
+        .set({
+          taxRate: null,
+          taxType: null,
+        })
+        .where(eq(transactions.id, result.transactionId));
+    }
+  }
+
+  // Mark inbox item as deleted and clear attachment/transaction references
   return db
     .update(inbox)
-    .set({ status: "deleted" })
+    .set({
+      status: "deleted",
+      transactionId: null,
+      attachmentId: null,
+    })
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .returning();
 }
@@ -285,6 +341,54 @@ export type UpdateInboxParams = {
 
 export async function updateInbox(db: Database, params: UpdateInboxParams) {
   const { id, teamId, ...data } = params;
+
+  // Special handling for status: "deleted" - need to clean up transaction attachments
+  if (data.status === "deleted") {
+    // First get the inbox item to check if it has attachments
+    const [result] = await db
+      .select({
+        id: inbox.id,
+        transactionId: inbox.transactionId,
+        attachmentId: inbox.attachmentId,
+      })
+      .from(inbox)
+      .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
+      .limit(1);
+
+    if (result?.attachmentId && result?.transactionId) {
+      // Delete the specific transaction attachment for this inbox item
+      await db
+        .delete(transactionAttachments)
+        .where(
+          and(
+            eq(transactionAttachments.id, result.attachmentId),
+            eq(transactionAttachments.teamId, teamId),
+          ),
+        );
+
+      // Check if this transaction still has other attachments before resetting tax info
+      const remainingAttachments = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(transactionAttachments)
+        .where(
+          and(
+            eq(transactionAttachments.transactionId, result.transactionId),
+            eq(transactionAttachments.teamId, teamId),
+          ),
+        );
+
+      // Only reset tax rate and type if no more attachments exist for this transaction
+      if (remainingAttachments[0]?.count === 0) {
+        await db
+          .update(transactions)
+          .set({
+            taxRate: null,
+            taxType: null,
+          })
+          .where(eq(transactions.id, result.transactionId));
+      }
+    }
+  }
 
   // Update the inbox record
   await db

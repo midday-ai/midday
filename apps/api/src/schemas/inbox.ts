@@ -166,7 +166,7 @@ export const updateInboxSchema = z.object({
     },
   }),
   status: z
-    .enum(["new", "archived", "processing", "done", "pending"])
+    .enum(["new", "archived", "processing", "done", "pending", "deleted"])
     .optional(),
   displayName: z.string().optional(),
   currency: z.string().optional(),

@@ -17,9 +17,22 @@ type Props = {
 export function InboxStatus({ item }: Props) {
   if (item.status === "processing" || item.status === "new") {
     return (
-      <div className="flex space-x-1 items-center px-1.5 py-0.5 h-[26px]">
-        <span className="text-xs">Processing</span>
-      </div>
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex space-x-1 items-center p-1 text-[#878787] text-[10px] px-1.5 py-0.5 cursor-default font-mono border">
+              <Spinner size={14} className="stroke-primary" />
+              <span>Processing</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={10} className="text-xs">
+            <p>
+              We're processing the file and extracting <br />
+              relevant information
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   }
 
