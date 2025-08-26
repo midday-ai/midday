@@ -65,9 +65,9 @@ export function OTPSignIn({ className }: Props) {
   if (isSent) {
     return (
       <div className={cn("flex flex-col space-y-4 items-center", className)}>
-        <div className="h-[62px] w-full">
+        <div className="h-[62px] w-full flex items-center justify-center">
           {verifyOtp.isExecuting || isVerifying ? (
-            <div className="flex items-center justify-center h-full bg-background/95 border border-input">
+            <div className="flex items-center justify-center h-full bg-background/95 border border-input w-full">
               <div className="flex items-center space-x-2 bg-background px-4 py-2 rounded-md shadow-sm">
                 <Spinner size={16} className="text-primary" />
                 <span className="text-sm text-foreground font-medium">

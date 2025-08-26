@@ -117,9 +117,9 @@ export function EnrollMFA() {
       </Collapsible>
 
       <div className="flex w-full">
-        <div className="w-full h-16">
+        <div className="w-full h-16 flex items-center justify-center">
           {isValidating || isRedirecting ? (
-            <div className="flex items-center justify-center h-full bg-background/95 border border-input">
+            <div className="flex items-center justify-center h-full bg-background/95 border border-input w-full">
               <div className="flex items-center space-x-2 bg-background px-4 py-2 rounded-md shadow-sm">
                 <Spinner size={16} className="text-primary" />
                 <span className="text-sm text-foreground font-medium">

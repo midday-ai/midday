@@ -3,15 +3,17 @@ import { cn } from "../utils";
 
 function Skeleton({
   className,
+  animate = true,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.HTMLAttributes<HTMLDivElement> & { animate?: boolean }) {
   return (
     <div
       className={cn(
         "relative overflow-hidden",
         "bg-gradient-to-r from-transparent via-primary/10 to-transparent dark:via-primary/10",
         "bg-[length:200%_100%]",
-        "animate-shimmer rounded-none",
+        "rounded-none",
+        animate && "animate-shimmer",
         className,
       )}
       {...props}
