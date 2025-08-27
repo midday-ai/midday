@@ -478,6 +478,20 @@ Even when merchant patterns are eligible, each match still requires:
 - **Strong Semantic Similarity**: ≥ 85% embedding score
 - **Reasonable Date Alignment**: ≥ 70% date score
 
+<<<<<<< HEAD
+=======
+#### Feature Flag Control
+
+Semantic merchant auto-matching is controlled by an environment variable for safe rollout:
+
+```bash
+# Enable semantic merchant auto-matching
+ENABLE_SEMANTIC_AUTO_MATCH=true
+```
+
+When disabled, the system gracefully falls back to the previous behavior with clear logging.
+
+>>>>>>> 913ab1504 (wip)
 #### Benefits
 
 - **Merchant-Specific Learning**: Netflix confirmations only affect Netflix auto-matching
