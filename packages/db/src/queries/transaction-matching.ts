@@ -1151,36 +1151,38 @@ export async function findMatches(
           };
 
           if (confidenceScore >= teamWeights.autoMatchThreshold) {
-            let shouldAutoMatch = false;
+            // let shouldAutoMatch = false;
 
-            // TIER 1: Perfect financial matches - most reliable
-            if (
-              confidenceScore >= autoMatchTiers.perfect &&
-              (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-              embeddingScore >= 0.75 &&
-              dateScore >= 0.6
-            ) {
-              shouldAutoMatch = true;
-            }
-            // TIER 2: Excellent matches with strong signals - more conservative
-            else if (
-              confidenceScore >= 0.97 &&
-              (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-              embeddingScore >= 0.75 &&
-              dateScore >= 0.7
-            ) {
-              shouldAutoMatch = true;
-            } else if (
-              confidenceScore >= 0.92 &&
-              calibration.autoMatchAccuracy > 0.99 &&
-              calibration.totalSuggestions > 50 &&
-              (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-              embeddingScore >= 0.85 &&
-              dateScore >= 0.8
-            ) {
-              shouldAutoMatch = true;
-            }
+            // // TIER 1: Perfect financial matches - most reliable
+            // if (
+            //   confidenceScore >= autoMatchTiers.perfect &&
+            //   (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
+            //   embeddingScore >= 0.75 &&
+            //   dateScore >= 0.6
+            // ) {
+            //   shouldAutoMatch = true;
+            // }
+            // // TIER 2: Excellent matches with strong signals - more conservative
+            // else if (
+            //   confidenceScore >= 0.97 &&
+            //   (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
+            //   embeddingScore >= 0.75 &&
+            //   dateScore >= 0.7
+            // ) {
+            //   shouldAutoMatch = true;
+            // } else if (
+            //   confidenceScore >= 0.92 &&
+            //   calibration.autoMatchAccuracy > 0.99 &&
+            //   calibration.totalSuggestions > 50 &&
+            //   (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
+            //   embeddingScore >= 0.85 &&
+            //   dateScore >= 0.8
+            // ) {
+            //   shouldAutoMatch = true;
+            // }
 
+            // Auto-matching disabled - all matches become suggestions
+            const shouldAutoMatch = false;
             matchType = shouldAutoMatch ? "auto_matched" : "high_confidence";
           } else if (confidenceScore >= 0.72) {
             // Lowered from 0.75 for better UX
@@ -1581,35 +1583,38 @@ export async function findInboxMatches(
         };
 
         if (confidenceScore >= teamWeights.autoMatchThreshold) {
-          let shouldAutoMatch = false;
+          // let shouldAutoMatch = false;
 
-          // TIER 1: Perfect financial matches - most reliable
-          if (
-            confidenceScore >= autoMatchTiers.perfect &&
-            (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-            embeddingScore >= 0.75 &&
-            dateScore >= 0.6
-          ) {
-            shouldAutoMatch = true;
-          }
-          // TIER 2: Excellent matches with strong signals - more conservative
-          else if (
-            confidenceScore >= 0.97 &&
-            (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-            embeddingScore >= 0.75 &&
-            dateScore >= 0.7
-          ) {
-            shouldAutoMatch = true;
-          } else if (
-            confidenceScore >= 0.92 &&
-            calibration.autoMatchAccuracy > 0.99 &&
-            calibration.totalSuggestions > 50 &&
-            (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-            embeddingScore >= 0.85 &&
-            dateScore >= 0.8
-          ) {
-            shouldAutoMatch = true;
-          }
+          // // TIER 1: Perfect financial matches - most reliable
+          // if (
+          //   confidenceScore >= autoMatchTiers.perfect &&
+          //   (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
+          //   embeddingScore >= 0.75 &&
+          //   dateScore >= 0.6
+          // ) {
+          //   shouldAutoMatch = true;
+          // }
+          // // TIER 2: Excellent matches with strong signals - more conservative
+          // else if (
+          //   confidenceScore >= 0.97 &&
+          //   (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
+          //   embeddingScore >= 0.75 &&
+          //   dateScore >= 0.7
+          // ) {
+          //   shouldAutoMatch = true;
+          // } else if (
+          //   confidenceScore >= 0.92 &&
+          //   calibration.autoMatchAccuracy > 0.99 &&
+          //   calibration.totalSuggestions > 50 &&
+          //   (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
+          //   embeddingScore >= 0.85 &&
+          //   dateScore >= 0.8
+          // ) {
+          //   shouldAutoMatch = true;
+          // }
+
+          // Auto-matching disabled - all matches become suggestions
+          const shouldAutoMatch = false;
 
           matchType = shouldAutoMatch ? "auto_matched" : "high_confidence";
         } else if (confidenceScore >= 0.72) {
