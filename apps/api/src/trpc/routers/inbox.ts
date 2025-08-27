@@ -108,11 +108,12 @@ export const inboxRouter = createTRPCRouter({
   search: protectedProcedure
     .input(searchInboxSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
-      const { query, limit = 10 } = input;
+      const { q, transactionId, limit = 10 } = input;
 
       return getInboxSearch(db, {
         teamId: teamId!,
-        q: query,
+        q,
+        transactionId,
         limit,
       });
     }),

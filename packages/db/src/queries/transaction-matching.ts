@@ -570,11 +570,20 @@ export async function findMatches(
     });
 
     // QUERY 2: Perfect base currency matches (if we need more and have base currency)
-    if (
-      candidateTransactions.length < 5 &&
+    const shouldRunQuery2 =
+      candidateTransactions.length < 15 &&
       inboxBaseCurrency &&
-      inboxBaseCurrency !== ""
-    ) {
+      inboxBaseCurrency !== "";
+
+    logger.info("🎯 QUERY 2 - Base currency matching check", {
+      inboxId,
+      candidateCount: candidateTransactions.length,
+      inboxBaseCurrency,
+      inboxBaseAmount,
+      willRun: shouldRunQuery2,
+    });
+
+    if (shouldRunQuery2) {
       const baseMatches = await db
         .select({
           transactionId: transactions.id,
@@ -666,6 +675,7 @@ export async function findMatches(
           inboxBaseAmount,
           inboxBaseCurrency,
           embeddingThreshold: EMBEDDING_THRESHOLDS.WEAK_MATCH,
+          tolerance: Math.max(50, Math.abs(inboxBaseAmount) * 0.15),
         },
         found: baseMatches.length,
         totalCandidates: candidateTransactions.length,
@@ -675,6 +685,9 @@ export async function findMatches(
           baseAmount: t.baseAmount,
           baseCurrency: t.baseCurrency,
           embeddingScore: t.embeddingScore,
+          amountDiff: Math.abs(
+            Math.abs(t.baseAmount || 0) - Math.abs(inboxBaseAmount),
+          ),
         })),
       });
     }
@@ -1060,9 +1073,11 @@ export async function findMatches(
         confidenceScore = Math.max(confidenceScore, 0.82);
       }
 
-      // Apply penalties for poor matches
+      // Apply penalties for poor matches - but reduce penalty for very high semantic matches
       if (inboxItem.currency !== candidate.currency && currencyScore < 0.7) {
-        confidenceScore *= 0.9;
+        // Reduce currency penalty when semantic similarity is very high (85%+)
+        const currencyPenalty = embeddingScore >= 0.85 ? 0.95 : 0.9;
+        confidenceScore *= currencyPenalty;
       }
       if (dateScore < 0.2) {
         confidenceScore *= 0.85;
@@ -1544,12 +1559,14 @@ export async function findInboxMatches(
       confidenceScore = Math.min(1.0, confidenceScore + 0.05);
     }
 
-    // Apply penalties
+    // Apply penalties - but reduce penalty for very high semantic matches
     if (
       candidate.currency !== transactionItem.currency &&
       currencyScore < 0.8
     ) {
-      confidenceScore *= 0.85;
+      // Reduce currency penalty when semantic similarity is very high (85%+)
+      const currencyPenalty = embeddingScore >= 0.85 ? 0.92 : 0.85;
+      confidenceScore *= currencyPenalty;
     }
 
     // ROBUSTNESS: Ensure confidence score is always within valid bounds

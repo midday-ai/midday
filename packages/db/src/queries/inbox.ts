@@ -2,14 +2,68 @@ import type { Database } from "@db/client";
 import {
   inbox,
   inboxAccounts,
+  inboxEmbeddings,
   transactionAttachments,
+  transactionEmbeddings,
   transactionMatchSuggestions,
   transactions,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { logger } from "@midday/logger";
-import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ne, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
+
+// Scoring functions for suggestion ranking
+function calculateAmountScore(
+  item1: { amount: number | null },
+  item2: { amount: number | null },
+): number {
+  const amount1 = item1.amount;
+  const amount2 = item2.amount;
+
+  if (amount1 === null || amount2 === null) return 0.0;
+
+  const abs1 = Math.abs(amount1);
+  const abs2 = Math.abs(amount2);
+
+  if (abs1 === abs2) return 1.0;
+
+  const diff = Math.abs(abs1 - abs2);
+  const max = Math.max(abs1, abs2);
+  const percentDiff = diff / max;
+
+  if (percentDiff <= 0.05) return 0.9;
+  if (percentDiff <= 0.15) return 0.7;
+  return 0.3;
+}
+
+function calculateCurrencyScore(
+  currency1?: string,
+  currency2?: string,
+): number {
+  if (!currency1 || !currency2) return 0.5;
+  if (currency1 === currency2) return 1.0;
+  return 0.3;
+}
+
+function calculateDateScore(
+  inboxDate: string,
+  transactionDate: string,
+): number {
+  const inboxDateObj = new Date(inboxDate);
+  const transactionDateObj = new Date(transactionDate);
+  const diffTime = Math.abs(
+    transactionDateObj.getTime() - inboxDateObj.getTime(),
+  );
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return 1.0;
+  if (diffDays <= 1) return 0.9;
+  if (diffDays <= 3) return 0.8;
+  if (diffDays <= 7) return 0.7;
+  if (diffDays <= 14) return 0.6;
+  return 0.5;
+}
 
 export type GetInboxParams = {
   teamId: string;
@@ -276,53 +330,290 @@ export async function deleteInbox(db: Database, params: DeleteInboxParams) {
 export type GetInboxSearchParams = {
   teamId: string;
   limit?: number;
-  q: string | number;
+  q?: string; // Search query (text or amount)
+  transactionId?: string; // For AI suggestions
 };
 
 export async function getInboxSearch(
   db: Database,
   params: GetInboxSearchParams,
 ) {
-  const { teamId, q, limit = 10 } = params;
+  try {
+    const { teamId, q, transactionId, limit = 10 } = params;
 
-  const whereConditions: SQL[] = [
-    eq(inbox.teamId, teamId),
-    ne(inbox.status, "deleted"),
-  ];
+    const whereConditions: SQL[] = [
+      eq(inbox.teamId, teamId),
+      ne(inbox.status, "deleted"),
+      // Exclude items that are already matched to other transactions
+      sql`${inbox.transactionId} IS NULL`,
+    ];
 
-  // Apply search query filter
-  if (!Number.isNaN(Number.parseInt(String(q)))) {
-    // If the query is a number, search by amount
-    whereConditions.push(
-      sql`${inbox.amount}::text LIKE '%' || ${String(q)} || '%'`,
-    );
-  } else {
-    // Search using full-text search
-    const query = buildSearchQuery(String(q));
-    whereConditions.push(sql`to_tsquery('english', ${query}) @@ ${inbox.fts}`);
+    // PRIORITY 1: User is searching with query
+    if (q && q.trim().length > 0) {
+      const searchTerm = q.trim();
+      const searchQuery = buildSearchQuery(searchTerm); // Use FTS format
+
+      logger.info("🔍 SEARCH DEBUG:", {
+        searchTerm,
+        searchQuery,
+        teamId,
+        limit,
+      });
+
+      // Check if search term is a number (for amount searching)
+      const numericSearch = Number.parseFloat(
+        searchTerm.replace(/[^\d.-]/g, ""),
+      );
+
+      const isNumericSearch =
+        !Number.isNaN(numericSearch) && Number.isFinite(numericSearch);
+
+      if (isNumericSearch) {
+        // Search by amount (exact match or close match within 10%)
+        const tolerance = Math.max(1, Math.abs(numericSearch) * 0.1);
+        whereConditions.push(
+          sql`(
+            to_tsquery('english', ${searchQuery}) @@ ${inbox.fts}
+            OR ABS(COALESCE(${inbox.amount}, 0) - ${numericSearch}) <= ${tolerance}
+          )`,
+        );
+      } else {
+        // Text-only search using FTS
+        whereConditions.push(
+          sql`to_tsquery('english', ${searchQuery}) @@ ${inbox.fts}`,
+        );
+      }
+
+      // For search, return results ordered by date (most recent first)
+      const searchResults = await db
+        .select({
+          id: inbox.id,
+          createdAt: inbox.createdAt,
+          fileName: inbox.fileName,
+          amount: inbox.amount,
+          currency: inbox.currency,
+          filePath: inbox.filePath,
+          contentType: inbox.contentType,
+          date: inbox.date,
+          displayName: inbox.displayName,
+          size: inbox.size,
+          description: inbox.description,
+        })
+        .from(inbox)
+        .where(and(...whereConditions))
+        .orderBy(desc(inbox.date), desc(inbox.createdAt)) // Most recent first
+        .limit(limit);
+
+      logger.info("🎯 SEARCH RESULTS:", {
+        searchTerm,
+        resultsCount: searchResults.length,
+        results: searchResults.slice(0, 3).map((r) => ({
+          id: r.id,
+          displayName: r.displayName,
+          amount: r.amount,
+          currency: r.currency,
+        })),
+      });
+
+      return searchResults;
+    }
+
+    // PRIORITY 2: AI suggestions for transaction
+    if (transactionId) {
+      // Get transaction details for context-aware matching
+      const transactionData = await db
+        .select({
+          id: transactions.id,
+          name: transactions.name,
+          amount: transactions.amount,
+          currency: transactions.currency,
+          baseAmount: transactions.baseAmount,
+          baseCurrency: transactions.baseCurrency,
+          date: transactions.date,
+          counterpartyName: transactions.counterpartyName,
+          description: transactions.description,
+        })
+        .from(transactions)
+        .where(
+          and(
+            eq(transactions.id, transactionId),
+            eq(transactions.teamId, teamId),
+          ),
+        )
+        .limit(1);
+
+      if (transactionData.length > 0) {
+        const transaction = transactionData[0]!;
+
+        // Check if transaction already has attachments - if so, don't show suggestions
+        const [hasAttachments] = await db
+          .select({ count: sql`count(*)` })
+          .from(transactionAttachments)
+          .where(
+            and(
+              eq(transactionAttachments.transactionId, transactionId),
+              eq(transactionAttachments.teamId, teamId),
+            ),
+          );
+
+        const attachmentCount = hasAttachments?.count
+          ? Number(hasAttachments.count)
+          : 0;
+
+        if (attachmentCount > 0) {
+          return [];
+        }
+
+        // Use the same successful approach as batch-process-matching
+        // Get candidates first, then score them with the same logic that works
+        const candidates = await db
+          .select({
+            id: inbox.id,
+            createdAt: inbox.createdAt,
+            fileName: inbox.fileName,
+            amount: inbox.amount,
+            currency: inbox.currency,
+            filePath: inbox.filePath,
+            contentType: inbox.contentType,
+            date: inbox.date,
+            displayName: inbox.displayName,
+            size: inbox.size,
+            description: inbox.description,
+            baseAmount: inbox.baseAmount,
+            baseCurrency: inbox.baseCurrency,
+            embeddingScore:
+              sql<number>`(${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding})`.as(
+                "embedding_score",
+              ),
+          })
+          .from(inbox)
+          .innerJoin(inboxEmbeddings, eq(inbox.id, inboxEmbeddings.inboxId))
+          .crossJoin(transactionEmbeddings)
+          .where(
+            and(
+              ...whereConditions,
+              eq(transactionEmbeddings.transactionId, transactionId),
+              // More permissive threshold for manual suggestions (80%+)
+              sql`(${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding}) < 0.2`,
+              // Very wide date range for manual suggestions (full year)
+              sql`${inbox.date} BETWEEN (${sql.param(transaction.date)}::date - INTERVAL '365 days') 
+                  AND (${sql.param(transaction.date)}::date + INTERVAL '90 days')`,
+            ),
+          )
+          .orderBy(
+            sql`(${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding})`,
+          )
+          .limit(20); // Get more candidates for better scoring
+
+        logger.info(
+          "🔍 Main candidates found:",
+          candidates.length,
+          candidates.map((c) => ({
+            displayName: c.displayName,
+            amount: c.amount,
+            currency: c.currency,
+            embeddingScore: c.embeddingScore,
+            semanticSimilarity: (1 - c.embeddingScore).toFixed(3),
+          })),
+        );
+
+        if (candidates.length > 0) {
+          // Score candidates using the same logic as successful batch-process-matching
+          const scoredCandidates = candidates.map((candidate) => {
+            const embeddingScore = Math.max(0, 1 - candidate.embeddingScore);
+            const amountScore = calculateAmountScore(candidate, transaction);
+            const currencyScore = calculateCurrencyScore(
+              candidate.currency || undefined,
+              transaction.currency || undefined,
+            );
+            const dateScore = calculateDateScore(
+              candidate.date!,
+              transaction.date,
+            );
+
+            // Same confidence calculation as successful matching
+            let confidenceScore =
+              embeddingScore * 0.5 + // Same weights as successful matching
+              amountScore * 0.35 +
+              currencyScore * 0.1 +
+              dateScore * 0.05;
+
+            // Apply same currency penalty reduction for high semantic matches
+            if (
+              candidate.currency !== transaction.currency &&
+              currencyScore < 0.8
+            ) {
+              const currencyPenalty = embeddingScore >= 0.85 ? 0.92 : 0.85;
+              confidenceScore *= currencyPenalty;
+            }
+
+            return {
+              ...candidate,
+              confidenceScore,
+              embeddingScore,
+              amountScore,
+              currencyScore,
+              dateScore,
+            };
+          });
+
+          // Sort by confidence score first, then by date (more recent first) for ties
+          const sortedSuggestions = scoredCandidates
+            .sort((a, b) => {
+              const confidenceDiff = b.confidenceScore - a.confidenceScore;
+              // If confidence scores are very close (within 1%), use date as tiebreaker
+              if (Math.abs(confidenceDiff) < 0.01) {
+                const dateA = new Date(a.date || 0).getTime();
+                const dateB = new Date(b.date || 0).getTime();
+                return dateB - dateA; // More recent first
+              }
+              return confidenceDiff;
+            })
+            .slice(0, limit);
+
+          logger.info(
+            "🎯 Found and scored suggestions:",
+            sortedSuggestions.length,
+            sortedSuggestions.map((s) => ({
+              displayName: s.displayName,
+              amount: s.amount,
+              confidence: s.confidenceScore,
+            })),
+          );
+
+          return sortedSuggestions;
+        }
+
+        // No matches found
+        return [];
+      }
+    }
+
+    // PRIORITY 3: Recent unmatched items
+    const data = await db
+      .select({
+        id: inbox.id,
+        createdAt: inbox.createdAt,
+        fileName: inbox.fileName,
+        amount: inbox.amount,
+        currency: inbox.currency,
+        filePath: inbox.filePath,
+        contentType: inbox.contentType,
+        date: inbox.date,
+        displayName: inbox.displayName,
+        size: inbox.size,
+        description: inbox.description,
+      })
+      .from(inbox)
+      .where(and(...whereConditions))
+      .orderBy(desc(inbox.createdAt))
+      .limit(limit);
+
+    return data;
+  } catch (error) {
+    logger.error("Error in getInboxSearch:", error);
+    return [];
   }
-
-  // Execute query
-  const data = await db
-    .select({
-      id: inbox.id,
-      createdAt: inbox.createdAt,
-      fileName: inbox.fileName,
-      amount: inbox.amount,
-      currency: inbox.currency,
-      filePath: inbox.filePath,
-      contentType: inbox.contentType,
-      date: inbox.date,
-      displayName: inbox.displayName,
-      size: inbox.size,
-      description: inbox.description,
-    })
-    .from(inbox)
-    .where(and(...whereConditions))
-    .orderBy(asc(inbox.createdAt))
-    .limit(limit);
-
-  return data;
 }
 
 export type UpdateInboxParams = {

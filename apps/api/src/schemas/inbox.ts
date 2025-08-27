@@ -161,8 +161,9 @@ export const processAttachmentsSchema = z.array(
 );
 
 export const searchInboxSchema = z.object({
-  query: z.string(),
-  limit: z.number().optional(),
+  q: z.string().optional(), // Search query (text or amount)
+  transactionId: z.string().optional(), // For AI suggestions
+  limit: z.number().optional().default(10),
 });
 
 export const updateInboxSchema = z.object({
