@@ -9,7 +9,6 @@ import { getUrl } from "@/utils/environment";
 import { formatDate } from "@/utils/format";
 import { getInitials } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
-import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -30,16 +29,18 @@ import {
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useCopyToClipboard } from "usehooks-ts";
 import { EditInboxModal } from "../modals/edit-inbox-modal";
+import { InboxActions } from "./inbox-actions";
 import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
-import { MatchTransaction } from "./match-transaction";
 
 export function InboxDetails() {
   const { setParams, params } = useInboxParams();
+
   const { params: filterParams } = useInboxFilterParams();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -55,17 +56,6 @@ export function InboxDetails() {
       { id: id! },
       {
         enabled: !!id,
-        initialData: () => {
-          const pages = queryClient
-            .getQueriesData({ queryKey: trpc.inbox.get.infiniteQueryKey() })
-            // @ts-expect-error
-            .flatMap(([, data]) => data?.pages ?? [])
-            .flatMap((page) => page.data ?? []);
-
-          return pages.find(
-            (d) => d.id === id,
-          ) as RouterOutputs["inbox"]["getById"];
-        },
       },
     ),
   );
@@ -154,9 +144,19 @@ export function InboxDetails() {
     }),
   );
 
+  const retryMatchingMutation = useMutation(
+    trpc.inbox.retryMatching.mutationOptions(),
+  );
+
   const handleOnDelete = () => {
     if (data?.id) {
       deleteInboxMutation.mutate({ id: data.id });
+    }
+  };
+
+  const handleRetryMatching = () => {
+    if (data?.id) {
+      retryMatchingMutation.mutate({ id: data.id });
     }
   };
 
@@ -260,6 +260,14 @@ export function InboxDetails() {
                 <DropdownMenuItem onClick={handleCopyLink}>
                   Copy Link
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleRetryMatching}
+                  disabled={retryMatchingMutation.isPending}
+                >
+                  {retryMatchingMutation.isPending
+                    ? "Processing..."
+                    : "Retry Matching"}
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </EditInboxModal>
@@ -336,7 +344,7 @@ export function InboxDetails() {
           <Separator />
 
           <div className="absolute bottom-4 left-4 right-4 z-50">
-            <MatchTransaction />
+            <InboxActions data={data} />
           </div>
 
           {data?.filePath && (

@@ -3,10 +3,12 @@ import {
   inbox,
   inboxAccounts,
   transactionAttachments,
+  transactionMatchSuggestions,
   transactions,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
-import { and, asc, desc, eq, ne, sql } from "drizzle-orm";
+import { logger } from "@midday/logger";
+import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 
 export type GetInboxParams = {
@@ -15,7 +17,15 @@ export type GetInboxParams = {
   order?: string | null;
   pageSize?: number;
   q?: string | null;
-  status?: "new" | "archived" | "processing" | "done" | "pending" | null;
+  status?:
+    | "new"
+    | "archived"
+    | "processing"
+    | "done"
+    | "pending"
+    | "analyzing"
+    | "suggested_match"
+    | null;
 };
 
 export async function getInbox(db: Database, params: GetInboxParams) {
@@ -146,12 +156,49 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
         name: transactions.name,
         date: transactions.date,
       },
+      suggestion: {
+        id: transactionMatchSuggestions.id,
+        transactionId: transactionMatchSuggestions.transactionId,
+        confidenceScore: transactionMatchSuggestions.confidenceScore,
+        matchType: transactionMatchSuggestions.matchType,
+        status: transactionMatchSuggestions.status,
+      },
     })
     .from(inbox)
     .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
     .leftJoin(inboxAccounts, eq(inbox.inboxAccountId, inboxAccounts.id))
+    .leftJoin(
+      transactionMatchSuggestions,
+      and(
+        eq(transactionMatchSuggestions.inboxId, inbox.id),
+        eq(transactionMatchSuggestions.status, "pending"),
+      ),
+    )
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
+
+  // If there's a suggestion, get the suggested transaction details
+  if (result?.suggestion?.transactionId) {
+    const [suggestedTransaction] = await db
+      .select({
+        id: transactions.id,
+        name: transactions.name,
+        amount: transactions.amount,
+        currency: transactions.currency,
+        date: transactions.date,
+      })
+      .from(transactions)
+      .where(eq(transactions.id, result.suggestion.transactionId))
+      .limit(1);
+
+    return {
+      ...result,
+      suggestion: {
+        ...result.suggestion,
+        suggestedTransaction,
+      },
+    };
+  }
 
   return result;
 }
@@ -163,9 +210,65 @@ export type DeleteInboxParams = {
 
 export async function deleteInbox(db: Database, params: DeleteInboxParams) {
   const { id, teamId } = params;
+
+  // First get the inbox item to check if it has attachments
+  const [result] = await db
+    .select({
+      id: inbox.id,
+      transactionId: inbox.transactionId,
+      attachmentId: inbox.attachmentId,
+    })
+    .from(inbox)
+    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
+    .limit(1);
+
+  if (!result) {
+    throw new Error("Inbox item not found");
+  }
+
+  // Clean up transaction attachment if it exists (same logic as unmatchTransaction)
+  if (result.attachmentId && result.transactionId) {
+    // Delete the specific transaction attachment for this inbox item
+    await db
+      .delete(transactionAttachments)
+      .where(
+        and(
+          eq(transactionAttachments.id, result.attachmentId),
+          eq(transactionAttachments.teamId, teamId),
+        ),
+      );
+
+    // Check if this transaction still has other attachments before resetting tax info
+    const remainingAttachments = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(transactionAttachments)
+      .where(
+        and(
+          eq(transactionAttachments.transactionId, result.transactionId),
+          eq(transactionAttachments.teamId, teamId),
+        ),
+      );
+
+    // Only reset tax rate and type if no more attachments exist for this transaction
+    if (remainingAttachments[0]?.count === 0) {
+      await db
+        .update(transactions)
+        .set({
+          taxRate: null,
+          taxType: null,
+        })
+        .where(eq(transactions.id, result.transactionId));
+    }
+  }
+
+  // Mark inbox item as deleted and clear attachment/transaction references
   return db
     .update(inbox)
-    .set({ status: "deleted" })
+    .set({
+      status: "deleted",
+      transactionId: null,
+      attachmentId: null,
+    })
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .returning();
 }
@@ -225,11 +328,67 @@ export async function getInboxSearch(
 export type UpdateInboxParams = {
   id: string;
   teamId: string;
-  status?: "deleted" | "new" | "archived" | "processing" | "done" | "pending";
+  status?:
+    | "deleted"
+    | "new"
+    | "archived"
+    | "processing"
+    | "done"
+    | "pending"
+    | "analyzing"
+    | "suggested_match";
 };
 
 export async function updateInbox(db: Database, params: UpdateInboxParams) {
   const { id, teamId, ...data } = params;
+
+  // Special handling for status: "deleted" - need to clean up transaction attachments
+  if (data.status === "deleted") {
+    // First get the inbox item to check if it has attachments
+    const [result] = await db
+      .select({
+        id: inbox.id,
+        transactionId: inbox.transactionId,
+        attachmentId: inbox.attachmentId,
+      })
+      .from(inbox)
+      .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
+      .limit(1);
+
+    if (result?.attachmentId && result?.transactionId) {
+      // Delete the specific transaction attachment for this inbox item
+      await db
+        .delete(transactionAttachments)
+        .where(
+          and(
+            eq(transactionAttachments.id, result.attachmentId),
+            eq(transactionAttachments.teamId, teamId),
+          ),
+        );
+
+      // Check if this transaction still has other attachments before resetting tax info
+      const remainingAttachments = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(transactionAttachments)
+        .where(
+          and(
+            eq(transactionAttachments.transactionId, result.transactionId),
+            eq(transactionAttachments.teamId, teamId),
+          ),
+        );
+
+      // Only reset tax rate and type if no more attachments exist for this transaction
+      if (remainingAttachments[0]?.count === 0) {
+        await db
+          .update(transactions)
+          .set({
+            taxRate: null,
+            taxType: null,
+          })
+          .where(eq(transactions.id, result.transactionId));
+      }
+    }
+  }
 
   // Update the inbox record
   await db
@@ -335,7 +494,7 @@ export async function matchTransaction(
   }
 
   // Return updated inbox with transaction data
-  return db
+  const [data] = await db
     .select({
       id: inbox.id,
       fileName: inbox.fileName,
@@ -362,6 +521,8 @@ export async function matchTransaction(
     .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
+
+  return data;
 }
 
 export type UnmatchTransactionParams = {
@@ -371,9 +532,9 @@ export type UnmatchTransactionParams = {
 
 export async function unmatchTransaction(
   db: Database,
-  params: UnmatchTransactionParams,
+  params: UnmatchTransactionParams & { userId?: string },
 ) {
-  const { id, teamId } = params;
+  const { id, teamId, userId } = params;
 
   // Get inbox data
   const [result] = await db
@@ -385,6 +546,53 @@ export async function unmatchTransaction(
     .from(inbox)
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
+
+  // LEARNING FEEDBACK: Find the original match suggestion to mark as incorrect
+  if (result?.transactionId) {
+    // Look for the match suggestion that led to this pairing
+    const [originalSuggestion] = await db
+      .select({
+        id: transactionMatchSuggestions.id,
+        status: transactionMatchSuggestions.status,
+        matchType: transactionMatchSuggestions.matchType,
+        confidenceScore: transactionMatchSuggestions.confidenceScore,
+      })
+      .from(transactionMatchSuggestions)
+      .where(
+        and(
+          eq(transactionMatchSuggestions.inboxId, id),
+          eq(transactionMatchSuggestions.transactionId, result.transactionId),
+          eq(transactionMatchSuggestions.teamId, teamId),
+          eq(transactionMatchSuggestions.status, "confirmed"),
+        ),
+      )
+      .orderBy(desc(transactionMatchSuggestions.createdAt))
+      .limit(1);
+
+    // Mark the suggestion as "unmatched" to provide negative feedback for learning
+    if (originalSuggestion) {
+      await db
+        .update(transactionMatchSuggestions)
+        .set({
+          status: "unmatched", // New status for post-match removal
+          userActionAt: new Date().toISOString(),
+          userId: userId || null,
+        })
+        .where(eq(transactionMatchSuggestions.id, originalSuggestion.id));
+
+      // Log for debugging/monitoring
+      logger.info("📚 UNMATCH LEARNING FEEDBACK", {
+        teamId,
+        inboxId: id,
+        transactionId: result.transactionId,
+        originalMatchType: originalSuggestion.matchType,
+        originalConfidence: Number(originalSuggestion.confidenceScore),
+        originalStatus: originalSuggestion.status,
+        message:
+          "User unmatched a previously confirmed/auto-matched pair - negative feedback for learning",
+      });
+    }
+  }
 
   // Update inbox record
   await db
@@ -476,9 +684,16 @@ export async function getInboxByFilePath(
   const [result] = await db
     .select({
       id: inbox.id,
+      status: inbox.status,
     })
     .from(inbox)
-    .where(and(eq(inbox.filePath, filePath), eq(inbox.teamId, teamId)))
+    .where(
+      and(
+        eq(inbox.filePath, filePath),
+        eq(inbox.teamId, teamId),
+        ne(inbox.status, "deleted"),
+      ),
+    )
     .limit(1);
 
   return result;
@@ -494,6 +709,14 @@ export type CreateInboxParams = {
   referenceId?: string;
   website?: string;
   inboxAccountId?: string;
+  status?:
+    | "new"
+    | "analyzing"
+    | "pending"
+    | "done"
+    | "processing"
+    | "archived"
+    | "deleted";
 };
 
 export async function createInbox(db: Database, params: CreateInboxParams) {
@@ -507,6 +730,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
     referenceId,
     website,
     inboxAccountId,
+    status = "new",
   } = params;
 
   const [result] = await db
@@ -521,6 +745,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
       referenceId,
       website,
       inboxAccountId,
+      status,
     })
     .returning({
       id: inbox.id,

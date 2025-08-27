@@ -6,6 +6,7 @@ import {
   date,
   foreignKey,
   index,
+  integer,
   json,
   jsonb,
   numeric,
@@ -92,8 +93,11 @@ export const inboxStatusEnum = pgEnum("inbox_status", [
   "pending",
   "archived",
   "new",
-  "deleted",
+  "analyzing",
+  "suggested_match",
+  "no_match",
   "done",
+  "deleted",
 ]);
 
 export const inboxTypeEnum = pgEnum("inbox_type", ["invoice", "expense"]);
@@ -193,8 +197,12 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "transactions_created",
   "invoice_paid",
   "inbox_new",
+  "inbox_auto_matched",
+  "inbox_needs_review",
+  "inbox_cross_currency_matched",
   "invoice_overdue",
   "invoice_sent",
+  "inbox_match_confirmed",
 
   // User actions
   "document_uploaded",
@@ -1891,6 +1899,102 @@ export const inboxEmbeddings = pgTable(
       name: "inbox_embeddings_team_id_fkey",
     }).onDelete("cascade"),
     unique("inbox_embeddings_unique").on(table.inboxId),
+  ],
+);
+
+export const transactionMatchSuggestions = pgTable(
+  "transaction_match_suggestions",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    // Core relationship
+    teamId: uuid("team_id").notNull(),
+    inboxId: uuid("inbox_id").notNull(),
+    transactionId: uuid("transaction_id").notNull(),
+
+    // Match scores for transparency
+    confidenceScore: numericCasted("confidence_score", {
+      precision: 4,
+      scale: 3,
+    }).notNull(),
+    amountScore: numericCasted("amount_score", { precision: 4, scale: 3 }),
+    currencyScore: numericCasted("currency_score", { precision: 4, scale: 3 }),
+    dateScore: numericCasted("date_score", { precision: 4, scale: 3 }),
+    embeddingScore: numericCasted("embedding_score", {
+      precision: 4,
+      scale: 3,
+    }),
+    nameScore: numericCasted("name_score", { precision: 4, scale: 3 }),
+
+    // Match context
+    matchType: text("match_type").notNull(), // 'auto_matched', 'high_confidence', 'suggested'
+    matchDetails: jsonb("match_details"),
+
+    // User interaction tracking
+    status: text("status").default("pending").notNull(), // 'pending', 'confirmed', 'declined', 'expired', 'unmatched'
+    userActionAt: timestamp("user_action_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    userId: uuid("user_id"),
+  },
+  (table) => [
+    index("transaction_match_suggestions_inbox_id_idx").using(
+      "btree",
+      table.inboxId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("transaction_match_suggestions_transaction_id_idx").using(
+      "btree",
+      table.transactionId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("transaction_match_suggestions_team_id_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("transaction_match_suggestions_status_idx").using(
+      "btree",
+      table.status.asc().nullsLast().op("text_ops"),
+    ),
+    index("transaction_match_suggestions_confidence_idx").using(
+      "btree",
+      table.confidenceScore.desc().nullsLast(),
+    ),
+    index("transaction_match_suggestions_lookup_idx").using(
+      "btree",
+      table.transactionId.asc().nullsLast().op("uuid_ops"),
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+      table.status.asc().nullsLast().op("text_ops"),
+    ),
+    foreignKey({
+      columns: [table.inboxId],
+      foreignColumns: [inbox.id],
+      name: "transaction_match_suggestions_inbox_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.transactionId],
+      foreignColumns: [transactions.id],
+      name: "transaction_match_suggestions_transaction_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "transaction_match_suggestions_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "transaction_match_suggestions_user_id_fkey",
+    }).onDelete("set null"),
+    unique("transaction_match_suggestions_unique").on(
+      table.inboxId,
+      table.transactionId,
+    ),
   ],
 );
 

@@ -5,7 +5,7 @@ export const getInboxSchema = z.object({
   order: z.string().nullable().optional(),
   pageSize: z.coerce.number().min(1).max(100).optional(),
   q: z.string().nullable().optional(),
-  status: z.enum(["done", "pending"]).nullable().optional(),
+  status: z.enum(["done", "pending", "suggested_match"]).nullable().optional(),
 });
 
 export const inboxItemResponseSchema = z
@@ -145,6 +145,13 @@ export const deleteInboxSchema = z
     description: "Schema for deleting an inbox item by its ID.",
   });
 
+export const createInboxItemSchema = z.object({
+  filename: z.string(),
+  mimetype: z.string(),
+  size: z.number(),
+  filePath: z.array(z.string()),
+});
+
 export const processAttachmentsSchema = z.array(
   z.object({
     mimetype: z.string(),
@@ -166,7 +173,7 @@ export const updateInboxSchema = z.object({
     },
   }),
   status: z
-    .enum(["new", "archived", "processing", "done", "pending"])
+    .enum(["new", "archived", "processing", "done", "pending", "deleted"])
     .optional(),
   displayName: z.string().optional(),
   currency: z.string().optional(),
@@ -180,6 +187,40 @@ export const matchTransactionSchema = z.object({
 
 export const unmatchTransactionSchema = z.object({
   id: z.string().uuid(),
+});
+
+export const retryMatchingSchema = z.object({
+  id: z.string().uuid().openapi({
+    description: "Inbox item ID to retry matching for",
+    example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+  }),
+});
+
+export const getInboxByStatusSchema = z.object({
+  status: z
+    .enum([
+      "processing",
+      "pending",
+      "archived",
+      "new",
+      "analyzing",
+      "suggested_match",
+      "no_match",
+      "done",
+      "deleted",
+    ])
+    .optional(),
+});
+
+export const confirmMatchSchema = z.object({
+  suggestionId: z.string().uuid(),
+  inboxId: z.string().uuid(),
+  transactionId: z.string().uuid(),
+});
+
+export const declineMatchSchema = z.object({
+  suggestionId: z.string().uuid(),
+  inboxId: z.string().uuid(),
 });
 
 export const deleteInboxResponseSchema = z

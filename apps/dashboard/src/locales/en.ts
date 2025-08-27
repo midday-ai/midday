@@ -182,6 +182,61 @@ export default {
       "upload_title#one": "A new document was uploaded to your inbox",
       "upload_title#other": "{count} new documents were uploaded to your inbox",
     },
+    inbox_auto_matched: {
+      name: "Auto-matched",
+      description:
+        "Get notified when documents are automatically matched with transactions",
+      title: "Document automatically matched",
+      with_details:
+        '"{documentName}" ({amount}) was matched with "{transactionName}"',
+      with_names: '"{documentName}" was matched with "{transactionName}"',
+      cross_currency_details:
+        '"{documentName}" ({documentAmount}) was matched with "{transactionName}" ({transactionAmount}) across currencies',
+    },
+    inbox_high_confidence: {
+      name: "High Confidence Match",
+      description:
+        "Get notified when high-confidence matches are found that likely need confirmation",
+      title: "Likely match found",
+      with_details:
+        '"{documentName}" ({amount}) looks like it matches "{transactionName}" — click to review',
+      with_names:
+        '"{documentName}" looks like it matches "{transactionName}" — click to review',
+      cross_currency_details:
+        '"{documentName}" ({documentAmount}) might match "{transactionName}" ({transactionAmount}) across currencies — click to review',
+    },
+    inbox_needs_review: {
+      name: "Needs Review",
+      description:
+        "Get notified when potential matches are found that need your review",
+      title: "Possible match found",
+      with_details:
+        '"{documentName}" ({amount}) might match "{transactionName}" — click to review',
+      with_names:
+        '"{documentName}" might match "{transactionName}" — click to review',
+      high_confidence_details:
+        '"{documentName}" ({amount}) looks like it matches "{transactionName}" — click to review',
+      high_confidence_names:
+        '"{documentName}" looks like it matches "{transactionName}" — click to review',
+      cross_currency_high_confidence:
+        '"{documentName}" ({documentAmount}) looks like it matches "{transactionName}" ({transactionAmount}) across currencies — click to review',
+      cross_currency_suggested:
+        '"{documentName}" ({documentAmount}) might match "{transactionName}" ({transactionAmount}) across currencies — click to review',
+    },
+    inbox_cross_currency_matched: {
+      name: "Cross-currency Match",
+      description:
+        "Get notified when documents are matched with transactions in different currencies",
+      title: "Cross-currency match found",
+      with_details:
+        '"{documentName}" ({documentAmount}) might match "{transactionName}" ({transactionAmount}) across currencies — click to review',
+      with_names:
+        '"{documentName}" might match "{transactionName}" across currencies — click to review',
+      high_confidence_details:
+        '"{documentName}" ({documentAmount}) looks like it matches "{transactionName}" ({transactionAmount}) across currencies — click to review',
+      high_confidence_names:
+        '"{documentName}" looks like it matches "{transactionName}" across currencies — click to review',
+    },
     default: {
       title: "New activity detected",
     },

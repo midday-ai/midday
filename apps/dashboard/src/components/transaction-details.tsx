@@ -30,6 +30,7 @@ import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
 import { SelectTags } from "./select-tags";
+import { SuggestedMatch } from "./suggested-match";
 import { TransactionAttachments } from "./transaction-attachments";
 import { TransactionBankAccount } from "./transaction-bank-account";
 import { TransactionShortcuts } from "./transaction-shortcuts";
@@ -40,7 +41,7 @@ export function TransactionDetails() {
 
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     ...trpc.transactions.getById.queryOptions({ id: transactionId! }),
     enabled: Boolean(transactionId),
     staleTime: 0, // Always consider data stale so it always refetches
@@ -411,6 +412,18 @@ export function TransactionDetails() {
           }}
         />
       </div>
+
+      {(data?.suggestion?.suggestionId || data?.hasPendingSuggestion) && (
+        <div className="mt-6">
+          <SuggestedMatch
+            suggestion={data?.suggestion}
+            transactionId={transactionId!}
+            isLoading={
+              data?.hasPendingSuggestion && !data?.suggestion?.suggestionId
+            }
+          />
+        </div>
+      )}
 
       <Accordion type="multiple" defaultValue={defaultValue}>
         <AccordionItem value="attachment">

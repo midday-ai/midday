@@ -42,10 +42,8 @@ export const embedTransaction = schemaTask({
       );
     }
 
-    const db = getDb();
-
     // Step 2: Get transactions that need embedding
-    const transactionsToEmbed = await getTransactionsForEmbedding(db, {
+    const transactionsToEmbed = await getTransactionsForEmbedding(getDb(), {
       transactionIds,
       teamId,
     });
@@ -111,7 +109,10 @@ export const embedTransaction = schemaTask({
         });
 
       // Insert embeddings
-      const result = await createTransactionEmbeddings(db, embeddingsToInsert);
+      const result = await createTransactionEmbeddings(
+        getDb(),
+        embeddingsToInsert,
+      );
 
       logger.info("Transaction embeddings batch created", {
         batchSize: embeddingsToInsert.length,

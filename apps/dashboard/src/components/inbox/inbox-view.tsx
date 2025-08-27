@@ -15,7 +15,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useInView } from "react-intersection-observer";
-import { useDebounceCallback } from "usehooks-ts";
+import { useBoolean, useCounter, useDebounceCallback } from "usehooks-ts";
 import { InboxDetails } from "./inbox-details";
 import { NoResults } from "./inbox-empty";
 import { InboxItem } from "./inbox-item";
@@ -48,13 +48,79 @@ export function InboxView() {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
-  const debouncedEventHandler = useDebounceCallback(() => {
+  // Enhanced batching mechanism using usehooks-ts
+  const {
+    count: updateCount,
+    increment: incrementUpdates,
+    reset: resetUpdates,
+  } = useCounter(0);
+  const {
+    value: hasMatchingChanges,
+    setTrue: setHasMatchingChanges,
+    setFalse: resetMatchingChanges,
+  } = useBoolean(false);
+
+  const MAX_BATCH_SIZE = 10;
+
+  // Helper to check if update affects transaction matching
+  const checkMatchingChanges = (payload: any) => {
+    if (payload?.new) {
+      const newRecord = payload.new;
+      const oldRecord = payload.old;
+
+      return (
+        newRecord.status !== oldRecord?.status &&
+        (newRecord.status === "done" ||
+          newRecord.status === "suggested_match" ||
+          oldRecord?.status === "done" ||
+          oldRecord?.status === "suggested_match")
+      );
+    }
+    return false;
+  };
+
+  // Refresh function that handles invalidations
+  const performRefresh = (shouldInvalidateTransactions: boolean) => {
     refetch();
 
     queryClient.invalidateQueries({
       queryKey: trpc.inbox.getById.queryKey(),
     });
-  }, 50);
+
+    if (shouldInvalidateTransactions) {
+      queryClient.invalidateQueries({
+        queryKey: trpc.transactions.get.infiniteQueryKey(),
+      });
+    }
+  };
+
+  // Debounced handler for regular updates
+  const debouncedRefresh = useDebounceCallback(() => {
+    performRefresh(hasMatchingChanges);
+    resetUpdates();
+    resetMatchingChanges();
+  }, 200);
+
+  // Main batch handler
+  const batchedUpdateHandler = (payload: any) => {
+    incrementUpdates();
+
+    // Check if this update affects transaction matching
+    if (checkMatchingChanges(payload)) {
+      setHasMatchingChanges();
+    }
+
+    // Force immediate update for bulk operations
+    if (updateCount >= MAX_BATCH_SIZE) {
+      performRefresh(hasMatchingChanges);
+      resetUpdates();
+      resetMatchingChanges();
+      return;
+    }
+
+    // Use debounced update for smaller batches
+    debouncedRefresh();
+  };
 
   useRealtime({
     channelName: "realtime_inbox",
@@ -62,7 +128,7 @@ export function InboxView() {
     filter: `team_id=eq.${user?.teamId}`,
     onEvent: (payload) => {
       if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
-        debouncedEventHandler();
+        batchedUpdateHandler(payload);
       }
     },
   });
@@ -87,13 +153,13 @@ export function InboxView() {
   }, [tableData]);
 
   useEffect(() => {
-    if (!params.inboxId) {
+    if (!params.inboxId && tableData.length > 0) {
       setParams({
         ...params,
         inboxId: tableData.at(0)?.id,
       });
     }
-  }, [tableData]);
+  }, [tableData, params.inboxId, setParams]);
 
   // Arrow key navigation
   useHotkeys(
