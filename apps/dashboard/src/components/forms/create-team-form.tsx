@@ -17,7 +17,7 @@ import {
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { use, useState } from "react";
+import { use, useRef, useState } from "react";
 import { z } from "zod";
 import { CountrySelector } from "../country-selector";
 
@@ -42,19 +42,30 @@ export function CreateTeamForm({
   const countryCode = use(defaultCountryCodePromise);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const isSubmittedRef = useRef(false);
 
   const createTeamMutation = useMutation(
     trpc.team.create.mutationOptions({
       onSuccess: async () => {
-        setIsRedirecting(true);
-        // Invalidate all queries to ensure fresh data everywhere
-        await queryClient.invalidateQueries();
-        // Revalidate server-side paths and redirect
-        await revalidateAfterTeamChange();
+        // Lock the form permanently - never reset on success
+        setIsLoading(true);
+        isSubmittedRef.current = true;
+
+        try {
+          // Invalidate all queries to ensure fresh data everywhere
+          await queryClient.invalidateQueries();
+          // Revalidate server-side paths and redirect
+          await revalidateAfterTeamChange();
+        } catch (error) {
+          // Even if redirect fails, keep the form locked to prevent duplicates
+          console.error("Redirect failed, but keeping form locked:", error);
+        }
+        // Note: We NEVER reset loading state on success - user should be redirected
       },
       onError: () => {
-        setIsRedirecting(false);
+        setIsLoading(false);
+        isSubmittedRef.current = false; // Reset on error to allow retry
       },
     }),
   );
@@ -67,10 +78,16 @@ export function CreateTeamForm({
     },
   });
 
+  // Computed loading state that can never be reset unexpectedly
+  const isFormLocked = isLoading || isSubmittedRef.current;
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    if (createTeamMutation.isPending || isRedirecting) {
+    if (isFormLocked) {
       return;
     }
+
+    setIsLoading(true);
+    isSubmittedRef.current = true; // Permanent flag that survives re-renders
 
     createTeamMutation.mutate({
       name: values.name,
@@ -155,7 +172,7 @@ export function CreateTeamForm({
         <SubmitButton
           className="mt-6 w-full"
           type="submit"
-          isSubmitting={createTeamMutation.isPending || isRedirecting}
+          isSubmitting={isFormLocked}
         >
           Create
         </SubmitButton>
