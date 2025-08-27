@@ -34,8 +34,8 @@ type CrossCurrencyComparableItem = {
 export function isCrossCurrencyMatch(
   item1: CrossCurrencyComparableItem,
   item2: CrossCurrencyComparableItem,
-  tolerancePercent = 0.05,
-  minTolerance = 25,
+  tolerancePercent = 0.02,
+  minTolerance = 15,
 ): boolean {
   // Must have different currencies
   if (!item1.currency || !item2.currency || item1.currency === item2.currency) {
@@ -67,20 +67,20 @@ export function isCrossCurrencyMatch(
   let effectiveTolerancePercent: number;
 
   if (avgAmount < 100) {
-    // Small amounts: More generous (rounding errors, fees, small transactions)
-    adjustedTolerance = Math.max(15, avgAmount * 0.08); // 8% for small amounts
+    // Small amounts: More conservative (rounding errors, fees, small transactions)
+    adjustedTolerance = Math.max(10, avgAmount * 0.04);
     toleranceCategory = "small";
-    effectiveTolerancePercent = 0.08;
+    effectiveTolerancePercent = 0.04;
   } else if (avgAmount < 1000) {
-    // Medium amounts: Standard tolerance
-    adjustedTolerance = Math.max(25, avgAmount * 0.05); // 5% for medium amounts
+    // Medium amounts: More conservative tolerance
+    adjustedTolerance = Math.max(15, avgAmount * 0.02);
     toleranceCategory = "medium";
-    effectiveTolerancePercent = 0.05;
+    effectiveTolerancePercent = 0.02;
   } else {
     // Large amounts: Very strict (exchange rate should be stable)
-    adjustedTolerance = Math.max(50, avgAmount * 0.03); // 3% for large amounts
+    adjustedTolerance = Math.max(25, avgAmount * 0.015);
     toleranceCategory = "large";
-    effectiveTolerancePercent = 0.03;
+    effectiveTolerancePercent = 0.015;
   }
 
   const isMatch = difference < adjustedTolerance;
