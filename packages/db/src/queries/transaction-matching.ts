@@ -219,12 +219,12 @@ export async function getTeamCalibration(
   let calibratedAutoThreshold = defaultAutoThreshold;
   let calibratedSuggestedThreshold = defaultSuggestedThreshold;
 
-  // Auto-match threshold - responsive to performance with lower sample requirements
+  // Auto-match threshold - responsive to performance with globally reduced sample requirements
   if (
     autoMatchAccuracy > 0.95 &&
     autoMatches.length >= CALIBRATION_LIMITS.MIN_SAMPLES_AUTO
   ) {
-    // High auto-match accuracy - be more aggressive (lower sample requirement)
+    // High auto-match accuracy - be more aggressive
     const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.02);
     calibratedAutoThreshold = Math.max(0.92, defaultAutoThreshold - adjustment);
   } else if (
@@ -236,12 +236,12 @@ export async function getTeamCalibration(
     calibratedAutoThreshold = Math.min(0.98, defaultAutoThreshold + adjustment);
   }
 
-  // Suggested match threshold - responsive to user feedback with appropriate sample sizes
+  // Suggested match threshold - responsive to user feedback with globally reduced sample requirements
   if (
     suggestedMatchAccuracy > 0.9 &&
     confirmed.length >= CALIBRATION_LIMITS.MIN_SAMPLES_CONSERVATIVE
   ) {
-    // Excellent user acceptance - suggest more aggressively (requires more samples)
+    // Excellent user acceptance - suggest more aggressively
     const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.03);
     calibratedSuggestedThreshold = Math.max(
       0.65,
@@ -261,7 +261,7 @@ export async function getTeamCalibration(
     suggestedMatchAccuracy < 0.3 &&
     declined.length >= CALIBRATION_LIMITS.MIN_SAMPLES_SUGGESTED
   ) {
-    // Poor acceptance - be more selective (lower threshold for being conservative)
+    // Poor acceptance - be more selective
     const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.03);
     calibratedSuggestedThreshold = Math.min(
       0.85,
@@ -359,17 +359,17 @@ export async function findMatches(
     });
   }
 
-  // Balanced production weights - embeddings handle semantic name matching
+  // Conservative production weights - require stronger semantic validation for same-currency matches
   const teamWeights = {
-    embeddingWeight: 0.45, // Trust AI embeddings for semantic similarity including names
+    embeddingWeight: 0.5, // Increased: Require stronger semantic similarity to prevent false matches
     amountWeight: 0.35, // Keep financial accuracy high - critical for correctness
-    currencyWeight: 0.15, // Supporting signal for cross-currency matching
+    currencyWeight: 0.1, // Reduced: Currency match is less meaningful when most transactions use same currency
     dateWeight: 0.05, // Supporting signal for temporal alignment
-    autoMatchThreshold: Math.max(0.85, calibration.calibratedAutoThreshold), // Higher threshold for auto-matching
+    autoMatchThreshold: Math.max(0.9, calibration.calibratedAutoThreshold), // HIGHER threshold: Be more conservative for auto-matching
     suggestedMatchThreshold: Math.max(
-      0.7,
+      0.75,
       calibration.calibratedSuggestedThreshold,
-    ), // Higher threshold for suggestions
+    ), // HIGHER threshold: Be more conservative for suggestions
   };
 
   // Get inbox item with embedding
@@ -1012,22 +1012,22 @@ export async function findMatches(
 
       // HYBRID SCORING: Perfect financial matches get aggressive boosting
       // This ensures obvious matches don't get stuck in manual review
-      if (isPerfectFinancialMatch && embeddingScore > 0.5 && dateScore > 0.7) {
-        // Perfect financial + reasonable semantic + good date = guarantee high confidence
-        confidenceScore = Math.max(confidenceScore, 0.96);
+      if (isPerfectFinancialMatch && embeddingScore > 0.75 && dateScore > 0.7) {
+        // Perfect financial + STRONG semantic + good date = high confidence
+        confidenceScore = Math.max(confidenceScore, 0.94); // Reduced from 0.96
       } else if (
         isPerfectFinancialMatch &&
-        embeddingScore > 0.4 &&
-        dateScore > 0.5
+        embeddingScore > 0.65 &&
+        dateScore > 0.6
       ) {
-        // Perfect financial + minimal semantic + reasonable date = still very good
-        confidenceScore = Math.max(confidenceScore, 0.93);
+        // Perfect financial + good semantic + decent date = moderate confidence
+        confidenceScore = Math.max(confidenceScore, 0.88); // Reduced from 0.93
       }
 
       // Enhanced confidence boosting - financial accuracy first, then semantics
-      if (isPerfectFinancialMatch && embeddingScore > 0.8 && dateScore > 0.7) {
-        // Perfect: same currency, exact amount, strong semantics, good date
-        confidenceScore = Math.max(confidenceScore, 0.98);
+      if (isPerfectFinancialMatch && embeddingScore > 0.85 && dateScore > 0.7) {
+        // Perfect: same currency, exact amount, VERY strong semantics, good date
+        confidenceScore = Math.max(confidenceScore, 0.96); // Reduced from 0.98
       } else if (
         isExcellentCrossCurrencyMatch &&
         embeddingScore > 0.8 &&
@@ -1328,14 +1328,17 @@ export async function findInboxMatches(
   // Get calibrated thresholds
   const calibration = await getTeamCalibration(db, teamId);
 
-  // Balanced production weights - embeddings handle semantic name matching
+  // Conservative production weights - require stronger semantic validation for same-currency matches
   const teamWeights = {
-    embeddingWeight: 0.45, // Trust AI embeddings for semantic similarity including names
+    embeddingWeight: 0.5, // Increased: Require stronger semantic similarity to prevent false matches
     amountWeight: 0.35, // Keep financial accuracy high - critical for correctness
-    currencyWeight: 0.15, // Supporting signal for cross-currency matching
+    currencyWeight: 0.1, // Reduced: Currency match is less meaningful when most transactions use same currency
     dateWeight: 0.05, // Supporting signal for temporal alignment
-    autoMatchThreshold: calibration.calibratedAutoThreshold, // Learned from user feedback
-    suggestedMatchThreshold: calibration.calibratedSuggestedThreshold, // Learned from user feedback
+    autoMatchThreshold: Math.max(0.9, calibration.calibratedAutoThreshold), // HIGHER threshold: Be more conservative for auto-matching
+    suggestedMatchThreshold: Math.max(
+      0.75,
+      calibration.calibratedSuggestedThreshold,
+    ), // HIGHER threshold: Be more conservative for suggestions
   };
 
   // TIER 1: Look for exact currency + amount matches first (fastest and most accurate)
@@ -1486,22 +1489,22 @@ export async function findInboxMatches(
 
     // HYBRID SCORING: Perfect financial matches get aggressive boosting
     // This ensures obvious matches don't get stuck in manual review
-    if (isPerfectFinancialMatch && embeddingScore > 0.5 && dateScore > 0.7) {
-      // Perfect financial + reasonable semantic + good date = guarantee high confidence
-      confidenceScore = Math.max(confidenceScore, 0.96);
+    if (isPerfectFinancialMatch && embeddingScore > 0.75 && dateScore > 0.7) {
+      // Perfect financial + STRONG semantic + good date = high confidence
+      confidenceScore = Math.max(confidenceScore, 0.94); // Reduced from 0.96
     } else if (
       isPerfectFinancialMatch &&
-      embeddingScore > 0.4 &&
-      dateScore > 0.5
+      embeddingScore > 0.65 &&
+      dateScore > 0.6
     ) {
-      // Perfect financial + minimal semantic + reasonable date = still very good
-      confidenceScore = Math.max(confidenceScore, 0.93);
+      // Perfect financial + good semantic + decent date = moderate confidence
+      confidenceScore = Math.max(confidenceScore, 0.88); // Reduced from 0.93
     }
 
     // Enhanced confidence boosting - financial accuracy first, then semantics
-    if (isPerfectFinancialMatch && embeddingScore > 0.8 && dateScore > 0.7) {
-      // Perfect: same currency, exact amount, strong semantics, good date
-      confidenceScore = Math.max(confidenceScore, 0.98);
+    if (isPerfectFinancialMatch && embeddingScore > 0.85 && dateScore > 0.7) {
+      // Perfect: same currency, exact amount, VERY strong semantics, good date
+      confidenceScore = Math.max(confidenceScore, 0.96); // Reduced from 0.98
     } else if (
       isExcellentCrossCurrencyMatch &&
       embeddingScore > 0.8 &&
