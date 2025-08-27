@@ -10,9 +10,9 @@ export const EMBEDDING_THRESHOLDS = {
 
 export const CALIBRATION_LIMITS = {
   MAX_ADJUSTMENT: 0.03, // Max 3% threshold adjustment per calibration
-  MIN_SAMPLES_AUTO: 10, // Minimum samples for auto-match calibration (conservative - auto-match is high risk)
-  MIN_SAMPLES_SUGGESTED: 5, // Minimum samples for suggested-match calibration
-  MIN_SAMPLES_CONSERVATIVE: 15, // Higher threshold for aggressive adjustments
+  MIN_SAMPLES_AUTO: 5, // Minimum samples for auto-match calibration
+  MIN_SAMPLES_SUGGESTED: 3, // Minimum samples for suggested-match calibration
+  MIN_SAMPLES_CONSERVATIVE: 8, // Higher threshold for conservative adjustments
 } as const;
 
 // Type definitions for matching utilities

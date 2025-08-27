@@ -219,12 +219,12 @@ export async function getTeamCalibration(
   let calibratedAutoThreshold = defaultAutoThreshold;
   let calibratedSuggestedThreshold = defaultSuggestedThreshold;
 
-  // Auto-match threshold - responsive to performance with lower sample requirements
+  // Auto-match threshold - responsive to performance with globally reduced sample requirements
   if (
     autoMatchAccuracy > 0.95 &&
     autoMatches.length >= CALIBRATION_LIMITS.MIN_SAMPLES_AUTO
   ) {
-    // High auto-match accuracy - be more aggressive (lower sample requirement)
+    // High auto-match accuracy - be more aggressive
     const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.02);
     calibratedAutoThreshold = Math.max(0.92, defaultAutoThreshold - adjustment);
   } else if (
@@ -236,12 +236,12 @@ export async function getTeamCalibration(
     calibratedAutoThreshold = Math.min(0.98, defaultAutoThreshold + adjustment);
   }
 
-  // Suggested match threshold - responsive to user feedback with appropriate sample sizes
+  // Suggested match threshold - responsive to user feedback with globally reduced sample requirements
   if (
     suggestedMatchAccuracy > 0.9 &&
     confirmed.length >= CALIBRATION_LIMITS.MIN_SAMPLES_CONSERVATIVE
   ) {
-    // Excellent user acceptance - suggest more aggressively (requires more samples)
+    // Excellent user acceptance - suggest more aggressively
     const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.03);
     calibratedSuggestedThreshold = Math.max(
       0.65,
@@ -261,7 +261,7 @@ export async function getTeamCalibration(
     suggestedMatchAccuracy < 0.3 &&
     declined.length >= CALIBRATION_LIMITS.MIN_SAMPLES_SUGGESTED
   ) {
-    // Poor acceptance - be more selective (lower threshold for being conservative)
+    // Poor acceptance - be more selective
     const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.03);
     calibratedSuggestedThreshold = Math.min(
       0.85,
