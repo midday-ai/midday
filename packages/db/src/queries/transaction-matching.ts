@@ -30,13 +30,11 @@ import {
 export type FindMatchesParams = {
   teamId: string;
   inboxId: string;
-  includeAlreadyMatched?: boolean;
 };
 
 export type FindInboxMatchesParams = {
   teamId: string;
   transactionId: string;
-  includeAlreadyMatched?: boolean;
 };
 
 export type MatchResult = {
@@ -97,30 +95,27 @@ export type InboxSuggestion = {
   status: "pending" | "confirmed" | "declined" | "expired";
 };
 
-// Confidence calibration system - learns from user feedback
+// Suggestion calibration system - learns from user feedback to improve suggestion quality
 export type TeamCalibrationData = {
   teamId: string;
   totalSuggestions: number;
   confirmedSuggestions: number;
   declinedSuggestions: number;
-  unmatchedSuggestions: number; // New: post-match negative feedback
+  unmatchedSuggestions: number; // Post-match negative feedback
   avgConfidenceConfirmed: number;
   avgConfidenceDeclined: number;
-  avgConfidenceUnmatched: number; // New: confidence of unmatched pairs
-  autoMatchAccuracy: number;
+  avgConfidenceUnmatched: number; // Confidence of unmatched pairs
   suggestedMatchAccuracy: number;
-  calibratedAutoThreshold: number;
   calibratedSuggestedThreshold: number;
   lastUpdated: string;
 };
 
-// Get team's calibration data and adjust thresholds based on user feedback
+// Get team's suggestion calibration data and adjust suggestion threshold based on user feedback
 export async function getTeamCalibration(
   db: Database,
   teamId: string,
 ): Promise<TeamCalibrationData> {
-  // Default weights for fallback
-  const defaultAutoThreshold = 0.95;
+  // Default threshold for fallback
   const defaultSuggestedThreshold = 0.6;
 
   // Get historical performance data from last 90 days
@@ -146,7 +141,7 @@ export async function getTeamCalibration(
     );
 
   if (performanceData.length < 5) {
-    // Not enough data - use default thresholds
+    // Not enough data - use default threshold
     return {
       teamId,
       totalSuggestions: performanceData.length,
@@ -156,9 +151,7 @@ export async function getTeamCalibration(
       avgConfidenceConfirmed: 0,
       avgConfidenceDeclined: 0,
       avgConfidenceUnmatched: 0,
-      autoMatchAccuracy: 0,
       suggestedMatchAccuracy: 0,
-      calibratedAutoThreshold: defaultAutoThreshold,
       calibratedSuggestedThreshold: defaultSuggestedThreshold,
       lastUpdated: new Date().toISOString(),
     };
@@ -168,12 +161,6 @@ export async function getTeamCalibration(
   const confirmed = performanceData.filter((d) => d.status === "confirmed");
   const declined = performanceData.filter((d) => d.status === "declined");
   const unmatched = performanceData.filter((d) => d.status === "unmatched"); // Post-match negative feedback
-  const autoMatches = performanceData.filter(
-    (d) => d.matchType === "auto_matched",
-  );
-  const suggestedMatches = performanceData.filter(
-    (d) => d.matchType === "high_confidence" || d.matchType === "suggested",
-  );
 
   const avgConfidenceConfirmed =
     confirmed.length > 0
@@ -204,38 +191,12 @@ export async function getTeamCalibration(
         ) / negativeOutcomes.length
       : avgConfidenceDeclined; // Fallback to declined-only average
 
-  const autoMatchAccuracy =
-    autoMatches.length > 0
-      ? autoMatches.filter((d) => d.status === "confirmed").length /
-        autoMatches.length
-      : 0;
-
   const suggestedMatchAccuracy =
-    suggestedMatches.length > 0
-      ? suggestedMatches.filter((d) => d.status === "confirmed").length /
-        suggestedMatches.length
-      : 0;
+    performanceData.length > 0 ? confirmed.length / performanceData.length : 0;
 
-  // Calibrate thresholds based on performance
-  let calibratedAutoThreshold = defaultAutoThreshold;
+  // Calibrate suggestion threshold based on performance
+  // Note: Auto-match threshold is now fixed - merchant patterns handle auto-matching decisions
   let calibratedSuggestedThreshold = defaultSuggestedThreshold;
-
-  // Auto-match threshold - responsive to performance with globally reduced sample requirements
-  if (
-    autoMatchAccuracy > 0.95 &&
-    autoMatches.length >= CALIBRATION_LIMITS.MIN_SAMPLES_AUTO
-  ) {
-    // High auto-match accuracy - be more aggressive
-    const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.02);
-    calibratedAutoThreshold = Math.max(0.92, defaultAutoThreshold - adjustment);
-  } else if (
-    autoMatchAccuracy < 0.9 &&
-    autoMatches.length >= CALIBRATION_LIMITS.MIN_SAMPLES_AUTO
-  ) {
-    // Auto-match failures - be more conservative
-    const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.02);
-    calibratedAutoThreshold = Math.min(0.98, defaultAutoThreshold + adjustment);
-  }
 
   // Suggested match threshold - responsive to user feedback with globally reduced sample requirements
   if (
@@ -319,13 +280,11 @@ export async function getTeamCalibration(
     totalSuggestions: performanceData.length,
     confirmedSuggestions: confirmed.length,
     declinedSuggestions: declined.length,
-    unmatchedSuggestions: unmatched.length, // New metric
+    unmatchedSuggestions: unmatched.length,
     avgConfidenceConfirmed,
     avgConfidenceDeclined,
-    avgConfidenceUnmatched, // New metric
-    autoMatchAccuracy,
+    avgConfidenceUnmatched,
     suggestedMatchAccuracy,
-    calibratedAutoThreshold,
     calibratedSuggestedThreshold,
     lastUpdated: new Date().toISOString(),
   };
@@ -460,26 +419,23 @@ export async function findMatches(
   db: Database,
   params: FindMatchesParams,
 ): Promise<MatchResult | null> {
-  const { teamId, inboxId, includeAlreadyMatched = false } = params;
+  const { teamId, inboxId } = params;
 
   // Get team-specific calibrated thresholds based on user feedback
   const calibration = await getTeamCalibration(db, teamId);
 
-  // Log calibration for debugging - only when thresholds are adjusted
-  const thresholdAdjusted =
-    calibration.calibratedSuggestedThreshold !== 0.6 ||
-    calibration.calibratedAutoThreshold !== 0.95;
+  // Log calibration for debugging - only when suggestion threshold is adjusted
+  const thresholdAdjusted = calibration.calibratedSuggestedThreshold !== 0.6;
 
   if (thresholdAdjusted) {
-    logger.info("🔧 CALIBRATION ACTIVE", {
+    logger.info("🔧 SUGGESTION CALIBRATION ACTIVE", {
       teamId,
-      originalAutoThreshold: 0.95,
       originalSuggestedThreshold: 0.6,
-      calibratedAutoThreshold: calibration.calibratedAutoThreshold,
       calibratedSuggestedThreshold: calibration.calibratedSuggestedThreshold,
+      autoMatchThreshold: 0.9, // Fixed - no longer calibrated
       adjustmentReason: `Based on ${calibration.totalSuggestions} past suggestions (${calibration.confirmedSuggestions} confirmed, ${calibration.declinedSuggestions} declined). Accuracy: ${(calibration.suggestedMatchAccuracy * 100).toFixed(1)}%`,
+      note: "Auto-matching uses merchant-specific patterns, not global calibration",
       totalSuggestions: calibration.totalSuggestions,
-      autoMatchAccuracy: calibration.autoMatchAccuracy,
       suggestedMatchAccuracy: calibration.suggestedMatchAccuracy,
     });
   }
@@ -490,7 +446,7 @@ export async function findMatches(
     amountWeight: 0.35, // Keep financial accuracy high - critical for correctness
     currencyWeight: 0.1, // Reduced: Currency match is less meaningful when most transactions use same currency
     dateWeight: 0.05, // Supporting signal for temporal alignment
-    autoMatchThreshold: Math.max(0.9, calibration.calibratedAutoThreshold), // HIGHER threshold: Be more conservative for auto-matching
+    autoMatchThreshold: 0.9, // Fixed conservative threshold - don't let global calibration affect auto-matching
     suggestedMatchThreshold: Math.max(
       0.75,
       calibration.calibratedSuggestedThreshold,
@@ -1441,7 +1397,7 @@ export async function findInboxMatches(
 ): Promise<InboxMatchResult | null> {
   // ROBUSTNESS: Performance monitoring
   const startTime = Date.now();
-  const { teamId, transactionId, includeAlreadyMatched = false } = params;
+  const { teamId, transactionId } = params;
 
   // Get transaction with embedding
   const transactionData = await db
@@ -1482,7 +1438,7 @@ export async function findInboxMatches(
     amountWeight: 0.35, // Keep financial accuracy high - critical for correctness
     currencyWeight: 0.1, // Reduced: Currency match is less meaningful when most transactions use same currency
     dateWeight: 0.05, // Supporting signal for temporal alignment
-    autoMatchThreshold: Math.max(0.9, calibration.calibratedAutoThreshold), // HIGHER threshold: Be more conservative for auto-matching
+    autoMatchThreshold: 0.9, // Fixed conservative threshold - don't let global calibration affect auto-matching
     suggestedMatchThreshold: Math.max(
       0.75,
       calibration.calibratedSuggestedThreshold,
@@ -1518,8 +1474,8 @@ export async function findInboxMatches(
         sql`${inbox.date} BETWEEN (${sql.param(transactionItem.date)}::date - INTERVAL '30 days') 
             AND (${sql.param(transactionItem.date)}::date + INTERVAL '7 days')`,
 
-        // Exclude already matched if requested
-        ...(includeAlreadyMatched ? [] : [isNull(inbox.transactionId)]),
+        // Exclude already matched inbox items
+        isNull(inbox.transactionId),
       ),
     )
     .orderBy(sql`ABS(${inbox.date} - ${sql.param(transactionItem.date)})`)
@@ -1573,8 +1529,8 @@ export async function findInboxMatches(
           sql`${inbox.date} BETWEEN (${sql.param(transactionItem.date)}::date - INTERVAL '90 days') 
               AND (${sql.param(transactionItem.date)}::date + INTERVAL '90 days')`,
 
-          // Exclude already matched if requested
-          ...(includeAlreadyMatched ? [] : [isNull(inbox.transactionId)]),
+          // Exclude already matched inbox items
+          isNull(inbox.transactionId),
         ),
       )
       .orderBy(
