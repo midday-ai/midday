@@ -34,19 +34,14 @@ export function SelectAttachment({
 
   const trpc = useTRPC();
 
-  // Use smart suggestions when no search query, otherwise use search
   // Always fetch suggestions/search results so they're ready when sheet opens
   const { data: items, isLoading } = useQuery({
-    ...(debouncedValue.length > 0
-      ? trpc.inbox.search.queryOptions({
-          query: debouncedValue,
-          limit: 30,
-        })
-      : trpc.inbox.suggestions.queryOptions({
-          transactionId,
-          limit: 3,
-        })),
-    enabled: true, // Always enabled so data is pre-fetched
+    ...trpc.inbox.search.queryOptions({
+      q: debouncedValue.length > 0 ? debouncedValue : undefined,
+      transactionId: debouncedValue.length > 0 ? undefined : transactionId,
+      limit: debouncedValue.length > 0 ? 30 : 3,
+    }),
+    enabled: Boolean(debouncedValue.length > 0 || transactionId), // Enable for search OR suggestions
   });
 
   const handleOnSelect = (item: Attachment) => {
