@@ -2,8 +2,10 @@ import { useDocumentParams } from "@/hooks/use-document-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { formatDate } from "@/utils/format";
+import { Badge } from "@midday/ui/badge";
 import { Combobox } from "@midday/ui/combobox";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
@@ -17,69 +19,106 @@ type Attachment = {
 type Props = {
   placeholder: string;
   onSelect: (file: Attachment) => void;
+  transactionId?: string;
 };
 
-export function SelectAttachment({ placeholder, onSelect }: Props) {
+export function SelectAttachment({
+  placeholder,
+  onSelect,
+  transactionId,
+}: Props) {
   const [debouncedValue, setDebouncedValue] = useDebounceValue("", 200);
+  const [isOpen, setIsOpen] = useState(false);
   const { data: user } = useUserQuery();
   const { setParams } = useDocumentParams();
 
   const trpc = useTRPC();
 
+  // Use smart suggestions when no search query, otherwise use search
+  // Always fetch suggestions/search results so they're ready when sheet opens
   const { data: items, isLoading } = useQuery({
-    ...trpc.inbox.search.queryOptions({
-      query: debouncedValue,
-      limit: 30,
-    }),
-    enabled: Boolean(debouncedValue),
+    ...(debouncedValue.length > 0
+      ? trpc.inbox.search.queryOptions({
+          query: debouncedValue,
+          limit: 30,
+        })
+      : trpc.inbox.suggestions.queryOptions({
+          transactionId,
+          limit: 3,
+        })),
+    enabled: true, // Always enabled so data is pre-fetched
   });
 
   const handleOnSelect = (item: Attachment) => {
     onSelect(item);
   };
 
-  const options = items?.map((item) => ({
-    id: item.id,
-    name: item.displayName,
-    data: item,
-    component: () => {
-      const filePath = `${item?.filePath?.join("/")}`;
+  // Only create options if we have items and should show results
+  const hasResults = items && items.length > 0;
+  const shouldShowResults = isOpen && (Boolean(debouncedValue) || hasResults);
 
-      return (
-        <div className="flex w-full items-center justify-between gap-2 text-sm">
-          <div className="flex gap-2 items-center">
-            <div className="w-7 h-7 overflow-hidden">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setParams({ filePath });
-                }}
-              >
-                <FilePreview mimeType={item.contentType!} filePath={filePath} />
-              </button>
-            </div>
-            <div className="flex flex-col">
-              <span className="truncate">
-                {item.displayName || item.fileName}
-              </span>
-              {item?.date && (
-                <span className="text-muted-foreground text-xs">
-                  {formatDate(item.date, user?.dateFormat, true)}
-                </span>
-              )}
-            </div>
-          </div>
+  const options = hasResults
+    ? items.map((item, index) => ({
+        id: item.id,
+        name: item.displayName,
+        data: item,
+        component: () => {
+          const filePath = `${item?.filePath?.join("/")}`;
+          const isSmartSuggestion =
+            debouncedValue.length === 0 && transactionId;
+          const showBestMatch =
+            isSmartSuggestion && index === 0 && items?.length > 1;
 
-          <div className="flex flex-shrink-0 items-center gap-4">
-            {item?.amount && item?.currency && (
-              <FormatAmount amount={item.amount} currency={item.currency} />
-            )}
-          </div>
-        </div>
-      );
-    },
-  }));
+          return (
+            <div className="flex w-full items-center justify-between gap-2 text-sm">
+              <div className="flex gap-2 items-center">
+                <div className="w-7 h-7 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setParams({ filePath });
+                    }}
+                  >
+                    <FilePreview
+                      mimeType={item.contentType!}
+                      filePath={filePath}
+                    />
+                  </button>
+                </div>
+                <div className="flex flex-col">
+                  <span className="truncate">
+                    {item.displayName || item.fileName}
+                  </span>
+                  {item?.date && (
+                    <span className="text-muted-foreground text-xs">
+                      {formatDate(item.date, user?.dateFormat, true)}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-shrink-0 items-center gap-4">
+                {showBestMatch && (
+                  <Badge variant="outline" className="px-2 py-0">
+                    Best Match
+                  </Badge>
+                )}
+                {item?.amount && item?.currency && (
+                  <FormatAmount amount={item.amount} currency={item.currency} />
+                )}
+              </div>
+            </div>
+          );
+        },
+      }))
+    : [];
+
+  const handleFocus = () => {
+    if (!isOpen && !debouncedValue) {
+      setIsOpen(true);
+    }
+  };
 
   return (
     <Combobox
@@ -93,12 +132,15 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
           handleOnSelect(value);
         }
       }}
-      options={(options ?? []).map((opt) => ({
+      options={options.map((opt) => ({
         ...opt,
         name: opt.name!,
       }))}
-      isLoading={isLoading}
+      isLoading={isLoading && Boolean(debouncedValue)} // Only show loading when actively searching
       classNameList="mt-2 max-h-[161px]"
+      open={shouldShowResults} // Only open when we should show results
+      onOpenChange={setIsOpen}
+      onFocus={handleFocus}
     />
   );
 }

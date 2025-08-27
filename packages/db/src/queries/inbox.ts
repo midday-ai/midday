@@ -2,13 +2,15 @@ import type { Database } from "@db/client";
 import {
   inbox,
   inboxAccounts,
+  inboxEmbeddings,
   transactionAttachments,
+  transactionEmbeddings,
   transactionMatchSuggestions,
   transactions,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { logger } from "@midday/logger";
-import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 
 export type GetInboxParams = {
@@ -279,6 +281,12 @@ export type GetInboxSearchParams = {
   q: string | number;
 };
 
+export type GetInboxSuggestionsParams = {
+  teamId: string;
+  transactionId?: string;
+  limit?: number;
+};
+
 export async function getInboxSearch(
   db: Database,
   params: GetInboxSearchParams,
@@ -290,16 +298,20 @@ export async function getInboxSearch(
     ne(inbox.status, "deleted"),
   ];
 
-  // Apply search query filter
-  if (!Number.isNaN(Number.parseInt(String(q)))) {
-    // If the query is a number, search by amount
-    whereConditions.push(
-      sql`${inbox.amount}::text LIKE '%' || ${String(q)} || '%'`,
-    );
-  } else {
-    // Search using full-text search
-    const query = buildSearchQuery(String(q));
-    whereConditions.push(sql`to_tsquery('english', ${query}) @@ ${inbox.fts}`);
+  // Apply search query filter only if query is provided
+  if (q && String(q).trim() !== "") {
+    if (!Number.isNaN(Number.parseInt(String(q)))) {
+      // If the query is a number, search by amount
+      whereConditions.push(
+        sql`${inbox.amount}::text LIKE '%' || ${String(q)} || '%'`,
+      );
+    } else {
+      // Search using full-text search
+      const query = buildSearchQuery(String(q));
+      whereConditions.push(
+        sql`to_tsquery('english', ${query}) @@ ${inbox.fts}`,
+      );
+    }
   }
 
   // Execute query
@@ -319,10 +331,299 @@ export async function getInboxSearch(
     })
     .from(inbox)
     .where(and(...whereConditions))
-    .orderBy(asc(inbox.createdAt))
+    .orderBy(
+      // If no query provided, order by most recent first, otherwise by creation date
+      q && String(q).trim() !== ""
+        ? asc(inbox.createdAt)
+        : desc(inbox.createdAt),
+    )
     .limit(limit);
 
   return data;
+}
+
+export async function getInboxSuggestions(
+  db: Database,
+  params: GetInboxSuggestionsParams,
+) {
+  try {
+    const { teamId, transactionId, limit = 3 } = params;
+
+    const whereConditions: SQL[] = [
+      eq(inbox.teamId, teamId),
+      ne(inbox.status, "deleted"),
+      // Exclude items that are already matched to other transactions
+      sql`${inbox.transactionId} IS NULL`,
+    ];
+
+    // If we have transaction context, use it for smart suggestions
+    if (transactionId) {
+      // Get transaction details for context-aware matching
+      const transactionData = await db
+        .select({
+          id: transactions.id,
+          name: transactions.name,
+          amount: transactions.amount,
+          currency: transactions.currency,
+          baseAmount: transactions.baseAmount,
+          baseCurrency: transactions.baseCurrency,
+          date: transactions.date,
+          counterpartyName: transactions.counterpartyName,
+          description: transactions.description,
+        })
+        .from(transactions)
+        .where(
+          and(
+            eq(transactions.id, transactionId),
+            eq(transactions.teamId, teamId),
+          ),
+        )
+        .limit(1);
+
+      if (transactionData.length > 0) {
+        const transaction = transactionData[0]!;
+
+        // Try to get transaction embedding for semantic matching
+        const transactionEmbeddingData = await db
+          .select({
+            embedding: transactionEmbeddings.embedding,
+            sourceText: transactionEmbeddings.sourceText,
+          })
+          .from(transactionEmbeddings)
+          .where(
+            and(
+              eq(transactionEmbeddings.transactionId, transactionId),
+              eq(transactionEmbeddings.teamId, teamId),
+            ),
+          )
+          .limit(1);
+
+        // If we have embeddings, use semantic similarity with financial context
+        if (
+          transactionEmbeddingData.length > 0 &&
+          transactionEmbeddingData[0]!.embedding
+        ) {
+          // Pre-calculate values to avoid parameter type issues
+          const transactionAmount = transaction.amount ?? 0;
+          const transactionCurrency = transaction.currency ?? "";
+          const tier2Threshold = Math.max(
+            100,
+            Math.abs(transactionAmount) * 0.2,
+          );
+          const tier3Threshold = Math.max(
+            200,
+            Math.abs(transactionAmount) * 0.4,
+          );
+
+          const smartSuggestions = await db
+            .select({
+              id: inbox.id,
+              createdAt: inbox.createdAt,
+              fileName: inbox.fileName,
+              amount: inbox.amount,
+              currency: inbox.currency,
+              filePath: inbox.filePath,
+              contentType: inbox.contentType,
+              date: inbox.date,
+              displayName: inbox.displayName,
+              size: inbox.size,
+              description: inbox.description,
+              // Embedding similarity score (converted from cosine distance)
+              embeddingScore:
+                sql<number>`1 - (${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding})`.as(
+                  "embedding_score",
+                ),
+            })
+            .from(inbox)
+            .innerJoin(
+              inboxEmbeddings,
+              and(
+                eq(inboxEmbeddings.inboxId, inbox.id),
+                isNotNull(inboxEmbeddings.embedding),
+              ),
+            )
+            .innerJoin(
+              transactionEmbeddings,
+              and(
+                eq(transactionEmbeddings.transactionId, transactionId),
+                isNotNull(transactionEmbeddings.embedding),
+              ),
+            )
+            .where(
+              and(
+                ...whereConditions,
+                // Use proven transaction matching tiers with higher thresholds:
+                sql`(
+                 -- TIER 1: Perfect financial matches (exact amount + currency) with decent semantic relevance
+                 ((ABS(COALESCE(${inbox.amount}, 0)) = ABS(${sql.param(transactionAmount)}) 
+                   AND COALESCE(${inbox.currency}, '') = ${sql.param(transactionCurrency)})
+                   AND (${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding}) < 0.7)
+                 OR
+                 -- TIER 2: Strong semantic matches (< 0.35 distance) with exact amounts  
+                  ((${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding}) < 0.35
+                  AND ABS(COALESCE(${inbox.amount}, 0)) = ABS(${sql.param(transactionAmount)}))
+                 OR
+                 -- TIER 3: Very strong semantic matches (< 0.25 distance) with reasonable financial alignment
+                  ((${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding}) < 0.25
+                  AND ABS(COALESCE(${inbox.amount}, 0) - ${sql.param(transactionAmount)}) < ${sql.param(tier2Threshold)})
+               )`,
+              ),
+            )
+            .orderBy(
+              // Use proven transaction matching weights and add confidence filtering
+              desc(sql`
+               CASE
+                 -- Calculate base confidence score using proven weights
+                 WHEN (
+                   ((1 - (${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding})) * 0.45) +
+                   ((CASE 
+                     WHEN ${inbox.amount} IS NULL THEN 0.0
+                     WHEN ${sql.param(transactionAmount)} = 0 THEN 0.0
+                     WHEN abs(${inbox.amount}) = abs(${sql.param(transactionAmount)}) THEN 1.0
+                     WHEN abs(abs(${inbox.amount}) - abs(${sql.param(transactionAmount)})) / GREATEST(abs(${inbox.amount}), abs(${sql.param(transactionAmount)})) <= 0.05 THEN 0.9
+                     WHEN abs(abs(${inbox.amount}) - abs(${sql.param(transactionAmount)})) / GREATEST(abs(${inbox.amount}), abs(${sql.param(transactionAmount)})) <= 0.15 THEN 0.7
+                     ELSE 0.3
+                   END) * 0.35) +
+                   ((CASE 
+                     WHEN ${inbox.currency} = ${sql.param(transactionCurrency)} THEN 1.0
+                     WHEN ${inbox.currency} IS NULL OR ${sql.param(transactionCurrency)} = '' THEN 0.5
+                     ELSE 0.2
+                   END) * 0.15) +
+                   (0.5 * 0.05)
+                 ) >= 0.6 -- Only show suggestions with 60%+ confidence
+                 THEN (
+                   -- Boost perfect financial matches
+                   CASE 
+                     WHEN (ABS(COALESCE(${inbox.amount}, 0)) = ABS(${sql.param(transactionAmount)}) 
+                           AND COALESCE(${inbox.currency}, '') = ${sql.param(transactionCurrency)})
+                     THEN 1.0
+                     ELSE (
+                       ((1 - (${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding})) * 0.45) +
+                       ((CASE 
+                         WHEN ${inbox.amount} IS NULL THEN 0.0
+                         WHEN ${sql.param(transactionAmount)} = 0 THEN 0.0
+                         WHEN abs(${inbox.amount}) = abs(${sql.param(transactionAmount)}) THEN 1.0
+                         WHEN abs(abs(${inbox.amount}) - abs(${sql.param(transactionAmount)})) / GREATEST(abs(${inbox.amount}), abs(${sql.param(transactionAmount)})) <= 0.05 THEN 0.9
+                         WHEN abs(abs(${inbox.amount}) - abs(${sql.param(transactionAmount)})) / GREATEST(abs(${inbox.amount}), abs(${sql.param(transactionAmount)})) <= 0.15 THEN 0.7
+                         ELSE 0.3
+                       END) * 0.35) +
+                       ((CASE 
+                         WHEN ${inbox.currency} = ${sql.param(transactionCurrency)} THEN 1.0
+                         WHEN ${inbox.currency} IS NULL OR ${sql.param(transactionCurrency)} = '' THEN 0.5
+                         ELSE 0.2
+                       END) * 0.15) +
+                       (0.5 * 0.05)
+                     )
+                   END
+                 )
+                 ELSE 0.0 -- Filter out low confidence matches
+               END
+             `),
+              // Secondary sort by recency
+              desc(inbox.createdAt),
+            )
+            .limit(limit);
+
+          return smartSuggestions;
+        }
+
+        // Fallback to basic matching when no embeddings available
+        const transactionAmount = transaction.amount ?? 0;
+        const transactionCurrency = transaction.currency ?? "";
+        const transactionName = transaction.name ?? "";
+        const similarAmountThreshold = Math.max(
+          50,
+          Math.abs(transactionAmount) * 0.1,
+        );
+        const closeAmountThreshold = Math.max(
+          10,
+          Math.abs(transactionAmount) * 0.05,
+        );
+
+        const basicSuggestions = await db
+          .select({
+            id: inbox.id,
+            createdAt: inbox.createdAt,
+            fileName: inbox.fileName,
+            amount: inbox.amount,
+            currency: inbox.currency,
+            filePath: inbox.filePath,
+            contentType: inbox.contentType,
+            date: inbox.date,
+            displayName: inbox.displayName,
+            size: inbox.size,
+            description: inbox.description,
+          })
+          .from(inbox)
+          .where(
+            and(
+              ...whereConditions,
+              // Higher quality basic financial matching when no embeddings
+              sql`(
+               -- TIER 1: Perfect financial matches (exact amount + currency)
+               (ABS(COALESCE(${inbox.amount}, 0)) = ABS(${sql.param(transactionAmount)}) 
+                AND COALESCE(${inbox.currency}, '') = ${sql.param(transactionCurrency)})
+               OR
+               -- TIER 2: Exact amount matches (any currency) - very reliable
+               (ABS(COALESCE(${inbox.amount}, 0)) = ABS(${sql.param(transactionAmount)}))
+               OR
+               -- TIER 3: Strong text similarity with reasonable amount match (within 5%)
+               (${inbox.displayName} IS NOT NULL 
+                AND ${sql.param(transactionName)} != ''
+                AND similarity(lower(${inbox.displayName}), lower(${sql.param(transactionName)})) > 0.6
+                AND ABS(COALESCE(${inbox.amount}, 0) - ${sql.param(transactionAmount)}) < ${sql.param(closeAmountThreshold)})
+             )`,
+            ),
+          )
+          .orderBy(
+            // Prioritize perfect matches, then exact amounts, then similarity
+            sql`
+             CASE 
+               -- Perfect financial match gets highest priority
+               WHEN (ABS(COALESCE(${inbox.amount}, 0)) = ABS(${sql.param(transactionAmount)}) 
+                     AND COALESCE(${inbox.currency}, '') = ${sql.param(transactionCurrency)}) THEN 1
+               -- Exact amount match gets second priority  
+               WHEN ABS(COALESCE(${inbox.amount}, 0)) = ABS(${sql.param(transactionAmount)}) THEN 2
+               -- High text similarity with close amount gets third priority
+               WHEN (${inbox.displayName} IS NOT NULL 
+                     AND ${sql.param(transactionName)} != ''
+                     AND similarity(lower(${inbox.displayName}), lower(${sql.param(transactionName)})) > 0.6) THEN 3
+               ELSE 4
+             END
+           `,
+            desc(inbox.createdAt),
+          )
+          .limit(limit);
+
+        return basicSuggestions;
+      }
+    }
+
+    // Fallback: return recent unmatched items if no transaction context
+    const data = await db
+      .select({
+        id: inbox.id,
+        createdAt: inbox.createdAt,
+        fileName: inbox.fileName,
+        amount: inbox.amount,
+        currency: inbox.currency,
+        filePath: inbox.filePath,
+        contentType: inbox.contentType,
+        date: inbox.date,
+        displayName: inbox.displayName,
+        size: inbox.size,
+        description: inbox.description,
+      })
+      .from(inbox)
+      .where(and(...whereConditions))
+      .orderBy(desc(inbox.createdAt))
+      .limit(limit);
+
+    return data;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
 }
 
 export type UpdateInboxParams = {

@@ -6,6 +6,7 @@ import {
   getInboxByIdSchema,
   getInboxByStatusSchema,
   getInboxSchema,
+  getInboxSuggestionsSchema,
   matchTransactionSchema,
   processAttachmentsSchema,
   retryMatchingSchema,
@@ -24,6 +25,7 @@ import {
   getInboxById,
   getInboxByStatus,
   getInboxSearch,
+  getInboxSuggestions,
   matchTransaction,
   unmatchTransaction,
   updateInbox,
@@ -113,6 +115,18 @@ export const inboxRouter = createTRPCRouter({
       return getInboxSearch(db, {
         teamId: teamId!,
         q: query,
+        limit,
+      });
+    }),
+
+  suggestions: protectedProcedure
+    .input(getInboxSuggestionsSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      const { transactionId, limit = 3 } = input;
+
+      return getInboxSuggestions(db, {
+        teamId: teamId!,
+        transactionId,
         limit,
       });
     }),
