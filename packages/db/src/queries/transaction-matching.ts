@@ -10,6 +10,7 @@ import {
 import { logger } from "@midday/logger";
 import {
   and,
+  desc,
   eq,
   inArray,
   isNotNull,
@@ -327,6 +328,130 @@ export async function getTeamCalibration(
     calibratedAutoThreshold,
     calibratedSuggestedThreshold,
     lastUpdated: new Date().toISOString(),
+  };
+}
+
+/**
+ * Semantic merchant pattern analysis - find similar merchant patterns using embeddings
+ *
+ * This function analyzes historical match patterns for semantically similar merchants
+ * to determine if auto-matching should be enabled for a specific merchant pair.
+ *
+ * To enable this feature, set environment variable: ENABLE_SEMANTIC_AUTO_MATCH=true
+ *
+ * Requirements for auto-matching:
+ * - At least 3 confirmed matches for similar merchant patterns
+ * - 90%+ accuracy rate (confirmed vs declined/unmatched)
+ * - Maximum 1 negative signal (declined or unmatched)
+ * - Average confidence >= 85%
+ * - Patterns within last 6 months
+ */
+async function findSimilarMerchantPatterns(
+  db: Database,
+  teamId: string,
+  inboxEmbedding: number[],
+  transactionEmbedding: number[],
+): Promise<{
+  canAutoMatch: boolean;
+  confidence: number;
+  historicalAccuracy: number;
+  matchCount: number;
+  reason: string;
+}> {
+  // Feature flag for gradual rollout
+  const ENABLE_SEMANTIC_AUTO_MATCH =
+    process.env.ENABLE_SEMANTIC_AUTO_MATCH === "true";
+
+  if (!ENABLE_SEMANTIC_AUTO_MATCH) {
+    return {
+      canAutoMatch: false,
+      confidence: 0,
+      historicalAccuracy: 0,
+      matchCount: 0,
+      reason: "feature_disabled",
+    };
+  }
+
+  // Find historically similar matches using embedding similarity
+  // This leverages existing embedding infrastructure
+  const historicalMatches = await db
+    .select({
+      status: transactionMatchSuggestions.status,
+      confidenceScore: transactionMatchSuggestions.confidenceScore,
+      embeddingScore: transactionMatchSuggestions.embeddingScore,
+      createdAt: transactionMatchSuggestions.createdAt,
+    })
+    .from(transactionMatchSuggestions)
+    .innerJoin(
+      inboxEmbeddings,
+      eq(transactionMatchSuggestions.inboxId, inboxEmbeddings.inboxId),
+    )
+    .innerJoin(
+      transactionEmbeddings,
+      eq(
+        transactionMatchSuggestions.transactionId,
+        transactionEmbeddings.transactionId,
+      ),
+    )
+    .where(
+      and(
+        eq(transactionMatchSuggestions.teamId, teamId),
+        inArray(transactionMatchSuggestions.status, [
+          "confirmed",
+          "declined",
+          "unmatched",
+        ]),
+        isNotNull(inboxEmbeddings.embedding),
+        isNotNull(transactionEmbeddings.embedding),
+        // Find semantically similar inbox items (same merchant)
+        sql`(${inboxEmbeddings.embedding} <-> ${sql.param(inboxEmbedding)}) < 0.15`,
+        // Find semantically similar transactions (same merchant)
+        sql`(${transactionEmbeddings.embedding} <-> ${sql.param(transactionEmbedding)}) < 0.15`,
+        // Only recent history (last 6 months)
+        sql`${transactionMatchSuggestions.createdAt} > NOW() - INTERVAL '6 months'`,
+      ),
+    )
+    .orderBy(desc(transactionMatchSuggestions.createdAt))
+    .limit(20);
+
+  if (historicalMatches.length < 3) {
+    return {
+      canAutoMatch: false,
+      confidence: 0,
+      historicalAccuracy: 0,
+      matchCount: 0,
+      reason: `insufficient_history_${historicalMatches.length}`,
+    };
+  }
+
+  // Analyze the pattern
+  const confirmed = historicalMatches.filter((m) => m.status === "confirmed");
+  const negative = historicalMatches.filter(
+    (m) => m.status === "declined" || m.status === "unmatched",
+  );
+
+  const accuracy = confirmed.length / historicalMatches.length;
+  const avgConfidence =
+    confirmed.length > 0
+      ? confirmed.reduce((sum, m) => sum + Number(m.confidenceScore), 0) /
+        confirmed.length
+      : 0;
+
+  // Conservative criteria for auto-matching
+  const canAutoMatch =
+    confirmed.length >= 3 && // At least 3 confirmations
+    accuracy >= 0.9 && // 90%+ accuracy
+    negative.length <= 1 && // Max 1 negative signal
+    avgConfidence >= 0.85; // Good average confidence
+
+  return {
+    canAutoMatch,
+    confidence: avgConfidence,
+    historicalAccuracy: accuracy,
+    matchCount: confirmed.length,
+    reason: canAutoMatch
+      ? `eligible_${confirmed.length}_matches_${(accuracy * 100).toFixed(0)}pct_accuracy`
+      : `ineligible_${confirmed.length}_matches_${(accuracy * 100).toFixed(0)}pct_accuracy_${negative.length}_negative`,
   };
 }
 
@@ -1181,8 +1306,59 @@ export async function findMatches(
             //   shouldAutoMatch = true;
             // }
 
-            // Auto-matching disabled - all matches become suggestions
-            const shouldAutoMatch = false;
+            // Semantic merchant pattern auto-matching
+            let shouldAutoMatch = false;
+
+            // Check if we can auto-match based on semantic merchant patterns
+            if (inboxItem.embedding) {
+              // We don't have direct access to transaction embedding here, but we can
+              // use a simplified approach with the embedding similarity score
+              const embeddingSimilarity = Math.max(
+                0,
+                1 - (candidate.embeddingScore || 1),
+              );
+
+              // For now, use a simplified pattern check based on embedding similarity
+              // This will be enhanced when we have direct access to transaction embeddings
+              if (embeddingSimilarity >= 0.85) {
+                // Very high semantic similarity
+                const merchantPattern = await findSimilarMerchantPatterns(
+                  db,
+                  teamId,
+                  inboxItem.embedding,
+                  [], // Placeholder - will be enhanced with actual transaction embedding
+                );
+
+                if (merchantPattern.canAutoMatch) {
+                  // Additional validation using existing logic
+                  if (
+                    confidenceScore >=
+                      Math.max(0.9, merchantPattern.confidence - 0.05) &&
+                    (isPerfectFinancialMatch ||
+                      isExcellentCrossCurrencyMatch) &&
+                    embeddingScore >= 0.85 &&
+                    dateScore >= 0.7
+                  ) {
+                    shouldAutoMatch = true;
+
+                    logger.info("🏆 SEMANTIC MERCHANT AUTO-MATCH", {
+                      teamId,
+                      inboxId,
+                      transactionId: candidate.transactionId,
+                      reason: merchantPattern.reason,
+                      historicalMatches: merchantPattern.matchCount,
+                      historicalAccuracy: merchantPattern.historicalAccuracy,
+                      avgHistoricalConfidence: merchantPattern.confidence,
+                      currentConfidence: confidenceScore,
+                      embeddingScore,
+                      embeddingSimilarity,
+                      dateScore,
+                    });
+                  }
+                }
+              }
+            }
+
             matchType = shouldAutoMatch ? "auto_matched" : "high_confidence";
           } else if (confidenceScore >= 0.72) {
             // Lowered from 0.75 for better UX
@@ -1613,8 +1789,54 @@ export async function findInboxMatches(
           //   shouldAutoMatch = true;
           // }
 
-          // Auto-matching disabled - all matches become suggestions
-          const shouldAutoMatch = false;
+          // Semantic merchant pattern auto-matching
+          let shouldAutoMatch = false;
+
+          // Check if we can auto-match based on semantic merchant patterns
+          if (transactionItem.embedding) {
+            // We need to get the inbox embedding for this candidate
+            // For now, use a simplified approach with high embedding similarity threshold
+            const embeddingSimilarity = Math.max(
+              0,
+              1 - (candidate.embeddingScore || 1),
+            );
+
+            if (embeddingSimilarity >= 0.85) {
+              // Very high semantic similarity
+              const merchantPattern = await findSimilarMerchantPatterns(
+                db,
+                teamId,
+                [], // Placeholder for inbox embedding - will be enhanced
+                transactionItem.embedding, // transaction embedding
+              );
+
+              if (merchantPattern.canAutoMatch) {
+                // Additional validation using existing logic
+                if (
+                  confidenceScore >=
+                    Math.max(0.9, merchantPattern.confidence - 0.05) &&
+                  (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
+                  embeddingScore >= 0.85 &&
+                  dateScore >= 0.7
+                ) {
+                  shouldAutoMatch = true;
+
+                  logger.info("🏆 SEMANTIC MERCHANT AUTO-MATCH (Reverse)", {
+                    teamId,
+                    transactionId,
+                    inboxId: candidate.inboxId,
+                    reason: merchantPattern.reason,
+                    historicalMatches: merchantPattern.matchCount,
+                    historicalAccuracy: merchantPattern.historicalAccuracy,
+                    avgHistoricalConfidence: merchantPattern.confidence,
+                    currentConfidence: confidenceScore,
+                    embeddingScore,
+                    dateScore,
+                  });
+                }
+              }
+            }
+          }
 
           matchType = shouldAutoMatch ? "auto_matched" : "high_confidence";
         } else if (confidenceScore >= 0.72) {
