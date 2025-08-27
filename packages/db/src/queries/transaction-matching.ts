@@ -1173,10 +1173,10 @@ export async function findMatches(
             }
             // TIER 2.5: Strong semantic matches with decent financial alignment
             else if (
-              confidenceScore >= autoMatchTiers.strongSemantic &&
-              embeddingScore >= 0.85 && // Very strong semantic match
-              dateScore >= 0.8 && // Good date alignment
-              amountScore >= 0.25 // Some financial correlation (not completely off)
+              confidenceScore >= 0.95 &&
+              embeddingScore >= 0.88 &&
+              dateScore >= 0.8 &&
+              amountScore >= 0.4
             ) {
               shouldAutoMatch = true;
             }
@@ -1614,10 +1614,10 @@ export async function findInboxMatches(
           }
           // TIER 2.5: Strong semantic matches with decent financial alignment
           else if (
-            confidenceScore >= autoMatchTiers.strongSemantic &&
-            embeddingScore >= 0.85 && // Very strong semantic match
-            dateScore >= 0.8 && // Good date alignment
-            amountScore >= 0.25 // Some financial correlation (not completely off)
+            confidenceScore >= 0.95 &&
+            embeddingScore >= 0.88 &&
+            dateScore >= 0.8 &&
+            amountScore >= 0.4
           ) {
             shouldAutoMatch = true;
           }
