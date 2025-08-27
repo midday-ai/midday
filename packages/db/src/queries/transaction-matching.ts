@@ -1162,32 +1162,21 @@ export async function findMatches(
             ) {
               shouldAutoMatch = true;
             }
-            // TIER 2: Excellent matches with strong signals
+            // TIER 2: Excellent matches with strong signals - more conservative
             else if (
-              confidenceScore >= autoMatchTiers.excellent &&
+              confidenceScore >= 0.97 &&
               (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-              embeddingScore >= 0.65 &&
-              dateScore >= 0.5
+              embeddingScore >= 0.75 &&
+              dateScore >= 0.7
             ) {
               shouldAutoMatch = true;
-            }
-            // TIER 2.5: Strong semantic matches with decent financial alignment
-            else if (
-              confidenceScore >= 0.95 &&
-              embeddingScore >= 0.88 &&
-              dateScore >= 0.8 &&
-              amountScore >= 0.4
-            ) {
-              shouldAutoMatch = true;
-            }
-            // TIER 3: Conservative auto-match for calibrated teams
-            else if (
-              confidenceScore >= autoMatchTiers.conservative &&
-              calibration.autoMatchAccuracy > 0.98 && // Team has excellent track record
-              calibration.totalSuggestions > 20 && // Sufficient data
+            } else if (
+              confidenceScore >= 0.92 &&
+              calibration.autoMatchAccuracy > 0.99 &&
+              calibration.totalSuggestions > 50 &&
               (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-              embeddingScore >= 0.8 &&
-              dateScore >= 0.6
+              embeddingScore >= 0.85 &&
+              dateScore >= 0.8
             ) {
               shouldAutoMatch = true;
             }
@@ -1603,32 +1592,21 @@ export async function findInboxMatches(
           ) {
             shouldAutoMatch = true;
           }
-          // TIER 2: Excellent matches with strong signals
+          // TIER 2: Excellent matches with strong signals - more conservative
           else if (
-            confidenceScore >= autoMatchTiers.excellent &&
+            confidenceScore >= 0.97 &&
             (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-            embeddingScore >= 0.65 &&
-            dateScore >= 0.5
+            embeddingScore >= 0.75 &&
+            dateScore >= 0.7
           ) {
             shouldAutoMatch = true;
-          }
-          // TIER 2.5: Strong semantic matches with decent financial alignment
-          else if (
-            confidenceScore >= 0.95 &&
-            embeddingScore >= 0.88 &&
-            dateScore >= 0.8 &&
-            amountScore >= 0.4
-          ) {
-            shouldAutoMatch = true;
-          }
-          // TIER 3: Conservative auto-match for calibrated teams (inbox matching doesn't have recurring info)
-          else if (
-            confidenceScore >= autoMatchTiers.conservative &&
-            calibration.autoMatchAccuracy > 0.98 && // Team has excellent track record
-            calibration.totalSuggestions > 20 && // Sufficient data
+          } else if (
+            confidenceScore >= 0.92 &&
+            calibration.autoMatchAccuracy > 0.99 &&
+            calibration.totalSuggestions > 50 &&
             (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-            embeddingScore >= 0.8 &&
-            dateScore >= 0.6
+            embeddingScore >= 0.85 &&
+            dateScore >= 0.8
           ) {
             shouldAutoMatch = true;
           }
