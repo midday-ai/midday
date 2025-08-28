@@ -46,6 +46,8 @@ const config = {
 export default withSentryConfig(config, {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  telemetry: false,
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
@@ -55,7 +57,4 @@ export default withSentryConfig(config, {
 
   // Tree-shake Sentry logger statements to reduce bundle size
   disableLogger: true,
-
-  // Enable Vercel Cron Monitors in production
-  automaticVercelMonitors: true,
 });

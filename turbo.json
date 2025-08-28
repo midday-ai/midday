@@ -7,7 +7,18 @@
       "dependsOn": ["^topo"]
     },
     "build": {
-      "env": [
+      "inputs": ["$TURBO_DEFAULT$", ".env"],
+      "dependsOn": ["^build"],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "next-env.d.ts",
+        ".expo/**",
+        "dist/**",
+        "build/**",
+        "lib/**"
+      ],
+      "passThroughEnv": [
         "SUPABASE_SERVICE_KEY",
         "SUPABASE_API_KEY",
         "RESEND_API_KEY",
@@ -38,18 +49,10 @@
         "MIDDAY_ENCRYPTION_KEY",
         "NEXT_PUBLIC_URL",
         "VERCEL_TARGET_ENV",
-        "SENTRY_AUTH_TOKEN"
-      ],
-      "inputs": ["$TURBO_DEFAULT$", ".env"],
-      "dependsOn": ["^build"],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "next-env.d.ts",
-        ".expo/**",
-        "dist/**",
-        "build/**",
-        "lib/**"
+        "SENTRY_AUTH_TOKEN",
+        "SENTRY_ORG",
+        "SENTRY_PROJECT",
+        "NEXT_PUBLIC_SENTRY_DSN"
       ]
     },
     "start": {

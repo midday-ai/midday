@@ -35,6 +35,10 @@ jobs:
       - name: 📤 Pull Vercel Environment Information
         run: bunx vercel pull --yes --environment=beta --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         run: bunx vercel build --target=beta --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🔄 Deploy Background Jobs
         env:
