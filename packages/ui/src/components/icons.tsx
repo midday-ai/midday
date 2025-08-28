@@ -1,4 +1,5 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
+import { FaWhatsapp } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiGithub } from "react-icons/fi";
 import {
@@ -585,4 +586,5 @@ export const Icons = {
   OutgoingMail: MdOutlineSignpost,
   AttachEmail: MdOutlineAttachEmail,
   SyncAlt: MdOutlineSyncAlt,
+  WhatsApp: FaWhatsapp,
 };

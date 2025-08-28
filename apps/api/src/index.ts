@@ -37,6 +37,9 @@ app.use(
   trpcServer({
     router: appRouter,
     createContext: createTRPCContext,
+    batching: {
+      enabled: true,
+    },
   }),
 );
 
