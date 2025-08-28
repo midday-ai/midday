@@ -520,6 +520,10 @@ export async function getTransactionById(
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, params.teamId)})) OR ${transactions.status} = 'completed'`.as(
           "isFulfilled",
         ),
+      hasPendingSuggestion:
+        sql<boolean>`${transactionMatchSuggestions.id} IS NOT NULL`.as(
+          "hasPendingSuggestion",
+        ),
       suggestion: {
         suggestionId: transactionMatchSuggestions.id,
         inboxId: transactionMatchSuggestions.inboxId,
