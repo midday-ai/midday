@@ -10,5 +10,9 @@
     "./team-permissions-cache": "./src/team-permissions-cache.ts",
     "./redis-client": "./src/redis-client.ts",
     "./health": "./src/health.ts"
+  },
+  "dependencies": {
+    "redis": "^5.8.2",
+    "@types/redis": "^4.0.11"
   }
 }
