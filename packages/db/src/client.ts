@@ -3,13 +3,13 @@ import postgres from "postgres";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
-// Common connection configuration to prevent timeout issues
+// Optimized connection configuration for stateful Fly VMs (3 instances)
 const connectionConfig = {
   prepare: false,
-  idle_timeout: 20, // Close idle connections after 20 seconds
-  max_lifetime: 60 * 60, // Close connections after 1 hour
-  connect_timeout: 30, // 30 second connection timeout (longer than job client for complex queries)
-  max: 10, // Allow more connections for main app vs job client
+  max: 5, // Fewer connections per VM 3 VMs total (15 max connections)
+  idle_timeout: 60, // Longer idle timeout for stateful VMs (1 minute)
+  max_lifetime: 60 * 60 * 4, // 4 hours - much longer for persistent connections
+  connect_timeout: 20, // Reasonable connection timeout
 };
 
 const primaryPool = postgres(
