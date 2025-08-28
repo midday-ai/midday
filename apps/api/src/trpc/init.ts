@@ -8,6 +8,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";
 import superjson from "superjson";
+import { ZodError } from "zod";
 import { withPrimaryReadAfterWrite } from "./middleware/primary-read-after-write";
 import { withTeamPermission } from "./middleware/team-permission";
 
@@ -39,6 +40,37 @@ export const createTRPCContext = async (
 
 const t = initTRPC.context<TRPCContext>().create({
   transformer: superjson,
+  errorFormatter(opts) {
+    const { shape, error } = opts;
+
+    // Enhanced error logging for server-side issues
+    console.error(`[tRPC Server Error] ${error.code}:`, {
+      message: error.message,
+      code: error.code,
+      cause: error.cause,
+      stack: error.stack,
+      timestamp: new Date().toISOString(),
+    });
+
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        zodError:
+          error.code === "BAD_REQUEST" && error.cause instanceof ZodError
+            ? error.cause.flatten()
+            : null,
+        timestamp: new Date().toISOString(),
+        serverError:
+          process.env.NODE_ENV === "development"
+            ? {
+                stack: error.stack,
+                cause: error.cause,
+              }
+            : undefined,
+      },
+    };
+  },
 });
 
 export const createTRPCRouter = t.router;

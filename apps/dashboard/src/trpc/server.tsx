@@ -5,7 +5,12 @@ import { getCountryCode, getLocale, getTimezone } from "@midday/location";
 import { createClient } from "@midday/supabase/server";
 import { HydrationBoundary } from "@tanstack/react-query";
 import { dehydrate } from "@tanstack/react-query";
-import { createTRPCClient, httpLink, loggerLink } from "@trpc/client";
+import {
+  createTRPCClient,
+  httpLink,
+  loggerLink,
+  retryLink,
+} from "@trpc/client";
 import {
   type TRPCQueryOptions,
   createTRPCOptionsProxy,
@@ -22,6 +27,22 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
   queryClient: getQueryClient,
   client: createTRPCClient({
     links: [
+      retryLink({
+        retry(opts) {
+          // Retry on server errors or connection failures
+          if (opts.error.data?.code === "INTERNAL_SERVER_ERROR") {
+            return opts.attempts <= 3;
+          }
+          // Retry on fetch failures (network issues)
+          if (opts.error.message?.includes("fetch failed")) {
+            return opts.attempts <= 3;
+          }
+          // Don't retry client errors (4xx)
+          return false;
+        },
+        // Exponential backoff: 500ms, 1s, 2s
+        retryDelayMs: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 2000),
+      }),
       httpLink({
         url: `${process.env.NEXT_PUBLIC_API_URL}/trpc`,
         transformer: superjson,
