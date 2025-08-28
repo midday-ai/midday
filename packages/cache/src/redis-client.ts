@@ -4,49 +4,79 @@ export class RedisCache {
   private redis: RedisClient | null = null;
   private prefix: string;
   private defaultTTL: number;
+  private lastConnectionCheck = 0;
+  private connectionCheckInterval = 30000; // 30 seconds
 
   constructor(prefix: string, defaultTTL: number = 30 * 60) {
     this.prefix = prefix;
     this.defaultTTL = defaultTTL;
   }
 
-  private getRedisClient(): RedisClient {
-    if (!this.redis) {
-      const redisUrl = process.env.REDIS_URL;
+  private async getRedisClient(): Promise<RedisClient> {
+    const now = Date.now();
 
-      if (!redisUrl) {
-        throw new Error("REDIS_URL environment variable is required");
-      }
-
-      // Configure connection options for Fly.io production vs local development
-      const isProduction =
-        process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
-
-      const options = isProduction
-        ? {
-            // Fly.io production settings - handles IPv6 connections
-            connectionTimeout: 10000,
-            idleTimeout: 30000,
-            autoReconnect: true,
-            maxRetries: 10,
-            enableOfflineQueue: true,
-            enableAutoPipelining: true,
-            // Enable TLS for production Upstash connections
-            tls: redisUrl.startsWith("rediss://"),
-          }
-        : {
-            // Local development settings - IPv4 connections
-            connectionTimeout: 5000,
-            idleTimeout: 0, // No idle timeout for dev
-            autoReconnect: true,
-            maxRetries: 3,
-            enableOfflineQueue: true,
-            enableAutoPipelining: true,
-            tls: redisUrl.startsWith("rediss://"),
-          };
-
-      this.redis = new RedisClient(redisUrl, options);
+    // If we have a client and it's been less than 30 seconds since last check, use it
+    if (
+      this.redis &&
+      now - this.lastConnectionCheck < this.connectionCheckInterval
+    ) {
+      return this.redis;
     }
+
+    // Test existing connection if we have one
+    if (this.redis) {
+      try {
+        await this.redis.ping();
+        this.lastConnectionCheck = now;
+        return this.redis;
+      } catch (error) {
+        console.log(`Redis connection lost, reconnecting... Error: ${error}`);
+        try {
+          this.redis.close();
+        } catch (closeError) {
+          // Ignore close errors
+        }
+        this.redis = null;
+      }
+    }
+
+    // Create new connection with enhanced options
+    const redisUrl = process.env.REDIS_URL;
+
+    if (!redisUrl) {
+      throw new Error("REDIS_URL environment variable is required");
+    }
+
+    const isProduction =
+      process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
+
+    const options = isProduction
+      ? {
+          // Fly.io production settings - enhanced based on your previous solution
+          connectionTimeout: 15000, // Increased for Fly.io
+          idleTimeout: 60000, // 1 minute - longer for production stability
+          autoReconnect: true,
+          maxRetries: 10, // More retries for production
+          enableOfflineQueue: true,
+          enableAutoPipelining: true,
+          tls: redisUrl.startsWith("rediss://"),
+        }
+      : {
+          // Local development settings
+          connectionTimeout: 5000,
+          idleTimeout: 0,
+          autoReconnect: true,
+          maxRetries: 3,
+          enableOfflineQueue: true,
+          enableAutoPipelining: true,
+          tls: redisUrl.startsWith("rediss://"),
+        };
+
+    this.redis = new RedisClient(redisUrl, options);
+    this.lastConnectionCheck = now;
+
+    // Log connection creation for debugging
+    console.log(`Redis connection created for ${this.prefix} cache`);
 
     return this.redis;
   }
@@ -76,7 +106,7 @@ export class RedisCache {
 
   async get<T>(key: string): Promise<T | undefined> {
     try {
-      const redis = this.getRedisClient();
+      const redis = await this.getRedisClient();
       const value = await redis.get(this.getKey(key));
       return this.parseValue<T>(value);
     } catch (error) {
@@ -84,13 +114,16 @@ export class RedisCache {
         `Redis get error for ${this.prefix} cache, key "${key}":`,
         error,
       );
+      // Reset connection on error to force reconnection next time
+      this.redis = null;
+      this.lastConnectionCheck = 0;
       return undefined;
     }
   }
 
   async set(key: string, value: any, ttlSeconds?: number): Promise<void> {
     try {
-      const redis = this.getRedisClient();
+      const redis = await this.getRedisClient();
       const serializedValue = this.stringifyValue(value);
       const redisKey = this.getKey(key);
       const ttl = ttlSeconds ?? this.defaultTTL;
@@ -104,26 +137,35 @@ export class RedisCache {
         `Redis set error for ${this.prefix} cache, key "${key}":`,
         error,
       );
+      // Reset connection on error
+      this.redis = null;
+      this.lastConnectionCheck = 0;
     }
   }
 
   async delete(key: string): Promise<void> {
     try {
-      const redis = this.getRedisClient();
+      const redis = await this.getRedisClient();
       await redis.del(this.getKey(key));
     } catch (error) {
       console.error(
         `Redis delete error for ${this.prefix} cache, key "${key}":`,
         error,
       );
+      // Reset connection on error
+      this.redis = null;
+      this.lastConnectionCheck = 0;
     }
   }
 
   async healthCheck(): Promise<void> {
     try {
-      const redis = this.getRedisClient();
+      const redis = await this.getRedisClient();
       await redis.ping();
     } catch (error) {
+      // Reset connection state on health check failure
+      this.redis = null;
+      this.lastConnectionCheck = 0;
       throw new Error(`Redis health check failed: ${error}`);
     }
   }
