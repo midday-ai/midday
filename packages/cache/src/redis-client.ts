@@ -39,18 +39,6 @@ export class RedisCache {
       console.error(`Redis error for ${this.prefix} cache:`, err);
     });
 
-    this.redis.on("connect", () => {
-      console.log(`Redis connected for ${this.prefix} cache`);
-    });
-
-    this.redis.on("reconnecting", () => {
-      console.log(`Redis reconnecting for ${this.prefix} cache`);
-    });
-
-    this.redis.on("ready", () => {
-      console.log(`Redis ready for ${this.prefix} cache`);
-    });
-
     await this.redis.connect();
     return this.redis;
   }
