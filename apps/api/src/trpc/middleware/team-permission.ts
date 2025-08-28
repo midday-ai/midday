@@ -51,14 +51,14 @@ export const withTeamPermission = async <TReturn>(opts: {
   // If teamId is null, user has no team assigned but this is now allowed
   if (teamId !== null) {
     const cacheKey = `user:${userId}:team:${teamId}`;
-    let hasAccess = teamCache.get(cacheKey);
+    let hasAccess = await teamCache.get(cacheKey);
 
     if (hasAccess === undefined) {
       hasAccess = result.usersOnTeams.some(
         (membership) => membership.teamId === teamId,
       );
 
-      teamCache.set(cacheKey, hasAccess);
+      await teamCache.set(cacheKey, hasAccess);
     }
 
     if (!hasAccess) {

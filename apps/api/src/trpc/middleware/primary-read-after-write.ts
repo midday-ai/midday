@@ -26,7 +26,7 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
   if (teamId) {
     // For mutations, always use primary DB and update the team's timestamp
     if (type === "mutation") {
-      replicationCache.set(teamId);
+      await replicationCache.set(teamId);
 
       // Use primary-only mode to maintain interface consistency
       const dbWithPrimary = ctx.db as DatabaseWithPrimary;
@@ -37,7 +37,7 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
     }
     // For queries, check if the team recently performed a mutation
     else {
-      const timestamp = replicationCache.get(teamId);
+      const timestamp = await replicationCache.get(teamId);
       const now = Date.now();
 
       // If the timestamp exists and hasn't expired, use primary DB

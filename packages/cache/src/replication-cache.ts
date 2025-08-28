@@ -1,26 +1,18 @@
-import { LRUCache } from "lru-cache";
+import { RedisCache } from "./redis-client";
 
-// In-memory map to track teams who recently performed mutations.
-// Note: This map is per server instance, and we typically run 1 instance per region.
-// Otherwise, we would need to share this state with Redis or a similar external store.
+// Redis-based cache to track teams who recently performed mutations, shared across all server instances
 // Key: teamId, Value: timestamp when they should be able to use replicas again
-const cache = new LRUCache<string, number>({
-  max: 5_000, // up to 5k entries
-  ttl: 10000, // 10 seconds in milliseconds
-});
-
-// The window time in milliseconds to handle replication lag (10 seconds)
-const REPLICATION_LAG_WINDOW = 10000;
-
-const prefix = "replication";
+const REPLICATION_LAG_WINDOW = 10000; // 10 seconds in milliseconds
+const cache = new RedisCache("replication", 10); // 10 seconds TTL
 
 export const replicationCache = {
-  get: (key: string) => cache.get(`${prefix}:${key}`),
-  set: (key: string) => {
+  get: (key: string): Promise<number | undefined> => cache.get<number>(key),
+
+  set: async (key: string): Promise<void> => {
     // Set the timestamp when the team can use replicas again
     const expiryTime = Date.now() + REPLICATION_LAG_WINDOW;
-
-    cache.set(`${prefix}:${key}`, expiryTime);
+    await cache.set(key, expiryTime);
   },
-  delete: (key: string) => cache.delete(`${prefix}:${key}`),
+
+  delete: (key: string): Promise<void> => cache.delete(key),
 };

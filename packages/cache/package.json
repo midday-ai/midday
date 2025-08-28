@@ -7,9 +7,7 @@
     "./user-cache": "./src/user-cache.ts",
     "./replication-cache": "./src/replication-cache.ts",
     "./team-cache": "./src/team-cache.ts",
-    "./team-permissions-cache": "./src/team-permissions-cache.ts"
-  },
-  "dependencies": {
-    "lru-cache": "^11.1.0"
+    "./team-permissions-cache": "./src/team-permissions-cache.ts",
+    "./redis-client": "./src/redis-client.ts"
   }
 }

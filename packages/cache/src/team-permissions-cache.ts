@@ -1,15 +1,10 @@
-import { LRUCache } from "lru-cache";
+import { RedisCache } from "./redis-client";
 
-const teamPermissionCache = new LRUCache<string, string>({
-  max: 5_000, // up to 5k entries
-  ttl: 1000 * 60 * 30, // 30 minutes in milliseconds
-});
-
-const prefix = "team-permissions";
+// Redis-based cache for team permissions shared across all server instances
+const cache = new RedisCache("team-permissions", 30 * 60); // 30 minutes TTL
 
 export const teamPermissionsCache = {
-  get: (key: string) => teamPermissionCache.get(`${prefix}:${key}`),
-  set: (key: string, value: string) =>
-    teamPermissionCache.set(`${prefix}:${key}`, value),
-  delete: (key: string) => teamPermissionCache.delete(`${prefix}:${key}`),
+  get: (key: string): Promise<string | undefined> => cache.get<string>(key),
+  set: (key: string, value: string): Promise<void> => cache.set(key, value),
+  delete: (key: string): Promise<void> => cache.delete(key),
 };
