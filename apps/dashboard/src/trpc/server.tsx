@@ -26,57 +26,6 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
       httpBatchLink({
         url: `${process.env.NEXT_PUBLIC_API_URL}/trpc`,
         transformer: superjson,
-        fetch: (url, options) => {
-          const startTime = Date.now();
-          const requestId = Math.random().toString(36).substr(2, 9);
-
-          console.log(`[${requestId}] TRPC Request:`, {
-            url,
-            method: options?.method || "POST",
-            // @ts-expect-error - body is not typed
-            bodySize: options?.body ? new Blob([options.body]).size : 0,
-            // @ts-expect-error - headers is not typed
-            userAgent: options?.headers?.["user-agent"] || "unknown",
-          });
-
-          return fetch(url, {
-            ...options,
-            // Force HTTP/1.1 to avoid HTTP/2 issues
-            headers: {
-              ...options?.headers,
-              Connection: "keep-alive",
-            },
-          })
-            .then((response) => {
-              const duration = Date.now() - startTime;
-              console.log(`[${requestId}] Success:`, {
-                status: response.status,
-                duration: `${duration}ms`,
-                headers: {
-                  server: response.headers.get("server"),
-                  via: response.headers.get("via"),
-                  "fly-request-id": response.headers.get("fly-request-id"),
-                },
-              });
-              return response;
-            })
-            .catch((error) => {
-              const duration = Date.now() - startTime;
-              console.error(`[${requestId}] Failed:`, {
-                duration: `${duration}ms`,
-                error: error.message,
-                cause: error.cause
-                  ? {
-                      code: error.cause.code,
-                      host: error.cause.host,
-                      port: error.cause.port,
-                      localAddress: error.cause.localAddress,
-                    }
-                  : null,
-              });
-              throw error;
-            });
-        },
         async headers() {
           const supabase = await createClient();
 
