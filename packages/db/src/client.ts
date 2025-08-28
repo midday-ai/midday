@@ -7,8 +7,8 @@ import * as schema from "./schema";
 const connectionConfig = {
   prepare: false,
   max: 2, // Very conservative - 2 connections per pool per VM
-  idle_timeout: 20, // Aggressive connection recycling
-  max_lifetime: 60 * 15, // 15 minutes - frequent recycling
+  idle_timeout: 90, // fewer disconnects
+  max_lifetime: 0, // disable forced recycling
   connect_timeout: 10, // Quick connection timeout
 };
 
