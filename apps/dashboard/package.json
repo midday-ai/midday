@@ -35,6 +35,7 @@
     "@polar-sh/sdk": "^0.33.1",
     "@react-google-maps/api": "^2.20.6",
     "@react-pdf/renderer": "^4.3.0",
+    "@sentry/nextjs": "^10",
     "@tanstack/react-query": "^5.84.1",
     "@tanstack/react-query-devtools": "^5.84.1",
     "@tanstack/react-table": "^8.21.3",
