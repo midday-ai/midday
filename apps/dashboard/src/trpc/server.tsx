@@ -33,8 +33,10 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
           console.log(`[${requestId}] TRPC Request:`, {
             url,
             method: options?.method || "POST",
+            // @ts-expect-error - body is not typed
             bodySize: options?.body ? new Blob([options.body]).size : 0,
-            userAgent: options?.headers?.["User-Agent"] || "unknown",
+            // @ts-expect-error - headers is not typed
+            userAgent: options?.headers?.["user-agent"] || "unknown",
           });
 
           return fetch(url, {

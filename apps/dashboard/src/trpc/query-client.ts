@@ -11,6 +11,7 @@ export function makeQueryClient() {
         staleTime: 60 * 1000,
         retry: (failureCount, error) => {
           const errorMessage = error?.message || "";
+          // @ts-expect-error - cause is not typed
           const errorCode = error?.cause?.code;
 
           // Log all connection-related failures
@@ -24,6 +25,7 @@ export function makeQueryClient() {
               {
                 error: errorMessage,
                 code: errorCode,
+                // @ts-expect-error - cause is not typed
                 host: error?.cause?.host,
                 timestamp: new Date().toISOString(),
               },
