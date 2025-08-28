@@ -42,7 +42,6 @@
     "hono": "^4.8.12",
     "hono-rate-limiter": "^0.4.2",
     "jose": "^6.0.11",
-    "lru-cache": "^11.1.0",
     "nanoid": "^5.1.5",
     "pino": "^9.7.0",
     "postgres": "^3.4.7",

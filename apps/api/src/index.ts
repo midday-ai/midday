@@ -1,6 +1,5 @@
 import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { checkHealth } from "@midday/db/utils/health";
 import { Scalar } from "@scalar/hono-api-reference";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
@@ -8,6 +7,7 @@ import { routers } from "./rest/routers";
 import type { Context } from "./rest/types";
 import { createTRPCContext } from "./trpc/init";
 import { appRouter } from "./trpc/routers/_app";
+import { checkHealth } from "./utils/health";
 
 const app = new OpenAPIHono<Context>();
 
@@ -46,7 +46,13 @@ app.get("/health", async (c) => {
 
     return c.json({ status: "ok" }, 200);
   } catch (error) {
-    return c.json({ status: "error" }, 500);
+    return c.json(
+      {
+        status: "error",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      500,
+    );
   }
 });
 

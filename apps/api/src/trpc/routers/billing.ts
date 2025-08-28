@@ -50,8 +50,7 @@ export const billingRouter = createTRPCRouter({
                 : undefined,
           },
         };
-      } catch (error) {
-        console.error("Failed to fetch billing orders:", error);
+      } catch {
         return {
           data: [],
           meta: {

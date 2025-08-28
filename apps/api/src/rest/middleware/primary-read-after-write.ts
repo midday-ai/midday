@@ -26,7 +26,7 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
   // Try to get teamId from session/user context
   if (session?.user?.id) {
     const cacheKey = `user:${session.user.id}:team`;
-    teamId = teamPermissionsCache.get(cacheKey) || null;
+    teamId = (await teamPermissionsCache.get(cacheKey)) || null;
 
     if (!teamId && session.user.id) {
       try {
@@ -35,7 +35,7 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
 
         if (userTeamId) {
           teamId = userTeamId;
-          teamPermissionsCache.set(cacheKey, userTeamId);
+          await teamPermissionsCache.set(cacheKey, userTeamId);
         }
       } catch (error) {
         logger.warn({
@@ -52,7 +52,7 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
   if (teamId) {
     // For mutations, always use primary DB and update the team's timestamp
     if (operationType === "mutation") {
-      replicationCache.set(teamId);
+      await replicationCache.set(teamId);
 
       // Use primary-only mode to maintain interface consistency
       const dbWithPrimary = db as DatabaseWithPrimary;
@@ -63,7 +63,7 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
     }
     // For queries, check if the team recently performed a mutation
     else {
-      const timestamp = replicationCache.get(teamId);
+      const timestamp = await replicationCache.get(teamId);
       const now = Date.now();
 
       // If the timestamp exists and hasn't expired, use primary DB

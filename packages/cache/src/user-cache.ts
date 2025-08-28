@@ -1,14 +1,10 @@
-import { LRUCache } from "lru-cache";
+import { RedisCache } from "./redis-client";
 
-export const cache = new LRUCache<string, any>({
-  max: 5_000, // up to 5k entries (adjust based on memory)
-  ttl: 1000 * 60 * 30, // 30 minutes in milliseconds
-});
-
-const prefix = "user";
+// Redis-based cache for users shared across all server instances
+const cache = new RedisCache("user", 30 * 60); // 30 minutes TTL
 
 export const userCache = {
-  get: (key: string) => cache.get(`${prefix}:${key}`),
-  set: (key: string, value: any) => cache.set(`${prefix}:${key}`, value),
-  delete: (key: string) => cache.delete(`${prefix}:${key}`),
+  get: (key: string): Promise<any | undefined> => cache.get(key),
+  set: (key: string, value: any): Promise<void> => cache.set(key, value),
+  delete: (key: string): Promise<void> => cache.delete(key),
 };
