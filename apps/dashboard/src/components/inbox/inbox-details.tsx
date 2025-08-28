@@ -344,7 +344,7 @@ export function InboxDetails() {
           <Separator />
 
           <div className="absolute bottom-4 left-4 right-4 z-50">
-            <InboxActions data={data} />
+            <InboxActions data={data} key={data.id} />
           </div>
 
           {data?.filePath && (

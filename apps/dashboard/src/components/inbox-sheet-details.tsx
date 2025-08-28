@@ -128,7 +128,7 @@ export function InboxSheetDetails() {
         )}
 
         <div className="absolute bottom-4 z-10 left-4 right-4">
-          <InboxActions data={data} />
+          <InboxActions data={data} key={data.id} />
         </div>
       </div>
 
