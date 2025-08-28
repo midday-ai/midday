@@ -18,9 +18,7 @@ const primaryPool = postgres(
 );
 
 const fraPool = postgres(process.env.DATABASE_FRA_URL!, connectionConfig);
-
 const sjcPool = postgres(process.env.DATABASE_SJC_URL!, connectionConfig);
-
 const iadPool = postgres(process.env.DATABASE_IAD_URL!, connectionConfig);
 
 export const primaryDb = drizzle(primaryPool, {
