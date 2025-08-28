@@ -31,7 +31,6 @@ export class RedisCache {
       socket: {
         family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
         connectTimeout: isProduction ? 15000 : 5000,
-        lazyConnect: true,
       },
     });
 
