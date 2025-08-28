@@ -1,3 +1,5 @@
+import { withSentryConfig } from "@sentry/nextjs";
+
 /** @type {import("next").NextConfig} */
 const config = {
   poweredByHeader: false,
@@ -41,4 +43,24 @@ const config = {
   },
 };
 
-export default config;
+// Only enable Sentry in production
+const shouldUseSentry = process.env.SENTRY_ORG && process.env.SENTRY_PROJECT;
+
+export default shouldUseSentry
+  ? withSentryConfig(config, {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+
+      // Only print logs for uploading source maps in CI
+      silent: !process.env.CI,
+
+      // Upload source maps for better stack traces
+      widenClientFileUpload: true,
+
+      // Tree-shake Sentry logger statements to reduce bundle size
+      disableLogger: true,
+
+      // Enable Vercel Cron Monitors in production
+      automaticVercelMonitors: true,
+    })
+  : config;
