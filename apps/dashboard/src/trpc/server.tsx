@@ -44,6 +44,23 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
         enabled: (opts) =>
           process.env.NODE_ENV === "development" ||
           (opts.direction === "down" && opts.result instanceof Error),
+        logger(opts) {
+          const { type, path, direction, result } = opts;
+
+          if (direction === "down" && result instanceof Error) {
+            console.error(`[tRPC Server Error] ${type} ${path}:`, {
+              error: result.message,
+              stack: result.stack,
+              cause: result.cause,
+              timestamp: new Date().toISOString(),
+              url: `${process.env.NEXT_PUBLIC_API_URL}/trpc`,
+            });
+          } else if (direction === "up") {
+            console.log(`[tRPC Server Request] ${type} ${path}`, {
+              timestamp: new Date().toISOString(),
+            });
+          }
+        },
       }),
     ],
   }),
