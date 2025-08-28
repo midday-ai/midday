@@ -102,7 +102,6 @@ export class RedisCache {
       );
       // Reset connection on error to force reconnection next time
       this.redis = null;
-      this.lastConnectionCheck = 0;
       return undefined;
     }
   }
@@ -125,7 +124,6 @@ export class RedisCache {
       );
       // Reset connection on error
       this.redis = null;
-      this.lastConnectionCheck = 0;
     }
   }
 
@@ -140,7 +138,6 @@ export class RedisCache {
       );
       // Reset connection on error
       this.redis = null;
-      this.lastConnectionCheck = 0;
     }
   }
 
@@ -151,7 +148,7 @@ export class RedisCache {
     } catch (error) {
       // Reset connection state on health check failure
       this.redis = null;
-      this.lastConnectionCheck = 0;
+
       throw new Error(`Redis health check failed: ${error}`);
     }
   }
