@@ -271,10 +271,12 @@ export async function getTransactions(
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`.as(
           "isFulfilled",
         ),
-      hasPendingSuggestion:
-        sql<boolean>`${transactionMatchSuggestions.id} IS NOT NULL`.as(
-          "hasPendingSuggestion",
-        ),
+      hasPendingSuggestion: sql<boolean>`EXISTS (
+          SELECT 1 FROM ${transactionMatchSuggestions} tms 
+          WHERE tms.transaction_id = ${transactions.id} 
+          AND tms.team_id = ${teamId} 
+          AND tms.status = 'pending'
+        )`.as("hasPendingSuggestion"),
       attachments: sql<
         Array<{
           id: string;
@@ -356,14 +358,6 @@ export async function getTransactions(
         eq(transactionAttachments.teamId, teamId),
       ),
     )
-    .leftJoin(
-      transactionMatchSuggestions,
-      and(
-        eq(transactionMatchSuggestions.transactionId, transactions.id),
-        eq(transactionMatchSuggestions.teamId, teamId),
-        eq(transactionMatchSuggestions.status, "pending"),
-      ),
-    )
     .where(and(...finalWhereConditions))
     .groupBy(
       transactions.id,
@@ -395,7 +389,6 @@ export async function getTransactions(
       bankAccounts.currency,
       bankConnections.id,
       bankConnections.logoUrl,
-      transactionMatchSuggestions.id,
     );
 
   let query = queryBuilder.$dynamic();
@@ -527,10 +520,15 @@ export async function getTransactionById(
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, params.teamId)})) OR ${transactions.status} = 'completed'`.as(
           "isFulfilled",
         ),
-      hasPendingSuggestion:
-        sql<boolean>`${transactionMatchSuggestions.id} IS NOT NULL`.as(
-          "hasPendingSuggestion",
-        ),
+      suggestion: {
+        suggestionId: transactionMatchSuggestions.id,
+        inboxId: transactionMatchSuggestions.inboxId,
+        documentName: inbox.displayName,
+        documentAmount: inbox.amount,
+        documentCurrency: inbox.currency,
+        documentPath: inbox.filePath,
+        confidenceScore: transactionMatchSuggestions.confidenceScore,
+      },
       assigned: {
         id: users.id,
         fullName: users.fullName,
@@ -570,15 +568,6 @@ export async function getTransactionById(
       >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transactionAttachments.id}, 'filename', ${transactionAttachments.name}, 'path', ${transactionAttachments.path}, 'type', ${transactionAttachments.type}, 'size', ${transactionAttachments.size})) FILTER (WHERE ${transactionAttachments.id} IS NOT NULL), '[]'::json)`.as(
         "attachments",
       ),
-      suggestion: {
-        suggestionId: transactionMatchSuggestions.id,
-        inboxId: transactionMatchSuggestions.inboxId,
-        documentName: inbox.displayName,
-        documentAmount: inbox.amount,
-        documentCurrency: inbox.currency,
-        documentPath: inbox.filePath,
-        confidenceScore: transactionMatchSuggestions.confidenceScore,
-      },
     })
     .from(transactions)
     .leftJoin(
@@ -628,7 +617,7 @@ export async function getTransactionById(
       ),
     )
     .leftJoin(
-      // For suggestions aggregation
+      // Get any pending suggestion
       transactionMatchSuggestions,
       and(
         eq(transactionMatchSuggestions.transactionId, transactions.id),
