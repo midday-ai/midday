@@ -16,9 +16,9 @@ primary_region = 'fra'
 
   [[http_service.checks]]
     grace_period = "10s"
-    interval = "30s"
+    interval = "45s"
     method = "GET"
-    timeout = "5s"
+    timeout = "10s"
     path = "/health"
 
 [[vm]]
