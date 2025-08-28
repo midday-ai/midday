@@ -55,7 +55,4 @@ export default withSentryConfig(config, {
 
   // Tree-shake Sentry logger statements to reduce bundle size
   disableLogger: true,
-
-  // Enable Vercel Cron Monitors in production
-  automaticVercelMonitors: true,
 });
