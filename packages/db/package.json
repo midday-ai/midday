@@ -22,7 +22,6 @@
     "./utils/currency": "./src/utils/currency.ts"
   },
   "dependencies": {
-    "@midday/cache": "workspace:*",
     "@midday/invoice": "workspace:*",
     "@midday/encryption": "workspace:*",
     "@midday/logger": "workspace:*",
