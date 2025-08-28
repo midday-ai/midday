@@ -8,6 +8,7 @@
     "./replication-cache": "./src/replication-cache.ts",
     "./team-cache": "./src/team-cache.ts",
     "./team-permissions-cache": "./src/team-permissions-cache.ts",
-    "./redis-client": "./src/redis-client.ts"
+    "./redis-client": "./src/redis-client.ts",
+    "./health": "./src/health.ts"
   }
 }

@@ -118,4 +118,13 @@ export class RedisCache {
       );
     }
   }
+
+  async healthCheck(): Promise<void> {
+    try {
+      const redis = this.getRedisClient();
+      await redis.ping();
+    } catch (error) {
+      throw new Error(`Redis health check failed: ${error}`);
+    }
+  }
 }
