@@ -4,8 +4,6 @@ export class RedisCache {
   private redis: RedisClient | null = null;
   private prefix: string;
   private defaultTTL: number;
-  private lastConnectionCheck = 0;
-  private connectionCheckInterval = 30000; // 30 seconds
 
   constructor(prefix: string, defaultTTL: number = 30 * 60) {
     this.prefix = prefix;
@@ -13,21 +11,10 @@ export class RedisCache {
   }
 
   private async getRedisClient(): Promise<RedisClient> {
-    const now = Date.now();
-
-    // If we have a client and it's been less than 30 seconds since last check, use it
-    if (
-      this.redis &&
-      now - this.lastConnectionCheck < this.connectionCheckInterval
-    ) {
-      return this.redis;
-    }
-
-    // Test existing connection if we have one
+    // Always test existing connection if we have one
     if (this.redis) {
       try {
         await this.redis.ping();
-        this.lastConnectionCheck = now;
         return this.redis;
       } catch (error) {
         console.log(`Redis connection lost, reconnecting... Error: ${error}`);
@@ -73,7 +60,6 @@ export class RedisCache {
         };
 
     this.redis = new RedisClient(redisUrl, options);
-    this.lastConnectionCheck = now;
 
     // Log connection creation for debugging
     console.log(`Redis connection created for ${this.prefix} cache`);
