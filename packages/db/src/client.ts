@@ -3,21 +3,25 @@ import postgres from "postgres";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
-const primaryPool = postgres(process.env.DATABASE_PRIMARY_URL!, {
+// Common connection configuration to prevent timeout issues
+const connectionConfig = {
   prepare: false,
-});
+  idle_timeout: 20, // Close idle connections after 20 seconds
+  max_lifetime: 60 * 60, // Close connections after 1 hour
+  connect_timeout: 30, // 30 second connection timeout (longer than job client for complex queries)
+  max: 10, // Allow more connections for main app vs job client
+};
 
-const fraPool = postgres(process.env.DATABASE_FRA_URL!, {
-  prepare: false,
-});
+const primaryPool = postgres(
+  process.env.DATABASE_PRIMARY_URL!,
+  connectionConfig,
+);
 
-const sjcPool = postgres(process.env.DATABASE_SJC_URL!, {
-  prepare: false,
-});
+const fraPool = postgres(process.env.DATABASE_FRA_URL!, connectionConfig);
 
-const iadPool = postgres(process.env.DATABASE_IAD_URL!, {
-  prepare: false,
-});
+const sjcPool = postgres(process.env.DATABASE_SJC_URL!, connectionConfig);
+
+const iadPool = postgres(process.env.DATABASE_IAD_URL!, connectionConfig);
 
 export const primaryDb = drizzle(primaryPool, {
   schema,
