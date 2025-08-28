@@ -47,6 +47,7 @@ export default withSentryConfig(config, {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
   authToken: process.env.SENTRY_AUTH_TOKEN,
+  telemetry: false,
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
