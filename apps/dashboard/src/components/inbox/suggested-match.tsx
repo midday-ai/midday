@@ -89,6 +89,7 @@ export function SuggestedMatch() {
     if (!hasSeenLearningToast) {
       toast({
 <<<<<<< HEAD
+<<<<<<< HEAD
         title: "Midday AI",
         description: "We learn from your choices to improve matches over time.",
         variant: "ai",
@@ -100,6 +101,12 @@ export function SuggestedMatch() {
         variant: "ai",
         duration: 8000,
 >>>>>>> e8154f6d2 (wip)
+=======
+        title: "Midday AI",
+        description: "We learn from your choices to improve matches over time.",
+        variant: "ai",
+        duration: 5000,
+>>>>>>> e2e6ea459 (wip)
       });
       setHasSeenLearningToast(true);
     }
@@ -112,7 +119,6 @@ export function SuggestedMatch() {
         inboxId: id,
         transactionId: suggestion.transactionId,
       });
-      showLearningToast();
     }
   };
 
@@ -122,7 +128,6 @@ export function SuggestedMatch() {
         suggestionId: suggestion.id,
         inboxId: id,
       });
-      showLearningToast();
     }
   };
 
