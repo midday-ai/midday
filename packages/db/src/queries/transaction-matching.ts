@@ -10,6 +10,7 @@ import {
 import { logger } from "@midday/logger";
 import {
   and,
+  cosineDistance,
   desc,
   eq,
   inArray,
@@ -347,9 +348,9 @@ async function findSimilarMerchantPatterns(
         isNotNull(inboxEmbeddings.embedding),
         isNotNull(transactionEmbeddings.embedding),
         // Find semantically similar inbox items (same merchant)
-        sql`(${inboxEmbeddings.embedding} <-> ${sql.param(inboxEmbedding)}) < 0.15`,
+        sql`${cosineDistance(inboxEmbeddings.embedding, inboxEmbedding)} < 0.15`,
         // Find semantically similar transactions (same merchant)
-        sql`(${transactionEmbeddings.embedding} <-> ${sql.param(transactionEmbedding)}) < 0.15`,
+        sql`${cosineDistance(transactionEmbeddings.embedding, transactionEmbedding)} < 0.15`,
         // Only recent history (last 6 months)
         sql`${transactionMatchSuggestions.createdAt} > NOW() - INTERVAL '6 months'`,
       ),
