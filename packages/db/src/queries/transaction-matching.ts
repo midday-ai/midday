@@ -1306,6 +1306,7 @@ export async function findMatches(
 
       // CONSERVATIVE MERCHANT LEARNING: Never exceed 85% without proven merchant patterns
       let merchantCanAutoMatch = false;
+      let merchantPatternForAutoMatch = null;
       if (
         embeddingScore >= 0.75 &&
         inboxItem.embedding &&
@@ -1319,6 +1320,9 @@ export async function findMatches(
             inboxItem.embedding,
             candidate.embedding,
           );
+
+          // Store for later use in auto-match decision
+          merchantPatternForAutoMatch = merchantPattern;
 
           if (merchantPattern.canAutoMatch) {
             // Proven merchant - allow full confidence for auto-matching potential
@@ -1443,19 +1447,10 @@ export async function findMatches(
                 const transactionEmbedding = candidate.embedding; // Assuming embedding is available from query
 
                 if (transactionEmbedding) {
-                  // Very high semantic similarity
-                  const merchantPattern = await findSimilarMerchantPatterns(
-                    db,
-                    teamId,
-                    inboxItem.embedding,
-                    transactionEmbedding,
-                  );
-
-                  if (merchantPattern.canAutoMatch) {
+                  // Use the already-calculated merchant pattern from confidence scoring
+                  if (merchantCanAutoMatch && merchantPatternForAutoMatch) {
                     // Additional validation using existing logic
                     if (
-                      confidenceScore >=
-                        Math.max(0.9, merchantPattern.confidence - 0.05) &&
                       (isPerfectFinancialMatch ||
                         isExcellentCrossCurrencyMatch) &&
                       embeddingScore >= 0.85 &&
@@ -1467,10 +1462,13 @@ export async function findMatches(
                         teamId,
                         inboxId,
                         transactionId: candidate.transactionId,
-                        reason: merchantPattern.reason,
-                        historicalMatches: merchantPattern.matchCount,
-                        historicalAccuracy: merchantPattern.historicalAccuracy,
-                        avgHistoricalConfidence: merchantPattern.confidence,
+                        reason: merchantPatternForAutoMatch.reason,
+                        historicalMatches:
+                          merchantPatternForAutoMatch.matchCount,
+                        historicalAccuracy:
+                          merchantPatternForAutoMatch.historicalAccuracy,
+                        avgHistoricalConfidence:
+                          merchantPatternForAutoMatch.confidence,
                         currentConfidence: confidenceScore,
                         embeddingScore,
                         embeddingSimilarity,
@@ -1900,6 +1898,7 @@ export async function findInboxMatches(
 
     // CONSERVATIVE MERCHANT LEARNING: Never exceed 85% without proven merchant patterns (Reverse)
     let merchantCanAutoMatch = false;
+    let merchantPatternForAutoMatch = null;
     if (
       embeddingScore >= 0.75 &&
       transactionItem.embedding &&
@@ -1913,6 +1912,9 @@ export async function findInboxMatches(
           candidate.embedding,
           transactionItem.embedding,
         );
+
+        // Store for later use in auto-match decision
+        merchantPatternForAutoMatch = merchantPattern;
 
         if (merchantPattern.canAutoMatch) {
           // Proven merchant - allow full confidence for auto-matching potential
@@ -2010,19 +2012,10 @@ export async function findInboxMatches(
               const inboxEmbedding = candidate.embedding;
 
               if (inboxEmbedding) {
-                // Very high semantic similarity
-                const merchantPattern = await findSimilarMerchantPatterns(
-                  db,
-                  teamId,
-                  inboxEmbedding,
-                  transactionItem.embedding,
-                );
-
-                if (merchantPattern.canAutoMatch) {
+                // Use the already-calculated merchant pattern from confidence scoring
+                if (merchantCanAutoMatch && merchantPatternForAutoMatch) {
                   // Additional validation using existing logic
                   if (
-                    confidenceScore >=
-                      Math.max(0.9, merchantPattern.confidence - 0.05) &&
                     (isPerfectFinancialMatch ||
                       isExcellentCrossCurrencyMatch) &&
                     embeddingScore >= 0.85 &&
@@ -2034,10 +2027,12 @@ export async function findInboxMatches(
                       teamId,
                       transactionId,
                       inboxId: candidate.inboxId,
-                      reason: merchantPattern.reason,
-                      historicalMatches: merchantPattern.matchCount,
-                      historicalAccuracy: merchantPattern.historicalAccuracy,
-                      avgHistoricalConfidence: merchantPattern.confidence,
+                      reason: merchantPatternForAutoMatch.reason,
+                      historicalMatches: merchantPatternForAutoMatch.matchCount,
+                      historicalAccuracy:
+                        merchantPatternForAutoMatch.historicalAccuracy,
+                      avgHistoricalConfidence:
+                        merchantPatternForAutoMatch.confidence,
                       currentConfidence: confidenceScore,
                       embeddingScore,
                       dateScore,
