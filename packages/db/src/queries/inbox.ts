@@ -731,7 +731,7 @@ export async function matchTransaction(
 ) {
   const { id, transactionId, teamId } = params;
 
-  // Get inbox data
+  // Get inbox data and check if already matched
   const [result] = await db
     .select({
       id: inbox.id,
@@ -741,12 +741,36 @@ export async function matchTransaction(
       fileName: inbox.fileName,
       taxRate: inbox.taxRate,
       taxType: inbox.taxType,
+      transactionId: inbox.transactionId, // Check if already matched
+      status: inbox.status,
     })
     .from(inbox)
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
 
   if (!result) return null;
+
+  // Check if inbox item is already matched
+  if (result.transactionId) {
+    throw new Error("Inbox item is already matched to a transaction");
+  }
+
+  // Check if the target transaction is already matched to another inbox item
+  const [existingMatch] = await db
+    .select({ id: inbox.id })
+    .from(inbox)
+    .where(
+      and(
+        eq(inbox.transactionId, transactionId),
+        eq(inbox.teamId, teamId),
+        ne(inbox.id, id), // Not the same inbox item
+      ),
+    )
+    .limit(1);
+
+  if (existingMatch) {
+    throw new Error("Transaction is already matched to another inbox item");
+  }
 
   // Insert transaction attachment
   const [attachmentData] = await db

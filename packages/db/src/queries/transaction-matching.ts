@@ -10,6 +10,8 @@ import {
 import { logger } from "@midday/logger";
 import {
   and,
+  cosineDistance,
+  desc,
   eq,
   inArray,
   isNotNull,
@@ -29,13 +31,11 @@ import {
 export type FindMatchesParams = {
   teamId: string;
   inboxId: string;
-  includeAlreadyMatched?: boolean;
 };
 
 export type FindInboxMatchesParams = {
   teamId: string;
   transactionId: string;
-  includeAlreadyMatched?: boolean;
 };
 
 export type MatchResult = {
@@ -96,30 +96,27 @@ export type InboxSuggestion = {
   status: "pending" | "confirmed" | "declined" | "expired";
 };
 
-// Confidence calibration system - learns from user feedback
+// Suggestion calibration system - learns from user feedback to improve suggestion quality
 export type TeamCalibrationData = {
   teamId: string;
   totalSuggestions: number;
   confirmedSuggestions: number;
   declinedSuggestions: number;
-  unmatchedSuggestions: number; // New: post-match negative feedback
+  unmatchedSuggestions: number; // Post-match negative feedback
   avgConfidenceConfirmed: number;
   avgConfidenceDeclined: number;
-  avgConfidenceUnmatched: number; // New: confidence of unmatched pairs
-  autoMatchAccuracy: number;
+  avgConfidenceUnmatched: number; // Confidence of unmatched pairs
   suggestedMatchAccuracy: number;
-  calibratedAutoThreshold: number;
   calibratedSuggestedThreshold: number;
   lastUpdated: string;
 };
 
-// Get team's calibration data and adjust thresholds based on user feedback
+// Get team's suggestion calibration data and adjust suggestion threshold based on user feedback
 export async function getTeamCalibration(
   db: Database,
   teamId: string,
 ): Promise<TeamCalibrationData> {
-  // Default weights for fallback
-  const defaultAutoThreshold = 0.95;
+  // Default threshold for fallback
   const defaultSuggestedThreshold = 0.6;
 
   // Get historical performance data from last 90 days
@@ -145,7 +142,7 @@ export async function getTeamCalibration(
     );
 
   if (performanceData.length < 5) {
-    // Not enough data - use default thresholds
+    // Not enough data - use default threshold
     return {
       teamId,
       totalSuggestions: performanceData.length,
@@ -155,9 +152,7 @@ export async function getTeamCalibration(
       avgConfidenceConfirmed: 0,
       avgConfidenceDeclined: 0,
       avgConfidenceUnmatched: 0,
-      autoMatchAccuracy: 0,
       suggestedMatchAccuracy: 0,
-      calibratedAutoThreshold: defaultAutoThreshold,
       calibratedSuggestedThreshold: defaultSuggestedThreshold,
       lastUpdated: new Date().toISOString(),
     };
@@ -167,12 +162,6 @@ export async function getTeamCalibration(
   const confirmed = performanceData.filter((d) => d.status === "confirmed");
   const declined = performanceData.filter((d) => d.status === "declined");
   const unmatched = performanceData.filter((d) => d.status === "unmatched"); // Post-match negative feedback
-  const autoMatches = performanceData.filter(
-    (d) => d.matchType === "auto_matched",
-  );
-  const suggestedMatches = performanceData.filter(
-    (d) => d.matchType === "high_confidence" || d.matchType === "suggested",
-  );
 
   const avgConfidenceConfirmed =
     confirmed.length > 0
@@ -203,38 +192,12 @@ export async function getTeamCalibration(
         ) / negativeOutcomes.length
       : avgConfidenceDeclined; // Fallback to declined-only average
 
-  const autoMatchAccuracy =
-    autoMatches.length > 0
-      ? autoMatches.filter((d) => d.status === "confirmed").length /
-        autoMatches.length
-      : 0;
-
   const suggestedMatchAccuracy =
-    suggestedMatches.length > 0
-      ? suggestedMatches.filter((d) => d.status === "confirmed").length /
-        suggestedMatches.length
-      : 0;
+    performanceData.length > 0 ? confirmed.length / performanceData.length : 0;
 
-  // Calibrate thresholds based on performance
-  let calibratedAutoThreshold = defaultAutoThreshold;
+  // Calibrate suggestion threshold based on performance
+  // Note: Auto-match threshold is now fixed - merchant patterns handle auto-matching decisions
   let calibratedSuggestedThreshold = defaultSuggestedThreshold;
-
-  // Auto-match threshold - responsive to performance with globally reduced sample requirements
-  if (
-    autoMatchAccuracy > 0.95 &&
-    autoMatches.length >= CALIBRATION_LIMITS.MIN_SAMPLES_AUTO
-  ) {
-    // High auto-match accuracy - be more aggressive
-    const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.02);
-    calibratedAutoThreshold = Math.max(0.92, defaultAutoThreshold - adjustment);
-  } else if (
-    autoMatchAccuracy < 0.9 &&
-    autoMatches.length >= CALIBRATION_LIMITS.MIN_SAMPLES_AUTO
-  ) {
-    // Auto-match failures - be more conservative
-    const adjustment = Math.min(CALIBRATION_LIMITS.MAX_ADJUSTMENT, 0.02);
-    calibratedAutoThreshold = Math.min(0.98, defaultAutoThreshold + adjustment);
-  }
 
   // Suggested match threshold - responsive to user feedback with globally reduced sample requirements
   if (
@@ -318,15 +281,121 @@ export async function getTeamCalibration(
     totalSuggestions: performanceData.length,
     confirmedSuggestions: confirmed.length,
     declinedSuggestions: declined.length,
-    unmatchedSuggestions: unmatched.length, // New metric
+    unmatchedSuggestions: unmatched.length,
     avgConfidenceConfirmed,
     avgConfidenceDeclined,
-    avgConfidenceUnmatched, // New metric
-    autoMatchAccuracy,
+    avgConfidenceUnmatched,
     suggestedMatchAccuracy,
-    calibratedAutoThreshold,
     calibratedSuggestedThreshold,
     lastUpdated: new Date().toISOString(),
+  };
+}
+
+/**
+ * Semantic merchant pattern analysis - find similar merchant patterns using embeddings
+ *
+ * This function analyzes historical match patterns for semantically similar merchants
+ * to determine if auto-matching should be enabled for a specific merchant pair.
+ *
+ * Requirements for auto-matching:
+ * - At least 3 confirmed matches for similar merchant patterns
+ * - 90%+ accuracy rate (confirmed vs declined/unmatched)
+ * - Maximum 1 negative signal (declined or unmatched)
+ * - Average confidence >= 85%
+ * - Patterns within last 6 months
+ */
+async function findSimilarMerchantPatterns(
+  db: Database,
+  teamId: string,
+  inboxEmbedding: number[],
+  transactionEmbedding: number[],
+): Promise<{
+  canAutoMatch: boolean;
+  confidence: number;
+  historicalAccuracy: number;
+  matchCount: number;
+  reason: string;
+}> {
+  // Find historically similar matches using embedding similarity
+  // This leverages existing embedding infrastructure
+  const historicalMatches = await db
+    .select({
+      status: transactionMatchSuggestions.status,
+      confidenceScore: transactionMatchSuggestions.confidenceScore,
+      embeddingScore: transactionMatchSuggestions.embeddingScore,
+      createdAt: transactionMatchSuggestions.createdAt,
+    })
+    .from(transactionMatchSuggestions)
+    .innerJoin(
+      inboxEmbeddings,
+      eq(transactionMatchSuggestions.inboxId, inboxEmbeddings.inboxId),
+    )
+    .innerJoin(
+      transactionEmbeddings,
+      eq(
+        transactionMatchSuggestions.transactionId,
+        transactionEmbeddings.transactionId,
+      ),
+    )
+    .where(
+      and(
+        eq(transactionMatchSuggestions.teamId, teamId),
+        inArray(transactionMatchSuggestions.status, [
+          "confirmed",
+          "declined",
+          "unmatched",
+        ]),
+        isNotNull(inboxEmbeddings.embedding),
+        isNotNull(transactionEmbeddings.embedding),
+        // Find semantically similar inbox items (same merchant)
+        sql`${cosineDistance(inboxEmbeddings.embedding, inboxEmbedding)} < 0.15`,
+        // Find semantically similar transactions (same merchant)
+        sql`${cosineDistance(transactionEmbeddings.embedding, transactionEmbedding)} < 0.15`,
+        // Only recent history (last 6 months)
+        sql`${transactionMatchSuggestions.createdAt} > NOW() - INTERVAL '6 months'`,
+      ),
+    )
+    .orderBy(desc(transactionMatchSuggestions.createdAt))
+    .limit(20);
+
+  if (historicalMatches.length < 3) {
+    return {
+      canAutoMatch: false,
+      confidence: 0,
+      historicalAccuracy: 0,
+      matchCount: 0,
+      reason: `insufficient_history_${historicalMatches.length}`,
+    };
+  }
+
+  // Analyze the pattern
+  const confirmed = historicalMatches.filter((m) => m.status === "confirmed");
+  const negative = historicalMatches.filter(
+    (m) => m.status === "declined" || m.status === "unmatched",
+  );
+
+  const accuracy = confirmed.length / historicalMatches.length;
+  const avgConfidence =
+    confirmed.length > 0
+      ? confirmed.reduce((sum, m) => sum + Number(m.confidenceScore), 0) /
+        confirmed.length
+      : 0;
+
+  // Conservative criteria for auto-matching
+  const canAutoMatch =
+    confirmed.length >= 3 && // At least 3 confirmations
+    accuracy >= 0.9 && // 90%+ accuracy
+    negative.length <= 1 && // Max 1 negative signal
+    avgConfidence >= 0.85; // Good average confidence
+
+  return {
+    canAutoMatch,
+    confidence: avgConfidence,
+    historicalAccuracy: accuracy,
+    matchCount: confirmed.length,
+    reason: canAutoMatch
+      ? `eligible_${confirmed.length}_matches_${(accuracy * 100).toFixed(0)}pct_accuracy`
+      : `ineligible_${confirmed.length}_matches_${(accuracy * 100).toFixed(0)}pct_accuracy_${negative.length}_negative`,
   };
 }
 
@@ -335,26 +404,23 @@ export async function findMatches(
   db: Database,
   params: FindMatchesParams,
 ): Promise<MatchResult | null> {
-  const { teamId, inboxId, includeAlreadyMatched = false } = params;
+  const { teamId, inboxId } = params;
 
   // Get team-specific calibrated thresholds based on user feedback
   const calibration = await getTeamCalibration(db, teamId);
 
-  // Log calibration for debugging - only when thresholds are adjusted
-  const thresholdAdjusted =
-    calibration.calibratedSuggestedThreshold !== 0.6 ||
-    calibration.calibratedAutoThreshold !== 0.95;
+  // Log calibration for debugging - only when suggestion threshold is adjusted
+  const thresholdAdjusted = calibration.calibratedSuggestedThreshold !== 0.6;
 
   if (thresholdAdjusted) {
-    logger.info("🔧 CALIBRATION ACTIVE", {
+    logger.info("🔧 SUGGESTION CALIBRATION ACTIVE", {
       teamId,
-      originalAutoThreshold: 0.95,
       originalSuggestedThreshold: 0.6,
-      calibratedAutoThreshold: calibration.calibratedAutoThreshold,
       calibratedSuggestedThreshold: calibration.calibratedSuggestedThreshold,
+      autoMatchThreshold: 0.9, // Fixed - no longer calibrated
       adjustmentReason: `Based on ${calibration.totalSuggestions} past suggestions (${calibration.confirmedSuggestions} confirmed, ${calibration.declinedSuggestions} declined). Accuracy: ${(calibration.suggestedMatchAccuracy * 100).toFixed(1)}%`,
+      note: "Auto-matching uses merchant-specific patterns, not global calibration",
       totalSuggestions: calibration.totalSuggestions,
-      autoMatchAccuracy: calibration.autoMatchAccuracy,
       suggestedMatchAccuracy: calibration.suggestedMatchAccuracy,
     });
   }
@@ -365,7 +431,7 @@ export async function findMatches(
     amountWeight: 0.35, // Keep financial accuracy high - critical for correctness
     currencyWeight: 0.1, // Reduced: Currency match is less meaningful when most transactions use same currency
     dateWeight: 0.05, // Supporting signal for temporal alignment
-    autoMatchThreshold: Math.max(0.9, calibration.calibratedAutoThreshold), // HIGHER threshold: Be more conservative for auto-matching
+    autoMatchThreshold: 0.9, // Fixed conservative threshold - don't let global calibration affect auto-matching
     suggestedMatchThreshold: Math.max(
       0.75,
       calibration.calibratedSuggestedThreshold,
@@ -974,10 +1040,6 @@ export async function findMatches(
         inboxItem.amount &&
         Math.abs(Math.abs(inboxItem.amount) - Math.abs(candidate.amount)) <
           0.01;
-      const hasBaseAmountMatch =
-        inboxItem.baseAmount &&
-        candidate.baseAmount &&
-        Math.abs(inboxItem.baseAmount - candidate.baseAmount) < 0.01;
 
       // Perfect financial match (same currency + exact amount)
       const isPerfectFinancialMatch = hasSameCurrency && hasExactAmount;
@@ -987,33 +1049,6 @@ export async function findMatches(
         inboxItem,
         candidate,
       );
-
-      // TEMPORARY: Also calculate with old logic for comparison (using old 15% tolerance)
-      const oldCrossCurrencyMatch =
-        !hasSameCurrency &&
-        inboxItem.baseCurrency === candidate.baseCurrency &&
-        inboxItem.baseCurrency && // Must have base currency
-        (() => {
-          const inboxBase = Math.abs(inboxItem.baseAmount || 0);
-          const candidateBase = Math.abs(candidate.baseAmount || 0);
-          const difference = Math.abs(inboxBase - candidateBase);
-          const avgAmount = (inboxBase + candidateBase) / 2;
-          // OLD LOGIC: 15% difference or minimum 50 (for comparison only)
-          const tolerance = Math.max(50, avgAmount * 0.15);
-          return difference < tolerance;
-        })();
-
-      if (isExcellentCrossCurrencyMatch !== oldCrossCurrencyMatch) {
-        logger.error("❌ CROSS-CURRENCY MISMATCH", {
-          transactionId: candidate.transactionId,
-          newResult: isExcellentCrossCurrencyMatch,
-          oldResult: oldCrossCurrencyMatch,
-          inboxCurrency: inboxItem.currency,
-          candidateCurrency: candidate.currency,
-          inboxBaseAmount: inboxItem.baseAmount,
-          candidateBaseAmount: candidate.baseAmount,
-        });
-      }
 
       // Strong financial match with good semantics
       const isStrongMatch =
@@ -1141,48 +1176,75 @@ export async function findMatches(
           // Determine match type with enhanced tiered auto-matching
           let matchType: "auto_matched" | "high_confidence" | "suggested";
 
-          // Enhanced auto-match criteria with multiple confidence tiers
-          const autoMatchTiers = {
-            perfect: 0.98, // Perfect matches - immediate auto-match
-            excellent: 0.95, // Excellent matches - auto-match with high confidence
-            strongSemantic: 0.94, // Strong semantic matches with decent financial alignment
-            highConfidence: 0.92, // High confidence - auto-match for recurring patterns
-            conservative: 0.88, // Conservative threshold for team calibration
-          };
-
           if (confidenceScore >= teamWeights.autoMatchThreshold) {
-            // let shouldAutoMatch = false;
+            // Semantic merchant pattern auto-matching
+            let shouldAutoMatch = false;
 
-            // // TIER 1: Perfect financial matches - most reliable
-            // if (
-            //   confidenceScore >= autoMatchTiers.perfect &&
-            //   (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-            //   embeddingScore >= 0.75 &&
-            //   dateScore >= 0.6
-            // ) {
-            //   shouldAutoMatch = true;
-            // }
-            // // TIER 2: Excellent matches with strong signals - more conservative
-            // else if (
-            //   confidenceScore >= 0.97 &&
-            //   (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-            //   embeddingScore >= 0.75 &&
-            //   dateScore >= 0.7
-            // ) {
-            //   shouldAutoMatch = true;
-            // } else if (
-            //   confidenceScore >= 0.92 &&
-            //   calibration.autoMatchAccuracy > 0.99 &&
-            //   calibration.totalSuggestions > 50 &&
-            //   (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-            //   embeddingScore >= 0.85 &&
-            //   dateScore >= 0.8
-            // ) {
-            //   shouldAutoMatch = true;
-            // }
+            // Check if we can auto-match based on semantic merchant patterns
+            if (inboxItem.embedding) {
+              const embeddingSimilarity = Math.max(
+                0,
+                1 - (candidate.embeddingScore || 1),
+              );
 
-            // Auto-matching disabled - all matches become suggestions
-            const shouldAutoMatch = false;
+              if (embeddingSimilarity >= 0.85) {
+                // Get transaction embedding for semantic pattern analysis
+                const transactionEmbeddingData = await db
+                  .select({
+                    embedding: transactionEmbeddings.embedding,
+                  })
+                  .from(transactionEmbeddings)
+                  .where(
+                    eq(
+                      transactionEmbeddings.transactionId,
+                      candidate.transactionId,
+                    ),
+                  )
+                  .limit(1);
+
+                const transactionEmbedding =
+                  transactionEmbeddingData[0]?.embedding;
+
+                if (transactionEmbedding) {
+                  // Very high semantic similarity
+                  const merchantPattern = await findSimilarMerchantPatterns(
+                    db,
+                    teamId,
+                    inboxItem.embedding,
+                    transactionEmbedding,
+                  );
+
+                  if (merchantPattern.canAutoMatch) {
+                    // Additional validation using existing logic
+                    if (
+                      confidenceScore >=
+                        Math.max(0.9, merchantPattern.confidence - 0.05) &&
+                      (isPerfectFinancialMatch ||
+                        isExcellentCrossCurrencyMatch) &&
+                      embeddingScore >= 0.85 &&
+                      dateScore >= 0.7
+                    ) {
+                      shouldAutoMatch = true;
+
+                      logger.info("🏆 SEMANTIC MERCHANT AUTO-MATCH", {
+                        teamId,
+                        inboxId,
+                        transactionId: candidate.transactionId,
+                        reason: merchantPattern.reason,
+                        historicalMatches: merchantPattern.matchCount,
+                        historicalAccuracy: merchantPattern.historicalAccuracy,
+                        avgHistoricalConfidence: merchantPattern.confidence,
+                        currentConfidence: confidenceScore,
+                        embeddingScore,
+                        embeddingSimilarity,
+                        dateScore,
+                      });
+                    }
+                  }
+                }
+              }
+            }
+
             matchType = shouldAutoMatch ? "auto_matched" : "high_confidence";
           } else if (confidenceScore >= 0.72) {
             // Lowered from 0.75 for better UX
@@ -1289,6 +1351,27 @@ export async function findMatches(
     });
   }
 
+  // Check if the best match was previously dismissed by the user
+  if (bestMatch) {
+    const wasDismissed = await wasPreviouslyDismissed(
+      db,
+      teamId,
+      inboxId,
+      bestMatch.transactionId,
+    );
+
+    if (wasDismissed) {
+      logger.info("🚫 MATCH SKIPPED - Previously dismissed", {
+        teamId,
+        inboxId,
+        transactionId: bestMatch.transactionId,
+        confidence: bestMatch.confidenceScore,
+        matchType: bestMatch.matchType,
+      });
+      return null; // Don't suggest previously dismissed matches
+    }
+  }
+
   return bestMatch;
 }
 
@@ -1299,7 +1382,7 @@ export async function findInboxMatches(
 ): Promise<InboxMatchResult | null> {
   // ROBUSTNESS: Performance monitoring
   const startTime = Date.now();
-  const { teamId, transactionId, includeAlreadyMatched = false } = params;
+  const { teamId, transactionId } = params;
 
   // Get transaction with embedding
   const transactionData = await db
@@ -1340,7 +1423,7 @@ export async function findInboxMatches(
     amountWeight: 0.35, // Keep financial accuracy high - critical for correctness
     currencyWeight: 0.1, // Reduced: Currency match is less meaningful when most transactions use same currency
     dateWeight: 0.05, // Supporting signal for temporal alignment
-    autoMatchThreshold: Math.max(0.9, calibration.calibratedAutoThreshold), // HIGHER threshold: Be more conservative for auto-matching
+    autoMatchThreshold: 0.9, // Fixed conservative threshold - don't let global calibration affect auto-matching
     suggestedMatchThreshold: Math.max(
       0.75,
       calibration.calibratedSuggestedThreshold,
@@ -1376,8 +1459,8 @@ export async function findInboxMatches(
         sql`${inbox.date} BETWEEN (${sql.param(transactionItem.date)}::date - INTERVAL '30 days') 
             AND (${sql.param(transactionItem.date)}::date + INTERVAL '7 days')`,
 
-        // Exclude already matched if requested
-        ...(includeAlreadyMatched ? [] : [isNull(inbox.transactionId)]),
+        // Exclude already matched inbox items
+        isNull(inbox.transactionId),
       ),
     )
     .orderBy(sql`ABS(${inbox.date} - ${sql.param(transactionItem.date)})`)
@@ -1431,8 +1514,8 @@ export async function findInboxMatches(
           sql`${inbox.date} BETWEEN (${sql.param(transactionItem.date)}::date - INTERVAL '90 days') 
               AND (${sql.param(transactionItem.date)}::date + INTERVAL '90 days')`,
 
-          // Exclude already matched if requested
-          ...(includeAlreadyMatched ? [] : [isNull(inbox.transactionId)]),
+          // Exclude already matched inbox items
+          isNull(inbox.transactionId),
         ),
       )
       .orderBy(
@@ -1471,10 +1554,6 @@ export async function findInboxMatches(
       candidate.amount &&
       Math.abs(Math.abs(candidate.amount) - Math.abs(transactionItem.amount)) <
         0.01;
-    const hasBaseAmountMatch =
-      candidate.baseAmount &&
-      transactionItem.baseAmount &&
-      Math.abs(candidate.baseAmount - transactionItem.baseAmount) < 0.01;
 
     // Perfect financial match (same currency + exact amount)
     const isPerfectFinancialMatch = hasSameCurrency && hasExactAmount;
@@ -1573,48 +1652,67 @@ export async function findInboxMatches(
         // Determine match type with enhanced tiered auto-matching (same logic as forward matching)
         let matchType: "auto_matched" | "high_confidence" | "suggested";
 
-        // Enhanced auto-match criteria with multiple confidence tiers
-        const autoMatchTiers = {
-          perfect: 0.98, // Perfect matches - immediate auto-match
-          excellent: 0.95, // Excellent matches - auto-match with high confidence
-          strongSemantic: 0.94, // Strong semantic matches with decent financial alignment
-          highConfidence: 0.92, // High confidence - auto-match for recurring patterns
-          conservative: 0.88, // Conservative threshold for team calibration
-        };
-
         if (confidenceScore >= teamWeights.autoMatchThreshold) {
-          // let shouldAutoMatch = false;
+          // Semantic merchant pattern auto-matching
+          let shouldAutoMatch = false;
 
-          // // TIER 1: Perfect financial matches - most reliable
-          // if (
-          //   confidenceScore >= autoMatchTiers.perfect &&
-          //   (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-          //   embeddingScore >= 0.75 &&
-          //   dateScore >= 0.6
-          // ) {
-          //   shouldAutoMatch = true;
-          // }
-          // // TIER 2: Excellent matches with strong signals - more conservative
-          // else if (
-          //   confidenceScore >= 0.97 &&
-          //   (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-          //   embeddingScore >= 0.75 &&
-          //   dateScore >= 0.7
-          // ) {
-          //   shouldAutoMatch = true;
-          // } else if (
-          //   confidenceScore >= 0.92 &&
-          //   calibration.autoMatchAccuracy > 0.99 &&
-          //   calibration.totalSuggestions > 50 &&
-          //   (isPerfectFinancialMatch || isExcellentCrossCurrencyMatch) &&
-          //   embeddingScore >= 0.85 &&
-          //   dateScore >= 0.8
-          // ) {
-          //   shouldAutoMatch = true;
-          // }
+          // Check if we can auto-match based on semantic merchant patterns
+          if (transactionItem.embedding) {
+            const embeddingSimilarity = Math.max(
+              0,
+              1 - (candidate.embeddingScore || 1),
+            );
 
-          // Auto-matching disabled - all matches become suggestions
-          const shouldAutoMatch = false;
+            if (embeddingSimilarity >= 0.85) {
+              // Get inbox embedding for semantic pattern analysis
+              const inboxEmbeddingData = await db
+                .select({
+                  embedding: inboxEmbeddings.embedding,
+                })
+                .from(inboxEmbeddings)
+                .where(eq(inboxEmbeddings.inboxId, candidate.inboxId))
+                .limit(1);
+
+              const inboxEmbedding = inboxEmbeddingData[0]?.embedding;
+
+              if (inboxEmbedding) {
+                // Very high semantic similarity
+                const merchantPattern = await findSimilarMerchantPatterns(
+                  db,
+                  teamId,
+                  inboxEmbedding,
+                  transactionItem.embedding,
+                );
+
+                if (merchantPattern.canAutoMatch) {
+                  // Additional validation using existing logic
+                  if (
+                    confidenceScore >=
+                      Math.max(0.9, merchantPattern.confidence - 0.05) &&
+                    (isPerfectFinancialMatch ||
+                      isExcellentCrossCurrencyMatch) &&
+                    embeddingScore >= 0.85 &&
+                    dateScore >= 0.7
+                  ) {
+                    shouldAutoMatch = true;
+
+                    logger.info("🏆 SEMANTIC MERCHANT AUTO-MATCH (Reverse)", {
+                      teamId,
+                      transactionId,
+                      inboxId: candidate.inboxId,
+                      reason: merchantPattern.reason,
+                      historicalMatches: merchantPattern.matchCount,
+                      historicalAccuracy: merchantPattern.historicalAccuracy,
+                      avgHistoricalConfidence: merchantPattern.confidence,
+                      currentConfidence: confidenceScore,
+                      embeddingScore,
+                      dateScore,
+                    });
+                  }
+                }
+              }
+            }
+          }
 
           matchType = shouldAutoMatch ? "auto_matched" : "high_confidence";
         } else if (confidenceScore >= 0.72) {
@@ -1657,6 +1755,27 @@ export async function findInboxMatches(
       duration,
       candidateCount: candidateInboxItems?.length || 0,
     });
+  }
+
+  // Check if the best match was previously dismissed by the user
+  if (bestMatch) {
+    const wasDismissed = await wasPreviouslyDismissed(
+      db,
+      teamId,
+      bestMatch.inboxId,
+      transactionId,
+    );
+
+    if (wasDismissed) {
+      logger.info("🚫 REVERSE MATCH SKIPPED - Previously dismissed", {
+        teamId,
+        transactionId,
+        inboxId: bestMatch.inboxId,
+        confidence: bestMatch.confidenceScore,
+        matchType: bestMatch.matchType,
+      });
+      return null; // Don't suggest previously dismissed matches
+    }
   }
 
   return bestMatch;
@@ -1703,4 +1822,27 @@ export async function createMatchSuggestion(
     .returning();
 
   return result;
+}
+
+// Check if a specific inbox-transaction pair was previously dismissed
+async function wasPreviouslyDismissed(
+  db: Database,
+  teamId: string,
+  inboxId: string,
+  transactionId: string,
+): Promise<boolean> {
+  const dismissedMatch = await db
+    .select({ id: transactionMatchSuggestions.id })
+    .from(transactionMatchSuggestions)
+    .where(
+      and(
+        eq(transactionMatchSuggestions.teamId, teamId),
+        eq(transactionMatchSuggestions.inboxId, inboxId),
+        eq(transactionMatchSuggestions.transactionId, transactionId),
+        inArray(transactionMatchSuggestions.status, ["declined", "unmatched"]),
+      ),
+    )
+    .limit(1);
+
+  return dismissedMatch.length > 0;
 }
