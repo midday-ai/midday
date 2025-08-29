@@ -25,8 +25,12 @@ RUN bun install
 # Copy the full source code
 COPY --from=builder /app/out/full/ .
 
-# Copy the prebuilt engine dist from the build context (assumes CI built it)
-COPY apps/engine/dist /app/apps/engine/dist
+# Build the engine package inside the image (API depends on it at runtime)
+WORKDIR /app/apps/engine
+RUN bun run build
+
+# Return to root for next stages
+WORKDIR /app
 
 # Runner stage (same as installer to avoid another copy)
 FROM installer AS runner

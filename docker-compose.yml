@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+
+    environment:
+      PORT: 3000
+      # Database (required)
+      DATABASE_PRIMARY_URL: ${DATABASE_PRIMARY_URL}
+      DATABASE_FRA_URL: ${DATABASE_FRA_URL:-${DATABASE_PRIMARY_URL}}
+      DATABASE_IAD_URL: ${DATABASE_IAD_URL:-${DATABASE_PRIMARY_URL}}
+      DATABASE_SJC_URL: ${DATABASE_SJC_URL:-${DATABASE_PRIMARY_URL}}
+      DATABASE_SESSION_POOLER: ${DATABASE_SESSION_POOLER:-${DATABASE_PRIMARY_URL}}
+      # Supabase (required)
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
+      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET}
+      # Email (optional)
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      # CORS
+      ALLOWED_API_ORIGINS: ${ALLOWED_API_ORIGINS}
+      NODE_ENV: production
+      TZ: UTC
+    restart: unless-stopped
+    ports:
+      - 3000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.midday-api.rule=Host(`${API_DOMAIN}`)"
+      - "traefik.http.routers.midday-api.entrypoints=websecure"
+      - "traefik.http.routers.midday-api.tls=true"
+      - "traefik.http.routers.midday-api.tls.certResolver=${TRAEFIK_CERTRESOLVER}"
+      - "traefik.http.services.midday-api.loadbalancer.server.port=3000"
+    networks:
+      - dokploy-network
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: apps/dashboard/Dockerfile
+      args:
+        NEXT_PUBLIC_URL: ${NEXT_PUBLIC_URL}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+
+    environment:
+      PORT: 3001
+      NODE_ENV: production
+      TZ: UTC
+      NEXT_PUBLIC_URL: ${NEXT_PUBLIC_URL}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    restart: unless-stopped
+    ports:
+      - 3001
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.midday-dashboard.rule=Host(`${APP_DOMAIN}`)"
+      - "traefik.http.routers.midday-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.midday-dashboard.tls=true"
+      - "traefik.http.routers.midday-dashboard.tls.certResolver=${TRAEFIK_CERTRESOLVER}"
+      - "traefik.http.services.midday-dashboard.loadbalancer.server.port=3001"
+    networks:
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    external: true
+
