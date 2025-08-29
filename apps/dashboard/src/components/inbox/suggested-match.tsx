@@ -1,10 +1,13 @@
 "use client";
 
 import { useInboxParams } from "@/hooks/use-inbox-params";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { LocalStorageKeys } from "@/utils/constants";
 import { formatDate } from "@/utils/format";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { FormatAmount } from "../format-amount";
@@ -14,6 +17,11 @@ export function SuggestedMatch() {
   const { params } = useInboxParams();
   const { data: user } = useUserQuery();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [hasSeenLearningToast, setHasSeenLearningToast] = useLocalStorage(
+    LocalStorageKeys.MatchLearningToastSeen,
+    false,
+  );
 
   const id = params.inboxId;
 
@@ -73,6 +81,19 @@ export function SuggestedMatch() {
     }),
   );
 
+  const showLearningToast = () => {
+    if (!hasSeenLearningToast) {
+      toast({
+        title: "Smart Learning",
+        description:
+          "Great! The system learns from your choices to make better suggestions over time. The more you confirm or decline matches, the smarter it gets!",
+        variant: "ai",
+        duration: 8000,
+      });
+      setHasSeenLearningToast(true);
+    }
+  };
+
   const handleConfirm = () => {
     if (suggestion && id) {
       confirmMatchMutation.mutate({
@@ -80,6 +101,7 @@ export function SuggestedMatch() {
         inboxId: id,
         transactionId: suggestion.transactionId,
       });
+      showLearningToast();
     }
   };
 
@@ -89,6 +111,7 @@ export function SuggestedMatch() {
         suggestionId: suggestion.id,
         inboxId: id,
       });
+      showLearningToast();
     }
   };
 

@@ -1,13 +1,16 @@
 "use client";
 
 import { useDocumentParams } from "@/hooks/use-document-params";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useTRPC } from "@/trpc/client";
+import { LocalStorageKeys } from "@/utils/constants";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
@@ -32,6 +35,11 @@ export function SuggestedMatch({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { setParams } = useDocumentParams();
+  const { toast } = useToast();
+  const [hasSeenLearningToast, setHasSeenLearningToast] = useLocalStorage(
+    LocalStorageKeys.MatchLearningToastSeen,
+    false,
+  );
 
   const confirmMutation = useMutation(
     trpc.inbox.confirmMatch.mutationOptions({
@@ -61,6 +69,19 @@ export function SuggestedMatch({
     }),
   );
 
+  const showLearningToast = () => {
+    if (!hasSeenLearningToast) {
+      toast({
+        title: "🧠 Smart Learning",
+        description:
+          "Great! The system learns from your choices to make better suggestions over time. The more you confirm or decline matches, the smarter it gets!",
+        variant: "ai",
+        duration: 8000,
+      });
+      setHasSeenLearningToast(true);
+    }
+  };
+
   const handleConfirm = async () => {
     if (!suggestion?.suggestionId || !suggestion?.inboxId) return;
 
@@ -69,6 +90,7 @@ export function SuggestedMatch({
       inboxId: suggestion.inboxId,
       transactionId: transactionId,
     });
+    showLearningToast();
   };
 
   const handleDecline = async () => {
@@ -78,6 +100,7 @@ export function SuggestedMatch({
       suggestionId: suggestion.suggestionId,
       inboxId: suggestion.inboxId,
     });
+    showLearningToast();
   };
 
   const handleExpandDocument = () => {

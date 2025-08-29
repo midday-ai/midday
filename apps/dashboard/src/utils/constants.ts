@@ -10,3 +10,7 @@ export const Cookies = {
   LastProject: "last-project",
   WeeklyCalendar: "weekly-calendar",
 };
+
+export const LocalStorageKeys = {
+  MatchLearningToastSeen: "match-learning-toast-seen",
+};
