@@ -296,8 +296,6 @@ export async function getTeamCalibration(
  * This function analyzes historical match patterns for semantically similar merchants
  * to determine if auto-matching should be enabled for a specific merchant pair.
  *
- * To enable this feature, set environment variable: ENABLE_SEMANTIC_AUTO_MATCH=true
- *
  * Requirements for auto-matching:
  * - At least 3 confirmed matches for similar merchant patterns
  * - 90%+ accuracy rate (confirmed vs declined/unmatched)
@@ -317,20 +315,6 @@ async function findSimilarMerchantPatterns(
   matchCount: number;
   reason: string;
 }> {
-  // Feature flag for gradual rollout
-  const ENABLE_SEMANTIC_AUTO_MATCH =
-    process.env.ENABLE_SEMANTIC_AUTO_MATCH === "true";
-
-  if (!ENABLE_SEMANTIC_AUTO_MATCH) {
-    return {
-      canAutoMatch: false,
-      confidence: 0,
-      historicalAccuracy: 0,
-      matchCount: 0,
-      reason: "feature_disabled",
-    };
-  }
-
   // Find historically similar matches using embedding similarity
   // This leverages existing embedding infrastructure
   const historicalMatches = await db
