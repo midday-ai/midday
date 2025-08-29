@@ -1,6 +1,7 @@
 import type { Database } from "@db/client";
 import { trackerEntries } from "@db/schema";
 import { and, eq, gte, inArray, isNull, lte } from "drizzle-orm";
+import { createActivity } from "./activities";
 
 type GetTrackerRecordsByDateParams = {
   teamId: string;
@@ -207,7 +208,7 @@ export async function upsertTrackerEntries(
   }));
 
   // Perform the upsert operation
-  await db
+  const upsertResult = await db
     .insert(trackerEntries)
     .values(entries)
     .onConflictDoUpdate({
@@ -220,7 +221,30 @@ export async function upsertTrackerEntries(
         description: rest.description,
         duration: rest.duration,
       },
-    });
+    })
+    .returning({ id: trackerEntries.id });
+
+  // Create activity for new tracker entries (not updates)
+  // If no id was provided in params, this is a new entry
+  if (!id && upsertResult.length > 0) {
+    // Create activity for each new entry
+    for (const entry of upsertResult) {
+      createActivity(db, {
+        teamId,
+        userId: rest.assignedId || undefined,
+        type: "tracker_entry_created",
+        source: "user",
+        priority: 7,
+        metadata: {
+          entryId: entry.id,
+          projectId: rest.projectId,
+          duration: rest.duration,
+          dates: dates,
+          description: rest.description,
+        },
+      });
+    }
+  }
 
   // Build where conditions
   const whereConditions = [eq(trackerEntries.teamId, teamId)];

@@ -46,8 +46,11 @@ export function CustomerDetails() {
     });
 
     if (!content) {
-      setValue("customerName", null, { shouldValidate: true });
-      setValue("customerId", null, { shouldValidate: true });
+      setValue("customerName", null, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      setValue("customerId", null, { shouldValidate: true, shouldDirty: true });
     }
   };
 
@@ -58,8 +61,14 @@ export function CustomerDetails() {
       // Remove the selected customer id from the url so we don't introduce a race condition
       setParams({ selectedCustomerId: null });
 
-      setValue("customerName", customer.name, { shouldValidate: true });
-      setValue("customerId", customer.id, { shouldValidate: true });
+      setValue("customerName", customer.name, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      setValue("customerId", customer.id, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
       setValue("customerDetails", customerContent, {
         shouldValidate: true,
         shouldDirty: true,

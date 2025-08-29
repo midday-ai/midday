@@ -1,7 +1,6 @@
 import type { Database } from "@db/client";
 import { apiKeys, users } from "@db/schema";
 import { generateApiKey } from "@db/utils/api-keys";
-import { apiKeyCache } from "@midday/cache/api-key-cache";
 import { encrypt, hash } from "@midday/encryption";
 import { and, eq } from "drizzle-orm";
 
@@ -53,14 +52,10 @@ export async function upsertApiKey(db: Database, data: UpsertApiKeyData) {
         keyHash: apiKeys.keyHash,
       });
 
-    // Delete from cache
-    if (result?.keyHash) {
-      apiKeyCache.delete(result.keyHash);
-    }
-
-    // On update we don't return the key
+    // On update we don't return the key, but return keyHash for cache invalidation
     return {
       key: null,
+      keyHash: result?.keyHash,
     };
   }
 
@@ -123,9 +118,8 @@ export async function deleteApiKey(db: Database, params: DeleteApiKeyParams) {
       keyHash: apiKeys.keyHash,
     });
 
-  if (result?.keyHash) {
-    apiKeyCache.delete(result.keyHash);
-  }
+  // Return keyHash for cache invalidation by calling code
+  return result?.keyHash;
 }
 
 export async function updateApiKeyLastUsedAt(db: Database, id: string) {

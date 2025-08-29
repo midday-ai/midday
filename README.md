@@ -64,7 +64,6 @@ We are working on the documentation to get started with Midday for local develop
 
 - Trigger.dev (background jobs)
 - Resend (Transactional & Marketing)
-- Novu (notifications)
 - Github Actions (CI/CD)
 - GoCardLess (Bank connection EU)
 - Plaid (Bank connection in Canada and US)
@@ -73,6 +72,7 @@ We are working on the documentation to get started with Midday for local develop
 - Polar (Payment processing)
 - Typesense (Search)
 - Mistral
+- Gemini
 - OpenAI
 
 ## Repo Activity

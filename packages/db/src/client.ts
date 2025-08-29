@@ -3,21 +3,23 @@ import postgres from "postgres";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
-const primaryPool = postgres(process.env.DATABASE_PRIMARY_URL!, {
+// Optimized connection configuration for stateful Fly VMs (3 instances)
+const connectionConfig = {
   prepare: false,
-});
+  max: 2, // Very conservative - 2 connections per pool per VM
+  idle_timeout: 90, // fewer disconnects
+  max_lifetime: 0, // disable forced recycling
+  connect_timeout: 10, // Quick connection timeout
+};
 
-const fraPool = postgres(process.env.DATABASE_FRA_URL!, {
-  prepare: false,
-});
+const primaryPool = postgres(
+  process.env.DATABASE_PRIMARY_URL!,
+  connectionConfig,
+);
 
-const sjcPool = postgres(process.env.DATABASE_SJC_URL!, {
-  prepare: false,
-});
-
-const iadPool = postgres(process.env.DATABASE_IAD_URL!, {
-  prepare: false,
-});
+const fraPool = postgres(process.env.DATABASE_FRA_URL!, connectionConfig);
+const sjcPool = postgres(process.env.DATABASE_SJC_URL!, connectionConfig);
+const iadPool = postgres(process.env.DATABASE_IAD_URL!, connectionConfig);
 
 export const primaryDb = drizzle(primaryPool, {
   schema,

@@ -16,15 +16,13 @@ export function SubmitButton({
     <Button
       disabled={isSubmitting || disabled}
       {...props}
-      className={cn(props.className, "relative")}
+      className={cn("relative", props.className)}
     >
-      <span style={{ visibility: isSubmitting ? "hidden" : "visible" }}>
-        {children}
-      </span>
+      <span className={cn(isSubmitting && "invisible")}>{children}</span>
       {isSubmitting && (
-        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div className="absolute inset-0 flex items-center justify-center">
           <Spinner />
-        </span>
+        </div>
       )}
     </Button>
   );

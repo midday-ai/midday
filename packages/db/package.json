@@ -1,6 +1,16 @@
 {
   "name": "@midday/db",
   "private": true,
+  "scripts": {
+    "test": "bun test",
+    "test:matching": "bun test src/test/transaction-matching.test.ts",
+    "test:performance": "bun test src/test/transaction-matching.performance.test.ts",
+    "test:integration": "bun test src/test/transaction-matching.integration.test.ts",
+    "test:golden": "bun test src/test/transaction-matching.golden.test.ts",
+    "test:all-matching": "bun test src/test/transaction-matching*.test.ts",
+    "test:watch": "bun test --watch",
+    "validate-golden": "bun run src/test/validate-golden-dataset.ts"
+  },
   "exports": {
     "./client": "./src/client.ts",
     "./job-client": "./src/job-client.ts",
@@ -12,15 +22,16 @@
     "./utils/currency": "./src/utils/currency.ts"
   },
   "dependencies": {
-    "@midday/cache": "workspace:*",
     "@midday/invoice": "workspace:*",
     "@midday/encryption": "workspace:*",
+    "@midday/logger": "workspace:*",
     "drizzle-orm": "^0.44.2",
     "postgres": "^3.4.7",
     "snakecase-keys": "^8.0.1",
     "camelcase-keys": "^9.1.3"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.1"
+    "drizzle-kit": "^0.31.1",
+    "@types/bun": "latest"
   }
 }

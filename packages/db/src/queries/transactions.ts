@@ -6,17 +6,22 @@ import {
   tags,
   transactionAttachments,
   transactionCategories,
+  transactionEmbeddings,
   type transactionFrequencyEnum,
+  transactionMatchSuggestions,
   transactionTags,
   transactions,
   users,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
+import { logger } from "@midday/logger";
 import {
   and,
   asc,
+  cosineDistance,
   desc,
   eq,
+  gt,
   gte,
   inArray,
   isNull,
@@ -28,6 +33,7 @@ import {
 } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 import { nanoid } from "nanoid";
+import { createActivity } from "./activities";
 import { type Attachment, createAttachments } from "./transaction-attachments";
 
 export type GetTransactionsParams = {
@@ -265,6 +271,12 @@ export async function getTransactions(
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`.as(
           "isFulfilled",
         ),
+      hasPendingSuggestion: sql<boolean>`EXISTS (
+          SELECT 1 FROM ${transactionMatchSuggestions} tms 
+          WHERE tms.transaction_id = ${transactions.id} 
+          AND tms.team_id = ${teamId} 
+          AND tms.status = 'pending'
+        )`.as("hasPendingSuggestion"),
       attachments: sql<
         Array<{
           id: string;
@@ -508,6 +520,19 @@ export async function getTransactionById(
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, params.teamId)})) OR ${transactions.status} = 'completed'`.as(
           "isFulfilled",
         ),
+      hasPendingSuggestion:
+        sql<boolean>`${transactionMatchSuggestions.id} IS NOT NULL`.as(
+          "hasPendingSuggestion",
+        ),
+      suggestion: {
+        suggestionId: transactionMatchSuggestions.id,
+        inboxId: transactionMatchSuggestions.inboxId,
+        documentName: inbox.displayName,
+        documentAmount: inbox.amount,
+        documentCurrency: inbox.currency,
+        documentPath: inbox.filePath,
+        confidenceScore: transactionMatchSuggestions.confidenceScore,
+      },
       assigned: {
         id: users.id,
         fullName: users.fullName,
@@ -595,6 +620,20 @@ export async function getTransactionById(
         eq(transactionAttachments.teamId, params.teamId),
       ),
     )
+    .leftJoin(
+      // Get any pending suggestion
+      transactionMatchSuggestions,
+      and(
+        eq(transactionMatchSuggestions.transactionId, transactions.id),
+        eq(transactionMatchSuggestions.teamId, params.teamId),
+        eq(transactionMatchSuggestions.status, "pending"),
+      ),
+    )
+    .leftJoin(
+      // For inbox details in suggestions
+      inbox,
+      eq(inbox.id, transactionMatchSuggestions.inboxId),
+    )
     .where(
       and(
         eq(transactions.id, params.id),
@@ -625,6 +664,13 @@ export async function getTransactionById(
       transactions.name,
       transactions.description,
       transactions.createdAt,
+      transactionMatchSuggestions.id,
+      transactionMatchSuggestions.inboxId,
+      transactionMatchSuggestions.confidenceScore,
+      inbox.displayName,
+      inbox.amount,
+      inbox.currency,
+      inbox.filePath,
     )
     .limit(1);
 
@@ -706,34 +752,215 @@ type GetSimilarTransactionsParams = {
   teamId: string;
   categorySlug?: string;
   frequency?: "weekly" | "monthly" | "annually" | "irregular";
+  transactionId?: string; // Optional: if we want to exclude the source transaction
+  limit?: number;
+  minSimilarityScore?: number; // Alternative to limit: quality-based filtering
 };
 
+/**
+ * Find similar transactions using hybrid search: combines embeddings AND FTS for comprehensive results
+ *
+ * @param db - Database connection
+ * @param params - Search parameters including optional embedding settings
+ * @returns Array of similar transactions, ordered by relevance (embedding matches first, then FTS matches)
+ */
 export async function getSimilarTransactions(
   db: Database,
   params: GetSimilarTransactionsParams,
 ) {
-  const { name, teamId, categorySlug, frequency } = params;
+  const {
+    name,
+    teamId,
+    categorySlug,
+    frequency,
+    transactionId,
+    minSimilarityScore = 0.9,
+  } = params;
 
-  const conditions: (SQL | undefined)[] = [eq(transactions.teamId, teamId)];
+  logger.info({
+    msg: "Starting hybrid search for similar transactions",
+    name,
+    teamId,
+    minSimilarityScore,
+    transactionId,
+    categorySlug,
+    frequency,
+  });
 
-  const searchQuery = buildSearchQuery(name);
-  conditions.push(
+  let embeddingResults: any[] = [];
+  let ftsResults: any[] = [];
+  let embeddingSourceText: string | null = null;
+
+  // 1. EMBEDDING SEARCH (if transactionId provided)
+  if (transactionId) {
+    logger.info("Attempting embedding search", {
+      transactionId,
+      teamId,
+    });
+
+    try {
+      const sourceEmbedding = await db
+        .select({
+          embedding: transactionEmbeddings.embedding,
+          sourceText: transactionEmbeddings.sourceText,
+        })
+        .from(transactionEmbeddings)
+        .where(
+          and(
+            eq(transactionEmbeddings.transactionId, transactionId),
+            eq(transactionEmbeddings.teamId, teamId),
+          ),
+        )
+        .limit(1);
+
+      if (sourceEmbedding.length > 0 && sourceEmbedding[0]!.embedding) {
+        const sourceEmbeddingVector = sourceEmbedding[0]!.embedding;
+        const sourceText = sourceEmbedding[0]!.sourceText;
+        embeddingSourceText = sourceText; // Store for FTS search
+
+        logger.info("✅ Found embedding for transaction", {
+          transactionId,
+          sourceText,
+          embeddingExists: true,
+        });
+
+        // Calculate similarity using cosineDistance function from Drizzle
+        const similarity = sql<number>`1 - (${cosineDistance(transactionEmbeddings.embedding, sourceEmbeddingVector)})`;
+
+        const embeddingConditions: (SQL | undefined)[] = [
+          eq(transactions.teamId, teamId),
+          ne(transactions.id, transactionId), // Exclude the source transaction
+          gt(similarity, minSimilarityScore), // Use configurable similarity threshold
+        ];
+
+        if (categorySlug) {
+          embeddingConditions.push(
+            or(
+              isNull(transactions.categorySlug),
+              ne(transactions.categorySlug, categorySlug),
+            ),
+          );
+        }
+
+        // Note: We don't filter by frequency here because we want to find similar transactions
+        // regardless of their current frequency so we can update them to the new frequency
+
+        const finalEmbeddingConditions = embeddingConditions.filter(
+          (c) => c !== undefined,
+        ) as SQL[];
+
+        embeddingResults = await db
+          .select({
+            id: transactions.id,
+            amount: transactions.amount,
+            teamId: transactions.teamId,
+            name: transactions.name,
+            date: transactions.date,
+            categorySlug: transactions.categorySlug,
+            frequency: transactions.frequency,
+            similarity,
+            source: sql<string>`'embedding'`.as("source"),
+          })
+          .from(transactions)
+          .innerJoin(
+            transactionEmbeddings,
+            eq(transactionEmbeddings.transactionId, transactions.id),
+          )
+          .where(and(...finalEmbeddingConditions))
+          .orderBy(desc(similarity)); // No limit - let similarity threshold determine results
+
+        logger.info("Embedding search completed", {
+          resultsFound: embeddingResults.length,
+          minSimilarityScore,
+          transactionId,
+        });
+      } else {
+        logger.warn(
+          "❌ No embedding found for transaction - will rely on FTS only",
+          {
+            transactionId,
+            teamId,
+            transactionName: name,
+          },
+        );
+      }
+    } catch (error) {
+      logger.error("Embedding search failed", {
+        error: error instanceof Error ? error.message : String(error),
+        transactionId,
+        teamId,
+      });
+    }
+  }
+
+  // 2. FTS SEARCH (always run to complement embeddings)
+  logger.info("Running FTS search", {
+    name,
+    teamId,
+    hasEmbeddingResults: embeddingResults.length > 0,
+    hasSourceEmbedding: !!embeddingSourceText,
+  });
+
+  const ftsConditions: (SQL | undefined)[] = [eq(transactions.teamId, teamId)];
+
+  if (transactionId) {
+    ftsConditions.push(ne(transactions.id, transactionId));
+  }
+
+  // Always use the original transaction name for FTS search to ensure we find exact matches
+  // The embedding source text might be different from the actual transaction names
+  const searchTerm = name;
+  const searchQuery = buildSearchQuery(searchTerm);
+  ftsConditions.push(
     sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
   );
 
-  if (categorySlug) {
-    conditions.push(ne(transactions.categorySlug, categorySlug));
-  }
+  logger.info({
+    msg: "FTS search using term",
+    searchTerm,
+    searchQuery,
+    usingEmbeddingSourceText: false, // Always false now - we use original name
+    originalName: name,
+    embeddingSourceText: embeddingSourceText || "none",
+    reason: "Using original transaction name to find exact matches",
+  });
 
-  if (frequency) {
-    conditions.push(
-      eq(transactions.frequency, frequency as TransactionFrequency),
+  if (categorySlug) {
+    ftsConditions.push(
+      or(
+        isNull(transactions.categorySlug),
+        ne(transactions.categorySlug, categorySlug),
+      ),
     );
   }
 
-  const finalConditions = conditions.filter((c) => c !== undefined) as SQL[];
+  // Exclude transactions already found by embeddings
+  if (embeddingResults.length > 0) {
+    const embeddingIds = embeddingResults.map((r) => r.id);
+    ftsConditions.push(
+      sql`${transactions.id} NOT IN (${sql.join(
+        embeddingIds.map((id) => sql`${id}`),
+        sql`, `,
+      )})`,
+    );
+  }
 
-  return db
+  const finalFtsConditions = ftsConditions.filter(
+    (c) => c !== undefined,
+  ) as SQL[];
+
+  logger.info({
+    msg: "FTS search conditions",
+    searchTerm,
+    searchQuery,
+    conditionsCount: finalFtsConditions.length,
+    teamId,
+    transactionId,
+    categorySlug,
+    frequency,
+  });
+
+  ftsResults = await db
     .select({
       id: transactions.id,
       amount: transactions.amount,
@@ -742,9 +969,60 @@ export async function getSimilarTransactions(
       date: transactions.date,
       categorySlug: transactions.categorySlug,
       frequency: transactions.frequency,
+      source: sql<string>`'fts'`.as("source"),
     })
     .from(transactions)
-    .where(and(...finalConditions));
+    .where(and(...finalFtsConditions)); // No limit - get all FTS matches
+
+  logger.info({
+    msg: "FTS search completed",
+    resultsFound: ftsResults.length,
+    searchTerm,
+    searchQuery,
+    teamId,
+    sampleResults: ftsResults.slice(0, 3).map((r) => ({
+      name: r.name,
+      id: r.id,
+    })),
+  });
+
+  // 3. COMBINE AND DEDUPLICATE RESULTS
+  const allResults = [
+    ...embeddingResults.map(({ similarity, source, ...rest }) => ({
+      ...rest,
+      matchType: source,
+    })),
+    ...ftsResults.map(({ source, ...rest }) => ({
+      ...rest,
+      matchType: source,
+    })),
+  ];
+
+  // Remove duplicates based on transaction ID (most accurate)
+  // If same ID appears in both embedding and FTS results, prioritize embedding
+  const uniqueResults = allResults.filter((transaction, index, array) => {
+    return index === array.findIndex((t) => t.id === transaction.id);
+  });
+
+  // Log final results with structured data
+  logger.info("Hybrid search completed", {
+    totalResults: allResults.length,
+    uniqueResults: uniqueResults.length,
+    embeddingMatches: embeddingResults.length,
+    ftsMatches: ftsResults.length,
+    name,
+    teamId,
+    minSimilarityScore,
+    results: uniqueResults.map((t, i) => ({
+      rank: i + 1,
+      name: t.name,
+      matchType: t.matchType,
+      id: t.id,
+    })),
+  });
+
+  // Remove matchType field and return all quality matches
+  return uniqueResults.map(({ matchType, ...rest }) => rest);
 }
 
 type SearchTransactionMatchParams = {
@@ -812,9 +1090,7 @@ export async function searchTransactionMatch(
           displayName: inbox.displayName,
           amount: inbox.amount,
           currency: inbox.currency,
-          date: sql<string>`COALESCE(${inbox.date}, ${inbox.createdAt}::date)`.as(
-            "inbox_date",
-          ),
+          date: inbox.date,
           baseAmount: inbox.baseAmount,
           baseCurrency: inbox.baseCurrency,
         })
@@ -971,120 +1247,10 @@ export async function searchTransactionMatch(
   return [];
 }
 
-type UpdateSimilarTransactionsCategoryParams = {
-  teamId: string;
-  name: string;
-  categorySlug?: string | null;
-  frequency?: "weekly" | "monthly" | "annually" | "irregular";
-  recurring?: boolean;
-};
-
-export async function updateSimilarTransactionsCategory(
-  db: Database,
-  params: UpdateSimilarTransactionsCategoryParams,
-) {
-  const { name, teamId, categorySlug, frequency, recurring } = params;
-
-  const updateData: Partial<{
-    categorySlug: string | null;
-    recurring: boolean;
-    frequency: TransactionFrequency | null;
-  }> = {};
-
-  if (categorySlug !== undefined) {
-    updateData.categorySlug = categorySlug;
-  }
-
-  if (recurring !== undefined) {
-    updateData.recurring = recurring;
-  }
-
-  if (frequency !== undefined) {
-    updateData.frequency = frequency as TransactionFrequency;
-  }
-
-  const searchQuery = buildSearchQuery(name);
-
-  const results = await db
-    .update(transactions)
-    .set(updateData)
-    .where(
-      and(
-        eq(transactions.teamId, teamId),
-        sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
-      ),
-    )
-    .returning({
-      id: transactions.id,
-    });
-
-  // Get full transaction data for each updated transaction
-  const fullTransactions = await Promise.all(
-    results.map((result) => getFullTransactionData(db, result.id, teamId)),
-  );
-
-  // Filter out any null results
-  return fullTransactions.filter((transaction) => transaction !== null);
-}
-
-type UpdateSimilarTransactionsRecurringParams = {
-  id: string;
-  teamId: string;
-};
-
-export async function updateSimilarTransactionsRecurring(
-  db: Database,
-  params: UpdateSimilarTransactionsRecurringParams,
-) {
-  const { id, teamId } = params;
-
-  const [result] = await db
-    .select({
-      name: transactions.name,
-      recurring: transactions.recurring,
-      frequency: transactions.frequency,
-    })
-    .from(transactions)
-    .where(and(eq(transactions.id, id), eq(transactions.teamId, teamId)))
-    .limit(1);
-
-  if (!result) {
-    return [];
-  }
-
-  const { name, recurring, frequency } = result;
-
-  const searchQuery = buildSearchQuery(name);
-
-  const results = await db
-    .update(transactions)
-    .set({
-      recurring: recurring,
-      frequency: frequency,
-    })
-    .where(
-      and(
-        eq(transactions.teamId, teamId),
-        sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
-        ne(transactions.id, id),
-      ),
-    )
-    .returning({
-      id: transactions.id,
-    });
-
-  // Get full transaction data for each updated transaction
-  const fullTransactions = await Promise.all(
-    results.map((result) => getFullTransactionData(db, result.id, teamId)),
-  );
-
-  // Filter out any null results
-  return fullTransactions.filter((transaction) => transaction !== null);
-}
-
 type UpdateTransactionData = {
   id: string;
   teamId: string;
+  userId?: string;
   categorySlug?: string | null;
   status?: "pending" | "archived" | "completed" | "posted" | "excluded" | null;
   internal?: boolean;
@@ -1098,7 +1264,7 @@ export async function updateTransaction(
   db: Database,
   params: UpdateTransactionData,
 ) {
-  const { id, teamId, ...dataToUpdate } = params;
+  const { id, teamId, userId, ...dataToUpdate } = params;
 
   const [result] = await db
     .update(transactions)
@@ -1112,12 +1278,43 @@ export async function updateTransaction(
     return null;
   }
 
+  if (dataToUpdate.categorySlug) {
+    createActivity(db, {
+      teamId,
+      userId,
+      type: "transactions_categorized",
+      source: "user",
+      priority: 7,
+      metadata: {
+        categorySlug: dataToUpdate.categorySlug,
+        transactionIds: [result.id],
+        transactionCount: 1,
+      },
+    });
+  }
+
+  if (dataToUpdate.assignedId) {
+    createActivity(db, {
+      teamId,
+      userId,
+      type: "transactions_assigned",
+      source: "user",
+      priority: 7,
+      metadata: {
+        assignedUserId: dataToUpdate.assignedId,
+        transactionIds: [result.id],
+        transactionCount: 1,
+      },
+    });
+  }
+
   return getFullTransactionData(db, result.id, teamId);
 }
 
 type UpdateTransactionsData = {
   ids: string[];
   teamId: string;
+  userId?: string;
   categorySlug?: string | null;
   status?: "pending" | "archived" | "completed" | "posted" | "excluded" | null;
   internal?: boolean;
@@ -1132,7 +1329,7 @@ export async function updateTransactions(
   db: Database,
   data: UpdateTransactionsData,
 ) {
-  const { ids, tagId, teamId, ...input } = data;
+  const { ids, tagId, teamId, userId, ...input } = data;
 
   if (tagId) {
     await db
@@ -1163,6 +1360,41 @@ export async function updateTransactions(
   } else {
     // If no fields to update, just return the transaction IDs
     results = ids.map((id) => ({ id }));
+  }
+
+  // Create activities for transaction updates
+  if (results.length > 0) {
+    // Create bulk activity for categorization
+    if (input.categorySlug) {
+      createActivity(db, {
+        teamId,
+        userId,
+        type: "transactions_categorized",
+        source: "user",
+        priority: 7,
+        metadata: {
+          categorySlug: input.categorySlug,
+          transactionIds: results.map((r) => r.id),
+          transactionCount: results.length,
+        },
+      });
+    }
+
+    // Create bulk activity for assignment
+    if (input.assignedId) {
+      createActivity(db, {
+        teamId,
+        userId,
+        type: "transactions_assigned",
+        source: "user",
+        priority: 7,
+        metadata: {
+          assignedUserId: input.assignedId,
+          transactionIds: results.map((r) => r.id),
+          transactionCount: results.length,
+        },
+      });
+    }
   }
 
   // Get full transaction data for each updated transaction

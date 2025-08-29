@@ -139,6 +139,7 @@ export function SettingsMenu() {
                     onChange={(value) => {
                       setValue(watchKey, value, {
                         shouldValidate: true,
+                        shouldDirty: true,
                       });
                       updateTemplateMutation.mutate({
                         [item.key]: value,
@@ -166,6 +167,7 @@ export function SettingsMenu() {
                       if (checked) {
                         setValue(watchKey, option.value, {
                           shouldValidate: true,
+                          shouldDirty: true,
                         });
 
                         updateTemplateMutation.mutate({

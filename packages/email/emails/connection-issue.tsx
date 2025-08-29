@@ -22,12 +22,12 @@ interface Props {
 }
 
 export const ConnectionIssueEmail = ({
-  fullName = "Viktor Hofte",
+  fullName = "",
   bankName = "Revolut",
   teamName = "Midday",
 }: Props) => {
-  const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, We wanted to inform you that our connection to your bank ${bankName} for your team ${teamName} is currently disconnected.`;
+  const firstName = fullName ? fullName.split(" ").at(0) : "";
+  const text = `${firstName ? `Hi ${firstName}, ` : ""}We wanted to inform you that our connection to your bank ${bankName} for your team ${teamName} is currently disconnected.`;
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -59,7 +59,7 @@ export const ConnectionIssueEmail = ({
             className={`font-medium ${themeClasses.text}`}
             style={{ color: lightStyles.text.color }}
           >
-            Hi {firstName},
+            {firstName ? `Hi ${firstName},` : "Hello,"}
           </span>
           <Text
             className={themeClasses.text}

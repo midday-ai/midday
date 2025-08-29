@@ -6,6 +6,7 @@ import {
   CollapsibleTrigger,
 } from "@midday/ui/collapsible";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
+import { Spinner } from "@midday/ui/spinner";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,7 @@ export function EnrollMFA() {
   const supabase = createClient();
   const router = useRouter();
   const [isValidating, setValidating] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [factorId, setFactorId] = useState<string | undefined>(undefined);
   const [qr, setQR] = useState<string | undefined>(undefined);
   const [secret, setSecret] = useState<string | undefined>(undefined);
@@ -43,6 +45,7 @@ export function EnrollMFA() {
       });
 
       if (verify.data) {
+        setIsRedirecting(true);
         router.replace("/");
       } else {
         setError(true);
@@ -114,20 +117,33 @@ export function EnrollMFA() {
       </Collapsible>
 
       <div className="flex w-full">
-        <InputOTP
-          className={error ? "invalid" : ""}
-          maxLength={6}
-          autoFocus
-          onComplete={onComplete}
-          disabled={isValidating}
-          render={({ slots }) => (
-            <InputOTPGroup>
-              {slots.map((slot, index) => (
-                <InputOTPSlot key={index.toString()} {...slot} />
-              ))}
-            </InputOTPGroup>
+        <div className="w-full h-16 flex items-center justify-center">
+          {isValidating || isRedirecting ? (
+            <div className="flex items-center justify-center h-full bg-background/95 border border-input w-full">
+              <div className="flex items-center space-x-2 bg-background px-4 py-2 rounded-md shadow-sm">
+                <Spinner size={16} className="text-primary" />
+                <span className="text-sm text-foreground font-medium">
+                  {isRedirecting ? "Redirecting..." : "Setting up..."}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <InputOTP
+              className={error ? "invalid" : ""}
+              maxLength={6}
+              autoFocus
+              onComplete={onComplete}
+              disabled={isValidating || isRedirecting}
+              render={({ slots }) => (
+                <InputOTPGroup>
+                  {slots.map((slot, index) => (
+                    <InputOTPSlot key={index.toString()} {...slot} />
+                  ))}
+                </InputOTPGroup>
+              )}
+            />
           )}
-        />
+        </div>
       </div>
 
       <div className="flex border-t-[1px] pt-4 mt-6 justify-center mb-6">

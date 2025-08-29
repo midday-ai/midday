@@ -7,13 +7,77 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          created_at: string
+          group_id: string | null
+          id: string
+          last_used_at: string | null
+          metadata: Json
+          priority: number | null
+          source: Database["public"]["Enums"]["activity_source"]
+          status: Database["public"]["Enums"]["activity_status"]
+          team_id: string
+          type: Database["public"]["Enums"]["activity_type"]
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          last_used_at?: string | null
+          metadata: Json
+          priority?: number | null
+          source: Database["public"]["Enums"]["activity_source"]
+          status?: Database["public"]["Enums"]["activity_status"]
+          team_id: string
+          type: Database["public"]["Enums"]["activity_type"]
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          last_used_at?: string | null
+          metadata?: Json
+          priority?: number | null
+          source?: Database["public"]["Enums"]["activity_source"]
+          status?: Database["public"]["Enums"]["activity_status"]
+          team_id?: string
+          type?: Database["public"]["Enums"]["activity_type"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "activities_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_keys: {
         Row: {
           created_at: string
@@ -667,6 +731,7 @@ export type Database = {
           forwarded_to: string | null
           fts: unknown | null
           id: string
+          inbox_account_id: string | null
           meta: Json | null
           reference_id: string | null
           size: number | null
@@ -696,6 +761,7 @@ export type Database = {
           forwarded_to?: string | null
           fts?: unknown | null
           id?: string
+          inbox_account_id?: string | null
           meta?: Json | null
           reference_id?: string | null
           size?: number | null
@@ -724,6 +790,7 @@ export type Database = {
           forwarded_to?: string | null
           fts?: unknown | null
           id?: string
+          inbox_account_id?: string | null
           meta?: Json | null
           reference_id?: string | null
           size?: number | null
@@ -742,6 +809,13 @@ export type Database = {
             columns: ["attachment_id"]
             isOneToOne: false
             referencedRelation: "transaction_attachments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_inbox_account_id_fkey"
+            columns: ["inbox_account_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_accounts"
             referencedColumns: ["id"]
           },
           {
@@ -772,6 +846,7 @@ export type Database = {
           access_token: string
           created_at: string
           email: string
+          error_message: string | null
           expiry_date: string
           external_id: string
           id: string
@@ -781,12 +856,14 @@ export type Database = {
             | null
           refresh_token: string
           schedule_id: string | null
+          status: Database["public"]["Enums"]["inbox_account_status"]
           team_id: string
         }
         Insert: {
           access_token: string
           created_at?: string
           email: string
+          error_message?: string | null
           expiry_date: string
           external_id: string
           id?: string
@@ -796,12 +873,14 @@ export type Database = {
             | null
           refresh_token: string
           schedule_id?: string | null
+          status?: Database["public"]["Enums"]["inbox_account_status"]
           team_id: string
         }
         Update: {
           access_token?: string
           created_at?: string
           email?: string
+          error_message?: string | null
           expiry_date?: string
           external_id?: string
           id?: string
@@ -811,6 +890,7 @@ export type Database = {
             | null
           refresh_token?: string
           schedule_id?: string | null
+          status?: Database["public"]["Enums"]["inbox_account_status"]
           team_id?: string
         }
         Relationships: [
@@ -823,6 +903,58 @@ export type Database = {
           },
           {
             foreignKeyName: "inbox_accounts_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inbox_embeddings: {
+        Row: {
+          created_at: string
+          embedding: string | null
+          id: string
+          inbox_id: string
+          model: string
+          source_text: string
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          inbox_id: string
+          model?: string
+          source_text: string
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          inbox_id?: string
+          model?: string
+          source_text?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_embeddings_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: true
+            referencedRelation: "inbox"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_embeddings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "inbox_embeddings_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -1134,6 +1266,61 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_settings: {
+        Row: {
+          channel: string
+          created_at: string
+          enabled: boolean
+          id: string
+          notification_type: string
+          team_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          notification_type: string
+          team_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          notification_type?: string
+          team_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "notification_settings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1990,6 +2177,58 @@ export type Database = {
           },
         ]
       }
+      transaction_embeddings: {
+        Row: {
+          created_at: string
+          embedding: string | null
+          id: string
+          model: string
+          source_text: string
+          team_id: string
+          transaction_id: string
+        }
+        Insert: {
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          model?: string
+          source_text: string
+          team_id: string
+          transaction_id: string
+        }
+        Update: {
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          model?: string
+          source_text?: string
+          team_id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_embeddings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "transaction_embeddings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_embeddings_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: true
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transaction_enrichments: {
         Row: {
           category_slug: string | null
@@ -2035,6 +2274,102 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transaction_match_suggestions: {
+        Row: {
+          amount_score: number | null
+          confidence_score: number
+          created_at: string
+          currency_score: number | null
+          date_score: number | null
+          embedding_score: number | null
+          id: string
+          inbox_id: string
+          match_details: Json | null
+          match_type: string
+          name_score: number | null
+          status: string
+          team_id: string
+          transaction_id: string
+          updated_at: string
+          user_action_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_score?: number | null
+          confidence_score: number
+          created_at?: string
+          currency_score?: number | null
+          date_score?: number | null
+          embedding_score?: number | null
+          id?: string
+          inbox_id: string
+          match_details?: Json | null
+          match_type: string
+          name_score?: number | null
+          status?: string
+          team_id: string
+          transaction_id: string
+          updated_at?: string
+          user_action_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_score?: number | null
+          confidence_score?: number
+          created_at?: string
+          currency_score?: number | null
+          date_score?: number | null
+          embedding_score?: number | null
+          id?: string
+          inbox_id?: string
+          match_details?: Json | null
+          match_type?: string
+          name_score?: number | null
+          status?: string
+          team_id?: string
+          transaction_id?: string
+          updated_at?: string
+          user_action_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_match_suggestions_inbox_id_fkey"
+            columns: ["inbox_id"]
+            isOneToOne: false
+            referencedRelation: "inbox"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_match_suggestions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team_limits_metrics"
+            referencedColumns: ["team_id"]
+          },
+          {
+            foreignKeyName: "transaction_match_suggestions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_match_suggestions_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_match_suggestions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -2107,12 +2442,14 @@ export type Database = {
           currency: string
           date: string
           description: string | null
+          enrichment_completed: boolean
           frequency: Database["public"]["Enums"]["transaction_frequency"] | null
           fts_vector: unknown | null
           id: string
           internal: boolean | null
           internal_id: string
           manual: boolean | null
+          merchant_name: string | null
           method: Database["public"]["Enums"]["transactionMethods"]
           name: string
           note: string | null
@@ -2140,6 +2477,7 @@ export type Database = {
           currency: string
           date: string
           description?: string | null
+          enrichment_completed?: boolean
           frequency?:
             | Database["public"]["Enums"]["transaction_frequency"]
             | null
@@ -2148,6 +2486,7 @@ export type Database = {
           internal?: boolean | null
           internal_id: string
           manual?: boolean | null
+          merchant_name?: string | null
           method: Database["public"]["Enums"]["transactionMethods"]
           name: string
           note?: string | null
@@ -2172,6 +2511,7 @@ export type Database = {
           currency?: string
           date?: string
           description?: string | null
+          enrichment_completed?: boolean
           frequency?:
             | Database["public"]["Enums"]["transaction_frequency"]
             | null
@@ -2180,6 +2520,7 @@ export type Database = {
           internal?: boolean | null
           internal_id?: string
           manual?: boolean | null
+          merchant_name?: string | null
           method?: Database["public"]["Enums"]["transactionMethods"]
           name?: string
           note?: string | null
@@ -2407,45 +2748,45 @@ export type Database = {
       }
       calculate_amount_similarity: {
         Args: {
-          transaction_currency: string
+          inbox_amount: number
           inbox_currency: string
           transaction_amount: number
-          inbox_amount: number
+          transaction_currency: string
         }
         Returns: number
       }
       calculate_base_amount_score: {
         Args: {
-          transaction_base_currency: string
+          inbox_base_amount: number
           inbox_base_currency: string
           transaction_base_amount: number
-          inbox_base_amount: number
+          transaction_base_currency: string
         }
         Returns: number
       }
       calculate_date_proximity_score: {
-        Args: { t_date: string; i_date: string }
+        Args: { i_date: string; t_date: string }
         Returns: number
       }
       calculate_date_similarity: {
-        Args: { transaction_date: string; inbox_date: string }
+        Args: { inbox_date: string; transaction_date: string }
         Returns: number
       }
       calculate_match_score: {
         Args: {
-          t_record: Record<string, unknown>
           i_record: Record<string, unknown>
+          t_record: Record<string, unknown>
         }
         Returns: number
       }
       calculate_name_similarity_score: {
-        Args: { transaction_name: string; inbox_name: string }
+        Args: { inbox_name: string; transaction_name: string }
         Returns: number
       }
       calculate_overall_similarity: {
         Args: {
-          transaction_record: Record<string, unknown>
           inbox_record: Record<string, unknown>
+          transaction_record: Record<string, unknown>
         }
         Returns: number
       }
@@ -2460,25 +2801,25 @@ export type Database = {
       calculate_transaction_differences_v2: {
         Args: { p_team_id: string }
         Returns: {
-          transaction_group: string
           date: string
-          team_id: string
-          recurring: boolean
-          frequency: Database["public"]["Enums"]["transaction_frequency"]
           days_diff: number
+          frequency: Database["public"]["Enums"]["transaction_frequency"]
+          recurring: boolean
+          team_id: string
+          transaction_group: string
         }[]
       }
       calculate_transaction_frequency: {
         Args: {
-          p_transaction_group: string
-          p_team_id: string
           p_new_date: string
+          p_team_id: string
+          p_transaction_group: string
         }
         Returns: {
           avg_days_between: number
-          transaction_count: number
           is_recurring: boolean
           latest_frequency: string
+          transaction_count: number
         }[]
       }
       calculated_vat: {
@@ -2488,12 +2829,12 @@ export type Database = {
       classify_frequency_v2: {
         Args: { p_team_id: string }
         Returns: {
-          transaction_group: string
+          avg_days_between: number
+          frequency: Database["public"]["Enums"]["transaction_frequency"]
+          stddev_days_between: number
           team_id: string
           transaction_count: number
-          avg_days_between: number
-          stddev_days_between: number
-          frequency: Database["public"]["Enums"]["transaction_frequency"]
+          transaction_group: string
         }[]
       }
       create_team: {
@@ -2501,18 +2842,18 @@ export type Database = {
         Returns: string
       }
       create_team_v2: {
-        Args: { name: string; currency?: string }
+        Args: { currency?: string; name: string }
         Returns: string
       }
       determine_transaction_frequency: {
         Args:
-          | { p_avg_days_between: number; p_transaction_count: number }
           | {
               p_avg_days_between: number
-              p_transaction_count: number
               p_is_recurring: boolean
               p_latest_frequency: string
+              p_transaction_count: number
             }
+          | { p_avg_days_between: number; p_transaction_count: number }
         Returns: string
       }
       extract_product_names: {
@@ -2522,15 +2863,15 @@ export type Database = {
       find_matching_inbox_item: {
         Args: { input_transaction_id: string; specific_inbox_id?: string }
         Returns: {
+          file_name: string
           inbox_id: string
+          similarity_score: number
           transaction_id: string
           transaction_name: string
-          similarity_score: number
-          file_name: string
         }[]
       }
       generate_hmac: {
-        Args: { secret_key: string; message: string }
+        Args: { message: string; secret_key: string }
         Returns: string
       }
       generate_id: {
@@ -2543,14 +2884,14 @@ export type Database = {
       }
       generate_inbox_fts: {
         Args:
+          | {
+              amount: number
+              display_name_text: string
+              due_date: string
+              product_names: string
+            }
           | { display_name: string; products_json: Json }
           | { display_name_text: string; product_names: string }
-          | {
-              display_name_text: string
-              product_names: string
-              amount: number
-              due_date: string
-            }
         Returns: unknown
       }
       get_all_transactions_by_account: {
@@ -2569,12 +2910,14 @@ export type Database = {
           currency: string
           date: string
           description: string | null
+          enrichment_completed: boolean
           frequency: Database["public"]["Enums"]["transaction_frequency"] | null
           fts_vector: unknown | null
           id: string
           internal: boolean | null
           internal_id: string
           manual: boolean | null
+          merchant_name: string | null
           method: Database["public"]["Enums"]["transactionMethods"]
           name: string
           note: string | null
@@ -2598,10 +2941,10 @@ export type Database = {
       }
       get_burn_rate: {
         Args: {
-          team_id: string
+          currency: string
           date_from: string
           date_to: string
-          currency: string
+          team_id: string
         }
         Returns: {
           date: string
@@ -2610,56 +2953,56 @@ export type Database = {
       }
       get_burn_rate_v2: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: {
+          currency: string
           date: string
           value: number
-          currency: string
         }[]
       }
       get_burn_rate_v3: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: {
+          currency: string
           date: string
           value: number
-          currency: string
         }[]
       }
       get_burn_rate_v4: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: {
+          currency: string
           date: string
           value: number
-          currency: string
         }[]
       }
       get_current_burn_rate: {
-        Args: { team_id: string; currency: string }
+        Args: { currency: string; team_id: string }
         Returns: number
       }
       get_current_burn_rate_v2: {
-        Args: { team_id: string; base_currency?: string }
+        Args: { base_currency?: string; team_id: string }
         Returns: {
           currency: string
           value: number
         }[]
       }
       get_current_burn_rate_v3: {
-        Args: { team_id: string; base_currency?: string }
+        Args: { base_currency?: string; team_id: string }
         Returns: {
           currency: string
           value: number
@@ -2675,16 +3018,16 @@ export type Database = {
       }
       get_expenses: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: {
-          date: string
-          value: number
-          recurring_value: number
           currency: string
+          date: string
+          recurring_value: number
+          value: number
         }[]
       }
       get_invoice_count: {
@@ -2695,13 +3038,13 @@ export type Database = {
       }
       get_invoice_summary: {
         Args: {
-          team_id: string
           status?: Database["public"]["Enums"]["invoice_status"]
+          team_id: string
         }
         Returns: {
           currency: string
-          total_amount: number
           invoice_count: number
+          total_amount: number
         }[]
       }
       get_next_invoice_number: {
@@ -2711,16 +3054,16 @@ export type Database = {
       get_payment_score: {
         Args: { team_id: string }
         Returns: {
-          score: number
           payment_status: string
+          score: number
         }[]
       }
       get_profit: {
         Args: {
-          team_id: string
+          currency: string
           date_from: string
           date_to: string
-          currency: string
+          team_id: string
         }
         Returns: {
           date: string
@@ -2729,41 +3072,41 @@ export type Database = {
       }
       get_profit_v2: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: {
+          currency: string
           date: string
           value: number
-          currency: string
         }[]
       }
       get_profit_v3: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: {
+          currency: string
           date: string
           value: number
-          currency: string
         }[]
       }
       get_profit_v4: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: {
+          currency: string
           date: string
           value: number
-          currency: string
         }[]
       }
       get_project_assigned_users_count: {
@@ -2784,10 +3127,10 @@ export type Database = {
       }
       get_revenue: {
         Args: {
-          team_id: string
+          currency: string
           date_from: string
           date_to: string
-          currency: string
+          team_id: string
         }
         Returns: {
           date: string
@@ -2796,228 +3139,228 @@ export type Database = {
       }
       get_revenue_v2: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: {
+          currency: string
           date: string
           value: number
-          currency: string
         }[]
       }
       get_revenue_v3: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: {
+          currency: string
           date: string
           value: number
-          currency: string
         }[]
       }
       get_runway: {
         Args: {
-          team_id: string
+          currency: string
           date_from: string
           date_to: string
-          currency: string
+          team_id: string
         }
         Returns: number
       }
       get_runway_v2: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: number
       }
       get_runway_v3: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: number
       }
       get_runway_v4: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: number
       }
       get_spending: {
         Args: {
-          team_id: string
+          currency_target: string
           date_from: string
           date_to: string
-          currency_target: string
+          team_id: string
         }
         Returns: {
-          name: string
-          slug: string
           amount: number
-          currency: string
           color: string
+          currency: string
+          name: string
           percentage: number
+          slug: string
         }[]
       }
       get_spending_v2: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: {
-          name: string
-          slug: string
           amount: number
-          currency: string
           color: string
+          currency: string
+          name: string
           percentage: number
+          slug: string
         }[]
       }
       get_spending_v3: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: {
-          name: string
-          slug: string
           amount: number
-          currency: string
           color: string
+          currency: string
+          name: string
           percentage: number
+          slug: string
         }[]
       }
       get_spending_v4: {
         Args: {
-          team_id: string
+          base_currency?: string
           date_from: string
           date_to: string
-          base_currency?: string
+          team_id: string
         }
         Returns: {
-          name: string
-          slug: string
           amount: number
-          currency: string
           color: string
+          currency: string
+          name: string
           percentage: number
+          slug: string
         }[]
       }
       get_team_bank_accounts_balances: {
         Args: { team_id: string }
         Returns: {
-          id: string
-          currency: string
           balance: number
-          name: string
+          currency: string
+          id: string
           logo_url: string
+          name: string
         }[]
       }
       get_team_limits_metrics: {
         Args: { input_team_id: string }
         Returns: {
+          inbox_created_this_month: number
+          invoices_created_this_month: number
+          number_of_bank_connections: number
+          number_of_users: number
           team_id: string
           total_document_size: number
-          number_of_users: number
-          number_of_bank_connections: number
-          invoices_created_this_month: number
-          inbox_created_this_month: number
         }[]
       }
       get_total_balance: {
-        Args: { team_id: string; currency: string }
+        Args: { currency: string; team_id: string }
         Returns: number
       }
       get_total_balance_v2: {
-        Args: { team_id: string; currency: string }
+        Args: { currency: string; team_id: string }
         Returns: number
       }
       get_total_balance_v3: {
-        Args: { team_id: string; currency: string }
+        Args: { currency: string; team_id: string }
         Returns: number
       }
       get_transactions_amount_full_range_data: {
-        Args: { team_id: string; amount_type?: string }
+        Args: { amount_type?: string; team_id: string }
         Returns: {
           amount: number
           currency: string
         }[]
       }
       get_transactions_amount_range_data: {
-        Args: { team_id: string; amount_type?: string }
+        Args: { amount_type?: string; team_id: string }
         Returns: {
-          id: string
           amount: number
+          id: string
         }[]
       }
       global_search: {
         Args: {
+          p_items_per_table_limit?: number
+          p_limit?: number
+          p_relevance_threshold?: number
+          p_search_lang?: string
           p_search_term: string
           p_team_id: string
-          p_search_lang?: string
-          p_limit?: number
-          p_items_per_table_limit?: number
-          p_relevance_threshold?: number
         }
         Returns: {
-          id: string
-          type: string
-          relevance: number
           created_at: string
           data: Json
+          id: string
+          relevance: number
+          type: string
         }[]
       }
       global_semantic_search: {
         Args: {
-          team_id: string
+          amount?: number
+          amount_max?: number
+          amount_min?: number
+          currency?: string
+          due_date_end?: string
+          due_date_start?: string
+          end_date?: string
+          items_per_table_limit?: number
+          language?: string
+          max_results?: number
           search_term?: string
           start_date?: string
-          end_date?: string
-          types?: string[]
-          amount?: number
-          amount_min?: number
-          amount_max?: number
           status?: string
-          currency?: string
-          language?: string
-          due_date_start?: string
-          due_date_end?: string
-          max_results?: number
-          items_per_table_limit?: number
+          team_id: string
+          types?: string[]
         }
         Returns: {
-          id: string
-          type: string
-          relevance: number
           created_at: string
           data: Json
+          id: string
+          relevance: number
+          type: string
         }[]
       }
       group_transactions_v2: {
         Args: { p_team_id: string }
         Returns: {
-          transaction_group: string
           date: string
-          team_id: string
-          recurring: boolean
           frequency: Database["public"]["Enums"]["transaction_frequency"]
+          recurring: boolean
+          team_id: string
+          transaction_group: string
         }[]
       }
       gtrgm_compress: {
@@ -3080,52 +3423,52 @@ export type Database = {
       }
       match_similar_documents_by_title: {
         Args: {
-          source_document_id: string
-          p_team_id: string
-          match_threshold: number
           match_count: number
+          match_threshold: number
+          p_team_id: string
+          source_document_id: string
         }
         Returns: {
           id: string
-          name: string
           metadata: Json
+          name: string
           path_tokens: string[]
+          summary: string
           tag: string
           title: string
-          summary: string
           title_similarity: number
         }[]
       }
       match_transactions_to_inbox: {
         Args: {
-          p_team_id: string
           p_inbox_id: string
           p_max_results?: number
           p_min_confidence_score?: number
+          p_team_id: string
         }
         Returns: {
-          transaction_id: string
+          amount_score: number
+          confidence_score: number
+          currency_score: number
+          date_score: number
           name: string
+          name_score: number
           transaction_amount: number
           transaction_currency: string
           transaction_date: string
-          name_score: number
-          amount_score: number
-          currency_score: number
-          date_score: number
-          confidence_score: number
+          transaction_id: string
         }[]
       }
       nanoid: {
         Args: {
-          size?: number
-          alphabet?: string
           additionalbytesfactor?: number
+          alphabet?: string
+          size?: number
         }
         Returns: string
       }
       nanoid_optimized: {
-        Args: { size: number; alphabet: string; mask: number; step: number }
+        Args: { alphabet: string; mask: number; size: number; step: number }
         Returns: string
       }
       project_members: {
@@ -3133,44 +3476,44 @@ export type Database = {
           | { "": Database["public"]["Tables"]["tracker_entries"]["Row"] }
           | { "": Database["public"]["Tables"]["tracker_projects"]["Row"] }
         Returns: {
-          id: string
           avatar_url: string
           full_name: string
+          id: string
         }[]
       }
       search_transactions: {
         Args: {
-          team_id: string
           inbox_id?: string
-          query?: string
           max_results?: number
+          query?: string
+          team_id: string
         }
         Returns: {
-          transaction_id: string
+          amount_score: number
+          confidence_score: number
+          currency_score: number
+          date_score: number
           name: string
+          name_score: number
           transaction_amount: number
           transaction_currency: string
           transaction_date: string
-          name_score: number
-          amount_score: number
-          currency_score: number
-          date_score: number
-          confidence_score: number
+          transaction_id: string
         }[]
       }
       search_transactions_direct: {
-        Args: { p_team_id: string; p_query: string; p_max_results?: number }
+        Args: { p_max_results?: number; p_query: string; p_team_id: string }
         Returns: {
-          transaction_id: string
+          amount_score: number
+          confidence_score: number
+          currency_score: number
+          date_score: number
           name: string
+          name_score: number
           transaction_amount: number
           transaction_currency: string
           transaction_date: string
-          name_score: number
-          amount_score: number
-          currency_score: number
-          date_score: number
-          confidence_score: number
+          transaction_id: string
         }[]
       }
       set_limit: {
@@ -3209,6 +3552,34 @@ export type Database = {
         | "other_asset"
         | "loan"
         | "other_liability"
+      activity_source: "system" | "user"
+      activity_status: "unread" | "read" | "archived"
+      activity_type:
+        | "transactions_enriched"
+        | "transactions_created"
+        | "inbox_new"
+        | "invoice_paid"
+        | "invoice_overdue"
+        | "invoice_scheduled"
+        | "invoice_sent"
+        | "invoice_reminder_sent"
+        | "invoice_cancelled"
+        | "invoice_created"
+        | "document_uploaded"
+        | "invoice_duplicated"
+        | "tracker_entry_created"
+        | "tracker_project_created"
+        | "transactions_categorized"
+        | "transactions_assigned"
+        | "transaction_attachment_created"
+        | "transaction_category_created"
+        | "transactions_exported"
+        | "draft_invoice_created"
+        | "document_processed"
+        | "customer_created"
+        | "inbox_auto_matched"
+        | "inbox_needs_review"
+        | "inbox_cross_currency_matched"
       approval_status: "draft" | "pending" | "approved" | "rejected"
       bank_providers:
         | "gocardless"
@@ -3224,6 +3595,7 @@ export type Database = {
         | "completed"
         | "failed"
       inbox_account_providers: "gmail"
+      inbox_account_status: "connected" | "disconnected"
       inbox_status:
         | "processing"
         | "pending"
@@ -3231,6 +3603,9 @@ export type Database = {
         | "new"
         | "deleted"
         | "done"
+        | "analyzing"
+        | "suggested_match"
+        | "no_match"
       inbox_type: "invoice" | "expense"
       invoice_delivery_type: "create" | "create_and_send" | "scheduled"
       invoice_size: "a4" | "letter"
@@ -3425,6 +3800,35 @@ export const Constants = {
         "loan",
         "other_liability",
       ],
+      activity_source: ["system", "user"],
+      activity_status: ["unread", "read", "archived"],
+      activity_type: [
+        "transactions_enriched",
+        "transactions_created",
+        "inbox_new",
+        "invoice_paid",
+        "invoice_overdue",
+        "invoice_scheduled",
+        "invoice_sent",
+        "invoice_reminder_sent",
+        "invoice_cancelled",
+        "invoice_created",
+        "document_uploaded",
+        "invoice_duplicated",
+        "tracker_entry_created",
+        "tracker_project_created",
+        "transactions_categorized",
+        "transactions_assigned",
+        "transaction_attachment_created",
+        "transaction_category_created",
+        "transactions_exported",
+        "draft_invoice_created",
+        "document_processed",
+        "customer_created",
+        "inbox_auto_matched",
+        "inbox_needs_review",
+        "inbox_cross_currency_matched",
+      ],
       approval_status: ["draft", "pending", "approved", "rejected"],
       bank_providers: [
         "gocardless",
@@ -3442,6 +3846,7 @@ export const Constants = {
         "failed",
       ],
       inbox_account_providers: ["gmail"],
+      inbox_account_status: ["connected", "disconnected"],
       inbox_status: [
         "processing",
         "pending",
@@ -3449,6 +3854,9 @@ export const Constants = {
         "new",
         "deleted",
         "done",
+        "analyzing",
+        "suggested_match",
+        "no_match",
       ],
       inbox_type: ["invoice", "expense"],
       invoice_delivery_type: ["create", "create_and_send", "scheduled"],

@@ -17,7 +17,7 @@ export function translations(locale: string, params?: TranslationParams) {
         "notifications.invoicePaid": `Invoice ${params?.invoiceNumber} has been paid`,
         "notifications.invoiceOverdue": `Invoice ${params?.invoiceNumber} is overdue`,
         "transactions.subject": "New transactions",
-        "transactions.preview": `Hi ${params?.firstName}, You have ${
+        "transactions.preview": `${params?.firstName ? `Hi ${params?.firstName}, ` : ""}You have ${
           params?.numberOfTransactions
         } ${
           params?.numberOfTransactions > 1
@@ -30,14 +30,14 @@ export function translations(locale: string, params?: TranslationParams) {
             ? "new transactions"
             : "new transaction"
         }`,
-        "transactions.description1": `Hi ${params?.firstName}`,
+        "transactions.description1": `${params?.firstName ? `Hi ${params?.firstName}` : "Hello"}`,
         "transactions.description2": "We found",
         "transactions.description3": `${params?.numberOfTransactions} ${
           params?.numberOfTransactions > 1
             ? "new transactions"
             : "new transaction"
         }`,
-        "transactions.description4": `for your team ${params?.teamName}, we will try to match those against receipts in your inbox for up to 45 days. Additionally, you can simply reply to this email with the receipts.`,
+        "transactions.description4": `${params?.teamName ? `for your team ${params?.teamName}` : "for your account"}. We'll automatically match them against receipts in your inbox, or you can simply reply to this email with the receipts.`,
         "transactions.button": "View transactions",
         "transactions.settings": "Notification preferences",
         "transactions.amount": "Amount",
@@ -57,6 +57,8 @@ export function translations(locale: string, params?: TranslationParams) {
           "If you were not expecting this invitation, you can ignore this email. If you are concerned about your account's safety, please reply to this email to get in touch with us.",
         "invoice.overdue.subject": `Invoice #${params?.invoiceNumber} is overdue`,
         "invoice.paid.subject": `Invoice #${params?.invoiceNumber} has been paid`,
+        "invoice.sent.subject": `${params?.teamName} sent you an invoice`,
+        "invoice.reminder.subject": `Reminder: Payment for ${params?.invoiceNumber}`,
       };
     case "sv":
       return {
@@ -70,28 +72,27 @@ export function translations(locale: string, params?: TranslationParams) {
         "notifications.invoicePaid": `Faktura ${params?.invoiceNumber} har betalats`,
         "notifications.invoiceOverdue": `Faktura ${params?.invoiceNumber} är försenad`,
         "transactions.subject": "Nya transaktioner",
-        "transactions.preview": `Hej ${params?.firstName}, Vi hittade ${
+        "transactions.preview": `${params?.firstName ? `Hej ${params?.firstName}, ` : ""}Vi hittade ${
           params?.numberOfTransactions
         } ${
           params?.numberOfTransactions > 1
             ? "nya transaktioner"
             : "nya transaktion"
-        } .`,
+        }.`,
         "transactions.title1": "Du har ",
         "transactions.title2": `${params?.numberOfTransactions} ${
           params?.numberOfTransactions > 1
             ? "nya transaktioner"
             : "nya transaktion"
         }`,
-        "transactions.description1": `Hej ${params?.firstName}`,
+        "transactions.description1": `${params?.firstName ? `Hej ${params?.firstName}` : "Hej"}`,
         "transactions.description2": "Vi hittade",
         "transactions.description3": `${params?.numberOfTransactions} ${
           params?.numberOfTransactions > 1
             ? "nya transaktioner"
             : "nya transaktion"
         }`,
-        "transactions.description4":
-          "på ditt konto som vi försöker matcha mot kvitton i din inkorg i upp till 45 dagar. Du kan också svara på detta email med dina kvitton.",
+        "transactions.description4": `${params?.teamName ? `för ditt team ${params?.teamName}` : "på ditt konto"}. Vi matchar dem automatiskt mot kvitton i din inkorg, eller så kan du svara på detta email med dina kvitton.`,
         "transactions.button": "Visa transaktioner",
         "transactions.footer":
           " Nam imperdiet congue volutpat. Nulla quis facilisis lacus. Vivamus convallis sit amet lectus eget tincidunt. Vestibulum vehicula rutrum nisl, sed faucibus neque. Donec lacus mi, rhoncus at dictum eget, pulvinar at metus. Donec cursus tellus erat, a hendrerit elit rutrum ut. Fusce quis tristique ligula. Etiam sit amet enim vitae mauris auctor blandit id et nibh.",
@@ -114,6 +115,8 @@ export function translations(locale: string, params?: TranslationParams) {
           "Om du inte väntade dig den här inbjudan kan du ignorera det här e-postmeddelandet. Om du är orolig för ditt kontos säkerhet, vänligen svara på det här e-postmeddelandet för att komma i kontakt med oss.",
         "invoice.overdue.subject": `Faktura #${params?.invoiceNumber} är försenad`,
         "invoice.paid.subject": `Faktura #${params?.invoiceNumber} har betalats`,
+        "invoice.sent.subject": `${params?.teamName} har skickat dig en faktura`,
+        "invoice.reminder.subject": `Påminnelse: Betalning för ${params?.invoiceNumber}`,
       };
 
     default:

@@ -9,12 +9,19 @@ primary_region = 'fra'
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = true
+  auto_stop_machines = 'off'
   auto_start_machines = true
-  min_machines_running = 1
+  min_machines_running = 3
   processes = ['app']
 
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "45s"
+    method = "GET"
+    timeout = "10s"
+    path = "/health"
+
 [[vm]]
-  memory = '1gb'
+  memory = '2gb'
   cpu_kind = 'shared'
   cpus = 1

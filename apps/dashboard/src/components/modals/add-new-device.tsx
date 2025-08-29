@@ -5,6 +5,7 @@ import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
+import { Spinner } from "@midday/ui/spinner";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -16,13 +17,17 @@ export function AddNewDeviceModal() {
   const router = useRouter();
   const pathname = usePathname();
   const [isValidating, setValidating] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [factorId, setFactorId] = useState("");
   const [error, setError] = useState(false);
   const [qr, setQR] = useState("");
   const isOpen = searchParams.get("add") === "device";
 
   const verify = useAction(mfaVerifyAction, {
-    onSuccess: () => router.push(pathname),
+    onSuccess: () => {
+      setIsRedirecting(true);
+      router.push(pathname);
+    },
   });
 
   const onComplete = async (code: string) => {
@@ -106,20 +111,33 @@ export function AddNewDeviceModal() {
           </div>
 
           <div className="flex w-full justify-center">
-            <InputOTP
-              maxLength={6}
-              onComplete={onComplete}
-              autoFocus
-              disabled={isValidating}
-              className={error ? "invalid" : ""}
-              render={({ slots }) => (
-                <InputOTPGroup>
-                  {slots.map((slot, index) => (
-                    <InputOTPSlot key={index.toString()} {...slot} />
-                  ))}
-                </InputOTPGroup>
+            <div className="h-16 w-full max-w-fit flex items-center justify-center">
+              {isValidating || isRedirecting ? (
+                <div className="flex items-center justify-center h-full bg-background/95 border border-input px-4">
+                  <div className="flex items-center space-x-2 bg-background px-4 py-2 rounded-md shadow-sm">
+                    <Spinner size={16} className="text-primary" />
+                    <span className="text-sm text-foreground font-medium">
+                      {isRedirecting ? "Closing..." : "Adding device..."}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <InputOTP
+                  maxLength={6}
+                  onComplete={onComplete}
+                  autoFocus
+                  disabled={isValidating || isRedirecting}
+                  className={error ? "invalid" : ""}
+                  render={({ slots }) => (
+                    <InputOTPGroup>
+                      {slots.map((slot, index) => (
+                        <InputOTPSlot key={index.toString()} {...slot} />
+                      ))}
+                    </InputOTPGroup>
+                  )}
+                />
               )}
-            />
+            </div>
           </div>
 
           <div className="flex border-t-[1px] pt-4 mt-4 justify-center">

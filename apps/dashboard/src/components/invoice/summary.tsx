@@ -97,19 +97,25 @@ export function Summary() {
 
   useEffect(() => {
     if (!includeTax) {
-      setValue("template.taxRate", 0, { shouldValidate: true });
+      setValue("template.taxRate", 0, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     }
   }, [includeTax]);
 
   useEffect(() => {
     if (!includeVat) {
-      setValue("template.vatRate", 0, { shouldValidate: true });
+      setValue("template.vatRate", 0, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     }
   }, [includeVat]);
 
   useEffect(() => {
     if (!includeDiscount) {
-      setValue("discount", 0, { shouldValidate: true });
+      setValue("discount", 0, { shouldValidate: true, shouldDirty: true });
     }
   }, [includeDiscount]);
 

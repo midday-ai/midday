@@ -6,6 +6,7 @@ import {
   date,
   foreignKey,
   index,
+  integer,
   json,
   jsonb,
   numeric,
@@ -92,8 +93,11 @@ export const inboxStatusEnum = pgEnum("inbox_status", [
   "pending",
   "archived",
   "new",
-  "deleted",
+  "analyzing",
+  "suggested_match",
+  "no_match",
   "done",
+  "deleted",
 ]);
 
 export const inboxTypeEnum = pgEnum("inbox_type", ["invoice", "expense"]);
@@ -185,6 +189,49 @@ export const transactionFrequencyEnum = pgEnum("transaction_frequency", [
   "annually",
   "irregular",
   "unknown",
+]);
+
+export const activityTypeEnum = pgEnum("activity_type", [
+  // System-generated activities
+  "transactions_enriched",
+  "transactions_created",
+  "invoice_paid",
+  "inbox_new",
+  "inbox_auto_matched",
+  "inbox_needs_review",
+  "inbox_cross_currency_matched",
+  "invoice_overdue",
+  "invoice_sent",
+  "inbox_match_confirmed",
+
+  // User actions
+  "document_uploaded",
+  "document_processed",
+  "invoice_duplicated",
+  "invoice_scheduled",
+  "invoice_reminder_sent",
+  "invoice_cancelled",
+  "invoice_created",
+  "draft_invoice_created",
+  "tracker_entry_created",
+  "tracker_project_created",
+  "transactions_categorized",
+  "transactions_assigned",
+  "transaction_attachment_created",
+  "transaction_category_created",
+  "transactions_exported",
+  "customer_created",
+]);
+
+export const activitySourceEnum = pgEnum("activity_source", [
+  "system", // Automated system processes
+  "user", // Direct user actions
+]);
+
+export const activityStatusEnum = pgEnum("activity_status", [
+  "unread",
+  "read",
+  "archived",
 ]);
 
 export const documentTagEmbeddings = pgTable(
@@ -1855,6 +1902,102 @@ export const inboxEmbeddings = pgTable(
   ],
 );
 
+export const transactionMatchSuggestions = pgTable(
+  "transaction_match_suggestions",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    // Core relationship
+    teamId: uuid("team_id").notNull(),
+    inboxId: uuid("inbox_id").notNull(),
+    transactionId: uuid("transaction_id").notNull(),
+
+    // Match scores for transparency
+    confidenceScore: numericCasted("confidence_score", {
+      precision: 4,
+      scale: 3,
+    }).notNull(),
+    amountScore: numericCasted("amount_score", { precision: 4, scale: 3 }),
+    currencyScore: numericCasted("currency_score", { precision: 4, scale: 3 }),
+    dateScore: numericCasted("date_score", { precision: 4, scale: 3 }),
+    embeddingScore: numericCasted("embedding_score", {
+      precision: 4,
+      scale: 3,
+    }),
+    nameScore: numericCasted("name_score", { precision: 4, scale: 3 }),
+
+    // Match context
+    matchType: text("match_type").notNull(), // 'auto_matched', 'high_confidence', 'suggested'
+    matchDetails: jsonb("match_details"),
+
+    // User interaction tracking
+    status: text("status").default("pending").notNull(), // 'pending', 'confirmed', 'declined', 'expired', 'unmatched'
+    userActionAt: timestamp("user_action_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    userId: uuid("user_id"),
+  },
+  (table) => [
+    index("transaction_match_suggestions_inbox_id_idx").using(
+      "btree",
+      table.inboxId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("transaction_match_suggestions_transaction_id_idx").using(
+      "btree",
+      table.transactionId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("transaction_match_suggestions_team_id_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("transaction_match_suggestions_status_idx").using(
+      "btree",
+      table.status.asc().nullsLast().op("text_ops"),
+    ),
+    index("transaction_match_suggestions_confidence_idx").using(
+      "btree",
+      table.confidenceScore.desc().nullsLast(),
+    ),
+    index("transaction_match_suggestions_lookup_idx").using(
+      "btree",
+      table.transactionId.asc().nullsLast().op("uuid_ops"),
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+      table.status.asc().nullsLast().op("text_ops"),
+    ),
+    foreignKey({
+      columns: [table.inboxId],
+      foreignColumns: [inbox.id],
+      name: "transaction_match_suggestions_inbox_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.transactionId],
+      foreignColumns: [transactions.id],
+      name: "transaction_match_suggestions_transaction_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "transaction_match_suggestions_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "transaction_match_suggestions_user_id_fkey",
+    }).onDelete("set null"),
+    unique("transaction_match_suggestions_unique").on(
+      table.inboxId,
+      table.transactionId,
+    ),
+  ],
+);
+
 export const documentTagAssignments = pgTable(
   "document_tag_assignments",
   {
@@ -2898,4 +3041,123 @@ export const oauthAccessTokensRelations = relations(
       references: [teams.id],
     }),
   }),
+);
+
+export const activities = pgTable(
+  "activities",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+
+    // Core fields
+    teamId: uuid("team_id").notNull(),
+    userId: uuid("user_id"),
+    type: activityTypeEnum().notNull(),
+    priority: smallint().default(5), // 1-3 = notifications, 4-10 = insights only
+
+    // Group related activities together (e.g., same business event across multiple users)
+    groupId: uuid("group_id"),
+
+    // Source of the activity
+    source: activitySourceEnum().notNull(),
+
+    // All the data
+    metadata: jsonb().notNull(),
+
+    // Simple lifecycle (only for notifications)
+    status: activityStatusEnum().default("unread").notNull(),
+
+    // Timestamp of last system use (e.g. insight generation, digest inclusion)
+    lastUsedAt: timestamp("last_used_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+  },
+  (table) => [
+    // Optimized indexes
+    index("activities_notifications_idx").using(
+      "btree",
+      table.teamId,
+      table.priority,
+      table.status,
+      table.createdAt.desc(),
+    ),
+    index("activities_insights_idx").using(
+      "btree",
+      table.teamId,
+      table.type,
+      table.source,
+      table.createdAt.desc(),
+    ),
+    index("activities_metadata_gin_idx").using("gin", table.metadata),
+    index("activities_group_id_idx").on(table.groupId),
+    index("activities_insights_group_idx").using(
+      "btree",
+      table.teamId,
+      table.groupId,
+      table.type,
+      table.createdAt.desc(),
+    ),
+
+    // Foreign keys
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "activities_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "activities_user_id_fkey",
+    }).onDelete("set null"),
+  ],
+);
+
+export const notificationSettings = pgTable(
+  "notification_settings",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    userId: uuid("user_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    notificationType: text("notification_type").notNull(),
+    channel: text("channel").notNull(), // 'in_app', 'email', 'push'
+    enabled: boolean().default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("notification_settings_user_team_type_channel_key").on(
+      table.userId,
+      table.teamId,
+      table.notificationType,
+      table.channel,
+    ),
+    index("notification_settings_user_team_idx").on(table.userId, table.teamId),
+    index("notification_settings_type_channel_idx").on(
+      table.notificationType,
+      table.channel,
+    ),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "notification_settings_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "notification_settings_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Users can manage their own notification settings", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(user_id = auth.uid())`,
+    }),
+  ],
 );

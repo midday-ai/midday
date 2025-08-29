@@ -148,13 +148,13 @@ const defaultTransactions = [
 const baseAppUrl = getAppUrl();
 
 export const TransactionsEmail = ({
-  fullName = "Viktor Hofte",
+  fullName = "",
   transactions = defaultTransactions,
   locale = "en",
-  teamName = "Viktor Hofte AB",
+  teamName = "",
 }: Props) => {
   const { t } = getI18n({ locale });
-  const firstName = fullName.split(" ").at(0);
+  const firstName = fullName ? fullName.split(" ").at(0) : "";
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
@@ -166,12 +166,9 @@ export const TransactionsEmail = ({
   const displayedTransactions = transactions.slice(0, 10);
 
   return (
-    <EmailThemeProvider
-      preview={<Preview>{previewText}</Preview>}
-      disableDarkMode
-    >
+    <EmailThemeProvider preview={<Preview>{previewText}</Preview>}>
       <Body
-        className={`my-auto mx-auto font-sans ${themeClasses.body} disable-dark-mode`}
+        className={`my-auto mx-auto font-sans ${themeClasses.body}`}
         style={lightStyles.body}
       >
         <Container

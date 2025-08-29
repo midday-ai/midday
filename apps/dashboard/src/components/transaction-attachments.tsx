@@ -267,6 +267,7 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
       <SelectAttachment
         placeholder="Search attachment"
         onSelect={handleOnSelectFile}
+        transactionId={id}
       />
       <div
         className={cn(

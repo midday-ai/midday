@@ -1,5 +1,6 @@
 "use client";
 
+import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
 import { SelectCurrency } from "@/components/select-currency";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
@@ -16,8 +17,7 @@ import {
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { use } from "react";
+import { use, useRef, useState } from "react";
 import { z } from "zod";
 import { CountrySelector } from "../country-selector";
 
@@ -42,23 +42,30 @@ export function CreateTeamForm({
   const countryCode = use(defaultCountryCodePromise);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const router = useRouter();
-
-  const changeTeamMutation = useMutation(
-    trpc.user.update.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries();
-        router.push("/");
-      },
-    }),
-  );
+  const [isLoading, setIsLoading] = useState(false);
+  const isSubmittedRef = useRef(false);
 
   const createTeamMutation = useMutation(
     trpc.team.create.mutationOptions({
-      onSuccess: (teamId) => {
-        changeTeamMutation.mutate({
-          teamId,
-        });
+      onSuccess: async () => {
+        // Lock the form permanently - never reset on success
+        setIsLoading(true);
+        isSubmittedRef.current = true;
+
+        try {
+          // Invalidate all queries to ensure fresh data everywhere
+          await queryClient.invalidateQueries();
+          // Revalidate server-side paths and redirect
+          await revalidateAfterTeamChange();
+        } catch (error) {
+          // Even if redirect fails, keep the form locked to prevent duplicates
+          console.error("Redirect failed, but keeping form locked:", error);
+        }
+        // Note: We NEVER reset loading state on success - user should be redirected
+      },
+      onError: () => {
+        setIsLoading(false);
+        isSubmittedRef.current = false; // Reset on error to allow retry
       },
     }),
   );
@@ -71,11 +78,22 @@ export function CreateTeamForm({
     },
   });
 
+  // Computed loading state that can never be reset unexpectedly
+  const isFormLocked = isLoading || isSubmittedRef.current;
+
   function onSubmit(values: z.infer<typeof formSchema>) {
+    if (isFormLocked) {
+      return;
+    }
+
+    setIsLoading(true);
+    isSubmittedRef.current = true; // Permanent flag that survives re-renders
+
     createTeamMutation.mutate({
       name: values.name,
       baseCurrency: values.baseCurrency,
       countryCode: values.countryCode,
+      switchTeam: true, // Automatically switch to the new team
     });
   }
 
@@ -154,9 +172,7 @@ export function CreateTeamForm({
         <SubmitButton
           className="mt-6 w-full"
           type="submit"
-          isSubmitting={
-            changeTeamMutation.isPending || createTeamMutation.isPending
-          }
+          isSubmitting={isFormLocked}
         >
           Create
         </SubmitButton>

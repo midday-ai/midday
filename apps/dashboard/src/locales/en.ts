@@ -83,13 +83,165 @@ export default {
     completed: "Completed",
   },
   notifications: {
-    inbox: "Receive notifications about new items in your inbox.",
-    match: "Receive notifications about matches.",
-    transaction: "Receive notifications about a new transaction.",
-    transactions: "Receive notifications about new transactions.",
-    "invoice.paid": "Receive notifications about paid invoices.",
-    "invoice.overdue": "Receive notifications about overdue invoices.",
-    "inbox.match": "Receive notifications about new matches in your inbox.",
+    categories: {
+      transactions: "Transactions",
+      invoices: "Invoices",
+      inbox: "Inbox",
+    },
+    transactions_created: {
+      name: "New Transactions",
+      description: "Get notified when new transactions are imported",
+      "title#one": "New transaction from {name} {amount} on {date}",
+      "title#other": "{count} new transactions added",
+      "title_many#other": "{count} transactions imported",
+      single_transaction: "New transaction from {name} {amount} on {date}",
+    },
+    invoice_paid: {
+      name: "Paid",
+      description: "Get notified when invoices are paid",
+      title: "Invoice payment received",
+      subtitle: "Your invoice has been paid",
+      manual_with_date:
+        "Invoice {invoiceNumber} from {customerName} marked as paid on {date}",
+      manual_with_date_no_customer:
+        "Invoice {invoiceNumber} marked as paid on {date}",
+      manual: "Invoice {invoiceNumber} from {customerName} marked as paid",
+      manual_no_customer: "Invoice {invoiceNumber} marked as paid",
+      automatic: "Payment received for invoice {invoiceNumber}",
+    },
+    invoice_overdue: {
+      name: "Overdue",
+      description: "Get notified when invoices become overdue",
+      title: "Invoice is overdue",
+      subtitle: "Payment is past due date",
+      with_number: "Invoice {invoiceNumber} is now overdue",
+    },
+    invoice_scheduled: {
+      name: "Scheduled",
+      description: "Get notified when invoices are scheduled for sending",
+      title: "Invoice scheduled",
+      subtitle: "Invoice has been scheduled for automatic delivery",
+      with_customer:
+        "Invoice {invoiceNumber} scheduled to be sent to {customerName} on {date} at {time}",
+      without_customer:
+        "Invoice {invoiceNumber} scheduled for {date} at {time}",
+      simple: "Invoice {invoiceNumber} has been scheduled",
+    },
+    invoice_sent: {
+      name: "Sent",
+      description: "Get notified when invoices are successfully sent",
+      title: "Invoice sent",
+      subtitle: "Invoice has been delivered to customer",
+      with_customer: "Invoice {invoiceNumber} sent to {customerName}",
+      without_customer: "Invoice {invoiceNumber} has been sent",
+    },
+    invoice_reminder_sent: {
+      name: "Reminder Sent",
+      description: "Get notified when invoice reminders are sent",
+      title: "Invoice reminder sent",
+      subtitle: "Payment reminder has been sent to customer",
+      with_customer:
+        "Payment reminder sent to {customerName} for invoice {invoiceNumber}",
+      without_customer: "Payment reminder sent for invoice {invoiceNumber}",
+    },
+
+    invoice_cancelled: {
+      name: "Cancelled",
+      description: "Get notified when invoices are cancelled",
+      title: "Invoice cancelled",
+      subtitle: "Invoice has been cancelled",
+      with_customer:
+        "Invoice {invoiceNumber} for {customerName} has been cancelled",
+      without_customer: "Invoice {invoiceNumber} has been cancelled",
+    },
+    invoice_created: {
+      name: "Created",
+      description: "Get notified when new invoices are created",
+      title: "Invoice created",
+      subtitle: "A new invoice has been created",
+      with_customer_and_amount:
+        "Invoice {invoiceNumber} created for {customerName} - {amount}",
+      with_customer: "Invoice {invoiceNumber} created for {customerName}",
+      without_customer: "Invoice {invoiceNumber} has been created",
+    },
+    inbox_new: {
+      name: "New Inbox Items",
+      description: "Get notified when new items arrive in your inbox",
+      "type.email#one": "New document received via team inbox email",
+      "type.email#other": "{count} new documents received via team inbox email",
+      "type.sync#one": "New document synced from your {provider} account",
+      "type.sync#other":
+        "{count} new documents synced from your {provider} account",
+      "type.slack#one": "New document shared via Slack",
+      "type.slack#other": "{count} new documents shared via Slack",
+      "type.upload#one": "New document uploaded to your inbox",
+      "type.upload#other": "{count} new documents uploaded to your inbox",
+      // Fallback titles (shouldn't be used with new implementation)
+      "title#one": "We found a new document in your inbox",
+      "title#other": "We found {count} new documents in your inbox",
+      "upload_title#one": "A new document was uploaded to your inbox",
+      "upload_title#other": "{count} new documents were uploaded to your inbox",
+    },
+    inbox_auto_matched: {
+      name: "Auto-matched",
+      description:
+        "Get notified when documents are automatically matched with transactions",
+      title: "Document automatically matched",
+      with_details:
+        '"{documentName}" ({amount}) was matched with "{transactionName}"',
+      with_names: '"{documentName}" was matched with "{transactionName}"',
+      cross_currency_details:
+        '"{documentName}" ({documentAmount}) was matched with "{transactionName}" ({transactionAmount}) across currencies',
+    },
+    inbox_high_confidence: {
+      name: "High Confidence Match",
+      description:
+        "Get notified when high-confidence matches are found that likely need confirmation",
+      title: "Likely match found",
+      with_details:
+        '"{documentName}" ({amount}) looks like it matches "{transactionName}" — click to review',
+      with_names:
+        '"{documentName}" looks like it matches "{transactionName}" — click to review',
+      cross_currency_details:
+        '"{documentName}" ({documentAmount}) might match "{transactionName}" ({transactionAmount}) across currencies — click to review',
+    },
+    inbox_needs_review: {
+      name: "Needs Review",
+      description:
+        "Get notified when potential matches are found that need your review",
+      title: "Possible match found",
+      with_details:
+        '"{documentName}" ({amount}) might match "{transactionName}" — click to review',
+      with_names:
+        '"{documentName}" might match "{transactionName}" — click to review',
+      high_confidence_details:
+        '"{documentName}" ({amount}) looks like it matches "{transactionName}" — click to review',
+      high_confidence_names:
+        '"{documentName}" looks like it matches "{transactionName}" — click to review',
+      cross_currency_high_confidence:
+        '"{documentName}" ({documentAmount}) looks like it matches "{transactionName}" ({transactionAmount}) across currencies — click to review',
+      cross_currency_suggested:
+        '"{documentName}" ({documentAmount}) might match "{transactionName}" ({transactionAmount}) across currencies — click to review',
+    },
+    inbox_cross_currency_matched: {
+      name: "Cross-currency Match",
+      description:
+        "Get notified when documents are matched with transactions in different currencies",
+      title: "Cross-currency match found",
+      with_details:
+        '"{documentName}" ({documentAmount}) might match "{transactionName}" ({transactionAmount}) across currencies — click to review',
+      with_names:
+        '"{documentName}" might match "{transactionName}" across currencies — click to review',
+      high_confidence_details:
+        '"{documentName}" ({documentAmount}) looks like it matches "{transactionName}" ({transactionAmount}) across currencies — click to review',
+      high_confidence_names:
+        '"{documentName}" looks like it matches "{transactionName}" across currencies — click to review',
+    },
+    default: {
+      title: "New activity detected",
+    },
+    archive_button: "Archive notification",
+    time_ago: "{time} ago",
   },
   widgets: {
     insights: "Assistant",

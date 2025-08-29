@@ -7,7 +7,18 @@
       "dependsOn": ["^topo"]
     },
     "build": {
-      "env": [
+      "inputs": ["$TURBO_DEFAULT$", ".env"],
+      "dependsOn": ["^build"],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "next-env.d.ts",
+        ".expo/**",
+        "dist/**",
+        "build/**",
+        "lib/**"
+      ],
+      "passThroughEnv": [
         "SUPABASE_SERVICE_KEY",
         "SUPABASE_API_KEY",
         "RESEND_API_KEY",
@@ -16,7 +27,6 @@
         "GOCARDLESS_SECRET_KEY",
         "UPSTASH_REDIS_REST_URL",
         "UPSTASH_REDIS_REST_TOKEN",
-        "NOVU_API_KEY",
         "API_ROUTE_SECRET",
         "TELLER_CERTIFICATE",
         "TELLER_CERTIFICATE_PRIVATE_KEY",
@@ -38,18 +48,11 @@
         "GMAIL_REDIRECT_URI",
         "MIDDAY_ENCRYPTION_KEY",
         "NEXT_PUBLIC_URL",
-        "VERCEL_TARGET_ENV"
-      ],
-      "inputs": ["$TURBO_DEFAULT$", ".env"],
-      "dependsOn": ["^build"],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "next-env.d.ts",
-        ".expo/**",
-        "dist/**",
-        "build/**",
-        "lib/**"
+        "VERCEL_TARGET_ENV",
+        "SENTRY_AUTH_TOKEN",
+        "SENTRY_ORG",
+        "SENTRY_PROJECT",
+        "NEXT_PUBLIC_SENTRY_DSN"
       ]
     },
     "start": {

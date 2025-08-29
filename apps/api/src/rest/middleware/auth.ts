@@ -71,14 +71,14 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
   const keyHash = hash(token);
 
   // Check cache first for API key
-  let apiKey = apiKeyCache.get(keyHash);
+  let apiKey = await apiKeyCache.get(keyHash);
 
   if (!apiKey) {
     // If not in cache, query database
     apiKey = await getApiKeyByToken(db, keyHash);
     if (apiKey) {
       // Store in cache for future requests
-      apiKeyCache.set(keyHash, apiKey);
+      await apiKeyCache.set(keyHash, apiKey);
     }
   }
 
@@ -87,14 +87,14 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
   }
 
   // Check cache first for user
-  let user = userCache.get(apiKey.userId);
+  let user = await userCache.get(apiKey.userId);
 
   if (!user) {
     // If not in cache, query database
     user = await getUserById(db, apiKey.userId);
     if (user) {
       // Store in cache for future requests
-      userCache.set(apiKey.userId, user);
+      await userCache.set(apiKey.userId, user);
     }
   }
 

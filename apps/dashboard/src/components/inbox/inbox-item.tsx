@@ -70,7 +70,11 @@ export function InboxItem({ item, index }: Props) {
           </div>
 
           <div className="ml-auto">
-            <InboxStatus item={item} />
+            {isProcessing ? (
+              <Skeleton className="h-4 w-[60px]" />
+            ) : (
+              <InboxStatus item={item} />
+            )}
           </div>
         </div>
       </div>

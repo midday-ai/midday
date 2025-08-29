@@ -1,15 +1,10 @@
-import { LRUCache } from "lru-cache";
+import { RedisCache } from "./redis-client";
 
-// In-memory cache to check if a user has access to a team
-// Note: This cache is per server instance, and we typically run 1 instance per region.
-// Otherwise, we would need to share this state with Redis or a similar external store.
-const cache = new LRUCache<string, boolean>({
-  max: 5_000, // up to 5k entries (adjust based on memory)
-  ttl: 1000 * 60 * 30, // 30 minutes in milliseconds
-});
+// Redis-based cache to check if a user has access to a team, shared across all server instances
+const cache = new RedisCache("team", 30 * 60); // 30 minutes TTL
 
 export const teamCache = {
-  get: (key: string) => cache.get(key),
-  set: (key: string, value: boolean) => cache.set(key, value),
-  delete: (key: string) => cache.delete(key),
+  get: (key: string): Promise<boolean | undefined> => cache.get<boolean>(key),
+  set: (key: string, value: boolean): Promise<void> => cache.set(key, value),
+  delete: (key: string): Promise<void> => cache.delete(key),
 };

@@ -1,13 +1,12 @@
-import {
-  handleOverdueInvoiceNotifications,
-  handlePaidInvoiceNotifications,
-} from "@jobs/utils/invoice-notifications";
-import { createClient } from "@midday/supabase/job";
+import { getDb } from "@jobs/init";
+import { Notifications } from "@midday/notifications";
 import { schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
 export const sendInvoiceNotifications = schemaTask({
   id: "invoice-notifications",
+  machine: "micro",
+  maxDuration: 60,
   schema: z.object({
     invoiceId: z.string().uuid(),
     invoiceNumber: z.string(),
@@ -16,34 +15,40 @@ export const sendInvoiceNotifications = schemaTask({
     customerName: z.string(),
   }),
   run: async ({ invoiceId, invoiceNumber, status, teamId, customerName }) => {
-    const supabase = createClient();
-
-    const { data: user } = await supabase
-      .from("users_on_team")
-      .select(
-        "id, team_id, user:users(id, full_name, avatar_url, email, locale)",
-      )
-      .eq("team_id", teamId)
-      .eq("role", "owner");
+    const notifications = new Notifications(getDb());
 
     switch (status) {
-      case "paid":
-        await handlePaidInvoiceNotifications({
-          // @ts-expect-error - TODO: Fix types with drizzle
-          user,
-          invoiceId,
-          invoiceNumber,
-        });
+      case "paid": {
+        await notifications.create(
+          "invoice_paid",
+          teamId,
+          {
+            invoiceId,
+            invoiceNumber,
+            source: "system",
+          },
+          {
+            sendEmail: true,
+          },
+        );
         break;
-      case "overdue":
-        await handleOverdueInvoiceNotifications({
-          // @ts-expect-error - TODO: Fix types with drizzle
-          user,
-          invoiceId,
-          invoiceNumber,
-          customerName,
-        });
+      }
+      case "overdue": {
+        await notifications.create(
+          "invoice_overdue",
+          teamId,
+          {
+            invoiceId,
+            invoiceNumber,
+            customerName,
+            source: "system",
+          },
+          {
+            sendEmail: true,
+          },
+        );
         break;
+      }
     }
   },
 });

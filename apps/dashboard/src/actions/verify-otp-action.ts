@@ -25,6 +25,15 @@ export const verifyOtpAction = actionClient
       type: "email",
     });
 
+    // Validate that the session was actually established (similar to OAuth callback)
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      throw new Error("Failed to establish session after OTP verification");
+    }
+
     (await cookies()).set(Cookies.PreferredSignInProvider, "otp", {
       expires: addYears(new Date(), 1),
     });

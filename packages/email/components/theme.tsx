@@ -155,68 +155,40 @@ export const getEmailDarkModeCSS = () => {
   `;
 };
 
-// Comprehensive email theme provider that wraps everything
 interface EmailThemeProviderProps {
   children: React.ReactNode;
   preview?: React.ReactNode;
   additionalHeadContent?: React.ReactNode;
-  disableDarkMode?: boolean;
 }
 
 export function EmailThemeProvider({
   children,
   preview,
   additionalHeadContent,
-  disableDarkMode = false,
 }: EmailThemeProviderProps) {
   return (
-    <Html className={disableDarkMode ? "disable-dark-mode" : ""}>
+    <Html>
       <Tailwind>
         <Head>
           {/* Essential meta tags for email dark mode support */}
-          {!disableDarkMode && (
-            <>
-              <meta name="color-scheme" content="light dark" />
-              <meta name="supported-color-schemes" content="light dark" />
+          <meta name="color-scheme" content="light dark" />
+          <meta name="supported-color-schemes" content="light dark" />
 
-              {/* Additional Gmail dark mode hints */}
-              <meta
-                name="theme-color"
-                content="#0C0C0C"
-                media="(prefers-color-scheme: dark)"
-              />
-              <meta
-                name="theme-color"
-                content="#ffffff"
-                media="(prefers-color-scheme: light)"
-              />
-              <meta name="msapplication-navbutton-color" content="#0C0C0C" />
+          {/* Additional Gmail dark mode hints */}
+          <meta
+            name="theme-color"
+            content="#0C0C0C"
+            media="(prefers-color-scheme: dark)"
+          />
+          <meta
+            name="theme-color"
+            content="#ffffff"
+            media="(prefers-color-scheme: light)"
+          />
+          <meta name="msapplication-navbutton-color" content="#0C0C0C" />
 
-              {/* Dark mode styles */}
-              <style>{getEmailDarkModeCSS()}</style>
-            </>
-          )}
-
-          {/* Force light mode when dark mode is disabled */}
-          {disableDarkMode && (
-            <>
-              <meta name="color-scheme" content="light only" />
-              <meta name="supported-color-schemes" content="light" />
-              <meta name="theme-color" content="#ffffff" />
-              <style>{`
-                /* Force light mode styles */
-                :root {
-                  color-scheme: light only;
-                  supported-color-schemes: light;
-                }
-                
-                /* Override any potential dark mode styles */
-                * {
-                  color-scheme: light !important;
-                }
-              `}</style>
-            </>
-          )}
+          {/* Dark mode styles */}
+          <style>{getEmailDarkModeCSS()}</style>
 
           {/* Default fonts for all emails */}
           <Font
@@ -299,11 +271,10 @@ export function getEmailInlineStyles(mode: "light" | "dark" = "light") {
   };
 }
 
-// Simplified theme hook
+// Simplified theme hook for email components
 export function useEmailTheme() {
   return {
     classes: getEmailThemeClasses(),
     lightStyles: getEmailInlineStyles("light"),
-    darkStyles: getEmailInlineStyles("dark"),
   };
 }

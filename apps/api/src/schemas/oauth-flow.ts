@@ -49,32 +49,38 @@ export const oauthAuthorizationResponseSchema = z.object({
 });
 
 // OAuth Token Exchange Request Schema
-export const oauthTokenRequestSchema = z.object({
-  grant_type: z.literal("authorization_code").openapi({
-    description: "OAuth grant type, must be 'authorization_code'",
-    example: "authorization_code",
-  }),
-  code: z.string().openapi({
-    description: "Authorization code received from authorization endpoint",
-    example: "mid_authorization_code_abcdef123456789",
-  }),
-  redirect_uri: z.string().url().openapi({
-    description: "Redirect URI used in authorization request",
-    example: "https://myapp.com/callback",
-  }),
-  client_id: z.string().openapi({
-    description: "Client ID of the OAuth application",
-    example: "mid_client_abcdef123456789",
-  }),
-  client_secret: z.string().openapi({
-    description: "Client secret of the OAuth application",
-    example: "mid_secret_abcdef123456789",
-  }),
-  code_verifier: z.string().optional().openapi({
-    description: "Code verifier for PKCE",
-    example: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
-  }),
-});
+export const oauthTokenRequestSchema = z
+  .object({
+    grant_type: z.literal("authorization_code").openapi({
+      description: "OAuth grant type, must be 'authorization_code'",
+      example: "authorization_code",
+    }),
+    code: z.string().openapi({
+      description: "Authorization code received from authorization endpoint",
+      example: "mid_authorization_code_abcdef123456789",
+    }),
+    redirect_uri: z.string().url().openapi({
+      description: "Redirect URI used in authorization request",
+      example: "https://myapp.com/callback",
+    }),
+    client_id: z.string().openapi({
+      description: "Client ID of the OAuth application",
+      example: "mid_client_abcdef123456789",
+    }),
+    client_secret: z.string().optional().openapi({
+      description:
+        "Client secret of the OAuth application (required for confidential clients)",
+      example: "mid_secret_abcdef123456789",
+    }),
+    code_verifier: z.string().optional().openapi({
+      description:
+        "Code verifier for PKCE (required for public clients using PKCE)",
+      example: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+    }),
+  })
+  .refine((data) => data.client_secret || data.code_verifier, {
+    message: "Either client_secret or code_verifier must be provided",
+  });
 
 // OAuth Refresh Token Request Schema
 export const oauthRefreshTokenRequestSchema = z.object({
@@ -90,8 +96,9 @@ export const oauthRefreshTokenRequestSchema = z.object({
     description: "Client ID of the OAuth application",
     example: "mid_client_abcdef123456789",
   }),
-  client_secret: z.string().openapi({
-    description: "Client secret of the OAuth application",
+  client_secret: z.string().optional().openapi({
+    description:
+      "Client secret of the OAuth application (required for confidential clients)",
     example: "mid_secret_abcdef123456789",
   }),
   scope: z.string().optional().openapi({
@@ -141,8 +148,9 @@ export const oauthRevokeTokenRequestSchema = z.object({
     description: "Client ID of the OAuth application",
     example: "mid_client_abcdef123456789",
   }),
-  client_secret: z.string().openapi({
-    description: "Client secret of the OAuth application",
+  client_secret: z.string().optional().openapi({
+    description:
+      "Client secret of the OAuth application (required for confidential clients)",
     example: "mid_secret_abcdef123456789",
   }),
 });

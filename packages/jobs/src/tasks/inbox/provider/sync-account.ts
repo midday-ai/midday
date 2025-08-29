@@ -5,7 +5,7 @@ import { InboxConnector } from "@midday/inbox/connector";
 import { isAuthenticationError } from "@midday/inbox/utils";
 import { createClient } from "@midday/supabase/job";
 import { getExistingInboxAttachmentsQuery } from "@midday/supabase/queries";
-import { logger, schemaTask } from "@trigger.dev/sdk";
+import { logger, schemaTask, tasks } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { processAttachment } from "../process-attachment";
 
@@ -170,7 +170,17 @@ export const syncInboxAccount = schemaTask({
           accountId: id,
           attachmentCount: uploadedAttachments.length,
         });
+
         await processAttachment.batchTriggerAndWait(uploadedAttachments);
+
+        // Send notification for new inbox items
+        await tasks.trigger("notification", {
+          type: "inbox_new",
+          teamId: accountRow.teamId,
+          totalCount: uploadedAttachments.length,
+          inboxType: "sync",
+          provider: accountRow.provider,
+        });
       }
 
       // Update account with successful sync - mark as connected and clear errors

@@ -1,19 +1,28 @@
 import {
+  confirmMatchSchema,
+  createInboxItemSchema,
+  declineMatchSchema,
   deleteInboxSchema,
   getInboxByIdSchema,
+  getInboxByStatusSchema,
   getInboxSchema,
   matchTransactionSchema,
   processAttachmentsSchema,
+  retryMatchingSchema,
   searchInboxSchema,
   unmatchTransactionSchema,
   updateInboxSchema,
 } from "@api/schemas/inbox";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
+  confirmSuggestedMatch,
+  createInbox,
+  declineSuggestedMatch,
   deleteInbox,
   deleteInboxEmbedding,
   getInbox,
   getInboxById,
+  getInboxByStatus,
   getInboxSearch,
   matchTransaction,
   unmatchTransaction,
@@ -56,10 +65,24 @@ export const inboxRouter = createTRPCRouter({
       ]);
     }),
 
+  create: protectedProcedure
+    .input(createInboxItemSchema)
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return createInbox(db, {
+        displayName: input.filename,
+        teamId: teamId!,
+        filePath: input.filePath,
+        fileName: input.filename,
+        contentType: input.mimetype,
+        size: input.size,
+        status: "processing",
+      });
+    }),
+
   processAttachments: protectedProcedure
     .input(processAttachmentsSchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
-      return tasks.batchTrigger(
+      const batchResult = await tasks.batchTrigger(
         "process-attachment",
         input.map((item) => ({
           payload: {
@@ -70,16 +93,27 @@ export const inboxRouter = createTRPCRouter({
           },
         })) as { payload: ProcessAttachmentPayload }[],
       );
+
+      // Send notification for user uploads
+      await tasks.trigger("notification", {
+        type: "inbox_new",
+        teamId: teamId!,
+        totalCount: input.length,
+        inboxType: "upload",
+      });
+
+      return batchResult;
     }),
 
   search: protectedProcedure
     .input(searchInboxSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
-      const { query, limit = 10 } = input;
+      const { q, transactionId, limit = 10 } = input;
 
       return getInboxSearch(db, {
         teamId: teamId!,
-        q: query,
+        q,
+        transactionId,
         limit,
       });
     }),
@@ -98,10 +132,58 @@ export const inboxRouter = createTRPCRouter({
 
   unmatchTransaction: protectedProcedure
     .input(unmatchTransactionSchema)
-    .mutation(async ({ ctx: { db, teamId }, input }) => {
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
       return unmatchTransaction(db, {
         id: input.id,
         teamId: teamId!,
+        userId: session.user.id,
       });
+    }),
+
+  // Get inbox items by status
+  getByStatus: protectedProcedure
+    .input(getInboxByStatusSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getInboxByStatus(db, {
+        teamId: teamId!,
+        status: input.status,
+      });
+    }),
+
+  // Confirm a match suggestion
+  confirmMatch: protectedProcedure
+    .input(confirmMatchSchema)
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
+      return confirmSuggestedMatch(db, {
+        teamId: teamId!,
+        suggestionId: input.suggestionId,
+        inboxId: input.inboxId,
+        transactionId: input.transactionId,
+        userId: session.user.id,
+      });
+    }),
+
+  // Decline a match suggestion
+  declineMatch: protectedProcedure
+    .input(declineMatchSchema)
+    .mutation(async ({ ctx: { db, session, teamId }, input }) => {
+      return declineSuggestedMatch(db, {
+        suggestionId: input.suggestionId,
+        inboxId: input.inboxId,
+        userId: session.user.id,
+        teamId: teamId!,
+      });
+    }),
+
+  // Retry matching for an inbox item
+  retryMatching: protectedProcedure
+    .input(retryMatchingSchema)
+    .mutation(async ({ ctx: { teamId }, input }) => {
+      const result = await tasks.trigger("batch-process-matching", {
+        teamId: teamId!,
+        inboxIds: [input.id],
+      });
+
+      return { jobId: result.id };
     }),
 });

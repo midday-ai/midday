@@ -15,7 +15,8 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { TransactionMatchItem } from "./transaction-match-item";
 import { TransactionUnmatchItem } from "./transaction-unmatch-item";
@@ -32,6 +33,7 @@ export function MatchTransaction() {
     "inbox-include-already-matched",
     true,
   );
+  const previousStatusRef = useRef<string | null>(null);
 
   const id = params.inboxId;
 
@@ -165,12 +167,44 @@ export function MatchTransaction() {
     }
   }, [id]);
 
+  // Track status changes to detect transitions from suggested_match
+  useEffect(() => {
+    if (data?.status) {
+      previousStatusRef.current = data.status;
+    }
+  }, [data?.status]);
+
+  // Check if we're transitioning from suggested_match to show manual search
+  const isTransitioningFromSuggestion =
+    previousStatusRef.current === "suggested_match" &&
+    data?.status !== "suggested_match";
+
   if (data?.transactionId) {
-    return <TransactionUnmatchItem />;
+    return (
+      <motion.div
+        key="transaction-unmatch"
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 100, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      >
+        <TransactionUnmatchItem />
+      </motion.div>
+    );
   }
 
   return (
-    <div className="bg-background h-12 relative">
+    <motion.div
+      key="match-transaction"
+      initial={{
+        y: isTransitioningFromSuggestion ? 100 : 0,
+        opacity: isTransitioningFromSuggestion ? 0 : 1,
+      }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 100, opacity: 0 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      className="bg-background h-12 relative"
+    >
       <Combobox
         key={data?.transaction?.id}
         placeholder="Select a transaction"
@@ -210,6 +244,6 @@ export function MatchTransaction() {
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-    </div>
+    </motion.div>
   );
 }

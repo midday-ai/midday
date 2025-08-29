@@ -7,9 +7,12 @@
     "./user-cache": "./src/user-cache.ts",
     "./replication-cache": "./src/replication-cache.ts",
     "./team-cache": "./src/team-cache.ts",
-    "./team-permissions-cache": "./src/team-permissions-cache.ts"
+    "./team-permissions-cache": "./src/team-permissions-cache.ts",
+    "./redis-client": "./src/redis-client.ts",
+    "./health": "./src/health.ts"
   },
   "dependencies": {
-    "lru-cache": "^11.1.0"
+    "redis": "^5.8.2",
+    "@types/redis": "^4.0.11"
   }
 }
