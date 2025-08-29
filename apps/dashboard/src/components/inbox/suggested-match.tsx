@@ -88,10 +88,18 @@ export function SuggestedMatch() {
   const showLearningToast = () => {
     if (!hasSeenLearningToast) {
       toast({
+<<<<<<< HEAD
         title: "Midday AI",
         description: "We learn from your choices to improve matches over time.",
         variant: "ai",
         duration: 5000,
+=======
+        title: "Smart Learning",
+        description:
+          "Great! The system learns from your choices to make better suggestions over time. The more you confirm or decline matches, the smarter it gets!",
+        variant: "ai",
+        duration: 8000,
+>>>>>>> e8154f6d2 (wip)
       });
       setHasSeenLearningToast(true);
     }
@@ -104,6 +112,7 @@ export function SuggestedMatch() {
         inboxId: id,
         transactionId: suggestion.transactionId,
       });
+      showLearningToast();
     }
   };
 
@@ -113,6 +122,7 @@ export function SuggestedMatch() {
         suggestionId: suggestion.id,
         inboxId: id,
       });
+      showLearningToast();
     }
   };
 
