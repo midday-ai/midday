@@ -10,7 +10,7 @@ The Inbox Matching System automatically matches incoming receipts, invoices, and
 - **💰 Multi-Tier Financial Matching**: Sophisticated amount, currency, and date matching with accounting-specific logic
 - **🎯 Adaptive Confidence Calibration**: Learns from user feedback to improve matching accuracy over time
 - **🔄 Bidirectional Processing**: Matches new transactions against existing inbox items AND new inbox items against existing transactions
-- **⚡ Semantic Merchant Auto-matching**: Learns merchant-specific patterns to enable auto-matching for proven merchant pairs
+- **⚡ Semantic Merchant Pattern Auto-Matching**: Learns from historical merchant patterns with 90%+ accuracy to automatically confirm matches for proven merchant pairs
 - **🚫 Dismissed Match Prevention**: Never re-suggests inbox-transaction pairs that users have previously dismissed
 - **💡 Smart Suggestions**: Lower-confidence matches are presented as suggestions for user review
 - **🌍 Cross-Currency Support**: Handles multi-currency transactions with base currency conversion and penalty systems
@@ -157,15 +157,28 @@ The matching confidence is calculated using weighted factors with team-specific 
 
 ```typescript
 const confidenceScore = 
-  (embeddingScore * 0.45) +      // Semantic similarity (45%)
+  (embeddingScore * 0.5) +       // Semantic similarity (50%)
   (amountScore * 0.35) +         // Financial accuracy (35%)
-  (currencyScore * 0.15) +       // Currency alignment (15%)
+  (currencyScore * 0.1) +        // Currency alignment (10%)
   (dateScore * 0.05)             // Temporal alignment (5%)
 ```
 
+#### Conservative Merchant Learning
+
+The algorithm applies sophisticated merchant pattern analysis to determine auto-matching eligibility:
+
+- **85% Confidence Cap**: Unproven merchants are capped at 85% confidence until patterns are established
+- **Merchant Pattern Requirements**: Auto-matching requires:
+  - At least 3 confirmed historical matches
+  - 90%+ accuracy rate (confirmed vs declined/unmatched)
+  - Maximum 1 negative signal (declined or unmatched)
+  - Average confidence >= 85%
+  - Patterns within last 6 months
+- **Semantic Similarity**: Merchant patterns use embedding similarity < 0.15 to identify similar merchants
+
 ### Scoring Components
 
-#### 1. Embedding Score (45% weight)
+#### 1. Embedding Score (50% weight)
 - **Source**: Cosine similarity between transaction and inbox item embeddings
 - **Range**: 0.0 to 1.0 (1 - cosine_distance)
 - **Purpose**: Captures semantic similarity of merchant names, descriptions, and content
@@ -183,7 +196,7 @@ const confidenceScore =
   - ≤10% difference: 0.6
 - **Cross-perspective**: Handles invoice (positive) to payment (negative) scenarios
 
-#### 3. Currency Score (15% weight)
+#### 3. Currency Score (10% weight)
 - **Same currency**: 1.0
 - **Different currency**: 0.5 (assumes conversion capability exists)
 - **Missing currency**: 0.5
@@ -233,10 +246,40 @@ Perfect financial matches (exact amount + currency) receive aggressive confidenc
 ### Thresholds and Match Types
 
 #### Default Thresholds
-- **Auto-match**: ≥ 0.95 confidence (very strict, automatically processed)
-- **High-confidence suggestion**: ≥ 0.85 confidence
-- **Regular suggestion**: ≥ 0.70 confidence
-- **No match**: < 0.70 confidence
+- **Auto-match**: ≥ 0.90 confidence (automatically processed)
+- **High-confidence suggestion**: ≥ 0.72 confidence  
+- **Regular suggestion**: ≥ 0.60 confidence (team-calibrated)
+- **No match**: < 0.60 confidence
+
+### Semantic Merchant Pattern Auto-Matching
+
+A sophisticated merchant learning system that enables automatic confirmation of matches for proven merchant patterns:
+
+#### How It Works
+
+1. **Pattern Recognition**: The system analyzes historical matches using semantic embeddings to identify similar merchant patterns
+2. **Eligibility Assessment**: For each potential match, the algorithm checks if similar merchant pairs have been successfully matched before  
+3. **Auto-Match Decision**: If merchant patterns meet strict criteria, matches can be auto-confirmed even with moderate confidence scores
+
+#### Auto-Match Criteria
+
+For a merchant pattern to enable auto-matching, it must meet ALL of the following requirements:
+
+- **Minimum History**: At least 3 confirmed matches for similar merchant patterns
+- **High Accuracy**: 90%+ accuracy rate (confirmed vs declined/unmatched)
+- **Low Risk**: Maximum 1 negative signal (declined or unmatched match)
+- **Strong Confidence**: Average historical confidence ≥ 85%
+- **Recent Activity**: Pattern activity within the last 6 months
+- **Semantic Similarity**: Current match has ≥ 85% embedding similarity
+- **Financial Accuracy**: Perfect financial match OR excellent cross-currency match
+- **Date Alignment**: Date score ≥ 70%
+
+#### Benefits
+
+- **Reduced Manual Work**: Proven merchants are automatically matched, reducing user review burden
+- **Improved Accuracy**: Only merchants with proven track records can trigger auto-matching
+- **Learning System**: The more you use the system, the more merchants become eligible for auto-matching
+- **Risk Management**: Conservative criteria ensure false positives are minimized
 
 #### Auto-Match Tiers
 Auto-matching uses a tiered approach with different requirements:
@@ -282,13 +325,18 @@ type TeamCalibrationData = {
 }
 ```
 
-#### Conservative Calibration Logic
-- **Minimum samples**: 10 for auto-match, 5 for suggestions, 15 for aggressive adjustments
-- **Maximum adjustment**: 3% per calibration cycle
-- **Conservative approach**: Higher sample requirements prevent premature optimization
-- **Comprehensive feedback integration**: 
-  - High confirmation rates → lower thresholds (more matches)
-  - Low confirmation rates → higher thresholds (fewer false positives)
+#### Enhanced Calibration Logic
+
+The system uses sophisticated calibration based on 90-day performance windows:
+
+- **Data Window**: Last 90 days of suggestion performance for relevance
+- **Minimum Samples**: 5 suggestions required before any calibration activates
+- **Conservative Adjustments**: 8+ samples needed for conservative threshold changes
+- **Aggressive Adjustments**: 25+ confirmed matches needed for aggressive threshold reduction  
+- **Maximum Adjustment**: 3% per calibration cycle to prevent instability
+- **Confidence Gap Analysis**: Compares average confidence of confirmed vs declined matches
+- **Volume-Based Tuning**: High-engagement teams (25+ confirmations) get slightly more aggressive thresholds
+- **Negative Feedback Integration**: Includes both declined and unmatched feedback in accuracy calculations
   - **Post-match unmatching** → treats as negative feedback (like declines)
   - **Confidence gap analysis** → uses combined negative feedback (declined + unmatched)
 
@@ -672,7 +720,7 @@ originalSuggestion: {
 2. **Dismissed Match Prevention**: Permanently respects user dismissals - never re-suggests the same inbox-transaction pair once declined
 3. **Post-Match Learning**: Unlike most systems that only learn from initial feedback, Midday learns when users unmatch transactions days or weeks later
 4. **Hybrid Scoring**: Perfect financial matches get confidence boosts even with moderate semantic scores
-5. **Conservative Calibration**: Requires statistical significance (10+ samples) before adjusting auto-match thresholds
+5. **Conservative Merchant Learning**: Applies 85% confidence caps for unproven merchants until patterns are established
 6. **Cross-Currency Intelligence**: Sophisticated detection of suspicious cross-currency matches
 7. **Team-Specific Adaptation**: Each team's matching system improves based on their specific usage patterns
 
