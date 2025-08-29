@@ -1677,10 +1677,13 @@ export async function findInboxMatches(
       date: inbox.date,
       website: inbox.website,
       embeddingScore: sql<number>`0.1`.as("embedding_score"), // Perfect match gets best embedding score
-      embedding: sql<number[] | null>`NULL`.as("embedding"),
+      embedding: sql<number[] | null>`${inboxEmbeddings.embedding}`.as(
+        "embedding",
+      ),
       isAlreadyMatched: sql<boolean>`${inbox.transactionId} IS NOT NULL`,
     })
     .from(inbox)
+    .leftJoin(inboxEmbeddings, eq(inbox.id, inboxEmbeddings.inboxId))
     .where(
       and(
         eq(inbox.teamId, teamId),
