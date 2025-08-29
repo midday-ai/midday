@@ -51,6 +51,8 @@ export function SuggestedMatch({
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
+
+        showLearningToast();
       },
     }),
   );
@@ -65,6 +67,8 @@ export function SuggestedMatch({
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
+
+        showLearningToast();
       },
     }),
   );
@@ -72,11 +76,10 @@ export function SuggestedMatch({
   const showLearningToast = () => {
     if (!hasSeenLearningToast) {
       toast({
-        title: "🧠 Smart Learning",
-        description:
-          "Great! The system learns from your choices to make better suggestions over time. The more you confirm or decline matches, the smarter it gets!",
+        title: "Midday AI",
+        description: "We learn from your choices to improve matches over time.",
         variant: "ai",
-        duration: 8000,
+        duration: 5000,
       });
       setHasSeenLearningToast(true);
     }
@@ -90,7 +93,6 @@ export function SuggestedMatch({
       inboxId: suggestion.inboxId,
       transactionId: transactionId,
     });
-    showLearningToast();
   };
 
   const handleDecline = async () => {
@@ -100,7 +102,6 @@ export function SuggestedMatch({
       suggestionId: suggestion.suggestionId,
       inboxId: suggestion.inboxId,
     });
-    showLearningToast();
   };
 
   const handleExpandDocument = () => {
