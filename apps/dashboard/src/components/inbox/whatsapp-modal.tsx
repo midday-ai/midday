@@ -82,7 +82,7 @@ export function WhatsAppModal({
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
             </div>
           ) : (
-            <div className="p-4 bg-white">
+            <div className="bg-white">
               <img src={qrCodeUrl} alt="WhatsApp QR Code" className="size-40" />
             </div>
           )}

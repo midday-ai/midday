@@ -27,7 +27,7 @@ export function ConnectWhatsApp() {
         isSubmitting={false}
       >
         <div className="flex items-center space-x-2">
-          <Icons.WhatsApp className="size-[19px]" />
+          <Icons.WhatsApp className="size-[22px]" />
           <span>Connect WhatsApp</span>
         </div>
       </SubmitButton>

@@ -1,6 +1,7 @@
 "use client";
 
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
+import { ConnectSlack } from "@/components/inbox/connect-slack";
 import { ConnectWhatsApp } from "@/components/inbox/connect-whatsapp";
 import { useUserQuery } from "@/hooks/use-user";
 import { getInboxEmail } from "@midday/inbox";
@@ -30,14 +31,16 @@ export function InboxGetStarted() {
             <div className="pb-4 text-center">
               <h2 className="font-medium text-lg">Connect Your Accounts</h2>
               <p className="pb-6 text-sm text-[#878787]">
-                Connect Gmail or WhatsApp to import receipts and invoices. We'll
-                extract data and match transactions automatically.
+                Connect Gmail, WhatsApp, or Slack to import receipts and
+                invoices. We'll extract data and match transactions
+                automatically.
               </p>
             </div>
 
             <div className="pointer-events-auto flex flex-col space-y-4">
               <ConnectGmail />
               <ConnectWhatsApp />
+              <ConnectSlack />
 
               {user?.team?.inboxId && (
                 <Accordion
@@ -61,8 +64,8 @@ export function InboxGetStarted() {
 
             <div className="text-center mt-8">
               <p className="text-xs text-[#878787]">
-                You can also forward receipts to your unique Midday email, send
-                them via WhatsApp, or drag and drop files here
+                You can also forward receipts to your unique Midday email or
+                drag and drop files directly here
               </p>
             </div>
           </div>
