@@ -479,6 +479,7 @@ Even when merchant patterns are eligible, each match still requires:
 - **Reasonable Date Alignment**: ≥ 70% date score
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 #### Feature Flag Control
 
@@ -492,6 +493,8 @@ ENABLE_SEMANTIC_AUTO_MATCH=true
 When disabled, the system gracefully falls back to the previous behavior with clear logging.
 
 >>>>>>> 913ab1504 (wip)
+=======
+>>>>>>> e62935692 (wip)
 #### Benefits
 
 - **Merchant-Specific Learning**: Netflix confirmations only affect Netflix auto-matching
