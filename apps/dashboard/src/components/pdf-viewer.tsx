@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Document, Page, PasswordResponses, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css";
 import { Alert, AlertDescription } from "@midday/ui/alert";
-import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Input } from "@midday/ui/input";
 import { ScrollArea } from "@midday/ui/scroll-area";
@@ -127,55 +126,50 @@ export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
       <ScrollArea className="w-full flex-1">
         {isPasswordProtected && !isSubmittingPassword ? (
           <div className="absolute inset-0 flex items-center justify-center p-8">
-            <Alert className="max-w-md">
-              <AlertDescription>
-                <div className="space-y-3">
-                  <p>
-                    This PDF is password protected. Enter the password to view
-                    it.
-                  </p>
-                  <div className="space-y-2">
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
+            <div className="max-w-md w-full space-y-6 text-center">
+              <div className="space-y-1">
+                <h3 className="text-[#878787]">
+                  This document is password protected.
+                </h3>
+                <p className="text-xs text-[#878787]">
+                  Please enter the password below.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handlePasswordSubmit();
+                  }}
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                >
+                  <Input
+                    type="password"
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && password.trim()) {
                         handlePasswordSubmit();
-                      }}
-                      autoComplete="off"
-                    >
-                      <div className="flex gap-2">
-                        <Input
-                          type="text"
-                          placeholder="Enter password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              handlePasswordSubmit();
-                            }
-                          }}
-                          disabled={isSubmittingPassword}
-                          autoComplete="off"
-                          data-form-type="other"
-                          data-lpignore="true"
-                          name="pdf-unlock-key"
-                          className="flex-1"
-                        />
-                        <Button
-                          type="submit"
-                          size="sm"
-                          disabled={!password.trim() || isSubmittingPassword}
-                        >
-                          {isSubmittingPassword ? "Loading..." : "Submit"}
-                        </Button>
-                      </div>
-                    </form>
-                    {passwordError && (
-                      <p className="text-sm text-red-500">{passwordError}</p>
-                    )}
-                  </div>
-                </div>
-              </AlertDescription>
-            </Alert>
+                      }
+                    }}
+                    disabled={isSubmittingPassword}
+                    autoComplete="one-time-code"
+                    data-form-type="other"
+                    data-lpignore="true"
+                    data-1p-ignore="true"
+                    data-bitwarden-watching="false"
+                    name="document-unlock-password"
+                    className="text-center bg-transparent focus:ring-0 focus:outline-none"
+                  />
+                </form>
+                {passwordError && (
+                  <p className="text-sm text-red-500">{passwordError}</p>
+                )}
+              </div>
+            </div>
           </div>
         ) : (
           <Document
