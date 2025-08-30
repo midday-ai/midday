@@ -5,6 +5,7 @@ import {
 import { DocumentClient } from "@midday/documents";
 import { inboxSlackUploadSchema } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/job";
+import { getExtensionFromMimeType } from "@midday/utils";
 import { schemaTask, tasks } from "@trigger.dev/sdk";
 import { format } from "date-fns";
 
@@ -45,7 +46,13 @@ export const inboxSlackUpload = schemaTask({
       throw Error("No file data");
     }
 
-    const pathTokens = [teamId, "inbox", name];
+    // Ensure file has proper extension based on mimetype
+    const hasExtension = /\.[^.]+$/.test(name);
+    const fileName = hasExtension
+      ? name
+      : `${name}${getExtensionFromMimeType(mimetype)}`;
+
+    const pathTokens = [teamId, "inbox", fileName];
 
     // Upload file to vault
     await supabase.storage
@@ -59,12 +66,12 @@ export const inboxSlackUpload = schemaTask({
       .from("inbox")
       .insert({
         // NOTE: If we can't parse the name using OCR this will be the fallback name
-        display_name: name,
+        display_name: fileName,
         team_id: teamId,
         file_path: pathTokens,
-        file_name: name,
+        file_name: fileName,
         content_type: mimetype,
-        reference_id: `${id}_${name}`,
+        reference_id: `${id}_${fileName}`,
         size,
       })
       .select("*")

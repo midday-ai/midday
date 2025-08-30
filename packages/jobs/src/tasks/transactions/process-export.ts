@@ -2,6 +2,7 @@ import { blobToSerializable } from "@jobs/utils/blob";
 import { processBatch } from "@jobs/utils/process-batch";
 import { createClient } from "@midday/supabase/job";
 import { download } from "@midday/supabase/storage";
+import { getExtensionFromMimeType } from "@midday/utils";
 import { getTaxTypeLabel } from "@midday/utils/tax";
 import { schemaTask } from "@trigger.dev/sdk";
 import { format, parseISO } from "date-fns";
@@ -58,13 +59,38 @@ export const processExport = schemaTask({
             const rowId = idx + 1;
             return (transaction.attachments ?? []).map(
               async (attachment, idx2: number) => {
-                const filename = attachment.name?.split(".").at(0);
-                const extension = attachment.name?.split(".").at(-1);
+                const originalName = attachment.name || "attachment";
+
+                // Get extension using multiple fallbacks
+                const getExtension = (): string => {
+                  // Check filename first
+                  const fileExt = originalName.split(".").pop();
+                  if (fileExt && fileExt !== originalName) return fileExt;
+
+                  // Use MIME type mapping
+                  if (attachment.type) {
+                    const mimeExt = getExtensionFromMimeType(attachment.type);
+                    if (mimeExt !== ".bin") return mimeExt.substring(1);
+                  }
+
+                  // Check file path for extension
+                  const pathExt = attachment.path
+                    ?.find((p) => p.includes("."))
+                    ?.split(".")
+                    .pop();
+                  if (pathExt) return pathExt;
+
+                  return "bin";
+                };
+
+                const extension = getExtension();
+                const baseFilename =
+                  originalName.replace(/\.[^.]*$/, "") || "attachment";
 
                 const name =
                   idx2 > 0
-                    ? `${filename}-${rowId}_${idx2}.${extension}`
-                    : `${filename}-${rowId}.${extension}`;
+                    ? `${baseFilename}-${rowId}_${idx2}.${extension}`
+                    : `${baseFilename}-${rowId}.${extension}`;
 
                 const { data } = await download(supabase, {
                   bucket: "vault",

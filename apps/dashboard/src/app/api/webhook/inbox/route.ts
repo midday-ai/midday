@@ -6,6 +6,7 @@ import { setupAnalytics } from "@midday/events/server";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
 import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/server";
+import { getExtensionFromMimeType } from "@midday/utils";
 import { tasks } from "@trigger.dev/sdk";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
@@ -129,10 +130,13 @@ export async function POST(req: Request) {
       ?.map(async (attachment) => {
         // Add a random 4 character string to the end of the file name
         // to make it unique before the extension
-        const uniqueFileName = attachment.Name.replace(
-          /(\.[^.]+)$/,
-          (ext) => `_${nanoid(4)}${ext}`,
-        );
+        const hasExtension = /\.[^.]+$/.test(attachment.Name);
+        const uniqueFileName = hasExtension
+          ? attachment.Name.replace(
+              /(\.[^.]+)$/,
+              (ext) => `_${nanoid(4)}${ext}`,
+            )
+          : `${attachment.Name}_${nanoid(4)}${getExtensionFromMimeType(attachment.ContentType)}`;
 
         const { data } = await supabase.storage
           .from("vault")
