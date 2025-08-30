@@ -5,6 +5,7 @@ import { InboxConnector } from "@midday/inbox/connector";
 import { isAuthenticationError } from "@midday/inbox/utils";
 import { createClient } from "@midday/supabase/job";
 import { getExistingInboxAttachmentsQuery } from "@midday/supabase/queries";
+import { ensureFileExtension } from "@midday/utils";
 import { logger, schemaTask, tasks } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { processAttachment } from "../process-attachment";
@@ -127,16 +128,18 @@ export const syncInboxAccount = schemaTask({
         async (batch) => {
           const results = [];
           for (const item of batch) {
+            // Ensure filename has proper extension as final safety check
+            const safeFilename = ensureFileExtension(
+              item.filename,
+              item.mimeType,
+            );
+
             const { data: uploadData } = await supabase.storage
               .from("vault")
-              .upload(
-                `${accountRow.teamId}/inbox/${item.filename}`,
-                item.data,
-                {
-                  contentType: item.mimeType,
-                  upsert: true,
-                },
-              );
+              .upload(`${accountRow.teamId}/inbox/${safeFilename}`, item.data, {
+                contentType: item.mimeType,
+                upsert: true,
+              });
 
             if (uploadData) {
               results.push({
