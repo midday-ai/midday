@@ -66,7 +66,10 @@ export const processExport = schemaTask({
                   ? ensureFileExtension(originalName, attachment.type)
                   : originalName;
                 const baseFilename = nameWithExtension.replace(/\.[^.]*$/, "");
-                const extension = nameWithExtension.split(".").pop() || "bin";
+
+                // Extract extension properly - if no extension exists, use "bin"
+                const parts = nameWithExtension.split(".");
+                const extension = parts.length > 1 ? parts.pop()! : "bin";
 
                 const name =
                   idx2 > 0
