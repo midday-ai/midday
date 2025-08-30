@@ -5,7 +5,7 @@ export function getExtensionFromMimeType(mimeType: string): string {
   const mimeToExt: Record<string, string> = {
     "application/pdf": ".pdf",
     "text/csv": ".csv",
-    "application/vnd.ms-excel": ".xlsx",
+    "application/vnd.ms-excel": ".xls",
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
       ".xlsx",
     "application/msword": ".doc",

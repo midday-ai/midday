@@ -61,10 +61,10 @@ export const processExport = schemaTask({
               async (attachment, idx2: number) => {
                 const originalName = attachment.name || "attachment";
 
-                const nameWithExtension = ensureFileExtension(
-                  originalName,
-                  attachment.type || "",
-                );
+                // Only apply MIME type extension if we have a valid MIME type
+                const nameWithExtension = attachment.type
+                  ? ensureFileExtension(originalName, attachment.type)
+                  : originalName;
                 const baseFilename = nameWithExtension.replace(/\.[^.]*$/, "");
                 const extension = nameWithExtension.split(".").pop() || "bin";
 
