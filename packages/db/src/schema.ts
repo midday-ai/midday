@@ -244,8 +244,8 @@ export const documentTagEmbeddings = pgTable(
   },
   (table) => [
     index("document_tag_embeddings_idx")
-      .using("ivfflat", table.embedding.asc().nullsLast().op("vector_l2_ops"))
-      .with({ lists: "100" }),
+      .using("hnsw", table.embedding.asc().nullsLast().op("vector_cosine_ops"))
+      .with({ m: "16", ef_construction: "64" }),
     pgPolicy("Enable insert for authenticated users only", {
       as: "permissive",
       for: "insert",
