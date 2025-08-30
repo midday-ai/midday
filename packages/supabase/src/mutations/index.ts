@@ -61,23 +61,6 @@ export async function updateTeamPlan(
     .single();
 }
 
-type CreateDocumentTagEmbeddingParams = {
-  slug: string;
-  name: string;
-  embedding: string;
-};
-
-export async function createDocumentTagEmbedding(
-  supabase: Client,
-  params: CreateDocumentTagEmbeddingParams,
-) {
-  return supabase.from("document_tag_embeddings").insert({
-    embedding: params.embedding,
-    slug: params.slug,
-    name: params.name,
-  });
-}
-
 type DeleteBankConnectionParams = {
   id: string;
 };

@@ -49,22 +49,21 @@ export const embedDocumentTags = schemaTask({
 
     // 4. Generate and insert new embeddings if any
     if (newTagNames.length > 0) {
-      const embedResult = await embed.embedMany(newTagNames);
+      const { embeddings, model } = await embed.embedMany(newTagNames);
 
-      if (!embedResult || embedResult.length !== newTagNames.length) {
+      if (!embeddings || embeddings.length !== newTagNames.length) {
         console.error(
           "Embeddings result is missing or length mismatch:",
-          embedResult,
+          embeddings,
         );
         throw new Error("Failed to generate embeddings for all new tags.");
       }
-
-      const embeddings = embedResult;
 
       const newEmbeddingsToInsert = tagsToEmbed.map((tag, index) => ({
         name: tag.name,
         slug: tag.slug,
         embedding: JSON.stringify(embeddings[index]),
+        model,
       }));
 
       // Upsert embeddings to handle potential race conditions or duplicates

@@ -238,8 +238,9 @@ export const documentTagEmbeddings = pgTable(
   "document_tag_embeddings",
   {
     slug: text().primaryKey().notNull(),
-    embedding: vector({ dimensions: 1024 }),
+    embedding: vector({ dimensions: 768 }),
     name: text().notNull(),
+    model: text().notNull().default("gemini-embedding-001"),
   },
   (table) => [
     index("document_tag_embeddings_idx")
