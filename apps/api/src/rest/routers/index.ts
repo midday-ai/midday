@@ -1,5 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { protectedMiddleware } from "../middleware";
+import whatsappWebhook from "../webhooks/whatsapp";
 import { bankAccountsRouter } from "./bank-accounts";
 import { customersRouter } from "./customers";
 import { documentsRouter } from "./documents";
@@ -20,6 +21,9 @@ const routers = new OpenAPIHono();
 
 // Mount OAuth routes first (publicly accessible)
 routers.route("/oauth", oauthRouter);
+
+// Mount WhatsApp webhook (publicly accessible)
+routers.route("/webhooks/whatsapp", whatsappWebhook);
 
 // Apply protected middleware to all subsequent routes
 routers.use(...protectedMiddleware);
