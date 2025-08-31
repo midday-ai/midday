@@ -95,12 +95,7 @@ export async function getTransactions(
     whereConditions.push(gte(transactions.date, start));
   }
   if (end) {
-    const endDate = new Date(end);
-    endDate.setDate(endDate.getDate() + 1);
-    const endDateString = endDate.toISOString().split("T")[0];
-    if (endDateString) {
-      whereConditions.push(lte(transactions.date, endDateString));
-    }
+    whereConditions.push(lte(transactions.date, end));
   }
 
   // Search query filter (name, description, or amount)

@@ -7,9 +7,9 @@ import { useState } from "react";
 
 function ErrorImage() {
   return (
-    <div className="absolute inset-0 h-full w-full items-center justify-center bg-primary/10">
-      <div className="flex h-full w-full flex-col items-center justify-center">
-        <Icons.BrokenImage className="h-6" />
+    <div className="w-full h-full flex items-center justify-center bg-primary/10">
+      <div className="flex flex-col items-center justify-center">
+        <Icons.BrokenImage className="size-4" />
       </div>
     </div>
   );

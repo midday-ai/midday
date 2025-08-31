@@ -145,7 +145,17 @@ export function InboxDetails() {
   );
 
   const retryMatchingMutation = useMutation(
-    trpc.inbox.retryMatching.mutationOptions(),
+    trpc.inbox.retryMatching.mutationOptions({
+      onSuccess: () => {
+        // Refresh queries after retry matching completes
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.getById.queryKey({ id: data?.id }),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
+        });
+      },
+    }),
   );
 
   const handleOnDelete = () => {
@@ -156,6 +166,11 @@ export function InboxDetails() {
 
   const handleRetryMatching = () => {
     if (data?.id) {
+      updateInboxMutation.mutate({
+        id: data.id,
+        status: "analyzing",
+      });
+
       retryMatchingMutation.mutate({ id: data.id });
     }
   };
@@ -226,10 +241,49 @@ export function InboxDetails() {
                   <span className="sr-only">More</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateInboxMutation.mutate({
+                      id: data?.id!,
+                      status: data?.status === "done" ? "pending" : "done",
+                    })
+                  }
+                >
+                  {data?.status === "done" ? (
+                    <>
+                      <Icons.SubdirectoryArrowLeft className="mr-2 size-4" />
+                      <span className="text-xs">Mark as unhandled</span>
+                    </>
+                  ) : (
+                    <>
+                      <Icons.Check className="mr-2 size-4" />
+                      <span className="text-xs">Mark as done</span>
+                    </>
+                  )}
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={handleRetryMatching}
+                  disabled={retryMatchingMutation.isPending}
+                >
+                  {retryMatchingMutation.isPending ? (
+                    <>
+                      <Icons.Refresh className="mr-2 size-4 animate-spin" />
+                      <span className="text-xs">Processing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Icons.Refresh className="mr-2 size-4" />
+                      <span className="text-xs">Retry Matching</span>
+                    </>
+                  )}
+                </DropdownMenuItem>
+
                 <DropdownMenuItem>
-                  <DialogTrigger className="w-full text-left">
-                    Edit
+                  <DialogTrigger className="w-full text-left flex items-center">
+                    <Icons.Edit className="mr-2 size-4" />
+                    <span className="text-xs">Edit</span>
                   </DialogTrigger>
                 </DropdownMenuItem>
 
@@ -243,30 +297,22 @@ export function InboxDetails() {
                     }
                   }}
                 >
-                  Download
+                  <Icons.ProjectStatus className="mr-2 size-4" />
+                  <span className="text-xs">Download</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() =>
-                    updateInboxMutation.mutate({
-                      id: data?.id!,
-                      status: data?.status === "done" ? "pending" : "done",
-                    })
-                  }
-                >
-                  {data?.status === "done"
-                    ? "Mark as unhandled"
-                    : "Mark as done"}
-                </DropdownMenuItem>
+
                 <DropdownMenuItem onClick={handleCopyLink}>
-                  Copy Link
+                  <Icons.Copy className="mr-2 size-4" />
+                  <span className="text-xs">Copy Link</span>
                 </DropdownMenuItem>
+
+                {/* Destructive Actions - At Bottom */}
                 <DropdownMenuItem
-                  onClick={handleRetryMatching}
-                  disabled={retryMatchingMutation.isPending}
+                  onClick={handleOnDelete}
+                  className="text-destructive focus:text-destructive"
                 >
-                  {retryMatchingMutation.isPending
-                    ? "Processing..."
-                    : "Retry Matching"}
+                  <Trash2 className="mr-2 size-4" />
+                  <span className="text-xs">Delete</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

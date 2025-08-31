@@ -91,18 +91,18 @@ We use **pgvector** in PostgreSQL with HNSW indexing for lightning-fast similari
 
 Our matching algorithm evaluates four key dimensions, each with carefully tuned weights:
 
-**Embedding Score (45% weight):** Semantic similarity between transaction and receipt text
+**Embedding Score (50% weight):** Semantic similarity between transaction and receipt text
 **Amount Score (35% weight):** Financial accuracy with tolerance for fees and conversions  
-**Currency Score (15% weight):** Currency matching with cross-currency support
+**Currency Score (10% weight):** Currency matching with cross-currency support
 **Date Score (5% weight):** Temporal alignment accounting for banking delays
 
 <br />
 
 ```typescript
 const confidenceScore = 
-  embeddingScore * 0.45 +
+  embeddingScore * 0.5 +
   amountScore * 0.35 + 
-  currencyScore * 0.15 +
+  currencyScore * 0.1 +
   dateScore * 0.05;
 ```
 
@@ -122,9 +122,9 @@ But here's the clever part—we don't just calculate a simple weighted average. 
 
 Not all matches are created equal. Our system categorizes matches into three tiers:
 
-**Auto-Matched (95%+ confidence):** Automatically processed without human intervention
-**High Confidence (75-95%):** Suggested with high priority  
-**Suggested (60-75%):** Flagged for manual review
+**Auto-Matched (90%+ confidence):** Automatically processed without human intervention
+**High Confidence (72-90%):** Suggested with high priority  
+**Suggested (60-72%):** Flagged for manual review
 
 <br />
 
@@ -132,9 +132,40 @@ The thresholds aren't static. They adapt based on your team's behavior through o
 
 <br />
 
+### 5. Semantic Merchant Pattern Auto-Matching
+
+Here's where our system gets really smart. We've built a merchant learning system that recognizes patterns in your transaction history to enable safe auto-matching for proven merchant pairs.
+
+<br />
+
+**How It Works:**
+
+When evaluating a potential match, our system doesn't just look at the current transaction—it analyzes your historical matching patterns for similar merchants using semantic embeddings. If you've consistently matched receipts from "Netflix" to "NFLX NETFLIX.COM" transactions with high accuracy, the system learns this pattern.
+
+<br />
+
+**Auto-Match Eligibility:**
+
+For a merchant pattern to enable auto-matching, it must meet strict criteria:
+
+- **Minimum History:** At least 3 confirmed matches for similar merchant patterns
+- **High Accuracy:** 90%+ accuracy rate (confirmed vs declined/unmatched)  
+- **Low Risk:** Maximum 1 negative signal (declined or unmatched match)
+- **Strong Confidence:** Average historical confidence ≥ 85%
+- **Recent Activity:** Pattern activity within the last 6 months
+- **Current Match Quality:** ≥85% semantic similarity + perfect financial match + good date alignment
+
+<br />
+
+**Conservative Learning:**
+
+For unproven merchants, we apply a conservative 85% confidence cap until patterns are established. This prevents false auto-matches while the system is still learning your specific merchant relationships.
+
+<br />
+
 ## Learning Calibration: Getting More Accurate Over Time
 
-This is where our system becomes adaptive. Every time you confirm, decline, or unmatch a suggestion, we feed that data back into a calibration algorithm that adjusts the matching thresholds for your team.
+This is where our system becomes adaptive. Every time you confirm, decline, or unmatch a suggestion, we feed that data back into a sophisticated calibration algorithm that adjusts the matching thresholds for your team based on 90-day performance windows.
 
 <br />
 
@@ -162,9 +193,11 @@ export async function getTeamCalibration(
 
 <br />
 
-**Conservative Teams:** If you frequently decline suggestions, we raise the thresholds to be more selective.
+**Enhanced Calibration:** We use 90-day performance windows with minimum 5 samples before any calibration activates. Conservative adjustments need 8+ samples, while aggressive threshold reductions require 25+ confirmed matches.
 
-**Aggressive Teams:** If you confirm most suggestions, we lower thresholds to catch more matches automatically.
+**Confidence Gap Analysis:** We analyze the confidence score patterns between confirmed vs declined matches, including post-match unmatching feedback as negative signals.
+
+**Volume-Based Tuning:** High-engagement teams (25+ confirmations) get slightly more aggressive thresholds, while maintaining conservative 85% caps for unproven merchants.
 
 **Pattern Recognition:** We learn your specific business patterns—maybe you frequently have small processing fees, or you often pay invoices 30 days after receipt.
 
@@ -240,10 +273,11 @@ The system processes thousands of matches daily with sub-second response times, 
 
 After months of refinement and thousands of hours of real-world usage, our matching engine achieves:
 
-- **95%+ accuracy** on auto-matched transactions
+- **95%+ accuracy** on auto-matched transactions with proven merchant patterns
 - **Sub-second matching** for most documents  
 - **Cross-currency support** with intelligent tolerance handling
-- **Learning adaptation** that improves accuracy over time
+- **Conservative merchant learning** that prevents false positives while building trust
+- **Adaptive calibration** that improves accuracy over time based on team behavior
 - **99.9% uptime** with robust error handling and fallbacks
 
 <br />

@@ -1,7 +1,7 @@
 import { mistral } from "@ai-sdk/mistral";
 import { generateObject } from "ai";
 import { extractText, getDocumentProxy } from "unpdf";
-import type { z } from "zod";
+import type { z } from "zod/v4";
 import { invoicePrompt } from "../../prompt";
 import { invoiceSchema } from "../../schema";
 import type { GetDocumentRequest } from "../../types";
@@ -41,8 +41,9 @@ export class InvoiceProcessor {
               content: [
                 {
                   type: "file",
+
                   data: documentUrl,
-                  mimeType: "application/pdf",
+                  mediaType: "application/pdf",
                 },
               ],
             },

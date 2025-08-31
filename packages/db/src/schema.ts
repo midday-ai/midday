@@ -238,13 +238,14 @@ export const documentTagEmbeddings = pgTable(
   "document_tag_embeddings",
   {
     slug: text().primaryKey().notNull(),
-    embedding: vector({ dimensions: 1024 }),
+    embedding: vector({ dimensions: 768 }),
     name: text().notNull(),
+    model: text().notNull().default("gemini-embedding-001"),
   },
   (table) => [
     index("document_tag_embeddings_idx")
-      .using("ivfflat", table.embedding.asc().nullsLast().op("vector_l2_ops"))
-      .with({ lists: "100" }),
+      .using("hnsw", table.embedding.asc().nullsLast().op("vector_cosine_ops"))
+      .with({ m: "16", ef_construction: "64" }),
     pgPolicy("Enable insert for authenticated users only", {
       as: "permissive",
       for: "insert",

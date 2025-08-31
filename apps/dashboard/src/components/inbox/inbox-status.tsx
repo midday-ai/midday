@@ -107,7 +107,7 @@ export function InboxStatus({ item }: Props) {
     <TooltipProvider delayDuration={0}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="flex space-x-1 items-center border px-1.5 py-0.5">
+          <div className="flex space-x-1 items-center px-1.5 py-0.5 text-[10px] cursor-default font-mono border">
             <span>No match</span>
           </div>
         </TooltipTrigger>

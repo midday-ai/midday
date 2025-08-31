@@ -2,6 +2,7 @@ import { blobToSerializable } from "@jobs/utils/blob";
 import { processBatch } from "@jobs/utils/process-batch";
 import { createClient } from "@midday/supabase/job";
 import { download } from "@midday/supabase/storage";
+import { ensureFileExtension } from "@midday/utils";
 import { getTaxTypeLabel } from "@midday/utils/tax";
 import { schemaTask } from "@trigger.dev/sdk";
 import { format, parseISO } from "date-fns";
@@ -58,13 +59,22 @@ export const processExport = schemaTask({
             const rowId = idx + 1;
             return (transaction.attachments ?? []).map(
               async (attachment, idx2: number) => {
-                const filename = attachment.name?.split(".").at(0);
-                const extension = attachment.name?.split(".").at(-1);
+                const originalName = attachment.name || "attachment";
+
+                // Only apply MIME type extension if we have a valid MIME type
+                const nameWithExtension = attachment.type
+                  ? ensureFileExtension(originalName, attachment.type)
+                  : originalName;
+                const baseFilename = nameWithExtension.replace(/\.[^.]*$/, "");
+
+                // Extract extension properly - if no extension exists, use "bin"
+                const parts = nameWithExtension.split(".");
+                const extension = parts.length > 1 ? parts.pop()! : "bin";
 
                 const name =
                   idx2 > 0
-                    ? `${filename}-${rowId}_${idx2}.${extension}`
-                    : `${filename}-${rowId}.${extension}`;
+                    ? `${baseFilename}-${rowId}_${idx2}.${extension}`
+                    : `${baseFilename}-${rowId}.${extension}`;
 
                 const { data } = await download(supabase, {
                   bucket: "vault",

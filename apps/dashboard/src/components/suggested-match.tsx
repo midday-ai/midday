@@ -1,13 +1,16 @@
 "use client";
 
 import { useDocumentParams } from "@/hooks/use-document-params";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useTRPC } from "@/trpc/client";
+import { LocalStorageKeys } from "@/utils/constants";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
@@ -32,6 +35,11 @@ export function SuggestedMatch({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { setParams } = useDocumentParams();
+  const { toast } = useToast();
+  const [hasSeenLearningToast, setHasSeenLearningToast] = useLocalStorage(
+    LocalStorageKeys.MatchLearningToastSeen,
+    false,
+  );
 
   const confirmMutation = useMutation(
     trpc.inbox.confirmMatch.mutationOptions({
@@ -43,6 +51,8 @@ export function SuggestedMatch({
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
+
+        showLearningToast();
       },
     }),
   );
@@ -57,9 +67,23 @@ export function SuggestedMatch({
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
+
+        showLearningToast();
       },
     }),
   );
+
+  const showLearningToast = () => {
+    if (!hasSeenLearningToast) {
+      toast({
+        title: "Midday AI",
+        description: "We learn from your choices to improve matches over time.",
+        variant: "ai",
+        duration: 5000,
+      });
+      setHasSeenLearningToast(true);
+    }
+  };
 
   const handleConfirm = async () => {
     if (!suggestion?.suggestionId || !suggestion?.inboxId) return;

@@ -5,3 +5,8 @@ export function stripSpecialCharacters(inputString: string) {
     .replace(/\s+/g, "-") // Replace spaces with hyphens
     .toLowerCase(); // Convert to lowercase for consistency
 }
+
+export {
+  getExtensionFromMimeType,
+  ensureFileExtension,
+} from "./mime-to-extension";

@@ -6,6 +6,7 @@ type CreateDocumentTagEmbeddingParams = {
   slug: string;
   name: string;
   embedding: string;
+  model: string;
 };
 
 export async function createDocumentTagEmbedding(
@@ -16,6 +17,7 @@ export async function createDocumentTagEmbedding(
     slug: params.slug,
     name: params.name,
     embedding: JSON.parse(params.embedding),
+    model: params.model,
   });
 }
 
@@ -44,6 +46,7 @@ export type UpsertDocumentTagEmbeddingParams = {
   slug: string;
   name: string;
   embedding: string;
+  model: string;
 };
 
 export async function upsertDocumentTagEmbeddings(
@@ -58,6 +61,7 @@ export async function upsertDocumentTagEmbeddings(
     slug: param.slug,
     name: param.name,
     embedding: JSON.parse(param.embedding),
+    model: param.model,
   }));
 
   return db
@@ -68,6 +72,7 @@ export async function upsertDocumentTagEmbeddings(
       set: {
         name: sql`excluded.name`,
         embedding: sql`excluded.embedding`,
+        model: sql`excluded.model`,
       },
     })
     .returning({

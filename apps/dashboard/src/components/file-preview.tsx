@@ -2,6 +2,7 @@
 
 import { FilePreviewIcon } from "@/components/file-preview-icon";
 import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { useEffect, useState } from "react";
 
@@ -10,8 +11,19 @@ type Props = {
   filePath: string;
 };
 
+function ErrorPreview() {
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-primary/10">
+      <div className="flex flex-col items-center justify-center">
+        <Icons.BrokenImage className="size-4" />
+      </div>
+    </div>
+  );
+}
+
 export function FilePreview({ mimeType, filePath }: Props) {
   const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
   let src = null;
 
@@ -31,13 +43,23 @@ export function FilePreview({ mimeType, filePath }: Props) {
     if (src) {
       const img = new Image();
       img.src = src;
-      img.onload = () => setIsLoading(false);
-      img.onerror = () => setIsLoading(false);
+      img.onload = () => {
+        setIsLoading(false);
+        setIsError(false);
+      };
+      img.onerror = () => {
+        setIsLoading(false);
+        setIsError(true);
+      };
     }
   }, [src]);
 
   if (!src) {
     return <FilePreviewIcon mimetype={mimeType} />;
+  }
+
+  if (isError) {
+    return <ErrorPreview />;
   }
 
   return (
@@ -52,6 +74,7 @@ export function FilePreview({ mimeType, filePath }: Props) {
           isLoading ? "opacity-0" : "opacity-100",
           "transition-opacity duration-100",
         )}
+        onError={() => setIsError(true)}
       />
     </div>
   );

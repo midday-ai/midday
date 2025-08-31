@@ -1,9 +1,10 @@
 import type { Database } from "@midday/db/client";
 import { updateInboxAccount } from "@midday/db/queries";
 import { encrypt } from "@midday/encryption";
+import { ensureFileExtension } from "@midday/utils";
 import type { Credentials } from "google-auth-library";
 import { type Auth, type gmail_v1, google } from "googleapis";
-import { decodeBase64Url, ensurePdfExtension } from "../attachments";
+import { decodeBase64Url } from "../attachments";
 import { generateDeterministicId } from "../generate-id";
 import type {
   Attachment,
@@ -353,7 +354,7 @@ export class GmailProvider implements OAuthProviderInterface {
       );
 
       const attachments: Attachment[] = rawAttachments.map((att) => {
-        const filename = ensurePdfExtension(att.filename);
+        const filename = ensureFileExtension(att.filename, att.mimeType);
         const referenceId = generateDeterministicId(
           `${message.id}_${filename}`,
         );

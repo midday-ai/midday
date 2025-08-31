@@ -1,10 +1,13 @@
 "use client";
 
 import { useInboxParams } from "@/hooks/use-inbox-params";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { LocalStorageKeys } from "@/utils/constants";
 import { formatDate } from "@/utils/format";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { FormatAmount } from "../format-amount";
@@ -14,6 +17,11 @@ export function SuggestedMatch() {
   const { params } = useInboxParams();
   const { data: user } = useUserQuery();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [hasSeenLearningToast, setHasSeenLearningToast] = useLocalStorage(
+    LocalStorageKeys.MatchLearningToastSeen,
+    false,
+  );
 
   const id = params.inboxId;
 
@@ -56,6 +64,8 @@ export function SuggestedMatch() {
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.searchTransactionMatch.queryKey(),
         });
+
+        showLearningToast();
       },
     }),
   );
@@ -69,9 +79,23 @@ export function SuggestedMatch() {
         queryClient.invalidateQueries({
           queryKey: trpc.inbox.get.infiniteQueryKey(),
         });
+
+        showLearningToast();
       },
     }),
   );
+
+  const showLearningToast = () => {
+    if (!hasSeenLearningToast) {
+      toast({
+        title: "Midday AI",
+        description: "We learn from your choices to improve matches over time.",
+        variant: "ai",
+        duration: 5000,
+      });
+      setHasSeenLearningToast(true);
+    }
+  };
 
   const handleConfirm = () => {
     if (suggestion && id) {
