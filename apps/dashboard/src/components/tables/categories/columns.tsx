@@ -39,7 +39,7 @@ function CategoryTooltip({ category }: { category: any }) {
   try {
     return (
       // @ts-expect-error - slug is not nullable
-      <span>{t(`transaction_categories.${category.slug}`, category.slug)}</span>
+      <span>{t(`transaction_categories.${category.slug}`)}</span>
     );
   } catch {
     // Fallback if translation not found
