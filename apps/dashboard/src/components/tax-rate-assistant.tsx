@@ -29,7 +29,7 @@ export function TaxRateAssistant({
     { taxRate: number; country?: string } | undefined
   >();
   const [isLoading, setLoading] = useState(false);
-  const lastProcessedName = useRef<string | undefined>();
+  const lastProcessedName = useRef<string | undefined>(undefined);
 
   const getVatRate = useAction(getTaxRateAction, {
     onSuccess: ({ data }) => {

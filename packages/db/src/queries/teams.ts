@@ -76,7 +76,7 @@ type CreateTeamParams = {
 async function createSystemCategoriesForTeam(
   db: Database,
   teamId: string,
-  countryCode?: string,
+  countryCode: string | null | undefined,
 ) {
   // Get all existing categories for this team
   const existingCategories = await db
