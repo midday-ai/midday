@@ -46,6 +46,13 @@ export {
   getAllColors,
 } from "./color-system";
 
+// Embeddings
+export {
+  generateCategoryEmbedding,
+  generateCategoryEmbeddings,
+  CategoryEmbeddings,
+} from "./embeddings";
+
 // Constants for easy reference
 export const TAX_TYPES = [
   "vat",

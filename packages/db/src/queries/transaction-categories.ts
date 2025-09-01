@@ -1,6 +1,10 @@
 import type { Database } from "@db/client";
 import { transactionCategories } from "@db/schema";
 import { and, asc, desc, eq, isNotNull, isNull } from "drizzle-orm";
+import {
+  generateCategoryEmbedding,
+  generateCategoryEmbeddingsBatch,
+} from "../utils/embeddings";
 import { createActivity } from "./activities";
 
 export type GetCategoriesParams = {
@@ -137,6 +141,17 @@ export const createTransactionCategory = async (
         parentId: result.parentId,
       },
     });
+
+    // Generate embedding for the new category (async, don't block the response)
+    generateCategoryEmbedding(db, {
+      name: result.name,
+      system: false, // User-created category
+    }).catch((error) => {
+      console.error(
+        `Failed to generate embedding for category "${result.name}":`,
+        error,
+      );
+    });
   }
 
   return result;
@@ -195,6 +210,21 @@ export const createTransactionCategories = async (
     });
   }
 
+  // Generate embeddings for all new categories (async, don't block the response)
+  if (result.length > 0) {
+    const categoryNames = result.map((category) => ({
+      name: category.name,
+      system: false, // User-created categories
+    }));
+
+    generateCategoryEmbeddingsBatch(db, categoryNames).catch((error) => {
+      console.error(
+        "Failed to generate embeddings for batch categories:",
+        error,
+      );
+    });
+  }
+
   return result;
 };
 
@@ -225,6 +255,19 @@ export const updateTransactionCategory = async (
       ),
     )
     .returning();
+
+  // If the name was updated, regenerate the embedding
+  if (result && updates.name && updates.name !== result.name) {
+    generateCategoryEmbedding(db, {
+      name: updates.name,
+      system: result.system || false,
+    }).catch((error) => {
+      console.error(
+        `Failed to update embedding for category "${updates.name}":`,
+        error,
+      );
+    });
+  }
 
   return result;
 };

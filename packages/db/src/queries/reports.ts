@@ -1,9 +1,67 @@
+import { UTCDate } from "@date-fns/utc";
 import type { Database } from "@db/client";
-import { endOfMonth, parseISO, startOfMonth, subYears } from "date-fns";
-import { sql } from "drizzle-orm";
+import {
+  eachMonthOfInterval,
+  endOfMonth,
+  format,
+  parseISO,
+  startOfMonth,
+  subYears,
+} from "date-fns";
+import {
+  and,
+  eq,
+  gte,
+  isNotNull,
+  isNull,
+  lt,
+  lte,
+  ne,
+  or,
+  sql,
+} from "drizzle-orm";
+import {
+  bankAccounts,
+  teams,
+  transactionCategories,
+  transactions,
+} from "../schema";
 
 function getPercentageIncrease(a: number, b: number) {
   return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
+}
+
+// Simple in-memory cache for team currencies (clears on server restart)
+const teamCurrencyCache = new Map<
+  string,
+  { currency: string | null; timestamp: number }
+>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+async function getTargetCurrency(
+  db: Database,
+  teamId: string,
+  inputCurrency?: string,
+): Promise<string | null> {
+  if (inputCurrency) return inputCurrency;
+
+  // Check cache
+  const cached = teamCurrencyCache.get(teamId);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.currency;
+  }
+
+  // Fetch from database
+  const team = await db
+    .select({ baseCurrency: teams.baseCurrency })
+    .from(teams)
+    .where(eq(teams.id, teamId))
+    .limit(1);
+
+  const currency = team[0]?.baseCurrency || null;
+  teamCurrencyCache.set(teamId, { currency, timestamp: Date.now() });
+
+  return currency;
 }
 
 export type GetReportsParams = {
@@ -20,21 +78,191 @@ interface ReportsResultItem {
   currency: string;
 }
 
+// Helper function for profit calculation
+export async function getProfit(db: Database, params: GetReportsParams) {
+  const { teamId, from, to, currency: inputCurrency } = params;
+
+  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = endOfMonth(new UTCDate(parseISO(to)));
+
+  // Step 1: Get the target currency (cached)
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+
+  // Step 2: Generate month series for complete results
+  const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
+
+  // Step 3: Build the main query conditions
+  const conditions = [
+    eq(transactions.teamId, teamId),
+    eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
+    gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
+    lte(transactions.date, format(toDate, "yyyy-MM-dd")),
+  ];
+
+  // Add currency conditions
+  if (inputCurrency && targetCurrency) {
+    conditions.push(eq(transactions.currency, targetCurrency));
+  } else if (targetCurrency) {
+    conditions.push(eq(transactions.baseCurrency, targetCurrency));
+  }
+
+  // Step 4: Execute the aggregated query
+  const monthlyData = await db
+    .select({
+      month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
+      value: sql<number>`COALESCE(SUM(
+        CASE
+          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN ${transactions.amount}
+          ELSE COALESCE(${transactions.baseAmount}, 0)
+        END
+      ), 0)`,
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionCategories,
+      and(
+        eq(transactionCategories.slug, transactions.categorySlug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .where(
+      and(
+        ...conditions,
+        or(
+          isNull(transactions.categorySlug),
+          isNull(transactionCategories.excluded),
+          eq(transactionCategories.excluded, false),
+        )!,
+      ),
+    )
+    .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
+    .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
+
+  // Step 5: Create a map of month data for quick lookup
+  const dataMap = new Map(monthlyData.map((item) => [item.month, item.value]));
+
+  // Step 6: Generate complete results (optimized)
+  const currencyStr = targetCurrency || "USD";
+  const results: ReportsResultItem[] = monthSeries.map((monthStart) => {
+    const monthKey = format(monthStart, "yyyy-MM-dd");
+    const value = dataMap.get(monthKey) || 0;
+
+    return {
+      date: monthKey,
+      value: value.toString(),
+      currency: currencyStr, // Avoid repeated string operations
+    };
+  });
+
+  return results;
+}
+
+// Helper function for revenue calculation
+export async function getRevenue(db: Database, params: GetReportsParams) {
+  const { teamId, from, to, currency: inputCurrency } = params;
+
+  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = endOfMonth(new UTCDate(parseISO(to)));
+
+  // Step 1: Get the target currency (cached)
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+
+  // Step 2: Generate month series for complete results
+  const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
+
+  // Step 3: Build the main query conditions
+  const conditions = [
+    eq(transactions.teamId, teamId),
+    eq(transactions.internal, false),
+    eq(transactions.categorySlug, "income"),
+    ne(transactions.status, "excluded"),
+    gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
+    lte(transactions.date, format(toDate, "yyyy-MM-dd")),
+  ];
+
+  // Add currency conditions
+  if (inputCurrency && targetCurrency) {
+    conditions.push(eq(transactions.currency, targetCurrency));
+  } else if (targetCurrency) {
+    conditions.push(eq(transactions.baseCurrency, targetCurrency));
+  }
+
+  // Step 4: Execute the aggregated query
+  const monthlyData = await db
+    .select({
+      month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
+      value: sql<number>`COALESCE(SUM(
+        CASE
+          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN ${transactions.amount}
+          ELSE COALESCE(${transactions.baseAmount}, 0)
+        END
+      ), 0)`,
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionCategories,
+      and(
+        eq(transactionCategories.slug, transactions.categorySlug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .where(
+      and(
+        ...conditions,
+        or(
+          isNull(transactionCategories.excluded),
+          eq(transactionCategories.excluded, false),
+        )!,
+      ),
+    )
+    .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
+    .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
+
+  // Step 5: Create a map of month data for quick lookup
+  const dataMap = new Map(monthlyData.map((item) => [item.month, item.value]));
+
+  // Step 6: Generate complete results (optimized)
+  const currencyStr = targetCurrency || "USD";
+  const results: ReportsResultItem[] = monthSeries.map((monthStart) => {
+    const monthKey = format(monthStart, "yyyy-MM-dd");
+    const value = dataMap.get(monthKey) || 0;
+
+    return {
+      date: monthKey,
+      value: value.toString(),
+      currency: currencyStr, // Avoid repeated string operations
+    };
+  });
+
+  return results;
+}
+
 export async function getReports(db: Database, params: GetReportsParams) {
   const { teamId, from, to, type = "profit", currency: inputCurrency } = params;
 
-  const rpc = type === "profit" ? "get_profit_v3" : "get_revenue_v3";
+  // Calculate previous year date range
+  const prevFromDate = subYears(startOfMonth(new UTCDate(parseISO(from))), 1);
+  const prevToDate = subYears(endOfMonth(new UTCDate(parseISO(to))), 1);
 
-  // Use sql.raw for function name to avoid parameterization of identifier
+  // Use our Drizzle implementations instead of PostgreSQL functions
+  const reportFunction = type === "profit" ? getProfit : getRevenue;
+
   // Run both queries in parallel since they're independent
-  const [rawPrev, rawCurr] = (await Promise.all([
-    db.execute(
-      sql`SELECT * FROM ${sql.raw(rpc)}(${teamId}, ${subYears(startOfMonth(parseISO(from)), 1).toISOString()}, ${subYears(endOfMonth(parseISO(to)), 1).toISOString()}, ${inputCurrency ?? null})`,
-    ),
-    db.execute(
-      sql`SELECT * FROM ${sql.raw(rpc)}(${teamId}, ${startOfMonth(parseISO(from)).toISOString()}, ${endOfMonth(parseISO(to)).toISOString()}, ${inputCurrency ?? null})`,
-    ),
-  ])) as unknown as [ReportsResultItem[], ReportsResultItem[]];
+  const [rawPrev, rawCurr] = await Promise.all([
+    reportFunction(db, {
+      teamId,
+      from: prevFromDate.toISOString(),
+      to: prevToDate.toISOString(),
+      currency: inputCurrency,
+    }),
+    reportFunction(db, {
+      teamId,
+      from,
+      to,
+      currency: inputCurrency,
+    }),
+  ]);
 
   const prevData = rawPrev.map((item) => ({
     ...item,
@@ -112,11 +340,99 @@ interface BurnRateResultItem {
 export async function getBurnRate(db: Database, params: GetBurnRateParams) {
   const { teamId, from, to, currency: inputCurrency } = params;
 
-  const rawData = (await db.executeOnReplica(
-    sql`SELECT * FROM ${sql.raw("get_burn_rate_v4")}(${teamId}, ${startOfMonth(parseISO(from)).toISOString()}, ${endOfMonth(parseISO(to)).toISOString()}, ${inputCurrency ?? null})`,
-  )) as unknown as BurnRateResultItem[];
+  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = endOfMonth(new UTCDate(parseISO(to)));
 
-  return rawData.map((item) => ({
+  // Step 1: Get the target currency (cached)
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+
+  // Step 2: Generate month series for complete results
+  const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
+
+  // Step 3: Build the main query conditions
+  const conditions = [
+    eq(transactions.teamId, teamId),
+    eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
+    gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
+    lte(transactions.date, format(toDate, "yyyy-MM-dd")),
+    lt(
+      inputCurrency
+        ? sql`CASE 
+        WHEN ${transactions.currency} = ${targetCurrency} THEN ${transactions.amount}
+        ELSE COALESCE(${transactions.baseAmount}, 0)
+      END`
+        : sql`COALESCE(${transactions.baseAmount}, 0)`,
+      0,
+    ),
+  ];
+
+  // Add currency conditions
+  if (inputCurrency && targetCurrency) {
+    conditions.push(
+      or(
+        eq(transactions.currency, targetCurrency),
+        eq(transactions.baseCurrency, targetCurrency),
+      )!,
+    );
+  } else if (targetCurrency) {
+    conditions.push(eq(transactions.baseCurrency, targetCurrency));
+  }
+
+  // Step 4: Execute the aggregated query
+  const monthlyData = await db
+    .select({
+      month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
+      totalAmount: sql<number>`COALESCE(ABS(SUM(
+        CASE
+          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN
+            CASE
+              WHEN ${transactions.currency} = ${targetCurrency} THEN ${transactions.amount}
+              ELSE COALESCE(${transactions.baseAmount}, 0)
+            END
+          ELSE COALESCE(${transactions.baseAmount}, 0)
+        END
+      )), 0)`,
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionCategories,
+      and(
+        eq(transactionCategories.slug, transactions.categorySlug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .where(
+      and(
+        ...conditions,
+        or(
+          isNull(transactions.categorySlug),
+          isNull(transactionCategories.excluded),
+          eq(transactionCategories.excluded, false),
+        )!,
+      ),
+    )
+    .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
+    .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
+
+  // Step 5: Create a map of month data for quick lookup
+  const dataMap = new Map(
+    monthlyData.map((item) => [item.month, item.totalAmount]),
+  );
+
+  // Step 6: Generate complete results for all months in the series
+  const results: BurnRateResultItem[] = monthSeries.map((monthStart) => {
+    const monthKey = format(monthStart, "yyyy-MM-dd");
+    const value = dataMap.get(monthKey) || 0;
+
+    return {
+      date: monthKey,
+      value: value.toString(),
+      currency: targetCurrency || "USD",
+    };
+  });
+
+  return results.map((item) => ({
     ...item,
     value: Number.parseFloat(item.value),
   }));
@@ -139,9 +455,104 @@ interface ExpensesResultItem {
 export async function getExpenses(db: Database, params: GetExpensesParams) {
   const { teamId, from, to, currency: inputCurrency } = params;
 
-  const rawData = (await db.executeOnReplica(
-    sql`SELECT * FROM ${sql.raw("get_expenses")}(${teamId}, ${startOfMonth(parseISO(from)).toISOString()}, ${endOfMonth(parseISO(to)).toISOString()}, ${inputCurrency ?? null})`,
-  )) as unknown as ExpensesResultItem[];
+  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = endOfMonth(new UTCDate(parseISO(to)));
+
+  // Step 1: Get the target currency (cached)
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+
+  // Step 2: Generate month series for complete results
+  const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
+
+  // Step 3: Build the main query conditions
+  const conditions = [
+    eq(transactions.teamId, teamId),
+    ne(transactions.status, "excluded"),
+    eq(transactions.internal, false),
+    gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
+    lte(transactions.date, format(toDate, "yyyy-MM-dd")),
+  ];
+
+  // Add currency and amount conditions
+  if (inputCurrency && targetCurrency) {
+    conditions.push(
+      and(
+        eq(transactions.currency, targetCurrency),
+        lt(transactions.amount, 0),
+      )!,
+    );
+  } else if (targetCurrency) {
+    conditions.push(
+      and(
+        eq(transactions.baseCurrency, targetCurrency),
+        lt(transactions.baseAmount, 0),
+      )!,
+    );
+  }
+
+  // Step 4: Execute the aggregated query
+  const monthlyData = await db
+    .select({
+      month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
+      value: sql<number>`COALESCE(SUM(
+        CASE
+          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL AND (${transactions.recurring} = false OR ${transactions.recurring} IS NULL) THEN ABS(${transactions.amount})
+          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NULL AND (${transactions.recurring} = false OR ${transactions.recurring} IS NULL) THEN ABS(COALESCE(${transactions.baseAmount}, 0))
+          ELSE 0
+        END
+      ), 0)`,
+      recurringValue: sql<number>`COALESCE(SUM(
+        CASE
+          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL AND ${transactions.recurring} = true THEN ABS(${transactions.amount})
+          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NULL AND ${transactions.recurring} = true THEN ABS(COALESCE(${transactions.baseAmount}, 0))
+          ELSE 0
+        END
+      ), 0)`,
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionCategories,
+      and(
+        eq(transactionCategories.slug, transactions.categorySlug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .where(
+      and(
+        ...conditions,
+        or(
+          isNull(transactions.categorySlug),
+          isNull(transactionCategories.excluded),
+          eq(transactionCategories.excluded, false),
+        )!,
+      ),
+    )
+    .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
+    .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
+
+  // Step 5: Create a map of month data for quick lookup
+  const dataMap = new Map(
+    monthlyData.map((item) => [
+      item.month,
+      { value: item.value, recurringValue: item.recurringValue },
+    ]),
+  );
+
+  // Step 6: Generate complete results for all months in the series
+  const rawData: ExpensesResultItem[] = monthSeries.map((monthStart) => {
+    const monthKey = format(monthStart, "yyyy-MM-dd");
+    const monthData = dataMap.get(monthKey) || {
+      value: 0,
+      recurringValue: 0,
+    };
+
+    return {
+      date: monthKey,
+      value: monthData.value.toString(),
+      currency: targetCurrency || "USD",
+      recurring_value: monthData.recurringValue,
+    };
+  });
 
   const averageExpense =
     rawData && rawData.length > 0
@@ -208,17 +619,195 @@ export async function getSpending(
 ): Promise<SpendingResultItem[]> {
   const { teamId, from, to, currency: inputCurrency } = params;
 
-  const rawData = (await db.executeOnReplica(
-    sql`SELECT * FROM ${sql.raw("get_spending_v4")}(${teamId}, ${startOfMonth(parseISO(from)).toISOString()}, ${endOfMonth(parseISO(to)).toISOString()}, ${inputCurrency ?? null})`,
-  )) as unknown as SpendingResultItem[];
+  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = endOfMonth(new UTCDate(parseISO(to)));
 
-  return Array.isArray(rawData)
-    ? rawData.map((item) => ({
-        ...item,
-        amount: Number.parseFloat(Number(item.amount).toFixed(2)),
-        percentage: Number.parseFloat(Number(item.percentage).toFixed(2)),
-      }))
-    : [];
+  // Step 1: Get the target currency (cached)
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+
+  // Step 2: Calculate total spending amount for percentage calculations
+  const totalAmountConditions = [
+    eq(transactions.teamId, teamId),
+    eq(transactions.internal, false),
+    gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
+    lte(transactions.date, format(toDate, "yyyy-MM-dd")),
+    lt(transactions.baseAmount, 0),
+  ];
+
+  if (targetCurrency) {
+    totalAmountConditions.push(
+      or(
+        eq(transactions.baseCurrency, targetCurrency),
+        eq(transactions.currency, targetCurrency),
+      )!,
+    );
+  }
+
+  const totalAmountResult = await db
+    .select({
+      total: sql<number>`SUM(CASE
+        WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN ${transactions.amount}
+        ELSE COALESCE(${transactions.baseAmount}, 0)
+      END)`,
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionCategories,
+      and(
+        eq(transactionCategories.slug, transactions.categorySlug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .where(
+      and(
+        ...totalAmountConditions,
+        or(
+          isNull(transactions.categorySlug),
+          isNull(transactionCategories.excluded),
+          eq(transactionCategories.excluded, false),
+        )!,
+      ),
+    );
+
+  const totalAmount = Math.abs(totalAmountResult[0]?.total || 0);
+
+  // Step 3: Get all spending data in a single aggregated query (MAJOR PERF WIN)
+  const spendingConditions = [
+    eq(transactions.teamId, teamId),
+    eq(transactions.internal, false),
+    gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
+    lte(transactions.date, format(toDate, "yyyy-MM-dd")),
+    lt(transactions.baseAmount, 0),
+    isNotNull(transactions.categorySlug), // Only categorized transactions
+  ];
+
+  if (targetCurrency) {
+    spendingConditions.push(
+      or(
+        eq(transactions.baseCurrency, targetCurrency),
+        eq(transactions.currency, targetCurrency),
+      )!,
+    );
+  }
+
+  // Single query replaces N queries (where N = number of categories)
+  const categorySpending = await db
+    .select({
+      name: transactionCategories.name,
+      slug: transactionCategories.slug,
+      color: transactionCategories.color,
+      amount: sql<number>`ABS(SUM(CASE
+        WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN ${transactions.amount}
+        ELSE COALESCE(${transactions.baseAmount}, 0)
+      END))`,
+    })
+    .from(transactions)
+    .innerJoin(
+      transactionCategories,
+      and(
+        eq(transactionCategories.slug, transactions.categorySlug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .where(
+      and(
+        ...spendingConditions,
+        or(
+          isNull(transactionCategories.excluded),
+          eq(transactionCategories.excluded, false),
+        )!,
+      ),
+    )
+    .groupBy(
+      transactionCategories.name,
+      transactionCategories.slug,
+      transactionCategories.color,
+    )
+    .having(sql`SUM(CASE
+      WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN ${transactions.amount}
+      ELSE COALESCE(${transactions.baseAmount}, 0)
+    END) < 0`)
+    .then((results) =>
+      results.map((item) => {
+        const percentage =
+          totalAmount !== 0 ? (item.amount / totalAmount) * 100 : 0;
+        return {
+          name: item.name,
+          slug: item.slug || "unknown",
+          amount: item.amount,
+          currency: targetCurrency || "USD",
+          color: item.color || "#606060",
+          percentage:
+            percentage > 1
+              ? Math.round(percentage)
+              : Math.round(percentage * 100) / 100,
+        };
+      }),
+    );
+
+  // Step 5: Handle uncategorized transactions
+  const uncategorizedConditions = [
+    eq(transactions.teamId, teamId),
+    eq(transactions.internal, false),
+    gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
+    lte(transactions.date, format(toDate, "yyyy-MM-dd")),
+    lt(transactions.baseAmount, 0),
+    or(
+      isNull(transactions.categorySlug),
+      sql`NOT EXISTS (
+        SELECT 1 FROM ${transactionCategories} tc 
+        WHERE tc.slug = ${transactions.categorySlug} 
+        AND tc.team_id = ${teamId}
+      )`,
+    )!,
+  ];
+
+  if (targetCurrency) {
+    uncategorizedConditions.push(
+      or(
+        eq(transactions.baseCurrency, targetCurrency),
+        eq(transactions.currency, targetCurrency),
+      )!,
+    );
+  }
+
+  const uncategorizedResult = await db
+    .select({
+      amount: sql<number>`SUM(CASE
+        WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN ${transactions.amount}
+        ELSE COALESCE(${transactions.baseAmount}, 0)
+      END)`,
+    })
+    .from(transactions)
+    .where(and(...uncategorizedConditions));
+
+  const uncategorizedAmount = Math.abs(uncategorizedResult[0]?.amount || 0);
+
+  if (uncategorizedAmount > 0) {
+    const percentage =
+      totalAmount !== 0 ? (uncategorizedAmount / totalAmount) * 100 : 0;
+
+    categorySpending.push({
+      name: "Uncategorized",
+      slug: "uncategorized",
+      amount: uncategorizedAmount,
+      currency: targetCurrency || "USD",
+      color: "#606060",
+      percentage:
+        percentage > 1
+          ? Math.round(percentage)
+          : Math.round(percentage * 100) / 100,
+    });
+  }
+
+  // Step 6: Sort by amount descending (highest first) and return
+  return categorySpending
+    .sort((a, b) => b.amount - a.amount)
+    .map((item) => ({
+      ...item,
+      amount: Number.parseFloat(Number(item.amount).toFixed(2)),
+      percentage: Number.parseFloat(Number(item.percentage).toFixed(2)),
+    }));
 }
 
 export type GetRunwayParams = {
@@ -228,24 +817,71 @@ export type GetRunwayParams = {
   currency?: string;
 };
 
-interface RunwayResultItem {
-  get_runway_v4: string;
-}
-
 export async function getRunway(db: Database, params: GetRunwayParams) {
   const { teamId, from, to, currency: inputCurrency } = params;
 
-  const rawData = (await db.executeOnReplica(
-    sql`SELECT * FROM ${sql.raw("get_runway_v4")}(${teamId}, ${startOfMonth(parseISO(from)).toISOString()}, ${endOfMonth(parseISO(to)).toISOString()}, ${inputCurrency ?? null})`,
-  )) as unknown as RunwayResultItem[];
+  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = endOfMonth(new UTCDate(parseISO(to)));
 
-  const runwayValue = rawData?.[0]?.get_runway_v4;
+  // Step 1: Get the target currency (cached)
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
 
-  if (runwayValue) {
-    return Number.parseInt(runwayValue, 10);
+  if (!targetCurrency) {
+    return 0;
   }
 
-  return 0;
+  // Step 2: Get total balance (equivalent to get_total_balance_v3)
+  const balanceConditions = [
+    eq(bankAccounts.teamId, teamId),
+    eq(bankAccounts.enabled, true),
+  ];
+
+  const balanceResult = await db
+    .select({
+      totalBalance: sql<number>`SUM(CASE
+        WHEN ${bankAccounts.currency} = ${targetCurrency} THEN COALESCE(${bankAccounts.balance}, 0)
+        ELSE COALESCE(${bankAccounts.baseBalance}, 0)
+      END)`,
+    })
+    .from(bankAccounts)
+    .where(and(...balanceConditions));
+
+  const totalBalance = balanceResult[0]?.totalBalance || 0;
+
+  // Step 3: Calculate number of months in the date range
+  const fromYear = fromDate.getFullYear();
+  const fromMonth = fromDate.getMonth();
+  const toYear = toDate.getFullYear();
+  const toMonth = toDate.getMonth();
+
+  const numberOfMonths = (toYear - fromYear) * 12 + (toMonth - fromMonth);
+
+  if (numberOfMonths <= 0) {
+    return 0;
+  }
+
+  // Step 4: Get burn rate data using our existing getBurnRate function
+  const burnRateData = await getBurnRate(db, {
+    teamId,
+    from,
+    to,
+    currency: inputCurrency,
+  });
+
+  // Step 5: Calculate average burn rate
+  if (burnRateData.length === 0) {
+    return 0;
+  }
+
+  const totalBurnRate = burnRateData.reduce((sum, item) => sum + item.value, 0);
+  const avgBurnRate = Math.round(totalBurnRate / burnRateData.length);
+
+  // Step 6: Calculate runway
+  if (avgBurnRate === 0) {
+    return 0;
+  }
+
+  return Math.round(totalBalance / avgBurnRate);
 }
 
 export type GetTaxParams = {
@@ -278,8 +914,8 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
     currency: inputCurrency,
   } = params;
 
-  const fromDate = startOfMonth(parseISO(from)).toISOString();
-  const toDate = endOfMonth(parseISO(to)).toISOString();
+  const fromDate = startOfMonth(new UTCDate(parseISO(from))).toISOString();
+  const toDate = endOfMonth(new UTCDate(parseISO(to))).toISOString();
 
   // Build the base query with conditions
   const conditions = [

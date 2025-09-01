@@ -19,6 +19,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   varchar,
   vector,
@@ -236,6 +237,51 @@ export const documentTagEmbeddings = pgTable(
   ],
 );
 
+export const transactionCategoryEmbeddings = pgTable(
+  "transaction_category_embeddings",
+  {
+    name: text().primaryKey().notNull(), // Unique by name - same embedding for all teams
+    embedding: vector({ dimensions: 768 }),
+    model: text().notNull().default("gemini-embedding-001"),
+    system: boolean().default(false).notNull(), // Whether this comes from system categories
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    // Vector similarity index for fast cosine similarity search
+    index("transaction_category_embeddings_vector_idx")
+      .using("hnsw", table.embedding.asc().nullsLast().op("vector_cosine_ops"))
+      .with({ m: "16", ef_construction: "64" }),
+    // System categories index for filtering
+    index("transaction_category_embeddings_system_idx").using(
+      "btree",
+      table.system.asc().nullsLast().op("bool_ops"),
+    ),
+    pgPolicy("Enable read access for authenticated users", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`true`,
+    }),
+    pgPolicy("Enable insert for authenticated users only", {
+      as: "permissive",
+      for: "insert",
+      to: ["authenticated"],
+      withCheck: sql`true`,
+    }),
+    pgPolicy("Enable update for authenticated users only", {
+      as: "permissive",
+      for: "update",
+      to: ["authenticated"],
+      using: sql`true`,
+    }),
+  ],
+);
+
 export const transactions = pgTable(
   "transactions",
   {
@@ -342,7 +388,6 @@ export const transactions = pgTable(
       table.date.asc().nullsLast().op("date_ops"),
       table.currency.asc().nullsLast().op("text_ops"),
       table.bankAccountId.asc().nullsLast().op("date_ops"),
-      table.category.asc().nullsLast().op("date_ops"),
     ),
     index("transactions_team_id_idx").using(
       "btree",

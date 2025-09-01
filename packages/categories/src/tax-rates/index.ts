@@ -833,7 +833,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
 
 // Helper function to get tax rate for a specific category and country
 export function getTaxRateForCategory(
-  countryCode: string | undefined,
+  countryCode: string | undefined | null,
   categorySlug: string,
 ): number {
   const effectiveCountryCode = countryCode || "DEFAULT";
@@ -848,7 +848,9 @@ export function getTaxRateForCategory(
 }
 
 // Helper function to get tax type for a country
-export function getTaxTypeForCountry(countryCode: string | undefined): string {
+export function getTaxTypeForCountry(
+  countryCode: string | undefined | null,
+): string {
   const effectiveCountryCode = countryCode || "DEFAULT";
   const config =
     TAX_RATE_CONFIGS[effectiveCountryCode] || TAX_RATE_CONFIGS.DEFAULT;
