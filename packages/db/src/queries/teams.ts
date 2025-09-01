@@ -1,5 +1,16 @@
 import type { Database } from "@db/client";
-import { bankConnections, teams, users, usersOnTeam } from "@db/schema";
+import {
+  bankConnections,
+  teams,
+  transactionCategories,
+  users,
+  usersOnTeam,
+} from "@db/schema";
+import {
+  CATEGORIES,
+  getTaxRateForCategory,
+  getTaxTypeForCountry,
+} from "@midday/categories";
 import { and, eq } from "drizzle-orm";
 
 export const getTeamById = async (db: Database, id: string) => {
@@ -61,38 +72,190 @@ type CreateTeamParams = {
   switchTeam?: boolean;
 };
 
-export const createTeam = async (db: Database, params: CreateTeamParams) => {
-  const [newTeam] = await db
-    .insert(teams)
-    .values({
-      name: params.name,
-      baseCurrency: params.baseCurrency,
-      countryCode: params.countryCode,
-      logoUrl: params.logoUrl,
-      email: params.email,
+// Helper function to create system categories for a new team
+async function createSystemCategoriesForTeam(
+  db: Database,
+  teamId: string,
+  countryCode?: string,
+) {
+  // Get all existing categories for this team
+  const existingCategories = await db
+    .select({
+      id: transactionCategories.id,
+      slug: transactionCategories.slug,
+      parentId: transactionCategories.parentId,
     })
-    .returning({ id: teams.id });
+    .from(transactionCategories)
+    .where(eq(transactionCategories.teamId, teamId));
 
-  if (!newTeam?.id) {
+  const existingSlugs = new Set(existingCategories.map((cat) => cat.slug));
+
+  // Only create categories that don't already exist
+  const categoriesToInsert: Array<typeof transactionCategories.$inferInsert> =
+    [];
+
+  // Flatten all categories (parents and children)
+  for (const parent of CATEGORIES) {
+    // Add parent category if it doesn't exist
+    if (!existingSlugs.has(parent.slug)) {
+      categoriesToInsert.push({
+        teamId,
+        name: parent.name,
+        slug: parent.slug,
+        color: parent.color,
+        system: parent.system,
+        excluded: parent.excluded,
+        taxRate: getTaxRateForCategory(countryCode, parent.slug),
+        taxType: getTaxTypeForCountry(countryCode),
+        taxReportingCode: undefined,
+        description: undefined,
+        parentId: undefined, // Parent categories have no parent
+      });
+    }
+
+    // Add child categories if they don't exist
+    for (const child of parent.children) {
+      if (!existingSlugs.has(child.slug)) {
+        categoriesToInsert.push({
+          teamId,
+          name: child.name,
+          slug: child.slug,
+          color: child.color,
+          system: child.system,
+          excluded: child.excluded,
+          taxRate: getTaxRateForCategory(countryCode, child.slug),
+          taxType: getTaxTypeForCountry(countryCode),
+          taxReportingCode: undefined,
+          description: undefined,
+          parentId: undefined, // We'll set this after creating all categories
+        });
+      }
+    }
+  }
+
+  // Create missing categories if any
+  if (categoriesToInsert.length > 0) {
+    await db.insert(transactionCategories).values(categoriesToInsert);
+  }
+
+  // Now ensure ALL categories have proper parent-child relationships
+  // This handles both existing categories (from PG trigger) and newly created ones
+  const allCategories = await db
+    .select({
+      id: transactionCategories.id,
+      slug: transactionCategories.slug,
+      parentId: transactionCategories.parentId,
+    })
+    .from(transactionCategories)
+    .where(eq(transactionCategories.teamId, teamId));
+
+  // Build the complete parent-child structure as defined in categories.ts
+  const parentCategoryMap = new Map();
+  const childCategoriesToUpdate: Array<{
+    id: string;
+    slug: string;
+    parentSlug: string;
+  }> = [];
+
+  // First pass: identify all parent categories and map their IDs
+  for (const category of allCategories) {
+    const parentCategory = CATEGORIES.find((p) => p.slug === category.slug);
+    if (parentCategory?.children) {
+      // This is a parent category (has children)
+      parentCategoryMap.set(parentCategory.slug, category.id);
+    }
+  }
+
+  // Second pass: identify all child categories that need parentId updates
+  for (const category of allCategories) {
+    if (!category.slug) continue; // Skip categories without slugs
+
+    const parentCategory = CATEGORIES.find((p) =>
+      p.children.some((c) => c.slug === category.slug),
+    );
+    if (parentCategory?.slug) {
+      // This is a child category
+      const expectedParentId = parentCategoryMap.get(parentCategory.slug);
+
+      if (expectedParentId && category.parentId !== expectedParentId) {
+        childCategoriesToUpdate.push({
+          id: category.id,
+          slug: category.slug,
+          parentSlug: parentCategory.slug,
+        });
+      }
+    }
+  }
+
+  // Update all child categories with correct parentIds
+  for (const child of childCategoriesToUpdate) {
+    const parentId = parentCategoryMap.get(child.parentSlug);
+    if (parentId) {
+      await db
+        .update(transactionCategories)
+        .set({ parentId })
+        .where(eq(transactionCategories.id, child.id));
+    }
+  }
+
+  // Verify the final structure
+  const finalCategories = await db
+    .select({
+      id: transactionCategories.id,
+      slug: transactionCategories.slug,
+      parentId: transactionCategories.parentId,
+    })
+    .from(transactionCategories)
+    .where(eq(transactionCategories.teamId, teamId));
+
+  const finalParentCount = finalCategories.filter(
+    (cat) => cat.parentId === null,
+  ).length;
+  const finalChildCount = finalCategories.filter(
+    (cat) => cat.parentId !== null,
+  ).length;
+}
+
+export const createTeam = async (db: Database, params: CreateTeamParams) => {
+  try {
+    const [newTeam] = await db
+      .insert(teams)
+      .values({
+        name: params.name,
+        baseCurrency: params.baseCurrency,
+        countryCode: params.countryCode,
+        logoUrl: params.logoUrl,
+        email: params.email,
+      })
+      .returning({ id: teams.id });
+
+    if (!newTeam?.id) {
+      throw new Error("Failed to create team.");
+    }
+
+    // Add user to team membership
+    await db.insert(usersOnTeam).values({
+      userId: params.userId,
+      teamId: newTeam.id,
+      role: "owner",
+    });
+
+    // Create system categories for the new team
+    await createSystemCategoriesForTeam(db, newTeam.id, params.countryCode);
+
+    // Optionally switch user to the new team
+    if (params.switchTeam) {
+      await db
+        .update(users)
+        .set({ teamId: newTeam.id })
+        .where(eq(users.id, params.userId));
+    }
+
+    return newTeam.id;
+  } catch (error) {
+    console.error(error);
     throw new Error("Failed to create team.");
   }
-
-  // Add user to team membership
-  await db.insert(usersOnTeam).values({
-    userId: params.userId,
-    teamId: newTeam.id,
-    role: "owner",
-  });
-
-  // Optionally switch user to the new team
-  if (params.switchTeam) {
-    await db
-      .update(users)
-      .set({ teamId: newTeam.id })
-      .where(eq(users.id, params.userId));
-  }
-
-  return newTeam.id;
 };
 
 export async function getTeamMembers(db: Database, teamId: string) {

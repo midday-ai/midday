@@ -171,7 +171,6 @@ export const transactionCategoriesEnum = pgEnum("transactionCategories", [
   "banking-finance",
   "assets-capex",
   "liabilities-debt",
-  "taxes-government",
   "owner-equity",
   "system",
 
@@ -2211,6 +2210,8 @@ export const transactionCategories = pgTable(
     slug: text(), // Generated in database
     taxRate: numericCasted("tax_rate", { precision: 10, scale: 2 }),
     taxType: text("tax_type"),
+    taxReportingCode: text("tax_reporting_code"),
+    excluded: boolean("excluded").default(false),
     description: text(),
     embedding: vector({ dimensions: 384 }),
     parentId: uuid("parent_id"),

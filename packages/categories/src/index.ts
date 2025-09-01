@@ -5,7 +5,6 @@ export type {
   ChildCategory,
   CategoryHierarchy,
   TaxRateConfig,
-  LegacyCategoryMapping,
 } from "./types";
 
 // Zod schemas for validation
@@ -18,10 +17,7 @@ export {
 } from "./types";
 
 // Main category definitions
-export {
-  CATEGORIES,
-  CATEGORY_COLORS,
-} from "./categories";
+export { CATEGORIES } from "./categories";
 
 // Tax rate configurations
 export {
@@ -39,6 +35,16 @@ export {
   getParentCategory,
   getCategoryWithTaxRate,
 } from "./utils";
+
+// Color system
+export {
+  CATEGORY_COLORS,
+  CATEGORY_COLOR_MAP,
+  getCategoryColor,
+  getColorFromSlug,
+  getRandomColor,
+  getAllColors,
+} from "./color-system";
 
 // Constants for easy reference
 export const TAX_TYPES = [

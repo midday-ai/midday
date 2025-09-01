@@ -23,20 +23,7 @@ export const transactionCategoriesRouter = createTRPCRouter({
         limit: input?.limit,
       });
 
-      return [
-        ...(data ?? []),
-        {
-          id: "uncategorized",
-          name: "Uncategorized",
-          color: "#606060",
-          slug: "uncategorized",
-          description: null,
-          system: true,
-          taxRate: 0,
-          taxType: "unknown",
-          parentId: null,
-        },
-      ];
+      return data;
     }),
 
   create: protectedProcedure

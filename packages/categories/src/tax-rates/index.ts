@@ -2,160 +2,827 @@ import type { TaxRateConfig } from "../types";
 
 // Tax rate configurations by country
 export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
-  // United States
-  US: {
-    countryCode: "US",
-    taxType: "sales_tax",
-    defaultRate: 0, // No federal sales tax, varies by state
-    categoryRates: {
-      // Most categories are subject to state sales tax
-      "revenue.product_sales": 0, // Will be set by state
-      "revenue.service_revenue": 0, // Often exempt from sales tax
-      "cost_of_goods_sold.inventory": 0, // Business purchases often exempt
-    },
-  },
-
-  // United Kingdom
-  GB: {
-    countryCode: "GB",
-    taxType: "vat",
-    defaultRate: 20,
-    categoryRates: {
-      // Standard VAT rate
-      "revenue.product_sales": 20,
-      "revenue.service_revenue": 20,
-      "technology.software": 20,
-      "operations.office_supplies": 20,
-      // Reduced rates
-      "travel_entertainment.meals": 5, // Reduced rate for food
-      // Zero rates
-      "revenue.subscription_revenue": 0, // Some digital services
-      "professional_services.insurance": 0, // Insurance is exempt
-    },
-  },
-
-  // Canada
-  CA: {
-    countryCode: "CA",
-    taxType: "gst",
-    defaultRate: 5, // Federal GST
-    categoryRates: {
-      "revenue.product_sales": 5,
-      "revenue.service_revenue": 5,
-      "technology.software": 5,
-      "operations.office_supplies": 5,
-      "travel_entertainment.meals": 5,
-      // Note: Provinces may add PST/HST
-    },
-  },
-
-  // Germany
-  DE: {
-    countryCode: "DE",
-    taxType: "vat",
-    defaultRate: 19,
-    categoryRates: {
-      "revenue.product_sales": 19,
-      "revenue.service_revenue": 19,
-      "technology.software": 19,
-      "operations.office_supplies": 19,
-      "travel_entertainment.meals": 7, // Reduced rate
-      "professional_services.insurance": 0, // Insurance is exempt
-    },
-  },
-
-  // France
-  FR: {
-    countryCode: "FR",
-    taxType: "vat",
-    defaultRate: 20,
-    categoryRates: {
-      "revenue.product_sales": 20,
-      "revenue.service_revenue": 20,
-      "technology.software": 20,
-      "operations.office_supplies": 20,
-      "travel_entertainment.meals": 10, // Reduced rate
-      "professional_services.insurance": 0, // Insurance is exempt
-    },
-  },
-
-  // Australia
-  AU: {
-    countryCode: "AU",
-    taxType: "gst",
-    defaultRate: 10,
-    categoryRates: {
-      "revenue.product_sales": 10,
-      "revenue.service_revenue": 10,
-      "technology.software": 10,
-      "operations.office_supplies": 10,
-      "travel_entertainment.meals": 10,
-      "professional_services.insurance": 0, // Insurance is exempt
-      "human_resources.salary": 0, // Wages are exempt
-    },
-  },
-
-  // Netherlands
-  NL: {
-    countryCode: "NL",
-    taxType: "vat",
-    defaultRate: 21,
-    categoryRates: {
-      "revenue.product_sales": 21,
-      "revenue.service_revenue": 21,
-      "technology.software": 21,
-      "operations.office_supplies": 21,
-      "travel_entertainment.meals": 9, // Reduced rate
-      "professional_services.insurance": 0, // Insurance is exempt
-    },
-  },
-
   // Sweden
   SE: {
     countryCode: "SE",
     taxType: "vat",
     defaultRate: 25,
     categoryRates: {
-      "revenue.product_sales": 25,
-      "revenue.service_revenue": 25,
-      "technology.software": 25,
-      "operations.office_supplies": 25,
-      "travel_entertainment.meals": 12, // Reduced rate
-      "professional_services.insurance": 0, // Insurance is exempt
+      meals: 12,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
     },
   },
-
+  // Finland
+  FI: {
+    countryCode: "FI",
+    taxType: "vat",
+    defaultRate: 25.5,
+    categoryRates: {
+      meals: 14,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
   // Norway
   NO: {
     countryCode: "NO",
     taxType: "vat",
     defaultRate: 25,
     categoryRates: {
-      "revenue.product_sales": 25,
-      "revenue.service_revenue": 25,
-      "technology.software": 25,
-      "operations.office_supplies": 25,
-      "travel_entertainment.meals": 15, // Reduced rate
-      "professional_services.insurance": 0, // Insurance is exempt
+      meals: 15,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
     },
   },
-
   // Denmark
   DK: {
     countryCode: "DK",
     taxType: "vat",
     defaultRate: 25,
     categoryRates: {
-      "revenue.product_sales": 25,
-      "revenue.service_revenue": 25,
-      "technology.software": 25,
-      "operations.office_supplies": 25,
-      "travel_entertainment.meals": 25, // Standard rate
-      "professional_services.insurance": 0, // Insurance is exempt
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
     },
   },
-
-  // Default fallback for countries without specific configuration
+  // Germany
+  DE: {
+    countryCode: "DE",
+    taxType: "vat",
+    defaultRate: 19,
+    categoryRates: {
+      meals: 7,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // France
+  FR: {
+    countryCode: "FR",
+    taxType: "vat",
+    defaultRate: 20,
+    categoryRates: {
+      meals: 10,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Netherlands
+  NL: {
+    countryCode: "NL",
+    taxType: "vat",
+    defaultRate: 21,
+    categoryRates: {
+      meals: 9,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Belgium
+  BE: {
+    countryCode: "BE",
+    taxType: "vat",
+    defaultRate: 21,
+    categoryRates: {
+      meals: 12,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Austria
+  AT: {
+    countryCode: "AT",
+    taxType: "vat",
+    defaultRate: 20,
+    categoryRates: {
+      meals: 10,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Italy
+  IT: {
+    countryCode: "IT",
+    taxType: "vat",
+    defaultRate: 22,
+    categoryRates: {
+      meals: 10,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Spain
+  ES: {
+    countryCode: "ES",
+    taxType: "vat",
+    defaultRate: 21,
+    categoryRates: {
+      meals: 10,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // United States
+  US: {
+    countryCode: "US",
+    taxType: "sales_tax",
+    defaultRate: 0, // No federal sales tax, varies by state
+    categoryRates: {
+      // Most business purchases are exempt from sales tax
+      // Only specify categories that might be subject to sales tax
+      "office-supplies": 0, // Often exempt for business use
+      equipment: 0, // Often exempt for business use
+      software: 0, // Often exempt or varies by state
+      // Categories that are typically exempt
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+      // Note: Actual sales tax rates vary by state (0-10%+)
+      // SMBs should configure based on their state/local rates
+    },
+  },
+  // United Kingdom
+  GB: {
+    countryCode: "GB",
+    taxType: "vat",
+    defaultRate: 20,
+    categoryRates: {
+      meals: 5,
+      utilities: 5,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Canada
+  CA: {
+    countryCode: "CA",
+    taxType: "gst",
+    defaultRate: 5, // Federal GST only
+    categoryRates: {
+      // Note: Provinces add PST/HST on top
+      // This is just federal GST - actual rates vary by province
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+      // Most business expenses subject to 5% GST
+      // Plus provincial PST/HST (varies 0-10% additional)
+    },
+  },
+  // Australia
+  AU: {
+    countryCode: "AU",
+    taxType: "gst",
+    defaultRate: 10,
+    categoryRates: {
+      // GST exempt (0%)
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // New Zealand
+  NZ: {
+    countryCode: "NZ",
+    taxType: "gst",
+    defaultRate: 15,
+    categoryRates: {
+      // GST exempt (0%)
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Switzerland
+  CH: {
+    countryCode: "CH",
+    taxType: "vat",
+    defaultRate: 7.7,
+    categoryRates: {
+      meals: 7.7,
+      utilities: 7.7,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Ireland
+  IE: {
+    countryCode: "IE",
+    taxType: "vat",
+    defaultRate: 23,
+    categoryRates: {
+      meals: 13.5,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Poland
+  PL: {
+    countryCode: "PL",
+    taxType: "vat",
+    defaultRate: 23,
+    categoryRates: {
+      meals: 8,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Czech Republic
+  CZ: {
+    countryCode: "CZ",
+    taxType: "vat",
+    defaultRate: 21,
+    categoryRates: {
+      meals: 12,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Portugal
+  PT: {
+    countryCode: "PT",
+    taxType: "vat",
+    defaultRate: 23,
+    categoryRates: {
+      meals: 13,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Luxembourg
+  LU: {
+    countryCode: "LU",
+    taxType: "vat",
+    defaultRate: 17,
+    categoryRates: {
+      meals: 8,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Estonia
+  EE: {
+    countryCode: "EE",
+    taxType: "vat",
+    defaultRate: 20,
+    categoryRates: {
+      meals: 9,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Latvia
+  LV: {
+    countryCode: "LV",
+    taxType: "vat",
+    defaultRate: 21,
+    categoryRates: {
+      meals: 12,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Lithuania
+  LT: {
+    countryCode: "LT",
+    taxType: "vat",
+    defaultRate: 21,
+    categoryRates: {
+      meals: 9,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Slovakia
+  SK: {
+    countryCode: "SK",
+    taxType: "vat",
+    defaultRate: 23,
+    categoryRates: {
+      meals: 10,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Slovenia
+  SI: {
+    countryCode: "SI",
+    taxType: "vat",
+    defaultRate: 22,
+    categoryRates: {
+      meals: 9.5,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Romania
+  RO: {
+    countryCode: "RO",
+    taxType: "vat",
+    defaultRate: 19,
+    categoryRates: {
+      meals: 9,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Hungary
+  HU: {
+    countryCode: "HU",
+    taxType: "vat",
+    defaultRate: 27,
+    categoryRates: {
+      meals: 18,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
+  // Turkey
+  TR: {
+    countryCode: "TR",
+    taxType: "vat",
+    defaultRate: 18,
+    categoryRates: {
+      meals: 8,
+      insurance: 0,
+      benefits: 0,
+      "employer-taxes": 0,
+      taxes: 0,
+      "vat-gst-pst-qst-payments": 0,
+      "sales-use-tax-payments": 0,
+      "income-tax-payments": 0,
+      "payroll-tax-remittances": 0,
+      "government-fees": 0,
+      "credit-card-payment": 0,
+      "loan-proceeds": 0,
+      "loan-principal-repayment": 0,
+      "interest-expense": 0,
+      "payment-platform-payouts": 0,
+      "owner-draws": 0,
+      "capital-investment": 0,
+      "charitable-donations": 0,
+      uncategorized: 0,
+    },
+  },
   DEFAULT: {
     countryCode: "DEFAULT",
     taxType: "none",
@@ -166,23 +833,25 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
 
 // Helper function to get tax rate for a specific category and country
 export function getTaxRateForCategory(
-  countryCode: string,
+  countryCode: string | undefined,
   categorySlug: string,
 ): number {
-  const config = TAX_RATE_CONFIGS[countryCode] || TAX_RATE_CONFIGS.DEFAULT;
-
+  const effectiveCountryCode = countryCode || "DEFAULT";
+  const config =
+    TAX_RATE_CONFIGS[effectiveCountryCode] || TAX_RATE_CONFIGS.DEFAULT;
   // Check if there's a specific rate for this category
   if (config?.categoryRates?.[categorySlug] !== undefined) {
     return config.categoryRates[categorySlug];
   }
-
   // Fall back to default rate
   return config?.defaultRate || 0;
 }
 
 // Helper function to get tax type for a country
-export function getTaxTypeForCountry(countryCode: string): string {
-  const config = TAX_RATE_CONFIGS[countryCode] || TAX_RATE_CONFIGS.DEFAULT;
+export function getTaxTypeForCountry(countryCode: string | undefined): string {
+  const effectiveCountryCode = countryCode || "DEFAULT";
+  const config =
+    TAX_RATE_CONFIGS[effectiveCountryCode] || TAX_RATE_CONFIGS.DEFAULT;
   return config?.taxType || "none";
 }
 
@@ -192,6 +861,7 @@ export function getSupportedCountries(): string[] {
 }
 
 // Helper function to check if a country is supported
-export function isCountrySupported(countryCode: string): boolean {
+export function isCountrySupported(countryCode: string | undefined): boolean {
+  if (!countryCode) return false;
   return countryCode in TAX_RATE_CONFIGS;
 }

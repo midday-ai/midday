@@ -195,19 +195,19 @@ export function prepareUpdateData(
     updateData.merchantName = result.merchant!;
   }
 
-  // Only update category if:
-  // 1. Confidence is high enough (using threshold)
-  // 2. Category is valid
-  // 3. Transaction doesn't already have a category
-  // 4. Amount is not positive (positive amounts are typically income)
-  if (
-    shouldUseCategoryResult(result) &&
-    result.category &&
-    isValidCategory(result.category) &&
-    !transaction.categorySlug &&
-    transaction.amount <= 0
-  ) {
-    updateData.categorySlug = result.category;
+  // Category assignment logic
+  if (!transaction.categorySlug && transaction.amount <= 0) {
+    if (
+      shouldUseCategoryResult(result) &&
+      result.category &&
+      isValidCategory(result.category)
+    ) {
+      // High confidence: use the suggested category
+      updateData.categorySlug = result.category;
+    } else {
+      // Low confidence or no category: mark as uncategorized to prevent reprocessing
+      updateData.categorySlug = "uncategorized";
+    }
   }
 
   return updateData;

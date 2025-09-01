@@ -17,6 +17,7 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { Switch } from "@midday/ui/switch";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { InputColor } from "../input-color";
@@ -30,6 +31,8 @@ type Props = {
   defaultTaxRate?: number;
   defaultTaxType?: string;
   defaultColor?: string;
+  defaultTaxReportingCode?: string;
+  defaultExcluded?: boolean;
 };
 
 const formSchema = z.object({
@@ -38,6 +41,8 @@ const formSchema = z.object({
   color: z.string().optional().nullable(),
   taxRate: z.number().optional().nullable(),
   taxType: z.string().optional().nullable(),
+  taxReportingCode: z.string().optional().nullable(),
+  excluded: z.boolean().optional().nullable(),
   parentId: z.string().uuid(),
 });
 
@@ -50,6 +55,8 @@ export function CreateSubCategoryModal({
   defaultTaxRate,
   defaultTaxType,
   defaultColor,
+  defaultTaxReportingCode,
+  defaultExcluded,
 }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -73,6 +80,8 @@ export function CreateSubCategoryModal({
       taxRate: defaultTaxRate,
       taxType: defaultTaxType,
       color: defaultColor,
+      taxReportingCode: defaultTaxReportingCode,
+      excluded: defaultExcluded ?? false,
     },
   });
 
@@ -83,6 +92,8 @@ export function CreateSubCategoryModal({
       color: values.color ?? undefined,
       taxRate: values.taxRate ?? undefined,
       taxType: values.taxType ?? undefined,
+      taxReportingCode: values.taxReportingCode ?? undefined,
+      excluded: values.excluded ?? false,
     });
   }
 
@@ -143,6 +154,26 @@ export function CreateSubCategoryModal({
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="taxReportingCode"
+                  render={({ field }) => (
+                    <FormItem className="flex-1 space-y-1">
+                      <FormLabel className="text-xs text-[#878787] font-normal">
+                        Report Code
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          autoFocus={false}
+                          placeholder="Report Code"
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
                 <div className="flex relative gap-2">
                   <FormField
                     control={form.control}
@@ -190,6 +221,34 @@ export function CreateSubCategoryModal({
                     )}
                   />
                 </div>
+
+                <FormField
+                  control={form.control}
+                  name="excluded"
+                  render={({ field }) => (
+                    <FormItem className="flex-1 space-y-1">
+                      <div className="border border-border p-3 mt-4">
+                        <div className="flex items-center justify-between space-x-2">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Exclude from Reports
+                            </FormLabel>
+                            <div className="text-xs text-muted-foreground">
+                              Transactions in this category won't appear in
+                              financial reports
+                            </div>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value ?? false}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </div>
+                      </div>
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <DialogFooter className="mt-8 w-full">

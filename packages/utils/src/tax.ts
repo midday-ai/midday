@@ -22,7 +22,7 @@ export const taxTypes = [
   {
     value: "service_tax",
     label: "Service Tax",
-    description: "For legacy or niche service-based regions.",
+    description: "For niche service-based regions.",
   },
   {
     value: "excise_tax",
