@@ -1,6 +1,6 @@
 "use client";
 
-import { useMetricsParams } from "@/hooks/use-metrics-params";
+import { useReportsParams } from "@/hooks/use-reports-params";
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { BurnRateChart } from "./burn-rate-chart";
@@ -9,7 +9,7 @@ import { ProfitChart } from "./profit-chart";
 import { RevenueChart } from "./revenue-chart";
 
 export function Charts() {
-  const { params } = useMetricsParams();
+  const { params } = useReportsParams();
   const trpc = useTRPC();
 
   const { data: accounts } = useQuery(

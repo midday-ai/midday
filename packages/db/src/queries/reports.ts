@@ -6,7 +6,7 @@ function getPercentageIncrease(a: number, b: number) {
   return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
 }
 
-export type GetMetricsParams = {
+export type GetReportsParams = {
   teamId: string;
   from: string;
   to: string;
@@ -14,13 +14,13 @@ export type GetMetricsParams = {
   type?: "revenue" | "profit";
 };
 
-interface MetricsResultItem {
+interface ReportsResultItem {
   value: string;
   date: string;
   currency: string;
 }
 
-export async function getMetrics(db: Database, params: GetMetricsParams) {
+export async function getReports(db: Database, params: GetReportsParams) {
   const { teamId, from, to, type = "profit", currency: inputCurrency } = params;
 
   const rpc = type === "profit" ? "get_profit_v3" : "get_revenue_v3";
@@ -34,7 +34,7 @@ export async function getMetrics(db: Database, params: GetMetricsParams) {
     db.execute(
       sql`SELECT * FROM ${sql.raw(rpc)}(${teamId}, ${startOfMonth(parseISO(from)).toISOString()}, ${endOfMonth(parseISO(to)).toISOString()}, ${inputCurrency ?? null})`,
     ),
-  ])) as unknown as [MetricsResultItem[], MetricsResultItem[]];
+  ])) as unknown as [ReportsResultItem[], ReportsResultItem[]];
 
   const prevData = rawPrev.map((item) => ({
     ...item,

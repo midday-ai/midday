@@ -16,7 +16,7 @@ export function BurnRate({ result }: Props) {
   const { from, to, currency } = result.params;
 
   const { data, isLoading } = useQuery(
-    trpc.metrics.burnRate.queryOptions({
+    trpc.reports.burnRate.queryOptions({
       from,
       to,
       currency,

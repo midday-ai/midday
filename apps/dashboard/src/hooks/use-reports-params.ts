@@ -75,7 +75,7 @@ export const chartPeriodOptions = [
   },
 ];
 
-export const metricsParamsSchema = {
+export const reportsParamsSchema = {
   from: parseAsString.withDefault(
     format(subMonths(startOfMonth(new Date()), 12), "yyyy-MM-dd"),
   ),
@@ -87,8 +87,8 @@ export const metricsParamsSchema = {
   currency: parseAsString,
 };
 
-export function useMetricsParams() {
-  const [params, setParams] = useQueryStates(metricsParamsSchema);
+export function useReportsParams() {
+  const [params, setParams] = useQueryStates(reportsParamsSchema);
 
   return {
     params,
@@ -96,4 +96,4 @@ export function useMetricsParams() {
   };
 }
 
-export const loadMetricsParams = createLoader(metricsParamsSchema);
+export const loadReportsParams = createLoader(reportsParamsSchema);

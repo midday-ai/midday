@@ -2249,25 +2249,6 @@ export const transactionCategories = pgTable(
   ],
 );
 
-export const teamLimitsMetrics = pgMaterializedView("team_limits_metrics", {
-  teamId: uuid("team_id"),
-  totalDocumentSize: numeric("total_document_size"),
-  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-  numberOfUsers: bigint("number_of_users", { mode: "number" }),
-  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-  numberOfBankConnections: bigint("number_of_bank_connections", {
-    mode: "number",
-  }),
-  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-  invoicesCreatedThisMonth: bigint("invoices_created_this_month", {
-    mode: "number",
-  }),
-  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-  inboxCreatedThisMonth: bigint("inbox_created_this_month", { mode: "number" }),
-}).as(
-  sql`SELECT t.id AS team_id, COALESCE(sum((d.metadata ->> 'size'::text)::bigint), 0::numeric) AS total_document_size, count(DISTINCT u.id) AS number_of_users, count(DISTINCT bc.id) AS number_of_bank_connections, count(DISTINCT i.id) FILTER (WHERE date_trunc('month'::text, i.created_at) = date_trunc('month'::text, CURRENT_DATE::timestamp with time zone)) AS invoices_created_this_month, count(DISTINCT inbox.id) FILTER (WHERE date_trunc('month'::text, inbox.created_at) = date_trunc('month'::text, CURRENT_DATE::timestamp with time zone)) AS inbox_created_this_month FROM teams t LEFT JOIN documents d ON d.team_id = t.id LEFT JOIN users u ON u.team_id = t.id LEFT JOIN bank_connections bc ON bc.team_id = t.id LEFT JOIN invoices i ON i.team_id = t.id LEFT JOIN inbox ON inbox.team_id = t.id GROUP BY t.id`,
-);
-
 export const usersInAuth = pgTable(
   "auth.users",
   {

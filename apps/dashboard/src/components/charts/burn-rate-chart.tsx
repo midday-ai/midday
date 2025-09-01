@@ -1,6 +1,6 @@
 "use client";
 
-import { useMetricsParams } from "@/hooks/use-metrics-params";
+import { useReportsParams } from "@/hooks/use-reports-params";
 import { useTRPC } from "@/trpc/client";
 import { calculateAvgBurnRate } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
@@ -23,10 +23,10 @@ type Props = {
 
 export function BurnRateChart({ disabled }: Props) {
   const trpc = useTRPC();
-  const { params } = useMetricsParams();
+  const { params } = useReportsParams();
 
   const { data } = useQuery({
-    ...trpc.metrics.burnRate.queryOptions({
+    ...trpc.reports.burnRate.queryOptions({
       from: params.from,
       to: params.to,
       currency: params.currency ?? undefined,
@@ -35,7 +35,7 @@ export function BurnRateChart({ disabled }: Props) {
   });
 
   const { data: runway } = useQuery({
-    ...trpc.metrics.runway.queryOptions({
+    ...trpc.reports.runway.queryOptions({
       from: params.from,
       to: params.to,
       currency: params.currency ?? undefined,

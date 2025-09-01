@@ -38,7 +38,7 @@ export const getTaxSummary = tool({
     const queryClient = getQueryClient();
 
     const data = await queryClient.fetchQuery(
-      trpc.metrics.taxSummary.queryOptions({
+      trpc.reports.taxSummary.queryOptions({
         from: startOfMonth(new Date(from)).toISOString(),
         to: new Date(to).toISOString(),
         currency,

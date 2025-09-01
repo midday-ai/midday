@@ -22,7 +22,7 @@ export const getRunway = tool({
     const queryClient = getQueryClient();
 
     const months = await queryClient.fetchQuery(
-      trpc.metrics.runway.queryOptions({
+      trpc.reports.runway.queryOptions({
         from: startOfMonth(new Date(startDate)).toISOString(),
         to: new Date(endDate).toISOString(),
         currency,

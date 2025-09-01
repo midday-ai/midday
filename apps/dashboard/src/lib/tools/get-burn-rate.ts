@@ -25,14 +25,14 @@ export const getBurnRate = tool({
 
     const [months, burnRateData] = await Promise.all([
       queryClient.fetchQuery(
-        trpc.metrics.runway.queryOptions({
+        trpc.reports.runway.queryOptions({
           currency: params.currency,
           from: startOfMonth(new Date(params.from)).toISOString(),
           to: params.to.toISOString(),
         }),
       ),
       queryClient.fetchQuery(
-        trpc.metrics.burnRate.queryOptions({
+        trpc.reports.burnRate.queryOptions({
           from: startOfMonth(new Date(params.from)).toISOString(),
           to: new Date(params.to).toISOString(),
           currency: params.currency,

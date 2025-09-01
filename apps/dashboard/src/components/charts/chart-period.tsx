@@ -2,8 +2,8 @@
 
 import {
   chartPeriodOptions,
-  useMetricsParams,
-} from "@/hooks/use-metrics-params";
+  useReportsParams,
+} from "@/hooks/use-reports-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
@@ -26,7 +26,7 @@ type Props = {
 };
 
 export function ChartPeriod({ disabled }: Props) {
-  const { params, setParams } = useMetricsParams();
+  const { params, setParams } = useReportsParams();
   const { data: user } = useUserQuery();
 
   const handleChangePeriod = (

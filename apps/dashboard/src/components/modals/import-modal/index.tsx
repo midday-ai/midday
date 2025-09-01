@@ -159,7 +159,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
       });
 
       queryClient.invalidateQueries({
-        queryKey: trpc.metrics.pathKey(),
+        queryKey: trpc.reports.pathKey(),
       });
 
       toast({

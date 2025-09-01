@@ -1,6 +1,6 @@
 "use client";
 
-import { chartTypeOptions, useMetricsParams } from "@/hooks/use-metrics-params";
+import { chartTypeOptions, useReportsParams } from "@/hooks/use-reports-params";
 import { useI18n } from "@/locales/client";
 import {
   Select,
@@ -16,7 +16,7 @@ type Props = {
 
 export function ChartType({ disabled }: Props) {
   const t = useI18n();
-  const { params, setParams } = useMetricsParams();
+  const { params, setParams } = useReportsParams();
 
   return (
     <Select

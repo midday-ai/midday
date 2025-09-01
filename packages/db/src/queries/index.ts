@@ -16,7 +16,7 @@ export * from "./inbox-embeddings";
 export * from "./inbox-matching";
 export * from "./invoice-templates";
 export * from "./invoices";
-export * from "./metrics";
+export * from "./reports";
 export * from "./search";
 export * from "./short-links";
 export * from "./tags";

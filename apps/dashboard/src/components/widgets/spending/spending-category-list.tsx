@@ -17,7 +17,7 @@ type Props = {
     from: string;
     to: string;
   };
-  data: RouterOutputs["metrics"]["spending"];
+  data: RouterOutputs["reports"]["spending"];
   disabled: boolean;
 };
 
