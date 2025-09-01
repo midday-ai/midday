@@ -1,0 +1,26 @@
+{
+  "name": "@midday/categories",
+  "version": "0.1.0",
+  "description": "Transaction categories with parent-child structure for financial reports",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tax-rates": "./src/tax-rates/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "migrate": "tsx scripts/migrate.ts",
+    "migrate:preview": "tsx scripts/migrate.ts --command preview",
+    "migrate:run": "tsx scripts/migrate.ts --command migrate"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  }
+}

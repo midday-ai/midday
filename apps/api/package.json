@@ -19,6 +19,7 @@
     "@hono/zod-openapi": "^0.19.8",
     "@hono/zod-validator": "^0.7.0",
     "@midday/cache": "workspace:*",
+    "@midday/categories": "workspace:*",
     "@midday/db": "workspace:*",
     "@midday/documents": "workspace:*",
     "@midday/encryption": "workspace:*",

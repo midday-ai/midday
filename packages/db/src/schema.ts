@@ -141,6 +141,7 @@ export const trackerStatusEnum = pgEnum("trackerStatus", [
 ]);
 
 export const transactionCategoriesEnum = pgEnum("transactionCategories", [
+  // Existing categories
   "travel",
   "office-supplies",
   "meals",
@@ -157,6 +158,96 @@ export const transactionCategoriesEnum = pgEnum("transactionCategories", [
   "other",
   "salary",
   "fees",
+
+  // New parent categories
+  "revenue",
+  "cost-of-goods-sold",
+  "sales-marketing",
+  "operations",
+  "professional-services",
+  "human-resources",
+  "travel-entertainment",
+  "technology",
+  "banking-finance",
+  "assets-capex",
+  "liabilities-debt",
+  "taxes-government",
+  "owner-equity",
+  "system",
+
+  // New revenue categories
+  "product-sales",
+  "service-revenue",
+  "consulting-revenue",
+  "subscription-revenue",
+  "interest-income",
+  "other-income",
+  "customer-refunds",
+  "chargebacks-disputes",
+
+  // Cost of goods sold
+  "inventory",
+  "manufacturing",
+  "shipping-inbound",
+  "duties-customs",
+
+  // Sales & marketing
+  "marketing",
+  "advertising",
+  "website",
+  "events",
+  "promotional-materials",
+
+  // Professional services
+  "professional-services-fees",
+  "contractors",
+  "insurance",
+
+  // Operations (additional)
+  "utilities",
+  "shipping-outbound",
+  "maintenance-repairs",
+  "cleaning-supplies",
+  "security",
+
+  // Human resources (additional)
+  "training",
+  "employer-taxes",
+  "benefits",
+
+  // Technology (additional)
+  "non-software-subscriptions",
+  "domain-hosting",
+  "cloud-storage",
+
+  // Banking & finance (additional)
+  "credit-card-payment",
+  "banking-fees",
+  "loan-proceeds",
+  "loan-principal-repayment",
+  "interest-expense",
+  "payment-platform-payouts",
+  "payment-processor-fees",
+
+  // Assets & CapEx
+  "fixed-assets",
+  "prepaid-expenses",
+
+  // Liabilities & debt
+  "leases",
+  "deferred-revenue",
+
+  // Taxes & government (additional)
+  "vat-gst-pst-qst-payments",
+  "sales-use-tax-payments",
+  "income-tax-payments",
+  "payroll-tax-remittances",
+  "government-fees",
+
+  // Owner equity
+  "owner-draws",
+  "capital-investment",
+  "charitable-donations",
 ]);
 
 export const transactionMethodsEnum = pgEnum("transactionMethods", [
