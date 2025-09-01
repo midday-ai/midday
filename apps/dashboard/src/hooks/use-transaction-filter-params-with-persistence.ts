@@ -5,18 +5,15 @@ import {
   type FilterHookReturn,
   type TransactionFilters,
 } from "@/utils/transaction-filters";
-import { useGenericFilterPersistence } from "./use-generic-filter-persistence";
+import { useCallback } from "react";
 import { useTransactionFilterParams } from "./use-transaction-filter-params";
 
 export function useTransactionFilterParamsWithPersistence(): FilterHookReturn<TransactionFilters> {
   const { filter, setFilter, hasFilters } = useTransactionFilterParams();
 
-  const { clearAllFilters } = useGenericFilterPersistence({
-    storageKey: "transaction-filters",
-    emptyState: EMPTY_FILTER_STATE,
-    currentFilters: filter,
-    setFilters: setFilter,
-  });
+  const clearAllFilters = useCallback(() => {
+    setFilter(EMPTY_FILTER_STATE);
+  }, [setFilter]);
 
   return {
     filter,
