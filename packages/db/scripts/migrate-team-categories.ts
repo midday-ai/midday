@@ -310,6 +310,7 @@ async function main() {
   try {
     console.log(`🚀 Starting category migration for team: ${teamId}`);
 
+    // @ts-expect-error
     const result = await migrateExistingTeamCategories(db, teamId);
 
     console.log("\n✅ Migration completed successfully!");

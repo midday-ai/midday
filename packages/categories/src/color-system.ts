@@ -146,7 +146,7 @@ export const CATEGORY_COLOR_MAP = {
   system: "#6B7280", // Gray
 
   // Revenue Children (Green variations)
-  income: "#00B894", // Darker green
+  income: "#06eb51",
   "product-sales": "#00D084", // Main green
   "service-revenue": "#00E676", // Lighter green
   "consulting-revenue": "#00C853", // Medium green

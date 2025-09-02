@@ -42,7 +42,7 @@ export const getCategories = async (
       ),
     )
     .orderBy(
-      desc(transactionCategories.createdAt),
+      desc(transactionCategories.system),
       asc(transactionCategories.name),
     )
     .limit(limit);

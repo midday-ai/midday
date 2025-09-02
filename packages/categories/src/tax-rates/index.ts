@@ -9,6 +9,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 25,
     categoryRates: {
       meals: 12,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -36,6 +47,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 25.5,
     categoryRates: {
       meals: 14,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -63,6 +85,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 25,
     categoryRates: {
       meals: 15,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -89,6 +122,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     taxType: "vat",
     defaultRate: 25,
     categoryRates: {
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -116,6 +160,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 19,
     categoryRates: {
       meals: 7,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -143,6 +198,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 20,
     categoryRates: {
       meals: 10,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -170,6 +236,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 21,
     categoryRates: {
       meals: 9,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -197,6 +274,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 21,
     categoryRates: {
       meals: 12,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -224,6 +312,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 20,
     categoryRates: {
       meals: 10,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -251,6 +350,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 22,
     categoryRates: {
       meals: 10,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -278,6 +388,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 21,
     categoryRates: {
       meals: 10,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -304,6 +425,16 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     taxType: "sales_tax",
     defaultRate: 0, // No federal sales tax, varies by state
     categoryRates: {
+      // Income categories (sales tax rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
       // Most business purchases are exempt from sales tax
       // Only specify categories that might be subject to sales tax
       "office-supplies": 0, // Often exempt for business use
@@ -340,6 +471,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 5,
       utilities: 5,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -366,6 +508,16 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     taxType: "gst",
     defaultRate: 5, // Federal GST only
     categoryRates: {
+      // Income categories (GST rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
       // Note: Provinces add PST/HST on top
       // This is just federal GST - actual rates vary by province
       insurance: 0,
@@ -396,6 +548,16 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     taxType: "gst",
     defaultRate: 10,
     categoryRates: {
+      // Income categories (GST rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
       // GST exempt (0%)
       insurance: 0,
       benefits: 0,
@@ -423,6 +585,16 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     taxType: "gst",
     defaultRate: 15,
     categoryRates: {
+      // Income categories (GST rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
       // GST exempt (0%)
       insurance: 0,
       benefits: 0,
@@ -452,6 +624,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 7.7,
       utilities: 7.7,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -479,6 +662,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 23,
     categoryRates: {
       meals: 13.5,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -506,6 +700,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 23,
     categoryRates: {
       meals: 8,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -533,6 +738,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 21,
     categoryRates: {
       meals: 12,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -560,6 +776,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 23,
     categoryRates: {
       meals: 13,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -587,6 +814,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 17,
     categoryRates: {
       meals: 8,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -614,6 +852,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 20,
     categoryRates: {
       meals: 9,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -641,6 +890,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 21,
     categoryRates: {
       meals: 12,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -668,6 +928,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 21,
     categoryRates: {
       meals: 9,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -695,6 +966,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 23,
     categoryRates: {
       meals: 10,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -722,6 +1004,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 22,
     categoryRates: {
       meals: 9.5,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -749,6 +1042,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 19,
     categoryRates: {
       meals: 9,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -776,6 +1080,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 27,
     categoryRates: {
       meals: 18,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,
@@ -803,6 +1118,17 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 18,
     categoryRates: {
       meals: 8,
+      // Income categories (VAT rate 0%)
+      income: 0,
+      "product-sales": 0,
+      "service-revenue": 0,
+      "consulting-revenue": 0,
+      "subscription-revenue": 0,
+      "interest-income": 0,
+      "other-income": 0,
+      "customer-refunds": 0,
+      "chargebacks-disputes": 0,
+      // Other exempt categories
       insurance: 0,
       benefits: 0,
       "employer-taxes": 0,

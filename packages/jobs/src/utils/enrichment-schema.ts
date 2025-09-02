@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Transaction categories that the LLM can assign (only categories suitable for AI categorization)
 export const transactionCategories = [
-  // Core expense categories (high confidence)
+  // Core operational expenses (high confidence)
   "software", // SaaS subscriptions, development tools
   "travel", // Business trips, transportation
   "meals", // Business dining, client meals
@@ -12,32 +12,48 @@ export const transactionCategories = [
   "rent", // Office space, co-working
   "internet-and-telephone", // ISP, phone bills
   "facilities-expenses", // Building maintenance
+  "shipping", // Shipping costs
 
   // Marketing & advertising
   "marketing", // Marketing services, agencies
   "advertising", // Ad platforms, campaigns
   "website", // Domain, hosting, web development
-  "domain-hosting", // Specific hosting services
+  "events", // Conferences, trade shows
+  "promotional-materials", // Brochures, branded items
 
   // Professional services
+  "professional-services-fees", // Legal, accounting, consulting
   "insurance", // Business insurance premiums
   "contractors", // Freelancer payments
-  "fees", // Bank fees, processing fees
 
-  // Operations
-  "maintenance-repairs", // Equipment/building maintenance
-  "cleaning-supplies", // Cleaning services, supplies
-  "security", // Security systems, monitoring
-  "cloud-storage", // Cloud backup, storage services
-
-  // Training & development
+  // Human resources
   "training", // Courses, certifications
+  "employer-taxes", // Payroll taxes
+  "benefits", // Health insurance, retirement
 
-  // Financial (automated transactions)
+  // Technology
+  "non-software-subscriptions", // Non-software subscriptions
+
+  // Entertainment & activities
+  "activity", // Team building, entertainment
+
+  // Banking & finance
+  "transfer", // Bank transfers
   "credit-card-payment", // Credit card charges
+  "banking-fees", // Bank fees
   "interest-expense", // Loan interest payments
+  "payouts", // Payment platform payouts
+  "processor-fees", // Payment processing fees
+  "fees", // General fees
 
-  // Fallback
+  // Assets
+  "fixed-assets", // Equipment, furniture purchases
+  "prepaid-expenses", // Prepaid services
+
+  // Liabilities
+  "leases", // Equipment or property leases
+
+  // Fallback categories
   "uncategorized", // When uncertain
   "other", // Miscellaneous expenses
 ] as const;
