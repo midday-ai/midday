@@ -2148,7 +2148,6 @@ export const transactionCategories = pgTable(
     taxReportingCode: text("tax_reporting_code"),
     excluded: boolean("excluded").default(false),
     description: text(),
-    embedding: vector({ dimensions: 384 }),
     parentId: uuid("parent_id"),
   },
   (table) => [
