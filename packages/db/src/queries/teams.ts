@@ -84,6 +84,9 @@ async function createSystemCategoriesForTeam(
 
   // First, add all parent categories
   for (const parent of CATEGORIES) {
+    const taxRate = getTaxRateForCategory(countryCode, parent.slug);
+    const taxType = getTaxTypeForCountry(countryCode);
+
     categoriesToInsert.push({
       teamId,
       name: parent.name,
@@ -91,8 +94,8 @@ async function createSystemCategoriesForTeam(
       color: parent.color,
       system: parent.system,
       excluded: parent.excluded,
-      taxRate: getTaxRateForCategory(countryCode, parent.slug),
-      taxType: getTaxTypeForCountry(countryCode),
+      taxRate: taxRate > 0 ? taxRate : null,
+      taxType: taxRate > 0 ? taxType : null,
       taxReportingCode: undefined,
       description: undefined,
       parentId: undefined, // Parent categories have no parent
@@ -122,6 +125,9 @@ async function createSystemCategoriesForTeam(
     const parentId = parentSlugToId.get(parent.slug);
     if (parentId) {
       for (const child of parent.children) {
+        const taxRate = getTaxRateForCategory(countryCode, child.slug);
+        const taxType = getTaxTypeForCountry(countryCode);
+
         childCategoriesToInsert.push({
           teamId,
           name: child.name,
@@ -129,8 +135,8 @@ async function createSystemCategoriesForTeam(
           color: child.color,
           system: child.system,
           excluded: child.excluded,
-          taxRate: getTaxRateForCategory(countryCode, child.slug),
-          taxType: getTaxTypeForCountry(countryCode),
+          taxRate: taxRate > 0 ? taxRate : null,
+          taxType: taxRate > 0 ? taxType : null,
           taxReportingCode: undefined,
           description: undefined,
           parentId: parentId,
