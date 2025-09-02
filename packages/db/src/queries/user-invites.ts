@@ -1,6 +1,6 @@
 import type { Database } from "@db/client";
-import { teams, userInvites, usersOnTeam } from "@db/schema";
-import { and, eq } from "drizzle-orm";
+import { teams, userInvites, users, usersOnTeam } from "@db/schema";
+import { and, eq, inArray } from "drizzle-orm";
 
 export async function getUserInvites(db: Database, email: string) {
   return db.query.userInvites.findMany({
@@ -164,15 +164,122 @@ type CreateTeamInvitesParams = {
   }[];
 };
 
+type InviteValidationResult = {
+  validInvites: {
+    email: string;
+    role: "owner" | "member";
+    invitedBy: string;
+  }[];
+  skippedInvites: {
+    email: string;
+    reason: "already_member" | "already_invited" | "duplicate";
+  }[];
+};
+
+/**
+ * Validates invites by checking for existing team members, pending invites, and duplicates
+ */
+async function validateInvites(
+  db: Database,
+  teamId: string,
+  invites: {
+    email: string;
+    role: "owner" | "member";
+    invitedBy: string;
+  }[],
+): Promise<InviteValidationResult> {
+  // Remove duplicates from input
+  const uniqueInvites = invites.filter(
+    (invite, index, self) =>
+      index ===
+      self.findIndex(
+        (i) => i.email.toLowerCase() === invite.email.toLowerCase(),
+      ),
+  );
+
+  const emails = uniqueInvites.map((invite) => invite.email.toLowerCase());
+
+  // Check for existing team members
+  const existingMembers = await db
+    .select({
+      email: users.email,
+    })
+    .from(usersOnTeam)
+    .innerJoin(users, eq(usersOnTeam.userId, users.id))
+    .where(and(eq(usersOnTeam.teamId, teamId), inArray(users.email, emails)));
+
+  const existingMemberEmails = new Set(
+    existingMembers
+      .map((member) => member.email?.toLowerCase())
+      .filter(Boolean),
+  );
+
+  // Check for pending invites
+  const pendingInvites = await db
+    .select({
+      email: userInvites.email,
+    })
+    .from(userInvites)
+    .where(
+      and(eq(userInvites.teamId, teamId), inArray(userInvites.email, emails)),
+    );
+
+  const pendingInviteEmails = new Set(
+    pendingInvites.map((invite) => invite.email?.toLowerCase()).filter(Boolean),
+  );
+
+  const validInvites: typeof uniqueInvites = [];
+  const skippedInvites: {
+    email: string;
+    reason: "already_member" | "already_invited" | "duplicate";
+  }[] = [];
+
+  // Process each invite
+  for (const invite of uniqueInvites) {
+    const emailLower = invite.email.toLowerCase();
+
+    if (existingMemberEmails.has(emailLower)) {
+      skippedInvites.push({
+        email: invite.email,
+        reason: "already_member",
+      });
+    } else if (pendingInviteEmails.has(emailLower)) {
+      skippedInvites.push({
+        email: invite.email,
+        reason: "already_invited",
+      });
+    } else {
+      validInvites.push(invite);
+    }
+  }
+
+  return { validInvites, skippedInvites };
+}
+
 export async function createTeamInvites(
   db: Database,
   params: CreateTeamInvitesParams,
 ) {
   const { teamId, invites } = params;
 
+  // Validate invites and filter out invalid ones
+  const { validInvites, skippedInvites } = await validateInvites(
+    db,
+    teamId,
+    invites,
+  );
+
+  // If no valid invites, return empty results with skipped info
+  if (validInvites.length === 0) {
+    return {
+      results: [],
+      skippedInvites,
+    };
+  }
+
   const results = await Promise.all(
-    invites.map(async (invite) => {
-      // Upsert invite
+    validInvites.map(async (invite) => {
+      // Insert new invite (no upsert needed since we've already validated)
       const [row] = await db
         .insert(userInvites)
         .values({
@@ -180,13 +287,6 @@ export async function createTeamInvites(
           role: invite.role,
           invitedBy: invite.invitedBy,
           teamId: teamId,
-        })
-        .onConflictDoUpdate({
-          target: [userInvites.email, userInvites.teamId],
-          set: {
-            role: invite.role,
-            invitedBy: invite.invitedBy,
-          },
         })
         .returning({
           id: userInvites.id,
@@ -217,5 +317,8 @@ export async function createTeamInvites(
     }),
   );
 
-  return results;
+  return {
+    results: results.filter(Boolean),
+    skippedInvites,
+  };
 }

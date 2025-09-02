@@ -181,22 +181,34 @@ export const teamRouter = createTRPCRouter({
         })),
       });
 
-      const invites =
-        data?.map((invite) => ({
-          email: invite?.email!,
-          invitedBy: session.user.id!,
-          invitedByName: session.user.full_name!,
-          invitedByEmail: session.user.email!,
-          teamName: invite?.team?.name!,
-          inviteCode: invite?.code!,
-        })) ?? [];
+      const results = data?.results ?? [];
+      const skippedInvites = data?.skippedInvites ?? [];
 
-      await tasks.trigger("invite-team-members", {
-        teamId: teamId!,
-        invites,
-        ip,
-        locale: "en",
-      } satisfies InviteTeamMembersPayload);
+      const invites = results.map((invite) => ({
+        email: invite?.email!,
+        invitedBy: session.user.id!,
+        invitedByName: session.user.full_name!,
+        invitedByEmail: session.user.email!,
+        teamName: invite?.team?.name!,
+        inviteCode: invite?.code!,
+      }));
+
+      // Only trigger email sending if there are valid invites
+      if (invites.length > 0) {
+        await tasks.trigger("invite-team-members", {
+          teamId: teamId!,
+          invites,
+          ip,
+          locale: "en",
+        } satisfies InviteTeamMembersPayload);
+      }
+
+      // Return information about the invitation process
+      return {
+        sent: invites.length,
+        skipped: skippedInvites.length,
+        skippedInvites,
+      };
     }),
 
   deleteInvite: protectedProcedure
