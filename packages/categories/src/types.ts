@@ -26,7 +26,7 @@ export type CategoryHierarchy = ParentCategory[];
 // Tax rate configuration
 export interface TaxRateConfig {
   countryCode: string;
-  taxType: "vat" | "gst" | "sales_tax" | "income_tax" | "none";
+  taxType: "vat" | "gst" | "sales_tax" | "income_tax" | "none" | null;
   defaultRate: number;
   categoryRates?: Record<string, number>; // category slug -> tax rate
 }

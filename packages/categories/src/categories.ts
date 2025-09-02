@@ -82,7 +82,6 @@ const RAW_CATEGORIES = [
     children: [
       { slug: "salary", name: "Salary" },
       { slug: "training", name: "Training" },
-      { slug: "employer-taxes", name: "Employer Taxes" },
       { slug: "benefits", name: "Benefits" },
     ],
   },
@@ -158,6 +157,7 @@ const RAW_CATEGORIES = [
       { slug: "sales-use-tax-payments", name: "Sales & Use Tax Payments" },
       { slug: "income-tax-payments", name: "Income Tax Payments" },
       { slug: "payroll-tax-remittances", name: "Payroll Tax Remittances" },
+      { slug: "employer-taxes", name: "Employer Taxes" },
       { slug: "government-fees", name: "Government Fees" },
     ],
   },

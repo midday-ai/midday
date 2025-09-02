@@ -10,6 +10,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 12,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -22,6 +23,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -34,6 +36,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -48,6 +64,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 14,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -60,6 +77,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -72,6 +90,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -86,6 +118,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 15,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -98,6 +131,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -110,6 +144,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -123,6 +171,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     defaultRate: 25,
     categoryRates: {
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -135,6 +184,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -147,6 +197,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -161,6 +225,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 7,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -173,6 +238,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -185,6 +251,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -199,6 +279,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 10,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -211,6 +292,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -223,6 +305,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -237,6 +333,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 9,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -249,6 +346,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -261,6 +359,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -275,6 +387,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 12,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -287,6 +400,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -299,6 +413,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -313,6 +441,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 10,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -325,6 +454,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -337,6 +467,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -351,6 +495,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 10,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -363,6 +508,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -375,6 +521,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -389,6 +549,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 10,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -401,6 +562,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -413,6 +575,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -455,6 +631,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -472,6 +662,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       meals: 5,
       utilities: 5,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -484,6 +675,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -496,6 +688,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -534,6 +740,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -573,6 +793,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -610,6 +844,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -625,6 +873,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       meals: 7.7,
       utilities: 7.7,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -637,6 +886,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -649,6 +899,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -663,6 +927,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 13.5,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -675,6 +940,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -687,6 +953,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -701,6 +981,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 8,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -713,6 +994,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -725,6 +1007,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -739,6 +1035,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 12,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -751,6 +1048,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -763,6 +1061,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -777,6 +1089,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 13,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -789,6 +1102,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -801,6 +1115,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -815,6 +1143,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 8,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -827,6 +1156,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -839,6 +1169,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -853,6 +1197,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 9,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -865,6 +1210,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -877,6 +1223,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -891,6 +1251,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 12,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -903,6 +1264,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -915,6 +1277,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -929,6 +1305,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 9,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -941,6 +1318,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -953,6 +1331,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -967,6 +1359,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 10,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -979,6 +1372,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -991,6 +1385,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -1005,6 +1413,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 9.5,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -1017,6 +1426,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -1029,6 +1439,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -1043,6 +1467,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 9,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -1055,6 +1480,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -1067,6 +1493,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -1081,6 +1521,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 18,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -1093,6 +1534,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -1105,6 +1547,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -1119,6 +1575,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
     categoryRates: {
       meals: 8,
       // Income categories (VAT rate 0%)
+      revenue: 0,
       income: 0,
       "product-sales": 0,
       "service-revenue": 0,
@@ -1131,6 +1588,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       // Other exempt categories
       insurance: 0,
       benefits: 0,
+      salary: 0,
       "employer-taxes": 0,
       taxes: 0,
       "vat-gst-pst-qst-payments": 0,
@@ -1143,6 +1601,20 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "loan-principal-repayment": 0,
       "interest-expense": 0,
       "payment-platform-payouts": 0,
+      // Banking & Finance categories (VAT rate 0%)
+      "banking-finance": 0,
+      "banking-fees": 0,
+      transfer: 0,
+      "internal-transfer": 0,
+      payouts: 0,
+      "processor-fees": 0,
+      fees: 0,
+      // Assets categories (VAT rate 0%)
+      "assets-capex": 0,
+      "fixed-assets": 0,
+      "prepaid-expenses": 0,
+      // Owner/Equity categories (VAT rate 0%)
+      "owner-equity": 0,
       "owner-draws": 0,
       "capital-investment": 0,
       "charitable-donations": 0,
@@ -1151,7 +1623,7 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
   },
   DEFAULT: {
     countryCode: "DEFAULT",
-    taxType: "none",
+    taxType: null,
     defaultRate: 0,
     categoryRates: {},
   },

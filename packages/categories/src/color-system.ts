@@ -171,7 +171,7 @@ export const CATEGORY_COLOR_MAP = {
 
   // Operations Children (Sky Blue variations)
   "office-supplies": "#8ED1FC", // Main sky blue
-  rent: "#75D701", // Neon green (distinct)
+  rent: "#A8E6FF", // Light sky blue (consistent with operations)
   utilities: "#39CCCC", // Teal (distinct)
   "facilities-expenses": "#8ED1FC", // Main sky blue
   equipment: "#00A9FE", // Electric blue (distinct)
@@ -186,7 +186,6 @@ export const CATEGORY_COLOR_MAP = {
   // Human Resources Children (Red variations)
   salary: "#EB144C", // Main red
   training: "#FF6FA4", // Pink sherbet
-  "employer-taxes": "#DC2626", // Darker red
   benefits: "#FF78CB", // Pink
 
   // Travel & Entertainment Children (Orange variations)
@@ -222,6 +221,7 @@ export const CATEGORY_COLOR_MAP = {
   "sales-use-tax-payments": "#FF5A5F", // Coral
   "income-tax-payments": "#DC2626", // Main red
   "payroll-tax-remittances": "#FF5A5F", // Coral
+  "employer-taxes": "#DC2626", // Main red
   "government-fees": "#DC2626", // Main red
 
   // Owner / Equity Children (Green variations)
