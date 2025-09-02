@@ -1,3 +1,4 @@
+import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
 import { useI18n } from "@/locales/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
@@ -108,10 +109,9 @@ export const columns: ColumnDef<TeamMember>[] = [
 
       const leaveTeamMutation = useMutation(
         trpc.team.leave.mutationOptions({
-          onSuccess: () => {
-            queryClient.invalidateQueries({
-              queryKey: trpc.team.members.queryKey(),
-            });
+          onSuccess: async () => {
+            // Revalidate server state and redirect
+            await revalidateAfterTeamChange();
           },
         }),
       );
