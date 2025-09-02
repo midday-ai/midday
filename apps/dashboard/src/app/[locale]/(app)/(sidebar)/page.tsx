@@ -4,7 +4,7 @@ import { EmptyState } from "@/components/charts/empty-state";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
 import { defaultPeriod } from "@/components/widgets/spending/data";
-import { loadMetricsParams } from "@/hooks/use-metrics-params";
+import { loadReportsParams } from "@/hooks/use-reports-params";
 import { HydrateClient, batchPrefetch, trpc } from "@/trpc/server";
 import { getQueryClient } from "@/trpc/server";
 import { Cookies } from "@/utils/constants";
@@ -23,7 +23,7 @@ type Props = {
 export default async function Overview(props: Props) {
   const queryClient = getQueryClient();
   const searchParams = await props.searchParams;
-  const { from, to, currency } = loadMetricsParams(searchParams);
+  const { from, to, currency } = loadReportsParams(searchParams);
 
   const cookieStore = await cookies();
   const hideConnectFlow =
@@ -32,22 +32,22 @@ export default async function Overview(props: Props) {
   batchPrefetch([
     trpc.invoice.get.queryOptions({ pageSize: 10 }),
     trpc.invoice.paymentStatus.queryOptions(),
-    trpc.metrics.expense.queryOptions({
+    trpc.reports.expense.queryOptions({
       from,
       to,
       currency: currency ?? undefined,
     }),
-    trpc.metrics.profit.queryOptions({
+    trpc.reports.profit.queryOptions({
       from,
       to,
       currency: currency ?? undefined,
     }),
-    trpc.metrics.burnRate.queryOptions({
+    trpc.reports.burnRate.queryOptions({
       from,
       to,
       currency: currency ?? undefined,
     }),
-    trpc.metrics.runway.queryOptions({
+    trpc.reports.runway.queryOptions({
       from,
       to,
       currency: currency ?? undefined,
@@ -55,7 +55,7 @@ export default async function Overview(props: Props) {
     trpc.inbox.get.queryOptions(),
     trpc.bankAccounts.balances.queryOptions(),
     trpc.documents.get.queryOptions({ pageSize: 10 }),
-    trpc.metrics.spending.queryOptions({
+    trpc.reports.spending.queryOptions({
       from: defaultPeriod.from,
       to: defaultPeriod.to,
       currency: currency ?? undefined,
@@ -73,7 +73,7 @@ export default async function Overview(props: Props) {
       }),
     ),
     queryClient.fetchQuery(
-      trpc.metrics.revenue.queryOptions({
+      trpc.reports.revenue.queryOptions({
         from,
         to,
         currency: currency ?? undefined,

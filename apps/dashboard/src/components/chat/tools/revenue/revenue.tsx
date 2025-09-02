@@ -16,7 +16,7 @@ export function Revenue({ result }: Props) {
   const { from, to, currency } = result.params;
 
   const { data, isLoading } = useQuery(
-    trpc.metrics.revenue.queryOptions({
+    trpc.reports.revenue.queryOptions({
       from,
       to,
       currency,

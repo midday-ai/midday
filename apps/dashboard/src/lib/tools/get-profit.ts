@@ -23,7 +23,7 @@ export const getProfit = tool({
     const queryClient = getQueryClient();
 
     const data = await queryClient.fetchQuery(
-      trpc.metrics.profit.queryOptions({
+      trpc.reports.profit.queryOptions({
         from: startOfMonth(new Date(from)).toISOString(),
         to: new Date(to).toISOString(),
         currency,

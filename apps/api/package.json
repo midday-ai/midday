@@ -14,11 +14,11 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.22",
-    "@date-fns/utc": "^2.1.0",
     "@hono/trpc-server": "^0.4.0",
     "@hono/zod-openapi": "^0.19.8",
     "@hono/zod-validator": "^0.7.0",
     "@midday/cache": "workspace:*",
+    "@midday/categories": "workspace:*",
     "@midday/db": "workspace:*",
     "@midday/documents": "workspace:*",
     "@midday/encryption": "workspace:*",

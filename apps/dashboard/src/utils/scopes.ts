@@ -107,10 +107,10 @@ export const RESOURCES = [
     ],
   },
   {
-    key: "metrics",
-    name: "Metrics",
-    description: "Access to metrics data",
-    scopes: [{ scope: "metrics.read", type: "read", label: "Read" }],
+    key: "reports",
+    name: "Reports",
+    description: "Access to reports data",
+    scopes: [{ scope: "reports.read", type: "read", label: "Read" }],
   },
   {
     key: "search",

@@ -80,8 +80,27 @@ export const mapTransactionCategory = ({
     case "sport":
       return "activity";
     case "utilities":
+      return "utilities"; // Updated to use new utilities category
     case "electronics":
       return "equipment";
+    case "accommodation":
+      return "travel"; // Hotel stays should be travel
+    case "advertising":
+      return "advertising"; // Use new advertising category
+    case "charity":
+      return "charitable-donations"; // Use new charitable donations category
+    case "education":
+      return "training"; // Use new training category
+    case "health":
+      return "benefits"; // Health-related could be benefits
+    case "insurance":
+      return "insurance"; // Use new insurance category
+    case "fuel":
+      return "travel"; // Business fuel is typically travel-related
+    case "home":
+      return "facilities-expenses"; // Home office expenses
+    case "service":
+      return "professional-services-fees"; // General services
     default:
       return null;
   }

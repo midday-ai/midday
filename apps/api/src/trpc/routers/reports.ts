@@ -6,22 +6,22 @@ import {
   getRunwaySchema,
   getSpendingSchema,
   getTaxSummarySchema,
-} from "@api/schemas/metrics";
+} from "@api/schemas/reports";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   getBurnRate,
   getExpenses,
-  getMetrics,
+  getReports,
   getRunway,
   getSpending,
   getTaxSummary,
 } from "@midday/db/queries";
 
-export const metricsRouter = createTRPCRouter({
+export const reportsRouter = createTRPCRouter({
   revenue: protectedProcedure
     .input(getRevenueSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
-      return getMetrics(db, {
+      return getReports(db, {
         teamId: teamId!,
         from: input.from,
         to: input.to,
@@ -33,7 +33,7 @@ export const metricsRouter = createTRPCRouter({
   profit: protectedProcedure
     .input(getProfitSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
-      return getMetrics(db, {
+      return getReports(db, {
         teamId: teamId!,
         from: input.from,
         to: input.to,

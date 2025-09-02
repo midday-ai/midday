@@ -1,6 +1,6 @@
 "use client";
 
-import { useMetricsParams } from "@/hooks/use-metrics-params";
+import { useReportsParams } from "@/hooks/use-reports-params";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -22,10 +22,10 @@ type Props = {
 
 export function ExpenseChart({ disabled }: Props) {
   const trpc = useTRPC();
-  const { params } = useMetricsParams();
+  const { params } = useReportsParams();
 
   const { data } = useQuery({
-    ...trpc.metrics.expense.queryOptions({
+    ...trpc.reports.expense.queryOptions({
       from: params.from,
       to: params.to,
       currency: params.currency ?? undefined,

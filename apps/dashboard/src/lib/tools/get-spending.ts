@@ -22,7 +22,7 @@ export const getSpending = tool({
     const queryClient = getQueryClient();
 
     const data = await queryClient.fetchQuery(
-      trpc.metrics.spending.queryOptions({
+      trpc.reports.spending.queryOptions({
         from: startOfMonth(new Date(startDate)).toISOString(),
         to: new Date(endDate).toISOString(),
         currency,

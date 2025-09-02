@@ -69,6 +69,7 @@ export const mapTransactionCategory = ({
     return "travel";
   }
 
+  // Software and technology
   if (
     transaction.personal_finance_category?.detailed ===
     "GENERAL_SERVICES_OTHER_GENERAL_SERVICES"
@@ -76,6 +77,7 @@ export const mapTransactionCategory = ({
     return "software";
   }
 
+  // Utilities - use new utilities category instead of facilities-expenses
   if (
     transaction.personal_finance_category?.detailed ===
       "RENT_AND_UTILITIES_GAS_AND_ELECTRICITY" ||
@@ -86,7 +88,7 @@ export const mapTransactionCategory = ({
     transaction.personal_finance_category?.detailed ===
       "RENT_AND_UTILITIES_OTHER_UTILITIES"
   ) {
-    return "facilities-expenses";
+    return "utilities"; // Updated to use new utilities category
   }
 
   if (
@@ -105,12 +107,56 @@ export const mapTransactionCategory = ({
     return "internet-and-telephone";
   }
 
+  // Professional services
+  if (
+    transaction.personal_finance_category?.primary === "PROFESSIONAL_SERVICES"
+  ) {
+    return "professional-services-fees";
+  }
+
+  // Insurance
+  if (transaction.personal_finance_category?.primary === "INSURANCE") {
+    return "insurance";
+  }
+
+  // Marketing and advertising
+  if (transaction.personal_finance_category?.primary === "MARKETING") {
+    return "marketing";
+  }
+
+  // Home improvement for office supplies
   if (transaction.personal_finance_category?.primary === "HOME_IMPROVEMENT") {
     return "office-supplies";
   }
 
   if (transaction.personal_finance_category?.primary === "ENTERTAINMENT") {
     return "activity";
+  }
+
+  // Tax payments
+  if (transaction.personal_finance_category?.primary === "TAX") {
+    return "taxes";
+  }
+
+  // Healthcare/medical - could be benefits
+  if (transaction.personal_finance_category?.primary === "MEDICAL") {
+    return "benefits";
+  }
+
+  // General merchandise - could be office supplies for small amounts
+  if (
+    transaction.personal_finance_category?.primary === "GENERAL_MERCHANDISE" &&
+    Math.abs(amount) < 500 // Small amounts likely office supplies
+  ) {
+    return "office-supplies";
+  }
+
+  // Large general merchandise - likely equipment
+  if (
+    transaction.personal_finance_category?.primary === "GENERAL_MERCHANDISE" &&
+    Math.abs(amount) >= 500 // Large amounts likely equipment
+  ) {
+    return "equipment";
   }
 
   return null;

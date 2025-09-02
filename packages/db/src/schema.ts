@@ -19,6 +19,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   varchar,
   vector,
@@ -140,25 +141,6 @@ export const trackerStatusEnum = pgEnum("trackerStatus", [
   "completed",
 ]);
 
-export const transactionCategoriesEnum = pgEnum("transactionCategories", [
-  "travel",
-  "office-supplies",
-  "meals",
-  "software",
-  "rent",
-  "income",
-  "equipment",
-  "transfer",
-  "internet-and-telephone",
-  "facilities-expenses",
-  "activity",
-  "uncategorized",
-  "taxes",
-  "other",
-  "salary",
-  "fees",
-]);
-
 export const transactionMethodsEnum = pgEnum("transactionMethods", [
   "payment",
   "card_purchase",
@@ -255,6 +237,51 @@ export const documentTagEmbeddings = pgTable(
   ],
 );
 
+export const transactionCategoryEmbeddings = pgTable(
+  "transaction_category_embeddings",
+  {
+    name: text().primaryKey().notNull(), // Unique by name - same embedding for all teams
+    embedding: vector({ dimensions: 768 }),
+    model: text().notNull().default("gemini-embedding-001"),
+    system: boolean().default(false).notNull(), // Whether this comes from system categories
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    // Vector similarity index for fast cosine similarity search
+    index("transaction_category_embeddings_vector_idx")
+      .using("hnsw", table.embedding.asc().nullsLast().op("vector_cosine_ops"))
+      .with({ m: "16", ef_construction: "64" }),
+    // System categories index for filtering
+    index("transaction_category_embeddings_system_idx").using(
+      "btree",
+      table.system.asc().nullsLast().op("bool_ops"),
+    ),
+    pgPolicy("Enable read access for authenticated users", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`true`,
+    }),
+    pgPolicy("Enable insert for authenticated users only", {
+      as: "permissive",
+      for: "insert",
+      to: ["authenticated"],
+      withCheck: sql`true`,
+    }),
+    pgPolicy("Enable update for authenticated users only", {
+      as: "permissive",
+      for: "update",
+      to: ["authenticated"],
+      using: sql`true`,
+    }),
+  ],
+);
+
 export const transactions = pgTable(
   "transactions",
   {
@@ -273,7 +300,6 @@ export const transactions = pgTable(
     bankAccountId: uuid("bank_account_id"),
     internalId: text("internal_id").notNull(),
     status: transactionStatusEnum().default("posted"),
-    category: transactionCategoriesEnum(),
     balance: numericCasted({ precision: 10, scale: 2 }),
     manual: boolean().default(false),
     notified: boolean().default(false),
@@ -362,7 +388,6 @@ export const transactions = pgTable(
       table.date.asc().nullsLast().op("date_ops"),
       table.currency.asc().nullsLast().op("text_ops"),
       table.bankAccountId.asc().nullsLast().op("date_ops"),
-      table.category.asc().nullsLast().op("date_ops"),
     ),
     index("transactions_team_id_idx").using(
       "btree",
@@ -2120,6 +2145,8 @@ export const transactionCategories = pgTable(
     slug: text(), // Generated in database
     taxRate: numericCasted("tax_rate", { precision: 10, scale: 2 }),
     taxType: text("tax_type"),
+    taxReportingCode: text("tax_reporting_code"),
+    excluded: boolean("excluded").default(false),
     description: text(),
     embedding: vector({ dimensions: 384 }),
     parentId: uuid("parent_id"),
@@ -2155,25 +2182,6 @@ export const transactionCategories = pgTable(
       using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
     }),
   ],
-);
-
-export const teamLimitsMetrics = pgMaterializedView("team_limits_metrics", {
-  teamId: uuid("team_id"),
-  totalDocumentSize: numeric("total_document_size"),
-  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-  numberOfUsers: bigint("number_of_users", { mode: "number" }),
-  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-  numberOfBankConnections: bigint("number_of_bank_connections", {
-    mode: "number",
-  }),
-  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-  invoicesCreatedThisMonth: bigint("invoices_created_this_month", {
-    mode: "number",
-  }),
-  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-  inboxCreatedThisMonth: bigint("inbox_created_this_month", { mode: "number" }),
-}).as(
-  sql`SELECT t.id AS team_id, COALESCE(sum((d.metadata ->> 'size'::text)::bigint), 0::numeric) AS total_document_size, count(DISTINCT u.id) AS number_of_users, count(DISTINCT bc.id) AS number_of_bank_connections, count(DISTINCT i.id) FILTER (WHERE date_trunc('month'::text, i.created_at) = date_trunc('month'::text, CURRENT_DATE::timestamp with time zone)) AS invoices_created_this_month, count(DISTINCT inbox.id) FILTER (WHERE date_trunc('month'::text, inbox.created_at) = date_trunc('month'::text, CURRENT_DATE::timestamp with time zone)) AS inbox_created_this_month FROM teams t LEFT JOIN documents d ON d.team_id = t.id LEFT JOIN users u ON u.team_id = t.id LEFT JOIN bank_connections bc ON bc.team_id = t.id LEFT JOIN invoices i ON i.team_id = t.id LEFT JOIN inbox ON inbox.team_id = t.id GROUP BY t.id`,
 );
 
 export const usersInAuth = pgTable(

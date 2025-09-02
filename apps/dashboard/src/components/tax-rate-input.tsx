@@ -15,7 +15,6 @@ export function TaxRateInput({
   onSelect,
   value: defaultValue,
 }: Props) {
-  const [isFocused, setFocused] = useState(false);
   const [value, setValue] = useState(defaultValue);
 
   const handleOnSelect = (vat: number) => {
@@ -43,15 +42,16 @@ export function TaxRateInput({
           );
         }}
         allowNegative={false}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
       />
 
       <TaxRateAssistant
         name={name}
         value={value?.toString() ?? ""}
         onSelect={handleOnSelect}
-        isFocused={isFocused}
+        onSuggestionReceived={(taxRate) => {
+          setValue(taxRate);
+          onChange(taxRate.toString());
+        }}
       />
     </div>
   );

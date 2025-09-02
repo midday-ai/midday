@@ -9,20 +9,27 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useAction } from "next-safe-action/hooks";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useDebounceValue } from "usehooks-ts";
 
 type Props = {
   name?: string;
   value?: string | null;
   onSelect: (value: number) => void;
-  isFocused: boolean;
+  onSuggestionReceived?: (taxRate: number) => void;
 };
 
-export function TaxRateAssistant({ name, onSelect, isFocused, value }: Props) {
+export function TaxRateAssistant({
+  name,
+  onSelect,
+  onSuggestionReceived,
+  value,
+}: Props) {
   const [result, setResult] = useState<
     { taxRate: number; country?: string } | undefined
   >();
   const [isLoading, setLoading] = useState(false);
+  const lastProcessedName = useRef<string | undefined>(undefined);
 
   const getVatRate = useAction(getTaxRateAction, {
     onSuccess: ({ data }) => {
@@ -30,6 +37,8 @@ export function TaxRateAssistant({ name, onSelect, isFocused, value }: Props) {
 
       if (data) {
         setResult(data);
+        // Auto-update the input with the AI suggestion
+        onSuggestionReceived?.(data.taxRate);
       }
     },
     onError: () => {
@@ -43,12 +52,22 @@ export function TaxRateAssistant({ name, onSelect, isFocused, value }: Props) {
     }
   };
 
+  // Use debounced name value with 500ms delay
+  const [debouncedName] = useDebounceValue(name, 500);
+
   useEffect(() => {
-    if (isFocused && name && name.length > 2 && !value) {
+    // Only trigger API call if debounced name is different from last processed name
+    if (
+      debouncedName &&
+      debouncedName.length > 2 &&
+      debouncedName !== lastProcessedName.current
+    ) {
+      lastProcessedName.current = debouncedName;
+      setResult(undefined);
       setLoading(true);
-      getVatRate.execute({ name });
+      getVatRate.execute({ name: debouncedName });
     }
-  }, [isFocused, name]);
+  }, [debouncedName, getVatRate]);
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -73,7 +92,7 @@ export function TaxRateAssistant({ name, onSelect, isFocused, value }: Props) {
               <span>Tax Rate Assistant</span>
             </div>
             <span className="text-xs text-[#878787]">
-              {`The tax rate for ${name} in ${result.country} is generally ${result.taxRate}%. Please remember to confirm this with your local Tax office.`}
+              {`The tax rate for ${name} in ${result.country} is generally ${result.taxRate}%. This value has been automatically filled in the input field. Please remember to confirm this with your local Tax office.`}
             </span>
 
             <div className="flex justify-end mt-3 pt-3">

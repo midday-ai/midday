@@ -172,11 +172,20 @@ function useFilterData(isOpen: boolean, isFocused: boolean) {
       name: bankAccount.name ?? "",
       currency: bankAccount.currency ?? "",
     })),
-    categories: categoriesData?.map((category) => ({
-      id: category.id,
-      name: category.name,
-      slug: category.slug,
-    })),
+    categories: categoriesData?.flatMap((category) => [
+      // Include parent category
+      {
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+      },
+      // Include all child categories
+      ...(category.children?.map((child) => ({
+        id: child.id,
+        name: child.name,
+        slug: child.slug,
+      })) || []),
+    ]),
   };
 }
 

@@ -22,13 +22,15 @@
     "./utils/currency": "./src/utils/currency.ts"
   },
   "dependencies": {
-    "@midday/invoice": "workspace:*",
+    "@date-fns/utc": "^2.1.1",
+    "@midday/categories": "workspace:*",
     "@midday/encryption": "workspace:*",
+    "@midday/invoice": "workspace:*",
     "@midday/logger": "workspace:*",
+    "camelcase-keys": "^9.1.3",
     "drizzle-orm": "^0.44.2",
     "postgres": "^3.4.7",
-    "snakecase-keys": "^8.0.1",
-    "camelcase-keys": "^9.1.3"
+    "snakecase-keys": "^8.0.1"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.1",

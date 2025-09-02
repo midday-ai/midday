@@ -364,4 +364,116 @@ export default {
   account_balance: {
     total_balance: "Total balance",
   },
+  transaction_categories: {
+    // Parent Categories
+    revenue: "Income and money received from business activities",
+    "cost-of-goods-sold":
+      "Direct costs associated with producing goods or services",
+    "sales-marketing":
+      "Expenses related to sales activities and marketing efforts",
+    operations: "Day-to-day operational costs of running the business",
+    "professional-services":
+      "Fees paid to external professionals and service providers",
+    "human-resources":
+      "Employee-related costs including salaries, benefits, and training",
+    "travel-entertainment":
+      "Business travel, meals, and entertainment expenses",
+    technology: "Software, hardware, and technology-related expenses",
+    "banking-finance":
+      "Banking fees, loan payments, and financial transactions",
+    "assets-capex": "Capital expenditures and asset acquisitions",
+    "liabilities-debt": "Debt obligations and deferred revenue",
+    taxes: "Tax payments and government fees",
+    "owner-equity": "Owner investments, draws, and equity transactions",
+    system: "System-generated categories for uncategorized transactions",
+
+    // Child Categories - Revenue
+    income: "General business income from various sources",
+    "product-sales": "Revenue from selling physical or digital products",
+    "service-revenue": "Income from providing services to customers",
+    "consulting-revenue": "Revenue from consulting and advisory services",
+    "subscription-revenue": "Recurring income from subscription-based services",
+    "interest-income": "Earnings from interest on investments or loans",
+    "other-income": "Miscellaneous income not classified elsewhere",
+    "customer-refunds": "Money returned to customers for refunds",
+    "chargebacks-disputes": "Revenue adjustments from payment disputes",
+
+    // Child Categories - Cost of Goods Sold
+    inventory: "Cost of goods held for sale",
+    manufacturing: "Production costs for manufacturing goods",
+    "shipping-inbound": "Costs for receiving goods and materials",
+    "duties-customs": "Import duties and customs fees",
+
+    // Child Categories - Sales & Marketing
+    marketing: "Marketing campaign and promotional expenses",
+    advertising: "Paid advertising and media placement costs",
+    website: "Website development, hosting, and maintenance",
+    events: "Trade shows, conferences, and event expenses",
+    "promotional-materials":
+      "Brochures, business cards, and marketing materials",
+
+    // Child Categories - Operations
+    "office-supplies": "Office materials and stationery",
+    rent: "Office, warehouse, or equipment rental costs",
+    utilities: "Electricity, water, gas, and other utility bills",
+    "facilities-expenses": "Building maintenance and facility costs",
+    equipment: "Non-capital equipment purchases and maintenance",
+    "internet-and-telephone": "Internet, phone, and communication services",
+    shipping: "Outbound shipping and delivery costs",
+
+    // Child Categories - Professional Services
+    "professional-services-fees": "Legal, accounting, and consulting fees",
+    contractors: "Payments to independent contractors and freelancers",
+    insurance: "Business insurance premiums and coverage",
+
+    // Child Categories - Human Resources
+    salary: "Employee wages and salaries",
+    training: "Employee training and development costs",
+    "employer-taxes": "Payroll taxes and employer contributions",
+    benefits: "Employee benefits and health insurance",
+
+    // Child Categories - Travel & Entertainment
+    travel: "Business travel expenses including transportation",
+    meals: "Business meal and dining expenses",
+    activity: "Entertainment and team building activities",
+
+    // Child Categories - Technology
+    software: "Software licenses and subscriptions",
+    "non-software-subscriptions": "Non-software subscription services",
+
+    // Child Categories - Banking & Finance
+    transfer: "Bank transfers between accounts",
+    "credit-card-payment": "Credit card payments and fees",
+    "banking-fees": "Bank account maintenance and transaction fees",
+    "loan-proceeds": "Money received from loans and financing",
+    "loan-principal-repayment": "Principal payments on loans",
+    "interest-expense": "Interest paid on loans and credit",
+    payouts: "Payment platform payouts to business",
+    "processor-fees": "Payment processing and transaction fees",
+    fees: "General banking and financial fees",
+
+    // Child Categories - Assets
+    "fixed-assets": "Long-term assets like buildings and equipment",
+    "prepaid-expenses": "Advance payments for future services",
+
+    // Child Categories - Liabilities & Debt
+    leases: "Equipment and property lease payments",
+    "deferred-revenue": "Advance payments received for future services",
+
+    // Child Categories - Taxes & Government
+    "vat-gst-pst-qst-payments": "Value-added tax and sales tax payments",
+    "sales-use-tax-payments": "Sales and use tax obligations",
+    "income-tax-payments": "Income tax payments and installments",
+    "payroll-tax-remittances": "Employee tax withholdings and remittances",
+    "government-fees": "Government licensing and regulatory fees",
+
+    // Child Categories - Owner / Equity
+    "owner-draws": "Money withdrawn by business owners",
+    "capital-investment": "Owner investments in the business",
+    "charitable-donations": "Charitable contributions and donations",
+
+    // Child Categories - System
+    uncategorized: "Transactions that haven't been classified yet",
+    other: "Miscellaneous transactions not fitting other categories",
+  },
 } as const;

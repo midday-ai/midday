@@ -1,6 +1,14 @@
 import type { TransactionForEnrichment } from "@midday/db/queries";
-import type { TransactionData, UpdateData } from "./enrichment-schema";
-import { transactionCategories } from "./enrichment-schema";
+import type {
+  EnrichmentResult,
+  TransactionData,
+  UpdateData,
+} from "./enrichment-schema";
+import {
+  shouldUseCategoryResult,
+  shouldUseMerchantResult,
+  transactionCategories,
+} from "./enrichment-schema";
 
 /**
  * Generates the enrichment prompt for the LLM
@@ -56,85 +64,60 @@ REQUIREMENTS:
 - Ignore location codes, store numbers, and transaction details
 - If genuinely unknown, provide best cleaned/capitalized version available
 
+CONFIDENCE SCORING:
+- categoryConfidence: Rate your confidence in the category assignment (0-1)
+  • 1.0 = Very certain (e.g., "Slack" → software)
+  • 0.8 = Quite confident (e.g., "Hotel booking" → travel)  
+  • 0.5 = Unsure (e.g., ambiguous merchant)
+  • 0.2 = Very uncertain
+- merchantConfidence: Rate your confidence in the merchant name (0-1)
+  • 1.0 = Official company name found
+  • 0.8 = Strong match with known entity
+  • 0.5 = Best guess from available info
+  • 0.2 = Very uncertain
+- Only return category if confidence >= 0.7, otherwise return null
+
 ${
   needsCategories
     ? `
-CATEGORY RULES:
-Categorize based on the primary business purpose and nature of the expense. Consider amount, merchant type, and business context.
+CATEGORIZATION RULES:
+Assign categories based on merchant name and business purpose. Only return category if confidence >= 0.7, otherwise return null.
 
-• software - Digital tools and services for business operations
-  ✓ SaaS platforms: Google Workspace, Microsoft 365, Adobe Creative Cloud, Slack, Zoom, Figma
-  ✓ Development tools: GitHub, AWS, Azure, Vercel, Stripe, payment processors
-  ✓ Business software: CRM systems, accounting software, project management tools
-  ✓ Domain/hosting: GoDaddy, Cloudflare, hosting services, SSL certificates
-  ✗ NOT: Physical hardware, mobile/internet service bills, app store purchases for games
+CONFIDENCE EXAMPLES:
+• "Slack Technologies" → software (0.95) ✅
+• "Delta Air Lines" → travel (0.95) ✅
+• "ConEd Electric" → utilities (0.90) ✅
+• "ABC Corp payment" → null (0.4) ❌ Too uncertain
 
-• travel - Transportation and accommodation for business trips
-  ✓ Transportation: Airlines, trains, buses, ride-sharing (Uber/Lyft), rental cars, gas during trips
-  ✓ Accommodation: Hotels, Airbnb, business lodging
-  ✓ Trip-related: Parking fees during travel, tolls, airport services
-  ✗ NOT: Daily commute expenses, local parking, personal vehicle maintenance
+COMMON CATEGORIES (only use if confident):
+• software: SaaS tools (Slack, Google Workspace, GitHub, AWS)
+• travel: Business trips (airlines, hotels, Uber to meetings)
+• meals: Business dining (restaurants, client meals, catering)
+• office-supplies: Stationery, consumables (paper, pens, supplies)
+• equipment: Computers, furniture, tools >$500
+• utilities: Utility bills (electric, water, gas, internet)
+• rent: Office space, co-working, storage facilities
+• marketing: Marketing services, agencies, SEO
+• advertising: Ad platforms (Google Ads, Facebook Ads)
+• insurance: Business insurance premiums
+• contractors: Freelancer payments, 1099 contractors
+• fees: Bank charges, processing fees, service fees
+• website: Domains, hosting, web development
+• domain-hosting: Specific hosting services (GoDaddy, Cloudflare)
+• cloud-storage: Cloud services (Dropbox, Google Drive, AWS S3)
+• training: Courses, certifications, conferences
+• maintenance-repairs: Equipment repairs, building maintenance
+• cleaning-supplies: Cleaning services, janitorial supplies
+• security: Security systems, monitoring services
+• credit-card-payment: Credit card transactions
+• interest-expense: Loan interest payments
+• uncategorized: Use when uncertain
 
-• meals - Food and beverages for business purposes
-  ✓ Business meals: Client dinners, team lunches, conference catering
-  ✓ Business travel meals: Restaurant meals during business trips
-  ✓ Office provisions: Catered meetings, employee meals, coffee/snacks for office
-  ✗ NOT: Personal groceries, alcohol not for business entertainment, daily employee lunches
-
-• office-supplies - Physical materials and small office items
-  ✓ Stationery: Paper, pens, folders, notebooks, printing supplies
-  ✓ Office materials: Staplers, scissors, calendars, whiteboards, basic storage
-  ✓ Consumables: Ink cartridges, batteries, cleaning supplies for office use
-  ✗ NOT: Expensive equipment >$500, furniture, technology devices
-
-• equipment - Durable business assets and technology hardware
-  ✓ Computing: Computers, laptops, tablets, monitors, keyboards, mice
-  ✓ Communication: Phones, headsets, webcams, conferencing equipment
-  ✓ Office equipment: Printers, scanners, shredders, furniture >$500
-  ✓ Specialized tools: Industry-specific machinery, professional instruments
-  ✗ NOT: Small supplies <$100, consumables, software licenses
-
-• internet-and-telephone - Communication and connectivity services
-  ✓ Internet services: Business internet, Wi-Fi plans, ISP bills
-  ✓ Phone services: Business phone lines, mobile plans, VoIP services
-  ✓ Communication tools: Video conferencing services, business messaging platforms
-  ✗ NOT: Software subscriptions, streaming services, personal phone bills
-
-• rent - Property and workspace costs
-  ✓ Office space: Commercial rent, co-working memberships (WeWork, etc.)
-  ✓ Storage: Warehouse rent, storage units for business
-  ✓ Parking: Monthly parking fees, dedicated business parking spots
-  ✗ NOT: Utilities (use facilities-expenses), equipment leasing, vehicle rentals
-
-• facilities-expenses - Building operations and maintenance
-  ✓ Utilities: Electricity, gas, water, waste management, heating/cooling
-  ✓ Maintenance: Cleaning services, repairs, security systems, landscaping
-  ✓ Building services: Elevator maintenance, HVAC servicing, pest control
-  ✗ NOT: Rent payments, office supplies, equipment purchases
-
-• activity - Professional development and business events
-  ✓ Education: Conferences, workshops, training courses, certifications
-  ✓ Networking: Business events, trade shows, professional association fees
-  ✓ Team building: Corporate retreats, employee training sessions
-  ✗ NOT: Personal education, entertainment not business-related, regular meals
-
-• fees - Professional services and administrative costs
-  ✓ Professional services: Legal fees, accounting, consulting, tax preparation
-  ✓ Financial fees: Bank charges, payment processing, credit card fees, wire fees
-  ✓ Business fees: License renewals, permits, registration fees, compliance costs
-  ✗ NOT: Investment fees, personal banking charges, late payment penalties
-
-• transfer - Movement of funds between accounts
-  ✓ Internal transfers: Between business accounts, owner draws, capital contributions
-  ✓ Payment transfers: Wire transfers, ACH transfers, loan payments
-  ✓ Investment moves: Transfers to investment accounts, escrow payments
-  ✗ NOT: Purchase transactions, refunds, fee payments
-
-PRIORITIZATION RULES:
-1. Choose the most specific category that fits (software over fees for SaaS)
-2. Consider primary business purpose (Uber for client meeting = travel, not activity)
-3. Amount context matters (small tech purchase = office-supplies, large = equipment)
-4. When uncertain between categories, prefer the more specific business function
+RULES:
+1. Only categorize if confidence >= 0.7
+2. When uncertain, return null for category
+3. Focus on merchant name for clues
+4. Consider business context and amount
 `
     : ""
 }
@@ -203,22 +186,28 @@ export function prepareUpdateData(
     merchantName: string | null;
     amount: number;
   },
-  result: { merchant: string | null; category: string },
+  result: EnrichmentResult,
 ): UpdateData {
   const updateData: UpdateData = {};
 
-  // Always update merchantName if the LLM provides one
-  // This allows enhancement of existing simplified names to formal legal entity names
-  if (result.merchant) {
-    updateData.merchantName = result.merchant;
+  // Only update merchantName if confidence is high enough
+  if (shouldUseMerchantResult(result)) {
+    updateData.merchantName = result.merchant!;
   }
 
-  const validCategory = isValidCategory(result.category);
-
-  // Only update categorySlug if it's currently null AND amount is not positive
-  // Positive amounts are typically income and shouldn't be categorized as business expenses
-  if (!transaction.categorySlug && validCategory && transaction.amount <= 0) {
-    updateData.categorySlug = result.category;
+  // Category assignment logic
+  if (!transaction.categorySlug && transaction.amount <= 0) {
+    if (
+      shouldUseCategoryResult(result) &&
+      result.category &&
+      isValidCategory(result.category)
+    ) {
+      // High confidence: use the suggested category
+      updateData.categorySlug = result.category;
+    } else {
+      // Low confidence or no category: mark as uncategorized to prevent reprocessing
+      updateData.categorySlug = "uncategorized";
+    }
   }
 
   return updateData;

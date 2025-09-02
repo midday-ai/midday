@@ -2,6 +2,7 @@
 
 import { CreateSubCategoryModal } from "@/components/modals/create-sub-category-modal";
 import { EditCategoryModal } from "@/components/modals/edit-category-modal";
+import { useI18n } from "@/locales/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -24,6 +25,27 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import * as React from "react";
 
 export type Category = RouterOutputs["transactionCategories"]["get"][number];
+
+// Component to display category description from localization
+function CategoryTooltip({ category }: { category: any }) {
+  const t = useI18n();
+
+  // Priority 1: User-defined description
+  if (category.description) {
+    return <span>{category.description}</span>;
+  }
+
+  // Priority 2: System description from localization
+  try {
+    return (
+      // @ts-expect-error - slug is not nullable
+      <span>{t(`transaction_categories.${category.slug}`)}</span>
+    );
+  } catch {
+    // Fallback if translation not found
+    return <span>Category description not available</span>;
+  }
+}
 
 // Flatten categories to include both parents and children with hierarchy info
 export function flattenCategories(categories: any[]): any[] {
@@ -107,23 +129,30 @@ export const columns: ColumnDef<any>[] = [
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="cursor-default">{row.getValue("name")}</span>
-              </TooltipTrigger>
-              {row.original?.description && (
-                <TooltipContent
-                  className="px-3 py-1.5 text-xs"
-                  side="right"
-                  sideOffset={10}
+                <span
+                  className={cn(
+                    hasChildren && !isChild
+                      ? "cursor-pointer"
+                      : "cursor-default",
+                  )}
+                  onClick={hasChildren && !isChild ? toggleExpanded : undefined}
                 >
-                  {row.original.description}
-                </TooltipContent>
-              )}
+                  {row.getValue("name")}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent
+                className="px-3 py-1.5 text-xs"
+                side="right"
+                sideOffset={10}
+              >
+                <CategoryTooltip category={row.original} />
+              </TooltipContent>
             </Tooltip>
           </TooltipProvider>
 
           {row.original.system && (
             <div className="pl-2">
-              <span className="border border-border rounded-full py-1.5 px-3 text-xs text-[#878787] font-mono">
+              <span className="border border-border rounded-full py-1 px-2 text-[10px] text-[#878787] font-mono">
                 System
               </span>
             </div>
@@ -145,6 +174,11 @@ export const columns: ColumnDef<any>[] = [
       row.getValue("taxRate") ? `${row.getValue("taxRate")}%` : "-",
   },
   {
+    header: () => <span className="whitespace-nowrap">Report Code</span>,
+    accessorKey: "taxReportingCode",
+    cell: ({ row }) => row.getValue("taxReportingCode") || "-",
+  },
+  {
     id: "actions",
     cell: ({ row, table }) => {
       const [isEditOpen, setIsEditOpen] = React.useState(false);
@@ -160,16 +194,18 @@ export const columns: ColumnDef<any>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
+                Edit
+              </DropdownMenuItem>
+
               {!row.original.isChild && (
                 <DropdownMenuItem
                   onClick={() => setIsCreateSubcategoryOpen(true)}
                 >
-                  Create Subcategory
+                  Add Subcategory
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
-                Edit
-              </DropdownMenuItem>
+
               {!row.original.system && (
                 <DropdownMenuItem
                   onClick={() =>
@@ -196,6 +232,8 @@ export const columns: ColumnDef<any>[] = [
             defaultTaxRate={row.original.taxRate}
             defaultTaxType={row.original.taxType}
             defaultColor={row.original.color}
+            defaultTaxReportingCode={row.original.taxReportingCode}
+            defaultExcluded={row.original.excluded}
           />
         </div>
       );

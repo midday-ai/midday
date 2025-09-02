@@ -24,13 +24,13 @@ export const getForecast = tool({
     const queryClient = getQueryClient();
 
     let data:
-      | RouterOutputs["metrics"]["revenue"]
-      | RouterOutputs["metrics"]["profit"]
+      | RouterOutputs["reports"]["revenue"]
+      | RouterOutputs["reports"]["profit"]
       | null = null;
 
     if (type === "revenue") {
       data = await queryClient.fetchQuery(
-        trpc.metrics.revenue.queryOptions({
+        trpc.reports.revenue.queryOptions({
           from: startOfMonth(new Date(startDate)).toISOString(),
           to: new Date(endDate).toISOString(),
           currency,
@@ -40,7 +40,7 @@ export const getForecast = tool({
 
     if (type === "profit") {
       data = await queryClient.fetchQuery(
-        trpc.metrics.profit.queryOptions({
+        trpc.reports.profit.queryOptions({
           from: startOfMonth(new Date(startDate)).toISOString(),
           to: new Date(endDate).toISOString(),
           currency,
