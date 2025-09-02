@@ -1,7 +1,9 @@
 import { CategoryEmbeddings } from "@midday/categories";
 import { logger } from "@midday/logger";
+import { eq, inArray } from "drizzle-orm";
 import type { Database } from "../client";
 import { upsertCategoryEmbedding } from "../queries/transaction-category-embeddings";
+import { transactionCategoryEmbeddings } from "../schema";
 
 export type GenerateCategoryEmbeddingParams = {
   name: string;
@@ -16,10 +18,22 @@ export type GenerateCategoryEmbeddingParams = {
 export async function generateCategoryEmbedding(
   db: Database,
   params: GenerateCategoryEmbeddingParams,
-): Promise<{ success: boolean; existed: boolean; error?: string }> {
+) {
   const { name, system = false, model } = params;
 
   try {
+    // First check if embedding already exists
+    const existingEmbedding = await db
+      .select({ name: transactionCategoryEmbeddings.name })
+      .from(transactionCategoryEmbeddings)
+      .where(eq(transactionCategoryEmbeddings.name, name))
+      .limit(1);
+
+    if (existingEmbedding.length > 0) {
+      logger.info(`Embedding already exists for category: "${name}"`);
+      return { success: true, existed: true };
+    }
+
     const embedService = new CategoryEmbeddings();
 
     // Generate the embedding using Vercel AI SDK
@@ -53,25 +67,51 @@ export async function generateCategoryEmbeddingsBatch(
   db: Database,
   categories: Array<{ name: string; system?: boolean }>,
   model?: string,
-): Promise<{
-  processed: number;
-  errors: number;
-  results: Array<{ name: string; success: boolean; error?: string }>;
-}> {
+) {
   let processed = 0;
+  let skipped = 0;
   let errors = 0;
   const results: Array<{ name: string; success: boolean; error?: string }> = [];
 
   try {
-    const embedService = new CategoryEmbeddings();
+    // First, check which embeddings already exist
     const categoryNames = categories.map((cat) => cat.name);
+    const existingEmbeddings =
+      categoryNames.length > 0
+        ? await db
+            .select({ name: transactionCategoryEmbeddings.name })
+            .from(transactionCategoryEmbeddings)
+            .where(inArray(transactionCategoryEmbeddings.name, categoryNames))
+        : [];
+
+    // Use a more efficient IN query for multiple categories
+    const existingNames = new Set(existingEmbeddings.map((e) => e.name));
+    const categoriesToProcess = categories.filter(
+      (cat) => !existingNames.has(cat.name),
+    );
+
+    // Log skipped categories
+    for (const cat of categories) {
+      if (existingNames.has(cat.name)) {
+        logger.info(`Embedding already exists for category: "${cat.name}"`);
+        results.push({ name: cat.name, success: true });
+        skipped++;
+      }
+    }
+
+    if (categoriesToProcess.length === 0) {
+      return { processed: 0, skipped, errors: 0, results };
+    }
+
+    const embedService = new CategoryEmbeddings();
+    const newCategoryNames = categoriesToProcess.map((cat) => cat.name);
 
     // Generate all embeddings at once using the batch API
     const { embeddings, model: embeddingModel } =
-      await embedService.embedMany(categoryNames);
+      await embedService.embedMany(newCategoryNames);
 
     // Store all embeddings in parallel
-    const promises = categories.map(async (category, index) => {
+    const promises = categoriesToProcess.map(async (category, index) => {
       try {
         const embedding = embeddings[index];
         if (!embedding) {
@@ -169,5 +209,5 @@ export async function generateCategoryEmbeddingsBatch(
     }
   }
 
-  return { processed, errors, results };
+  return { processed, skipped, errors, results };
 }

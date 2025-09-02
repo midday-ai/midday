@@ -21,10 +21,7 @@ const EMBEDDING_CONFIG = {
 /**
  * Generate a single embedding for a category name
  */
-export async function generateCategoryEmbedding(categoryName: string): Promise<{
-  embedding: number[];
-  model: string;
-}> {
+export async function generateCategoryEmbedding(categoryName: string) {
   const { embedding } = await embed({
     model: EMBEDDING_CONFIG.model,
     value: categoryName,
@@ -40,12 +37,7 @@ export async function generateCategoryEmbedding(categoryName: string): Promise<{
 /**
  * Generate embeddings for multiple category names
  */
-export async function generateCategoryEmbeddings(
-  categoryNames: string[],
-): Promise<{
-  embeddings: number[][];
-  model: string;
-}> {
+export async function generateCategoryEmbeddings(categoryNames: string[]) {
   const { embeddings } = await embedMany({
     model: EMBEDDING_CONFIG.model,
     values: categoryNames,
@@ -66,20 +58,14 @@ export class CategoryEmbeddings {
   /**
    * Generate embedding for a single category
    */
-  public async embed(categoryName: string): Promise<{
-    embedding: number[];
-    model: string;
-  }> {
+  public async embed(categoryName: string) {
     return generateCategoryEmbedding(categoryName);
   }
 
   /**
    * Generate embeddings for multiple categories
    */
-  public async embedMany(categoryNames: string[]): Promise<{
-    embeddings: number[][];
-    model: string;
-  }> {
+  public async embedMany(categoryNames: string[]) {
     return generateCategoryEmbeddings(categoryNames);
   }
 }

@@ -1,5 +1,14 @@
 #!/usr/bin/env tsx
 
+import { CATEGORIES } from "@midday/categories";
+import {
+  getTaxRateForCategory,
+  getTaxTypeForCountry,
+} from "@midday/categories";
+import type { Database } from "@midday/db/client";
+import { getTeamById } from "@midday/db/queries";
+import { transactionCategories } from "@midday/db/schema";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
