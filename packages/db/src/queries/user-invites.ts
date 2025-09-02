@@ -1,6 +1,6 @@
 import type { Database } from "@db/client";
 import { teams, userInvites, users, usersOnTeam } from "@db/schema";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
 export async function getUserInvites(db: Database, email: string) {
   return db.query.userInvites.findMany({
@@ -206,7 +206,12 @@ async function validateInvites(
     })
     .from(usersOnTeam)
     .innerJoin(users, eq(usersOnTeam.userId, users.id))
-    .where(and(eq(usersOnTeam.teamId, teamId), inArray(users.email, emails)));
+    .where(
+      and(
+        eq(usersOnTeam.teamId, teamId),
+        sql`LOWER(${users.email}) = ANY(${emails.map((email) => `'${email}'`).join(",")}::text[])`,
+      ),
+    );
 
   const existingMemberEmails = new Set(
     existingMembers
@@ -221,7 +226,10 @@ async function validateInvites(
     })
     .from(userInvites)
     .where(
-      and(eq(userInvites.teamId, teamId), inArray(userInvites.email, emails)),
+      and(
+        eq(userInvites.teamId, teamId),
+        sql`LOWER(${userInvites.email}) = ANY(${emails.map((email) => `'${email}'`).join(",")}::text[])`,
+      ),
     );
 
   const pendingInviteEmails = new Set(
@@ -279,7 +287,7 @@ export async function createTeamInvites(
 
   const results = await Promise.all(
     validInvites.map(async (invite) => {
-      // Insert new invite (no upsert needed since we've already validated)
+      // Insert new invite with conflict handling to prevent race conditions
       const [row] = await db
         .insert(userInvites)
         .values({
@@ -287,6 +295,9 @@ export async function createTeamInvites(
           role: invite.role,
           invitedBy: invite.invitedBy,
           teamId: teamId,
+        })
+        .onConflictDoNothing({
+          target: [userInvites.teamId, userInvites.email],
         })
         .returning({
           id: userInvites.id,
