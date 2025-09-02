@@ -1,4 +1,3 @@
-import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -99,8 +98,7 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
       const leaveTeamMutation = useMutation(
         trpc.team.leave.mutationOptions({
           onSuccess: async () => {
-            // Revalidate server state and redirect
-            await revalidateAfterTeamChange();
+            router.push("/teams");
           },
           onError: () => {
             toast({

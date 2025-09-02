@@ -1,6 +1,5 @@
 "use client";
 
-import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import {
@@ -26,18 +25,20 @@ import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function DeleteTeam() {
   const [value, setValue] = useState("");
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
+  const router = useRouter();
 
   const deleteTeamMutation = useMutation(
     trpc.team.delete.mutationOptions({
       onSuccess: async () => {
         // Revalidate server state and redirect
-        await revalidateAfterTeamChange();
+        router.push("/teams");
       },
     }),
   );

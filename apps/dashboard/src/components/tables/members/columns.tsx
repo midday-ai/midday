@@ -1,4 +1,3 @@
-import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
 import { useI18n } from "@/locales/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
@@ -35,6 +34,7 @@ import * as React from "react";
 import "@tanstack/react-table";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 type TeamMember = RouterOutputs["team"]["members"][number];
 
@@ -91,6 +91,7 @@ export const columns: ColumnDef<TeamMember>[] = [
       const meta = table.options.meta;
       const trpc = useTRPC();
       const queryClient = useQueryClient();
+      const router = useRouter();
 
       const deleteMemberMutation = useMutation(
         trpc.team.deleteMember.mutationOptions({
@@ -110,8 +111,7 @@ export const columns: ColumnDef<TeamMember>[] = [
       const leaveTeamMutation = useMutation(
         trpc.team.leave.mutationOptions({
           onSuccess: async () => {
-            // Revalidate server state and redirect
-            await revalidateAfterTeamChange();
+            router.push("/teams");
           },
         }),
       );
