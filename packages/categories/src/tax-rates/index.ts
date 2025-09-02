@@ -1648,11 +1648,11 @@ export function getTaxRateForCategory(
 // Helper function to get tax type for a country
 export function getTaxTypeForCountry(
   countryCode: string | undefined | null,
-): string {
+): string | null {
   const effectiveCountryCode = countryCode || "DEFAULT";
   const config =
     TAX_RATE_CONFIGS[effectiveCountryCode] || TAX_RATE_CONFIGS.DEFAULT;
-  return config?.taxType || "none";
+  return config?.taxType || null;
 }
 
 // Helper function to get all supported countries
