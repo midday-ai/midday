@@ -32,6 +32,8 @@ export const getCategories = async (
       system: transactionCategories.system,
       taxRate: transactionCategories.taxRate,
       taxType: transactionCategories.taxType,
+      taxReportingCode: transactionCategories.taxReportingCode,
+      excluded: transactionCategories.excluded,
       parentId: transactionCategories.parentId,
     })
     .from(transactionCategories)
@@ -58,6 +60,8 @@ export const getCategories = async (
       system: transactionCategories.system,
       taxRate: transactionCategories.taxRate,
       taxType: transactionCategories.taxType,
+      taxReportingCode: transactionCategories.taxReportingCode,
+      excluded: transactionCategories.excluded,
       parentId: transactionCategories.parentId,
     })
     .from(transactionCategories)
@@ -95,6 +99,7 @@ export type CreateTransactionCategoryParams = {
   description?: string | null;
   taxRate?: number | null;
   taxType?: string | null;
+  taxReportingCode?: string | null;
   parentId?: string | null;
 };
 
@@ -110,6 +115,7 @@ export const createTransactionCategory = async (
     description,
     taxRate,
     taxType,
+    taxReportingCode,
     parentId,
   } = params;
 
@@ -122,6 +128,7 @@ export const createTransactionCategory = async (
       description,
       taxRate,
       taxType,
+      taxReportingCode,
       parentId,
     })
     .returning();
@@ -141,6 +148,7 @@ export const createTransactionCategory = async (
         categoryDescription: result.description,
         taxRate: result.taxRate,
         taxType: result.taxType,
+        taxReportingCode: result.taxReportingCode,
         parentId: result.parentId,
       },
     });
@@ -169,6 +177,7 @@ export type CreateTransactionCategoriesParams = {
     description?: string | null;
     taxRate?: number | null;
     taxType?: string | null;
+    taxReportingCode?: string | null;
     parentId?: string | null;
   }[];
 };
@@ -208,6 +217,7 @@ export const createTransactionCategories = async (
         categoryDescription: category.description,
         taxRate: category.taxRate,
         taxType: category.taxType,
+        taxReportingCode: category.taxReportingCode,
         parentId: category.parentId,
       },
     });
@@ -264,6 +274,7 @@ export type UpdateTransactionCategoryParams = {
   description?: string | null;
   taxRate?: number | null;
   taxType?: string | null;
+  taxReportingCode?: string | null;
   parentId?: string | null;
 };
 

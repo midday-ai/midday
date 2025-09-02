@@ -611,11 +611,16 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       "other-income": 0,
       "customer-refunds": 0,
       "chargebacks-disputes": 0,
-      // Most business purchases are exempt from sales tax
-      // Only specify categories that might be subject to sales tax
-      "office-supplies": 0, // Often exempt for business use
-      equipment: 0, // Often exempt for business use
-      software: 0, // Often exempt or varies by state
+      // Conservative default rates for commonly taxed categories
+      "office-supplies": 5, // Often taxed for small businesses
+      equipment: 5, // Business equipment commonly taxed
+      software: 4, // SaaS increasingly taxed by states
+      meals: 6, // Restaurant meals almost always taxed
+      "non-software-subscriptions": 4, // Physical subscriptions often taxed
+      "promotional-materials": 5, // Marketing materials often taxed
+      "facilities-expenses": 4, // Maintenance supplies often taxed
+      "internet-and-telephone": 3, // Telecom services increasingly taxed
+      "fixed-assets": 5, // Capital purchases commonly taxed
       // Categories that are typically exempt
       insurance: 0,
       benefits: 0,
@@ -641,7 +646,6 @@ export const TAX_RATE_CONFIGS: Record<string, TaxRateConfig> = {
       fees: 0,
       // Assets categories (VAT rate 0%)
       "assets-capex": 0,
-      "fixed-assets": 0,
       "prepaid-expenses": 0,
       // Owner/Equity categories (VAT rate 0%)
       "owner-equity": 0,
@@ -1648,11 +1652,11 @@ export function getTaxRateForCategory(
 // Helper function to get tax type for a country
 export function getTaxTypeForCountry(
   countryCode: string | undefined | null,
-): string {
+): string | null {
   const effectiveCountryCode = countryCode || "DEFAULT";
   const config =
     TAX_RATE_CONFIGS[effectiveCountryCode] || TAX_RATE_CONFIGS.DEFAULT;
-  return config?.taxType || "none";
+  return config?.taxType || null;
 }
 
 // Helper function to get all supported countries
