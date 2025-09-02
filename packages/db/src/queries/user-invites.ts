@@ -1,6 +1,6 @@
 import type { Database } from "@db/client";
 import { teams, userInvites, users, usersOnTeam } from "@db/schema";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, or, sql } from "drizzle-orm";
 
 export async function getUserInvites(db: Database, email: string) {
   return db.query.userInvites.findMany({
@@ -209,7 +209,7 @@ async function validateInvites(
     .where(
       and(
         eq(usersOnTeam.teamId, teamId),
-        sql`LOWER(${users.email}) = ANY(${emails.map((email) => `'${email}'`).join(",")}::text[])`,
+        or(...emails.map((email) => sql`LOWER(${users.email}) = ${email}`)),
       ),
     );
 
@@ -228,7 +228,9 @@ async function validateInvites(
     .where(
       and(
         eq(userInvites.teamId, teamId),
-        sql`LOWER(${userInvites.email}) = ANY(${emails.map((email) => `'${email}'`).join(",")}::text[])`,
+        or(
+          ...emails.map((email) => sql`LOWER(${userInvites.email}) = ${email}`),
+        ),
       ),
     );
 
