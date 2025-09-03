@@ -34,6 +34,9 @@ export function formatEditorContent(doc?: EditorDoc) {
                       fontFamily: "Inter",
                     };
                     let href: string | undefined;
+                    let hasUnderline = false;
+                    let hasStrike = false;
+
                     if (inlineContent.marks) {
                       for (const mark of inlineContent.marks) {
                         if (mark.type === "bold") {
@@ -44,12 +47,21 @@ export function formatEditorContent(doc?: EditorDoc) {
                         }
                         if (mark.type === "link") {
                           href = mark.attrs?.href;
-                          style.textDecoration = "underline";
+                          hasUnderline = true;
                         }
                         if (mark.type === "strike") {
-                          style.textDecoration = "line-through";
+                          hasStrike = true;
                         }
                       }
+                    }
+
+                    // Combine text decorations
+                    if (hasUnderline && hasStrike) {
+                      style.textDecoration = "underline line-through";
+                    } else if (hasUnderline) {
+                      style.textDecoration = "underline";
+                    } else if (hasStrike) {
+                      style.textDecoration = "line-through";
                     }
 
                     const content = inlineContent.text || "";
