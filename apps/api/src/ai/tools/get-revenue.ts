@@ -7,7 +7,7 @@ import { z } from "zod";
 export const getRevenueTool = ({ db, teamId }: ToolContext) =>
   tool({
     description:
-      "Get revenue data for a specific time period. Shows total revenue and monthly breakdown. Use this when users ask about income, revenue, earnings, or sales.",
+      "Get revenue data for a specific time period. Shows total revenue and monthly breakdown. Use this when users ask about revenue.",
     parameters: z.object({
       from: z.coerce
         .date()
