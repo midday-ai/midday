@@ -36,8 +36,9 @@ export function DeleteTeam() {
 
   const deleteTeamMutation = useMutation(
     trpc.team.delete.mutationOptions({
-      onSuccess: () => {
-        router.push("/");
+      onSuccess: async () => {
+        // Revalidate server state and redirect
+        router.push("/teams");
       },
     }),
   );

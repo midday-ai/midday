@@ -97,6 +97,9 @@ export const columns: ColumnDef<RouterOutputs["team"]["list"][number]>[] = [
 
       const leaveTeamMutation = useMutation(
         trpc.team.leave.mutationOptions({
+          onSuccess: async () => {
+            router.push("/teams");
+          },
           onError: () => {
             toast({
               duration: 6000,

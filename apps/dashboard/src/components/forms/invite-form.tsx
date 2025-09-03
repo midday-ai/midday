@@ -40,16 +40,29 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
 
   const inviteMutation = useMutation(
     trpc.team.invite.mutationOptions({
-      onSuccess: () => {
+      onSuccess: (data) => {
         queryClient.invalidateQueries({
           queryKey: trpc.team.teamInvites.queryKey(),
         });
 
-        toast({
-          title: "Invites sent",
-          description: "Invites sent to the team members",
-          variant: "success",
-        });
+        // Show appropriate feedback based on results
+        if (data.sent > 0 && data.skipped === 0) {
+          toast({
+            title: "Invites sent",
+            description: `${data.sent} invite${data.sent > 1 ? "s" : ""} sent successfully`,
+            variant: "success",
+          });
+        } else if (data.sent > 0 && data.skipped > 0) {
+          toast({
+            title: "Invites partially sent",
+            description: `${data.sent} invite${data.sent > 1 ? "s" : ""} sent, ${data.skipped} skipped (already members or invited)`,
+          });
+        } else if (data.sent === 0 && data.skipped > 0) {
+          toast({
+            title: "No invites sent",
+            description: `All ${data.skipped} invite${data.skipped > 1 ? "s" : ""} were skipped (already members or invited)`,
+          });
+        }
 
         onSuccess?.();
       },

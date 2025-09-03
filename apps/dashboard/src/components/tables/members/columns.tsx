@@ -34,6 +34,7 @@ import * as React from "react";
 import "@tanstack/react-table";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 type TeamMember = RouterOutputs["team"]["members"][number];
 
@@ -90,6 +91,7 @@ export const columns: ColumnDef<TeamMember>[] = [
       const meta = table.options.meta;
       const trpc = useTRPC();
       const queryClient = useQueryClient();
+      const router = useRouter();
 
       const deleteMemberMutation = useMutation(
         trpc.team.deleteMember.mutationOptions({
@@ -108,10 +110,8 @@ export const columns: ColumnDef<TeamMember>[] = [
 
       const leaveTeamMutation = useMutation(
         trpc.team.leave.mutationOptions({
-          onSuccess: () => {
-            queryClient.invalidateQueries({
-              queryKey: trpc.team.members.queryKey(),
-            });
+          onSuccess: async () => {
+            router.push("/teams");
           },
         }),
       );
