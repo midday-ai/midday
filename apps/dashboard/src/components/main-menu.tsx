@@ -138,7 +138,7 @@ const ChildItem = ({
           className={cn(
             "ml-[35px] mr-[15px] h-[32px] flex items-center",
             "border-l border-[#DCDAD2] dark:border-[#2C2C2C] pl-3",
-            "transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
+            "transition-all duration-200 ease-out",
             showChild
               ? "opacity-100 translate-x-0"
               : "opacity-0 -translate-x-2",
@@ -247,7 +247,7 @@ const Item = ({
       {hasChildren && (
         <div
           className={cn(
-            "transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden",
+            "transition-all duration-300 ease-out overflow-hidden",
             shouldShowChildren ? "max-h-96 mt-1" : "max-h-0",
           )}
         >

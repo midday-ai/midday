@@ -3,10 +3,10 @@
 // Note that this config is unrelated to the Vercel Edge Runtime and is also required when running locally.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
-import * as Sentry from "@sentry/nextjs";
-
-// Only initialize Sentry in production
+// Only import and initialize Sentry in production
 if (process.env.NODE_ENV === "production") {
+  const Sentry = require("@sentry/nextjs");
+
   Sentry.init({
     dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
     environment: process.env.NODE_ENV,

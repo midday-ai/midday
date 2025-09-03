@@ -7,6 +7,7 @@ const config = {
   images: {
     loader: "custom",
     loaderFile: "./image-loader.ts",
+    qualities: [80, 100],
     remotePatterns: [
       {
         protocol: "https",
