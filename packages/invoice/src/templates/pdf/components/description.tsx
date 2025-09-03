@@ -7,9 +7,7 @@ export function Description({ content }: { content: string }) {
 
   // If the content is not valid JSON, return the content as a string
   if (!value) {
-    return (
-      <Text style={{ fontFamily: "Helvetica", fontSize: 9 }}>{content}</Text>
-    );
+    return <Text style={{ fontFamily: "Inter", fontSize: 9 }}>{content}</Text>;
   }
 
   return (

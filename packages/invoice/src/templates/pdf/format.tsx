@@ -29,21 +29,39 @@ export function formatEditorContent(doc?: EditorDoc) {
               <Text>
                 {node.content?.map((inlineContent, inlineIndex) => {
                   if (inlineContent.type === "text") {
-                    const style: PDFTextStyle = { fontSize: 9 };
+                    const style: PDFTextStyle = {
+                      fontSize: 9,
+                      fontFamily: "Inter",
+                    };
                     let href: string | undefined;
+                    let hasUnderline = false;
+                    let hasStrike = false;
+
                     if (inlineContent.marks) {
                       for (const mark of inlineContent.marks) {
                         if (mark.type === "bold") {
-                          style.fontFamily = "Helvetica-Bold";
-                        } else if (mark.type === "italic") {
-                          style.fontFamily = "Helvetica-Oblique";
-                        } else if (mark.type === "link") {
+                          style.fontWeight = 600;
+                        }
+                        if (mark.type === "italic") {
+                          style.fontStyle = "italic";
+                        }
+                        if (mark.type === "link") {
                           href = mark.attrs?.href;
-                          style.textDecoration = "underline";
-                        } else if (mark.type === "strike") {
-                          style.textDecoration = "line-through";
+                          hasUnderline = true;
+                        }
+                        if (mark.type === "strike") {
+                          hasStrike = true;
                         }
                       }
+                    }
+
+                    // Combine text decorations
+                    if (hasUnderline && hasStrike) {
+                      style.textDecoration = "underline line-through";
+                    } else if (hasUnderline) {
+                      style.textDecoration = "underline";
+                    } else if (hasStrike) {
+                      style.textDecoration = "line-through";
                     }
 
                     const content = inlineContent.text || "";
