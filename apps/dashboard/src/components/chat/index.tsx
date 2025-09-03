@@ -52,22 +52,73 @@ export function Chat() {
       <div className="flex flex-col h-full">
         <Conversation className="h-full">
           <ConversationContent>
-            {messages.map((message) => (
-              <div key={message.id}>
-                {/* {message.role === "assistant" && (
-                  <Sources>
-                    <SourcesTrigger count={0} />
-                  </Sources>
-                )} */}
-                {message.role !== "data" && (
-                  <Message from={message.role} key={message.id}>
-                    <MessageContent>
-                      <Response>{message.content}</Response>
-                    </MessageContent>
-                  </Message>
-                )}
-              </div>
-            ))}
+            {messages.map((message) => {
+              console.log(message);
+              return (
+                <div key={message.id}>
+                  {message.role !== "data" && (
+                    <Message from={message.role} key={message.id}>
+                      <MessageContent>
+                        {message.parts?.map((part, partIndex) => {
+                          if (part.type === "text") {
+                            return (
+                              <Response key={`text-${partIndex.toString()}`}>
+                                {part.text}
+                              </Response>
+                            );
+                          }
+
+                          if (part.type === "tool-invocation") {
+                            const toolPart = part as any; // Type assertion for tool invocation
+                            return (
+                              <div
+                                key={`tool-${partIndex.toString()}`}
+                                className="mt-4 p-4 border border-border rounded-lg bg-muted/50"
+                              >
+                                <div className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                                  {toolPart.toolName === "getRevenue" && "💰"}
+                                  {toolPart.toolName !== "getRevenue" && "🔧"}
+                                  {toolPart.toolName === "getRevenue"
+                                    ? "Revenue Data"
+                                    : toolPart.toolName}
+                                </div>
+
+                                {toolPart.state === "call" && (
+                                  <div className="text-sm text-muted-foreground">
+                                    <div className="animate-pulse">
+                                      Fetching data...
+                                    </div>
+                                  </div>
+                                )}
+
+                                {toolPart.state === "result" && (
+                                  <div className="whitespace-pre-wrap text-sm font-mono bg-background p-3 rounded border">
+                                    {typeof toolPart.result === "string"
+                                      ? toolPart.result
+                                      : JSON.stringify(
+                                          toolPart.result,
+                                          null,
+                                          2,
+                                        )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          }
+
+                          return null;
+                        })}
+
+                        {/* Fallback for message.content if no parts */}
+                        {!message.parts?.length && (
+                          <Response>{message.content}</Response>
+                        )}
+                      </MessageContent>
+                    </Message>
+                  )}
+                </div>
+              );
+            })}
             {isLoading && <Loader />}
           </ConversationContent>
           <ConversationScrollButton />

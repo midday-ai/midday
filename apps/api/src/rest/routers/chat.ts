@@ -1,4 +1,5 @@
 import { openai } from "@ai-sdk/openai";
+import { getRevenueTool } from "@api/ai/tools/get-revenue";
 import type { Context } from "@api/rest/types";
 import { chatRequestSchema } from "@api/schemas/chat";
 import { OpenAPIHono } from "@hono/zod-openapi";
@@ -6,7 +7,7 @@ import { zValidator } from "@hono/zod-validator";
 import { chatCache } from "@midday/cache/chat-cache";
 import { getTeamById, getUserById } from "@midday/db/queries";
 import { logger } from "@midday/logger";
-import { streamText } from "ai";
+import { smoothStream, streamText } from "ai";
 import { createDataStream } from "ai";
 import { HTTPException } from "hono/http-exception";
 import { stream } from "hono/streaming";
@@ -91,6 +92,13 @@ app.post(
             `,
             temperature: 0.7,
             maxTokens: 1000,
+            maxSteps: 10,
+            experimental_transform: smoothStream({
+              chunking: "word",
+            }),
+            tools: {
+              getRevenue: getRevenueTool({ db, teamId, userId }),
+            },
           });
 
           // Track response for metrics only
