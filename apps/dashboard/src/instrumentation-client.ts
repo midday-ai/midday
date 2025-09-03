@@ -4,18 +4,21 @@
 
 import * as Sentry from "@sentry/nextjs";
 
-Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  environment: process.env.NODE_ENV,
+// Only initialize Sentry in production
+if (process.env.NODE_ENV === "production") {
+  Sentry.init({
+    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    environment: process.env.NODE_ENV,
 
-  // Lower trace sampling to save quota
-  tracesSampleRate: 0.1,
+    // Lower trace sampling to save quota
+    tracesSampleRate: 0.1,
 
-  // Enable logs
-  enableLogs: true,
+    // Enable logs
+    enableLogs: true,
 
-  // Disable debug
-  debug: false,
-});
+    // Disable debug
+    debug: false,
+  });
+}
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
