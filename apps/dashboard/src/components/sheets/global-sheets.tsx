@@ -1,6 +1,5 @@
 "use client";
 
-import { AssistantModal } from "@/components/assistant/assistant-modal";
 import { ConnectTransactionsModal } from "@/components/modals/connect-transactions-modal";
 import { ImportModal } from "@/components/modals/import-modal";
 import { SelectBankAccountsModal } from "@/components/modals/select-bank-accounts";
@@ -51,7 +50,6 @@ export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
       <TransactionSheet />
       <TransactionCreateSheet />
 
-      <AssistantModal />
       <SelectBankAccountsModal />
       <TrialEndedModal />
       <SearchModal />
