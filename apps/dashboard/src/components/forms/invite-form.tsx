@@ -17,7 +17,7 @@ import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useFieldArray } from "react-hook-form";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 const formSchema = z.object({
   invites: z.array(
