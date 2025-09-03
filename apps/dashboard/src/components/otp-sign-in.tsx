@@ -13,7 +13,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 const formSchema = z.object({
   email: z.string().email(),
