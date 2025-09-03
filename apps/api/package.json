@@ -34,7 +34,7 @@
     "@polar-sh/sdk": "^0.34.9",
     "@scalar/hono-api-reference": "^0.9.4",
     "@sindresorhus/slugify": "^2.2.1",
-    "@trigger.dev/sdk": "4.0.1",
+    "@trigger.dev/sdk": "4.0.2",
     "@trpc/server": "^11.5.0",
     "ai": "^4.3.19",
     "camelcase-keys": "^9.1.3",
