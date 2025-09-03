@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { SubmitButton } from "@midday/ui/submit-button";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { CountrySelector } from "./country-selector";
 
 const formSchema = z.object({

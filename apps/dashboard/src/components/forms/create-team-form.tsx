@@ -18,7 +18,7 @@ import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { use, useRef, useState } from "react";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { CountrySelector } from "../country-selector";
 
 const formSchema = z.object({
