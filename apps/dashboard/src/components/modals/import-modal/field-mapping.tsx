@@ -5,6 +5,7 @@ import { SelectAccount } from "@/components/select-account";
 import { SelectCurrency } from "@/components/select-currency";
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount } from "@/utils/format";
+import { readStreamableValue } from "@ai-sdk/rsc";
 import { formatAmountValue, formatDate } from "@midday/import";
 import {
   Accordion,
@@ -31,7 +32,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { readStreamableValue } from "ai/rsc";
 import { capitalCase } from "change-case";
 import { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";

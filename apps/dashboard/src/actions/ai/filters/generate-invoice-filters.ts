@@ -1,8 +1,8 @@
 "use server";
 
 import { openai } from "@ai-sdk/openai";
+import { createStreamableValue } from "@ai-sdk/rsc";
 import { streamObject } from "ai";
-import { createStreamableValue } from "ai/rsc";
 import { z } from "zod/v3";
 
 const schema = z.object({
@@ -12,11 +12,11 @@ const schema = z.object({
     .optional()
     .describe("The statuses to filter by"),
   start: z
-    .date()
+    .string()
     .optional()
     .describe("The start date when to retrieve from. Return ISO-8601 format."),
   end: z
-    .date()
+    .string()
     .optional()
     .describe(
       "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
@@ -32,7 +32,7 @@ export async function generateInvoiceFilters(prompt: string, context?: string) {
 
   (async () => {
     const { partialObjectStream } = await streamObject({
-      model: openai("gpt-4o-mini"),
+      model: openai("gpt-5-nano"),
       system: `You are a helpful assistant that generates filters for a given prompt. \n
                 Current date is: ${new Date().toISOString().split("T")[0]} \n
                 ${context}

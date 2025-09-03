@@ -1,8 +1,8 @@
 "use server";
 
 import { openai } from "@ai-sdk/openai";
+import { createStreamableValue } from "@ai-sdk/rsc";
 import { streamObject } from "ai";
-import { createStreamableValue } from "ai/rsc";
 import { z } from "zod";
 
 export async function generateCsvMapping(
@@ -13,10 +13,10 @@ export async function generateCsvMapping(
 
   (async () => {
     const { partialObjectStream } = await streamObject({
-      model: openai("gpt-4o-mini"),
+      model: openai("gpt-5-nano"),
       schema: z.object({
         date: z
-          .date()
+          .string()
           .transform((value) => new Date(value))
           .describe(
             "The date of the transaction, return it in ISO-8601 format",
