@@ -2,20 +2,29 @@
 // The added config here will be used whenever a users loads a page in their browser.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
-import * as Sentry from "@sentry/nextjs";
+// Only import and initialize Sentry in production
+let onRouterTransitionStart: () => void;
 
-Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  environment: process.env.NODE_ENV,
+if (process.env.NODE_ENV === "production") {
+  const Sentry = require("@sentry/nextjs");
 
-  // Lower trace sampling to save quota
-  tracesSampleRate: 0.1,
+  Sentry.init({
+    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    environment: process.env.NODE_ENV,
 
-  // Enable logs
-  enableLogs: true,
+    // Lower trace sampling to save quota
+    tracesSampleRate: 0.1,
 
-  // Disable debug
-  debug: false,
-});
+    // Enable logs
+    enableLogs: true,
 
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+    // Disable debug
+    debug: false,
+  });
+
+  onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+} else {
+  onRouterTransitionStart = () => {};
+}
+
+export { onRouterTransitionStart };

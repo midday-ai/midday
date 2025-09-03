@@ -7,6 +7,7 @@ const config = {
   images: {
     loader: "custom",
     loaderFile: "./image-loader.ts",
+    qualities: [80, 100],
     remotePatterns: [
       {
         protocol: "https",
@@ -43,18 +44,23 @@ const config = {
   },
 };
 
-export default withSentryConfig(config, {
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-  telemetry: false,
+// Only apply Sentry configuration in production
+const isProduction = process.env.NODE_ENV === "production";
 
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
+export default isProduction
+  ? withSentryConfig(config, {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      telemetry: false,
 
-  // Upload source maps for better stack traces
-  widenClientFileUpload: true,
+      // Only print logs for uploading source maps in CI
+      silent: !process.env.CI,
 
-  // Tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
-});
+      // Upload source maps for better stack traces
+      widenClientFileUpload: true,
+
+      // Tree-shake Sentry logger statements to reduce bundle size
+      disableLogger: true,
+    })
+  : config;
