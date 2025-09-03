@@ -3,6 +3,8 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 // Only import and initialize Sentry in production
+let onRouterTransitionStart: () => void;
+
 if (process.env.NODE_ENV === "production") {
   const Sentry = require("@sentry/nextjs");
 
@@ -20,13 +22,9 @@ if (process.env.NODE_ENV === "production") {
     debug: false,
   });
 
-  // Export the function only in production
-  module.exports = {
-    onRouterTransitionStart: Sentry.captureRouterTransitionStart,
-  };
+  onRouterTransitionStart = Sentry.captureRouterTransitionStart;
 } else {
-  // Export a no-op function in development
-  module.exports = {
-    onRouterTransitionStart: () => {},
-  };
+  onRouterTransitionStart = () => {};
 }
+
+export { onRouterTransitionStart };
