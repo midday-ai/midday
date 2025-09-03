@@ -13,7 +13,7 @@ import { TimeRangeInput } from "@midday/ui/time-range-input";
 import { startOfDay } from "date-fns";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { AssignUser } from "../assign-user";
 import { TrackerSelectProject } from "../tracker-select-project";
 

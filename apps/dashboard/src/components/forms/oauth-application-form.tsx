@@ -38,13 +38,12 @@ import { Switch } from "@midday/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { Textarea } from "@midday/ui/textarea";
 import { useToast } from "@midday/ui/use-toast";
-import { stripSpecialCharacters } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useFieldArray } from "react-hook-form";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { LogoUpload } from "../logo-upload";
 import { ScopeSelector } from "../scope-selector";
 

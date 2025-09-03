@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import type { Control, UseFormSetValue, UseFormWatch } from "react-hook-form";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 export const mappableFields = {
   date: {

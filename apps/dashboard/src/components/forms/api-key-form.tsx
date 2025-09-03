@@ -25,7 +25,7 @@ import { SubmitButton } from "@midday/ui/submit-button";
 import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { ScopeSelector } from "../scope-selector";
 
 const formSchema = z.object({
