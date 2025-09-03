@@ -5,6 +5,7 @@ import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-param
 import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTRPC } from "@/trpc/client";
 import { formatAccountName } from "@/utils/format";
+import { readStreamableValue } from "@ai-sdk/rsc";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
@@ -21,7 +22,6 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
-import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
