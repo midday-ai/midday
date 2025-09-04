@@ -38,7 +38,7 @@ export async function POST(req: Request) {
   const parsedBody = inboxWebhookPostSchema.safeParse(await req.json());
 
   if (!parsedBody.success) {
-    const errors = parsedBody.error.errors.map((error) => ({
+    const errors = parsedBody.error.issues.map((error) => ({
       path: error.path.join("."),
       message: error.message,
     }));
