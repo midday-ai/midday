@@ -396,6 +396,7 @@
         "node-xlsx": "^0.24.0",
         "sharp": "0.34.1",
         "trigger.dev": "4.0.2",
+        "zod": "^4.1.5",
       },
       "devDependencies": {
         "@types/bun": "latest",

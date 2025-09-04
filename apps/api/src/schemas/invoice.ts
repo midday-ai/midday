@@ -502,7 +502,7 @@ export const getInvoicesSchema = z.object({
       example: "25",
     }),
   sort: z
-    .array(z.string(), z.string())
+    .tuple([z.string(), z.string()])
     .nullable()
     .optional()
     .openapi({
