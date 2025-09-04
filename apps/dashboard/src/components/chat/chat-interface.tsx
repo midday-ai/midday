@@ -1,7 +1,6 @@
 "use client";
 
 import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import { useChat } from "@ai-sdk/react";
 import { createClient } from "@midday/supabase/client";
 import {
@@ -21,40 +20,37 @@ import {
 } from "@midday/ui/prompt-input";
 import { Response } from "@midday/ui/response";
 import { Spinner } from "@midday/ui/spinner";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { DefaultChatTransport, type UIMessage, generateId } from "ai";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMemo } from "react";
 import { ChatHeader } from "./chat-header";
 
-// Define message metadata type for chat titles
-type ChatMessageMetadata = {
-  title?: string;
-  isFirstMessage?: boolean;
-  chatId?: string;
-};
-
-// Define data part types for streaming title data
-type ChatDataParts = {
-  "data-title": {
+// Define data part types for streaming data
+export type ChatMessageDataParts = {
+  title: {
     title: string;
   };
 };
 
-type ChatUIMessage = UIMessage<ChatMessageMetadata, ChatDataParts>;
+export type ChatMessage = UIMessage<
+  Record<string, unknown>, // metadata (empty for now)
+  ChatMessageDataParts
+>;
 
-interface ChatInterfaceProps {
+type Props = {
   id?: string;
-  initialMessages?: UIMessage[];
-}
+  initialMessages?: ChatMessage[];
+  initialTitle?: string | null;
+};
 
-export function ChatInterface({ id, initialMessages }: ChatInterfaceProps) {
+export function ChatInterface({ id, initialMessages, initialTitle }: Props) {
   const [input, setInput] = useState("");
-  const [chatTitle, setChatTitle] = useState<string | null>(null);
+  const [chatTitle, setChatTitle] = useState<string | undefined>(
+    initialTitle || undefined,
+  );
   const { data: user } = useUserQuery();
   const pathname = usePathname();
-  const router = useRouter();
 
   const chatId = useMemo(() => id ?? generateId(), [id]);
 
@@ -95,7 +91,7 @@ export function ChatInterface({ id, initialMessages }: ChatInterfaceProps) {
     stop,
     status,
     error,
-  } = useChat<ChatUIMessage>({
+  } = useChat<ChatMessage>({
     id: chatId,
     messages: initialMessages,
     transport: new DefaultChatTransport({
@@ -113,21 +109,28 @@ export function ChatInterface({ id, initialMessages }: ChatInterfaceProps) {
     onData: (dataPart) => {
       // Handle title data parts as they stream in (before main response is done)
       if (dataPart.type === "data-title") {
-        const titleData = dataPart.data;
-        setChatTitle(titleData.title);
+        // With proper generic typing, TypeScript should know the structure
+        setChatTitle(dataPart.data.title);
 
         if (typeof document !== "undefined") {
-          document.title = `${titleData.title} | Midday`;
+          document.title = `${dataPart.data.title} | Midday`;
         }
       }
     },
   });
 
+  // Set document title when chat title is available
+  useEffect(() => {
+    if (chatTitle && typeof document !== "undefined") {
+      document.title = `${chatTitle} | Midday`;
+    }
+  }, [chatTitle]);
+
   // Clear messages and title when navigating away
   useEffect(() => {
     if (pathname === "/") {
       setMessages([]);
-      setChatTitle(null);
+      setChatTitle(undefined);
     }
   }, [pathname, setMessages]);
 
@@ -188,7 +191,7 @@ export function ChatInterface({ id, initialMessages }: ChatInterfaceProps) {
           <ConversationScrollButton />
         </Conversation>
 
-        <div className="bg-[#F7F7F7] dark:bg-[#131313] pt-2 max-w-4xl mx-auto w-full">
+        <div className="bg-[#F7F7F7] dark:bg-[#131313] pt-2 max-w-[770px] mx-auto w-full">
           <PromptInput onSubmit={handleSubmit}>
             <PromptInputTextarea
               onChange={(e) => setInput(e.target.value)}
@@ -200,7 +203,7 @@ export function ChatInterface({ id, initialMessages }: ChatInterfaceProps) {
             <PromptInputToolbar className="pb-1 px-4">
               <PromptInputTools>
                 <PromptInputButton className="-ml-2">
-                  <Icons.Add className="size-5" />
+                  <Icons.Add className="size-4" />
                 </PromptInputButton>
               </PromptInputTools>
               <PromptInputSubmit

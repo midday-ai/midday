@@ -36,28 +36,27 @@ export function ChatHeader({ title }: Props) {
         <Icons.ArrowBack size={16} />
       </Button>
       <h1
-        className={`text-primary text-sm font-regular truncate transition-all duration-300 ease-out transform ${
-          showTitle
-            ? "opacity-100 translate-y-0 scale-100"
-            : "opacity-0 translate-y-3 scale-90"
+        className={`text-primary text-sm font-regular truncate transition-all duration-150 ease-out transform ${
+          showTitle ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
         }`}
       >
         {title.split("").map((char, index) => {
           const centerIndex = Math.floor(title.length / 2);
           const distanceFromCenter = Math.abs(index - centerIndex);
-          const delay = distanceFromCenter * 10 + 50; // Much faster timing
+          const delay = distanceFromCenter * 3 + 20; // Much faster timing
 
           return (
             <span
               key={`${title}-${index}-${char}`}
-              className={`inline-block transform transition-all duration-250 ${
+              className={`inline-block transform transition-all duration-100 ${
                 showTitle
-                  ? "opacity-100 translate-y-0 scale-100 rotate-0"
-                  : "opacity-0 translate-y-2 scale-75 -rotate-12"
+                  ? "opacity-100 translate-y-0 rotate-0"
+                  : "opacity-0 translate-y-2 -rotate-12"
               }`}
               style={{
                 transitionDelay: `${delay}ms`,
-                transitionTimingFunction: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+                transitionTimingFunction:
+                  "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
               }}
             >
               {char === " " ? "\u00A0" : char}
