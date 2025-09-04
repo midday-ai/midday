@@ -3,6 +3,7 @@ export * from "./api-keys";
 export * from "./apps";
 export * from "./bank-accounts";
 export * from "./bank-connections";
+export * from "./chats";
 export * from "./customers";
 export * from "./customer-analytics";
 export * from "./document-tag-assignments";
