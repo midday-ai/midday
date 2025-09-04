@@ -216,91 +216,91 @@ export const notificationSchema = z.discriminatedUnion("type", [
     .extend({
       type: z.literal("transactions_created"),
     })
-    .merge(transactionsCreatedSchema.omit({ users: true })),
+    .extend(transactionsCreatedSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("inbox_new"),
     })
-    .merge(inboxNewSchema.omit({ users: true })),
+    .extend(inboxNewSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("invoice_paid"),
     })
-    .merge(invoicePaidSchema.omit({ users: true })),
+    .extend(invoicePaidSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("invoice_overdue"),
     })
-    .merge(invoiceOverdueSchema.omit({ users: true })),
+    .extend(invoiceOverdueSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("invoice_scheduled"),
     })
-    .merge(invoiceScheduledSchema.omit({ users: true })),
+    .extend(invoiceScheduledSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("invoice_sent"),
     })
-    .merge(invoiceSentSchema.omit({ users: true })),
+    .extend(invoiceSentSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("invoice_reminder_sent"),
     })
-    .merge(invoiceReminderSentSchema.omit({ users: true })),
+    .extend(invoiceReminderSentSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("invoice_cancelled"),
     })
-    .merge(invoiceCancelledSchema.omit({ users: true })),
+    .extend(invoiceCancelledSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("invoice_created"),
     })
-    .merge(invoiceCreatedSchema.omit({ users: true })),
+    .extend(invoiceCreatedSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("transactions_exported"),
     })
-    .merge(transactionsExportedSchema.omit({ users: true })),
+    .extend(transactionsExportedSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("document_uploaded"),
     })
-    .merge(documentUploadedSchema.omit({ users: true })),
+    .extend(documentUploadedSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("document_processed"),
     })
-    .merge(documentProcessedSchema.omit({ users: true })),
+    .extend(documentProcessedSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("inbox_auto_matched"),
     })
-    .merge(inboxAutoMatchedSchema.omit({ users: true })),
+    .extend(inboxAutoMatchedSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("inbox_needs_review"),
     })
-    .merge(inboxNeedsReviewSchema.omit({ users: true })),
+    .extend(inboxNeedsReviewSchema.omit({ users: true }).shape),
 
   baseJobSchema
     .extend({
       type: z.literal("inbox_cross_currency_matched"),
     })
-    .merge(inboxCrossCurrencyMatchedSchema.omit({ users: true })),
+    .extend(inboxCrossCurrencyMatchedSchema.omit({ users: true }).shape),
 ]);
 
 export type NotificationPayload = z.infer<typeof notificationSchema>;
