@@ -18,6 +18,8 @@ import { logger } from "@midday/logger";
 import {
   convertToModelMessages,
   createIdGenerator,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
   smoothStream,
   streamText,
   validateUIMessages,
@@ -113,83 +115,113 @@ app.post(
         tools,
       });
 
-      const result = streamText({
-        model: openai("gpt-4o-mini"),
-        system: generateSystemPrompt(userContext),
-        messages: convertToModelMessages(validatedMessages),
-        temperature: 0.7,
-        experimental_transform: smoothStream({
-          chunking: "word",
-          delayInMs: 0,
-        }),
-        tools,
-        onFinish: async (result) => {
-          // Log completion metrics
-          const responseTime = Date.now() - startTime;
-          logger.info({
-            msg: "Chat response completed",
-            userId,
-            teamId,
-            chatId: id,
-            responseTime,
-            text: result.text,
-            usage: result.usage,
-          });
-        },
-      });
-
       // Check if this is the first message (no previous messages)
       const isFirstMessage =
         !previousMessages || previousMessages.messages.length === 0;
 
-      // Generate title for first message (to include in stream metadata)
-      let generatedTitle: string | null = null;
-      if (isFirstMessage) {
-        try {
-          const messageContent =
-            (message as any).content ||
-            message.parts?.find((part: any) => part.type === "text")?.text ||
-            "";
+      // Create a UI message stream to handle early title streaming
+      const stream = createUIMessageStream({
+        execute: async ({ writer }) => {
+          // Generate and stream title immediately for first message
+          let generatedTitle: string | null = null;
+          if (isFirstMessage) {
+            try {
+              const messageContent =
+                (message as any).content ||
+                message.parts?.find((part: any) => part.type === "text")
+                  ?.text ||
+                "";
 
-          generatedTitle = await generateTitle({
-            message: messageContent,
-            teamName: userContext.teamName,
-            fullName: userContext.fullName,
+              generatedTitle = await generateTitle({
+                message: messageContent,
+                teamName: userContext.teamName,
+                fullName: userContext.fullName,
+              });
+
+              // Stream the title immediately as a data part
+              writer.write({
+                type: "data-title",
+                id: "chat-title",
+                data: {
+                  title: generatedTitle,
+                },
+              });
+
+              logger.info({
+                msg: "Chat title streamed early",
+                chatId: id,
+                title: generatedTitle,
+                userId,
+                teamId,
+              });
+            } catch (error) {
+              logger.error({
+                msg: "Failed to generate chat title for early streaming",
+                chatId: id,
+                error: error instanceof Error ? error.message : String(error),
+              });
+            }
+          }
+
+          // Start the main AI response
+          const result = streamText({
+            model: openai("gpt-4o-mini"),
+            system: generateSystemPrompt(userContext),
+            messages: convertToModelMessages(validatedMessages),
+            temperature: 0.7,
+            experimental_transform: smoothStream({
+              chunking: "word",
+              delayInMs: 0,
+            }),
+            tools,
+            onFinish: async (result) => {
+              // Log completion metrics
+              const responseTime = Date.now() - startTime;
+              logger.info({
+                msg: "Chat response completed",
+                userId,
+                teamId,
+                chatId: id,
+                responseTime,
+                text: result.text,
+                usage: result.usage,
+              });
+
+              // Save title to database if generated
+              if (isFirstMessage && generatedTitle) {
+                try {
+                  await updateChatTitle(db, id, generatedTitle, teamId);
+
+                  logger.info({
+                    msg: "Chat title saved to database",
+                    chatId: id,
+                    title: generatedTitle,
+                    userId,
+                    teamId,
+                  });
+                } catch (error) {
+                  logger.error({
+                    msg: "Failed to save chat title to database",
+                    chatId: id,
+                    error:
+                      error instanceof Error ? error.message : String(error),
+                  });
+                }
+              }
+            },
           });
 
-          logger.info({
-            msg: "Chat title generated for stream",
-            chatId: id,
-            title: generatedTitle,
-            userId,
-            teamId,
-          });
-        } catch (error) {
-          logger.error({
-            msg: "Failed to generate chat title for stream",
-            chatId: id,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
+          // Convert to UI message stream and merge with our custom stream
+          writer.merge(result.toUIMessageStream());
+        },
+      });
 
-      const response = result.toUIMessageStreamResponse({
-        originalMessages: validatedMessages,
+      const response = createUIMessageStreamResponse({
+        stream,
         generateMessageId: createIdGenerator({
           prefix: "msg",
           size: 16,
         }),
-        messageMetadata: ({ part }) => {
-          // Include title in metadata for first message when response is finished
-          if (part.type === "finish" && isFirstMessage && generatedTitle) {
-            return {
-              title: generatedTitle,
-              isFirstMessage: true,
-              chatId: id,
-            };
-          }
-          return {};
-        },
         onFinish: async ({ messages: finalMessages }) => {
           // Save chat messages
           await saveChat(db, {
@@ -198,27 +230,6 @@ app.post(
             teamId,
             userId,
           });
-
-          // Save title to database if generated
-          if (isFirstMessage && generatedTitle) {
-            try {
-              await updateChatTitle(db, id, generatedTitle, teamId);
-
-              logger.info({
-                msg: "Chat title saved to database",
-                chatId: id,
-                title: generatedTitle,
-                userId,
-                teamId,
-              });
-            } catch (error) {
-              logger.error({
-                msg: "Failed to save chat title to database",
-                chatId: id,
-                error: error instanceof Error ? error.message : String(error),
-              });
-            }
-          }
         },
       });
 

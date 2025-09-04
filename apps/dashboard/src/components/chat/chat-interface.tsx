@@ -35,7 +35,14 @@ type ChatMessageMetadata = {
   chatId?: string;
 };
 
-type ChatUIMessage = UIMessage<ChatMessageMetadata>;
+// Define data part types for streaming title data
+type ChatDataParts = {
+  "data-title": {
+    title: string;
+  };
+};
+
+type ChatUIMessage = UIMessage<ChatMessageMetadata, ChatDataParts>;
 
 interface ChatInterfaceProps {
   id?: string;
@@ -103,17 +110,14 @@ export function ChatInterface({ id, initialMessages }: ChatInterfaceProps) {
         };
       },
     }),
-    onFinish: ({ message }) => {
-      console.log("message", message);
-      // Handle title from message metadata
-      if (message.metadata?.title && message.metadata?.isFirstMessage) {
-        setChatTitle(message.metadata.title);
-        console.log("setting chat title", message.metadata.title);
+    onData: (dataPart) => {
+      // Handle title data parts as they stream in (before main response is done)
+      if (dataPart.type === "data-title") {
+        const titleData = dataPart.data;
+        setChatTitle(titleData.title);
 
-        // Update document title
         if (typeof document !== "undefined") {
-          console.log("setting document title", message.metadata.title);
-          document.title = `${message.metadata.title} | Midday`;
+          document.title = `${titleData.title} | Midday`;
         }
       }
     },
