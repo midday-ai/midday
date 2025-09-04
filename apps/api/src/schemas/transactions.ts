@@ -14,7 +14,9 @@ export const getTransactionsSchema = z.object({
       },
     }),
   sort: z
-    .tuple([z.string(), z.string()])
+    .array(z.string().min(1))
+    .max(2)
+    .min(2)
     .nullable()
     .optional()
     .openapi({
