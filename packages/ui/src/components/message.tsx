@@ -29,7 +29,7 @@ export const MessageContent = ({
   <div
     className={cn(
       "flex flex-col gap-2 overflow-hidden rounded-lg px-4 py-3 text-foreground text-sm",
-      "group-[.is-user]:!bg-[#131313] group-[.is-user]:!text-primary group-[.is-user]:!px-4 group-[.is-user]:!py-2 group-[.is-user]:max-w-fit group-[.is-user]:rounded-2xl group-[.is-user]:rounded-br-none",
+      "group-[.is-user]:!bg-[#F7F7F7] dark:group-[.is-user]:!bg-[#131313] group-[.is-user]:!text-primary group-[.is-user]:!px-4 group-[.is-user]:!py-2 group-[.is-user]:max-w-fit group-[.is-user]:rounded-2xl group-[.is-user]:rounded-br-none",
       "group-[.is-assistant]:!bg-transparent group-[.is-assistant]:!shadow-none group-[.is-assistant]:!border-none group-[.is-assistant]:!px-0 group-[.is-assistant]:!py-0 group-[.is-assistant]:!rounded-none group-[.is-assistant]:!text-[#666666]",
       className,
     )}
@@ -50,7 +50,7 @@ export const MessageAvatar = ({
   className,
   ...props
 }: MessageAvatarProps) => (
-  <Avatar className={cn("size-5 ring-1 ring-border", className)} {...props}>
+  <Avatar className={cn("size-5", className)} {...props}>
     <AvatarImage alt="" className="mt-0 mb-0" src={src} />
     <AvatarFallback>{name?.slice(0, 2) || "ME"}</AvatarFallback>
   </Avatar>

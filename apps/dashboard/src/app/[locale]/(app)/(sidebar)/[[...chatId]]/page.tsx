@@ -1,6 +1,6 @@
 import { ChatInterface } from "@/components/chat/chat-interface";
 import { OverviewModal } from "@/components/modals/overview-modal";
-import { HydrateClient, getQueryClient, prefetch, trpc } from "@/trpc/server";
+import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import { Cookies } from "@/utils/constants";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -24,14 +24,15 @@ export default async function Overview({
 
   const queryClient = getQueryClient();
 
-  // Prefetch chat data if chatId exists
-  if (currentChatId) {
-    prefetch(trpc.chats.get.queryOptions({ chatId: currentChatId }));
-  }
+  const chat = currentChatId
+    ? await queryClient.fetchQuery(
+        trpc.chats.get.queryOptions({ chatId: currentChatId }),
+      )
+    : null;
 
   return (
     <HydrateClient>
-      <ChatInterface chatId={currentChatId} />
+      <ChatInterface id={currentChatId} initialMessages={chat?.messages} />
       <OverviewModal hideConnectFlow={hideConnectFlow} />
     </HydrateClient>
   );
