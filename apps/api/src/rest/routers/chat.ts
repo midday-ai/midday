@@ -5,14 +5,19 @@ import { chatRequestSchema } from "@api/schemas/chat";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { zValidator } from "@hono/zod-validator";
 import { chatCache } from "@midday/cache/chat-cache";
-import { getTeamById, getUserById } from "@midday/db/queries";
+import {
+  getChatById,
+  getTeamById,
+  getUserById,
+  saveChat,
+} from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import {
   convertToModelMessages,
   createIdGenerator,
-  generateId,
   smoothStream,
   streamText,
+  validateUIMessages,
 } from "ai";
 import { HTTPException } from "hono/http-exception";
 import { withRequiredScope } from "../middleware";
@@ -59,25 +64,26 @@ app.post(
         await chatCache.setUserContext(userId, teamId, userContext);
       }
 
-      // Generate chat ID for logging (no persistence for now)
-      const currentChatId = id || generateId();
+      // Frontend must provide chatId
+      if (!id) {
+        throw new HTTPException(400, { message: "Chat ID is required" });
+      }
 
-      // Use only the last message (frontend handles history via initialMessages)
-      const messages = [
-        {
-          ...message,
-          id: message.id || generateId(),
-          parts: message.parts || [],
-        },
-      ];
+      const tools = {
+        getRevenue: getRevenueTool({ db, teamId, userId }),
+      };
 
-      logger.info({
-        msg: "Starting chat request",
-        userId,
-        teamId,
-        chatId: currentChatId,
-        messagesCount: messages.length,
-        isNewChat: !id,
+      // load the previous messages from the server:
+      const previousMessages = await getChatById(db, id, teamId);
+
+      const validatedMessages = await validateUIMessages({
+        // append the new message to the previous messages:
+        messages: [
+          ...(previousMessages ? previousMessages.messages : []),
+          message,
+        ],
+        // @ts-ignore
+        tools,
       });
 
       const result = streamText({
@@ -100,14 +106,12 @@ app.post(
         Company country: ${userContext.countryCode}
         Base currency: ${userContext.baseCurrency}
         `,
-        messages: convertToModelMessages(messages),
+        messages: convertToModelMessages(validatedMessages),
         temperature: 0.7,
         experimental_transform: smoothStream({
           chunking: "word",
         }),
-        tools: {
-          getRevenue: getRevenueTool({ db, teamId, userId }),
-        },
+        tools,
         onFinish: async (result) => {
           // Log completion metrics
           const responseTime = Date.now() - startTime;
@@ -115,7 +119,7 @@ app.post(
             msg: "Chat response completed",
             userId,
             teamId,
-            chatId: currentChatId,
+            chatId: id,
             responseTime,
             text: result.text,
             usage: result.usage,
@@ -123,22 +127,26 @@ app.post(
         },
       });
 
-      const response = result.toUIMessageStreamResponse({
-        originalMessages: messages,
+      // consume the stream to ensure it runs to completion & triggers onFinish
+      // even when the client response is aborted:
+      result.consumeStream();
+
+      return result.toUIMessageStreamResponse({
+        originalMessages: validatedMessages,
         generateMessageId: createIdGenerator({
           prefix: "msg",
           size: 16,
         }),
+        onFinish: async ({ messages: finalMessages }) => {
+          // Save the entire chat with all messages following AI SDK pattern
+          await saveChat(db, {
+            chatId: id,
+            messages: finalMessages,
+            teamId,
+            userId,
+          });
+        },
       });
-
-      logger.info({
-        msg: "Returning stream response",
-        userId,
-        teamId,
-        chatId: currentChatId,
-      });
-
-      return response;
     } catch (error) {
       logger.error({
         msg: "Chat request failed",

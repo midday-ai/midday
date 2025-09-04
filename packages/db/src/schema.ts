@@ -1,3 +1,4 @@
+import type { UIMessage } from "ai";
 import { type SQL, relations, sql } from "drizzle-orm";
 import {
   bigint,
@@ -3277,6 +3278,7 @@ export const chats = pgTable(
         onDelete: "cascade",
       }),
     title: text("title"),
+    messages: jsonb("messages").$type<UIMessage[]>().notNull().default([]), // Store all messages as JSONB
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -3291,29 +3293,8 @@ export const chats = pgTable(
   }),
 );
 
-export const chatMessages = pgTable(
-  "chat_messages",
-  {
-    id: text("id").primaryKey(), // nanoid
-    chatId: text("chat_id")
-      .notNull()
-      .references(() => chats.id, {
-        onDelete: "cascade",
-      }),
-    role: text("role", { enum: ["user", "assistant", "system"] }).notNull(),
-    content: jsonb("content").notNull(), // UIMessage parts
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-  },
-  (table) => ({
-    chatIdIdx: index("chat_messages_chat_id_idx").on(table.chatId),
-    createdAtIdx: index("chat_messages_created_at_idx").on(table.createdAt),
-  }),
-);
-
 // Relations
-export const chatsRelations = relations(chats, ({ many, one }) => ({
+export const chatsRelations = relations(chats, ({ one }) => ({
   team: one(teams, {
     fields: [chats.teamId],
     references: [teams.id],
@@ -3321,13 +3302,5 @@ export const chatsRelations = relations(chats, ({ many, one }) => ({
   user: one(users, {
     fields: [chats.userId],
     references: [users.id],
-  }),
-  messages: many(chatMessages),
-}));
-
-export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
-  chat: one(chats, {
-    fields: [chatMessages.chatId],
-    references: [chats.id],
   }),
 }));
