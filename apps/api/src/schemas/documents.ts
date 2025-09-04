@@ -8,7 +8,7 @@ export const getDocumentsSchema = z
       example: "20",
     }),
     sort: z
-      .array(z.string(), z.string())
+      .tuple([z.string(), z.string()])
       .nullable()
       .optional()
       .openapi({

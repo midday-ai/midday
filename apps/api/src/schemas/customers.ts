@@ -15,7 +15,7 @@ export const getCustomersSchema = z
         },
       }),
     sort: z
-      .array(z.string(), z.string())
+      .tuple([z.string(), z.string()])
       .nullable()
       .optional()
       .openapi({
