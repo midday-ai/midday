@@ -143,7 +143,7 @@ export const notificationSchema = z
       description: "Current status of the notification",
       example: "unread",
     }),
-    metadata: z.record(z.any()).openapi({
+    metadata: z.record(z.any(), z.any()).openapi({
       description: "Additional metadata for the notification",
       example: {
         transactionCount: 5,
