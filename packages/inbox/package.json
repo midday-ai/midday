@@ -19,8 +19,6 @@
     "@midday/encryption": "workspace:*",
     "@midday/supabase": "workspace:*",
     "googleapis": "^150.0.1",
-    "zod": "^4.1.5",
-    "@microsoft/microsoft-graph-client": "^3.0.7",
-    "@azure/msal-node": "^3.6.0"
+    "zod": "^4.1.5"
   }
 }
