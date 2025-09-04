@@ -26,6 +26,16 @@ import { DefaultChatTransport, type UIMessage, generateId } from "ai";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMemo } from "react";
+import { ChatHeader } from "./chat-header";
+
+// Define message metadata type for chat titles
+type ChatMessageMetadata = {
+  title?: string;
+  isFirstMessage?: boolean;
+  chatId?: string;
+};
+
+type ChatUIMessage = UIMessage<ChatMessageMetadata>;
 
 interface ChatInterfaceProps {
   id?: string;
@@ -34,6 +44,7 @@ interface ChatInterfaceProps {
 
 export function ChatInterface({ id, initialMessages }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
+  const [chatTitle, setChatTitle] = useState<string | null>(null);
   const { data: user } = useUserQuery();
   const pathname = usePathname();
   const router = useRouter();
@@ -77,7 +88,7 @@ export function ChatInterface({ id, initialMessages }: ChatInterfaceProps) {
     stop,
     status,
     error,
-  } = useChat({
+  } = useChat<ChatUIMessage>({
     id: chatId,
     messages: initialMessages,
     transport: new DefaultChatTransport({
@@ -92,14 +103,29 @@ export function ChatInterface({ id, initialMessages }: ChatInterfaceProps) {
         };
       },
     }),
+    onFinish: ({ message }) => {
+      console.log("message", message);
+      // Handle title from message metadata
+      if (message.metadata?.title && message.metadata?.isFirstMessage) {
+        setChatTitle(message.metadata.title);
+        console.log("setting chat title", message.metadata.title);
+
+        // Update document title
+        if (typeof document !== "undefined") {
+          console.log("setting document title", message.metadata.title);
+          document.title = `${message.metadata.title} | Midday`;
+        }
+      }
+    },
   });
 
-  // Clear messages when navigating away
+  // Clear messages and title when navigating away
   useEffect(() => {
     if (pathname === "/") {
       setMessages([]);
+      setChatTitle(null);
     }
-  }, [pathname]);
+  }, [pathname, setMessages]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +144,8 @@ export function ChatInterface({ id, initialMessages }: ChatInterfaceProps) {
   return (
     <div className="w-full mx-auto pb-0 relative size-full h-[calc(100vh-102px)]">
       <div className="flex flex-col h-full">
+        <ChatHeader title={chatTitle} />
+
         <Conversation className="h-full w-full">
           <ConversationContent className="px-6 max-w-4xl mx-auto">
             {messages.map((message) => {

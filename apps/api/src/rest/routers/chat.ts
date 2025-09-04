@@ -1,4 +1,6 @@
 import { openai } from "@ai-sdk/openai";
+import { generateSystemPrompt } from "@api/ai/generate-system-prompt";
+import { generateTitle } from "@api/ai/generate-title";
 import { getRevenueTool } from "@api/ai/tools/get-revenue";
 import type { Context } from "@api/rest/types";
 import { chatRequestSchema } from "@api/schemas/chat";
@@ -10,6 +12,7 @@ import {
   getTeamById,
   getUserById,
   saveChat,
+  updateChatTitle,
 } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import {
@@ -24,6 +27,8 @@ import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
 
+const MAX_MESSAGES_IN_CONTEXT = 20;
+
 app.post(
   "/",
   withRequiredScope("chat.write"),
@@ -37,42 +42,56 @@ app.post(
     const userId = session.user.id;
 
     try {
-      // Get or cache user context
-      let userContext = await chatCache.getUserContext(userId, teamId);
-      if (!userContext) {
-        const [team, user] = await Promise.all([
-          getTeamById(db, teamId),
-          getUserById(db, userId),
-        ]);
-
-        if (!team || !user) {
-          throw new HTTPException(404, { message: "User or team not found" });
-        }
-
-        userContext = {
-          userId,
-          teamId,
-          teamName: team.name,
-          fullName: user.fullName,
-          baseCurrency: team.baseCurrency,
-          countryCode: team.countryCode,
-          locale: user.locale ?? "en-US",
-          dateFormat: user.dateFormat,
-        };
-
-        // Cache for future requests
-        await chatCache.setUserContext(userId, teamId, userContext);
-      }
-
-      // Frontend must provide chatId
       if (!id) {
         throw new HTTPException(400, { message: "Chat ID is required" });
       }
 
+      const [userContext, previousMessages] = await Promise.all([
+        chatCache.getUserContext(userId, teamId).then(async (cached) => {
+          if (cached) return cached;
+
+          // If not cached, fetch team and user data in parallel
+          const [team, user] = await Promise.all([
+            getTeamById(db, teamId),
+            getUserById(db, userId),
+          ]);
+
+          if (!team || !user) {
+            throw new HTTPException(404, {
+              message: "User or team not found",
+            });
+          }
+
+          const context = {
+            userId,
+            teamId,
+            teamName: team.name,
+            fullName: user.fullName,
+            baseCurrency: team.baseCurrency,
+            countryCode: team.countryCode,
+            locale: user.locale ?? "en-US",
+            dateFormat: user.dateFormat,
+          };
+
+          // Cache for future requests (non-blocking)
+          chatCache.setUserContext(userId, teamId, context).catch((err) => {
+            logger.warn({
+              msg: "Failed to cache user context",
+              userId,
+              teamId,
+              error: err.message,
+            });
+          });
+
+          return context;
+        }),
+
+        getChatById(db, id, teamId),
+      ]);
+
       const tools = {
         getRevenue: getRevenueTool({ db, teamId, userId }),
         web_search_preview: openai.tools.webSearchPreview({
-          // optional configuration:
           searchContextSize: "low",
           userLocation: {
             type: "approximate",
@@ -81,13 +100,13 @@ app.post(
         }),
       };
 
-      // load the previous messages from the server:
-      const previousMessages = await getChatById(db, id, teamId);
-
       const validatedMessages = await validateUIMessages({
         // append the new message to the previous messages:
+        // Only keep recent messages for context
         messages: [
-          ...(previousMessages ? previousMessages.messages : []),
+          ...(previousMessages
+            ? previousMessages.messages.slice(-MAX_MESSAGES_IN_CONTEXT)
+            : []),
           message,
         ],
         // @ts-ignore
@@ -96,28 +115,12 @@ app.post(
 
       const result = streamText({
         model: openai("gpt-4o-mini"),
-        system: `You are a helpful AI assistant for Midday, a financial management platform. 
-        You help users with:
-        - Financial insights and analysis
-        - Invoice management
-        - Transaction categorization
-        - Time tracking
-        - Business reporting
-        - General financial advice
-
-        Be helpful, professional, and concise in your responses.
-        Output titles for sections when it makes sense.
-        
-        Current team: ${userContext.teamName}
-        Current full name: ${userContext.fullName}
-        Current date: ${new Date().toISOString().split("T")[0]}
-        Company country: ${userContext.countryCode}
-        Base currency: ${userContext.baseCurrency}
-        `,
+        system: generateSystemPrompt(userContext),
         messages: convertToModelMessages(validatedMessages),
         temperature: 0.7,
         experimental_transform: smoothStream({
           chunking: "word",
+          delayInMs: 0,
         }),
         tools,
         onFinish: async (result) => {
@@ -135,26 +138,91 @@ app.post(
         },
       });
 
-      // consume the stream to ensure it runs to completion & triggers onFinish
-      // even when the client response is aborted:
-      result.consumeStream();
+      // Check if this is the first message (no previous messages)
+      const isFirstMessage =
+        !previousMessages || previousMessages.messages.length === 0;
 
-      return result.toUIMessageStreamResponse({
+      // Generate title for first message (to include in stream metadata)
+      let generatedTitle: string | null = null;
+      if (isFirstMessage) {
+        try {
+          const messageContent =
+            (message as any).content ||
+            message.parts?.find((part: any) => part.type === "text")?.text ||
+            "";
+
+          generatedTitle = await generateTitle({
+            message: messageContent,
+            teamName: userContext.teamName,
+            fullName: userContext.fullName,
+          });
+
+          logger.info({
+            msg: "Chat title generated for stream",
+            chatId: id,
+            title: generatedTitle,
+            userId,
+            teamId,
+          });
+        } catch (error) {
+          logger.error({
+            msg: "Failed to generate chat title for stream",
+            chatId: id,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+
+      const response = result.toUIMessageStreamResponse({
         originalMessages: validatedMessages,
         generateMessageId: createIdGenerator({
           prefix: "msg",
           size: 16,
         }),
+        messageMetadata: ({ part }) => {
+          // Include title in metadata for first message when response is finished
+          if (part.type === "finish" && isFirstMessage && generatedTitle) {
+            return {
+              title: generatedTitle,
+              isFirstMessage: true,
+              chatId: id,
+            };
+          }
+          return {};
+        },
         onFinish: async ({ messages: finalMessages }) => {
-          // Save the entire chat with all messages following AI SDK pattern
+          // Save chat messages
           await saveChat(db, {
             chatId: id,
             messages: finalMessages,
             teamId,
             userId,
           });
+
+          // Save title to database if generated
+          if (isFirstMessage && generatedTitle) {
+            try {
+              await updateChatTitle(db, id, generatedTitle, teamId);
+
+              logger.info({
+                msg: "Chat title saved to database",
+                chatId: id,
+                title: generatedTitle,
+                userId,
+                teamId,
+              });
+            } catch (error) {
+              logger.error({
+                msg: "Failed to save chat title to database",
+                chatId: id,
+                error: error instanceof Error ? error.message : String(error),
+              });
+            }
+          }
         },
       });
+
+      return response;
     } catch (error) {
       logger.error({
         msg: "Chat request failed",
