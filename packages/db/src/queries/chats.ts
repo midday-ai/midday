@@ -43,6 +43,7 @@ export const saveChat = async (
     messages: UIMessage[];
     teamId: string;
     userId: string;
+    title?: string | null;
   },
 ) => {
   const [chat] = await db
@@ -52,33 +53,17 @@ export const saveChat = async (
       teamId: data.teamId,
       userId: data.userId,
       messages: data.messages,
+      title: data.title,
       updatedAt: new Date(),
     })
     .onConflictDoUpdate({
       target: chats.id,
       set: {
         messages: data.messages,
+        title: data.title,
         updatedAt: new Date(),
       },
     })
-    .returning();
-
-  return chat;
-};
-
-export const updateChatTitle = async (
-  db: Database,
-  chatId: string,
-  title: string,
-  teamId: string,
-) => {
-  const [chat] = await db
-    .update(chats)
-    .set({
-      title,
-      updatedAt: new Date(),
-    })
-    .where(and(eq(chats.id, chatId), eq(chats.teamId, teamId)))
     .returning();
 
   return chat;

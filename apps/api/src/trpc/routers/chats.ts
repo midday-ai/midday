@@ -2,15 +2,9 @@ import {
   deleteChatSchema,
   getChatSchema,
   listChatsSchema,
-  updateChatTitleSchema,
 } from "@api/schemas/chat";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import {
-  deleteChat,
-  getChatById,
-  getChatsByTeam,
-  updateChatTitle,
-} from "@midday/db/queries";
+import { deleteChat, getChatById, getChatsByTeam } from "@midday/db/queries";
 
 export const chatsRouter = createTRPCRouter({
   list: protectedProcedure
@@ -27,12 +21,6 @@ export const chatsRouter = createTRPCRouter({
   get: protectedProcedure.input(getChatSchema).query(async ({ ctx, input }) => {
     return getChatById(ctx.db, input.chatId, ctx.teamId!);
   }),
-
-  updateTitle: protectedProcedure
-    .input(updateChatTitleSchema)
-    .mutation(async ({ ctx, input }) => {
-      return updateChatTitle(ctx.db, input.chatId, input.title, ctx.teamId!);
-    }),
 
   delete: protectedProcedure
     .input(deleteChatSchema)

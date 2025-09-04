@@ -12,7 +12,6 @@ import {
   getTeamById,
   getUserById,
   saveChat,
-  updateChatTitle,
 } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import {
@@ -119,18 +118,31 @@ app.post(
       const isFirstMessage =
         !previousMessages || previousMessages.messages.length === 0;
 
+      // Variable to store generated title for saving with chat
+      let generatedTitle: string | null = null;
+
       // Create a UI message stream to handle early title streaming
       const stream = createUIMessageStream({
+        generateId: createIdGenerator({
+          prefix: "msg",
+          size: 16,
+        }),
+        onFinish: async ({ messages: finalMessages }) => {
+          // Save chat messages with title if it was generated
+          await saveChat(db, {
+            chatId: id,
+            messages: finalMessages,
+            teamId,
+            userId,
+            title: generatedTitle,
+          });
+        },
         execute: async ({ writer }) => {
           // Generate and stream title immediately for first message
-          let generatedTitle: string | null = null;
           if (isFirstMessage) {
             try {
               const messageContent =
-                (message as any).content ||
-                message.parts?.find((part: any) => part.type === "text")
-                  ?.text ||
-                "";
+                message.parts?.find((part) => part.type === "text")?.text || "";
 
               generatedTitle = await generateTitle({
                 message: messageContent,
@@ -154,6 +166,8 @@ app.post(
                 userId,
                 teamId,
               });
+
+              // Title will be saved with the chat in onFinish callback
             } catch (error) {
               logger.error({
                 msg: "Failed to generate chat title for early streaming",
@@ -186,28 +200,6 @@ app.post(
                 text: result.text,
                 usage: result.usage,
               });
-
-              // Save title to database if generated
-              if (isFirstMessage && generatedTitle) {
-                try {
-                  await updateChatTitle(db, id, generatedTitle, teamId);
-
-                  logger.info({
-                    msg: "Chat title saved to database",
-                    chatId: id,
-                    title: generatedTitle,
-                    userId,
-                    teamId,
-                  });
-                } catch (error) {
-                  logger.error({
-                    msg: "Failed to save chat title to database",
-                    chatId: id,
-                    error:
-                      error instanceof Error ? error.message : String(error),
-                  });
-                }
-              }
             },
           });
 
@@ -218,19 +210,6 @@ app.post(
 
       const response = createUIMessageStreamResponse({
         stream,
-        generateMessageId: createIdGenerator({
-          prefix: "msg",
-          size: 16,
-        }),
-        onFinish: async ({ messages: finalMessages }) => {
-          // Save chat messages
-          await saveChat(db, {
-            chatId: id,
-            messages: finalMessages,
-            teamId,
-            userId,
-          });
-        },
       });
 
       return response;

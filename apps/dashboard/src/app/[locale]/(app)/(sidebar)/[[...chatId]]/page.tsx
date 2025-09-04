@@ -30,9 +30,15 @@ export default async function Overview({
       )
     : null;
 
+  console.log("chat", chat);
+
   return (
     <HydrateClient>
-      <ChatInterface id={currentChatId} initialMessages={chat?.messages} />
+      <ChatInterface
+        id={currentChatId}
+        initialMessages={chat?.messages as any}
+        initialTitle={chat?.title}
+      />
       <OverviewModal hideConnectFlow={hideConnectFlow} />
     </HydrateClient>
   );

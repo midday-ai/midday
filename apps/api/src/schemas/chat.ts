@@ -74,17 +74,6 @@ export const getChatSchema = z.object({
   }),
 });
 
-export const updateChatTitleSchema = z.object({
-  chatId: z.string().openapi({
-    description: "Unique identifier of the chat",
-    example: "chat_abc123",
-  }),
-  title: z.string().openapi({
-    description: "New title for the chat",
-    example: "Updated Financial Planning Discussion",
-  }),
-});
-
 export const deleteChatSchema = z.object({
   chatId: z.string().openapi({
     description: "Unique identifier of the chat to delete",
