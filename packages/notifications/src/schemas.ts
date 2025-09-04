@@ -34,7 +34,7 @@ export const createActivitySchema = z.object({
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
   groupId: z.string().uuid().optional(), // Links related activities together
-  metadata: z.record(z.any()), // Flexible - any JSON object
+  metadata: z.record(z.any(), z.any()), // Flexible - any JSON object
 });
 
 export type CreateActivityInput = z.infer<typeof createActivitySchema>;
