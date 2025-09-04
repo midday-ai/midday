@@ -1,53 +1,80 @@
 import type { ToolContext } from "@api/ai/types";
 import { getRevenue } from "@db/queries";
+import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
-import { endOfMonth, startOfMonth, subMonths } from "date-fns";
+import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
 import { z } from "zod";
 
-export const getRevenueTool = ({ db, teamId }: ToolContext) =>
+export const getRevenueTool = ({ db, teamId, locale }: ToolContext) =>
   tool({
     description:
-      "Get revenue data for a specific time period. Shows total revenue and monthly breakdown. Use this when users ask about revenue.",
-    parameters: z.object({
-      from: z.coerce
-        .date()
-        .describe("The start date for revenue data (defaults to 12 months ago)")
-        .default(subMonths(new Date(), 12)),
-      to: z.coerce
-        .date()
-        .describe("The end date for revenue data (defaults to today)")
-        .default(new Date()),
+      "Get revenue for a period, including total and a monthly breakdown. Use when users ask about revenue.",
+    inputSchema: z.object({
+      from: z
+        .string()
+        .nullable()
+        .describe(
+          "The start date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
+        ),
+      to: z
+        .string()
+        .nullable()
+        .describe(
+          "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
+        ),
       currency: z
         .string()
-        .describe(
-          "Optional currency code (e.g., 'USD', 'SEK'). If not specified, uses base currency",
-        )
-        .optional(),
+        .describe("Optional currency code (e.g., 'USD', 'SEK').")
+        .nullable(),
     }),
     execute: async ({ from, to, currency }) => {
-      const data = await getRevenue(db, {
+      // Resolve dates (default: last 12 months through end of current month)
+      const fromDate = startOfMonth(
+        from ? new Date(from) : subMonths(new Date(), 12),
+      );
+      const toDate = endOfMonth(to ? new Date(to) : new Date());
+
+      const rows = await getRevenue(db, {
         teamId,
-        from: startOfMonth(from).toISOString(),
-        to: endOfMonth(to).toISOString(),
-        currency,
+        from: fromDate.toISOString(),
+        to: toDate.toISOString(),
+        currency: currency ?? undefined,
       });
 
-      const total = data.reduce((acc, curr) => acc + Number(curr.value), 0);
-      const currencyDisplay = currency || "base currency";
+      const total = rows.reduce((sum, r) => sum + Number(r.value || 0), 0);
 
-      // Format the result for better chat display
-      const monthlyBreakdown = data
-        .filter((item) => Number(item.value) > 0)
+      // Determine currency to display (explicit param > data currency > base)
+      const resolvedCurrency = currency ?? rows[0]?.currency ?? null;
+
+      const fmt = (amount: number) =>
+        resolvedCurrency
+          ? formatAmount({
+              amount,
+              currency: resolvedCurrency,
+              locale: locale ?? undefined,
+            })
+          : `${amount.toLocaleString()} (base currency)`;
+
+      const monthly = rows
+        .filter((r) => Number(r.value) > 0)
         .map(
-          (item) =>
-            `${item.date}: ${Number(item.value).toLocaleString()} ${currencyDisplay}`,
-        )
-        .join("\n");
+          (r) =>
+            `${format(new Date(r.date), "MMM yyyy")}: ${fmt(Number(r.value))}`,
+        );
 
-      const content = monthlyBreakdown
-        ? `Total revenue: ${total.toLocaleString()} ${currencyDisplay}\n\nMonthly breakdown:\n${monthlyBreakdown}`
-        : `Total revenue: ${total.toLocaleString()} ${currencyDisplay} (no revenue recorded for this period)`;
+      const period = `${format(fromDate, "MMM yyyy")} - ${format(
+        toDate,
+        "MMM yyyy",
+      )}`;
+      const header = `**Revenue Summary (${period})**`;
+      const totalLine = `Total Revenue: ${fmt(total)}`;
 
-      return content;
+      if (monthly.length === 0) {
+        return `${header}\n${totalLine}\n\nNo revenue recorded for this period.`;
+      }
+
+      return [header, totalLine, "", "**Monthly Breakdown:**", ...monthly].join(
+        "\n",
+      );
     },
   });
