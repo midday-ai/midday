@@ -1,7 +1,7 @@
 "use client";
 
 import type { ChatStatus } from "ai";
-import { Loader2Icon, SendIcon, SquareIcon, XIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
 import type {
   ComponentProps,
   HTMLAttributes,
@@ -10,6 +10,7 @@ import type {
 import { Children } from "react";
 import { cn } from "../utils";
 import { Button } from "./button";
+import { Icons } from "./icons";
 import {
   Select,
   SelectContent,
@@ -145,12 +146,10 @@ export const PromptInputSubmit = ({
   children,
   ...props
 }: PromptInputSubmitProps) => {
-  let Icon = <SendIcon className="size-4" />;
+  let Icon = <Icons.ArrowUpward className="size-4" />;
 
-  if (status === "submitted") {
-    Icon = <Loader2Icon className="size-4 animate-spin" />;
-  } else if (status === "streaming") {
-    Icon = <SquareIcon className="size-4" />;
+  if (status === "streaming") {
+    Icon = <Icons.Stop className="size-4" />;
   } else if (status === "error") {
     Icon = <XIcon className="size-4" />;
   }
