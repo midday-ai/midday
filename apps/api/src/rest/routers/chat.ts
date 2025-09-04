@@ -7,7 +7,13 @@ import { zValidator } from "@hono/zod-validator";
 import { chatCache } from "@midday/cache/chat-cache";
 import { getTeamById, getUserById } from "@midday/db/queries";
 import { logger } from "@midday/logger";
-import { convertToModelMessages, smoothStream, streamText } from "ai";
+import {
+  convertToModelMessages,
+  createIdGenerator,
+  generateId,
+  smoothStream,
+  streamText,
+} from "ai";
 import { HTTPException } from "hono/http-exception";
 import { withRequiredScope } from "../middleware";
 
@@ -20,7 +26,7 @@ app.post(
   async (c) => {
     const startTime = Date.now();
     const db = c.get("db");
-    const { messages } = c.req.valid("json");
+    const { message, id } = c.req.valid("json");
     const teamId = c.get("teamId");
     const session = c.get("session");
     const userId = session.user.id;
@@ -53,12 +59,25 @@ app.post(
         await chatCache.setUserContext(userId, teamId, userContext);
       }
 
+      // Generate chat ID for logging (no persistence for now)
+      const currentChatId = id || generateId();
+
+      // Use only the last message (frontend handles history via initialMessages)
+      const messages = [
+        {
+          ...message,
+          id: message.id || generateId(),
+          parts: message.parts || [],
+        },
+      ];
+
       logger.info({
         msg: "Starting chat request",
         userId,
         teamId,
+        chatId: currentChatId,
         messagesCount: messages.length,
-        messages: JSON.stringify(messages, null, 2),
+        isNewChat: !id,
       });
 
       const result = streamText({
@@ -89,13 +108,14 @@ app.post(
         tools: {
           getRevenue: getRevenueTool({ db, teamId, userId }),
         },
-        onFinish: (result) => {
+        onFinish: async (result) => {
           // Log completion metrics
           const responseTime = Date.now() - startTime;
           logger.info({
             msg: "Chat response completed",
             userId,
             teamId,
+            chatId: currentChatId,
             responseTime,
             text: result.text,
             usage: result.usage,
@@ -103,11 +123,19 @@ app.post(
         },
       });
 
-      const response = result.toUIMessageStreamResponse();
+      const response = result.toUIMessageStreamResponse({
+        originalMessages: messages,
+        generateMessageId: createIdGenerator({
+          prefix: "msg",
+          size: 16,
+        }),
+      });
+
       logger.info({
         msg: "Returning stream response",
         userId,
         teamId,
+        chatId: currentChatId,
       });
 
       return response;

@@ -1,8 +1,9 @@
 "use client";
 
-import { useChat } from "@/hooks/use-chat";
 import { useUserQuery } from "@/hooks/use-user";
-import { cn } from "@midday/ui/cn";
+import { useTRPC } from "@/trpc/client";
+import { useChat } from "@ai-sdk/react";
+import { createClient } from "@midday/supabase/client";
 import {
   Conversation,
   ConversationContent,
@@ -20,11 +21,50 @@ import {
 } from "@midday/ui/prompt-input";
 import { Response } from "@midday/ui/response";
 import { Spinner } from "@midday/ui/spinner";
-import { useState } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { DefaultChatTransport } from "ai";
+import { nanoid } from "nanoid";
+import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
-export function ChatInterface() {
+interface ChatInterfaceProps {
+  chatId?: string;
+}
+
+export function ChatInterface({ chatId }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const { data: user } = useUserQuery();
+  const trpc = useTRPC();
+
+  // Load existing chat messages if chatId is provided (from route params)
+  const existingChat = chatId
+    ? useSuspenseQuery(trpc.chats.get.queryOptions({ chatId })).data
+    : null;
+
+  console.log("existingChat:", existingChat);
+  console.log("initialMessages:", existingChat?.messages || []);
+
+  const authenticatedFetch = useMemo(
+    () =>
+      Object.assign(
+        async (url: RequestInfo | URL, requestOptions?: RequestInit) => {
+          const supabase = createClient();
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+
+          return fetch(url, {
+            ...requestOptions,
+            headers: {
+              ...requestOptions?.headers,
+              Authorization: `Bearer ${session?.access_token}`,
+              "Content-Type": "application/json",
+            },
+          });
+        },
+      ),
+    [],
+  );
   const {
     messages,
     sendMessage,
@@ -33,12 +73,50 @@ export function ChatInterface() {
     stop,
     status,
     error,
-  } = useChat();
+  } = useChat({
+    initialMessages: existingChat?.messages || [],
+    transport: new DefaultChatTransport({
+      api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
+      fetch: authenticatedFetch,
+      // Only send the last message to the server
+      prepareSendMessagesRequest({ messages, id }) {
+        return {
+          body: {
+            message: messages[messages.length - 1],
+            id,
+          },
+        };
+      },
+    }),
+  });
+
+  const updateUrl = (newChatId: string) => {
+    // Update URL without navigation using History API
+    const newUrl = `/${newChatId}`;
+    window.history.pushState({ chatId: newChatId }, "", newUrl);
+  };
+
+  const handleNewChat = () => {
+    const newChatId = nanoid();
+    updateUrl(newChatId);
+    // Clear messages for new chat
+    setMessages([]);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (input.trim()) {
+      // If no chatId exists, create a new chat first
+      if (!chatId) {
+        const newChatId = nanoid();
+        updateUrl(newChatId);
+        sendMessage({ role: "user", parts: [{ type: "text", text: input }] });
+        setInput("");
+        return;
+      }
+
+      // If chatId exists, send the message
       sendMessage({ role: "user", parts: [{ type: "text", text: input }] });
       setInput("");
     }
@@ -50,29 +128,15 @@ export function ChatInterface() {
         <Conversation className="h-full w-full">
           <ConversationContent className="px-6 max-w-4xl mx-auto">
             {messages.map((message) => {
+              console.log("Rendering message:", message);
+              console.log("Message parts:", message.parts);
               return (
                 <div key={message.id} className="w-full">
                   {message.role !== "system" && (
-                    <Message
-                      from={message.role}
-                      key={message.id}
-                      className={cn(
-                        "mb-6 w-full",
-                        message.role === "assistant" &&
-                          "!flex-row !justify-start [&>div]:max-w-full [&>div]:w-full",
-                        message.role === "user" &&
-                          "!flex-row !justify-end gap-3 [&>div]:max-w-[80%]",
-                      )}
-                    >
-                      <MessageContent
-                        className={cn(
-                          message.role === "assistant" &&
-                            "!bg-transparent !shadow-none !border-none !px-0 !py-0 !rounded-none !text-[#666666]",
-                          message.role === "user" &&
-                            "!bg-[#131313] !text-primary !px-4 !py-2 max-w-fit rounded-2xl rounded-br-none",
-                        )}
-                      >
+                    <Message from={message.role} key={message.id}>
+                      <MessageContent>
                         {message.parts?.map((part, partIndex) => {
+                          console.log("Rendering part:", part);
                           if (part.type === "text") {
                             return (
                               <Response key={`text-${partIndex.toString()}`}>
@@ -82,8 +146,14 @@ export function ChatInterface() {
                           }
 
                           return null;
-                        })}
+                        }) || (
+                          <Response>
+                            No parts found for message:{" "}
+                            {JSON.stringify(message)}
+                          </Response>
+                        )}
                       </MessageContent>
+
                       {message.role === "user" && user && (
                         <MessageAvatar
                           src={user.avatarUrl!}
@@ -112,7 +182,11 @@ export function ChatInterface() {
             />
             <PromptInputToolbar className="pb-1 px-4">
               <PromptInputTools>
-                <PromptInputButton className="-ml-2">
+                <PromptInputButton
+                  className="-ml-2"
+                  onClick={handleNewChat}
+                  title="New chat"
+                >
                   <Icons.Add className="size-5" />
                 </PromptInputButton>
               </PromptInputTools>
