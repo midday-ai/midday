@@ -1,18 +1,56 @@
 import { z } from "@hono/zod-openapi";
 
+// Define message parts schema for AI SDK compatibility - flexible to handle any part structure
+const messagePartSchema = z.any();
+
 export const chatRequestSchema = z.object({
   messages: z
     .array(
-      z.object({
-        role: z.enum(["user", "assistant", "system"]).openapi({
-          description: "The role of the message sender",
-          example: "user",
+      z
+        .object({
+          id: z.string().optional(),
+          role: z.enum(["user", "assistant", "system"]).openapi({
+            description: "The role of the message sender",
+            example: "user",
+          }),
+          content: z.string().optional().openapi({
+            description: "The message content",
+            example: "Hello, can you help me with my finances?",
+          }),
+          parts: z.array(messagePartSchema).optional().openapi({
+            description: "Message parts for complex messages",
+          }),
+        })
+        .transform((message) => {
+          // Extract content from parts if content is missing
+          let content = message.content;
+          if (!content && message.parts && Array.isArray(message.parts)) {
+            // Handle different AI SDK part structures
+            for (const part of message.parts) {
+              if (part && typeof part === "object") {
+                // Try different possible text properties
+                if (part.text && typeof part.text === "string") {
+                  content = (content || "") + part.text;
+                } else if (part.content && typeof part.content === "string") {
+                  content = (content || "") + part.content;
+                } else if (typeof part === "string") {
+                  content = (content || "") + part;
+                }
+              }
+            }
+          }
+
+          // Ensure content is always a string
+          if (!content) {
+            content = "";
+          }
+
+          return {
+            ...message,
+            content,
+            parts: message.parts || [],
+          };
         }),
-        content: z.string().openapi({
-          description: "The message content",
-          example: "Hello, can you help me with my finances?",
-        }),
-      }),
     )
     .openapi({
       description: "Array of chat messages",

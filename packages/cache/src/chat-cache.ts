@@ -2,33 +2,37 @@ import { RedisCache } from "./redis-client";
 
 // Redis-based cache for chat data shared across all server instances
 const userContextCache = new RedisCache("chat:user", 30 * 60); // 30 minutes TTL
-const rateLimitCache = new RedisCache("chat:ratelimit", 60); // 1 minute TTL
+
+// Disable caching in development
+const isDevelopment = process.env.NODE_ENV === "development";
 
 export interface ChatUserContext {
   userId: string;
   teamId: string;
   teamName?: string | null;
   fullName?: string | null;
+  avatarUrl?: string | null;
   baseCurrency?: string | null;
   countryCode?: string | null;
+  dateFormat?: string | null;
+  locale?: string | null;
 }
 
 export const chatCache = {
-  // User context caching
-  getUserContext: (userId: string): Promise<ChatUserContext | undefined> =>
-    userContextCache.get<ChatUserContext>(userId),
+  getUserContext: (
+    userId: string,
+    teamId: string,
+  ): Promise<ChatUserContext | undefined> => {
+    if (isDevelopment) return Promise.resolve(undefined);
+    return userContextCache.get<ChatUserContext>(`${userId}:${teamId}`);
+  },
 
-  setUserContext: (userId: string, context: ChatUserContext): Promise<void> =>
-    userContextCache.set(userId, context),
-
-  // Rate limiting
-  getRateLimitCount: (userId: string): Promise<number | undefined> =>
-    rateLimitCache.get<number>(`limit:${userId}`),
-
-  incrementRateLimit: async (userId: string): Promise<number> => {
-    const current = (await chatCache.getRateLimitCount(userId)) || 0;
-    const newCount = current + 1;
-    await rateLimitCache.set(`limit:${userId}`, newCount);
-    return newCount;
+  setUserContext: (
+    userId: string,
+    teamId: string,
+    context: ChatUserContext,
+  ): Promise<void> => {
+    if (isDevelopment) return Promise.resolve();
+    return userContextCache.set(`${userId}:${teamId}`, context);
   },
 };

@@ -7,10 +7,8 @@ import { zValidator } from "@hono/zod-validator";
 import { chatCache } from "@midday/cache/chat-cache";
 import { getTeamById, getUserById } from "@midday/db/queries";
 import { logger } from "@midday/logger";
-import { smoothStream, streamText } from "ai";
-import { createDataStream } from "ai";
+import { convertToModelMessages, smoothStream, streamText } from "ai";
 import { HTTPException } from "hono/http-exception";
-import { stream } from "hono/streaming";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
@@ -28,17 +26,8 @@ app.post(
     const userId = session.user.id;
 
     try {
-      // Rate limiting: 30 requests per minute per user
-      const rateLimitCount = await chatCache.incrementRateLimit(userId);
-      if (rateLimitCount > 30) {
-        throw new HTTPException(429, {
-          message:
-            "Too many requests. Please wait a minute before trying again.",
-        });
-      }
-
       // Get or cache user context
-      let userContext = await chatCache.getUserContext(userId);
+      let userContext = await chatCache.getUserContext(userId, teamId);
       if (!userContext) {
         const [team, user] = await Promise.all([
           getTeamById(db, teamId),
@@ -56,97 +45,72 @@ app.post(
           fullName: user.fullName,
           baseCurrency: team.baseCurrency,
           countryCode: team.countryCode,
+          locale: user.locale ?? "en-US",
+          dateFormat: user.dateFormat,
         };
 
         // Cache for future requests
-        await chatCache.setUserContext(userId, userContext);
+        await chatCache.setUserContext(userId, teamId, userContext);
       }
 
-      // Use current messages only (no history storage)
-      const contextMessages = messages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      }));
+      logger.info({
+        msg: "Starting chat request",
+        userId,
+        teamId,
+        messagesCount: messages.length,
+        messages: JSON.stringify(messages, null, 2),
+      });
 
-      const dataStream = createDataStream({
-        execute: async (dataStreamWriter) => {
-          const result = streamText({
-            model: openai("gpt-4o-mini"),
-            messages: contextMessages,
-            system: `You are a helpful AI assistant for Midday, a financial management platform. 
-            You help users with:
-            - Financial insights and analysis
-            - Invoice management
-            - Transaction categorization
-            - Time tracking
-            - Business reporting
-            - General financial advice
+      const result = streamText({
+        model: openai("gpt-4o-mini"),
+        system: `You are a helpful AI assistant for Midday, a financial management platform. 
+        You help users with:
+        - Financial insights and analysis
+        - Invoice management
+        - Transaction categorization
+        - Time tracking
+        - Business reporting
+        - General financial advice
 
-            Be helpful, professional, and concise in your responses.
-            
-            Current team: ${userContext.teamName}
-            Current full name: ${userContext.fullName}
-            Current date: ${new Date().toISOString().split("T")[0]}
-            Company country: ${userContext.countryCode}
-            Base currency: ${userContext.baseCurrency}
-            `,
-            temperature: 0.7,
-            maxTokens: 1000,
-            maxSteps: 10,
-            experimental_transform: smoothStream({
-              chunking: "word",
-            }),
-            tools: {
-              getRevenue: getRevenueTool({ db, teamId, userId }),
-            },
-          });
-
-          // Track response for metrics only
-          let assistantResponse = "";
-          result.textStream.pipeThrough(
-            new TransformStream({
-              transform(chunk, controller) {
-                assistantResponse += chunk;
-                controller.enqueue(chunk);
-              },
-              flush() {
-                // Response complete - log completion metrics
-                const responseTime = Date.now() - startTime;
-                logger.info({
-                  msg: "Chat response completed",
-                  userId,
-                  teamId,
-                  responseTime,
-                  responseLength: assistantResponse.length,
-                });
-              },
-            }),
-          );
-
-          result.mergeIntoDataStream(dataStreamWriter);
+        Be helpful, professional, and concise in your responses.
+        Output titles for sections when it makes sense.
+        
+        Current team: ${userContext.teamName}
+        Current full name: ${userContext.fullName}
+        Current date: ${new Date().toISOString().split("T")[0]}
+        Company country: ${userContext.countryCode}
+        Base currency: ${userContext.baseCurrency}
+        `,
+        messages: convertToModelMessages(messages),
+        temperature: 0.7,
+        experimental_transform: smoothStream({
+          chunking: "word",
+        }),
+        tools: {
+          getRevenue: getRevenueTool({ db, teamId, userId }),
         },
-        onError: (error) => {
-          logger.error({
-            msg: "Chat streaming error",
+        onFinish: (result) => {
+          // Log completion metrics
+          const responseTime = Date.now() - startTime;
+          logger.info({
+            msg: "Chat response completed",
             userId,
             teamId,
-            error: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack : undefined,
+            responseTime,
+            text: result.text,
+            usage: result.usage,
           });
-          return error instanceof Error ? error.message : String(error);
         },
       });
 
-      // Set headers for AI SDK data stream
-      c.header("X-Vercel-AI-Data-Stream", "v1");
-      c.header("Content-Type", "text/plain; charset=utf-8");
-      c.header("Cache-Control", "no-cache");
-      c.header("Connection", "keep-alive");
+      const response = result.toUIMessageStreamResponse();
+      logger.info({
+        msg: "Returning stream response",
+        userId,
+        teamId,
+      });
 
-      // Stream the data stream response
-      return stream(c, (stream) =>
-        stream.pipe(dataStream.pipeThrough(new TextEncoderStream())),
-      );
+      return response;
     } catch (error) {
       logger.error({
         msg: "Chat request failed",
