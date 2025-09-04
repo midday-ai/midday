@@ -15,7 +15,13 @@ import transactionsRoutes from "./routes/transactions";
 const app = new OpenAPIHono({
   defaultHook: (result, c) => {
     if (!result.success) {
-      return c.json({ success: false, errors: result.error.errors }, 422);
+      return c.json(
+        {
+          success: false,
+          errors: result.error.issues,
+        },
+        422,
+      );
     }
   },
 });
