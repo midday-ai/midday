@@ -1,72 +1,42 @@
+import {
+  deleteChatSchema,
+  getChatSchema,
+  listChatsSchema,
+  updateChatTitleSchema,
+} from "@api/schemas/chat";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
-  createChat,
   deleteChat,
-  getChatWithMessages,
+  getChatById,
   getChatsByTeam,
   updateChatTitle,
 } from "@midday/db/queries";
-import { z } from "zod";
 
 export const chatsRouter = createTRPCRouter({
-  // Get all chats for a team
   list: protectedProcedure
-    .input(
-      z.object({
-        limit: z.number().min(1).max(100).default(50),
-      }),
-    )
+    .input(listChatsSchema)
     .query(async ({ ctx, input }) => {
-      return await getChatsByTeam(ctx.db, ctx.teamId!, input.limit);
+      return getChatsByTeam(
+        ctx.db,
+        ctx.teamId!,
+        ctx.session.user.id,
+        input.limit,
+      );
     }),
 
-  // Get a specific chat with messages
-  get: protectedProcedure
-    .input(
-      z.object({
-        chatId: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      return await getChatWithMessages(ctx.db, input.chatId, ctx.teamId!);
-    }),
-
-  create: protectedProcedure
-    .input(
-      z.object({
-        chatId: z.string(),
-        title: z.string().optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      return await createChat(ctx.db, {
-        id: input.chatId,
-        teamId: ctx.teamId!,
-        userId: ctx.session.user.id,
-        title: input.title,
-      });
-    }),
+  get: protectedProcedure.input(getChatSchema).query(async ({ ctx, input }) => {
+    return getChatById(ctx.db, input.chatId, ctx.teamId!);
+  }),
 
   updateTitle: protectedProcedure
-    .input(
-      z.object({
-        chatId: z.string(),
-        title: z.string(),
-      }),
-    )
+    .input(updateChatTitleSchema)
     .mutation(async ({ ctx, input }) => {
-      return await updateChatTitle(ctx.db, input.chatId, input.title);
+      return updateChatTitle(ctx.db, input.chatId, input.title, ctx.teamId!);
     }),
 
-  // Delete a chat
   delete: protectedProcedure
-    .input(
-      z.object({
-        chatId: z.string(),
-      }),
-    )
+    .input(deleteChatSchema)
     .mutation(async ({ ctx, input }) => {
-      await deleteChat(ctx.db, input.chatId, ctx.teamId!);
-      return { success: true };
+      return deleteChat(ctx.db, input.chatId, ctx.teamId!);
     }),
 });

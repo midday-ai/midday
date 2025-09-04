@@ -1,39 +1,7 @@
 import type { Database } from "@db/client";
-import { chatMessages, chats } from "@db/schema";
+import { chats } from "@db/schema";
 import type { UIMessage } from "ai";
 import { and, desc, eq } from "drizzle-orm";
-
-export interface ChatWithMessages {
-  id: string;
-  teamId: string;
-  userId: string;
-  title: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  messages: UIMessage[];
-}
-
-export const createChat = async (
-  db: Database,
-  data: {
-    id: string;
-    teamId: string;
-    userId: string;
-    title?: string;
-  },
-) => {
-  const [chat] = await db
-    .insert(chats)
-    .values({
-      id: data.id,
-      teamId: data.teamId,
-      userId: data.userId,
-      title: data.title || null,
-    })
-    .returning();
-
-  return chat;
-};
 
 export const getChatById = async (
   db: Database,
@@ -49,36 +17,10 @@ export const getChatById = async (
   return chat;
 };
 
-export const getChatWithMessages = async (
-  db: Database,
-  chatId: string,
-  teamId: string,
-): Promise<ChatWithMessages | null> => {
-  const [chat] = await db
-    .select()
-    .from(chats)
-    .where(and(eq(chats.id, chatId), eq(chats.teamId, teamId)))
-    .limit(1);
-
-  if (!chat) {
-    return null;
-  }
-
-  const messages = await db
-    .select()
-    .from(chatMessages)
-    .where(eq(chatMessages.chatId, chatId))
-    .orderBy(chatMessages.createdAt);
-
-  return {
-    ...chat,
-    messages,
-  };
-};
-
 export const getChatsByTeam = async (
   db: Database,
   teamId: string,
+  userId: string,
   limit = 50,
 ) => {
   return await db
@@ -89,37 +31,46 @@ export const getChatsByTeam = async (
       updatedAt: chats.updatedAt,
     })
     .from(chats)
-    .where(eq(chats.teamId, teamId))
+    .where(and(eq(chats.teamId, teamId), eq(chats.userId, userId)))
     .orderBy(desc(chats.updatedAt))
     .limit(limit);
 };
 
-export const saveChatMessage = async (
+export const saveChat = async (
   db: Database,
   data: {
-    id: string;
     chatId: string;
-    role: "user" | "assistant" | "system";
-    content: any; // UIMessage parts
+    messages: UIMessage[];
+    teamId: string;
+    userId: string;
   },
 ) => {
-  const [message] = await db
-    .insert(chatMessages)
+  const [chat] = await db
+    .insert(chats)
     .values({
-      id: data.id,
-      chatId: data.chatId,
-      role: data.role,
-      content: data.content,
+      id: data.chatId,
+      teamId: data.teamId,
+      userId: data.userId,
+      messages: data.messages,
+      updatedAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: chats.id,
+      set: {
+        messages: data.messages,
+        updatedAt: new Date(),
+      },
     })
     .returning();
 
-  return message;
+  return chat;
 };
 
 export const updateChatTitle = async (
   db: Database,
   chatId: string,
   title: string,
+  teamId: string,
 ) => {
   const [chat] = await db
     .update(chats)
@@ -127,7 +78,7 @@ export const updateChatTitle = async (
       title,
       updatedAt: new Date(),
     })
-    .where(eq(chats.id, chatId))
+    .where(and(eq(chats.id, chatId), eq(chats.teamId, teamId)))
     .returning();
 
   return chat;

@@ -22,27 +22,26 @@ import {
 import { Response } from "@midday/ui/response";
 import { Spinner } from "@midday/ui/spinner";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { DefaultChatTransport } from "ai";
-import { nanoid } from "nanoid";
+import { DefaultChatTransport, type UIMessage, generateId } from "ai";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMemo } from "react";
 
 interface ChatInterfaceProps {
-  chatId?: string;
+  id?: string;
+  initialMessages?: UIMessage[];
 }
 
-export function ChatInterface({ chatId }: ChatInterfaceProps) {
+export function ChatInterface({ id, initialMessages }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const { data: user } = useUserQuery();
-  const trpc = useTRPC();
+  const pathname = usePathname();
+  const router = useRouter();
 
-  // Load existing chat messages if chatId is provided (from route params)
-  const existingChat = chatId
-    ? useSuspenseQuery(trpc.chats.get.queryOptions({ chatId })).data
-    : null;
+  const chatId = useMemo(() => id ?? generateId(), [id]);
 
-  console.log("existingChat:", existingChat);
-  console.log("initialMessages:", existingChat?.messages || []);
+  // Check if we're currently on the root path (no chatId in URL)
+  const isOnRootPath = pathname === "/" || pathname === "";
 
   const authenticatedFetch = useMemo(
     () =>
@@ -65,6 +64,11 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
       ),
     [],
   );
+
+  const updateUrl = (chatId?: string) => {
+    window.history.pushState({ chatId }, "", `/${chatId}`);
+  };
+
   const {
     messages,
     sendMessage,
@@ -74,11 +78,11 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
     status,
     error,
   } = useChat({
-    initialMessages: existingChat?.messages || [],
+    id: chatId,
+    messages: initialMessages,
     transport: new DefaultChatTransport({
       api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
       fetch: authenticatedFetch,
-      // Only send the last message to the server
       prepareSendMessagesRequest({ messages, id }) {
         return {
           body: {
@@ -90,33 +94,22 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
     }),
   });
 
-  const updateUrl = (newChatId: string) => {
-    // Update URL without navigation using History API
-    const newUrl = `/${newChatId}`;
-    window.history.pushState({ chatId: newChatId }, "", newUrl);
-  };
-
-  const handleNewChat = () => {
-    const newChatId = nanoid();
-    updateUrl(newChatId);
-    // Clear messages for new chat
-    setMessages([]);
-  };
+  // Clear messages when navigating away
+  useEffect(() => {
+    if (pathname === "/") {
+      setMessages([]);
+    }
+  }, [pathname]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (input.trim()) {
-      // If no chatId exists, create a new chat first
-      if (!chatId) {
-        const newChatId = nanoid();
-        updateUrl(newChatId);
-        sendMessage({ role: "user", parts: [{ type: "text", text: input }] });
-        setInput("");
-        return;
+      // If we're on the root path and this is the first message, update URL
+      if (isOnRootPath && messages.length === 0) {
+        updateUrl(chatId);
       }
 
-      // If chatId exists, send the message
       sendMessage({ role: "user", parts: [{ type: "text", text: input }] });
       setInput("");
     }
@@ -128,15 +121,12 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
         <Conversation className="h-full w-full">
           <ConversationContent className="px-6 max-w-4xl mx-auto">
             {messages.map((message) => {
-              console.log("Rendering message:", message);
-              console.log("Message parts:", message.parts);
               return (
                 <div key={message.id} className="w-full">
                   {message.role !== "system" && (
                     <Message from={message.role} key={message.id}>
                       <MessageContent>
                         {message.parts?.map((part, partIndex) => {
-                          console.log("Rendering part:", part);
                           if (part.type === "text") {
                             return (
                               <Response key={`text-${partIndex.toString()}`}>
@@ -146,12 +136,7 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
                           }
 
                           return null;
-                        }) || (
-                          <Response>
-                            No parts found for message:{" "}
-                            {JSON.stringify(message)}
-                          </Response>
-                        )}
+                        })}
                       </MessageContent>
 
                       {message.role === "user" && user && (
@@ -171,7 +156,7 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
           <ConversationScrollButton />
         </Conversation>
 
-        <div className="dark:bg-[#131313] pt-2 max-w-4xl mx-auto w-full">
+        <div className="bg-[#F7F7F7] dark:bg-[#131313] pt-2 max-w-4xl mx-auto w-full">
           <PromptInput onSubmit={handleSubmit}>
             <PromptInputTextarea
               onChange={(e) => setInput(e.target.value)}
@@ -182,11 +167,7 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
             />
             <PromptInputToolbar className="pb-1 px-4">
               <PromptInputTools>
-                <PromptInputButton
-                  className="-ml-2"
-                  onClick={handleNewChat}
-                  title="New chat"
-                >
+                <PromptInputButton className="-ml-2">
                   <Icons.Add className="size-5" />
                 </PromptInputButton>
               </PromptInputTools>
