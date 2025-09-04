@@ -32,6 +32,7 @@ export const getRevenueTool = ({ db, teamId, locale }: ToolContext) =>
       const fromDate = startOfMonth(
         from ? new Date(from) : subMonths(new Date(), 12),
       );
+
       const toDate = endOfMonth(to ? new Date(to) : new Date());
 
       const rows = await getRevenue(db, {
