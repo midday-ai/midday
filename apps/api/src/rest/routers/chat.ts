@@ -71,6 +71,14 @@ app.post(
 
       const tools = {
         getRevenue: getRevenueTool({ db, teamId, userId }),
+        web_search_preview: openai.tools.webSearchPreview({
+          // optional configuration:
+          searchContextSize: "low",
+          userLocation: {
+            type: "approximate",
+            country: userContext.countryCode ?? undefined,
+          },
+        }),
       };
 
       // load the previous messages from the server:
