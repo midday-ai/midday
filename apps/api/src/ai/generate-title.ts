@@ -2,7 +2,8 @@ import { openai } from "@ai-sdk/openai";
 import { TZDate } from "@date-fns/tz";
 import type { ChatUserContext } from "@midday/cache/chat-cache";
 import { logger } from "@midday/logger";
-import { streamText } from "ai";
+import { generateObject } from "ai";
+import { z } from "zod";
 
 type Params = Omit<ChatUserContext, "teamId" | "userId"> & {
   message: string;
@@ -13,18 +14,23 @@ export const generateTitle = async ({
   teamName,
   country,
   fullName,
-  countryCode,
   baseCurrency,
   city,
   region,
   timezone,
+  countryCode,
 }: Params) => {
   try {
+    console.log("message", message);
+
     const userTimezone = timezone || "UTC";
     const tzDate = new TZDate(new Date(), userTimezone);
 
-    const titleResult = await streamText({
+    const titleResult = await generateObject({
       model: openai("gpt-4o-mini"),
+      schema: z.object({
+        title: z.string().describe("The title of the chat"),
+      }),
       temperature: 0.7,
       system: `You are a financial analyst and title generator specializing in financial management conversations for SMBs. Generate concise, finance-focused titles that capture the core financial intent and business value.
 
@@ -49,7 +55,7 @@ Fallback Rules:
 Examples of financial-focused titles:
 - "January 2024 Expense Reconciliation"
 - "2023-2024 Revenue Growth Analysis"
-- "Q1 Cash Flow Forecasting"
+- "Q1 Cash Flow Forecasting"  
 - "2023 Tax Optimization Review"
 - "December AR Aging Report"
 - "Q3 Margin Analysis & KPIs"
@@ -70,21 +76,7 @@ Examples of financial-focused titles:
       prompt: message,
     });
 
-    let title = "";
-    for await (const delta of titleResult.textStream) {
-      title += delta;
-    }
-
-    const cleanTitle = title.trim();
-
-    // Handle fallback responses from AI
-    if (cleanTitle === "FALLBACK_TO_MESSAGE") {
-      return message.trim().slice(0, 60);
-    }
-
-    if (cleanTitle === "New Chat" || cleanTitle.length === 0) {
-      return "New Chat";
-    }
+    const cleanTitle = titleResult.object.title;
 
     return cleanTitle.slice(0, 60);
   } catch (error) {
@@ -93,13 +85,12 @@ Examples of financial-focused titles:
       error: error instanceof Error ? error.message : String(error),
     });
 
-    // Try to use the message as fallback if it's meaningful, otherwise "New Chat"
     const trimmedMessage = message.trim();
 
     if (trimmedMessage) {
       return trimmedMessage.slice(0, 60);
     }
 
-    return "New Chat"; // Fallback title
+    return "New Chat";
   }
 };
