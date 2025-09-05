@@ -2,7 +2,7 @@
 
 import { useUserQuery } from "@/hooks/use-user";
 import { useChat } from "@ai-sdk/react";
-import type { MessageDataParts, UITools } from "@api/ai/tools/registry";
+import type { UIChatMessage } from "@api/ai/types";
 import { createClient } from "@midday/supabase/client";
 import {
   Conversation,
@@ -24,17 +24,10 @@ import { Spinner } from "@midday/ui/spinner";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, type UIMessage, generateId } from "ai";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useMemo } from "react";
 import { Overview } from "../overview/overview";
 import { ChatHeader } from "./chat-header";
-import { ToolCallButton } from "./tool-call-button";
-
-export type UIChatMessage = UIMessage<
-  Record<string, unknown>, // metadata (empty for now)
-  MessageDataParts,
-  UITools
->;
 
 type Props = {
   id?: string;
@@ -43,14 +36,12 @@ type Props = {
   geo?: Geo;
 };
 
-function ChatInterfaceInner({
-  id,
+export function ChatInterface({
+  id: chatId,
   initialMessages,
   initialTitle,
   geo,
-  chatId,
-  onReady,
-}: Props & { chatId: string; onReady?: (sendMessage: any) => void }) {
+}: Props) {
   const [input, setInput] = useState("");
   const [chatTitle, setChatTitle] = useState<string | undefined>(
     initialTitle || undefined,
@@ -122,24 +113,16 @@ function ChatInterfaceInner({
       // Handle title data parts as they stream in (before main response is done)
       if (dataPart.type === "data-title") {
         // With proper generic typing, TypeScript should know the structure
+        // @ts-ignore
         setChatTitle(dataPart.data.title);
 
         if (typeof document !== "undefined") {
+          // @ts-ignore
           document.title = `${dataPart.data.title} | Midday`;
         }
       }
     },
   });
-
-  const hasCalledOnReady = useRef(false);
-
-  // Call onReady when component is ready and sendMessage is available
-  useEffect(() => {
-    if (onReady && sendMessage && !hasCalledOnReady.current) {
-      hasCalledOnReady.current = true;
-      onReady(sendMessage);
-    }
-  }, [onReady, sendMessage]);
 
   // Clear messages and title when navigating away
   useEffect(() => {
@@ -281,123 +264,6 @@ function ChatInterfaceInner({
                 </PromptInputToolbar>
               </PromptInput>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function ChatInterface({
-  id,
-  initialMessages,
-  initialTitle,
-  geo,
-}: Props) {
-  const [currentChatId, setCurrentChatId] = useState(() => id ?? generateId());
-  const [pendingToolCall, setPendingToolCall] = useState<{
-    toolName: string;
-    toolParams: Record<string, any>;
-  } | null>(null);
-  const pathname = usePathname();
-  const toolCallSentRef = useRef(false);
-
-  // Update chatId when id prop changes
-  useEffect(() => {
-    if (id) {
-      console.log("Using provided id:", id);
-      setCurrentChatId(id);
-    }
-  }, [id]);
-
-  // Generate new chatId for fresh session when on root path
-  useEffect(() => {
-    if (pathname === "/") {
-      if (!id) {
-        const newChatId = generateId();
-        console.log("Generated new chatId for fresh session:", newChatId);
-        setCurrentChatId(newChatId);
-      }
-    }
-  }, [pathname, id]);
-
-  const updateUrl = (chatId?: string) => {
-    window.history.pushState({ chatId }, "", `/${chatId}`);
-  };
-
-  // Function to trigger specific tool calls programmatically
-  const triggerToolCall = (
-    toolName: string,
-    toolParams: Record<string, any>,
-  ) => {
-    // Generate a new chat ID for the tool call
-    const newChatId = generateId();
-
-    // Update URL to new chat
-    updateUrl(newChatId);
-
-    // Reset the tool call sent flag
-    toolCallSentRef.current = false;
-
-    // Set pending tool call to be sent after remount
-    setPendingToolCall({ toolName, toolParams });
-
-    // Update current chat ID - this will cause the component to remount
-    setCurrentChatId(newChatId);
-  };
-
-  const handleInnerComponentReady = useCallback(
-    (sendMessage: any) => {
-      if (pendingToolCall && !toolCallSentRef.current) {
-        // Mark as sent to prevent duplicate calls
-        toolCallSentRef.current = true;
-
-        // Create a hidden message with tool call metadata
-        const paramsText = JSON.stringify(pendingToolCall.toolParams, null, 2);
-        const hiddenMessage: any = {
-          role: "user" as const,
-          parts: [
-            {
-              type: "text",
-              text: `Execute ${pendingToolCall.toolName} tool with these exact parameters: ${paramsText}. Use only these parameters, do not make multiple calls or modify them.`,
-            },
-          ],
-          metadata: {
-            toolCall: {
-              toolName: pendingToolCall.toolName,
-              toolParams: pendingToolCall.toolParams,
-            },
-            internal: true, // Mark as internal/hidden
-          },
-        };
-
-        // Send the message
-        sendMessage(hiddenMessage);
-
-        // Clear pending tool call
-        setPendingToolCall(null);
-      }
-    },
-    [pendingToolCall],
-  );
-
-  return (
-    <div>
-      <ChatInterfaceInner
-        key={currentChatId} // Force remount when chat ID changes
-        id={id}
-        initialMessages={initialMessages}
-        initialTitle={initialTitle}
-        geo={geo}
-        chatId={currentChatId}
-        onReady={handleInnerComponentReady}
-      />
-
-      {/* Tool call buttons - positioned outside the inner component */}
-      <div className="fixed bottom-4 left-[70px] right-0 z-20">
-        <div className="max-w-[770px] mx-auto w-full bg-[#F7F7F7] dark:bg-[#131313] pt-2">
-          <div className="px-4 pb-2">
-            <ToolCallButton onTriggerTool={triggerToolCall} disabled={false} />
           </div>
         </div>
       </div>

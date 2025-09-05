@@ -9,6 +9,9 @@
     "test": "bun test",
     "test:watch": "bun test --watch"
   },
+  "exports": {
+    "./trpc/routers/_app": "./src/trpc/routers/_app.ts"
+  },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.24",
     "@ai-sdk/react": "^2.0.30",

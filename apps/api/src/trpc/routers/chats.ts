@@ -5,7 +5,6 @@ import {
 } from "@api/schemas/chat";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { deleteChat, getChatById, getChatsByTeam } from "@midday/db/queries";
-import { TRPCError } from "@trpc/server";
 
 export const chatsRouter = createTRPCRouter({
   list: protectedProcedure
@@ -20,13 +19,7 @@ export const chatsRouter = createTRPCRouter({
     }),
 
   get: protectedProcedure.input(getChatSchema).query(async ({ ctx, input }) => {
-    const chat = await getChatById(ctx.db, input.chatId, ctx.teamId!);
-
-    if (!chat) {
-      throw new TRPCError({ code: "NOT_FOUND" });
-    }
-
-    return chat;
+    return getChatById(ctx.db, input.chatId, ctx.teamId!);
   }),
 
   delete: protectedProcedure
