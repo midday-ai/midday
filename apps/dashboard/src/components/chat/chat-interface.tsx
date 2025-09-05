@@ -23,7 +23,6 @@ import { Response } from "@midday/ui/response";
 import { Spinner } from "@midday/ui/spinner";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, type UIMessage, generateId } from "ai";
-import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMemo } from "react";
@@ -214,36 +213,10 @@ export function ChatInterface({
 
   return (
     <div>
-      {/* Chat header - positioned before AnimatePresence to avoid conflicts */}
-      {!isOnRootPath && (
-        <motion.div
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-        >
-          <ChatHeader title={chatTitle} />
-        </motion.div>
-      )}
+      {/* Chat header - instant transition */}
+      {!isOnRootPath && <ChatHeader title={chatTitle} />}
 
-      {/* Overview with framer-motion animation */}
-      <div className="overflow-hidden">
-        <AnimatePresence>
-          {showOverview && (
-            <motion.div
-              initial={{ y: 0, opacity: 1 }}
-              exit={{ y: "-100%", opacity: 0 }}
-              transition={{
-                duration: 0.2,
-                ease: [0.25, 0.46, 0.45, 0.94], // Optimized easing curve
-                type: "tween",
-              }}
-              style={{ willChange: "transform, opacity" }}
-            >
-              <Overview />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      {showOverview && <Overview />}
 
       {/* Chat content */}
       <div className="w-full mx-auto pb-0 relative size-full h-[calc(100vh-192px)]">
@@ -267,7 +240,11 @@ export function ChatInterface({
                               );
                             }
 
-                            return null;
+                            return (
+                              <Response key={`text-${partIndex.toString()}`}>
+                                {part as string}
+                              </Response>
+                            );
                           })}
                         </MessageContent>
 
