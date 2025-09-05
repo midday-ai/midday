@@ -8,7 +8,7 @@ import { Toaster } from "@midday/ui/toaster";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
-import { Lora } from "next/font/google";
+import { Hedvig_Letters_Serif } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { ReactElement } from "react";
 import { Providers } from "./providers";
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   },
 };
 
-const lora = Lora({
+const hedvigSerif = Hedvig_Letters_Serif({
   weight: "400",
   subsets: ["latin"],
   display: "swap",
@@ -94,7 +94,7 @@ export default async function Layout({
     >
       <body
         className={cn(
-          `${GeistSans.variable} ${GeistMono.variable} ${lora.variable} font-sans`,
+          `${GeistSans.variable} ${GeistMono.variable} ${hedvigSerif.variable} font-sans`,
           "whitespace-pre-line overscroll-none antialiased",
         )}
       >

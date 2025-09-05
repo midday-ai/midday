@@ -37,7 +37,8 @@ app.post(
   async (c) => {
     const startTime = Date.now();
     const db = c.get("db");
-    const { message, id } = c.req.valid("json");
+    const { message, id, country, city, region, timezone } =
+      c.req.valid("json");
     const teamId = c.get("teamId");
     const session = c.get("session");
     const userId = session.user.id;
@@ -69,9 +70,12 @@ app.post(
             teamName: team.name,
             fullName: user.fullName,
             baseCurrency: team.baseCurrency,
-            countryCode: team.countryCode,
             locale: user.locale ?? "en-US",
             dateFormat: user.dateFormat,
+            country,
+            city,
+            region,
+            timezone,
           };
 
           // Cache for future requests (non-blocking)
@@ -93,10 +97,12 @@ app.post(
       const tools = {
         getRevenue: getRevenueTool({ db, teamId, userId }),
         web_search_preview: openai.tools.webSearchPreview({
-          searchContextSize: "low",
+          searchContextSize: "medium",
           userLocation: {
             type: "approximate",
-            country: userContext.countryCode ?? undefined,
+            country: userContext.country ?? undefined,
+            city: userContext.city ?? undefined,
+            region: userContext.region ?? undefined,
           },
         }),
       };
@@ -114,9 +120,10 @@ app.post(
         tools,
       });
 
-      // Check if this is the first message (no previous messages)
-      const isFirstMessage =
-        !previousMessages || previousMessages.messages.length === 0;
+      // Check if this chat needs a title (title is null)
+      const needsTitle = !previousMessages?.title;
+
+      console.log("needsTitle", needsTitle);
 
       // Variable to store generated title for saving with chat
       let generatedTitle: string | null = null;
@@ -138,8 +145,8 @@ app.post(
           });
         },
         execute: async ({ writer }) => {
-          // Generate and stream title immediately for first message
-          if (isFirstMessage) {
+          // Generate and stream title immediately if chat doesn't have one
+          if (needsTitle) {
             try {
               const messageContent =
                 message.parts?.find((part) => part.type === "text")?.text || "";

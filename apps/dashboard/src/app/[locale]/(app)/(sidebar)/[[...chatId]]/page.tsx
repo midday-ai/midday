@@ -2,8 +2,9 @@ import { ChatInterface } from "@/components/chat/chat-interface";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import { Cookies } from "@/utils/constants";
+import { geolocation } from "@vercel/functions";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Overview | Midday",
@@ -19,6 +20,11 @@ export default async function Overview({
   const hideConnectFlow =
     cookieStore.get(Cookies.HideConnectFlow)?.value === "true";
 
+  const headersList = await headers();
+  const geo = geolocation({
+    headers: headersList,
+  });
+
   // Extract the first chatId if it exists
   const currentChatId = chatId?.at(0);
 
@@ -30,14 +36,13 @@ export default async function Overview({
       )
     : null;
 
-  console.log("chat", chat);
-
   return (
     <HydrateClient>
       <ChatInterface
         id={currentChatId}
         initialMessages={chat?.messages as any}
         initialTitle={chat?.title}
+        geo={geo}
       />
       <OverviewModal hideConnectFlow={hideConnectFlow} />
     </HydrateClient>
