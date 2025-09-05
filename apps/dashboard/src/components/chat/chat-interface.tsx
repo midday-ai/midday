@@ -3,6 +3,7 @@
 import { useUserQuery } from "@/hooks/use-user";
 import { useChat } from "@ai-sdk/react";
 import { createClient } from "@midday/supabase/client";
+import { cn } from "@midday/ui/cn";
 import {
   Conversation,
   ConversationContent,
@@ -20,10 +21,13 @@ import {
 } from "@midday/ui/prompt-input";
 import { Response } from "@midday/ui/response";
 import { Spinner } from "@midday/ui/spinner";
+import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, type UIMessage, generateId } from "ai";
+import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMemo } from "react";
+import { Overview } from "../overview/overview";
 import { ChatHeader } from "./chat-header";
 
 // Define data part types for streaming data
@@ -42,20 +46,39 @@ type Props = {
   id?: string;
   initialMessages?: ChatMessage[];
   initialTitle?: string | null;
+  geo?: Geo;
 };
 
-export function ChatInterface({ id, initialMessages, initialTitle }: Props) {
+export function ChatInterface({
+  id,
+  initialMessages,
+  initialTitle,
+  geo,
+}: Props) {
   const [input, setInput] = useState("");
   const [chatTitle, setChatTitle] = useState<string | undefined>(
     initialTitle || undefined,
   );
+
   const { data: user } = useUserQuery();
   const pathname = usePathname();
 
-  const chatId = useMemo(() => id ?? generateId(), [id]);
-
   // Check if we're currently on the root path (no chatId in URL)
   const isOnRootPath = pathname === "/" || pathname === "";
+
+  // Track overview visibility
+  const [showOverview, setShowOverview] = useState(isOnRootPath);
+
+  const [currentChatId, setCurrentChatId] = useState(() => id ?? generateId());
+
+  const chatId = currentChatId;
+
+  console.log("ChatInterface props:", {
+    id,
+    initialMessages: initialMessages?.length,
+    initialTitle,
+    pathname,
+  });
 
   const authenticatedFetch = useMemo(
     () =>
@@ -100,8 +123,12 @@ export function ChatInterface({ id, initialMessages, initialTitle }: Props) {
       prepareSendMessagesRequest({ messages, id }) {
         return {
           body: {
-            message: messages[messages.length - 1],
             id,
+            message: messages[messages.length - 1],
+            country: geo?.country,
+            city: geo?.city,
+            region: geo?.region,
+            timezone: new Intl.DateTimeFormat().resolvedOptions().timeZone,
           },
         };
       },
@@ -119,6 +146,46 @@ export function ChatInterface({ id, initialMessages, initialTitle }: Props) {
     },
   });
 
+  // Clear messages and title when navigating away, and generate new chatId for fresh start
+  useEffect(() => {
+    if (pathname === "/") {
+      setMessages([]);
+      setChatTitle(undefined);
+      // Generate new chatId for next chat session (only if we don't have an explicit id)
+      if (!id) {
+        const newChatId = generateId();
+        console.log("Generated new chatId for fresh session:", newChatId);
+        setCurrentChatId(newChatId);
+      }
+
+      // Show overview header immediately when back on root path
+      setShowOverview(true);
+    }
+  }, [pathname, setMessages, id]);
+
+  // Hide header immediately when transitioning to chat
+  useEffect(() => {
+    if (!isOnRootPath && showOverview) {
+      // Hide header immediately to trigger animation
+      setShowOverview(false);
+    }
+  }, [isOnRootPath, showOverview]);
+
+  // Update chatId when id prop changes
+  useEffect(() => {
+    if (id) {
+      console.log("Using provided id:", id);
+      setCurrentChatId(id);
+    }
+  }, [id]);
+
+  // Update chat title when initialTitle changes (but don't reset to undefined)
+  useEffect(() => {
+    if (initialTitle) {
+      setChatTitle(initialTitle);
+    }
+  }, [initialTitle]);
+
   // Set document title when chat title is available
   useEffect(() => {
     if (chatTitle && typeof document !== "undefined") {
@@ -126,18 +193,15 @@ export function ChatInterface({ id, initialMessages, initialTitle }: Props) {
     }
   }, [chatTitle]);
 
-  // Clear messages and title when navigating away
-  useEffect(() => {
-    if (pathname === "/") {
-      setMessages([]);
-      setChatTitle(undefined);
-    }
-  }, [pathname, setMessages]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (input.trim()) {
+      // Start header animation immediately when user sends first message
+      if (isOnRootPath && messages.length === 0 && showOverview) {
+        setShowOverview(false);
+      }
+
       // If we're on the root path and this is the first message, update URL
       if (isOnRootPath && messages.length === 0) {
         updateUrl(chatId);
@@ -149,70 +213,106 @@ export function ChatInterface({ id, initialMessages, initialTitle }: Props) {
   };
 
   return (
-    <div className="w-full mx-auto pb-0 relative size-full h-[calc(100vh-102px)]">
-      <div className="flex flex-col h-full">
-        <ChatHeader title={chatTitle} />
+    <div>
+      {/* Chat header - positioned before AnimatePresence to avoid conflicts */}
+      {!isOnRootPath && (
+        <motion.div
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+        >
+          <ChatHeader title={chatTitle} />
+        </motion.div>
+      )}
 
-        <Conversation className="h-full w-full">
-          <ConversationContent className="px-6 max-w-4xl mx-auto">
-            {messages.map((message) => {
-              return (
-                <div key={message.id} className="w-full">
-                  {message.role !== "system" && (
-                    <Message from={message.role} key={message.id}>
-                      <MessageContent>
-                        {message.parts?.map((part, partIndex) => {
-                          if (part.type === "text") {
-                            return (
-                              <Response key={`text-${partIndex.toString()}`}>
-                                {part.text}
-                              </Response>
-                            );
-                          }
+      {/* Overview with framer-motion animation */}
+      <div className="overflow-hidden">
+        <AnimatePresence>
+          {showOverview && (
+            <motion.div
+              initial={{ y: 0, opacity: 1 }}
+              exit={{ y: "-100%", opacity: 0 }}
+              transition={{
+                duration: 0.2,
+                ease: [0.25, 0.46, 0.45, 0.94], // Optimized easing curve
+                type: "tween",
+              }}
+              style={{ willChange: "transform, opacity" }}
+            >
+              <Overview />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
-                          return null;
-                        })}
-                      </MessageContent>
+      {/* Chat content */}
+      <div className="w-full mx-auto pb-0 relative size-full h-[calc(100vh-192px)]">
+        <div className="flex flex-col h-full">
+          <Conversation
+            className="h-full w-full pb-20" // Add bottom padding for fixed prompt input
+          >
+            <ConversationContent className="px-6 max-w-4xl mx-auto">
+              {messages.map((message) => {
+                return (
+                  <div key={message.id} className="w-full">
+                    {message.role !== "system" && (
+                      <Message from={message.role} key={message.id}>
+                        <MessageContent>
+                          {message.parts?.map((part, partIndex) => {
+                            if (part.type === "text") {
+                              return (
+                                <Response key={`text-${partIndex.toString()}`}>
+                                  {part.text}
+                                </Response>
+                              );
+                            }
 
-                      {message.role === "user" && user && (
-                        <MessageAvatar
-                          src={user.avatarUrl!}
-                          name={user.fullName!}
-                        />
-                      )}
-                    </Message>
-                  )}
-                </div>
-              );
-            })}
+                            return null;
+                          })}
+                        </MessageContent>
 
-            {status === "submitted" && <Spinner />}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
+                        {message.role === "user" && user && (
+                          <MessageAvatar
+                            src={user.avatarUrl!}
+                            name={user.fullName!}
+                          />
+                        )}
+                      </Message>
+                    )}
+                  </div>
+                );
+              })}
 
-        <div className="bg-[#F7F7F7] dark:bg-[#131313] pt-2 max-w-[770px] mx-auto w-full">
-          <PromptInput onSubmit={handleSubmit}>
-            <PromptInputTextarea
-              onChange={(e) => setInput(e.target.value)}
-              maxHeight={30}
-              minHeight={30}
-              value={input}
-              placeholder="Ask me anything"
-            />
-            <PromptInputToolbar className="pb-1 px-4">
-              <PromptInputTools>
-                <PromptInputButton className="-ml-2">
-                  <Icons.Add className="size-4" />
-                </PromptInputButton>
-              </PromptInputTools>
-              <PromptInputSubmit
-                status={status}
-                className="mr-0 mb-2"
-                size="icon"
-              />
-            </PromptInputToolbar>
-          </PromptInput>
+              {status === "submitted" && <Spinner />}
+            </ConversationContent>
+            <ConversationScrollButton />
+          </Conversation>
+
+          <div className="fixed bottom-4 left-0 right-0 z-20">
+            <div className="max-w-[770px] mx-auto w-full bg-[#F7F7F7] dark:bg-[#131313] pt-2">
+              <PromptInput onSubmit={handleSubmit}>
+                <PromptInputTextarea
+                  onChange={(e) => setInput(e.target.value)}
+                  maxHeight={30}
+                  minHeight={30}
+                  value={input}
+                  placeholder="Ask me anything"
+                />
+                <PromptInputToolbar className="pb-1 px-4">
+                  <PromptInputTools>
+                    <PromptInputButton className="-ml-2">
+                      <Icons.Add className="size-4" />
+                    </PromptInputButton>
+                  </PromptInputTools>
+                  <PromptInputSubmit
+                    status={status}
+                    className="mr-0 mb-2"
+                    size="icon"
+                  />
+                </PromptInputToolbar>
+              </PromptInput>
+            </div>
+          </div>
         </div>
       </div>
     </div>

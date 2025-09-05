@@ -43,6 +43,22 @@ export const chatRequestSchema = z.object({
       content: "Hello, can you help me with my finances?",
     },
   }),
+  country: z.string().optional().openapi({
+    description: "User's country",
+    example: "United States",
+  }),
+  city: z.string().optional().openapi({
+    description: "User's city",
+    example: "San Francisco",
+  }),
+  region: z.string().optional().openapi({
+    description: "User's region/state",
+    example: "California",
+  }),
+  timezone: z.string().optional().openapi({
+    description: "User's timezone",
+    example: "America/New_York",
+  }),
 });
 
 // Use the same structure as messageSchema for consistency with UIMessage
