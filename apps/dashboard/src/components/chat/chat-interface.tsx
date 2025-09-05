@@ -288,7 +288,7 @@ export function ChatInterface({
             <ConversationScrollButton />
           </Conversation>
 
-          <div className="fixed bottom-4 left-0 right-0 z-20">
+          <div className="fixed bottom-4 left-[70px] right-0 z-20">
             <div className="max-w-[770px] mx-auto w-full bg-[#F7F7F7] dark:bg-[#131313] pt-2">
               <PromptInput onSubmit={handleSubmit}>
                 <PromptInputTextarea

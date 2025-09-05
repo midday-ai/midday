@@ -155,6 +155,12 @@ app.post(
                 message: messageContent,
                 teamName: userContext.teamName,
                 fullName: userContext.fullName,
+                country: userContext.country,
+                baseCurrency: userContext.baseCurrency,
+                city: userContext.city,
+                region: userContext.region,
+                timezone: userContext.timezone,
+                countryCode: userContext.countryCode,
               });
 
               // Stream the title immediately as a data part
