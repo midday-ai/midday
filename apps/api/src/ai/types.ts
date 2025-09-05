@@ -9,5 +9,18 @@ export type ToolContext = {
   locale?: string | null;
 };
 
+// Define message metadata type
+export type ChatMessageMetadata = {
+  internal?: boolean;
+  toolCall?: {
+    toolName: string;
+    toolParams: Record<string, any>;
+  };
+};
+
 // Define the UI chat message type with proper metadata and tool typing
-export type UIChatMessage = UIMessage<never, MessageDataParts, UITools>;
+export type UIChatMessage = UIMessage<
+  ChatMessageMetadata,
+  MessageDataParts,
+  UITools
+>;

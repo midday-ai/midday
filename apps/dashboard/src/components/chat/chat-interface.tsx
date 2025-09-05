@@ -22,7 +22,7 @@ import {
 import { Response } from "@midday/ui/response";
 import { Spinner } from "@midday/ui/spinner";
 import type { Geo } from "@vercel/functions";
-import { DefaultChatTransport, type UIMessage, generateId } from "ai";
+import { DefaultChatTransport, generateId } from "ai";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMemo } from "react";
@@ -37,7 +37,7 @@ type Props = {
 };
 
 export function ChatInterface({
-  id: chatId,
+  id,
   initialMessages,
   initialTitle,
   geo,
@@ -49,6 +49,9 @@ export function ChatInterface({
 
   const { data: user } = useUserQuery();
   const pathname = usePathname();
+
+  // Generate a consistent chat ID - use provided ID or generate one
+  const chatId = useMemo(() => id ?? generateId(), [id]);
 
   // Check if we're currently on the root path (no chatId in URL)
   const isOnRootPath = pathname === "/" || pathname === "";
