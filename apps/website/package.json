@@ -20,7 +20,7 @@
     "@uidotdev/usehooks": "^2.4.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.15.0",
-    "geist": "^1.4.2",
+    "geist": "^1.5.1",
     "next": "15.5.2",
     "next-mdx-remote": "^5.0.0",
     "next-safe-action": "^7.10.8",

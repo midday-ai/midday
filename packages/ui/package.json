@@ -112,7 +112,7 @@
     "@tiptap/react": "^2.12.0",
     "@tiptap/starter-kit": "^2.12.0",
     "@uidotdev/usehooks": "^2.4.1",
-    "ai": "^5.0.30",
+    "ai": "^5.0.33",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.1.1",

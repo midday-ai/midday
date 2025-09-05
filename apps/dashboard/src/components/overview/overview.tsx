@@ -1,5 +1,6 @@
 "use client";
 
+import { SuggestedActions } from "../suggested-actions";
 import { OverviewWidgets } from "./overeview-widgets";
 import { OverviewHeader } from "./overview-header";
 
@@ -8,6 +9,7 @@ export function Overview() {
     <div className="flex flex-col gap-4">
       <OverviewHeader />
       <OverviewWidgets />
+      <SuggestedActions />
     </div>
   );
 }
