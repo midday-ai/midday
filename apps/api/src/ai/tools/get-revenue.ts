@@ -4,30 +4,11 @@ import { logger } from "@midday/logger";
 import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
 import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
-import { z } from "zod";
+import { toolMetadata } from "./registry";
 
 export const getRevenueTool = ({ db, teamId, locale }: ToolContext) =>
   tool({
-    description:
-      "Get revenue for a period, including total and a monthly breakdown. Use when users ask about revenue.",
-    inputSchema: z.object({
-      from: z
-        .string()
-        .nullable()
-        .describe(
-          "The start date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
-        ),
-      to: z
-        .string()
-        .nullable()
-        .describe(
-          "The end date when to retrieve data from. If not provided, defaults to the current date plus 12 months. Return ISO-8601 format.",
-        ),
-      currency: z
-        .string()
-        .describe("Optional currency code (e.g., 'USD', 'SEK').")
-        .nullable(),
-    }),
+    ...toolMetadata.getRevenue,
     execute: async ({ from, to, currency }) => {
       try {
         logger.info("Executing getRevenueTool", { from, to, currency });

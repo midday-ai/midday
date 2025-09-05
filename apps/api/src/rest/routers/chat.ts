@@ -1,7 +1,15 @@
 import { openai } from "@ai-sdk/openai";
-import { generateSystemPrompt } from "@api/ai/generate-system-prompt";
+import {
+  generateForcedToolCallPrompt,
+  generateSystemPrompt,
+} from "@api/ai/generate-system-prompt";
 import { generateTitle } from "@api/ai/generate-title";
-import { getRevenueTool } from "@api/ai/tools/get-revenue";
+import {
+  type ToolName,
+  createToolRegistry,
+  validateToolParams,
+} from "@api/ai/tools/registry";
+import { formatToolCallTitle } from "@api/ai/utils/format-tool-call-title";
 import type { Context } from "@api/rest/types";
 import { chatRequestSchema } from "@api/schemas/chat";
 import { OpenAPIHono } from "@hono/zod-openapi";
@@ -95,8 +103,15 @@ app.post(
         getChatById(db, id, teamId),
       ]);
 
+      const toolRegistry = createToolRegistry({
+        db,
+        teamId,
+        userId,
+        locale: userContext.locale,
+      });
+
       const tools = {
-        getRevenue: getRevenueTool({ db, teamId, userId }),
+        ...toolRegistry,
         web_search_preview: openai.tools.webSearchPreview({
           searchContextSize: "medium",
           userLocation: {
@@ -107,6 +122,40 @@ app.post(
           },
         }),
       };
+
+      // Check if this is a hidden tool call message
+      const messageMetadata = message.metadata as any;
+      const isToolCallMessage = messageMetadata?.toolCall;
+      let shouldForceToolCall = false;
+      let forcedToolName: string | undefined;
+      let forcedToolParams: Record<string, any> | undefined;
+
+      if (isToolCallMessage) {
+        const { toolName, toolParams } = messageMetadata.toolCall;
+
+        try {
+          // Validate tool parameters
+          validateToolParams(toolName as ToolName, toolParams);
+          shouldForceToolCall = true;
+          forcedToolName = toolName;
+          forcedToolParams = toolParams;
+        } catch (error) {
+          throw new HTTPException(400, {
+            message: `Invalid tool parameters: ${error instanceof Error ? error.message : String(error)}`,
+          });
+        }
+      }
+
+      // Debug logging to see what messages we're receiving
+      logger.info({
+        msg: "Processing chat message",
+        isToolCallMessage,
+        shouldForceToolCall,
+        forcedToolName,
+        messageId: message.id,
+        messageRole: message.role,
+        hasMetadata: !!messageMetadata,
+      });
 
       const validatedMessages = await validateUIMessages({
         // append the new message to the previous messages:
@@ -145,10 +194,22 @@ app.post(
         },
         execute: async ({ writer }) => {
           // Generate and stream title immediately if chat doesn't have one
-          if (needsTitle) {
+          if (needsTitle && message) {
             try {
-              const messageContent =
-                message.parts?.find((part) => part.type === "text")?.text || "";
+              let messageContent: string;
+
+              if (isToolCallMessage && forcedToolName && forcedToolParams) {
+                // Generate a descriptive title for tool calls using registry metadata
+                messageContent = formatToolCallTitle(
+                  forcedToolName,
+                  forcedToolParams,
+                );
+              } else {
+                // Regular message content
+                messageContent =
+                  message.parts?.find((part) => part.type === "text")?.text ||
+                  "";
+              }
 
               generatedTitle = await generateTitle({
                 message: messageContent,
@@ -159,7 +220,6 @@ app.post(
                 city: userContext.city,
                 region: userContext.region,
                 timezone: userContext.timezone,
-                countryCode: userContext.countryCode,
               });
 
               // Stream the title immediately as a data part
@@ -190,19 +250,42 @@ app.post(
           }
 
           // Start the main AI response
+          const systemPrompt =
+            shouldForceToolCall && forcedToolName && forcedToolParams
+              ? generateForcedToolCallPrompt(
+                  userContext,
+                  forcedToolName,
+                  forcedToolParams,
+                )
+              : generateSystemPrompt(userContext);
+
           const result = streamText({
             model: openai("gpt-4o-mini"),
-            system: generateSystemPrompt(userContext),
+            system: systemPrompt,
             messages: convertToModelMessages(validatedMessages),
             temperature: 0.7,
-            stopWhen: stepCountIs(10),
+            stopWhen: [
+              stepCountIs(5),
+              // Stop if we've made a tool call for forced tool calls
+              ({ steps }) => {
+                if (shouldForceToolCall && forcedToolName) {
+                  return steps.some((step) => {
+                    return step.content?.some(
+                      (content) =>
+                        content.type === "tool-result" &&
+                        content.toolName === forcedToolName,
+                    );
+                  });
+                }
+                return false;
+              },
+            ],
             experimental_transform: smoothStream({
               chunking: "word",
               delayInMs: 0,
             }),
             tools,
-            onFinish: async (result) => {
-              // Log completion metrics
+            onFinish: async (result: any) => {
               const responseTime = Date.now() - startTime;
 
               logger.info({
