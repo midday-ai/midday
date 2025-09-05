@@ -20,6 +20,7 @@ import {
   createUIMessageStream,
   createUIMessageStreamResponse,
   smoothStream,
+  stepCountIs,
   streamText,
   validateUIMessages,
 } from "ai";
@@ -123,8 +124,6 @@ app.post(
       // Check if this chat needs a title (title is null)
       const needsTitle = !previousMessages?.title;
 
-      console.log("needsTitle", needsTitle);
-
       // Variable to store generated title for saving with chat
       let generatedTitle: string | null = null;
 
@@ -196,6 +195,7 @@ app.post(
             system: generateSystemPrompt(userContext),
             messages: convertToModelMessages(validatedMessages),
             temperature: 0.7,
+            stopWhen: stepCountIs(10),
             experimental_transform: smoothStream({
               chunking: "word",
               delayInMs: 0,
@@ -204,6 +204,7 @@ app.post(
             onFinish: async (result) => {
               // Log completion metrics
               const responseTime = Date.now() - startTime;
+
               logger.info({
                 msg: "Chat response completed",
                 userId,
