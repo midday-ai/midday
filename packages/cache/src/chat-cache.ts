@@ -16,6 +16,10 @@ export interface ChatUserContext {
   countryCode?: string | null;
   dateFormat?: string | null;
   locale?: string | null;
+  country?: string | null;
+  city?: string | null;
+  region?: string | null;
+  timezone?: string | null;
 }
 
 export const chatCache = {

@@ -60,7 +60,7 @@ export const saveChat = async (
       target: chats.id,
       set: {
         messages: data.messages,
-        title: data.title,
+        ...(data.title && { title: data.title }),
         updatedAt: new Date(),
       },
     })
