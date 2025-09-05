@@ -1,7 +1,7 @@
 import { TZDate } from "@date-fns/tz";
 import type { ChatUserContext } from "@midday/cache/chat-cache";
 
-export const generateSystemPrompt = (userContext: ChatUserContext) => {
+const generateBasePrompt = (userContext: ChatUserContext) => {
   // Format the current date and time in the user's timezone
   const userTimezone = userContext.timezone || "UTC";
   const tzDate = new TZDate(new Date(), userTimezone);
@@ -26,6 +26,37 @@ export const generateSystemPrompt = (userContext: ChatUserContext) => {
     User current city: ${userContext.city}
     User current region: ${userContext.region}
     User current country: ${userContext.country}
-    User local timezone: ${userTimezone}
-    `;
+    User local timezone: ${userTimezone}`;
+};
+
+export const generateSystemPrompt = (userContext: ChatUserContext) => {
+  return generateBasePrompt(userContext);
+};
+
+export const generateForcedToolCallPrompt = (
+  userContext: ChatUserContext,
+  toolName: string,
+  toolParams: Record<string, any>,
+) => {
+  const basePrompt = generateBasePrompt(userContext);
+  const paramsText = JSON.stringify(toolParams, null, 2);
+
+  return `${basePrompt}
+
+FORCED TOOL CALL MODE:
+You are executing a specific tool call that has been programmatically triggered.
+
+Tool: ${toolName}
+Parameters: ${paramsText}
+
+CRITICAL INSTRUCTIONS:
+- Execute the ${toolName} tool EXACTLY ONCE with the provided parameters
+- DO NOT modify, interpret, or expand the parameters in any way
+- DO NOT make multiple tool calls or additional calls with different parameters
+- DO NOT try to be "helpful" by gathering additional data
+- Use ONLY the exact parameters provided above
+- Provide a clear, concise response based solely on the tool's output
+- Do not suggest additional analysis or follow-up actions
+
+This is a programmatic tool execution - stick strictly to the provided parameters.`;
 };
