@@ -2,7 +2,7 @@
 
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
-import { useEffect, useState } from "react";
+import { endOfMonth, subMonths } from "date-fns";
 import {
   MdBarChart,
   MdContentCopy,
@@ -12,56 +12,102 @@ import {
   MdTrendingUp,
 } from "react-icons/md";
 
-const SUGGESTED_ACTIONS = [
-  {
-    id: "revenue",
-    title: "Revenue",
-    icon: MdBarChart,
-  },
-  {
-    id: "duplicate-invoice",
-    title: "Duplicate invoice",
-    icon: MdContentCopy,
-  },
-  {
-    id: "expenses",
-    title: "Expenses",
-    icon: MdTrendingUp,
-  },
-  {
-    id: "time-track",
-    title: "Time track",
-    icon: MdSchedule,
-  },
-  {
-    id: "new-task",
-    title: "New task",
-    icon: MdTask,
-  },
-  {
-    id: "health-report",
-    title: "Health report",
-    icon: MdHealthAndSafety,
-  },
-];
+type Props = {
+  handleToolCall: ({
+    toolName,
+    toolParams,
+    text,
+  }: {
+    toolName: string;
+    toolParams: Record<string, any>;
+    text: string;
+  }) => void;
+};
 
-const VISIBLE_COUNT = 6;
-
-export function SuggestedActions() {
-  const [visibleActions, setVisibleActions] = useState(
-    SUGGESTED_ACTIONS.slice(0, VISIBLE_COUNT),
-  );
-
-  // Randomize actions on mount
-  useEffect(() => {
-    const shuffled = [...SUGGESTED_ACTIONS].sort(() => Math.random() - 0.5);
-    setVisibleActions(shuffled.slice(0, VISIBLE_COUNT));
-  }, []);
+export function SuggestedActions({ handleToolCall }: Props) {
+  const SUGGESTED_ACTIONS = [
+    {
+      id: "revenue",
+      title: "Revenue",
+      icon: MdBarChart,
+      onClick: () => {
+        handleToolCall({
+          toolName: "getRevenue",
+          toolParams: {
+            from: subMonths(new Date(), 12).toISOString(),
+            to: endOfMonth(new Date()).toISOString(),
+            currency: "SEK",
+          },
+          text: "Get my revenue data",
+        });
+      },
+    },
+    {
+      id: "duplicate-invoice",
+      title: "Duplicate invoice",
+      icon: MdContentCopy,
+      onClick: () => {
+        handleToolCall({
+          toolName: "duplicateInvoice",
+          toolParams: {},
+          text: "Duplicate invoice",
+        });
+      },
+    },
+    {
+      id: "expenses",
+      title: "Expenses",
+      icon: MdTrendingUp,
+      onClick: () => {
+        handleToolCall({
+          toolName: "getExpenses",
+          toolParams: {},
+          text: "Get my expenses data",
+        });
+      },
+    },
+    {
+      id: "time-track",
+      title: "Time track",
+      icon: MdSchedule,
+      onClick: () => {
+        handleToolCall({
+          toolName: "getTimeTrack",
+          toolParams: {},
+          text: "Get my time track data",
+        });
+      },
+    },
+    {
+      id: "new-task",
+      title: "New task",
+      icon: MdTask,
+      onClick: () => {
+        handleToolCall({
+          toolName: "newTask",
+          toolParams: {},
+          text: "New task",
+        });
+      },
+    },
+    {
+      id: "health-report",
+      title: "Health report",
+      icon: MdHealthAndSafety,
+      onClick: () => {
+        handleToolCall({
+          toolName: "healthReport",
+          toolParams: {},
+          text: "Health report",
+        });
+      },
+    },
+  ];
 
   return (
     <div className="w-full px-6 py-4 flex items-center justify-center">
       <div className="flex gap-3 overflow-x-auto scrollbar-hide">
-        {visibleActions.map((action) => {
+        {SUGGESTED_ACTIONS.map((action) => {
           const Icon = action.icon;
           return (
             <Button
@@ -73,6 +119,7 @@ export function SuggestedActions() {
                 "text-sm font-regular text-foreground",
                 "whitespace-nowrap",
               )}
+              onClick={action.onClick}
             >
               <Icon className="w-4 h-4 text-muted-foreground" />
               {action.title}
