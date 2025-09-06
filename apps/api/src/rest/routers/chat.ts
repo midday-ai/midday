@@ -1,15 +1,12 @@
 import { openai } from "@ai-sdk/openai";
-import {
-  generateForcedToolCallPrompt,
-  generateSystemPrompt,
-} from "@api/ai/generate-system-prompt";
+import { generateSystemPrompt } from "@api/ai/generate-system-prompt";
 import { generateTitle } from "@api/ai/generate-title";
 import {
   type ToolName,
   createToolRegistry,
   validateToolParams,
 } from "@api/ai/tools/registry";
-import type { UIChatMessage } from "@api/ai/types";
+import type { ChatMessageMetadata, UIChatMessage } from "@api/ai/types";
 import { formatToolCallTitle } from "@api/ai/utils/format-tool-call-title";
 import type { Context } from "@api/rest/types";
 import { chatRequestSchema } from "@api/schemas/chat";
@@ -24,8 +21,11 @@ import {
 } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import {
+  type ToolChoice,
   convertToModelMessages,
   createIdGenerator,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
   smoothStream,
   stepCountIs,
   streamText,
@@ -132,22 +132,36 @@ app.post(
         }),
       };
 
-      // Check if this is a hidden tool call message
-      const messageMetadata = message.metadata as any;
+      // Check if this is a forced tool call message
+      const messageMetadata = message.metadata as ChatMessageMetadata;
       const isToolCallMessage = messageMetadata?.toolCall;
-      let shouldForceToolCall = false;
-      let forcedToolName: string | undefined;
-      let forcedToolParams: Record<string, any> | undefined;
+      let toolChoice: ToolChoice<typeof tools> | "auto" = "auto";
+      let forcedToolCall:
+        | { toolName: string; toolParams: Record<string, any> }
+        | undefined;
 
       if (isToolCallMessage) {
-        const { toolName, toolParams } = messageMetadata.toolCall;
+        const { toolName, toolParams } = messageMetadata.toolCall!;
 
         try {
           // Validate tool parameters
           validateToolParams(toolName as ToolName, toolParams);
-          shouldForceToolCall = true;
-          forcedToolName = toolName;
-          forcedToolParams = toolParams;
+
+          // Set tool choice to force the specific tool (cast to the proper type)
+          toolChoice = {
+            type: "tool",
+            toolName: toolName as keyof typeof tools,
+          };
+
+          // Prepare forced tool call data for system prompt
+          forcedToolCall = { toolName, toolParams };
+
+          logger.info({
+            msg: "Forcing tool execution",
+            toolName,
+            toolParams,
+            chatId: id,
+          });
         } catch (error) {
           throw new HTTPException(400, {
             message: `Invalid tool parameters: ${error instanceof Error ? error.message : String(error)}`,
@@ -159,8 +173,7 @@ app.post(
       logger.info({
         msg: "Processing chat message",
         isToolCallMessage,
-        shouldForceToolCall,
-        forcedToolName,
+        toolChoice,
         messageId: message.id,
         messageRole: message.role,
         hasMetadata: !!messageMetadata,
@@ -185,17 +198,15 @@ app.post(
       // Variable to store generated title for saving with chat
       let generatedTitle: string | null = null;
 
-      // Generate title if needed (but don't stream it here since we're using toUIMessageStreamResponse)
+      // Generate title if needed for streaming
       if (needsTitle && message) {
         try {
           let messageContent: string;
 
-          if (isToolCallMessage && forcedToolName && forcedToolParams) {
+          if (isToolCallMessage) {
+            const { toolName, toolParams } = messageMetadata.toolCall!;
             // Generate a descriptive title for tool calls using registry metadata
-            messageContent = formatToolCallTitle(
-              forcedToolName,
-              forcedToolParams,
-            );
+            messageContent = formatToolCallTitle(toolName, toolParams);
           } else {
             // Regular message content
             messageContent =
@@ -229,21 +240,13 @@ app.post(
         }
       }
 
-      // Start the main AI response
-      const systemPrompt =
-        shouldForceToolCall && forcedToolName && forcedToolParams
-          ? generateForcedToolCallPrompt(
-              userContext,
-              forcedToolName,
-              forcedToolParams,
-            )
-          : generateSystemPrompt(userContext);
-
+      // Start the main AI response - use single system prompt for all cases
       const result = streamText({
         model: openai("gpt-4o-mini"),
-        system: systemPrompt,
+        system: generateSystemPrompt(userContext, forcedToolCall),
         messages: convertToModelMessages(validatedMessages),
         temperature: 0.7,
+        toolChoice,
         stopWhen: [
           stepCountIs(5),
           ({ steps }) => {
@@ -270,30 +273,36 @@ app.post(
             responseTime,
             text: result.text,
             usage: result.usage,
+            toolChoice,
           });
         },
       });
 
-      const response = result.toUIMessageStreamResponse({
-        originalMessages: validatedMessages, // Pass all messages (previous + current)
-        generateMessageId: createIdGenerator({
+      // Use hybrid approach: createUIMessageStream for title streaming + proper message persistence
+      const stream = createUIMessageStream({
+        generateId: createIdGenerator({
           prefix: "msg",
           size: 16,
         }),
-        onFinish: async ({ messages }) => {
-          // Now messages contains ALL messages in the conversation (original + new)
+        onFinish: async ({ messages: streamMessages }) => {
+          const allMessages = [
+            ...(previousMessages?.messages || []),
+            message, // Current user message
+            ...streamMessages, // AI response(s)
+          ];
+
           logger.info({
             msg: "Saving chat messages to database",
             chatId: id,
-            messageCount: messages.length,
-            messageIds: messages.map((m) => m.id),
-            messageRoles: messages.map((m) => m.role),
+            messageCount: allMessages.length,
+            messageIds: allMessages.map((m) => m.id),
+            messageRoles: allMessages.map((m) => m.role),
             title: generatedTitle,
           });
 
           await saveChat(db, {
             chatId: id,
-            messages: messages as UIChatMessage[],
+            messages: allMessages as UIChatMessage[],
             teamId,
             userId,
             title: generatedTitle,
@@ -302,10 +311,35 @@ app.post(
           logger.info({
             msg: "Chat messages saved successfully",
             chatId: id,
-            totalMessages: messages.length,
+            totalMessages: allMessages.length,
           });
         },
+        execute: async ({ writer }) => {
+          // Stream title immediately if generated
+          if (generatedTitle) {
+            writer.write({
+              type: "data-title",
+              id: "chat-title",
+              data: {
+                title: generatedTitle,
+              },
+            });
+
+            logger.info({
+              msg: "Chat title streamed to UI",
+              chatId: id,
+              title: generatedTitle,
+              userId,
+              teamId,
+            });
+          }
+
+          // Merge the AI response stream
+          writer.merge(result.toUIMessageStream());
+        },
       });
+
+      const response = createUIMessageStreamResponse({ stream });
 
       return response;
     } catch (error) {
