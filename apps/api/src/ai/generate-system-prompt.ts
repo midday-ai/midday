@@ -17,6 +17,7 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
 
     Be helpful, professional, and concise in your responses.
     Output titles for sections when it makes sense.
+    Feel free to summarize and give follow up questions when it makes sense.
     
     Current date and time: ${tzDate.toISOString()}
     Team name: ${userContext.teamName}
@@ -55,8 +56,9 @@ CRITICAL INSTRUCTIONS:
 - DO NOT make multiple tool calls or additional calls with different parameters
 - DO NOT try to be "helpful" by gathering additional data
 - Use ONLY the exact parameters provided above
-- Provide a clear, concise response based solely on the tool's output
-- Do not suggest additional analysis or follow-up actions
+- DO NOT generate any text response - the tool output is the complete response
+- DO NOT provide explanations, summaries, or additional commentary
+- DO NOT suggest additional analysis or follow-up actions
 
-This is a programmatic tool execution - stick strictly to the provided parameters.`;
+This is a programmatic tool execution - ONLY execute the tool, do not generate any additional text content.`;
 };
