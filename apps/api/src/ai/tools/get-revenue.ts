@@ -3,7 +3,7 @@ import { getRevenue } from "@db/queries";
 import { logger } from "@midday/logger";
 import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
-import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
+import { endOfMonth, format, startOfMonth } from "date-fns";
 import { toolMetadata } from "./registry";
 
 export const getRevenueTool = ({ db, teamId, locale }: ToolContext) =>
@@ -13,12 +13,9 @@ export const getRevenueTool = ({ db, teamId, locale }: ToolContext) =>
       try {
         logger.info("Executing getRevenueTool", { from, to, currency });
 
-        // Resolve dates (default: last 12 months through end of current month)
-        const fromDate = startOfMonth(
-          from ? new Date(from) : subMonths(new Date(), 12),
-        );
-
-        const toDate = endOfMonth(to ? new Date(to) : new Date());
+        // Use the provided dates (which now have defaults from the schema)
+        const fromDate = startOfMonth(new Date(from));
+        const toDate = endOfMonth(new Date(to));
 
         const rows = await getRevenue(db, {
           teamId,

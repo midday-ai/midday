@@ -172,12 +172,40 @@ export function ChatInterface({
     }
   };
 
+  const handleToolCall = ({
+    toolName,
+    toolParams,
+    text,
+  }: { toolName: string; toolParams: Record<string, any>; text: string }) => {
+    // Start header animation immediately when user sends first message
+    if (isOnRootPath && messages.length === 0 && showOverview) {
+      setShowOverview(false);
+    }
+
+    // If we're on the root path and this is the first message, update URL
+    if (isOnRootPath && messages.length === 0) {
+      updateUrl(chatId);
+    }
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text }],
+      metadata: {
+        internal: true,
+        toolCall: {
+          toolName,
+          toolParams,
+        },
+      },
+    });
+  };
+
   return (
     <div>
       {/* Chat header - instant transition */}
       {!isOnRootPath && <ChatHeader title={chatTitle} />}
 
-      {showOverview && <Overview />}
+      {showOverview && <Overview handleToolCall={handleToolCall} />}
 
       {/* Chat content */}
       <div className="w-full mx-auto pb-0 relative size-full h-[calc(100vh-192px)]">
