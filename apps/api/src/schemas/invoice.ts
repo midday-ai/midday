@@ -272,7 +272,9 @@ export const getInvoicesSchema = z.object({
       example: "25",
     }),
   sort: z
-    .array(z.string(), z.string())
+    .array(z.string().min(1))
+    .max(2)
+    .min(2)
     .nullable()
     .optional()
     .openapi({

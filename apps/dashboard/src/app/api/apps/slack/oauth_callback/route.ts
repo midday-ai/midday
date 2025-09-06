@@ -5,7 +5,7 @@ import {
   getSlackInstaller,
 } from "@midday/app-store/slack";
 import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 const paramsSchema = z.object({
   code: z.string(),

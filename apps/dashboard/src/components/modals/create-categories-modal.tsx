@@ -25,7 +25,7 @@ import { getTaxTypeForCountry, taxTypes } from "@midday/utils/tax";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useFieldArray } from "react-hook-form";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { SelectTaxType } from "../select-tax-type";
 import { TaxRateInput } from "../tax-rate-input";
 

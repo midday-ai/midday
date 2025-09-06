@@ -19,7 +19,7 @@
     "@midday/db": "workspace:*",
     "nanoid": "^5.1.5",
     "resend": "^4.6.0",
-    "zod": "3.25.64"
+    "zod": "^4.1.5"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",

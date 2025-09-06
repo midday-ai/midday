@@ -4,6 +4,7 @@ import { generateVaultFilters } from "@/actions/ai/filters/generate-vault-filter
 import { FilterList } from "@/components/filter-list";
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useTRPC } from "@/trpc/client";
+import { readStreamableValue } from "@ai-sdk/rsc";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
@@ -21,7 +22,6 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
-import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";

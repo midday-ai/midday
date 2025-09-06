@@ -131,6 +131,7 @@ app.openapi(
 
     return c.json(
       validateResponse(applicationInfo, oauthApplicationInfoSchema),
+      200,
     );
   },
 );
@@ -417,7 +418,7 @@ app.openapi(
         scope: tokenResponse.scopes.join(" "),
       };
 
-      return c.json(validateResponse(response, oauthTokenResponseSchema));
+      return c.json(validateResponse(response, oauthTokenResponseSchema), 200);
     }
 
     if (grant_type === "refresh_token") {
@@ -448,7 +449,10 @@ app.openapi(
           scope: tokenResponse.scopes.join(" "),
         };
 
-        return c.json(validateResponse(response, oauthTokenResponseSchema));
+        return c.json(
+          validateResponse(response, oauthTokenResponseSchema),
+          200,
+        );
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
