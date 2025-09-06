@@ -37,15 +37,6 @@ export type ToolSchemas = typeof toolSchemas;
 export type ToolParams<T extends ToolName> = z.infer<ToolSchemas[T]>;
 export type UITools = InferUITools<ReturnType<typeof createToolRegistry>>;
 
-// Validate tool parameters
-export function validateToolParams<T extends ToolName>(
-  toolName: T,
-  params: unknown,
-): ToolParams<T> {
-  const schema = toolSchemas[toolName];
-  return schema.parse(params);
-}
-
 // Get all available tool names
 export function getAvailableTools(): ToolName[] {
   return Object.keys(toolSchemas) as ToolName[];
