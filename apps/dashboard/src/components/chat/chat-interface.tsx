@@ -85,47 +85,41 @@ export function ChatInterface({
     window.history.pushState({ chatId }, "", `/${chatId}`);
   };
 
-  const {
-    messages,
-    sendMessage,
-    setMessages,
-    regenerate,
-    stop,
-    status,
-    error,
-  } = useChat<UIChatMessage>({
-    id: chatId,
-    messages: initialMessages,
-    transport: new DefaultChatTransport({
-      api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
-      fetch: authenticatedFetch,
-      prepareSendMessagesRequest({ messages, id }) {
-        return {
-          body: {
-            id,
-            message: messages[messages.length - 1],
-            country: geo?.country,
-            city: geo?.city,
-            region: geo?.region,
-            timezone: new Intl.DateTimeFormat().resolvedOptions().timeZone,
-          },
-        };
-      },
-    }),
-    onData: (dataPart) => {
-      // Handle title data parts as they stream in (before main response is done)
-      if (dataPart.type === "data-title") {
-        // With proper generic typing, TypeScript should know the structure
-        // @ts-ignore
-        setChatTitle(dataPart.data.title);
-
-        if (typeof document !== "undefined") {
+  const { messages, sendMessage, setMessages, status } = useChat<UIChatMessage>(
+    {
+      id: chatId,
+      messages: initialMessages,
+      transport: new DefaultChatTransport({
+        api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
+        fetch: authenticatedFetch,
+        prepareSendMessagesRequest({ messages, id }) {
+          return {
+            body: {
+              id,
+              message: messages[messages.length - 1],
+              country: geo?.country,
+              city: geo?.city,
+              region: geo?.region,
+              timezone: new Intl.DateTimeFormat().resolvedOptions().timeZone,
+            },
+          };
+        },
+      }),
+      onData: (dataPart) => {
+        // Handle title data parts as they stream in (before main response is done)
+        if (dataPart.type === "data-title") {
+          // With proper generic typing, TypeScript should know the structure
           // @ts-ignore
-          document.title = `${dataPart.data.title} | Midday`;
+          setChatTitle(dataPart.data.title);
+
+          if (typeof document !== "undefined") {
+            // @ts-ignore
+            document.title = `${dataPart.data.title} | Midday`;
+          }
         }
-      }
+      },
     },
-  });
+  );
 
   // Clear messages and title when navigating away
   useEffect(() => {
@@ -204,14 +198,6 @@ export function ChatInterface({
                       <Message from={message.role} key={message.id}>
                         <MessageContent>
                           {message.parts?.map((part, partIndex) => {
-                            if (part.type === "text") {
-                              return (
-                                <Response key={`text-${partIndex.toString()}`}>
-                                  {part.text}
-                                </Response>
-                              );
-                            }
-
                             if (part.type === "tool-getRevenue") {
                               return (
                                 <Response
@@ -222,7 +208,21 @@ export function ChatInterface({
                               );
                             }
 
+                            if (part.type === "text") {
+                              return (
+                                <Response key={`text-${partIndex.toString()}`}>
+                                  {part.text}
+                                </Response>
+                              );
+                            }
+
                             return null;
+
+                            // return (
+                            //   <Response key={`text-${partIndex.toString()}`}>
+                            //     {JSON.stringify(part)}
+                            //   </Response>
+                            // );
                           })}
                         </MessageContent>
 
