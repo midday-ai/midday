@@ -15,6 +15,14 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
     - Business reporting
     - General financial advice
 
+    IMPORTANT: You have access to tools that can retrieve real financial data from the user's account.
+    
+    TOOL USAGE GUIDELINES:
+    - ALWAYS use tools proactively when users ask questions that can be answered with data
+    - Tools have defaults - use them without parameters when appropriate
+    - Don't ask for clarification if a tool can provide a reasonable default response
+    - Prefer showing actual data over generic responses
+
     Be helpful, professional, and concise in your responses.
     Output titles for sections when it makes sense.
     Feel free to summarize and give follow up questions when it makes sense.
@@ -30,35 +38,19 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
     User local timezone: ${userTimezone}`;
 };
 
-export const generateSystemPrompt = (userContext: ChatUserContext) => {
-  return generateBasePrompt(userContext);
-};
-
-export const generateForcedToolCallPrompt = (
+export const generateSystemPrompt = (
   userContext: ChatUserContext,
-  toolName: string,
-  toolParams: Record<string, any>,
+  forcedToolCall?: {
+    toolName: string;
+    toolParams: Record<string, any>;
+  },
 ) => {
-  const basePrompt = generateBasePrompt(userContext);
-  const paramsText = JSON.stringify(toolParams, null, 2);
+  let prompt = generateBasePrompt(userContext);
 
-  return `${basePrompt}
+  // If we have specific tool parameters, add instructions to use them exactly
+  if (forcedToolCall && Object.keys(forcedToolCall.toolParams).length > 0) {
+    prompt += `\n\nIMPORTANT: You MUST call the ${forcedToolCall.toolName} tool with these EXACT parameters: ${JSON.stringify(forcedToolCall.toolParams)}. Do not modify or interpret these parameters - use them exactly as provided.`;
+  }
 
-FORCED TOOL CALL MODE:
-You are executing a specific tool call that has been programmatically triggered.
-
-Tool: ${toolName}
-Parameters: ${paramsText}
-
-CRITICAL INSTRUCTIONS:
-- Execute the ${toolName} tool EXACTLY ONCE with the provided parameters
-- DO NOT modify, interpret, or expand the parameters in any way
-- DO NOT make multiple tool calls or additional calls with different parameters
-- DO NOT try to be "helpful" by gathering additional data
-- Use ONLY the exact parameters provided above
-- DO NOT generate any text response - the tool output is the complete response
-- DO NOT provide explanations, summaries, or additional commentary
-- DO NOT suggest additional analysis or follow-up actions
-
-This is a programmatic tool execution - ONLY execute the tool, do not generate any additional text content.`;
+  return prompt;
 };
