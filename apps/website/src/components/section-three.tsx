@@ -26,13 +26,13 @@ export function SectionThree() {
               invoices from your recorded hours.
             </p>
 
-            <div className="flex flex-col space-y-2">
-              <div className="flex space-x-2 items-center mt-8 text-sm">
+            <div className="flex flex-col space-y-2 mt-8">
+              <div className="flex space-x-2 text-sm">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width={18}
-                  height={13}
+                  viewBox="0 0 18 13"
                   fill="none"
+                  className="flex-none w-[1.125rem] h-[1lh]"
                 >
                   <path
                     fill="currentColor"
@@ -43,12 +43,12 @@ export function SectionThree() {
                   Get a monthly overview of tracked hours
                 </span>
               </div>
-              <div className="flex space-x-2 items-center text-sm">
+              <div className="flex space-x-2 text-sm">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width={18}
-                  height={13}
+                  viewBox="0 0 18 13"
                   fill="none"
+                  className="flex-none w-[1.125rem] h-[1lh]"
                 >
                   <path
                     fill="currentColor"
@@ -60,12 +60,12 @@ export function SectionThree() {
                 </span>
               </div>
 
-              <div className="flex space-x-2 items-center text-sm">
+              <div className="flex space-x-2 text-sm">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width={18}
-                  height={13}
+                  viewBox="0 0 18 13"
                   fill="none"
+                  className="flex-none w-[1.125rem] h-[1lh]"
                 >
                   <path
                     fill="currentColor"
@@ -77,12 +77,12 @@ export function SectionThree() {
                 </span>
               </div>
 
-              <div className="flex space-x-2 items-center text-sm">
+              <div className="flex space-x-2 text-sm">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width={18}
-                  height={13}
+                  viewBox="0 0 18 13"
                   fill="none"
+                  className="flex-none w-[1.125rem] h-[1lh]"
                 >
                   <path
                     fill="currentColor"
@@ -94,12 +94,12 @@ export function SectionThree() {
                 </span>
               </div>
 
-              <div className="flex space-x-2 items-center text-sm">
+              <div className="flex space-x-2 text-sm">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width={18}
-                  height={13}
+                  viewBox="0 0 18 13"
                   fill="none"
+                  className="flex-none w-[1.125rem] h-[1lh]"
                 >
                   <path
                     fill="currentColor"

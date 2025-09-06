@@ -30,64 +30,64 @@ export function SectionTwo() {
           </p>
 
           <div className="flex flex-col space-y-2">
-            <div className="flex space-x-2 items-center ">
+            <div className="flex space-x-2 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
+                viewBox="0 0 18 13"
                 fill="none"
+                className="flex-none w-[1.125rem] h-[1lh]"
               >
                 <path
                   fill="currentColor"
                   d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
                 />
               </svg>
-              <span className="text-primary text-sm">Revenue</span>
+              <span className="text-primary">Revenue</span>
             </div>
 
-            <div className="flex space-x-2 items-center">
+            <div className="flex space-x-2 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
+                viewBox="0 0 18 13"
                 fill="none"
+                className="flex-none w-[1.125rem] h-[1lh]"
               >
                 <path
                   fill="currentColor"
                   d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
                 />
               </svg>
-              <span className="text-primary text-sm">Burnrate</span>
+              <span className="text-primary">Burnrate</span>
             </div>
 
-            <div className="flex space-x-2 items-center">
+            <div className="flex space-x-2 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
+                viewBox="0 0 18 13"
                 fill="none"
+                className="flex-none w-[1.125rem] h-[1lh]"
               >
                 <path
                   fill="currentColor"
                   d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
                 />
               </svg>
-              <span className="text-primary text-sm">Expenses</span>
+              <span className="text-primary">Expenses</span>
             </div>
 
-            <div className="flex space-x-2 items-center">
+            <div className="flex space-x-2 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
+                viewBox="0 0 18 13"
                 fill="none"
+                className="flex-none w-[1.125rem] h-[1lh]"
               >
                 <path
                   fill="currentColor"
                   d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
                 />
               </svg>
-              <span className="text-primary text-sm">
+              <span className="text-primary">
                 Unified currency overview across all your accounts
               </span>
             </div>
