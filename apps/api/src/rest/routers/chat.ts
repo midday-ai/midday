@@ -9,6 +9,7 @@ import {
   createToolRegistry,
   validateToolParams,
 } from "@api/ai/tools/registry";
+import type { UIChatMessage } from "@api/ai/types";
 import { formatToolCallTitle } from "@api/ai/utils/format-tool-call-title";
 import type { Context } from "@api/rest/types";
 import { chatRequestSchema } from "@api/schemas/chat";
@@ -25,8 +26,6 @@ import { logger } from "@midday/logger";
 import {
   convertToModelMessages,
   createIdGenerator,
-  createUIMessageStream,
-  createUIMessageStreamResponse,
   smoothStream,
   stepCountIs,
   streamText,
@@ -103,6 +102,16 @@ app.post(
         getChatById(db, id, teamId),
       ]);
 
+      // Debug logging for database messages
+      logger.info({
+        msg: "Previous messages loaded from database",
+        chatId: id,
+        hasPreviousMessages: !!previousMessages,
+        previousMessageCount: previousMessages?.messages?.length || 0,
+        previousTitle: previousMessages?.title,
+        previousMessageIds: previousMessages?.messages?.map((m) => m.id) || [],
+      });
+
       const toolRegistry = createToolRegistry({
         db,
         teamId,
@@ -176,137 +185,126 @@ app.post(
       // Variable to store generated title for saving with chat
       let generatedTitle: string | null = null;
 
-      // Create a UI message stream to handle early title streaming
-      const stream = createUIMessageStream({
-        generateId: createIdGenerator({
+      // Generate title if needed (but don't stream it here since we're using toUIMessageStreamResponse)
+      if (needsTitle && message) {
+        try {
+          let messageContent: string;
+
+          if (isToolCallMessage && forcedToolName && forcedToolParams) {
+            // Generate a descriptive title for tool calls using registry metadata
+            messageContent = formatToolCallTitle(
+              forcedToolName,
+              forcedToolParams,
+            );
+          } else {
+            // Regular message content
+            messageContent =
+              message.parts?.find((part) => part.type === "text")?.text || "";
+          }
+
+          generatedTitle = await generateTitle({
+            message: messageContent,
+            teamName: userContext.teamName,
+            fullName: userContext.fullName,
+            country: userContext.country,
+            baseCurrency: userContext.baseCurrency,
+            city: userContext.city,
+            region: userContext.region,
+            timezone: userContext.timezone,
+          });
+
+          logger.info({
+            msg: "Chat title generated",
+            chatId: id,
+            title: generatedTitle,
+            userId,
+            teamId,
+          });
+        } catch (error) {
+          logger.error({
+            msg: "Failed to generate chat title",
+            chatId: id,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+
+      // Start the main AI response
+      const systemPrompt =
+        shouldForceToolCall && forcedToolName && forcedToolParams
+          ? generateForcedToolCallPrompt(
+              userContext,
+              forcedToolName,
+              forcedToolParams,
+            )
+          : generateSystemPrompt(userContext);
+
+      const result = streamText({
+        model: openai("gpt-4o-mini"),
+        system: systemPrompt,
+        messages: convertToModelMessages(validatedMessages),
+        temperature: 0.7,
+        stopWhen: [
+          stepCountIs(5),
+          ({ steps }) => {
+            return steps.some((step) => {
+              return step.content?.some(
+                (content) => content.type === "tool-result",
+              );
+            });
+          },
+        ],
+        experimental_transform: smoothStream({
+          chunking: "word",
+          delayInMs: 0,
+        }),
+        tools,
+        onFinish: async (result) => {
+          const responseTime = Date.now() - startTime;
+
+          logger.info({
+            msg: "Chat response completed",
+            userId,
+            teamId,
+            chatId: id,
+            responseTime,
+            text: result.text,
+            usage: result.usage,
+          });
+        },
+      });
+
+      const response = result.toUIMessageStreamResponse({
+        originalMessages: validatedMessages, // Pass all messages (previous + current)
+        generateMessageId: createIdGenerator({
           prefix: "msg",
           size: 16,
         }),
-        onFinish: async ({ messages: finalMessages }) => {
-          // Save chat messages with title if it was generated
+        onFinish: async ({ messages }) => {
+          // Now messages contains ALL messages in the conversation (original + new)
+          logger.info({
+            msg: "Saving chat messages to database",
+            chatId: id,
+            messageCount: messages.length,
+            messageIds: messages.map((m) => m.id),
+            messageRoles: messages.map((m) => m.role),
+            title: generatedTitle,
+          });
+
           await saveChat(db, {
             chatId: id,
-            messages: finalMessages,
+            messages: messages as UIChatMessage[],
             teamId,
             userId,
             title: generatedTitle,
           });
-        },
-        execute: async ({ writer }) => {
-          // Generate and stream title immediately if chat doesn't have one
-          if (needsTitle && message) {
-            try {
-              let messageContent: string;
 
-              if (isToolCallMessage && forcedToolName && forcedToolParams) {
-                // Generate a descriptive title for tool calls using registry metadata
-                messageContent = formatToolCallTitle(
-                  forcedToolName,
-                  forcedToolParams,
-                );
-              } else {
-                // Regular message content
-                messageContent =
-                  message.parts?.find((part) => part.type === "text")?.text ||
-                  "";
-              }
-
-              generatedTitle = await generateTitle({
-                message: messageContent,
-                teamName: userContext.teamName,
-                fullName: userContext.fullName,
-                country: userContext.country,
-                baseCurrency: userContext.baseCurrency,
-                city: userContext.city,
-                region: userContext.region,
-                timezone: userContext.timezone,
-              });
-
-              // Stream the title immediately as a data part
-              writer.write({
-                type: "data-title",
-                id: "chat-title",
-                data: {
-                  title: generatedTitle,
-                },
-              });
-
-              logger.info({
-                msg: "Chat title streamed early",
-                chatId: id,
-                title: generatedTitle,
-                userId,
-                teamId,
-              });
-
-              // Title will be saved with the chat in onFinish callback
-            } catch (error) {
-              logger.error({
-                msg: "Failed to generate chat title for early streaming",
-                chatId: id,
-                error: error instanceof Error ? error.message : String(error),
-              });
-            }
-          }
-
-          // Start the main AI response
-          const systemPrompt =
-            shouldForceToolCall && forcedToolName && forcedToolParams
-              ? generateForcedToolCallPrompt(
-                  userContext,
-                  forcedToolName,
-                  forcedToolParams,
-                )
-              : generateSystemPrompt(userContext);
-
-          const result = streamText({
-            model: openai("gpt-4o-mini"),
-            system: systemPrompt,
-            messages: convertToModelMessages(validatedMessages),
-            temperature: 0.7,
-            stopWhen: [
-              stepCountIs(5),
-              // Stop if we've made a tool call for forced tool calls
-              ({ steps }) => {
-                if (shouldForceToolCall && forcedToolName) {
-                  return steps.some((step) => {
-                    return step.content?.some(
-                      (content) =>
-                        content.type === "tool-result" &&
-                        content.toolName === forcedToolName,
-                    );
-                  });
-                }
-                return false;
-              },
-            ],
-            experimental_transform: smoothStream({
-              chunking: "word",
-              delayInMs: 0,
-            }),
-            tools,
-            onFinish: async (result: any) => {
-              const responseTime = Date.now() - startTime;
-
-              logger.info({
-                msg: "Chat response completed",
-                userId,
-                teamId,
-                chatId: id,
-                responseTime,
-                text: result.text,
-                usage: result.usage,
-              });
-            },
+          logger.info({
+            msg: "Chat messages saved successfully",
+            chatId: id,
+            totalMessages: messages.length,
           });
-
-          // Convert to UI message stream and merge with our custom stream
-          writer.merge(result.toUIMessageStream());
         },
-      });
-
-      const response = createUIMessageStreamResponse({
-        stream,
       });
 
       return response;

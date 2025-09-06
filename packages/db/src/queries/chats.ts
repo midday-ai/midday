@@ -1,6 +1,6 @@
+import type { UIChatMessage } from "@api/ai/types";
 import type { Database } from "@db/client";
 import { chats } from "@db/schema";
-import type { UIMessage } from "ai";
 import { and, desc, eq } from "drizzle-orm";
 
 export const getChatById = async (
@@ -40,7 +40,7 @@ export const saveChat = async (
   db: Database,
   data: {
     chatId: string;
-    messages: UIMessage[];
+    messages: UIChatMessage[];
     teamId: string;
     userId: string;
     title?: string | null;
