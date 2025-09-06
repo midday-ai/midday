@@ -20,12 +20,12 @@ import {
   PromptInputTools,
 } from "@midday/ui/prompt-input";
 import { Response } from "@midday/ui/response";
-import { Spinner } from "@midday/ui/spinner";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, generateId } from "ai";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMemo } from "react";
+import { ThinkingMessage } from "../message";
 import { Overview } from "../overview/overview";
 import { ChatHeader } from "./chat-header";
 
@@ -226,12 +226,62 @@ export function ChatInterface({
                       <Message from={message.role} key={message.id}>
                         <MessageContent>
                           {message.parts?.map((part, partIndex) => {
-                            if (part.type === "tool-getRevenue") {
+                            if (part.type?.startsWith("tool-")) {
+                              // Check if tool output should be displayed
+                              const toolOutput = (part as any).output;
+                              const shouldHide =
+                                toolOutput?.display === "hidden";
+
+                              if (shouldHide) {
+                                // Check if this message has text content - if so, don't show the pill
+                                const hasTextContent = message.parts?.some(
+                                  (p) => p.type === "text" && p.text?.trim(),
+                                );
+
+                                if (hasTextContent) {
+                                  return null; // Hide pill when we have AI analysis
+                                }
+
+                                // Show pill for hidden tools only when no text content exists yet
+                                const toolName = part.type.replace("tool-", "");
+                                const getToolLabel = (tool: string) => {
+                                  switch (tool) {
+                                    case "getRevenue":
+                                      return "Getting revenue data";
+                                    case "web_search_preview":
+                                      return "Searching the web";
+                                    default:
+                                      return `Running ${tool}`;
+                                  }
+                                };
+
+                                return (
+                                  <div
+                                    key={`tool-pill-${partIndex.toString()}`}
+                                    className="inline-flex items-center gap-2 px-3 py-2 bg-black/10 dark:bg-white/10 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium mb-3 border border-gray-200 dark:border-gray-700"
+                                  >
+                                    <svg
+                                      className="w-3 h-3"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" />
+                                    </svg>
+                                    {getToolLabel(toolName)}
+                                  </div>
+                                );
+                              }
+
+                              // Show full tool output for tools that want to be displayed
                               return (
                                 <Response
                                   key={`tool-result-${partIndex.toString()}`}
                                 >
-                                  {part.output}
+                                  {toolOutput?.content || toolOutput}
                                 </Response>
                               );
                             }
@@ -245,12 +295,6 @@ export function ChatInterface({
                             }
 
                             return null;
-
-                            // return (
-                            //   <Response key={`text-${partIndex.toString()}`}>
-                            //     {JSON.stringify(part)}
-                            //   </Response>
-                            // );
                           })}
                         </MessageContent>
 
@@ -266,7 +310,11 @@ export function ChatInterface({
                 );
               })}
 
-              {status === "submitted" && <Spinner />}
+              {status === "submitted" &&
+                messages.length > 0 &&
+                messages[messages.length - 1]?.role === "user" && (
+                  <ThinkingMessage />
+                )}
             </ConversationContent>
             <ConversationScrollButton />
           </Conversation>

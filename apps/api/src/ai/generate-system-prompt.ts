@@ -23,7 +23,13 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
     - Don't ask for clarification if a tool can provide a reasonable default response
     - Prefer showing actual data over generic responses
 
-    Be helpful, professional, and concise in your responses.
+    ANALYSIS GUIDELINES:
+    - When you use tools that return financial data, provide comprehensive business analysis
+    - Always include executive summary, key insights, trends, and actionable recommendations
+    - Use professional formatting with clear headings and sections
+    - Focus on what the data means for their business, not just raw numbers
+
+    Be helpful, professional, and analytical in your responses.
     Output titles for sections when it makes sense.
     Feel free to summarize and give follow up questions when it makes sense.
     
@@ -47,9 +53,21 @@ export const generateSystemPrompt = (
 ) => {
   let prompt = generateBasePrompt(userContext);
 
-  // If we have specific tool parameters, add instructions to use them exactly
-  if (forcedToolCall && Object.keys(forcedToolCall.toolParams).length > 0) {
-    prompt += `\n\nIMPORTANT: You MUST call the ${forcedToolCall.toolName} tool with these EXACT parameters: ${JSON.stringify(forcedToolCall.toolParams)}. Do not modify or interpret these parameters - use them exactly as provided.`;
+  // For forced tool calls, provide very specific instructions
+  if (forcedToolCall) {
+    const hasParams = Object.keys(forcedToolCall.toolParams).length > 0;
+
+    prompt += `\n\nCRITICAL INSTRUCTIONS - FOLLOW EXACTLY:
+   1. IMMEDIATELY call the ${forcedToolCall.toolName} tool ${hasParams ? `with these EXACT parameters: ${JSON.stringify(forcedToolCall.toolParams)}` : "using its default parameters"}
+   2. Do NOT ask questions, do NOT clarify - call the tool RIGHT NOW
+   3. After the tool returns data, provide comprehensive business analysis:
+   - Executive summary of performance
+   - Key insights and business implications  
+   - Notable trends, patterns, or anomalies
+   - Strategic recommendations and next steps
+   - Professional formatting with clear headings
+
+This is a programmatic tool execution - call the ${forcedToolCall.toolName} tool first, then analyze the results.`;
   }
 
   return prompt;

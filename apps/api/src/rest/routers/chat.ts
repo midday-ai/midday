@@ -1,11 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import { generateSystemPrompt } from "@api/ai/generate-system-prompt";
 import { generateTitle } from "@api/ai/generate-title";
-import {
-  type ToolName,
-  createToolRegistry,
-  validateToolParams,
-} from "@api/ai/tools/registry";
+import { createToolRegistry } from "@api/ai/tools/registry";
 import type { ChatMessageMetadata, UIChatMessage } from "@api/ai/types";
 import { formatToolCallTitle } from "@api/ai/utils/format-tool-call-title";
 import type { Context } from "@api/rest/types";
@@ -21,7 +17,6 @@ import {
 } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import {
-  type ToolChoice,
   convertToModelMessages,
   createIdGenerator,
   createUIMessageStream,
@@ -135,49 +130,6 @@ app.post(
       // Check if this is a forced tool call message
       const messageMetadata = message.metadata as ChatMessageMetadata;
       const isToolCallMessage = messageMetadata?.toolCall;
-      let toolChoice: ToolChoice<typeof tools> | "auto" = "auto";
-      let forcedToolCall:
-        | { toolName: string; toolParams: Record<string, any> }
-        | undefined;
-
-      if (isToolCallMessage) {
-        const { toolName, toolParams } = messageMetadata.toolCall!;
-
-        try {
-          // Validate tool parameters
-          validateToolParams(toolName as ToolName, toolParams);
-
-          // Set tool choice to force the specific tool (cast to the proper type)
-          toolChoice = {
-            type: "tool",
-            toolName: toolName as keyof typeof tools,
-          };
-
-          // Prepare forced tool call data for system prompt
-          forcedToolCall = { toolName, toolParams };
-
-          logger.info({
-            msg: "Forcing tool execution",
-            toolName,
-            toolParams,
-            chatId: id,
-          });
-        } catch (error) {
-          throw new HTTPException(400, {
-            message: `Invalid tool parameters: ${error instanceof Error ? error.message : String(error)}`,
-          });
-        }
-      }
-
-      // Debug logging to see what messages we're receiving
-      logger.info({
-        msg: "Processing chat message",
-        isToolCallMessage,
-        toolChoice,
-        messageId: message.id,
-        messageRole: message.role,
-        hasMetadata: !!messageMetadata,
-      });
 
       const validatedMessages = await validateUIMessages({
         // append the new message to the previous messages:
@@ -243,20 +195,10 @@ app.post(
       // Start the main AI response - use single system prompt for all cases
       const result = streamText({
         model: openai("gpt-4o-mini"),
-        system: generateSystemPrompt(userContext, forcedToolCall),
+        system: generateSystemPrompt(userContext, isToolCallMessage),
         messages: convertToModelMessages(validatedMessages),
         temperature: 0.7,
-        toolChoice,
-        stopWhen: [
-          stepCountIs(5),
-          ({ steps }) => {
-            return steps.some((step) => {
-              return step.content?.some(
-                (content) => content.type === "tool-result",
-              );
-            });
-          },
-        ],
+        stopWhen: stepCountIs(5),
         experimental_transform: smoothStream({
           chunking: "word",
           delayInMs: 0,
@@ -273,7 +215,6 @@ app.post(
             responseTime,
             text: result.text,
             usage: result.usage,
-            toolChoice,
           });
         },
       });
