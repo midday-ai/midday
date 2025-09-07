@@ -1,9 +1,15 @@
 "use client";
 
+import { ChatHeader } from "@/components/chat/chat-header";
+import { ActiveToolCall, ThinkingMessage } from "@/components/message";
+import { Overview } from "@/components/overview/overview";
 import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { useChat } from "@ai-sdk/react";
+import type { ToolName } from "@api/ai/tools/registry";
 import type { UIChatMessage } from "@api/ai/types";
 import { createClient } from "@midday/supabase/client";
+import { cn } from "@midday/ui/cn";
 import {
   Conversation,
   ConversationContent,
@@ -20,14 +26,12 @@ import {
   PromptInputTools,
 } from "@midday/ui/prompt-input";
 import { Response } from "@midday/ui/response";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, generateId } from "ai";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMemo } from "react";
-import { ThinkingMessage } from "../message";
-import { Overview } from "../overview/overview";
-import { ChatHeader } from "./chat-header";
 
 type Props = {
   id?: string;
@@ -46,6 +50,9 @@ export function ChatInterface({
   const [chatTitle, setChatTitle] = useState<string | undefined>(
     initialTitle || undefined,
   );
+
+  const queryClient = useQueryClient();
+  const trpc = useTRPC();
 
   const { data: user } = useUserQuery();
   const pathname = usePathname();
@@ -116,6 +123,11 @@ export function ChatInterface({
             // @ts-ignore
             document.title = `${dataPart.data.title} | Midday`;
           }
+
+          //  Invalidate chats list
+          queryClient.invalidateQueries({
+            queryKey: trpc.chats.list.queryKey(),
+          });
         }
       },
     },
@@ -201,19 +213,21 @@ export function ChatInterface({
   };
 
   return (
-    <div>
-      {/* Chat header - instant transition */}
-      {!isOnRootPath && <ChatHeader title={chatTitle} />}
+    <div className="relative">
+      <ChatHeader title={chatTitle} />
 
       {showOverview && <Overview handleToolCall={handleToolCall} />}
 
       {/* Chat content */}
-      <div className="w-full mx-auto pb-0 relative size-full h-[calc(100vh-192px)]">
+      <div
+        className={cn(
+          "w-full mx-auto pb-0 relative size-full h-[calc(100vh-86px)]",
+          showOverview && "h-[calc(100vh-660px)]",
+        )}
+      >
         <div className="flex flex-col h-full">
-          <Conversation
-            className="h-full w-full pb-20" // Add bottom padding for fixed prompt input
-          >
-            <ConversationContent className="px-6 max-w-4xl mx-auto">
+          <Conversation className="h-full w-full">
+            <ConversationContent className="px-6 max-w-4xl mx-auto mt-16 mb-28">
               {messages.map((message) => {
                 // Skip rendering internal/hidden messages
                 if (message.metadata?.internal) {
@@ -242,38 +256,12 @@ export function ChatInterface({
                                   return null; // Hide pill when we have AI analysis
                                 }
 
-                                // Show pill for hidden tools only when no text content exists yet
-                                const toolName = part.type.replace("tool-", "");
-                                const getToolLabel = (tool: string) => {
-                                  switch (tool) {
-                                    case "getRevenue":
-                                      return "Getting revenue data";
-                                    case "web_search_preview":
-                                      return "Searching the web";
-                                    default:
-                                      return `Running ${tool}`;
-                                  }
-                                };
+                                const toolName = part.type.replace(
+                                  "tool-",
+                                  "",
+                                ) as ToolName | "web_search_preview";
 
-                                return (
-                                  <div
-                                    key={`tool-pill-${partIndex.toString()}`}
-                                    className="inline-flex items-center gap-2 px-3 py-2 bg-black/10 dark:bg-white/10 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium mb-3 border border-gray-200 dark:border-gray-700"
-                                  >
-                                    <svg
-                                      className="w-3 h-3"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    >
-                                      <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" />
-                                    </svg>
-                                    {getToolLabel(toolName)}
-                                  </div>
-                                );
+                                return <ActiveToolCall toolName={toolName} />;
                               }
 
                               // Show full tool output for tools that want to be displayed
