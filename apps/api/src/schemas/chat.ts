@@ -81,6 +81,10 @@ export const listChatsSchema = z.object({
     description: "Maximum number of chats to return",
     example: 50,
   }),
+  search: z.string().optional().openapi({
+    description: "Search query to filter chats by title",
+    example: "budget analysis",
+  }),
 });
 
 export const getChatSchema = z.object({

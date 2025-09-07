@@ -15,6 +15,7 @@ export const chatsRouter = createTRPCRouter({
         ctx.teamId!,
         ctx.session.user.id,
         input.limit,
+        input.search,
       );
     }),
 

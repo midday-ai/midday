@@ -1,6 +1,7 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiGithub } from "react-icons/fi";
+import type { IconType as BaseIconType } from "react-icons/lib";
 import {
   MdArrowBack,
   MdArrowDownward,
@@ -95,6 +96,8 @@ type SVGIconProps = {
   children?: React.ReactNode;
   viewBox?: string;
 };
+
+export type IconType = BaseIconType;
 
 const SVGIcon: React.FC<SVGIconProps> = ({
   size = 20,

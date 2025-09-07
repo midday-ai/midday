@@ -1,8 +1,11 @@
 "use client";
 
+import { ChatHistory } from "@/components/chat/chat-history";
+import { NewChat } from "@/components/chat/new-chat";
+import { OverviewCustomize } from "@/components/overview/overview-customize";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -12,6 +15,10 @@ type Props = {
 export function ChatHeader({ title }: Props) {
   const router = useRouter();
   const [showTitle, setShowTitle] = useState(false);
+
+  const pathname = usePathname();
+
+  const isOnRootPath = pathname === "/" || pathname === "";
 
   useEffect(() => {
     if (!title) {
@@ -29,10 +36,12 @@ export function ChatHeader({ title }: Props) {
   }, [title]);
 
   return (
-    <div className="flex items-center justify-between px-8 py-6 transition-all duration-300 w-full">
-      <Button variant="outline" size="icon" onClick={() => router.back()}>
-        <Icons.ArrowBack size={16} />
-      </Button>
+    <div className="flex items-center justify-between py-6 transition-all duration-300 w-full absolute top-0 left-0 right-0 z-10 bg-background">
+      {!isOnRootPath && (
+        <Button variant="outline" size="icon" onClick={() => router.push("/")}>
+          <Icons.ArrowBack size={16} />
+        </Button>
+      )}
 
       {title ? (
         <h1
@@ -43,7 +52,7 @@ export function ChatHeader({ title }: Props) {
           {title.split("").map((char, index) => {
             const centerIndex = Math.floor(title.length / 2);
             const distanceFromCenter = Math.abs(index - centerIndex);
-            const delay = distanceFromCenter * 3 + 20; // Much faster timing
+            const delay = distanceFromCenter * 3 + 20;
 
             return (
               <span
@@ -65,17 +74,13 @@ export function ChatHeader({ title }: Props) {
           })}
         </h1>
       ) : (
-        <div className="h-5" /> // Placeholder to maintain layout
+        <div className="h-5" />
       )}
 
-      <div className="flex items-center space-x-2">
-        <Button variant="outline" size="icon">
-          <Icons.Close size={16} />
-        </Button>
-
-        <Button variant="outline" size="icon">
-          <Icons.Close size={16} />
-        </Button>
+      <div className="flex items-center space-x-4">
+        <NewChat />
+        <OverviewCustomize />
+        <ChatHistory />
       </div>
     </div>
   );

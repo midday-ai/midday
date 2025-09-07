@@ -27,7 +27,7 @@ export function OverviewHeader() {
   const greeting = getTimeBasedGreeting(user?.timezone ?? undefined);
 
   return (
-    <div className="pt-7">
+    <div className="pt-7 relative z-10 w-fit">
       <div>
         <h1 className="text-[30px] font-serif leading-normal mb-1">
           <span>{greeting} </span>
