@@ -76,7 +76,8 @@
     "./reasoning": "./src/components/reasoning.tsx",
     "./response": "./src/components/response.tsx",
     "./sources": "./src/components/sources.tsx",
-    "./suggestion": "./src/components/suggestion.tsx"
+    "./suggestion": "./src/components/suggestion.tsx",
+    "./text-shimmer": "./src/components/text-shimmer.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",

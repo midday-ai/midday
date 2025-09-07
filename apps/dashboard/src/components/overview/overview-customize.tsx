@@ -14,8 +14,9 @@ export function OverviewCustomize() {
   }
 
   return (
-    <Button variant="outline" size="icon">
-      <Icons.Settings size={16} />
+    <Button variant="outline" className="space-x-2">
+      <span>Customize</span>
+      <Icons.DashboardCustomize size={16} className="text-[#666]" />
     </Button>
   );
 }
