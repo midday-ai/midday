@@ -49,6 +49,7 @@ export default async function Overview({
         initialTitle={chat?.title}
         geo={geo}
       />
+
       <OverviewModal hideConnectFlow={hideConnectFlow} />
     </HydrateClient>
   );

@@ -1,7 +1,7 @@
 import type { UIChatMessage } from "@api/ai/types";
 import type { Database } from "@db/client";
 import { chats } from "@db/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, ilike } from "drizzle-orm";
 
 export const getChatById = async (
   db: Database,
@@ -22,7 +22,14 @@ export const getChatsByTeam = async (
   teamId: string,
   userId: string,
   limit = 50,
+  search?: string,
 ) => {
+  const baseConditions = [eq(chats.teamId, teamId), eq(chats.userId, userId)];
+
+  if (search) {
+    baseConditions.push(ilike(chats.title, `%${search}%`));
+  }
+
   return await db
     .select({
       id: chats.id,
@@ -31,7 +38,7 @@ export const getChatsByTeam = async (
       updatedAt: chats.updatedAt,
     })
     .from(chats)
-    .where(and(eq(chats.teamId, teamId), eq(chats.userId, userId)))
+    .where(and(...baseConditions))
     .orderBy(desc(chats.updatedAt))
     .limit(limit);
 };
