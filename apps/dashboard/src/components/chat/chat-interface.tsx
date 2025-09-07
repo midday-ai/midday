@@ -227,7 +227,7 @@ export function ChatInterface({
       >
         <div className="flex flex-col h-full">
           <Conversation className="h-full w-full">
-            <ConversationContent className="px-6 max-w-4xl mx-auto mt-16 mb-28">
+            <ConversationContent className="px-6 max-w-[770px] mx-auto mt-16 mb-28">
               {messages.map((message) => {
                 // Skip rendering internal/hidden messages
                 if (message.metadata?.internal) {
@@ -261,7 +261,12 @@ export function ChatInterface({
                                   "",
                                 ) as ToolName | "web_search_preview";
 
-                                return <ActiveToolCall toolName={toolName} />;
+                                return (
+                                  <ActiveToolCall
+                                    key={`tool-call-${partIndex.toString()}`}
+                                    toolName={toolName}
+                                  />
+                                );
                               }
 
                               // Show full tool output for tools that want to be displayed

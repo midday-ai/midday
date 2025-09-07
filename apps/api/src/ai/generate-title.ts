@@ -5,6 +5,9 @@ import { logger } from "@midday/logger";
 import { generateObject } from "ai";
 import { z } from "zod";
 
+const MIN_CONTEXT_LENGTH = 20;
+const DEFAULT_TITLE = "New Chat";
+
 type Params = Omit<ChatUserContext, "teamId" | "userId"> & {
   message: string;
 };
@@ -21,7 +24,10 @@ export const generateTitle = async ({
   countryCode,
 }: Params) => {
   try {
-    console.log("message", message);
+    // If the message is too short, return "New Chat"
+    if (message.length < MIN_CONTEXT_LENGTH) {
+      return DEFAULT_TITLE;
+    }
 
     const userTimezone = timezone || "UTC";
     const tzDate = new TZDate(new Date(), userTimezone);
@@ -91,6 +97,6 @@ Examples of financial-focused titles:
       return trimmedMessage.slice(0, 60);
     }
 
-    return "New Chat";
+    return DEFAULT_TITLE;
   }
 };
