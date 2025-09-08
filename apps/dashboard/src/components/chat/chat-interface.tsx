@@ -1,12 +1,13 @@
 "use client";
 
+import { ChatCanvas } from "@/components/chat/chat-canvas";
 import { ChatHeader } from "@/components/chat/chat-header";
 import { ActiveToolCall, ThinkingMessage } from "@/components/message";
 import { Overview } from "@/components/overview/overview";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { useChat } from "@ai-sdk/react";
-import type { ToolName } from "@api/ai/tools/registry";
+import type { MessageDataParts, ToolName } from "@api/ai/tools/registry";
 import type { UIChatMessage } from "@api/ai/types";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
@@ -133,6 +134,31 @@ export function ChatInterface({
     },
   );
 
+  // Extract canvas data and titles from message parts (automatically persisted by AI SDK)
+  const { canvasData, canvasTitle, hasCanvasContent } = useMemo(() => {
+    const canvasParts: MessageDataParts["data-canvas"][] = [];
+    let title: string | undefined;
+
+    for (const message of messages) {
+      if (message.parts) {
+        for (const part of message.parts) {
+          // Check if this is a canvas-related data part
+          if ((part as any).type === "data-canvas-title") {
+            title = (part as any).data?.title;
+          } else if ((part as any).type === "data-canvas") {
+            canvasParts.push((part as any).data);
+          }
+        }
+      }
+    }
+
+    return {
+      canvasData: canvasParts,
+      canvasTitle: title,
+      hasCanvasContent: canvasParts.length > 0 || !!title,
+    };
+  }, [messages]);
+
   // Clear messages and title when navigating away
   useEffect(() => {
     if (pathname === "/") {
@@ -213,131 +239,186 @@ export function ChatInterface({
   };
 
   return (
-    <div className="relative">
-      <ChatHeader title={chatTitle} />
+    <div className="relative h-full overflow-hidden">
+      {/* Header stays fixed but content slides with canvas */}
+      <ChatHeader title={chatTitle} hasCanvas={hasCanvasContent} />
 
-      {showOverview && <Overview handleToolCall={handleToolCall} />}
-
-      {/* Chat content */}
+      {/* Main chat container - slides to the left when canvas appears */}
       <div
         className={cn(
-          "w-full mx-auto pb-0 relative size-full h-[calc(100vh-86px)]",
-          showOverview && "h-[calc(100vh-660px)]",
+          "relative transition-all duration-300 ease-in-out w-full",
+          hasCanvasContent ? "-translate-x-[300px]" : "translate-x-0",
         )}
       >
-        <div className="flex flex-col h-full">
-          <Conversation className="h-full w-full">
-            <ConversationContent className="px-6 max-w-[770px] mx-auto mt-16 mb-28">
-              {messages.map((message) => {
-                // Skip rendering internal/hidden messages
-                if (message.metadata?.internal) {
-                  return null;
-                }
+        {showOverview && (
+          <div className="pt-20">
+            <Overview handleToolCall={handleToolCall} />
+          </div>
+        )}
 
-                return (
-                  <div key={message.id} className="w-full">
-                    {message.role !== "system" && (
-                      <Message from={message.role} key={message.id}>
-                        <MessageContent>
-                          {message.parts?.map((part, partIndex) => {
-                            if (part.type?.startsWith("tool-")) {
-                              // Check if tool output should be displayed
-                              const toolOutput = (part as any).output;
-                              const shouldHide =
-                                toolOutput?.display === "hidden";
+        {/* Chat content - account for header height */}
+        <div
+          className={cn(
+            "w-full mx-auto pb-0 relative size-full h-[calc(100vh-86px)] pt-20", // Add padding-top for header space
+            showOverview && "h-[calc(100vh-660px)]",
+          )}
+        >
+          <div className="flex flex-col h-full w-full">
+            <Conversation className="h-full w-full">
+              <ConversationContent className="px-6 mx-auto mt-16 mb-28 max-w-[770px]">
+                {messages.map((message) => {
+                  // Skip rendering internal/hidden messages
+                  if (message.metadata?.internal) {
+                    return null;
+                  }
 
-                              if (shouldHide) {
-                                // Check if this message has text content - if so, don't show the pill
-                                const hasTextContent = message.parts?.some(
-                                  (p) => p.type === "text" && p.text?.trim(),
-                                );
+                  return (
+                    <div key={message.id} className="w-full">
+                      {message.role !== "system" && (
+                        <Message from={message.role} key={message.id}>
+                          <MessageContent>
+                            {message.parts?.map((part, partIndex) => {
+                              // Handle canvas data parts in messages
+                              if ((part as any).presentation === "canvas") {
+                                // Canvas data is automatically extracted via useMemo
+                                // Don't render canvas parts in the message - they go to the sidebar
+                                return null;
+                              }
 
-                                if (hasTextContent) {
-                                  return null; // Hide pill when we have AI analysis
+                              if (part.type?.startsWith("tool-")) {
+                                // Check if tool output should be displayed
+                                const toolOutput = (part as any).output;
+                                const shouldHide =
+                                  toolOutput?.display === "hidden";
+
+                                if (shouldHide) {
+                                  // Check if this message has text content - if so, don't show the pill
+                                  const hasTextContent = message.parts?.some(
+                                    (p) => p.type === "text" && p.text?.trim(),
+                                  );
+
+                                  if (hasTextContent) {
+                                    return null; // Hide pill when we have AI analysis
+                                  }
+
+                                  const toolName = part.type.replace(
+                                    "tool-",
+                                    "",
+                                  ) as ToolName | "web_search_preview";
+
+                                  return (
+                                    <ActiveToolCall
+                                      key={`tool-call-${partIndex.toString()}`}
+                                      toolName={toolName}
+                                    />
+                                  );
                                 }
 
-                                const toolName = part.type.replace(
-                                  "tool-",
-                                  "",
-                                ) as ToolName | "web_search_preview";
-
+                                // Show full tool output for tools that want to be displayed
                                 return (
-                                  <ActiveToolCall
-                                    key={`tool-call-${partIndex.toString()}`}
-                                    toolName={toolName}
-                                  />
+                                  <Response
+                                    key={`tool-result-${partIndex.toString()}`}
+                                  >
+                                    {toolOutput?.content || toolOutput}
+                                  </Response>
                                 );
                               }
 
-                              // Show full tool output for tools that want to be displayed
-                              return (
-                                <Response
-                                  key={`tool-result-${partIndex.toString()}`}
-                                >
-                                  {toolOutput?.content || toolOutput}
-                                </Response>
-                              );
-                            }
+                              if (part.type === "text") {
+                                return (
+                                  <Response
+                                    key={`text-${partIndex.toString()}`}
+                                  >
+                                    {part.text}
+                                  </Response>
+                                );
+                              }
 
-                            if (part.type === "text") {
-                              return (
-                                <Response key={`text-${partIndex.toString()}`}>
-                                  {part.text}
-                                </Response>
-                              );
-                            }
+                              return null;
+                            })}
+                          </MessageContent>
 
-                            return null;
-                          })}
-                        </MessageContent>
+                          {message.role === "user" && user && (
+                            <MessageAvatar
+                              src={user.avatarUrl!}
+                              name={user.fullName!}
+                            />
+                          )}
+                        </Message>
+                      )}
+                    </div>
+                  );
+                })}
 
-                        {message.role === "user" && user && (
-                          <MessageAvatar
-                            src={user.avatarUrl!}
-                            name={user.fullName!}
-                          />
-                        )}
-                      </Message>
-                    )}
-                  </div>
-                );
-              })}
-
-              {status === "submitted" &&
-                messages.length > 0 &&
-                messages[messages.length - 1]?.role === "user" && (
-                  <ThinkingMessage />
+                {status === "submitted" &&
+                  messages.length > 0 &&
+                  messages[messages.length - 1]?.role === "user" && (
+                    <ThinkingMessage />
+                  )}
+              </ConversationContent>
+              <ConversationScrollButton
+                className={cn(
+                  hasCanvasContent && "left-[calc(50%-150px)]", // Adjust position when canvas is open
                 )}
-            </ConversationContent>
-            <ConversationScrollButton />
-          </Conversation>
+              />
+            </Conversation>
 
-          <div className="fixed bottom-4 left-[70px] right-0 z-20">
-            <div className="max-w-[770px] mx-auto w-full bg-[#F7F7F7] dark:bg-[#131313] pt-2">
-              <PromptInput onSubmit={handleSubmit}>
-                <PromptInputTextarea
-                  onChange={(e) => setInput(e.target.value)}
-                  maxHeight={30}
-                  minHeight={30}
-                  value={input}
-                  placeholder="Ask me anything"
-                />
-                <PromptInputToolbar className="pb-1 px-4">
-                  <PromptInputTools>
-                    <PromptInputButton className="-ml-2">
-                      <Icons.Add className="size-4" />
-                    </PromptInputButton>
-                  </PromptInputTools>
-                  <PromptInputSubmit
-                    status={status}
-                    className="mr-0 mb-2"
-                    size="icon"
+            <div className="absolute bottom-4 left-0 right-0 z-20 px-6">
+              <div className="mx-auto w-full bg-[#F7F7F7] dark:bg-[#131313] pt-2 max-w-[770px]">
+                <PromptInput onSubmit={handleSubmit}>
+                  <PromptInputTextarea
+                    onChange={(e) => setInput(e.target.value)}
+                    maxHeight={30}
+                    minHeight={30}
+                    value={input}
+                    placeholder="Ask me anything"
                   />
-                </PromptInputToolbar>
-              </PromptInput>
+                  <PromptInputToolbar className="pb-1 px-4">
+                    <PromptInputTools>
+                      <PromptInputButton className="-ml-2">
+                        <Icons.Add className="size-4" />
+                      </PromptInputButton>
+                    </PromptInputTools>
+                    <PromptInputSubmit
+                      status={status}
+                      className="mr-0 mb-2"
+                      size="icon"
+                    />
+                  </PromptInputToolbar>
+                </PromptInput>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Canvas overlay - slides in from right */}
+      <div
+        className={cn(
+          "absolute top-0 right-0 h-full transition-all duration-300 ease-in-out overflow-hidden border-l z-30 bg-background",
+          hasCanvasContent
+            ? "w-[600px] opacity-100 translate-x-0"
+            : "w-[600px] opacity-0 translate-x-full",
+        )}
+      >
+        {hasCanvasContent && (
+          <ChatCanvas
+            canvasData={canvasData}
+            canvasTitle={canvasTitle}
+            onClose={() => {
+              // Remove all canvas-related data parts from messages
+              const updatedMessages = messages.map((message) => ({
+                ...message,
+                parts: message.parts?.filter(
+                  (part: any) =>
+                    part.type !== "data-canvas" &&
+                    part.type !== "data-canvas-title",
+                ),
+              }));
+              setMessages(updatedMessages);
+            }}
+          />
+        )}
       </div>
     </div>
   );

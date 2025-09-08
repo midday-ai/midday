@@ -43,14 +43,14 @@ export function SuggestedActions({ handleToolCall }: Props) {
       },
     },
     {
-      id: "duplicate-invoice",
-      title: "Duplicate invoice",
-      icon: MdContentCopy,
+      id: "burn-rate",
+      title: "Burn rate",
+      icon: MdHealthAndSafety,
       onClick: () => {
         handleToolCall({
-          toolName: "duplicateInvoice",
+          toolName: "getBurnRate",
           toolParams: {},
-          text: "Duplicate invoice",
+          text: "Get my burn rate data",
         });
       },
     },
