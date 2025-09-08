@@ -9,20 +9,7 @@ import { toolMetadata } from "./registry";
 export const getRevenueTool = ({ db, user, writer }: ToolContext) =>
   tool({
     ...toolMetadata.getRevenue,
-    execute: async ({ from, to, currency }) => {
-      // if (writer) {
-      //   writer.write({
-      //     type: "data-title",
-      //     id: "revenue-summary",
-      //     data: {
-      //       title: "Revenue Summary",
-      //       currency: currency ?? undefined,
-      //       from: from,
-      //       to: to,
-      //     },
-      //   });
-      // }
-
+    execute: async ({ from, to, currency }, { toolCallId }) => {
       try {
         logger.info("Executing getRevenueTool", { from, to, currency });
 
@@ -97,6 +84,43 @@ export const getRevenueTool = ({ db, user, writer }: ToolContext) =>
           values.reduce((sum, val) => sum + (val - avgMonthly) ** 2, 0) /
           values.length;
         const stdDev = Math.sqrt(variance);
+
+        // Stream canvas data via writer - these will be automatically added to message parts
+        if (writer) {
+          // Stream canvas title first
+          writer.write({
+            type: "data-canvas-title",
+            id: toolCallId,
+            data: {
+              presentation: "canvas",
+              type: "canvas-title",
+              title: "Revenue Analysis",
+            },
+          });
+
+          // Stream canvas data
+          writer.write({
+            type: "data-canvas",
+            id: toolCallId,
+            data: {
+              presentation: "canvas",
+              type: "chart",
+              chartType: "area",
+              title: "Revenue Analysis",
+              data: {
+                total,
+                currency: currency || "USD",
+                breakdown: revenueData.map((r) => ({
+                  month: format(new Date(r.date), "MMM yyyy"),
+                  value: r.value,
+                })),
+                from,
+                to,
+              },
+            },
+          });
+        }
+
         const coefficientOfVariation = (stdDev / avgMonthly) * 100;
 
         logger.info("Revenue tool response", {
