@@ -1,3 +1,4 @@
+import { openai } from "@ai-sdk/openai";
 import type { ToolContext } from "@api/ai/types";
 import type { InferUITools } from "ai";
 import type { z } from "zod";
@@ -22,6 +23,15 @@ export const toolMetadata = {
 // Tool registry - maps tool names to their implementations
 export const createToolRegistry = (context: ToolContext) => ({
   getRevenue: getRevenueTool(context),
+  web_search_preview: openai.tools.webSearchPreview({
+    searchContextSize: "medium",
+    userLocation: {
+      type: "approximate",
+      country: context.user.country ?? undefined,
+      city: context.user.city ?? undefined,
+      region: context.user.region ?? undefined,
+    },
+  }),
 });
 
 // Type helpers

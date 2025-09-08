@@ -1,35 +1,33 @@
+import type { UIChatMessage } from "@api/ai/types";
 import { z } from "@hono/zod-openapi";
 
-// Define message parts schema to match AI SDK UIMessage structure
-const messagePartSchema = z
-  .object({
-    type: z.string(),
-    text: z.string().optional(),
-    // Allow additional properties for extensibility
-  })
-  .passthrough();
-
-// UIMessage schema that matches the exact structure from AI SDK
+// Create a Zod schema that validates UIChatMessage structure
 const messageSchema = z
-  .object({
-    id: z.string().openapi({
-      description: "Unique identifier for the message",
-      example: "msg_abc123",
-    }),
-    role: z.enum(["user", "assistant", "system"]).openapi({
-      description: "The role of the message sender",
-      example: "user",
-    }),
-    content: z.string().optional().openapi({
-      description: "The message content (legacy field)",
-      example: "Hello, can you help me with my finances?",
-    }),
-    parts: z.array(messagePartSchema).optional().openapi({
-      description: "Message parts for complex messages",
-    }),
-    // Allow additional properties that might be added by AI SDK
+  .custom<UIChatMessage>((val) => {
+    if (typeof val !== "object" || val === null) return false;
+
+    const msg = val as any;
+
+    // Check required fields
+    if (typeof msg.id !== "string") return false;
+    if (!["user", "assistant", "system"].includes(msg.role)) return false;
+
+    // Optional fields validation
+    if (msg.content !== undefined && typeof msg.content !== "string")
+      return false;
+    if (msg.parts !== undefined && !Array.isArray(msg.parts)) return false;
+
+    return true;
   })
-  .passthrough();
+  .openapi({
+    description:
+      "UIMessage compatible chat message with tools and metadata support",
+    example: {
+      id: "msg_abc123",
+      role: "user",
+      content: "Hello, can you help me with my finances?",
+    },
+  });
 
 export const chatRequestSchema = z.object({
   id: z.string().openapi({
@@ -62,12 +60,7 @@ export const chatRequestSchema = z.object({
 });
 
 // Use the same structure as messageSchema for consistency with UIMessage
-export const chatMessageSchema = messageSchema.extend({
-  createdAt: z.string().datetime().optional().openapi({
-    description: "ISO 8601 timestamp when the message was created",
-    example: "2024-01-15T10:30:00.000Z",
-  }),
-});
+export const chatMessageSchema = messageSchema;
 
 export const chatResponseSchema = z.object({
   messages: z.array(messageSchema).openapi({

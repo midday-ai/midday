@@ -1,12 +1,12 @@
 import type { MessageDataParts, UITools } from "@api/ai/tools/registry";
 import type { Database } from "@db/client";
-import type { UIMessage } from "ai";
+import type { ChatUserContext } from "@midday/cache/chat-cache";
+import type { UIMessage, UIMessageStreamWriter } from "ai";
 
 export type ToolContext = {
   db: Database;
-  teamId: string;
-  userId: string;
-  locale?: string | null;
+  writer: UIMessageStreamWriter;
+  user: ChatUserContext;
 };
 
 // Define message metadata type
