@@ -6,10 +6,23 @@ import { tool } from "ai";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import { toolMetadata } from "./registry";
 
-export const getRevenueTool = ({ db, teamId, locale }: ToolContext) =>
+export const getRevenueTool = ({ db, user, writer }: ToolContext) =>
   tool({
     ...toolMetadata.getRevenue,
     execute: async ({ from, to, currency }) => {
+      // if (writer) {
+      //   writer.write({
+      //     type: "data-title",
+      //     id: "revenue-summary",
+      //     data: {
+      //       title: "Revenue Summary",
+      //       currency: currency ?? undefined,
+      //       from: from,
+      //       to: to,
+      //     },
+      //   });
+      // }
+
       try {
         logger.info("Executing getRevenueTool", { from, to, currency });
 
@@ -18,7 +31,7 @@ export const getRevenueTool = ({ db, teamId, locale }: ToolContext) =>
         const toDate = endOfMonth(new Date(to));
 
         const rows = await getRevenue(db, {
-          teamId,
+          teamId: user.teamId,
           from: fromDate.toISOString(),
           to: toDate.toISOString(),
           currency: currency ?? undefined,
@@ -41,7 +54,7 @@ export const getRevenueTool = ({ db, teamId, locale }: ToolContext) =>
             ? formatAmount({
                 amount,
                 currency: resolvedCurrency,
-                locale: locale ?? undefined,
+                locale: user.locale ?? undefined,
               })
             : `${amount.toLocaleString()} (base currency)`;
 
