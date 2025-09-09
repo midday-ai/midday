@@ -1,6 +1,6 @@
 import type { UIChatMessage } from "@api/ai/types";
 import type { Database } from "@db/client";
-import { chats } from "@db/schema";
+import { chatMessages, chats } from "@db/schema";
 import { and, desc, eq, ilike } from "drizzle-orm";
 
 export const getChatById = async (
@@ -14,7 +14,23 @@ export const getChatById = async (
     .where(and(eq(chats.id, chatId), eq(chats.teamId, teamId)))
     .limit(1);
 
-  return chat;
+  if (!chat) {
+    return null;
+  }
+
+  // Get all messages for this chat
+  const messages = await db
+    .select()
+    .from(chatMessages)
+    .where(
+      and(eq(chatMessages.chatId, chatId), eq(chatMessages.teamId, teamId)),
+    )
+    .orderBy(chatMessages.createdAt);
+
+  return {
+    ...chat,
+    messages: messages.map((m: any) => m.content),
+  };
 };
 
 export const getChatsByTeam = async (
@@ -47,7 +63,6 @@ export const saveChat = async (
   db: Database,
   data: {
     chatId: string;
-    messages: UIChatMessage[];
     teamId: string;
     userId: string;
     title?: string | null;
@@ -59,14 +74,12 @@ export const saveChat = async (
       id: data.chatId,
       teamId: data.teamId,
       userId: data.userId,
-      messages: data.messages,
       title: data.title,
       updatedAt: new Date(),
     })
     .onConflictDoUpdate({
       target: chats.id,
       set: {
-        messages: data.messages,
         ...(data.title && { title: data.title }),
         updatedAt: new Date(),
       },
@@ -74,6 +87,28 @@ export const saveChat = async (
     .returning();
 
   return chat;
+};
+
+export const saveChatMessage = async (
+  db: Database,
+  data: {
+    chatId: string;
+    teamId: string;
+    userId: string;
+    message: UIChatMessage;
+  },
+) => {
+  const [message] = await db
+    .insert(chatMessages)
+    .values({
+      chatId: data.chatId,
+      teamId: data.teamId,
+      userId: data.userId,
+      content: data.message,
+    })
+    .returning();
+
+  return message;
 };
 
 export const deleteChat = async (

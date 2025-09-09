@@ -27,18 +27,14 @@ export function OverviewHeader() {
   const greeting = getTimeBasedGreeting(user?.timezone ?? undefined);
 
   return (
-    <div className="pt-7 relative z-10 w-fit">
-      <div>
-        <h1 className="text-[30px] font-serif leading-normal mb-1">
-          <span>{greeting} </span>
-          <span className="text-[#666666]">
-            {user?.fullName?.split(" ")[0]},
-          </span>
-        </h1>
-        <p className="text-[#666666] text-[14px]">
-          here's a quick look at how things are going.
-        </p>
-      </div>
+    <div>
+      <h1 className="text-[30px] font-serif leading-normal mb-1">
+        <span>{greeting} </span>
+        <span className="text-[#666666]">{user?.fullName?.split(" ")[0]},</span>
+      </h1>
+      <p className="text-[#666666] text-[14px]">
+        here's a quick look at how things are going.
+      </p>
     </div>
   );
 }

@@ -1,14 +1,15 @@
-import { openai } from "@ai-sdk/openai";
-import type { ToolContext } from "@api/ai/types";
-import type { InferUITools } from "ai";
 import type { z } from "zod";
-import { getBurnRateTool } from "./get-burn-rate";
-import { getRevenueTool } from "./get-revenue";
-import { getBurnRateSchema, getRevenueSchema } from "./schema";
+import type { CanvasData } from "./canvas-types";
+import {
+  getBurnRateSchema,
+  getExpensesSchema,
+  getRevenueSchema,
+} from "./schema";
 
 // Tool schema definitions for validation
 export const toolSchemas = {
   getRevenue: getRevenueSchema,
+  getExpenses: getExpensesSchema,
 } as const;
 
 // Tool metadata for UI and validation
@@ -25,22 +26,15 @@ export const toolMetadata = {
       "Get burn rate for a period, including total and a monthly breakdown",
     inputSchema: getBurnRateSchema,
   },
+  getExpenses: {
+    name: "getExpenses",
+    description:
+      "Get comprehensive expense analysis for a period, including monthly breakdown, category analysis, and spending insights",
+    inputSchema: getExpensesSchema,
+  },
 } as const;
 
-// Tool registry - maps tool names to their implementations
-export const createToolRegistry = (context: ToolContext) => ({
-  getRevenue: getRevenueTool(context),
-  getBurnRate: getBurnRateTool(context),
-  web_search_preview: openai.tools.webSearchPreview({
-    searchContextSize: "medium",
-    userLocation: {
-      type: "approximate",
-      country: context.user.country ?? undefined,
-      city: context.user.city ?? undefined,
-      region: context.user.region ?? undefined,
-    },
-  }),
-});
+// Tool registry is now defined in tool-types.ts to avoid circular dependencies
 
 // Type helpers
 // Define data part types for streaming data that will be added to message parts
@@ -53,20 +47,13 @@ export type MessageDataParts = {
     type: "canvas-title";
     title: string;
   };
-  "data-canvas": {
-    presentation: "canvas";
-    type: "chart" | "table" | "dashboard" | "report";
-    chartType?: "area" | "bar" | "line" | "pie" | "donut";
-    title?: string;
-    data: any;
-    config?: Record<string, any>;
-  };
+  "data-canvas": CanvasData;
 };
 
 export type ToolName = keyof typeof toolSchemas;
 export type ToolSchemas = typeof toolSchemas;
 export type ToolParams<T extends ToolName> = z.infer<ToolSchemas[T]>;
-export type UITools = InferUITools<ReturnType<typeof createToolRegistry>>;
+// UITools is now defined in types.ts to avoid circular dependency
 
 // Get all available tool names
 export function getAvailableTools(): ToolName[] {

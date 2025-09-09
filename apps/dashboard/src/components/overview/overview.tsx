@@ -2,7 +2,6 @@
 
 import { SuggestedActions } from "../suggested-actions";
 import { OverviewWidgets } from "./overeview-widgets";
-import { OverviewHeader } from "./overview-header";
 
 type Props = {
   handleToolCall: ({
@@ -18,8 +17,7 @@ type Props = {
 
 export function Overview({ handleToolCall }: Props) {
   return (
-    <div className="flex flex-col gap-4">
-      <OverviewHeader />
+    <div className="flex flex-col gap-4 mt-[130px]">
       <OverviewWidgets />
       <SuggestedActions handleToolCall={handleToolCall} />
     </div>

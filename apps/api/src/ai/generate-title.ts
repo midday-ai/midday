@@ -4,9 +4,9 @@ import type { ChatUserContext } from "@midday/cache/chat-cache";
 import { logger } from "@midday/logger";
 import { generateObject } from "ai";
 import { z } from "zod";
+import type { UIChatMessage } from "./types";
 
-const MIN_CONTEXT_LENGTH = 20;
-const DEFAULT_TITLE = "New Chat";
+const MIN_CONTEXT_LENGTH = 10;
 
 type Params = Omit<ChatUserContext, "teamId" | "userId"> & {
   message: string;
@@ -26,7 +26,7 @@ export const generateTitle = async ({
   try {
     // If the message is too short, return "New Chat"
     if (message.length < MIN_CONTEXT_LENGTH) {
-      return DEFAULT_TITLE;
+      return null;
     }
 
     const userTimezone = timezone || "UTC";
@@ -97,6 +97,35 @@ Examples of financial-focused titles:
       return trimmedMessage.slice(0, 60);
     }
 
-    return DEFAULT_TITLE;
+    return null;
   }
 };
+
+/**
+ * Extracts and combines all text content from an array of chat messages
+ * @param messages Array of chat messages
+ * @returns Combined text content from all messages
+ */
+export function extractTextContent(messages: UIChatMessage[]): string {
+  return messages
+    .map((msg) => {
+      const textPart = msg.parts?.find((part: any) => part.type === "text");
+      return (textPart as any)?.text || "";
+    })
+    .join(" ")
+    .trim();
+}
+
+/**
+ * Checks if a conversation has enough content for title generation
+ * @param messages Array of chat messages
+ * @param minLength Minimum length threshold (default: 20)
+ * @returns True if conversation has enough content
+ */
+export function hasEnoughContent(
+  messages: UIChatMessage[],
+  minLength = MIN_CONTEXT_LENGTH,
+): boolean {
+  const combinedText = extractTextContent(messages);
+  return combinedText.length > minLength;
+}
