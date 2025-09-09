@@ -382,16 +382,14 @@ export async function getBurnRate(db: Database, params: GetBurnRateParams) {
   const monthlyData = await db
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
-      totalAmount: sql<number>`COALESCE(ABS(SUM(
-        CASE
-          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN
+      totalAmount: inputCurrency
+        ? sql<number>`COALESCE(ABS(SUM(
             CASE
               WHEN ${transactions.currency} = ${targetCurrency} THEN ${transactions.amount}
               ELSE COALESCE(${transactions.baseAmount}, 0)
             END
-          ELSE COALESCE(${transactions.baseAmount}, 0)
-        END
-      )), 0)`,
+          )), 0)`
+        : sql<number>`COALESCE(ABS(SUM(COALESCE(${transactions.baseAmount}, 0))), 0)`,
     })
     .from(transactions)
     .leftJoin(

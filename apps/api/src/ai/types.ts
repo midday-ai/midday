@@ -1,13 +1,12 @@
-import type { MessageDataParts, UITools } from "@api/ai/tools/registry";
-import type { Database } from "@db/client";
-import type { ChatUserContext } from "@midday/cache/chat-cache";
-import type { UIMessage, UIMessageStreamWriter } from "ai";
+import type { MessageDataParts } from "@api/ai/tools/registry";
+import type { UIMessage } from "ai";
 
-export type ToolContext = {
-  db: Database;
-  writer: UIMessageStreamWriter;
-  user: ChatUserContext;
-};
+// Re-export ToolContext from context file for convenience
+export type { ToolContext } from "@api/ai/context";
+
+// Define UITools as a generic type to avoid circular dependencies
+// This will be properly typed when used with the actual tool registry
+export type UITools = Record<string, any>;
 
 // Define message metadata type
 export type ChatMessageMetadata = {

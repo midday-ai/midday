@@ -52,6 +52,41 @@ export function ChatInterface({
     initialTitle || undefined,
   );
 
+  // Initialize canvas data from initial messages immediately to avoid flickering
+  const initialCanvasData = useMemo(() => {
+    if (!initialMessages || initialMessages.length === 0)
+      return { title: undefined, data: [] };
+
+    let latestCanvasTitle: string | undefined;
+    let latestCanvasData: any[] = [];
+
+    for (const message of initialMessages) {
+      if (message.parts) {
+        for (const part of message.parts) {
+          if (part.type?.includes("data-canvas")) {
+            const data = (part as any).data;
+            if (data?.title) {
+              latestCanvasTitle = data.title;
+            }
+            if (data?.canvasData && !data.loading) {
+              latestCanvasData = [data.canvasData];
+            }
+          }
+        }
+      }
+    }
+
+    return { title: latestCanvasTitle, data: latestCanvasData };
+  }, [initialMessages]);
+
+  // Preserve canvas data once set (don't lose it on subsequent yields)
+  const [preservedCanvasData, setPreservedCanvasData] = useState<any[]>(
+    initialCanvasData.data,
+  );
+  const [preservedCanvasTitle, setPreservedCanvasTitle] = useState<
+    string | undefined
+  >(initialCanvasData.title);
+
   const queryClient = useQueryClient();
   const trpc = useTRPC();
 
@@ -116,7 +151,6 @@ export function ChatInterface({
       onData: (dataPart) => {
         // Handle title data parts as they stream in (before main response is done)
         if (dataPart.type === "data-title") {
-          // With proper generic typing, TypeScript should know the structure
           // @ts-ignore
           setChatTitle(dataPart.data.title);
 
@@ -125,45 +159,72 @@ export function ChatInterface({
             document.title = `${dataPart.data.title} | Midday`;
           }
 
-          //  Invalidate chats list
+          // Invalidate chats list
           queryClient.invalidateQueries({
             queryKey: trpc.chats.list.queryKey(),
           });
+        }
+
+        // Handle canvas data streaming - show canvas immediately
+        if (dataPart.type === "data-canvas") {
+          console.log("🎨 Canvas data received:", dataPart.data);
+
+          // Always show canvas when we get data-canvas
+          const data = (dataPart as any).data;
+
+          if (data?.title) {
+            setPreservedCanvasTitle(data.title);
+          }
+
+          // If we have canvasData, use it; otherwise use empty array for loading state
+          if (data?.canvasData) {
+            setPreservedCanvasData([data.canvasData]);
+          } else {
+            // Loading state - show canvas with empty data
+            setPreservedCanvasData([]);
+          }
         }
       },
     },
   );
 
-  // Extract canvas data and titles from message parts (automatically persisted by AI SDK)
-  const { canvasData, canvasTitle, hasCanvasContent } = useMemo(() => {
-    const canvasParts: MessageDataParts["data-canvas"][] = [];
-    let title: string | undefined;
+  // Determine if canvas data came from initial messages (SSR) - no animation needed
+  const canvasFromInitial = useMemo(() => {
+    if (!initialMessages || !preservedCanvasTitle) return false;
 
-    for (const message of messages) {
-      if (message.parts) {
-        for (const part of message.parts) {
-          // Check if this is a canvas-related data part
-          if ((part as any).type === "data-canvas-title") {
-            title = (part as any).data?.title;
-          } else if ((part as any).type === "data-canvas") {
-            canvasParts.push((part as any).data);
-          }
-        }
-      }
+    // Check if any initial message has canvas data
+    return initialMessages.some((message) =>
+      message.parts?.some(
+        (part) =>
+          part.type?.includes("data-canvas") && (part as any).data?.title,
+      ),
+    );
+  }, [initialMessages, preservedCanvasTitle]);
+
+  // Simple canvas logic: show if we have preserved title from streaming
+  const { canvasData, canvasTitle, hasCanvasContent } = useMemo(() => {
+    if (preservedCanvasTitle) {
+      return {
+        canvasData: preservedCanvasData || [],
+        canvasTitle: preservedCanvasTitle,
+        hasCanvasContent: true,
+      };
     }
 
     return {
-      canvasData: canvasParts,
-      canvasTitle: title,
-      hasCanvasContent: canvasParts.length > 0 || !!title,
+      canvasData: [],
+      canvasTitle: undefined,
+      hasCanvasContent: false,
     };
-  }, [messages]);
+  }, [preservedCanvasData, preservedCanvasTitle]);
 
   // Clear messages and title when navigating away
   useEffect(() => {
     if (pathname === "/") {
       setMessages([]);
       setChatTitle(undefined);
+      setPreservedCanvasData([]);
+      setPreservedCanvasTitle(undefined);
       // Show overview header immediately when back on root path
       setShowOverview(true);
     }
@@ -234,7 +295,7 @@ export function ChatInterface({
           toolName,
           toolParams,
         },
-      },
+      } as any,
     });
   };
 
@@ -246,21 +307,18 @@ export function ChatInterface({
       {/* Main chat container - slides to the left when canvas appears */}
       <div
         className={cn(
-          "relative transition-all duration-300 ease-in-out w-full",
+          "relative w-full",
+          // Only animate if canvas data came from streaming, not initial messages
+          !canvasFromInitial && "transition-all duration-300 ease-in-out",
           hasCanvasContent ? "-translate-x-[300px]" : "translate-x-0",
         )}
       >
-        {showOverview && (
-          <div className="pt-20">
-            <Overview handleToolCall={handleToolCall} />
-          </div>
-        )}
+        {showOverview && <Overview handleToolCall={handleToolCall} />}
 
-        {/* Chat content - account for header height */}
         <div
           className={cn(
-            "w-full mx-auto pb-0 relative size-full h-[calc(100vh-86px)] pt-20", // Add padding-top for header space
-            showOverview && "h-[calc(100vh-660px)]",
+            "w-full mx-auto pb-0 relative size-full h-[calc(100vh-86px)]",
+            showOverview && "h-[calc(100vh-677px)]",
           )}
         >
           <div className="flex flex-col h-full w-full">
@@ -268,7 +326,7 @@ export function ChatInterface({
               <ConversationContent className="px-6 mx-auto mt-16 mb-28 max-w-[770px]">
                 {messages.map((message) => {
                   // Skip rendering internal/hidden messages
-                  if (message.metadata?.internal) {
+                  if ((message.metadata as any)?.internal) {
                     return null;
                   }
 
@@ -278,13 +336,6 @@ export function ChatInterface({
                         <Message from={message.role} key={message.id}>
                           <MessageContent>
                             {message.parts?.map((part, partIndex) => {
-                              // Handle canvas data parts in messages
-                              if ((part as any).presentation === "canvas") {
-                                // Canvas data is automatically extracted via useMemo
-                                // Don't render canvas parts in the message - they go to the sidebar
-                                return null;
-                              }
-
                               if (part.type?.startsWith("tool-")) {
                                 // Check if tool output should be displayed
                                 const toolOutput = (part as any).output;
@@ -395,7 +446,9 @@ export function ChatInterface({
       {/* Canvas overlay - slides in from right */}
       <div
         className={cn(
-          "absolute top-0 right-0 h-full transition-all duration-300 ease-in-out overflow-hidden border-l z-30 bg-background",
+          "absolute top-0 right-0 h-full overflow-hidden border-l z-30 bg-background",
+          // Only animate if canvas data came from streaming, not initial messages
+          !canvasFromInitial && "transition-all duration-300 ease-in-out",
           hasCanvasContent
             ? "w-[600px] opacity-100 translate-x-0"
             : "w-[600px] opacity-0 translate-x-full",
@@ -416,6 +469,9 @@ export function ChatInterface({
                 ),
               }));
               setMessages(updatedMessages);
+              // Reset canvas state
+              setPreservedCanvasData([]);
+              setPreservedCanvasTitle(undefined);
             }}
           />
         )}

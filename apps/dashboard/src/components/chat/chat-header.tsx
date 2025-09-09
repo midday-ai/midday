@@ -8,6 +8,7 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { OverviewHeader } from "../overview/overview-header";
 
 type Props = {
   title?: string;
@@ -28,25 +29,15 @@ export function ChatHeader({ title, hasCanvas }: Props) {
       return;
     }
 
-    // Reset first, then trigger animation
-    setShowTitle(false);
-    const timeout = setTimeout(() => {
-      setShowTitle(true);
-    }, 30);
-
-    return () => clearTimeout(timeout);
+    setShowTitle(true);
   }, [title]);
 
   return (
     <div className="absolute top-0 left-0 right-0 z-10 bg-background py-6">
-      <div
-        className={cn(
-          "flex items-center justify-between transition-all duration-300 ease-in-out",
-          hasCanvas
-            ? "px-6 mx-auto max-w-[770px] w-full -translate-x-[300px]" // Constrained and slide left when canvas open
-            : "px-6 w-full translate-x-0", // Full width when canvas closed
-        )}
-      >
+      {isOnRootPath && <OverviewHeader />}
+
+      {/* Left section - back button stays in place */}
+      <div className="absolute left-4 top-6 flex items-center">
         {!isOnRootPath && (
           <Button
             variant="outline"
@@ -56,7 +47,18 @@ export function ChatHeader({ title, hasCanvas }: Props) {
             <Icons.ArrowBack size={16} />
           </Button>
         )}
+      </div>
 
+      {/* Center section - title centered in available space */}
+      <div
+        className={cn(
+          "flex items-center justify-center transition-all duration-300 ease-in-out",
+          hasCanvas ? "mr-[604px]" : "", // Account for canvas width + margin when centering
+        )}
+        style={{
+          marginLeft: !isOnRootPath ? "64px" : "16px", // Account for back button width
+        }}
+      >
         {title ? (
           <h1
             className={`text-primary text-sm font-regular truncate transition-all duration-150 ease-out transform ${
@@ -90,14 +92,22 @@ export function ChatHeader({ title, hasCanvas }: Props) {
             })}
           </h1>
         ) : (
-          <div className="h-5" />
+          <div />
         )}
+      </div>
 
-        <div className="flex items-center space-x-4">
-          <NewChat />
-          <OverviewCustomize />
-          <ChatHistory />
-        </div>
+      {/* Right section - positioned relative to canvas edge */}
+      <div
+        className={cn(
+          "absolute top-6 flex items-center space-x-4 transition-all duration-300 ease-in-out",
+          hasCanvas
+            ? "right-[634px]" // 600px canvas width + 4px margin
+            : "right-4", // Normal right margin when no canvas
+        )}
+      >
+        <NewChat />
+        <OverviewCustomize />
+        <ChatHistory />
       </div>
     </div>
   );
