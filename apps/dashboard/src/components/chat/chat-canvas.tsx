@@ -5,6 +5,14 @@ import { Badge } from "@midday/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@midday/ui/table";
 import { formatAmount } from "@midday/utils/format";
 import { useMemo } from "react";
 import {
@@ -222,23 +230,18 @@ function GenericDashboard({
     return null;
   }
 
-  const { cards, summary, chart } = dashboard;
+  const { cards, summary, chart, table } = dashboard;
 
   return (
     <div className="space-y-6">
       {/* Chart Section - First */}
       {(breakdown && breakdown.length > 0) ||
       (chart?.data && chart.data.length > 0) ? (
-        <Card className="p-6">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg">
-              {chart?.config?.title || "Monthly Trend"}
-            </CardTitle>
-          </CardHeader>
+        <Card className="p-0 border-none">
           <CardContent>
             <ResponsiveContainer
               width="100%"
-              height={chart?.config?.height || 200}
+              height={chart?.config?.height || 320}
             >
               <AreaChart data={chart?.data || breakdown}>
                 <defs>
@@ -312,6 +315,112 @@ function GenericDashboard({
           </CardContent>
         </Card>
       ) : null}
+
+      {/* Table Section */}
+      {table && (
+        <Card className="p-0 border-none">
+          <CardHeader className="p-0 pb-4">
+            <CardTitle className="text-lg">{table.title}</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {table.columns.map((column) => (
+                      <TableHead
+                        key={column.key}
+                        className={cn(
+                          column.width,
+                          column.align === "right"
+                            ? "text-right"
+                            : column.align === "center"
+                              ? "text-center"
+                              : "text-left",
+                        )}
+                      >
+                        {column.label}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {table.data.map((row) => (
+                    <TableRow key={row.id}>
+                      {table.columns.map((column) => {
+                        const value = row.data[column.key];
+                        let displayValue = value;
+
+                        // Format based on column type
+                        if (column.type === "currency") {
+                          displayValue = formatAmount({
+                            amount: value,
+                            currency:
+                              column.format?.currency || currency || "USD",
+                          });
+                        } else if (column.type === "percentage") {
+                          displayValue = `${value}%`;
+                        } else if (column.type === "date") {
+                          displayValue = value; // Already formatted in the data
+                        }
+
+                        return (
+                          <TableCell
+                            key={`${row.id}-${column.key}`}
+                            className={cn(
+                              column.align === "right"
+                                ? "text-right"
+                                : column.align === "center"
+                                  ? "text-center"
+                                  : "text-left",
+                              column.type === "currency" ? "font-medium" : "",
+                              column.type === "date"
+                                ? "font-medium text-xs"
+                                : "",
+                              column.type === "percentage"
+                                ? "text-xs text-muted-foreground"
+                                : "",
+                            )}
+                          >
+                            {column.key === "vendor" ? (
+                              <div className="flex items-center gap-2">
+                                <span className="truncate max-w-32">
+                                  {displayValue}
+                                </span>
+                                {row.metadata?.recurring && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs px-1 py-0"
+                                  >
+                                    Recurring
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : column.type === "text" &&
+                              column.key === "category" ? (
+                              <span className="text-xs text-muted-foreground">
+                                {displayValue}
+                              </span>
+                            ) : (
+                              displayValue
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            {table.metadata?.totalTransactions && (
+              <div className="mt-2 text-xs text-muted-foreground">
+                Showing {table.data.length} of{" "}
+                {table.metadata.totalTransactions} transactions
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Dashboard Cards - Dynamic Grid */}
       <div
@@ -407,11 +516,11 @@ function GenericDashboard({
 
       {/* Summary Section */}
       {summary && (
-        <Card className="p-6">
-          <CardHeader className="pb-4">
+        <Card className="p-0 border-none">
+          <CardHeader className="p-0 pb-4">
             <CardTitle className="text-lg">{summary.title}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 p-0">
             <p className="text-sm text-muted-foreground">
               {summary.description}
             </p>
