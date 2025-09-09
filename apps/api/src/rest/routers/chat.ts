@@ -1,15 +1,19 @@
 import { openai } from "@ai-sdk/openai";
 import { generateSystemPrompt } from "@api/ai/generate-system-prompt";
-import { generateTitle } from "@api/ai/generate-title";
-import { createToolRegistry } from "@api/ai/tools/registry";
-import type { ChatMessageMetadata, UIChatMessage } from "@api/ai/types";
+import {
+  extractTextContent,
+  generateTitle,
+  hasEnoughContent,
+} from "@api/ai/generate-title";
+import { createToolRegistry } from "@api/ai/tool-types";
+import type { ChatMessageMetadata } from "@api/ai/types";
 import { formatToolCallTitle } from "@api/ai/utils/format-tool-call-title";
 import { getUserContext } from "@api/ai/utils/get-user-context";
 import type { Context } from "@api/rest/types";
 import { chatRequestSchema } from "@api/schemas/chat";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { zValidator } from "@hono/zod-validator";
-import { getChatById, saveChat } from "@midday/db/queries";
+import { getChatById, saveChat, saveChatMessage } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import {
   convertToModelMessages,
@@ -18,6 +22,7 @@ import {
   smoothStream,
   stepCountIs,
   streamText,
+  validateUIMessages,
 } from "ai";
 import { HTTPException } from "hono/http-exception";
 import { withRequiredScope } from "../middleware";
@@ -56,22 +61,34 @@ app.post(
       const messageMetadata = message.metadata as ChatMessageMetadata;
       const isToolCallMessage = messageMetadata?.toolCall;
 
-      // Prepare original messages for the new pattern
-      const originalMessages = [
-        ...(previousMessages
-          ? previousMessages.messages.slice(-MAX_MESSAGES_IN_CONTEXT)
-          : []),
-        message,
-      ];
+      const previousMessagesList = previousMessages?.messages || [];
+      const allMessagesForValidation = [...previousMessagesList, message];
 
-      // Check if this chat needs a title (title is null)
+      // Validate messages to ensure they're properly formatted
+      const validatedMessages = await validateUIMessages({
+        messages: allMessagesForValidation,
+      });
+
+      // Use only the last MAX_MESSAGES_IN_CONTEXT messages for context
+      const originalMessages = validatedMessages.slice(
+        -MAX_MESSAGES_IN_CONTEXT,
+      );
+
+      // Check if this is the first message
+      const isFirstMessage =
+        !previousMessages || previousMessages.messages.length === 0;
+
+      // Check if we need a title (no existing title)
       const needsTitle = !previousMessages?.title;
 
       // Variable to store generated title for saving with chat
       let generatedTitle: string | null = null;
 
-      // Generate title if needed for streaming
-      if (needsTitle && message) {
+      // Generate title if conversation has enough combined content
+      const allMessages = [...(previousMessages?.messages || []), message];
+      const shouldGenerateTitle = needsTitle && hasEnoughContent(allMessages);
+
+      if (shouldGenerateTitle) {
         try {
           let messageContent: string;
 
@@ -80,9 +97,8 @@ app.post(
             // Generate a descriptive title for tool calls using registry metadata
             messageContent = formatToolCallTitle(toolName, toolParams);
           } else {
-            // Regular message content
-            messageContent =
-              message.parts?.find((part) => part.type === "text")?.text || "";
+            // Use combined text from all messages for better context
+            messageContent = extractTextContent(allMessages);
           }
 
           generatedTitle = await generateTitle({
@@ -115,20 +131,51 @@ app.post(
       return createUIMessageStreamResponse({
         stream: createUIMessageStream({
           originalMessages,
-          onFinish: async ({ messages: streamMessages }) => {
-            const allMessages = [
-              ...(previousMessages?.messages || []),
-              message,
-              ...streamMessages,
-            ];
+          onFinish: async ({ isContinuation, responseMessage }) => {
+            if (isContinuation) {
+              // If this is a continuation, save/update the chat with title if generated
+              await saveChat(db, {
+                chatId: id,
+                teamId,
+                userId,
+                title: generatedTitle,
+              });
 
-            await saveChat(db, {
-              chatId: id,
-              messages: allMessages as UIChatMessage[],
-              teamId,
-              userId,
-              title: generatedTitle,
-            });
+              // Only save the new AI response message
+              await saveChatMessage(db, {
+                chatId: id,
+                teamId,
+                userId,
+                message: responseMessage,
+              });
+            } else {
+              // If this is a new conversation, create the chat with title if generated
+              await saveChat(db, {
+                chatId: id,
+                teamId,
+                userId,
+                title: generatedTitle, // Generate title if first message has enough content
+              });
+
+              // Save user message
+              const userMessage = originalMessages[originalMessages.length - 1];
+              if (userMessage) {
+                await saveChatMessage(db, {
+                  chatId: id,
+                  teamId,
+                  userId,
+                  message: userMessage,
+                });
+              }
+
+              // Save AI response
+              await saveChatMessage(db, {
+                chatId: id,
+                teamId,
+                userId,
+                message: responseMessage,
+              });
+            }
           },
           execute: ({ writer }) => {
             // Stream title immediately if generated

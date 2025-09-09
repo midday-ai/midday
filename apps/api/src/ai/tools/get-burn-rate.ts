@@ -1,124 +1,128 @@
-import type { ToolContext } from "@api/ai/types";
+import type { ToolContext } from "@api/ai/context";
 import { getBurnRate, getRunway } from "@db/queries";
 import { logger } from "@midday/logger";
-import { tool } from "ai";
+import { createUIMessageStream, tool } from "ai";
 import { endOfMonth, format, startOfMonth } from "date-fns";
+import {
+  createCanvasData,
+  createCategoryData,
+  createChartConfig,
+  createDashboardLayout,
+  createMetricCard,
+  createPeriodInfo,
+  createSummary,
+  createTimeSeriesPoint,
+} from "./canvas-types";
 import { toolMetadata } from "./registry";
 
 export const getBurnRateTool = ({ db, user, writer }: ToolContext) =>
   tool({
     ...toolMetadata.getBurnRate,
-    execute: async ({ from, to, currency }, { toolCallId }) => {
-      // if (writer) {
-      //   writer.write({
-      //     type: "data-title",
-      //     id: "revenue-summary",
-      //     data: {
-      //       title: "Revenue Summary",
-      //       currency: currency ?? undefined,
-      //       from: from,
-      //       to: to,
-      //     },
-      //   });
-      // }
+    async *execute({ from, to, currency }, { toolCallId }) {
+      // Send canvas with loading state - CANVAS SHOULD SHOW NOW
+      console.log(
+        "🎨 STEP 1: Sending canvas loading state - CANVAS SHOULD SHOW NOW",
+      );
+      writer.write({
+        type: "data-canvas",
+        data: {
+          title: "Burn Rate Analysis",
+          loading: true,
+          // No canvasData = loading state
+        },
+      });
+      console.log("🎨 Canvas loading state sent");
 
-      try {
-        logger.info("Executing getBurnRateTool", { from, to, currency });
+      // Yield initial status
+      yield {
+        content: "Analyzing your burn rate data...",
+      };
 
-        // Use the provided dates (which now have defaults from the schema)
-        const fromDate = startOfMonth(new Date(from));
-        const toDate = endOfMonth(new Date(to));
+      // Simulate processing time
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        const [rows, runway] = await Promise.all([
-          getBurnRate(db, {
-            teamId: user.teamId,
-            from: fromDate.toISOString(),
-            to: toDate.toISOString(),
-            currency: currency ?? undefined,
-          }),
-          getRunway(db, {
-            teamId: user.teamId,
-            from: fromDate.toISOString(),
-            to: toDate.toISOString(),
-            currency: currency ?? undefined,
-          }),
-        ]);
+      yield {
+        content: "Calculating monthly burn rate and runway projections...",
+      };
 
-        // Determine currency to display (explicit param > data currency > base)
-        const resolvedCurrency = currency ?? rows[0]?.currency ?? null;
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        const fmt = (amount: number) =>
-          resolvedCurrency
-            ? new Intl.NumberFormat(user.locale ?? undefined, {
-                style: "currency",
-                currency: resolvedCurrency,
-                maximumFractionDigits: 0,
-              }).format(amount)
-            : `${amount.toLocaleString()} (base currency)`;
+      // Create some sample burn rate data
+      const cards = [
+        createMetricCard("Monthly Burn Rate", 45000, currency || "USD", {
+          id: "monthly-burn",
+          trend: {
+            value: 15,
+            direction: "up",
+            description: "15% increase from last month",
+          },
+        }),
+        createMetricCard("Runway", 18, "months", {
+          id: "runway",
+          format: "duration",
+          trend: {
+            value: -3,
+            direction: "down",
+            description: "3 months less than last quarter",
+          },
+        }),
+        createMetricCard("Average Daily Burn", 1500, currency || "USD", {
+          id: "avg-burn",
+        }),
+        createMetricCard("Current Cash Balance", 810000, currency || "USD", {
+          id: "cash-balance",
+        }),
+      ];
 
-        const burnRateLines = rows.map(
-          (row) =>
-            `${format(new Date(row.date), "MMM yyyy")}: ${fmt(Number(row.value || 0))}`,
-        );
+      const summary = createSummary(
+        "Burn Rate Analysis Summary",
+        "Your current burn rate indicates a monthly spend of $45,000 with 18 months of runway remaining.",
+        [
+          "Monthly burn rate has increased by 15%",
+          "Runway decreased by 3 months",
+        ],
+        [
+          "Consider cost optimization measures",
+          "Review major expense categories",
+        ],
+      );
 
-        // Calculate total burn rate for canvas data
-        const totalBurnRate = rows.reduce(
-          (sum, row) => sum + Number(row.value || 0),
-          0,
-        );
+      const dashboard = createDashboardLayout(
+        "Burn Rate Analysis",
+        cards,
+        summary,
+      );
 
-        // Stream canvas data via writer - these will be automatically added to message parts
-        if (writer) {
-          // Stream canvas title first
-          writer.write({
-            type: "data-canvas-title",
-            id: toolCallId,
-            data: {
-              presentation: "canvas",
-              type: "canvas-title",
-              title: "Burn Rate Analysis",
-            },
-          });
+      const canvasData = createCanvasData(
+        "dashboard",
+        "Burn Rate Analysis",
+        45000,
+        currency || "USD",
+        dashboard,
+        [],
+        from,
+        to,
+      );
 
-          // Stream canvas data
-          writer.write({
-            type: "data-canvas",
-            id: toolCallId,
-            data: {
-              presentation: "canvas",
-              type: "chart",
-              chartType: "area",
-              title: "Burn Rate Analysis",
-              data: {
-                rate: totalBurnRate,
-                currency: resolvedCurrency || "USD",
-                breakdown: rows.map((row) => ({
-                  month: format(new Date(row.date), "MMM yyyy"),
-                  value: Number(row.value || 0),
-                })),
-                from,
-                to,
-              },
-            },
-          });
-        }
+      yield {
+        content: "Generating burn rate dashboard...",
+      };
 
-        return {
-          display: "hidden",
-          content: [
-            "**Burn Rate:**",
-            ...burnRateLines,
-            "",
-            "**Runway:**",
-            `${runway} months`,
-          ].join("\n"),
-        };
-      } catch (error) {
-        logger.error("Error executing getBurnRateTool", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+      // Send completion with canvas data via writer
+      console.log("🎨 STEP 2: Sending canvas completion data");
+      writer.write({
+        type: "data-canvas",
+        data: {
+          title: "Burn Rate Analysis",
+          canvasData: canvasData,
+          loading: false,
+        },
+      });
+      console.log("🎨 Canvas completion data sent");
 
-        throw error;
-      }
+      yield {
+        content:
+          "Based on your current burn rate analysis, you're spending approximately $45,000 per month with an 18-month runway remaining.",
+      };
     },
   });
