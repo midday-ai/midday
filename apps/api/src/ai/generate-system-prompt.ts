@@ -22,6 +22,13 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
     - Tools have defaults - use them without parameters when appropriate
     - Don't ask for clarification if a tool can provide a reasonable default response
     - Prefer showing actual data over generic responses
+    
+    VISUAL ANALYTICS (showCanvas parameter):
+    - Set showCanvas=true for in-depth analysis, trends, breakdowns, comparisons, or when user explicitly asks for charts/visuals/dashboard
+    - Set showCanvas=true for questions like "show me", "analyze", "breakdown", "trends", "performance", "dashboard"
+    - Set showCanvas=false for simple questions, quick answers, or basic data requests
+    - Examples requiring showCanvas=true: "Show me revenue trends", "Analyze my expenses", "How is my business performing?"
+    - Examples requiring showCanvas=false: "What was last month's revenue?", "How much did I spend on office supplies?"
 
     RESPONSE GUIDELINES:
     - Provide clear, direct answers to user questions

@@ -19,6 +19,12 @@ export const getRevenueSchema = z.object({
     .describe("Optional currency code (e.g., 'USD', 'SEK').")
     .nullable()
     .optional(),
+  showCanvas: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Whether to show detailed visual analytics. Use true for in-depth analysis requests, trends, breakdowns, or when user asks for charts/visuals. Use false for simple questions or quick answers.",
+    ),
 });
 
 export const getBurnRateSchema = z.object({
@@ -39,6 +45,12 @@ export const getBurnRateSchema = z.object({
     .describe("Optional currency code (e.g., 'USD', 'SEK').")
     .nullable()
     .optional(),
+  showCanvas: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Whether to show detailed visual analytics. Use true for in-depth analysis requests, trends, breakdowns, or when user asks for charts/visuals. Use false for simple questions or quick answers.",
+    ),
 });
 
 export const getExpensesSchema = z.object({
@@ -59,4 +71,10 @@ export const getExpensesSchema = z.object({
     .describe("Optional currency code (e.g., 'USD', 'SEK').")
     .nullable()
     .optional(),
+  showCanvas: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Whether to show detailed visual analytics. Use true for in-depth analysis requests, trends, breakdowns, or when user asks for charts/visuals. Use false for simple questions or quick answers.",
+    ),
 });

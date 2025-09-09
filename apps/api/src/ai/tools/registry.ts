@@ -10,6 +10,7 @@ import {
 export const toolSchemas = {
   getRevenue: getRevenueSchema,
   getExpenses: getExpensesSchema,
+  getBurnRate: getBurnRateSchema,
 } as const;
 
 // Tool metadata for UI and validation
