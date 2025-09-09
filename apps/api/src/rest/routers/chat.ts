@@ -200,6 +200,7 @@ app.post(
                 user: userContext,
               }),
               onError: (error) => {
+                console.error(error);
                 logger.error({
                   msg: "Error communicating with AI",
                   userId,

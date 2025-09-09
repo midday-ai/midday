@@ -491,20 +491,32 @@ export async function getExpenses(db: Database, params: GetExpensesParams) {
   const monthlyData = await db
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
-      value: sql<number>`COALESCE(SUM(
-        CASE
-          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL AND (${transactions.recurring} = false OR ${transactions.recurring} IS NULL) THEN ABS(${transactions.amount})
-          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NULL AND (${transactions.recurring} = false OR ${transactions.recurring} IS NULL) THEN ABS(COALESCE(${transactions.baseAmount}, 0))
-          ELSE 0
-        END
-      ), 0)`,
-      recurringValue: sql<number>`COALESCE(SUM(
-        CASE
-          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL AND ${transactions.recurring} = true THEN ABS(${transactions.amount})
-          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NULL AND ${transactions.recurring} = true THEN ABS(COALESCE(${transactions.baseAmount}, 0))
-          ELSE 0
-        END
-      ), 0)`,
+      value: inputCurrency
+        ? sql<number>`COALESCE(SUM(
+            CASE
+              WHEN (${transactions.recurring} = false OR ${transactions.recurring} IS NULL) THEN ABS(${transactions.amount})
+              ELSE 0
+            END
+          ), 0)`
+        : sql<number>`COALESCE(SUM(
+            CASE
+              WHEN (${transactions.recurring} = false OR ${transactions.recurring} IS NULL) THEN ABS(COALESCE(${transactions.baseAmount}, 0))
+              ELSE 0
+            END
+          ), 0)`,
+      recurringValue: inputCurrency
+        ? sql<number>`COALESCE(SUM(
+            CASE
+              WHEN ${transactions.recurring} = true THEN ABS(${transactions.amount})
+              ELSE 0
+            END
+          ), 0)`
+        : sql<number>`COALESCE(SUM(
+            CASE
+              WHEN ${transactions.recurring} = true THEN ABS(COALESCE(${transactions.baseAmount}, 0))
+              ELSE 0
+            END
+          ), 0)`,
     })
     .from(transactions)
     .leftJoin(
