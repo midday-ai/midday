@@ -74,10 +74,6 @@ app.post(
         -MAX_MESSAGES_IN_CONTEXT,
       );
 
-      // Check if this is the first message
-      const isFirstMessage =
-        !previousMessages || previousMessages.messages.length === 0;
-
       // Check if we need a title (no existing title)
       const needsTitle = !previousMessages?.title;
 

@@ -7,7 +7,7 @@ import { Overview } from "@/components/overview/overview";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { useChat } from "@ai-sdk/react";
-import type { MessageDataParts, ToolName } from "@api/ai/tools/registry";
+import type { ToolName } from "@api/ai/tools/registry";
 import type { UIChatMessage } from "@api/ai/types";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
@@ -167,8 +167,6 @@ export function ChatInterface({
 
         // Handle canvas data streaming - show canvas immediately
         if (dataPart.type === "data-canvas") {
-          console.log("🎨 Canvas data received:", dataPart.data);
-
           // Always show canvas when we get data-canvas
           const data = (dataPart as any).data;
 
@@ -463,9 +461,7 @@ export function ChatInterface({
               const updatedMessages = messages.map((message) => ({
                 ...message,
                 parts: message.parts?.filter(
-                  (part: any) =>
-                    part.type !== "data-canvas" &&
-                    part.type !== "data-canvas-title",
+                  (part: any) => part.type !== "data-canvas",
                 ),
               }));
               setMessages(updatedMessages);
