@@ -19,18 +19,25 @@ import { toolMetadata } from "./registry";
 export const getExpensesTool = ({ db, user, writer }: ToolContext) =>
   tool({
     ...toolMetadata.getExpenses,
-    async *execute({ from, to, currency }) {
+    async *execute({ from, to, currency, showCanvas }) {
       try {
-        logger.info("Executing getExpensesTool", { from, to, currency });
-
-        // Send canvas with loading state
-        writer.write({
-          type: "data-canvas",
-          data: {
-            title: "Expense Analysis",
-            loading: true,
-          },
+        logger.info("Executing getExpensesTool", {
+          from,
+          to,
+          currency,
+          showCanvas,
         });
+
+        // Send canvas with loading state only if showCanvas is true
+        if (showCanvas) {
+          writer.write({
+            type: "data-canvas",
+            data: {
+              title: "Expense Analysis",
+              loading: true,
+            },
+          });
+        }
 
         // Log context for debugging
         logger.info("Expenses analysis context", {
@@ -401,15 +408,17 @@ export const getExpensesTool = ({ db, user, writer }: ToolContext) =>
           content: "Generating expense dashboard...",
         };
 
-        // Send completion with canvas data via writer
-        writer.write({
-          type: "data-canvas",
-          data: {
-            title: "Expense Analysis",
-            canvasData: canvasData,
-            loading: false,
-          },
-        });
+        // Send completion with canvas data via writer only if showCanvas is true
+        if (showCanvas) {
+          writer.write({
+            type: "data-canvas",
+            data: {
+              title: "Expense Analysis",
+              canvasData: canvasData,
+              loading: false,
+            },
+          });
+        }
 
         const period = `${format(fromDate, "MMM yyyy")} - ${format(
           toDate,

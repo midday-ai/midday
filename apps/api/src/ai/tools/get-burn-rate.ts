@@ -18,19 +18,21 @@ import { toolMetadata } from "./registry";
 export const getBurnRateTool = ({ db, user, writer }: ToolContext) =>
   tool({
     ...toolMetadata.getBurnRate,
-    async *execute({ from, to, currency }, { toolCallId }) {
-      // Send canvas with loading state - CANVAS SHOULD SHOW NOW
-      console.log(
-        "🎨 STEP 1: Sending canvas loading state - CANVAS SHOULD SHOW NOW",
-      );
-      writer.write({
-        type: "data-canvas",
-        data: {
-          title: "Burn Rate Analysis",
-          loading: true,
-          // No canvasData = loading state
-        },
-      });
+    async *execute({ from, to, currency, showCanvas }, { toolCallId }) {
+      // Send canvas with loading state only if showCanvas is true
+      if (showCanvas) {
+        console.log(
+          "🎨 STEP 1: Sending canvas loading state - CANVAS SHOULD SHOW NOW",
+        );
+        writer.write({
+          type: "data-canvas",
+          data: {
+            title: "Burn Rate Analysis",
+            loading: true,
+            // No canvasData = loading state
+          },
+        });
+      }
       console.log("🎨 Canvas loading state sent");
 
       // Yield initial status
@@ -109,16 +111,19 @@ export const getBurnRateTool = ({ db, user, writer }: ToolContext) =>
       };
 
       // Send completion with canvas data via writer
-      console.log("🎨 STEP 2: Sending canvas completion data");
-      writer.write({
-        type: "data-canvas",
-        data: {
-          title: "Burn Rate Analysis",
-          canvasData: canvasData,
-          loading: false,
-        },
-      });
-      console.log("🎨 Canvas completion data sent");
+      // Send completion with canvas data only if showCanvas is true
+      if (showCanvas) {
+        console.log("🎨 STEP 2: Sending canvas completion data");
+        writer.write({
+          type: "data-canvas",
+          data: {
+            title: "Burn Rate Analysis",
+            canvasData: canvasData,
+            loading: false,
+          },
+        });
+        console.log("🎨 Canvas completion data sent");
+      }
 
       yield {
         content:
