@@ -18,18 +18,25 @@ import { toolMetadata } from "./registry";
 export const getRevenueTool = ({ db, user, writer }: ToolContext) =>
   tool({
     ...toolMetadata.getRevenue,
-    async *execute({ from, to, currency }) {
+    async *execute({ from, to, currency, showCanvas }) {
       try {
-        logger.info("Executing getRevenueTool", { from, to, currency });
-
-        // Send canvas with loading state
-        writer.write({
-          type: "data-canvas",
-          data: {
-            title: "Revenue Analysis",
-            loading: true,
-          },
+        logger.info("Executing getRevenueTool", {
+          from,
+          to,
+          currency,
+          showCanvas,
         });
+
+        // Send canvas with loading state only if showCanvas is true
+        if (showCanvas) {
+          writer.write({
+            type: "data-canvas",
+            data: {
+              title: "Revenue Analysis",
+              loading: true,
+            },
+          });
+        }
 
         // Log context for debugging
         logger.info("Revenue analysis context", {
@@ -421,15 +428,17 @@ export const getRevenueTool = ({ db, user, writer }: ToolContext) =>
           content: "Generating revenue dashboard...",
         };
 
-        // Send completion with canvas data via writer
-        writer.write({
-          type: "data-canvas",
-          data: {
-            title: "Revenue Analysis",
-            canvasData: canvasData,
-            loading: false,
-          },
-        });
+        // Send completion with canvas data via writer only if showCanvas is true
+        if (showCanvas) {
+          writer.write({
+            type: "data-canvas",
+            data: {
+              title: "Revenue Analysis",
+              canvasData: canvasData,
+              loading: false,
+            },
+          });
+        }
 
         yield {
           content: detailedContent.join("\n"),

@@ -37,6 +37,7 @@ export function SuggestedActions({ handleToolCall }: Props) {
             from: subMonths(new Date(), 12).toISOString(),
             to: endOfMonth(new Date()).toISOString(),
             currency: "SEK",
+            showCanvas: true,
           },
           text: "Get my revenue data",
         });
@@ -49,7 +50,9 @@ export function SuggestedActions({ handleToolCall }: Props) {
       onClick: () => {
         handleToolCall({
           toolName: "getBurnRate",
-          toolParams: {},
+          toolParams: {
+            showCanvas: true,
+          },
           text: "Get my burn rate data",
         });
       },
@@ -61,7 +64,9 @@ export function SuggestedActions({ handleToolCall }: Props) {
       onClick: () => {
         handleToolCall({
           toolName: "getExpenses",
-          toolParams: {},
+          toolParams: {
+            showCanvas: true,
+          },
           text: "Get my expenses data",
         });
       },
