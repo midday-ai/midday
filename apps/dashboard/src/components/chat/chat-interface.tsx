@@ -1,6 +1,6 @@
 "use client";
 
-import { ChatCanvas } from "@/components/chat/chat-canvas";
+import { Canvas } from "@/components/canvas/canvas";
 import { ChatHeader } from "@/components/chat/chat-header";
 import { ActiveToolCall, ThinkingMessage } from "@/components/message";
 import { Overview } from "@/components/overview/overview";
@@ -51,41 +51,6 @@ export function ChatInterface({
   const [chatTitle, setChatTitle] = useState<string | undefined>(
     initialTitle || undefined,
   );
-
-  // Initialize canvas data from initial messages immediately to avoid flickering
-  const initialCanvasData = useMemo(() => {
-    if (!initialMessages || initialMessages.length === 0)
-      return { title: undefined, data: [] };
-
-    let latestCanvasTitle: string | undefined;
-    let latestCanvasData: any[] = [];
-
-    for (const message of initialMessages) {
-      if (message.parts) {
-        for (const part of message.parts) {
-          if (part.type?.includes("data-canvas")) {
-            const data = (part as any).data;
-            if (data?.title) {
-              latestCanvasTitle = data.title;
-            }
-            if (data?.canvasData && !data.loading) {
-              latestCanvasData = [data.canvasData];
-            }
-          }
-        }
-      }
-    }
-
-    return { title: latestCanvasTitle, data: latestCanvasData };
-  }, [initialMessages]);
-
-  // Preserve canvas data once set (don't lose it on subsequent yields)
-  const [preservedCanvasData, setPreservedCanvasData] = useState<any[]>(
-    initialCanvasData.data,
-  );
-  const [preservedCanvasTitle, setPreservedCanvasTitle] = useState<
-    string | undefined
-  >(initialCanvasData.title);
 
   const queryClient = useQueryClient();
   const trpc = useTRPC();
@@ -164,65 +129,37 @@ export function ChatInterface({
             queryKey: trpc.chats.list.queryKey(),
           });
         }
-
-        // Handle canvas data streaming - show canvas immediately
-        if (dataPart.type === "data-canvas") {
-          // Always show canvas when we get data-canvas
-          const data = (dataPart as any).data;
-
-          if (data?.title) {
-            setPreservedCanvasTitle(data.title);
-          }
-
-          // If we have canvasData, use it; otherwise use empty array for loading state
-          if (data?.canvasData) {
-            setPreservedCanvasData([data.canvasData]);
-          } else {
-            // Loading state - show canvas with empty data
-            setPreservedCanvasData([]);
-          }
-        }
       },
     },
   );
 
-  // Determine if canvas data came from initial messages (SSR) - no animation needed
-  const canvasFromInitial = useMemo(() => {
-    if (!initialMessages || !preservedCanvasTitle) return false;
+  // Extract canvas data directly from current messages
+  const canvasData = useMemo(() => {
+    const allMessages = [...(initialMessages || []), ...messages];
+    let latestCanvasData: any = null;
 
-    // Check if any initial message has canvas data
-    return initialMessages.some((message) =>
-      message.parts?.some(
-        (part) =>
-          part.type?.includes("data-canvas") && (part as any).data?.title,
-      ),
-    );
-  }, [initialMessages, preservedCanvasTitle]);
-
-  // Simple canvas logic: show if we have preserved title from streaming
-  const { canvasData, canvasTitle, hasCanvasContent } = useMemo(() => {
-    if (preservedCanvasTitle) {
-      return {
-        canvasData: preservedCanvasData || [],
-        canvasTitle: preservedCanvasTitle,
-        hasCanvasContent: true,
-      };
+    // Find the latest canvas data from all messages
+    for (const message of allMessages) {
+      if (message.parts) {
+        for (const part of message.parts) {
+          if (part.type === "data-canvas") {
+            latestCanvasData = (part as any).data;
+          }
+        }
+      }
     }
+    return latestCanvasData;
+  }, [initialMessages, messages]);
 
-    return {
-      canvasData: [],
-      canvasTitle: undefined,
-      hasCanvasContent: false,
-    };
-  }, [preservedCanvasData, preservedCanvasTitle]);
+  // Simple canvas logic: show canvas if we have canvas data
+  const hasCanvasContent = !!canvasData;
+  const canvasTitle = canvasData?.title;
 
   // Clear messages and title when navigating away
   useEffect(() => {
     if (pathname === "/") {
       setMessages([]);
       setChatTitle(undefined);
-      setPreservedCanvasData([]);
-      setPreservedCanvasTitle(undefined);
       // Show overview header immediately when back on root path
       setShowOverview(true);
     }
@@ -307,7 +244,7 @@ export function ChatInterface({
         className={cn(
           "relative w-full",
           // Only animate if canvas data came from streaming, not initial messages
-          !canvasFromInitial && "transition-all duration-300 ease-in-out",
+          // !canvasFromInitial && "transition-all duration-300 ease-in-out",
           hasCanvasContent ? "-translate-x-[300px]" : "translate-x-0",
         )}
       >
@@ -334,8 +271,15 @@ export function ChatInterface({
                         <Message from={message.role} key={message.id}>
                           <MessageContent>
                             {message.parts?.map((part, partIndex) => {
+                              // Canvas parts are handled by the canvas sidebar, not rendered inline
+                              if (part.type === "data-canvas") {
+                                return null; // Canvas content is rendered in sidebar
+                              }
+
                               if (part.type?.startsWith("tool-")) {
-                                // Check if tool output should be displayed
+                                // Handle expense tool specifically for generative UI
+
+                                // Check if tool output should be displayed (existing logic)
                                 const toolOutput = (part as any).output;
                                 const shouldHide =
                                   toolOutput?.display === "hidden";
@@ -446,28 +390,18 @@ export function ChatInterface({
         className={cn(
           "absolute top-0 right-0 h-full overflow-hidden border-l z-30 bg-background",
           // Only animate if canvas data came from streaming, not initial messages
-          !canvasFromInitial && "transition-all duration-300 ease-in-out",
+          // !canvasFromInitial && "transition-all duration-300 ease-in-out",
           hasCanvasContent
             ? "w-[600px] opacity-100 translate-x-0"
             : "w-[600px] opacity-0 translate-x-full",
         )}
       >
         {hasCanvasContent && (
-          <ChatCanvas
-            canvasData={canvasData}
-            canvasTitle={canvasTitle}
+          <Canvas
+            data={[canvasData]}
+            title={canvasTitle}
             onClose={() => {
-              // Remove all canvas-related data parts from messages
-              const updatedMessages = messages.map((message) => ({
-                ...message,
-                parts: message.parts?.filter(
-                  (part: any) => part.type !== "data-canvas",
-                ),
-              }));
-              setMessages(updatedMessages);
-              // Reset canvas state
-              setPreservedCanvasData([]);
-              setPreservedCanvasTitle(undefined);
+              setMessages([]);
             }}
           />
         )}

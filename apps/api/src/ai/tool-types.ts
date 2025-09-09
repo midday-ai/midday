@@ -3,11 +3,9 @@ import type { ToolContext } from "@api/ai/context";
 import type { InferUITools } from "ai";
 import { getBurnRateTool } from "./tools/get-burn-rate";
 import { getExpensesTool } from "./tools/get-expenses";
-import { getRevenueTool } from "./tools/get-revenue";
 
 // Tool registry function - this creates the actual tool implementations
 export const createToolRegistry = (context: ToolContext) => ({
-  getRevenue: getRevenueTool(context),
   getBurnRate: getBurnRateTool(context),
   getExpenses: getExpensesTool(context),
   web_search_preview: openai.tools.webSearchPreview({
